@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -15,6 +16,7 @@ namespace ClassicUO
         {
             _graphics = new GraphicsDeviceManager(this);
 
+            Log.Message(LogTypes.Trace, "Gameloop initialized.");
         }
 
         protected override void Initialize()
@@ -37,6 +39,9 @@ namespace ClassicUO
 
         protected override void Update(GameTime gameTime)
         {
+            Inputs.MouseManager.Update();
+            Inputs.KeyboardManager.Update();
+
             base.Update(gameTime);
         }
 
