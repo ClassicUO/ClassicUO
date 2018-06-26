@@ -1,0 +1,3 @@
+[submodule "fnalibs"]
+	path = fnalibs
+	url = https://github.com/jaedan/fnalibs

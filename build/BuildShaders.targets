@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<ItemGroup>
+		<AvailableItemName Include="CompileShader" />   
+	</ItemGroup>
+	
+	<PropertyGroup>
+		<!-- WINDOWS: -->
+		
+		<!-- 1) Use a provided tools\fxc.exe (Requires DirectX (June 2010) or the SDK) -->
+		<FxcCommandLine Condition="'$(FxcCommandLine)' == '' AND '$(OS)' == 'Windows_NT' AND Exists('$(MSBuildThisFileDirectory)tools\fxc.exe')" >"$(MSBuildThisFileDirectory)tools\fxc.exe"</FxcCommandLine>
+		
+		<!-- 2) Use the SDK version (Requires DirectX SDK (June 2010)) -->
+		<FxcCommandLine Condition="'$(FxcCommandLine)' == '' AND '$(OS)' == 'Windows_NT' AND Exists('$(DXSDK_DIR)\Utilities\bin\x86\fxc.exe')" >"$(DXSDK_DIR)\Utilities\bin\x86\fxc.exe"</FxcCommandLine>
+		
+		
+		<!-- NON-WINDOWS (eg: OSX) (Requires wine is in PATH) -->
+		
+		<!-- 1) Use a provided tools/fxc.exe (Requires "winetricks d3dcompiler_43" or "winetricks dxsdk_jun2010") -->
+		<FxcCommandLine Condition="'$(FxcCommandLine)' == '' AND '$(OS)' != 'Windows_NT' AND Exists('$(MSBuildThisFileDirectory)tools\fxc.exe')" >wine "$(MSBuildThisFileDirectory)tools/fxc.exe"</FxcCommandLine>
+		
+		<!-- 2) Use the SDK version (Requires "winetricks dxsdk_jun2010") -->
+		<FxcCommandLine Condition="'$(FxcCommandLine)' == '' AND '$(OS)' != 'Windows_NT' AND '$(WINEPREFIX)' != '' AND Exists('$(WINEPREFIX)/drive_c/Program Files/Microsoft DirectX SDK (June 2010)/Utilities/bin/x86/fxc.exe')" >wine "$(WINEPREFIX)/drive_c/Program Files/Microsoft DirectX SDK (June 2010)/Utilities/bin/x86/fxc.exe"</FxcCommandLine>
+		<FxcCommandLine Condition="'$(FxcCommandLine)' == '' AND '$(OS)' != 'Windows_NT' AND '$(WINEPREFIX)' != '' AND Exists('$(WINEPREFIX)/drive_c/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Utilities/bin/x86/fxc.exe')" >wine "$(WINEPREFIX)/drive_c/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Utilities/bin/x86/fxc.exe"</FxcCommandLine>
+		<FxcCommandLine Condition="'$(FxcCommandLine)' == '' AND '$(OS)' != 'Windows_NT' AND Exists('$(HOME)/.wine/drive_c/Program Files/Microsoft DirectX SDK (June 2010)/Utilities/bin/x86/fxc.exe')" >wine "$(HOME)/.wine/drive_c/Program Files/Microsoft DirectX SDK (June 2010)/Utilities/bin/x86/fxc.exe"</FxcCommandLine>
+		<FxcCommandLine Condition="'$(FxcCommandLine)' == '' AND '$(OS)' != 'Windows_NT' AND Exists('$(HOME)/.wine/drive_c/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Utilities/bin/x86/fxc.exe')" >wine "$(HOME)/.wine/drive_c/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Utilities/bin/x86/fxc.exe"</FxcCommandLine>
+		
+	</PropertyGroup>
+
+	
+	<!-- Reference:
+		https://stackoverflow.com/questions/3433200/msbuild-how-do-i-create-and-use-a-task-to-convert-content-items-at-build-time
+		
+		Handy reload solution: https://stackoverflow.com/a/24837585/165500
+	-->
+	<Target Name="BuildShaders" BeforeTargets="Compile"
+		Inputs="@(CompileShader)"
+		Outputs="@(CompileShader -> '$(OutputPath)%(RelativeDir)%(Filename).fxb' )" >
+		
+		<Error Text="Unable to find fxc.exe. Install DirectX SDK (June 2010). See the documentation for more details."
+				Condition="'$(FxcCommandLine)' == '' AND '$(OS)' == 'Windows_NT'" />
+		<Error Text="Unable to find fxc.exe. Install DirectX SDK (June 2010) using 'winetricks dxsdk_jun2010'. See the documentation for more details."
+				Condition="'$(FxcCommandLine)' == '' AND '$(OS)' != 'Windows_NT'" />
+		
+		<!-- fxc doesn't know how to create directories: -->
+		<MakeDir Directories="$(OutputPath)%(CompileShader.RelativeDir)"/>
+		
+		<Exec Command="$(FxcCommandLine) /nologo /Vd /T fx_2_0 /Fo &quot;$(OutputPath)%(CompileShader.RelativeDir)%(CompileShader.Filename).fxb&quot; &quot;%(CompileShader.Identity)&quot;" />
+		
+		<Message Text="@(CompileShader -> '$(OutputPath)%(RelativeDir)%(Filename).fxb' )" Importance="High" />
+		
+		<!-- Add to the cleaning list, so we know how to do rebuilds:
+			(NOTE: FileWrites gets written out to obj directory at some point, possbily after CoreCompile)
+		-->
+		<ItemGroup>
+			<FileWrites Include="@(CompileShader -> '$(OutputPath)%(RelativeDir)%(Filename).fxb' )"/>
+		</ItemGroup>
+	</Target>
+	
+	
+	<!-- Ensure that dependent projects are aware of generated shaders:
+	
+		Reference: https://stackoverflow.com/questions/14322391/msbuild-to-copy-dynamically-generated-files-as-part-of-project-dependency
+		Also: https://stackoverflow.com/questions/44752139/how-to-make-msbuild-correctly-track-files-generated-with-an-external-tool-across
+	-->
+	<Target Name="IncludeShaders" BeforeTargets="GetCopyToOutputDirectoryItems">
+		<ItemGroup>
+			<CompiledShaders Include="@(CompileShader -> '$(OutputPath)%(RelativeDir)%(Filename).fxb' )">
+				<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+				<TargetPath>%(RelativeDir)%(FileName).fxb</TargetPath>
+			</CompiledShaders>
+			<AllItemsFullPathWithTargetPath Include="@(CompiledShaders->'%(FullPath)')"  />
+		</ItemGroup>
+	</Target>
+	
+</Project>
+

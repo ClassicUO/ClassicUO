@@ -16,4 +16,10 @@
     <ProjectReference Include="..\Utility\Utility.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="FNA">
+      <HintPath>..\FNA\FNA.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

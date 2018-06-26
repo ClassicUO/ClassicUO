@@ -11,4 +11,10 @@
     <OutputPath>..\bin\$(Configuration)\</OutputPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Reference Include="FNA">
+      <HintPath>..\FNA\FNA.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
