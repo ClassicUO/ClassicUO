@@ -20,7 +20,7 @@
     <ProjectReference Include="..\Input\Input.csproj" />
     <ProjectReference Include="..\Network\Network.csproj" />
     <ProjectReference Include="..\UI\UI.csproj" />
-    <ProjectReference Include="..\ClassicUO.Utility\Utility.csproj" />
+    <ProjectReference Include="..\Utility\Utility.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AssetLoader\AssetLoader.csproj" />
-    <ProjectReference Include="..\ClassicUO.Utility\Utility.csproj" />
+    <ProjectReference Include="..\Utility\Utility.csproj" />
   </ItemGroup>
 
 </Project>

@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Game", "Game\Game.csproj", "{2D7D9F75-8D73-48CC-9306-B9A4D228B1D5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility", "ClassicUO.Utility\Utility.csproj", "{4EFAD0C8-B28F-4A96-B33F-E9F9597341A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utility", "Utility\Utility.csproj", "{4EFAD0C8-B28F-4A96-B33F-E9F9597341A3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Network", "Network\Network.csproj", "{BF62B911-B917-47B9-A7C7-BE4FACCB8C26}"
 EndProject
