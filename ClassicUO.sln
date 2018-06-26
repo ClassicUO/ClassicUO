@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UI", "ClassicUO.UI\ClassicU
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssetLoader", "AssetLoader\AssetLoader.csproj", "{D84FE296-85EA-431B-ACE4-7DDD170ED81C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Inputs", "ClassicUO.Inputs\Inputs.csproj", "{FA25B4B5-9F15-423A-92FB-C8A4350C4D7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Input", "Input\Input.csproj", "{FA25B4B5-9F15-423A-92FB-C8A4350C4D7F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Configuration", "Configuration\Configuration.csproj", "{1F5DBA64-8347-49A4-9D03-094AE96D22B8}"
 EndProject

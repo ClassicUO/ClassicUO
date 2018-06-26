@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Input;
 using System;
 
-namespace ClassicUO.Inputs
+namespace ClassicUO.Input
 {
     public static class MouseManager
     {

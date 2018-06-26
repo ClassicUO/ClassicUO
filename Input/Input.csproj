@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>ClassicUO.Inputs</RootNamespace>
-    <AssemblyName>ClassicUO.Inputs</AssemblyName>
+    <RootNamespace>ClassicUO.Input</RootNamespace>
+    <AssemblyName>Input</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

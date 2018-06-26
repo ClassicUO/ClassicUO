@@ -39,8 +39,8 @@ namespace ClassicUO
 
         protected override void Update(GameTime gameTime)
         {
-            Inputs.MouseManager.Update();
-            Inputs.KeyboardManager.Update();
+            Input.MouseManager.Update();
+            Input.KeyboardManager.Update();
 
             base.Update(gameTime);
         }
