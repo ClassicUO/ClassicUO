@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>ClassicUO.Network</AssemblyName>
+    <AssemblyName>Network</AssemblyName>
+    <RootNamespace>ClassicUO.Network</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -15,8 +16,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AssetLoader\AssetLoader.csproj" />
-    <ProjectReference Include="..\..\ClassicUO.Game\Game.csproj" />
+    <ProjectReference Include="..\AssetLoader\AssetLoader.csproj" />
+    <ProjectReference Include="..\ClassicUO.Game\Game.csproj" />
   </ItemGroup>
 
 </Project>

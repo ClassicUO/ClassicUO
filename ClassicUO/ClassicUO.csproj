@@ -18,7 +18,7 @@
     <ProjectReference Include="..\Configuration\Configuration.csproj" />
     <ProjectReference Include="..\ClassicUO.Game\Game.csproj" />
     <ProjectReference Include="..\ClassicUO.Inputs\Inputs.csproj" />
-    <ProjectReference Include="..\ClassicUO.Network\ClassicUO.Network\Network.csproj" />
+    <ProjectReference Include="..\Network\Network.csproj" />
     <ProjectReference Include="..\ClassicUO.UI\ClassicUO.UI\UI.csproj" />
     <ProjectReference Include="..\ClassicUO.Utility\Utility.csproj" />
   </ItemGroup>
