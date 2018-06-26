@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>ClassicUO.UI</AssemblyName>
+    <AssemblyName>UI</AssemblyName>
     <RootNamespace>ClassicUO.UI</RootNamespace>
   </PropertyGroup>
 
@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <Reference Include="FNA">
-      <HintPath>..\..\libs\FNA x64\FNA.dll</HintPath>
+      <HintPath>..\libs\FNA x64\FNA.dll</HintPath>
     </Reference>
   </ItemGroup>
 
