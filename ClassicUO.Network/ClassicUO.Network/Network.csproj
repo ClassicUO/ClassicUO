@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>latest</LangVersion>
     <OutputPath>C:\Users\andre\source\repos\ClassicUO\bin\Debug\</OutputPath>
   </PropertyGroup>
 
