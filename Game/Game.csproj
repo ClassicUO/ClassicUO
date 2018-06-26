@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>ClassicUO.Game</RootNamespace>
-    <AssemblyName>ClassicUO.Game</AssemblyName>
+    <AssemblyName>Game</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

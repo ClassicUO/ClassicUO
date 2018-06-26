@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AssetLoader\AssetLoader.csproj" />
-    <ProjectReference Include="..\ClassicUO.Game\Game.csproj" />
+    <ProjectReference Include="..\Game\Game.csproj" />
   </ItemGroup>
 
 </Project>
