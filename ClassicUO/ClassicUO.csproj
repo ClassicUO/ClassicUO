@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClassicUO.Assets\Assets.csproj" />
+    <ProjectReference Include="..\AssetLoader\AssetLoader.csproj" />
     <ProjectReference Include="..\ClassicUO.Configuration\Configuration.csproj" />
     <ProjectReference Include="..\ClassicUO.Game\Game.csproj" />
     <ProjectReference Include="..\ClassicUO.Inputs\Inputs.csproj" />

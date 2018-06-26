@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Network", "ClassicUO.Networ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UI", "ClassicUO.UI\ClassicUO.UI\UI.csproj", "{2C80FE6C-168D-4E80-9F13-D297CAD27C6E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Assets", "ClassicUO.Assets\Assets.csproj", "{D84FE296-85EA-431B-ACE4-7DDD170ED81C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssetLoader", "AssetLoader\AssetLoader.csproj", "{D84FE296-85EA-431B-ACE4-7DDD170ED81C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Inputs", "ClassicUO.Inputs\Inputs.csproj", "{FA25B4B5-9F15-423A-92FB-C8A4350C4D7F}"
 EndProject

@@ -5,8 +5,8 @@
     <ApplicationIcon />
     <OutputType>Library</OutputType>
     <StartupObject></StartupObject>
-    <RootNamespace>ClassicUO.Assets</RootNamespace>
-    <AssemblyName>ClassicUO.Assets</AssemblyName>
+    <RootNamespace>ClassicUO.AssetLoader</RootNamespace>
+    <AssemblyName>AssetsLoader</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
