@@ -260,5 +260,4 @@ paket-files/
 __pycache__/
 *.pyc
 
-
-/ClassicUO.Network/Sample/
+ClassicUO/ClassicUO.Network/Sample/
