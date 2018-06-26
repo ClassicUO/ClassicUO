@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Sample": {
+      "commandName": "Project",
+      "commandLineArgs": "-ip \"login.uoforever.com\" -port 2599 -username \"seel8222\" -password \"simone82\" -charname \"aaawd\""
+    }
+  }
+}
