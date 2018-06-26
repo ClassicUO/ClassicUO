@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <Reference Include="FNA">
-      <HintPath>..\..\..\..\Desktop\FNA\bin\x64\Release\netstandard2.0\FNA.dll</HintPath>
+      <HintPath>..\libs\FNA x64\FNA.dll</HintPath>
     </Reference>
   </ItemGroup>
 

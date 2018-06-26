@@ -64,6 +64,7 @@ namespace ClassicUO.Game
         private ushort _damageMax;
         private bool _female;
         private readonly Ability[] _ability = new Ability[2] { Ability.None, Ability.None };
+        private List<Skill> _sklls;
 
 
         public event EventHandler StatsChanged, SkillsChanged;
@@ -71,11 +72,11 @@ namespace ClassicUO.Game
 
         public PlayerMobile(Serial serial) : base(serial)
         {
-            Skills = new List<Skill>();
+            _sklls = new List<Skill>();
         }
 
 
-        public List<Skill> Skills { get; }
+        public IReadOnlyList<Skill> Skills => _sklls;
 
         public ushort Strength
         {
@@ -314,7 +315,7 @@ namespace ClassicUO.Game
         public Ability PrimaryAbility => _ability[0];
         public Ability SecondaryAbility => _ability[1];
 
-        internal void UpdateSkill(int id, ushort realValue, ushort baseValue, SkillLock skillLock, ushort cap)
+        public void UpdateSkill(int id, ushort realValue, ushort baseValue, SkillLock skillLock, ushort cap)
         {
             if (id < Skills.Count)
             {
@@ -327,7 +328,7 @@ namespace ClassicUO.Game
             }
         }
 
-        internal void UpdateSkillLock(int id, SkillLock skillLock)
+        public void UpdateSkillLock(int id, SkillLock skillLock)
         {
             if (id < Skills.Count)
             {
@@ -337,7 +338,7 @@ namespace ClassicUO.Game
             }
         }
 
-        internal void UpdateAbilities()
+        public void UpdateAbilities()
         {
             Item right = GetItemAtLayer(Layer.RightHand);
             Item left = GetItemAtLayer(Layer.LeftHand);
