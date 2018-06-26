@@ -24,6 +24,8 @@ namespace ClassicUO
 
         protected override void LoadContent()
         {
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
+
             base.LoadContent();
         }
 
