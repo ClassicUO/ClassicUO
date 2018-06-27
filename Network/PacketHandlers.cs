@@ -202,6 +202,7 @@ namespace ClassicUO.Network
             ToClient.Add(0xAB, GumpTextEntryDialog);
             /*ToServer.Add(0xAC, GumpTextEntryDialogReply);
             ToServer.Add(0xAD, UnicodeAsciiSpeechRequest);*/
+            ToClient.Add(0xAE, UnicodeSpeechMessage);
             ToClient.Add(0xB0, SendGumpMenuDialog);
             //ToServer.Add(0xB1, GumpMenuSelection);
             ToClient.Add(0xB2, ChatMessage);
@@ -425,12 +426,37 @@ namespace ClassicUO.Network
 
         private static void SendSpeech(Packet p)
         {
-            
+            Serial serial = p.ReadUInt();
+            Entity entity = World.Mobiles.Get(serial);
+            ushort graphic = p.ReadUShort();
+            MessageType type = (MessageType)p.ReadByte();
+            Hue hue = p.ReadUShort();
+            MessageFont font = (MessageFont)p.ReadUShort();
+            string name = p.ReadASCII(30);
+            string text = p.ReadASCII();
+
+            if (entity != null)
+            {
+                entity.Graphic = graphic;
+                entity.Name = name;
+                entity.ProcessDelta();
+            }
+
         }
 
         private static void DeleteObject(Packet p)
         {
-            
+            Serial serial = p.ReadUInt();
+            if (serial.IsItem)
+            {
+                if (World.RemoveItem(serial))
+                    World.Items.ProcessDelta();
+            }
+            else if (serial.IsMobile && World.RemoveMobile(serial))
+            {
+                World.Items.ProcessDelta();
+                World.Mobiles.ProcessDelta();
+            }
         }
 
         private static void Explosion(Packet p)
@@ -897,6 +923,27 @@ namespace ClassicUO.Network
             
         }
 
+        private static void UnicodeSpeechMessage(Packet p)
+        {
+            Serial serial = p.ReadUInt();
+            Entity entity = World.Mobiles.Get(serial);
+            ushort graphic = p.ReadUShort();
+            MessageType type = (MessageType)p.ReadByte();
+            Hue hue = p.ReadUShort();
+            MessageFont font = (MessageFont)p.ReadUShort();
+            string lang = p.ReadASCII(4);
+            string name = p.ReadASCII(30);
+            string text = p.ReadUnicode();
+
+            if (entity != null)
+            {
+                entity.Graphic = graphic;
+                entity.Name = name;
+                entity.ProcessDelta();
+            }
+
+        }
+
         private static void SendGumpMenuDialog(Packet p)
         {
             
@@ -944,7 +991,14 @@ namespace ClassicUO.Network
 
         private static void GeneralInformationPacketR(Packet p)
         {
-            
+            switch (p.ReadUShort())
+            {
+                case 6: //party
+                    break;
+                case 8: // map change
+                    break;
+            }
+
         }
 
         private static void GraphcialEffect(Packet p)
@@ -954,7 +1008,23 @@ namespace ClassicUO.Network
 
         private static void ClilocMessage(Packet p)
         {
-            
+            Serial serial = p.ReadUInt();
+            Entity entity = World.Mobiles.Get(serial);
+            ushort graphic = p.ReadUShort();
+            MessageType type = (MessageType)p.ReadByte();
+            Hue hue = p.ReadUShort();
+            MessageFont font = (MessageFont)p.ReadUShort();
+            uint cliloc = p.ReadUInt();
+            string name = p.ReadASCII(30);
+            string text = Cliloc.GetString((int)cliloc);
+
+            if (entity != null)
+            {
+                entity.Graphic = graphic;
+                entity.Name = name;
+                entity.ProcessDelta();
+            }
+
         }
 
         private static void UnicodeTextEntryR(Packet p)
@@ -989,7 +1059,25 @@ namespace ClassicUO.Network
 
         private static void ClilocMessageAffix(Packet p)
         {
-            
+            Serial serial = p.ReadUInt();
+            Entity entity = World.Mobiles.Get(serial);
+            ushort graphic = p.ReadUShort();
+            MessageType type = (MessageType)p.ReadByte();
+            Hue hue = p.ReadUShort();
+            MessageFont font = (MessageFont)p.ReadUShort();
+            uint cliloc = p.ReadUInt();
+            AffixType affixType = (AffixType)p.ReadByte();
+            string name = p.ReadASCII(30);
+            string affix = p.ReadASCII();
+            string text = p.ReadUnicode();
+
+            if (entity != null)
+            {
+                entity.Graphic = graphic;
+                entity.Name = name;
+                entity.ProcessDelta();
+            }
+
         }
 
         private static void ConfigurationFileR(Packet p)
@@ -1051,7 +1139,43 @@ namespace ClassicUO.Network
 
         private static void CompressedGump(Packet p)
         {
-            
+            Serial sender = p.ReadUInt();
+            Serial gumpID = p.ReadUInt();
+            uint x = p.ReadUInt();
+            uint y = p.ReadUInt();
+            uint clen = p.ReadUInt() - 4;
+            uint dlen = p.ReadUInt();
+
+            byte[] data = new byte[clen];
+            for (int i = 0; i < data.Length; i++)
+                data[i] = p.ReadByte();
+
+            byte[] decData = new byte[dlen];
+
+            Zlib.Decompress(data, 0, decData, (int)dlen);
+
+            string layout = Encoding.UTF8.GetString(decData);
+
+            uint linesNum = p.ReadUInt();
+            if (linesNum > 0)
+            {
+                uint clineLength = p.ReadUInt() - 4;
+                uint dlineLength = p.ReadUInt();
+
+                byte[] linesdata = new byte[clineLength];
+                for (int i = 0; i < linesdata.Length; i++)
+                    linesdata[i] = p.ReadByte();
+
+                /*Packet dp = GetDecompressedData(linesdata, (int)dlineLength);
+               
+                for (int i = 0; i < linesNum; i++)
+                {
+                    ushort len = dp.ReadUShort();
+                    string text = dp.ReadUnicode(len);
+                }*/
+            }
+
+
         }
 
         private static void UpdateMobileStatus(Packet p)
@@ -1086,7 +1210,34 @@ namespace ClassicUO.Network
 
         private static void ObjectInformationSA(Packet p)
         {
-            
+            p.Skip(2);//unknown
+
+            byte type = p.ReadByte();
+            Item item = World.GetOrCreateItem(p.ReadUInt());
+
+            ushort g = p.ReadUShort();
+            if (type == 2)
+                g |= 0x4000;
+            item.Graphic = g;
+            item.Direction = (Direction)p.ReadByte();
+
+            item.Amount = p.ReadUShort();
+            p.Skip(2);//amount again? wtf???
+
+            item.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            p.Skip(1);//light? wtf?
+
+            item.Hue = p.ReadUShort();
+            item.Flags = (Flags)p.ReadByte();
+
+            if (FileManager.ClientVersion >= ClientVersions.CV_7090)
+                p.ReadUShort();//unknown
+
+            item.Container = Serial.Invalid;
+            item.ProcessDelta();
+            if (World.Items.Add(item))
+                World.Items.ProcessDelta();
+
         }
 
         private static void NewMapMessage(Packet p)
