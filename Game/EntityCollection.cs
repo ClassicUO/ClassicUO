@@ -13,7 +13,7 @@ namespace ClassicUO.Game
         private readonly List<T> _added = new List<T>(), _removed = new List<T>();
 
         public event EventHandler<CollectionChangedEventArgs<T>> Added, Removed;
-        internal void ProcessDelta()
+        public void ProcessDelta()
         {
             if (_added.Count > 0)
             {
@@ -38,7 +38,7 @@ namespace ClassicUO.Game
             return entity;
         }
 
-        internal bool Add(T entity)
+        public bool Add(T entity)
         {
             if (!_entities.TryAdd(entity.Serial, entity))
                 return false;
@@ -46,14 +46,14 @@ namespace ClassicUO.Game
             return true;
         }
 
-        internal T Remove(Serial serial)
+        public T Remove(Serial serial)
         {
             if (_entities.TryRemove(serial, out T entity))
                 _removed.Add(entity);
             return entity;
         }
 
-        internal void Clear()
+        public void Clear()
         {
             _removed.AddRange(this);
             _entities.Clear();

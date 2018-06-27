@@ -56,7 +56,7 @@ namespace ClassicUO.Game
         public ushort Amount
         {
             get { return _amount; }
-            internal set
+            set
             {
                 if (_amount != value)
                 {
@@ -69,7 +69,7 @@ namespace ClassicUO.Game
         public Serial Container
         {
             get { return _container; }
-            internal set
+            set
             {
                 if (_container != value)
                 {
@@ -82,7 +82,7 @@ namespace ClassicUO.Game
         public Layer Layer
         {
             get { return _layer; }
-            internal set
+            set
             {
                 if (_layer != value)
                 {

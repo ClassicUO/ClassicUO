@@ -1,4 +1,5 @@
-﻿using ClassicUO.Game;
+﻿using ClassicUO.Assets;
+using ClassicUO.Game;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -265,7 +266,66 @@ namespace ClassicUO.Network
 
         private static void StatusBarInfo(Packet p)
         {
-            
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (mobile == null)
+                return;
+
+            mobile.Name = p.ReadASCII(30);
+            mobile.Hits = p.ReadUShort();
+            mobile.HitsMax = p.ReadUShort();
+            mobile.Renamable = p.ReadBool();
+
+            byte type = p.ReadByte();
+            if (type > 0)
+            {
+
+                World.Player.Female = p.ReadBool();
+                World.Player.Strength = p.ReadUShort();
+                World.Player.Dexterity = p.ReadUShort();
+                World.Player.Intelligence = p.ReadUShort();
+                World.Player.Stamina = p.ReadUShort();
+                //if (Player.IsDead)
+                //{
+                //    p.Seek(p.Position -2);
+                //    p.WriteUShort(Player.StaminaMax);
+                //}
+                World.Player.StaminaMax = p.ReadUShort();
+                World.Player.Mana = p.ReadUShort();
+                World.Player.ManaMax = p.ReadUShort();
+                World.Player.Gold = p.ReadUInt();
+                World.Player.ResistPhysical = p.ReadUShort();
+                World.Player.Weight = p.ReadUShort();
+            }
+
+            if (type >= 5)//ML
+            {
+                World.Player.WeightMax = p.ReadUShort();
+                p.Skip(1);
+            }
+
+            if (type >= 2)//T2A
+                p.Skip(2);
+
+            if (type >= 3)//Renaissance
+            {
+                World.Player.Followers = p.ReadByte();
+                World.Player.FollowersMax = p.ReadByte();
+            }
+
+            if (type >= 4)//AOS
+            {
+                World.Player.ResistFire = p.ReadUShort();
+                World.Player.ResistCold = p.ReadUShort();
+                World.Player.ResistPoison = p.ReadUShort();
+                World.Player.ResistEnergy = p.ReadUShort();
+                World.Player.Luck = p.ReadUShort();
+                World.Player.DamageMin = p.ReadUShort();
+                World.Player.DamageMax = p.ReadUShort();
+                World.Player.TithingPoints = p.ReadUInt();
+            }
+
+            mobile.ProcessDelta();
+
         }
 
         private static void FollowR(Packet p)
@@ -280,7 +340,43 @@ namespace ClassicUO.Network
 
         private static void HealtBarStatusUpdateKR(Packet p)
         {
-            
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (mobile == null)
+                return;
+
+            ushort count = p.ReadUShort();
+            for (int i = 0; i < count; i++)
+            {
+                ushort type = p.ReadUShort();
+                bool enabled = p.ReadBool();
+                byte flags = (byte)mobile.Flags;
+
+                if (type == 1)
+                {
+                    if (FileManager.ClientVersion >= ClientVersions.CV_7000)
+                        mobile.SetSAPoison(true);
+                    else
+                        flags |= 0x04;
+                }
+                else if (type == 2)
+                {
+                    if (FileManager.ClientVersion >= ClientVersions.CV_7000)
+                        mobile.SetSAPoison(false);
+                    else
+                        flags &= 0x04;
+                }
+                else if (type == 3)
+                {
+                    if (enabled)
+                        flags |= 0x08;
+                    else
+                        flags &= 0x08;
+                }
+
+                mobile.Flags = (Flags)flags;
+            }
+            mobile.ProcessDelta();
+
         }
 
         private static void ObjectInfo(Packet p)
@@ -290,7 +386,13 @@ namespace ClassicUO.Network
 
         private static void CharLocaleAndBody(Packet p)
         {
-            
+            World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
+            p.Skip(4);
+            World.Player.Graphic = p.ReadUShort();
+            World.Player.Position = new Position(p.ReadUShort(), p.ReadUShort(), (sbyte)p.ReadUShort());
+            World.Player.Direction = (Direction)p.ReadByte();
+            World.Player.ProcessDelta();
+            World.Mobiles.ProcessDelta();
         }
 
         private static void SendSpeech(Packet p)
@@ -310,7 +412,20 @@ namespace ClassicUO.Network
 
         private static void DrawGamePlayer(Packet p)
         {
-            
+            if (p.ReadUInt() != World.Player)
+                throw new Exception("OnMobileStatus");
+            //World.MovementsQueue.Clear();
+            World.Player.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
+            World.Player.Hue = p.ReadUShort();
+            World.Player.Flags = (Flags)p.ReadByte();
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
+            p.Skip(2);
+            World.Player.Direction = (Direction)p.ReadByte();
+            World.Player.Position = new Position(x, y, p.ReadSByte());
+            //OnPlayerMoved();
+            World.Player.ProcessDelta();
+
         }
 
         private static void CharMoveRejection(Packet p)
@@ -370,7 +485,17 @@ namespace ClassicUO.Network
 
         private static void MobAttributes(Packet p)
         {
-            
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (mobile == null)
+                return;
+            mobile.HitsMax = p.ReadUShort();
+            mobile.Hits = p.ReadUShort();
+            mobile.ManaMax = p.ReadUShort();
+            mobile.Mana = p.ReadUShort();
+            mobile.StaminaMax = p.ReadUShort();
+            mobile.Stamina = p.ReadUShort();
+            mobile.ProcessDelta();
+
         }
 
         private static void WornItem(Packet p)
@@ -395,7 +520,31 @@ namespace ClassicUO.Network
 
         private static void ReceiveSkills(Packet p)
         {
-            
+            ushort id;
+            switch (p.ReadByte())
+            {
+                case 0:
+                    while ((id = p.ReadUShort()) > 0)
+                        World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (SkillLock)p.ReadByte(), 100);
+                    break;
+
+                case 2:
+                    while ((id = p.ReadUShort()) > 0)
+                        World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (SkillLock)p.ReadByte(), p.ReadUShort());
+                    break;
+
+                case 0xDF:
+                    id = p.ReadUShort();
+                    World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (SkillLock)p.ReadByte(), p.ReadUShort());
+                    break;
+
+                case 0xFF:
+                    id = p.ReadUShort();
+                    World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (SkillLock)p.ReadByte(), 100);
+                    break;
+            }
+            World.Player.ProcessDelta();
+
         }
 
         private static void RemoveGroupR(Packet p)
@@ -480,7 +629,8 @@ namespace ClassicUO.Network
 
         private static void SetWarMode(Packet p)
         {
-            
+            World.Player.WarMode = p.ReadBool();
+            World.Player.ProcessDelta();
         }
 
         private static void PingR(Packet p)
@@ -500,12 +650,57 @@ namespace ClassicUO.Network
 
         private static void UpdatePlayer(Packet p)
         {
-            
+            Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
+            mobile.Graphic = p.ReadUShort();
+
+            mobile.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            mobile.Direction = (Direction)p.ReadByte();
+            mobile.Hue = p.ReadUShort();
+            mobile.Flags = (Flags)p.ReadByte();
+            mobile.Notoriety = (Notoriety)p.ReadByte();
+            mobile.ProcessDelta();
+            if (World.Mobiles.Add(mobile))
+                World.Mobiles.ProcessDelta();
+
         }
 
         private static void DrawObject(Packet p)
         {
-            
+            Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
+            mobile.Graphic = p.ReadUShort();
+            mobile.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            mobile.Direction = (Direction)p.ReadByte();
+            mobile.Hue = p.ReadUShort();
+            mobile.Flags = (Flags)p.ReadByte();
+            mobile.Notoriety = (Notoriety)p.ReadByte();
+
+            uint itemSerial;
+            while ((itemSerial = p.ReadUInt()) != 0)
+            {
+                Item item = World.GetOrCreateItem(itemSerial);
+                ushort graphic = p.ReadUShort();
+                item.Layer = (Layer)p.ReadByte();
+                if (FileManager.ClientVersion >= ClientVersions.CV_70331 || (graphic & 0x8000) != 0)
+                    item.Hue = p.ReadUShort();
+
+                if (FileManager.ClientVersion >= ClientVersions.CV_70331)
+                    item.Graphic = graphic;
+                else if (FileManager.ClientVersion >= ClientVersions.CV_7000)
+                    item.Graphic = (ushort)(graphic & 0x7FFF);
+                else
+                    item.Graphic = (ushort)(graphic & 0x3FFF);
+
+                item.Amount = 1;
+                item.Container = mobile;
+                mobile.Items.Add(item);
+                item.ProcessDelta();
+                World.Items.Add(item);
+            }
+            mobile.ProcessDelta();
+            if (World.Mobiles.Add(mobile))
+                World.Mobiles.ProcessDelta();
+            World.Items.ProcessDelta();
+
         }
 
         private static void OpenDialogBox(Packet p)
@@ -585,17 +780,34 @@ namespace ClassicUO.Network
 
         private static void UpdateCurrentHealht(Packet p)
         {
-            
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (mobile == null)
+                return;
+            mobile.HitsMax = p.ReadUShort();
+            mobile.Hits = p.ReadUShort();
+            mobile.ProcessDelta();
+
         }
 
         private static void UpdateCurrentMana(Packet p)
         {
-            
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (mobile == null)
+                return;
+            mobile.ManaMax = p.ReadUShort();
+            mobile.Mana = p.ReadUShort();
+            mobile.ProcessDelta();
+
         }
 
         private static void UpdateCurrentStamina(Packet p)
         {
-            
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (mobile == null)
+                return;
+            mobile.StaminaMax = p.ReadUShort();
+            mobile.Stamina = p.ReadUShort();
+            mobile.ProcessDelta();
         }
 
         private static void OpenWebBrowser(Packet p)

@@ -9,7 +9,7 @@ namespace ClassicUO.Game
         public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
         public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
-        public static PlayerMobile Player { get; internal set; }
+        public static PlayerMobile Player { get; set; }
 
 
 

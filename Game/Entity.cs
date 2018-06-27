@@ -64,7 +64,7 @@ namespace ClassicUO.Game
         public Graphic Graphic
         {
             get => _graphic;
-            internal set
+            set
             {
                 if (_graphic != value)
                 {
@@ -163,7 +163,7 @@ namespace ClassicUO.Game
                 PropertiesChanged.Raise(this);
         }
 
-        internal void ProcessDelta()
+        public void ProcessDelta()
         {
             Delta d = _delta;
             OnProcessDelta(d);
