@@ -16,6 +16,7 @@ namespace ClassicUO.Network
             {
                 skillcount++;
                 this[0] = 0xF8;
+                IsDynamic = PacketsTable.GetPacketLength(this[0]) < 0;
             }
 
             WriteUInt(0xEDEDEDED);
@@ -106,6 +107,271 @@ namespace ClassicUO.Network
             WriteUInt(0xEDEDEDED);
             WriteByte(4);
             WriteUInt(serial);
+        }
+    }
+
+    public sealed class PSkillsRequest : PacketWriter
+    {
+        public PSkillsRequest(Serial serial) : base(0x34)
+        {
+            WriteUInt(0xEDEDEDED);
+            WriteByte(5);
+            WriteUInt(serial);
+        }
+    }
+
+    public sealed class PSkillsStatusChangeRequest : PacketWriter
+    {
+        public PSkillsStatusChangeRequest(byte skill, bool state) : base(0x3A)
+        {
+            WriteUShort(skill);
+            WriteBool(state);
+        }
+    }
+
+    public sealed class PClickRequest : PacketWriter
+    {
+        public PClickRequest(Serial serial) : base(0x09)
+        {
+            WriteUInt(serial);
+        }
+    }
+
+    public sealed class PDoubleClickRequest : PacketWriter
+    {
+        public PDoubleClickRequest(Serial serial) : base(0x06)
+        {
+            WriteUInt(serial);
+        }
+    }
+
+    public sealed class PAttackRequest : PacketWriter
+    {
+        public PAttackRequest(Serial serial) : base(0x05)
+        {
+            WriteUInt(serial);
+        }
+    }
+
+    public sealed class PClientVersion : PacketWriter
+    {
+        public PClientVersion(string version) : base(0xBD)
+        {
+            WriteASCII(string.Format("{0}.{1}.{2}.{3}", version[0], version[1], version[2], version[3]));
+        }
+    }
+
+    public sealed class PASCIISpeechRequest : PacketWriter
+    {
+        public PASCIISpeechRequest(string text, MessageType type, MessageFont font, Hue hue) : base(0x03)
+        {
+            WriteByte((byte)type);
+            WriteUShort(hue);
+            WriteUShort((ushort)font);
+            WriteASCII(text);
+        }
+    }
+
+    public sealed class PUnicodeSpeechRequest : PacketWriter
+    {
+        public PUnicodeSpeechRequest(string text, MessageType type, MessageFont font, Hue hue, string lang) : base(0xAD)
+        {
+            WriteByte((byte)type);
+            WriteUShort(hue);
+            WriteUShort((ushort)font);
+            WriteASCII(lang, 4);
+            WriteUnicode(text);
+        }
+    }
+
+    public sealed class PCastSpell : PacketWriter
+    {
+        public PCastSpell(int idx) : base(0xBF)
+        {
+            if (FileManager.ClientVersion >= ClientVersions.CV_60142)
+            {
+                WriteUShort(0x1C);
+                WriteUShort(0x02);
+                WriteUShort((ushort)idx);
+            }
+            else
+            {
+                this[0] = 0x12;
+                this.IsDynamic = PacketsTable.GetPacketLength(this[0]) < 0; 
+                WriteByte(0x56);
+                WriteASCII(idx.ToString());
+                // need a \0 ?
+            }
+        }
+    }
+
+    public sealed class PCastSpellFromBook : PacketWriter
+    {
+        public PCastSpellFromBook(int idx, Serial serial) : base(0x12)
+        {
+            WriteByte(0x27);
+            WriteASCII(string.Format("{0} {1}", idx, serial));
+        }
+    }
+
+    public sealed class PUseSkill : PacketWriter
+    {
+        public PUseSkill(int idx) : base(0x12)
+        {
+            WriteByte(0x24);
+            WriteASCII(idx.ToString() + " 0");
+        }
+    }
+
+    public sealed class POpenDoor : PacketWriter
+    {
+        public POpenDoor() : base(0x12)
+        {
+            WriteByte(0x58);
+        }
+    }
+
+    public sealed class POpenSpellBook : PacketWriter
+    {
+        public POpenSpellBook(byte type) : base (0x12)
+        {
+            WriteByte(0x43);
+            WriteByte(type);
+        }
+    }
+
+    public sealed class PEmoteAction : PacketWriter
+    {
+        public PEmoteAction(string action) : base (0x12)
+        {
+            WriteByte(0xC7);
+            WriteASCII(action.ToString());
+        }
+    }
+
+    public sealed class PGumpResponse : PacketWriter
+    {
+        public PGumpResponse() : base (0xB1)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public sealed class PVirtueGumpReponse : PacketWriter
+    {
+        public PVirtueGumpReponse() : base (0xB1)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public sealed class PMenuResponse : PacketWriter
+    {
+        public PMenuResponse() : base (0x7D)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public sealed class PGrayMenuResponse : PacketWriter
+    {
+        public PGrayMenuResponse() : base (0x7D)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public sealed class PTradeResponse : PacketWriter
+    {
+        public PTradeResponse() : base (0x6F)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public sealed class PTextEntryDialogResponse : PacketWriter
+    {
+        public PTextEntryDialogResponse() : base (0xAC)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public sealed class PRenameRequest : PacketWriter
+    {
+        public PRenameRequest(Serial serial, string name) : base(0x75)
+        {
+            WriteUInt(serial);
+            WriteASCII(name);
+        }
+    }
+
+    public sealed class PTipRequest : PacketWriter
+    {
+        public PTipRequest(ushort id, byte flag) : base(0xA7)
+        {
+            WriteUShort(id);
+            WriteByte(flag);
+        }
+    }
+
+    /*public sealed class PASCIIPromptResponse : PacketWriter
+    {
+        public PASCIIPromptResponse(string text, int len, bool cancel) : base(0x)
+    }
+
+    public sealed class PUnicodePromptResponse : PacketWriter
+    {
+        public PUnicodePromptResponse(string text, int len, string lang, bool cancel) : base()
+    }*/
+
+    public sealed class PDyeDataResponse : PacketWriter
+    {
+        public PDyeDataResponse(Serial serial, Graphic graphic, Hue hue) : base (0x95)
+        {
+            WriteUInt(serial);
+            WriteUShort(graphic);
+            WriteUShort(hue);
+        }
+    }
+
+    public sealed class PProfileRequest : PacketWriter
+    {
+        public PProfileRequest(Serial serial) : base (0xB8)
+        {
+            WriteByte(0);
+            WriteUInt(serial);
+        }
+    }
+
+    public sealed class PProfileUpdate : PacketWriter
+    {
+        public PProfileUpdate(Serial serial, string text, int len) : base (0xB8)
+        {
+            WriteByte(1);
+            WriteUInt(serial);
+            WriteUShort(0x01);
+            WriteUShort((ushort)len);
+            WriteUnicode(text, len);
+        }
+    }
+
+    public sealed class PCloseStatusBarGump : PacketWriter
+    {
+        public PCloseStatusBarGump(Serial serial) : base (0xBF)
+        {
+            WriteUShort(0x0C);
+            WriteUInt(serial);
+        }
+    }
+
+    public sealed class PPartyInviteRequest : PacketWriter
+    {
+        public PPartyInviteRequest() : base(0xBF)
+        {
+            WriteUShort(0x06);
+            WriteByte(1);
+            WriteUInt(0);
         }
     }
 
