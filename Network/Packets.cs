@@ -1,9 +1,117 @@
-﻿using System;
+﻿using ClassicUO.Assets;
+using ClassicUO.Game;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace ClassicUO.Network
 {
+    public sealed class PCreateCharacter : PacketWriter
+    {
+        public PCreateCharacter(string name) : base(0x00)
+        {
+            int skillcount = 3;
+
+            if (FileManager.ClientVersion >= ClientVersions.CV_70160)
+            {
+                skillcount++;
+                this[0] = 0xF8;
+            }
+
+            WriteUInt(0xEDEDEDED);
+            WriteUShort(0xFFFF);
+            WriteUShort(0xFFFF);
+            WriteByte(0x00);
+            WriteASCII(name, 30);
+            WriteUShort(0x00);
+
+            uint clientflag = 0;
+
+            /*IFOR(i, 0, g_CharacterList.ClientFlag)
+                clientFlag |= (1 << i);*/
+
+            WriteUInt(clientflag);
+            WriteUInt(0x01);
+            WriteUInt(0x0);
+
+            // to terminate...
+        }
+    }
+
+    public sealed class PPickUpRequest : PacketWriter
+    {
+        public PPickUpRequest(Serial serial, ushort count) : base(0x07)
+        {
+            WriteUInt(serial);
+            WriteUShort(count);
+        }
+    }
+
+    public sealed class PDropRequestOld : PacketWriter
+    {
+        public PDropRequestOld(Serial serial, Position position, Serial container) : base(0x08)
+        {
+            WriteUInt(serial);
+            WriteUShort(position.X);
+            WriteUShort(position.Y);
+            WriteSByte(position.Z);
+            WriteUInt(container);
+        }
+    }
+
+    public sealed class PDropRequestNew : PacketWriter
+    {
+        public PDropRequestNew(Serial serial, Position position, byte slot, Serial container) : base(0x08)
+        {
+            WriteUInt(serial);
+            WriteUShort(position.X);
+            WriteUShort(position.Y);
+            WriteSByte(position.Z);
+            WriteByte(slot);
+            WriteUInt(container);
+        }
+    }
+
+    public sealed class PEquipRequest : PacketWriter
+    {
+        public PEquipRequest(Serial serial, Layer layer, Serial container) : base(0x13)
+        {
+            WriteUInt(serial);
+            WriteByte((byte)layer);
+            WriteUInt(container);
+        }
+    }
+
+    public sealed class PChangeWarMode : PacketWriter
+    {
+        public PChangeWarMode(bool state) : base(0x72)
+        {
+            WriteBool(state);
+            WriteUShort(0x0032);
+        }
+    }
+
+    public sealed class PHelpRequest : PacketWriter
+    {
+        public PHelpRequest() : base(0x9B)
+        {
+
+        }
+    }
+    
+    public sealed class PStatusRequest : PacketWriter
+    {
+        public PStatusRequest(Serial serial) : base(0x34)
+        {
+            WriteUInt(0xEDEDEDED);
+            WriteByte(4);
+            WriteUInt(serial);
+        }
+    }
+
+
+
+
     public sealed class PSeed : PacketWriter
     {
         public PSeed(byte[] version) : base(0xEF)
