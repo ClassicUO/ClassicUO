@@ -381,7 +381,35 @@ namespace ClassicUO.Network
 
         private static void ObjectInfo(Packet p)
         {
-            
+            uint serial = p.ReadUInt();
+            Item item = World.GetOrCreateItem(serial & 0x7FFFFFFF);
+
+            ushort graphic = (ushort)(p.ReadUShort() & 0x3FFF);
+            item.Amount = (serial & 0x80000000) != 0 ? p.ReadUShort() : (ushort)1;
+
+            if ((graphic & 0x8000) != 0)
+                item.Graphic = (ushort)(graphic & 0x7FFF + p.ReadSByte());
+            else
+                item.Graphic = (ushort)(graphic & 0x7FFF);
+
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
+
+            if ((x & 0x8000) != 0)
+                item.Direction = (Direction)p.ReadByte();//wtf???
+
+            item.Position = new Position((ushort)(x & 0x7FFF), (ushort)(y & 0x3FFF), p.ReadSByte());
+
+            if ((y & 0x8000) != 0)
+                item.Hue = p.ReadUShort();
+
+            if ((y & 0x4000) != 0)
+                item.Flags = (Flags)p.ReadByte();
+
+            item.Container = Serial.Invalid;
+            item.ProcessDelta();
+            if (World.Items.Add(item))
+                World.Items.ProcessDelta();
         }
 
         private static void CharLocaleAndBody(Packet p)
@@ -430,12 +458,20 @@ namespace ClassicUO.Network
 
         private static void CharMoveRejection(Packet p)
         {
-            
+            p.Skip(1);
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
+            World.Player.Direction = (Direction)p.ReadByte();
+            World.Player.Position = new Position(x, y, p.ReadSByte());
+            World.Player.ProcessDelta();
         }
 
         private static void CharacterMoveACK(Packet p)
         {
-            
+            p.Skip(1);
+            World.Player.Notoriety = (Notoriety)p.ReadByte();
+
+            World.Player.ProcessDelta();
         }
 
         private static void DraggingOfItem(Packet p)
@@ -450,7 +486,8 @@ namespace ClassicUO.Network
 
         private static void AddItemToContainer(Packet p)
         {
-            
+            if (ReadContainerContent(p))
+                World.Items.ProcessDelta();
         }
 
         private static void KickPlayer(Packet p)
@@ -500,7 +537,23 @@ namespace ClassicUO.Network
 
         private static void WornItem(Packet p)
         {
-            
+            Item item = World.GetOrCreateItem(p.ReadUInt());
+            item.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
+            item.Layer = (Layer)p.ReadByte();
+            item.Container = p.ReadUInt();
+            item.Hue = p.ReadUShort();
+            item.Amount = 1;
+
+            Mobile mobile = World.Mobiles.Get(item.Container);
+            mobile?.Items.Add(item);
+            item.ProcessDelta();
+            if (World.Items.Add(item))
+                World.Items.ProcessDelta();
+            mobile?.ProcessDelta();
+
+            if (mobile == World.Player)
+                World.Player.UpdateAbilities();
+
         }
 
         private static void FightOccuring(Packet p)
@@ -564,7 +617,10 @@ namespace ClassicUO.Network
 
         private static void AddMultipleItemsInContainer(Packet p)
         {
-            
+            ushort count = p.ReadUShort();
+            for (int i = 0; i < count; i++)
+                ReadContainerContent(p);
+            World.Items.ProcessDelta();
         }
 
         private static void VersionGodClient(Packet p)
@@ -750,7 +806,8 @@ namespace ClassicUO.Network
 
         private static void MovePlayer(Packet p)
         {
-            
+            Direction direction = (Direction)p.ReadByte();
+            World.Player.ProcessDelta();
         }
 
         private static void AllNames3DGameOnlyR(Packet p)
@@ -962,7 +1019,14 @@ namespace ClassicUO.Network
 
         private static void MegaClilocR(Packet p)
         {
-            
+            p.Skip(2);
+            Entity entity = World.Get(p.ReadUInt());
+            if (entity == null)
+                return;
+            p.Skip(6);
+            entity.UpdateProperties(ReadProperties(p));
+            entity.ProcessDelta();
+
         }
 
         private static void GenericAOSCommandsR(Packet p)
@@ -1029,5 +1093,49 @@ namespace ClassicUO.Network
         {
             
         }
+
+
+        private static bool ReadContainerContent(Packet p)
+        {
+            Item item = World.GetOrCreateItem(p.ReadUInt());
+            item.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
+            item.Amount = Math.Max(p.ReadUShort(), (ushort)1);
+            item.Position = new Position(p.ReadUShort(), p.ReadUShort());
+            if (FileManager.ClientVersion >= ClientVersions.CV_6017)
+                p.ReadByte(); //gridnumber - useless?
+
+            item.Container = p.ReadUInt();
+            item.Hue = p.ReadUShort();
+
+            Item entity = World.Items.Get(item.Container);
+            if (entity != null)
+            {
+                entity.Items.Add(item);
+                foreach (Item i in World.ToAdd.Where(i => i.Container == item))
+                {
+                    item.Items.Add(i);
+                    World.Items.Add(i);
+                }
+                World.ToAdd.ExceptWith(item.Items);
+                item.ProcessDelta();
+                entity.ProcessDelta();
+                return World.Items.Add(item);
+            }
+            World.ToAdd.Add(item);
+            item.ProcessDelta();
+            return false;
+        }
+
+        private static IEnumerable<Property> ReadProperties(Packet p)
+        {
+            uint cliloc;
+            while ((cliloc = p.ReadUInt()) != 0)
+            {
+                ushort len = p.ReadUShort();
+                string str = p.ReadUnicodeReversed(len);
+                yield return new Property(cliloc, str);
+            }
+        }
+
     }
 }

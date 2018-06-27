@@ -139,7 +139,7 @@ namespace ClassicUO.Game
             }
         }
 
-        internal void UpdateProperties(IEnumerable<Property> props)
+        public void UpdateProperties(IEnumerable<Property> props)
         {
             _properties.Clear();
             int temp = 0;
