@@ -2,6 +2,7 @@
 using ClassicUO.Game;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace ClassicUO.Network
@@ -375,8 +376,112 @@ namespace ClassicUO.Network
         }
     }
 
+    public sealed class PPartyRemoveRequest : PacketWriter
+    {
+        public PPartyRemoveRequest(Serial serial) : base (0xBF)
+        {
+            WriteUShort(0x06);
+            WriteByte(2);
+            WriteUInt(serial);
+        }
+    }
 
+    public sealed class PPartyChangeLootTypeRequest : PacketWriter
+    {
+        public PPartyChangeLootTypeRequest(bool type) : base (0xBF)
+        {
+            WriteUShort(0x06);
+            WriteByte(0x06);
+            WriteBool(type);
+        }
+    }
 
+    public sealed class PPartyAccept : PacketWriter
+    {
+        public PPartyAccept(Serial serial) : base (0xBF)
+        {
+            WriteUShort(0x06);
+            WriteByte(0x08);
+            WriteUInt(serial);
+        }
+    }
+
+    public sealed class PPartyDecline : PacketWriter
+    {
+        public PPartyDecline(Serial serial) : base(0xBF)
+        {
+            WriteUShort(0x06);
+            WriteByte(0x09);
+            WriteUInt(serial);
+        }
+    }
+
+    public sealed class PPartyMessage : PacketWriter
+    {
+        public PPartyMessage(string text, Serial serial) : base(0xBF)
+        {
+            WriteUShort(0x06);
+            if (serial.IsValid)
+            {
+                WriteByte(0x03);
+                WriteUInt(serial);
+            }
+            else
+                WriteByte(0x04);
+
+            WriteUnicode(text);
+        }
+    }
+
+    public sealed class PGameWindowSize : PacketWriter
+    {
+        public PGameWindowSize(uint w, uint h) : base(0xBF)
+        {
+            WriteUShort(0x05);
+            WriteUInt(w);
+            WriteUInt(h);
+        }
+    }
+
+    public sealed class PBulletinBoardRequestMessage : PacketWriter
+    {
+        public PBulletinBoardRequestMessage(Serial serial, Serial msgserial) : base (0x71)
+        {
+            WriteByte(0x03);
+            WriteUInt(serial);
+            WriteUInt(msgserial);
+        }
+    }
+
+    public sealed class PBulletinBoardRequestMessageSummary : PacketWriter
+    {
+        public PBulletinBoardRequestMessageSummary(Serial serial, Serial msgserial) : base(0x71)
+        {
+            WriteByte(0x04);
+            WriteUInt(serial);
+            WriteUInt(msgserial);
+        }
+    }
+
+    public sealed class PBulletinBoardPostMessage : PacketWriter
+    {
+        public PBulletinBoardPostMessage(Serial serial, Serial msgserial, string subject, string message) : base(0x71)
+        {
+            WriteByte(0x05);
+            WriteUInt(serial);
+            WriteUInt(msgserial);
+            WriteByte((byte)(subject.Length + 1));
+            WriteASCII(subject);
+
+            string[] lines = message.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                WriteByte((byte)lines[i].Length);
+                WriteASCII(lines[i]);
+            }
+        }
+    }
 
     public sealed class PSeed : PacketWriter
     {
