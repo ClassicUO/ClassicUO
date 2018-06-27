@@ -156,7 +156,7 @@ namespace ClassicUO.Network
 
     public sealed class PClientVersion : PacketWriter
     {
-        public PClientVersion(string version) : base(0xBD)
+        public PClientVersion(byte[] version) : base(0xBD)
         {
             WriteASCII(string.Format("{0}.{1}.{2}.{3}", version[0], version[1], version[2], version[3]));
         }
@@ -482,4 +482,76 @@ namespace ClassicUO.Network
             }
         }
     }
+
+    public sealed class PBulletinBoardRemoveMessage : PacketWriter
+    {
+        public PBulletinBoardRemoveMessage(Serial serial, Serial msgserial) : base(0x71)
+        {
+            WriteByte(0x06);
+            WriteUInt(serial);
+            WriteUInt(msgserial);
+        }
+    }
+
+    public sealed class PAssistVersion : PacketWriter
+    {
+        public PAssistVersion(byte[] clientversion, uint version) : base(0xBE)
+        {
+            WriteUInt(version);
+            WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2], clientversion[3]));
+        }
+    }
+
+    public sealed class PRazorAnswer : PacketWriter
+    {
+        public PRazorAnswer() : base( 0xF0)
+        {
+            WriteByte(0x04);
+            WriteByte(0xFF);
+        }
+    }
+    
+    public sealed class PLanguage : PacketWriter
+    {
+        public PLanguage(string lang) : base(0xBF)
+        {
+            WriteUShort(0x0B);
+            WriteASCII(lang);
+        }
+    }
+
+    public sealed class PClientType : PacketWriter
+    {
+        public PClientType() : base (0xBF)
+        {
+            WriteUShort(0x0F);
+            WriteByte(0x0A);
+
+            uint clientFlag = 0;
+
+            /*IFOR(i, 0, g_CharacterList.ClientFlag)
+                clientFlag |= (1 << i);*/
+            WriteUInt(clientFlag);
+        }
+    }
+
+    public sealed class PRequestPopupMenu : PacketWriter
+    {
+        public PRequestPopupMenu(Serial serial) : base(0xBF)
+        {
+            WriteUShort(0x13);
+            WriteUInt(serial);
+        }
+    }
+
+    public sealed class PPopupMenuSelection : PacketWriter
+    {
+        public PPopupMenuSelection(Serial serial, Graphic menuid) : base(0xBF)
+        {
+            WriteUShort(0x15);
+            WriteUInt(serial);
+            WriteUShort(menuid);
+        }
+    }
+
 }
