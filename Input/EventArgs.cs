@@ -25,30 +25,32 @@ namespace ClassicUO.Input
 
     public sealed class MouseEventArgs : EventArgs
     {
-        public MouseEventArgs(int x, int y, MouseButton button = MouseButton.None, ButtonState state = ButtonState.Released)
+        public MouseEventArgs(int x, int y, int offx, int offy, MouseButton button = MouseButton.None, ButtonState state = ButtonState.Released)
         {
             Location = new Point(x, y);
             Button = button;
             ButtonState = state;
-
-
+            Offset = new Point(x - offx, y - offy);
         }
 
-        public Point Location { get; set; }
-        public MouseButton Button { get; set; }
-        public ButtonState ButtonState { get; set; }
+        public Point Location { get; }
+        public Point Offset { get; }
+        public MouseButton Button { get; }
+        public ButtonState ButtonState { get; }
     }
 
     public sealed class MouseWheelEventArgs : EventArgs
     {
-        public MouseWheelEventArgs(int x, int y, WheelDirection direction)
+        public MouseWheelEventArgs(int x, int y, int offx, int offy,  WheelDirection direction)
         {
             Location = new Point(x, y);
             Direction = direction;
+            Offset = new Point(x - offx, y - offy);
         }
 
-        public Point Location { get; set; }
-        public WheelDirection Direction { get; set; }
+        public Point Location { get; }
+        public Point Offset { get; }
+        public WheelDirection Direction { get; }
     }
 
     public sealed class KeyboardEventArgs : EventArgs

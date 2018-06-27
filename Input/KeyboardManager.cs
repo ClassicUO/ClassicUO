@@ -10,6 +10,8 @@ namespace ClassicUO.Input
     {
         private static KeyboardState _prevKeyboardState = Keyboard.GetState();
 
+        public static event EventHandler<KeyboardEventArgs> KeyDown, KeyUp;
+
         public static void Update()
         {
             KeyboardState current = Keyboard.GetState();
