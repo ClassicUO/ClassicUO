@@ -45,6 +45,7 @@ namespace ClassicUO.Game
                         int pos = y * 8 + x;
                         var pp = block->Cells[pos].TileID & 0x3FFF;
 
+                        Tiles[pos].Location.Set((ushort)(bx + x), (ushort)(by + y));
                     }
                 }
 
