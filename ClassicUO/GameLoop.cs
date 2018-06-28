@@ -30,7 +30,7 @@ namespace ClassicUO
 
             Stopwatch t = Stopwatch.StartNew();
 
-            facet.LoadChunks(1511, 1894, 24 / 8);
+            facet.LoadChunks(1443, 1659, 24 / 8);
 
             long elapsed = t.ElapsedMilliseconds;
             Log.Message(LogTypes.Trace, elapsed.ToString());
