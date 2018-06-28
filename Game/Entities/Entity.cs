@@ -21,7 +21,7 @@ namespace ClassicUO.Game.Entities
         Hidden = 0x80
     }
 
-    public abstract class Entity
+    public abstract class Entity : RenderObject
     {
         [Flags]
         protected enum Delta
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.Entities
             }
         }
 
-        public Position Position
+        public override Position Position
         {
             get => _position;
             set
