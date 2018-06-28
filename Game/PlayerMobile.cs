@@ -81,7 +81,7 @@ namespace ClassicUO.Game
         public ushort Strength
         {
             get { return _strength; }
-            internal set
+            set
             {
                 if (_strength != value)
                 {
@@ -94,7 +94,7 @@ namespace ClassicUO.Game
         public ushort Intelligence
         {
             get { return _intelligence; }
-            internal set
+            set
             {
                 if (_intelligence != value)
                 {
@@ -107,7 +107,7 @@ namespace ClassicUO.Game
         public ushort Dexterity
         {
             get { return _dexterity; }
-            internal set
+            set
             {
                 if (_dexterity != value)
                 {
@@ -120,7 +120,7 @@ namespace ClassicUO.Game
         public ushort Weight
         {
             get { return _weight; }
-            internal set
+            set
             {
                 if (_weight != value)
                 {
@@ -133,7 +133,7 @@ namespace ClassicUO.Game
         public ushort WeightMax
         {
             get { return _weightMax; }
-            internal set
+            set
             {
                 if (_weightMax != value)
                 {
@@ -146,7 +146,7 @@ namespace ClassicUO.Game
         public uint Gold
         {
             get { return _gold; }
-            internal set
+            set
             {
                 if (_gold != value)
                 {
@@ -159,7 +159,7 @@ namespace ClassicUO.Game
         public ushort ResistPhysical
         {
             get { return _resistPhysical; }
-            internal set
+            set
             {
                 if (_resistPhysical != value)
                 {
@@ -172,7 +172,7 @@ namespace ClassicUO.Game
         public ushort ResistFire
         {
             get { return _resistFire; }
-            internal set
+            set
             {
                 if (_resistFire != value)
                 {
@@ -185,7 +185,7 @@ namespace ClassicUO.Game
         public ushort ResistCold
         {
             get { return _resistCold; }
-            internal set
+            set
             {
                 if (_resistCold != value)
                 {
@@ -198,7 +198,7 @@ namespace ClassicUO.Game
         public ushort ResistPoison
         {
             get { return _resistPoison; }
-            internal set
+            set
             {
                 if (_resistPoison != value)
                 {
@@ -211,7 +211,7 @@ namespace ClassicUO.Game
         public ushort ResistEnergy
         {
             get { return _resistEnergy; }
-            internal set
+            set
             {
                 if (_resistEnergy != value)
                 {
@@ -224,7 +224,7 @@ namespace ClassicUO.Game
         public byte Followers
         {
             get { return _followers; }
-            internal set
+            set
             {
                 if (_followers != value)
                 {
@@ -237,7 +237,7 @@ namespace ClassicUO.Game
         public byte FollowersMax
         {
             get { return _followersMax; }
-            internal set
+            set
             {
                 if (_followersMax != value)
                 {
@@ -250,7 +250,7 @@ namespace ClassicUO.Game
         public ushort Luck
         {
             get { return _luck; }
-            internal set
+            set
             {
                 if (_luck != value)
                 {
@@ -263,7 +263,7 @@ namespace ClassicUO.Game
         public uint TithingPoints
         {
             get { return _tithingPoints; }
-            internal set
+            set
             {
                 if (_tithingPoints != value)
                 {
@@ -276,7 +276,7 @@ namespace ClassicUO.Game
         public ushort DamageMin
         {
             get { return _damageMin; }
-            internal set
+            set
             {
                 if (_damageMin != value)
                 {
@@ -289,7 +289,7 @@ namespace ClassicUO.Game
         public ushort DamageMax
         {
             get { return _damageMax; }
-            internal set
+            set
             {
                 if (_damageMax != value)
                 {
@@ -302,7 +302,7 @@ namespace ClassicUO.Game
         public bool Female
         {
             get { return _female; }
-            internal set
+            set
             {
                 if (_female != value)
                 {

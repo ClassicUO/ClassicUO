@@ -64,7 +64,7 @@ namespace ClassicUO.Game
         public Graphic Graphic
         {
             get => _graphic;
-            internal set
+            set
             {
                 if (_graphic != value)
                 {
@@ -139,7 +139,7 @@ namespace ClassicUO.Game
             }
         }
 
-        internal void UpdateProperties(IEnumerable<Property> props)
+        public void UpdateProperties(IEnumerable<Property> props)
         {
             _properties.Clear();
             int temp = 0;
@@ -163,7 +163,7 @@ namespace ClassicUO.Game
                 PropertiesChanged.Raise(this);
         }
 
-        internal void ProcessDelta()
+        public void ProcessDelta()
         {
             Delta d = _delta;
             OnProcessDelta(d);

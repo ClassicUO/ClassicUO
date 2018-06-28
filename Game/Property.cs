@@ -6,7 +6,7 @@ namespace ClassicUO.Game
 {
     public struct Property
     {
-        internal Property(uint cliloc, string args) : this()
+        public Property(uint cliloc, string args) : this()
         {
             Cliloc = cliloc;
             Args = args;

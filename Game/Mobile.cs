@@ -44,7 +44,7 @@ namespace ClassicUO.Game
         public ushort Hits
         {
             get { return _hits; }
-            internal set
+            set
             {
                 if (_hits != value)
                 {
@@ -57,7 +57,7 @@ namespace ClassicUO.Game
         public ushort HitsMax
         {
             get { return _hitsMax; }
-            internal set
+            set
             {
                 if (_hitsMax != value)
                 {
@@ -70,7 +70,7 @@ namespace ClassicUO.Game
         public ushort Mana
         {
             get { return _mana; }
-            internal set
+            set
             {
                 if (_mana != value)
                 {
@@ -83,7 +83,7 @@ namespace ClassicUO.Game
         public ushort ManaMax
         {
             get { return _manaMax; }
-            internal set
+            set
             {
                 if (_manaMax != value)
                 {
@@ -96,7 +96,7 @@ namespace ClassicUO.Game
         public ushort Stamina
         {
             get { return _stamina; }
-            internal set
+            set
             {
                 if (_stamina != value)
                 {
@@ -109,7 +109,7 @@ namespace ClassicUO.Game
         public ushort StaminaMax
         {
             get { return _staminaMax; }
-            internal set
+            set
             {
                 if (_staminaMax != value)
                 {
@@ -122,7 +122,7 @@ namespace ClassicUO.Game
         public Notoriety Notoriety
         {
             get { return _notoriety; }
-            internal set
+            set
             {
                 if (_notoriety != value)
                 {
@@ -135,7 +135,7 @@ namespace ClassicUO.Game
         public bool WarMode
         {
             get { return _warMode; }
-            internal set
+            set
             {
                 if (_warMode != value)
                 {
@@ -148,7 +148,7 @@ namespace ClassicUO.Game
         public bool Renamable
         {
             get { return _renamable; }
-            internal set
+            set
             {
                 if (_renamable != value)
                 {
@@ -173,7 +173,7 @@ namespace ClassicUO.Game
             || MathHelper.InRange(Graphic, 0x02B6, 0x02B7)
             || Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2;
 
-        internal void SetSAPoison(bool value) => _isSA_Poisoned = value;
+        public void SetSAPoison(bool value) => _isSA_Poisoned = value;
 
 
         public Item GetItemAtLayer(Layer layer) => Items.SingleOrDefault(s => s.Layer == layer);
