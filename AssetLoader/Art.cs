@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ClassicUO.Assets
 {
+    /*
+     *      TODO: 
+     *          - use Span<T> (retarget to netcore2.1) to read pixels and other array stuffs to improve performances
+     */
+
     public static class Art
     {
         private static UOFile _file;
@@ -45,7 +51,7 @@ namespace ClassicUO.Assets
              if (_pixels.TryGetValue(graphic, out pixels))
                  return pixels;*/
 
-            ushort[] pixels = new ushort[width * height];
+            ushort[] pixels = new ushort[width * height];           
 
             ushort* ptr = (ushort*)_file.PositionAddress;
             //long datastart = _file.Position;

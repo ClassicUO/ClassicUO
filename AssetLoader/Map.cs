@@ -20,7 +20,7 @@ namespace ClassicUO.Assets
             new int[2] { 1280, 4096 },
         };
 
-        private static readonly int[][] _mapsSize = new int[MAPS_COUNT][];
+        //private static readonly int[][] _mapsSize = new int[MAPS_COUNT][];
         private static readonly int[][] _mapsBlockSize = new int[MAPS_COUNT][];
         private static readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];
         private static readonly UOFileMul[] _filesStatics = new UOFileMul[MAPS_COUNT];
@@ -29,6 +29,8 @@ namespace ClassicUO.Assets
         private static readonly IndexMap[][] _blockData = new IndexMap[MAPS_COUNT][];
 
         public static IndexMap[][] BlockData => _blockData;
+        public static int[][] MapBlocksSize => _mapsBlockSize;
+        public static int[][] MapsDefaultSize => _mapsDefaultSize;
 
         public unsafe static void Load()
         {
@@ -197,7 +199,7 @@ namespace ClassicUO.Assets
     {
         public uint Header;
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.Struct, SizeConst = 64)]
-        public MapCells[] Cells;
+        public unsafe MapCells* Cells;
     }
 
     public struct IndexMap
