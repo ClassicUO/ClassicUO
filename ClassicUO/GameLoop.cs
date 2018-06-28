@@ -20,21 +20,14 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, "Gameloop initialized.");
         }
 
+        private Game.Facet _facet;
+
         protected override void Initialize()
         {
-            // TEST
-            Assets.FileManager.UoFolderPath = @"E:\Giochi\Ultima Online Classic ORION";
-            Assets.FileManager.LoadFiles();
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
 
-            Game.Facet facet = new Game.Facet(0);
+            IsFixedTimeStep = false;
 
-            Stopwatch t = Stopwatch.StartNew();
-
-            facet.LoadChunks(1443, 1659, 24 / 8);
-
-            long elapsed = t.ElapsedMilliseconds;
-            Log.Message(LogTypes.Trace, elapsed.ToString());
-            // END TEST
 
             base.Initialize();
         }
@@ -42,6 +35,14 @@ namespace ClassicUO
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            // TEST
+            Assets.FileManager.UoFolderPath = @"E:\Giochi\Ultima Online Classic ORION";
+            Assets.FileManager.LoadFiles();
+
+            _facet = new Game.Facet(0);
+
+            // END TEST
 
             base.LoadContent();
         }
@@ -52,10 +53,36 @@ namespace ClassicUO
         }
 
 
+        const double TIME_RUN_MOUNT = (2d / 20d) * 1000d;
+        private DateTime _delay = DateTime.Now;
+
+        private ushort _x = 1443, _y = 1659;
+        private ushort _maxX = 1560;
+        private ushort _currentX = 1443;
+        private Stopwatch _stopwatch;
+
         protected override void Update(GameTime gameTime)
         {
-            Input.MouseManager.Update();
-            Input.KeyboardManager.Update();
+            //Input.MouseManager.Update();
+            //Input.KeyboardManager.Update();
+
+            if (_stopwatch == null)
+                _stopwatch = Stopwatch.StartNew();
+
+            if (_stopwatch.ElapsedMilliseconds > TIME_RUN_MOUNT)
+            {
+                if (_currentX + 1 > _maxX)
+                    _currentX = _x;
+                _currentX++;
+
+                _facet.LoadChunks(_currentX, _y, 24/8 );
+
+                Log.Message(LogTypes.Trace, _stopwatch.ElapsedMilliseconds.ToString());
+                _stopwatch.Restart();
+               // _delay = DateTime.Now.AddMilliseconds(TIME_RUN_MOUNT);
+            }
+
+
 
             base.Update(gameTime);
         }

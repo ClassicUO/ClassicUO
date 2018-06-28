@@ -89,8 +89,9 @@ namespace ClassicUO.Game
         public void Unload()
         {
             for (int i = 0; i < Tiles.Length; i++)
-                Tiles[i].Clear();        
-            
+            {
+                Tiles[i].Clear();
+            }
         }
 
     }
