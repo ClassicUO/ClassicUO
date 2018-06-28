@@ -1,9 +1,10 @@
-﻿using ClassicUO.Assets;
-using ClassicUO.Game;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ClassicUO.AssetsLoader;
+using ClassicUO.Game;
+using ClassicUO.Game.Entities;
 
 namespace ClassicUO.Network
 {

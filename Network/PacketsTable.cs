@@ -1,4 +1,4 @@
-﻿using ClassicUO.Assets;
+﻿using ClassicUO.AssetsLoader;
 using System;
 using System.Collections.Generic;
 using System.Text;

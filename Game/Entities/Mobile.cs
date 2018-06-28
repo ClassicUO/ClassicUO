@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using ClassicUO.Assets;
+using ClassicUO.AssetsLoader;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Entities
 {
     [Flags]
     public enum Notoriety : byte

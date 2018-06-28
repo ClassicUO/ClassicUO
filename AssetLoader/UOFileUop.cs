@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO.Compression;
 
-namespace ClassicUO.Assets
+namespace ClassicUO.AssetsLoader
 {
     public class UOFileUop : UOFile
     {

@@ -4,10 +4,10 @@ using System.Text;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Threading.Tasks;
-using ClassicUO.Assets;
+using ClassicUO.AssetsLoader;
 using System.Runtime.InteropServices;
 
-namespace ClassicUO.Assets
+namespace ClassicUO.AssetsLoader
 {
     public unsafe abstract class UOFile
     {

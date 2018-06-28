@@ -24,7 +24,7 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, "Gameloop initialized.");
         }
 
-        private Game.Facet _facet;
+        private Game.Map.Facet _facet;
 
         protected override void Initialize()
         {
@@ -38,10 +38,10 @@ namespace ClassicUO
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TEST
-            Assets.FileManager.UoFolderPath = @"E:\Giochi\Ultima Online Classic ORION";
-            Assets.FileManager.LoadFiles();
+            AssetsLoader.FileManager.UoFolderPath = @"E:\Giochi\Ultima Online Classic ORION";
+            AssetsLoader.FileManager.LoadFiles();
 
-            _facet = new Game.Facet(0);
+            _facet = new Game.Map.Facet(0);
 
             // END TEST
 

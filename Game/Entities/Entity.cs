@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Entities
 {
     [Flags]
     public enum Flags : byte

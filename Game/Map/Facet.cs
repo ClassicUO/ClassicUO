@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Map
 {
     public sealed class Facet
     {
@@ -34,17 +34,17 @@ namespace ClassicUO.Game
                 minBlockX = 0;
             if (minBlockY < 0)
                 minBlockY = 0;
-            if (maxBlockX >= Assets.Map.MapsDefaultSize[Index][0])
-                maxBlockX = Assets.Map.MapsDefaultSize[Index][0] - 1;
-            if (maxBlockY >= Assets.Map.MapsDefaultSize[Index][1])
-                maxBlockY = Assets.Map.MapsDefaultSize[Index][1] - 1;
+            if (maxBlockX >= AssetsLoader.Map.MapsDefaultSize[Index][0])
+                maxBlockX = AssetsLoader.Map.MapsDefaultSize[Index][0] - 1;
+            if (maxBlockY >= AssetsLoader.Map.MapsDefaultSize[Index][1])
+                maxBlockY = AssetsLoader.Map.MapsDefaultSize[Index][1] - 1;
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
-                ushort cellY = (ushort)(i % Assets.Map.MapBlocksSize[Index][1]);
+                ushort cellY = (ushort)(i % AssetsLoader.Map.MapBlocksSize[Index][1]);
                 for (int j = minBlockY; j <= maxBlockY; j++)
                 {
-                    ushort cellX = (ushort)(j % Assets.Map.MapBlocksSize[Index][0]);
+                    ushort cellX = (ushort)(j % AssetsLoader.Map.MapBlocksSize[Index][0]);
 
                     int cellindex = (cellY % 11) * 11 + (cellX % 11);
                     if (_chunks[cellindex] == null ||
@@ -69,10 +69,10 @@ namespace ClassicUO.Game
 
             for (int y = -distance; y <= distance; y++)
             {
-                ushort cellY = (ushort)((centerY + y) % Assets.Map.MapBlocksSize[Index][1]); 
+                ushort cellY = (ushort)((centerY + y) % AssetsLoader.Map.MapBlocksSize[Index][1]); 
                 for (int x = -distance; x <= distance; x++)
                 {
-                    ushort cellX = (ushort)((centerX + x) % Assets.Map.MapBlocksSize[Index][0]);
+                    ushort cellX = (ushort)((centerX + x) % AssetsLoader.Map.MapBlocksSize[Index][0]);
 
                     int cellindex = (cellY % 11) * 11 + (cellX % 11);
                     if (_chunks[cellindex] == null ||

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Assets
+namespace ClassicUO.AssetsLoader
 {
     public struct UOFileIndex3D
     {

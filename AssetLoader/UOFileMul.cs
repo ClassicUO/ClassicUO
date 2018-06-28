@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using ClassicUO.Assets;
+using ClassicUO.AssetsLoader;
 
-namespace ClassicUO.Assets
+namespace ClassicUO.AssetsLoader
 {
     public class UOFileMul : UOFile
     {

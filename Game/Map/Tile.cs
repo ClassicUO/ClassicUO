@@ -1,8 +1,9 @@
-﻿using System;
+﻿using ClassicUO.Game.Entities;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Map
 {
     public sealed class Tile
     {

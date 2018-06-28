@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace ClassicUO.Assets
+namespace ClassicUO.AssetsLoader
 {
     public static class Verdata
     {

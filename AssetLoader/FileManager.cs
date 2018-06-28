@@ -2,7 +2,7 @@
 using System.IO;
 
 
-namespace ClassicUO.Assets
+namespace ClassicUO.AssetsLoader
 {
     public static class FileManager
     {

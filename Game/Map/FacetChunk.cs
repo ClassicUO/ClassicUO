@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Map
 {
     public sealed class FacetChunk
     {
@@ -34,7 +34,7 @@ namespace ClassicUO.Game
 
             unsafe
             {
-                Assets.MapBlock block = Marshal.PtrToStructure<Assets.MapBlock>((IntPtr)im.MapAddress);
+                AssetsLoader.MapBlock block = Marshal.PtrToStructure<AssetsLoader.MapBlock>((IntPtr)im.MapAddress);
 
                 int bx = X * 8;
                 int by = Y * 8;
@@ -51,7 +51,7 @@ namespace ClassicUO.Game
                     }
                 }
 
-                Assets.StaticsBlock* sb = (Assets.StaticsBlock*)im.StaticAddress;
+                AssetsLoader.StaticsBlock* sb = (AssetsLoader.StaticsBlock*)im.StaticAddress;
                 if (sb != null)
                 {
                     int count = (int)im.StaticCount;
@@ -79,10 +79,10 @@ namespace ClassicUO.Game
             }
         }
 
-        private Assets.IndexMap GetIndex(in int map)
+        private AssetsLoader.IndexMap GetIndex(in int map)
         {
-            uint block = (uint)(X * Assets.Map.MapBlocksSize[map][1]) + Y;
-            return Assets.Map.BlockData[map][block];
+            uint block = (uint)(X * AssetsLoader.Map.MapBlocksSize[map][1]) + Y;
+            return AssetsLoader.Map.BlockData[map][block];
         }
 
         // we wants to avoid reallocation, so use a reset method

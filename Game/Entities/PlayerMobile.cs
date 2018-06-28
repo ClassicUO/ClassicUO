@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Entities
 {
     public enum Ability : ushort
     {

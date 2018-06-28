@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.IO;
 
-namespace ClassicUO.Assets
+namespace ClassicUO.AssetsLoader
 {
     public static class TileData
     {

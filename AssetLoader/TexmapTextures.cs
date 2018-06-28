@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
-namespace ClassicUO.Assets
+namespace ClassicUO.AssetsLoader
 {
     public static class TextmapTextures
     {

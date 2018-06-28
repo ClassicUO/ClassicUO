@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.Linq;
 using System.IO.Compression;
 
-namespace ClassicUO.Assets
+namespace ClassicUO.AssetsLoader
 {
     public enum ANIMATION_GROUPS_TYPE
     {

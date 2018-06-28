@@ -4,7 +4,7 @@ using System.Text;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace ClassicUO.Assets
+namespace ClassicUO.AssetsLoader
 {
     public static class Skills
     {

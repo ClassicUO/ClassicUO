@@ -1,4 +1,5 @@
-﻿using ClassicUO.Utility;
+﻿using ClassicUO.Game.Entities;
+using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
 using System.Text;
