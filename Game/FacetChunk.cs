@@ -56,6 +56,11 @@ namespace ClassicUO.Game
                 {
                     int count = (int)im.StaticCount;
 
+                    if (count == 68)
+                    {
+
+                    }
+
                     for (int i = 0; i < count; i++, sb++)
                     {
                         if (sb->Color > 0 && sb->Color != 0xFFFF)

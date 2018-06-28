@@ -15,6 +15,10 @@ namespace ClassicUO
 
         public GameLoop()
         {
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
+           // IsFixedTimeStep = false;
+
+
             _graphics = new GraphicsDeviceManager(this);
 
             Log.Message(LogTypes.Trace, "Gameloop initialized.");
@@ -24,10 +28,7 @@ namespace ClassicUO
 
         protected override void Initialize()
         {
-            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
-
-            IsFixedTimeStep = false;
-
+          
 
             base.Initialize();
         }
@@ -75,9 +76,9 @@ namespace ClassicUO
                     _currentX = _x;
                 _currentX++;
 
-                _facet.LoadChunks(_currentX, _y, 24/8 );
+                _facet.LoadChunks(_currentX, _y, 5 );
 
-                Log.Message(LogTypes.Trace, _stopwatch.ElapsedMilliseconds.ToString());
+                //Log.Message(LogTypes.Trace, _stopwatch.ElapsedMilliseconds.ToString());
                 _stopwatch.Restart();
                // _delay = DateTime.Now.AddMilliseconds(TIME_RUN_MOUNT);
             }
