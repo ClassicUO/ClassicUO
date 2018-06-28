@@ -13,7 +13,7 @@ namespace ClassicUO.Game
             _entities = new Dictionary<Serial, Entity>();
         }
 
-        public Position Location { get; }
+        public Position Location { get; set; }
 
         public IReadOnlyDictionary<Serial, Entity> Entities => _entities;
 

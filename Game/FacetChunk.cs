@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ClassicUO.Game
@@ -33,7 +34,7 @@ namespace ClassicUO.Game
 
             unsafe
             {
-                Assets.MapBlock* block = (Assets.MapBlock*)im.MapAddress;
+                Assets.MapBlock block = Marshal.PtrToStructure<Assets.MapBlock>((IntPtr)im.MapAddress);
 
                 int bx = X * 8;
                 int by = Y * 8;
@@ -43,9 +44,10 @@ namespace ClassicUO.Game
                     for (int y = 0; y < 8; y++)
                     {
                         int pos = y * 8 + x;
-                        var pp = block->Cells[pos].TileID & 0x3FFF;
 
-                        Tiles[pos].Location.Set((ushort)(bx + x), (ushort)(by + y));
+                        var pp = block.Cells[pos].TileID & 0x3FFF;
+
+                        Tiles[pos].Location = new Position((ushort)(bx + x), (ushort)(by + y));
                     }
                 }
 

@@ -6,13 +6,13 @@ namespace ClassicUO.Game
 {
     public sealed class Facet
     {
-        private readonly FacetChunk[,] _chunks;
+        private readonly FacetChunk[] _chunks;
 
         public Facet(in int index)
         {
             Index = index;
 
-            _chunks = new FacetChunk[8,8];
+            _chunks = new FacetChunk[11 * 11];
         }
 
         public int Index { get; }
@@ -27,28 +27,31 @@ namespace ClassicUO.Game
 
             for (int y = -distance; y <= distance; y++)
             {
-                ushort cellY = (ushort)((centerY + y) & Assets.Map.MapBlocksSize[Index][1]); 
+                short cellY = (short)((centerY + y) % Assets.Map.MapBlocksSize[Index][1]); 
                 for (int x = -distance; x <= distance; x++)
                 {
-                    ushort cellX = (ushort)((centerX + x) & Assets.Map.MapBlocksSize[Index][0]);
+                    short cellX = (short)((centerX + x) % Assets.Map.MapBlocksSize[Index][0]);
 
-                    if (_chunks[cellX, cellY] == null ||
-                        _chunks[cellX, cellY].X != cellX ||
-                        _chunks[cellX, cellY].Y != cellY)
+                    int cellindex = (cellY % 11) * 11 + (cellX % 11);
+
+                    if (_chunks[cellindex] == null ||
+                        _chunks[cellindex].X != cellX ||
+                        _chunks[cellindex].Y != cellY)
                     {
-                        if (_chunks[cellX, cellY] == null)
-                            _chunks[cellX, cellY] = new FacetChunk(cellX, cellY);
+                        if (_chunks[cellindex] == null)
+                            _chunks[cellindex] = new FacetChunk((ushort)cellX, (ushort)cellY);
                         else
                         {
-                            _chunks[cellX, cellY].Unload();
-                            _chunks[cellX, cellY].SetTo(cellX, cellY);
+                            _chunks[cellindex].Unload();
+                            _chunks[cellindex].SetTo((ushort)cellX, (ushort)cellY);
                         }
 
-                        _chunks[cellX, cellY].Load(Index);
+                        _chunks[cellindex].Load(Index);
 
                     }
                 }
             }
         }
+
     }
 }

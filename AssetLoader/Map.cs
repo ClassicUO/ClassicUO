@@ -72,6 +72,8 @@ namespace ClassicUO.Assets
                 _mapsDefaultSize[0][0] = _mapsDefaultSize[1][0] = 6144;
             }
 
+            int ss = Marshal.SizeOf<MapCells>();
+
             int mapblocksize = Marshal.SizeOf<MapBlock>();
             int staticidxblocksize = Marshal.SizeOf<StaidxBlock>();
             int staticblocksize = Marshal.SizeOf<StaticsBlock>();
@@ -129,9 +131,9 @@ namespace ClassicUO.Assets
 
                     ulong address = mapddress + uopoffset + (ulong)(blocknum * mapblocksize);
 
-                    //MapBlock mapblock = Marshal.PtrToStructure<MapBlock>((IntPtr)address);
-
-                     //file.Accessor.Read<MapBlock>((long)address, out var mapblock);
+                    // MapBlock mapblock = Marshal.PtrToStructure<MapBlock>((IntPtr)address);
+                    //MapBlock* mapblock = (MapBlock*)((IntPtr)address);
+                    //file.Accessor.Read<MapBlock>((long)address, out var mapblock);
 
                     if (address < endmapaddress)
                         realmapaddress = address;
@@ -199,7 +201,7 @@ namespace ClassicUO.Assets
     {
         public uint Header;
         [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.Struct, SizeConst = 64)]
-        public unsafe MapCells* Cells;
+        public MapCells[] Cells;
     }
 
     public struct IndexMap

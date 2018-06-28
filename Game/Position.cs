@@ -20,16 +20,6 @@ namespace ClassicUO.Game
         public ushort Y { get; set; }
         public sbyte Z { get; set; }
 
-        public void Set(in ushort x, in ushort y)
-        {
-            X = x; Y = y;
-        }
-
-        public void Set(in ushort x, in ushort y, in sbyte z)
-        {
-            Set(x, y);
-            Z = z;
-        }
 
         public static bool operator ==(Position p1, Position p2) { return p1.X == p2.X && p1.Y == p2.Y && p1.Z == p2.Z; }
         public static bool operator !=(Position p1, Position p2) { return p1.X != p2.X || p1.Y != p2.Y || p1.Z != p2.Z; }
