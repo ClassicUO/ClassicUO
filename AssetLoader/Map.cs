@@ -173,27 +173,27 @@ namespace ClassicUO.AssetsLoader
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct StaticsBlock
+    public readonly struct StaticsBlock
     {
-        public ushort Color;
-        public byte X;
-        public byte Y;
-        public sbyte Z;
-        public ushort Hue;
+        public ushort Color { get; }
+        public byte X { get; }
+        public byte Y { get; }
+        public sbyte Z { get; }
+        public ushort Hue { get; }
     }
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct StaidxBlock
+    public readonly struct StaidxBlock
     {
-        public uint Position;
-        public uint Size;
-        public uint Unknown;
+        public uint Position { get; }
+        public uint Size { get; }
+        public uint Unknown { get; }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct MapCells
+    public readonly struct MapCells
     {
-        public ushort TileID;
-        public sbyte Z;
+        public ushort TileID { get; }
+        public sbyte Z { get; }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

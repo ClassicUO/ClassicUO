@@ -34,7 +34,7 @@ namespace ClassicUO.Network
 
 
 
-        public void Connect(string ip, ushort port)
+        public void Connect(in string ip, in ushort port)
         {
             _isDisposing = _sending = false;
 
@@ -174,7 +174,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private void Send(byte[] data)
+        private void Send(in byte[] data)
         {
             if(_socket == null)
                 return;
@@ -260,7 +260,7 @@ namespace ClassicUO.Network
                 IO_Socket(null, _recvEventArgs);
         }
 
-        private void ProcessRecv(SocketAsyncEventArgs e)
+        private void ProcessRecv(in SocketAsyncEventArgs e)
         {
             int bytesLen = e.BytesTransferred;
 
@@ -320,7 +320,7 @@ namespace ClassicUO.Network
                 IO_Socket(null, _sendEventArgs);
         }
 
-        private void ProcessSend(SocketAsyncEventArgs e)
+        private void ProcessSend(in SocketAsyncEventArgs e)
         {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
@@ -359,7 +359,7 @@ namespace ClassicUO.Network
         }
 
 
-        private IPAddress ResolveIP(string addr)
+        private IPAddress ResolveIP(in string addr)
         {
             IPAddress result = IPAddress.None;
             if (string.IsNullOrEmpty(addr))

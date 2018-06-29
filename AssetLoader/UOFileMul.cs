@@ -10,7 +10,7 @@ namespace ClassicUO.AssetsLoader
         private readonly UOFileIdxMul _idxFile;
         private readonly int _count, _patch;
 
-        public UOFileMul(string file, string idxfile, int count, int patch = -1) : base(file)
+        public UOFileMul(in string file, in string idxfile, in int count, in int patch = -1) : base(file)
         {
             _idxFile = new UOFileIdxMul(idxfile);
             _count = count;
@@ -18,7 +18,7 @@ namespace ClassicUO.AssetsLoader
             Load();
         }
 
-        public UOFileMul(string file) : base(file)
+        public UOFileMul(in string file) : base(file)
         {
             Load();
         }
@@ -59,7 +59,7 @@ namespace ClassicUO.AssetsLoader
 
         private class UOFileIdxMul : UOFile
         {
-            public UOFileIdxMul(string idxpath) : base(idxpath) { Load(); }
+            public UOFileIdxMul(in string idxpath) : base(idxpath) { Load(); }
         }
     }
 }

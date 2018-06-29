@@ -13,7 +13,7 @@ namespace ClassicUO.AssetsLoader
         private int _count;
         private readonly bool _hasExtra;
 
-        public UOFileUop(string path, string extension, int count = 0, bool hasextra = false) : base(path)
+        public UOFileUop(in string path, in string extension, in int count = 0, in bool hasextra = false) : base(path)
         {
              _extension = extension; _count = count; _hasExtra = hasextra;
 
@@ -110,7 +110,7 @@ namespace ClassicUO.AssetsLoader
 
         }
 
-        public long GetOffsetFromUOP(long offset)
+        public long GetOffsetFromUOP(in long offset)
         {
             long pos = 0;
 
@@ -125,7 +125,7 @@ namespace ClassicUO.AssetsLoader
             return Length;
         }
        
-        internal static ulong CreateHash(string s)
+        internal static ulong CreateHash(in string s)
         {
             uint eax, ecx, edx, ebx, esi, edi;
 

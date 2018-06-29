@@ -9,7 +9,7 @@ namespace ClassicUO.Network
         private readonly byte[] _data;
         private readonly int _len;
 
-        public Packet(byte[] data, int length)
+        public Packet(in byte[] data, in int length)
         {
             _data = data; _len = length; IsDynamic = PacketsTable.GetPacketLength(ID) < 0;
         }
@@ -38,7 +38,7 @@ namespace ClassicUO.Network
         public override byte[] ToArray() => _data;
         public void MoveToData() => Seek(IsDynamic ? 3 : 1);
 
-        protected override void EnsureSize(int length)
+        protected override void EnsureSize(in int length)
         {
             if (length < 0 || Position + length > Length)
                 throw new ArgumentOutOfRangeException("length");
@@ -77,7 +77,7 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
-        public string ReadASCII(int length)
+        public string ReadASCII(in int length)
         {
             EnsureSize(length);
             StringBuilder sb = new StringBuilder(length);
@@ -105,7 +105,7 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
-        public string ReadUnicode(int length)
+        public string ReadUnicode(in int length)
         {
             EnsureSize(length);
             StringBuilder sb = new StringBuilder(length);

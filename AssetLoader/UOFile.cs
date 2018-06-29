@@ -17,7 +17,7 @@ namespace ClassicUO.AssetsLoader
         protected long _position;
         protected long _length;
 
-        public UOFile(string filepath)
+        public UOFile(in string filepath)
         {
             FileName = filepath;
             Path = System.IO.Path.GetDirectoryName(FileName);
@@ -111,30 +111,30 @@ namespace ClassicUO.AssetsLoader
         internal long ReadLong() { var r = _accessor.ReadInt64(_position); _position += 8; return r; }
         internal ulong ReadULong() { var r = _accessor.ReadUInt64(_position); _position += 8; return r; }
         */
-        internal T[] ReadArray<T>(int count) where T : struct
+        internal T[] ReadArray<T>(in int count) where T : struct
         {
             T[] t = ReadArray<T>(_position, count);
             _position += count;
             return t;
         }
 
-        internal T[] ReadArray<T>(long position, int count) where T : struct
+        internal T[] ReadArray<T>(in long position, in int count) where T : struct
         {
             T[] array = new T[count];
             _accessor.ReadArray(position, array, 0, count);
             return array;
         }
 
-        internal T ReadStruct<T>(long position) where T : struct
+        internal T ReadStruct<T>(in long position) where T : struct
         {
             _accessor.Read(position, out T s);
             return s;
         }
 
-        internal void Skip(int count) => _position += count;
-        internal void Seek(int count) => _position = count;
-        internal void Seek(long count) => _position = (int)count;
-        internal (int, int, bool) SeekByEntryIndex(int entryidx)
+        internal void Skip(in int count) => _position += count;
+        internal void Seek(in int count) => _position = count;
+        internal void Seek(in long count) => _position = (int)count;
+        internal (int, int, bool) SeekByEntryIndex(in int entryidx)
         {
             if (entryidx < 0 || entryidx >= Entries.Length)
             {
@@ -168,6 +168,6 @@ namespace ClassicUO.AssetsLoader
 
     public class UOFileException : Exception
     {
-        public UOFileException(string text) : base(text) { }
+        public UOFileException(in string text) : base(text) { }
     }
 }

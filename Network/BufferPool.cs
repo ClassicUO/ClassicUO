@@ -10,7 +10,7 @@ namespace ClassicUO.Network
         private readonly int _capacity;
         private readonly Queue<byte[]> _freeSegment;
 
-        public BufferPool(int capacity, int arraysize)
+        public BufferPool(in int capacity, in int arraysize)
         {
             _capacity = capacity;
             _arraySize = arraysize;
@@ -34,7 +34,7 @@ namespace ClassicUO.Network
             }
         }
 
-        public void AddFreeSegment(byte[] segment)
+        public void AddFreeSegment(in byte[] segment)
         {
             if (segment == null)
                 return;

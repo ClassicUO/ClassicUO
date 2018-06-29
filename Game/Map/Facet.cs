@@ -18,10 +18,10 @@ namespace ClassicUO.Game.Map
         public int Index { get; }
 
 
-        public void LoadChunks(Position center, in int distance)
+        public void LoadChunks(in Position center, in int distance)
             => LoadChunks(center.X, center.Y, distance);
 
-        public void LoadChunks(ushort centerX, ushort centerY, in int distance)
+        public void LoadChunks(in ushort centerX, in ushort centerY, in int distance)
         {
             const int XY_OFFSET = 30;
 

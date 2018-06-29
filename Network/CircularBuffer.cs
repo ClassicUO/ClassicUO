@@ -39,7 +39,7 @@ namespace ClassicUO.Network
         /// <summary>
         /// Extends the capacity of the bytequeue
         /// </summary>
-        private void SetCapacity(int capacity)
+        private void SetCapacity(in int capacity)
         {
             byte[] newBuffer = new byte[capacity];
 
@@ -67,7 +67,7 @@ namespace ClassicUO.Network
         /// <param name="buffer">Buffer to enqueue</param>
         /// <param name="offset">The zero-based byte offset in the buffer</param>
         /// <param name="size">The number of bytes to enqueue</param>
-        internal void Enqueue(byte[] buffer, int offset, int size)
+        internal void Enqueue(in byte[] buffer, in int offset, in int size)
         {
             if ((_size + size) > _buffer.Length)
                 SetCapacity((_size + size + 2047) & ~2047);
@@ -102,7 +102,7 @@ namespace ClassicUO.Network
         /// <param name="offset">The zero-based byte offset in the buffer</param>
         /// <param name="size">The number of bytes to dequeue</param>
         /// <returns>Number of bytes dequeued</returns>
-        internal int Dequeue(byte[] buffer, int offset, int size)
+        internal int Dequeue(in byte[] buffer, in int offset, int size)
         {
             if (size > _size)
                 size = _size;

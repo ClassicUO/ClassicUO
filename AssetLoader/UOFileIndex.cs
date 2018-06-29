@@ -6,7 +6,7 @@ namespace ClassicUO.AssetsLoader
 {
     public struct UOFileIndex3D
     {
-        public UOFileIndex3D(long offset, int length, int extra = 0, int decLength = 0, int animID = 0)
+        public UOFileIndex3D(in long offset, in int length, in int extra = 0, in int decLength = 0, in int animID = 0)
         {
             Offset = offset; Length = length; Extra = extra;
             DecompressedLength = decLength; AnimID = animID;
@@ -24,7 +24,7 @@ namespace ClassicUO.AssetsLoader
 
     public struct UOFileIndex5D
     {
-        public UOFileIndex5D(int file, int index, int offset, int length, int extra = 0)
+        public UOFileIndex5D(in int file, in int index, in int offset, in int length, in int extra = 0)
         {
             File = file; Index = index; Offset = offset; Length = length; Extra = extra;
         }

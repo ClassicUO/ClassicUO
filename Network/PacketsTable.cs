@@ -7,7 +7,7 @@ namespace ClassicUO.Network
 {
     public static class PacketsTable
     {
-        public static short GetPacketLength(int id)
+        public static short GetPacketLength(in int id)
             => _packetsTable[id];
 
         private static readonly short[] _packetsTable = new short[255]

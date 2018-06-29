@@ -38,8 +38,15 @@ namespace ClassicUO
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TEST
+
+
             AssetsLoader.FileManager.UoFolderPath = @"E:\Giochi\Ultima Online Classic ORION";
+
+            _stopwatch = Stopwatch.StartNew();
+            Log.Message(LogTypes.Trace, "Loading UO files...");
             AssetsLoader.FileManager.LoadFiles();
+            Log.Message(LogTypes.Trace, "UO files loaded in " + _stopwatch.ElapsedMilliseconds  +" ms");
+
 
             _facet = new Game.Map.Facet(0);
 
@@ -66,9 +73,6 @@ namespace ClassicUO
         {
             //Input.MouseManager.Update();
             //Input.KeyboardManager.Update();
-
-            if (_stopwatch == null)
-                _stopwatch = Stopwatch.StartNew();
 
             if (_stopwatch.ElapsedMilliseconds >= TIME_RUN_MOUNT)
             {

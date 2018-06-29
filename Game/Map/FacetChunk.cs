@@ -8,12 +8,12 @@ namespace ClassicUO.Game.Map
 {
     public sealed class FacetChunk
     {
-        public FacetChunk(Position location) : this(location.X, location.Y)
+        public FacetChunk(in Position location) : this(location.X, location.Y)
         {
 
         }
 
-        public FacetChunk(ushort x, ushort y)
+        public FacetChunk(in ushort x, in ushort y)
         {
             X = x; Y = y;
 

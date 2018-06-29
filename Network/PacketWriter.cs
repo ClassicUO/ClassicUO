@@ -8,7 +8,7 @@ namespace ClassicUO.Network
     {
         private byte[] _data;
 
-        public PacketWriter(byte id)
+        public PacketWriter(in byte id)
         {
             short len = PacketsTable.GetPacketLength(id);
             IsDynamic = len < 0;
@@ -39,7 +39,7 @@ namespace ClassicUO.Network
             }
         }
 
-        protected override void EnsureSize(int length)
+        protected override void EnsureSize(in int length)
         {
             if (length < 0)
                 throw new ArgumentOutOfRangeException("length");

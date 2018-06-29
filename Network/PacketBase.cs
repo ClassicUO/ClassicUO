@@ -7,7 +7,7 @@ namespace ClassicUO.Network
     public abstract class PacketBase
     {
         protected abstract byte this[int index] { get; set; }
-        protected abstract void EnsureSize(int length);
+        protected abstract void EnsureSize(in int length);
 
         public abstract int Length { get; }
         public byte ID => this[0];
@@ -15,42 +15,42 @@ namespace ClassicUO.Network
         public int Position { get; protected set; }
         public abstract byte[] ToArray();
 
-        public void Skip(int lengh)
+        public void Skip(in int lengh)
         {
             EnsureSize(lengh);
             Position += lengh;
         }
 
-        public void Seek(int index)
+        public void Seek(in int index)
         {
             Position = index;
             EnsureSize(0);
         }
 
-        public void WriteByte(byte v)
+        public void WriteByte(in byte v)
         {
             EnsureSize(1);
             this[Position++] = v;
         }
 
-        public void WriteSByte(sbyte v)
+        public void WriteSByte(in sbyte v)
         {
             WriteByte((byte)v);
         }
 
-        public void WriteBool(bool v)
+        public void WriteBool(in bool v)
         {
             WriteByte(v ? (byte)0x01 : (byte)0x00);
         }
 
-        public void WriteUShort(ushort v)
+        public void WriteUShort(in ushort v)
         {
             EnsureSize(2);
             WriteByte((byte)(v >> 8));
             WriteByte((byte)v);
         }
 
-        public void WriteUInt(uint v)
+        public void WriteUInt(in uint v)
         {
             EnsureSize(4);
             WriteByte((byte)(v >> 24));
@@ -59,7 +59,7 @@ namespace ClassicUO.Network
             WriteByte((byte)v);
         }
 
-        public void WriteASCII(string value)
+        public void WriteASCII(in string value)
         {
             EnsureSize(value.Length + 1);
             foreach (char c in value)
@@ -67,7 +67,7 @@ namespace ClassicUO.Network
             WriteByte(0);
         }
 
-        public void WriteASCII(string value, int length)
+        public void WriteASCII(in string value, in int length)
         {
             EnsureSize(length);
             if (value.Length > length)
@@ -83,7 +83,7 @@ namespace ClassicUO.Network
             }
         }
 
-        public void WriteUnicode(string value)
+        public void WriteUnicode(in string value)
         {
             EnsureSize((value.Length + 1) * 2);
             foreach (char c in value)
@@ -94,7 +94,7 @@ namespace ClassicUO.Network
             WriteUShort(0);
         }
 
-        public void WriteUnicode(string value, int length)
+        public void WriteUnicode(in string value, in int length)
         {
             EnsureSize(length);
             if (value.Length > length)

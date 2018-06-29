@@ -40,13 +40,13 @@ namespace ClassicUO.Network
                 _handlers[i] = new List<PacketHandler>();
         }
 
-        public void Add(byte id, Action<Packet> handler)
+        public void Add(in byte id, in Action<Packet> handler)
         {
             lock (_handlers)
                 _handlers[id].Add(new PacketHandler(handler));
         }
 
-        public void Remove(byte id, Action<Packet> handler)
+        public void Remove(in byte id, Action<Packet> handler)
         {
             lock (_handlers)
                 _handlers[id].Remove(_handlers[id].FirstOrDefault(s => s.Callback == handler));

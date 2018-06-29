@@ -17,12 +17,12 @@ namespace ClassicUO.Game
         public bool IsValid { get { return Value > 0 && Value < 0x80000000; } }
         public uint Value { get; }
 
-        public static implicit operator Serial(uint value) { return new Serial(value); }
-        public static implicit operator uint(Serial serial) { return serial.Value; }
-        public static bool operator ==(Serial s1, Serial s2) { return s1.Value == s2.Value; }
-        public static bool operator !=(Serial s1, Serial s2) { return s1.Value != s2.Value; }
-        public static bool operator <(Serial s1, Serial s2) { return s1.Value < s2.Value; }
-        public static bool operator >(Serial s1, Serial s2) { return s1.Value > s2.Value; }
+        public static implicit operator Serial(in uint value) { return new Serial(value); }
+        public static implicit operator uint(in Serial serial) { return serial.Value; }
+        public static bool operator ==(in Serial s1, in Serial s2) { return s1.Value == s2.Value; }
+        public static bool operator !=(in Serial s1, in Serial s2) { return s1.Value != s2.Value; }
+        public static bool operator <(in Serial s1, in Serial s2) { return s1.Value < s2.Value; }
+        public static bool operator >(in Serial s1, in Serial s2) { return s1.Value > s2.Value; }
 
         public int CompareTo(object obj) { return Value.CompareTo(obj); }
         public int CompareTo(uint other) { return Value.CompareTo(other); }
@@ -38,7 +38,7 @@ namespace ClassicUO.Game
             return false;
         }
 
-        public static Serial Parse(string str)
+        public static Serial Parse(in string str)
         {
             if (str.StartsWith("0x"))
                 return uint.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
