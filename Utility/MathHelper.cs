@@ -6,6 +6,6 @@ namespace ClassicUO.Utility
 {
     public static class MathHelper
     {
-        public static bool InRange(int input, int low, int high) => input >= low && input <= high;
+        public static bool InRange(in int input, in int low, in int high) => input >= low && input <= high;
     }
 }

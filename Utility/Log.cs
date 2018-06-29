@@ -35,9 +35,9 @@ namespace ClassicUO.Utility
         };
 
 
-        public static void Message(LogTypes type, string msg)
+        public static void Message(in LogTypes type, in string msg)
         {
-            Console.Write(DateTime.Now.ToString("HH:mm::ss") + " | ");
+            Console.Write(DateTime.Now.ToString("HH:mm:ss") + " | ");
 
             var prev = Console.ForegroundColor;
             Console.ForegroundColor = _logMsgColor[type];
