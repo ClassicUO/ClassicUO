@@ -8,6 +8,35 @@ using ClassicUO.Game.WorldObjects;
 
 namespace ClassicUO.Network
 {
+    public sealed class PFirstLogin : PacketWriter
+    {
+        public PFirstLogin(string account, string password) : base(0x80)
+        {
+            WriteASCII(account, 30);
+            WriteASCII(password, 30);
+            WriteByte(0xFF);
+        }
+    }
+
+    public sealed class PSelectServer : PacketWriter
+    {
+        public PSelectServer(byte index) : base(0xA0)
+        {
+            WriteByte(0);
+            WriteByte(index);
+        }
+    }
+
+    public sealed class PSecondLogin : PacketWriter
+    {
+        public PSecondLogin(string account, string password, uint seed) : base(0x91)
+        {
+            WriteUInt(seed);
+            WriteASCII(account, 30);
+            WriteASCII(password, 30);
+        }
+    }
+
     public sealed class PCreateCharacter : PacketWriter
     {
         public PCreateCharacter(string name) : base(0x00)
@@ -41,6 +70,34 @@ namespace ClassicUO.Network
         }
     }
 
+    public sealed class PDeleteCharacter : PacketWriter
+    {
+        public PDeleteCharacter(byte index, uint ipclient) : base(0x83)
+        {
+            Skip(30);
+            WriteUInt(index);
+            WriteUInt(ipclient);
+        }
+    }
+
+    public sealed class PSelectCharacter : PacketWriter
+    {
+        public PSelectCharacter(byte index, string name, uint ipclient) : base(0x5D)
+        {
+            WriteUInt(0xEDEDEDED);
+            WriteASCII(name, 30);
+            Skip(2);
+
+            uint clientflag = 0;
+            /* IFOR (i, 0, g_CharacterList.ClientFlag)
+            clientFlag |= (1 << i);*/
+            WriteUInt(clientflag);
+            Skip(24);
+            WriteUInt(index);
+            WriteUInt(ipclient);
+        }
+    }
+    
     public sealed class PPickUpRequest : PacketWriter
     {
         public PPickUpRequest(Serial serial, ushort count) : base(0x07)
