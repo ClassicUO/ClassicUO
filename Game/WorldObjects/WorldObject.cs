@@ -7,5 +7,7 @@ namespace ClassicUO.Game.WorldObjects
     public abstract class WorldObject
     {
         public abstract Position Position { get; set; }
+
+        public WorldRenderObject RenderObject { get; protected set; }
     }
 }

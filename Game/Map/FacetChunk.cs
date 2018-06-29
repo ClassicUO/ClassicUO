@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Map
 
                             sbyte z = sb->Z;
 
-                            StaticObject staticObject = new StaticObject(sb->Color, sb->Hue, i)
+                            Static staticObject = new Static(sb->Color, sb->Hue, i)
                             {
                                 Position = new Position((ushort)(bx + x), (ushort)(by + y), z)
                             };

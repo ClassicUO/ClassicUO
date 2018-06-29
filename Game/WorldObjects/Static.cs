@@ -4,9 +4,9 @@ using System.Text;
 
 namespace ClassicUO.Game.WorldObjects
 {
-    public class StaticObject : WorldObject
+    public class Static : WorldObject
     {
-        public StaticObject(Graphic tileID, Hue hue, int index)
+        public Static(Graphic tileID, Hue hue, int index)
         {
             TileID = tileID; Hue = hue; Index = index;
         }
