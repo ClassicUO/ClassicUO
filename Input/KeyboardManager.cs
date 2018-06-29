@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Input;
+﻿using ClassicUO.Utility;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,7 @@ namespace ClassicUO.Input
                     {
                         // pressed 1st time: FIRE!
                         var arg = new KeyboardEventArgs(k, KeyState.Down);
-                        Console.WriteLine("KEY DOWN");
+                        KeyDown.Raise(arg);
                     }
                 }
             }
@@ -42,7 +43,7 @@ namespace ClassicUO.Input
                     {
                         // released 1st time: FIRE!
                         var arg = new KeyboardEventArgs(k, KeyState.Up);
-                        Console.WriteLine("KEY UP");
+                        KeyUp.Raise(arg);
                     }
                 }
             }

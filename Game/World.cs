@@ -15,7 +15,7 @@ namespace ClassicUO.Game
         public static int Map { get; set; }
 
 
-        public static bool Contains(Serial serial)
+        public static bool Contains(in Serial serial)
         {
             if (serial.IsItem)
                 return Items.Contains(serial);
@@ -24,7 +24,7 @@ namespace ClassicUO.Game
             return false;
         }
 
-        public static Entity Get(Serial serial)
+        public static Entity Get(in Serial serial)
         {
             if (serial.IsItem)
                 return Items.Get(serial);
@@ -33,12 +33,12 @@ namespace ClassicUO.Game
             return null;
         }
 
-        public static Item GetOrCreateItem(Serial serial)
+        public static Item GetOrCreateItem(in Serial serial)
         {
             return Items.Get(serial) ?? new Item(serial);
         }
 
-        public static Mobile GetOrCreateMobile(Serial serial)
+        public static Mobile GetOrCreateMobile(in Serial serial)
         {
             return Mobiles.Get(serial) ?? new Mobile(serial);
         }
@@ -58,7 +58,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        public static bool RemoveMobile(Serial serial)
+        public static bool RemoveMobile(in Serial serial)
         {
             Mobile mobile = Mobiles.Remove(serial);
             if (mobile == null)

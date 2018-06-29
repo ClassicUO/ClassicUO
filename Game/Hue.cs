@@ -14,16 +14,16 @@ namespace ClassicUO.Game
         public static Hue Warning = new Hue(1174);
 
         private readonly ushort _value;
-        public Hue(ushort hue) { _value = hue; }
+        public Hue(in ushort hue) { _value = hue; }
 
         public bool IsInvariant { get { return _value == Invariant; } }
 
-        public static implicit operator Hue(ushort value) { return new Hue(value); }
-        public static implicit operator ushort(Hue color) { return color._value; }
-        public static bool operator ==(Hue h1, Hue h2) { return h1.IsInvariant || h2.IsInvariant || h1._value == h2._value; }
-        public static bool operator !=(Hue h1, Hue h2) { return !h1.IsInvariant && !h2.IsInvariant && h1._value != h2._value; }
-        public static bool operator <(Hue h1, Hue h2) { return h1._value < h2._value; }
-        public static bool operator >(Hue h1, Hue h2) { return h1._value > h2._value; }
+        public static implicit operator Hue(in ushort value) { return new Hue(value); }
+        public static implicit operator ushort(in Hue color) { return color._value; }
+        public static bool operator ==(in Hue h1, in Hue h2) { return h1.IsInvariant || h2.IsInvariant || h1._value == h2._value; }
+        public static bool operator !=(in Hue h1, in Hue h2) { return !h1.IsInvariant && !h2.IsInvariant && h1._value != h2._value; }
+        public static bool operator <(in Hue h1, in Hue h2) { return h1._value < h2._value; }
+        public static bool operator >(in Hue h1, in Hue h2) { return h1._value > h2._value; }
 
         public int CompareTo(object obj) { return _value.CompareTo(obj); }
         public int CompareTo(ushort other) { return _value.CompareTo(other); }
@@ -39,7 +39,7 @@ namespace ClassicUO.Game
             return false;
         }
 
-        public static Hue Parse(string str)
+        public static Hue Parse(in string str)
         {
             if (str.StartsWith("0x"))
                 return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);

@@ -13,7 +13,7 @@ namespace ClassicUO.Game
 
     public sealed class Skill
     {
-        public Skill(string name, int index, bool click)
+        public Skill(in string name, in int index, in bool click)
         {
             Name = name;
             Index = index;

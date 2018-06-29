@@ -11,20 +11,20 @@ namespace ClassicUO.Game
         public static Graphic Invalid = new Graphic(-1);
 
         private readonly ushort _value;
-        public Graphic(ushort graphic) { _value = graphic; }
-        public Graphic(int graphic)
+        public Graphic(in ushort graphic) { _value = graphic; }
+        public Graphic(in int graphic)
         {
             _value = (ushort)graphic;
         }
 
         public bool IsInvariant { get { return _value == Invariant; } }
 
-        public static implicit operator Graphic(ushort value) { return new Graphic(value); }
-        public static implicit operator ushort(Graphic color) { return color._value; }
-        public static bool operator ==(Graphic g1, Graphic g2) { return g1.IsInvariant || g2.IsInvariant || g1._value == g2._value; }
-        public static bool operator !=(Graphic g1, Graphic g2) { return !g1.IsInvariant && !g2.IsInvariant && g1._value != g2._value; }
-        public static bool operator <(Graphic g1, Graphic g2) { return g1._value < g2._value; }
-        public static bool operator >(Graphic g1, Graphic g2) { return g1._value > g2._value; }
+        public static implicit operator Graphic(in ushort value) { return new Graphic(value); }
+        public static implicit operator ushort(in Graphic color) { return color._value; }
+        public static bool operator ==(in Graphic g1, in Graphic g2) { return g1.IsInvariant || g2.IsInvariant || g1._value == g2._value; }
+        public static bool operator !=(in Graphic g1, in Graphic g2) { return !g1.IsInvariant && !g2.IsInvariant && g1._value != g2._value; }
+        public static bool operator <(in Graphic g1, in Graphic g2) { return g1._value < g2._value; }
+        public static bool operator >(in Graphic g1, in Graphic g2) { return g1._value > g2._value; }
 
         public int CompareTo(object obj) { return _value.CompareTo(obj); }
         public int CompareTo(ushort other) { return _value.CompareTo(other); }
@@ -40,7 +40,7 @@ namespace ClassicUO.Game
             return false;
         }
 
-        public static Graphic Parse(string str)
+        public static Graphic Parse(in string str)
         {
             if (str.StartsWith("0x"))
                 return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
