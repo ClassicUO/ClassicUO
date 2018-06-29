@@ -12,6 +12,7 @@ namespace ClassicUO.Game
         public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
         public static PlayerMobile Player { get; set; }
 
+        public static int Map { get; set; }
 
 
         public static bool Contains(Serial serial)
@@ -71,6 +72,7 @@ namespace ClassicUO.Game
 
         public static void Clear()
         {
+            Map = 0;
             Player = null;
             Items.Clear();
             Mobiles.Clear();

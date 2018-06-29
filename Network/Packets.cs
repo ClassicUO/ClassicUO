@@ -555,4 +555,386 @@ namespace ClassicUO.Network
         }
     }
 
+    public sealed class POpenChat : PacketWriter
+    {
+        public POpenChat(string name) : base(0xB5)
+        {
+            WriteUnicode(name, 30);
+        }
+    }
+
+    public sealed class PMapMessage : PacketWriter
+    {
+        public PMapMessage(Serial serial, byte action, byte pin, ushort x, ushort y) : base(0x56)
+        {
+            WriteUInt(serial);
+            WriteByte(action);
+            WriteByte(pin);
+            WriteUShort(x);
+            WriteUShort(y);
+        }
+    }
+
+    public sealed class PGuildMenuRequest : PacketWriter
+    {
+        public PGuildMenuRequest() : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x28);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed  class PQuestMenuRequest : PacketWriter
+    {
+        public PQuestMenuRequest() : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x32);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PEquipLastWeapon : PacketWriter
+    {
+        public PEquipLastWeapon() : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x1E);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PVirtueRequest : PacketWriter
+    {
+        public PVirtueRequest(uint buttonID) : base(0xB1)
+        {
+            WriteUInt(World.Player);
+            WriteUInt(0x000001CD);
+            WriteUInt(buttonID);
+            WriteUInt(0x00000001);
+            WriteUInt(World.Player);
+        }
+    }
+
+    public sealed class PInvokeVirtueRequest : PacketWriter
+    {
+        public PInvokeVirtueRequest(byte id) : base(0x12)
+        {
+            WriteByte(0xF4);
+            WriteByte(id);
+            WriteByte(0);
+        }
+    }
+
+    public sealed class PMegaClilocRequestOld : PacketWriter
+    {
+        public PMegaClilocRequestOld(Serial serial) : base(0xBF)
+        {
+            WriteUShort(0x10);
+            WriteUInt(serial);
+        }
+    }
+
+    public sealed class PMegaClilocRequest : PacketWriter
+    {
+        public PMegaClilocRequest(List<Serial> list) : base(0xD6)
+        {
+            for (int i = 0; i < list.Count && i < 50; i++)
+                WriteUInt(list[i]);
+
+        }
+    }
+
+    public sealed class PChangeStatLockStateRequest : PacketWriter
+    {
+        public PChangeStatLockStateRequest(byte stat, SkillLock state) : base(0xBF)
+        {
+            WriteUShort(0x1A);
+            WriteByte(stat);
+            WriteByte((byte)state);
+        }
+    }
+
+   /* public sealed class PBookPageData : PacketWriter
+    {
+        public PBookPageData()
+        {
+
+        }
+    }*/
+
+    public sealed class PBookPageDataRequest : PacketWriter
+    {
+        public PBookPageDataRequest(Serial serial, ushort page) : base(0x66)
+        {
+            WriteUInt(serial);
+            WriteUShort(1);
+            WriteUShort(page);
+            WriteUShort(0xFFFF);
+        }
+    }
+
+    /*public sealed class PBuyRequest : PacketWriter
+    {
+        public PBuyRequest() : base()
+        {
+
+        }
+    }
+
+    public sealed class PSellRequest : PacketWriter
+    {
+
+    }*/
+
+    public sealed class PUseCombatAbility : PacketWriter
+    {
+        public PUseCombatAbility(byte idx) : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x19);
+            WriteUInt(0);
+            WriteByte(idx);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PTargetSelectedObject : PacketWriter
+    {
+        public PTargetSelectedObject(Serial useObjSerial, Serial targObjSerial) : base(0xBF)
+        {
+            WriteUShort(0x2C);
+            WriteUInt(useObjSerial);
+            WriteUInt(targObjSerial);
+        }
+    }
+
+    public sealed class PToggleGargoyleFlying : PacketWriter
+    {
+        public PToggleGargoyleFlying() : base(0xBF)
+        {
+            WriteUShort(0x32);
+            WriteUShort(0x01);
+            WriteUInt(0);
+        }
+    }
+
+    public sealed class PCustomHouseDataRequest : PacketWriter
+    {
+        public PCustomHouseDataRequest(Serial serial) : base(0xBF)
+        {
+            WriteUShort(0x1E);
+            WriteUInt(serial);
+        }
+    }
+
+    public sealed class PStunRequest : PacketWriter
+    {
+        public PStunRequest() : base(0xBF)
+        {
+            WriteUShort(0x09);
+        }
+    }
+
+    public sealed class PDisarmRequest : PacketWriter
+    {
+        public PDisarmRequest() : base(0xBF)
+        {
+            WriteUShort(0x0A);
+        }
+    }
+
+    public sealed class PResend : PacketWriter
+    {
+        public PResend() : base(0x22) { }
+    }
+
+    public sealed class PWalkRequest : PacketWriter
+    {
+        public PWalkRequest(Direction direction, byte seq) : base(0x02)
+        {
+            WriteByte((byte)direction);
+            WriteByte(seq);
+            WriteUInt(0);
+        }
+    }
+
+    public sealed class PCustomHouseBackup : PacketWriter
+    {
+        public PCustomHouseBackup() : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x02);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseRestore : PacketWriter
+    {
+        public PCustomHouseRestore() : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x03);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseCommit : PacketWriter
+    {
+        public PCustomHouseCommit() : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x04);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseBuildingExit : PacketWriter
+    {
+        public PCustomHouseBuildingExit() : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x0C);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseGoToFloor : PacketWriter
+    {
+        public PCustomHouseGoToFloor(byte floor) : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x12);
+            WriteUInt(0);
+            WriteByte(floor);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseSync : PacketWriter
+    {
+        public PCustomHouseSync() : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x0E);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseClear : PacketWriter
+    {
+        public PCustomHouseClear() : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x10);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseRevert : PacketWriter
+    {
+        public PCustomHouseRevert() : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x1A);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseResponse : PacketWriter
+    {
+        public PCustomHouseResponse() : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x0A);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseAddItem : PacketWriter
+    {
+        public PCustomHouseAddItem(Graphic graphic, uint x, uint y) : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x06);
+            WriteByte(0);
+            WriteUInt(graphic);
+            WriteByte(0);
+            WriteUInt(x);
+            WriteByte(0);
+            WriteUInt(y);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseDeleteItem : PacketWriter
+    {
+        public PCustomHouseDeleteItem(Graphic graphic, uint x, uint y, uint z) : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x05);
+            WriteByte(0);
+            WriteUInt(graphic);
+            WriteByte(0);
+            WriteUInt(x);
+            WriteByte(0);
+            WriteUInt(y);
+            WriteByte(0);
+            WriteUInt(z);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseAddRoof : PacketWriter
+    {
+        public PCustomHouseAddRoof(Graphic graphic, uint x, uint y, uint z) : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x13);
+            WriteByte(0);
+            WriteUInt(graphic);
+            WriteByte(0);
+            WriteUInt(x);
+            WriteByte(0);
+            WriteUInt(y);
+            WriteByte(0);
+            WriteUInt(z);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseDeleteRoof : PacketWriter
+    {
+        public PCustomHouseDeleteRoof(Graphic graphic, uint x, uint y, uint z) : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x14);
+            WriteByte(0);
+            WriteUInt(graphic);
+            WriteByte(0);
+            WriteUInt(x);
+            WriteByte(0);
+            WriteUInt(y);
+            WriteByte(0);
+            WriteUInt(z);
+            WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PCustomHouseAddStair : PacketWriter
+    {
+        public PCustomHouseAddStair(Graphic graphic, uint x, uint y) : base(0xD7)
+        {
+            WriteUInt(World.Player);
+            WriteUShort(0x0D);
+            WriteByte(0);
+            WriteUInt(graphic);
+            WriteByte(0);
+            WriteUInt(x);
+            WriteByte(0);
+            WriteUInt(y);
+            WriteByte(0x0A);
+        }
+    }
 }
