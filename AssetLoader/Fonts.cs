@@ -38,14 +38,14 @@ namespace ClassicUO.AssetsLoader
             }
         }
 
-        public static ASCIIFont GetASCII(int index)
+        public static ASCIIFont GetASCII(in int index)
         {
             if (index < 0 || index >= _asciiFonts.Length)
                 return _asciiFonts[9];
             return _asciiFonts[index];
         }
 
-        public static UniFont GetUnicode(int index)
+        public static UniFont GetUnicode(in int index)
         {
             if (index < 0 || index >= _uniFonts.Length)
                 return _uniFonts[0];
@@ -57,9 +57,9 @@ namespace ClassicUO.AssetsLoader
     {
         int Height { get; set; }
 
-        void Load(UOFile file);
-        BaseCharacter GetChar(char c);
-        string GetString();
+        void Load(in UOFile file);
+        BaseCharacter GetChar(in char c);
+        BaseCharacter[] GetString(in string s);
     }
 
     public class ASCIIFont : IFont
@@ -75,7 +75,7 @@ namespace ClassicUO.AssetsLoader
         public int Height { get; set; }
 
 
-        public void Load(UOFile file)
+        public void Load(in UOFile file)
         {
             byte header = file.ReadByte();
             _chars[0] = new ASCIIChar();
@@ -99,7 +99,7 @@ namespace ClassicUO.AssetsLoader
             GetChar(' ').Width = GetChar('M').Width / 3;
         }
 
-        public BaseCharacter GetChar(char c)
+        public BaseCharacter GetChar(in char c)
         {
             int index = (c & 0xFFFFF) - 0x20;
 
@@ -109,9 +109,12 @@ namespace ClassicUO.AssetsLoader
             return _chars[index];
         }
 
-        public string GetString()
+        public BaseCharacter[] GetString(in string s)
         {
-            throw new NotImplementedException();
+            BaseCharacter[] chars = new BaseCharacter[s.Length];
+            for (int i = 0; i < chars.Length; i++)
+                chars[i] = GetChar(s[i]);
+            return chars;
         }
     }
 
@@ -128,7 +131,7 @@ namespace ClassicUO.AssetsLoader
 
         public int Height { get; set; }
 
-        public void Load(UOFile file)
+        public void Load(in UOFile file)
         {
             _file = file;
 
@@ -140,7 +143,7 @@ namespace ClassicUO.AssetsLoader
             GetChar(' ').Width = GetChar('M').Width / 3;
         }
 
-        public BaseCharacter GetChar(char c)
+        public BaseCharacter GetChar(in char c)
         {
             int index = (c & 0xFFFFF) - 0x20;
             if (index < 0)
@@ -158,12 +161,15 @@ namespace ClassicUO.AssetsLoader
             return _chars[index];
         }
 
-        public string GetString()
+        public BaseCharacter[] GetString(in string s)
         {
-            throw new NotImplementedException();
+            BaseCharacter[] chars = new BaseCharacter[s.Length];
+            for (int i = 0; i < chars.Length; i++)
+                chars[i] = GetChar(s[i]);
+            return chars;
         }
 
-        private UniChar LoadChar(int index)
+        private UniChar LoadChar(in int index)
         {
             _file.Position = index * 4;
             int lookup = _file.ReadInt();
@@ -182,7 +188,7 @@ namespace ClassicUO.AssetsLoader
 
         }
 
-        public ASCIIChar(UOFile file)
+        public ASCIIChar(in UOFile file)
         {
             Width = file.ReadByte();
             Height = file.ReadByte();
@@ -260,7 +266,7 @@ namespace ClassicUO.AssetsLoader
 
         }
 
-        public UniChar(UOFile file)
+        public UniChar(in UOFile file)
         {
             OffsetX = file.ReadSByte();
             OffsetY = file.ReadSByte();
