@@ -91,7 +91,7 @@ namespace ClassicUO.Game.Map
         }
 
         // we wants to avoid reallocation, so use a reset method
-        public void SetTo(ushort x, ushort y)
+        public void SetTo(in ushort x, in ushort y)
         {
             X = x; Y = y;
         }
