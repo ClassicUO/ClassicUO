@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Game.Entities
+namespace ClassicUO.Game.WorldObjects
 {
     public enum Layer : byte
     {

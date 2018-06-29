@@ -5,7 +5,7 @@ using System.Text;
 using System.Linq;
 using ClassicUO.AssetsLoader;
 
-namespace ClassicUO.Game.Entities
+namespace ClassicUO.Game.WorldObjects
 {
     [Flags]
     public enum Notoriety : byte

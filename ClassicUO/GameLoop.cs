@@ -70,7 +70,7 @@ namespace ClassicUO
             if (_stopwatch == null)
                 _stopwatch = Stopwatch.StartNew();
 
-            if (_stopwatch.ElapsedMilliseconds > TIME_RUN_MOUNT)
+            if (_stopwatch.ElapsedMilliseconds >= TIME_RUN_MOUNT)
             {
                 if (_currentX + 1 > _maxX)
                     _currentX = _x;

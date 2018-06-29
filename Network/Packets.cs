@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using ClassicUO.AssetsLoader;
 using ClassicUO.Game;
-using ClassicUO.Game.Entities;
+using ClassicUO.Game.WorldObjects;
 
 namespace ClassicUO.Network
 {

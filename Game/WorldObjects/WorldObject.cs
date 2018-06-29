@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Game.Entities
+namespace ClassicUO.Game.WorldObjects
 {
-    public abstract class RenderObject
+    public abstract class WorldObject
     {
         public abstract Position Position { get; set; }
-        public int Facet { get; set; }
     }
 }

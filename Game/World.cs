@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using ClassicUO.Game.Entities;
+using ClassicUO.Game.WorldObjects;
 
 namespace ClassicUO.Game
 {

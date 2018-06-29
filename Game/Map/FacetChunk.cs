@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ClassicUO.Game.WorldObjects;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -45,9 +46,11 @@ namespace ClassicUO.Game.Map
                     {
                         int pos = y * 8 + x;
 
-                        var pp = block.Cells[pos].TileID & 0x3FFF;
+                        ushort tileID = (ushort)(block.Cells[pos].TileID & 0x3FFF);
+                        sbyte z = block.Cells[pos].Z;
 
-                        Tiles[pos].Location = new Position((ushort)(bx + x), (ushort)(by + y));
+                        Tiles[pos].TileID = tileID;
+                        Tiles[pos].Location = new Position((ushort)(bx + x), (ushort)(by + y), z);
                     }
                 }
 
@@ -56,23 +59,25 @@ namespace ClassicUO.Game.Map
                 {
                     int count = (int)im.StaticCount;
 
-                    if (count == 68)
-                    {
-
-                    }
-
                     for (int i = 0; i < count; i++, sb++)
                     {
                         if (sb->Color > 0 && sb->Color != 0xFFFF)
                         {
-                            int x = sb->X;
-                            int y = sb->Y;
+                            ushort x = sb->X;
+                            ushort y = sb->Y;
 
                             int pos = (y * 8) + x;
                             if (pos >= 64)
                                 continue;
 
+                            sbyte z = sb->Z;
 
+                            StaticObject staticObject = new StaticObject(sb->Color, sb->Hue, i)
+                            {
+                                Position = new Position((ushort)(bx + x), (ushort)(by + y), z)
+                            };
+
+                            Tiles[pos].AddWorldObject(staticObject);
                         }
                     }
                 }

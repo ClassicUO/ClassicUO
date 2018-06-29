@@ -1,4 +1,4 @@
-﻿using ClassicUO.Game.Entities;
+﻿using ClassicUO.Game.WorldObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,32 +7,32 @@ namespace ClassicUO.Game.Map
 {
     public sealed class Tile
     {
-        private readonly Dictionary<Serial, Entity> _entities;
+        private readonly List<WorldObject> _objectsOnTile;
 
         public Tile()
         {
-            _entities = new Dictionary<Serial, Entity>();
+            _objectsOnTile = new List<WorldObject>();
         }
 
+        public Graphic TileID { get; set; }
         public Position Location { get; set; }
-
-        public IReadOnlyDictionary<Serial, Entity> Entities => _entities;
-
+        public IReadOnlyList<WorldObject> ObjectsOnTiles => _objectsOnTile;
 
 
-        public void AddEntity(in Entity entity)
+
+        public void AddWorldObject(in WorldObject obj)
         {
-            _entities.Add(entity.Serial, entity);
+            _objectsOnTile.Add(obj);
         }
 
-        public void RemoveEntity(in Entity entity)
+        public void RemoveWorldObject(in WorldObject obj)
         {
-            _entities.Remove(entity);
+            _objectsOnTile.Remove(obj);
         }
 
         public void Clear()
         {
-            _entities.Clear();
+            _objectsOnTile.Clear();
         }
     }
 }

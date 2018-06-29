@@ -41,10 +41,11 @@ namespace ClassicUO.Game.Map
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
-                ushort cellY = (ushort)(i % AssetsLoader.Map.MapBlocksSize[Index][1]);
+                ushort cellX = (ushort)(i % AssetsLoader.Map.MapBlocksSize[Index][0]);
+
                 for (int j = minBlockY; j <= maxBlockY; j++)
                 {
-                    ushort cellX = (ushort)(j % AssetsLoader.Map.MapBlocksSize[Index][0]);
+                    ushort cellY = (ushort)(j % AssetsLoader.Map.MapBlocksSize[Index][1]);
 
                     int cellindex = (cellY % 11) * 11 + (cellX % 11);
                     if (_chunks[cellindex] == null ||
@@ -65,7 +66,7 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-           /* centerX /= 8; centerY /= 8;
+            /*centerX /= 8; centerY /= 8;
 
             for (int y = -distance; y <= distance; y++)
             {

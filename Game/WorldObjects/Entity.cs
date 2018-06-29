@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ClassicUO.Game.Entities
+namespace ClassicUO.Game.WorldObjects
 {
     [Flags]
     public enum Flags : byte
@@ -21,7 +21,7 @@ namespace ClassicUO.Game.Entities
         Hidden = 0x80
     }
 
-    public abstract class Entity : RenderObject
+    public abstract class Entity : WorldObject
     {
         [Flags]
         protected enum Delta
