@@ -312,8 +312,8 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
-        public Ability PrimaryAbility => _ability[0];
-        public Ability SecondaryAbility => _ability[1];
+        public Ability PrimaryAbility { get => _ability[0]; set => _ability[0] = value; }
+        public Ability SecondaryAbility { get => _ability[1]; set => _ability[1] = value; }
 
         public void UpdateSkill(int id, ushort realValue, ushort baseValue, SkillLock skillLock, ushort cap)
         {
