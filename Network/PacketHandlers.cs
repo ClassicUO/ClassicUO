@@ -83,46 +83,46 @@ namespace ClassicUO.Network
             ToServer.Add(0x0A, EditGodMode);*/
             ToClient.Add(0x0B, Damage);
             ToClient.Add(0x0C, EditTileDataGodClientR); /*ToServer.Add(0x0C, EditTileDataGodClientS);*/
-            ToClient.Add(0x11, StatusBarInfo);
+            ToClient.Add(0x11, CharacterStatus);
            /* ToServer.Add(0x12, RequestSkill);
             ToServer.Add(0x13, WearItem);
             ToServer.Add(0x14, SendElevationGodClient);
             ToServer.Add(0x15 FollowS);*/ ToClient.Add(0x15, FollowR);
-            ToClient.Add(0x16, NewHealthBarStatusUpdateSA);
-            ToClient.Add(0x17, HealtBarStatusUpdateKR);
-            ToClient.Add(0x1A, ObjectInfo);
-            ToClient.Add(0x1B, CharLocaleAndBody);
-            ToClient.Add(0x1C, SendSpeech);
+            ToClient.Add(0x16, /*NewHealthBarStatusUpdateSA*/ NewHealthbarUpdate);
+            ToClient.Add(0x17, NewHealthbarUpdate);
+            ToClient.Add(0x1A, UpdateItem);
+            ToClient.Add(0x1B, EnterWorld);
+            ToClient.Add(0x1C, Talk);
             ToClient.Add(0x1D, DeleteObject);
             ToClient.Add(0x1F, Explosion);
-            ToClient.Add(0x20, DrawGamePlayer);
-            ToClient.Add(0x21, CharMoveRejection);
-            ToClient.Add(0x22, CharacterMoveACK); /*ToServer.Add(0x22, ResyncRequest);*/
-            ToClient.Add(0x23, DraggingOfItem);
-            ToClient.Add(0x24, DrawContainer);
-            ToClient.Add(0x25, AddItemToContainer);
+            ToClient.Add(0x20, UpdatePlayer);
+            ToClient.Add(0x21, DenyWalk);
+            ToClient.Add(0x22, ConfirmWalk); /*ToServer.Add(0x22, ResyncRequest);*/
+            ToClient.Add(0x23, DragAnimation);
+            ToClient.Add(0x24, OpenContainer);
+            ToClient.Add(0x25, UpdateContainedItem);
             ToClient.Add(0x26, KickPlayer);
-            ToClient.Add(0x27, RejectMoveItemRequest);
-            ToClient.Add(0x28, DropItemFailed);
-            ToClient.Add(0x29, DropItemApproved);
+            ToClient.Add(0x27, DenyMoveItem);
+            ToClient.Add(0x28, EndDraggingItem);
+            ToClient.Add(0x29, DropItemAccepted);
             ToClient.Add(0x2A, Blood);
             ToClient.Add(0x2B, GodMode);
-            ToClient.Add(0x2D, MobAttributes);
-            ToClient.Add(0x2E, WornItem);
+            ToClient.Add(0x2D, MobileAttributes);
+            ToClient.Add(0x2E, EquipItem);
             ToClient.Add(0x2F, FightOccuring);
             ToClient.Add(0x30, AttackOK);
             ToClient.Add(0x31, AttackEnded);
             ToClient.Add(0x32, (Packet p) => { }); // unknown
-            ToClient.Add(0x33, PauseClient);
+            ToClient.Add(0x33, PauseControl);
             /*ToServer.Add(0x34, GetPlayerStatus);
             ToServer.Add(0x35, AddResourceGodClient);*/
             ToClient.Add(0x36, ResourceTileDataGodClient);
             /*ToServer.Add(0x37, MoveItemGodClient);
             ToServer.Add(0x38, PathfindingInClient);
             ToServer.Add(0x39, RemoveGroupS);*/ ToClient.Add(0x39, RemoveGroupR);
-            /*ToServer.Add(0x3A, SendSkills);*/ ToClient.Add(0x3A, ReceiveSkills);
+            /*ToServer.Add(0x3A, SendSkills);*/ ToClient.Add(0x3A, UpdateSkills);
             //ToServer.Add(0x3B, BuyItems);
-            ToClient.Add(0x3C, AddMultipleItemsInContainer);
+            ToClient.Add(0x3C, UpdateContainedItems);
             ToClient.Add(0x3E, VersionGodClient);
             ToClient.Add(0x3F, UpdateStaticsGodClient);
             /*ToServer.Add(0x45, VersionOK);
@@ -134,19 +134,19 @@ namespace ClassicUO.Network
             ToServer.Add(0x4B, CheckClientVersion);
             ToServer.Add(0x4C, ScriptNames);
             ToServer.Add(0x4D, EditScriptFile);*/
-            ToClient.Add(0x4F, OverallLightLevel);
+            ToClient.Add(0x4F, LightLevel);
             /*ToServer.Add(0x50, BoardHeader);
             ToServer.Add(0x51, BoardMessage);
             ToServer.Add(0x52, BoardPostMessage);*/
-            ToClient.Add(0x53, RejectCharacterLogon);
+            ToClient.Add(0x53, ErrorCode);
             ToClient.Add(0x54, PlaySoundEffect);
             ToClient.Add(0x55, LoginComplete);
-            ToClient.Add(0x56, MapPacketTreauseCartographyR); //ToServer.Add(0x56, MapPacketTreauseCartographyS);
+            ToClient.Add(0x56, MapData); //ToServer.Add(0x56, MapPacketTreauseCartographyS);
             /*ToServer.Add(0x57, UpdateRegions);
             ToServer.Add(0x58, AddRegion);
             ToServer.Add(0x59, NewContextFX);
             ToServer.Add(0x5A, UpdateContextFX);*/
-            ToClient.Add(0x5B, Time);
+            ToClient.Add(0x5B, SetTime);
             /*ToServer.Add(0x5C, RestartVersion);
             ToServer.Add(0x5D, LoginCharacter);
             ToServer.Add(0x5E, ServerListing);
@@ -157,108 +157,113 @@ namespace ClassicUO.Network
             ToServer.Add(0x63, LoadArea);
             ToServer.Add(0x64, LoadAreaRequest);*/
             ToClient.Add(0x65, SetWeather);
-            ToClient.Add(0x66, BookPagesR); //ToServer.Add(0x66, BookPagesS);
+            ToClient.Add(0x66, BookData); //ToServer.Add(0x66, BookPagesS);
             //ToServer.Add(0x69, ChangeText);
-            ToClient.Add(0x70, GraphicalEffect);
-            ToClient.Add(0x71, BulletinBoardMessagesR); //ToServer.Add(0x71, BulletinBoardMessagesS);
-            ToClient.Add(0x72, SetWarMode);// ToServer.Add(0x72, RequestWarMode);
-            ToClient.Add(0x73, PingR); //ToServer.Add(0x73, PingS);
-            ToClient.Add(0x74, OpenByuWindow);
+            ToClient.Add(0x70, GraphicEffect);
+            ToClient.Add(0x71, BulletinBoardData); //ToServer.Add(0x71, BulletinBoardMessagesS);
+            ToClient.Add(0x72, Warmode);// ToServer.Add(0x72, RequestWarMode);
+            ToClient.Add(0x73, Ping); //ToServer.Add(0x73, PingS);
+            ToClient.Add(0x74, BuyList);
             //ToServer.Add(0x75, RenameCharacter);
             ToClient.Add(0x76, NewSubServer);
-            ToClient.Add(0x77, UpdatePlayer);
-            ToClient.Add(0x78, DrawObject);
-            ToClient.Add(0x7C, OpenDialogBox);
+            ToClient.Add(0x77, UpdateCharacter);
+            ToClient.Add(0x78, UpdateObject);
+            ToClient.Add(0x7C, OpenMenu);
             /*ToServer.Add(0x7D, ResponseToDialogBox);
             ToServer.Add(0x80, LoginRequest);*/
-            ToClient.Add(0x82, LoginDenied);
+            ToClient.Add(0x82, LoginError);
             //ToServer.Add(0x83, DeleteCharacter);
-            ToClient.Add(0x86, ResendCharactersAfterDelete);
+            ToClient.Add(0x86, ResendCharacterList);
             ToClient.Add(0x88, OpenPaperdoll);
-            ToClient.Add(0x89, CorpseClothing);
-            ToClient.Add(0x8C, ConnectToGameServer);
-            ToClient.Add(0x90, MapMessage);
+            ToClient.Add(0x89, CorpseEquipment);
+            ToClient.Add(0x8C, RelayServer);
+            ToClient.Add(0x90, DisplayMap);
             //ToServer.Add(0x91, GameServerLogin);
-            ToClient.Add(0x93, BookHeaderOldR); //ToServer.Add(0x93, BookHeaderOldS);
-            ToClient.Add(0x95, DyeWindowR); //ToServer.Add(0x95, DyeWindowS);
+            ToClient.Add(0x93, OpenBook); //ToServer.Add(0x93, BookHeaderOldS);
+            ToClient.Add(0x95, DyeData); //ToServer.Add(0x95, DyeWindowS);
             ToClient.Add(0x97, MovePlayer);
             ToClient.Add(0x98, AllNames3DGameOnlyR); //ToServer.Add(0x98, AllNames3DGameOnlyS);
-            ToClient.Add(0x99, GiveBoatAndHousePlacement); //ToServer.Add(0x99, RequestBoatAndHousePlacement);
-            ToClient.Add(0x9A, ConsoleEntryPromptR); //ToServer.Add(0x9A, ConsoleEntryPromptS);
+            ToClient.Add(0x99, MultiPlacement); //ToServer.Add(0x99, RequestBoatAndHousePlacement);
+            ToClient.Add(0x9A, ASCIIPrompt); //ToServer.Add(0x9A, ConsoleEntryPromptS);
             //ToServer.Add(0x9B, RequestHelp);
             ToClient.Add(0x9C, RequestAssistance);
             ToClient.Add(0x9E, SellList);
             /*ToServer.Add(0x9F, SellListReply);
             ToServer.Add(0xA0, SelectServer);*/
-            ToClient.Add(0xA1, UpdateCurrentHealht);
-            ToClient.Add(0xA2, UpdateCurrentMana);
-            ToClient.Add(0xA3, UpdateCurrentStamina);
+            ToClient.Add(0xA1, UpdateHitpoints);
+            ToClient.Add(0xA2, UpdateMana);
+            ToClient.Add(0xA3, UpdateStamina);
             //ToServer.Add(0xA4, ClientSpy);
-            ToClient.Add(0xA5, OpenWebBrowser);
-            ToClient.Add(0xA6, NoticeWindow);
+            ToClient.Add(0xA5, OpenUrl);
+            ToClient.Add(0xA6, TipWindow);
             //ToServer.Add(0xA7, RequestNoticeWindow);
-            ToClient.Add(0xA8, GameServerList);
-            ToClient.Add(0xA9, CharactersAndStartingLocations);
-            ToClient.Add(0xAA, AllowRefuseAttack);
-            ToClient.Add(0xAB, GumpTextEntryDialog);
+            ToClient.Add(0xA8, ServerList);
+            ToClient.Add(0xA9, CharacterList);
+            ToClient.Add(0xAA, AttackCharacter);
+            ToClient.Add(0xAB, TextEntryDialog);
             /*ToServer.Add(0xAC, GumpTextEntryDialogReply);
             ToServer.Add(0xAD, UnicodeAsciiSpeechRequest);*/
-            ToClient.Add(0xAE, UnicodeSpeechMessage);
-            ToClient.Add(0xB0, SendGumpMenuDialog);
+            ToClient.Add(0xAE, UnicodeTalk);
+            ToClient.Add(0xB0, OpenGump);
             //ToServer.Add(0xB1, GumpMenuSelection);
             ToClient.Add(0xB2, ChatMessage);
             /*ToServer.Add(0xB3, ChatText);
             ToServer.Add(0xB5, OpenChatWindow);
             ToServer.Add(0xB6, SendHelpRequest);*/
             ToClient.Add(0xB7, Help);
-            ToClient.Add(0xB8, CharProfile); //ToServer.Add(0xB8, RequestCharProfile);
-            ToClient.Add(0xBA, QuestArrow);
+            ToClient.Add(0xB8, CharacterProfile); //ToServer.Add(0xB8, RequestCharProfile);
+            ToClient.Add(0xBA, DisplayQuestArrow);
             ToClient.Add(0xBB, UltimaMessengerR); //ToServer.Add(0xBB, UltimaMessengerS);
-            ToClient.Add(0xBC, SeasonalInformation);
-            ToClient.Add(0xBD, ClientVersionR); //ToServer.Add(0xBD, ClientVersionS);
-            ToClient.Add(0xBE, AssistVersionR);// ToServer.Add(0xBE, AssistVersionS);
-            ToClient.Add(0xBF, GeneralInformationPacketR); //ToServer.Add(0xBF, GeneralInformationPacketS);
-            ToClient.Add(0xC0, GraphcialEffect);
-            ToClient.Add(0xC1, ClilocMessage);
-            ToClient.Add(0xC2, UnicodeTextEntryR); //ToServer.Add(0xC2, UnicodeTextEntryS);
+            ToClient.Add(0xBC, Season);
+            ToClient.Add(0xBD, ClientVersion); //ToServer.Add(0xBD, ClientVersionS);
+            ToClient.Add(0xBE, AssistVersion);// ToServer.Add(0xBE, AssistVersionS);
+            ToClient.Add(0xBF, ExtendedCommand); //ToServer.Add(0xBF, GeneralInformationPacketS);
+            ToClient.Add(0xC0, GraphicEffect);
+            ToClient.Add(0xC1, DisplayClilocString);
+            ToClient.Add(0xC2, UnicodePrompt); //ToServer.Add(0xC2, UnicodeTextEntryS);
             ToClient.Add(0xC4, Semivisible);
             //ToServer.Add(0xC5, InvalidMapRequest);
             ToClient.Add(0xC6, InvalidMapEnable);
-            ToClient.Add(0xC7, ParticleEffect3D);
+            ToClient.Add(0xC7, GraphicEffect);
             ToClient.Add(0xCA, GetUserServerPingGodClientR); //ToServer.Add(0xCA, GetUserServerPingGodClientS);
             ToClient.Add(0xCB, GlobalQueCount);
-            ToClient.Add(0xCC, ClilocMessageAffix);
+            ToClient.Add(0xCC, DisplayClilocString);
             ToClient.Add(0xD0, ConfigurationFileR); //ToServer.Add(0xD0, ConfigurationFileS);
-            ToClient.Add(0xD1, LogoutStatusR); //ToServer.Add(0xD1, LogoutStatusS);
-            ToClient.Add(0xD2, Extended0x20);
-            ToClient.Add(0xD3, Extended0x78);
-            ToClient.Add(0xD4, BookHeaderNewR); //ToServer.Add(0xD4, BookHeaderNewS);
-            ToClient.Add(0xD6, MegaClilocR); //ToServer.Add(0xD6, MegaClilocS);
+            ToClient.Add(0xD1, Logout); //ToServer.Add(0xD1, LogoutStatusS);
+            ToClient.Add(0xD2, UpdateCharacter);
+            ToClient.Add(0xD3, UpdateObject);
+            ToClient.Add(0xD4, OpenBookNew); //ToServer.Add(0xD4, BookHeaderNewS);
+            ToClient.Add(0xD6, MegaCliloc); //ToServer.Add(0xD6, MegaClilocS);
             ToClient.Add(0xD7, GenericAOSCommandsR); //ToServer.Add(0xD7, GenericAOSCommandsS);
-            ToClient.Add(0xD8, SendCustomHouse);
+            ToClient.Add(0xD8, CustomHouse);
             //ToServer.Add(0xD9, SpyOnClient);
             ToClient.Add(0xDB, CharacterTransferLog);
-            ToClient.Add(0xDC, SEIntroducedRevision);
-            ToClient.Add(0xDD, CompressedGump);
+            ToClient.Add(0xDC, OPLInfo);
+            ToClient.Add(0xDD, OpenCompressedGump);
             ToClient.Add(0xDE, UpdateMobileStatus);
-            ToClient.Add(0xDF, BuffDebuffSystem);
+            ToClient.Add(0xDF, BuffDebuff);
             /*ToServer.Add(0xE0, BugReportKR);
             ToServer.Add(0xE1, ClientTypeKRSA);*/
-            ToClient.Add(0xE2, NewCharacterAnimationKR);
+            ToClient.Add(0xE2, NewCharacterAnimation);
             ToClient.Add(0xE3, KREncryptionResponse);
             /*ToServer.Add(0xEC, EquipMacroKR);
             ToServer.Add(0xED, UnequipItemMacroKR);
             ToServer.Add(0xEF, KR2DClientLoginSeed);*/
             ToClient.Add(0xF0, KrriosClientSpecial);
             ToClient.Add(0xF1, FreeshardListR); //ToServer.Add(0xF1, FreeshardListS);
-            ToClient.Add(0xF3, ObjectInformationSA);
-            ToClient.Add(0xF5, NewMapMessage);
+            ToClient.Add(0xF3, UpdateItemSA);
+            ToClient.Add(0xF5, DisplayMap);
             //ToServer.Add(0xF8, CharacterCreation_7_0_16_0);
         }
 
         private static void Damage(Packet p)
         {
-            
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (mobile == null)
+                return;
+
+            ushort damage = p.ReadUShort();
+
         }
 
         private static void EditTileDataGodClientR(Packet p)
@@ -266,7 +271,7 @@ namespace ClassicUO.Network
             
         }
 
-        private static void StatusBarInfo(Packet p)
+        private static void CharacterStatus(Packet p)
         {
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
             if (mobile == null)
@@ -332,16 +337,20 @@ namespace ClassicUO.Network
 
         private static void FollowR(Packet p)
         {
-            
+            Serial tofollow = p.ReadUInt();
+            Serial isfollowing = p.ReadUInt();
         }
 
-        private static void NewHealthBarStatusUpdateSA(Packet p)
+       /* private static void NewHealthBarStatusUpdateSA(Packet p)
         {
-            
-        }
+          
+        }*/
 
-        private static void HealtBarStatusUpdateKR(Packet p)
+        private static void NewHealthbarUpdate(Packet p)
         {
+            if (p.ID == 0x16 && FileManager.ClientVersion < ClientVersions.CV_500A)
+                return;
+
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
             if (mobile == null)
                 return;
@@ -381,7 +390,7 @@ namespace ClassicUO.Network
 
         }
 
-        private static void ObjectInfo(Packet p)
+        private static void UpdateItem(Packet p)
         {
             uint serial = p.ReadUInt();
             Item item = World.GetOrCreateItem(serial & 0x7FFFFFFF);
@@ -414,7 +423,7 @@ namespace ClassicUO.Network
                 World.Items.ProcessDelta();
         }
 
-        private static void CharLocaleAndBody(Packet p)
+        private static void EnterWorld(Packet p)
         {
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
@@ -425,7 +434,7 @@ namespace ClassicUO.Network
             World.Mobiles.ProcessDelta();
         }
 
-        private static void SendSpeech(Packet p)
+        private static void Talk(Packet p)
         {
             Serial serial = p.ReadUInt();
             Entity entity = World.Mobiles.Get(serial);
@@ -465,7 +474,7 @@ namespace ClassicUO.Network
             
         }
 
-        private static void DrawGamePlayer(Packet p)
+        private static void UpdatePlayer(Packet p)
         {
             if (p.ReadUInt() != World.Player)
                 throw new Exception("OnMobileStatus");
@@ -483,35 +492,78 @@ namespace ClassicUO.Network
 
         }
 
-        private static void CharMoveRejection(Packet p)
+        private static void DenyWalk(Packet p)
         {
-            p.Skip(1);
+            byte seq = p.ReadByte();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             World.Player.Direction = (Direction)p.ReadByte();
-            World.Player.Position = new Position(x, y, p.ReadSByte());
+            sbyte z = p.ReadSByte();
+            World.Player.Position = new Position(x, y, z);
             World.Player.ProcessDelta();
         }
 
-        private static void CharacterMoveACK(Packet p)
+        private static void ConfirmWalk(Packet p)
         {
-            p.Skip(1);
-            World.Player.Notoriety = (Notoriety)p.ReadByte();
+            byte seq = p.ReadByte();
+            World.Player.Notoriety = (Notoriety)(p.ReadByte() & (~0x40));
 
             World.Player.ProcessDelta();
         }
 
-        private static void DraggingOfItem(Packet p)
+        private static void DragAnimation(Packet p)
+        {
+            Graphic graphic = p.ReadUShort();
+            graphic += p.ReadByte();
+
+            Hue hue = p.ReadUShort();
+            ushort count = p.ReadUShort();
+            Serial source = p.ReadUInt();
+            ushort sourceX = p.ReadUShort();
+            ushort sourceY = p.ReadUShort();
+            sbyte sourceZ = p.ReadSByte();
+
+            Serial dest = p.ReadUInt();
+            ushort destX = p.ReadUShort();
+            ushort destY = p.ReadUShort();
+            sbyte destZ = p.ReadSByte();
+
+            if (graphic == 0x0EED)
+                graphic = 0x0EEF;
+            else if (graphic == 0x0EEA)
+                graphic = 0x0EEC;
+            else if (graphic == 0x0EF0)
+                graphic = 0x0EF2;
+
+            Entity entity = World.Get(source);
+            if (entity == null)
+                source = 0;
+            else
+            {
+                sourceX = entity.Position.X;
+                sourceY = entity.Position.Y;
+                sourceZ = entity.Position.Z;
+            }
+
+            Entity destEntity = World.Get(dest);
+            if (destEntity == null)
+                dest = 0;
+            else
+            {
+                destX = destEntity.Position.X;
+                destY = destEntity.Position.Y;
+                destZ = destEntity.Position.Z;
+            }
+
+            // effect moving. To do
+        }
+
+        private static void OpenContainer(Packet p)
         {
             
         }
 
-        private static void DrawContainer(Packet p)
-        {
-            
-        }
-
-        private static void AddItemToContainer(Packet p)
+        private static void UpdateContainedItem(Packet p)
         {
             if (ReadContainerContent(p))
                 World.Items.ProcessDelta();
@@ -522,17 +574,17 @@ namespace ClassicUO.Network
             
         }
 
-        private static void RejectMoveItemRequest(Packet p)
+        private static void DenyMoveItem(Packet p)
         {
             
         }
 
-        private static void DropItemFailed(Packet p)
+        private static void EndDraggingItem(Packet p)
         {
             
         }
 
-        private static void DropItemApproved(Packet p)
+        private static void DropItemAccepted(Packet p)
         {
             
         }
@@ -547,7 +599,7 @@ namespace ClassicUO.Network
             
         }
 
-        private static void MobAttributes(Packet p)
+        private static void MobileAttributes(Packet p)
         {
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
             if (mobile == null)
@@ -562,7 +614,7 @@ namespace ClassicUO.Network
 
         }
 
-        private static void WornItem(Packet p)
+        private static void EquipItem(Packet p)
         {
             Item item = World.GetOrCreateItem(p.ReadUInt());
             item.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
@@ -598,7 +650,7 @@ namespace ClassicUO.Network
             
         }
 
-        private static void ReceiveSkills(Packet p)
+        private static void UpdateSkills(Packet p)
         {
             ushort id;
             switch (p.ReadByte())
@@ -632,7 +684,7 @@ namespace ClassicUO.Network
             
         }
 
-        private static void PauseClient(Packet p)
+        private static void PauseControl(Packet p)
         {
             
         }
@@ -642,7 +694,7 @@ namespace ClassicUO.Network
             
         }
 
-        private static void AddMultipleItemsInContainer(Packet p)
+        private static void UpdateContainedItems(Packet p)
         {
             ushort count = p.ReadUShort();
             for (int i = 0; i < count; i++)
@@ -660,12 +712,12 @@ namespace ClassicUO.Network
             
         }
 
-        private static void OverallLightLevel(Packet p)
+        private static void LightLevel(Packet p)
         {
             
         }
 
-        private static void RejectCharacterLogon(Packet p)
+        private static void ErrorCode(Packet p)
         {
             
         }
@@ -680,12 +732,12 @@ namespace ClassicUO.Network
             
         }
 
-        private static void MapPacketTreauseCartographyR(Packet p)
+        private static void MapData(Packet p)
         {
             
         }
 
-        private static void Time(Packet p)
+        private static void SetTime(Packet p)
         {
             
         }
@@ -695,33 +747,33 @@ namespace ClassicUO.Network
             
         }
 
-        private static void BookPagesR(Packet p)
+        private static void BookData(Packet p)
         {
             
         }
 
-        private static void GraphicalEffect(Packet p)
+        private static void GraphicEffect(Packet p)
         {
             
         }
 
-        private static void BulletinBoardMessagesR(Packet p)
+        private static void BulletinBoardData(Packet p)
         {
             
         }
 
-        private static void SetWarMode(Packet p)
+        private static void Warmode(Packet p)
         {
             World.Player.WarMode = p.ReadBool();
             World.Player.ProcessDelta();
         }
 
-        private static void PingR(Packet p)
+        private static void Ping(Packet p)
         {
             
         }
 
-        private static void OpenByuWindow(Packet p)
+        private static void BuyList(Packet p)
         {
             
         }
@@ -731,7 +783,7 @@ namespace ClassicUO.Network
             
         }
 
-        private static void UpdatePlayer(Packet p)
+        private static void UpdateCharacter(Packet p)
         {
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
             mobile.Graphic = p.ReadUShort();
@@ -747,7 +799,7 @@ namespace ClassicUO.Network
 
         }
 
-        private static void DrawObject(Packet p)
+        private static void UpdateObject(Packet p)
         {
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
             mobile.Graphic = p.ReadUShort();
@@ -786,17 +838,17 @@ namespace ClassicUO.Network
 
         }
 
-        private static void OpenDialogBox(Packet p)
+        private static void OpenMenu(Packet p)
         {
             
         }
 
-        private static void LoginDenied(Packet p)
+        private static void LoginError(Packet p)
         {
             
         }
 
-        private static void ResendCharactersAfterDelete(Packet p)
+        private static void ResendCharacterList(Packet p)
         {
             
         }
@@ -806,27 +858,27 @@ namespace ClassicUO.Network
             
         }
 
-        private static void CorpseClothing(Packet p)
+        private static void CorpseEquipment(Packet p)
         {
             
         }
 
-        private static void ConnectToGameServer(Packet p)
+        private static void RelayServer(Packet p)
         {
             
         }
 
-        private static void MapMessage(Packet p)
+        private static void DisplayMap(Packet p)
         {
             
         }
 
-        private static void BookHeaderOldR(Packet p)
+        private static void OpenBook(Packet p)
         {
             
         }
 
-        private static void DyeWindowR(Packet p)
+        private static void DyeData(Packet p)
         {
             
         }
@@ -842,12 +894,12 @@ namespace ClassicUO.Network
             
         }
 
-        private static void GiveBoatAndHousePlacement(Packet p)
+        private static void MultiPlacement(Packet p)
         {
             
         }
 
-        private static void ConsoleEntryPromptR(Packet p)
+        private static void ASCIIPrompt(Packet p)
         {
             
         }
@@ -862,7 +914,7 @@ namespace ClassicUO.Network
             
         }
 
-        private static void UpdateCurrentHealht(Packet p)
+        private static void UpdateHitpoints(Packet p)
         {
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
             if (mobile == null)
@@ -873,7 +925,7 @@ namespace ClassicUO.Network
 
         }
 
-        private static void UpdateCurrentMana(Packet p)
+        private static void UpdateMana(Packet p)
         {
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
             if (mobile == null)
@@ -884,7 +936,7 @@ namespace ClassicUO.Network
 
         }
 
-        private static void UpdateCurrentStamina(Packet p)
+        private static void UpdateStamina(Packet p)
         {
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
             if (mobile == null)
@@ -894,37 +946,37 @@ namespace ClassicUO.Network
             mobile.ProcessDelta();
         }
 
-        private static void OpenWebBrowser(Packet p)
+        private static void OpenUrl(Packet p)
         {
             
         }
 
-        private static void NoticeWindow(Packet p)
+        private static void TipWindow(Packet p)
         {
             
         }
 
-        private static void GameServerList(Packet p)
+        private static void ServerList(Packet p)
         {
             
         }
 
-        private static void CharactersAndStartingLocations(Packet p)
+        private static void CharacterList(Packet p)
         {
             
         }
 
-        private static void AllowRefuseAttack(Packet p)
+        private static void AttackCharacter(Packet p)
         {
             
         }
 
-        private static void GumpTextEntryDialog(Packet p)
+        private static void TextEntryDialog(Packet p)
         {
             
         }
 
-        private static void UnicodeSpeechMessage(Packet p)
+        private static void UnicodeTalk(Packet p)
         {
             Serial serial = p.ReadUInt();
             Entity entity = World.Mobiles.Get(serial);
@@ -945,7 +997,7 @@ namespace ClassicUO.Network
 
         }
 
-        private static void SendGumpMenuDialog(Packet p)
+        private static void OpenGump(Packet p)
         {
             
         }
@@ -960,12 +1012,12 @@ namespace ClassicUO.Network
             
         }
 
-        private static void CharProfile(Packet p)
+        private static void CharacterProfile(Packet p)
         {
             
         }
 
-        private static void QuestArrow(Packet p)
+        private static void DisplayQuestArrow(Packet p)
         {
             
         }
@@ -975,22 +1027,22 @@ namespace ClassicUO.Network
             
         }
 
-        private static void SeasonalInformation(Packet p)
+        private static void Season(Packet p)
         {
             
         }
 
-        private static void ClientVersionR(Packet p)
+        private static void ClientVersion(Packet p)
         {
             
         }
 
-        private static void AssistVersionR(Packet p)
+        private static void AssistVersion(Packet p)
         {
             
         }
 
-        private static void GeneralInformationPacketR(Packet p)
+        private static void ExtendedCommand(Packet p)
         {
             switch (p.ReadUShort())
             {
@@ -1002,12 +1054,7 @@ namespace ClassicUO.Network
 
         }
 
-        private static void GraphcialEffect(Packet p)
-        {
-            
-        }
-
-        private static void ClilocMessage(Packet p)
+        private static void DisplayClilocString(Packet p)
         {
             Serial serial = p.ReadUInt();
             Entity entity = World.Mobiles.Get(serial);
@@ -1028,7 +1075,7 @@ namespace ClassicUO.Network
 
         }
 
-        private static void UnicodeTextEntryR(Packet p)
+        private static void UnicodePrompt(Packet p)
         {
             
         }
@@ -1058,55 +1105,22 @@ namespace ClassicUO.Network
             
         }
 
-        private static void ClilocMessageAffix(Packet p)
-        {
-            Serial serial = p.ReadUInt();
-            Entity entity = World.Mobiles.Get(serial);
-            ushort graphic = p.ReadUShort();
-            MessageType type = (MessageType)p.ReadByte();
-            Hue hue = p.ReadUShort();
-            MessageFont font = (MessageFont)p.ReadUShort();
-            uint cliloc = p.ReadUInt();
-            AffixType affixType = (AffixType)p.ReadByte();
-            string name = p.ReadASCII(30);
-            string affix = p.ReadASCII();
-            string text = p.ReadUnicode();
-
-            if (entity != null)
-            {
-                entity.Graphic = graphic;
-                entity.Name = name;
-                entity.ProcessDelta();
-            }
-
-        }
-
         private static void ConfigurationFileR(Packet p)
         {
             
         }
 
-        private static void LogoutStatusR(Packet p)
+        private static void Logout(Packet p)
         {
             
         }
 
-        private static void Extended0x20(Packet p)
+        private static void OpenBookNew(Packet p)
         {
             
         }
 
-        private static void Extended0x78(Packet p)
-        {
-            
-        }
-
-        private static void BookHeaderNewR(Packet p)
-        {
-            
-        }
-
-        private static void MegaClilocR(Packet p)
+        private static void MegaCliloc(Packet p)
         {
             p.Skip(2);
             Entity entity = World.Get(p.ReadUInt());
@@ -1123,7 +1137,7 @@ namespace ClassicUO.Network
             
         }
 
-        private static void SendCustomHouse(Packet p)
+        private static void CustomHouse(Packet p)
         {
             
         }
@@ -1133,12 +1147,12 @@ namespace ClassicUO.Network
             
         }
 
-        private static void SEIntroducedRevision(Packet p)
+        private static void OPLInfo(Packet p)
         {
             
         }
 
-        private static void CompressedGump(Packet p)
+        private static void OpenCompressedGump(Packet p)
         {
             Serial sender = p.ReadUInt();
             Serial gumpID = p.ReadUInt();
@@ -1184,12 +1198,12 @@ namespace ClassicUO.Network
             
         }
 
-        private static void BuffDebuffSystem(Packet p)
+        private static void BuffDebuff(Packet p)
         {
             
         }
 
-        private static void NewCharacterAnimationKR(Packet p)
+        private static void NewCharacterAnimation(Packet p)
         {
             
         }
@@ -1201,7 +1215,10 @@ namespace ClassicUO.Network
 
         private static void KrriosClientSpecial(Packet p)
         {
-            
+            if (p.ReadByte() == 0xFE)
+            {
+                new PRazorAnswer().SendToServer();
+            }
         }
 
         private static void FreeshardListR(Packet p)
@@ -1209,7 +1226,7 @@ namespace ClassicUO.Network
             
         }
 
-        private static void ObjectInformationSA(Packet p)
+        private static void UpdateItemSA(Packet p)
         {
             p.Skip(2);//unknown
 
@@ -1240,12 +1257,6 @@ namespace ClassicUO.Network
                 World.Items.ProcessDelta();
 
         }
-
-        private static void NewMapMessage(Packet p)
-        {
-            
-        }
-
 
         private static bool ReadContainerContent(Packet p)
         {

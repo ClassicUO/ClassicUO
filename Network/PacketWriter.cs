@@ -56,14 +56,13 @@ namespace ClassicUO.Network
         public void SendToClient()
         {
             WriteSize();
-            int len = this.Length;
             //WOrion.SendToClient(this.Data, ref len);
         }
 
         public void SendToServer()
         {
             WriteSize();
-            int len = this.Length;
+            NetClient.Socket.Send(this);
             //WOrion.SendToServer(this.Data, ref len);
         }
     }

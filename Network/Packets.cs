@@ -562,7 +562,7 @@ namespace ClassicUO.Network
 
     public sealed class PRazorAnswer : PacketWriter
     {
-        public PRazorAnswer() : base( 0xF0)
+        public PRazorAnswer() : base(0xF0)
         {
             WriteByte(0x04);
             WriteByte(0xFF);

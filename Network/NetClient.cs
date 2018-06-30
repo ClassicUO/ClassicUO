@@ -8,6 +8,8 @@ namespace ClassicUO.Network
 {
     public sealed class NetClient
     {
+        public static NetClient Socket { get; } = new NetClient();
+
         public static event EventHandler Connected, Disconnected;
         public static event EventHandler<Packet> PacketReceived, PacketSended;
 
@@ -25,7 +27,7 @@ namespace ClassicUO.Network
 
         private int _incompletePacketLength;
 
-        public NetClient()
+        private NetClient()
         {
 
         }
