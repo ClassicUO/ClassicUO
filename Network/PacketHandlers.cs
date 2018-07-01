@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using ClassicUO.AssetsLoader;
@@ -416,6 +417,8 @@ namespace ClassicUO.Network
 
             if ((y & 0x4000) != 0)
                 item.Flags = (Flags)p.ReadByte();
+
+            item.IsMulti = item.Graphic >= 0x4000;
 
             item.Container = Serial.Invalid;
             item.ProcessDelta();
@@ -1446,7 +1449,142 @@ namespace ClassicUO.Network
 
         private static void CustomHouse(Packet p)
         {
-            
+            bool compressed = p.ReadByte() == 0x03;
+            bool enableReponse = p.ReadBool();
+            Item foundation = World.Items.Get(p.ReadUInt());
+            uint revision = p.ReadUInt();
+
+            if (foundation == null)
+                return;
+
+            Game.WorldObjects.Multi multi = foundation.Multi;
+            if (multi == null)
+                return;
+
+            p.Skip(4);
+
+            House house = World.GetOrCreateHouse(foundation);
+            house.Revision = revision;
+
+            house.Items.Clear();
+
+            short minX = multi.MinX;
+            short minY = multi.MinY;
+            short maxY = multi.MaxY;
+
+            byte planes = p.ReadByte();
+
+            for (int plane = 0; plane < planes; plane++)
+            {
+                uint header = p.ReadUInt();
+                ulong dlen = ((header & 0xFF0000) >> 16) | ((header & 0xF0) << 4);
+                int clen = (int)(((header & 0xFF00) >> 8) | ((header & 0x0F) << 8));
+                int planeZ = (int)((header & 0x0F000000) >> 24);
+                int planeMode = (int)((header & 0xF0000000) >> 28);
+                if (clen <= 0)
+                    continue;
+
+                byte[] compressedBytes = new byte[clen];
+                Buffer.BlockCopy(p.ToArray(), p.Position, compressedBytes, 0, clen);
+
+                byte[] decompressedBytes = new byte[dlen];
+                Zlib.Decompress(compressedBytes, 0, decompressedBytes, (int)dlen);
+
+                using (BinaryReader stream = new BinaryReader(new MemoryStream(decompressedBytes)))
+                {
+                    p.Skip(clen);
+
+                    ushort id = 0;
+                    byte x = 0, y = 0, z = 0;
+
+                    switch (planeMode)
+                    {
+                        case 0:
+                            for (uint i = 0; i < decompressedBytes.Length / 5; i++)
+                            {
+                                id = stream.ReadUInt16();
+                                x = stream.ReadByte();
+                                y = stream.ReadByte();
+                                z = stream.ReadByte();
+
+                                if (id != 0)
+                                    house.Items.Add(new Static(id, 0, 0)
+                                    {
+                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y), (sbyte)z)
+                                    });
+                            }
+                            break;
+                        case 1:
+                            if (planeZ > 0)
+                                z = (byte)(((planeZ - 1) % 4) * 20 + 7);
+                            else
+                                z = 0;
+
+                            for (uint i = 0; i < decompressedBytes.Length / 4; i++)
+                            {
+                                id = stream.ReadUInt16();
+                                x = stream.ReadByte();
+                                y = stream.ReadByte();
+
+                                if (id != 0)
+                                    house.Items.Add(new Static(id, 0, 0)
+                                    {
+                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y), (sbyte)z)
+                                    });
+                            }
+
+                            break;
+                        case 2:
+                            short offX = 0, offY = 0;
+                            short multiHeight = 0;
+
+                            if (planeZ > 0)
+                                z = (byte)(((planeZ - 1) % 4) * 20 + 7);
+                            else
+                                z = 0;
+
+                            if (planeZ <= 0)
+                            {
+                                offX = minX;
+                                offY = minY;
+                                multiHeight = (short)((maxY - minY) + 2);
+                            }
+                            else if (planeZ <= 4)
+                            {
+                                offX =  (short)(minX + 1);
+                                offY = (short)(minY + 1);
+                                multiHeight = (short)(maxY - minY);
+                            }
+                            else
+                            {
+                                offX = minX;
+                                offY = minY;
+                                multiHeight = (short)((maxY - minY) + 1);
+                            }
+
+                            for (uint i = 0; i < decompressedBytes.Length / 2; i++)
+                            {
+                                id = stream.ReadUInt16();
+                                x = (byte)(i / multiHeight + offX);
+                                y = (byte)(i / multiHeight + offY);
+
+                                if (id != 0)
+                                    house.Items.Add(new Static(id, 0, 0)
+                                    {
+                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y), (sbyte)z)
+                                    });
+                            }
+
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+
+            }
+
+
         }
 
         private static void CharacterTransferLog(Packet p)
@@ -1542,7 +1680,10 @@ namespace ClassicUO.Network
 
             ushort g = p.ReadUShort();
             if (type == 2)
+            {
                 g |= 0x4000;
+                item.IsMulti = true;
+            }
             item.Graphic = g;
             item.Direction = (Direction)p.ReadByte();
 

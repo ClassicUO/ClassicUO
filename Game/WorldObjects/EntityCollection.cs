@@ -30,15 +30,15 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
-        public bool Contains(Serial serial) => _entities.ContainsKey(serial);
+        public bool Contains(in Serial serial) => _entities.ContainsKey(serial);
 
-        public T Get(Serial serial)
+        public T Get(in Serial serial)
         {
             _entities.TryGetValue(serial, out T entity);
             return entity;
         }
 
-        public bool Add(T entity)
+        public bool Add(in T entity)
         {
             if (!_entities.TryAdd(entity.Serial, entity))
                 return false;
@@ -46,7 +46,7 @@ namespace ClassicUO.Game.WorldObjects
             return true;
         }
 
-        public T Remove(Serial serial)
+        public T Remove(in Serial serial)
         {
             if (_entities.TryRemove(serial, out T entity))
                 _removed.Add(entity);

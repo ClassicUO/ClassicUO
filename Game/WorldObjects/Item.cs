@@ -44,6 +44,7 @@ namespace ClassicUO.Game.WorldObjects
         private ushort _amount;
         private Serial _container;
         private Layer _layer;
+        private bool _isMulti;
 
         public Item(Serial serial) : base(serial)
         {
@@ -92,6 +93,59 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
+        public bool IsMulti
+        {
+            get => _isMulti;
+            set
+            {
+                if (_isMulti != value)
+                {
+                    _isMulti = value;
+
+                    if (value)
+                    {
+                        short minX = 0;
+                        short minY = 0;
+                        short maxX = 0;
+                        short maxY = 0;
+
+                        int count = AssetsLoader.Multi.GetCount(Graphic);
+                        MultiComponent[] components = new MultiComponent[count];
+
+                        for (int i = 0; i < count; i++)
+                        {
+                            AssetsLoader.MultiBlock pbm = AssetsLoader.Multi.GetMulti(i);
+
+                            MultiComponent component = new MultiComponent(pbm.ID, (ushort)(Position.X + pbm.X), (ushort)(Position.Y + pbm.Y), (sbyte)(Position.Z + pbm.Z), pbm.Flags);
+
+                            if (pbm.X < minX)
+                                minX = pbm.X;
+                            if (pbm.X > maxX)
+                                maxX = pbm.X;
+                            if (pbm.Y < minY)
+                                minY = pbm.Y;
+                            if (pbm.Y > maxY)
+                                maxY = pbm.Y;
+                        }
+
+                        Multi = new Multi(this)
+                        {
+                            MinX = minX,
+                            MaxX = maxX,
+                            MinY = minY,
+                            MaxY = maxY,
+                            Components = components
+                        };
+                    }
+                    else
+                    {
+                        Multi = null;
+                    }
+                }
+            }
+        }
+
+        public Multi Multi { get; private set; }
 
         public bool IsCorpse => MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) || Graphic == 0x2006;
 

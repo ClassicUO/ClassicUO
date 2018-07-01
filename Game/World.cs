@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Game.WorldObjects;
@@ -11,8 +12,33 @@ namespace ClassicUO.Game
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
         public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
         public static PlayerMobile Player { get; set; }
-
         public static int Map { get; set; }
+
+        private static readonly ConcurrentDictionary<Serial, House> _houses = new ConcurrentDictionary<Serial, House>();
+
+
+        public static House GetHouse(in Serial serial)
+        {
+            _houses.TryGetValue(serial, out var h);
+            return h;
+        }
+
+        public static House GetOrCreateHouse(in Serial serial)
+        {
+            if (_houses.TryGetValue(serial, out var house))
+                return house;
+            return new House(serial);
+        }
+
+        public static void AddOrUpdateHouse(in House house)
+        {
+            _houses.TryAdd(house.Serial, house);
+        }
+
+        public static  void RemoveHouse(in Serial house)
+        {
+            _houses.TryRemove(house, out var h);
+        }
 
 
         public static bool Contains(in Serial serial)
