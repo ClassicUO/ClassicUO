@@ -46,6 +46,7 @@ namespace ClassicUO
 
             // TEST
 
+           
 
             AssetsLoader.FileManager.UoFolderPath = @"E:\Giochi\Ultima Online Classic ORION";
 
@@ -56,6 +57,11 @@ namespace ClassicUO
 
 
             _facet = new Game.Map.Facet(0);
+
+            var data = AssetsLoader.Art.ReadStaticArt(3850, out short w, out short h);
+
+            _texture = new Texture2D(GraphicsDevice, 1, 1);
+            _texture.SetData(new Color[] { Color.Wheat } );
 
             // END TEST
 
@@ -75,6 +81,7 @@ namespace ClassicUO
         private ushort _maxX = 1560;
         private ushort _currentX = 1443;
         private Stopwatch _stopwatch;
+        private Texture2D _texture;
 
         protected override void Update(GameTime gameTime)
         {
@@ -101,7 +108,11 @@ namespace ClassicUO
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            _spriteBatch.Begin();
+            _spriteBatch.Draw(_texture, new Rectangle(100, 100, 100, 100), Color.Red);
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }
