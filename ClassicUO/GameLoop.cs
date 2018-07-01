@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using ClassicUO.Input;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,6 +13,8 @@ namespace ClassicUO
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+        private MouseManager _mouseManager;
+        private KeyboardManager _keyboardManager;
 
         public GameLoop()
         {
@@ -28,7 +31,11 @@ namespace ClassicUO
 
         protected override void Initialize()
         {
-          
+            _mouseManager = new MouseManager(this);
+            _keyboardManager = new KeyboardManager(this);
+
+            Components.Add(_mouseManager);
+            Components.Add(_keyboardManager);
 
             base.Initialize();
         }

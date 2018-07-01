@@ -1,4 +1,5 @@
 ﻿using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
@@ -7,13 +8,16 @@ using System.Text;
 
 namespace ClassicUO.Input
 {
-    public static class KeyboardManager
+    public sealed class KeyboardManager : GameComponent
     {
-        private static KeyboardState _prevKeyboardState = Keyboard.GetState();
+        private KeyboardState _prevKeyboardState = Keyboard.GetState();
 
-        public static event EventHandler<KeyboardEventArgs> KeyDown, KeyUp;
+        public KeyboardManager(Game game): base(game)
+        {
+          
+        }
 
-        public static void Update()
+        public override void Update(GameTime gameTime)
         {
             KeyboardState current = Keyboard.GetState();
 
@@ -49,6 +53,11 @@ namespace ClassicUO.Input
             }
 
             _prevKeyboardState = current;
+
+            base.Update(gameTime);
         }
+
+
+        public event EventHandler<KeyboardEventArgs> KeyDown, KeyUp;
     }
 }

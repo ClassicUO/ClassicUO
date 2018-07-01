@@ -1,17 +1,20 @@
 ﻿using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
 
 namespace ClassicUO.Input
 {
-    public static class MouseManager
+    public class MouseManager : GameComponent
     {
-        private static MouseState _prevMouseState = Mouse.GetState();
+        private MouseState _prevMouseState = Mouse.GetState();
 
-        public static event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove;
-        public static event EventHandler<MouseWheelEventArgs> MouseWheel;
+        public MouseManager(Game game) : base(game)
+        {
+           
+        }
 
-        public static void Update()
+        public override void Update(GameTime gameTime)
         {
             MouseState current = Mouse.GetState();
 
@@ -79,14 +82,18 @@ namespace ClassicUO.Input
             {
                 MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y);
                 MouseMove.Raise(arg);
+                Log.Message(LogTypes.Trace, arg.Location.ToString());
             }
 
             _prevMouseState = current;
+
+            base.Update(gameTime);
         }
 
+        public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove;
+        public event EventHandler<MouseWheelEventArgs> MouseWheel;
 
-        private static bool IsMouseButtonDown(ButtonState current, ButtonState prev) => current == ButtonState.Pressed && prev == ButtonState.Released;
-        private static bool IsMouseButtonUp(ButtonState current, ButtonState prev) => current == ButtonState.Released && prev == ButtonState.Pressed;
-
+        private bool IsMouseButtonDown(ButtonState current, ButtonState prev) => current == ButtonState.Pressed && prev == ButtonState.Released;
+        private bool IsMouseButtonUp(ButtonState current, ButtonState prev) => current == ButtonState.Released && prev == ButtonState.Pressed;
     }
 }
