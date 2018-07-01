@@ -1510,7 +1510,7 @@ namespace ClassicUO.Network
                                 if (id != 0)
                                     house.Items.Add(new Static(id, 0, 0)
                                     {
-                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y), (sbyte)z)
+                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y), (sbyte)(foundation.Position.Z + z))
                                     });
                             }
                             break;
@@ -1529,7 +1529,7 @@ namespace ClassicUO.Network
                                 if (id != 0)
                                     house.Items.Add(new Static(id, 0, 0)
                                     {
-                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y), (sbyte)z)
+                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y), (sbyte)(foundation.Position.Z + z))
                                     });
                             }
 
@@ -1571,7 +1571,7 @@ namespace ClassicUO.Network
                                 if (id != 0)
                                     house.Items.Add(new Static(id, 0, 0)
                                     {
-                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y), (sbyte)z)
+                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y), (sbyte)(foundation.Position.Z + z))
                                     });
                             }
 
