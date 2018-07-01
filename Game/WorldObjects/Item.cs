@@ -104,38 +104,41 @@ namespace ClassicUO.Game.WorldObjects
 
                     if (value)
                     {
-                        short minX = 0;
-                        short minY = 0;
-                        short maxX = 0;
-                        short maxY = 0;
-
-                        int count = AssetsLoader.Multi.GetCount(Graphic);
-                        MultiComponent[] components = new MultiComponent[count];
-
-                        for (int i = 0; i < count; i++)
+                        if (Multi == null)
                         {
-                            AssetsLoader.MultiBlock pbm = AssetsLoader.Multi.GetMulti(i);
+                            short minX = 0;
+                            short minY = 0;
+                            short maxX = 0;
+                            short maxY = 0;
 
-                            MultiComponent component = new MultiComponent(pbm.ID, (ushort)(Position.X + pbm.X), (ushort)(Position.Y + pbm.Y), (sbyte)(Position.Z + pbm.Z), pbm.Flags);
+                            int count = AssetsLoader.Multi.GetCount(Graphic);
+                            MultiComponent[] components = new MultiComponent[count];
 
-                            if (pbm.X < minX)
-                                minX = pbm.X;
-                            if (pbm.X > maxX)
-                                maxX = pbm.X;
-                            if (pbm.Y < minY)
-                                minY = pbm.Y;
-                            if (pbm.Y > maxY)
-                                maxY = pbm.Y;
+                            for (int i = 0; i < count; i++)
+                            {
+                                AssetsLoader.MultiBlock pbm = AssetsLoader.Multi.GetMulti(i);
+
+                                MultiComponent component = new MultiComponent(pbm.ID, (ushort)(Position.X + pbm.X), (ushort)(Position.Y + pbm.Y), (sbyte)(Position.Z + pbm.Z), pbm.Flags);
+
+                                if (pbm.X < minX)
+                                    minX = pbm.X;
+                                if (pbm.X > maxX)
+                                    maxX = pbm.X;
+                                if (pbm.Y < minY)
+                                    minY = pbm.Y;
+                                if (pbm.Y > maxY)
+                                    maxY = pbm.Y;
+                            }
+
+                            Multi = new Multi(this)
+                            {
+                                MinX = minX,
+                                MaxX = maxX,
+                                MinY = minY,
+                                MaxY = maxY,
+                                Components = components
+                            };
                         }
-
-                        Multi = new Multi(this)
-                        {
-                            MinX = minX,
-                            MaxX = maxX,
-                            MinY = minY,
-                            MaxY = maxY,
-                            Components = components
-                        };
                     }
                     else
                     {
