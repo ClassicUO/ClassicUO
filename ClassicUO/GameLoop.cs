@@ -56,12 +56,12 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, "UO files loaded in " + _stopwatch.ElapsedMilliseconds  +" ms");
 
 
-            _facet = new Game.Map.Facet(0);
+            //_facet = new Game.Map.Facet(0);
 
-            var data = AssetsLoader.Art.ReadStaticArt(3850, out short w, out short h);
+            //var data = AssetsLoader.Art.ReadStaticArt(3850, out short w, out short h);
 
-            _texture = new Texture2D(GraphicsDevice, w, h, false, SurfaceFormat.Bgra5551);
-            _texture.SetData(data);
+            //_texture = new Texture2D(GraphicsDevice, w, h, false, SurfaceFormat.Bgra5551);
+            //_texture.SetData(data);
 
 
 
@@ -90,18 +90,18 @@ namespace ClassicUO
             //Input.MouseManager.Update();
             //Input.KeyboardManager.Update();
 
-            if (_stopwatch.ElapsedMilliseconds >= TIME_RUN_MOUNT)
-            {
-                if (_currentX + 1 > _maxX)
-                    _currentX = _x;
-                _currentX++;
+            //if (_stopwatch.ElapsedMilliseconds >= TIME_RUN_MOUNT)
+            //{
+            //    if (_currentX + 1 > _maxX)
+            //        _currentX = _x;
+            //    _currentX++;
 
-                _facet.LoadChunks(_x, _y, 5 );
+            //    _facet.LoadChunks(_x, _y, 5 );
 
-                //Log.Message(LogTypes.Trace, _stopwatch.ElapsedMilliseconds.ToString());
-                _stopwatch.Restart();
-               // _delay = DateTime.Now.AddMilliseconds(TIME_RUN_MOUNT);
-            }
+            //    //Log.Message(LogTypes.Trace, _stopwatch.ElapsedMilliseconds.ToString());
+            //    _stopwatch.Restart();
+            //   // _delay = DateTime.Now.AddMilliseconds(TIME_RUN_MOUNT);
+            //}
 
 
 

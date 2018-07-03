@@ -32,11 +32,10 @@ namespace ClassicUO.AssetsLoader
         {
             Map.Load();
             Art.Load();
-            BodyDef.Load();
             Cliloc.Load();
             Animations.Load();
             Gumps.Load();
-            Fonts.Load();
+            //Fonts.Load();
             Hues.Load();
             TileData.Load();
             Multi.Load();

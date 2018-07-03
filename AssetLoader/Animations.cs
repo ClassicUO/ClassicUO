@@ -105,6 +105,8 @@ namespace ClassicUO.AssetsLoader
         LAG_ANIMATION_COUNT
     }
 
+
+
     public static class Animations
     {
         private static List<UOFile> _files = new List<UOFile>();
@@ -119,21 +121,19 @@ namespace ClassicUO.AssetsLoader
         private static readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
 
 
-        public static IndexAnimation[] DataIndex => _dataIndex;
-
         public static void Load()
         {
-            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim.mul"), Path.Combine(FileManager.UoFolderPath, "anim.idx"), 0x40000, 6));
-            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim2.mul"), Path.Combine(FileManager.UoFolderPath, "anim2.idx"), 0x10000));
-            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim3.mul"), Path.Combine(FileManager.UoFolderPath, "anim3.idx"), 0x20000));
-            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim4.mul"), Path.Combine(FileManager.UoFolderPath, "anim4.idx"), 0x20000));
-            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim5.mul"), Path.Combine(FileManager.UoFolderPath, "anim5.idx"), 0x20000));
+            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim.mul"), Path.Combine(FileManager.UoFolderPath, "anim.idx"), 0, 6));
+            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim2.mul"), Path.Combine(FileManager.UoFolderPath, "anim2.idx"), 0));
+            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim3.mul"), Path.Combine(FileManager.UoFolderPath, "anim3.idx"), 0));
+            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim4.mul"), Path.Combine(FileManager.UoFolderPath, "anim4.idx"), 0));
+            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim5.mul"), Path.Combine(FileManager.UoFolderPath, "anim5.idx"), 0));
 
             for (int i = 1; i < 5; i++)
             {
                 string filepath = Path.Combine(FileManager.UoFolderPath, string.Format("AnimationFrame{0}.uop", i));
                 if (File.Exists(filepath))
-                    _files.Add(new UOFileUopAnimation(filepath));
+                    _files.Add(new UOFileUopAnimation(filepath, _files.Count + i - 1));
             }
 
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
@@ -272,13 +272,6 @@ namespace ClassicUO.AssetsLoader
                         
                     }
                 }
-
-
-                // initialize other groups to default
-                //for (int j = count - 1; j < 100 - count; j++)
-                //{
-                //    _dataIndex[i].Groups[j].Direction = new AnimationDirection[5];
-                //}
             }
 
             void readAnimDef(in StreamReader reader, in int idx)
@@ -768,6 +761,9 @@ namespace ClassicUO.AssetsLoader
                     }
                 }
             }
+
+
+            UOFileUopAnimation.Hashes.Clear();
         }
 
         public static void GetAnimDirection(ref byte dir, ref bool mirror)
@@ -840,219 +836,219 @@ namespace ClassicUO.AssetsLoader
         }*/
 
 
-        public static AnimationFrame[] GetAnimation(int body, int action, int direction, ref int hue)
-        {
-            BodyDef.Translate(ref body, ref hue);
-            int type = GraphicHelper.Convert(ref body);
+        //public static AnimationFrame[] GetAnimation(int body, int action, int direction, ref int hue)
+        //{
+        //    BodyDef.Translate(ref body, ref hue);
+        //    int type = GraphicHelper.Convert(ref body);
             
-            GetFileToRead(body, action, direction, type, out UOFile file, out int index);
+        //    GetFileToRead(body, action, direction, type, out UOFile file, out int index);
 
-            bool flip = direction > 4;
+        //    bool flip = direction > 4;
 
-            if (file is UOFileUopAnimation uopfile)
-            {
-                uopfile.Seek(uopfile.Entries[index].Offset);
-                return LoadAnimationUop(uopfile, body, direction);
-            }
+        //    if (file is UOFileUopAnimation uopfile)
+        //    {
+        //        uopfile.Seek(uopfile.Entries[index].Offset);
+        //        return LoadAnimationUop(uopfile, body, direction);
+        //    }
             
-            file.Seek(file.Entries[index].Offset);
-            return LoadAnimation(file);
-        }
+        //    file.Seek(file.Entries[index].Offset);
+        //    return LoadAnimation(file);
+        //}
 
-        private static AnimationFrame[] LoadAnimation(UOFile file)
-        {
-            ushort[] palette = new ushort[0x100];
-            for (int i = 0; i < palette.Length; i++)
-                palette[i] = (ushort)(file.ReadUShort() ^ 0x8000);
+        //private static AnimationFrame[] LoadAnimation(UOFile file)
+        //{
+        //    ushort[] palette = new ushort[0x100];
+        //    for (int i = 0; i < palette.Length; i++)
+        //        palette[i] = (ushort)(file.ReadUShort() ^ 0x8000);
 
-            int start = (int)file.Position;
-            int frameCount = file.ReadInt();
+        //    int start = (int)file.Position;
+        //    int frameCount = file.ReadInt();
 
-            int[] lookups = new int[frameCount];
-            for (int i = 0; i < lookups.Length; i++)
-                lookups[i] = start + file.ReadInt();
+        //    int[] lookups = new int[frameCount];
+        //    for (int i = 0; i < lookups.Length; i++)
+        //        lookups[i] = start + file.ReadInt();
 
-            AnimationFrame[] frames = new AnimationFrame[frameCount];
-            for (int i = 0; i < frames.Length; i++)
-            {
-                file.Seek(lookups[i]);
-                frames[i] = new AnimationFrame(palette, file);
-            }
-            return frames;
-        }
+        //    AnimationFrame[] frames = new AnimationFrame[frameCount];
+        //    for (int i = 0; i < frames.Length; i++)
+        //    {
+        //        file.Seek(lookups[i]);
+        //        frames[i] = new AnimationFrame(palette, file);
+        //    }
+        //    return frames;
+        //}
 
-        private struct UopDataFrame
-        {
-            public short ID;
-            public int Offset;
-            public int Start;
+        //private struct UopDataFrame
+        //{
+        //    public short ID;
+        //    public int Offset;
+        //    public int Start;
 
-            public static UopDataFrame Null = new UopDataFrame()
-            {
-                ID = 0,
-                Offset = 0,
-                Start = -1,
-            };
-        }
+        //    public static UopDataFrame Null = new UopDataFrame()
+        //    {
+        //        ID = 0,
+        //        Offset = 0,
+        //        Start = -1,
+        //    };
+        //}
 
-        private static unsafe AnimationFrame[] LoadAnimationUop(UOFileUopAnimation file, int body, int direction)
-        {
-            int start = 0;
+        //private static unsafe AnimationFrame[] LoadAnimationUop(UOFileUopAnimation file, int body, int direction)
+        //{
+        //    int start = 0;
 
-            file.Uncompress(body);
+        //    file.Uncompress(body);
 
-            file.Skip(8);
-            int dcsize = file.ReadInt();
-            int animid = file.ReadInt();
-            file.Skip(16);
-            int framecount = file.ReadInt();
-            int datastart = start + file.ReadInt();
-            file.Seek(datastart);
+        //    file.Skip(8);
+        //    int dcsize = file.ReadInt();
+        //    int animid = file.ReadInt();
+        //    file.Skip(16);
+        //    int framecount = file.ReadInt();
+        //    int datastart = start + file.ReadInt();
+        //    file.Seek(datastart);
 
-            List<UopDataFrame> datas = new List<UopDataFrame>();
-            for (int i = 0; i < framecount; i++)
-            {
-                UopDataFrame data = new UopDataFrame()
-                {
-                    Start = (int)file.Position,
-                };
-                file.Skip(2);
-                data.ID = file.ReadShort();
-                file.Skip(8);
-                data.Offset = file.ReadInt();
+        //    List<UopDataFrame> datas = new List<UopDataFrame>();
+        //    for (int i = 0; i < framecount; i++)
+        //    {
+        //        UopDataFrame data = new UopDataFrame()
+        //        {
+        //            Start = (int)file.Position,
+        //        };
+        //        file.Skip(2);
+        //        data.ID = file.ReadShort();
+        //        file.Skip(8);
+        //        data.Offset = file.ReadInt();
 
-                int vsize = datas.Count;
-                if (vsize + 1 != data.ID)
-                {
-                    while (vsize + 1 != data.ID)
-                    {
-                        datas.Add(UopDataFrame.Null);
-                        vsize++;
-                    }
-                }
-                datas.Add(data);
-            }
+        //        int vsize = datas.Count;
+        //        if (vsize + 1 != data.ID)
+        //        {
+        //            while (vsize + 1 != data.ID)
+        //            {
+        //                datas.Add(UopDataFrame.Null);
+        //                vsize++;
+        //            }
+        //        }
+        //        datas.Add(data);
+        //    }
 
-            int animframecount = datas.Count / 5;
+        //    int animframecount = datas.Count / 5;
 
-            AnimationFrame[] frames = new AnimationFrame[animframecount];
+        //    AnimationFrame[] frames = new AnimationFrame[animframecount];
 
-            int dir = direction & 7;
-            if (dir > 4)
-                dir = dir - (dir - 4) * 2;
+        //    int dir = direction & 7;
+        //    if (dir > 4)
+        //        dir = dir - (dir - 4) * 2;
 
-            int framestartidx = animframecount * dir;
+        //    int framestartidx = animframecount * dir;
 
-            for (int i = 0; i < animframecount; i++)
-            {
-                UopDataFrame data = datas[i + framestartidx];
-                if (data.Start == -1)
-                {
-                    frames[i] = AnimationFrame.Null;
-                    continue;
-                }
+        //    for (int i = 0; i < animframecount; i++)
+        //    {
+        //        UopDataFrame data = datas[i + framestartidx];
+        //        if (data.Start == -1)
+        //        {
+        //            frames[i] = AnimationFrame.Null;
+        //            continue;
+        //        }
 
-                file.Seek(data.Start + data.Offset);
+        //        file.Seek(data.Start + data.Offset);
 
-                ushort[] palette = new ushort[0x100];
-                for (int a = 0; a < palette.Length; a++)
-                    palette[a] = (ushort)(file.ReadUShort() ^ 0x8000);
+        //        ushort[] palette = new ushort[0x100];
+        //        for (int a = 0; a < palette.Length; a++)
+        //            palette[a] = (ushort)(file.ReadUShort() ^ 0x8000);
 
-                frames[i] = new AnimationFrame(palette, file);
-            }
+        //        frames[i] = new AnimationFrame(palette, file);
+        //    }
 
-            return frames;
-        }
+        //    return frames;
+        //}
 
-        private static void GetFileToRead(int body, int action, int direction, int type, out UOFile file, out int index)
-        {
-            switch (type)
-            {
-                default:
-                case 1:
-                    if (body < 200)
-                        index = body * 110;
-                    else if (body < 400)
-                        index = 22000 + ((body - 200) * 65);
-                    else
-                        index = 35000 + ((body - 400) * 175);
+        //private static void GetFileToRead(int body, int action, int direction, int type, out UOFile file, out int index)
+        //{
+        //    switch (type)
+        //    {
+        //        default:
+        //        case 1:
+        //            if (body < 200)
+        //                index = body * 110;
+        //            else if (body < 400)
+        //                index = 22000 + ((body - 200) * 65);
+        //            else
+        //                index = 35000 + ((body - 400) * 175);
 
-                    if (index >= _files[0].Entries.Length || (body < _files[5].Entries.Length && _files[5].Entries[body].IsUOP ))
-                    {
-                        file = _files[5];
-                        index = file.Entries[body].AnimID;
-                    }
-                    else
-                        file = _files[0];                    
-                    break;
-                case 2:
-                    if (body < 200)
-                        index = body * 110;
-                    else
-                        index = 22000 + ((body - 200) * 65);
+        //            if (index >= _files[0].Entries.Length || (body < _files[5].Entries.Length && _files[5].Entries[body].IsUOP ))
+        //            {
+        //                file = _files[5];
+        //                index = file.Entries[body].AnimID;
+        //            }
+        //            else
+        //                file = _files[0];                    
+        //            break;
+        //        case 2:
+        //            if (body < 200)
+        //                index = body * 110;
+        //            else
+        //                index = 22000 + ((body - 200) * 65);
 
-                    if (index >= _files[1].Entries.Length || (body < _files[6].Entries.Length && _files[6].Entries[body].IsUOP))
-                    {
-                        file = _files[6];
-                        index = file.Entries[body].AnimID;
-                    }
-                    else
-                        file = _files[1];
+        //            if (index >= _files[1].Entries.Length || (body < _files[6].Entries.Length && _files[6].Entries[body].IsUOP))
+        //            {
+        //                file = _files[6];
+        //                index = file.Entries[body].AnimID;
+        //            }
+        //            else
+        //                file = _files[1];
 
-                    break;
-                case 3:
-                    if (body < 300)
-                        index = body * 65;
-                    else if (body < 400)
-                        index = 33000 + ((body - 300) * 110);
-                    else
-                        index = 35000 + ((body - 400) * 175);
+        //            break;
+        //        case 3:
+        //            if (body < 300)
+        //                index = body * 65;
+        //            else if (body < 400)
+        //                index = 33000 + ((body - 300) * 110);
+        //            else
+        //                index = 35000 + ((body - 400) * 175);
 
-                    if (index >= _files[2].Entries.Length || (index < _files[7].Entries.Length && _files[7].Entries[body].IsUOP))
-                    {
-                        file = _files[7];
-                        index = file.Entries[body].AnimID;
-                    }
-                    else
-                        file = _files[2];
+        //            if (index >= _files[2].Entries.Length || (index < _files[7].Entries.Length && _files[7].Entries[body].IsUOP))
+        //            {
+        //                file = _files[7];
+        //                index = file.Entries[body].AnimID;
+        //            }
+        //            else
+        //                file = _files[2];
 
-                    break;
-                case 4:
-                    if (body < 200)
-                        index = body * 110;
-                    else if (body < 400)
-                        index = 22000 + ((body - 200) * 65);
-                    else
-                        index = 35000 + ((body - 400) * 175);
+        //            break;
+        //        case 4:
+        //            if (body < 200)
+        //                index = body * 110;
+        //            else if (body < 400)
+        //                index = 22000 + ((body - 200) * 65);
+        //            else
+        //                index = 35000 + ((body - 400) * 175);
 
-                    if (index >= _files[3].Entries.Length || (body < _files[8].Entries.Length && _files[8].Entries[body].IsUOP))
-                    {
-                        file = _files[8];
-                        index = file.Entries[body].AnimID;
-                    }
-                    else
-                        file = _files[3];
+        //            if (index >= _files[3].Entries.Length || (body < _files[8].Entries.Length && _files[8].Entries[body].IsUOP))
+        //            {
+        //                file = _files[8];
+        //                index = file.Entries[body].AnimID;
+        //            }
+        //            else
+        //                file = _files[3];
 
-                    break;
-                case 5:
-                    // NB: maybe wrong .uop
-                    file = _files[4];
-                    if ((body < 200) && (body != 34)) // looks strange, though it works.
-                        index = body * 110;
-                    else if (body < 400)
-                        index = 22000 + ((body - 200) * 65);
-                    else
-                        index = 35000 + ((body - 400) * 175);
-                    break;
-            }
+        //            break;
+        //        case 5:
+        //            // NB: maybe wrong .uop
+        //            file = _files[4];
+        //            if ((body < 200) && (body != 34)) // looks strange, though it works.
+        //                index = body * 110;
+        //            else if (body < 400)
+        //                index = 22000 + ((body - 200) * 65);
+        //            else
+        //                index = 35000 + ((body - 400) * 175);
+        //            break;
+        //    }
 
-            index += action * 5;
+        //    index += action * 5;
 
-            if (direction <= 4)
-                index += direction;
-            else
-                index += direction - (direction - 4) * 2;
-        }
+        //    if (direction <= 4)
+        //        index += direction;
+        //    else
+        //        index += direction - (direction - 4) * 2;
+        //}
 
 
 
@@ -1061,83 +1057,78 @@ namespace ClassicUO.AssetsLoader
     }
 
 
-    public struct UOPAnimationData
-    {
-        public string Path;
-        public uint Offset;
-        public uint CompressedLength;
-        public uint DecompressedLength;
-        public UOFileUopAnimation File;
-    }
 
 
-    public class AnimationFrame
-    {
-        public static readonly AnimationFrame Null = new AnimationFrame();
-        public static readonly AnimationFrame[] Empty = { Null };
 
-        const int DOUBLE_XOR = (0x200 << 22) | (0x200 << 12);
-        const int END_OF_FRAME = 0x7FFF7FFF;
+    //public class AnimationFrame
+    //{
+    //    public static readonly AnimationFrame Null = new AnimationFrame();
+    //    public static readonly AnimationFrame[] Empty = { Null };
 
-        private AnimationFrame()
-        {
-            CenterX = 0;
-            CenterY = 0;
-        }
+    //    const int DOUBLE_XOR = (0x200 << 22) | (0x200 << 12);
+    //    const int END_OF_FRAME = 0x7FFF7FFF;
 
-        public unsafe AnimationFrame(ushort[] palette, UOFile file)
-        {
-            int centerX = file.ReadShort();
-            int centerY = file.ReadShort();
-            int width = file.ReadUShort();
-            int height = file.ReadUShort();
+    //    private AnimationFrame()
+    //    {
+    //        CenterX = 0;
+    //        CenterY = 0;
+    //    }
 
-            if (width == 0 || height == 0)
-                return;
+    //    public unsafe AnimationFrame(ushort[] palette, UOFile file)
+    //    {
+    //        int centerX = file.ReadShort();
+    //        int centerY = file.ReadShort();
+    //        int width = file.ReadUShort();
+    //        int height = file.ReadUShort();
 
-            // sittings ?
+    //        if (width == 0 || height == 0)
+    //            return;
 
-            ushort[] data = new ushort[width * height];
+    //        // sittings ?
 
-            fixed (ushort* pdata = data)
-            {
-                ushort* dataRef = pdata;
+    //        ushort[] data = new ushort[width * height];
 
-                int header;
+    //        fixed (ushort* pdata = data)
+    //        {
+    //            ushort* dataRef = pdata;
 
-                while ((header = file.ReadInt()) != END_OF_FRAME)
-                {
-                    header ^= DOUBLE_XOR;
+    //            int header;
 
-                    int x = ((header >> 22) & 0x3FF) + centerX - 0x200;
-                    int y = ((header >> 12) & 0x3FF) + centerY + height - 0x200;
+    //            while ((header = file.ReadInt()) != END_OF_FRAME)
+    //            {
+    //                header ^= DOUBLE_XOR;
 
-                    ushort* cur = dataRef + y * width + x;
-                    ushort* end = cur + (header & 0xFFF);
-                    int filecount = 0;
-                    byte[] filedata = file.ReadArray<byte>(header & 0xFFF);
-                    while (cur < end)
-                        *cur++ = palette[filedata[filecount++]];
-                }
+    //                int x = ((header >> 22) & 0x3FF) + centerX - 0x200;
+    //                int y = ((header >> 12) & 0x3FF) + centerY + height - 0x200;
 
-            }
+    //                ushort* cur = dataRef + y * width + x;
+    //                ushort* end = cur + (header & 0xFFF);
+    //                int filecount = 0;
+    //                byte[] filedata = file.ReadArray<byte>(header & 0xFFF);
+    //                while (cur < end)
+    //                    *cur++ = palette[filedata[filecount++]];
+    //            }
 
-            CenterX = centerX;
-            CenterY = centerY;
-            Data = data;
-        }
+    //        }
 
-        public int CenterX { get; }
-        public int CenterY { get; }
-        public ushort[] Data { get; }
-    }
+    //        CenterX = centerX;
+    //        CenterY = centerY;
+    //        Data = data;
+    //    }
+
+    //    public int CenterX { get; }
+    //    public int CenterY { get; }
+    //    public ushort[] Data { get; }
+    //}
 
     public class UOFileUopAnimation : UOFile
     {
         private const uint UOP_MAGIC_NUMBER = 0x50594D;
+        private int _indexFile;
 
-        public UOFileUopAnimation(string path) : base(path)
+        public UOFileUopAnimation(string path, int index) : base(path)
         {
+            _indexFile = index;
             Load();
         }
 
@@ -1210,8 +1201,8 @@ namespace ClassicUO.AssetsLoader
                         Offset = (uint)(offset + headerLength),
                         CompressedLength = (uint)compressedLength,
                         DecompressedLength = (uint)decompressedLength,
-                        File = this,
-                        Path = System.IO.Path.Combine(this.Path, this.FileName)
+                        FileIndex = _indexFile,
+                        //Path = System.IO.Path.Combine(this.Path, this.FileName)
                     };
 
                     // UOFileIndex3D data = new UOFileIndex3D(offset + headerLength, compressedLength, 0, decompressedLength);
@@ -1613,11 +1604,11 @@ namespace ClassicUO.AssetsLoader
         public uint Size;
         public bool IsUOP;
         public bool IsVerdata;
+    }
 
-        public struct AnimationFrame
-        {
-            public short CenterX, CenterY;
-        }
+    public struct AnimationFrame
+    {
+        public short CenterX, CenterY;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -1638,5 +1629,15 @@ namespace ClassicUO.AssetsLoader
         public ushort Graphic;
         public ushort Gump;
         public ushort Color;
+    }
+
+    public struct UOPAnimationData
+    {
+        //public string Path;
+        public uint Offset;
+        public uint CompressedLength;
+        public uint DecompressedLength;
+
+        public int FileIndex;
     }
 }
