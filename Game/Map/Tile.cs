@@ -18,7 +18,7 @@ namespace ClassicUO.Game.Map
         public Position Location { get; set; }
         public IReadOnlyList<WorldObject> ObjectsOnTiles => _objectsOnTile;
 
-
+        public Microsoft.Xna.Framework.Graphics.Texture2D Texture { get; set; }
 
         public void AddWorldObject(in WorldObject obj)
         {

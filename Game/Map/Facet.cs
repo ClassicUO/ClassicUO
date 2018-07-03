@@ -16,7 +16,7 @@ namespace ClassicUO.Game.Map
         }
 
         public int Index { get; }
-
+        public FacetChunk[] Chunks => _chunks;
 
         public void LoadChunks(in Position center, in int distance)
             => LoadChunks(center.X, center.Y, distance);

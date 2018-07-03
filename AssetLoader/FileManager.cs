@@ -33,7 +33,6 @@ namespace ClassicUO.AssetsLoader
             Map.Load();
             Art.Load();
             BodyDef.Load();
-            GraphicHelper.Load();
             Cliloc.Load();
             Animations.Load();
             Gumps.Load();

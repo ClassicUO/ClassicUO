@@ -60,8 +60,10 @@ namespace ClassicUO
 
             var data = AssetsLoader.Art.ReadStaticArt(3850, out short w, out short h);
 
-            _texture = new Texture2D(GraphicsDevice, 1, 1);
-            _texture.SetData(new Color[] { Color.Wheat } );
+            _texture = new Texture2D(GraphicsDevice, w, h, false, SurfaceFormat.Bgra5551);
+            _texture.SetData(data);
+
+
 
             // END TEST
 
@@ -94,7 +96,7 @@ namespace ClassicUO
                     _currentX = _x;
                 _currentX++;
 
-                _facet.LoadChunks(_currentX, _y, 5 );
+                _facet.LoadChunks(_x, _y, 5 );
 
                 //Log.Message(LogTypes.Trace, _stopwatch.ElapsedMilliseconds.ToString());
                 _stopwatch.Restart();
@@ -110,9 +112,6 @@ namespace ClassicUO
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            _spriteBatch.Begin();
-            _spriteBatch.Draw(_texture, new Rectangle(100, 100, 100, 100), Color.Red);
-            _spriteBatch.End();
 
             base.Draw(gameTime);
         }
