@@ -36,6 +36,8 @@ namespace ClassicUO.AssetsLoader
             _landData = new LandTiles[512 * 32];
             _staticData = new StaticTiles[staticscount * 32];
 
+            byte[] bufferString = new byte[20];
+
             for (int i = 0; i < 512; i++)
             {
                 tiledata.Skip(4);
@@ -44,7 +46,9 @@ namespace ClassicUO.AssetsLoader
                     int idx = (i * 32) + j;
                     _landData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     _landData[idx].TexID = tiledata.ReadUShort();
-                    _landData[idx].Name = Encoding.UTF8.GetString(tiledata.ReadArray<byte>(20));
+
+                    tiledata.Fill(bufferString, 20);
+                    _landData[idx].Name = Encoding.UTF8.GetString(bufferString).TrimEnd('\0');
                 }
             }
 
@@ -62,7 +66,9 @@ namespace ClassicUO.AssetsLoader
                     _staticData[idx].Hue = tiledata.ReadUShort();
                     _staticData[idx].LightIndex = tiledata.ReadUShort();
                     _staticData[idx].Height = tiledata.ReadByte();
-                    _staticData[idx].Name = Encoding.UTF8.GetString(tiledata.ReadArray<byte>(20));
+
+                    tiledata.Fill(bufferString, 20);
+                    _staticData[idx].Name = Encoding.UTF8.GetString(bufferString).TrimEnd('\0');
                 }
             }
         }

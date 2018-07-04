@@ -111,6 +111,15 @@ namespace ClassicUO.AssetsLoader
         internal long ReadLong() { var r = _accessor.ReadInt64(_position); _position += 8; return r; }
         internal ulong ReadULong() { var r = _accessor.ReadUInt64(_position); _position += 8; return r; }
         */
+
+        internal void Fill(in byte[] buffer, in int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                buffer[i] = ReadByte();
+            }
+        }
+
         internal T[] ReadArray<T>(in int count) where T : struct
         {
             T[] t = ReadArray<T>(_position, count);

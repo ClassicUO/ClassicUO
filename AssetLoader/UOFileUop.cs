@@ -79,7 +79,7 @@ namespace ClassicUO.AssetsLoader
                     {
                         if (idx < 0 || idx > Entries.Length)
                             throw new IndexOutOfRangeException("hashes dictionary and files collection have different count of entries!");
-                        Entries[idx] = new UOFileIndex3D(offset + headerLength, length, 0, decompressedLength);
+                        Entries[idx] = new UOFileIndex3D(offset + headerLength, length);
 
                         // extra?
                         if (_hasExtra)
@@ -105,12 +105,7 @@ namespace ClassicUO.AssetsLoader
             } while (nextBlock != 0);
         }
 
-        internal void Uncompress()
-        {
-
-        }
-
-        public long GetOffsetFromUOP(in long offset)
+        internal long GetOffsetFromUOP(in long offset)
         {
             long pos = 0;
 

@@ -123,6 +123,8 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
+            Dictionary<ulong, UOPAnimationData> hashes = new Dictionary<ulong, UOPAnimationData>();
+
             _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim.mul"), Path.Combine(FileManager.UoFolderPath, "anim.idx"), 0, 6));
             _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim2.mul"), Path.Combine(FileManager.UoFolderPath, "anim2.idx"), 0));
             _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim3.mul"), Path.Combine(FileManager.UoFolderPath, "anim3.idx"), 0));
@@ -133,8 +135,13 @@ namespace ClassicUO.AssetsLoader
             {
                 string filepath = Path.Combine(FileManager.UoFolderPath, string.Format("AnimationFrame{0}.uop", i));
                 if (File.Exists(filepath))
-                    _files.Add(new UOFileUopAnimation(filepath, _files.Count + i - 1));
+                {
+                    var uopfile = new UOFileUopAnimation(filepath, _files.Count + i - 1);
+                    uopfile.LoadEx(ref hashes);
+                    _files.Add(uopfile);
+                }
             }
+
 
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
             {
@@ -743,7 +750,7 @@ namespace ClassicUO.AssetsLoader
                 {
                     string hashstring = string.Format("build/animationlegacyframe/{0:D6}/{1:D2}.bin", animID, grpID);
                     ulong hash = UOFileUop.CreateHash(hashstring);
-                    if (UOFileUopAnimation.Hashes.TryGetValue(hash, out var data))
+                    if (hashes.TryGetValue(hash, out var data))
                     {
                         if (grpID > maxGroup)
                             maxGroup = grpID;
@@ -762,8 +769,6 @@ namespace ClassicUO.AssetsLoader
                 }
             }
 
-
-            UOFileUopAnimation.Hashes.Clear();
         }
 
         public static void GetAnimDirection(ref byte dir, ref bool mirror)
@@ -1129,40 +1134,40 @@ namespace ClassicUO.AssetsLoader
         public UOFileUopAnimation(string path, int index) : base(path)
         {
             _indexFile = index;
-            Load();
+            //Load();
         }
 
         public unsafe void Uncompress(int index)
         {
             /*var e = Entries[index];
             Seek(e.Offset);*/
-            (int length, int extra, bool patcher) = SeekByEntryIndex(index);
-            byte[] buffer = ReadArray<byte>(length);
-            int clen = length;
-            int dlen = Entries[index].DecompressedLength;
+            //(int length, int extra, bool patcher) = SeekByEntryIndex(index);
+            //byte[] buffer = ReadArray<byte>(length);
+            //int clen = length;
+            //int dlen = Entries[index].DecompressedLength;
 
-            byte[] decbuffer = new byte[dlen];
-            using (MemoryStream ms = new MemoryStream(buffer))
-            {
-                ms.Seek(2, SeekOrigin.Begin);
-                using (DeflateStream stream = new DeflateStream(ms, CompressionMode.Decompress))
-                {
-                    for (int i = 0; i < dlen; i++)
-                        decbuffer[i] = (byte)stream.ReadByte();
-                }
-            }
+            //byte[] decbuffer = new byte[dlen];
+            //using (MemoryStream ms = new MemoryStream(buffer))
+            //{
+            //    ms.Seek(2, SeekOrigin.Begin);
+            //    using (DeflateStream stream = new DeflateStream(ms, CompressionMode.Decompress))
+            //    {
+            //        for (int i = 0; i < dlen; i++)
+            //            decbuffer[i] = (byte)stream.ReadByte();
+            //    }
+            //}
 
-            fixed (byte* ptr = decbuffer)
-            {
-                _ptr = ptr;
-                _position = 0;
-                _length = decbuffer.Length;
-            }
+            //fixed (byte* ptr = decbuffer)
+            //{
+            //    _ptr = ptr;
+            //    _position = 0;
+            //    _length = decbuffer.Length;
+            //}
         }
 
-        public static Dictionary<ulong, UOPAnimationData> Hashes { get; } = new Dictionary<ulong, UOPAnimationData>();
+        //public static Dictionary<ulong, UOPAnimationData> Hashes { get; } = new Dictionary<ulong, UOPAnimationData>();
 
-        protected override void Load()
+        internal void LoadEx(ref Dictionary<ulong, UOPAnimationData> hashes)
         {
             base.Load();
 
@@ -1175,9 +1180,6 @@ namespace ClassicUO.AssetsLoader
             Skip(4);
 
             Seek(nextblock);
-
-           // Dictionary<ulong, UOPAnimationData> hashes = new Dictionary<ulong, UOPAnimationData>();      
-            //Entries = new UOFileIndex3D[4096];
 
             do
             {
@@ -1202,35 +1204,58 @@ namespace ClassicUO.AssetsLoader
                         CompressedLength = (uint)compressedLength,
                         DecompressedLength = (uint)decompressedLength,
                         FileIndex = _indexFile,
-                        //Path = System.IO.Path.Combine(this.Path, this.FileName)
                     };
 
-                    // UOFileIndex3D data = new UOFileIndex3D(offset + headerLength, compressedLength, 0, decompressedLength);
-
-
-                    Hashes.Add(hash, data);
+                    hashes.Add(hash, data);
                 }
                 Seek(nextblock);
             } while (nextblock != 0);
-
-
-            //int idx = 0;
-            //for (int animID = 0; animID < 2048; animID++)
-            //{
-            //    for (int grpID = 0; grpID < 100; grpID++)
-            //    {
-            //        string hashstring = string.Format("build/animationlegacyframe/{0:D6}/{1:D2}.bin", animID, grpID);
-            //        ulong hash = UOFileUop.CreateHash(hashstring);
-
-            //        if (Hashes.TryGetValue(hash, out var data))
-            //        {
-            //            /*if (data.AnimID <= 0)
-            //                data.AnimID = idx++;
-            //            Entries[animID + grpID] = data;*/
-            //        }
-            //    }
-            //}
         }
+
+        //protected override void Load()
+        //{
+        //    base.Load();
+
+        //    Seek(0);
+        //    if (ReadInt() != UOP_MAGIC_NUMBER)
+        //        throw new ArgumentException("Bad uop file");
+
+        //    Skip(8);
+        //    long nextblock = ReadLong();
+        //    Skip(4);
+
+        //    Seek(nextblock);
+
+        //    do
+        //    {
+        //        int fileCount = ReadInt();
+        //        nextblock = ReadLong();
+
+        //        for (int i = 0; i < fileCount; i++)
+        //        {
+        //            long offset = ReadLong();
+        //            int headerLength = ReadInt();
+        //            int compressedLength = ReadInt();
+        //            int decompressedLength = ReadInt();
+        //            ulong hash = ReadULong();
+        //            Skip(6);
+
+        //            if (offset == 0)
+        //                continue;
+
+        //            UOPAnimationData data = new UOPAnimationData()
+        //            {
+        //                Offset = (uint)(offset + headerLength),
+        //                CompressedLength = (uint)compressedLength,
+        //                DecompressedLength = (uint)decompressedLength,
+        //                FileIndex = _indexFile,
+        //            };
+
+        //            Hashes.Add(hash, data);
+        //        }
+        //        Seek(nextblock);
+        //    } while (nextblock != 0);
+        //}
     }
 
     public static class GraphicHelper
