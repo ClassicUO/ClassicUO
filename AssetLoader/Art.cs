@@ -30,8 +30,6 @@ namespace ClassicUO.AssetsLoader
             }
         }
 
-       // private static readonly Dictionary<ushort, ushort[]> _pixels = new Dictionary<ushort, ushort[]>();
-
         public static unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height)
         {
             graphic &= FileManager.GraphicMask;
@@ -46,22 +44,12 @@ namespace ClassicUO.AssetsLoader
             if (width <= 0 || height <= 0)
                 return null;
 
-            /* ushort[] pixels ;
-
-             if (_pixels.TryGetValue(graphic, out pixels))
-                 return pixels;*/
-
             ushort[] pixels = new ushort[width * height];           
 
             ushort* ptr = (ushort*)_file.PositionAddress;
-            //long datastart = _file.Position;
 
-            //ushort[] lineoffsets = _file.ReadArray<ushort>(height*2);
             ushort* lineoffsets = ptr;
             byte* datastart = (byte*)(ptr) + (height * 2);
-            /*+ height * 2*/
-
-            //datastart += (height * 2);
 
             int x = 0;
             int y = 0;
@@ -69,17 +57,11 @@ namespace ClassicUO.AssetsLoader
             ushort run = 0;
 
             ptr = (ushort*)(datastart + (lineoffsets[0] * 2));
-           // _file.Seek(datastart + (lineoffsets[0] * 2));
 
             while (y < height)
             {
                  xoffs = *ptr++;
-                 //ptr++;
                  run = *ptr++;
-                 //ptr++;
-
-                //xoffs = _file.ReadUShort();
-               // run = _file.ReadUShort();
 
                 if (xoffs + run >= 2048)
                 {
@@ -93,11 +75,8 @@ namespace ClassicUO.AssetsLoader
                     for (int j = 0; j < run; j++)
                     {
                         ushort val = *ptr++;
-                       // ushort val = _file.ReadUShort();
                         if (val > 0)
-                        {
                             val = (ushort)(0x8000 | val);
-                        }
                         pixels[pos++] = val;
                     }
                     x += run;
@@ -106,7 +85,6 @@ namespace ClassicUO.AssetsLoader
                 {
                     x = 0;
                     y++;
-                    //_file.Seek(datastart + (lineoffsets[y] * 2));
                     ptr = (ushort*)(datastart + (lineoffsets[y] * 2));
                 }
             }
@@ -127,22 +105,16 @@ namespace ClassicUO.AssetsLoader
                 }
             }
 
-          //  _pixels[graphic] = pixels;
-
             return pixels;
         }
 
-        private static ushort[] _landArray = new ushort[44 * 44];
+        private static readonly ushort[] _landArray = new ushort[44 * 44];
 
         public static ushort[] ReadLandArt(ushort graphic)
         {
             graphic &= FileManager.GraphicMask;
 
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
-
-            //ushort[] pixels = new ushort[44 * 44];
-
-            Array.Clear(_landArray, 0, _landArray.Length);
 
             for (int i = 0; i < 22; i++)
             {

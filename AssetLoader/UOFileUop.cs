@@ -30,7 +30,6 @@ namespace ClassicUO.AssetsLoader
                 throw new ArgumentException("Bad uop file");
             int version = ReadInt();
             Skip(4);
-            //Skip(8);
             long nextBlock = ReadLong();
             Skip(4);
 
@@ -41,7 +40,7 @@ namespace ClassicUO.AssetsLoader
             Entries = new UOFileIndex3D[_count];
             Dictionary<ulong, int> hashes = new Dictionary<ulong, int>();
 
-            string pattern = System.IO.Path.GetFileNameWithoutExtension(FileName).ToLowerInvariant();
+            string pattern = System.IO.Path.GetFileNameWithoutExtension(Path).ToLowerInvariant();
 
             for (int i = 0; i < _count; i++)
             {

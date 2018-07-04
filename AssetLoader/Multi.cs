@@ -32,17 +32,8 @@ namespace ClassicUO.AssetsLoader
             _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? Marshal.SizeOf<MultiBlockNew>() : Marshal.SizeOf<MultiBlock>();
         }
 
-        public static unsafe MultiBlock GetMulti(int index)
-        {
-            //_file.Accessor.Read<MultiBlock>(_file.Position + (index * _itemOffset), out var m);
-
-            //MultiBlock* pbm = (MultiBlock*)(_file.StartAddress + _file.Position + (index * _itemOffset));
-            //return pbm[0];
-            //return _file.ReadStruct<MultiBlock>(_file.Position + (index * _itemOffset));
-
-            return *((MultiBlock*)(_file.PositionAddress + (index * _itemOffset)));
-
-        }
+        public static unsafe MultiBlock GetMulti(int index) => *((MultiBlock*)(_file.PositionAddress + (index * _itemOffset)));
+        
 
         public static int GetCount(int graphic)
         {

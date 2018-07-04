@@ -20,7 +20,6 @@ namespace ClassicUO.AssetsLoader
             new int[2] { 1280, 4096 },
         };
 
-        //private static readonly int[][] _mapsSize = new int[MAPS_COUNT][];
         private static readonly int[][] _mapsBlockSize = new int[MAPS_COUNT][];
         private static readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];
         private static readonly UOFileMul[] _filesStatics = new UOFileMul[MAPS_COUNT];
@@ -131,16 +130,11 @@ namespace ClassicUO.AssetsLoader
 
                     ulong address = mapddress + uopoffset + (ulong)(blocknum * mapblocksize);
 
-                    // MapBlock mapblock = Marshal.PtrToStructure<MapBlock>((IntPtr)address);
-                    //MapBlock* mapblock = (MapBlock*)((IntPtr)address);
-                    //file.Accessor.Read<MapBlock>((long)address, out var mapblock);
-
                     if (address < endmapaddress)
                         realmapaddress = address;
 
-
                     ulong stidxaddress = (staticidxaddress + (ulong)(block * staticidxblocksize));
-                    StaidxBlock bb = fileidx.ReadStruct<StaidxBlock>(block * staticidxblocksize); //Marshal.PtrToStructure<StaidxBlock>((IntPtr)stidxaddress);
+                    StaidxBlock bb = fileidx.ReadStruct<StaidxBlock>(block * staticidxblocksize);
 
                     if (stidxaddress < endstaticidxaddress
                         && bb.Size > 0 && bb.Position != 0xFFFFFFFF)
@@ -149,7 +143,6 @@ namespace ClassicUO.AssetsLoader
 
                         if (address1 < endstaticaddress)
                         {
-                            //StaticsBlock sss = Marshal.PtrToStructure<StaticsBlock>((IntPtr)address1);
                             StaticsBlock sss = staticfile.ReadStruct<StaticsBlock>(bb.Position);
                             realstaticaddress = address1;
                             realstaticcount = (uint)(bb.Size / staticblocksize);
@@ -158,7 +151,6 @@ namespace ClassicUO.AssetsLoader
                                 realstaticcount = 1024;
                         }
                     }
-
 
                     _blockData[i][block].OriginalMapAddress = realmapaddress;
                     _blockData[i][block].OriginalStaticAddress = realstaticaddress;
@@ -181,6 +173,7 @@ namespace ClassicUO.AssetsLoader
         public sbyte Z { get; }
         public ushort Hue { get; }
     }
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct StaidxBlock
     {

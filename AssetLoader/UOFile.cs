@@ -19,11 +19,9 @@ namespace ClassicUO.AssetsLoader
 
         public UOFile(in string filepath)
         {
-            FileName = filepath;
-            Path = System.IO.Path.GetDirectoryName(FileName);
+            Path = filepath;
         }
 
-        public string FileName { get; }
         public string Path { get; }
         public long Length => _length;
         public UOFileIndex3D[] Entries { get; protected set; }
@@ -33,15 +31,15 @@ namespace ClassicUO.AssetsLoader
 
         protected virtual void Load()
         {
-            FileInfo fileInfo = new FileInfo(FileName);
+            FileInfo fileInfo = new FileInfo(Path);
             if (!fileInfo.Exists)
-                throw new UOFileException(FileName + " not exists.");
+                throw new UOFileException(Path + " not exists.");
             long size = fileInfo.Length;
             if (size > 0)
             {
                 var file = MemoryMappedFile.CreateFromFile(fileInfo.FullName, FileMode.Open);
                 if (file == null)
-                    throw new UOFileException("Something goes wrong with file mapping creation '" + FileName + "'");
+                    throw new UOFileException("Something goes wrong with file mapping creation '" + Path + "'");
                 //var stream = file.CreateViewStream(0, size, MemoryMappedFileAccess.Read);
                 //_reader = new BinaryReader(stream);
                 _accessor = file.CreateViewAccessor(0, size, MemoryMappedFileAccess.Read);
@@ -61,7 +59,7 @@ namespace ClassicUO.AssetsLoader
 
             }
             else
-                throw new UOFileException($"{FileName} size must has > 0");
+                throw new UOFileException($"{Path} size must has > 0");
         }
 
         /*internal byte ReadByte() => _reader.ReadByte();

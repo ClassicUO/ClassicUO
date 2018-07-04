@@ -65,14 +65,10 @@ namespace ClassicUO.AssetsLoader
         }        
     }
 
-   
-
-
     public struct SkillEntry
     {
         public int Index;
         public string Name;
         public bool HasButton;
     }
-
 }

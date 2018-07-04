@@ -36,7 +36,6 @@ namespace ClassicUO.AssetsLoader
                 {
                     ushort val = _file.ReadUShort();
                     val = (ushort)((val << 10) | (val << 5) | val);
-                    //p++;
                     pixels[pos + j] = (ushort)((val > 0 ? 0x8000 : 0) | val);
                 }
             }

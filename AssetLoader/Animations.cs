@@ -7,106 +7,6 @@ using System.Text.RegularExpressions;
 
 namespace ClassicUO.AssetsLoader
 {
-    public enum ANIMATION_GROUPS_TYPE
-    {
-        MONSTER = 0,
-        SEA_MONSTER,
-        ANIMAL,
-        HUMAN,
-        EQUIPMENT,
-        UNKNOWN
-    }
-
-    public enum HIGHT_ANIMATION_GROUP
-    {
-        HAG_WALK = 0,
-        HAG_STAND,
-        HAG_DIE_1,
-        HAG_DIE_2,
-        HAG_ATTACK_1,
-        HAG_ATTACK_2,
-        HAG_ATTACK_3,
-        HAG_MISC_1,
-        HAG_MISC_2,
-        HAG_MISC_3,
-        HAG_STUMBLE,
-        HAG_SLAP_GROUND,
-        HAG_CAST,
-        HAG_GET_HIT_1,
-        HAG_MISC_4,
-        HAG_GET_HIT_2,
-        HAG_GET_HIT_3,
-        HAG_FIDGET_1,
-        HAG_FIDGET_2,
-        HAG_FLY,
-        HAG_LAND,
-        HAG_DIE_IN_FLIGHT,
-
-        HAG_ANIMATION_COUNT
-    }
-
-    public enum PEOPLE_ANIMATION_GROUP
-    {
-        PAG_WALK_UNARMED = 0,
-        PAG_WALK_ARMED,
-        PAG_RUN_UNARMED,
-        PAG_RUN_ARMED,
-        PAG_STAND,
-        PAG_FIDGET_1,
-        PAG_FIDGET_2,
-        PAG_STAND_ONEHANDED_ATTACK,
-        PAG_STAND_TWOHANDED_ATTACK,
-        PAG_ATTACK_ONEHANDED,
-        PAG_ATTACK_UNARMED_1,
-        PAG_ATTACK_UNARMED_2,
-        PAG_ATTACK_TWOHANDED_DOWN,
-        PAG_ATTACK_TWOHANDED_WIDE,
-        PAG_ATTACK_TWOHANDED_JAB,
-        PAG_WALK_WARMODE,
-        PAG_CAST_DIRECTED,
-        PAG_CAST_AREA,
-        PAG_ATTACK_BOW,
-        PAG_ATTACK_CROSSBOW,
-        PAG_GET_HIT,
-        PAG_DIE_1,
-        PAG_DIE_2,
-        PAG_ONMOUNT_RIDE_SLOW,
-        PAG_ONMOUNT_RIDE_FAST,
-        PAG_ONMOUNT_STAND,
-        PAG_ONMOUNT_ATTACK,
-        PAG_ONMOUNT_ATTACK_BOW,
-        PAG_ONMOUNT_ATTACK_CROSSBOW,
-        PAG_ONMOUNT_SLAP_HORSE,
-        PAG_TURN,
-        PAG_ATTACK_UNARMED_AND_WALK,
-        PAG_EMOTE_BOW,
-        PAG_EMOTE_SALUTE,
-        PAG_FIDGET_3,
-
-        PAG_ANIMATION_COUNT
-    }
-
-    public enum LOW_ANIMATION_GROUP
-    {
-        LAG_WALK = 0,
-        LAG_RUN,
-        LAG_STAND,
-        LAG_EAT,
-        LAG_UNKNOWN,
-        LAG_ATTACK_1,
-        LAG_ATTACK_2,
-        LAG_ATTACK_3,
-        LAG_DIE_1,
-        LAG_FIDGET_1,
-        LAG_FIDGET_2,
-        LAG_LIE_DOWN,
-        LAG_DIE_2,
-
-        LAG_ANIMATION_COUNT
-    }
-
-
-
     public static class Animations
     {
         private static List<UOFile> _files = new List<UOFile>();
@@ -1062,7 +962,103 @@ namespace ClassicUO.AssetsLoader
     }
 
 
+    public enum ANIMATION_GROUPS_TYPE
+    {
+        MONSTER = 0,
+        SEA_MONSTER,
+        ANIMAL,
+        HUMAN,
+        EQUIPMENT,
+        UNKNOWN
+    }
 
+    public enum HIGHT_ANIMATION_GROUP
+    {
+        HAG_WALK = 0,
+        HAG_STAND,
+        HAG_DIE_1,
+        HAG_DIE_2,
+        HAG_ATTACK_1,
+        HAG_ATTACK_2,
+        HAG_ATTACK_3,
+        HAG_MISC_1,
+        HAG_MISC_2,
+        HAG_MISC_3,
+        HAG_STUMBLE,
+        HAG_SLAP_GROUND,
+        HAG_CAST,
+        HAG_GET_HIT_1,
+        HAG_MISC_4,
+        HAG_GET_HIT_2,
+        HAG_GET_HIT_3,
+        HAG_FIDGET_1,
+        HAG_FIDGET_2,
+        HAG_FLY,
+        HAG_LAND,
+        HAG_DIE_IN_FLIGHT,
+
+        HAG_ANIMATION_COUNT
+    }
+
+    public enum PEOPLE_ANIMATION_GROUP
+    {
+        PAG_WALK_UNARMED = 0,
+        PAG_WALK_ARMED,
+        PAG_RUN_UNARMED,
+        PAG_RUN_ARMED,
+        PAG_STAND,
+        PAG_FIDGET_1,
+        PAG_FIDGET_2,
+        PAG_STAND_ONEHANDED_ATTACK,
+        PAG_STAND_TWOHANDED_ATTACK,
+        PAG_ATTACK_ONEHANDED,
+        PAG_ATTACK_UNARMED_1,
+        PAG_ATTACK_UNARMED_2,
+        PAG_ATTACK_TWOHANDED_DOWN,
+        PAG_ATTACK_TWOHANDED_WIDE,
+        PAG_ATTACK_TWOHANDED_JAB,
+        PAG_WALK_WARMODE,
+        PAG_CAST_DIRECTED,
+        PAG_CAST_AREA,
+        PAG_ATTACK_BOW,
+        PAG_ATTACK_CROSSBOW,
+        PAG_GET_HIT,
+        PAG_DIE_1,
+        PAG_DIE_2,
+        PAG_ONMOUNT_RIDE_SLOW,
+        PAG_ONMOUNT_RIDE_FAST,
+        PAG_ONMOUNT_STAND,
+        PAG_ONMOUNT_ATTACK,
+        PAG_ONMOUNT_ATTACK_BOW,
+        PAG_ONMOUNT_ATTACK_CROSSBOW,
+        PAG_ONMOUNT_SLAP_HORSE,
+        PAG_TURN,
+        PAG_ATTACK_UNARMED_AND_WALK,
+        PAG_EMOTE_BOW,
+        PAG_EMOTE_SALUTE,
+        PAG_FIDGET_3,
+
+        PAG_ANIMATION_COUNT
+    }
+
+    public enum LOW_ANIMATION_GROUP
+    {
+        LAG_WALK = 0,
+        LAG_RUN,
+        LAG_STAND,
+        LAG_EAT,
+        LAG_UNKNOWN,
+        LAG_ATTACK_1,
+        LAG_ATTACK_2,
+        LAG_ATTACK_3,
+        LAG_DIE_1,
+        LAG_FIDGET_1,
+        LAG_FIDGET_2,
+        LAG_LIE_DOWN,
+        LAG_DIE_2,
+
+        LAG_ANIMATION_COUNT
+    }
 
 
     //public class AnimationFrame
@@ -1134,7 +1130,6 @@ namespace ClassicUO.AssetsLoader
         public UOFileUopAnimation(string path, int index) : base(path)
         {
             _indexFile = index;
-            //Load();
         }
 
         public unsafe void Uncompress(int index)
@@ -1164,8 +1159,6 @@ namespace ClassicUO.AssetsLoader
             //    _length = decbuffer.Length;
             //}
         }
-
-        //public static Dictionary<ulong, UOPAnimationData> Hashes { get; } = new Dictionary<ulong, UOPAnimationData>();
 
         internal void LoadEx(ref Dictionary<ulong, UOPAnimationData> hashes)
         {
@@ -1658,11 +1651,9 @@ namespace ClassicUO.AssetsLoader
 
     public struct UOPAnimationData
     {
-        //public string Path;
         public uint Offset;
         public uint CompressedLength;
         public uint DecompressedLength;
-
         public int FileIndex;
     }
 }

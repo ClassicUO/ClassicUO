@@ -53,12 +53,6 @@ namespace ClassicUO.AssetsLoader
             }
         }
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private struct GumpBlock
-        {
-            public ushort Value;
-            public ushort Run;
-        }
 
         public static unsafe ushort[] GetGump(int index, out int width, out int height)
         {
@@ -77,9 +71,6 @@ namespace ClassicUO.AssetsLoader
                 return null;
 
             ushort[] pixels = new ushort[width * height];
-
-            //int[] lookuplist = _file.ReadArray<int>(_file.Position, height);
-
             int* lookuplist = (int*)_file.PositionAddress;
 
             for (int y = 0; y < height; y++)
@@ -89,8 +80,6 @@ namespace ClassicUO.AssetsLoader
                     gsize = lookuplist[y + 1] - lookuplist[y];
                 else
                     gsize = (length / 4) - lookuplist[y];
-
-                //GumpBlock[] gmul =  _file.ReadArray<GumpBlock>(_file.Position + lookuplist[y] * 4, gsize);
 
                 GumpBlock* gmul = (GumpBlock*)(_file.PositionAddress + lookuplist[y] * 4);
 
@@ -108,5 +97,13 @@ namespace ClassicUO.AssetsLoader
          
             return pixels;
         }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct GumpBlock
+        {
+            public ushort Value;
+            public ushort Run;
+        }
+
     }
 }

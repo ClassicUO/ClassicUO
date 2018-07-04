@@ -10,22 +10,13 @@ namespace ClassicUO.AssetsLoader
     {
         private static Dictionary<int, StringEntry> _entries;
 
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private struct ClilocEntry
-        {
-            public int Number;
-            public byte Flag;
-            public ushort Length;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-            public char[] Name;
-        }
 
         public static void Load()
         {
             _entries = new Dictionary<int, StringEntry>();
 
-            string path = System.IO.Path.Combine(FileManager.UoFolderPath, "Cliloc.ENU");
-            if (!System.IO.File.Exists(path))
+            string path = Path.Combine(FileManager.UoFolderPath, "Cliloc.ENU");
+            if (!File.Exists(path))
                 return;
 
             using (BinaryReader reader = new BinaryReader(new FileStream(path, FileMode.Open, FileAccess.Read)))
@@ -74,5 +65,16 @@ namespace ClassicUO.AssetsLoader
 
         public int Number { get; }
         public string Text { get; }
+    }
+
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    struct ClilocEntry
+    {
+        public int Number;
+        public byte Flag;
+        public ushort Length;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+        public char[] Name;
     }
 }

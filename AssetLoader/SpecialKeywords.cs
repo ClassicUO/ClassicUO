@@ -9,8 +9,8 @@ namespace ClassicUO.AssetsLoader
     public static class SpecialKeywords
     {
         private static UOFile _file;
-
         private static List<KeywordEntry> _keywords = new List<KeywordEntry>();
+
 
         public static IReadOnlyList<KeywordEntry> Keywords => _keywords;
 
@@ -46,7 +46,6 @@ namespace ClassicUO.AssetsLoader
     public struct KeywordEntry
     {
         public ushort Code;
-        //[MarshalAs(UnmanagedType.LPWStr)]
         public string Text;
     }
 }

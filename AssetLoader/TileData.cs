@@ -8,9 +8,8 @@ namespace ClassicUO.AssetsLoader
 {
     public static class TileData
     {
-
-        private static LandTiles[] _landData;
-        private static StaticTiles[] _staticData;
+        public static LandTiles[] LandData { get; private set; }
+        public static StaticTiles[] StaticData { get; private set; }
 
         public static void Load()
         {
@@ -33,8 +32,8 @@ namespace ClassicUO.AssetsLoader
 
             tiledata.Seek(0);
 
-            _landData = new LandTiles[512 * 32];
-            _staticData = new StaticTiles[staticscount * 32];
+            LandData = new LandTiles[512 * 32];
+            StaticData = new StaticTiles[staticscount * 32];
 
             byte[] bufferString = new byte[20];
 
@@ -44,11 +43,11 @@ namespace ClassicUO.AssetsLoader
                 for (int j = 0; j < 32; j++)
                 {
                     int idx = (i * 32) + j;
-                    _landData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
-                    _landData[idx].TexID = tiledata.ReadUShort();
+                    LandData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
+                    LandData[idx].TexID = tiledata.ReadUShort();
 
                     tiledata.Fill(bufferString, 20);
-                    _landData[idx].Name = Encoding.UTF8.GetString(bufferString).TrimEnd('\0');
+                    LandData[idx].Name = Encoding.UTF8.GetString(bufferString).TrimEnd('\0');
                 }
             }
 
@@ -58,23 +57,20 @@ namespace ClassicUO.AssetsLoader
                 for (int j = 0; j < 32; j++)
                 {
                     int idx = (i * 32) + j;
-                    _staticData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
-                    _staticData[idx].Weight = tiledata.ReadByte();
-                    _staticData[idx].Layer = tiledata.ReadByte();
-                    _staticData[idx].Count = tiledata.ReadInt();
-                    _staticData[idx].AnimID = tiledata.ReadUShort();
-                    _staticData[idx].Hue = tiledata.ReadUShort();
-                    _staticData[idx].LightIndex = tiledata.ReadUShort();
-                    _staticData[idx].Height = tiledata.ReadByte();
+                    StaticData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
+                    StaticData[idx].Weight = tiledata.ReadByte();
+                    StaticData[idx].Layer = tiledata.ReadByte();
+                    StaticData[idx].Count = tiledata.ReadInt();
+                    StaticData[idx].AnimID = tiledata.ReadUShort();
+                    StaticData[idx].Hue = tiledata.ReadUShort();
+                    StaticData[idx].LightIndex = tiledata.ReadUShort();
+                    StaticData[idx].Height = tiledata.ReadByte();
 
                     tiledata.Fill(bufferString, 20);
-                    _staticData[idx].Name = Encoding.UTF8.GetString(bufferString).TrimEnd('\0');
+                    StaticData[idx].Name = Encoding.UTF8.GetString(bufferString).TrimEnd('\0');
                 }
             }
         }
-
-        public static LandTiles[] LandData => _landData;
-        public static StaticTiles[] StaticData => _staticData;
     }
 
 
