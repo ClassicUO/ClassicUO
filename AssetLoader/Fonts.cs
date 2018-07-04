@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ClassicUO.AssetsLoader
@@ -10,32 +12,132 @@ namespace ClassicUO.AssetsLoader
         private static ASCIIFont[] _asciiFonts = new ASCIIFont[10];
         private static UniFont[] _uniFonts = new UniFont[3];
 
-        public static void Load()
+        public static int FontCount { get; private set; }
+
+        private static FontData[] _font;
+
+        private static readonly byte[] _fontIndex =  
+        {
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0,    1,    2,    3,    4,    5,    6,    7,    8,    9,    10,   11,   12,   13,   14,   15,
+            16,   17,   18,   19,   20,   21,   22,   23,   24,   25,   26,   27,   28,   29,   30,   31,
+            32,   33,   34,   35,   36,   37,   38,   39,   40,   41,   42,   43,   44,   45,   46,   47,
+            48,   49,   50,   51,   52,   53,   54,   55,   56,   57,   58,   59,   60,   61,   62,   63,
+            64,   65,   66,   67,   68,   69,   70,   71,   72,   73,   74,   75,   76,   77,   78,   79,
+            80,   81,   82,   83,   84,   85,   86,   87,   88,   89,   90,   0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 136,  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 152,  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+            160,  161,  162,  163,  164,  165,  166,  167,  168,  169,  170,  171,  172,  173,  174,  175,
+            176,  177,  178,  179,  180,  181,  182,  183,  184,  185,  186,  187,  188,  189,  190,  191,
+            192,  193,  194,  195,  196,  197,  198,  199,  200,  201,  202,  203,  204,  205,  206,  207,
+            208,  209,  210,  211,  212,  213,  214,  215,  216,  217,  218,  219,  220,  221,  222,  223
+        };
+
+    public static void Load()
         {
             UOFileMul fonts = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "fonts.mul"));
 
-            for (int i = 0; i < _asciiFonts.Length; i++)
+            UOFileMul[] uniFonts = new UOFileMul[20];
+            for (int i = 0; i < 20; i++)
             {
-                _asciiFonts[i] = new ASCIIFont();
-                _asciiFonts[i].Load(fonts);
+                string path = Path.Combine(FileManager.UoFolderPath, "unifont" + (i == 0 ? "" : i.ToString()) + ".mul");
+                if (File.Exists(path))
+                    uniFonts[i] = new UOFileMul(path);
             }
 
-            int maxHeight = 0;
-            for (int i = 0; i < _uniFonts.Length; i++)
+            int fontHeaderSize = Marshal.SizeOf<FontHeader>();
+            FontCount = 0;
+
+            while (fonts.Position < fonts.Length)
             {
-                UOFileMul unifont = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "unifont" + (i == 0 ? "" : i.ToString()) + ".mul"));
+                bool exit = false;
+                fonts.Skip(1);
 
-                _uniFonts[i] = new UniFont();
-                _uniFonts[i].Load(unifont);
+                unsafe
+                {
+                    for (int i = 0; i < 224; i++)
+                    {
+                        FontHeader* fh = (FontHeader*)fonts.PositionAddress;
+                        fonts.Skip(fontHeaderSize);
 
-                if (_uniFonts[i].Height > maxHeight)
-                    maxHeight = _uniFonts[i].Height;
+                        int bcount = fh->Width * fh->Height * 2;
+                        if (fonts.Position + bcount > fonts.Length)
+                        {
+                            exit = true;
+                            break;
+                        }
+
+                        fonts.Skip(bcount);
+                    }
+                }
+
+                if (exit)
+                    break;
+
+                FontCount++;
             }
 
-            for (int i = 0; i < _uniFonts.Length; i++)
+            if (FontCount < 1)
             {
-                _uniFonts[i].Height = maxHeight;
+                FontCount = 0;
+                return;
             }
+
+            _font = new FontData[FontCount];
+            fonts.Seek(0);
+
+            for (int i = 0; i < FontCount; i++)
+            {
+                _font[i].Header = fonts.ReadByte();
+                _font[i].Chars = new FontCharacterData[224];
+                for (int j = 0; j < 224; j++)
+                {
+                    _font[i].Chars[j].Width = fonts.ReadByte();
+                    _font[i].Chars[j].Height = fonts.ReadByte();
+                    fonts.Skip(1);
+                    int dataSize = _font[i].Chars[j].Width * _font[i].Chars[j].Height;
+                    _font[i].Chars[j].Data = fonts.ReadArray<ushort>(dataSize).ToList();
+                }
+            }
+
+
+            if (uniFonts[1] == null)
+            {
+                uniFonts[1] = uniFonts[0];
+            }
+
+            for (int i = 0; i < 256; i++)
+            {
+                if (_fontIndex[i] >= 0xE0)
+                    _fontIndex[i] = _fontIndex[' '];
+            }
+
+
+            //for (int i = 0; i < _asciiFonts.Length; i++)
+            //{
+            //    _asciiFonts[i] = new ASCIIFont();
+            //    _asciiFonts[i].Load(fonts);
+            //}
+
+            //int maxHeight = 0;
+            //for (int i = 0; i < _uniFonts.Length; i++)
+            //{
+            //    UOFileMul unifont = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "unifont" + (i == 0 ? "" : i.ToString()) + ".mul"));
+
+            //    _uniFonts[i] = new UniFont();
+            //    _uniFonts[i].Load(unifont);
+
+            //    if (_uniFonts[i].Height > maxHeight)
+            //        maxHeight = _uniFonts[i].Height;
+            //}
+
+            //for (int i = 0; i < _uniFonts.Length; i++)
+            //{
+            //    _uniFonts[i].Height = maxHeight;
+            //}
         }
 
         public static ASCIIFont GetASCII(in int index)
@@ -126,7 +228,7 @@ namespace ClassicUO.AssetsLoader
 
         public UniFont()
         {
-            _chars = new UniChar[0x10000];
+            _chars = new UniChar[100];
         }
 
         public int Height { get; set; }
@@ -307,5 +409,30 @@ namespace ClassicUO.AssetsLoader
         public int Height { get; set; }
         public int OffsetX { get; protected set; }
         public int OffsetY { get; internal set; }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct FontHeader
+    {
+        public byte Width, Height, Unknown;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct FontCharacter
+    {
+        public byte Width, Height, Unknown;
+    }
+
+    public struct FontCharacterData
+    {
+        public byte Width, Height;
+        public List<ushort> Data;
+    }
+
+    public struct FontData
+    {
+        public byte Header;
+        // 224
+        public FontCharacterData[] Chars;
     }
 }
