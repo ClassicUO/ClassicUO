@@ -6,6 +6,7 @@ using System.Text;
 using ClassicUO.AssetsLoader;
 using ClassicUO.Game;
 using ClassicUO.Game.WorldObjects;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Network
 {

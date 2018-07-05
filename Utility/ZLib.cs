@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.IO.Compression;
 using System.Runtime.InteropServices;
+using System.Text;
 
-namespace ClassicUO.Network
+namespace ClassicUO.Utility
 {
     public static class Zlib
     {
@@ -24,7 +22,7 @@ namespace ClassicUO.Network
 
         private static readonly byte[] _zlibHeader = { 0x78, 0x9C };
 
-        public static void Decompress(byte[] source, int offset, byte[] dest, int length)
+        public static bool Decompress(byte[] source, int offset, byte[] dest, int length)
         {
             /*using (MemoryStream ms = new MemoryStream(source, offset, source.Length - offset))
             {
@@ -35,7 +33,7 @@ namespace ClassicUO.Network
                 }
             }*/
 
-            Uncompress(dest, ref length, source, source.Length);
+            return Uncompress(dest, ref length, source, source.Length) == ZLibError.Z_OK;
         }
 
 

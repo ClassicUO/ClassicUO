@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
 using ClassicUO.Input;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -11,7 +12,7 @@ namespace ClassicUO
 {
     internal class GameLoop : Microsoft.Xna.Framework.Game
     {
-        private GraphicsDeviceManager _graphics;
+        private readonly GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private MouseManager _mouseManager;
         private KeyboardManager _keyboardManager;
@@ -19,9 +20,9 @@ namespace ClassicUO
         public GameLoop()
         {
             TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
-           // IsFixedTimeStep = false;
+            // IsFixedTimeStep = false;
 
-
+            IsMouseVisible = true;
             _graphics = new GraphicsDeviceManager(this);
 
             Log.Message(LogTypes.Trace, "Gameloop initialized.");
@@ -50,10 +51,21 @@ namespace ClassicUO
 
             AssetsLoader.FileManager.UoFolderPath = @"E:\Giochi\Ultima Online Classic ORION";
 
-            _stopwatch = Stopwatch.StartNew();
-            Log.Message(LogTypes.Trace, "Loading UO files...");
-            AssetsLoader.FileManager.LoadFiles();
-            Log.Message(LogTypes.Trace, "UO files loaded in " + _stopwatch.ElapsedMilliseconds  +" ms");
+            
+
+            Task.Run(() => 
+            {
+                _stopwatch = Stopwatch.StartNew();
+                Log.Message(LogTypes.Trace, "Loading UO files...");
+
+                AssetsLoader.FileManager.LoadFiles();
+
+                Log.Message(LogTypes.Trace, "UO files loaded in " + _stopwatch.ElapsedMilliseconds + " ms");
+
+            });
+
+            
+
 
 
             //_facet = new Game.Map.Facet(0);
