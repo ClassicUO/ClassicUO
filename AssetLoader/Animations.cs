@@ -10,7 +10,8 @@ namespace ClassicUO.AssetsLoader
 {
     public static class Animations
     {
-        private static List<UOFile> _files = new List<UOFile>();
+        private static UOFileMul[] _files = new UOFileMul[5];
+        private static UOFileUopAnimation[] _filesUop = new UOFileUopAnimation[4];
 
         public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
         private static readonly IndexAnimation[] _dataIndex = new IndexAnimation[MAX_ANIMATIONS_DATA_INDEX_COUNT];
@@ -26,23 +27,26 @@ namespace ClassicUO.AssetsLoader
         {
             Dictionary<ulong, UOPAnimationData> hashes = new Dictionary<ulong, UOPAnimationData>();
 
-            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim.mul"), Path.Combine(FileManager.UoFolderPath, "anim.idx"), 0, 6));
-            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim2.mul"), Path.Combine(FileManager.UoFolderPath, "anim2.idx"), 0));
-            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim3.mul"), Path.Combine(FileManager.UoFolderPath, "anim3.idx"), 0));
-            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim4.mul"), Path.Combine(FileManager.UoFolderPath, "anim4.idx"), 0));
-            _files.Add(new UOFileMul(Path.Combine(FileManager.UoFolderPath, "anim5.mul"), Path.Combine(FileManager.UoFolderPath, "anim5.idx"), 0));
-
-            for (int i = 1; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
-                string filepath = Path.Combine(FileManager.UoFolderPath, string.Format("AnimationFrame{0}.uop", i));
-                if (File.Exists(filepath))
+                string pathmul = Path.Combine(FileManager.UoFolderPath, "anim" + (i == 0 ? "" : i.ToString()) + ".mul");
+                string pathidx = Path.Combine(FileManager.UoFolderPath, "anim" + (i == 0 ? "" : i.ToString()) + ".idx");
+
+                if (File.Exists(pathmul) && File.Exists(pathidx))
                 {
-                    var uopfile = new UOFileUopAnimation(filepath, _files.Count + i - 1);
-                    uopfile.LoadEx(ref hashes);
-                    _files.Add(uopfile);
+                    _files[i] = new UOFileMul(pathmul, pathidx, 0, i == 0 ? 6 : 0);
+                }
+
+                if (i > 0 && FileManager.ClientVersion >= ClientVersions.CV_7000)
+                {
+                    string pathuop = Path.Combine(FileManager.UoFolderPath, string.Format("AnimationFrame{0}.uop", i));
+                    if (File.Exists(pathuop))
+                    {
+                        _filesUop[i - 1] = new UOFileUopAnimation(pathuop, i - 1);
+                        _filesUop[i - 1].LoadEx(ref hashes);
+                    }
                 }
             }
-
 
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
             {
@@ -89,15 +93,15 @@ namespace ClassicUO.AssetsLoader
 
             int animIdxBlockSize = Marshal.SizeOf<AnimIdxBlock>();
 
-            var idxfile0 = ((UOFileMul)_files[0]).IdxFile;
+            var idxfile0 = _files[0].IdxFile;
             long maxAddress0 = (long)idxfile0.StartAddress + idxfile0.Length;
-            var idxfile2 = ((UOFileMul)_files[1]).IdxFile;
+            var idxfile2 = _files[1].IdxFile;
             long maxAddress2 = (long)idxfile2.StartAddress + idxfile2.Length;
-            var idxfile3 = ((UOFileMul)_files[2]).IdxFile;
+            var idxfile3 = _files[2].IdxFile;
             long maxAddress3 = (long)idxfile3.StartAddress + idxfile3.Length;
-            var idxfile4 = ((UOFileMul)_files[3]).IdxFile;
+            var idxfile4 = _files[3].IdxFile;
             long maxAddress4 = (long)idxfile4.StartAddress + idxfile4.Length;
-            var idxfile5 = ((UOFileMul)_files[4]).IdxFile;
+            var idxfile5 = _files[4].IdxFile;
             long maxAddress5 = (long)idxfile5.StartAddress + idxfile5.Length;
 
             for (int i = 0; i < MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
@@ -146,7 +150,7 @@ namespace ClassicUO.AssetsLoader
 
                 _dataIndex[i].Type = groupTye;
 
-                IntPtr address = ((UOFileMul)_files[0]).IdxFile.StartAddress + findID;
+                IntPtr address = _files[0].IdxFile.StartAddress + findID;
 
                 _dataIndex[i].Groups = new AnimationGroup[100];
 
@@ -436,7 +440,7 @@ namespace ClassicUO.AssetsLoader
                         {
                             startAnimID = startAnimID * animIdxBlockSize;
 
-                            var currentIdxFile = ((UOFileMul)_files[animFile]).IdxFile;
+                            var currentIdxFile = _files[animFile].IdxFile;
 
                             if ((uint)startAnimID < currentIdxFile.Length)
                             {
@@ -669,7 +673,6 @@ namespace ClassicUO.AssetsLoader
                     }
                 }
             }
-
         }
 
         public static void GetAnimDirection(ref byte dir, ref bool mirror)
@@ -747,7 +750,7 @@ namespace ClassicUO.AssetsLoader
                 return false;
 
             int decLen = (int)animData.DecompressedLength;
-            UOFileUopAnimation file = (UOFileUopAnimation)_files[5 + animData.FileIndex];
+            UOFileUopAnimation file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
             byte[] buffer = file.ReadArray<byte>((int)animData.CompressedLength);
             byte[] decbuffer = new byte[decLen];
