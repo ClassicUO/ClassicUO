@@ -53,8 +53,8 @@ namespace ClassicUO
 
             
 
-            Task.Run(() => 
-            {
+           // Task.Run(() => 
+            //{
                 _stopwatch = Stopwatch.StartNew();
                 Log.Message(LogTypes.Trace, "Loading UO files...");
 
@@ -62,7 +62,7 @@ namespace ClassicUO
 
                 Log.Message(LogTypes.Trace, "UO files loaded in " + _stopwatch.ElapsedMilliseconds + " ms");
 
-            });
+            //});
 
             
 

@@ -29,8 +29,8 @@ namespace ClassicUO.AssetsLoader
 
             for (int i = 0; i < 5; i++)
             {
-                string pathmul = Path.Combine(FileManager.UoFolderPath, "anim" + (i == 0 ? "" : i.ToString()) + ".mul");
-                string pathidx = Path.Combine(FileManager.UoFolderPath, "anim" + (i == 0 ? "" : i.ToString()) + ".idx");
+                string pathmul = Path.Combine(FileManager.UoFolderPath, "anim" + (i == 0 ? "" : (i + 1).ToString()) + ".mul");
+                string pathidx = Path.Combine(FileManager.UoFolderPath, "anim" + (i == 0 ? "" : (i + 1).ToString()) + ".idx");
 
                 if (File.Exists(pathmul) && File.Exists(pathidx))
                 {
@@ -673,6 +673,11 @@ namespace ClassicUO.AssetsLoader
                     }
                 }
             }
+
+            AnimationDirection dd = _dataIndex[401].Groups[4].Direction[1];
+
+
+            LoadDirectionGroup(ref dd, 401, 4, 3);
         }
 
         public static void GetAnimDirection(ref byte dir, ref bool mirror)
@@ -740,6 +745,7 @@ namespace ClassicUO.AssetsLoader
             var file = _files[animDir.FileIndex];
             byte[] animData = file.ReadArray<byte>(animDir.Address, (int)animDir.Size);
 
+            ReadFramesPixelData(ref animDir, animData);
             return true;
         }
 
@@ -878,25 +884,26 @@ namespace ClassicUO.AssetsLoader
 
         private static unsafe void ReadFramesPixelData(ref AnimationDirection animDir, in byte[] data)
         {
-            fixed (byte* ptrBuff = data)
+            fixed (byte* ptrR = data)
             {
+                byte* ptrBuff = ptrR;
+
                 ushort* palette = (ushort*)ptrBuff;
-                int count = 256;
+                int count = 512;
 
-                byte* dataStart = (byte*)ptrBuff[count];
-                count++;
+                byte* dataStart = ptrBuff + count;
 
-                int frameCount = ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24);
+                int frameCount = (ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
                 animDir.FrameCount = (byte)frameCount;
 
-                uint* frameOffset = (uint*)ptrBuff[count];
-                count += 4;
+                uint* frameOffset = (uint*)(ptrBuff + count);
 
                 animDir.Frames = new AnimationFrame[frameCount];
 
                 for (int i = 0; i < frameCount; i++)
                 {
-                    byte* ptr = dataStart + frameOffset[i];
+                    ptrBuff = dataStart + frameOffset[i];
+                    count = 0;
 
                     short imageCenterX = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
                     animDir.Frames[i].CenterX = imageCenterX;
@@ -904,8 +911,8 @@ namespace ClassicUO.AssetsLoader
                     short imageCenterY = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
                     animDir.Frames[i].CenterY = imageCenterY;
 
-                    short imageWidth = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
-                    short imageHeight= (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
+                    ushort imageWidth = (ushort)(ptrBuff[count++] | (ptrBuff[count++] << 8));
+                    ushort imageHeight= (ushort)(ptrBuff[count++] | (ptrBuff[count++] << 8));
 
                     if (imageWidth <= 0 || imageHeight <= 0)
                         continue;
