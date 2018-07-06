@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Input;
+using ClassicUO.Network;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,6 +20,7 @@ namespace ClassicUO
 
         public GameLoop()
         {
+
             TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
             // IsFixedTimeStep = false;
 
@@ -64,9 +66,11 @@ namespace ClassicUO
 
             //});
 
-            
+            PacketHandlers.Load();
+            PacketsTable.AdjustPacketSizeByVersion(AssetsLoader.FileManager.ClientVersion);
 
 
+            //NetClient.Socket.Connect("login.uodemise.com", 2593);
 
             //_facet = new Game.Map.Facet(0);
 
@@ -115,6 +119,9 @@ namespace ClassicUO
             //   // _delay = DateTime.Now.AddMilliseconds(TIME_RUN_MOUNT);
             //}
 
+            
+            NetClient.Socket.Slice();
+            
 
 
             base.Update(gameTime);

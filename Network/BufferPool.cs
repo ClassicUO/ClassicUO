@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ClassicUO.Network
 {
-    public class BufferPool
+    internal class BufferPool
     {
         private readonly int _arraySize;
         private readonly int _capacity;

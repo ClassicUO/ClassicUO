@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ClassicUO.Network
 {
-    public sealed class CircularBuffer
+    internal sealed class CircularBuffer
     {
         private int _head;
         private int _tail;

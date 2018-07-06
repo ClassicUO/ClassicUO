@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ClassicUO.Game.Stages
 {
-    public sealed class MainScreenStage : Stage
+    public sealed class MainScreenStage : Scene
     {
         public MainScreenStage()
         {

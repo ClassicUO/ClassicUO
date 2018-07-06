@@ -4,9 +4,9 @@ using System.Text;
 
 namespace ClassicUO.Game.Stages
 {
-    public abstract class Stage
+    public abstract class Scene
     {
-        protected Stage()
+        protected Scene()
         {
             ChainActions = new List<Func<bool>>();
         }

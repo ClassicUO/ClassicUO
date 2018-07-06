@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ClassicUO.Network
 {
-    public class Huffman
+    internal class Huffman
     {
         #region Decompression Tree
         private static readonly int[,] dec_tree = {

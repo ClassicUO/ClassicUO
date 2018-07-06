@@ -29,7 +29,6 @@ namespace ClassicUO.Network
 
         private NetClient()
         {
-
         }
 
         public bool IsConnected => _socket != null && _socket.Connected;

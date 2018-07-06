@@ -4,9 +4,9 @@ using System.Text;
 
 namespace ClassicUO.Game.Stages
 {
-    public sealed class StartStage : Stage
+    public sealed class StartScene : Scene
     {
-        public StartStage()
+        public StartScene()
         {
             ChainActions.Add(OnGameLoading);
             ChainActions.Add(OnGameLoaded);

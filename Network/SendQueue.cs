@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ClassicUO.Network
 {
-    public class SendQueue
+    internal class SendQueue
     {
         private const int PendingCap = 256 * 1024;
 
