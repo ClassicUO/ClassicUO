@@ -685,10 +685,6 @@ namespace ClassicUO.AssetsLoader
 
             if (_animGroupCount < maxGroup)
                 _animGroupCount = maxGroup;
-
-
-            AnimationDirection dd = _dataIndex[401].Groups[4].Direction[1];
-            LoadDirectionGroup(ref dd);
         }
 
 
