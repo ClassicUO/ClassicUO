@@ -163,7 +163,7 @@ namespace ClassicUO.AssetsLoader
 
                 _dataIndex[i].Groups = new AnimationGroup[100];
 
-                for (int j = 0; j < 100; j++)
+                for (byte j = 0; j < 100; j++)
                 {
                     _dataIndex[i].Groups[j].Direction = new AnimationDirection[5];
 
@@ -172,7 +172,7 @@ namespace ClassicUO.AssetsLoader
                         continue;
 
                     int offset = j * 5;
-                    for (int d = 0; d < 5; d++)
+                    for (byte d = 0; d < 5; d++)
                     {
                         unsafe
                         {
@@ -286,7 +286,7 @@ namespace ClassicUO.AssetsLoader
                         if (j == ignoreGroups[0] || j == ignoreGroups[1])
                             continue;
 
-                        for (int d = 0; d < 5; d++)
+                        for (byte d = 0; d < 5; d++)
                         {
                             _dataIndex[index].Groups[j].Direction[d].BaseAddress = _dataIndex[checkIndex].Groups[j].Direction[d].BaseAddress;
                             _dataIndex[index].Groups[j].Direction[d].BaseSize = _dataIndex[checkIndex].Groups[j].Direction[d].BaseSize;
@@ -495,7 +495,7 @@ namespace ClassicUO.AssetsLoader
                                 for (int j = 0; j < count; j++)
                                 {
                                     int offset = j * 5;
-                                    for (int d = 0; d < 5; d++)
+                                    for (byte d = 0; d < 5; d++)
                                     {
                                         unsafe
                                         {
@@ -576,9 +576,9 @@ namespace ClassicUO.AssetsLoader
                     if (ignoreGroups[0] == -1)
                         continue;
 
-                    for (int j = 0; j < 2; j++)
+                    for (byte j = 0; j < 2; j++)
                     {
-                        for (int d = 0; d < 5; d++)
+                        for (byte d = 0; d < 5; d++)
                         {
                             _dataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress = _dataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
                             _dataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize = _dataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseSize;
