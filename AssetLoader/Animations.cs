@@ -754,9 +754,10 @@ namespace ClassicUO.AssetsLoader
                 return false;
 
             var file = _files[animDir.FileIndex];
-            byte[] animData = file.ReadArray<byte>(animDir.Address, (int)animDir.Size);
+            //byte[] animData = file.ReadArray<byte>(animDir.Address, (int)animDir.Size);
 
-            _reader.SetData(animData, animDir.Size);
+            // long to int can loss data
+            _reader.SetData(file.StartAddress + (int)animDir.Address, animDir.Size);
 
             ReadFramesPixelData(ref animDir);
             return true;
@@ -1010,7 +1011,6 @@ namespace ClassicUO.AssetsLoader
 
         private static unsafe void ReadFramesPixelData(ref AnimationDirection animDir)
         {
-
             ushort* palette = (ushort*)_reader.StartAddress;
             _reader.Skip(512);
             IntPtr dataStart = _reader.PositionAddress;
