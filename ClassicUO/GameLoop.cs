@@ -69,6 +69,7 @@ namespace ClassicUO
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(AssetsLoader.FileManager.ClientVersion);
 
+            _mouseManager.LoadTextures();
 
             //NetClient.Socket.Connect("login.uodemise.com", 2593);
 
