@@ -201,7 +201,7 @@ namespace ClassicUO.AssetsLoader
                 while ((line = reader.ReadLine()) != null)
                 {
                     line = line.Trim();
-                    if (line.Length <= 0 || line[0] == '#')
+                    if (line.Length <= 0 || line[0] == '#' || !char.IsNumber(line[0]))
                         continue;
 
                     string[] parts = line.Split(new char[] { '\t', ' ' }, StringSplitOptions.RemoveEmptyEntries);
