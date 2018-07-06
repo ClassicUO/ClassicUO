@@ -799,7 +799,7 @@ namespace ClassicUO.AssetsLoader
             {
                 UOPFrameData data = new UOPFrameData()
                 {
-                    DataStart = (byte*)_reader.StartAddress
+                    DataStart = _reader.StartAddress
                 };
 
                 _reader.Skip(2);
@@ -836,10 +836,10 @@ namespace ClassicUO.AssetsLoader
             for (int i = 0; i < animDirection.FrameCount; i++)
             {
                 UOPFrameData frameData = pixelDataOffsets[i + dirFrameStartIdx];
-                if (frameData.DataStart == null)
+                if (frameData.DataStart == null || frameData.DataStart == IntPtr.Zero)
                     continue;
 
-                _reader.SetData((IntPtr)frameData.DataStart + (int)frameData.PixelDataOffset);
+                _reader.SetData(frameData.DataStart + (int)frameData.PixelDataOffset);
                 ushort* palette = (ushort*)_reader.StartAddress;
                 _reader.Skip(512);
 
@@ -1156,7 +1156,7 @@ namespace ClassicUO.AssetsLoader
 
         struct UOPFrameData
         {
-            public unsafe byte* DataStart;
+            public IntPtr DataStart;
             public short FrameID;
             public uint PixelDataOffset;
         }
