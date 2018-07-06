@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>ClassicUO.Renderer</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>E:\Progetti\ClassicUO-FNA\bin\Debug</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>E:\Progetti\ClassicUO-FNA\bin\Release</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="FNA">
+      <HintPath>..\FNA\FNA.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
