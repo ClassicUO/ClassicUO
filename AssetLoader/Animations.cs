@@ -23,6 +23,7 @@ namespace ClassicUO.AssetsLoader
         private static readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
 
         private static byte _animGroupCount = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
+        private static readonly DataReader _reader = new DataReader();
 
 
         public static ushort Color { get; set; }
@@ -759,10 +760,9 @@ namespace ClassicUO.AssetsLoader
             var file = _files[animDir.FileIndex];
             byte[] animData = file.ReadArray<byte>(animDir.Address, (int)animDir.Size);
 
-            DataReader reader = new DataReader();
-            reader.SetData(animData, animDir.Size);
+            _reader.SetData(animData, animDir.Size);
 
-            ReadFramesPixelData(ref animDir, reader);
+            ReadFramesPixelData(ref animDir);
             return true;
         }
 
@@ -770,7 +770,10 @@ namespace ClassicUO.AssetsLoader
         {
             UOPAnimationData animData = _dataIndex[AnimID].Groups[AnimGroup].UOPAnimData;
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
+            {
+                Log.Message(LogTypes.Warning, "uop animData is null");
                 return false;
+            }
 
             int decLen = (int)animData.DecompressedLength;
             UOFileUopAnimation file = _filesUop[animData.FileIndex];
@@ -779,33 +782,33 @@ namespace ClassicUO.AssetsLoader
             byte[] decbuffer = new byte[decLen];
 
             if (!Zlib.Decompress(buffer, 0, decbuffer, decLen))
+            {
+                Log.Message(LogTypes.Error, "Error to decompress uop animation");
                 return false;
+            }
 
-            //List<UOPFrameData> pixelDataOffsets = new List<UOPFrameData>();
+            _reader.SetData(decbuffer, decLen);
 
-            DataReader reader = new DataReader();
-            reader.SetData(decbuffer, decLen);
-
-            reader.Skip(8);
-            int dcsize = reader.ReadInt();
-            int animID = reader.ReadInt();
-            reader.Skip(4 + 4 + 2 + 2 + 4);
-            int frameCount = reader.ReadInt();
-            IntPtr dataStart = reader.StartAddress + reader.ReadInt();
-            reader.SetData(dataStart);
+            _reader.Skip(8);
+            int dcsize = _reader.ReadInt();
+            int animID = _reader.ReadInt();
+            _reader.Skip(4 + 4 + 2 + 2 + 4);
+            int frameCount = _reader.ReadInt();
+            IntPtr dataStart = _reader.StartAddress + _reader.ReadInt();
+            _reader.SetData(dataStart);
             List<UOPFrameData> pixelDataOffsets = new List<UOPFrameData>();
 
             for (int i = 0; i < frameCount; i++)
             {
                 UOPFrameData data = new UOPFrameData()
                 {
-                    DataStart = (byte*)reader.StartAddress
+                    DataStart = (byte*)_reader.StartAddress
                 };
 
-                reader.Skip(2);
-                data.FrameID = reader.ReadShort();
-                reader.Skip(8);
-                data.PixelDataOffset = reader.ReadUInt();
+                _reader.Skip(2);
+                data.FrameID = _reader.ReadShort();
+                _reader.Skip(8);
+                data.PixelDataOffset = _reader.ReadUInt();
                 int vsize = pixelDataOffsets.Count;
                 if (vsize + 1 != data.FrameID)
                 {
@@ -838,27 +841,34 @@ namespace ClassicUO.AssetsLoader
                 UOPFrameData frameData = pixelDataOffsets[i + dirFrameStartIdx];
                 if (frameData.DataStart == null)
                     continue;
-                reader.SetData((IntPtr)frameData.DataStart + (int)frameData.PixelDataOffset);
-                ushort* palette = (ushort*)reader.StartAddress;
-                reader.Skip(512);
 
-                short imageCenterX = reader.ReadShort();
-                short imageCenterY = reader.ReadShort();
-                short imageWidth = reader.ReadShort();
-                short imageHeight = reader.ReadShort();
+                _reader.SetData((IntPtr)frameData.DataStart + (int)frameData.PixelDataOffset);
+                ushort* palette = (ushort*)_reader.StartAddress;
+                _reader.Skip(512);
+
+                short imageCenterX = _reader.ReadShort();
+                short imageCenterY = _reader.ReadShort();
+                short imageWidth = _reader.ReadShort();
+                short imageHeight = _reader.ReadShort();
 
                 animDirection.Frames[i].CenterX = imageCenterX;
                 animDirection.Frames[i].CenterY = imageCenterY;
 
                 if (imageWidth <= 0 || imageHeight <= 0)
+                {
+                    Log.Message(LogTypes.Warning, "frame size is null");
                     continue;
+                }
 
                 int textureSize = imageWidth * imageHeight;
                 ushort[] pixels = new ushort[textureSize];
 
-                uint header = reader.ReadUInt();
+                uint header = _reader.ReadUInt();
 
-                while (header != 0x7FFF7FFF && reader.PositionAddress.ToInt64() < (reader.StartAddress + (int)reader.Length).ToInt64())
+                long pos = _reader.PositionAddress.ToInt64();
+                long end = (_reader.StartAddress + (int)_reader.Length).ToInt64();
+
+                while (header != 0x7FFF7FFF && pos < end)
                 {
                     ushort runLength = (ushort)(header & 0x0FFF);
 
@@ -876,13 +886,13 @@ namespace ClassicUO.AssetsLoader
                     int block = (y * imageWidth) + x;
                     for (int k = 0; k < runLength; k++)
                     {
-                        ushort val = palette[reader.ReadByte()];
+                        ushort val = palette[_reader.ReadByte()];
                         if (val > 0)
                             val |= 0x8000;
                         pixels[block++] = val;
                     }
 
-                    header = reader.ReadUInt();
+                    header = _reader.ReadUInt();
                 }
             }
 
@@ -1002,42 +1012,48 @@ namespace ClassicUO.AssetsLoader
             return true;
         }
 
-        private static unsafe void ReadFramesPixelData(ref AnimationDirection animDir, in DataReader reader)
+        private static unsafe void ReadFramesPixelData(ref AnimationDirection animDir)
         {
 
-            ushort* palette = (ushort*)reader.StartAddress;
-            reader.Skip(512);
-            IntPtr dataStart = reader.PositionAddress;
+            ushort* palette = (ushort*)_reader.StartAddress;
+            _reader.Skip(512);
+            IntPtr dataStart = _reader.PositionAddress;
 
-            uint frameCount = reader.ReadUInt();
+            uint frameCount = _reader.ReadUInt();
             animDir.FrameCount = (byte)frameCount;
 
-            uint* frameOffset = (uint*)reader.PositionAddress;
+            uint* frameOffset = (uint*)_reader.PositionAddress;
             animDir.Frames = new AnimationFrame[frameCount];
 
             for (int i = 0; i < frameCount; i++)
             {
-                reader.SetData(dataStart + (int)frameOffset[i]);
+                _reader.SetData(dataStart + (int)frameOffset[i]);
 
-                short imageCenterX = reader.ReadShort();
+                short imageCenterX = _reader.ReadShort();
                 animDir.Frames[i].CenterX = imageCenterX;
 
-                short imageCenterY = reader.ReadShort();
+                short imageCenterY = _reader.ReadShort();
                 animDir.Frames[i].CenterY = imageCenterY;
 
-                short imageWidth = reader.ReadShort();
-                short imageHeight = reader.ReadShort();
+                short imageWidth = _reader.ReadShort();
+                short imageHeight = _reader.ReadShort();
 
                 if (imageWidth <= 0 || imageHeight <= 0)
+                {
+                    Log.Message(LogTypes.Warning, "mul frame size is null");
                     continue;
+                }
 
                 int wantSize = imageWidth * imageHeight;
 
                 ushort[] pixels = new ushort[wantSize];
 
-                uint header = reader.ReadUInt();
+                uint header = _reader.ReadUInt();
 
-                while ( header != 0x7FFF7FFF && reader.PositionAddress.ToInt64() < (reader.StartAddress + (int)reader.Length).ToInt64())
+                long pos = _reader.PositionAddress.ToInt64();
+                long end = (_reader.StartAddress + (int)_reader.Length).ToInt64();
+
+                while ( header != 0x7FFF7FFF && pos < end)
                 {
                     ushort runLength = (ushort)(header & 0x0FFF);
 
@@ -1055,7 +1071,7 @@ namespace ClassicUO.AssetsLoader
                     int block = (y * imageWidth) + x;
                     for (int k = 0; k < runLength; k++)
                     {
-                        ushort val = palette[reader.ReadByte()];
+                        ushort val = palette[_reader.ReadByte()];
                         if (val > 0)
                             pixels[block] =  (ushort)(0x8000 | val);
                         else
@@ -1063,7 +1079,7 @@ namespace ClassicUO.AssetsLoader
                         block++;
                     }
 
-                    header = reader.ReadUInt();
+                    header = _reader.ReadUInt();
                 }
             }
 
