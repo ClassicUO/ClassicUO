@@ -2,7 +2,7 @@
 
 namespace ClassicUO.Renderer
 {
-    public class Class1
+    public class SpriteBatch3D
     {
     }
 }
