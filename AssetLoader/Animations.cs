@@ -10,10 +10,10 @@ namespace ClassicUO.AssetsLoader
 {
     public static class Animations
     {
-        private static UOFileMul[] _files = new UOFileMul[5];
-        private static UOFileUopAnimation[] _filesUop = new UOFileUopAnimation[4];
+        private const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
 
-        public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
+        private static readonly UOFileMul[] _files = new UOFileMul[5];
+        private static readonly UOFileUopAnimation[] _filesUop = new UOFileUopAnimation[4];
         private static readonly IndexAnimation[] _dataIndex = new IndexAnimation[MAX_ANIMATIONS_DATA_INDEX_COUNT];
         private static readonly List<Tuple<ushort, byte>>[] _groupReplaces = new List<Tuple<ushort, byte>>[2]
         {
@@ -21,6 +21,14 @@ namespace ClassicUO.AssetsLoader
             new List<Tuple<ushort, byte>>()
         };
         private static readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
+
+        private static byte _animGroupCount = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
+
+
+        public static ushort Color { get; set; }
+        public static byte AnimGroup { get; set; }
+        public static byte Direction { get; set; }
+        public static ushort AnimID { get; set; }
 
 
         public static void Load()
@@ -647,11 +655,11 @@ namespace ClassicUO.AssetsLoader
 
 
 
-            int maxGroup = 0;
+            byte maxGroup = 0;
 
             for (int animID = 0; animID < MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
             {
-                for (int grpID = 0; grpID < 100; grpID++)
+                for (byte grpID = 0; grpID < 100; grpID++)
                 {
                     string hashstring = string.Format("build/animationlegacyframe/{0:D6}/{1:D2}.bin", animID, grpID);
                     ulong hash = UOFileUop.CreateHash(hashstring);
@@ -663,7 +671,7 @@ namespace ClassicUO.AssetsLoader
                         _dataIndex[animID].IsUOP = true;
                         _dataIndex[animID].Groups[grpID].UOPAnimData = data;
 
-                        for (int dirID = 0; dirID < 5; dirID++)
+                        for (byte dirID = 0; dirID < 5; dirID++)
                         {
                             _dataIndex[animID].Groups[grpID].Direction[dirID].IsUOP = true;
                             _dataIndex[animID].Groups[grpID].Direction[dirID].BaseAddress = 0;
@@ -674,11 +682,15 @@ namespace ClassicUO.AssetsLoader
                 }
             }
 
+            if (_animGroupCount < maxGroup)
+                _animGroupCount = maxGroup;
+
+
             AnimationDirection dd = _dataIndex[401].Groups[4].Direction[1];
-
-
-            LoadDirectionGroup(ref dd, 401, 4, 3);
+            LoadDirectionGroup(ref dd);
         }
+
+
 
         public static void GetAnimDirection(ref byte dir, ref bool mirror)
         {
@@ -735,23 +747,28 @@ namespace ClassicUO.AssetsLoader
             }
         }
 
-        public static unsafe bool LoadDirectionGroup(ref AnimationDirection animDir, in int animID, in int groupID, in byte direction)
+
+
+        public static bool LoadDirectionGroup(ref AnimationDirection animDir)
         {
             if (animDir.IsUOP)
-                return TryReadUOPAnimDimension(ref animDir, animID, groupID, direction);
+                return TryReadUOPAnimDimension(ref animDir);
             if (animDir.Address == 0)
                 return false;
 
             var file = _files[animDir.FileIndex];
             byte[] animData = file.ReadArray<byte>(animDir.Address, (int)animDir.Size);
 
-            ReadFramesPixelData(ref animDir, animData);
+            DataReader reader = new DataReader();
+            reader.SetData(animData, animDir.Size);
+
+            ReadFramesPixelData(ref animDir, reader);
             return true;
         }
 
-        private static unsafe bool TryReadUOPAnimDimension(ref AnimationDirection animDirection, in int animID, in int animGroup, in byte direction)
+        private static unsafe bool TryReadUOPAnimDimension(ref AnimationDirection animDirection)
         {
-            UOPAnimationData animData = _dataIndex[animID].Groups[animGroup].UOPAnimData;
+            UOPAnimationData animData = _dataIndex[AnimID].Groups[AnimGroup].UOPAnimData;
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
                 return false;
 
@@ -764,197 +781,366 @@ namespace ClassicUO.AssetsLoader
             if (!Zlib.Decompress(buffer, 0, decbuffer, decLen))
                 return false;
 
+            //List<UOPFrameData> pixelDataOffsets = new List<UOPFrameData>();
+
+            DataReader reader = new DataReader();
+            reader.SetData(decbuffer, decLen);
+
+            reader.Skip(8);
+            int dcsize = reader.ReadInt();
+            int animID = reader.ReadInt();
+            reader.Skip(4 + 4 + 2 + 2 + 4);
+            int frameCount = reader.ReadInt();
+            IntPtr dataStart = reader.StartAddress + reader.ReadInt();
+            reader.SetData(dataStart);
             List<UOPFrameData> pixelDataOffsets = new List<UOPFrameData>();
 
-
-            fixed (byte* ptrBuff = decbuffer)
+            for (int i = 0; i < frameCount; i++)
             {
-                int count = 8;
-                int dcsize = ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24);
-                int id = ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24);
-
-                count += 16;
-
-                int frameCount = ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24);
-                byte* dataStart = ptrBuff + (ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
-
-                byte* ptr = dataStart;
-
-                for (int i = 0; i < frameCount; i++)
+                UOPFrameData data = new UOPFrameData()
                 {
-                    UOPFrameData frameData = new UOPFrameData()
-                    {
-                        DataStart = ptr
-                    };
+                    DataStart = (byte*)reader.StartAddress
+                };
 
-                    count += 2;
-                    frameData.FrameID = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
-                    count += 8;
-                    frameData.PixelDataOffset = (uint)(ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
-
-                    int vsize = pixelDataOffsets.Count;
-
-                    if (vsize + 1 != frameData.FrameID)
-                    {
-                        while (vsize + 1 != frameData.FrameID)
-                        {
-                            pixelDataOffsets.Add(new UOPFrameData());
-                            vsize++;
-                        }
-                    }
-                    pixelDataOffsets.Add(frameData);
-                }
-
-                int vectorSize = pixelDataOffsets.Count;
-                if (vectorSize < 50)
+                reader.Skip(2);
+                data.FrameID = reader.ReadShort();
+                reader.Skip(8);
+                data.PixelDataOffset = reader.ReadUInt();
+                int vsize = pixelDataOffsets.Count;
+                if (vsize + 1 != data.FrameID)
                 {
-                    while (vectorSize != 50)
+                    while (vsize + 1 != data.FrameID)
                     {
                         pixelDataOffsets.Add(new UOPFrameData());
-                        vectorSize++;
+                        vsize++;
                     }
                 }
-
-
-                animDirection.FrameCount = (byte)(pixelDataOffsets.Count / 5);
-                int dirFrameStartIdx = animDirection.FrameCount * direction;
-
-                if (animDirection.Frames == null)
-                    animDirection.Frames = new AnimationFrame[animDirection.FrameCount];
-
-                for (int i = 0; i < animDirection.FrameCount; i++)
-                {
-                    int currIdx = i + dirFrameStartIdx;
-
-                    if (pixelDataOffsets[currIdx].DataStart == null)
-                        continue;
-
-                    ptr = pixelDataOffsets[currIdx].DataStart + pixelDataOffsets[currIdx].PixelDataOffset;
-                    ushort* palette = (ushort*)ptr;
-                    count += 512;
-
-                    short imageCenterX = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
-                    short imageCenterY = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
-                    short imageWidth = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
-                    short imageHeight = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
-
-                    animDirection.Frames[i].CenterX = imageCenterX;
-                    animDirection.Frames[i].CenterY = imageCenterY;
-                    if (imageWidth <= 0 || imageHeight <= 0)
-                        continue;
-                    int textureSize = imageWidth * imageHeight;
-
-                    ushort[] data = new ushort[textureSize];
-
-                    uint header = (uint)(ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
-
-                    if (header != 0x7FFF7FFF && count < file.Length)
-                    {
-                        ushort runLength = (ushort)(header & 0x0FFF);
-                        int x = (int)((header >> 22) & 0x03FF);
-
-                        if ((x & 0x0200) > 0)
-                            x |= unchecked((int)0xFFFFFE00);
-
-                        int y = (int)((header >> 12) & 0x03FF);
-
-                        if ((y & 0x0200) > 0)
-                            y |= unchecked((int)0xFFFFFE00);
-
-                        x += imageCenterX;
-                        y += imageCenterY + imageHeight;
-
-                        int block = (y * imageWidth) + x;
-
-                        for (int k = 0; k < runLength; k++)
-                        {
-                            ushort val = palette[ptrBuff[count++]];
-                            if (val > 0)
-                                val |= 0x8000;
-                            data[block++] = val;
-                        }
-
-                        header = (uint)(ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
-                    }
-                }
-
+                pixelDataOffsets.Add(data);
             }
+
+            int vectorSize = pixelDataOffsets.Count;
+            if (vectorSize < 50)
+            {
+                while (vectorSize < 50)
+                {
+                    pixelDataOffsets.Add(new UOPFrameData());
+                    vectorSize++;
+                }
+            }
+
+            animDirection.FrameCount = (byte)(pixelDataOffsets.Count / 5);
+            int dirFrameStartIdx = animDirection.FrameCount * Direction;
+            if (animDirection.Frames == null)
+                animDirection.Frames = new AnimationFrame[animDirection.FrameCount];
+
+            for (int i = 0; i < animDirection.FrameCount; i++)
+            {
+                UOPFrameData frameData = pixelDataOffsets[i + dirFrameStartIdx];
+                if (frameData.DataStart == null)
+                    continue;
+                reader.SetData((IntPtr)frameData.DataStart + (int)frameData.PixelDataOffset);
+                ushort* palette = (ushort*)reader.StartAddress;
+                reader.Skip(512);
+
+                short imageCenterX = reader.ReadShort();
+                short imageCenterY = reader.ReadShort();
+                short imageWidth = reader.ReadShort();
+                short imageHeight = reader.ReadShort();
+
+                animDirection.Frames[i].CenterX = imageCenterX;
+                animDirection.Frames[i].CenterY = imageCenterY;
+
+                if (imageWidth <= 0 || imageHeight <= 0)
+                    continue;
+
+                int textureSize = imageWidth * imageHeight;
+                ushort[] pixels = new ushort[textureSize];
+
+                uint header = reader.ReadUInt();
+
+                while (header != 0x7FFF7FFF && reader.PositionAddress.ToInt64() < (reader.StartAddress + (int)reader.Length).ToInt64())
+                {
+                    ushort runLength = (ushort)(header & 0x0FFF);
+
+                    int x = (int)((header >> 22) & 0x03FF);
+                    if ((x & 0x0200) > 0)
+                        x |= unchecked((int)0xFFFFFE00);
+
+                    int y = (int)((header >> 12) & 0x3FF);
+                    if ((y & 0x0200) > 0)
+                        y |= unchecked((int)0xFFFFFE00);
+
+                    x += imageCenterX;
+                    y += imageCenterY + imageHeight;
+
+                    int block = (y * imageWidth) + x;
+                    for (int k = 0; k < runLength; k++)
+                    {
+                        ushort val = palette[reader.ReadByte()];
+                        if (val > 0)
+                            val |= 0x8000;
+                        pixels[block++] = val;
+                    }
+
+                    header = reader.ReadUInt();
+                }
+            }
+
+
+            //fixed (byte* ptrBuff = decbuffer)
+            //{
+            //    int count = 8;
+            //    int dcsize = ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24);
+            //    int id = ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24);
+
+            //    count += 16;
+
+            //    int frameCount = ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24);
+            //    byte* dataStart = ptrBuff + (ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
+
+            //    byte* ptr = dataStart;
+
+            //    for (int i = 0; i < frameCount; i++)
+            //    {
+            //        UOPFrameData frameData = new UOPFrameData()
+            //        {
+            //            DataStart = ptr
+            //        };
+
+            //        count += 2;
+            //        frameData.FrameID = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
+            //        count += 8;
+            //        frameData.PixelDataOffset = (uint)(ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
+
+            //        int vsize = pixelDataOffsets.Count;
+
+            //        if (vsize + 1 != frameData.FrameID)
+            //        {
+            //            while (vsize + 1 != frameData.FrameID)
+            //            {
+            //                pixelDataOffsets.Add(new UOPFrameData());
+            //                vsize++;
+            //            }
+            //        }
+            //        pixelDataOffsets.Add(frameData);
+            //    }
+
+            //    int vectorSize = pixelDataOffsets.Count;
+            //    if (vectorSize < 50)
+            //    {
+            //        while (vectorSize != 50)
+            //        {
+            //            pixelDataOffsets.Add(new UOPFrameData());
+            //            vectorSize++;
+            //        }
+            //    }
+
+
+            //    animDirection.FrameCount = (byte)(pixelDataOffsets.Count / 5);
+            //    int dirFrameStartIdx = animDirection.FrameCount * Direction;
+
+            //    if (animDirection.Frames == null)
+            //        animDirection.Frames = new AnimationFrame[animDirection.FrameCount];
+
+            //    for (int i = 0; i < animDirection.FrameCount; i++)
+            //    {
+            //        int currIdx = i + dirFrameStartIdx;
+
+            //        if (pixelDataOffsets[currIdx].DataStart == null)
+            //            continue;
+
+            //        ptr = pixelDataOffsets[currIdx].DataStart + pixelDataOffsets[currIdx].PixelDataOffset;
+            //        ushort* palette = (ushort*)ptr;
+            //        count += 512;
+
+            //        short imageCenterX = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
+            //        short imageCenterY = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
+            //        short imageWidth = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
+            //        short imageHeight = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
+
+            //        animDirection.Frames[i].CenterX = imageCenterX;
+            //        animDirection.Frames[i].CenterY = imageCenterY;
+            //        if (imageWidth <= 0 || imageHeight <= 0)
+            //            continue;
+            //        int textureSize = imageWidth * imageHeight;
+
+            //        ushort[] data = new ushort[textureSize];
+
+            //        uint header = (uint)(ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
+
+            //        if (header != 0x7FFF7FFF && count < file.Length)
+            //        {
+            //            ushort runLength = (ushort)(header & 0x0FFF);
+            //            int x = (int)((header >> 22) & 0x03FF);
+
+            //            if ((x & 0x0200) > 0)
+            //                x |= unchecked((int)0xFFFFFE00);
+
+            //            int y = (int)((header >> 12) & 0x03FF);
+
+            //            if ((y & 0x0200) > 0)
+            //                y |= unchecked((int)0xFFFFFE00);
+
+            //            x += imageCenterX;
+            //            y += imageCenterY + imageHeight;
+
+            //            int block = (y * imageWidth) + x;
+
+            //            for (int k = 0; k < runLength; k++)
+            //            {
+            //                ushort val = palette[ptrBuff[count++]];
+            //                if (val > 0)
+            //                    val |= 0x8000;
+            //                data[block++] = val;
+            //            }
+
+            //            header = (uint)(ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
+            //        }
+            //    }
+
+            //}
             return true;
         }
 
-        private static unsafe void ReadFramesPixelData(ref AnimationDirection animDir, in byte[] data)
+        private static unsafe void ReadFramesPixelData(ref AnimationDirection animDir, in DataReader reader)
         {
-            fixed (byte* ptrR = data)
+
+            ushort* palette = (ushort*)reader.StartAddress;
+            reader.Skip(512);
+            IntPtr dataStart = reader.PositionAddress;
+
+            uint frameCount = reader.ReadUInt();
+            animDir.FrameCount = (byte)frameCount;
+
+            uint* frameOffset = (uint*)reader.PositionAddress;
+            animDir.Frames = new AnimationFrame[frameCount];
+
+            for (int i = 0; i < frameCount; i++)
             {
-                byte* ptrBuff = ptrR;
+                reader.SetData(dataStart + (int)frameOffset[i]);
 
-                ushort* palette = (ushort*)ptrBuff;
-                int count = 512;
+                short imageCenterX = reader.ReadShort();
+                animDir.Frames[i].CenterX = imageCenterX;
 
-                byte* dataStart = ptrBuff + count;
+                short imageCenterY = reader.ReadShort();
+                animDir.Frames[i].CenterY = imageCenterY;
 
-                int frameCount = (ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
-                animDir.FrameCount = (byte)frameCount;
+                short imageWidth = reader.ReadShort();
+                short imageHeight = reader.ReadShort();
 
-                uint* frameOffset = (uint*)(ptrBuff + count);
+                if (imageWidth <= 0 || imageHeight <= 0)
+                    continue;
 
-                animDir.Frames = new AnimationFrame[frameCount];
+                int wantSize = imageWidth * imageHeight;
 
-                for (int i = 0; i < frameCount; i++)
+                ushort[] pixels = new ushort[wantSize];
+
+                uint header = reader.ReadUInt();
+
+                while ( header != 0x7FFF7FFF && reader.PositionAddress.ToInt64() < (reader.StartAddress + (int)reader.Length).ToInt64())
                 {
-                    ptrBuff = dataStart + frameOffset[i];
-                    count = 0;
+                    ushort runLength = (ushort)(header & 0x0FFF);
 
-                    short imageCenterX = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
-                    animDir.Frames[i].CenterX = imageCenterX;
+                    int x = (int)((header >> 22) & 0x03FF);
+                    if ((x & 0x0200) > 0)
+                        x |= unchecked((int)0xFFFFFE00);
 
-                    short imageCenterY = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
-                    animDir.Frames[i].CenterY = imageCenterY;
+                    int y = (int)((header >> 12) & 0x3FF);
+                    if ((y & 0x0200) > 0)
+                        y |= unchecked((int)0xFFFFFE00);
 
-                    ushort imageWidth = (ushort)(ptrBuff[count++] | (ptrBuff[count++] << 8));
-                    ushort imageHeight= (ushort)(ptrBuff[count++] | (ptrBuff[count++] << 8));
+                    x += imageCenterX;
+                    y += imageCenterY + imageHeight;
 
-                    if (imageWidth <= 0 || imageHeight <= 0)
-                        continue;
-
-                    int wantSize = imageWidth * imageHeight;
-                    ushort[] pixels = new ushort[wantSize];
-
-                    uint header = (uint)(ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
-
-                    while (header != 0x7FFF7FFF && count < data.Length)
+                    int block = (y * imageWidth) + x;
+                    for (int k = 0; k < runLength; k++)
                     {
-                        ushort runLength = (ushort)(header & 0x0FFF);
-
-                        int x = (int)((header >> 22) & 0x03FF);
-
-                        if ((x & 0x0200) > 0)
-                            x |= unchecked((int)0xFFFFFE00);
-
-                        int y = (int)((header >> 12) & 0x03FF);
-
-                        if ((y & 0x0200) > 0)
-                            y |= unchecked((int)0xFFFFFE00);
-
-                        x += imageCenterX;
-                        y += imageCenterY + imageHeight;
-
-                        int block = (y * imageWidth) + x;
-                        for (int k = 0; k < runLength; k++)
-                        {
-                            ushort val = palette[ptrBuff[count++]];
-                            if (val > 0)
-                                pixels[block] = (ushort)(0x8000 | val);
-                            else
-                                pixels[block] = 0;
-                            block++;
-                        }
-
-                        header = (uint)(ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
+                        ushort val = palette[reader.ReadByte()];
+                        if (val > 0)
+                            pixels[block] =  (ushort)(0x8000 | val);
+                        else
+                            pixels[block] = 0;
+                        block++;
                     }
+
+                    header = reader.ReadUInt();
                 }
             }
+
+            //fixed (byte* ptrR = data)
+            //{
+            //    byte* ptrBuff = ptrR;
+            //    byte* end = ptrR + data.Length;
+
+            //    ushort* palette = (ushort*)ptrBuff;
+            //    int count = 512;
+
+            //    byte* dataStart = ptrBuff + count;
+
+            //    int frameCount = (ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
+            //    animDir.FrameCount = (byte)frameCount;
+
+            //    uint* frameOffset = (uint*)(ptrBuff + count);
+
+            //    animDir.Frames = new AnimationFrame[frameCount];
+
+            //    for (int i = 0; i < frameCount; i++)
+            //    {
+            //        ptrBuff = dataStart + frameOffset[i];
+            //        count = 0;
+
+            //        short imageCenterX = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
+            //        animDir.Frames[i].CenterX = imageCenterX;
+
+            //        short imageCenterY = (short)(ptrBuff[count++] | (ptrBuff[count++] << 8));
+            //        animDir.Frames[i].CenterY = imageCenterY;
+
+            //        ushort imageWidth = (ushort)(ptrBuff[count++] | (ptrBuff[count++] << 8));
+            //        ushort imageHeight= (ushort)(ptrBuff[count++] | (ptrBuff[count++] << 8));
+
+            //        if (imageWidth <= 0 || imageHeight <= 0)
+            //            continue;
+
+            //        int wantSize = imageWidth * imageHeight;
+            //        ushort[] pixels = new ushort[wantSize];
+
+            //        uint header = (uint)(ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
+
+            //        while (header != 0x7FFF7FFF && ptrBuff < end)
+            //        {
+            //            ushort runLength = (ushort)(header & 0x0FFF);
+
+            //            int x = (int)((header >> 22) & 0x03FF);
+
+            //            if ((x & 0x0200) > 0)
+            //                x |= unchecked((int)0xFFFFFE00);
+
+            //            int y = (int)((header >> 12) & 0x03FF);
+
+            //            if ((y & 0x0200) > 0)
+            //                y |= unchecked((int)0xFFFFFE00);
+
+            //            x += imageCenterX;
+            //            y += imageCenterY + imageHeight;
+
+            //            int block = (y * imageWidth) + x;
+            //            for (int k = 0; k < runLength; k++)
+            //            {
+            //                ushort val = palette[ptrBuff[count++]];
+            //                if (val > 0)
+            //                    pixels[block] = (ushort)(0x8000 | val);
+            //                else
+            //                    pixels[block] = 0;
+            //                block++;
+            //            }
+
+            //            header = (uint)(ptrBuff[count++] | (ptrBuff[count++] << 8) | (ptrBuff[count++] << 16) | (ptrBuff[count++] << 24));
+            //        }
+            //    }
+            //}
         }
+
+
 
         struct UOPFrameData
         {
@@ -1176,10 +1362,6 @@ namespace ClassicUO.AssetsLoader
         //    else
         //        index += direction - (direction - 4) * 2;
         //}
-
-
-
-
 
     }
 

@@ -9,13 +9,13 @@ using System.Runtime.InteropServices;
 
 namespace ClassicUO.AssetsLoader
 {
-    public unsafe abstract class UOFile
+    public unsafe abstract class UOFile : DataReader
     {
         private MemoryMappedViewAccessor _accessor;
 
-        protected byte* _ptr;
-        protected long _position;
-        protected long _length;
+        //protected byte* _ptr;
+        //protected long _position;
+        //protected long _length;
 
         public UOFile(in string filepath)
         {
@@ -23,11 +23,11 @@ namespace ClassicUO.AssetsLoader
         }
 
         public string Path { get; }
-        public long Length => _length;
+        //public long Length => _length;
         public UOFileIndex3D[] Entries { get; protected set; }
-        public long Position { get => _position; set => _position = value; }
-        public IntPtr StartAddress => (IntPtr)_ptr;
-        public IntPtr PositionAddress => (IntPtr)(_ptr + _position);
+        //public long Position { get => _position; set => _position = value; }
+        //public IntPtr StartAddress => (IntPtr)_ptr;
+        //public IntPtr PositionAddress => (IntPtr)(_ptr + _position);
 
         protected virtual void Load()
         {
@@ -43,13 +43,15 @@ namespace ClassicUO.AssetsLoader
                 //var stream = file.CreateViewStream(0, size, MemoryMappedFileAccess.Read);
                 //_reader = new BinaryReader(stream);
                 _accessor = file.CreateViewAccessor(0, size, MemoryMappedFileAccess.Read);
-               // stream.SafeMemoryMappedViewHandle.AcquirePointer(ref _ptr);
-                _position = 0;
-                _length = _accessor.Capacity;
+                // stream.SafeMemoryMappedViewHandle.AcquirePointer(ref _ptr);
+                //_position = 0;
+                //_length = _accessor.Capacity;
+                byte* ptr = null;
                 try
                 {
-                    _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref _ptr);
+                    _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
 
+                    SetData(ptr, _accessor.Capacity);
                 }
                 catch
                 {
@@ -81,15 +83,15 @@ namespace ClassicUO.AssetsLoader
         internal long Seek(int count) => _reader.BaseStream.Seek(count, SeekOrigin.Begin);
         internal long Seek(long count) => _reader.BaseStream.Seek(count, SeekOrigin.Begin);*/
 
-         internal byte ReadByte() => _ptr[_position++];
-         internal sbyte ReadSByte() => (sbyte)ReadByte();
-         internal bool ReadBool() => ReadByte() != 0;
-         internal short ReadShort() => (short)(ReadByte() | (ReadByte() << 8));
-         internal ushort ReadUShort() => (ushort)ReadShort();
-         internal int ReadInt() => (ReadByte() | (ReadByte() << 8) | (ReadByte() << 16) | (ReadByte() << 24));
-         internal uint ReadUInt() => (uint)ReadInt();
-         internal long ReadLong() => (ReadByte() | ((long)ReadByte() << 8) | ((long)ReadByte() << 16) | ((long)ReadByte() << 24) | ((long)ReadByte() << 32) | ((long)ReadByte() << 40) | ((long)ReadByte() << 48) | ((long)ReadByte() << 56));
-         internal ulong ReadULong() => (ulong)ReadLong();
+         //internal byte ReadByte() => _ptr[_position++];
+         //internal sbyte ReadSByte() => (sbyte)ReadByte();
+         //internal bool ReadBool() => ReadByte() != 0;
+         //internal short ReadShort() => (short)(ReadByte() | (ReadByte() << 8));
+         //internal ushort ReadUShort() => (ushort)ReadShort();
+         //internal int ReadInt() => (ReadByte() | (ReadByte() << 8) | (ReadByte() << 16) | (ReadByte() << 24));
+         //internal uint ReadUInt() => (uint)ReadInt();
+         //internal long ReadLong() => (ReadByte() | ((long)ReadByte() << 8) | ((long)ReadByte() << 16) | ((long)ReadByte() << 24) | ((long)ReadByte() << 32) | ((long)ReadByte() << 40) | ((long)ReadByte() << 48) | ((long)ReadByte() << 56));
+         //internal ulong ReadULong() => (ulong)ReadLong();
        /*  internal byte[] ReadArray(int count)
          {
              byte[] buffer = new byte[count];
@@ -120,8 +122,8 @@ namespace ClassicUO.AssetsLoader
 
         internal T[] ReadArray<T>(in int count) where T : struct
         {
-            T[] t = ReadArray<T>(_position, count);
-            _position += count;
+            T[] t = ReadArray<T>(Position, count);
+            Position += count;
             return t;
         }
 
@@ -138,9 +140,10 @@ namespace ClassicUO.AssetsLoader
             return s;
         }
 
-        internal void Skip(in int count) => _position += count;
+        /*internal void Skip(in int count) => _position += count;
         internal void Seek(in int count) => _position = count;
-        internal void Seek(in long count) => _position = (int)count;
+        internal void Seek(in long count) => _position = (int)count;*/
+
         internal (int, int, bool) SeekByEntryIndex(in int entryidx)
         {
             if (entryidx < 0 || entryidx >= Entries.Length)

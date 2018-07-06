@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <RootNamespace>ClassicUO.AssetLoader</RootNamespace>
+    <RootNamespace>ClassicUO.AssetsLoader</RootNamespace>
     <AssemblyName>AssetsLoader</AssemblyName>
     <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>Library</OutputType>
