@@ -24,7 +24,6 @@ namespace ClassicUO
             TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
             // IsFixedTimeStep = false;
 
-            IsMouseVisible = true;
             _graphics = new GraphicsDeviceManager(this);
 
             Log.Message(LogTypes.Trace, "Gameloop initialized.");
@@ -121,6 +120,8 @@ namespace ClassicUO
             //}
 
             
+
+            
             NetClient.Socket.Slice();
             
 
@@ -128,11 +129,23 @@ namespace ClassicUO
             base.Update(gameTime);
         }
 
+        protected override bool BeginDraw()
+        {
+            _mouseManager.BeginDraw();
+
+            return base.BeginDraw();
+        }
+
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            _spriteBatch.Begin();
 
+            _mouseManager.Draw(_spriteBatch);
+
+            _spriteBatch.End();
+            
             base.Draw(gameTime);
         }
     }

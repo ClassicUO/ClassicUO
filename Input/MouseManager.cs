@@ -33,6 +33,22 @@ namespace ClassicUO.Input
         }
 
 
+        private bool _updateTexture;
+        private ushort _currentGraphic = 0x2073;
+        public ushort CurrentGraphic
+        {
+            get => _currentGraphic;
+            set
+            {
+                if (_currentGraphic != value)
+                {
+                    _currentGraphic = value;
+                    _updateTexture = true;
+                }
+            }
+        }
+        public Texture2D Texture { get; private set; }
+
         public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove;
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
 
@@ -153,6 +169,34 @@ namespace ClassicUO.Input
             }
         }
 
+
+        public void BeginDraw()
+        {
+            if (Texture == null || _updateTexture)
+            {
+                ushort[] pixels = AssetsLoader.Art.ReadStaticArt(CurrentGraphic, out var w, out var h);
+                Texture = new Texture2D(this.Game.GraphicsDevice, w, h, false, SurfaceFormat.Bgra5551);
+                Texture.SetData(pixels);
+                _updateTexture = false;
+            }
+        }
+
+        public void Draw(in SpriteBatch sb)
+        {
+            ushort id = CurrentGraphic;
+
+            if (id < 0x206A)
+                id -= 0x2053;
+            else
+            {
+                id -= 0x206A;
+            }
+
+            if (id < 16)
+            {
+                sb.Draw(Texture, new Vector2(_prevMouseState.X + _cursorOffset[0, id], _prevMouseState.Y + _cursorOffset[1, id]), Color.White);
+            }
+        }
 
 
         public override void Update(GameTime gameTime)
