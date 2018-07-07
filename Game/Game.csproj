@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AssetLoader\AssetLoader.csproj" />
+    <ProjectReference Include="..\Renderer\Renderer.csproj" />
     <ProjectReference Include="..\Utility\Utility.csproj" />
   </ItemGroup>
 

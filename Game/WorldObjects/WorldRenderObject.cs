@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using ClassicUO.Renderer;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,9 +17,12 @@ namespace ClassicUO.Game.WorldObjects
         public Texture2D Texture { get; private set; }
 
 
-        public virtual void Draw()
+        public virtual void Draw(in SpriteBatch3D  spriteBatch)
         {
+            if (Texture == null)
+                return;
 
+            //spriteBatch.DrawSprite()
         }
 
         public void AssignTexture(in Texture2D texture) => Texture = texture;

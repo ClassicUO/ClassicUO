@@ -195,7 +195,9 @@ namespace ClassicUO.Input
 
             if (id < 16)
             {
-                sb.Draw2D(Texture, new Vector3( _prevMouseState.X + _cursorOffset[0, id], _prevMouseState.Y + _cursorOffset[1, id], 0), Vector3.Zero);
+                sb.Draw2D(Texture, 
+                    new Vector3( _prevMouseState.X + _cursorOffset[0, id], _prevMouseState.Y + _cursorOffset[1, id], 0),
+                    RenderExtentions.GetHueVector(38));
             }
         }
 

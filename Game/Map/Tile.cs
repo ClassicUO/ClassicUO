@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class Tile
+    public sealed class Tile : WorldObject
     {
         private readonly List<WorldObject> _objectsOnTile;
 
@@ -15,10 +15,8 @@ namespace ClassicUO.Game.Map
         }
 
         public Graphic TileID { get; set; }
-        public Position Location { get; set; }
         public IReadOnlyList<WorldObject> ObjectsOnTiles => _objectsOnTile;
-
-        public Microsoft.Xna.Framework.Graphics.Texture2D Texture { get; set; }
+        public override Position Position { get; set; }
 
         public void AddWorldObject(in WorldObject obj)
         {
@@ -33,6 +31,14 @@ namespace ClassicUO.Game.Map
         public void Clear()
         {
             _objectsOnTile.Clear();
+        }
+    }
+
+    public class TileView : WorldRenderObject
+    {
+        public TileView(Tile tile) : base(tile)
+        {
+
         }
     }
 }

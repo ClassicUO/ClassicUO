@@ -98,52 +98,52 @@ namespace ClassicUO.Renderer
             _effect.Parameters["WorldMatrix"].SetValue(ProjectionMatrixWorld);
             _effect.Parameters["Viewport"].SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
            
-
             GraphicsDevice.DepthStencilState = _dss;
 
 
             _effect.CurrentTechnique = _effect.Techniques["HueTechnique"];
             _effect.CurrentTechnique.Passes[0].Apply();
 
-            var enumerator = _drawingQueue.GetEnumerator();
+            //var enumerator = _drawingQueue.GetEnumerator();
 
-            while (enumerator.MoveNext())
-            {
-                Texture2D texture = enumerator.Current.Key;
-                var list = enumerator.Current.Value;
-
-                list.CopyTo(0, _vertexBuffer, 0, Math.Min(list.Count, MAX_VERTICES_PER_DRAW));
-
-                GraphicsDevice.Textures[0] = texture;
-                GraphicsDevice.DrawUserIndexedPrimitives(
-                    PrimitiveType.TriangleList,
-                    _vertexBuffer,
-                    0,
-                    Math.Min(list.Count, MAX_VERTICES_PER_DRAW),
-                    _indexBuffer,
-                    0, list.Count / 2);
-
-                list.Clear();
-                _vertexQueue.Enqueue(list);
-            }
-
-            //foreach (KeyValuePair<Texture2D, List<SpriteVertex>> k in _drawingQueue)
+            //while (enumerator.MoveNext())
             //{
+            //    Texture2D texture = enumerator.Current.Key;
+            //    var list = enumerator.Current.Value;
 
-            //    k.Value.CopyTo(0, _vertexBuffer, 0, Math.Min(k.Value.Count, MAX_VERTICES_PER_DRAW));
+            //    list.CopyTo(0, _vertexBuffer, 0, Math.Min(list.Count, MAX_VERTICES_PER_DRAW));
 
-            //    GraphicsDevice.Textures[0] = k.Key;
+            //    GraphicsDevice.Textures[0] = texture;
             //    GraphicsDevice.DrawUserIndexedPrimitives(
             //        PrimitiveType.TriangleList,
             //        _vertexBuffer,
             //        0,
-            //        Math.Min(k.Value.Count, MAX_VERTICES_PER_DRAW),
+            //        Math.Min(list.Count, MAX_VERTICES_PER_DRAW),
             //        _indexBuffer,
-            //        0, k.Value.Count / 2);
+            //        0, list.Count / 2);
 
-            //    k.Value.Clear();
-            //    _vertexQueue.Enqueue(k.Value);
+            //    list.Clear();
+            //    _vertexQueue.Enqueue(list);
             //}
+
+            foreach (KeyValuePair<Texture2D, List<SpriteVertex>> k in _drawingQueue)
+            {
+                k.Value.CopyTo(0, _vertexBuffer, 0, Math.Min(k.Value.Count, MAX_VERTICES_PER_DRAW));
+
+                GraphicsDevice.Textures[0] = k.Key;
+                GraphicsDevice.DrawUserIndexedPrimitives
+                (
+                    PrimitiveType.TriangleList,
+                    _vertexBuffer,
+                    0,
+                    Math.Min(k.Value.Count, MAX_VERTICES_PER_DRAW),
+                    _indexBuffer,
+                    0, k.Value.Count / 2
+                );
+
+                k.Value.Clear();
+                _vertexQueue.Enqueue(k.Value);
+            }
             _drawingQueue.Clear();
         }
 

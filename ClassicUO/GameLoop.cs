@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Input;
@@ -42,7 +43,6 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, "Gameloop initialized.");
         }
 
-        private Game.Map.Facet _facet;
 
         protected override void Initialize()
         {
@@ -90,12 +90,31 @@ namespace ClassicUO
             AssetsLoader.Hues.CreateHuesPalette();
             AssetsLoader.FloatHues[] huedata = AssetsLoader.Hues.Palette;
 
-            //GraphicsDevice.Textures[1] = textureHue0;
-            //GraphicsDevice.Textures[2] = textureHue1;
+
+            uint[] hues = new uint[32 * 2048 * 2];
+            int idx = 0; // 32
+
+            foreach (var range in AssetsLoader.Hues.HuesRange)
+            {
+                foreach(var entry in range.Entries)
+                {
+                    foreach (var c in entry.ColorTable)
+                    {
+                        hues[idx++] = AssetsLoader.Hues.Color16To32(c);
+                    }
+                }
+            }
+
+
+            textureHue0.SetData(hues, 0, 2048 * 32);
+            textureHue1.SetData(hues, 2048 * 32, 2048 * 32);
+
+            GraphicsDevice.Textures[1] = textureHue0;
+            GraphicsDevice.Textures[2] = textureHue1;
 
             //NetClient.Socket.Connect("login.uodemise.com", 2593);
 
-            //_facet = new Game.Map.Facet(0);
+            _facet = new Game.Map.Facet(0);
 
             //var data = AssetsLoader.Art.ReadStaticArt(3850, out short w, out short h);
 
@@ -124,6 +143,7 @@ namespace ClassicUO
         private ushort _currentX = 1443;
         private Stopwatch _stopwatch;
         private Texture2D _texture;
+        private Game.Map.Facet _facet;
 
         protected override void Update(GameTime gameTime)
         {
@@ -143,7 +163,8 @@ namespace ClassicUO
             //   // _delay = DateTime.Now.AddMilliseconds(TIME_RUN_MOUNT);
             //}
 
-            
+            _facet.LoadChunks(_x, _y, 5);
+
             NetClient.Socket.Slice();
             
 

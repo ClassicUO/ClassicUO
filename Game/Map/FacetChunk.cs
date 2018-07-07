@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Map
                         sbyte z = block.Cells[pos].Z;
 
                         Tiles[pos].TileID = tileID;
-                        Tiles[pos].Location = new Position((ushort)(bx + x), (ushort)(by + y), z);
+                        Tiles[pos].Position = new Position((ushort)(bx + x), (ushort)(by + y), z);
                     }
                 }
 
