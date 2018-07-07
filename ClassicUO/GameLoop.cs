@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Input;
 using ClassicUO.Network;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,17 +15,29 @@ namespace ClassicUO
     internal class GameLoop : Microsoft.Xna.Framework.Game
     {
         private readonly GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
         private MouseManager _mouseManager;
         private KeyboardManager _keyboardManager;
+        private SpriteBatchUI _spriteBatch;
 
         public GameLoop()
         {
-
             TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
-            // IsFixedTimeStep = false;
-
             _graphics = new GraphicsDeviceManager(this);
+
+            _graphics.PreparingDeviceSettings += (sender, e) =>
+            {
+                e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+            };
+
+            
+            if (_graphics.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
+                _graphics.GraphicsProfile = GraphicsProfile.HiDef;
+
+            _graphics.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
+            _graphics.SynchronizeWithVerticalRetrace = false;
+            _graphics.ApplyChanges();
+
+           
 
             Log.Message(LogTypes.Trace, "Gameloop initialized.");
         }
@@ -39,12 +52,13 @@ namespace ClassicUO
             Components.Add(_mouseManager);
             Components.Add(_keyboardManager);
 
+            _spriteBatch = new SpriteBatchUI(this);
+
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             // TEST
 
@@ -70,6 +84,15 @@ namespace ClassicUO
 
             _mouseManager.LoadTextures();
 
+            Texture2D textureHue0 = new Texture2D(GraphicsDevice, 32, 2048);
+            Texture2D textureHue1 = new Texture2D(GraphicsDevice, 32, 2048);
+
+            AssetsLoader.Hues.CreateHuesPalette();
+            AssetsLoader.FloatHues[] huedata = AssetsLoader.Hues.Palette;
+
+            //GraphicsDevice.Textures[1] = textureHue0;
+            //GraphicsDevice.Textures[2] = textureHue1;
+
             //NetClient.Socket.Connect("login.uodemise.com", 2593);
 
             //_facet = new Game.Map.Facet(0);
@@ -91,6 +114,7 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
+        
 
         const double TIME_RUN_MOUNT = (2d / 20d) * 1000d;
         private DateTime _delay = DateTime.Now;
@@ -120,8 +144,6 @@ namespace ClassicUO
             //}
 
             
-
-            
             NetClient.Socket.Slice();
             
 
@@ -138,14 +160,17 @@ namespace ClassicUO
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Transparent);
 
-            _spriteBatch.Begin();
+            _spriteBatch.BeginDraw();
 
             _mouseManager.Draw(_spriteBatch);
 
-            _spriteBatch.End();
-            
+
+            _spriteBatch.EndDraw();
+
+
+
             base.Draw(gameTime);
         }
     }

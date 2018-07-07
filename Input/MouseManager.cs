@@ -1,4 +1,5 @@
-﻿using ClassicUO.Utility;
+﻿using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -181,7 +182,7 @@ namespace ClassicUO.Input
             }
         }
 
-        public void Draw(in SpriteBatch sb)
+        public void Draw(in SpriteBatchUI sb)
         {
             ushort id = CurrentGraphic;
 
@@ -194,7 +195,7 @@ namespace ClassicUO.Input
 
             if (id < 16)
             {
-                sb.Draw(Texture, new Vector2(_prevMouseState.X + _cursorOffset[0, id], _prevMouseState.Y + _cursorOffset[1, id]), Color.White);
+                sb.Draw2D(Texture, new Vector3( _prevMouseState.X + _cursorOffset[0, id], _prevMouseState.Y + _cursorOffset[1, id], 0), Vector3.Zero);
             }
         }
 

@@ -7,11 +7,17 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>E:\Progetti\ClassicUO-FNA\bin\Debug</OutputPath>
+    <LangVersion>7.3</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>E:\Progetti\ClassicUO-FNA\bin\Release</OutputPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AssetLoader\AssetLoader.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="FNA">
