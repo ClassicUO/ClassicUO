@@ -12,7 +12,7 @@ namespace ClassicUO.Game
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
         public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
         public static PlayerMobile Player { get; set; }
-        public static int Map { get; set; }
+        public static Map.Facet Map { get; set; }
 
         private static readonly ConcurrentDictionary<Serial, House> _houses = new ConcurrentDictionary<Serial, House>();
 
@@ -98,7 +98,7 @@ namespace ClassicUO.Game
 
         public static void Clear()
         {
-            Map = 0;
+            Map = null;
             Player = null;
             Items.Clear();
             Mobiles.Clear();

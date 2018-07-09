@@ -1,4 +1,5 @@
 ﻿using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -11,20 +12,43 @@ namespace ClassicUO.Game.WorldObjects
         public WorldRenderObject(in WorldObject parent)
         {
             WorldObject = parent;
+            AllowedToDraw = true;
+
+            SortZ = parent.Position.Z;
         }
 
         public WorldObject WorldObject { get; }
-        public Texture2D Texture { get; private set; }
+        public Texture2D Texture { get; protected set; }
+        public Rectangle Bounds { get; set; }
 
+        public sbyte SortZ { get; set; }
 
-        public virtual void Draw(in SpriteBatch3D  spriteBatch)
+        public bool AllowedToDraw { get; set; }
+
+        public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            if (Texture == null)
-                return;
+            if (Texture == null || !AllowedToDraw)
+                return false;
 
-            //spriteBatch.DrawSprite()
+            SpriteVertex[] vertex = SpriteVertex.PolyBuffer;
+            vertex[0].Position = position;
+            vertex[0].Position.X -= Bounds.X;
+            vertex[0].Position.Y -= Bounds.Y;
+            vertex[0].TextureCoordinate.Y = 0;
+            vertex[1].Position = vertex[0].Position;
+            vertex[1].Position.X += Bounds.Width;
+            vertex[1].TextureCoordinate.Y = 0;
+            vertex[2].Position = vertex[0].Position;
+            vertex[2].Position.Y += Bounds.Height;
+            vertex[3].Position = vertex[1].Position;
+            vertex[3].Position.Y += Bounds.Height;
+
+
+
+            if (!spriteBatch.DrawSprite(Texture, vertex))
+                return false;
+
+            return true;
         }
-
-        public void AssignTexture(in Texture2D texture) => Texture = texture;
     }
 }

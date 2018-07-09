@@ -84,6 +84,7 @@ namespace ClassicUO.Game.Map
             }
         }
 
+      
         private AssetsLoader.IndexMap GetIndex(in int map)
         {
             uint block = (uint)(X * AssetsLoader.Map.MapBlocksSize[map][1]) + Y;
@@ -101,7 +102,9 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < Tiles.Length; i++)
             {
                 Tiles[i].Clear();
+                //Tiles[i] = null;
             }
+            //Tiles = null;
         }
 
     }

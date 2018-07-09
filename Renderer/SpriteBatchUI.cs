@@ -77,7 +77,7 @@ namespace ClassicUO.Renderer
             _vertexBuffer[0].TextureCoordinate.Y = minY;
             _vertexBuffer[0].TextureCoordinate.Z = 0;
 
-            _vertexBuffer[1].Position.X = position.X + texture.Width;
+            _vertexBuffer[1].Position.X = position.X + sourceRect.Width;
             _vertexBuffer[1].Position.Y = position.Y;
             _vertexBuffer[1].Position.Z = 0;
             _vertexBuffer[1].Normal.X = 0;
@@ -88,7 +88,7 @@ namespace ClassicUO.Renderer
             _vertexBuffer[1].TextureCoordinate.Z = 0;
 
             _vertexBuffer[2].Position.X = position.X;
-            _vertexBuffer[2].Position.Y = position.Y + texture.Height;
+            _vertexBuffer[2].Position.Y = position.Y + sourceRect.Height;
             _vertexBuffer[2].Position.Z = 0;
             _vertexBuffer[2].Normal.X = 0;
             _vertexBuffer[2].Normal.Y = 0;
@@ -97,8 +97,8 @@ namespace ClassicUO.Renderer
             _vertexBuffer[2].TextureCoordinate.Y = maxY;
             _vertexBuffer[2].TextureCoordinate.Z = 0;
 
-            _vertexBuffer[3].Position.X = position.X + texture.Width;
-            _vertexBuffer[3].Position.Y = position.Y + texture.Height;
+            _vertexBuffer[3].Position.X = position.X + sourceRect.Width;
+            _vertexBuffer[3].Position.Y = position.Y + sourceRect.Height;
             _vertexBuffer[3].Position.Z = 0;
             _vertexBuffer[3].Normal.X = 0;
             _vertexBuffer[3].Normal.Y = 0;
@@ -172,7 +172,7 @@ namespace ClassicUO.Renderer
             _vertexBuffer[0].Normal.Z = 1;
             _vertexBuffer[0].TextureCoordinate = Vector3.Zero;
 
-            _vertexBuffer[1].Position.X = destRect.X + texture.Width;
+            _vertexBuffer[1].Position.X = destRect.X + destRect.Width;
             _vertexBuffer[1].Position.Y = destRect.Y;
             _vertexBuffer[1].Position.Z = 0;
             _vertexBuffer[1].Normal.X = 0;
@@ -183,7 +183,7 @@ namespace ClassicUO.Renderer
             _vertexBuffer[1].TextureCoordinate.Z = 0;
 
             _vertexBuffer[2].Position.X = destRect.X;
-            _vertexBuffer[2].Position.Y = destRect.Y + texture.Height;
+            _vertexBuffer[2].Position.Y = destRect.Y + destRect.Height;
             _vertexBuffer[2].Position.Z = 0;
             _vertexBuffer[2].Normal.X = 0;
             _vertexBuffer[2].Normal.Y = 0;
@@ -192,8 +192,8 @@ namespace ClassicUO.Renderer
             _vertexBuffer[2].TextureCoordinate.Y = 1;
             _vertexBuffer[2].TextureCoordinate.Z = 0;
 
-            _vertexBuffer[3].Position.X = destRect.X + texture.Width;
-            _vertexBuffer[3].Position.Y = destRect.Y + texture.Height;
+            _vertexBuffer[3].Position.X = destRect.X + destRect.Width;
+            _vertexBuffer[3].Position.Y = destRect.Y + destRect.Height;
             _vertexBuffer[3].Position.Z = 0;
             _vertexBuffer[3].Normal.X = 0;
             _vertexBuffer[3].Normal.Y = 0;

@@ -170,6 +170,7 @@ namespace ClassicUO.Input
             }
         }
 
+        private Texture2D _blackTexture;
 
         public void BeginDraw()
         {
@@ -179,6 +180,9 @@ namespace ClassicUO.Input
                 Texture = new Texture2D(this.Game.GraphicsDevice, w, h, false, SurfaceFormat.Bgra5551);
                 Texture.SetData(pixels);
                 _updateTexture = false;
+
+                _blackTexture = new Texture2D(this.Game.GraphicsDevice, 1, 1);
+                _blackTexture.SetData(new Color[] { Color.Black });
             }
         }
 
@@ -197,7 +201,10 @@ namespace ClassicUO.Input
             {
                 sb.Draw2D(Texture, 
                     new Vector3( _prevMouseState.X + _cursorOffset[0, id], _prevMouseState.Y + _cursorOffset[1, id], 0),
-                    RenderExtentions.GetHueVector(38));
+                    RenderExtentions.GetHueVector(0));
+
+                // tooltip testing, very nice!
+                //sb.Draw2D(_blackTexture, new Rectangle(_prevMouseState.X + _cursorOffset[0, id] - 100, _prevMouseState.Y + _cursorOffset[1, id] - 50, 100, 50), new Vector3(0, 0, 0.3f));
             }
         }
 

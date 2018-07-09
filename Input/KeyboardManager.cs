@@ -35,6 +35,11 @@ namespace ClassicUO.Input
                         var arg = new KeyboardEventArgs(k, KeyState.Down);
                         KeyDown.Raise(arg);
                     }
+                    else
+                    {
+                        var arg = new KeyboardEventArgs(k, KeyState.Down);
+                        KeyPressed.Raise(arg);
+                    }
                 }
             }
 
@@ -58,6 +63,6 @@ namespace ClassicUO.Input
         }
 
 
-        public event EventHandler<KeyboardEventArgs> KeyDown, KeyUp;
+        public event EventHandler<KeyboardEventArgs> KeyDown, KeyUp, KeyPressed;
     }
 }

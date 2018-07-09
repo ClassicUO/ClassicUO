@@ -49,6 +49,11 @@ namespace ClassicUO.Renderer
         };
 
         public static int SizeInBytes { get { return sizeof(float) * 12; } }
+
+        public override string ToString()
+        {
+            return string.Format("VPNTH: <{0}> <{1}>", Position.ToString(), TextureCoordinate.ToString());
+        }
     }
 
 }
