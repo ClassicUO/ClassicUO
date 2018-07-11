@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using ClassicUO.AssetsLoader;
+using ClassicUO.Game.WorldObjects.Views;
 
 namespace ClassicUO.Game.WorldObjects
 {
@@ -40,6 +41,12 @@ namespace ClassicUO.Game.WorldObjects
         public event EventHandler HitsChanged;
         public event EventHandler ManaChanged;
         public event EventHandler StaminaChanged;
+
+
+        protected override WorldRenderObject CreateView() => new MobileView(this);
+
+        public new MobileView ViewObject => (MobileView)base.ViewObject;
+
 
         public ushort Hits
         {

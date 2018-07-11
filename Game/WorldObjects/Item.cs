@@ -1,4 +1,5 @@
-﻿using ClassicUO.Utility;
+﻿using ClassicUO.Game.WorldObjects.Views;
+using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -52,6 +53,12 @@ namespace ClassicUO.Game.WorldObjects
 
 
         public event EventHandler OwnerChanged;
+
+
+
+        public new ItemView ViewObject => (ItemView)base.ViewObject;
+
+        protected override WorldRenderObject CreateView() => new ItemView(this);
 
 
         public ushort Amount

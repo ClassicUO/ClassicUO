@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Map
                 if (_center != value)
                 {
                     _center = value;
-                    LoadChunks((ushort)_center.X, (ushort)_center.Y, 5);
+                    LoadChunks((ushort)_center.X, (ushort)_center.Y);
                 }
             }
         }
@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public float GetTileZ(in short x, in short y)
+        public sbyte GetTileZ(in short x, in short y)
         {
             Tile tile = GetTile(x, y);
             if (tile == null)
@@ -129,7 +129,7 @@ namespace ClassicUO.Game.Map
             return (v / 2);
         }
 
-        private void LoadChunks(in ushort centerX, in ushort centerY, in int distance)
+        private void LoadChunks(in ushort centerX, in ushort centerY)
         {
             const int XY_OFFSET = 30;
 
@@ -172,19 +172,6 @@ namespace ClassicUO.Game.Map
                     }
                 }
             }
-
-            //centerX /= 8; centerY /= 8;
-
-            //for (int y = -distance; y <= distance; y++)
-            //{
-            //    ushort cellY = (ushort)((centerY + y) % AssetsLoader.Map.MapBlocksSize[Index][1]); 
-            //    for (int x = -distance; x <= distance; x++)
-            //    {
-            //        ushort cellX = (ushort)((centerX + x) % AssetsLoader.Map.MapBlocksSize[Index][0]);
-
-            //        LoadOneChunk(cellX, cellY);
-            //    }
-            //}
         }
     }
 }
