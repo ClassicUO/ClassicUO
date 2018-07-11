@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace ClassicUO.Renderer
@@ -70,9 +71,9 @@ namespace ClassicUO.Renderer
             {
                 if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
                 {
-                    vertices[0].Position.Z = 
-                        vertices[1].Position.Z = 
-                        vertices[2].Position.Z = 
+                    vertices[0].Position.Z =
+                        vertices[1].Position.Z =
+                        vertices[2].Position.Z =
                         vertices[3].Position.Z = _z++;
 
                     GetVertexList(texture).AddRange(vertices);

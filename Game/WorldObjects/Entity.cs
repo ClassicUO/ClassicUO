@@ -74,7 +74,7 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
-        public Hue Hue
+        public override Hue Hue
         {
             get => _hue;
             set

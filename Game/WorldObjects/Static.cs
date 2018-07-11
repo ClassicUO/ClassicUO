@@ -14,7 +14,6 @@ namespace ClassicUO.Game.WorldObjects
         }
 
         public Graphic TileID { get; }
-        public Hue Hue { get; }
         public int Index { get; }
         public override Position Position { get; set; }
 

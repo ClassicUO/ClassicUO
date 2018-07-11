@@ -8,7 +8,8 @@ namespace ClassicUO.Game.WorldObjects
     {
         private WorldRenderObject _viewObject;
 
-        public abstract Position Position { get; set; }
+        public virtual Position Position { get; set; }
+        public virtual Hue Hue { get; set; }
 
         public WorldRenderObject ViewObject
         {

@@ -1,4 +1,5 @@
 ﻿using ClassicUO.Game.WorldObjects;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -17,19 +18,24 @@ namespace ClassicUO.Game.Map
         {
             X = x; Y = y;
 
-            Tiles = new Tile[64];
-            for (int i = 0; i < Tiles.Length; i++)
-                Tiles[i] = new Tile();
+            Tiles = new Tile[8][];
+            for (int i = 0; i < 8; i++)
+            {
+                Tiles[i] = new Tile[8];
+                for (int j = 0; j < 8; j++)
+                    Tiles[i][j] = new Tile();
+            }
         }
 
         public ushort X { get; private set; }
         public ushort Y { get; private set; }
-        public Tile[] Tiles { get; private set; }
+        public Tile[][] Tiles { get; private set; }
 
+        public long Ticks { get; private set; }
 
-        public void Load(in int index)
+        public void Load(in int map)
         {
-            var im = GetIndex(index);
+            var im = GetIndex(map);
             if (im.MapAddress == 0)
                 throw new Exception();
 
@@ -49,8 +55,8 @@ namespace ClassicUO.Game.Map
                         ushort tileID = (ushort)(block.Cells[pos].TileID & 0x3FFF);
                         sbyte z = block.Cells[pos].Z;
 
-                        Tiles[pos].TileID = tileID;
-                        Tiles[pos].Position = new Position((ushort)(bx + x), (ushort)(by + y), z);
+                        Tiles[x][y].TileID = tileID;
+                        Tiles[x][y].Position = new Position((ushort)(bx + x), (ushort)(by + y), z);
                     }
                 }
 
@@ -72,22 +78,39 @@ namespace ClassicUO.Game.Map
 
                             sbyte z = sb->Z;
 
-                            Static staticObject = new Static(sb->Color, sb->Hue, i)
+                            Static staticObject = new Static(sb->Color, sb->Hue, pos)
                             {
-                                Position = new Position((ushort)(bx + x), (ushort)(by + y), z)
+                                Position = new Position((ushort)(bx + x), (ushort)(by + y), z)        
                             };
 
-                            Tiles[pos].AddWorldObject(staticObject);
+                            Tiles[x][y].AddWorldObject(staticObject);
                         }
                     }
                 }
             }
         }
 
-      
-        private AssetsLoader.IndexMap GetIndex(in int map)
+        public float GetTileZ(in int map, in short x, in short y)
         {
-            uint block = (uint)(X * AssetsLoader.Map.MapBlocksSize[map][1]) + Y;
+            if (x < 0 || y < 0)
+                return -125;
+
+            var blockIndex = GetIndex(map, x / 8, y / 8);
+            if (blockIndex.MapAddress == 0)
+                return -125;
+
+            int mx = x % 8;
+            int my = y % 8;
+
+            return Marshal.PtrToStructure<AssetsLoader.MapBlock>((IntPtr)blockIndex.MapAddress).Cells[my * 8 + mx].Z;
+        }
+
+        private AssetsLoader.IndexMap GetIndex(in int map)
+            => GetIndex(map, X, Y);
+
+        private AssetsLoader.IndexMap GetIndex(in int map, in int x, in int y)
+        {
+            int block = (x * AssetsLoader.Map.MapBlocksSize[map][1]) + y;
             return AssetsLoader.Map.BlockData[map][block];
         }
 
@@ -99,12 +122,11 @@ namespace ClassicUO.Game.Map
 
         public void Unload()
         {
-            for (int i = 0; i < Tiles.Length; i++)
+            for (int i = 0; i < 8; i++)
             {
-                Tiles[i].Clear();
-                //Tiles[i] = null;
+                for (int j = 0; j < 8; j++)
+                    Tiles[i][j].Clear();
             }
-            //Tiles = null;
         }
 
     }

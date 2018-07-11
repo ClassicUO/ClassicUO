@@ -14,9 +14,9 @@ namespace ClassicUO.UI
     public sealed class UIEngine
     {
         private Control _lastFocused;
-        private Game _game;
+        private Microsoft.Xna.Framework.Game _game;
 
-        public UIEngine(Game game)
+        public UIEngine(Microsoft.Xna.Framework.Game game)
         {
             _game = game;
             Controls = new List<Control>();

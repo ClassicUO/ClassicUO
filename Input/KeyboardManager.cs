@@ -12,7 +12,7 @@ namespace ClassicUO.Input
     {
         private KeyboardState _prevKeyboardState = Keyboard.GetState();
 
-        public KeyboardManager(Game game): base(game)
+        public KeyboardManager(Microsoft.Xna.Framework.Game game): base(game)
         {
           
         }

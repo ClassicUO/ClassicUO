@@ -1,4 +1,5 @@
-﻿using ClassicUO.Renderer;
+﻿using ClassicUO.Game.WorldObjects;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -28,7 +29,7 @@ namespace ClassicUO.Input
 
         private readonly int[,] _cursorOffset = new int[2, 16];
 
-        public MouseManager(Game game) : base(game)
+        public MouseManager(Microsoft.Xna.Framework.Game game) : base(game)
         {
            
         }
@@ -49,6 +50,10 @@ namespace ClassicUO.Input
             }
         }
         public Texture2D Texture { get; private set; }
+        public Point ScreenPosition { get; private set; }
+        public Point GamePosition { get; private set; }
+
+        public WorldObject SelectedWorldObject { get; set; }
 
         public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove;
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
@@ -200,11 +205,11 @@ namespace ClassicUO.Input
             if (id < 16)
             {
                 sb.Draw2D(Texture, 
-                    new Vector3( _prevMouseState.X + _cursorOffset[0, id], _prevMouseState.Y + _cursorOffset[1, id], 0),
+                    new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0),
                     RenderExtentions.GetHueVector(0));
 
                 // tooltip testing, very nice!
-                //sb.Draw2D(_blackTexture, new Rectangle(_prevMouseState.X + _cursorOffset[0, id] - 100, _prevMouseState.Y + _cursorOffset[1, id] - 50, 100, 50), new Vector3(0, 0, 0.3f));
+               // sb.Draw2D(_blackTexture, new Rectangle(ScreenPosition.X + _cursorOffset[0, id] - 100, ScreenPosition.Y + _cursorOffset[1, id] - 50, 100, 50), new Vector3(0, 1, 0.3f));
             }
         }
 
@@ -275,9 +280,9 @@ namespace ClassicUO.Input
 
             if (current.X != _prevMouseState.X || current.Y != _prevMouseState.Y)
             {
+                ScreenPosition = new Point(current.X, current.Y);
                 MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y);
                 MouseMove.Raise(arg);
-                Log.Message(LogTypes.Trace, arg.Location.ToString());
             }
 
             _prevMouseState = current;
