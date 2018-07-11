@@ -180,10 +180,10 @@ namespace ClassicUO
         const double TIME_RUN_MOUNT = (2d / 20d) * 1000d;
         private DateTime _delay = DateTime.Now;
 
-        private ushort _x = 774, _y = 1697;
+        private ushort _x = 1446, _y = 1665;
         private sbyte _z = 0;
         private ushort _maxX = 5454;
-        private ushort _currentX = 774;
+        private ushort _currentX = 1446;
         private Stopwatch _stopwatch;
         private Texture2D _texture, _crossTexture;
         private Game.Map.Facet _facet;

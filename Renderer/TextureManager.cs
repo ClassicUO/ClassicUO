@@ -7,11 +7,18 @@ namespace ClassicUO.Renderer
 {
     public static class TextureManager
     {
+
+        const long TEXTURE_TIME_LIFE = 3 * 10000000;
+
+
         struct TextureDuration
         {
             public Texture2D Texture;
             public long Ticks;
         }
+
+
+        private static long _ticks;
 
         private readonly static Dictionary<ushort, TextureDuration> _staticTextures = new Dictionary<ushort, TextureDuration>();
         private readonly static Dictionary<ushort, TextureDuration> _landTextures = new Dictionary<ushort, TextureDuration>();
@@ -23,7 +30,6 @@ namespace ClassicUO.Renderer
 
         public static GraphicsDevice Device { get; set; }
 
-        private static long _ticks;
 
         public static void UpdateTicks(in long ticks)
         {
@@ -99,7 +105,6 @@ namespace ClassicUO.Renderer
             toremove.Clear();
         }
 
-        const long TEXTURE_TIME_LIFE = 3 * 10000000;
 
         public static Texture2D GetOrCreateStaticTexture(in ushort g)
         {

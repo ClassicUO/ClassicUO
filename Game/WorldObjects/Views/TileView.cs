@@ -11,7 +11,7 @@ namespace ClassicUO.Game.WorldObjects.Views
     {
         private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
         private readonly Vector3[] _normals = new Vector3[4];
-        private readonly SpriteVertex[] _vertexBufferAlternate =
+        private readonly SpriteVertex[] _vertex =
         {
             new SpriteVertex(new Vector3(), new Vector3(),  new Vector3(0, 0, 0)),
             new SpriteVertex(new Vector3(), new Vector3(),  new Vector3(1, 0, 0)),
@@ -27,7 +27,8 @@ namespace ClassicUO.Game.WorldObjects.Views
             new Point(0, 2), new Point(1, 2)
         };
 
-        bool _MustUpdateSurroundings = true;
+        private bool _needUpdateStrechedTile = true;
+
 
 
         public TileView(in Tile tile) : base(tile)
@@ -45,19 +46,25 @@ namespace ClassicUO.Game.WorldObjects.Views
                 Texture = TextureManager.GetOrCreateLandTexture(tile.TileID);
                 Bounds = new Rectangle(0, tile.Position.Z * 4, 44, 44);
             }
+
+            AllowedToDraw = !(tile.TileID < 3 || (tile.TileID >= 0x1AF && tile.TileID <= 0x1B5));
         }
 
-        public bool IsStretched { get; set; }
+
+        public bool IsStretched { get; }
+
 
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            if (_MustUpdateSurroundings)
+            if (Texture == null || !AllowedToDraw)
+                return false;
+
+            if (_needUpdateStrechedTile)
             {
                 UpdateStreched(World.Map);
-                _MustUpdateSurroundings = false;
+                _needUpdateStrechedTile = false;
             }
-
 
             if (!IsStretched)
                 return base.Draw(spriteBatch, position);
@@ -66,15 +73,15 @@ namespace ClassicUO.Game.WorldObjects.Views
 
         private bool Draw3DStretched(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            _vertexBufferAlternate[0].Position = position + _vertex0_yOffset;
-            _vertexBufferAlternate[1].Position = position + _vertex1_yOffset;
-            _vertexBufferAlternate[2].Position = position + _vertex2_yOffset;
-            _vertexBufferAlternate[3].Position = position + _vertex3_yOffset;
+            _vertex[0].Position = position + _vertex0_yOffset;
+            _vertex[1].Position = position + _vertex1_yOffset;
+            _vertex[2].Position = position + _vertex2_yOffset;
+            _vertex[3].Position = position + _vertex3_yOffset;
 
-
-            if (!spriteBatch.DrawSprite(Texture, _vertexBufferAlternate))
+            if (!spriteBatch.DrawSprite(Texture, _vertex))
                 return false;
 
+            MousePick(_vertex);
 
             return true;
         }
@@ -119,18 +126,18 @@ namespace ClassicUO.Game.WorldObjects.Views
             _vertex2_yOffset = new Vector3(0, 22 - (leftZ * 4), 0);
             _vertex3_yOffset = new Vector3(22, 44f - (bottomZ * 4), 0);
 
-            _vertexBufferAlternate[0].Normal = _normals[0];
-            _vertexBufferAlternate[1].Normal = _normals[1];
-            _vertexBufferAlternate[2].Normal = _normals[2];
-            _vertexBufferAlternate[3].Normal = _normals[3];
+            _vertex[0].Normal = _normals[0];
+            _vertex[1].Normal = _normals[1];
+            _vertex[2].Normal = _normals[2];
+            _vertex[3].Normal = _normals[3];
 
             Vector3 hue = RenderExtentions.GetHueVector(WorldObject.Hue);
-            if (_vertexBufferAlternate[0].Hue != hue)
+            if (_vertex[0].Hue != hue)
             {
-                _vertexBufferAlternate[0].Hue =
-                _vertexBufferAlternate[1].Hue =
-                _vertexBufferAlternate[2].Hue =
-                _vertexBufferAlternate[3].Hue = hue;
+                _vertex[0].Hue =
+                _vertex[1].Hue =
+                _vertex[2].Hue =
+                _vertex[3].Hue = hue;
             }
         }
 

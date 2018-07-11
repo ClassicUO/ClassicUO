@@ -71,6 +71,40 @@ namespace ClassicUO.AssetsLoader
                 }
             }
         }
+
+
+        public static bool IsBackground(in long flags) => (flags & 0x00000001) != 0;
+        public static bool IsWeapon(in long flags) => (flags & 0x00000002) != 0;
+        public static bool IsTransparent(in long flags) => (flags & 0x00000004) != 0;
+        public static bool IsTranslucent(in long flags) => (flags & 0x00000008) != 0;
+        public static bool IsWall(in long flags) => (flags & 0x00000010) != 0;
+        public static bool IsDamaging(in long flags) => (flags & 0x00000020) != 0;
+        public static bool IsImpassable(in long flags) => (flags & 0x00000040) != 0;
+        public static bool IsWet(in long flags) => (flags & 0x00000080) != 0;
+        public static bool IsUnknown(in long flags) => (flags & 0x00000100) != 0;
+        public static bool IsSurface(in long flags) => (flags & 0x00000200) != 0;
+        public static bool IsBridge(in long flags) => (flags & 0x00000400) != 0;
+        public static bool IsStackable(in long flags) => (flags & 0x00000800) != 0;
+        public static bool IsWindow(in long flags) => (flags & 0x00001000) != 0;
+        public static bool IsNoShoot(in long flags) => (flags & 0x00002000) != 0;
+        public static bool IsPrefixA(in long flags) => (flags & 0x00004000) != 0;
+        public static bool IsPrefixAn(in long flags) => (flags & 0x00008000) != 0;
+        public static bool IsInternal(in long flags) => (flags & 0x00010000) != 0;
+        public static bool IsFoliage(in long flags) => (flags & 0x00020000) != 0;
+        public static bool IsPartialHue(in long flags) => (flags & 0x00040000) != 0;
+        public static bool IsUnknown1(in long flags) => (flags & 0x00080000) != 0;
+        public static bool IsMap(in long flags) => (flags & 0x00100000) != 0;
+        public static bool IsContainer(in long flags) => (flags & 0x00200000) != 0;
+        public static bool IsWearable(in long flags) => (flags & 0x00400000) != 0;
+        public static bool IsLightSource(in long flags) => (flags & 0x00800000) != 0;
+        public static bool IsAnimated(in long flags) => (flags & 0x01000000) != 0;
+        public static bool IsNoDiagonal(in long flags) => (flags & 0x02000000) != 0;
+        public static bool IsUnknown2(in long flags) => (flags & 0x04000000) != 0;
+        public static bool IsArmor(in long flags) => (flags & 0x08000000) != 0;
+        public static bool IsRoof(in long flags) => (flags & 0x10000000) != 0;
+        public static bool IsDoor(in long flags) => (flags & 0x20000000) != 0;
+        public static bool IsStairBack(in long flags) => (flags & 0x40000000) != 0;
+        public static bool IsStairRight(in long flags) => (flags & 0x80000000) != 0;      
     }
 
 

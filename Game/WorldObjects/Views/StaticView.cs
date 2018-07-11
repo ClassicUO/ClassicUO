@@ -12,6 +12,8 @@ namespace ClassicUO.Game.WorldObjects.Views
         {
             Texture = TextureManager.GetOrCreateStaticTexture(st.TileID);
             Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + (st.Position.Z * 4), Texture.Width, Texture.Height);
+
+            AllowedToDraw = !IsNoDrawable(st.TileID);
         }
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)

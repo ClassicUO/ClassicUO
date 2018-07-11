@@ -29,7 +29,9 @@ namespace ClassicUO.Game.WorldObjects
         protected void DisposeView()
         {
             if (_viewObject != null)
+            {
                 _viewObject = null;
+            }
         }
     }
 }

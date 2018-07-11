@@ -21,6 +21,13 @@ namespace ClassicUO.Game.WorldObjects
         Invulnerable = 0x07,
     }
 
+    public enum RaceType : byte
+    {
+        HUMAN,
+        ELF,
+        GARGOYLE
+    }
+
     public class Mobile : Entity
     {
         private ushort _hits;
@@ -33,6 +40,7 @@ namespace ClassicUO.Game.WorldObjects
         private bool _warMode;
         private bool _renamable;
         private bool _isSA_Poisoned;
+        private RaceType _race;
 
         public Mobile(Serial serial) : base(serial)
         {
@@ -47,6 +55,19 @@ namespace ClassicUO.Game.WorldObjects
 
         public new MobileView ViewObject => (MobileView)base.ViewObject;
 
+
+        public RaceType Race
+        {
+            get => _race;
+            set
+            {
+                if (_race != value)
+                {
+                    _race = value;
+                    _delta |= Delta.Appearance;
+                }
+            }
+        }
 
         public ushort Hits
         {
