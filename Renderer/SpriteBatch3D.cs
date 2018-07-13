@@ -30,6 +30,7 @@ namespace ClassicUO.Renderer
             DepthBufferWriteEnable = true
         };
 
+
         public SpriteBatch3D(in Game game)
         {
             _game = game;
@@ -45,7 +46,14 @@ namespace ClassicUO.Renderer
             }
 
             _effect = new Effect(GraphicsDevice, File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, "IsometricWorld.fxc")));
-            _effect.Parameters["HuesPerTexture"].SetValue(2048f);
+            _effect.Parameters["HuesPerTexture"].SetValue(3000f);
+
+            _drawLightingEffect = _effect.Parameters["DrawLighting"];
+            _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];
+            _worldMatrixEffect = _effect.Parameters["WorldMatrix"];
+            _viewportEffect = _effect.Parameters["Viewport"];
+
+            _huesTechnique = _effect.Techniques["HueTechnique"];
         }
 
        
@@ -84,25 +92,32 @@ namespace ClassicUO.Renderer
             return false;
         }
 
+        private EffectParameter _drawLightingEffect, _projectionMatrixEffect, _worldMatrixEffect, _viewportEffect;
+        private EffectTechnique _huesTechnique;
+
         public void EndDraw()
         {
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
-            GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
-            GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
-            GraphicsDevice.SamplerStates[3] = SamplerState.PointWrap;
 
-            _effect.Parameters["DrawLighting"].SetValue(false);
+            GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
+            //GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
+            //GraphicsDevice.SamplerStates[3] = SamplerState.PointClamp;
+
+            //GraphicsDevice.SamplerStates[4] = SamplerState.PointWrap;
+
+            _drawLightingEffect.SetValue(false);
             // set up viewport.
-            _effect.Parameters["ProjectionMatrix"].SetValue(ProjectionMatrixScreen);
-            _effect.Parameters["WorldMatrix"].SetValue(ProjectionMatrixWorld);
-            _effect.Parameters["Viewport"].SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-           
+            _projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
+            _worldMatrixEffect.SetValue(ProjectionMatrixWorld);
+            _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+            //_effect.Parameters["hues"].SetValue(AssetsLoader.Hues.GetColorForShader(38));
+
             GraphicsDevice.DepthStencilState = _dss;
 
 
-            _effect.CurrentTechnique = _effect.Techniques["HueTechnique"];
+            _effect.CurrentTechnique = _huesTechnique;
             _effect.CurrentTechnique.Passes[0].Apply();
 
             var enumerator = _drawingQueue.GetEnumerator();

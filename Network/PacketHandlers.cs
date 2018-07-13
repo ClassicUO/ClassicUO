@@ -68,6 +68,19 @@ namespace ClassicUO.Network
 
 
 
+        public static void LoadLoginHandlers()
+        {
+            ToClient.Add(0x1B, EnterWorld);
+            ToClient.Add(0x55, LoginComplete);
+            ToClient.Add(0x82, LoginError);
+            ToClient.Add(0x86, ResendCharacterList);
+            ToClient.Add(0x8C, RelayServer);
+            ToClient.Add(0xA8, ServerList);
+            ToClient.Add(0xA9, CharacterList);
+            ToClient.Add(0xBD, ClientVersion);
+
+            Load();
+        }
 
 
         public static void Load()
@@ -93,7 +106,7 @@ namespace ClassicUO.Network
             ToClient.Add(0x16, /*NewHealthBarStatusUpdateSA*/ NewHealthbarUpdate);
             ToClient.Add(0x17, NewHealthbarUpdate);
             ToClient.Add(0x1A, UpdateItem);
-            ToClient.Add(0x1B, EnterWorld);
+            // *** ToClient.Add(0x1B, EnterWorld);
             ToClient.Add(0x1C, Talk);
             ToClient.Add(0x1D, DeleteObject);
             ToClient.Add(0x1F, Explosion);
@@ -142,7 +155,7 @@ namespace ClassicUO.Network
             ToServer.Add(0x52, BoardPostMessage);*/
             ToClient.Add(0x53, ErrorCode);
             ToClient.Add(0x54, PlaySoundEffect);
-            ToClient.Add(0x55, LoginComplete);
+            // *** ToClient.Add(0x55, LoginComplete);
             ToClient.Add(0x56, MapData); //ToServer.Add(0x56, MapPacketTreauseCartographyS);
             /*ToServer.Add(0x57, UpdateRegions);
             ToServer.Add(0x58, AddRegion);
@@ -173,12 +186,12 @@ namespace ClassicUO.Network
             ToClient.Add(0x7C, OpenMenu);
             /*ToServer.Add(0x7D, ResponseToDialogBox);
             ToServer.Add(0x80, LoginRequest);*/
-            ToClient.Add(0x82, LoginError);
+            // *** ToClient.Add(0x82, LoginError);
             //ToServer.Add(0x83, DeleteCharacter);
-            ToClient.Add(0x86, ResendCharacterList);
+            // *** ToClient.Add(0x86, ResendCharacterList);
             ToClient.Add(0x88, OpenPaperdoll);
             ToClient.Add(0x89, CorpseEquipment);
-            ToClient.Add(0x8C, RelayServer);
+            // *** ToClient.Add(0x8C, RelayServer);
             ToClient.Add(0x90, DisplayMap);
             //ToServer.Add(0x91, GameServerLogin);
             ToClient.Add(0x93, OpenBook); //ToServer.Add(0x93, BookHeaderOldS);
@@ -199,8 +212,8 @@ namespace ClassicUO.Network
             ToClient.Add(0xA5, OpenUrl);
             ToClient.Add(0xA6, TipWindow);
             //ToServer.Add(0xA7, RequestNoticeWindow);
-            ToClient.Add(0xA8, ServerList);
-            ToClient.Add(0xA9, CharacterList);
+            // *** ToClient.Add(0xA8, ServerList);
+            // *** ToClient.Add(0xA9, CharacterList);
             ToClient.Add(0xAA, AttackCharacter);
             ToClient.Add(0xAB, TextEntryDialog);
             /*ToServer.Add(0xAC, GumpTextEntryDialogReply);
@@ -217,7 +230,7 @@ namespace ClassicUO.Network
             ToClient.Add(0xBA, DisplayQuestArrow);
             ToClient.Add(0xBB, UltimaMessengerR); //ToServer.Add(0xBB, UltimaMessengerS);
             ToClient.Add(0xBC, Season);
-            ToClient.Add(0xBD, ClientVersion); //ToServer.Add(0xBD, ClientVersionS);
+            // *** ToClient.Add(0xBD, ClientVersion); //ToServer.Add(0xBD, ClientVersionS);
             ToClient.Add(0xBE, AssistVersion);// ToServer.Add(0xBE, AssistVersionS);
             ToClient.Add(0xBF, ExtendedCommand); //ToServer.Add(0xBF, GeneralInformationPacketS);
             ToClient.Add(0xC0, GraphicEffect);
@@ -733,7 +746,8 @@ namespace ClassicUO.Network
 
         private static void LoginComplete(Packet p)
         {
-            
+            //Load();
+
         }
 
         private static void MapData(Packet p)
@@ -1186,6 +1200,7 @@ namespace ClassicUO.Network
                 case 6: //party
                     break;
                 case 8: // map change
+                    World.Map = new Game.Map.Facet(p.ReadByte());
                     break;
                 case 0x0C: // close statusbar gump
                     serial = p.ReadUInt();

@@ -31,7 +31,6 @@ namespace ClassicUO.Game.Map
         public ushort Y { get; private set; }
         public Tile[][] Tiles { get; private set; }
 
-        public long Ticks { get; private set; }
 
         public void Load(in int map)
         {

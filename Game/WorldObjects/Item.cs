@@ -60,6 +60,7 @@ namespace ClassicUO.Game.WorldObjects
 
         protected override WorldRenderObject CreateView() => new ItemView(this);
 
+        public AssetsLoader.StaticTiles ItemData => AssetsLoader.TileData.StaticData[Graphic];
 
         public ushort Amount
         {
@@ -97,6 +98,24 @@ namespace ClassicUO.Game.WorldObjects
                     _layer = value;
                     _delta |= Delta.Ownership;
                 }
+            }
+        }
+
+        public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
+
+        public Graphic DisplayedGraphic
+        {
+            get
+            {
+                if (IsCoin)
+                {
+                    if (Amount > 5)
+                        return (Graphic)(Graphic + 2);
+                    if (Amount > 1)
+                        return (Graphic)(Graphic + 1);
+                }
+
+                return Graphic;
             }
         }
 

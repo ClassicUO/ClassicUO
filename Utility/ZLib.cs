@@ -37,7 +37,7 @@ namespace ClassicUO.Utility
         }
 
 
-        [DllImport("zlib")]
+        [DllImport("zlib1", EntryPoint ="uncompress")]
         private static extern ZLibError Uncompress(byte[] dest, ref int destLen, byte[] source, int sourceLen);
 
     }

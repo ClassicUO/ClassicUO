@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Map
         }
 
         public void Sort()
-        {         
+        {
             for (int i = 0; i < _objectsOnTile.Count - 1; i++)
             {
                 int j = i + 1;
@@ -96,15 +96,35 @@ namespace ClassicUO.Game.Map
         {
             if (e is Tile tile)
             {
-                return (tile.ViewObject.SortZ, 0, 0, 0);
+                return (tile.ViewObject.SortZ,
+                        0, 
+                        0, 
+                        0);
             }
             else if (e is Static staticitem)
             {
                 var itemdata = AssetsLoader.TileData.StaticData[staticitem.TileID];
 
-                return (staticitem.Position.Z, 1, (itemdata.Height > 0 ? 1 : 0) + ((itemdata.Flags & 0x00000001) != 0 ? 0 : 1), staticitem.Index);
+                return (staticitem.Position.Z, 
+                        1, 
+                        (itemdata.Height > 0 ? 1 : 0) + (AssetsLoader.TileData.IsBackground((long)itemdata.Flags) ? 0 : 1), 
+                        staticitem.Index);
             }
-            
+            else if (e is Item item)
+            {
+                return (item.Position.Z, 
+                        ((item.Graphic & AssetsLoader.FileManager.GraphicMask) == 0x2006) ? 4 : 2, 
+                        (item.ItemData.Height > 0 ? 1 : 0) + (AssetsLoader.TileData.IsBackground((long)item.ItemData.Flags) ? 0 : 1), 
+                        (int)item.Serial.Value);
+            }
+            else if (e is Mobile mobile)
+            {
+                return (mobile.Position.Z, 
+                    3 /* is sitting */, 
+                    2,
+                    mobile == World.Player ? 0x40000000 : (int)mobile.Serial.Value);
+            }
+
             return (0, 0, 0, 0);        
         }
     }

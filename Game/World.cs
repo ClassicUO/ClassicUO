@@ -12,9 +12,60 @@ namespace ClassicUO.Game
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
         public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
         public static PlayerMobile Player { get; set; }
-        public static Map.Facet Map { get; set; }
+
+        private static Map.Facet _map;
+        public static Map.Facet Map
+        {
+            get => _map;
+            set
+            {
+                if (value == null)
+                    return;
+
+                if (_map == null || _map.Index != value.Index)
+                {
+                    _map = null;
+                    _map = value;
+
+                    var position = Player.Position;
+                    Player.Position = Position.Invalid;
+                    Player.Position = position;
+                    Player.ProcessDelta();
+                }
+            }
+        } 
+        
 
         private static readonly ConcurrentDictionary<Serial, House> _houses = new ConcurrentDictionary<Serial, House>();
+
+
+
+        const int DISTANCE_POV = 24;
+
+
+
+        public static void Update()
+        {
+            if (Player != null)
+            {
+                foreach (Mobile mob in Mobiles)
+                {
+                    mob.ViewObject.Update();
+
+                    if (mob.Distance > DISTANCE_POV)
+                        RemoveMobile(mob);
+                }
+
+                foreach (Item item in Items)
+                {
+                    item.ViewObject.Update();
+
+                    if (item.Distance > DISTANCE_POV)
+                        RemoveItem(item);
+                }
+            }
+        }
+
 
 
         public static House GetHouse(in Serial serial)
@@ -81,6 +132,7 @@ namespace ClassicUO.Game
             foreach (Item i in item.Items)
                 RemoveItem(i);
             item.Items.Clear();
+            item.Tile = null;
             return true;
         }
 
@@ -93,6 +145,7 @@ namespace ClassicUO.Game
             foreach (Item i in mobile.Items)
                 RemoveItem(i);
             mobile.Items.Clear();
+            mobile.Tile = null;
             return true;
         }
 

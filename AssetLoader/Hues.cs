@@ -77,6 +77,22 @@ namespace ClassicUO.AssetsLoader
             }
         }
 
+        public static float[] GetColorForShader(ushort color)
+        {
+            if (color != 0)
+            {
+                if (color >= HuesCount)
+                {
+                    color %= (ushort)HuesCount;
+                    if (color <= 0)
+                        color = 1;
+                }
+
+                return Palette[color - 1].Palette;
+            }
+            return null;
+        }
+
         public static unsafe void SetHuesBlock(int index, IntPtr ptr)
         {
             VerdataHuesGroup group = Marshal.PtrToStructure<VerdataHuesGroup>((IntPtr)ptr);

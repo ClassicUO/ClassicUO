@@ -7,8 +7,9 @@ namespace ClassicUO.Game.WorldObjects
     public abstract class WorldObject
     {
         private WorldRenderObject _viewObject;
+        private Map.Tile _tile;
 
-        public virtual Position Position { get; set; }
+        public virtual Position Position { get; set; } = Position.Invalid;
         public virtual Hue Hue { get; set; }
 
         public WorldRenderObject ViewObject
@@ -24,6 +25,24 @@ namespace ClassicUO.Game.WorldObjects
         protected virtual WorldRenderObject CreateView()
         {
             return null;
+        }
+
+        public Map.Tile Tile
+        {
+            get => _tile;
+            set
+            {
+                if (_tile != value)
+                {
+                    _tile?.RemoveWorldObject(this);
+
+                    _tile = value;
+
+                    if (_tile != null)
+                        _tile.AddWorldObject(this);
+
+                }
+            }
         }
 
         protected void DisposeView()

@@ -76,6 +76,7 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
+
         public IReadOnlyList<Skill> Skills => _sklls;
 
         public ushort Strength
@@ -1003,6 +1004,15 @@ namespace ClassicUO.Game.WorldObjects
 
             if (d.HasFlag(Delta.Skills))
                 SkillsChanged.Raise(this);
+        }
+
+        protected override void OnPositionChanged(object sender, EventArgs e)
+        {
+            if (World.Map != null)
+            {
+                World.Map.Center = new Microsoft.Xna.Framework.Point((short)Position.X, (short)Position.Y);
+                base.OnPositionChanged(sender, e);
+            }
         }
 
     }

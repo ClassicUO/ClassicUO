@@ -55,11 +55,27 @@ namespace ClassicUO.Game.WorldObjects
         {
             Serial = serial;
             Items = new EntityCollection<Item>();
+
+            PositionChanged += OnPositionChanged;            
         }
 
         public EntityCollection<Item> Items { get; }
         public Serial Serial { get; }
         public IEnumerable<Property> Properties => _properties.Select(s => s.Value);
+
+        private int _mapIndex;
+        public int MapIndex
+        {
+            get => _mapIndex;
+            set
+            {
+                if (_mapIndex != value)
+                {
+                    _mapIndex = value;
+                    _delta |= Delta.Position;
+                }
+            }
+        }
 
         public Graphic Graphic
         {
@@ -171,6 +187,10 @@ namespace ClassicUO.Game.WorldObjects
             _delta = Delta.None;
         }
 
+        protected virtual void OnPositionChanged(object sender, EventArgs e)
+        {
+            Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
+        }
 
         public static implicit operator Serial(Entity entity) { return entity.Serial; }
         public static implicit operator uint(Entity entity) { return entity.Serial; }

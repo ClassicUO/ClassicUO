@@ -8,6 +8,19 @@ using ClassicUO.Game.WorldObjects;
 
 namespace ClassicUO.Network
 {
+    public sealed class PSeed : PacketWriter
+    {
+        public PSeed(byte[] version) : base(0xEF)
+        {
+            const uint SEED = 0x1337BEEF;
+
+            WriteUInt(SEED);
+
+            for (int i = 0; i < 4; i++)
+                WriteUInt(version[i]);
+        }
+    }
+
     public sealed class PFirstLogin : PacketWriter
     {
         public PFirstLogin(in string account, in string password) : base(0x80)
@@ -564,7 +577,7 @@ namespace ClassicUO.Network
     {
         public PRazorAnswer() : base(0xF0)
         {
-            WriteByte(0x04);
+            WriteUShort(0x04);
             WriteByte(0xFF);
         }
     }
@@ -992,6 +1005,14 @@ namespace ClassicUO.Network
             WriteByte(0);
             WriteUInt(y);
             WriteByte(0x0A);
+        }
+    }
+
+    public sealed class PPing : PacketWriter
+    {
+        public PPing() : base(0x73)
+        {
+            WriteByte(0);
         }
     }
 }

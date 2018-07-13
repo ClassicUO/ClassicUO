@@ -30,7 +30,15 @@ namespace ClassicUO.Game.WorldObjects
         protected bool IsFlipped { get; set; }
         protected float Rotation { get; set; }
 
+        public Vector3 ScreenPosition { get; set; }
 
+        public virtual void Update()
+        {
+            //if (WorldObject.Tile == null)
+            //{
+            //    WorldObject.Tile = World.Map.GetTile((short)WorldObject.Position.X, (short)WorldObject.Position.Y);
+            //}     
+        }
 
         public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
