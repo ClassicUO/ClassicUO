@@ -196,6 +196,8 @@ namespace ClassicUO
                         break;
                     case 0x8C:
                         NetClient.Socket.EnableCompression();
+                        e.Seek(0);
+                        e.MoveToData();
                         e.Skip(6);
                         NetClient.Socket.Send(new PSecondLogin(username, password, e.ReadUInt()));
                         break;

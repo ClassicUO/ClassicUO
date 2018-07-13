@@ -577,7 +577,6 @@ namespace ClassicUO.Network
     {
         public PRazorAnswer() : base(0xF0)
         {
-            WriteUShort(0x04);
             WriteByte(0xFF);
         }
     }
