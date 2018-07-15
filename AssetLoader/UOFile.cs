@@ -123,7 +123,7 @@ namespace ClassicUO.AssetsLoader
         internal T[] ReadArray<T>(in int count) where T : struct
         {
             T[] t = ReadArray<T>(Position, count);
-            Position += count;
+            Position += (Marshal.SizeOf<T>() * count);
             return t;
         }
 

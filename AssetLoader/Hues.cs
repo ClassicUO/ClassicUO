@@ -128,7 +128,7 @@ namespace ClassicUO.AssetsLoader
         {
             if (color != 0 && color < HuesCount)
             {
-                color--;
+                color -= 1;
                 int g = color / 8;
                 int e = color % 8;
 
@@ -141,7 +141,7 @@ namespace ClassicUO.AssetsLoader
         {
             if (color != 0 && color < HuesCount)
             {
-                color--;
+                color -= 1;
                 int g = color / 8;
                 int e = color % 8;
 
@@ -154,7 +154,7 @@ namespace ClassicUO.AssetsLoader
         {
             if (color != 0 && color < HuesCount)
             {
-                color--;
+                color -= 1;
                 int g = color / 8;
                 int e = color % 8;
 
@@ -167,7 +167,7 @@ namespace ClassicUO.AssetsLoader
         {
             if (color != 0 && color < HuesCount)
             {
-                color--;
+                color -= 1;
                 int g = color / 8;
                 int e = color % 8;
 
@@ -180,13 +180,16 @@ namespace ClassicUO.AssetsLoader
         {
             if (color != 0 && color < HuesCount)
             {
-                color--;
+                color -= 1;
                 int g = color / 8;
                 int e = color % 8;
 
                 uint cl = Color16To32(c);
 
-                if (GetR(cl) == GetG(cl) && GetB(cl) == GetG(cl))
+                 (byte B, byte G, byte R, byte A) = GetBGRA(cl);
+
+               // if (GetR(cl) == GetG(cl) && GetB(cl) == GetG(cl))
+                if (R == G && B == G)
                     return Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
 
                 return cl;
@@ -197,11 +200,24 @@ namespace ClassicUO.AssetsLoader
         public static ushort GetRadarColorData(int c)
             => c < RadarCol.Length ? RadarCol[c] : (ushort)0;
 
-        private static byte GetR(uint rgb) => LOBYTE(rgb);
-        private static byte GetG(uint rgb) => LOBYTE(rgb >> 8);
-        private static byte GetB(uint rgb) => LOBYTE(rgb >> 16);
 
-        private static byte LOBYTE(uint b) => (byte)(b & 0xff);
+        public static (byte, byte, byte, byte) GetBGRA(in uint cl)  
+            => (
+                (byte)(cl & 0xFF) ,          // B
+                (byte)((cl >> 8) & 0xFF),   // G
+                (byte)((cl >> 16) & 0xFF),  // R
+                (byte)((cl >> 24) & 0xFF)  // A
+               );
+
+        public static uint RgbaToArgb(in uint rgba)
+        {
+            //uint alpha = rgba << 24;
+            //uint argb = rgba >> 8;
+            //argb |= alpha;
+            //return argb;
+            return (rgba >> 8) | (rgba << 24);
+        }
+
     }
 
 

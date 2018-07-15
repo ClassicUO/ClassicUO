@@ -71,7 +71,8 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	// Hue the color if the hue vector y component is greater than 0.
 	if (IN.Hue.y > 0)
 	{
-		float4 hueColor = tex2D(HueSampler0, float2(color.r, (IN.Hue.x) / HuesPerTexture));
+	//(color.r + color.g + color.b) / 3
+		float4 hueColor = tex2D(HueSampler0, float2(  (color.r + color.g + color.b) / 3  , (IN.Hue.x) / HuesPerTexture));
 		
 		hueColor.a = color.a;
 

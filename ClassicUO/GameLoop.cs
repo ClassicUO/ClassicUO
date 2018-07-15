@@ -228,8 +228,30 @@ namespace ClassicUO
             };
 
 
-            NetClient.Socket.Connect(settings.IP, settings.Port);
+            AssetsLoader.Fonts.SetUseHTML(false);
+            AssetsLoader.Fonts.RecalculateWidthByInfo = false;
+            _textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, 0, 30);
 
+            //NetClient.Socket.Connect(settings.IP, settings.Port);
+
+            int font = 0;
+            _mouseManager.MouseMove += (sender, e) =>
+            {
+                //if (font + 1 > 10)
+                //    font = 0;
+                //_textRenderer.Text = string.Format("Mouse screen location: {0},{1}   FONT: {2}", e.Location.X, e.Location.Y, font);
+                //_textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, font++);
+
+            };
+
+
+            var datagump = AssetsLoader.Gumps.GetGump(0x2329, out int gw, out int gh);
+            _gump = new Texture2D(GraphicsDevice, gw, gh, false, SurfaceFormat.Bgra5551);
+            _gump.SetData(datagump);
+
+            var datatextentry = AssetsLoader.Gumps.GetGump(9350 + 4, out gw, out gh);
+            _textentry = new Texture2D(GraphicsDevice, gw, gh, false, SurfaceFormat.Bgra5551);
+            _textentry.SetData(datatextentry);
 
             // END TEST
 
@@ -251,7 +273,13 @@ namespace ClassicUO
         private ushort _maxX = 5454;
         private ushort _currentX = 1446;
         private Stopwatch _stopwatch;
-        private Texture2D _texture, _crossTexture;
+        private Texture2D _texture, _crossTexture, _gump, _textentry;
+
+        private TextRenderer _textRenderer = new TextRenderer("Select which shard to play on:")
+        {
+            IsUnicode = true,
+            Color = 65535
+        };
 
         private DateTime _timePing;
 
@@ -380,182 +408,106 @@ namespace ClassicUO
 
         protected override void Draw(GameTime gameTime)
         {
-            if (Game.World.Player == null || Game.World.Map == null)
+            if (Game.World.Player != null && Game.World.Map !=  null)
             {
-                _spriteBatch.GraphicsDevice.Clear(Color.Transparent);
-                return;
-            }
+                int scale = 1;
 
-            int scale = 1;
-
-            if (_targetRender == null || _targetRender.Width != _graphics.PreferredBackBufferWidth / scale || _targetRender.Height != _graphics.PreferredBackBufferHeight / scale)
-            {
-                if (_targetRender != null)
-                    _targetRender.Dispose();
-
-                _targetRender = new RenderTarget2D(GraphicsDevice, _graphics.PreferredBackBufferWidth / scale, _graphics.PreferredBackBufferHeight / scale,
-                    false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
-
-            }
-
-            _spriteBatch.BeginDraw();
-
-            // Stopwatch stopwatch = Stopwatch.StartNew();
-
-            (Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset) = GetViewPort();
-
-
-            int minX = minChunkTile.X;
-            int minY = minChunkTile.Y;
-            int maxX = maxChunkTile.X;
-            int maxY = maxChunkTile.Y;
-
-            int mapBlockHeight = AssetsLoader.Map.MapBlocksSize[Game.World.Map.Index][1];
-
-
-            for (int i = 0; i < 2; i++)
-            {
-                int minValue = minY;
-                int maxValue = maxY;
-
-                if (i > 0)
+                if (_targetRender == null || _targetRender.Width != _graphics.PreferredBackBufferWidth / scale || _targetRender.Height != _graphics.PreferredBackBufferHeight / scale)
                 {
-                    minValue = minX;
-                    maxValue = maxX;
+                    if (_targetRender != null)
+                        _targetRender.Dispose();
+
+                    _targetRender = new RenderTarget2D(GraphicsDevice, _graphics.PreferredBackBufferWidth / scale, _graphics.PreferredBackBufferHeight / scale,
+                        false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+
                 }
 
-                for (int lead = minValue; lead < maxValue; lead++)
+                _spriteBatch.BeginDraw();
+
+
+                (Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset) = GetViewPort();
+
+
+                int minX = minChunkTile.X;
+                int minY = minChunkTile.Y;
+                int maxX = maxChunkTile.X;
+                int maxY = maxChunkTile.Y;
+
+                int mapBlockHeight = AssetsLoader.Map.MapBlocksSize[Game.World.Map.Index][1];
+
+
+                for (int i = 0; i < 2; i++)
                 {
-                    int x = minX;
-                    int y = lead;
+                    int minValue = minY;
+                    int maxValue = maxY;
 
                     if (i > 0)
                     {
-                        x = lead;
-                        y = maxY;
+                        minValue = minX;
+                        maxValue = maxX;
                     }
 
-                   
-
-                    while (true)
+                    for (int lead = minValue; lead < maxValue; lead++)
                     {
-                        if (x < minX || x > maxX || y < minY || y > maxY)
-                            break;
+                        int x = minX;
+                        int y = lead;
 
-
-
-
-                        Game.Map.Tile tile = Game.World.Map.GetTile((short)x, (short)y);
-                        if (tile != null)
+                        if (i > 0)
                         {
-
-                            Vector3 position = new Vector3(
-                           ((x - y) * 22f) - offset.X,
-                           ((x + y) * 22f - (_z * 4)) - offset.Y, 0);
-
-                            //if (position.X >= minPixel.X && position.X <= maxPixel.X &&
-                            //    position.Y >= minPixel.Y && position.Y <= maxPixel.Y)
-                            //{
-
-                            //tile.ViewObject.Draw(_spriteBatch, position);
-
-                            for (int k = 0; k < tile.ObjectsOnTiles.Count; k++)
-                            {
-                                tile.ObjectsOnTiles[k].ViewObject.Draw(_spriteBatch, position);
-                            }
-                            //}
-
-
+                            x = lead;
+                            y = maxY;
                         }
 
-                        x++;
-                        y--;
+
+
+                        while (true)
+                        {
+                            if (x < minX || x > maxX || y < minY || y > maxY)
+                                break;
+
+
+
+
+                            Game.Map.Tile tile = Game.World.Map.GetTile((short)x, (short)y);
+                            if (tile != null)
+                            {
+
+                                Vector3 position = new Vector3(
+                               ((x - y) * 22f) - offset.X,
+                               ((x + y) * 22f - (_z * 4)) - offset.Y, 0);
+
+
+                                for (int k = 0; k < tile.ObjectsOnTiles.Count; k++)
+                                {
+                                    tile.ObjectsOnTiles[k].ViewObject.Draw(_spriteBatch, position);
+                                }
+
+                            }
+
+                            x++;
+                            y--;
+                        }
                     }
                 }
+
+
+                _spriteBatch.GraphicsDevice.SetRenderTarget(_targetRender);
+                _spriteBatch.GraphicsDevice.Clear(Color.Black);
+                _spriteBatch.EndDraw();
+                _spriteBatch.GraphicsDevice.SetRenderTarget(null);
+
             }
-
-
-            //for (int y = minChunkTile.Y, yy = 0; y < maxChunkTile.Y; y++, yy++)
-            //{
-
-            //    Vector3 position = new Vector3(
-            //                ( (minChunkTile.X - minChunkTile.Y) + (yy % 2)) * 22 - offset.X,
-            //                (((minChunkTile.X + minChunkTile.Y) - (5 * 4)) + yy) * 22 - offset.Y, 0);
-
-            //    Point firstTileInRow = new Point(_currentX + ((yy + 1) / 2), _y + (yy / 2));
-
-            //    for (int x = maxChunkTile.X, xx = 0; x >= minChunkTile.X; x--, xx++, position.X -= 44)
-            //    {
-            //        Game.Map.Tile tile = _facet.GetTile((short)(firstTileInRow.X - xx), (short)(firstTileInRow.Y + xx));
-            //        if (tile != null)
-            //        {
-
-                     
-            //            //if (position.X >= minPixel.X && position.X <= maxPixel.X &&
-            //            //    position.Y >= minPixel.Y && position.Y <= maxPixel.Y)
-            //            {
-
-            //                tile.ViewObject.Draw(_spriteBatch, position);
-
-            //                //for (int i = 0; i < tile.ObjectsOnTiles.Count; i++)
-            //                //{
-            //                //    tile.ObjectsOnTiles[i].ViewObject?.Draw(_spriteBatch, position);
-            //                //}
-            //            }
-
-            //        }
-
-            //    }
-            //}
-
-            //Log.Message(LogTypes.Warning, "FIRST: " + stopwatch.ElapsedMilliseconds);
-
-            //stopwatch.Restart();
-            //(Point firstTile, Point renderOffset, int renderDimensions) = CalculateViewport();
-
-            //for (int y = 0; y < renderDimensions * 2; y++)
-            //{
-            //    Vector3 drawPosition = new Vector3
-            //    {
-            //        X = (firstTile.X - firstTile.Y + (y % 2)) * 22f + renderOffset.X,
-            //        Y = (firstTile.X + firstTile.Y + y) * 22f + renderOffset.Y
-            //    };
-
-            //    Point firstTileInRow = new Point(firstTile.X + ((y + 1) / 2), firstTile.Y + (y / 2));
-
-            //    for (int x = 0; x < renderDimensions + 1; x++, drawPosition.X -= 44f)
-            //    {
-            //        Game.Map.Tile tile = _facet.GetTile((short)(firstTileInRow.X - x), (short)(firstTileInRow.Y + x));
-            //        if (tile == null)
-            //            continue;
-
-            //        //tile.ViewObject.Draw(_spriteBatch, drawPosition);
-
-            //        //for (int i = 0; i < tile.ObjectsOnTiles.Count; i++)
-            //        //{
-            //        //    tile.ObjectsOnTiles[i].ViewObject.Draw(_spriteBatch, drawPosition);
-            //        //}
-
-            //    }
-            //}
-
-            // Log.Message(LogTypes.Warning, "SECOND: " + stopwatch.ElapsedMilliseconds);
-
-
-            _spriteBatch.GraphicsDevice.SetRenderTarget(_targetRender);
-            _spriteBatch.GraphicsDevice.Clear(Color.Black);
-            _spriteBatch.EndDraw();
-            _spriteBatch.GraphicsDevice.SetRenderTarget(null);
-
-
 
             _spriteBatch.GraphicsDevice.Clear(Color.Transparent);
             _spriteBatch.BeginDraw();
 
-            _spriteBatch.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
+            //_spriteBatch.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
 
             _spriteBatch.Draw2D(_crossTexture, new Rectangle(_graphics.PreferredBackBufferWidth / 2  - 5, _graphics.PreferredBackBufferHeight / 2 - 5, 10, 10), Vector3.Zero);
 
+            _spriteBatch.Draw2D(_textentry, new Vector3(0, 0, 0), Vector3.Zero);
+
+            _textRenderer.Draw(_spriteBatch, new Point(100, 150));
 
             _mouseManager.Draw(_spriteBatch);
 
