@@ -35,6 +35,8 @@ namespace ClassicUO.Game.Map
             }
         }
 
+        public Tile GetTile(in int x, in int y) => GetTile((short)x, (short)y);
+
         public Tile GetTile(in short x, in short y)
         {
             int cellX = x / 8;

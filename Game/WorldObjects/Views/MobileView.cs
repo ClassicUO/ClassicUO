@@ -18,5 +18,13 @@ namespace ClassicUO.Game.WorldObjects.Views
         {
             return base.Draw(spriteBatch, position);
         }
+
+        public override void Update()
+        {
+            if (WorldObject == World.Player)
+                World.Player.CheckIfNeedToMove();
+
+            base.Update();
+        }
     }
 }

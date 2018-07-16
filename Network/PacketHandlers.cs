@@ -814,14 +814,24 @@ namespace ClassicUO.Network
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
             mobile.Graphic = p.ReadUShort();
 
-            mobile.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
-            mobile.Direction = (Direction)p.ReadByte();
+            Position position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            Direction direction = (Direction)p.ReadByte();
+            //mobile.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            //mobile.Direction = (Direction)p.ReadByte();
             mobile.Hue = p.ReadUShort();
             mobile.Flags = (Flags)p.ReadByte();
             mobile.Notoriety = (Notoriety)p.ReadByte();
             mobile.ProcessDelta();
             if (World.Mobiles.Add(mobile))
                 World.Mobiles.ProcessDelta();
+
+            if (mobile == World.Player)
+                return;
+
+            if (mobile.Position == Position.Invalid)
+                mobile.MoveTo(position, direction);
+            else
+                mobile.EnqueueMovement(position, direction);
 
         }
 

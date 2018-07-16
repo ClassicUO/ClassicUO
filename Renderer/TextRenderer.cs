@@ -31,15 +31,16 @@ namespace ClassicUO.Renderer
             List<WebLinkRect> links;
 
             if (IsUnicode)
-            {
                 (data, Width, Height, linesCount, links) = Fonts.GenerateUnicode((byte)font, Text, Color, cell, maxWidth, aling, flags);
-            }
             else
                 (data, Width, Height, linesCount, _isPartialHue) = Fonts.GenerateASCII((byte)font, Text, Color, maxWidth, aling, flags);
 
 
             if (Texture != null)
                 Texture.Dispose();
+
+            if (data == null || data.Length <= 0)
+                return;
 
             Texture = new TextTexture(TextureManager.Device, Width, Height, false, SurfaceFormat.Color);
             Texture.SetData(data);

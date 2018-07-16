@@ -47,7 +47,7 @@ namespace ClassicUO.Game.WorldObjects.Views
                 Bounds = new Rectangle(0, tile.Position.Z * 4, 44, 44);
             }
 
-            AllowedToDraw = !(tile.TileID < 3 || (tile.TileID >= 0x1AF && tile.TileID <= 0x1B5));
+            AllowedToDraw = !(tile.IsIgnored);
         }
 
 

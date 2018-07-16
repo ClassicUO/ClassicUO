@@ -228,17 +228,20 @@ namespace ClassicUO
             };
 
 
-            AssetsLoader.Fonts.SetUseHTML(false);
-            AssetsLoader.Fonts.RecalculateWidthByInfo = false;
+            AssetsLoader.Fonts.SetUseHTML(true);
+            AssetsLoader.Fonts.RecalculateWidthByInfo = true;
             _textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, 0, 30);
 
-            //NetClient.Socket.Connect(settings.IP, settings.Port);
+            NetClient.Socket.Connect(settings.IP, settings.Port);
 
             int font = 0;
             _mouseManager.MouseMove += (sender, e) =>
             {
-                //if (font + 1 > 10)
-                //    font = 0;
+                if (font + 1 > 20)
+                    font = 0;
+                _textRenderer.Text = string.Format("Mouse screen location: {0},{1}   FONT: {2}", e.Location.X, e.Location.Y, font);
+                _textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, font, 30);
+                font++;
                 //_textRenderer.Text = string.Format("Mouse screen location: {0},{1}   FONT: {2}", e.Location.X, e.Location.Y, font);
                 //_textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, font++);
 
@@ -278,7 +281,7 @@ namespace ClassicUO
         private TextRenderer _textRenderer = new TextRenderer("Select which shard to play on:")
         {
             IsUnicode = true,
-            Color = 65535
+            Color = 847
         };
 
         private DateTime _timePing;
@@ -501,13 +504,13 @@ namespace ClassicUO
             _spriteBatch.GraphicsDevice.Clear(Color.Transparent);
             _spriteBatch.BeginDraw();
 
-            //_spriteBatch.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
+            _spriteBatch.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
 
-            _spriteBatch.Draw2D(_crossTexture, new Rectangle(_graphics.PreferredBackBufferWidth / 2  - 5, _graphics.PreferredBackBufferHeight / 2 - 5, 10, 10), Vector3.Zero);
+            //_spriteBatch.Draw2D(_crossTexture, new Rectangle(_graphics.PreferredBackBufferWidth / 2  - 5, _graphics.PreferredBackBufferHeight / 2 - 5, 10, 10), Vector3.Zero);
 
-            _spriteBatch.Draw2D(_textentry, new Vector3(0, 0, 0), Vector3.Zero);
+            //_spriteBatch.Draw2D(_textentry, new Vector3(0, 0, 0), Vector3.Zero);
 
-            _textRenderer.Draw(_spriteBatch, new Point(100, 150));
+            //_textRenderer.Draw(_spriteBatch, new Point(100, 150));
 
             _mouseManager.Draw(_spriteBatch);
 

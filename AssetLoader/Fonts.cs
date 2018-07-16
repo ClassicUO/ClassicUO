@@ -995,15 +995,15 @@ namespace ClassicUO.AssetsLoader
             uint datacolor = 0;
 
             if (color == 0xFFFF)
-                datacolor = 0xFFFFFFFE; // Hues.RgbaToArgb(0xFFFFFFFE);
+                datacolor = /*0xFFFFFFFE;*/  Hues.RgbaToArgb(0xFFFFFFFE);
             else
-                datacolor = Hues.GetPolygoneColor(cell, color) << 8 | 0xFF; // Hues.RgbaToArgb(Hues.GetPolygoneColor(cell, color) << 8 | 0xFF);
+                datacolor = /*Hues.GetPolygoneColor(cell, color) << 8 | 0xFF;*/  Hues.RgbaToArgb(Hues.GetPolygoneColor(cell, color) << 8 | 0xFF);
 
             bool isItalic = (flags & UOFONT_ITALIC) != 0;
             bool isSolid = (flags & UOFONT_SOLID) != 0;
             bool isBlackBorder = (flags & UOFONT_BLACK_BORDER) != 0;
             bool isUnderline = (flags & UOFONT_UNDERLINE) != 0;
-            uint blackColor = 0x010101FF;
+            uint blackColor = Hues.RgbaToArgb(0x010101FF);
 
             bool isLink = false;
             int linkStartX = 0;
@@ -1178,7 +1178,7 @@ namespace ClassicUO.AssetsLoader
 
                         if (isSolid)
                         {
-                            uint solidColor = blackColor;
+                            uint solidColor = Hues.RgbaToArgb( blackColor );
 
                             if (solidColor == charcolor)
                                 solidColor++;
@@ -1384,9 +1384,8 @@ namespace ClassicUO.AssetsLoader
                     int yPos = (y * width);
                     for (int x = 0; x < width; x++)
                     {
-                        uint p = pData[yPos + x];
-                        if (p <= 0)
-                            p = _backgroundColor;
+                        if (pData[yPos + x] <= 0)
+                            pData[yPos + x] = Hues.RgbaToArgb(_backgroundColor);
                     }
                 }
             }

@@ -223,5 +223,182 @@ namespace ClassicUO.Game.WorldObjects
         public override bool Exists => World.Contains(Serial);
 
 
+
+        public bool IsMounted => GetItemAtLayer(Layer.Mount) != null;
+        public bool IsRunning => (Direction & Direction.Running) == Direction.Running;
+
+        protected readonly MovementsHistory _movementsHanlder = new MovementsHistory();
+        
+
+        public void MoveTo(in Position position, in Direction direction)
+        {
+            _movementsHanlder.Reset();
+            Direction = direction;
+            Position = position;
+            // goal position?
+
+            ProcessDelta();
+        }
+
+        public void EnqueueMovement(in Position position, in Direction direction)
+            => _movementsHanlder.Enqueue(position, direction);
+
+
+
+        protected class MovementsHistory
+        {
+            private byte? _lastACK;
+            private byte _sendedACK;
+            private byte _nextACK;
+            private SingleMovement[] _history;
+
+            public MovementsHistory()
+            {
+                Reset();
+            }
+
+            public void Reset()
+            {
+                _lastACK = null;
+                _sendedACK = 0;
+                _nextACK = 0;
+                _history = new SingleMovement[256];
+            }
+
+
+            public void Enqueue(in Position position, in Direction direction, bool isfromuser = false)
+            {
+                SingleMovement movement = new SingleMovement(position, direction);
+                _history[_sendedACK++] = movement;
+                if (_sendedACK > byte.MaxValue)
+                    _sendedACK = 1;
+            }
+
+            public SingleMovement Dequeue(out byte sequence)
+            {
+                if (_history[_nextACK] != null)
+                {
+                    var m = _history[_nextACK];
+                    _history[_nextACK] = null;
+                    sequence = _nextACK++;
+                    if (_nextACK > byte.MaxValue)
+                        _nextACK = 1;
+                    return m;
+                }
+
+                sequence = 0;
+                return null;
+            }
+
+            public bool TryDequeue(out byte seq, out SingleMovement movement)
+            {
+                if (_history[_nextACK] != null)
+                {
+                    movement = _history[_nextACK];
+                    _history[_nextACK] = null;
+                    seq = _nextACK++;
+                    if (_nextACK > byte.MaxValue)
+                        _nextACK = 1;
+                    return true;
+                }
+                seq = 0;
+                movement = null;
+                return false;
+            }
+
+            public SingleMovement Peek() => _history[_nextACK];
+
+            public SingleMovement GetAt(in int seq)
+            {
+                if (_history[_nextACK] != null)
+                {
+                    var m = _history[_nextACK];
+                    _history[_nextACK++] = null;
+                    if (_nextACK > byte.MaxValue)
+                        _nextACK = 1;
+                    return m;
+                }
+                return null;
+            }
+
+            public SingleMovement GetNextMovement(out byte seq)
+            {
+                SingleMovement movement = null;
+                SingleMovement lastMovement;
+
+                while (TryDequeue(out seq, out var nextMovement))
+                {
+                    lastMovement = movement;
+                    movement = nextMovement;
+                    nextMovement = Peek();
+
+                    if (nextMovement == null && lastMovement != null && movement.Position == lastMovement.Position && movement.Direction != lastMovement.Direction)
+                    {
+                        Enqueue(movement.Position, movement.Direction);
+                        return lastMovement;
+                    }
+                }
+
+                return movement;
+            }
+
+            public void ACKReceived(in byte seq)
+            {
+                _history[seq] = null;
+                _lastACK = seq;
+            }
+
+            public void RejectedMovementRequest(in byte seq, out Position position, out Direction direction)
+            {
+                if (_history[seq] != null)
+                {
+                    var e = _history[seq];
+                    position = e.Position;
+                    direction = e.Direction;
+                }
+                else
+                {
+                    position = Position.Invalid;
+                    direction = Direction.NONE;
+                }
+
+                Reset();
+            }
+        }
+
+        protected class SingleMovement
+        {
+            public SingleMovement(in Position position, in Direction direction)
+            {
+                Position = position; Direction = direction;
+                FastWalkKey = 0; // atm set to 0
+            }
+
+            public Position Position { get; }
+            public Direction Direction { get; }
+            public int FastWalkKey { get; }
+
+            public override string ToString() => string.Format("{0} {1}", Position, Direction);
+        }
+
+
+    }
+
+    public static class MovementSpeed
+    {
+        const double TIME_WALK_FOOT = (8d / 20d) * 1000d;
+        const double TIME_RUN_FOOT = (4d / 20d) * 1000d;
+        const double TIME_WALK_MOUNT = (4d / 20d) * 1000d;
+        const double TIME_RUN_MOUNT = (2d / 20d) * 1000d;
+
+
+        public static double TimeToCompleteMovement(in Mobile mobile, in Direction direction)
+        {
+            bool isrunning  = (direction & Direction.Running) == Direction.Running;
+
+            if (mobile.IsMounted)
+                return isrunning ? TIME_RUN_MOUNT : TIME_WALK_MOUNT;
+            return isrunning ? TIME_RUN_FOOT : TIME_WALK_FOOT;
+        }
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace ClassicUO.Game.Map
 {
@@ -23,7 +24,7 @@ namespace ClassicUO.Game.Map
         public IReadOnlyList<WorldObject> ObjectsOnTiles => _objectsOnTile;
         public override Position Position { get; set; }
         public new TileView ViewObject => (TileView)base.ViewObject;
-
+        public bool IsIgnored => TileID == 2 || TileID == 0x1DB || (TileID >= 0x1AE && TileID <= 0x1B5);
 
 
         public void AddWorldObject(in WorldObject obj)
@@ -67,6 +68,8 @@ namespace ClassicUO.Game.Map
             }
         }
 
+        public T[] GetWorldObjects<T>() where T: WorldObject
+            => _objectsOnTile.OfType<T>().Cast<T>().ToArray();
 
         // create view only when TileID is initialized
         protected override WorldRenderObject CreateView()

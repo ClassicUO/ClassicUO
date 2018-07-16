@@ -18,6 +18,7 @@ namespace ClassicUO.Game.WorldObjects
         public int Index { get; }
         public override Position Position { get; set; }
         public new StaticView ViewObject => (StaticView)base.ViewObject;
+        public AssetsLoader.StaticTiles ItemData => AssetsLoader.TileData.StaticData[TileID];
 
         protected override WorldRenderObject CreateView() => new StaticView(this);
     }  

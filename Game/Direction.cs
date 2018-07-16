@@ -15,6 +15,8 @@ namespace ClassicUO.Game
         Left = 0x05,
         West = 0x06,
         Up = 0x07,
-        Running = 0x80
+        Running = 0x80,
+
+        NONE = 0xED
     }
 }
