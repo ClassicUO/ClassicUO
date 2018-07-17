@@ -55,7 +55,7 @@ namespace ClassicUO.Input
 
         public WorldObject SelectedWorldObject { get; set; }
 
-        public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove;
+        public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MousePressed;
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
 
 
@@ -216,6 +216,9 @@ namespace ClassicUO.Input
 
         public override void Update(GameTime gameTime)
         {
+            if (!Game.IsActive)
+                return;
+
             MouseState current = Mouse.GetState();
 
             if (IsMouseButtonDown(current.LeftButton, _prevMouseState.LeftButton))
@@ -272,6 +275,34 @@ namespace ClassicUO.Input
             }
 
 
+
+            if (IsMouseButtonPressed(current.LeftButton, _prevMouseState.LeftButton))
+            {
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.Left, ButtonState.Pressed);
+                MousePressed.Raise(arg);
+            }
+            else if (IsMouseButtonPressed(current.RightButton, _prevMouseState.RightButton))
+            {
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.Right, ButtonState.Pressed);
+                MousePressed.Raise(arg);
+            }
+            else if (IsMouseButtonPressed(current.MiddleButton, _prevMouseState.MiddleButton))
+            {
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.Middle, ButtonState.Pressed);
+                MousePressed.Raise(arg);
+            }
+            else if (IsMouseButtonPressed(current.XButton1, _prevMouseState.XButton1))
+            {
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.XButton1, ButtonState.Pressed);
+                MousePressed.Raise(arg);
+            }
+            else if (IsMouseButtonPressed(current.XButton2, _prevMouseState.XButton2))
+            {
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.XButton2, ButtonState.Pressed);
+                MousePressed.Raise(arg);
+            }
+
+
             if (current.ScrollWheelValue != _prevMouseState.ScrollWheelValue)
             {
                 MouseWheelEventArgs arg = new MouseWheelEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, current.ScrollWheelValue == 0 ? WheelDirection.None : current.ScrollWheelValue > 0 ? WheelDirection.Up : WheelDirection.Down);
@@ -293,5 +324,7 @@ namespace ClassicUO.Input
        
         private bool IsMouseButtonDown(ButtonState current, ButtonState prev) => current == ButtonState.Pressed && prev == ButtonState.Released;
         private bool IsMouseButtonUp(ButtonState current, ButtonState prev) => current == ButtonState.Released && prev == ButtonState.Pressed;
+        private bool IsMouseButtonPressed(ButtonState current, ButtonState prev) => current == ButtonState.Pressed && prev == ButtonState.Pressed;
+
     }
 }

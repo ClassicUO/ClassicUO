@@ -187,7 +187,7 @@ namespace ClassicUO
 
             NetClient.PacketReceived += (sender, e) =>
             {
-                Log.Message(LogTypes.Trace, string.Format(">> Received\t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
+                //Log.Message(LogTypes.Trace, string.Format(">> Received\t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
 
                 switch (e.ID)
                 {
@@ -237,14 +237,48 @@ namespace ClassicUO
             int font = 0;
             _mouseManager.MouseMove += (sender, e) =>
             {
-                if (font + 1 > 20)
-                    font = 0;
-                _textRenderer.Text = string.Format("Mouse screen location: {0},{1}   FONT: {2}", e.Location.X, e.Location.Y, font);
-                _textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, font, 30);
-                font++;
+                //if (font + 1 > 20)
+                //    font = 0;
+                //_textRenderer.Text = string.Format("Mouse screen location: {0},{1}   FONT: {2}", e.Location.X, e.Location.Y, font);
+                //_textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, font, 30);
+                //font++;
                 //_textRenderer.Text = string.Format("Mouse screen location: {0},{1}   FONT: {2}", e.Location.X, e.Location.Y, font);
                 //_textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, font++);
 
+            };
+
+            bool allowPGMove = false;
+            DateTime pause = DateTime.Now;
+
+            _mouseManager.MousePressed += (sender, e) =>
+            {
+                if (Game.World.Map != null && Game.World.Player != null)
+                {
+                    if (e.Button == MouseButton.Right)
+                    {
+                        allowPGMove = true;
+
+                        //if (DateTime.Now > pause)
+                        {
+                            Point center = new Point(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
+
+                            Game.Direction direction = Game.DirectionHelper.DirectionFromPoints(center, e.Location);
+
+                            //Game.World.Player.MovementStart(direction);
+                            Game.World.Player.Walk(direction, false);
+                        }
+                    }
+                }
+            };
+
+            _mouseManager.MouseUp += (sender, e) =>
+            {
+                if (e.Button == MouseButton.Right)
+                {
+                    allowPGMove = false;
+                    Game.World.Player.MovementStop();
+                    pause = DateTime.Now;
+                }
             };
 
 
@@ -304,12 +338,19 @@ namespace ClassicUO
                 }
 
 
-                Game.World.Update();
+                Game.World.Update(gameTime.TotalGameTime.Ticks);
 
                 if (DateTime.Now > _timePing)
                 {
                     NetClient.Socket.Send(new PPing());
                     _timePing = DateTime.Now.AddSeconds(10);
+                }
+
+
+
+                if (NetClient.Socket.IsConnected)
+                {
+
                 }
             }
 

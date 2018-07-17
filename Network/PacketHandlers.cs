@@ -445,8 +445,12 @@ namespace ClassicUO.Network
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
-            World.Player.Position = new Position(p.ReadUShort(), p.ReadUShort(), (sbyte)p.ReadUShort());
-            World.Player.Direction = (Direction)p.ReadByte();
+            var position = new Position(p.ReadUShort(), p.ReadUShort(), (sbyte)p.ReadUShort());
+            var direction = (Direction)p.ReadByte();
+
+
+            World.Player.MoveTo(position, direction);
+
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
         }
@@ -502,11 +506,13 @@ namespace ClassicUO.Network
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             p.Skip(2);
-            World.Player.Direction = (Direction)p.ReadByte();
-            World.Player.Position = new Position(x, y, p.ReadSByte());
+            var direction = (Direction)p.ReadByte();
+            var position = new Position(x, y, p.ReadSByte());
             //OnPlayerMoved();
-            World.Player.ProcessDelta();
 
+            World.Player.MoveTo(position, direction);
+
+            World.Player.ProcessDelta();
         }
 
         private static void DenyWalk(Packet p)
@@ -514,9 +520,14 @@ namespace ClassicUO.Network
             byte seq = p.ReadByte();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
-            World.Player.Direction = (Direction)p.ReadByte();
+            var direction = (Direction)p.ReadByte();
             sbyte z = p.ReadSByte();
-            World.Player.Position = new Position(x, y, z);
+            var position = new Position(x, y, z);
+
+            World.Player.DenyWalk(seq, direction, position);
+
+            //World.Player.MovementRejected(seq, position, direction);
+
             World.Player.ProcessDelta();
         }
 
@@ -524,6 +535,9 @@ namespace ClassicUO.Network
         {
             byte seq = p.ReadByte();
             World.Player.Notoriety = (Notoriety)(p.ReadByte() & (~0x40));
+
+            World.Player.ConfirmWalk(seq);
+            //World.Player.MovementACKReceived(seq);
 
             World.Player.ProcessDelta();
         }
@@ -839,8 +853,8 @@ namespace ClassicUO.Network
         {
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
             mobile.Graphic = p.ReadUShort();
-            mobile.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
-            mobile.Direction = (Direction)p.ReadByte();
+            var position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            var direction = (Direction)p.ReadByte();
             mobile.Hue = p.ReadUShort();
             mobile.Flags = (Flags)p.ReadByte();
             mobile.Notoriety = (Notoriety)p.ReadByte();
@@ -867,11 +881,15 @@ namespace ClassicUO.Network
                 item.ProcessDelta();
                 World.Items.Add(item);
             }
+
+            mobile.MoveTo(position, direction);
+
             mobile.ProcessDelta();
             if (World.Mobiles.Add(mobile))
                 World.Mobiles.ProcessDelta();
             World.Items.ProcessDelta();
 
+            new PClickRequest(mobile).SendToServer();
         }
 
         private static void OpenMenu(Packet p)

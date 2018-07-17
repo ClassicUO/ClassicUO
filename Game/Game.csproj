@@ -21,6 +21,9 @@
     <Reference Include="FNA">
       <HintPath>..\FNA\FNA.dll</HintPath>
     </Reference>
+    <Reference Include="Network">
+      <HintPath>..\bin\Debug\netcoreapp2.1\Network.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -24,7 +24,7 @@ namespace ClassicUO.Game.Map
         public IReadOnlyList<WorldObject> ObjectsOnTiles => _objectsOnTile;
         public override Position Position { get; set; }
         public new TileView ViewObject => (TileView)base.ViewObject;
-        public bool IsIgnored => TileID == 2 || TileID == 0x1DB || (TileID >= 0x1AE && TileID <= 0x1B5);
+        public bool IsIgnored => TileID < 3 || TileID == 0x1DB || (TileID >= 0x1AE && TileID <= 0x1B5);
 
 
         public void AddWorldObject(in WorldObject obj)

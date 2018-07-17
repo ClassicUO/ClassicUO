@@ -31,7 +31,7 @@ namespace ClassicUO.Game.WorldObjects
         protected float Rotation { get; set; }
 
 
-        public virtual void Update()
+        public virtual void Update(in double frameMS)
         {
             
         }

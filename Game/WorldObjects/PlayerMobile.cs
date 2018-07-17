@@ -1015,21 +1015,382 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
+        struct Step
+        {
+            public int X, Y;
+            public sbyte Z;
+
+            public byte Direction;
+            public byte Anim;
+            public bool Run;
+            public byte Seq;
+        }
+
+        const int MAX_STEP_COUNT = 5;
+        const int TURN_DELAY = 100;
+        const int WALKING_DELAY = 750;
+
+        private readonly Queue<Step> _requestedSteps = new Queue<Step>();
+        private readonly Queue<Step> _steps = new Queue<Step>();
+        private int _lastStepRequestedTime;
+        public byte SequenceNumber { get; set; }
+
+        public bool Walk(Direction direction, bool run)
+        {
+            if (_lastStepRequestedTime > 0 || _requestedSteps.Count >= MAX_STEP_COUNT)
+                return false;
+
+            int x = 0, y = 0;
+            sbyte z = 0;
+            Direction oldDirection = Direction.NONE;
+
+            if (_requestedSteps.Count <= 0)
+            {
+                GetEndPosition(ref x, ref y, ref z, ref oldDirection);
+            }
+            else
+            {
+                Step step1 = _requestedSteps.Dequeue();
+                x = step1.X; y = step1.Y; z = step1.Z; oldDirection = (Direction)step1.Direction;
+            }
+
+            ushort walkTime;
+
+            Direction newDirection = direction;
+            int newX = x;
+            int newY = y;
+            sbyte newZ = z;
+
+            if (oldDirection == newDirection)
+            {
+                if (newDirection != direction)
+                {
+                    direction = newDirection;
+                    walkTime = TURN_DELAY;
+                }
+                else
+                {
+                    direction = newDirection;
+                    x = newX; y = newY; z = newZ;
+                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, direction);
+                }
+            }
+            else
+            {
+                if (oldDirection == newDirection)
+                {
+                    direction = newDirection;
+                    x = newX; y = newY; z = newZ;
+                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, direction);
+                }
+                else
+                {
+                    direction = newDirection;
+                    walkTime = TURN_DELAY;
+                }
+            }
+
+            Step step = new Step()
+            {
+                X = x, Y = y, Z = z, Direction = (byte)direction, Run = run, Seq = SequenceNumber
+            };
+
+            _requestedSteps.Enqueue(step);
+            new Network.PWalkRequest(direction, SequenceNumber).SendToServer();
+
+            if (SequenceNumber == 0xFF)
+                SequenceNumber = 1;
+            else
+                SequenceNumber++;
+
+            _lastStepRequestedTime = 0 + walkTime;
+
+            GetAnimationGroup();
+            return true;
+        }
+
+        public void ConfirmWalk(in byte seq)
+        {
+            if (_requestedSteps.Count <= 0)
+                return;
+
+            Step step = _requestedSteps.Peek();
+            if (step.Seq != seq)
+                return;
+
+            _requestedSteps.Dequeue();
+        }
+
+        public void DenyWalk(in byte seq, in Direction dir, in Position position)
+        {
+            foreach (Step step in _requestedSteps)
+            {
+                if (step.Seq == seq)
+                {
+                    ResetSteps();
+                    Position = position;
+                    Direction = dir;
+
+                    break;
+                }
+            }
+        }
+
+        public void ResetSteps()
+        {
+            _requestedSteps.Clear();
+            SequenceNumber = 0;
+            _lastStepRequestedTime = 0;
+        }
+
+        private void GetEndPosition(ref int x, ref int y, ref sbyte z, ref Direction dir)
+        {
+            if (_requestedSteps.Count <= 0)
+            {
+                x = Position.X;
+                y = Position.Y;
+                z = Position.Z;
+                dir = Direction;
+            }
+            else
+            {
+                Step step = _requestedSteps.Dequeue();
+                x = step.X; y = step.Y; z = step.Z; dir = (Direction)step.Direction;
+            }
+        }
+
+        public byte GetAnimationGroup(in ushort checkGraphic = 0)
+        {
+            Graphic graphic = checkGraphic;
+            if (graphic == 0)
+                graphic = GetMountAnimation();
+
+            AssetsLoader.ANIMATION_GROUPS groupIndex = AssetsLoader.Animations.GetGroupIndex(graphic);
+            byte result = AnimationGroup;
+
+            if (result != 0xFF && Serial.IsMobile && checkGraphic > 0)
+            {
+
+            }
+
+            bool isWalking = IsWalking;
+            bool isRun = IsRunning;
+
+            if (_steps.Count > 0)
+            {
+                isWalking = true;
+                isRun = _steps.Peek().Run;
+            }
+
+            if ( groupIndex == AssetsLoader.ANIMATION_GROUPS.AG_LOW)
+            {
+                if (isWalking)
+                {
+                    if (isRun)
+                        result = (byte)AssetsLoader.LOW_ANIMATION_GROUP.LAG_RUN;
+                    else
+                        result = (byte)AssetsLoader.LOW_ANIMATION_GROUP.LAG_WALK;
+                }
+                else if (AnimationGroup == 0xFF)
+                {
+                    result = (byte)AssetsLoader.LOW_ANIMATION_GROUP.LAG_STAND;
+                    AnimIndex = 0;
+                }
+            }
+            else if (groupIndex == AssetsLoader.ANIMATION_GROUPS.AG_HIGHT)
+            {
+                if (isWalking)
+                {
+                    result = (byte)AssetsLoader.HIGHT_ANIMATION_GROUP.HAG_WALK;
+                    if (isRun)
+                    {
+                        if (AssetsLoader.Animations.AnimationExists(graphic, (byte)AssetsLoader.HIGHT_ANIMATION_GROUP.HAG_FLY))
+                            result = (byte)AssetsLoader.HIGHT_ANIMATION_GROUP.HAG_FLY;
+                    }
+                }
+                else if (AnimationGroup == 0xFF)
+                {
+                    result = (byte)AssetsLoader.HIGHT_ANIMATION_GROUP.HAG_STAND;
+                    AnimIndex = 0;
+                }
+
+                if (graphic == 151)
+                    result++;
+            }
+            else if (groupIndex == AssetsLoader.ANIMATION_GROUPS.AG_PEOPLE)
+            {
+                bool inWar = WarMode;
+
+                if (isWalking)
+                {
+                    if (isRun)
+                    {
+                        if (GetItemAtLayer(Layer.Mount) != null)
+                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
+                        else if (GetItemAtLayer(Layer.LeftHand) != null || GetItemAtLayer(Layer.RightHand) != null)
+                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
+                        else
+                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED;
+
+                        //if (!IsHuman && !AssetsLoader.Animations.AnimationExists(graphic, result))
+                        //    goto test_walk;
+
+                    }
+                    else
+                    {
+
+                        if (GetItemAtLayer(Layer.Mount) != null)
+                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
+                        else if ((GetItemAtLayer(Layer.LeftHand) != null || GetItemAtLayer(Layer.RightHand) != null) && !IsDead)
+                        {
+                            if (inWar)
+                                result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                            else
+                                result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
+                        }
+                        else if (inWar && !IsDead)
+                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                        else
+                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
+
+                    }
+                }
+                else if (AnimationGroup == 0xFF)
+                {
+                    if (GetItemAtLayer(Layer.Mount) != null)
+                        result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
+                    else if (inWar && !IsDead)
+                    {
+                        if (GetItemAtLayer(Layer.LeftHand) != null)
+                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
+                        else if (GetItemAtLayer(Layer.RightHand) != null)
+                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK;
+                        else
+                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
+                    }
+                    else
+                        result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_STAND;
+
+                    AnimIndex = 0;
+                }
+
+                if (Race == RaceType.GARGOYLE)
+                {
+                    if (IsFlying)
+                    {
+                        if (result == 0 || result == 1)
+                            result = 62;
+                        else if (result == 2 || result == 3)
+                            result = 63;
+                        else if (result == 4)
+                            result = 64;
+                        else if (result == 6)
+                            result = 66;
+                        else if (result == 7 || result == 8)
+                            result = 65;
+                        else if (result >= 9 && result <= 11)
+                        {
+                            result = 71;
+                        }
+                        else if (result >= 12 && result <= 14)
+                        {
+                            result = 72;
+                        }
+                        else if (result == 15)
+                        {
+                            result = 62;
+                        }
+                        else if (result == 20)
+                        {
+                            result = 77;
+                        }
+                        else if (result == 31)
+                        {
+                            result = 71;
+                        }
+                        else if (result == 34)
+                        {
+                            result = 78;
+                        }
+                        else if (result >= 200 && result <= 259)
+                        {
+                            result = 75;
+                        }
+                        else if (result >= 260 && result <= 270)
+                        {
+                            result = 75;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public bool IsWalking => _lastStepRequestedTime > (0 - WALKING_DELAY);
+        public byte AnimationGroup { get; set; } = 0xFF;
+        public byte AnimIndex { get; set; }
+
+        public Graphic GetMountAnimation()
+        {
+            ushort g = Graphic;
+
+            switch (g)
+            {
+                case 0x0192:
+                case 0x0193:
+                    {
+                        g -= 2;
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+            return g;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         private Direction _nextDirection = Direction.NONE;
-        private long _nextMovementTime;
 
-        public void MovementACKReceived(in byte seq) => _movementsHanlder.ACKReceived(seq);
+        public void MovementACKReceived(in byte seq)
+        {
+            MovementHandler.ACKReceived(seq);
+        }
         public void MovementRejected(in byte seq, in Position position, in Direction direction)
         {
-            _movementsHanlder.RejectedMovementRequest(seq, out _, out _);
+            Log.Message(LogTypes.Error, "Movement rejected to " + position.ToString() + " - " + direction.ToString());
+            MovementHandler.RejectedMovementRequest(seq, out _, out _);
             MoveTo(position, direction);
-            _movementsHanlder.Reset();
+            MovementHandler.Reset();
         }
-        public void MovementChangeDirection(in Direction direction)
-        {
-            _nextDirection = direction;
-        }
+
+
+        public void MovementStart(in Direction direction) { if (!IsMoving) _nextDirection = direction; }
+        public void MovementStop() => _nextDirection = Direction.NONE;
+
 
         public void CheckIfNeedToMove()
         {
@@ -1041,30 +1402,26 @@ namespace ClassicUO.Game.WorldObjects
 
                 (int tileX, int tileY) = OffsetTile(Position, nextDirection);
 
-                bool ok = GetNextTile(Position, tileX, tileY, out Direction direction, out int nextTileX, out int nextTileY, out int nextZ);
+                bool ok = GetNextTile(this, Position, tileX, tileY, out Direction direction, out int nextTileX, out int nextTileY, out int nextZ);
 
                 if (ok)
                 {
-                    bool onlyfacing = false;
+                    Log.Message(LogTypes.Warning, "ENQUEED!");
 
                     if ((Direction & Direction.Up) != (direction & Direction.Up))
                     {
-                        EnqueueMovement(Position, (direction & Direction.Up));
-                        onlyfacing = true;
+                        EnqueueMovement(Position, (direction & Direction.Up), true);
                     }
 
 
                     if ((nextDirection & Direction.Running) != 0)
                         direction |= Direction.Running;
                     else
-                        direction &= Direction.Running;
+                        direction &= Direction.Up;
 
                     if (Position.X != nextTileX || Position.Y != nextTileY || Position.Z != nextZ)
                     {
-                        if (!onlyfacing)
-                        {
-                            EnqueueMovement(new Position((ushort)nextTileX, (ushort)nextTileY, (sbyte)nextZ), direction);
-                        }
+                        EnqueueMovement(new Position((ushort)nextTileX, (ushort)nextTileY, (sbyte)nextZ), direction, true);                  
                     }
                 }
 
@@ -1072,38 +1429,38 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
-        private bool GetNextTile(in Position current, in int goalX, in int goalY, out Direction direction, out int nextX, out int nextY, out int nextZ)
+        private static bool GetNextTile(in Mobile m, in Position current, in int goalX, in int goalY, out Direction direction, out int nextX, out int nextY, out int nextZ)
         {
             direction = GetNextDirection(current, goalX, goalY);
             Direction initialDir = direction;
 
             (nextX, nextY) = OffsetTile(current, direction);
-            bool moveIsOK = CheckMovement(this, current, direction, out nextZ);
+            bool moveIsOK = CheckMovement(m, current, direction, out nextZ);
 
             if (!moveIsOK)
             {
                 direction = (Direction)(((int)direction - 1) & 0x87);
                 (nextX, nextY) = OffsetTile(current, direction);
-                moveIsOK = CheckMovement(this, current, direction, out nextZ);
+                moveIsOK = CheckMovement(m, current, direction, out nextZ);
             }
 
             if (!moveIsOK)
             {
                 direction = (Direction)(((int)direction + 2) & 0x87);
                 (nextX, nextY) = OffsetTile(current, direction);
-                moveIsOK = CheckMovement(this, current, direction, out nextZ);
+                moveIsOK = CheckMovement(m, current, direction, out nextZ);
             }
 
             if (moveIsOK)
             {
-                if (IsRunning)
+                if (m.IsRunning)
                     direction |= Direction.Running;
                 return true;
             }
             return false;
         }
 
-        private Direction GetNextDirection(in Position current, in int goalX, in int goalY)
+        private static Direction GetNextDirection(in Position current, in int goalX, in int goalY)
         {
             Direction direction;
 

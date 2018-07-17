@@ -44,13 +44,13 @@ namespace ClassicUO.Game
 
 
 
-        public static void Update()
+        public static void Update(in double frameMS)
         {
             if (Player != null)
             {
                 foreach (Mobile mob in Mobiles)
                 {
-                    mob.ViewObject.Update();
+                    mob.ViewObject.Update(frameMS);
 
                     if (mob.Distance > DISTANCE_POV)
                         RemoveMobile(mob);
@@ -58,7 +58,7 @@ namespace ClassicUO.Game
 
                 foreach (Item item in Items)
                 {
-                    item.ViewObject.Update();
+                    item.ViewObject.Update(frameMS);
 
                     if (item.Distance > DISTANCE_POV)
                         RemoveItem(item);

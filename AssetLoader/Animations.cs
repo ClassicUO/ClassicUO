@@ -31,6 +31,7 @@ namespace ClassicUO.AssetsLoader
         public static byte Direction { get; set; }
         public static ushort AnimID { get; set; }
 
+        public static IndexAnimation[] DataIndex => _dataIndex;
 
         public static void Load()
         {
@@ -744,7 +745,37 @@ namespace ClassicUO.AssetsLoader
             }
         }
 
+        public static ANIMATION_GROUPS GetGroupIndex(in ushort graphic)
+        {
+            if (graphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                return ANIMATION_GROUPS.AG_HIGHT;
 
+            switch (_dataIndex[graphic].Type)
+            {
+                case ANIMATION_GROUPS_TYPE.ANIMAL:
+                    return ANIMATION_GROUPS.AG_LOW;
+                case ANIMATION_GROUPS_TYPE.MONSTER:
+                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
+                    return ANIMATION_GROUPS.AG_HIGHT;
+                case ANIMATION_GROUPS_TYPE.HUMAN:
+                case ANIMATION_GROUPS_TYPE.EQUIPMENT:
+                    return ANIMATION_GROUPS.AG_PEOPLE;
+            }
+
+            return ANIMATION_GROUPS.AG_HIGHT;
+        }
+
+        public static bool AnimationExists(in ushort graphic, in byte group)
+        {
+            bool result = false;
+
+            if (graphic < MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
+            {
+                var d = _dataIndex[graphic].Groups[group].Direction[0];
+                result = d.Address != 0 || d.IsUOP;
+            }
+            return result;
+        }
 
         public static bool LoadDirectionGroup(ref AnimationDirection animDir)
         {
@@ -1377,6 +1408,14 @@ namespace ClassicUO.AssetsLoader
 
     }
 
+
+    public enum ANIMATION_GROUPS
+    {
+        AG_NONE = 0,
+        AG_LOW,
+        AG_HIGHT,
+        AG_PEOPLE
+    }
 
     public enum ANIMATION_GROUPS_TYPE
     {
