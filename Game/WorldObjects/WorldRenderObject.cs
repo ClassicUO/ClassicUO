@@ -11,6 +11,10 @@ namespace ClassicUO.Game.WorldObjects
     {
         protected static float PI = (float)Math.PI;
 
+        public WorldRenderObject()
+        {
+
+        }
 
         public WorldRenderObject(in WorldObject parent)
         {
@@ -29,7 +33,6 @@ namespace ClassicUO.Game.WorldObjects
         protected bool HasShadow { get; set; }
         protected bool IsFlipped { get; set; }
         protected float Rotation { get; set; }
-
 
         public virtual void Update(in double frameMS)
         {
@@ -156,5 +159,6 @@ namespace ClassicUO.Game.WorldObjects
 
             return true;
         }
+
     }
 }

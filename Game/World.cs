@@ -33,12 +33,13 @@ namespace ClassicUO.Game
                     Player.ProcessDelta();
                 }
             }
-        } 
-        
+        }
+
+        public static bool InGame => Player != null && Map != null;
 
         private static readonly ConcurrentDictionary<Serial, House> _houses = new ConcurrentDictionary<Serial, House>();
 
-
+        public static long Ticks { get; set; }
 
         const int DISTANCE_POV = 24;
 

@@ -13,11 +13,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO
 {
-    internal class GameLoop : Microsoft.Xna.Framework.Game
+    public class GameLoop : Microsoft.Xna.Framework.Game
     {
         private readonly GraphicsDeviceManager _graphics;
-        private MouseManager _mouseManager;
-        private KeyboardManager _keyboardManager;
         private SpriteBatchUI _spriteBatch;
 
         public GameLoop()
@@ -52,15 +50,12 @@ namespace ClassicUO
         }
 
 
+
         protected override void Initialize()
         {
             this.Window.AllowUserResizing = true;
 
-            _mouseManager = new MouseManager(this);
-            _keyboardManager = new KeyboardManager(this);
 
-            Components.Add(_mouseManager);
-            Components.Add(_keyboardManager);
 
             _spriteBatch = new SpriteBatchUI(this);
 
@@ -110,21 +105,20 @@ namespace ClassicUO
 
             
 
-           // Task.Run(() => 
-            //{
-                _stopwatch = Stopwatch.StartNew();
-                Log.Message(LogTypes.Trace, "Loading UO files...");
 
-                AssetsLoader.FileManager.LoadFiles();
+            _stopwatch = Stopwatch.StartNew();
+            Log.Message(LogTypes.Trace, "Loading UO files...");
 
-                Log.Message(LogTypes.Trace, "UO files loaded in " + _stopwatch.ElapsedMilliseconds + " ms");
+            AssetsLoader.FileManager.LoadFiles();
 
-            //});
+            Log.Message(LogTypes.Trace, "UO files loaded in " + _stopwatch.ElapsedMilliseconds + " ms");
+
+
 
             PacketHandlers.LoadLoginHandlers();
             PacketsTable.AdjustPacketSizeByVersion(AssetsLoader.FileManager.ClientVersion);
 
-            _mouseManager.LoadTextures();
+
 
             Texture2D textureHue0 = new Texture2D(GraphicsDevice, 32, 3000);
 
@@ -156,7 +150,7 @@ namespace ClassicUO
             _crossTexture = new Texture2D(GraphicsDevice, 1, 1);
             _crossTexture.SetData(new Color[] { Color.Red });
 
-            _keyboardManager.KeyPressed += (sender, e) =>
+            KeyboardManager.KeyPressed += (sender, e) =>
             {
                 if (e.KeyState == Microsoft.Xna.Framework.Input.KeyState.Down)
                 {
@@ -235,7 +229,7 @@ namespace ClassicUO
             NetClient.Socket.Connect(settings.IP, settings.Port);
 
             int font = 0;
-            _mouseManager.MouseMove += (sender, e) =>
+            MouseManager.MouseMove += (sender, e) =>
             {
                 //if (font + 1 > 20)
                 //    font = 0;
@@ -250,7 +244,7 @@ namespace ClassicUO
             bool allowPGMove = false;
             DateTime pause = DateTime.Now;
 
-            _mouseManager.MousePressed += (sender, e) =>
+            MouseManager.MousePressed += (sender, e) =>
             {
                 if (Game.World.Map != null && Game.World.Player != null)
                 {
@@ -271,14 +265,14 @@ namespace ClassicUO
                 }
             };
 
-            _mouseManager.MouseUp += (sender, e) =>
+            MouseManager.MouseUp += (sender, e) =>
             {
-                if (e.Button == MouseButton.Right)
-                {
-                    allowPGMove = false;
-                    Game.World.Player.MovementStop();
-                    pause = DateTime.Now;
-                }
+                //if (e.Button == MouseButton.Right)
+                //{
+                //    allowPGMove = false;
+                //    Game.World.Player.MovementStop();
+                //    pause = DateTime.Now;
+                //}
             };
 
 
@@ -289,6 +283,9 @@ namespace ClassicUO
             var datatextentry = AssetsLoader.Gumps.GetGump(9350 + 4, out gw, out gh);
             _textentry = new Texture2D(GraphicsDevice, gw, gh, false, SurfaceFormat.Bgra5551);
             _textentry.SetData(datatextentry);
+
+
+            _gameCursor = new Game.Renderer.CursorRenderer();
 
             // END TEST
 
@@ -311,6 +308,7 @@ namespace ClassicUO
         private ushort _currentX = 1446;
         private Stopwatch _stopwatch;
         private Texture2D _texture, _crossTexture, _gump, _textentry;
+        private Game.Renderer.CursorRenderer _gameCursor;
 
         private TextRenderer _textRenderer = new TextRenderer("Select which shard to play on:")
         {
@@ -320,11 +318,20 @@ namespace ClassicUO
 
         private DateTime _timePing;
 
+
         protected override void Update(GameTime gameTime)
         {
+
+            Game.World.Ticks = (long)gameTime.TotalGameTime.TotalMilliseconds;
+
+
+
             NetClient.Socket.Slice();
 
             TextureManager.UpdateTicks(gameTime.TotalGameTime.Ticks);
+
+            MouseManager.Update();
+            _gameCursor.Update(gameTime.TotalGameTime.Ticks);
 
 
             if (Game.World.Map != null && Game.World.Player != null)
@@ -340,29 +347,18 @@ namespace ClassicUO
 
                 Game.World.Update(gameTime.TotalGameTime.Ticks);
 
+
+
                 if (DateTime.Now > _timePing)
                 {
                     NetClient.Socket.Send(new PPing());
                     _timePing = DateTime.Now.AddSeconds(10);
-                }
-
-
-
-                if (NetClient.Socket.IsConnected)
-                {
-
                 }
             }
 
             base.Update(gameTime);
         }
 
-        protected override bool BeginDraw()
-        {
-            _mouseManager.BeginDraw();
-
-            return base.BeginDraw();
-        }
 
         private (Point, Point, Vector2, Vector2, Point) GetViewPort()
         {
@@ -553,7 +549,9 @@ namespace ClassicUO
 
             //_textRenderer.Draw(_spriteBatch, new Point(100, 150));
 
-            _mouseManager.Draw(_spriteBatch);
+            //_mouseManager.Draw(_spriteBatch);
+
+            _gameCursor.Draw(_spriteBatch);
 
             _spriteBatch.EndDraw();
 

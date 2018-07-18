@@ -77,7 +77,7 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
-        public Graphic Graphic
+        public override Graphic Graphic
         {
             get => _graphic;
             set

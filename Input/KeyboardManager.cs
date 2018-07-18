@@ -1,5 +1,4 @@
-﻿using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
@@ -8,16 +7,12 @@ using System.Text;
 
 namespace ClassicUO.Input
 {
-    public sealed class KeyboardManager : GameComponent
+    public static class KeyboardManager
     {
-        private KeyboardState _prevKeyboardState = Keyboard.GetState();
+        private static KeyboardState _prevKeyboardState = Keyboard.GetState();
 
-        public KeyboardManager(Microsoft.Xna.Framework.Game game): base(game)
-        {
-          
-        }
 
-        public override void Update(GameTime gameTime)
+        public static void Update()
         {
             KeyboardState current = Keyboard.GetState();
 
@@ -33,12 +28,12 @@ namespace ClassicUO.Input
                     {
                         // pressed 1st time: FIRE!
                         var arg = new KeyboardEventArgs(k, KeyState.Down);
-                        KeyDown.Raise(arg);
+                        KeyDown?.Invoke(null, arg);
                     }
                     else
                     {
                         var arg = new KeyboardEventArgs(k, KeyState.Down);
-                        KeyPressed.Raise(arg);
+                        KeyPressed?.Invoke(null, arg);
                     }
                 }
             }
@@ -52,17 +47,15 @@ namespace ClassicUO.Input
                     {
                         // released 1st time: FIRE!
                         var arg = new KeyboardEventArgs(k, KeyState.Up);
-                        KeyUp.Raise(arg);
+                        KeyUp?.Invoke(null, arg);
                     }
                 }
             }
 
             _prevKeyboardState = current;
-
-            base.Update(gameTime);
         }
 
 
-        public event EventHandler<KeyboardEventArgs> KeyDown, KeyUp, KeyPressed;
+        public static event EventHandler<KeyboardEventArgs> KeyDown, KeyUp, KeyPressed;
     }
 }

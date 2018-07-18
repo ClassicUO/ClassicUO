@@ -20,12 +20,12 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public Graphic TileID { get; set; }
         public IReadOnlyList<WorldObject> ObjectsOnTiles => _objectsOnTile;
         public override Position Position { get; set; }
         public new TileView ViewObject => (TileView)base.ViewObject;
-        public bool IsIgnored => TileID < 3 || TileID == 0x1DB || (TileID >= 0x1AE && TileID <= 0x1B5);
+        public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || (Graphic >= 0x1AE && Graphic <= 0x1B5);
 
+        public AssetsLoader.LandTiles TileData => AssetsLoader.TileData.LandData[Graphic];
 
         public void AddWorldObject(in WorldObject obj)
         {
@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Map
             _objectsOnTile.Clear();
             _objectsOnTile.Add(this);
             DisposeView();
-            TileID = 0;
+            Graphic = 0;
             Position = new Position(0, 0);
             
         }
@@ -73,7 +73,7 @@ namespace ClassicUO.Game.Map
 
         // create view only when TileID is initialized
         protected override WorldRenderObject CreateView()
-            => TileID <= 0 ? null : new TileView(this);
+            => Graphic <= 0 ? null : new TileView(this);
 
 
         private static int Compare(in WorldObject x, in WorldObject y)
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Map
             }
             else if (e is Static staticitem)
             {
-                var itemdata = AssetsLoader.TileData.StaticData[staticitem.TileID];
+                var itemdata = AssetsLoader.TileData.StaticData[staticitem.Graphic];
 
                 return (staticitem.Position.Z, 
                         1, 

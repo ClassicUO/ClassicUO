@@ -8,21 +8,27 @@
     <OutputPath>..\bin\$(Configuration)\</OutputPath>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AssetLoader\AssetLoader.csproj" />
-    <ProjectReference Include="..\Configuration\Configuration.csproj" />
-    <ProjectReference Include="..\Game\Game.csproj" />
-    <ProjectReference Include="..\Input\Input.csproj" />
-    <ProjectReference Include="..\Network\Network.csproj" />
-    <ProjectReference Include="..\Renderer\Renderer.csproj" />
-    <ProjectReference Include="..\UI\UI.csproj" />
-    <ProjectReference Include="..\Utility\Utility.csproj" />
-  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="FNA">
       <HintPath>..\FNA\FNA.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AssetLoader\AssetLoader.csproj" />
+    <ProjectReference Include="..\Configuration\Configuration.csproj" />
+    <ProjectReference Include="..\Game\Game.csproj" />
+    <ProjectReference Include="..\Input\Input.csproj" />
+    <ProjectReference Include="..\UI\UI.csproj" />
+    <ProjectReference Include="..\Utility\Utility.csproj" />
   </ItemGroup>
 
   <Import Project="..\build\CopyFNALibs.targets" />

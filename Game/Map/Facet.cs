@@ -87,7 +87,7 @@ namespace ClassicUO.Game.Map
             return AssetsLoader.Map.BlockData[Index][block];
         }
 
-        public int GetAverageZ(in int top, in int left, in int right, in int bottom, ref int low, ref int high)
+        public int GetAverageZ(in sbyte top, in sbyte left, in sbyte right, in sbyte bottom, ref sbyte low, ref sbyte high)
         {
             high = top;
             if (left > high)
@@ -111,13 +111,13 @@ namespace ClassicUO.Game.Map
                 return FloorAverage(top, bottom);
         }
 
-        public int GetAverageZ(short x, short y, ref int low, ref int top)
+        public int GetAverageZ(short x, short y, ref sbyte low, ref sbyte top)
         {
             return GetAverageZ(
-                (int)GetTileZ(x, y),
-                (int)GetTileZ(x, (short)(y + 1)),
-                (int)GetTileZ((short)(x + 1), y),
-                (int)GetTileZ((short)(x + 1), (short)(y + 1)),
+                GetTileZ(x, y),
+                GetTileZ(x, (short)(y + 1)),
+                GetTileZ((short)(x + 1), y),
+                GetTileZ((short)(x + 1), (short)(y + 1)),
                 ref low, ref top);
         }
 

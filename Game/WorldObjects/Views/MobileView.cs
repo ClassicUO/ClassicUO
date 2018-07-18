@@ -29,15 +29,17 @@ namespace ClassicUO.Game.WorldObjects.Views
             
             AssetsLoader.Animations.GetAnimDirection(ref dir, ref mirror);
 
-           // var direction = AssetsLoader.Animations.DataIndex[WorldObject.Graphic].Groups[]
+            // var direction = AssetsLoader.Animations.DataIndex[WorldObject.Graphic].Groups[]
 
+
+            WorldObject.ProcessAnimation();
 
             return base.Draw(spriteBatch, position);
         }
 
         public override void Update(in double frameMS)
         {
-            WorldObject.DoMovements(frameMS);
+            //WorldObject.DoMovements(frameMS);
 
 
             base.Update(frameMS);

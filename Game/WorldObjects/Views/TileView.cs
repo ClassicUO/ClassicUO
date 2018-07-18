@@ -33,17 +33,15 @@ namespace ClassicUO.Game.WorldObjects.Views
 
         public TileView(in Tile tile) : base(tile)
         {
-            var landData = AssetsLoader.TileData.LandData[tile.TileID];
-
-            IsStretched = !(landData.TexID <= 0 && (landData.Flags & 0x00000080) > 0);
+            IsStretched = !(tile.TileData.TexID <= 0 && (tile.TileData.Flags & 0x00000080) > 0);
 
             if (IsStretched)
             {
-                Texture = TextureManager.GetOrCreateTexmapTexture(landData.TexID);
+                Texture = TextureManager.GetOrCreateTexmapTexture(tile.TileData.TexID);
             }
             else
             {
-                Texture = TextureManager.GetOrCreateLandTexture(tile.TileID);
+                Texture = TextureManager.GetOrCreateLandTexture(tile.Graphic);
                 Bounds = new Rectangle(0, tile.Position.Z * 4, 44, 44);
             }
 
@@ -99,11 +97,11 @@ namespace ClassicUO.Game.WorldObjects.Views
 
             if (!(currentZ == leftZ && currentZ == rightZ && currentZ == bottomZ))
             {
-                int low = 0, high = 0, sort = 0;
-                sort = map.GetAverageZ(WorldObject.Position.Z, leftZ, rightZ, bottomZ, ref low, ref high);
+                sbyte low = 0, high = 0, sort = 0;
+                sort = (sbyte)map.GetAverageZ(WorldObject.Position.Z, leftZ, rightZ, bottomZ, ref low, ref high);
                 if (sort != SortZ)
                 {
-                    SortZ = (sbyte)sort;
+                    SortZ = sort;
                     map.GetTile((short)WorldObject.Position.X, (short)WorldObject.Position.Y).Sort()/*.ForceSort()*/;
                 }
             }

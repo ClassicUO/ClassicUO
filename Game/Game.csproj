@@ -13,16 +13,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AssetLoader\AssetLoader.csproj" />
-    <ProjectReference Include="..\Renderer\Renderer.csproj" />
+    <ProjectReference Include="..\Input\Input.csproj" />
     <ProjectReference Include="..\Utility\Utility.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="ClassicUO">
+      <HintPath>..\bin\Debug\netcoreapp2.1\ClassicUO.dll</HintPath>
+    </Reference>
     <Reference Include="FNA">
       <HintPath>..\FNA\FNA.dll</HintPath>
-    </Reference>
-    <Reference Include="Network">
-      <HintPath>..\bin\Debug\netcoreapp2.1\Network.dll</HintPath>
     </Reference>
   </ItemGroup>
 

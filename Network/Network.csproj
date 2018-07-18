@@ -12,11 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AssetLoader\AssetLoader.csproj" />
-    <ProjectReference Include="..\Game\Game.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="FNA">
       <HintPath>..\FNA\FNA.dll</HintPath>
     </Reference>

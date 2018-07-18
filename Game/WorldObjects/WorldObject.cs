@@ -11,6 +11,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public virtual Position Position { get; set; } = Position.Invalid;
         public virtual Hue Hue { get; set; }
+        public virtual Graphic Graphic { get; set; }
 
         public WorldRenderObject ViewObject
         {

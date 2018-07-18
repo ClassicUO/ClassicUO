@@ -11,14 +11,13 @@ namespace ClassicUO.Game.WorldObjects
     {
         public Static(Graphic tileID, Hue hue, int index)
         {
-            TileID = tileID; Hue = hue; Index = index;
+            Graphic = tileID; Hue = hue; Index = index;
         }
 
-        public Graphic TileID { get; }
         public int Index { get; }
         public override Position Position { get; set; }
         public new StaticView ViewObject => (StaticView)base.ViewObject;
-        public AssetsLoader.StaticTiles ItemData => AssetsLoader.TileData.StaticData[TileID];
+        public AssetsLoader.StaticTiles ItemData => AssetsLoader.TileData.StaticData[Graphic];
 
         protected override WorldRenderObject CreateView() => new StaticView(this);
     }  

@@ -1,7 +1,9 @@
 ﻿using ClassicUO.Game.Map;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace ClassicUO.Game.WorldObjects
@@ -1010,34 +1012,21 @@ namespace ClassicUO.Game.WorldObjects
         {
             if (World.Map != null)
             {
-                World.Map.Center = new Microsoft.Xna.Framework.Point((short)Position.X, (short)Position.Y);
+                World.Map.Center = new Point((short)Position.X, (short)Position.Y);
                 base.OnPositionChanged(sender, e);
             }
         }
 
-        struct Step
-        {
-            public int X, Y;
-            public sbyte Z;
+     
 
-            public byte Direction;
-            public byte Anim;
-            public bool Run;
-            public byte Seq;
-        }
-
-        const int MAX_STEP_COUNT = 5;
-        const int TURN_DELAY = 100;
-        const int WALKING_DELAY = 750;
-
-        private readonly Queue<Step> _requestedSteps = new Queue<Step>();
-        private readonly Queue<Step> _steps = new Queue<Step>();
-        private int _lastStepRequestedTime;
+       
+        private readonly Deque<Step> _requestedSteps = new Deque<Step>();
+        private long _lastStepRequestedTime;
         public byte SequenceNumber { get; set; }
 
         public bool Walk(Direction direction, bool run)
         {
-            if (_lastStepRequestedTime > 0 || _requestedSteps.Count >= MAX_STEP_COUNT)
+            if (_lastStepRequestedTime > World.Ticks || _requestedSteps.Count >= MAX_STEP_COUNT)
                 return false;
 
             int x = 0, y = 0;
@@ -1050,7 +1039,7 @@ namespace ClassicUO.Game.WorldObjects
             }
             else
             {
-                Step step1 = _requestedSteps.Dequeue();
+                Step step1 = _requestedSteps.Back();
                 x = step1.X; y = step1.Y; z = step1.Z; oldDirection = (Direction)step1.Direction;
             }
 
@@ -1063,6 +1052,12 @@ namespace ClassicUO.Game.WorldObjects
 
             if (oldDirection == newDirection)
             {
+
+                if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection))
+                {
+                    return false;
+                }
+
                 if (newDirection != direction)
                 {
                     direction = newDirection;
@@ -1092,10 +1087,35 @@ namespace ClassicUO.Game.WorldObjects
 
             Step step = new Step()
             {
-                X = x, Y = y, Z = z, Direction = (byte)direction, Run = run, Seq = SequenceNumber
+                X = x,
+                Y = y,
+                Z = z,
+                Direction = (byte)direction,
+                Run = run,
+                Seq = SequenceNumber
             };
 
-            _requestedSteps.Enqueue(step);
+
+            if (_movementState == PlayerMovementState.ANIMATE_IMMEDIATELY)
+            {
+                for (int i = 0; i < _requestedSteps.Count; i++)
+                {
+                    var s = _requestedSteps[i];
+                    if (!s.Anim)
+                    {
+                        s.Anim = true;
+                        _requestedSteps[i] = s;
+                        EnqueueStep(new Position((ushort)s.X, (ushort)s.Y, s.Z), (Direction)s.Direction, s.Run);
+
+                    }
+                }
+
+                step.Anim = true;
+                EnqueueStep(new Position((ushort)step.X, (ushort)step.Y, step.Z), (Direction)step.Direction, step.Run);
+            }
+
+
+            _requestedSteps.AddToBack(step);
             new Network.PWalkRequest(direction, SequenceNumber).SendToServer();
 
             if (SequenceNumber == 0xFF)
@@ -1103,7 +1123,7 @@ namespace ClassicUO.Game.WorldObjects
             else
                 SequenceNumber++;
 
-            _lastStepRequestedTime = 0 + walkTime;
+            _lastStepRequestedTime = World.Ticks + walkTime;
 
             GetAnimationGroup();
             return true;
@@ -1114,11 +1134,28 @@ namespace ClassicUO.Game.WorldObjects
             if (_requestedSteps.Count <= 0)
                 return;
 
-            Step step = _requestedSteps.Peek();
+            Step step = _requestedSteps.Front();
             if (step.Seq != seq)
                 return;
 
-            _requestedSteps.Dequeue();
+            _requestedSteps.RemoveFromFront();
+
+            if (!step.Anim)
+            {
+                int endX = 0, endY = 0;
+                sbyte endZ = 0;
+                Direction endDir = Direction.NONE;
+
+                GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
+
+                if (step.Direction == (byte)endDir)
+                {
+                    if (_movementState == PlayerMovementState.ANIMATE_ON_CONFIRM)
+                        _movementState = PlayerMovementState.ANIMATE_ON_CONFIRM;
+                }
+
+                EnqueueStep(new Position((ushort)step.X, (ushort)step.Y, step.Z), (Direction)step.Direction, step.Run);
+            }
         }
 
         public void DenyWalk(in byte seq, in Direction dir, in Position position)
@@ -1131,6 +1168,8 @@ namespace ClassicUO.Game.WorldObjects
                     Position = position;
                     Direction = dir;
 
+                    ProcessDelta();
+
                     break;
                 }
             }
@@ -1141,1006 +1180,22 @@ namespace ClassicUO.Game.WorldObjects
             _requestedSteps.Clear();
             SequenceNumber = 0;
             _lastStepRequestedTime = 0;
+
+            Offset = Vector3.Zero;
         }
 
-        private void GetEndPosition(ref int x, ref int y, ref sbyte z, ref Direction dir)
+        public void ResetRequestedSteps() => _requestedSteps.Clear();
+
+
+
+
+        private PlayerMovementState _movementState = PlayerMovementState.ANIMATE_IMMEDIATELY;
+
+        enum  PlayerMovementState
         {
-            if (_requestedSteps.Count <= 0)
-            {
-                x = Position.X;
-                y = Position.Y;
-                z = Position.Z;
-                dir = Direction;
-            }
-            else
-            {
-                Step step = _requestedSteps.Dequeue();
-                x = step.X; y = step.Y; z = step.Z; dir = (Direction)step.Direction;
-            }
+            ANIMATE_IMMEDIATELY = 0,
+            ANIMATE_ON_CONFIRM,
         }
 
-        public byte GetAnimationGroup(in ushort checkGraphic = 0)
-        {
-            Graphic graphic = checkGraphic;
-            if (graphic == 0)
-                graphic = GetMountAnimation();
-
-            AssetsLoader.ANIMATION_GROUPS groupIndex = AssetsLoader.Animations.GetGroupIndex(graphic);
-            byte result = AnimationGroup;
-
-            if (result != 0xFF && Serial.IsMobile && checkGraphic > 0)
-            {
-
-            }
-
-            bool isWalking = IsWalking;
-            bool isRun = IsRunning;
-
-            if (_steps.Count > 0)
-            {
-                isWalking = true;
-                isRun = _steps.Peek().Run;
-            }
-
-            if ( groupIndex == AssetsLoader.ANIMATION_GROUPS.AG_LOW)
-            {
-                if (isWalking)
-                {
-                    if (isRun)
-                        result = (byte)AssetsLoader.LOW_ANIMATION_GROUP.LAG_RUN;
-                    else
-                        result = (byte)AssetsLoader.LOW_ANIMATION_GROUP.LAG_WALK;
-                }
-                else if (AnimationGroup == 0xFF)
-                {
-                    result = (byte)AssetsLoader.LOW_ANIMATION_GROUP.LAG_STAND;
-                    AnimIndex = 0;
-                }
-            }
-            else if (groupIndex == AssetsLoader.ANIMATION_GROUPS.AG_HIGHT)
-            {
-                if (isWalking)
-                {
-                    result = (byte)AssetsLoader.HIGHT_ANIMATION_GROUP.HAG_WALK;
-                    if (isRun)
-                    {
-                        if (AssetsLoader.Animations.AnimationExists(graphic, (byte)AssetsLoader.HIGHT_ANIMATION_GROUP.HAG_FLY))
-                            result = (byte)AssetsLoader.HIGHT_ANIMATION_GROUP.HAG_FLY;
-                    }
-                }
-                else if (AnimationGroup == 0xFF)
-                {
-                    result = (byte)AssetsLoader.HIGHT_ANIMATION_GROUP.HAG_STAND;
-                    AnimIndex = 0;
-                }
-
-                if (graphic == 151)
-                    result++;
-            }
-            else if (groupIndex == AssetsLoader.ANIMATION_GROUPS.AG_PEOPLE)
-            {
-                bool inWar = WarMode;
-
-                if (isWalking)
-                {
-                    if (isRun)
-                    {
-                        if (GetItemAtLayer(Layer.Mount) != null)
-                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
-                        else if (GetItemAtLayer(Layer.LeftHand) != null || GetItemAtLayer(Layer.RightHand) != null)
-                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
-                        else
-                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED;
-
-                        //if (!IsHuman && !AssetsLoader.Animations.AnimationExists(graphic, result))
-                        //    goto test_walk;
-
-                    }
-                    else
-                    {
-
-                        if (GetItemAtLayer(Layer.Mount) != null)
-                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
-                        else if ((GetItemAtLayer(Layer.LeftHand) != null || GetItemAtLayer(Layer.RightHand) != null) && !IsDead)
-                        {
-                            if (inWar)
-                                result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
-                            else
-                                result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
-                        }
-                        else if (inWar && !IsDead)
-                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
-                        else
-                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
-
-                    }
-                }
-                else if (AnimationGroup == 0xFF)
-                {
-                    if (GetItemAtLayer(Layer.Mount) != null)
-                        result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
-                    else if (inWar && !IsDead)
-                    {
-                        if (GetItemAtLayer(Layer.LeftHand) != null)
-                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
-                        else if (GetItemAtLayer(Layer.RightHand) != null)
-                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK;
-                        else
-                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
-                    }
-                    else
-                        result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_STAND;
-
-                    AnimIndex = 0;
-                }
-
-                if (Race == RaceType.GARGOYLE)
-                {
-                    if (IsFlying)
-                    {
-                        if (result == 0 || result == 1)
-                            result = 62;
-                        else if (result == 2 || result == 3)
-                            result = 63;
-                        else if (result == 4)
-                            result = 64;
-                        else if (result == 6)
-                            result = 66;
-                        else if (result == 7 || result == 8)
-                            result = 65;
-                        else if (result >= 9 && result <= 11)
-                        {
-                            result = 71;
-                        }
-                        else if (result >= 12 && result <= 14)
-                        {
-                            result = 72;
-                        }
-                        else if (result == 15)
-                        {
-                            result = 62;
-                        }
-                        else if (result == 20)
-                        {
-                            result = 77;
-                        }
-                        else if (result == 31)
-                        {
-                            result = 71;
-                        }
-                        else if (result == 34)
-                        {
-                            result = 78;
-                        }
-                        else if (result >= 200 && result <= 259)
-                        {
-                            result = 75;
-                        }
-                        else if (result >= 260 && result <= 270)
-                        {
-                            result = 75;
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        public bool IsWalking => _lastStepRequestedTime > (0 - WALKING_DELAY);
-        public byte AnimationGroup { get; set; } = 0xFF;
-        public byte AnimIndex { get; set; }
-
-        public Graphic GetMountAnimation()
-        {
-            ushort g = Graphic;
-
-            switch (g)
-            {
-                case 0x0192:
-                case 0x0193:
-                    {
-                        g -= 2;
-                        break;
-                    }
-                default:
-                    break;
-            }
-
-            return g;
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        private Direction _nextDirection = Direction.NONE;
-
-        public void MovementACKReceived(in byte seq)
-        {
-            MovementHandler.ACKReceived(seq);
-        }
-        public void MovementRejected(in byte seq, in Position position, in Direction direction)
-        {
-            Log.Message(LogTypes.Error, "Movement rejected to " + position.ToString() + " - " + direction.ToString());
-            MovementHandler.RejectedMovementRequest(seq, out _, out _);
-            MoveTo(position, direction);
-            MovementHandler.Reset();
-        }
-
-
-        public void MovementStart(in Direction direction) { if (!IsMoving) _nextDirection = direction; }
-        public void MovementStop() => _nextDirection = Direction.NONE;
-
-
-        public void CheckIfNeedToMove()
-        {
-            if (_nextDirection != Direction.NONE)
-            {
-                Direction oldDirection = Direction;
-                Direction nextDirection = _nextDirection;
-                _nextDirection = Direction.NONE;
-
-                (int tileX, int tileY) = OffsetTile(Position, nextDirection);
-
-                bool ok = GetNextTile(this, Position, tileX, tileY, out Direction direction, out int nextTileX, out int nextTileY, out int nextZ);
-
-                if (ok)
-                {
-                    Log.Message(LogTypes.Warning, "ENQUEED!");
-
-                    if ((Direction & Direction.Up) != (direction & Direction.Up))
-                    {
-                        EnqueueMovement(Position, (direction & Direction.Up), true);
-                    }
-
-
-                    if ((nextDirection & Direction.Running) != 0)
-                        direction |= Direction.Running;
-                    else
-                        direction &= Direction.Up;
-
-                    if (Position.X != nextTileX || Position.Y != nextTileY || Position.Z != nextZ)
-                    {
-                        EnqueueMovement(new Position((ushort)nextTileX, (ushort)nextTileY, (sbyte)nextZ), direction, true);                  
-                    }
-                }
-
-            }
-        }
-
-
-        private static bool GetNextTile(in Mobile m, in Position current, in int goalX, in int goalY, out Direction direction, out int nextX, out int nextY, out int nextZ)
-        {
-            direction = GetNextDirection(current, goalX, goalY);
-            Direction initialDir = direction;
-
-            (nextX, nextY) = OffsetTile(current, direction);
-            bool moveIsOK = CheckMovement(m, current, direction, out nextZ);
-
-            if (!moveIsOK)
-            {
-                direction = (Direction)(((int)direction - 1) & 0x87);
-                (nextX, nextY) = OffsetTile(current, direction);
-                moveIsOK = CheckMovement(m, current, direction, out nextZ);
-            }
-
-            if (!moveIsOK)
-            {
-                direction = (Direction)(((int)direction + 2) & 0x87);
-                (nextX, nextY) = OffsetTile(current, direction);
-                moveIsOK = CheckMovement(m, current, direction, out nextZ);
-            }
-
-            if (moveIsOK)
-            {
-                if (m.IsRunning)
-                    direction |= Direction.Running;
-                return true;
-            }
-            return false;
-        }
-
-        private static Direction GetNextDirection(in Position current, in int goalX, in int goalY)
-        {
-            Direction direction;
-
-            if (goalX < current.X)
-            {
-                if (goalY < current.Y)
-                    direction = Direction.Up;
-                else if (goalY > current.Y)
-                    direction = Direction.Left;
-                else
-                    direction = Direction.West;
-            }
-            else if (goalX > current.X)
-            {
-                if (goalY < current.Y)
-                    direction = Direction.Right;
-                else if (goalY > current.Y)
-                    direction = Direction.Down;
-                else
-                    direction = Direction.East;
-            }
-            else
-            {
-                if (goalY < current.Y)
-                    direction = Direction.North;
-                else if (goalY > current.Y)
-                    direction = Direction.South;
-                else
-                    throw new Exception("Wrong direction");
-            }
-
-            return direction;
-        }
-
-
-        private static (int, int) OffsetTile(in Position position, Direction direction)
-        {
-            int nextX = position.X; int nextY = position.Y;
-
-            switch (direction & Direction.Up)
-            {
-                case Direction.North:
-                    nextY--;
-                    break;
-                case Direction.South:
-                    nextY++;
-                    break;
-                case Direction.West:
-                    nextX--;
-                    break;
-                case Direction.East:
-                    nextX++;
-                    break;
-                case Direction.Right:
-                    nextX++; nextY--;
-                    break;
-                case Direction.Left:
-                    nextX--; nextY++;
-                    break;
-                case Direction.Down:
-                    nextX++; nextY++;
-                    break;
-                case Direction.Up:
-                    nextX--; nextY--;
-                    break;
-            }
-
-            return (nextX, nextY);
-        }
-
-        private static List<Item>[] _poolsItems = { new List<Item>(), new List<Item>(), new List<Item>(), new List<Item>() };
-        private static List<Static>[] _poolsStatics = { new List<Static>(), new List<Static>(), new List<Static>(), new List<Static>() };
-
-        private static readonly List<Tile> _tiles = new List<Tile>();
-
-        const long IMPASSABLE_SURFACE = 0x00000040 | 0x00000200;
-        const int PERSON_HEIGHT = 16;
-        const int STEP_HEIGHT = 2;
-
-
-
-        private static int GetNextZ(in Mobile mobile, in Position loc, in Direction d)
-        {
-            if (CheckMovement(mobile, loc, d, out int newZ, true))
-                return newZ;
-            return loc.Z;
-        }
-
-        // servuo
-        private static bool CheckMovement(in Mobile mobile, in Position loc, in Direction d, out int newZ, bool forceOK = false)
-        {
-            Facet map = World.Map;
-
-            if (map == null)
-            {
-                newZ = 0;
-                return true;
-            }
-
-
-            int xStart = loc.X;
-            int yStart = loc.Y;
-            int xForward = xStart, yForward = yStart;
-            int xRight = xStart, yRight = yStart;
-            int xLeft = xStart, yLeft = yStart;
-
-            bool checkDiagonals = ((int)d & 0x1) == 0x1;
-
-            OffsetXY(d, ref xForward, ref yForward);
-            OffsetXY((Direction)(((int)d - 1) & 0x7), ref xLeft, ref yLeft);
-            OffsetXY((Direction)(((int)d + 1) & 0x7), ref xRight, ref yRight);
-
-            if (xForward < 0 || yForward < 0 || xForward >= AssetsLoader.Map.MapsDefaultSize[map.Index][0] || yForward >= AssetsLoader.Map.MapsDefaultSize[map.Index][1])
-            {
-                newZ = 0;
-                return false;
-            }
-
-
-            List<Item> itemsStart = _poolsItems[0];
-            List<Item> itemsForward = _poolsItems[1];
-            List<Item> itemsLeft = _poolsItems[2];
-            List<Item> itemsRight = _poolsItems[3];
-
-            List<Static> staticStart = _poolsStatics[0];
-            List<Static> staticForward = _poolsStatics[1];
-            List<Static> staticLeft = _poolsStatics[2];
-            List<Static> staticRight = _poolsStatics[3];
-
-            long reqFlags = IMPASSABLE_SURFACE;
-
-            if (checkDiagonals)
-            {
-                Tile tileStart = map.GetTile(xStart, yStart);
-                Tile tileForward = map.GetTile(xForward, yForward);
-                Tile tileLeft = map.GetTile(xLeft, yLeft);
-                Tile tileRight = map.GetTile(xRight, yRight);
-
-                if ((tileForward == null) || (tileStart == null) || (tileLeft == null) || (tileRight == null))
-                {
-                    newZ = loc.Z;
-                    return false;
-                }
-
-                List<Tile> tiles = _tiles;
-                tiles.Add(tileStart);
-                tiles.Add(tileForward);
-                tiles.Add(tileLeft);
-                tiles.Add(tileRight);
-
-                for (int i = 0; i < tiles.Count; ++i)
-                {
-                    Tile tile = tiles[i];
-
-                    for (int j = 0; j < tile.ObjectsOnTiles.Count; ++j)
-                    {
-                        WorldObject entity = tile.ObjectsOnTiles[j];
-
-                        // if (ignoreMovableImpassables && item.Movable && item.ItemData.Impassable)
-                        //     continue;
-
-                        if (entity is Item item)
-                        {
-                            if (((long)item.ItemData.Flags & reqFlags) == 0)
-                                continue;
-
-                            if (tile == tileStart && item.Position.X == xStart && item.Position.Y == yStart && item.Graphic < 0x4000)
-                                itemsStart.Add(item);
-                            else if (tile == tileForward && item.Position.X == xForward && item.Position.Y == yForward && item.Graphic < 0x4000)
-                                itemsForward.Add(item);
-                            else if (tile == tileLeft && item.Position.X == xLeft && item.Position.Y == yLeft && item.Graphic < 0x4000)
-                                itemsLeft.Add(item);
-                            else if (tile == tileRight && item.Position.X == xRight && item.Position.Y == yRight && item.Graphic < 0x4000)
-                                itemsRight.Add(item);
-                        }
-                        else if (entity is Static stat)
-                        {                          
-                            if (((long)stat.ItemData.Flags & reqFlags) == 0)
-                                continue;
-
-                            if (tile == tileStart && stat.Position.X == xStart && stat.Position.Y == yStart && stat.TileID < 0x4000)
-                                staticStart.Add(stat);
-                            else if (tile == tileForward && stat.Position.X == xForward && stat.Position.Y == yForward && stat.TileID < 0x4000)
-                                staticForward.Add(stat);
-                            else if (tile == tileLeft && stat.Position.X == xLeft && stat.Position.Y == yLeft && stat.TileID < 0x4000)
-                                staticLeft.Add(stat);
-                            else if (tile == tileRight && stat.Position.X == xRight && stat.Position.Y == yRight && stat.TileID < 0x4000)
-                                staticRight.Add(stat);
-                        }
-                    }
-
-
-                }
-            }
-            else
-            {
-                Tile tileStart = map.GetTile(xStart, yStart);
-                Tile tileForward = map.GetTile(xForward, yForward);
-                if ((tileForward == null) || (tileStart == null))
-                {
-                    newZ = loc.Z;
-                    return false;
-                }
-
-                if (tileStart == tileForward)
-                {
-                    for(int i = 0; i < tileStart.ObjectsOnTiles.Count; i++)
-                    {
-                        WorldObject entity = tileStart.ObjectsOnTiles[i];
-
-                        // if (ignoreMovableImpassables && item.Movable && item.ItemData.Impassable)
-                        //     continue;
-
-                        if (entity is Item item)
-                        {
-                            if (((long)item.ItemData.Flags & reqFlags) == 0)
-                                continue;
-
-                            if (item.Position.X == xStart && item.Position.Y == yStart && item.Graphic < 0x4000)
-                                itemsStart.Add(item);
-                            else if (item.Position.X == xForward && item.Position.Y == yForward && item.Graphic < 0x4000)
-                                itemsForward.Add(item);
-                        }
-                        else if (entity is Static stat)
-                        {
-                            if (((long)stat.ItemData.Flags & reqFlags) == 0)
-                                continue;
-
-                            if (stat.Position.X == xStart && stat.Position.Y == yStart && stat.TileID < 0x4000)
-                                staticStart.Add(stat);
-                            else if (stat.Position.X == xForward && stat.Position.Y == yForward && stat.TileID < 0x4000)
-                                staticForward.Add(stat);
-                        }
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < tileForward.ObjectsOnTiles.Count; i++)
-                    {
-                        WorldObject entity = tileForward.ObjectsOnTiles[i];
-
-                        // if (ignoreMovableImpassables && item.Movable && item.ItemData.Impassable)
-                        //     continue;
-
-                        if (entity is Item item)
-                        {
-                            if (((long)item.ItemData.Flags & reqFlags) == 0)
-                                continue;
-
-                            if (item.Position.X == xForward && item.Position.Y == yForward && item.Graphic < 0x4000)
-                                itemsForward.Add(item);
-                        }
-                        else if (entity is Static stat)
-                        {
-                            if (((long)stat.ItemData.Flags & reqFlags) == 0)
-                                continue;
-
-                            if (stat.Position.X == xForward && stat.Position.Y == yForward && stat.TileID < 0x4000)
-                                staticForward.Add(stat);
-                        }
-                    }
-
-                    for (int i = 0; i < tileStart.ObjectsOnTiles.Count; i++)
-                    {
-                        WorldObject entity = tileStart.ObjectsOnTiles[i];
-
-                        // if (ignoreMovableImpassables && item.Movable && item.ItemData.Impassable)
-                        //     continue;
-
-                        if (entity is Item item)
-                        {
-                            if (((long)item.ItemData.Flags & reqFlags) == 0)
-                                continue;
-
-                            if (item.Position.X == xStart && item.Position.Y == yStart && item.Graphic < 0x4000)
-                                itemsStart.Add(item);
-                        }
-                        else if (entity is Static stat)
-                        {
-                            if (((long)stat.ItemData.Flags & reqFlags) == 0)
-                                continue;
-
-                            if (stat.Position.X == xStart && stat.Position.Y == yStart && stat.TileID < 0x4000)
-                                staticStart.Add(stat);
-                        }
-                    }
-                }
-            }
-
-            GetStartZ(mobile, loc, itemsStart, staticStart, out int startZ, out int startTop);
-
-            bool moveIsOk = Check(mobile, itemsForward, staticForward, xForward, yForward, startTop, startZ, out newZ) ||
-                            forceOK;
-
-            if (moveIsOk && checkDiagonals)
-            {
-                if (!Check(mobile, itemsLeft, staticLeft, xLeft, yLeft, startTop, startZ, out int hold) && !Check(mobile, itemsRight, staticRight, xRight, yRight, startTop, startZ, out hold))
-                    moveIsOk = false;
-            }
-
-            for (int i = 0; i < (checkDiagonals ? 4 : 2); i++)
-            {
-                if (_poolsItems[i].Count > 0)
-                    _poolsItems[i].Clear();
-                if (_poolsStatics[i].Count > 0)
-                    _poolsStatics[i].Clear();
-            }
-
-            if (!moveIsOk)
-                newZ = startZ;
-
-            return moveIsOk;
-        }
-
-        private static void OffsetXY(in Direction d, ref int x, ref int y)
-        {
-            switch (d & Direction.Up)
-            {
-                case Direction.North:
-                    --y;
-                    break;
-                case Direction.South:
-                    ++y;
-                    break;
-                case Direction.West:
-                    --x;
-                    break;
-                case Direction.East:
-                    ++x;
-                    break;
-                case Direction.Right:
-                    ++x;
-                    --y;
-                    break;
-                case Direction.Left:
-                    --x;
-                    ++y;
-                    break;
-                case Direction.Down:
-                    ++x;
-                    ++y;
-                    break;
-                case Direction.Up:
-                    --x;
-                    --y;
-                    break;
-            }
-        }
-
-        private static void GetStartZ(in WorldObject e, in Position loc, in List<Item> itemList, in List<Static> staticList, out int zLow, out int zTop)
-        {
-            int xCheck = loc.X, yCheck = loc.Y;
-
-            Tile mapTile = World.Map.GetTile(xCheck, yCheck);
-            if (mapTile == null)
-            {
-                zLow = int.MinValue;
-                zTop = int.MinValue;
-            }
-
-            bool landBlocks = AssetsLoader.TileData.IsImpassable((long)AssetsLoader.TileData.LandData[mapTile.TileID].Flags);
-
-            int landLow = 0, landTop = 0;
-            int landCenter = World.Map.GetAverageZ((short)xCheck, (short)yCheck, ref landLow, ref landTop);
-
-            bool considerLand = !mapTile.IsIgnored;
-
-            int zCenter = zLow = zTop = 0;
-            bool isSet = false;
-
-            if (considerLand && !landBlocks && loc.Z >= landCenter)
-            {
-                zLow = landLow;
-                zCenter = landCenter;
-
-                if (!isSet || landTop > zTop)
-                    zTop = landTop;
-
-                isSet = true;
-            }
-
-            Static[] staticTiles = mapTile.GetWorldObjects<Static>();
-
-            for (int i = 0; i < staticTiles.Length; i++)
-            {
-                Static tile = staticTiles[i];
-                var id = tile.ItemData;
-
-                int calcTop = tile.Position.Z + ((id.Flags & 0x00000400) != 0 ? id.Height / 2 : id.Height);
-
-                if ((!isSet || calcTop >= zCenter) && ((id.Flags & 0x00000200) != 0) && loc.Z >= calcTop)
-                {
-                    //  || (m.CanSwim && (id.Flags & TileFlag.Wet) != 0)
-                    // if (m.CantWalk && (id.Flags & TileFlag.Wet) == 0)
-                    //     continue;
-
-                    zLow = tile.Position.Z;
-                    zCenter = calcTop;
-
-                    int top = tile.Position.Z + id.Height;
-
-                    if (!isSet || top > zTop)
-                        zTop = top;
-
-                    isSet = true;
-                }
-            }
-
-            for (int i = 0; i < itemList.Count; i++)
-            {
-                Item item = itemList[i];
-                var id = item.ItemData;
-
-                int calcTop = item.Position.Z + ((id.Flags & 0x00000400) != 0 ? id.Height / 2 : id.Height);
-
-                if ((!isSet || calcTop >= zCenter) && ((id.Flags & 0x00000200) != 0) && loc.Z >= calcTop)
-                {
-                    //  || (m.CanSwim && (id.Flags & TileFlag.Wet) != 0)
-                    // if (m.CantWalk && (id.Flags & TileFlag.Wet) == 0)
-                    //     continue;
-
-                    zLow = item.Position.Z;
-                    zCenter = calcTop;
-
-                    int top = item.Position.Z + id.Height;
-
-                    if (!isSet || top > zTop)
-                        zTop = top;
-
-                    isSet = true;
-                }
-            }
-
-            for (int i = 0; i < staticList.Count; i++)
-            {
-                Static item = staticList[i];
-                var id = item.ItemData;
-
-                int calcTop = item.Position.Z + ((id.Flags & 0x00000400) != 0 ? id.Height / 2 : id.Height);
-
-                if ((!isSet || calcTop >= zCenter) && ((id.Flags & 0x00000200) != 0) && loc.Z >= calcTop)
-                {
-                    //  || (m.CanSwim && (id.Flags & TileFlag.Wet) != 0)
-                    // if (m.CantWalk && (id.Flags & TileFlag.Wet) == 0)
-                    //     continue;
-
-                    zLow = item.Position.Z;
-                    zCenter = calcTop;
-
-                    int top = item.Position.Z + id.Height;
-
-                    if (!isSet || top > zTop)
-                        zTop = top;
-
-                    isSet = true;
-                }
-            }
-
-            if (!isSet)
-                zLow = zTop = loc.Z;
-            else if (loc.Z > zTop)
-                zTop = loc.Z;
-        }
-
-        private static bool IsOK(in bool ignoreDoors, in int ourZ, in int ourTop, in Static[] tiles, in List<Item> items, in List<Static> statics)
-        {
-            for (int i = 0; i < tiles.Length; ++i)
-            {
-                Static item = tiles[i];
-                if ((item.ItemData.Flags & IMPASSABLE_SURFACE) != 0) // Impassable || Surface
-                {
-                    int checkZ = item.Position.Z;
-                    int checkTop = checkZ + ((item.ItemData.Flags & 0x00000400) != 0 ? item.ItemData.Height / 2 : item.ItemData.Height);
-
-                    if (checkTop > ourZ && ourTop > checkZ)
-                        return false;
-                }
-            }
-
-            for (int i = 0; i < items.Count; ++i)
-            {
-                Item item = items[i];
-                int itemID = item.Graphic & AssetsLoader.FileManager.GraphicMask;
-                var itemData = AssetsLoader.TileData.StaticData[itemID];
-                ulong flags = itemData.Flags;
-
-                if ((flags & IMPASSABLE_SURFACE) != 0) // Impassable || Surface
-                {
-                    if (ignoreDoors && (AssetsLoader.TileData.IsDoor((long)flags) || itemID == 0x692 || itemID == 0x846 || itemID == 0x873 || (itemID >= 0x6F5 && itemID <= 0x6F6)))
-                        continue;
-
-                    int checkZ = item.Position.Z;
-                    int checkTop = checkZ + ((item.ItemData.Flags & 0x00000400) != 0 ? item.ItemData.Height / 2 : item.ItemData.Height);
-
-                    if (checkTop > ourZ && ourTop > checkZ)
-                        return false;
-                }
-            }
-
-            for (int i = 0; i < statics.Count; ++i)
-            {
-                Static item = statics[i];
-                int itemID = item.TileID & AssetsLoader.FileManager.GraphicMask;
-                var itemData = AssetsLoader.TileData.StaticData[itemID];
-                ulong flags = itemData.Flags;
-
-                if ((flags & IMPASSABLE_SURFACE) != 0) // Impassable || Surface
-                {
-                    if (ignoreDoors && (AssetsLoader.TileData.IsDoor((long)flags) || itemID == 0x692 || itemID == 0x846 || itemID == 0x873 || (itemID >= 0x6F5 && itemID <= 0x6F6)))
-                        continue;
-
-                    int checkZ = item.Position.Z;
-                    int checkTop = checkZ + ((item.ItemData.Flags & 0x00000400) != 0 ? item.ItemData.Height / 2 : item.ItemData.Height);
-
-                    if (checkTop > ourZ && ourTop > checkZ)
-                        return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool Check(in Mobile m, in List<Item> items, in List<Static> statics, in int x, int y, in int startTop, in int startZ, out int newZ)
-        {
-            newZ = 0;
-
-            Tile mapTile = World.Map.GetTile(x, y);
-            if (mapTile == null)
-                return false;
-
-            var id = AssetsLoader.TileData.LandData[mapTile.TileID];
-
-            Static[] tiles = mapTile.GetWorldObjects<Static>();
-            bool landBlocks = (id.Flags & 0x00000040) != 0;
-            bool considerLand = !mapTile.IsIgnored;
-
-            int landLow = 0, landCenter = 0, landTop = 0;
-            landCenter = World.Map.GetAverageZ((short)x, (short)y, ref landLow, ref landTop);
-
-            bool moveIsOk = false;
-
-            int stepTop = startTop + STEP_HEIGHT;
-            int checkTop = startZ + PERSON_HEIGHT;
-
-            bool ignoreDoors = (m.IsDead || m.Graphic == 0x3DB);
-
-
-            for (int i = 0; i < tiles.Length; ++i)
-            {
-                Static tile = tiles[i];
-
-                if ((tile.ItemData.Flags & IMPASSABLE_SURFACE) == 0x00000200) //  || (canSwim && (flags & TileFlag.Wet) != 0) Surface && !Impassable
-                {
-                    // if (cantWalk && (flags & TileFlag.Wet) == 0)
-                    //     continue;
-
-                    int itemZ = tile.Position.Z;
-                    int itemTop = itemZ;
-                    int ourZ = itemZ + ((tile.ItemData.Flags & 0x00000400) != 0 ? tile.ItemData.Height / 2 : tile.ItemData.Height);
-                    int ourTop = ourZ + PERSON_HEIGHT;
-                    int testTop = checkTop;
-
-                    if (moveIsOk)
-                    {
-                        int cmp = Math.Abs(ourZ - m.Position.Z) - Math.Abs(newZ - m.Position.Z);
-
-                        if (cmp > 0 || (cmp == 0 && ourZ > newZ))
-                            continue;
-                    }
-
-                    if (ourZ + PERSON_HEIGHT > testTop)
-                        testTop = ourZ + PERSON_HEIGHT;
-
-                    if ((tile.ItemData.Flags & 0x00000400) == 0)
-                        itemTop += tile.ItemData.Height;
-
-                    if (stepTop >= itemTop)
-                    {
-                        int landCheck = itemZ;
-
-                        if (tile.ItemData.Height >= STEP_HEIGHT)
-                            landCheck += STEP_HEIGHT;
-                        else
-                            landCheck += tile.ItemData.Height;
-
-                        if (considerLand && landCheck < landCenter && landCenter > ourZ && testTop > landLow)
-                            continue;
-
-                        if (IsOK(ignoreDoors, ourZ, testTop, tiles, items, statics))
-                        {
-                            newZ = ourZ;
-                            moveIsOk = true;
-                        }
-                    }
-                }
-            }
-
-            for (int i = 0; i < items.Count; ++i)
-            {
-                Item item = items[i];
-                var itemData = item.ItemData;
-                ulong flags = itemData.Flags;
-
-                if ((flags & IMPASSABLE_SURFACE) == 0x00000200) // Surface && !Impassable && !Movable
-                {
-                    //  || (m.CanSwim && (flags & TileFlag.Wet) != 0))
-                    // !item.Movable && 
-                    // if (cantWalk && (flags & TileFlag.Wet) == 0)
-                    //     continue;
-
-                    int itemZ = item.Position.Z;
-                    int itemTop = itemZ;
-                    int ourZ = itemZ + ((item.ItemData.Flags & 0x00000400) != 0 ? item.ItemData.Height / 2 : item.ItemData.Height);
-                    int ourTop = ourZ + PERSON_HEIGHT;
-                    int testTop = checkTop;
-
-                    if (moveIsOk)
-                    {
-                        int cmp = Math.Abs(ourZ - m.Position.Z) - Math.Abs(newZ - m.Position.Z);
-
-                        if (cmp > 0 || (cmp == 0 && ourZ > newZ))
-                            continue;
-                    }
-
-                    if (ourZ + PERSON_HEIGHT > testTop)
-                        testTop = ourZ + PERSON_HEIGHT;
-
-                    if ((itemData.Flags & 0x00000400) == 0)
-                        itemTop += itemData.Height;
-
-                    if (stepTop >= itemTop)
-                    {
-                        int landCheck = itemZ;
-
-                        if (itemData.Height >= STEP_HEIGHT)
-                            landCheck += STEP_HEIGHT;
-                        else
-                            landCheck += itemData.Height;
-
-                        if (considerLand && landCheck < landCenter && landCenter > ourZ && testTop > landLow)
-                            continue;
-
-                        if (IsOK(ignoreDoors, ourZ, testTop, tiles, items, statics))
-                        {
-                            newZ = ourZ;
-                            moveIsOk = true;
-                        }
-                    }
-                }
-            }
-
-
-            if (considerLand && !landBlocks && (stepTop) >= landLow)
-            {
-                int ourZ = landCenter;
-                int ourTop = ourZ + PERSON_HEIGHT;
-                int testTop = checkTop;
-
-                if (ourZ + PERSON_HEIGHT > testTop)
-                    testTop = ourZ + PERSON_HEIGHT;
-
-                bool shouldCheck = true;
-
-                if (moveIsOk)
-                {
-                    int cmp = Math.Abs(ourZ - m.Position.Z) - Math.Abs(newZ - m.Position.Z);
-
-                    if (cmp > 0 || (cmp == 0 && ourZ > newZ))
-                        shouldCheck = false;
-                }
-
-                if (shouldCheck && IsOK(ignoreDoors, ourZ, testTop, tiles, items, statics))
-                {
-                    newZ = ourZ;
-                    moveIsOk = true;
-                }
-            }
-
-
-            return moveIsOk;
-        }
     }
 }

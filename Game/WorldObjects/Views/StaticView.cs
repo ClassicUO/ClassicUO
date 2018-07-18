@@ -10,10 +10,10 @@ namespace ClassicUO.Game.WorldObjects.Views
     {
         public StaticView(in Static st) : base(st)
         {
-            Texture = TextureManager.GetOrCreateStaticTexture(st.TileID);
+            Texture = TextureManager.GetOrCreateStaticTexture(st.Graphic);
             Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + (st.Position.Z * 4), Texture.Width, Texture.Height);
 
-            AllowedToDraw = !IsNoDrawable(st.TileID);
+            AllowedToDraw = !IsNoDrawable(st.Graphic);
         }
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
