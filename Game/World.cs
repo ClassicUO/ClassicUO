@@ -21,7 +21,6 @@ namespace ClassicUO.Game
             {
                 if (value == null)
                     return;
-
                 if (_map == null || _map.Index != value.Index)
                 {
                     _map = null;

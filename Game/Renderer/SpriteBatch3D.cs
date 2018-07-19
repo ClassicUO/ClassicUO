@@ -84,7 +84,7 @@ namespace ClassicUO.Renderer
                     vertices[0].Position.Z =
                         vertices[1].Position.Z =
                         vertices[2].Position.Z =
-                        vertices[3].Position.Z = _z++;
+                        vertices[3].Position.Z = GetZ();
 
                     GetVertexList(texture).AddRange(vertices);
 
@@ -93,6 +93,8 @@ namespace ClassicUO.Renderer
             }
             return false;
         }
+
+        public float GetZ() => _z++;
 
         private EffectParameter _drawLightingEffect, _projectionMatrixEffect, _worldMatrixEffect, _viewportEffect;
         private EffectTechnique _huesTechnique;

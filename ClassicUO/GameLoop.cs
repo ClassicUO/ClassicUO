@@ -152,28 +152,28 @@ namespace ClassicUO
 
             KeyboardManager.KeyPressed += (sender, e) =>
             {
-                if (e.KeyState == Microsoft.Xna.Framework.Input.KeyState.Down)
-                {
-                    switch (e.Key)
-                    {
-                        case Microsoft.Xna.Framework.Input.Keys.Left:
-                            _currentX--;
-                            _y++;
-                            break;
-                        case Microsoft.Xna.Framework.Input.Keys.Up:
-                            _y--;
-                            _currentX--;
-                            break;
-                        case Microsoft.Xna.Framework.Input.Keys.Right:
-                            _currentX++;
-                            _y--;
-                            break;
-                        case Microsoft.Xna.Framework.Input.Keys.Down:
-                            _y++;
-                            _currentX++;
-                            break;
-                    }                
-                }
+                //if (e.KeyState == Microsoft.Xna.Framework.Input.KeyState.Down)
+                //{
+                //    switch (e.Key)
+                //    {
+                //        case Microsoft.Xna.Framework.Input.Keys.Left:
+                //            _currentX--;
+                //            _y++;
+                //            break;
+                //        case Microsoft.Xna.Framework.Input.Keys.Up:
+                //            _y--;
+                //            _currentX--;
+                //            break;
+                //        case Microsoft.Xna.Framework.Input.Keys.Right:
+                //            _currentX++;
+                //            _y--;
+                //            break;
+                //        case Microsoft.Xna.Framework.Input.Keys.Down:
+                //            _y++;
+                //            _currentX++;
+                //            break;
+                //    }                
+                //}
             };
 
             string username = settings.Username;
@@ -224,7 +224,7 @@ namespace ClassicUO
 
             AssetsLoader.Fonts.SetUseHTML(true);
             AssetsLoader.Fonts.RecalculateWidthByInfo = true;
-            _textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, 0, 30);
+            //_textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, 0, 30);
 
             NetClient.Socket.Connect(settings.IP, settings.Port);
 
@@ -241,8 +241,6 @@ namespace ClassicUO
 
             };
 
-            bool allowPGMove = false;
-            DateTime pause = DateTime.Now;
 
             MouseManager.MousePressed += (sender, e) =>
             {
@@ -250,30 +248,16 @@ namespace ClassicUO
                 {
                     if (e.Button == MouseButton.Right)
                     {
-                        allowPGMove = true;
 
-                        //if (DateTime.Now > pause)
-                        {
-                            Point center = new Point(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
+                        Point center = new Point(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
 
-                            Game.Direction direction = Game.DirectionHelper.DirectionFromPoints(center, e.Location);
+                        Game.Direction direction = Game.DirectionHelper.DirectionFromPoints(center, e.Location);
 
-                            //Game.World.Player.MovementStart(direction);
-                            Game.World.Player.Walk(direction, false);
-                        }
+                        Game.World.Player.Walk(direction, false);
                     }
                 }
             };
 
-            MouseManager.MouseUp += (sender, e) =>
-            {
-                //if (e.Button == MouseButton.Right)
-                //{
-                //    allowPGMove = false;
-                //    Game.World.Player.MovementStop();
-                //    pause = DateTime.Now;
-                //}
-            };
 
 
             var datagump = AssetsLoader.Gumps.GetGump(0x2329, out int gw, out int gh);
@@ -302,10 +286,10 @@ namespace ClassicUO
         const double TIME_RUN_MOUNT = (2d / 20d) * 1000d;
         private DateTime _delay = DateTime.Now;
 
-        private ushort _x = 1446, _y = 1665;
-        private sbyte _z = 0;
-        private ushort _maxX = 5454;
-        private ushort _currentX = 1446;
+        //private ushort _x = 1446, _y = 1665;
+        //private sbyte _z = 0;
+        //private ushort _maxX = 5454;
+        //private ushort _currentX = 1446;
         private Stopwatch _stopwatch;
         private Texture2D _texture, _crossTexture, _gump, _textentry;
         private Game.Renderer.CursorRenderer _gameCursor;
@@ -328,7 +312,7 @@ namespace ClassicUO
 
             NetClient.Socket.Slice();
 
-            TextureManager.UpdateTicks(gameTime.TotalGameTime.Ticks);
+            TextureManager.UpdateTicks();
 
             MouseManager.Update();
             _gameCursor.Update(gameTime.TotalGameTime.Ticks);
@@ -337,12 +321,12 @@ namespace ClassicUO
             if (Game.World.Map != null && Game.World.Player != null)
             {
 
-                if (Game.World.Player.Position.X != _currentX || Game.World.Player.Position.Y != _y)
-                {
-                    _currentX = (ushort)Game.World.Map.Center.X;
-                    _y = (ushort)Game.World.Map.Center.Y;
-                    _z = Game.World.Player.Position.Z;
-                }
+                //if (Game.World.Player.Position.X != _currentX || Game.World.Player.Position.Y != _y)
+                //{
+                //    _currentX = (ushort)Game.World.Map.Center.X;
+                //    _y = (ushort)Game.World.Map.Center.Y;
+                //    _z = Game.World.Player.Position.Z;
+                //}
 
 
                 Game.World.Update(gameTime.TotalGameTime.Ticks);
@@ -360,7 +344,7 @@ namespace ClassicUO
         }
 
 
-        private (Point, Point, Vector2, Vector2, Point) GetViewPort()
+        private (Point, Point, Vector2, Vector2, Point, Point) GetViewPort()
         {
             int scale = 1;
 
@@ -371,10 +355,13 @@ namespace ClassicUO
             int winGameHeight = _graphics.PreferredBackBufferHeight;
 
             int winGameCenterX = winGamePosX + (winGameWidth / 2);
-            int winGameCenterY = (winGamePosY + winGameHeight / 2) + (_z * 4);
+            int winGameCenterY = (winGamePosY + winGameHeight / 2) + (Game.World.Player.Position.Z * 4);
 
-            int winDrawOffsetX = ((_currentX - _y) * 22) - winGameCenterX + 22;
-            int winDrawOffsetY = ((_currentX + _y) * 22) - winGameCenterY + 22;
+            winGameCenterX -= (int)Game.World.Player.Offset.X;
+            winGameCenterY -= (int)(Game.World.Player.Offset.Y - Game.World.Player.Offset.Z);
+
+            int winDrawOffsetX = ((Game.World.Player.Position.X - Game.World.Player.Position.Y) * 22) - winGameCenterX + 22;
+            int winDrawOffsetY = ((Game.World.Player.Position.X + Game.World.Player.Position.Y) * 22) - winGameCenterY + 22;
 
             float left = winGamePosX;
             float right = winGameWidth + left;
@@ -399,17 +386,17 @@ namespace ClassicUO
             else
                 height = width;
 
-            int realMinRangeX = _currentX - width;
+            int realMinRangeX = Game.World.Player.Position.X - width;
             if (realMinRangeX < 0)
                 realMinRangeX = 0;
-            int realMaxRangeX = _currentX + width;
+            int realMaxRangeX = Game.World.Player.Position.X + width;
             if (realMaxRangeX >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0])
                 realMaxRangeX = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0];
 
-            int realMinRangeY = _y - height;
+            int realMinRangeY = Game.World.Player.Position.Y - height;
             if (realMinRangeY < 0)
                 realMinRangeY = 0;
-            int realMaxRangeY = _y + height;
+            int realMaxRangeY = Game.World.Player.Position.Y + height;
             if (realMaxRangeY >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1])
                 realMaxRangeY = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1];
 
@@ -441,7 +428,7 @@ namespace ClassicUO
 
             return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY),
                 new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY),
-                new Point(winDrawOffsetX, winDrawOffsetY));
+                new Point(winDrawOffsetX, winDrawOffsetY), new Point(winGameCenterX, winGameCenterY));
         }
 
         private RenderTarget2D _targetRender;
@@ -465,8 +452,12 @@ namespace ClassicUO
                 _spriteBatch.BeginDraw();
 
 
-                (Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset) = GetViewPort();
+                (Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center) = GetViewPort();
 
+                //if (Game.World.Map.Center != center)
+                //{
+                //    Game.World.Map.Center = center;
+                //}
 
                 int minX = minChunkTile.X;
                 int minY = minChunkTile.Y;
@@ -513,8 +504,8 @@ namespace ClassicUO
                             {
 
                                 Vector3 position = new Vector3(
-                               ((x - y) * 22f) - offset.X,
-                               ((x + y) * 22f - (_z * 4)) - offset.Y, 0);
+                               ((x - y) * 22f) - offset.X ,
+                               ((x + y) * 22f /*- (Game.World.Player.Position.Z * 4)*/) - offset.Y, 0);
 
 
                                 for (int k = 0; k < tile.ObjectsOnTiles.Count; k++)

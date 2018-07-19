@@ -227,6 +227,7 @@ namespace ClassicUO.Network
             ToServer.Add(0xB6, SendHelpRequest);*/
             ToClient.Add(0xB7, Help);
             ToClient.Add(0xB8, CharacterProfile); //ToServer.Add(0xB8, RequestCharProfile);
+            ToClient.Add(0xB9, EnableLockedFeatures);
             ToClient.Add(0xBA, DisplayQuestArrow);
             ToClient.Add(0xBB, UltimaMessengerR); //ToServer.Add(0xBB, UltimaMessengerS);
             ToClient.Add(0xBC, Season);
@@ -1222,6 +1223,21 @@ namespace ClassicUO.Network
         private static void CharacterProfile(Packet p)
         {
             
+        }
+
+        private static void EnableLockedFeatures(Packet p)
+        {
+            uint flags = 0;
+            if (FileManager.ClientVersion >= ClientVersions.CV_60142)
+            {
+                flags = p.ReadUInt();
+            }
+            else
+            {
+                flags = p.ReadUShort();
+            }
+
+            Animations.UpdateAnimationTable(flags);
         }
 
         private static void DisplayQuestArrow(Packet p)

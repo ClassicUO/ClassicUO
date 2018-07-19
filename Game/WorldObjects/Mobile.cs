@@ -535,9 +535,23 @@ namespace ClassicUO.Game.WorldObjects
 
                     float x = frameOffset;
                     float y = frameOffset;
-                    GetPixelOffset(step.Direction, ref x, ref y, ref framesPerTile);
 
-                    Offset = new Vector3((sbyte)x, (sbyte)y, ((step.Z - Position.Z) * frameOffset) * (4.0f / framesPerTile));
+                    GetPixelOffset((byte)Direction, ref x, ref y, framesPerTile);
+
+                    Offset = new Vector3((sbyte)x, (sbyte)y, (int)(((step.Z - Position.Z) * frameOffset) * (4.0f / framesPerTile)));
+
+                    //if (frameOffset < 1f)
+                    //    Offset = new Vector3()
+                    //    {
+                    //        X = (step.X - Position.X) * frameOffset,
+                    //        Y = (step.Y - Position.Y) * frameOffset,
+                    //        Z = (step.Z - Position.Z) * frameOffset
+                    //    };
+
+                    if (this == World.Player)
+                        World.Map.Center = new Point((short)step.X, (short)step.Y);
+
+
 
                     turnOnly = false;
                 }
@@ -581,7 +595,18 @@ namespace ClassicUO.Game.WorldObjects
             while (_steps.Count > 0 && turnOnly);
         }
 
-        private static void GetPixelOffset(in byte dir, ref float x, ref float y, ref float framesPerTile)
+        public Direction GetAnimationDirection()
+        {
+            Direction dir = (Direction & Direction.Up);
+
+            if (_steps.Count > 0)
+            {
+                dir = ((Direction)_steps.Front().Direction & Direction.Up);
+            }
+            return dir;
+        }
+
+        private static void GetPixelOffset(in byte dir, ref float x, ref float y, in float framesPerTile)
         {
             float step_NESW_D = 44.0f / framesPerTile;
             float step_NESW = 22.0f / framesPerTile;
@@ -652,9 +677,9 @@ namespace ClassicUO.Game.WorldObjects
             if (Math.Abs(valueX) > checkX)
             {
                 if (valueX < 0)
-                    x = -(float)checkX;
+                    x = -checkX;
                 else
-                    x = (float)checkX;
+                    x = checkX;
             }
 
             int valueY = (int)y;
@@ -662,9 +687,9 @@ namespace ClassicUO.Game.WorldObjects
             if (Math.Abs(valueY) > checkY)
             {
                 if (valueY < 0)
-                    y = -(float)checkY;
+                    y = -checkY;
                 else
-                    y = (float)checkY;
+                    y = checkY;
             }
         }
 
@@ -693,7 +718,7 @@ namespace ClassicUO.Game.WorldObjects
         public bool IsWalking => LastStepTime > (World.Ticks - WALKING_DELAY);
         public byte AnimationGroup { get; set; } = 0xFF;
         public byte AnimIndex { get; set; }
-        internal bool IsMoving => _steps.Count > 0; //GoalPosition != Position.Invalid && Position != GoalPosition;
+        internal bool IsMoving => _steps.Count > 0;
 
         public Graphic GetMountAnimation()
         {

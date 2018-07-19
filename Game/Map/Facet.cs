@@ -43,7 +43,8 @@ namespace ClassicUO.Game.Map
             int cellY = y / 8;
             int cellindex = (cellY % MAX_CHUNKS) * MAX_CHUNKS + (cellX % MAX_CHUNKS);
            // int cellindex = (cellX * AssetsLoader.Map.MapBlocksSize[Index][1]) + cellY;
-            if (Chunks[cellindex] == null || Chunks[cellindex].X != cellX || Chunks[cellindex].Y != cellY)
+            if (Chunks[cellindex] == null || Chunks[cellindex].X != cellX || Chunks[cellindex].Y != cellY
+                || x < 0 || y < 0)
             {
                 return null;
             }

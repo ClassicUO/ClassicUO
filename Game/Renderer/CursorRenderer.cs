@@ -1,4 +1,5 @@
-﻿using ClassicUO.Renderer;
+﻿using ClassicUO.Input;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -31,6 +32,19 @@ namespace ClassicUO.Game.Renderer
 
         public CursorRenderer()
         {
+            _textR = new TextRenderer()
+            {
+                Font = 0,
+                Color = 24,
+                IsUnicode = false,
+            };
+
+            MouseManager.MouseMove += (sender, e) =>
+            {
+                _textR.Text = $"({e.Location.X},{e.Location.Y})";
+                _textR.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_CENTER, 0);
+            };
+
             for (int i = 0; i < 2; i++)
             {
                 for (int j = 0; j < 16; j++)
@@ -160,7 +174,7 @@ namespace ClassicUO.Game.Renderer
             }
         } 
         public Texture2D Texture { get; private set; }
-        public Point ScreenPosition => Input.MouseManager.ScreenPosition;
+        public Point ScreenPosition => MouseManager.ScreenPosition;
 
 
         public void Update(in double frameMS)
@@ -171,6 +185,8 @@ namespace ClassicUO.Game.Renderer
                 _needGraphicUpdate = false;
             }
         }
+
+        private TextRenderer _textR;
 
         public void Draw(in SpriteBatchUI sb)
         {
@@ -183,7 +199,11 @@ namespace ClassicUO.Game.Renderer
 
             if (id < 16)
             {
-                sb.Draw2D(Texture, new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0), Vector3.Zero);
+                var v = new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0);
+                sb.Draw2D(Texture, v, Vector3.Zero);
+
+                _textR.Draw(sb, new Point((int)v.X, (int)v.Y + 20));
+
                 //        // tooltip testing, very nice!
                 //        //sb.Draw2D(_blackTexture, new Rectangle(ScreenPosition.X + _cursorOffset[0, id] - 100, ScreenPosition.Y + _cursorOffset[1, id] - 50, 100, 50), new Vector3(0, 1, 0.3f));
             }

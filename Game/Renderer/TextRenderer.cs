@@ -11,7 +11,7 @@ namespace ClassicUO.Renderer
     {
         private bool _isPartialHue;
 
-        public TextRenderer(in string text)
+        public TextRenderer(in string text = "")
         {
             Text = text;
         }
@@ -24,16 +24,16 @@ namespace ClassicUO.Renderer
         public byte Font { get; set; }
         public ushort Color { get; set; }
 
-        public void GenerateTexture(in int maxWidth, in ushort flags, in TEXT_ALIGN_TYPE aling, in int font, in byte cell)
+        public void GenerateTexture(in int maxWidth, in ushort flags, in TEXT_ALIGN_TYPE aling, in byte cell)
         {
             uint[] data;
             int linesCount;
             List<WebLinkRect> links;
 
             if (IsUnicode)
-                (data, Width, Height, linesCount, links) = Fonts.GenerateUnicode((byte)font, Text, Color, cell, maxWidth, aling, flags);
+                (data, Width, Height, linesCount, links) = Fonts.GenerateUnicode(Font, Text, Color, cell, maxWidth, aling, flags);
             else
-                (data, Width, Height, linesCount, _isPartialHue) = Fonts.GenerateASCII((byte)font, Text, Color, maxWidth, aling, flags);
+                (data, Width, Height, linesCount, _isPartialHue) = Fonts.GenerateASCII(Font, Text, Color, maxWidth, aling, flags);
 
 
             if (Texture != null)

@@ -1012,12 +1012,14 @@ namespace ClassicUO.Game.WorldObjects
         {
             if (World.Map != null)
             {
+                if (World.Map.Center == Point.Zero)
                 World.Map.Center = new Point((short)Position.X, (short)Position.Y);
                 base.OnPositionChanged(sender, e);
             }
         }
 
      
+        
 
        
         private readonly Deque<Step> _requestedSteps = new Deque<Step>();

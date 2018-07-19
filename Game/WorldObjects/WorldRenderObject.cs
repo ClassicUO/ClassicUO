@@ -27,7 +27,7 @@ namespace ClassicUO.Game.WorldObjects
         public bool AllowedToDraw { get; set; }
         public sbyte SortZ { get; protected set; }
 
-        protected Texture2D Texture { get; set; }
+        public Texture2D Texture { get; set; }
         protected Rectangle Bounds { get; set; }
         protected Vector3 HueVector { get; set; }
         protected bool HasShadow { get; set; }
