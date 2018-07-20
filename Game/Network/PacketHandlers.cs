@@ -520,7 +520,7 @@ namespace ClassicUO.Network
                 if (endDir != direction)
                 {
                     World.Player.ResetRequestedSteps();
-                    World.Player.EnqueueStep(position, direction, (direction & Direction.Running) == Direction.Running);
+                    World.Player.EnqueueStep(position, direction & Direction.Up, (direction & Direction.Running) == Direction.Running);
                 }
             }
             else
@@ -868,7 +868,7 @@ namespace ClassicUO.Network
                 mobile.Direction = direction;
             }
 
-            if (!mobile.EnqueueStep(position, direction, (direction & Direction.Running) == Direction.Running))
+            if (!mobile.EnqueueStep(position, direction & Direction.Up, (direction & Direction.Running) == Direction.Running))
             {
                 mobile.Position = position;
                 mobile.Direction = direction;
@@ -921,7 +921,7 @@ namespace ClassicUO.Network
                 mobile.Direction = direction;
             }
 
-            if (!mobile.EnqueueStep(position, direction, (direction & Direction.Running) == Direction.Running))
+            if (!mobile.EnqueueStep(position, direction & Direction.Up, (direction & Direction.Running) == Direction.Running))
             {
                 mobile.Position = position;
                 mobile.Direction = direction;
