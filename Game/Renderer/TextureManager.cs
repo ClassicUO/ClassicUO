@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Renderer
+namespace ClassicUO.Game.Renderer
 {
     class TextureDuration
     {
@@ -17,7 +17,7 @@ namespace ClassicUO.Renderer
         const long TEXTURE_TIME_LIFE = 3000;
 
 
-       
+
 
 
         private readonly static Dictionary<ushort, TextureDuration> _staticTextures = new Dictionary<ushort, TextureDuration>();

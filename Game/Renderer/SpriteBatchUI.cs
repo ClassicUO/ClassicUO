@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Renderer
+namespace ClassicUO.Game.Renderer
 {
     public class SpriteBatchUI : SpriteBatch3D
     {
@@ -55,7 +55,7 @@ namespace ClassicUO.Renderer
             _vertexBuffer[3].TextureCoordinate.X = 1;
             _vertexBuffer[3].TextureCoordinate.Y = 1;
             _vertexBuffer[3].TextureCoordinate.Z = 0;
-         
+
             _vertexBuffer[0].Hue = _vertexBuffer[1].Hue = _vertexBuffer[2].Hue = _vertexBuffer[3].Hue = hue;
             return DrawSprite(texture, _vertexBuffer);
         }

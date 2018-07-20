@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Renderer
+namespace ClassicUO.Game.Renderer
 {
     public sealed class TextRenderer
     {
@@ -52,7 +52,7 @@ namespace ClassicUO.Renderer
             spriteBatch.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), RenderExtentions.GetHueVector(0, _isPartialHue, false, false)  );
             // Draw(spriteBatch, new Rectangle(position.X, position.Y, Width, Height), 0, 0);
         }
-        
+
 
         public void Draw(in SpriteBatchUI spriteBatch, Rectangle destRect, in int scrollX, in int scrollY)
         {
@@ -76,7 +76,7 @@ namespace ClassicUO.Renderer
             else
                 destRect.Height = sourceRect.Height = Height - sourceRect.Y;
 
-            
+
 
             spriteBatch.Draw2D(Texture, destRect, sourceRect, new Vector3(0, 0, 0) /*new Vector3(Color, _isPartialHue ? -2 : -1, 0)*/ /*RenderExtentions.GetHueVector(0, _isPartialHue, false ,false)*/ );
         }

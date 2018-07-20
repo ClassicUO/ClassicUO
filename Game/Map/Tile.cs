@@ -1,6 +1,6 @@
 ﻿using ClassicUO.Game.WorldObjects;
 using ClassicUO.Game.Renderer.Views;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;

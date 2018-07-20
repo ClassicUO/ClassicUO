@@ -1,4 +1,4 @@
-﻿using ClassicUO.Renderer;
+﻿using ClassicUO.Game.Renderer;
 using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

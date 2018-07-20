@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Renderer;
 using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
 

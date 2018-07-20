@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Input;
 using ClassicUO.Network;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -28,7 +28,7 @@ namespace ClassicUO
                 e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
             };
 
-            
+
             if (_graphics.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
                 _graphics.GraphicsProfile = GraphicsProfile.HiDef;
 
@@ -38,7 +38,7 @@ namespace ClassicUO
             _graphics.PreferredBackBufferHeight = 600;
             _graphics.ApplyChanges();
 
-           
+
 
             Log.Message(LogTypes.Trace, "Gameloop initialized.");
 
@@ -103,7 +103,7 @@ namespace ClassicUO
 
             AssetsLoader.FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
 
-            
+
 
 
             _stopwatch = Stopwatch.StartNew();
@@ -172,7 +172,7 @@ namespace ClassicUO
                 //            _y++;
                 //            _currentX++;
                 //            break;
-                //    }                
+                //    }
                 //}
             };
 
@@ -281,7 +281,7 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
-        
+
 
         const double TIME_RUN_MOUNT = (2d / 20d) * 1000d;
         private DateTime _delay = DateTime.Now;

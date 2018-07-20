@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Game.Renderer.Views;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.WorldObjects

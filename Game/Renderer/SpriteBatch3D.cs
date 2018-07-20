@@ -9,7 +9,7 @@ using System.Text;
 
 using ClassicUO;
 
-namespace ClassicUO.Renderer
+namespace ClassicUO.Game.Renderer
 {
     public class SpriteBatch3D
     {
@@ -21,7 +21,7 @@ namespace ClassicUO.Renderer
         private readonly Microsoft.Xna.Framework.Game _game;
         private readonly short[] _indexBuffer = new short[MAX_VERTICES_PER_DRAW * 6];
         private readonly Queue<List<SpriteVertex>> _vertexQueue = new Queue<List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
-        private readonly Dictionary<Texture2D, List<SpriteVertex>> _drawingQueue = new Dictionary<Texture2D, List<SpriteVertex>>(INITIAL_TEXTURE_COUNT); 
+        private readonly Dictionary<Texture2D, List<SpriteVertex>> _drawingQueue = new Dictionary<Texture2D, List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
         private BoundingBox _drawingArea = new BoundingBox();
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
         private readonly SpriteVertex[] _vertexBuffer = new SpriteVertex[MAX_VERTICES_PER_DRAW];
@@ -58,7 +58,7 @@ namespace ClassicUO.Renderer
             _huesTechnique = _effect.Techniques["HueTechnique"];
         }
 
-       
+
         public GraphicsDevice GraphicsDevice => _game?.GraphicsDevice;
         public Matrix ProjectionMatrixWorld => Matrix.Identity;
         public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
