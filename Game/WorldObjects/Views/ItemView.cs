@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.WorldObjects.Views
 {
-    public class ItemView : WorldRenderObject
+    public class ItemView : View
     {
         private Graphic _originalGraphic;
         private Hue _hue;

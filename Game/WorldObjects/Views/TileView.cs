@@ -7,7 +7,7 @@ using System.Text;
 
 namespace ClassicUO.Game.WorldObjects.Views
 {
-    public class TileView : WorldRenderObject
+    public class TileView : View
     {
         private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
         private readonly Vector3[] _normals = new Vector3[4];

@@ -7,16 +7,16 @@ using System.Text;
 
 namespace ClassicUO.Game.WorldObjects
 {
-    public abstract class WorldRenderObject
+    public abstract class View
     {
         protected static float PI = (float)Math.PI;
 
-        public WorldRenderObject()
+        public View()
         {
 
         }
 
-        public WorldRenderObject(in WorldObject parent)
+        public View(in WorldObject parent)
         {
             WorldObject = parent;
             AllowedToDraw = true;
@@ -36,7 +36,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public virtual void Update(in double frameMS)
         {
-            
+
         }
 
         public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
@@ -101,7 +101,7 @@ namespace ClassicUO.Game.WorldObjects
                 vertex[3].Position.Y += Bounds.Height;
             }
 
-        
+
 
 
             if (vertex[0].Hue != HueVector)

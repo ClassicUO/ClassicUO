@@ -6,14 +6,14 @@ namespace ClassicUO.Game.WorldObjects
 {
     public abstract class WorldObject
     {
-        private WorldRenderObject _viewObject;
+        private View _viewObject;
         private Map.Tile _tile;
 
         public virtual Position Position { get; set; } = Position.Invalid;
         public virtual Hue Hue { get; set; }
         public virtual Graphic Graphic { get; set; }
 
-        public WorldRenderObject ViewObject
+        public View ViewObject
         {
             get
             {
@@ -23,7 +23,7 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
-        protected virtual WorldRenderObject CreateView()
+        protected virtual View CreateView()
         {
             return null;
         }

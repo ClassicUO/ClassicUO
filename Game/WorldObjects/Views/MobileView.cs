@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.WorldObjects.Views
 {
-    public class MobileView : WorldRenderObject
+    public class MobileView : View
     {
         const int USED_LAYER_COUNT = 25 ;
         private static readonly Layer[,] _usedLayers = new Layer[8, USED_LAYER_COUNT]
@@ -107,7 +107,7 @@ namespace ClassicUO.Game.WorldObjects.Views
             spriteBatch.GetZ();
 
             bool mirror = false;
-            byte dir = (byte)WorldObject.GetAnimationDirection();           
+            byte dir = (byte)WorldObject.GetAnimationDirection();
             AssetsLoader.Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
@@ -233,7 +233,7 @@ namespace ClassicUO.Game.WorldObjects.Views
 
 
             }
-           
+
             return true;
         }
 

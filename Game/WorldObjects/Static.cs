@@ -19,6 +19,6 @@ namespace ClassicUO.Game.WorldObjects
         public new StaticView ViewObject => (StaticView)base.ViewObject;
         public AssetsLoader.StaticTiles ItemData => AssetsLoader.TileData.StaticData[Graphic];
 
-        protected override WorldRenderObject CreateView() => new StaticView(this);
-    }  
+        protected override View CreateView() => new StaticView(this);
+    }
 }

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ClassicUO.Game.WorldObjects.Views
 {
-    public class StaticView : WorldRenderObject
+    public class StaticView : View
     {
         public StaticView(in Static st) : base(st)
         {
