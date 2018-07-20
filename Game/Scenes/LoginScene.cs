@@ -4,9 +4,9 @@ using System.Text;
 
 namespace ClassicUO.Game.Scenes
 {
-    public sealed class MainScreenStage : Scene
+    public sealed class LoginScene : Scene
     {
-        public MainScreenStage()
+        public LoginScene()
         {
 
         }
