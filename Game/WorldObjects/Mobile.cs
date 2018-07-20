@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using ClassicUO.AssetsLoader;
-using ClassicUO.Game.WorldObjects.Views;
+using ClassicUO.Game.Renderer.Views;
 using Microsoft.Xna.Framework;
 
 

@@ -1,5 +1,5 @@
 ﻿using ClassicUO.Game.WorldObjects;
-using ClassicUO.Game.WorldObjects.Views;
+using ClassicUO.Game.Renderer.Views;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;

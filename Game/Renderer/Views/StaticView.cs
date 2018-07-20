@@ -1,10 +1,11 @@
 ﻿using ClassicUO.Renderer;
+using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Game.WorldObjects.Views
+namespace ClassicUO.Game.Renderer.Views
 {
     public class StaticView : View
     {

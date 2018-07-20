@@ -1,11 +1,12 @@
 ﻿using ClassicUO.Renderer;
+using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Game.WorldObjects
+namespace ClassicUO.Game.Renderer.Views
 {
     public abstract class View
     {

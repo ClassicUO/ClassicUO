@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ClassicUO.Game.Renderer.Views;
 
 namespace ClassicUO.Game.WorldObjects
 {

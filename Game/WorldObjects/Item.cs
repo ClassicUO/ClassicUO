@@ -1,4 +1,4 @@
-﻿using ClassicUO.Game.WorldObjects.Views;
+﻿using ClassicUO.Game.Renderer.Views;
 using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;

@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Renderer;
+using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ClassicUO.Game.WorldObjects.Views
+namespace ClassicUO.Game.Renderer.Views
 {
     public class MobileView : View
     {
