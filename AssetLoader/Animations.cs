@@ -10,7 +10,7 @@ namespace ClassicUO.AssetsLoader
 {
     public static class Animations
     {
-        private const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
+        public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
 
         private static readonly UOFileMul[] _files = new UOFileMul[5];
         private static readonly UOFileUopAnimation[] _filesUop = new UOFileUopAnimation[4];
@@ -1027,6 +1027,9 @@ namespace ClassicUO.AssetsLoader
 
             for (int i = 0; i < frameCount; i++)
             {
+                if (animDir.Frames[i].Pixels != null && animDir.Frames[i].Pixels.Length > 0)
+                    continue;
+
                 _reader.SetData(dataStart + (int)frameOffset[i]);
 
                 short imageCenterX = _reader.ReadShort();

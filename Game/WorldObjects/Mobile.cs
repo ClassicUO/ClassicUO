@@ -513,6 +513,8 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
+        private long _lastAnimationChangeTime;
+
         public void ProcessAnimation()
         {
             if (_steps.Count <= 0)
@@ -522,11 +524,6 @@ namespace ClassicUO.Game.WorldObjects
 
             do
             {
-                if (this == World.Player)
-                {
-
-                }
-
                 Step step = _steps.Front();
 
                 int maxDelay = (int)MovementSpeed.TimeToCompleteMovement(this, step.Run) - 15;
@@ -583,6 +580,50 @@ namespace ClassicUO.Game.WorldObjects
                 }
             }
             while (_steps.Count > 0 && turnOnly);
+
+
+            if (_lastAnimationChangeTime < World.Ticks)
+            {
+
+                byte frameIndex = AnimIndex;
+
+                frameIndex++;
+
+                Graphic id = GetMountAnimation();
+                int animGroup = GetAnimationGroup(id);
+                bool mirror = false;
+                byte dir = (byte)GetAnimationDirection();
+
+                Animations.GetAnimDirection(ref dir, ref mirror);
+
+                int currentDelay = (int)CHARACTER_ANIMATION_DELAY;
+
+                if (id < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
+                {
+                    var direction = Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+                    Animations.AnimID = id;
+                    Animations.AnimGroup = (byte)animGroup;
+                    Animations.Direction = dir;
+
+                    if (direction.FrameCount == 0)
+                        Animations.LoadDirectionGroup(ref direction);
+
+                    if (direction.Address != 0 || direction.IsUOP)
+                    {
+                        int fc = direction.FrameCount;
+
+                        if (frameIndex >= fc)
+                        {
+                            frameIndex = 0;
+
+                        }
+
+                        AnimIndex = frameIndex;
+                    }
+
+                    _lastAnimationChangeTime = World.Ticks + currentDelay;
+                }
+            }
         }
 
         public Direction GetAnimationDirection()
