@@ -17,6 +17,109 @@ namespace ClassicUO
     {
         private readonly GraphicsDeviceManager _graphics;
         private SpriteBatchUI _spriteBatch;
+        const double TIME_RUN_MOUNT = (2d / 20d) * 1000d;
+        private DateTime _delay = DateTime.Now;
+
+        private Stopwatch _stopwatch;
+        private Texture2D _texture, _crossTexture, _gump, _textentry;
+        private Game.Renderer.CursorRenderer _gameCursor;
+
+        private RenderTarget2D _targetRender;
+
+        private TextRenderer _textRenderer = new TextRenderer("Select which shard to play on:")
+        {
+            IsUnicode = true,
+            Color = 847
+        };
+
+        private DateTime _timePing;
+
+        private (Point, Point, Vector2, Vector2, Point, Point) GetViewPort()
+        {
+            int scale = 1;
+
+            int winGamePosX = 0;
+            int winGamePosY = 0;
+
+            int winGameWidth = _graphics.PreferredBackBufferWidth;
+            int winGameHeight = _graphics.PreferredBackBufferHeight;
+
+            int winGameCenterX = winGamePosX + (winGameWidth / 2);
+            int winGameCenterY = (winGamePosY + winGameHeight / 2) + (Game.World.Player.Position.Z * 4);
+
+            winGameCenterX -= (int)Game.World.Player.Offset.X;
+            winGameCenterY -= (int)(Game.World.Player.Offset.Y - Game.World.Player.Offset.Z);
+
+            int winDrawOffsetX = ((Game.World.Player.Position.X - Game.World.Player.Position.Y) * 22) - winGameCenterX + 22;
+            int winDrawOffsetY = ((Game.World.Player.Position.X + Game.World.Player.Position.Y) * 22) - winGameCenterY + 22;
+
+            float left = winGamePosX;
+            float right = winGameWidth + left;
+            float top = winGamePosY;
+            float bottom = winGameHeight + top;
+
+            float newRight = right * scale;
+            float newBottom = bottom * scale;
+
+            int winGameScaledOffsetX = (int)((left * scale) - (newRight - right));
+            int winGameScaledOffsetY = (int)((top * scale) - (newBottom - bottom));
+
+            int winGameScaledWidth = (int)(newRight - winGameScaledOffsetX);
+            int winGameScaledHeight = (int)(newBottom - winGameScaledOffsetY);
+
+
+            int width = ((winGameWidth / 44) + 1) * scale;
+            int height = ((winGameHeight / 44) + 1) * scale;
+
+            if (width < height)
+                width = height;
+            else
+                height = width;
+
+            int realMinRangeX = Game.World.Player.Position.X - width;
+            if (realMinRangeX < 0)
+                realMinRangeX = 0;
+            int realMaxRangeX = Game.World.Player.Position.X + width;
+            if (realMaxRangeX >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0])
+                realMaxRangeX = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0];
+
+            int realMinRangeY = Game.World.Player.Position.Y - height;
+            if (realMinRangeY < 0)
+                realMinRangeY = 0;
+            int realMaxRangeY = Game.World.Player.Position.Y + height;
+            if (realMaxRangeY >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1])
+                realMaxRangeY = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1];
+
+            //int minBlockX = (realMinRangeX / 8) - 1;
+            //int minBlockY = (realMinRangeY / 8) - 1;
+            //int maxBlockX = (realMaxRangeX / 8) + 1;
+            //int maxBlockY = (realMaxRangeY / 8) + 1;
+
+            //if (minBlockX < 0)
+            //    minBlockX = 0;
+            //if (minBlockY < 0)
+            //    minBlockY = 0;
+            //if (maxBlockX >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0])
+            //    maxBlockX = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0] - 1;
+            //if (maxBlockY >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1])
+            //    maxBlockY = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1] - 1;
+
+            int drawOffset = scale * 40;
+
+            float maxX = winGamePosX + winGameWidth + drawOffset;
+            float maxY = winGamePosY + winGameHeight + drawOffset;
+            float newMaxX = maxX * scale;
+            float newMaxY = maxY * scale;
+
+            int minPixelsX = (int)(((winGamePosX - drawOffset) * scale) - (newMaxX - maxX));
+            int maxPixelsX = (int)newMaxX;
+            int minPixelsY = (int)(((winGamePosY - drawOffset) * scale) - (newMaxY - maxY));
+            int maxPixlesY = (int)newMaxY;
+
+            return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY),
+                new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY),
+                new Point(winDrawOffsetX, winDrawOffsetY), new Point(winGameCenterX, winGameCenterY));
+        }
 
         public GameLoop()
         {
@@ -48,8 +151,6 @@ namespace ClassicUO
                 _graphics.PreferredBackBufferHeight = this.Window.ClientBounds.Height;
             };
         }
-
-
 
         protected override void Initialize()
         {
@@ -281,34 +382,10 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
-
-
-        const double TIME_RUN_MOUNT = (2d / 20d) * 1000d;
-        private DateTime _delay = DateTime.Now;
-
-        //private ushort _x = 1446, _y = 1665;
-        //private sbyte _z = 0;
-        //private ushort _maxX = 5454;
-        //private ushort _currentX = 1446;
-        private Stopwatch _stopwatch;
-        private Texture2D _texture, _crossTexture, _gump, _textentry;
-        private Game.Renderer.CursorRenderer _gameCursor;
-
-        private TextRenderer _textRenderer = new TextRenderer("Select which shard to play on:")
-        {
-            IsUnicode = true,
-            Color = 847
-        };
-
-        private DateTime _timePing;
-
-
         protected override void Update(GameTime gameTime)
         {
 
             Game.World.Ticks = (long)gameTime.TotalGameTime.TotalMilliseconds;
-
-
 
             NetClient.Socket.Slice();
 
@@ -316,7 +393,6 @@ namespace ClassicUO
 
             MouseManager.Update();
             _gameCursor.Update(gameTime.TotalGameTime.Ticks);
-
 
             if (Game.World.Map != null && Game.World.Player != null)
             {
@@ -331,8 +407,6 @@ namespace ClassicUO
 
                 Game.World.Update(gameTime.TotalGameTime.Ticks);
 
-
-
                 if (DateTime.Now > _timePing)
                 {
                     NetClient.Socket.Send(new PPing());
@@ -342,96 +416,6 @@ namespace ClassicUO
 
             base.Update(gameTime);
         }
-
-
-        private (Point, Point, Vector2, Vector2, Point, Point) GetViewPort()
-        {
-            int scale = 1;
-
-            int winGamePosX = 0;
-            int winGamePosY = 0;
-
-            int winGameWidth = _graphics.PreferredBackBufferWidth;
-            int winGameHeight = _graphics.PreferredBackBufferHeight;
-
-            int winGameCenterX = winGamePosX + (winGameWidth / 2);
-            int winGameCenterY = (winGamePosY + winGameHeight / 2) + (Game.World.Player.Position.Z * 4);
-
-            winGameCenterX -= (int)Game.World.Player.Offset.X;
-            winGameCenterY -= (int)(Game.World.Player.Offset.Y - Game.World.Player.Offset.Z);
-
-            int winDrawOffsetX = ((Game.World.Player.Position.X - Game.World.Player.Position.Y) * 22) - winGameCenterX + 22;
-            int winDrawOffsetY = ((Game.World.Player.Position.X + Game.World.Player.Position.Y) * 22) - winGameCenterY + 22;
-
-            float left = winGamePosX;
-            float right = winGameWidth + left;
-            float top = winGamePosY;
-            float bottom = winGameHeight + top;
-
-            float newRight = right * scale;
-            float newBottom = bottom * scale;
-
-            int winGameScaledOffsetX = (int)((left * scale) - (newRight - right));
-            int winGameScaledOffsetY = (int)((top * scale) - (newBottom - bottom));
-
-            int winGameScaledWidth = (int)(newRight - winGameScaledOffsetX);
-            int winGameScaledHeight = (int)(newBottom - winGameScaledOffsetY);
-
-
-            int width = ((winGameWidth / 44) + 1) * scale;
-            int height = ((winGameHeight / 44) + 1) * scale;
-
-            if (width < height)
-                width = height;
-            else
-                height = width;
-
-            int realMinRangeX = Game.World.Player.Position.X - width;
-            if (realMinRangeX < 0)
-                realMinRangeX = 0;
-            int realMaxRangeX = Game.World.Player.Position.X + width;
-            if (realMaxRangeX >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0])
-                realMaxRangeX = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0];
-
-            int realMinRangeY = Game.World.Player.Position.Y - height;
-            if (realMinRangeY < 0)
-                realMinRangeY = 0;
-            int realMaxRangeY = Game.World.Player.Position.Y + height;
-            if (realMaxRangeY >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1])
-                realMaxRangeY = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1];
-
-            //int minBlockX = (realMinRangeX / 8) - 1;
-            //int minBlockY = (realMinRangeY / 8) - 1;
-            //int maxBlockX = (realMaxRangeX / 8) + 1;
-            //int maxBlockY = (realMaxRangeY / 8) + 1;
-
-            //if (minBlockX < 0)
-            //    minBlockX = 0;
-            //if (minBlockY < 0)
-            //    minBlockY = 0;
-            //if (maxBlockX >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0])
-            //    maxBlockX = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0] - 1;
-            //if (maxBlockY >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1])
-            //    maxBlockY = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1] - 1;
-
-            int drawOffset = scale * 40;
-
-            float maxX = winGamePosX + winGameWidth + drawOffset;
-            float maxY = winGamePosY + winGameHeight + drawOffset;
-            float newMaxX = maxX * scale;
-            float newMaxY = maxY * scale;
-
-            int minPixelsX = (int)(((winGamePosX - drawOffset) * scale) - (newMaxX - maxX));
-            int maxPixelsX = (int)newMaxX;
-            int minPixelsY = (int)(((winGamePosY - drawOffset) * scale) - (newMaxY - maxY));
-            int maxPixlesY = (int)newMaxY;
-
-            return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY),
-                new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY),
-                new Point(winDrawOffsetX, winDrawOffsetY), new Point(winGameCenterX, winGameCenterY));
-        }
-
-        private RenderTarget2D _targetRender;
 
         protected override void Draw(GameTime gameTime)
         {
