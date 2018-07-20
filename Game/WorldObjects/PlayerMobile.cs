@@ -1045,8 +1045,10 @@ namespace ClassicUO.Game.WorldObjects
                 x = step1.X; y = step1.Y; z = step1.Z; oldDirection = (Direction)step1.Direction;
             }
 
-            ushort walkTime;
+            oldDirection = (oldDirection & Direction.Up);
+            direction = (direction & Direction.Up);
 
+            ushort walkTime;
             Direction newDirection = direction;
             int newX = x;
             int newY = y;
@@ -1069,7 +1071,7 @@ namespace ClassicUO.Game.WorldObjects
                 {
                     direction = newDirection;
                     x = newX; y = newY; z = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, direction);
+                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
                 }
             }
             else
@@ -1078,7 +1080,7 @@ namespace ClassicUO.Game.WorldObjects
                 {
                     direction = newDirection;
                     x = newX; y = newY; z = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, direction);
+                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
                 }
                 else
                 {
@@ -1086,6 +1088,9 @@ namespace ClassicUO.Game.WorldObjects
                     walkTime = TURN_DELAY;
                 }
             }
+
+            if (run)
+                direction |= Direction.Running;
 
             Step step = new Step()
             {

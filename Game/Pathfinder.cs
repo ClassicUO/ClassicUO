@@ -56,8 +56,8 @@ namespace ClassicUO.Game
 
             if (moveIsOK)
             {
-                if (m.IsRunning)
-                    direction |= Direction.Running;
+                //if (m.IsRunning)
+                //    direction |= Direction.Running;
                 return true;
             }
             return false;

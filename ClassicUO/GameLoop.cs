@@ -253,7 +253,7 @@ namespace ClassicUO
 
                         Game.Direction direction = Game.DirectionHelper.DirectionFromPoints(center, e.Location);
 
-                        Game.World.Player.Walk(direction, false);
+                        Game.World.Player.Walk(direction, true);
                     }
                 }
             };

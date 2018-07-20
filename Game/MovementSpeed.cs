@@ -13,13 +13,11 @@ namespace ClassicUO.Game
         const double TIME_RUN_MOUNT = (2d / 20d) * 1000d;
 
 
-        public static double TimeToCompleteMovement(in Mobile mobile, in Direction direction)
+        public static double TimeToCompleteMovement(in Mobile mobile, in bool run)
         {
-            bool isrunning = (direction & Direction.Running) == Direction.Running;
-
             if (mobile.IsMounted)
-                return isrunning ? TIME_RUN_MOUNT : TIME_WALK_MOUNT;
-            return isrunning ? TIME_RUN_FOOT : TIME_WALK_FOOT;
+                return run ? TIME_RUN_MOUNT : TIME_WALK_MOUNT;
+            return run ? TIME_RUN_FOOT : TIME_WALK_FOOT;
         }
     }
 }

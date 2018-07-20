@@ -522,9 +522,14 @@ namespace ClassicUO.Game.WorldObjects
 
             do
             {
+                if (this == World.Player)
+                {
+
+                }
+
                 Step step = _steps.Front();
 
-                int maxDelay = (int)MovementSpeed.TimeToCompleteMovement(this, Direction) - 15;
+                int maxDelay = (int)MovementSpeed.TimeToCompleteMovement(this, step.Run) - 15;
                 int delay = (int)World.Ticks - (int)LastStepTime;
                 bool removeStep = (delay >= maxDelay);
 
@@ -536,22 +541,12 @@ namespace ClassicUO.Game.WorldObjects
                     float x = frameOffset;
                     float y = frameOffset;
 
-                    GetPixelOffset((byte)Direction, ref x, ref y, framesPerTile);
+                    GetPixelOffset(step.Direction, ref x, ref y, framesPerTile);
 
                     Offset = new Vector3((sbyte)x, (sbyte)y, (int)(((step.Z - Position.Z) * frameOffset) * (4.0f / framesPerTile)));
 
-                    //if (frameOffset < 1f)
-                    //    Offset = new Vector3()
-                    //    {
-                    //        X = (step.X - Position.X) * frameOffset,
-                    //        Y = (step.Y - Position.Y) * frameOffset,
-                    //        Z = (step.Z - Position.Z) * frameOffset
-                    //    };
-
                     if (this == World.Player)
                         World.Map.Center = new Point((short)step.X, (short)step.Y);
-
-
 
                     turnOnly = false;
                 }
@@ -576,13 +571,8 @@ namespace ClassicUO.Game.WorldObjects
                         }
                     }
 
-                    Log.Message(LogTypes.Info, $"CURRENT: {Position}");
-                    Log.Message(LogTypes.Info, $"NEXT: {step.X} {step.Y} {step.Z}");
                     Position = new Position((ushort)step.X, (ushort)step.Y, step.Z);
                     Direction = (Direction)step.Direction;
-
-                    if (step.Run)
-                        Direction |= Direction.Running;
 
                     Offset = Vector3.Zero;
                     _steps.RemoveFromFront();

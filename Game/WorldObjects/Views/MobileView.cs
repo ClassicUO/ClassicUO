@@ -107,55 +107,28 @@ namespace ClassicUO.Game.WorldObjects.Views
                     return false;
 
 
-                if (WorldObject.Offset !=  Vector3.Zero)
-                {
-
-                }
-
                 int drawCenterY = frame.CenterY;
-                int drawX = (int)position.X + (int)WorldObject.Offset.X ;
-                int drawY = (int)position.Y + (int)WorldObject.Offset.Y - (int)WorldObject.Offset.Z  -3;
-
-                //if (IsFlipped)
-                //{
-                //    drawX += 44;
-                //    //drawY += 44;
-                //}
-                //else
-                //{
-
-                //}
+                int drawX;
+                int drawY = drawCenterY + (( /*WorldObject.Offset.Z +*/ WorldObject.Position.Z) * 4) - 22 - (int)(WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
 
                 if (IsFlipped)
                 {
-                    drawX = -22 + (int)WorldObject.Offset.X /*+ (int)((WorldObject.Offset.X - WorldObject.Offset.Y) * 1)*/;
-                    drawY = drawCenterY + (int)((WorldObject.Offset.Z + WorldObject.Position.Z) * 4) - 22 - (int)((/*WorldObject.Offset.X +*/ WorldObject.Offset.Y) * 1);
+                    drawX = -22 + (int)(WorldObject.Offset.X /*- WorldObject.Offset.Y */);
                 }
                 else
                 {
-                    drawX = -22 - (int)WorldObject.Offset.X/*- (int)((WorldObject.Offset.X - WorldObject.Offset.Y) * 1)*/;
-                    drawY = drawCenterY - (int)((WorldObject.Offset.Z + WorldObject.Position.Z) * 4) - 22 - (int)((/*WorldObject.Offset.X +*/ WorldObject.Offset.Y) * 1);
+                    drawX = -22 - (int)(WorldObject.Offset.X/* - WorldObject.Offset.Y*/);
                 }
+
 
                 int x = (drawX + frame.CenterX);
                 int y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
 
-                //if (Texture != null)
-                //    Texture.Dispose();
 
                 Texture = TextureManager.GetOrCreateAnimTexture(id, animGroup, dir, animIndex);
-
-                //Texture = new Texture2D(TextureManager.Device, frame.Width, frame.Heigth, false, SurfaceFormat.Bgra5551);
-                //Texture.SetData(frame.Pixels);
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
                 HueVector = RenderExtentions.GetHueVector(WorldObject.Hue);
 
-                Vector3 t = new Vector3()
-                {
-                    X = drawX,
-                    Y = drawY,
-                    Z = 0
-                };
 
                 base.Draw(spriteBatch, position);
 
