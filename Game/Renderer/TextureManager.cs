@@ -134,7 +134,7 @@ namespace ClassicUO.Renderer
                 if (array[group] == null)
                     array[group] = new TextureDuration[5][];
                 if (array[group][dir] == null)
-                    array[group][dir] = new TextureDuration[frames.Length];
+                    array[group][dir] = new TextureDuration[50];
                 if (array[group][dir][index] == null)
                     array[group][dir][index] = new TextureDuration();
 

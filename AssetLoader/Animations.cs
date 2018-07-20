@@ -32,6 +32,7 @@ namespace ClassicUO.AssetsLoader
         public static ushort AnimID { get; set; }
 
         public static IndexAnimation[] DataIndex => _dataIndex;
+        public static IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions => _equipConv;
 
         public static void Load()
         {

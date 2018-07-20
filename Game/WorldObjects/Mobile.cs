@@ -206,7 +206,7 @@ namespace ClassicUO.Game.WorldObjects
         public void SetSAPoison(in bool value) => _isSA_Poisoned = value;
 
 
-        public Item GetItemAtLayer(Layer layer) => Items.SingleOrDefault(s => s.Layer == layer);
+        public Item GetItemAtLayer(in Layer layer) => Equipment[(int)layer]; /*Items.FirstOrDefault(s => s.Layer == layer);*/
 
 
         protected override void OnProcessDelta(Delta d)
@@ -225,6 +225,7 @@ namespace ClassicUO.Game.WorldObjects
         public override bool Exists => World.Contains(Serial);
 
 
+        public Item[] Equipment { get; } = new Item[(int)Layer.Bank + 1];
 
 
         public bool IsMounted => GetItemAtLayer(Layer.Mount) != null;

@@ -911,6 +911,7 @@ namespace ClassicUO.Network
                 item.Amount = 1;
                 item.Container = mobile;
                 mobile.Items.Add(item);
+                mobile.Equipment[(int)item.Layer] = item;
                 item.ProcessDelta();
                 World.Items.Add(item);
             }

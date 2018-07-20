@@ -9,49 +9,83 @@ namespace ClassicUO.Game.WorldObjects.Views
 {
     public class MobileView : WorldRenderObject
     {
-        const int USED_LAYER_COUNT = 23;
+        const int USED_LAYER_COUNT = 25 ;
         private static readonly Layer[,] _usedLayers = new Layer[8, USED_LAYER_COUNT]
         {
             {
-                Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.OuterLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
-                Layer.Face, Layer.Arms, Layer.Gloves, Layer.InnerLegs, Layer.MiddleTorso, Layer.OuterTorso, Layer.Waist , Layer.Neck,
-                Layer.Hair, Layer.FacialHair, Layer.Earrings, Layer.Helm, Layer.LeftHand, Layer.RightHand, Layer.Cloak
+                Layer.Mount, Layer.Invalid, Layer.Cloak, Layer.Shirt,
+                Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
+                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face,
+                Layer.Arms, Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso,
+                Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist,
+                Layer.FacialHair, Layer.Earrings, Layer.LeftHand, Layer.Helm,
+                Layer.RightHand
             },
             {
-                Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.OuterLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
-                Layer.Face, Layer.Arms, Layer.Gloves, Layer.InnerLegs, Layer.MiddleTorso, Layer.OuterTorso, Layer.Waist , Layer.Neck,
-                Layer.Hair, Layer.FacialHair, Layer.Earrings, Layer.Helm, Layer.LeftHand, Layer.RightHand, Layer.Cloak
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
+                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
+                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
+                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
+                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
+                Layer.RightHand
             },
             {
-               Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.OuterLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
-               Layer.Face, Layer.Arms, Layer.Gloves, Layer.InnerLegs, Layer.MiddleTorso, Layer.OuterTorso, Layer.Waist , Layer.Neck,
-               Layer.Hair, Layer.FacialHair, Layer.Earrings, Layer.Helm, Layer.LeftHand, Layer.Cloak,  Layer.RightHand
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
+                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
+                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
+                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
+                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
+                Layer.RightHand
             },
             {
-               Layer.Cloak, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.OuterLegs, Layer.InnerLegs, Layer.RightHand, Layer.Talisman,
-               Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.InnerLegs, Layer.MiddleTorso, Layer.OuterTorso, Layer.Waist,
-               Layer.Neck, Layer.Hair, Layer.FacialHair, Layer.Earrings, Layer.Helm, Layer.LeftHand, Layer.RightHand
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
+                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
+                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
+                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
+                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
+                Layer.RightHand
             },
             {
-               Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.OuterLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
-               Layer.Face, Layer.Arms, Layer.Gloves, Layer.InnerLegs, Layer.MiddleTorso, Layer.OuterTorso, Layer.Waist , Layer.Neck,
-               Layer.Hair, Layer.FacialHair, Layer.Earrings, Layer.Helm, Layer.LeftHand, Layer.Cloak,  Layer.RightHand
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
+                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
+                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
+                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
+                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
+                Layer.RightHand
             },
             {
-               Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.OuterLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
-               Layer.Face, Layer.Arms, Layer.Gloves, Layer.InnerLegs, Layer.MiddleTorso, Layer.OuterTorso, Layer.Waist , Layer.Neck,
-               Layer.Hair, Layer.FacialHair, Layer.Earrings, Layer.Helm, Layer.LeftHand, Layer.RightHand, Layer.Cloak
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
+                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
+                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
+                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
+                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
+                Layer.RightHand
             },
             {
-               Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.OuterLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
-               Layer.Face, Layer.Arms, Layer.Gloves, Layer.InnerLegs, Layer.MiddleTorso, Layer.OuterTorso, Layer.Waist , Layer.Neck,
-               Layer.Hair, Layer.FacialHair, Layer.Earrings, Layer.Helm, Layer.LeftHand, Layer.RightHand, Layer.Cloak
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
+                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
+                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
+                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
+                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
+                Layer.RightHand
             },
+
             {
-               Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.OuterLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
-               Layer.Face, Layer.Arms, Layer.Gloves, Layer.InnerLegs, Layer.MiddleTorso, Layer.OuterTorso, Layer.Waist , Layer.Neck,
-               Layer.Hair, Layer.FacialHair, Layer.Earrings, Layer.Helm, Layer.LeftHand, Layer.RightHand, Layer.Cloak
-            },
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
+                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
+                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
+                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
+                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
+                Layer.RightHand
+            }
+
         };
 
 
@@ -73,69 +107,130 @@ namespace ClassicUO.Game.WorldObjects.Views
             spriteBatch.GetZ();
 
             bool mirror = false;
-            byte dir = (byte)WorldObject.GetAnimationDirection();
-            
+            byte dir = (byte)WorldObject.GetAnimationDirection();           
             AssetsLoader.Animations.GetAnimDirection(ref dir, ref mirror);
-
             IsFlipped = mirror;
+
 
             byte animIndex = WorldObject.AnimIndex;
             byte animGroup = WorldObject.GetAnimationGroup();
 
-            Graphic id = WorldObject.GetMountAnimation();
 
-            AssetsLoader.Animations.AnimGroup = animGroup;
-            AssetsLoader.Animations.Direction = dir;
-
-            var direction = AssetsLoader.Animations.DataIndex[id].Groups[AssetsLoader.Animations.AnimGroup].Direction[AssetsLoader.Animations.Direction];
-            AssetsLoader.Animations.AnimID = id;
-
-            if (direction.FrameCount == 0 && !AssetsLoader.Animations.LoadDirectionGroup(ref direction))
-                return false;
-
-            int fc = direction.FrameCount;
-            if (fc > 0 && animIndex >= fc)
+            for (int i = 0; i < USED_LAYER_COUNT; i++)
             {
-                animIndex = 0;
-            }
+                Layer layer = _usedLayers[dir, i];
 
-            if (animIndex < direction.FrameCount)
-            {
-                var frame = direction.Frames[animIndex];
+                Graphic graphic = 0;
 
-                if (frame.Pixels == null || frame.Pixels.Length <= 0)
-                    return false;
-
-
-                int drawCenterY = frame.CenterY;
-                int drawX;
-                int drawY = drawCenterY + (( /*WorldObject.Offset.Z +*/ WorldObject.Position.Z) * 4) - 22 - (int)(WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
-
-                if (IsFlipped)
+                if (layer == Layer.Mount)
                 {
-                    drawX = -22 + (int)(WorldObject.Offset.X /*- WorldObject.Offset.Y */);
+                    if (WorldObject.IsHuman)
+                    {
+                        Item mount = WorldObject.Equipment[(int)Layer.Mount];
+                        if (mount != null)
+                        {
+                            graphic = mount.GetMountAnimation();
+                            int mountedHeightOffset = 0;
+
+                            if (graphic < AssetsLoader.Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                                mountedHeightOffset = AssetsLoader.Animations.DataIndex[graphic].MountedHeightOffset;
+
+
+                            HueVector = RenderExtentions.GetHueVector(mount.Hue);
+
+                        }
+                        else
+                            continue;
+                    }
+                    else
+                        continue;
+                }
+                else if (layer == Layer.Invalid)
+                {
+                    graphic = WorldObject.GetMountAnimation();
+
+
+                    HueVector = RenderExtentions.GetHueVector(WorldObject.Hue);
                 }
                 else
                 {
-                    drawX = -22 - (int)(WorldObject.Offset.X/* - WorldObject.Offset.Y*/);
+                    if (!WorldObject.IsHuman)
+                        continue;
+
+                    Item item = WorldObject.Equipment[(int)layer];
+                    if (item == null)
+                        continue;
+
+                    graphic = item.ItemData.AnimID;
+
+                    if (AssetsLoader.Animations.EquipConversions.TryGetValue(item.Graphic, out var map))
+                    {
+                        if (map.TryGetValue(item.ItemData.AnimID, out var data))
+                        {
+                            graphic = data.Graphic;
+                        }
+                    }
+
+
+                    HueVector = RenderExtentions.GetHueVector(item.Hue);
                 }
 
 
-                int x = (drawX + frame.CenterX);
-                int y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
 
 
-                Texture = TextureManager.GetOrCreateAnimTexture(id, animGroup, dir, animIndex);
-                Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
-                HueVector = RenderExtentions.GetHueVector(WorldObject.Hue);
 
 
-                base.Draw(spriteBatch, position);
 
-                for (int i = 0; i < USED_LAYER_COUNT; i++)
+                AssetsLoader.Animations.AnimID = graphic;
+                AssetsLoader.Animations.AnimGroup = WorldObject.GetAnimationGroup(graphic);
+                AssetsLoader.Animations.Direction = dir;
+
+                var direction = AssetsLoader.Animations.DataIndex[AssetsLoader.Animations.AnimID].Groups[AssetsLoader.Animations.AnimGroup].Direction[AssetsLoader.Animations.Direction];
+
+                if (direction.FrameCount == 0 && !AssetsLoader.Animations.LoadDirectionGroup(ref direction))
+                    continue;
+
+                int fc = direction.FrameCount;
+                if (fc > 0 && animIndex >= fc)
                 {
-                    
+                    animIndex = 0;
                 }
+
+                if (animIndex < direction.FrameCount)
+                {
+                    var frame = direction.Frames[animIndex];
+
+                    if (frame.Pixels == null || frame.Pixels.Length <= 0)
+                        return false;
+
+
+                    int drawCenterY = frame.CenterY;
+                    int drawX;
+                    int drawY = drawCenterY + (( /*WorldObject.Offset.Z +*/ WorldObject.Position.Z) * 4) - 22 - (int)(WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
+
+                    if (IsFlipped)
+                    {
+                        drawX = -22 + (int)(WorldObject.Offset.X /*- WorldObject.Offset.Y */);
+                    }
+                    else
+                    {
+                        drawX = -22 - (int)(WorldObject.Offset.X/* - WorldObject.Offset.Y*/);
+                    }
+
+
+                    int x = (drawX + frame.CenterX);
+                    int y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
+
+
+
+
+
+                    Texture = TextureManager.GetOrCreateAnimTexture(graphic, AssetsLoader.Animations.AnimGroup, dir, animIndex);
+                    Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
+
+                    base.Draw(spriteBatch, position);
+                }
+
 
             }
            

@@ -60,7 +60,17 @@ namespace ClassicUO.Game.WorldObjects
 
         protected override WorldRenderObject CreateView() => new ItemView(this);
 
-        public AssetsLoader.StaticTiles ItemData => AssetsLoader.TileData.StaticData[Graphic];
+        private AssetsLoader.StaticTiles? _itemData;
+
+        public AssetsLoader.StaticTiles ItemData
+        {
+            get
+            {
+                if (_itemData == null || !_itemData.HasValue)
+                    _itemData = AssetsLoader.TileData.StaticData[Graphic];
+                return _itemData.Value;
+            }
+        }
 
         public ushort Amount
         {
@@ -200,6 +210,262 @@ namespace ClassicUO.Game.WorldObjects
                 OwnerChanged.Raise(this);
         }
 
+
+        public Graphic GetMountAnimation()
+        {
+            Graphic graphic = Graphic;
+
+            if (Layer == Layer.Mount)
+            {
+                switch (graphic)
+                {
+                    case 0x3E90:
+                        {
+                            graphic = 0x0114;
+                            break;
+                        }
+                    case 0x3E91:
+                        {
+                            graphic = 0x0115;
+                            break;
+                        }
+                    case 0x3E92:
+                        {
+                            graphic = 0x011C;
+                            break;
+                        }
+                    case 0x3E94:
+                        {
+                            graphic = 0x00F3;
+                            break;
+                        }
+                    case 0x3E95:
+                        {
+                            graphic = 0x00A9;
+                            break;
+                        }
+                    case 0x3E97:
+                        {
+                            graphic = 0x00C3;
+                            break;
+                        }
+                    case 0x3E98:
+                        {
+                            graphic = 0x00C2;
+                            break;
+                        }
+                    case 0x3E9A:
+                        {
+                            graphic = 0x00C1;
+                            break;
+                        }
+                    case 0x3E9B:
+                    case 0x3E9D:
+                        {
+                            graphic = 0x00C0;
+                            break;
+                        }
+                    case 0x3E9C:
+                        {
+                            graphic = 0x00BF;
+                            break;
+                        }
+                    case 0x3E9E:
+                        {
+                            graphic = 0x00BE;
+                            break;
+                        }
+                    case 0x3EA0:
+                        {
+                            graphic = 0x00E2;
+                            break;
+                        }
+                    case 0x3EA1:
+                        {
+                            graphic = 0x00E4;
+                            break;
+                        }
+                    case 0x3EA2:
+                        {
+                            graphic = 0x00CC;
+                            break;
+                        }
+                    case 0x3EA3:
+                        {
+                            graphic = 0x00D2;
+                            break;
+                        }
+                    case 0x3EA4:
+                        {
+                            graphic = 0x00DA;
+                            break;
+                        }
+                    case 0x3EA5:
+                        {
+                            graphic = 0x00DB;
+                            break;
+                        }
+                    case 0x3EA6:
+                        {
+                            graphic = 0x00DC;
+                            break;
+                        }
+                    case 0x3EA7:
+                        {
+                            graphic = 0x0074;
+                            break;
+                        }
+                    case 0x3EA8:
+                        {
+                            graphic = 0x0075;
+                            break;
+                        }
+                    case 0x3EA9:
+                        {
+                            graphic = 0x0072;
+                            break;
+                        }
+                    case 0x3EAA:
+                        {
+                            graphic = 0x0073;
+                            break;
+                        }
+                    case 0x3EAB:
+                        {
+                            graphic = 0x00AA;
+                            break;
+                        }
+                    case 0x3EAC:
+                        {
+                            graphic = 0x00AB;
+                            break;
+                        }
+                    case 0x3EAD:
+                        {
+                            graphic = 0x0084;
+                            break;
+                        }
+                    case 0x3EAF:
+                        {
+                            graphic = 0x0078;
+                            break;
+                        }
+                    case 0x3EB0:
+                        {
+                            graphic = 0x0079;
+                            break;
+                        }
+                    case 0x3EB1:
+                        {
+                            graphic = 0x0077;
+                            break;
+                        }
+                    case 0x3EB2:
+                        {
+                            graphic = 0x0076;
+                            break;
+                        }
+                    case 0x3EB3:
+                        {
+                            graphic = 0x0090;
+                            break;
+                        }
+                    case 0x3EB4:
+                        {
+                            graphic = 0x007A;
+                            break;
+                        }
+                    case 0x3EB5:
+                        {
+                            graphic = 0x00B1;
+                            break;
+                        }
+                    case 0x3EB6:
+                        {
+                            graphic = 0x00B2;
+                            break;
+                        }
+                    case 0x3EB7:
+                        {
+                            graphic = 0x00B3;
+                            break;
+                        }
+                    case 0x3EB8:
+                        {
+                            graphic = 0x00BC;
+                            break;
+                        }
+                    case 0x3EBA:
+                        {
+                            graphic = 0x00BB;
+                            break;
+                        }
+                    case 0x3EBB:
+                        {
+                            graphic = 0x0319;
+                            break;
+                        }
+                    case 0x3EBC:
+                        {
+                            graphic = 0x0317;
+                            break;
+                        }
+                    case 0x3EBD:
+                        {
+                            graphic = 0x031A;
+                            break;
+                        }
+                    case 0x3EBE:
+                        {
+                            graphic = 0x031F;
+                            break;
+                        }
+                    case 0x3EC3:
+                        {
+                            graphic = 0x02D4;
+                            break;
+                        }
+                    case 0x3EC5:
+                    case 0x3F3A:
+                        {
+                            graphic = 0x00D5;
+                            break;
+                        }
+                    case 0x3EC6:
+                        {
+                            graphic = 0x01B0;
+                            break;
+                        }
+                    case 0x3EC7:
+                        {
+                            graphic = 0x04E6;
+                            break;
+                        }
+                    case 0x3EC8:
+                        {
+                            graphic = 0x04E7;
+                            break;
+                        }
+                    case 0x3EC9:
+                        {
+                            graphic = 0x042D;
+                            break;
+                        }
+                    default:
+                        {
+                            graphic = 0x00C8;
+
+                            break;
+                        }
+                }
+
+                if (ItemData.AnimID != 0)
+                    graphic = ItemData.AnimID;
+            }
+            // else if corpse
+
+            return graphic;
+        }
 
     }
 }
