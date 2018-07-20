@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Input;
-using ClassicUO.Network;
+using ClassicUO.Game.Network;
 using ClassicUO.Game.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;

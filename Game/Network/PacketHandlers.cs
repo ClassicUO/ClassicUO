@@ -8,7 +8,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.WorldObjects;
 using ClassicUO.Utility;
 
-namespace ClassicUO.Network
+namespace ClassicUO.Game.Network
 {
     public class PacketHandler
     {
@@ -284,7 +284,7 @@ namespace ClassicUO.Network
 
         private static void EditTileDataGodClientR(Packet p)
         {
-            
+
         }
 
         private static void CharacterStatus(Packet p)
@@ -359,7 +359,7 @@ namespace ClassicUO.Network
 
        /* private static void NewHealthBarStatusUpdateSA(Packet p)
         {
-          
+
         }*/
 
         private static void NewHealthbarUpdate(Packet p)
@@ -489,7 +489,7 @@ namespace ClassicUO.Network
 
         private static void Explosion(Packet p)
         {
-            
+
         }
 
         private static void UpdatePlayer(Packet p)
@@ -611,7 +611,7 @@ namespace ClassicUO.Network
 
         private static void OpenContainer(Packet p)
         {
-            
+
         }
 
         private static void UpdateContainedItem(Packet p)
@@ -622,32 +622,32 @@ namespace ClassicUO.Network
 
         private static void KickPlayer(Packet p)
         {
-            
+
         }
 
         private static void DenyMoveItem(Packet p)
         {
-            
+
         }
 
         private static void EndDraggingItem(Packet p)
         {
-            
+
         }
 
         private static void DropItemAccepted(Packet p)
         {
-            
+
         }
 
         private static void Blood(Packet p)
         {
-            
+
         }
 
         private static void GodMode(Packet p)
         {
-            
+
         }
 
         private static void MobileAttributes(Packet p)
@@ -688,17 +688,17 @@ namespace ClassicUO.Network
 
         private static void FightOccuring(Packet p)
         {
-            
+
         }
 
         private static void AttackOK(Packet p)
         {
-            
+
         }
 
         private static void AttackEnded(Packet p)
         {
-            
+
         }
 
         private static void UpdateSkills(Packet p)
@@ -732,17 +732,17 @@ namespace ClassicUO.Network
 
         private static void RemoveGroupR(Packet p)
         {
-            
+
         }
 
         private static void PauseControl(Packet p)
         {
-            
+
         }
 
         private static void ResourceTileDataGodClient(Packet p)
         {
-            
+
         }
 
         private static void UpdateContainedItems(Packet p)
@@ -755,27 +755,27 @@ namespace ClassicUO.Network
 
         private static void VersionGodClient(Packet p)
         {
-            
+
         }
 
         private static void UpdateStaticsGodClient(Packet p)
         {
-            
+
         }
 
         private static void LightLevel(Packet p)
         {
-            
+
         }
 
         private static void ErrorCode(Packet p)
         {
-            
+
         }
 
         private static void PlaySoundEffect(Packet p)
         {
-            
+
         }
 
         private static void LoginComplete(Packet p)
@@ -786,32 +786,32 @@ namespace ClassicUO.Network
 
         private static void MapData(Packet p)
         {
-            
+
         }
 
         private static void SetTime(Packet p)
         {
-            
+
         }
 
         private static void SetWeather(Packet p)
         {
-            
+
         }
 
         private static void BookData(Packet p)
         {
-            
+
         }
 
         private static void GraphicEffect(Packet p)
         {
-            
+
         }
 
         private static void BulletinBoardData(Packet p)
         {
-            
+
         }
 
         private static void Warmode(Packet p)
@@ -822,7 +822,7 @@ namespace ClassicUO.Network
 
         private static void Ping(Packet p)
         {
-            
+
         }
 
         private static void BuyList(Packet p)
@@ -840,7 +840,7 @@ namespace ClassicUO.Network
 
         private static void NewSubServer(Packet p)
         {
-            
+
         }
 
         private static void UpdateCharacter(Packet p)
@@ -1001,7 +1001,7 @@ namespace ClassicUO.Network
 
         private static void RelayServer(Packet p)
         {
-            
+
         }
 
         private static void DisplayMap(Packet p)
@@ -1044,22 +1044,22 @@ namespace ClassicUO.Network
 
         private static void AllNames3DGameOnlyR(Packet p)
         {
-            
+
         }
 
         private static void MultiPlacement(Packet p)
         {
-            
+
         }
 
         private static void ASCIIPrompt(Packet p)
         {
-            
+
         }
 
         private static void RequestAssistance(Packet p)
         {
-            
+
         }
 
         private static void SellList(Packet p)
@@ -1071,7 +1071,7 @@ namespace ClassicUO.Network
             ushort countItems = p.ReadUShort();
             if (countItems <= 0)
                 return;
-            
+
             for (int i = 0; i < countItems; i++)
             {
                 Item item = World.GetOrCreateItem(p.ReadUInt());
@@ -1122,7 +1122,7 @@ namespace ClassicUO.Network
 
         private static void OpenUrl(Packet p)
         {
-            
+
         }
 
         private static void TipWindow(Packet p)
@@ -1138,7 +1138,7 @@ namespace ClassicUO.Network
 
         private static void ServerList(Packet p)
         {
-            
+
         }
 
         private static void CharacterList(Packet p)
@@ -1182,7 +1182,7 @@ namespace ClassicUO.Network
 
         private static void TextEntryDialog(Packet p)
         {
-            
+
         }
 
         private static void UnicodeTalk(Packet p)
@@ -1208,22 +1208,22 @@ namespace ClassicUO.Network
 
         private static void OpenGump(Packet p)
         {
-            
+
         }
 
         private static void ChatMessage(Packet p)
         {
-            
+
         }
 
         private static void Help(Packet p)
         {
-            
+
         }
 
         private static void CharacterProfile(Packet p)
         {
-            
+
         }
 
         private static void EnableLockedFeatures(Packet p)
@@ -1243,12 +1243,12 @@ namespace ClassicUO.Network
 
         private static void DisplayQuestArrow(Packet p)
         {
-            
+
         }
 
         private static void UltimaMessengerR(Packet p)
         {
-            
+
         }
 
         private static void Season(Packet p)
@@ -1388,7 +1388,7 @@ namespace ClassicUO.Network
                             if (bonded == null)
                                 break;
                             bool dead = p.ReadBool();
-                            //bonded.IsDead 
+                            //bonded.IsDead
                             break;
                         case 2:
                             if (serial == World.Player)
@@ -1448,7 +1448,7 @@ namespace ClassicUO.Network
                         default:
                             break;
                     }
-                
+
                     break;
                 case 0x21:
 
@@ -1494,17 +1494,17 @@ namespace ClassicUO.Network
 
         private static void UnicodePrompt(Packet p)
         {
-            
+
         }
 
         private static void Semivisible(Packet p)
         {
-            
+
         }
 
         private static void InvalidMapEnable(Packet p)
         {
-            
+
         }
 
         private static void ParticleEffect3D(Packet p)
@@ -1514,27 +1514,27 @@ namespace ClassicUO.Network
 
         private static void GetUserServerPingGodClientR(Packet p)
         {
-            
+
         }
 
         private static void GlobalQueCount(Packet p)
         {
-            
+
         }
 
         private static void ConfigurationFileR(Packet p)
         {
-            
+
         }
 
         private static void Logout(Packet p)
         {
-            
+
         }
 
         private static void OpenBookNew(Packet p)
         {
-            
+
         }
 
         private static void MegaCliloc(Packet p)
@@ -1551,7 +1551,7 @@ namespace ClassicUO.Network
 
         private static void GenericAOSCommandsR(Packet p)
         {
-            
+
         }
 
         private static void CustomHouse(Packet p)
@@ -1696,12 +1696,12 @@ namespace ClassicUO.Network
 
         private static void CharacterTransferLog(Packet p)
         {
-            
+
         }
 
         private static void OPLInfo(Packet p)
         {
-            
+
         }
 
         private static void OpenCompressedGump(Packet p)
@@ -1734,7 +1734,7 @@ namespace ClassicUO.Network
                     linesdata[i] = p.ReadByte();
 
                 /*Packet dp = GetDecompressedData(linesdata, (int)dlineLength);
-               
+
                 for (int i = 0; i < linesNum; i++)
                 {
                     ushort len = dp.ReadUShort();
@@ -1747,22 +1747,22 @@ namespace ClassicUO.Network
 
         private static void UpdateMobileStatus(Packet p)
         {
-            
+
         }
 
         private static void BuffDebuff(Packet p)
         {
-            
+
         }
 
         private static void NewCharacterAnimation(Packet p)
         {
-            
+
         }
 
         private static void KREncryptionResponse(Packet p)
         {
-            
+
         }
 
         private static void KrriosClientSpecial(Packet p)
@@ -1775,7 +1775,7 @@ namespace ClassicUO.Network
 
         private static void FreeshardListR(Packet p)
         {
-            
+
         }
 
         private static void UpdateItemSA(Packet p)
