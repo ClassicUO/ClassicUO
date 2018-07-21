@@ -149,6 +149,7 @@ namespace ClassicUO.Game.Network
             ToServer.Add(0x4B, CheckClientVersion);
             ToServer.Add(0x4C, ScriptNames);
             ToServer.Add(0x4D, EditScriptFile);*/
+            ToClient.Add(0x4E, PersonalLightLevel);
             ToClient.Add(0x4F, LightLevel);
             /*ToServer.Add(0x50, BoardHeader);
             ToServer.Add(0x51, BoardMessage);
@@ -789,9 +790,17 @@ namespace ClassicUO.Game.Network
 
         }
 
+        private static void PersonalLightLevel(Packet p)
+        {
+            if (World.Player == p.ReadUInt())
+            {
+                World.Light.Personal = 0; // p.ReadByte();
+            }
+        }
+
         private static void LightLevel(Packet p)
         {
-
+            Game.World.Light.Overall = 0;// p.ReadByte();
         }
 
         private static void ErrorCode(Packet p)

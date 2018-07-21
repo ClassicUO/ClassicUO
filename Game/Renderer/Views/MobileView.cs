@@ -107,13 +107,14 @@ namespace ClassicUO.Game.Renderer.Views
             AssetsLoader.Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
-
             byte animGroup = 0;
 
             Hue color = 0;
 
             for (int i = 0; i < USED_LAYER_COUNT; i++)
             {
+                AssetsLoader.EquipConvData? convertedItem = null;
+
                 Layer layer = _usedLayers[dir, i];
 
                 Graphic graphic = 0;
@@ -162,6 +163,7 @@ namespace ClassicUO.Game.Renderer.Views
                     {
                         if (map.TryGetValue(item.ItemData.AnimID, out var data))
                         {
+                            convertedItem = data;
                             graphic = data.Graphic;
                         }
                     }
@@ -214,8 +216,13 @@ namespace ClassicUO.Game.Renderer.Views
                     int y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
 
                     if (color <= 0)
-                        color = AssetsLoader.Animations.DataIndex[AssetsLoader.Animations.AnimID].Color;
+                    {
+                        if (direction.Address != direction.PatchedAddress)
+                            color = AssetsLoader.Animations.DataIndex[AssetsLoader.Animations.AnimID].Color;
 
+                        if (color <= 0 && convertedItem.HasValue)
+                            color = convertedItem.Value.Color;
+                    }
                     Texture = TextureManager.GetOrCreateAnimTexture(graphic, AssetsLoader.Animations.AnimGroup, dir, animIndex, direction.Frames);
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
                     HueVector = RenderExtentions.GetHueVector(color);

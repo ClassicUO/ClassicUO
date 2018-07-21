@@ -39,6 +39,7 @@ namespace ClassicUO.Game
         private static readonly ConcurrentDictionary<Serial, House> _houses = new ConcurrentDictionary<Serial, House>();
 
         public static long Ticks { get; set; }
+        public static Renderer.IsometricLight Light { get; } = new Renderer.IsometricLight();
 
         const int DISTANCE_POV = 24;
 

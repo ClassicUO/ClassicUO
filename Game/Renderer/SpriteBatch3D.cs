@@ -64,6 +64,9 @@ namespace ClassicUO.Game.Renderer
         public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
 
 
+        public void SetLightDirection(in Vector3 dir) => _effect.Parameters["lightDirection"].SetValue(dir);
+        public void SetLightIntensity(in float inte) => _effect.Parameters["lightIntensity"].SetValue(inte);
+
 
         public void BeginDraw()
         {
@@ -99,7 +102,7 @@ namespace ClassicUO.Game.Renderer
         private EffectParameter _drawLightingEffect, _projectionMatrixEffect, _worldMatrixEffect, _viewportEffect;
         private EffectTechnique _huesTechnique;
 
-        public void EndDraw()
+        public void EndDraw(in bool light = false)
         {
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
@@ -111,7 +114,7 @@ namespace ClassicUO.Game.Renderer
 
             //GraphicsDevice.SamplerStates[4] = SamplerState.PointWrap;
 
-            _drawLightingEffect.SetValue(false);
+            _drawLightingEffect.SetValue(light);
             // set up viewport.
             _projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
             _worldMatrixEffect.SetValue(ProjectionMatrixWorld);

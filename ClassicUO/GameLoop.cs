@@ -434,6 +434,8 @@ namespace ClassicUO
                 }
 
                 _spriteBatch.BeginDraw();
+                _spriteBatch.SetLightIntensity(Game.World.Light.IsometricLevel);
+                _spriteBatch.SetLightDirection(Game.World.Light.IsometricDirection);
 
 
                 (Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center) = GetViewPort();
@@ -508,7 +510,7 @@ namespace ClassicUO
 
                 _spriteBatch.GraphicsDevice.SetRenderTarget(_targetRender);
                 _spriteBatch.GraphicsDevice.Clear(Color.Black);
-                _spriteBatch.EndDraw();
+                _spriteBatch.EndDraw(true);
                 _spriteBatch.GraphicsDevice.SetRenderTarget(null);
 
             }
