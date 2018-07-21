@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Renderer
             _textR = new TextRenderer()
             {
                 Font = 0,
-                Color = 24,
+                Color = 2655,
                 IsUnicode = false,
             };
 
@@ -200,7 +200,7 @@ namespace ClassicUO.Game.Renderer
             if (id < 16)
             {
                 var v = new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0);
-                sb.Draw2D(Texture, v, Vector3.Zero);
+                sb.Draw2D(Texture, v, RenderExtentions.GetHueVector(2655));
 
                 _textR.Draw(sb, new Point((int)v.X, (int)v.Y + 20));
 

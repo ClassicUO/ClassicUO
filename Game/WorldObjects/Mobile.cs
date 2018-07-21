@@ -1,11 +1,9 @@
-﻿using ClassicUO.Utility;
+﻿using ClassicUO.AssetsLoader;
+using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using ClassicUO.AssetsLoader;
-using ClassicUO.Game.Renderer.Views;
-using Microsoft.Xna.Framework;
 
 
 namespace ClassicUO.Game.WorldObjects
@@ -196,7 +194,7 @@ namespace ClassicUO.Game.WorldObjects
         public bool IsDead { get => Utility.MathHelper.InRange(Graphic, 0x0192, 0x0193) || Utility.MathHelper.InRange(Graphic, 0x025F, 0x0260) || Utility.MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || _isDead; set => _isDead = value; }
         public bool IsFlying => FileManager.ClientVersion >= ClientVersions.CV_7000 ? Flags.HasFlag(Flags.Flying) : false;
         public virtual bool InWarMode { get => ((byte)Flags & 0x40) != 0; set => throw new Exception(); }
-    
+
         public bool IsHuman =>
                Utility.MathHelper.InRange(Graphic, 0x0190, 0x0193)
             || Utility.MathHelper.InRange(Graphic, 0x00B7, 0x00BA)
@@ -279,7 +277,7 @@ namespace ClassicUO.Game.WorldObjects
             return true;
         }
 
-        private Direction CalculateDirection( in int curX, in int curY, in int newX, in int newY)
+        private Direction CalculateDirection(in int curX, in int curY, in int newX, in int newY)
         {
             int deltaX = newX - curX;
             int deltaY = newY - curY;
@@ -401,7 +399,7 @@ namespace ClassicUO.Game.WorldObjects
             ANIMATION_GROUPS groupIndex = Animations.GetGroupIndex(graphic);
             byte result = AnimationGroup;
 
-            if (result != 0xFF && (Serial & 0x80000000) <= 0 && ( !AnimationFromServer || checkGraphic > 0))
+            if (result != 0xFF && (Serial & 0x80000000) <= 0 && (!AnimationFromServer || checkGraphic > 0))
             {
                 GetAnimationGroup(groupIndex, ref result);
 
@@ -665,7 +663,7 @@ namespace ClassicUO.Game.WorldObjects
             if (group == ANIMATION_GROUPS.AG_LOW)
                 return (byte)(getReplacedGroup(Animations.GroupReplaces[0], index, (ushort)LOW_ANIMATION_GROUP.LAG_WALK) % (ushort)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT);
             else if (group == ANIMATION_GROUPS.AG_PEOPLE)
-                return (byte)(getReplacedGroup(Animations.GroupReplaces[1], index, (ushort)PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED) % (ushort) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT);
+                return (byte)(getReplacedGroup(Animations.GroupReplaces[1], index, (ushort)PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED) % (ushort)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT);
 
             return (byte)(index % (ushort)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
         }
@@ -707,7 +705,7 @@ namespace ClassicUO.Game.WorldObjects
             return 0;
         }
 
-        private static byte GetObjectNewAnimationType_0(in Mobile mobile, in ushort action , in byte mode)
+        private static byte GetObjectNewAnimationType_0(in Mobile mobile, in ushort action, in byte mode)
         {
             if (action <= 10)
             {
@@ -1087,7 +1085,7 @@ namespace ClassicUO.Game.WorldObjects
 
             }
 
-           
+
 
             if (_lastAnimationChangeTime < World.Ticks && !NoIterateAnimIndex())
             {
@@ -1102,7 +1100,7 @@ namespace ClassicUO.Game.WorldObjects
                 int animGroup = GetAnimationGroup(id);
 
                 Item mount = Equipment[(int)Layer.Mount];
-                if ( mount != null)
+                if (mount != null)
                 {
                     switch (animGroup)
                     {

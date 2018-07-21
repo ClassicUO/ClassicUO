@@ -95,9 +95,23 @@ namespace ClassicUO.Game.WorldObjects
             get => _hue;
             set
             {
-                if (_hue != value)
+                ushort fixedColor = (ushort)(value & 0x3FFF);
+
+                if (fixedColor > 0)
                 {
-                    _hue = value;
+                    if (fixedColor >= 0x0BB8)
+                        fixedColor = 1;
+                    fixedColor |= (ushort)(value & 0xC000);
+                }
+                else
+                {
+                    fixedColor = (ushort)(value & 0x8000);
+                }
+
+
+                if (_hue != fixedColor)
+                {               
+                    _hue = fixedColor;
                     _delta |= Delta.Appearance;
                 }
             }

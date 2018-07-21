@@ -110,6 +110,7 @@ namespace ClassicUO.Game.Renderer.Views
 
             byte animGroup = 0;
 
+            Hue color = 0;
 
             for (int i = 0; i < USED_LAYER_COUNT; i++)
             {
@@ -131,8 +132,7 @@ namespace ClassicUO.Game.Renderer.Views
                                 mountedHeightOffset = AssetsLoader.Animations.DataIndex[graphic].MountedHeightOffset;
 
                             animGroup = WorldObject.GetAnimationGroup(graphic);
-                            HueVector = RenderExtentions.GetHueVector(mount.Hue);
-
+                            color = mount.Hue;
                         }
                         else
                             continue;
@@ -145,7 +145,7 @@ namespace ClassicUO.Game.Renderer.Views
                     graphic = WorldObject.GetMountAnimation();
 
                     animGroup = WorldObject.GetAnimationGroup();
-                    HueVector = RenderExtentions.GetHueVector(WorldObject.Hue);
+                    color = WorldObject.Hue;
                 }
                 else
                 {
@@ -167,12 +167,8 @@ namespace ClassicUO.Game.Renderer.Views
                     }
 
 
-                    HueVector = RenderExtentions.GetHueVector(item.Hue);
+                    color = item.Hue;
                 }
-
-
-
-
 
 
                 sbyte animIndex = WorldObject.AnimIndex;
@@ -217,13 +213,15 @@ namespace ClassicUO.Game.Renderer.Views
                     int x = (drawX + frame.CenterX);
                     int y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
 
+                    if (color <= 0)
+                        color = AssetsLoader.Animations.DataIndex[AssetsLoader.Animations.AnimID].Color;
 
                     Texture = TextureManager.GetOrCreateAnimTexture(graphic, AssetsLoader.Animations.AnimGroup, dir, animIndex, direction.Frames);
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
+                    HueVector = RenderExtentions.GetHueVector(color);
 
                     base.Draw(spriteBatch, position);
                 }
-
             }
 
             return true;

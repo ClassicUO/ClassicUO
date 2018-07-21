@@ -941,19 +941,43 @@ namespace ClassicUO.Game.Network
             mobile.Flags = (Flags)p.ReadByte();
             mobile.Notoriety = (Notoriety)p.ReadByte();
 
+            if (p.ID != 0x78)
+                p.Skip(6);
+
             uint itemSerial;
             while ((itemSerial = p.ReadUInt()) != 0)
             {
                 Item item = World.GetOrCreateItem(itemSerial);
-                ushort graphic = p.ReadUShort();
+
+
+                Graphic graphic = p.ReadUShort();
                 item.Layer = (Layer)p.ReadByte();
-                if (FileManager.ClientVersion >= ClientVersions.CV_70331 || (graphic & 0x8000) != 0)
-                    item.Hue = p.ReadUShort();
+
+                //Hue color = 0;
+
+                //if (FileManager.ClientVersion >= ClientVersions.CV_70331)
+                //    color = p.ReadUShort();
+                //else if ((graphic & 0x8000) != 0 )
+                //{
+                //    graphic &= 0x7FFF;
+                //    color = p.ReadUShort();
+                //}
+
+                //item.Hue = color;
+
+                //if (FileManager.ClientVersion >= ClientVersions.CV_70331 || (graphic & 0x8000) != 0)
+                //    item.Hue = p.ReadUShort();
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_70331)
+                {
+                    item.Hue = p.ReadUShort();
                     item.Graphic = graphic;
+                }
                 else if (FileManager.ClientVersion >= ClientVersions.CV_7000)
+                {
                     item.Graphic = (ushort)(graphic & 0x7FFF);
+                    item.Hue = p.ReadUShort();
+                }
                 else
                     item.Graphic = (ushort)(graphic & 0x3FFF);
 
