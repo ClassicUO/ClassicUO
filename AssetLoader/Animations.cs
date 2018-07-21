@@ -293,7 +293,7 @@ namespace ClassicUO.AssetsLoader
                     if (line.Length <= 0 || line[0] == '#' || !char.IsNumber(line[0]))
                         continue;
 
-                    string[] parts = line.Split(new char[] { '\t', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = line.Split(new char[] { '\t', ' ', '#' }, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length >= 2)
                     {
                         ushort index = ushort.Parse(parts[0]);

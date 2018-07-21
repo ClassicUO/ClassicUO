@@ -307,44 +307,59 @@ namespace ClassicUO.Network
                 World.Player.Dexterity = p.ReadUShort();
                 World.Player.Intelligence = p.ReadUShort();
                 World.Player.Stamina = p.ReadUShort();
-                //if (Player.IsDead)
-                //{
-                //    p.Seek(p.Position -2);
-                //    p.WriteUShort(Player.StaminaMax);
-                //}
                 World.Player.StaminaMax = p.ReadUShort();
                 World.Player.Mana = p.ReadUShort();
                 World.Player.ManaMax = p.ReadUShort();
                 World.Player.Gold = p.ReadUInt();
                 World.Player.ResistPhysical = p.ReadUShort();
                 World.Player.Weight = p.ReadUShort();
-            }
 
-            if (type >= 5)//ML
-            {
-                World.Player.WeightMax = p.ReadUShort();
-                p.Skip(1);
-            }
 
-            if (type >= 2)//T2A
-                p.Skip(2);
+                if (type >= 5)//ML
+                {
+                    World.Player.WeightMax = p.ReadUShort();
+                    byte race = p.ReadByte();
+                    if (race <= 0)
+                        race = 1;
+                    World.Player.Race = (RaceType)race;
+                }
+                else
+                {
+                    if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+                        World.Player.WeightMax = (ushort)(7 * (World.Player.Strength / 2) + 40);
+                    else
+                        World.Player.WeightMax = (ushort)((World.Player.Strength * 4) + 25);
+                }
 
-            if (type >= 3)//Renaissance
-            {
-                World.Player.Followers = p.ReadByte();
-                World.Player.FollowersMax = p.ReadByte();
-            }
+                if (type >= 3)//Renaissance
+                {
+                    ushort murderCounts = p.ReadUShort();
+                    World.Player.Followers = p.ReadByte();
+                    World.Player.FollowersMax = p.ReadByte();
+                }
 
-            if (type >= 4)//AOS
-            {
-                World.Player.ResistFire = p.ReadUShort();
-                World.Player.ResistCold = p.ReadUShort();
-                World.Player.ResistPoison = p.ReadUShort();
-                World.Player.ResistEnergy = p.ReadUShort();
-                World.Player.Luck = p.ReadUShort();
-                World.Player.DamageMin = p.ReadUShort();
-                World.Player.DamageMax = p.ReadUShort();
-                World.Player.TithingPoints = p.ReadUInt();
+                if (type >= 4)//AOS
+                {
+                    ushort murderCountDecayHoursRemaining = p.ReadUShort();
+                    ushort criminalTimerSecondsRemaining = p.ReadUShort();
+                    ushort playerVSplayerCooldownSecondsRemaining = p.ReadUShort();
+                    ushort bandageTimerSecondsRemaining = p.ReadUShort();
+                    ushort hungerSatisfactionMinutsRemaining = p.ReadUShort();
+
+                    //World.Player.ResistFire = p.ReadUShort();
+                    //World.Player.ResistCold = p.ReadUShort();
+                    //World.Player.ResistPoison = p.ReadUShort();
+                    //World.Player.ResistEnergy = p.ReadUShort();
+                    //World.Player.Luck = p.ReadUShort();
+                    World.Player.DamageMin = p.ReadUShort();
+                    World.Player.DamageMax = p.ReadUShort();
+                    World.Player.TithingPoints = p.ReadUInt();
+                }
+
+                if (type >= 6)
+                {
+
+                }
             }
 
             mobile.ProcessDelta();

@@ -65,17 +65,24 @@ namespace ClassicUO.AssetsLoader
                 }
             }
 
+           
 
-            if (FileManager.ClientVersion < ClientVersions.CV_4011D)
+            /*if (FileManager.ClientVersion < ClientVersions.CV_4011D)
             {
                 _mapsDefaultSize[0][0] = _mapsDefaultSize[1][0] = 6144;
-            }
+            }*/
 
-            int ss = Marshal.SizeOf<MapCells>();
 
             int mapblocksize = Marshal.SizeOf<MapBlock>();
             int staticidxblocksize = Marshal.SizeOf<StaidxBlock>();
             int staticblocksize = Marshal.SizeOf<StaticsBlock>();
+
+
+            if (((_mapsDefaultSize[0][0] / 8) * (_mapsDefaultSize[0][1] / 8)) != _filesMap[0].Length / mapblocksize)
+            {
+                _mapsDefaultSize[0][0] = _mapsDefaultSize[1][0] = 6144;
+
+            }
 
             for (int i = 0; i < MAPS_COUNT; i++)
             {

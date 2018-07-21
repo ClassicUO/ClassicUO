@@ -25,7 +25,7 @@ namespace ClassicUO.Game.WorldObjects
 
     public enum RaceType : byte
     {
-        HUMAN,
+        HUMAN = 1,
         ELF,
         GARGOYLE
     }
