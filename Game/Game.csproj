@@ -18,9 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="ClassicUO">
-      <HintPath>..\bin\Debug\netcoreapp2.1\ClassicUO.dll</HintPath>
-    </Reference>
     <Reference Include="FNA">
       <HintPath>..\FNA\FNA.dll</HintPath>
     </Reference>

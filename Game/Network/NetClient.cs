@@ -4,7 +4,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 
-namespace ClassicUO.Network
+namespace ClassicUO.Game.Network
 {
     public sealed class NetClient
     {
@@ -282,7 +282,7 @@ namespace ClassicUO.Network
                     }
 
                     // if outbounds exception, BUFF_SIZE must be increased
-                    Buffer.BlockCopy(buffer, 0, source, incompletelength, bytesLen);                
+                    Buffer.BlockCopy(buffer, 0, source, incompletelength, bytesLen);
 
                     int processedOffset = 0;
                     int sourceOffset = 0;
@@ -325,7 +325,7 @@ namespace ClassicUO.Network
         {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
-                
+
             }
             else
                 Disconnect();

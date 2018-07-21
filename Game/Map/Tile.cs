@@ -1,6 +1,6 @@
 ﻿using ClassicUO.Game.WorldObjects;
-using ClassicUO.Game.WorldObjects.Views;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Map
             DisposeView();
             Graphic = 0;
             Position = new Position(0, 0);
-            
+
         }
 
         public void Sort()
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Map
             => _objectsOnTile.OfType<T>().Cast<T>().ToArray();
 
         // create view only when TileID is initialized
-        protected override WorldRenderObject CreateView()
+        protected override View CreateView()
             => Graphic <= 0 ? null : new TileView(this);
 
 
@@ -100,35 +100,35 @@ namespace ClassicUO.Game.Map
             if (e is Tile tile)
             {
                 return (tile.ViewObject.SortZ,
-                        0, 
-                        0, 
+                        0,
+                        0,
                         0);
             }
             else if (e is Static staticitem)
             {
                 var itemdata = AssetsLoader.TileData.StaticData[staticitem.Graphic];
 
-                return (staticitem.Position.Z, 
-                        1, 
-                        (itemdata.Height > 0 ? 1 : 0) + (AssetsLoader.TileData.IsBackground((long)itemdata.Flags) ? 0 : 1), 
+                return (staticitem.Position.Z,
+                        1,
+                        (itemdata.Height > 0 ? 1 : 0) + (AssetsLoader.TileData.IsBackground((long)itemdata.Flags) ? 0 : 1),
                         staticitem.Index);
             }
             else if (e is Item item)
             {
-                return (item.Position.Z, 
-                        ((item.Graphic & AssetsLoader.FileManager.GraphicMask) == 0x2006) ? 4 : 2, 
-                        (item.ItemData.Height > 0 ? 1 : 0) + (AssetsLoader.TileData.IsBackground((long)item.ItemData.Flags) ? 0 : 1), 
+                return (item.Position.Z,
+                        ((item.Graphic & AssetsLoader.FileManager.GraphicMask) == 0x2006) ? 4 : 2,
+                        (item.ItemData.Height > 0 ? 1 : 0) + (AssetsLoader.TileData.IsBackground((long)item.ItemData.Flags) ? 0 : 1),
                         (int)item.Serial.Value);
             }
             else if (e is Mobile mobile)
             {
-                return (mobile.Position.Z, 
-                    3 /* is sitting */, 
+                return (mobile.Position.Z,
+                    3 /* is sitting */,
                     2,
                     mobile == World.Player ? 0x40000000 : (int)mobile.Serial.Value);
             }
 
-            return (0, 0, 0, 0);        
+            return (0, 0, 0, 0);
         }
     }
 }

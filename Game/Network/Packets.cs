@@ -6,7 +6,7 @@ using ClassicUO.AssetsLoader;
 using ClassicUO.Game;
 using ClassicUO.Game.WorldObjects;
 
-namespace ClassicUO.Network
+namespace ClassicUO.Game.Network
 {
     public sealed class PSeed : PacketWriter
     {
@@ -110,7 +110,7 @@ namespace ClassicUO.Network
             WriteUInt(ipclient);
         }
     }
-    
+
     public sealed class PPickUpRequest : PacketWriter
     {
         public PPickUpRequest(in Serial serial, in ushort count) : base(0x07)
@@ -171,7 +171,7 @@ namespace ClassicUO.Network
 
         }
     }
-    
+
     public sealed class PStatusRequest : PacketWriter
     {
         public PStatusRequest(in Serial serial) : base(0x34)
@@ -269,7 +269,7 @@ namespace ClassicUO.Network
             else
             {
                 this[0] = 0x12;
-                this.IsDynamic = PacketsTable.GetPacketLength(this[0]) < 0; 
+                this.IsDynamic = PacketsTable.GetPacketLength(this[0]) < 0;
                 WriteByte(0x56);
                 WriteASCII(idx.ToString());
                 // need a \0 ?
@@ -580,7 +580,7 @@ namespace ClassicUO.Network
             WriteByte(0xFF);
         }
     }
-    
+
     public sealed class PLanguage : PacketWriter
     {
         public PLanguage(in string lang) : base(0xBF)

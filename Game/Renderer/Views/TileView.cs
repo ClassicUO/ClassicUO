@@ -1,13 +1,14 @@
 ﻿using ClassicUO.Game.Map;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Renderer;
+using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Game.WorldObjects.Views
+namespace ClassicUO.Game.Renderer.Views
 {
-    public class TileView : WorldRenderObject
+    public class TileView : View
     {
         private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
         private readonly Vector3[] _normals = new Vector3[4];

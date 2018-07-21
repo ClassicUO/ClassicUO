@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Renderer;
+using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.WorldObjects.Views
+namespace ClassicUO.Game.Renderer.Views
 {
-    public class ItemView : WorldRenderObject
+    public class ItemView : View
     {
         private Graphic _originalGraphic;
         private Hue _hue;

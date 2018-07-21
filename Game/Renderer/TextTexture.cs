@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Renderer
+namespace ClassicUO.Game.Renderer
 {
     public class TextTexture : Texture2D
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Network
+namespace ClassicUO.Game.Network
 {
     public class PacketWriter : PacketBase
     {

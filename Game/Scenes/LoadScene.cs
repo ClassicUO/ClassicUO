@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Game.Stages
+namespace ClassicUO.Game.Scenes
 {
-    public sealed class StartScene : Scene
+    public sealed class LoadScene : Scene
     {
-        public StartScene()
+        public LoadScene()
         {
             ChainActions.Add(OnGameLoading);
             ChainActions.Add(OnGameLoaded);
         }
-
 
         private bool OnGameLoading()
         {

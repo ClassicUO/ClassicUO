@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Network
+namespace ClassicUO.Game.Network
 {
     public static class PacketsTable
     {
@@ -236,7 +236,7 @@ namespace ClassicUO.Network
 	        -1, // dd
 	        -1, // de
 	        -1, // df
-	        -1, // e0 
+	        -1, // e0
 	        -1, // e1
             0x0A, // e2
             -1, // e3
@@ -381,6 +381,6 @@ namespace ClassicUO.Network
                 _packetsTable[0x00] = 0x68;
             }
         }
-        
+
     }
 }

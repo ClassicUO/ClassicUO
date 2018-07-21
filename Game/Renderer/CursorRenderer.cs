@@ -1,5 +1,5 @@
 ﻿using ClassicUO.Input;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -172,7 +172,7 @@ namespace ClassicUO.Game.Renderer
                     _needGraphicUpdate = true;
                 }
             }
-        } 
+        }
         public Texture2D Texture { get; private set; }
         public Point ScreenPosition => MouseManager.ScreenPosition;
 

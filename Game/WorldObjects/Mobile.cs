@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using ClassicUO.AssetsLoader;
-using ClassicUO.Game.WorldObjects.Views;
+using ClassicUO.Game.Renderer.Views;
 using Microsoft.Xna.Framework;
 
 
@@ -53,7 +53,7 @@ namespace ClassicUO.Game.WorldObjects
         public event EventHandler StaminaChanged;
 
 
-        protected override WorldRenderObject CreateView() => new MobileView(this);
+        protected override View CreateView() => new MobileView(this);
 
         public new MobileView ViewObject => (MobileView)base.ViewObject;
 
@@ -195,7 +195,7 @@ namespace ClassicUO.Game.WorldObjects
         public bool IsDead => Graphic == 402 || Graphic == 403 || Graphic == 607 || Graphic == 608 || Graphic == 970;
         public bool IsFlying => FileManager.ClientVersion >= ClientVersions.CV_7000 ? Flags.HasFlag(Flags.Flying) : false;
         public bool IsWarMode => Flags.HasFlag(Flags.WarMode);
-        public bool IsHuman => 
+        public bool IsHuman =>
                Utility.MathHelper.InRange(Graphic, 0x0190, 0x0193)
             || Utility.MathHelper.InRange(Graphic, 0x00B7, 0x00BA)
             || Utility.MathHelper.InRange(Graphic, 0x025D, 0x0260)

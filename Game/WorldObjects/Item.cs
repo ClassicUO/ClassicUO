@@ -1,4 +1,4 @@
-﻿using ClassicUO.Game.WorldObjects.Views;
+﻿using ClassicUO.Game.Renderer.Views;
 using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
@@ -58,7 +58,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public new ItemView ViewObject => (ItemView)base.ViewObject;
 
-        protected override WorldRenderObject CreateView() => new ItemView(this);
+        protected override View CreateView() => new ItemView(this);
 
         private AssetsLoader.StaticTiles? _itemData;
 

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using ClassicUO.Game.WorldObjects.Views;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.WorldObjects
@@ -19,6 +19,6 @@ namespace ClassicUO.Game.WorldObjects
         public new StaticView ViewObject => (StaticView)base.ViewObject;
         public AssetsLoader.StaticTiles ItemData => AssetsLoader.TileData.StaticData[Graphic];
 
-        protected override WorldRenderObject CreateView() => new StaticView(this);
-    }  
+        protected override View CreateView() => new StaticView(this);
+    }
 }
