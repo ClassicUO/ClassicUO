@@ -82,6 +82,8 @@ namespace ClassicUO.Game.WorldObjects
 
         public IReadOnlyList<Skill> Skills => _sklls;
 
+        public override bool InWarMode { get; set; }
+
         public ushort Strength
         {
             get { return _strength; }

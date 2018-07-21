@@ -390,24 +390,40 @@ namespace ClassicUO.Game.Network
 
                 if (type == 1)
                 {
-                    if (FileManager.ClientVersion >= ClientVersions.CV_7000)
-                        mobile.SetSAPoison(true);
+                    if (enabled)
+                    {
+                        if (FileManager.ClientVersion >= ClientVersions.CV_7000)
+                            mobile.SetSAPoison(true);
+                        else
+                            flags |= 0x04;
+                    }
                     else
-                        flags |= 0x04;
+                    {
+                        if (FileManager.ClientVersion >= ClientVersions.CV_7000)
+                            mobile.SetSAPoison(false);
+                        else
+                            flags &= 0x04;
+                    }
+                  
                 }
                 else if (type == 2)
-                {
-                    if (FileManager.ClientVersion >= ClientVersions.CV_7000)
-                        mobile.SetSAPoison(false);
-                    else
-                        flags &= 0x04;
-                }
-                else if (type == 3)
                 {
                     if (enabled)
                         flags |= 0x08;
                     else
                         flags &= 0x08;
+
+                    //if (FileManager.ClientVersion >= ClientVersions.CV_7000)
+                    //    mobile.SetSAPoison(false);
+                    //else
+                    //    flags &= 0x04;
+                }
+                else if (type == 3)
+                {
+                    //if (enabled)
+                    //    flags |= 0x08;
+                    //else
+                    //    flags &= 0x08;
                 }
 
                 mobile.Flags = (Flags)flags;
@@ -849,7 +865,7 @@ namespace ClassicUO.Game.Network
 
         private static void Warmode(Packet p)
         {
-            World.Player.WarMode = p.ReadBool();
+            World.Player.InWarMode = p.ReadBool();
             World.Player.ProcessDelta();
         }
 
@@ -1790,7 +1806,22 @@ namespace ClassicUO.Game.Network
 
         private static void NewCharacterAnimation(Packet p)
         {
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (mobile == null)
+                throw new Exception();
 
+            ushort type = p.ReadUShort();
+            ushort action = p.ReadUShort();
+            byte mode = p.ReadByte();
+            byte group = Mobile.GetObjectNewAnimation(mobile, type, action, mode);
+
+            mobile.SetAnimation(group);
+            mobile.AnimationRepeatMode = 1;
+            mobile.AnimationDirection = true;
+
+            if ((type == 1 || type == 2) && mobile.Graphic == 0x015)
+                mobile.AnimationRepeat = true;
+            mobile.AnimationFromServer = true;
         }
 
         private static void KREncryptionResponse(Packet p)

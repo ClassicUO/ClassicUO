@@ -162,18 +162,18 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
-        public bool WarMode
-        {
-            get { return _warMode; }
-            set
-            {
-                if (_warMode != value)
-                {
-                    _warMode = value;
-                    _delta |= Delta.Attributes;
-                }
-            }
-        }
+        //public bool WarMode
+        //{
+        //    get { return _warMode; }
+        //    set
+        //    {
+        //        if (_warMode != value)
+        //        {
+        //            _warMode = value;
+        //            _delta |= Delta.Attributes;
+        //        }
+        //    }
+        //}
 
         public bool Renamable
         {
@@ -188,13 +188,14 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
-        public bool Paralyzed => Flags.HasFlag(Flags.Frozen);
-        public bool YellowBar => Flags.HasFlag(Flags.YellowBar);
-        public bool Poisoned => FileManager.ClientVersion >= ClientVersions.CV_7000 ? _isSA_Poisoned : Flags.HasFlag(Flags.Poisoned);
-        public bool Hidden => Flags.HasFlag(Flags.Hidden);
+        public bool Paralyzed => ((byte)Flags & 0x01) != 0;
+        public bool YellowBar => ((byte)Flags & 0x08) != 0;
+        public bool Poisoned => FileManager.ClientVersion >= ClientVersions.CV_7000 ? _isSA_Poisoned : ((byte)Flags & 0x04) != 0;
+        public bool Hidden => ((byte)Flags & 0x80) != 0;
         public bool IsDead => Graphic == 402 || Graphic == 403 || Graphic == 607 || Graphic == 608 || Graphic == 970;
         public bool IsFlying => FileManager.ClientVersion >= ClientVersions.CV_7000 ? Flags.HasFlag(Flags.Flying) : false;
-        public bool IsWarMode => Flags.HasFlag(Flags.WarMode);
+        public virtual bool InWarMode { get => ((byte)Flags & 0x40) != 0; set => throw new Exception(); }
+    
         public bool IsHuman =>
                Utility.MathHelper.InRange(Graphic, 0x0190, 0x0193)
             || Utility.MathHelper.InRange(Graphic, 0x00B7, 0x00BA)
@@ -386,8 +387,8 @@ namespace ClassicUO.Game.WorldObjects
 
         public void GetAnimationGroup(in ANIMATION_GROUPS group, ref byte animation)
         {
-            if ((byte)group > 0 && animation < (byte)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT)
-                animation = _animAssociateTable[animation, (int)group - 1];
+            if ((sbyte)group > 0 && animation < (byte)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT)
+                animation = _animAssociateTable[animation, (sbyte)group - 1];
         }
 
         public byte GetAnimationGroup(in ushort checkGraphic = 0)
@@ -453,7 +454,7 @@ namespace ClassicUO.Game.WorldObjects
             }
             else if (groupIndex == AssetsLoader.ANIMATION_GROUPS.AG_PEOPLE)
             {
-                bool inWar = WarMode;
+                bool inWar = InWarMode;
 
                 if (isWalking)
                 {
@@ -667,6 +668,345 @@ namespace ClassicUO.Game.WorldObjects
 
             return (byte)(index % (ushort)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
         }
+
+        public static byte GetObjectNewAnimation(in Mobile mobile, in ushort type, in ushort action, in byte mode)
+        {
+            if (mobile.Graphic >= Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                return 0;
+
+            switch (type)
+            {
+                case 0:
+                    return GetObjectNewAnimationType_0(mobile, action, mode);
+                case 1:
+                case 2:
+                    return GetObjectNewAnimationType_1_2(mobile, action, mode);
+                case 3:
+                    return GetObjectNewAnimationType_3(mobile, action, mode);
+                case 4:
+                    return GetObjectNewAnimationType_4(mobile, action, mode);
+                case 5:
+                    return GetObjectNewAnimationType_5(mobile, action, mode);
+                case 6:
+                case 14:
+                    return GetObjectNewAnimationType_6_14(mobile, action, mode);
+                case 7:
+                    return GetObjectNewAnimationType_7(mobile, action, mode);
+                case 8:
+                    return GetObjectNewAnimationType_8(mobile, action, mode);
+                case 9:
+                case 10:
+                    return GetObjectNewAnimationType_9_10(mobile, action, mode);
+                case 11:
+                    return GetObjectNewAnimationType_11(mobile, action, mode);
+                default:
+                    break;
+            }
+
+            return 0;
+        }
+
+        private static byte GetObjectNewAnimationType_0(in Mobile mobile, in ushort action , in byte mode)
+        {
+            if (action <= 10)
+            {
+                ref var ia = ref Animations.DataIndex[mobile.Graphic];
+                ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+
+                if ((ia.Flags & 0x80000000) != 0)
+                    type = ia.Type;
+
+                if (type == ANIMATION_GROUPS_TYPE.MONSTER)
+                {
+                    switch (mode % 4)
+                    {
+                        case 1:
+                            return 5;
+                        case 2:
+                            return 6;
+                        case 3:
+                            if ((ia.Flags & 1) != 0)
+                                return 12;
+                            goto case 0;
+                        case 0:
+                            return 4;
+                        default:
+                            break;
+                    }
+                }
+                else if (type == ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+                {
+                    if ((mode % 2) != 0)
+                        return 6;
+
+                    return 5;
+                }
+                else if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+                {
+                    if (mobile.Equipment[(int)Layer.Mount] != null)
+                    {
+                        if (action > 0)
+                        {
+                            if (action == 1)
+                                return 27;
+                            else if (action == 2)
+                                return 28;
+
+                            return 26;
+                        }
+                        return 29;
+                    }
+                    else
+                    {
+                        switch (action)
+                        {
+                            default:
+                                return 31;
+                            case 1:
+                                return 18;
+                            case 2:
+                                return 19;
+                            case 6:
+                                return 12;
+                            case 7:
+                                return 13;
+                            case 8:
+                                return 14;
+                            case 3:
+                                return 11;
+                            case 4:
+                                return 9;
+                            case 5:
+                                return 10;
+                        }
+                    }
+
+                    return 0;
+                }
+
+                if ((mode % 2) != 0)
+                    return 6;
+
+                return 5;
+            }
+            return 0;
+        }
+
+        private static byte GetObjectNewAnimationType_1_2(in Mobile mobile, in ushort action, in byte mode)
+        {
+            ref var ia = ref Animations.DataIndex[mobile.Graphic];
+            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+
+            if ((ia.Flags & 0x80000000) != 0)
+                type = ia.Type;
+
+            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            {
+                if (type <= ANIMATION_GROUPS_TYPE.ANIMAL || mobile.Equipment[(int)Layer.Mount] != null)
+                    return 0xFF;
+                return 30;
+            }
+            else if ((mode % 2) != 0)
+                return 15;
+            return 16;
+        }
+
+        private static byte GetObjectNewAnimationType_3(in Mobile mobile, in ushort action, in byte mode)
+        {
+            ref var ia = ref Animations.DataIndex[mobile.Graphic];
+            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+
+            if ((ia.Flags & 0x80000000) != 0)
+                type = ia.Type;
+
+            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            {
+                if (type == ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+                    return 8;
+                else if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+                {
+                    if ((mode % 2) != 0)
+                        return 21;
+                    return 22;
+                }
+
+                if ((mode % 2) != 0)
+                    return 8;
+                return 12;
+            }
+            else if ((mode % 2) != 0)
+                return 2;
+            return 3;
+        }
+
+        private static byte GetObjectNewAnimationType_4(in Mobile mobile, in ushort action, in byte mode)
+        {
+            ref var ia = ref Animations.DataIndex[mobile.Graphic];
+            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+
+            if ((ia.Flags & 0x80000000) != 0)
+                type = ia.Type;
+
+            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            {
+                if (type > ANIMATION_GROUPS_TYPE.ANIMAL)
+                {
+                    if (mobile.Equipment[(int)Layer.Mount] != null)
+                        return 0xFF;
+                    return 20;
+                }
+
+                return 7;
+            }
+
+            return 10;
+        }
+
+        private static byte GetObjectNewAnimationType_5(in Mobile mobile, in ushort action, in byte mode)
+        {
+            ref var ia = ref Animations.DataIndex[mobile.Graphic];
+            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+
+            if ((ia.Flags & 0x80000000) != 0)
+                type = ia.Type;
+
+            if (type <= ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+            {
+                if ((mode % 2) != 0)
+                    return 18;
+
+                return 17;
+            }
+            else if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
+            {
+                if (mobile.Equipment[(int)Layer.Mount] != null)
+                    return 0xFF;
+
+                if ((mode % 2) != 0)
+                    return 6;
+
+                return 5;
+            }
+            else
+            {
+                switch (mode % 3)
+                {
+                    case 1:
+                        return 10;
+                    case 2:
+                        return 3;
+                    default:
+                        break;
+                }
+            }
+
+            return 9;
+        }
+
+        private static byte GetObjectNewAnimationType_6_14(in Mobile mobile, in ushort action, in byte mode)
+        {
+            ref var ia = ref Animations.DataIndex[mobile.Graphic];
+            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+
+            if ((ia.Flags & 0x80000000) != 0)
+                type = ia.Type;
+
+            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            {
+                if (type != ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+                {
+                    if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+                        return 3;
+                    if (mobile.Equipment[(int)Layer.Mount] != null)
+                        return 0xFF;
+                    return 34;
+                }
+                return 5;
+            }
+            return 11;
+        }
+
+        private static byte GetObjectNewAnimationType_7(in Mobile mobile, in ushort action, in byte mode)
+        {
+            if (mobile.Equipment[(int)Layer.Mount] != null)
+                return 0xFF;
+
+            if (action > 0)
+            {
+                if (action == 1)
+                    return 33;
+            }
+            else
+                return 32;
+            return 0;
+        }
+
+        private static byte GetObjectNewAnimationType_8(in Mobile mobile, in ushort action, in byte mode)
+        {
+            ref var ia = ref Animations.DataIndex[mobile.Graphic];
+            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+
+            if ((ia.Flags & 0x80000000) != 0)
+                type = ia.Type;
+
+            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            {
+                if (type != ANIMATION_GROUPS_TYPE.SEA_MONSTER)
+                {
+                    if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+                        return 9;
+                    if (mobile.Equipment[(int)Layer.Mount] != null)
+                        return 0xFF;
+                    return 33;
+                }
+                return 3;
+            }
+            return 11;
+        }
+
+        private static byte GetObjectNewAnimationType_9_10(in Mobile mobile, in ushort action, in byte mode)
+        {
+            ref var ia = ref Animations.DataIndex[mobile.Graphic];
+            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+
+            if ((ia.Flags & 0x80000000) != 0)
+                type = ia.Type;
+
+            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+                return 0xFF;
+            return 20;
+        }
+
+        private static byte GetObjectNewAnimationType_11(in Mobile mobile, in ushort action, in byte mode)
+        {
+            ref var ia = ref Animations.DataIndex[mobile.Graphic];
+            ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
+
+            if ((ia.Flags & 0x80000000) != 0)
+                type = ia.Type;
+
+            if (type != ANIMATION_GROUPS_TYPE.MONSTER)
+            {
+                if (type >= ANIMATION_GROUPS_TYPE.ANIMAL)
+                {
+                    if (mobile.Equipment[(int)Layer.Mount] != null)
+                        return 0xFF;
+                    switch (action)
+                    {
+                        case 1:
+                        case 2:
+                            return 17;
+                        default:
+                            break;
+                    }
+
+                    return 16;
+                }
+                return 5;
+            }
+            return 12;
+        }
+
 
         private long _lastAnimationChangeTime;
 
@@ -981,6 +1321,11 @@ namespace ClassicUO.Game.WorldObjects
 
         protected struct Step
         {
+            public Step(in int x, in int y, in sbyte z, in byte dir, in bool anim, in bool run, in byte seq)
+            {
+                X = x; Y = y; Z = z; Direction = dir; Anim = anim; Run = run; Seq = seq;
+            }
+
             public int X, Y;
             public sbyte Z;
 
@@ -988,6 +1333,8 @@ namespace ClassicUO.Game.WorldObjects
             public bool Anim;
             public bool Run;
             public byte Seq;
+
+            //public static Step CreateStep() => new Step(0, 0, 0, 6, true, true, 0);
         }
 
         protected readonly Deque<Step> _steps = new Deque<Step>();

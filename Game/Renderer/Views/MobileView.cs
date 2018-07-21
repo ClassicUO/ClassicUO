@@ -110,7 +110,7 @@ namespace ClassicUO.Game.Renderer.Views
 
 
             sbyte animIndex = WorldObject.AnimIndex;
-            byte animGroup = WorldObject.GetAnimationGroup();
+            byte animGroup = 0;
 
 
             for (int i = 0; i < USED_LAYER_COUNT; i++)
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.Renderer.Views
                             if (graphic < AssetsLoader.Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                 mountedHeightOffset = AssetsLoader.Animations.DataIndex[graphic].MountedHeightOffset;
 
-
+                            animGroup = WorldObject.GetAnimationGroup(graphic);
                             HueVector = RenderExtentions.GetHueVector(mount.Hue);
 
                         }
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.Renderer.Views
                 {
                     graphic = WorldObject.GetMountAnimation();
 
-
+                    animGroup = WorldObject.GetAnimationGroup();
                     HueVector = RenderExtentions.GetHueVector(WorldObject.Hue);
                 }
                 else
@@ -179,13 +179,18 @@ namespace ClassicUO.Game.Renderer.Views
 
 
                 AssetsLoader.Animations.AnimID = graphic;
-                AssetsLoader.Animations.AnimGroup = WorldObject.GetAnimationGroup(graphic);
+                AssetsLoader.Animations.AnimGroup = animGroup;
                 AssetsLoader.Animations.Direction = dir;
 
                 ref var direction = ref AssetsLoader.Animations.DataIndex[AssetsLoader.Animations.AnimID].Groups[AssetsLoader.Animations.AnimGroup].Direction[AssetsLoader.Animations.Direction];
 
                 if (direction.FrameCount == 0 && !AssetsLoader.Animations.LoadDirectionGroup(ref direction))
                     continue;
+
+                if (WorldObject.Graphic == 0x114)
+                {
+                    Utility.Log.Message(Utility.LogTypes.Error, animIndex.ToString()); 
+                }
 
                 int fc = direction.FrameCount;
                 if (fc > 0 && animIndex >= fc)

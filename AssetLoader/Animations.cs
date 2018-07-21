@@ -910,7 +910,7 @@ namespace ClassicUO.AssetsLoader
             {
                 UOPFrameData data = new UOPFrameData()
                 {
-                    DataStart = _reader.StartAddress
+                    DataStart = _reader.PositionAddress
                 };
 
                 _reader.Skip(2);
@@ -932,7 +932,7 @@ namespace ClassicUO.AssetsLoader
             int vectorSize = pixelDataOffsets.Count;
             if (vectorSize < 50)
             {
-                while (vectorSize < 50)
+                while (vectorSize != 50)
                 {
                     pixelDataOffsets.Add(new UOPFrameData());
                     vectorSize++;
@@ -955,7 +955,7 @@ namespace ClassicUO.AssetsLoader
 
                 _reader.SetData(frameData.DataStart + (int)frameData.PixelDataOffset);
                 ushort* palette = (ushort*)_reader.StartAddress;
-                _reader.Skip(512);
+                _reader.Skip(512 * 2);
 
                 short imageCenterX = _reader.ReadShort();
                 short imageCenterY = _reader.ReadShort();
