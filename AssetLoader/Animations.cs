@@ -839,43 +839,44 @@ namespace ClassicUO.AssetsLoader
         }
 
 
-        public static AnimationFrame[] GetAnimationFrames(in ushort graphic, in byte group, in byte dir)
-        {
-            // TODO: REMOVE THESE
-            AnimID = graphic;
-            AnimGroup = group;
-            Direction = dir;
+        //public static AnimationFrame[] GetAnimationFrames(in ushort graphic, in byte group, in byte dir)
+        //{
+        //    // TODO: REMOVE THESE
+        //    AnimID = graphic;
+        //    AnimGroup = group;
+        //    Direction = dir;
 
-            var direction = _dataIndex[graphic].Groups[group].Direction[dir];
+        //    var direction = _dataIndex[graphic].Groups[group].Direction[dir];
 
-            if (direction.FrameCount == 0 && !LoadDirectionGroup(ref direction))
-                return null;
+        //    if (direction.FrameCount == 0 && !LoadDirectionGroup(ref direction))
+        //        return null;
 
-            if (direction.IsUOP)
-            {
-                if (!TryReadUOPAnimDimension(ref direction))
-                    return null;
-                return direction.Frames;
-            }
-            if (direction.Address == 0)
-                return null;
+        //    if (direction.IsUOP)
+        //    {
+        //        if (!TryReadUOPAnimDimension(ref direction))
+        //            return null;
+        //        return direction.Frames;
+        //    }
+        //    if (direction.Address == 0)
+        //        return null;
 
-            var file = _files[direction.FileIndex];
+        //    var file = _files[direction.FileIndex];
 
-            // long to int can loss data
-            _reader.SetData(file.StartAddress + (int)direction.Address, direction.Size);
+        //    // long to int can loss data
+        //    _reader.SetData(file.StartAddress + (int)direction.Address, direction.Size);
 
-            ReadFramesPixelData(ref direction);
+        //    ReadFramesPixelData(ref direction);
 
-            return direction.Frames;
-        }
+        //    return direction.Frames;
+        //}
 
 
 
 
         private static unsafe bool TryReadUOPAnimDimension(ref AnimationDirection animDirection)
         {
-            UOPAnimationData animData = _dataIndex[AnimID].Groups[AnimGroup].UOPAnimData;
+            ref var dataindex = ref _dataIndex[AnimID].Groups[AnimGroup];
+            UOPAnimationData animData = dataindex.UOPAnimData;
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {
                 Log.Message(LogTypes.Warning, "uop animData is null");

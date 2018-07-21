@@ -122,12 +122,11 @@ namespace ClassicUO.Game.Renderer
             toremove.Clear();
         }
 
-
-        public static Texture2D GetOrCreateAnimTexture(in ushort g, in byte group, in byte dir, in int index)
+        public static Texture2D GetOrCreateAnimTexture(in ushort g, in byte group, in byte dir, in int index, in AssetsLoader.AnimationFrame[] frames)
         {
             if (!_animTextures.TryGetValue(g, out var array) || array[group] == null || array[group][dir] == null || array[group][dir][index] == null)
             {
-                var frames = AssetsLoader.Animations.GetAnimationFrames(g, group, dir);
+                //var frames = AssetsLoader.Animations.GetAnimationFrames(g, group, dir);
 
                 if (array == null)
                     array = new TextureDuration[100][][];
@@ -150,7 +149,7 @@ namespace ClassicUO.Game.Renderer
                     array[group][dir][i] = new TextureDuration()
                     {
                         Texture = texture,
-                        Ticks = Game.World.Ticks
+                        Ticks = World.Ticks
                     };
                 }
 
@@ -158,7 +157,7 @@ namespace ClassicUO.Game.Renderer
 
             }
             else
-                array[group][dir][index].Ticks = Game.World.Ticks;
+                array[group][dir][index].Ticks = World.Ticks;
 
             return array[group][dir][index].Texture;
         }

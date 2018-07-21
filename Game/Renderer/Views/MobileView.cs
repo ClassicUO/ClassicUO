@@ -182,7 +182,7 @@ namespace ClassicUO.Game.Renderer.Views
                 AssetsLoader.Animations.AnimGroup = WorldObject.GetAnimationGroup(graphic);
                 AssetsLoader.Animations.Direction = dir;
 
-                var direction = AssetsLoader.Animations.DataIndex[AssetsLoader.Animations.AnimID].Groups[AssetsLoader.Animations.AnimGroup].Direction[AssetsLoader.Animations.Direction];
+                ref var direction = ref AssetsLoader.Animations.DataIndex[AssetsLoader.Animations.AnimID].Groups[AssetsLoader.Animations.AnimGroup].Direction[AssetsLoader.Animations.Direction];
 
                 if (direction.FrameCount == 0 && !AssetsLoader.Animations.LoadDirectionGroup(ref direction))
                     continue;
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.Renderer.Views
                     int y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
 
 
-                    Texture = TextureManager.GetOrCreateAnimTexture(graphic, AssetsLoader.Animations.AnimGroup, dir, animIndex);
+                    Texture = TextureManager.GetOrCreateAnimTexture(graphic, AssetsLoader.Animations.AnimGroup, dir, animIndex, direction.Frames);
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
 
                     base.Draw(spriteBatch, position);

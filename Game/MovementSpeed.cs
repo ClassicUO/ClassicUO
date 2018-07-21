@@ -7,17 +7,17 @@ namespace ClassicUO.Game
 {
     public static class MovementSpeed
     {
-        const double TIME_WALK_FOOT = (8d / 20d) * 1000d;
-        const double TIME_RUN_FOOT = (4d / 20d) * 1000d;
-        const double TIME_WALK_MOUNT = (4d / 20d) * 1000d;
-        const double TIME_RUN_MOUNT = (2d / 20d) * 1000d;
+        const int STEP_DELAY_MOUNT_RUN = 100;
+        const int STEP_DELAY_MOUNT_WALK = 200;
+        const int STEP_DELAY_RUN = 200;
+        const int STEP_DELAY_WALK = 400;
 
 
-        public static double TimeToCompleteMovement(in Mobile mobile, in bool run)
+        public static int TimeToCompleteMovement(in Mobile mobile, in bool run)
         {
             if (mobile.IsMounted)
-                return run ? TIME_RUN_MOUNT : TIME_WALK_MOUNT;
-            return run ? TIME_RUN_FOOT : TIME_WALK_FOOT;
+                return run ? STEP_DELAY_MOUNT_RUN : STEP_DELAY_MOUNT_WALK;
+            return run ? STEP_DELAY_RUN : STEP_DELAY_WALK;
         }
     }
 }

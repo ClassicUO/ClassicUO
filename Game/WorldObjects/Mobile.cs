@@ -746,8 +746,14 @@ namespace ClassicUO.Game.WorldObjects
 
             }
 
+           
+
             if (_lastAnimationChangeTime < World.Ticks && !NoIterateAnimIndex())
             {
+                if (Graphic == 0x114)
+                {
+                    Log.Message(LogTypes.Info, AnimIndex.ToString());
+                }
 
                 sbyte frameIndex = AnimIndex;
 
@@ -784,7 +790,7 @@ namespace ClassicUO.Game.WorldObjects
 
                 if (id < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
-                    var direction = Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+                    ref AnimationDirection direction = ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
                     Animations.AnimID = id;
                     Animations.AnimGroup = (byte)animGroup;
                     Animations.Direction = dir;
