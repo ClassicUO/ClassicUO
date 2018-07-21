@@ -141,6 +141,9 @@ namespace ClassicUO.Game.Renderer
 
                 for (int i = 0; i < frames.Length; i++)
                 {
+                    if (frames[i].Width <= 0 || frames[i].Heigth <= 0)
+                        continue;
+
                     Texture2D texture = new Texture2D(Device, frames[i].Width, frames[i].Heigth, false, SurfaceFormat.Bgra5551);
                     texture.SetData(frames[i].Pixels);
 

@@ -33,6 +33,7 @@ namespace ClassicUO.AssetsLoader
 
         public static IndexAnimation[] DataIndex => _dataIndex;
         public static IReadOnlyDictionary<ushort, Dictionary<ushort, EquipConvData>> EquipConversions => _equipConv;
+        public static IReadOnlyList<Tuple<ushort, byte>>[] GroupReplaces => _groupReplaces;
 
         public static void Load()
         {
@@ -215,7 +216,7 @@ namespace ClassicUO.AssetsLoader
                     if (line.Length <= 0 || line[0] == '#' || !char.IsNumber(line[0]))
                         continue;
 
-                    string[] parts = line.Split(new char[] { '\t', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = line.Split(new char[] { '\t', ' ', '#' }, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length < 2)
                         continue;
 
@@ -1040,7 +1041,10 @@ namespace ClassicUO.AssetsLoader
                 animDir.Frames[i].CenterY = imageCenterY;
 
                 short imageWidth = _reader.ReadShort();
+                animDir.Frames[i].Width = imageWidth;
+
                 short imageHeight = _reader.ReadShort();
+                animDir.Frames[i].Heigth = imageHeight;
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {
@@ -1088,8 +1092,7 @@ namespace ClassicUO.AssetsLoader
 
 
                 animDir.Frames[i].Pixels = pixels;
-                animDir.Frames[i].Width = imageWidth;
-                animDir.Frames[i].Heigth = imageHeight;
+
             }
         }
 

@@ -174,6 +174,7 @@ namespace ClassicUO.Game.Network
             ToClient.Add(0x65, SetWeather);
             ToClient.Add(0x66, BookData); //ToServer.Add(0x66, BookPagesS);
             //ToServer.Add(0x69, ChangeText);
+            ToClient.Add(0x6E, CharacterAnimation);
             ToClient.Add(0x70, GraphicEffect);
             ToClient.Add(0x71, BulletinBoardData); //ToServer.Add(0x71, BulletinBoardMessagesS);
             ToClient.Add(0x72, Warmode);// ToServer.Add(0x72, RequestWarMode);
@@ -340,20 +341,14 @@ namespace ClassicUO.Game.Network
 
                 if (type >= 4)//AOS
                 {
-                    ushort murderCountDecayHoursRemaining = p.ReadUShort();
-                    ushort criminalTimerSecondsRemaining = p.ReadUShort();
-                    ushort playerVSplayerCooldownSecondsRemaining = p.ReadUShort();
-                    ushort bandageTimerSecondsRemaining = p.ReadUShort();
-                    ushort hungerSatisfactionMinutsRemaining = p.ReadUShort();
-
-                    //World.Player.ResistFire = p.ReadUShort();
-                    //World.Player.ResistCold = p.ReadUShort();
-                    //World.Player.ResistPoison = p.ReadUShort();
-                    //World.Player.ResistEnergy = p.ReadUShort();
-                    //World.Player.Luck = p.ReadUShort();
+                    World.Player.ResistFire = p.ReadUShort();
+                    World.Player.ResistCold = p.ReadUShort();
+                    World.Player.ResistPoison = p.ReadUShort();
+                    World.Player.ResistEnergy = p.ReadUShort();
+                    World.Player.Luck = p.ReadUShort();
                     World.Player.DamageMin = p.ReadUShort();
                     World.Player.DamageMax = p.ReadUShort();
-                    World.Player.TithingPoints = p.ReadUInt();
+                    World.Player.TithingPoints = p.Length == p.Position ? 0 : p.ReadUInt();
                 }
 
                 if (type >= 6)
@@ -817,6 +812,29 @@ namespace ClassicUO.Game.Network
         private static void BookData(Packet p)
         {
 
+        }
+
+        private static void CharacterAnimation(Packet p)
+        {
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (mobile == null)
+                throw new ArgumentNullException("mobile");
+
+            ushort action = p.ReadUShort();
+            ushort frameCount = p.ReadUShort();
+            frameCount = 0;
+            ushort repeatMode = p.ReadUShort();
+            bool frameDirection = p.ReadBool();
+            bool repeat = p.ReadBool();
+            byte delay = p.ReadByte();
+
+            mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile, action),
+            delay,
+            (byte)frameCount,
+            (byte)repeatMode,
+            repeat,
+            frameDirection);
+            mobile.AnimationFromServer = true;
         }
 
         private static void GraphicEffect(Packet p)

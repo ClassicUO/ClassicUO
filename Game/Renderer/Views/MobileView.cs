@@ -10,7 +10,7 @@ namespace ClassicUO.Game.Renderer.Views
 {
     public class MobileView : View
     {
-        const int USED_LAYER_COUNT = 25 ;
+        const int USED_LAYER_COUNT = 25;
         private static readonly Layer[,] _usedLayers = new Layer[8, USED_LAYER_COUNT]
         {
             {
@@ -92,15 +92,11 @@ namespace ClassicUO.Game.Renderer.Views
 
         public MobileView(in Mobile mobile) : base(mobile)
         {
-            //Texture = TextureManager.GetOrCreateStaticTexture(567);
-            //Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + (WorldObject.Position.Z * 4), Texture.Width, Texture.Height);
+
         }
 
         public sbyte AnimIndex { get; set; }
-
         public new Mobile WorldObject => (Mobile)base.WorldObject;
-
-
 
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
@@ -113,7 +109,7 @@ namespace ClassicUO.Game.Renderer.Views
             IsFlipped = mirror;
 
 
-            byte animIndex = WorldObject.AnimIndex;
+            sbyte animIndex = WorldObject.AnimIndex;
             byte animGroup = WorldObject.GetAnimationGroup();
 
 
@@ -223,15 +219,11 @@ namespace ClassicUO.Game.Renderer.Views
                     int y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
 
 
-
-
-
                     Texture = TextureManager.GetOrCreateAnimTexture(graphic, AssetsLoader.Animations.AnimGroup, dir, animIndex);
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
 
                     base.Draw(spriteBatch, position);
                 }
-
 
             }
 

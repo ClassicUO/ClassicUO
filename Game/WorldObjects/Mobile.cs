@@ -228,7 +228,7 @@ namespace ClassicUO.Game.WorldObjects
         public Item[] Equipment { get; } = new Item[(int)Layer.Bank + 1];
 
 
-        public bool IsMounted => GetItemAtLayer(Layer.Mount) != null;
+        public bool IsMounted => Equipment[(int)Layer.Mount] != null;
         public bool IsRunning => (Direction & Direction.Running) == Direction.Running;
         public double MoveSequence { get; set; }
 
@@ -345,18 +345,66 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
+        private static byte[,] _animAssociateTable = new byte[(int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT, 3]
+        {
+            { (byte)LOW_ANIMATION_GROUP.LAG_WALK, (byte)HIGHT_ANIMATION_GROUP.HAG_WALK, (byte)PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED },
+            { (byte)LOW_ANIMATION_GROUP.LAG_WALK, (byte)HIGHT_ANIMATION_GROUP.HAG_WALK, (byte)PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED },
+            { (byte)LOW_ANIMATION_GROUP.LAG_RUN, (byte)HIGHT_ANIMATION_GROUP.HAG_FLY, (byte)PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED },
+            { (byte)LOW_ANIMATION_GROUP.LAG_RUN, (byte)HIGHT_ANIMATION_GROUP.HAG_FLY, (byte)PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED },
+            { (byte)LOW_ANIMATION_GROUP.LAG_STAND, (byte)HIGHT_ANIMATION_GROUP.HAG_STAND, (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND },
+            { (byte)LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte)HIGHT_ANIMATION_GROUP.HAG_FIDGET_1, (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1 },
+            { (byte)LOW_ANIMATION_GROUP.LAG_FIDGET_2, (byte)HIGHT_ANIMATION_GROUP.HAG_FIDGET_2, (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2 },
+            { (byte)LOW_ANIMATION_GROUP.LAG_STAND, (byte)HIGHT_ANIMATION_GROUP.HAG_STAND, (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK },
+            { (byte)LOW_ANIMATION_GROUP.LAG_STAND, (byte)HIGHT_ANIMATION_GROUP.HAG_STAND, (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_3, (byte)PEOPLE_ANIMATION_GROUP.PAG_ATTACK_ONEHANDED },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_1, (byte)PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_1 },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte)PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_2 },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_3, (byte)PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_DOWN },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_1, (byte)PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_WIDE },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte)PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_JAB },
+            { (byte)LOW_ANIMATION_GROUP.LAG_WALK, (byte)HIGHT_ANIMATION_GROUP.HAG_WALK, (byte)PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte)PEOPLE_ANIMATION_GROUP.PAG_CAST_DIRECTED },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_3, (byte)PEOPLE_ANIMATION_GROUP.PAG_CAST_AREA },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_1, (byte)PEOPLE_ANIMATION_GROUP.PAG_ATTACK_BOW },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte)PEOPLE_ANIMATION_GROUP.PAG_ATTACK_CROSSBOW },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_GET_HIT_1, (byte)PEOPLE_ANIMATION_GROUP.PAG_GET_HIT },
+            { (byte)LOW_ANIMATION_GROUP.LAG_DIE_1, (byte)HIGHT_ANIMATION_GROUP.HAG_DIE_1, (byte)PEOPLE_ANIMATION_GROUP.PAG_DIE_1 },
+            { (byte)LOW_ANIMATION_GROUP.LAG_DIE_2, (byte)HIGHT_ANIMATION_GROUP.HAG_DIE_2, (byte)PEOPLE_ANIMATION_GROUP.PAG_DIE_2 },
+            { (byte)LOW_ANIMATION_GROUP.LAG_WALK, (byte)HIGHT_ANIMATION_GROUP.HAG_WALK, (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW },
+            { (byte)LOW_ANIMATION_GROUP.LAG_RUN, (byte)HIGHT_ANIMATION_GROUP.HAG_FLY,(byte)PEOPLE_ANIMATION_GROUP. PAG_ONMOUNT_RIDE_FAST },
+            { (byte)LOW_ANIMATION_GROUP.LAG_STAND, (byte)HIGHT_ANIMATION_GROUP.HAG_STAND, (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_1, (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK_BOW },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_1, (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK_CROSSBOW },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_SLAP_HORSE },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_STAND, (byte)PEOPLE_ANIMATION_GROUP.PAG_TURN },
+            { (byte)LOW_ANIMATION_GROUP.LAG_WALK,(byte)HIGHT_ANIMATION_GROUP. HAG_WALK, (byte)PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_AND_WALK },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_STAND, (byte)PEOPLE_ANIMATION_GROUP.PAG_EMOTE_BOW },
+            { (byte)LOW_ANIMATION_GROUP.LAG_EAT, (byte)HIGHT_ANIMATION_GROUP.HAG_STAND, (byte)PEOPLE_ANIMATION_GROUP.PAG_EMOTE_SALUTE },
+            { (byte)LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte)HIGHT_ANIMATION_GROUP.HAG_FIDGET_1, (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3 }
+        };
+
+        public void GetAnimationGroup(in ANIMATION_GROUPS group, ref byte animation)
+        {
+            if ((byte)group > 0 && animation < (byte)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT)
+                animation = _animAssociateTable[animation, (int)group - 1];
+        }
+
         public byte GetAnimationGroup(in ushort checkGraphic = 0)
         {
             Graphic graphic = checkGraphic;
             if (graphic == 0)
                 graphic = GetMountAnimation();
 
-            AssetsLoader.ANIMATION_GROUPS groupIndex = AssetsLoader.Animations.GetGroupIndex(graphic);
+            ANIMATION_GROUPS groupIndex = Animations.GetGroupIndex(graphic);
             byte result = AnimationGroup;
 
-            if (result != 0xFF && Serial.IsMobile && checkGraphic > 0)
+            if (result != 0xFF && (Serial & 0x80000000) <= 0 && ( !AnimationFromServer || checkGraphic > 0))
             {
+                GetAnimationGroup(groupIndex, ref result);
 
+                if (!Animations.AnimationExists(graphic, result))
+                    CorrectAnimationGroup(graphic, groupIndex, ref result);
             }
 
             bool isWalking = IsWalking;
@@ -418,9 +466,22 @@ namespace ClassicUO.Game.WorldObjects
                         else
                             result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED;
 
-                        //if (!IsHuman && !AssetsLoader.Animations.AnimationExists(graphic, result))
-                        //    goto test_walk;
-
+                        if (!IsHuman && !AssetsLoader.Animations.AnimationExists(graphic, result))
+                        {
+                            if (GetItemAtLayer(Layer.Mount) != null)
+                                result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
+                            else if ((GetItemAtLayer(Layer.LeftHand) != null || GetItemAtLayer(Layer.RightHand) != null) && !IsDead)
+                            {
+                                if (inWar)
+                                    result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                                else
+                                    result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
+                            }
+                            else if (inWar && !IsDead)
+                                result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                            else
+                                result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
+                        }
                     }
                     else
                     {
@@ -437,8 +498,7 @@ namespace ClassicUO.Game.WorldObjects
                         else if (inWar && !IsDead)
                             result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
                         else
-                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
-
+                            result = (byte)AssetsLoader.PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
                     }
                 }
                 else if (AnimationGroup == 0xFF)
@@ -513,88 +573,211 @@ namespace ClassicUO.Game.WorldObjects
             return result;
         }
 
+        private void CorrectAnimationGroup(in ushort graphic, in ANIMATION_GROUPS group, ref byte animation)
+        {
+            if (group == ANIMATION_GROUPS.AG_LOW)
+            {
+                switch ((LOW_ANIMATION_GROUP)animation)
+                {
+                    case LOW_ANIMATION_GROUP.LAG_DIE_2:
+                        animation = (byte)LOW_ANIMATION_GROUP.LAG_DIE_1;
+                        break;
+                    case LOW_ANIMATION_GROUP.LAG_FIDGET_2:
+                        animation = (byte)LOW_ANIMATION_GROUP.LAG_FIDGET_1;
+                        break;
+                    case LOW_ANIMATION_GROUP.LAG_ATTACK_3:
+                    case LOW_ANIMATION_GROUP.LAG_ATTACK_2:
+                        animation = (byte)LOW_ANIMATION_GROUP.LAG_ATTACK_1;
+                        break;
+                }
+
+                if (!Animations.AnimationExists(graphic, animation))
+                    animation = (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+            }
+            else if (group == ANIMATION_GROUPS.AG_HIGHT)
+            {
+                switch ((HIGHT_ANIMATION_GROUP)animation)
+                {
+                    case HIGHT_ANIMATION_GROUP.HAG_DIE_2:
+                        animation = (byte)HIGHT_ANIMATION_GROUP.HAG_DIE_1;
+                        break;
+                    case HIGHT_ANIMATION_GROUP.HAG_FIDGET_2:
+                        animation = (byte)HIGHT_ANIMATION_GROUP.HAG_FIDGET_1;
+                        break;
+                    case HIGHT_ANIMATION_GROUP.HAG_ATTACK_3:
+                    case HIGHT_ANIMATION_GROUP.HAG_ATTACK_2:
+                        animation = (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_1;
+                        break;
+                    case HIGHT_ANIMATION_GROUP.HAG_MISC_4:
+                    case HIGHT_ANIMATION_GROUP.HAG_MISC_3:
+                    case HIGHT_ANIMATION_GROUP.HAG_MISC_2:
+                        animation = (byte)HIGHT_ANIMATION_GROUP.HAG_MISC_1;
+                        break;
+                }
+
+                if (!Animations.AnimationExists(graphic, animation))
+                    animation = (byte)HIGHT_ANIMATION_GROUP.HAG_STAND;
+            }
+        }
+
+        public byte AnimationInterval { get; set; }
+        public byte AnimationFrameCount { get; set; }
+        public byte AnimationRepeatMode { get; set; } = 1;
+        public bool AnimationRepeat { get; set; }
+        public bool AnimationFromServer { get; set; }
+        public bool AnimationDirection { get; set; }
+
+        public void SetAnimation(in byte id, in byte interval = 0, in byte frameCount = 0, in byte repeatCount = 0, in bool repeat = false, in bool frameDirection = false)
+        {
+            AnimationGroup = id;
+            AnimIndex = 0;
+            AnimationInterval = interval;
+            AnimationFrameCount = frameCount;
+            AnimationRepeatMode = repeatCount;
+            AnimationRepeat = repeat;
+            AnimationDirection = frameDirection;
+            AnimationFromServer = false;
+
+            _lastAnimationChangeTime = World.Ticks;
+        }
+
+
+        public static byte GetReplacedObjectAnimation(in Mobile mobile, in ushort index)
+        {
+            ushort getReplacedGroup(in IReadOnlyList<Tuple<ushort, byte>> list, in ushort idx, in ushort walkIdx)
+            {
+                foreach (var item in list)
+                {
+                    if (item.Item1 == idx)
+                    {
+                        if (item.Item2 == 0xFF)
+                            return walkIdx;
+                        return item.Item2;
+                    }
+                }
+                return idx;
+            }
+
+            ANIMATION_GROUPS group = Animations.GetGroupIndex(mobile.Graphic);
+
+            if (group == ANIMATION_GROUPS.AG_LOW)
+                return (byte)(getReplacedGroup(Animations.GroupReplaces[0], index, (ushort)LOW_ANIMATION_GROUP.LAG_WALK) % (ushort)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT);
+            else if (group == ANIMATION_GROUPS.AG_PEOPLE)
+                return (byte)(getReplacedGroup(Animations.GroupReplaces[1], index, (ushort)PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED) % (ushort) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT);
+
+            return (byte)(index % (ushort)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
+        }
 
         private long _lastAnimationChangeTime;
 
+        protected virtual bool NoIterateAnimIndex() =>
+            ((LastStepTime > (uint)(World.Ticks - WALKING_DELAY)) && _steps.Count <= 0);
+
         public void ProcessAnimation()
         {
-            if (_steps.Count <= 0)
-                return;
+            byte dir = (byte)GetAnimationDirection();
 
-            bool turnOnly = false;
-
-            do
+            if (_steps.Count > 0)
             {
-                Step step = _steps.Front();
 
-                int maxDelay = (int)MovementSpeed.TimeToCompleteMovement(this, step.Run) - 15;
-                int delay = (int)World.Ticks - (int)LastStepTime;
-                bool removeStep = (delay >= maxDelay);
+                bool turnOnly = false;
 
-                if (step.Direction == (byte)Direction)
+                do
                 {
-                    float framesPerTile = maxDelay / CHARACTER_ANIMATION_DELAY;
-                    float frameOffset = delay / CHARACTER_ANIMATION_DELAY;
+                    Step step = _steps.Front();
 
-                    float x = frameOffset;
-                    float y = frameOffset;
+                    if (AnimationFromServer)
+                        SetAnimation(0xFF);
 
-                    GetPixelOffset(step.Direction, ref x, ref y, framesPerTile);
+                    int maxDelay = (int)MovementSpeed.TimeToCompleteMovement(this, step.Run) - 15;
+                    int delay = (int)World.Ticks - (int)LastStepTime;
+                    bool removeStep = (delay >= maxDelay);
 
-                    Offset = new Vector3((sbyte)x, (sbyte)y, (int)(((step.Z - Position.Z) * frameOffset) * (4.0f / framesPerTile)));
-
-                    if (this == World.Player)
-                        World.Map.Center = new Point((short)step.X, (short)step.Y);
-
-                    turnOnly = false;
-                }
-                else
-                {
-                    turnOnly = true;
-                    removeStep = true;
-                }
-
-                if (removeStep)
-                {
-                    if (this == World.Player)
+                    if (step.Direction == (byte)Direction)
                     {
-                        if (Position.X != step.X || Position.Y != step.Y || Position.Z != step.Z)
-                        {
+                        float framesPerTile = maxDelay / CHARACTER_ANIMATION_DELAY;
+                        float frameOffset = delay / CHARACTER_ANIMATION_DELAY;
 
-                        }
+                        float x = frameOffset;
+                        float y = frameOffset;
 
-                        if (Position.Z - step.Z >= 22)
-                        {
-                            // oUCH!!!!
-                        }
+                        GetPixelOffset(step.Direction, ref x, ref y, framesPerTile);
+
+                        Offset = new Vector3((sbyte)x, (sbyte)y, (int)(((step.Z - Position.Z) * frameOffset) * (4.0f / framesPerTile)));
+
+                        if (this == World.Player)
+                            World.Map.Center = new Point((short)step.X, (short)step.Y);
+
+                        turnOnly = false;
+                    }
+                    else
+                    {
+                        turnOnly = true;
+                        removeStep = true;
                     }
 
-                    Position = new Position((ushort)step.X, (ushort)step.Y, step.Z);
-                    Direction = (Direction)step.Direction;
+                    if (removeStep)
+                    {
+                        if (this == World.Player)
+                        {
+                            if (Position.X != step.X || Position.Y != step.Y || Position.Z != step.Z)
+                            {
 
-                    Offset = Vector3.Zero;
-                    _steps.RemoveFromFront();
+                            }
 
-                    LastStepTime = World.Ticks;
+                            if (Position.Z - step.Z >= 22)
+                            {
+                                // oUCH!!!!
+                            }
+                        }
 
-                    ProcessDelta();
+                        Position = new Position((ushort)step.X, (ushort)step.Y, step.Z);
+                        Direction = (Direction)step.Direction;
+
+                        Offset = Vector3.Zero;
+                        _steps.RemoveFromFront();
+
+                        LastStepTime = World.Ticks;
+
+                        ProcessDelta();
+                    }
                 }
+                while (_steps.Count > 0 && turnOnly);
+
             }
-            while (_steps.Count > 0 && turnOnly);
 
-
-            if (_lastAnimationChangeTime < World.Ticks)
+            if (_lastAnimationChangeTime < World.Ticks && !NoIterateAnimIndex())
             {
 
-                byte frameIndex = AnimIndex;
+                sbyte frameIndex = AnimIndex;
 
-                frameIndex++;
+
+                if (AnimationFromServer && !AnimationDirection)
+                    frameIndex--;
+                else
+                    frameIndex++;
 
                 Graphic id = GetMountAnimation();
                 int animGroup = GetAnimationGroup(id);
-                bool mirror = false;
-                byte dir = (byte)GetAnimationDirection();
 
+                Item mount = Equipment[(int)Layer.Mount];
+                if ( mount != null)
+                {
+                    switch (animGroup)
+                    {
+                        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
+                        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
+                        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
+                            id = mount.GetMountAnimation();
+                            animGroup = GetAnimationGroup(id);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+
+                bool mirror = false;
                 Animations.GetAnimDirection(ref dir, ref mirror);
 
                 int currentDelay = (int)CHARACTER_ANIMATION_DELAY;
@@ -613,11 +796,68 @@ namespace ClassicUO.Game.WorldObjects
                     {
                         int fc = direction.FrameCount;
 
-                        if (frameIndex >= fc)
+                        if (AnimationFromServer)
                         {
-                            frameIndex = 0;
+                            currentDelay += currentDelay * (AnimationInterval + 1);
+                            if (AnimationFrameCount <= 0)
+                                AnimationFrameCount = (byte)fc;
+                            else
+                                fc = AnimationFrameCount;
 
+                            if (AnimationDirection)
+                            {
+                                if (frameIndex >= fc)
+                                {
+                                    frameIndex = 0;
+
+                                    if (AnimationRepeat)
+                                    {
+                                        byte repCount = AnimationRepeatMode;
+                                        if (repCount == 2)
+                                        {
+                                            repCount--;
+                                            AnimationRepeatMode = repCount;
+                                        }
+                                        else if (repCount == 1)
+                                            SetAnimation(0xFF);
+                                    }
+                                    else
+                                        SetAnimation(0xFF);
+                                }
+                            }
+                            else
+                            {
+                                if (frameIndex < 0)
+                                {
+                                    if (fc <= 0)
+                                        frameIndex = 0;
+                                    else
+                                        frameIndex = (sbyte)(fc - 1);
+
+                                    if (AnimationRepeat)
+                                    {
+                                        byte repCount = AnimationRepeatMode;
+                                        if (repCount == 2)
+                                        {
+                                            repCount--;
+                                            AnimationRepeatMode = repCount;
+                                        }
+                                        else if (repCount == 1)
+                                            SetAnimation(0xFF);
+                                    }
+                                    else
+                                        SetAnimation(0xFF);
+                                }
+                            }
                         }
+                        else
+                        {
+                            if (frameIndex >= fc)
+                            {
+                                frameIndex = 0;
+                            }
+                        }
+
 
                         AnimIndex = frameIndex;
                     }
@@ -730,6 +970,7 @@ namespace ClassicUO.Game.WorldObjects
         protected const int MAX_STEP_COUNT = 5;
         protected const int TURN_DELAY = 100;
         protected const int WALKING_DELAY = 750;
+        protected const int PLAYER_WALKING_DELAY = 150;
         const float CHARACTER_ANIMATION_DELAY = 80;
 
         protected struct Step
@@ -747,9 +988,9 @@ namespace ClassicUO.Game.WorldObjects
 
         public long LastStepTime { get; set; }
 
-        public bool IsWalking => LastStepTime > (World.Ticks - WALKING_DELAY);
+        public virtual bool IsWalking => LastStepTime > (World.Ticks - PLAYER_WALKING_DELAY);
         public byte AnimationGroup { get; set; } = 0xFF;
-        public byte AnimIndex { get; set; }
+        public sbyte AnimIndex { get; set; }
         internal bool IsMoving => _steps.Count > 0;
 
         public Graphic GetMountAnimation()

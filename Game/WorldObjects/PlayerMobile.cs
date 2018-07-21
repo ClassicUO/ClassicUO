@@ -1018,10 +1018,14 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
-     
-        
 
-       
+        protected override bool NoIterateAnimIndex()
+        {
+            return false;
+        }
+
+        public override bool IsWalking => LastStepTime > (World.Ticks - WALKING_DELAY);
+
         private readonly Deque<Step> _requestedSteps = new Deque<Step>();
         private long _lastStepRequestedTime;
         public byte SequenceNumber { get; set; }
