@@ -67,7 +67,10 @@ namespace ClassicUO.Game.WorldObjects
             get
             {
                 if (_itemData == null || !_itemData.HasValue)
+                {
                     _itemData = AssetsLoader.TileData.StaticData[Graphic];
+                    Name = _itemData.Value.Name;
+                }
                 return _itemData.Value;
             }
         }

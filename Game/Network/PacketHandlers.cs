@@ -1192,8 +1192,6 @@ namespace ClassicUO.Game.Network
 
         private static void CharacterList(Packet p)
         {
-            return;
-
             int locCount = p.ReadByte();
             if (FileManager.ClientVersion >= ClientVersions.CV_70130)
             {

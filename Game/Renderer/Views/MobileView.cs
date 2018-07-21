@@ -95,7 +95,6 @@ namespace ClassicUO.Game.Renderer.Views
 
         }
 
-        public sbyte AnimIndex { get; set; }
         public new Mobile WorldObject => (Mobile)base.WorldObject;
 
 
@@ -109,7 +108,6 @@ namespace ClassicUO.Game.Renderer.Views
             IsFlipped = mirror;
 
 
-            sbyte animIndex = WorldObject.AnimIndex;
             byte animGroup = 0;
 
 
@@ -177,6 +175,7 @@ namespace ClassicUO.Game.Renderer.Views
 
 
 
+                sbyte animIndex = WorldObject.AnimIndex;
 
                 AssetsLoader.Animations.AnimID = graphic;
                 AssetsLoader.Animations.AnimGroup = animGroup;
@@ -186,11 +185,6 @@ namespace ClassicUO.Game.Renderer.Views
 
                 if (direction.FrameCount == 0 && !AssetsLoader.Animations.LoadDirectionGroup(ref direction))
                     continue;
-
-                if (WorldObject.Graphic == 0x114)
-                {
-                    Utility.Log.Message(Utility.LogTypes.Error, animIndex.ToString()); 
-                }
 
                 int fc = direction.FrameCount;
                 if (fc > 0 && animIndex >= fc)

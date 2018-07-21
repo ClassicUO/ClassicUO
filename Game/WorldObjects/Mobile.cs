@@ -39,13 +39,14 @@ namespace ClassicUO.Game.WorldObjects
         private ushort _stamina;
         private ushort _staminaMax;
         private Notoriety _notoriety;
-        private bool _warMode;
         private bool _renamable;
         private bool _isSA_Poisoned;
         private RaceType _race;
+        private bool _isDead;
 
         public Mobile(Serial serial) : base(serial)
         {
+
         }
 
         public event EventHandler HitsChanged;
@@ -192,7 +193,7 @@ namespace ClassicUO.Game.WorldObjects
         public bool YellowBar => ((byte)Flags & 0x08) != 0;
         public bool Poisoned => FileManager.ClientVersion >= ClientVersions.CV_7000 ? _isSA_Poisoned : ((byte)Flags & 0x04) != 0;
         public bool Hidden => ((byte)Flags & 0x80) != 0;
-        public bool IsDead => Graphic == 402 || Graphic == 403 || Graphic == 607 || Graphic == 608 || Graphic == 970;
+        public bool IsDead { get => Utility.MathHelper.InRange(Graphic, 0x0192, 0x0193) || Utility.MathHelper.InRange(Graphic, 0x025F, 0x0260) || Utility.MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || _isDead; set => _isDead = value; }
         public bool IsFlying => FileManager.ClientVersion >= ClientVersions.CV_7000 ? Flags.HasFlag(Flags.Flying) : false;
         public virtual bool InWarMode { get => ((byte)Flags & 0x40) != 0; set => throw new Exception(); }
     
@@ -1090,13 +1091,7 @@ namespace ClassicUO.Game.WorldObjects
 
             if (_lastAnimationChangeTime < World.Ticks && !NoIterateAnimIndex())
             {
-                if (Graphic == 0x114)
-                {
-                    Log.Message(LogTypes.Info, AnimIndex.ToString());
-                }
-
                 sbyte frameIndex = AnimIndex;
-
 
                 if (AnimationFromServer && !AnimationDirection)
                     frameIndex--;

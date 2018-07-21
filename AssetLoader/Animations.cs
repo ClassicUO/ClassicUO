@@ -955,7 +955,7 @@ namespace ClassicUO.AssetsLoader
 
                 _reader.SetData(frameData.DataStart + (int)frameData.PixelDataOffset);
                 ushort* palette = (ushort*)_reader.StartAddress;
-                _reader.Skip(512 * 2);
+                _reader.Skip(512);
 
                 short imageCenterX = _reader.ReadShort();
                 short imageCenterY = _reader.ReadShort();
