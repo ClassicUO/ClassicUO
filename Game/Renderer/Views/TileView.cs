@@ -36,28 +36,32 @@ namespace ClassicUO.Game.Renderer.Views
         {
             IsStretched = !(tile.TileData.TexID <= 0 && (tile.TileData.Flags & 0x00000080) > 0);
 
-            if (IsStretched)
-            {
-                Texture = TextureManager.GetOrCreateTexmapTexture(tile.TileData.TexID);
-            }
-            else
-            {
-                Texture = TextureManager.GetOrCreateLandTexture(tile.Graphic);
-                Bounds = new Rectangle(0, tile.Position.Z * 4, 44, 44);
-            }
-
             AllowedToDraw = !(tile.IsIgnored);
         }
 
 
         public bool IsStretched { get; }
-
+        public new Tile WorldObject => (Tile)base.WorldObject;
 
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            if (Texture == null || !AllowedToDraw)
+            if (!AllowedToDraw)
                 return false;
+
+
+            if (Texture == null || Texture.IsDisposed)
+            {
+                if (IsStretched)
+                {
+                    Texture = TextureManager.GetOrCreateTexmapTexture(WorldObject.TileData.TexID);
+                }
+                else
+                {
+                    Texture = TextureManager.GetOrCreateLandTexture(WorldObject.Graphic);
+                    Bounds = new Rectangle(0, WorldObject.Position.Z * 4, 44, 44);
+                }
+            }
 
             if (_needUpdateStrechedTile)
             {
@@ -72,6 +76,8 @@ namespace ClassicUO.Game.Renderer.Views
 
         private bool Draw3DStretched(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
+            Texture.Ticks = World.Ticks;
+
             _vertex[0].Position = position + _vertex0_yOffset;
             _vertex[1].Position = position + _vertex1_yOffset;
             _vertex[2].Position = position + _vertex2_yOffset;

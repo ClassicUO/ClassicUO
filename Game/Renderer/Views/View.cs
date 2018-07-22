@@ -28,7 +28,7 @@ namespace ClassicUO.Game.Renderer.Views
         public bool AllowedToDraw { get; set; }
         public sbyte SortZ { get; protected set; }
 
-        public Texture2D Texture { get; set; }
+        public TextureDuration Texture { get; set; }
         protected Rectangle Bounds { get; set; }
         protected Vector3 HueVector { get; set; }
         protected bool HasShadow { get; set; }
@@ -36,14 +36,16 @@ namespace ClassicUO.Game.Renderer.Views
         protected float Rotation { get; set; }
 
         public virtual void Update(in double frameMS)
-        {
-
+        {        
+           
         }
 
         public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             if (Texture == null || !AllowedToDraw)
                 return false;
+
+            Texture.Ticks = World.Ticks;
 
             SpriteVertex[] vertex;
 

@@ -9,6 +9,8 @@ namespace ClassicUO.AssetsLoader
     {
         private static UOFileMul _file;
 
+        public const int LIGHT_COUNT = 100;
+
         public static void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "light.mul");
@@ -17,7 +19,7 @@ namespace ClassicUO.AssetsLoader
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
 
-            _file = new UOFileMul(path, pathidx, 100);
+            _file = new UOFileMul(path, pathidx, LIGHT_COUNT);
         }
 
         public static ushort[] GetLight(int idx, out int width, out int height)

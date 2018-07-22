@@ -372,7 +372,7 @@ namespace ClassicUO
 
             NetClient.Socket.Slice();
 
-            TextureManager.UpdateTicks();
+            TextureManager.Update();
 
             MouseManager.Update();
             _gameCursor.Update(gameTime.TotalGameTime.Ticks);

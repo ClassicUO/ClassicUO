@@ -5,221 +5,181 @@ using System.Text;
 
 namespace ClassicUO.Game.Renderer
 {
-    class TextureDuration
+    public class TextureDuration : Texture2D
     {
-        public Texture2D Texture;
+        public TextureDuration(in int width, in int height, bool is32bit = true) : base(TextureManager.Device, width, height, false,is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551)
+        {
+        }
+
+
         public long Ticks;
     }
 
     public static class TextureManager
     {
-
         const long TEXTURE_TIME_LIFE = 3000;
-
-
-
-
-
-        private readonly static Dictionary<ushort, TextureDuration> _staticTextures = new Dictionary<ushort, TextureDuration>();
-        private readonly static Dictionary<ushort, TextureDuration> _landTextures = new Dictionary<ushort, TextureDuration>();
-        private readonly static Dictionary<ushort, TextureDuration> _gumpTextures = new Dictionary<ushort, TextureDuration>();
-        private readonly static Dictionary<ushort, TextureDuration> _texmapTextures = new Dictionary<ushort, TextureDuration>();
-        private readonly static Dictionary<ushort, TextureDuration> _soundTextures = new Dictionary<ushort, TextureDuration>();
-        private readonly static Dictionary<ushort, TextureDuration> _lightTextures = new Dictionary<ushort, TextureDuration>();
-        private readonly static Dictionary<ushort, TextureDuration[][][]> _animTextures = new Dictionary<ushort, TextureDuration[][][]>();
 
 
         public static GraphicsDevice Device { get; set; }
 
+        private static int _updateIndex = 0;
 
-        public static void UpdateTicks()
+        public static void Update()
         {
-
-            List<ushort> toremove = new List<ushort>();
-
-            //foreach (var k in _animTextures)
-            //{
-            //    bool all = true;
-            //    foreach (var j in k.Value)
-            //    {
-            //        if (Game.World.Ticks - j.Ticks < TEXTURE_TIME_LIFE)
-            //        {
-            //            all = false;
-            //            break;
-            //        }
-            //    }
-
-            //    if (all)
-            //        toremove.Add(k.Key);
-            //}
-            //foreach (var t in toremove)
-            //    _animTextures.Remove(t);
-            //toremove.Clear();
-
-            foreach (var k in _staticTextures)
+            if (_updateIndex == 0)
             {
-                if (Game.World.Ticks - k.Value.Ticks >= TEXTURE_TIME_LIFE)
-                    toremove.Add(k.Key);
+                for (int g = 0; g < _animTextureCache.Length; g++)
+                {
+                    for (int group = 0; group < _animTextureCache[g]?.Length; group++)
+                    {
+                        for (int dir = 0; dir < _animTextureCache[g][group]?.Length; dir++)
+                        {
+                            for (int idx = 0; idx < _animTextureCache[g][group][dir]?.Length; idx++)
+                            {
+                                if (World.Ticks - _animTextureCache[g][group][dir][idx]?.Ticks >= TEXTURE_TIME_LIFE)
+                                {
+                                    _animTextureCache[g][group][dir][idx].Dispose();
+                                    _animTextureCache[g][group][dir][idx] = null;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                _updateIndex++;
             }
-
-            foreach (var t in toremove)
-                _staticTextures.Remove(t);
-            toremove.Clear();
-
-
-            foreach (var k in _landTextures)
+            else if (_updateIndex > 0)
             {
-                if (Game.World.Ticks - k.Value.Ticks >= TEXTURE_TIME_LIFE)
-                    toremove.Add(k.Key);
+                void check(in TextureDuration[] array)
+                {
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        if (World.Ticks - array[i]?.Ticks >= TEXTURE_TIME_LIFE)
+                        {
+                            array[i].Dispose();
+                            array[i] = null;
+                        }
+                    }
+                    _updateIndex++;
+                }
+
+                if (_updateIndex == 1)
+                    check(_staticTextureCache);
+                else if (_updateIndex == 2)
+                    check(_landTextureCache);
+                else if (_updateIndex == 3)
+                    check(_gumpTextureCache);
+                else if (_updateIndex == 4)
+                    check(_lightTextureCache);
+                else if (_updateIndex == 5)
+                    check(_textmapTextureCache);
+                else
+                    _updateIndex = 0;
             }
-
-            foreach (var t in toremove)
-                _landTextures.Remove(t);
-            toremove.Clear();
-
-
-            foreach (var k in _gumpTextures)
-            {
-                if (Game.World.Ticks - k.Value.Ticks >= TEXTURE_TIME_LIFE)
-                    toremove.Add(k.Key);
-            }
-
-            foreach (var t in toremove)
-                _gumpTextures.Remove(t);
-            toremove.Clear();
-
-
-            foreach (var k in _texmapTextures)
-            {
-                if (Game.World.Ticks - k.Value.Ticks >= TEXTURE_TIME_LIFE)
-                    toremove.Add(k.Key);
-            }
-
-            foreach (var t in toremove)
-                _texmapTextures.Remove(t);
-            toremove.Clear();
-
-
-            foreach (var k in _soundTextures)
-            {
-                if (Game.World.Ticks - k.Value.Ticks >= TEXTURE_TIME_LIFE)
-                    toremove.Add(k.Key);
-            }
-
-            foreach (var t in toremove)
-                _soundTextures.Remove(t);
-            toremove.Clear();
-
-
-            foreach (var k in _lightTextures)
-            {
-                if (Game.World.Ticks - k.Value.Ticks >= TEXTURE_TIME_LIFE)
-                    toremove.Add(k.Key);
-            }
-
-            foreach (var t in toremove)
-                _lightTextures.Remove(t);
-            toremove.Clear();
         }
 
-        public static Texture2D GetOrCreateAnimTexture(in ushort g, in byte group, in byte dir, in int index, in AssetsLoader.AnimationFrame[] frames)
+        private static readonly TextureDuration[][][][] _animTextureCache = new TextureDuration[AssetsLoader.Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT][][][];
+        private static readonly TextureDuration[] _staticTextureCache = new TextureDuration[AssetsLoader.Art.ART_COUNT];
+        private static readonly TextureDuration[] _landTextureCache = new TextureDuration[AssetsLoader.Art.ART_COUNT];
+        private static readonly TextureDuration[] _gumpTextureCache = new TextureDuration[AssetsLoader.Gumps.GUMP_COUNT];
+        private static readonly TextureDuration[] _textmapTextureCache = new TextureDuration[AssetsLoader.TextmapTextures.TEXTMAP_COUNT];
+        //private static readonly TextureDuration[] _soundTextureCache = new TextureDuration[]
+        private static readonly TextureDuration[] _lightTextureCache = new TextureDuration[AssetsLoader.Light.LIGHT_COUNT];
+
+
+
+
+        public static ref TextureDuration GetOrCreateAnimTexture(in ushort g, in byte group, in byte dir, in int index, in AssetsLoader.AnimationFrame[] frames)
         {
-            if (!_animTextures.TryGetValue(g, out var array) || array[group] == null || array[group][dir] == null || array[group][dir][index] == null)
+            if (_animTextureCache[g] == null)
+                _animTextureCache[g] = new TextureDuration[100][][];
+            if (_animTextureCache[g][group] == null)
+                _animTextureCache[g][group] = new TextureDuration[5][];
+            if (_animTextureCache[g][group][dir] == null)
+                _animTextureCache[g][group][dir] = new TextureDuration[50];
+
+            if (_animTextureCache[g][group][dir][index] == null)
             {
-                //var frames = AssetsLoader.Animations.GetAnimationFrames(g, group, dir);
-
-                if (array == null)
-                    array = new TextureDuration[100][][];
-                if (array[group] == null)
-                    array[group] = new TextureDuration[5][];
-                if (array[group][dir] == null)
-                    array[group][dir] = new TextureDuration[50];
-                if (array[group][dir][index] == null)
-                    array[group][dir][index] = new TextureDuration();
-
 
                 for (int i = 0; i < frames.Length; i++)
                 {
                     if (frames[i].Width <= 0 || frames[i].Heigth <= 0)
                         continue;
 
-                    Texture2D texture = new Texture2D(Device, frames[i].Width, frames[i].Heigth, false, SurfaceFormat.Bgra5551);
-                    texture.SetData(frames[i].Pixels);
-
-                    array[group][dir][i] = new TextureDuration()
+                    TextureDuration texture = new TextureDuration(frames[i].Width, frames[i].Heigth, false)
                     {
-                        Texture = texture,
                         Ticks = World.Ticks
                     };
+
+                    texture.SetData(frames[i].Pixels);
+                    _animTextureCache[g][group][dir][i] = texture;
+                  
                 }
-
-                _animTextures[g] = array;
-
             }
-            else
-                array[group][dir][index].Ticks = World.Ticks;
 
-            return array[group][dir][index].Texture;
+            _animTextureCache[g][group][dir][index].Ticks = World.Ticks;
+            return ref _animTextureCache[g][group][dir][index];
         }
 
-        public static Texture2D GetOrCreateStaticTexture(in ushort g)
+        public static ref TextureDuration GetOrCreateStaticTexture(in ushort g)
         {
-            if (!_staticTextures.TryGetValue(g, out var tuple))
+            if (_staticTextureCache[g] == null)
             {
                 ushort[] pixels = AssetsLoader.Art.ReadStaticArt(g, out short w, out short h);
-                Texture2D texture = new Texture2D(Device, w, h, false, SurfaceFormat.Bgra5551);
+                TextureDuration texture = new TextureDuration(w, h, false)
+                {
+                    Ticks = World.Ticks
+                };
                 texture.SetData(pixels);
-                _staticTextures[g] = tuple = new TextureDuration { Ticks = Game.World.Ticks, Texture = texture };
+                _staticTextureCache[g] = texture;
             }
-            else
-                tuple.Ticks = Game.World.Ticks;
-
-            return tuple.Texture;
+            return ref _staticTextureCache[g];
         }
 
-        public static Texture2D GetOrCreateLandTexture(in ushort g)
+        public static ref TextureDuration GetOrCreateLandTexture(in ushort g)
         {
-            if (!_landTextures.TryGetValue(g, out var tuple))
+            if (_landTextureCache[g] == null)
             {
                 ushort[] pixels = AssetsLoader.Art.ReadLandArt(g);
-                Texture2D texture = new Texture2D(Device, 44, 44, false, SurfaceFormat.Bgra5551);
+                TextureDuration texture = new TextureDuration(44, 44, false)
+                {
+                    Ticks = World.Ticks
+                };
                 texture.SetData(pixels);
-                _landTextures[g] = tuple = new TextureDuration { Ticks = Game.World.Ticks, Texture = texture };
+                _landTextureCache[g] = texture;
             }
-            else
-                tuple.Ticks = Game.World.Ticks;
 
-            return tuple.Texture;
+            return ref _landTextureCache[g];
         }
 
-        public static Texture2D GetOrCreateGumpTexture(in ushort g)
+        public static ref TextureDuration GetOrCreateGumpTexture(in ushort g)
         {
-            if (!_gumpTextures.TryGetValue(g, out var tuple))
+            if (_gumpTextureCache[g] == null)
             {
                 ushort[] pixels = AssetsLoader.Gumps.GetGump(g, out int w, out int h);
-                Texture2D texture = new Texture2D(Device, w, h, false, SurfaceFormat.Bgra5551);
+                TextureDuration texture = new TextureDuration(w, h, false)
+                {
+                    Ticks = World.Ticks
+                };
                 texture.SetData(pixels);
-                _gumpTextures[g] = tuple = new TextureDuration { Ticks = Game.World.Ticks, Texture = texture };
+                _gumpTextureCache[g] = texture;
             }
-            else
-                tuple.Ticks = Game.World.Ticks;
-
-            return tuple.Texture;
+            return ref _gumpTextureCache[g];
         }
 
-        public static Texture2D GetOrCreateTexmapTexture(in ushort g)
+        public static ref TextureDuration GetOrCreateTexmapTexture(in ushort g)
         {
-            if (!_texmapTextures.TryGetValue(g, out var tuple))
+            if (_textmapTextureCache[g] == null)
             {
                 ushort[] pixels = AssetsLoader.TextmapTextures.GetTextmapTexture(g, out int size);
-                Texture2D texture = new Texture2D(Device, size, size, false, SurfaceFormat.Bgra5551);
+                TextureDuration texture = new TextureDuration(size, size, false)
+                {
+                    Ticks = World.Ticks
+                };
                 texture.SetData(pixels);
-                _texmapTextures[g] = tuple = new TextureDuration { Ticks = Game.World.Ticks, Texture = texture };
+                _textmapTextureCache[g] = texture;
             }
-            else
-                tuple.Ticks = Game.World.Ticks;
-
-            return tuple.Texture;
+            return ref _textmapTextureCache[g];            
         }
 
 

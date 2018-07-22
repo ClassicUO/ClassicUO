@@ -173,16 +173,20 @@ namespace ClassicUO.Game.Renderer
                 }
             }
         }
-        public Texture2D Texture { get; private set; }
+        public TextureDuration Texture { get; private set; }
         public Point ScreenPosition => MouseManager.ScreenPosition;
 
 
         public void Update(in double frameMS)
         {
-            if (Texture == null || _needGraphicUpdate)
+            if (Texture == null || Texture.IsDisposed || _needGraphicUpdate)
             {
                 Texture = TextureManager.GetOrCreateStaticTexture(Graphic);
                 _needGraphicUpdate = false;
+            }
+            else
+            {
+                Texture.Ticks = World.Ticks;
             }
         }
 

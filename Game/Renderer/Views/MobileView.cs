@@ -108,7 +108,6 @@ namespace ClassicUO.Game.Renderer.Views
             IsFlipped = mirror;
 
             byte animGroup = 0;
-
             Hue color = 0;
 
             for (int i = 0; i < USED_LAYER_COUNT; i++)
@@ -144,7 +143,6 @@ namespace ClassicUO.Game.Renderer.Views
                 else if (layer == Layer.Invalid)
                 {
                     graphic = WorldObject.GetMountAnimation();
-
                     animGroup = WorldObject.GetAnimationGroup();
                     color = WorldObject.Hue;
                 }
@@ -167,8 +165,6 @@ namespace ClassicUO.Game.Renderer.Views
                             graphic = data.Graphic;
                         }
                     }
-
-
                     color = item.Hue;
                 }
 

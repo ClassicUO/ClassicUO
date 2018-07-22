@@ -10,12 +10,14 @@ namespace ClassicUO.AssetsLoader
     {
         private static UOFile _file;
 
+        public const int GUMP_COUNT = 0x10000;
+
         public static void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "gumpartLegacyMUL.uop");
             if (File.Exists(path))
             {
-                _file = new UOFileUop(path, ".tga", 0x10000, true);
+                _file = new UOFileUop(path, ".tga", GUMP_COUNT, true);
             }
             else
             {
@@ -24,7 +26,7 @@ namespace ClassicUO.AssetsLoader
 
                 if (File.Exists(path) && File.Exists(pathidx))
                 {
-                    _file = new UOFileMul(path, pathidx, 0x10000, 12);
+                    _file = new UOFileMul(path, pathidx, GUMP_COUNT, 12);
                 }
             }
 

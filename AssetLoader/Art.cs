@@ -15,18 +15,21 @@ namespace ClassicUO.AssetsLoader
     {
         private static UOFile _file;
 
+        public const int ART_COUNT = 0x10000;
+
+
         public static void Load()
         {
             string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
 
             if (File.Exists(filepath))
-                _file = new UOFileUop(filepath, ".tga", 0x10000);
+                _file = new UOFileUop(filepath, ".tga", ART_COUNT);
             else
             {
                 filepath = Path.Combine(FileManager.UoFolderPath, "art.mul");
                 string idxpath = Path.Combine(FileManager.UoFolderPath, "artidx.mul");
                 if (File.Exists(filepath) && File.Exists(idxpath))
-                    _file = new UOFileMul(filepath, idxpath, 0x10000);
+                    _file = new UOFileMul(filepath, idxpath, ART_COUNT);
             }
         }
 

@@ -9,6 +9,8 @@ namespace ClassicUO.AssetsLoader
     {
         private static UOFile _file;
 
+        public const int TEXTMAP_COUNT = 0x4000;
+
         public static void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "texmaps.mul");
@@ -19,7 +21,7 @@ namespace ClassicUO.AssetsLoader
                 throw new FileNotFoundException();
             }
 
-            _file = new UOFileMul(path, pathidx, 0x4000, 10);
+            _file = new UOFileMul(path, pathidx, TEXTMAP_COUNT, 10);
 
             /*string pathdef = Path.Combine(FileManager.UoFolderPath, "texterr.def");
             if (File.Exists(pathdef))

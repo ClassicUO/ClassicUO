@@ -27,7 +27,7 @@ namespace ClassicUO.Game.Renderer.Views
                 return false;
 
 
-            if (_originalGraphic != WorldObject.DisplayedGraphic)
+            if (_originalGraphic != WorldObject.DisplayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _originalGraphic = WorldObject.DisplayedGraphic;
                 Texture = TextureManager.GetOrCreateStaticTexture(_originalGraphic);
