@@ -5,7 +5,7 @@ using ClassicUO.Game.Renderer.Views;
 
 namespace ClassicUO.Game.WorldObjects
 {
-    public abstract class WorldObject
+    public abstract class WorldObject //: IDisposable
     {
         private View _viewObject;
         private Map.Tile _tile;
@@ -51,8 +51,29 @@ namespace ClassicUO.Game.WorldObjects
         {
             if (_viewObject != null)
             {
+                _viewObject.Dispose();
                 _viewObject = null;
             }
         }
+
+        //public void Dispose()
+        //{
+        //    Dispose(true);
+        //    GC.SuppressFinalize(this);
+        //}
+
+        //protected virtual void Dispose(in bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        DisposeView();
+        //    }
+        //}
+
+        //~WorldObject()
+        //{
+        //    Dispose();
+        //}
+
     }
 }

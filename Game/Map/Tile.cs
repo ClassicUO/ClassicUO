@@ -46,7 +46,6 @@ namespace ClassicUO.Game.Map
             DisposeView();
             Graphic = 0;
             Position = new Position(0, 0);
-
         }
 
         public void Sort()

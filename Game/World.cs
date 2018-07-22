@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Game.WorldObjects;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game
 {
@@ -24,7 +25,7 @@ namespace ClassicUO.Game
                 if (_map == null || _map.Index != value.Index)
                 {
                     _map = null;
-                    _map = value;
+                    _map = value; 
 
                     var position = Player.Position;
                     Player.Position = Position.Invalid;

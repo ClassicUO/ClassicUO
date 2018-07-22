@@ -73,7 +73,7 @@ namespace ClassicUO.Game.WorldObjects
         public event EventHandler StatsChanged, SkillsChanged;
 
 
-        public PlayerMobile(Serial serial) : base(serial)
+        public PlayerMobile(in Serial serial) : base(serial)
         {
             _sklls = new List<Skill>();
         }
@@ -1015,8 +1015,15 @@ namespace ClassicUO.Game.WorldObjects
             if (World.Map != null)
             {
                 if (World.Map.Center == Point.Zero)
-                World.Map.Center = new Point((short)Position.X, (short)Position.Y);
+                    World.Map.Center = new Point((short)Position.X, (short)Position.Y);
+
                 base.OnPositionChanged(sender, e);
+
+                //if (Tile == null)
+                //{
+                //    World.Map.Center = new Point(World.Player.Position.X, World.Player.Position.Y);
+                //    base.OnPositionChanged(sender, e);
+                //}
             }
         }
 
@@ -1126,7 +1133,6 @@ namespace ClassicUO.Game.WorldObjects
                 step.Anim = true;
                 EnqueueStep(new Position((ushort)step.X, (ushort)step.Y, step.Z), (Direction)step.Direction, step.Run);
             }
-
 
             _requestedSteps.AddToBack(step);
             new Network.PWalkRequest(direction, SequenceNumber).SendToServer();

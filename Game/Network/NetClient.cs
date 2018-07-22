@@ -305,7 +305,7 @@ namespace ClassicUO.Game.Network
                         int l = sourcelength - processedOffset;
                         Buffer.BlockCopy(source, processedOffset, _incompletePacketBuffer, _incompletePacketLength, l);
                         _incompletePacketLength += l;
-                    }
+                    } 
                 }
 
                 lock (_circularBuffer)

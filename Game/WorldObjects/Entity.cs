@@ -51,7 +51,7 @@ namespace ClassicUO.Game.WorldObjects
         protected Delta _delta;
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
 
-        protected Entity(Serial serial)
+        protected Entity(in Serial serial)
         {
             Serial = serial;
             Items = new EntityCollection<Item>();

@@ -89,7 +89,7 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public float GetTileZ(in int map, in short x, in short y)
+        /*public float GetTileZ(in int map, in short x, in short y)
         {
             if (x < 0 || y < 0)
                 return -125;
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.Map
             int my = y % 8;
 
             return Marshal.PtrToStructure<AssetsLoader.MapBlock>((IntPtr)blockIndex.MapAddress).Cells[my * 8 + mx].Z;
-        }
+        }*/
 
         private AssetsLoader.IndexMap GetIndex(in int map)
             => GetIndex(map, X, Y);

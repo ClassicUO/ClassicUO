@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -23,6 +24,8 @@ namespace ClassicUO.Game.Renderer
         public static GraphicsDevice Device { get; set; }
 
         private static int _updateIndex = 0;
+
+
 
         public static void Update()
         {
@@ -126,10 +129,12 @@ namespace ClassicUO.Game.Renderer
             if (_staticTextureCache[g] == null)
             {
                 ushort[] pixels = AssetsLoader.Art.ReadStaticArt(g, out short w, out short h);
-                TextureDuration texture = new TextureDuration(w, h, false)
+
+                TextureDuration texture = _staticTextureCache[g] ?? new TextureDuration(w, h, false)
                 {
                     Ticks = World.Ticks
                 };
+
                 texture.SetData(pixels);
                 _staticTextureCache[g] = texture;
             }

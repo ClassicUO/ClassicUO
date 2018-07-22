@@ -78,7 +78,6 @@ namespace ClassicUO.Game.Network
             ToClient.Add(0xA8, ServerList);
             ToClient.Add(0xA9, CharacterList);
             ToClient.Add(0xBD, ClientVersion);
-
             Load();
         }
 
@@ -843,7 +842,7 @@ namespace ClassicUO.Game.Network
         {
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
             if (mobile == null)
-                throw new ArgumentNullException("mobile");
+                return;
 
             ushort action = p.ReadUShort();
             ushort frameCount = p.ReadUShort();
@@ -1371,7 +1370,7 @@ namespace ClassicUO.Game.Network
                 case 6: //party
                     break;
                 case 8: // map change
-                    World.Map = new Game.Map.Facet(p.ReadByte());
+                    World.Map = new Map.Facet(p.ReadByte());
                     break;
                 case 0x0C: // close statusbar gump
                     serial = p.ReadUInt();
@@ -1837,22 +1836,26 @@ namespace ClassicUO.Game.Network
 
         private static void NewCharacterAnimation(Packet p)
         {
-            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
-            if (mobile == null)
+            Serial serial = p.ReadUInt();
+            var e = World.Get(serial);
+            if (e == null)
                 throw new Exception();
+            //Mobile mobile = World.Mobiles.Get();
+            //if (mobile == null)
+            //    throw new Exception();
 
-            ushort type = p.ReadUShort();
-            ushort action = p.ReadUShort();
-            byte mode = p.ReadByte();
-            byte group = Mobile.GetObjectNewAnimation(mobile, type, action, mode);
+            //ushort type = p.ReadUShort();
+            //ushort action = p.ReadUShort();
+            //byte mode = p.ReadByte();
+            //byte group = Mobile.GetObjectNewAnimation(mobile, type, action, mode);
 
-            mobile.SetAnimation(group);
-            mobile.AnimationRepeatMode = 1;
-            mobile.AnimationDirection = true;
+            //mobile.SetAnimation(group);
+            //mobile.AnimationRepeatMode = 1;
+            //mobile.AnimationDirection = true;
 
-            if ((type == 1 || type == 2) && mobile.Graphic == 0x015)
-                mobile.AnimationRepeat = true;
-            mobile.AnimationFromServer = true;
+            //if ((type == 1 || type == 2) && mobile.Graphic == 0x015)
+            //    mobile.AnimationRepeat = true;
+            //mobile.AnimationFromServer = true;
         }
 
         private static void KREncryptionResponse(Packet p)

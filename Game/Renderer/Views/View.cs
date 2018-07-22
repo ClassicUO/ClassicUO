@@ -8,7 +8,7 @@ using System.Text;
 
 namespace ClassicUO.Game.Renderer.Views
 {
-    public abstract class View
+    public abstract class View : IDisposable
     {
         protected static float PI = (float)Math.PI;
 
@@ -134,6 +134,30 @@ namespace ClassicUO.Game.Renderer.Views
 
         }
 
+
+        ~View()
+        {
+            Dispose();
+        }
+
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(in bool disposing)
+        {
+            if (disposing)
+            {
+                if (Texture != null && Texture.IsDisposed) // disping happen into TextureManager.cs, here we clean up the referement
+                {
+                    Texture.Dispose();
+                    Texture = null;
+                }
+            }
+        }
 
         public static bool IsNoDrawable(in ushort g)
         {

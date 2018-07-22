@@ -10,6 +10,7 @@ using ClassicUO.Game.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content;
 
 namespace ClassicUO
 {
@@ -295,7 +296,7 @@ namespace ClassicUO
 
             NetClient.Connected += (sender, e) =>
             {
-                Log.Message(LogTypes.Trace, "Connected!");
+                Log.Message(LogTypes.Info, "Connected!");
                 NetClient.Socket.Send(new PSeed(clientVersionBuffer));
                 NetClient.Socket.Send(new PFirstLogin(username, password));
             };
@@ -341,7 +342,6 @@ namespace ClassicUO
                     }
                 }
             };
-
 
 
             var datagump = AssetsLoader.Gumps.GetGump(0x2329, out int gw, out int gh);

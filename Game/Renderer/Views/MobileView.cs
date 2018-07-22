@@ -234,7 +234,6 @@ namespace ClassicUO.Game.Renderer.Views
         {
             WorldObject.ProcessAnimation();
 
-
             base.Update(frameMS);
         }
     }

@@ -47,7 +47,7 @@ namespace ClassicUO.Game.WorldObjects
         private Layer _layer;
         private bool _isMulti;
 
-        public Item(Serial serial) : base(serial)
+        public Item(in Serial serial) : base(serial)
         {
         }
 

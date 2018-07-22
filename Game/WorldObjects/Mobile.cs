@@ -42,9 +42,9 @@ namespace ClassicUO.Game.WorldObjects
         private RaceType _race;
         private bool _isDead;
 
-        public Mobile(Serial serial) : base(serial)
+        public Mobile(in Serial serial) : base(serial)
         {
-
+            _lastAnimationChangeTime = World.Ticks;
         }
 
         public event EventHandler HitsChanged;
@@ -1028,7 +1028,7 @@ namespace ClassicUO.Game.WorldObjects
                     if (AnimationFromServer)
                         SetAnimation(0xFF);
 
-                    int maxDelay = (int)MovementSpeed.TimeToCompleteMovement(this, step.Run) - 15;
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - 15;
                     int delay = (int)World.Ticks - (int)LastStepTime;
                     bool removeStep = (delay >= maxDelay);
 
@@ -1082,7 +1082,6 @@ namespace ClassicUO.Game.WorldObjects
                     }
                 }
                 while (_steps.Count > 0 && turnOnly);
-
             }
 
 
