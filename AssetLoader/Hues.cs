@@ -77,6 +77,26 @@ namespace ClassicUO.AssetsLoader
             }
         }
 
+        public static uint[] CreateShaderColors()
+        {
+            uint[] hues = new uint[32 * 2 * 3000];
+            var len = HuesRange.Length;
+
+            for (int r = 0; r < len; r++)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    for (int x = 0; x < 32; x++)
+                    {
+                        int idx = (r * 8 * 32) + (y * 32) + x;
+
+                        hues[idx] = Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
+                    }
+                }
+            }
+            return hues;
+        }
+
         public static float[] GetColorForShader(ushort color)
         {
             if (color != 0)
@@ -188,7 +208,6 @@ namespace ClassicUO.AssetsLoader
 
                  (byte B, byte G, byte R, byte A) = GetBGRA(cl);
 
-               // if (GetR(cl) == GetG(cl) && GetB(cl) == GetG(cl))
                 if (R == G && B == G)
                     return Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
 
@@ -204,20 +223,12 @@ namespace ClassicUO.AssetsLoader
         public static (byte, byte, byte, byte) GetBGRA(in uint cl)  
             => (
                 (byte)(cl & 0xFF) ,          // B
-                (byte)((cl >> 8) & 0xFF),   // G
-                (byte)((cl >> 16) & 0xFF),  // R
-                (byte)((cl >> 24) & 0xFF)  // A
+                (byte)((cl >> 8) & 0xFF),    // G
+                (byte)((cl >> 16) & 0xFF),   // R
+                (byte)((cl >> 24) & 0xFF)    // A
                );
 
-        public static uint RgbaToArgb(in uint rgba)
-        {
-            //uint alpha = rgba << 24;
-            //uint argb = rgba >> 8;
-            //argb |= alpha;
-            //return argb;
-            return (rgba >> 8) | (rgba << 24);
-        }
-
+        public static uint RgbaToArgb(in uint rgba) => (rgba >> 8) | (rgba << 24);
     }
 
 

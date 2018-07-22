@@ -222,25 +222,8 @@ namespace ClassicUO
 
 
             Texture2D textureHue0 = new Texture2D(GraphicsDevice, 32, 3000);
-
-            uint[] hues = new uint[32 * 2 * 3000];
-            int index = 0; // 32
-
-            foreach (var range in AssetsLoader.Hues.HuesRange)
-            {
-                foreach (var entry in range.Entries)
-                {
-                    foreach (var c in entry.ColorTable)
-                    {
-                        hues[index++] = AssetsLoader.Hues.Color16To32(c);
-                    }
-                }
-            }
-
-            textureHue0.SetData(hues);
-
+            textureHue0.SetData(AssetsLoader.Hues.CreateShaderColors());
             GraphicsDevice.Textures[1] = textureHue0;
-
 
 
             var data = AssetsLoader.Art.ReadStaticArt(3850, out short w, out short h);

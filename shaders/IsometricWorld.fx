@@ -9,9 +9,7 @@ float lightIntensity;
 const float HuesPerTexture = 3000;
 const float ToGrayScale = 3;
 
-#define MAX_HUES 96
-
-uniform float hue[MAX_HUES];
+uniform float hue[96];
 
 
 sampler DrawSampler : register(s0);
@@ -68,11 +66,14 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		drawLighting = false;
 	}
 
+	int index = int(color.r * 31.875f) * 3;
+	//float4 vvv = float4(hue[index], hue[index + 1], hue[index + 2], 0);
+	
 	// Hue the color if the hue vector y component is greater than 0.
 	if (IN.Hue.y > 0)
 	{
 	//(color.r + color.g + color.b) / 3
-		float4 hueColor = tex2D(HueSampler0, float2(  (color.r + color.g + color.b) / 3  , (IN.Hue.x) / HuesPerTexture));
+		float4 hueColor = tex2D(HueSampler0, float2(  color.r  , IN.Hue.x / HuesPerTexture));
 		
 		hueColor.a = color.a;
 
