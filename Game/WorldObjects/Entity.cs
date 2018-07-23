@@ -39,12 +39,15 @@ namespace ClassicUO.Game.WorldObjects
             Properties = (1 << 9)
         }
 
+        protected const float CHARACTER_ANIMATION_DELAY = 80;
+
         private Graphic _graphic;
         private Hue _hue;
         private string _name;
         private Position _position;
         private Direction _direction;
         private Flags _flags;
+
 
         private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
 
@@ -212,6 +215,14 @@ namespace ClassicUO.Game.WorldObjects
         public virtual bool Exists { get { return World.Contains(Serial); } }
         public int DistanceTo(Entity entity) { return _position.DistanceTo(entity._position); }
         public int Distance { get { return DistanceTo(World.Player); } }
+
+
+        protected long _lastAnimationChangeTime;
+
+        public virtual void ProcessAnimation()
+        {
+
+        }
 
     }
 }

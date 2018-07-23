@@ -46,6 +46,8 @@ namespace ClassicUO.Game.WorldObjects
         private Serial _container;
         private Layer _layer;
         private bool _isMulti;
+        private AssetsLoader.StaticTiles? _itemData;
+        private Graphic? _displayedGraphic;
 
         public Item(in Serial serial) : base(serial)
         {
@@ -60,7 +62,6 @@ namespace ClassicUO.Game.WorldObjects
 
         protected override View CreateView() => new ItemView(this);
 
-        private AssetsLoader.StaticTiles? _itemData;
 
         public AssetsLoader.StaticTiles ItemData
         {
@@ -114,12 +115,22 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
+
+        public bool UsedLayer { get; set; }
+
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
+
+        private readonly Item[] _equipmentCorpse = new Item[(int)Layer.Bank + 1];
+        public Item[] Equipment => IsCorpse ? null : _equipmentCorpse;
+
 
         public Graphic DisplayedGraphic
         {
             get
             {
+                if (_displayedGraphic.HasValue)
+                    return _displayedGraphic.Value;
+
                 if (IsCoin)
                 {
                     if (Amount > 5)
@@ -130,6 +141,7 @@ namespace ClassicUO.Game.WorldObjects
 
                 return Graphic;
             }
+            set => _displayedGraphic = value;
         }
 
         public bool IsMulti
@@ -189,7 +201,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public Multi Multi { get; private set; }
 
-        public bool IsCorpse => Utility.MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) || Graphic == 0x2006;
+        public bool IsCorpse => MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) || Graphic == 0x2006;
 
         public override bool Exists => World.Contains(Serial);
 
@@ -465,10 +477,52 @@ namespace ClassicUO.Game.WorldObjects
                 if (ItemData.AnimID != 0)
                     graphic = ItemData.AnimID;
             }
-            // else if corpse
+            else if (IsCorpse)
+                return Amount;
 
             return graphic;
         }
 
+
+        public override void ProcessAnimation()
+        {
+            if (IsCorpse)
+            {
+                byte dir = (byte)Layer;
+
+                if (_lastAnimationChangeTime < World.Ticks)
+                {
+                    sbyte frameIndex = (sbyte)(AnimIndex + 1);
+
+                    Graphic id = GetMountAnimation();
+
+                    bool mirror = false;
+
+                    AssetsLoader.Animations.GetAnimDirection(ref dir, ref mirror);
+
+                    if (id < AssetsLoader.Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    {
+                        int animGroup = AssetsLoader.Animations.GetDieGroupIndex(id, UsedLayer);
+
+                        ref var direction = ref AssetsLoader.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+
+                        if (direction.FrameCount == 0)
+                            AssetsLoader.Animations.LoadDirectionGroup(ref direction);
+
+                        if (direction.Address != 0 || direction.IsUOP)
+                        {
+                            int fc = direction.FrameCount;
+
+                            if (frameIndex >= fc)
+                                frameIndex = (sbyte)(fc - 1);
+
+                            AnimIndex = frameIndex;
+                        }
+                    }
+
+                    _lastAnimationChangeTime = World.Ticks + (int) CHARACTER_ANIMATION_DELAY;
+                }
+            }
+        }
     }
 }

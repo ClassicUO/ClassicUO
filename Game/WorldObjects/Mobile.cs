@@ -1007,12 +1007,11 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
-        private long _lastAnimationChangeTime;
 
         protected virtual bool NoIterateAnimIndex() =>
             ((LastStepTime > (uint)(World.Ticks - WALKING_DELAY)) && _steps.Count <= 0);
 
-        public void ProcessAnimation()
+        public override void ProcessAnimation()
         {
             byte dir = (byte)GetAnimationDirection();
 
@@ -1083,7 +1082,6 @@ namespace ClassicUO.Game.WorldObjects
                 }
                 while (_steps.Count > 0 && turnOnly);
             }
-
 
 
             if (_lastAnimationChangeTime < World.Ticks && !NoIterateAnimIndex())
@@ -1284,6 +1282,7 @@ namespace ClassicUO.Game.WorldObjects
 
             int valueX = (int)x;
 
+
             if (Math.Abs(valueX) > checkX)
             {
                 if (valueX < 0)
@@ -1309,7 +1308,6 @@ namespace ClassicUO.Game.WorldObjects
         protected const int TURN_DELAY = 100;
         protected const int WALKING_DELAY = 750;
         protected const int PLAYER_WALKING_DELAY = 150;
-        const float CHARACTER_ANIMATION_DELAY = 80;
 
         protected struct Step
         {
@@ -1333,9 +1331,8 @@ namespace ClassicUO.Game.WorldObjects
 
         public long LastStepTime { get; set; }
 
-        public virtual bool IsWalking => LastStepTime > (World.Ticks - PLAYER_WALKING_DELAY);
+        public virtual bool IsWalking => LastStepTime > (World.Ticks - WALKING_DELAY);
         public byte AnimationGroup { get; set; } = 0xFF;
-        public sbyte AnimIndex { get; set; }
         internal bool IsMoving => _steps.Count > 0;
 
         public Graphic GetMountAnimation()

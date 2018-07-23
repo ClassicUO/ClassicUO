@@ -10,85 +10,7 @@ namespace ClassicUO.Game.Renderer.Views
 {
     public class MobileView : View
     {
-        const int USED_LAYER_COUNT = 25;
-        private static readonly Layer[,] _usedLayers = new Layer[8, USED_LAYER_COUNT]
-        {
-            {
-                Layer.Mount, Layer.Invalid, Layer.Cloak, Layer.Shirt,
-                Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
-                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face,
-                Layer.Arms, Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso,
-                Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist,
-                Layer.FacialHair, Layer.Earrings, Layer.LeftHand, Layer.Helm,
-                Layer.RightHand
-            },
-            {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
-                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
-                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
-                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
-                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
-                Layer.RightHand
-            },
-            {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
-                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
-                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
-                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
-                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
-                Layer.RightHand
-            },
-            {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
-                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
-                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
-                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
-                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
-                Layer.RightHand
-            },
-            {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
-                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
-                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
-                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
-                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
-                Layer.RightHand
-            },
-            {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
-                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
-                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
-                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
-                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
-                Layer.RightHand
-            },
-            {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
-                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
-                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
-                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
-                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
-                Layer.RightHand
-            },
-
-            {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants,
-                Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring,
-                Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms,
-                Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck,
-                Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
-                Layer.RightHand
-            }
-
-        };
-
+     
 
         public MobileView(in Mobile mobile) : base(mobile)
         {
@@ -96,7 +18,6 @@ namespace ClassicUO.Game.Renderer.Views
         }
 
         public new Mobile WorldObject => (Mobile)base.WorldObject;
-
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
@@ -109,14 +30,13 @@ namespace ClassicUO.Game.Renderer.Views
 
             byte animGroup = 0;
             Hue color = 0;
+            Graphic graphic = 0;
+            AssetsLoader.EquipConvData? convertedItem = null;
 
-            for (int i = 0; i < USED_LAYER_COUNT; i++)
+            for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
             {
-                AssetsLoader.EquipConvData? convertedItem = null;
 
-                Layer layer = _usedLayers[dir, i];
-
-                Graphic graphic = 0;
+                Layer layer = LayerOrder.UsedLayers[dir, i];
 
                 if (layer == Layer.Mount)
                 {
@@ -196,15 +116,15 @@ namespace ClassicUO.Game.Renderer.Views
 
                     int drawCenterY = frame.CenterY;
                     int drawX;
-                    int drawY = drawCenterY + (( /*WorldObject.Offset.Z +*/ WorldObject.Position.Z) * 4) - 22 - (int)(WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
+                    int drawY = drawCenterY + (WorldObject.Position.Z * 4) - 22 - (int)(WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
 
                     if (IsFlipped)
                     {
-                        drawX = -22 + (int)(WorldObject.Offset.X /*- WorldObject.Offset.Y */);
+                        drawX = -22 + (int)(WorldObject.Offset.X);
                     }
                     else
                     {
-                        drawX = -22 - (int)(WorldObject.Offset.X/* - WorldObject.Offset.Y*/);
+                        drawX = -22 - (int)(WorldObject.Offset.X);
                     }
 
 

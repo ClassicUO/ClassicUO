@@ -291,7 +291,7 @@ namespace ClassicUO
 
             NetClient.PacketSended += (sender, e) =>
             {
-                Log.Message(LogTypes.Trace, string.Format("<< Sended\t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
+                //Log.Message(LogTypes.Trace, string.Format("<< Sended\t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
             };
 
             NetClient.Connected += (sender, e) =>

@@ -809,6 +809,22 @@ namespace ClassicUO.AssetsLoader
             return ANIMATION_GROUPS.AG_HIGHT;
         }
 
+        public static byte GetDieGroupIndex(in ushort id, in bool second)
+        {
+            switch (_dataIndex[id].Type)
+            {
+                case ANIMATION_GROUPS_TYPE.ANIMAL:
+                    return (byte)(second ? LOW_ANIMATION_GROUP.LAG_DIE_2 : LOW_ANIMATION_GROUP.LAG_DIE_1);
+                case ANIMATION_GROUPS_TYPE.MONSTER:
+                case ANIMATION_GROUPS_TYPE.SEA_MONSTER:
+                    return (byte)(second ? HIGHT_ANIMATION_GROUP.HAG_DIE_2 : HIGHT_ANIMATION_GROUP.HAG_DIE_1);
+                case ANIMATION_GROUPS_TYPE.HUMAN:
+                case ANIMATION_GROUPS_TYPE.EQUIPMENT:
+                    return (byte)(second ? PEOPLE_ANIMATION_GROUP.PAG_DIE_2 : PEOPLE_ANIMATION_GROUP.PAG_DIE_1);
+            }
+            return 0;
+        }
+
         public static bool AnimationExists(in ushort graphic, in byte group)
         {
             bool result = false;

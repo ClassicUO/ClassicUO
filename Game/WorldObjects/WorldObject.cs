@@ -29,6 +29,8 @@ namespace ClassicUO.Game.WorldObjects
             return null;
         }
 
+        public sbyte AnimIndex { get; set; }
+
         public Map.Tile Tile
         {
             get => _tile;

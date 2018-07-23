@@ -36,7 +36,7 @@ namespace ClassicUO.Game.Renderer.Views
         {
             IsStretched = !(tile.TileData.TexID <= 0 && (tile.TileData.Flags & 0x00000080) > 0);
 
-            AllowedToDraw = !(tile.IsIgnored);
+            AllowedToDraw = !tile.IsIgnored;
         }
 
 

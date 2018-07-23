@@ -1019,6 +1019,9 @@ namespace ClassicUO.Game.WorldObjects
 
                 base.OnPositionChanged(sender, e);
 
+                if (Tile == null)
+                    World.Map.Center = Point.Zero;
+
                 //if (Tile == null)
                 //{
                 //    World.Map.Center = new Point(World.Player.Position.X, World.Player.Position.Y);
@@ -1028,12 +1031,8 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
-        protected override bool NoIterateAnimIndex()
-        {
-            return false;
-        }
-
-        public override bool IsWalking => LastStepTime > (World.Ticks - WALKING_DELAY);
+        //protected override bool NoIterateAnimIndex() => false;
+        public override bool IsWalking => LastStepTime > (World.Ticks - PLAYER_WALKING_DELAY);
 
         private readonly Deque<Step> _requestedSteps = new Deque<Step>();
         private long _lastStepRequestedTime;
