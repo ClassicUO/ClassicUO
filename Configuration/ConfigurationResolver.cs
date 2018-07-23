@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
@@ -11,7 +10,7 @@ namespace ClassicUO.Configuration
             if (!File.Exists(file))
                 return null;
 
-            T settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
+            var settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
             return settings;
         }
 

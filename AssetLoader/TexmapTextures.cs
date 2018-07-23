@@ -1,25 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
+﻿using System.IO;
 
 namespace ClassicUO.AssetsLoader
 {
     public static class TextmapTextures
     {
-        private static UOFile _file;
-
         public const int TEXTMAP_COUNT = 0x4000;
+        private static UOFile _file;
 
         public static void Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "texmaps.mul");
-            string pathidx = Path.Combine(FileManager.UoFolderPath, "texidx.mul");
+            var path = Path.Combine(FileManager.UoFolderPath, "texmaps.mul");
+            var pathidx = Path.Combine(FileManager.UoFolderPath, "texidx.mul");
 
-            if (!File.Exists(path) || !File.Exists(pathidx))
-            {
-                throw new FileNotFoundException();
-            }
+            if (!File.Exists(path) || !File.Exists(pathidx)) throw new FileNotFoundException();
 
             _file = new UOFileMul(path, pathidx, TEXTMAP_COUNT, 10);
 
@@ -48,7 +41,7 @@ namespace ClassicUO.AssetsLoader
 
         public static ushort[] GetTextmapTexture(ushort index, out int size)
         {
-            (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
+            var (length, extra, patched) = _file.SeekByEntryIndex(index);
 
             if (length <= 0)
             {
@@ -57,15 +50,12 @@ namespace ClassicUO.AssetsLoader
             }
 
             size = extra == 0 ? 64 : 128;
-            ushort[] pixels = new ushort[size * size];
+            var pixels = new ushort[size * size];
 
-            for (int i = 0; i < size; i++)
+            for (var i = 0; i < size; i++)
             {
-                int pos = i * size;
-                for (int j = 0; j < size; j++)
-                {
-                    pixels[pos + j] = (ushort)(0x8000 | _file.ReadUShort());
-                }
+                var pos = i * size;
+                for (var j = 0; j < size; j++) pixels[pos + j] = (ushort) (0x8000 | _file.ReadUShort());
             }
 
             return pixels;

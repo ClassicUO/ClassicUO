@@ -1,8 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Input
 {
@@ -20,12 +18,13 @@ namespace ClassicUO.Input
     {
         None,
         Up,
-        Down,
+        Down
     }
 
     public sealed class MouseEventArgs : EventArgs
     {
-        public MouseEventArgs(int x, int y, int offx, int offy, MouseButton button = MouseButton.None, ButtonState state = ButtonState.Released)
+        public MouseEventArgs(int x, int y, int offx, int offy, MouseButton button = MouseButton.None,
+            ButtonState state = ButtonState.Released)
         {
             Location = new Point(x, y);
             Button = button;
@@ -41,7 +40,7 @@ namespace ClassicUO.Input
 
     public sealed class MouseWheelEventArgs : EventArgs
     {
-        public MouseWheelEventArgs(int x, int y, int offx, int offy,  WheelDirection direction)
+        public MouseWheelEventArgs(int x, int y, int offx, int offy, WheelDirection direction)
         {
             Location = new Point(x, y);
             Direction = direction;
@@ -67,9 +66,5 @@ namespace ClassicUO.Input
 
     public sealed class ButtonClickEventArgs : EventArgs
     {
-        public ButtonClickEventArgs()
-        {
-
-        }
     }
 }

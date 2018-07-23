@@ -1,29 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ClassicUO.Input;
+using ClassicUO.AssetsLoader;
+using ClassicUO.Configuration;
+using ClassicUO.Game;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Network;
 using ClassicUO.Game.Renderer;
+using ClassicUO.Game.WorldObjects;
+using ClassicUO.Input;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
 
 namespace ClassicUO
 {
     public class GameLoop : Microsoft.Xna.Framework.Game
     {
         private readonly GraphicsDeviceManager _graphics;
-        private SpriteBatchUI _spriteBatch;
-        const double TIME_RUN_MOUNT = (2d / 20d) * 1000d;
         private DateTime _delay = DateTime.Now;
+        private CursorRenderer _gameCursor;
+        private SpriteBatchUI _spriteBatch;
 
         private Stopwatch _stopwatch;
-        private Texture2D _texture, _crossTexture, _gump, _textentry;
-        private Game.Renderer.CursorRenderer _gameCursor;
 
         private RenderTarget2D _targetRender;
 
@@ -33,63 +31,98 @@ namespace ClassicUO
             Color = 847
         };
 
+        private Texture2D _texture, _crossTexture, _gump, _textentry;
+
         private DateTime _timePing;
+
+        public GameLoop()
+        {
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
+            _graphics = new GraphicsDeviceManager(this);
+
+            _graphics.PreparingDeviceSettings += (sender, e) =>
+            {
+                e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage =
+                    RenderTargetUsage.PreserveContents;
+            };
+
+
+            if (_graphics.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
+                _graphics.GraphicsProfile = GraphicsProfile.HiDef;
+
+            _graphics.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
+            _graphics.SynchronizeWithVerticalRetrace = false;
+            _graphics.PreferredBackBufferWidth = 800;
+            _graphics.PreferredBackBufferHeight = 600;
+            _graphics.ApplyChanges();
+
+
+            Log.Message(LogTypes.Trace, "Gameloop initialized.");
+
+            Window.ClientSizeChanged += (sender, e) =>
+            {
+                _graphics.PreferredBackBufferWidth = Window.ClientBounds.Width;
+                _graphics.PreferredBackBufferHeight = Window.ClientBounds.Height;
+
+                _graphics.ApplyChanges();
+            };
+        }
 
         private (Point, Point, Vector2, Vector2, Point, Point) GetViewPort()
         {
-            int scale = 1;
+            var scale = 1;
 
-            int winGamePosX = 0;
-            int winGamePosY = 0;
+            var winGamePosX = 0;
+            var winGamePosY = 0;
 
-            int winGameWidth = _graphics.PreferredBackBufferWidth;
-            int winGameHeight = _graphics.PreferredBackBufferHeight;
+            var winGameWidth = _graphics.PreferredBackBufferWidth;
+            var winGameHeight = _graphics.PreferredBackBufferHeight;
 
-            int winGameCenterX = winGamePosX + (winGameWidth / 2);
-            int winGameCenterY = (winGamePosY + winGameHeight / 2) + (Game.World.Player.Position.Z * 4);
+            var winGameCenterX = winGamePosX + winGameWidth / 2;
+            var winGameCenterY = winGamePosY + winGameHeight / 2 + World.Player.Position.Z * 4;
 
-            winGameCenterX -= (int)Game.World.Player.Offset.X;
-            winGameCenterY -= (int)(Game.World.Player.Offset.Y - Game.World.Player.Offset.Z);
+            winGameCenterX -= (int) World.Player.Offset.X;
+            winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
 
-            int winDrawOffsetX = ((Game.World.Player.Position.X - Game.World.Player.Position.Y) * 22) - winGameCenterX + 22;
-            int winDrawOffsetY = ((Game.World.Player.Position.X + Game.World.Player.Position.Y) * 22) - winGameCenterY + 22;
+            var winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX + 22;
+            var winDrawOffsetY = (World.Player.Position.X + World.Player.Position.Y) * 22 - winGameCenterY + 22;
 
             float left = winGamePosX;
-            float right = winGameWidth + left;
+            var right = winGameWidth + left;
             float top = winGamePosY;
-            float bottom = winGameHeight + top;
+            var bottom = winGameHeight + top;
 
-            float newRight = right * scale;
-            float newBottom = bottom * scale;
+            var newRight = right * scale;
+            var newBottom = bottom * scale;
 
-            int winGameScaledOffsetX = (int)((left * scale) - (newRight - right));
-            int winGameScaledOffsetY = (int)((top * scale) - (newBottom - bottom));
+            var winGameScaledOffsetX = (int) (left * scale - (newRight - right));
+            var winGameScaledOffsetY = (int) (top * scale - (newBottom - bottom));
 
-            int winGameScaledWidth = (int)(newRight - winGameScaledOffsetX);
-            int winGameScaledHeight = (int)(newBottom - winGameScaledOffsetY);
+            var winGameScaledWidth = (int) (newRight - winGameScaledOffsetX);
+            var winGameScaledHeight = (int) (newBottom - winGameScaledOffsetY);
 
 
-            int width = ((winGameWidth / 44) + 1) * scale;
-            int height = ((winGameHeight / 44) + 1) * scale;
+            var width = (winGameWidth / 44 + 1) * scale;
+            var height = (winGameHeight / 44 + 1) * scale;
 
             if (width < height)
                 width = height;
             else
                 height = width;
 
-            int realMinRangeX = Game.World.Player.Position.X - width;
+            var realMinRangeX = World.Player.Position.X - width;
             if (realMinRangeX < 0)
                 realMinRangeX = 0;
-            int realMaxRangeX = Game.World.Player.Position.X + width;
-            if (realMaxRangeX >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0])
-                realMaxRangeX = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0];
+            var realMaxRangeX = World.Player.Position.X + width;
+            if (realMaxRangeX >= Map.MapsDefaultSize[World.Map.Index][0])
+                realMaxRangeX = Map.MapsDefaultSize[World.Map.Index][0];
 
-            int realMinRangeY = Game.World.Player.Position.Y - height;
+            var realMinRangeY = World.Player.Position.Y - height;
             if (realMinRangeY < 0)
                 realMinRangeY = 0;
-            int realMaxRangeY = Game.World.Player.Position.Y + height;
-            if (realMaxRangeY >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1])
-                realMaxRangeY = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1];
+            var realMaxRangeY = World.Player.Position.Y + height;
+            if (realMaxRangeY >= Map.MapsDefaultSize[World.Map.Index][1])
+                realMaxRangeY = Map.MapsDefaultSize[World.Map.Index][1];
 
             //int minBlockX = (realMinRangeX / 8) - 1;
             //int minBlockY = (realMinRangeY / 8) - 1;
@@ -105,58 +138,26 @@ namespace ClassicUO
             //if (maxBlockY >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1])
             //    maxBlockY = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1] - 1;
 
-            int drawOffset = scale * 40;
+            var drawOffset = scale * 40;
 
             float maxX = winGamePosX + winGameWidth + drawOffset;
             float maxY = winGamePosY + winGameHeight + drawOffset;
-            float newMaxX = maxX * scale;
-            float newMaxY = maxY * scale;
+            var newMaxX = maxX * scale;
+            var newMaxY = maxY * scale;
 
-            int minPixelsX = (int)(((winGamePosX - drawOffset) * scale) - (newMaxX - maxX));
-            int maxPixelsX = (int)newMaxX;
-            int minPixelsY = (int)(((winGamePosY - drawOffset) * scale) - (newMaxY - maxY));
-            int maxPixlesY = (int)newMaxY;
+            var minPixelsX = (int) ((winGamePosX - drawOffset) * scale - (newMaxX - maxX));
+            var maxPixelsX = (int) newMaxX;
+            var minPixelsY = (int) ((winGamePosY - drawOffset) * scale - (newMaxY - maxY));
+            var maxPixlesY = (int) newMaxY;
 
             return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY),
                 new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY),
                 new Point(winDrawOffsetX, winDrawOffsetY), new Point(winGameCenterX, winGameCenterY));
         }
 
-        public GameLoop()
-        {
-            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
-            _graphics = new GraphicsDeviceManager(this);
-
-            _graphics.PreparingDeviceSettings += (sender, e) =>
-            {
-                e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
-            };
-
-
-            if (_graphics.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
-                _graphics.GraphicsProfile = GraphicsProfile.HiDef;
-
-            _graphics.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
-            _graphics.SynchronizeWithVerticalRetrace = false;
-            _graphics.PreferredBackBufferWidth = 800;
-            _graphics.PreferredBackBufferHeight = 600;
-            _graphics.ApplyChanges();
-
-
-
-            Log.Message(LogTypes.Trace, "Gameloop initialized.");
-
-            this.Window.ClientSizeChanged += (sender, e) =>
-            {
-                _graphics.PreferredBackBufferWidth = this.Window.ClientBounds.Width;
-                _graphics.PreferredBackBufferHeight = this.Window.ClientBounds.Height;
-            };
-        }
-
         protected override void Initialize()
         {
-            this.Window.AllowUserResizing = true;
-
+            Window.AllowUserResizing = true;
 
 
             _spriteBatch = new SpriteBatchUI(this);
@@ -168,7 +169,6 @@ namespace ClassicUO
 
         protected override void LoadContent()
         {
-
             // TEST
 
 
@@ -187,10 +187,9 @@ namespace ClassicUO
             Configuration.ConfigurationResolver.Save(settings1, "settings.json");
             */
 
-            var settings = Configuration.ConfigurationResolver.Load<Configuration.Settings>("settings.json");
+            var settings = ConfigurationResolver.Load<Settings>("settings.json");
 
-            var parts = settings.ClientVersion.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-
+            var parts = settings.ClientVersion.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
 
 
             byte[] clientVersionBuffer =
@@ -198,71 +197,35 @@ namespace ClassicUO
                 byte.Parse(parts[0]),
                 byte.Parse(parts[1]),
                 byte.Parse(parts[2]),
-                byte.Parse(parts[3]),
+                byte.Parse(parts[3])
             };
 
 
-
-            AssetsLoader.FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
-
-
+            FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
 
 
             _stopwatch = Stopwatch.StartNew();
             Log.Message(LogTypes.Trace, "Loading UO files...");
 
-            AssetsLoader.FileManager.LoadFiles();
+            FileManager.LoadFiles();
 
             Log.Message(LogTypes.Trace, "UO files loaded in " + _stopwatch.ElapsedMilliseconds + " ms");
 
 
-
             PacketHandlers.LoadLoginHandlers();
-            PacketsTable.AdjustPacketSizeByVersion(AssetsLoader.FileManager.ClientVersion);
+            PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
 
 
-
-            Texture2D textureHue0 = new Texture2D(GraphicsDevice, 32, 3000);
-            textureHue0.SetData(AssetsLoader.Hues.CreateShaderColors());
+            var textureHue0 = new Texture2D(GraphicsDevice, 32, 3000);
+            textureHue0.SetData(Hues.CreateShaderColors());
             GraphicsDevice.Textures[1] = textureHue0;
 
 
-            var data = AssetsLoader.Art.ReadStaticArt(3850, out short w, out short h);
-
-            _texture = new Texture2D(GraphicsDevice, w, h, false, SurfaceFormat.Bgra5551);
-            _texture.SetData(data);
-
             _crossTexture = new Texture2D(GraphicsDevice, 1, 1);
-            _crossTexture.SetData(new Color[] { Color.Red });
+            _crossTexture.SetData(new[] {Color.Red});
 
-            KeyboardManager.KeyPressed += (sender, e) =>
-            {
-                //if (e.KeyState == Microsoft.Xna.Framework.Input.KeyState.Down)
-                //{
-                //    switch (e.Key)
-                //    {
-                //        case Microsoft.Xna.Framework.Input.Keys.Left:
-                //            _currentX--;
-                //            _y++;
-                //            break;
-                //        case Microsoft.Xna.Framework.Input.Keys.Up:
-                //            _y--;
-                //            _currentX--;
-                //            break;
-                //        case Microsoft.Xna.Framework.Input.Keys.Right:
-                //            _currentX++;
-                //            _y--;
-                //            break;
-                //        case Microsoft.Xna.Framework.Input.Keys.Down:
-                //            _y++;
-                //            _currentX++;
-                //            break;
-                //    }
-                //}
-            };
-
-            string username = settings.Username;
-            string password = settings.Password;
+            var username = settings.Username;
+            var password = settings.Password;
 
             NetClient.PacketReceived += (sender, e) =>
             {
@@ -281,7 +244,8 @@ namespace ClassicUO
                         NetClient.Socket.Send(new PSecondLogin(username, password, e.ReadUInt()));
                         break;
                     case 0xA9:
-                        NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName, BitConverter.ToUInt32(new byte[] { 127, 0, 0, 1 }, 0)));
+                        NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName,
+                            BitConverter.ToUInt32(new byte[] {127, 0, 0, 1}, 0)));
                         break;
                     case 0xBD:
                         NetClient.Socket.Send(new PClientVersion(clientVersionBuffer));
@@ -301,59 +265,27 @@ namespace ClassicUO
                 NetClient.Socket.Send(new PFirstLogin(username, password));
             };
 
-            NetClient.Disconnected += (sender, e) =>
-            {
-                Log.Message(LogTypes.Warning, "Disconnected!");
-            };
+            NetClient.Disconnected += (sender, e) => { Log.Message(LogTypes.Warning, "Disconnected!"); };
 
-
-            AssetsLoader.Fonts.SetUseHTML(true);
-            AssetsLoader.Fonts.RecalculateWidthByInfo = true;
-            //_textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, 0, 30);
 
             NetClient.Socket.Connect(settings.IP, settings.Port);
 
-            int font = 0;
-            MouseManager.MouseMove += (sender, e) =>
-            {
-                //if (font + 1 > 20)
-                //    font = 0;
-                //_textRenderer.Text = string.Format("Mouse screen location: {0},{1}   FONT: {2}", e.Location.X, e.Location.Y, font);
-                //_textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, font, 30);
-                //font++;
-                //_textRenderer.Text = string.Format("Mouse screen location: {0},{1}   FONT: {2}", e.Location.X, e.Location.Y, font);
-                //_textRenderer.GenerateTexture(0, 0, AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT, font++);
-
-            };
-
-
             MouseManager.MousePressed += (sender, e) =>
             {
-                if (Game.World.Map != null && Game.World.Player != null)
-                {
+                if (World.Map != null && World.Player != null)
                     if (e.Button == MouseButton.Right)
                     {
+                        var center = new Point(_graphics.PreferredBackBufferWidth / 2,
+                            _graphics.PreferredBackBufferHeight / 2);
 
-                        Point center = new Point(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
+                        var direction = DirectionHelper.DirectionFromPoints(center, e.Location);
 
-                        Game.Direction direction = Game.DirectionHelper.DirectionFromPoints(center, e.Location);
-
-                        Game.World.Player.Walk(direction, true);
+                        World.Player.Walk(direction, true);
                     }
-                }
             };
 
 
-            var datagump = AssetsLoader.Gumps.GetGump(0x2329, out int gw, out int gh);
-            _gump = new Texture2D(GraphicsDevice, gw, gh, false, SurfaceFormat.Bgra5551);
-            _gump.SetData(datagump);
-
-            var datatextentry = AssetsLoader.Gumps.GetGump(9350 + 4, out gw, out gh);
-            _textentry = new Texture2D(GraphicsDevice, gw, gh, false, SurfaceFormat.Bgra5551);
-            _textentry.SetData(datatextentry);
-
-
-            _gameCursor = new Game.Renderer.CursorRenderer();
+            _gameCursor = new CursorRenderer();
 
             // END TEST
 
@@ -367,19 +299,16 @@ namespace ClassicUO
 
         protected override void Update(GameTime gameTime)
         {
-
-            Game.World.Ticks = (long)gameTime.TotalGameTime.TotalMilliseconds;
+            World.Ticks = (long) gameTime.TotalGameTime.TotalMilliseconds;
 
             NetClient.Socket.Slice();
-
             TextureManager.Update();
-
             MouseManager.Update();
             _gameCursor.Update(gameTime.TotalGameTime.Ticks);
 
-            if (Game.World.Map != null && Game.World.Player != null)
+            if (World.Map != null && World.Player != null)
             {
-                Game.World.Update(gameTime.TotalGameTime.Ticks);
+                World.Update(gameTime.TotalGameTime.Ticks);
 
                 if (DateTime.Now > _timePing)
                 {
@@ -397,44 +326,57 @@ namespace ClassicUO
             drawTerrain = true;
             underSurface = false;
 
-            Game.Map.Tile tile = Game.World.Map.GetTile(Game.World.Map.Center.X, Game.World.Map.Center.Y);
-            if (tile != null && tile.IsZUnderObjectOrGround(Game.World.Player.Position.Z, out var underObject, out var underGround))
+            var tile = World.Map.GetTile(World.Map.Center.X, World.Map.Center.Y);
+            if (tile != null &&
+                tile.IsZUnderObjectOrGround(World.Player.Position.Z, out var underObject, out var underGround))
             {
                 drawTerrain = underGround == null;
                 if (underObject != null)
                 {
-                    if (underObject is Game.WorldObjects.Item item)
+                    if (underObject is Item item)
                     {
-                        if (AssetsLoader.TileData.IsRoof((long)item.ItemData.Flags))
-                            maxItemZ = Game.World.Player.Position.Z - (Game.World.Player.Position.Z % 20) + 20;
-                        else if (AssetsLoader.TileData.IsSurface((long)item.ItemData.Flags) || (AssetsLoader.TileData.IsWall((long)item.ItemData.Flags) && AssetsLoader.TileData.IsDoor((long)item.ItemData.Flags)))
+                        if (TileData.IsRoof((long) item.ItemData.Flags))
+                        {
+                            maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
+                        }
+                        else if (TileData.IsSurface((long) item.ItemData.Flags) ||
+                                 TileData.IsWall((long) item.ItemData.Flags) &&
+                                 TileData.IsDoor((long) item.ItemData.Flags))
+                        {
                             maxItemZ = item.Position.Z;
+                        }
                         else
                         {
-                            int z = Game.World.Player.Position.Z + ((item.ItemData.Height > 20) ? item.ItemData.Height : 20);
+                            var z = World.Player.Position.Z + (item.ItemData.Height > 20 ? item.ItemData.Height : 20);
                             maxItemZ = z;
                         }
                     }
-                    else if (underObject is Game.WorldObjects.Static sta)
+                    else if (underObject is Static sta)
                     {
-                        if (AssetsLoader.TileData.IsRoof((long)sta.ItemData.Flags))
-                            maxItemZ = Game.World.Player.Position.Z - (Game.World.Player.Position.Z % 20) + 20;
-                        else if (AssetsLoader.TileData.IsSurface((long)sta.ItemData.Flags) || (AssetsLoader.TileData.IsWall((long)sta.ItemData.Flags) && AssetsLoader.TileData.IsDoor((long)sta.ItemData.Flags)))
+                        if (TileData.IsRoof((long) sta.ItemData.Flags))
+                        {
+                            maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
+                        }
+                        else if (TileData.IsSurface((long) sta.ItemData.Flags) ||
+                                 TileData.IsWall((long) sta.ItemData.Flags) &&
+                                 TileData.IsDoor((long) sta.ItemData.Flags))
+                        {
                             maxItemZ = sta.Position.Z;
+                        }
                         else
                         {
-                            int z = Game.World.Player.Position.Z + ((sta.ItemData.Height > 20) ? sta.ItemData.Height : 20);
+                            var z = World.Player.Position.Z + (sta.ItemData.Height > 20 ? sta.ItemData.Height : 20);
                             maxItemZ = z;
                         }
                     }
 
-                    if ( (underObject is Game.WorldObjects.Item i && AssetsLoader.TileData.IsRoof((long)i.ItemData.Flags)) ||
-                         (underObject is Game.WorldObjects.Static s && AssetsLoader.TileData.IsRoof((long)s.ItemData.Flags)))
+                    if (underObject is Item i && TileData.IsRoof((long) i.ItemData.Flags) ||
+                        underObject is Static s && TileData.IsRoof((long) s.ItemData.Flags))
                     {
-                        bool isSE = true;
-                        if ((tile = Game.World.Map.GetTile(Game.World.Map.Center.X + 1, Game.World.Map.Center.Y)) != null)
+                        var isSE = true;
+                        if ((tile = World.Map.GetTile(World.Map.Center.X + 1, World.Map.Center.Y)) != null)
                         {
-                            tile.IsZUnderObjectOrGround(Game.World.Player.Position.Z, out underObject, out underGround);
+                            tile.IsZUnderObjectOrGround(World.Player.Position.Z, out underObject, out underGround);
                             isSE = underObject != null;
                         }
 
@@ -449,42 +391,42 @@ namespace ClassicUO
 
         protected override void Draw(GameTime gameTime)
         {
-            if (Game.World.Player != null && Game.World.Map !=  null)
+            if (World.Player != null && World.Map != null)
             {
-                int scale = 1;
+                var scale = 1;
 
-                if (_targetRender == null || _targetRender.Width != _graphics.PreferredBackBufferWidth / scale || _targetRender.Height != _graphics.PreferredBackBufferHeight / scale)
+                if (_targetRender == null || _targetRender.Width != _graphics.PreferredBackBufferWidth / scale ||
+                    _targetRender.Height != _graphics.PreferredBackBufferHeight / scale)
                 {
                     if (_targetRender != null)
                         _targetRender.Dispose();
 
-                    _targetRender = new RenderTarget2D(GraphicsDevice, _graphics.PreferredBackBufferWidth / scale, _graphics.PreferredBackBufferHeight / scale,
-                        false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
-
+                    _targetRender = new RenderTarget2D(GraphicsDevice, _graphics.PreferredBackBufferWidth / scale,
+                        _graphics.PreferredBackBufferHeight / scale,
+                        false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0,
+                        RenderTargetUsage.DiscardContents);
                 }
 
-                
 
+                var (minChunkTile, maxChunkTile, minPixel, maxPixel, offset, center) = GetViewPort();
 
-                (Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center) = GetViewPort();
-
-                CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
+                CheckIfUnderEntity(out var maxItemZ, out var drawTerrain, out var underSurface);
 
                 _spriteBatch.BeginDraw();
-                _spriteBatch.SetLightIntensity(Game.World.Light.IsometricLevel);
-                _spriteBatch.SetLightDirection(Game.World.Light.IsometricDirection);
+                _spriteBatch.SetLightIntensity(World.Light.IsometricLevel);
+                _spriteBatch.SetLightDirection(World.Light.IsometricDirection);
 
-                int minX = minChunkTile.X;
-                int minY = minChunkTile.Y;
-                int maxX = maxChunkTile.X;
-                int maxY = maxChunkTile.Y;
+                var minX = minChunkTile.X;
+                var minY = minChunkTile.Y;
+                var maxX = maxChunkTile.X;
+                var maxY = maxChunkTile.Y;
 
-                int mapBlockHeight = AssetsLoader.Map.MapBlocksSize[Game.World.Map.Index][1];
+                var mapBlockHeight = Map.MapBlocksSize[World.Map.Index][1];
 
-                for (int i = 0; i < 2; i++)
+                for (var i = 0; i < 2; i++)
                 {
-                    int minValue = minY;
-                    int maxValue = maxY;
+                    var minValue = minY;
+                    var maxValue = maxY;
 
                     if (i > 0)
                     {
@@ -492,10 +434,10 @@ namespace ClassicUO
                         maxValue = maxX;
                     }
 
-                    for (int lead = minValue; lead < maxValue; lead++)
+                    for (var lead = minValue; lead < maxValue; lead++)
                     {
-                        int x = minX;
-                        int y = lead;
+                        var x = minX;
+                        var y = lead;
 
                         if (i > 0)
                         {
@@ -508,43 +450,36 @@ namespace ClassicUO
                             if (x < minX || x > maxX || y < minY || y > maxY)
                                 break;
 
-                            bool draw = true;
+                            var draw = true;
 
-                            Game.Map.Tile tile = Game.World.Map.GetTile((short)x, (short)y);
+                            var tile = World.Map.GetTile((short) x, (short) y);
 
                             if (tile != null)
                             {
-                                Vector3 position = new Vector3(
-                               ((x - y) * 22f) - offset.X,
-                               ((x + y) * 22f /*- (Game.World.Player.Position.Z * 4)*/) - offset.Y, 0);
+                                var position = new Vector3(
+                                    (x - y) * 22f - offset.X,
+                                    (x + y) * 22f - offset.Y, 0);
 
-                                for (int k = 0; k < tile.ObjectsOnTiles.Count; k++)
+
+                                for (var k = 0; k < tile.ObjectsOnTiles.Count; k++)
                                 {
                                     var o = tile.ObjectsOnTiles[k];
 
 
                                     if (!drawTerrain)
-                                    {
-                                        if (o is Game.Map.Tile || o.Position.Z > tile.Position.Z)
+                                        if (o is Tile || o.Position.Z > tile.Position.Z)
                                             draw = false;
-                                    }
 
-                                    if ( (o.Position.Z >= maxItemZ ||
-                                         (maxItemZ != 255 && 
-                                                ((o is Game.WorldObjects.Item item && AssetsLoader.TileData.IsRoof((long)item.ItemData.Flags) || (o is Game.WorldObjects.Static st && AssetsLoader.TileData.IsRoof((long)st.ItemData.Flags))))))
-
-                                        && !(o is Game.Map.Tile)  )
+                                    if ((o.Position.Z >= maxItemZ ||
+                                         maxItemZ != 255 &&
+                                         (o is Item item && TileData.IsRoof((long) item.ItemData.Flags) ||
+                                          o is Static st && TileData.IsRoof((long) st.ItemData.Flags)))
+                                        && !(o is Tile))
                                         continue;
 
-                                    if (draw)
-                                    {
 
-                                        o.ViewObject.Draw(_spriteBatch, position);
-                                    }
-
-
+                                    if (draw) o.ViewObject.Draw(_spriteBatch, position);
                                 }
-
                             }
 
                             x++;
@@ -553,18 +488,21 @@ namespace ClassicUO
                     }
                 }
 
+                //foreach (var obj in worldObjects)
+                //    obj.Item2.ViewObject.Draw(_spriteBatch, obj.Item1);
 
                 _spriteBatch.GraphicsDevice.SetRenderTarget(_targetRender);
                 _spriteBatch.GraphicsDevice.Clear(Color.Black);
                 _spriteBatch.EndDraw(true);
                 _spriteBatch.GraphicsDevice.SetRenderTarget(null);
-
             }
 
             _spriteBatch.GraphicsDevice.Clear(Color.Transparent);
             _spriteBatch.BeginDraw();
 
-            _spriteBatch.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
+            _spriteBatch.Draw2D(_targetRender,
+                new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight),
+                Vector3.Zero);
 
             //_spriteBatch.Draw2D(_crossTexture, new Rectangle(_graphics.PreferredBackBufferWidth / 2  - 5, _graphics.PreferredBackBufferHeight / 2 - 5, 10, 10), Vector3.Zero);
 

@@ -1,16 +1,16 @@
-﻿using ClassicUO.Input;
+﻿using System;
+using System.Collections.Generic;
+using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
 
 namespace ClassicUO.UI
 {
     public abstract class Control
     {
+        private readonly List<Control> _children;
         private Control _parent;
         private Rectangle _rectangle;
-        private List<Control> _children;
 
         protected Control(Control parent = null)
         {
@@ -22,15 +22,24 @@ namespace ClassicUO.UI
 
         protected Control(Control parent, int x, int y) : this(parent)
         {
-            X = x; Y = y;
+            X = x;
+            Y = y;
         }
 
-        protected Control(Control parent, int x, int y, int width, int height) : this (parent, x, y)
+        protected Control(Control parent, int x, int y, int width, int height) : this(parent, x, y)
         {
-            X = x; Y = y; Width = width; Height = height;
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
         }
 
-        public Point Location { get => _rectangle.Location; set => _rectangle.Location = value; }
+        public Point Location
+        {
+            get => _rectangle.Location;
+            set => _rectangle.Location = value;
+        }
+
         public Rectangle Rectangle
         {
             get => _rectangle;
@@ -80,14 +89,20 @@ namespace ClassicUO.UI
                 else
                     value?.AddChildren(this);
 
-                _parent = value; 
+                _parent = value;
             }
         }
 
 
+        internal void SetFocused()
+        {
+            IsFocused = true;
+        }
 
-        internal void SetFocused() => IsFocused = true;
-        internal void RemoveFocus() => IsFocused = false;
+        internal void RemoveFocus()
+        {
+            IsFocused = false;
+        }
 
 
         public event EventHandler<MouseEventArgs> MouseButton, MouseMove, MouseEnter, MouseLeft;
@@ -130,13 +145,11 @@ namespace ClassicUO.UI
                 Console.WriteLine("OFFSET: {0},{1}", offsetX, offsetY);
 
                 if (Parent != null)
-                {
                     if (X + offsetX > Parent.Width ||
                         Y + offsetY > Parent.Height ||
                         X + offsetX < Parent.X ||
                         Y + offsetY < Parent.Y)
                         return;
-                }
 
 
                 X += offsetX;
@@ -179,7 +192,5 @@ namespace ClassicUO.UI
         {
             Keyboard?.Invoke(this, e);
         }
-
-
     }
 }

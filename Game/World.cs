@@ -1,19 +1,21 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
+using ClassicUO.Game.Map;
+using ClassicUO.Game.Renderer;
 using ClassicUO.Game.WorldObjects;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game
 {
     public static class World
     {
+        private const int DISTANCE_POV = 24;
+
+        private static readonly ConcurrentDictionary<Serial, House> _houses = new ConcurrentDictionary<Serial, House>();
         public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
         public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
         public static PlayerMobile Player { get; set; }
-        public static Map.Facet Map { get; private set; }
+        public static Facet Map { get; private set; }
 
         public static int MapIndex
         {
@@ -27,18 +29,18 @@ namespace ClassicUO.Game
                     if (Map != null)
                     {
                         var position = Player.Position;
-                        Player.SetMap(null);
+                        Player.Map = null;
                         Map = null;
-                        Map = new Map.Facet(value);
-                        Player.SetMap(Map);
+                        Map = new Facet(value);
+                        Player.Map = Map;
                         Player.Position = position;
                         Player.ClearSteps();
                         Player.ProcessDelta();
                     }
                     else
                     {
-                        Map = new Map.Facet(value);
-                        Player.SetMap(Map);
+                        Map = new Facet(value);
+                        Player.Map = Map;
                     }
                 }
             }
@@ -47,20 +49,15 @@ namespace ClassicUO.Game
 
         public static bool InGame => Player != null && Map != null;
 
-        private static readonly ConcurrentDictionary<Serial, House> _houses = new ConcurrentDictionary<Serial, House>();
-
         public static long Ticks { get; set; }
-        public static Renderer.IsometricLight Light { get; } = new Renderer.IsometricLight();
-
-        const int DISTANCE_POV = 24;
-
+        public static IsometricLight Light { get; } = new IsometricLight();
 
 
         public static void Update(in double frameMS)
         {
             if (Player != null)
             {
-                foreach (Mobile mob in Mobiles)
+                foreach (var mob in Mobiles)
                 {
                     mob.ViewObject.Update(frameMS);
 
@@ -71,7 +68,7 @@ namespace ClassicUO.Game
                     }
                 }
 
-                foreach (Item item in Items)
+                foreach (var item in Items)
                 {
                     item.ViewObject.Update(frameMS);
 
@@ -83,7 +80,6 @@ namespace ClassicUO.Game
                 }
             }
         }
-
 
 
         public static House GetHouse(in Serial serial)
@@ -104,7 +100,7 @@ namespace ClassicUO.Game
             _houses.TryAdd(house.Serial, house);
         }
 
-        public static  void RemoveHouse(in Serial house)
+        public static void RemoveHouse(in Serial house)
         {
             _houses.TryRemove(house, out var h);
         }
@@ -140,14 +136,14 @@ namespace ClassicUO.Game
 
         public static bool RemoveItem(Serial serial)
         {
-            Item item = Items.Remove(serial);
+            var item = Items.Remove(serial);
             if (item == null)
             {
                 ToAdd.RemoveWhere(i => i == serial);
                 return false;
             }
 
-            foreach (Item i in item.Items)
+            foreach (var i in item.Items)
                 RemoveItem(i);
             item.Items.Clear();
             return true;
@@ -155,11 +151,11 @@ namespace ClassicUO.Game
 
         public static bool RemoveMobile(in Serial serial)
         {
-            Mobile mobile = Mobiles.Remove(serial);
+            var mobile = Mobiles.Remove(serial);
             if (mobile == null)
                 return false;
 
-            foreach (Item i in mobile.Items)
+            foreach (var i in mobile.Items)
                 RemoveItem(i);
             mobile.Items.Clear();
             return true;
@@ -176,20 +172,17 @@ namespace ClassicUO.Game
             foreach (var item in Items)
             {
                 if (noplayer)
-                {
                     if (item.RootContainer == Player)
                         continue;
-                }
                 item.Dispose();
                 RemoveItem(item);
             }
+
             foreach (var mob in Mobiles)
             {
                 if (noplayer)
-                {
                     if (mob == Player)
                         continue;
-                }
                 mob.Dispose();
                 RemoveMobile(mob);
             }

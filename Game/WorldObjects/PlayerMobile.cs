@@ -1,10 +1,8 @@
-﻿using ClassicUO.Game.Map;
+﻿using System;
+using System.Collections.Generic;
+using ClassicUO.Game.Network;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ClassicUO.Game.WorldObjects
 {
@@ -48,29 +46,32 @@ namespace ClassicUO.Game.WorldObjects
 
     public class PlayerMobile : Mobile
     {
-        private ushort _strength;
-        private ushort _intelligence;
+        private readonly Ability[] _ability = new Ability[2] {Ability.None, Ability.None};
+
+        private readonly Deque<Step> _requestedSteps = new Deque<Step>();
+        private ushort _damageMax;
+        private ushort _damageMin;
         private ushort _dexterity;
-        private ushort _weight;
-        private ushort _weightMax;
-        private uint _gold;
-        private ushort _resistPhysical;
-        private ushort _resistFire;
-        private ushort _resistCold;
-        private ushort _resistPoison;
-        private ushort _resistEnergy;
+        private bool _female;
         private byte _followers;
         private byte _followersMax;
+        private uint _gold;
+        private ushort _intelligence;
+        private long _lastStepRequestedTime;
         private ushort _luck;
+
+
+        private PlayerMovementState _movementState = PlayerMovementState.ANIMATE_IMMEDIATELY;
+        private ushort _resistCold;
+        private ushort _resistEnergy;
+        private ushort _resistFire;
+        private ushort _resistPhysical;
+        private ushort _resistPoison;
+        private readonly List<Skill> _sklls;
+        private ushort _strength;
         private uint _tithingPoints;
-        private ushort _damageMin;
-        private ushort _damageMax;
-        private bool _female;
-        private readonly Ability[] _ability = new Ability[2] { Ability.None, Ability.None };
-        private List<Skill> _sklls;
-
-
-        public event EventHandler StatsChanged, SkillsChanged;
+        private ushort _weight;
+        private ushort _weightMax;
 
 
         public PlayerMobile(in Serial serial) : base(serial)
@@ -79,14 +80,13 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
-
         public IReadOnlyList<Skill> Skills => _sklls;
 
         public override bool InWarMode { get; set; }
 
         public ushort Strength
         {
-            get { return _strength; }
+            get => _strength;
             set
             {
                 if (_strength != value)
@@ -99,7 +99,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public ushort Intelligence
         {
-            get { return _intelligence; }
+            get => _intelligence;
             set
             {
                 if (_intelligence != value)
@@ -112,7 +112,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public ushort Dexterity
         {
-            get { return _dexterity; }
+            get => _dexterity;
             set
             {
                 if (_dexterity != value)
@@ -125,7 +125,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public ushort Weight
         {
-            get { return _weight; }
+            get => _weight;
             set
             {
                 if (_weight != value)
@@ -138,7 +138,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public ushort WeightMax
         {
-            get { return _weightMax; }
+            get => _weightMax;
             set
             {
                 if (_weightMax != value)
@@ -151,7 +151,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public uint Gold
         {
-            get { return _gold; }
+            get => _gold;
             set
             {
                 if (_gold != value)
@@ -164,7 +164,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public ushort ResistPhysical
         {
-            get { return _resistPhysical; }
+            get => _resistPhysical;
             set
             {
                 if (_resistPhysical != value)
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public ushort ResistFire
         {
-            get { return _resistFire; }
+            get => _resistFire;
             set
             {
                 if (_resistFire != value)
@@ -190,7 +190,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public ushort ResistCold
         {
-            get { return _resistCold; }
+            get => _resistCold;
             set
             {
                 if (_resistCold != value)
@@ -203,7 +203,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public ushort ResistPoison
         {
-            get { return _resistPoison; }
+            get => _resistPoison;
             set
             {
                 if (_resistPoison != value)
@@ -216,7 +216,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public ushort ResistEnergy
         {
-            get { return _resistEnergy; }
+            get => _resistEnergy;
             set
             {
                 if (_resistEnergy != value)
@@ -229,7 +229,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public byte Followers
         {
-            get { return _followers; }
+            get => _followers;
             set
             {
                 if (_followers != value)
@@ -242,7 +242,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public byte FollowersMax
         {
-            get { return _followersMax; }
+            get => _followersMax;
             set
             {
                 if (_followersMax != value)
@@ -255,7 +255,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public ushort Luck
         {
-            get { return _luck; }
+            get => _luck;
             set
             {
                 if (_luck != value)
@@ -268,7 +268,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public uint TithingPoints
         {
-            get { return _tithingPoints; }
+            get => _tithingPoints;
             set
             {
                 if (_tithingPoints != value)
@@ -281,7 +281,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public ushort DamageMin
         {
-            get { return _damageMin; }
+            get => _damageMin;
             set
             {
                 if (_damageMin != value)
@@ -294,7 +294,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public ushort DamageMax
         {
-            get { return _damageMax; }
+            get => _damageMax;
             set
             {
                 if (_damageMax != value)
@@ -307,7 +307,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public bool Female
         {
-            get { return _female; }
+            get => _female;
             set
             {
                 if (_female != value)
@@ -318,14 +318,31 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
-        public Ability PrimaryAbility { get => _ability[0]; set => _ability[0] = value; }
-        public Ability SecondaryAbility { get => _ability[1]; set => _ability[1] = value; }
+        public Ability PrimaryAbility
+        {
+            get => _ability[0];
+            set => _ability[0] = value;
+        }
+
+        public Ability SecondaryAbility
+        {
+            get => _ability[1];
+            set => _ability[1] = value;
+        }
+
+
+        //protected override bool NoIterateAnimIndex() => false;
+        public override bool IsWalking => LastStepTime > World.Ticks - PLAYER_WALKING_DELAY;
+        public byte SequenceNumber { get; set; }
+
+
+        public event EventHandler StatsChanged, SkillsChanged;
 
         public void UpdateSkill(int id, ushort realValue, ushort baseValue, SkillLock skillLock, ushort cap)
         {
             if (id < Skills.Count)
             {
-                Skill skill = Skills[id];
+                var skill = Skills[id];
                 skill.ValueFixed = realValue;
                 skill.BaseFixed = baseValue;
                 skill.Lock = skillLock;
@@ -338,7 +355,7 @@ namespace ClassicUO.Game.WorldObjects
         {
             if (id < Skills.Count)
             {
-                Skill skill = Skills[id];
+                var skill = Skills[id];
                 skill.Lock = skillLock;
                 _delta |= Delta.Skills;
             }
@@ -346,8 +363,8 @@ namespace ClassicUO.Game.WorldObjects
 
         public void UpdateAbilities()
         {
-            Item right = GetItemAtLayer(Layer.RightHand);
-            Item left = GetItemAtLayer(Layer.LeftHand);
+            var right = GetItemAtLayer(Layer.RightHand);
+            var left = GetItemAtLayer(Layer.LeftHand);
 
             _ability[0] = Ability.None;
             _ability[1] = Ability.None;
@@ -355,21 +372,25 @@ namespace ClassicUO.Game.WorldObjects
             if (right == null && left == null)
                 return;
 
-            Graphic[] graphics = { 0x00, 0x00 };
+            Graphic[] graphics = {0x00, 0x00};
 
             if (right == null && left != null)
+            {
                 graphics[0] = left.Graphic;
+            }
             else if (right != null && left == null)
+            {
                 graphics[1] = right.Graphic;
+            }
             else
             {
                 graphics[0] = left.Graphic;
                 graphics[1] = right.Graphic;
             }
 
-            for (int i = 0; i < graphics.Length; i++)
+            for (var i = 0; i < graphics.Length; i++)
             {
-                Graphic g = graphics[i];
+                var g = graphics[i];
 
                 switch (g)
                 {
@@ -893,7 +914,7 @@ namespace ClassicUO.Game.WorldObjects
                         _ability[0] = Ability.MovingShot;
                         _ability[1] = Ability.InfusedThrow;
                         goto done;
-                    case 0x406D:// Dual Pointed Spear
+                    case 0x406D: // Dual Pointed Spear
                         _ability[0] = Ability.DoubleShot;
                         _ability[1] = Ability.Disarm;
                         goto done;
@@ -991,13 +1012,11 @@ namespace ClassicUO.Game.WorldObjects
                         goto done;
                     default:
                         break;
-                }    
+                }
             }
 
-            done:
-            ;
+            done: ;
         }
-
 
 
         protected override void OnProcessDelta(Delta d)
@@ -1012,22 +1031,12 @@ namespace ClassicUO.Game.WorldObjects
 
         protected override void OnPositionChanged(object sender, EventArgs e)
         {
-            
             if (World.Map != null && World.Map.Index >= 0)
             {
-                World.Map.Center = new Point((short)Position.X, (short)Position.Y);
+                World.Map.Center = new Point((short) Position.X, (short) Position.Y);
                 base.OnPositionChanged(sender, e);
             }
-            
         }
-
-
-        //protected override bool NoIterateAnimIndex() => false;
-        public override bool IsWalking => LastStepTime > (World.Ticks - PLAYER_WALKING_DELAY);
-
-        private readonly Deque<Step> _requestedSteps = new Deque<Step>();
-        private long _lastStepRequestedTime;
-        public byte SequenceNumber { get; set; }
 
         public bool Walk(Direction direction, bool run)
         {
@@ -1036,7 +1045,7 @@ namespace ClassicUO.Game.WorldObjects
 
             int x = 0, y = 0;
             sbyte z = 0;
-            Direction oldDirection = Direction.NONE;
+            var oldDirection = Direction.NONE;
 
             if (_requestedSteps.Count <= 0)
             {
@@ -1044,26 +1053,25 @@ namespace ClassicUO.Game.WorldObjects
             }
             else
             {
-                Step step1 = _requestedSteps.Back();
-                x = step1.X; y = step1.Y; z = step1.Z; oldDirection = (Direction)step1.Direction;
+                var step1 = _requestedSteps.Back();
+                x = step1.X;
+                y = step1.Y;
+                z = step1.Z;
+                oldDirection = (Direction) step1.Direction;
             }
 
-            oldDirection = (oldDirection & Direction.Up);
-            direction = (direction & Direction.Up);
+            oldDirection = oldDirection & Direction.Up;
+            direction = direction & Direction.Up;
 
             ushort walkTime;
-            Direction newDirection = direction;
-            int newX = x;
-            int newY = y;
-            sbyte newZ = z;
+            var newDirection = direction;
+            var newX = x;
+            var newY = y;
+            var newZ = z;
 
             if (oldDirection == newDirection)
             {
-
-                if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection))
-                {
-                    return false;
-                }
+                if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection)) return false;
 
                 if (newDirection != direction)
                 {
@@ -1073,8 +1081,10 @@ namespace ClassicUO.Game.WorldObjects
                 else
                 {
                     direction = newDirection;
-                    x = newX; y = newY; z = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
+                    x = newX;
+                    y = newY;
+                    z = newZ;
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
                 }
             }
             else
@@ -1082,8 +1092,10 @@ namespace ClassicUO.Game.WorldObjects
                 if (oldDirection == newDirection)
                 {
                     direction = newDirection;
-                    x = newX; y = newY; z = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
+                    x = newX;
+                    y = newY;
+                    z = newZ;
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
                 }
                 else
                 {
@@ -1095,12 +1107,12 @@ namespace ClassicUO.Game.WorldObjects
             if (run)
                 direction |= Direction.Running;
 
-            Step step = new Step()
+            var step = new Step
             {
                 X = x,
                 Y = y,
                 Z = z,
-                Direction = (byte)direction,
+                Direction = (byte) direction,
                 Run = run,
                 Seq = SequenceNumber
             };
@@ -1108,24 +1120,23 @@ namespace ClassicUO.Game.WorldObjects
 
             if (_movementState == PlayerMovementState.ANIMATE_IMMEDIATELY)
             {
-                for (int i = 0; i < _requestedSteps.Count; i++)
+                for (var i = 0; i < _requestedSteps.Count; i++)
                 {
                     var s = _requestedSteps[i];
                     if (!s.Anim)
                     {
                         s.Anim = true;
                         _requestedSteps[i] = s;
-                        EnqueueStep(s.X, s.Y, s.Z, (Direction)s.Direction, s.Run);
-
+                        EnqueueStep(s.X, s.Y, s.Z, (Direction) s.Direction, s.Run);
                     }
                 }
 
                 step.Anim = true;
-                EnqueueStep(step.X, step.Y, step.Z, (Direction)step.Direction, step.Run);
+                EnqueueStep(step.X, step.Y, step.Z, (Direction) step.Direction, step.Run);
             }
 
             _requestedSteps.AddToBack(step);
-            new Network.PWalkRequest(direction, SequenceNumber).SendToServer();
+            new PWalkRequest(direction, SequenceNumber).SendToServer();
 
             if (SequenceNumber == 0xFF)
                 SequenceNumber = 1;
@@ -1143,7 +1154,7 @@ namespace ClassicUO.Game.WorldObjects
             if (_requestedSteps.Count <= 0)
                 return;
 
-            Step step = _requestedSteps.Front();
+            var step = _requestedSteps.Front();
             if (step.Seq != seq)
                 return;
 
@@ -1153,24 +1164,21 @@ namespace ClassicUO.Game.WorldObjects
             {
                 int endX = 0, endY = 0;
                 sbyte endZ = 0;
-                Direction endDir = Direction.NONE;
+                var endDir = Direction.NONE;
 
                 GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
 
-                if (step.Direction == (byte)endDir)
-                {
+                if (step.Direction == (byte) endDir)
                     if (_movementState == PlayerMovementState.ANIMATE_ON_CONFIRM)
                         _movementState = PlayerMovementState.ANIMATE_ON_CONFIRM;
-                }
 
-                EnqueueStep(step.X, step.Y, step.Z, (Direction)step.Direction, step.Run);
+                EnqueueStep(step.X, step.Y, step.Z, (Direction) step.Direction, step.Run);
             }
         }
 
         public void DenyWalk(in byte seq, in Direction dir, in Position position)
         {
-            foreach (Step step in _requestedSteps)
-            {
+            foreach (var step in _requestedSteps)
                 if (step.Seq == seq)
                 {
                     ResetSteps();
@@ -1181,7 +1189,6 @@ namespace ClassicUO.Game.WorldObjects
 
                     break;
                 }
-            }
         }
 
         public void ResetSteps()
@@ -1193,18 +1200,15 @@ namespace ClassicUO.Game.WorldObjects
             Offset = Vector3.Zero;
         }
 
-        public void ResetRequestedSteps() => _requestedSteps.Clear();
-
-
-
-
-        private PlayerMovementState _movementState = PlayerMovementState.ANIMATE_IMMEDIATELY;
-
-        enum  PlayerMovementState
+        public void ResetRequestedSteps()
         {
-            ANIMATE_IMMEDIATELY = 0,
-            ANIMATE_ON_CONFIRM,
+            _requestedSteps.Clear();
         }
 
+        private enum PlayerMovementState
+        {
+            ANIMATE_IMMEDIATELY = 0,
+            ANIMATE_ON_CONFIRM
+        }
     }
 }

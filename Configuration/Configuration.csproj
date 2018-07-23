@@ -15,10 +15,4 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="FNA">
-      <HintPath>..\FNA\FNA.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

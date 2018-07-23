@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Utility
 {
@@ -15,23 +14,22 @@ namespace ClassicUO.Utility
 
     public static class Log
     {
-
-        private static readonly Dictionary<LogTypes, string> _logMsgFormat = new Dictionary<LogTypes, string>()
+        private static readonly Dictionary<LogTypes, string> _logMsgFormat = new Dictionary<LogTypes, string>
         {
-            { LogTypes.None, string.Empty },
-            { LogTypes.Trace,   "  Trace   " },
-            { LogTypes.Info,    "  Info    " },
-            { LogTypes.Warning, "  Warning " },
-            { LogTypes.Error,   "  Error   " }
+            {LogTypes.None, string.Empty},
+            {LogTypes.Trace, "  Trace   "},
+            {LogTypes.Info, "  Info    "},
+            {LogTypes.Warning, "  Warning "},
+            {LogTypes.Error, "  Error   "}
         };
 
-        private static readonly Dictionary<LogTypes, ConsoleColor> _logMsgColor = new Dictionary<LogTypes, ConsoleColor>()
+        private static readonly Dictionary<LogTypes, ConsoleColor> _logMsgColor = new Dictionary<LogTypes, ConsoleColor>
         {
-            { LogTypes.None,  ConsoleColor.White },
-            { LogTypes.Trace, ConsoleColor.Green },
-            { LogTypes.Info, ConsoleColor.Cyan },
-            { LogTypes.Warning, ConsoleColor.Yellow },
-            { LogTypes.Error, ConsoleColor.Red }
+            {LogTypes.None, ConsoleColor.White},
+            {LogTypes.Trace, ConsoleColor.Green},
+            {LogTypes.Info, ConsoleColor.Cyan},
+            {LogTypes.Warning, ConsoleColor.Yellow},
+            {LogTypes.Error, ConsoleColor.Red}
         };
 
 
@@ -46,7 +44,5 @@ namespace ClassicUO.Utility
 
             Console.WriteLine(" | " + msg);
         }
-
-
     }
 }

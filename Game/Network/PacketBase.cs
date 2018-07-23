@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Network
 {
     public abstract class PacketBase
     {
         protected abstract byte this[int index] { get; set; }
-        protected abstract void EnsureSize(in int length);
 
         public abstract int Length { get; }
         public byte ID => this[0];
         public bool IsDynamic { get; protected set; }
         public int Position { get; protected set; }
+        protected abstract void EnsureSize(in int length);
         public abstract byte[] ToArray();
 
         public void Skip(in int lengh)
@@ -35,35 +33,35 @@ namespace ClassicUO.Game.Network
 
         public void WriteSByte(in sbyte v)
         {
-            WriteByte((byte)v);
+            WriteByte((byte) v);
         }
 
         public void WriteBool(in bool v)
         {
-            WriteByte(v ? (byte)0x01 : (byte)0x00);
+            WriteByte(v ? (byte) 0x01 : (byte) 0x00);
         }
 
         public void WriteUShort(in ushort v)
         {
             EnsureSize(2);
-            WriteByte((byte)(v >> 8));
-            WriteByte((byte)v);
+            WriteByte((byte) (v >> 8));
+            WriteByte((byte) v);
         }
 
         public void WriteUInt(in uint v)
         {
             EnsureSize(4);
-            WriteByte((byte)(v >> 24));
-            WriteByte((byte)(v >> 16));
-            WriteByte((byte)(v >> 8));
-            WriteByte((byte)v);
+            WriteByte((byte) (v >> 24));
+            WriteByte((byte) (v >> 16));
+            WriteByte((byte) (v >> 8));
+            WriteByte((byte) v);
         }
 
         public void WriteASCII(in string value)
         {
             EnsureSize(value.Length + 1);
-            foreach (char c in value)
-                WriteByte((byte)c);
+            foreach (var c in value)
+                WriteByte((byte) c);
             WriteByte(0);
         }
 
@@ -73,8 +71,8 @@ namespace ClassicUO.Game.Network
             if (value.Length > length)
                 throw new ArgumentOutOfRangeException();
 
-            for (int i = 0; i < value.Length; i++)
-                WriteByte((byte)value[i]);
+            for (var i = 0; i < value.Length; i++)
+                WriteByte((byte) value[i]);
 
             if (value.Length < length)
             {
@@ -86,11 +84,12 @@ namespace ClassicUO.Game.Network
         public void WriteUnicode(in string value)
         {
             EnsureSize((value.Length + 1) * 2);
-            foreach (char c in value)
+            foreach (var c in value)
             {
-                WriteByte((byte)(c >> 8));
-                WriteByte((byte)(c));
+                WriteByte((byte) (c >> 8));
+                WriteByte((byte) c);
             }
+
             WriteUShort(0);
         }
 
@@ -100,10 +99,10 @@ namespace ClassicUO.Game.Network
             if (value.Length > length)
                 throw new ArgumentOutOfRangeException();
 
-            for (int i = 0; i < value.Length; i++)
+            for (var i = 0; i < value.Length; i++)
             {
-                WriteByte((byte)(value[i] >> 8));
-                WriteByte((byte)value[i]);
+                WriteByte((byte) (value[i] >> 8));
+                WriteByte((byte) value[i]);
             }
 
             if (value.Length < length)

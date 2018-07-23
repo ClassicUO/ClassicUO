@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace ClassicUO.AssetsLoader
 {
     public static class SpecialKeywords
     {
         private static UOFile _file;
-        private static List<KeywordEntry> _keywords = new List<KeywordEntry>();
+        private static readonly List<KeywordEntry> _keywords = new List<KeywordEntry>();
 
 
         public static IReadOnlyList<KeywordEntry> Keywords => _keywords;
@@ -19,7 +18,7 @@ namespace ClassicUO.AssetsLoader
             if (_keywords.Count > 0)
                 return;
 
-            string path = Path.Combine(FileManager.UoFolderPath, "speech.mul");
+            var path = Path.Combine(FileManager.UoFolderPath, "speech.mul");
             if (!File.Exists(path))
                 throw new FileNotFoundException();
 
@@ -27,18 +26,18 @@ namespace ClassicUO.AssetsLoader
 
             while (_file.Position < _file.Length)
             {
-                ushort id = (ushort)((_file.ReadByte() << 8) | _file.ReadByte());
-                ushort length = (ushort)((_file.ReadByte() << 8) | _file.ReadByte());
+                var id = (ushort) ((_file.ReadByte() << 8) | _file.ReadByte());
+                var length = (ushort) ((_file.ReadByte() << 8) | _file.ReadByte());
 
                 if (length > 128)
                     length = 128;
 
-                _keywords.Add(new KeywordEntry()
+                _keywords.Add(new KeywordEntry
                 {
                     Code = id,
                     Text = Encoding.UTF8.GetString(_file.ReadArray<byte>(length))
                 });
-            }          
+            }
         }
     }
 

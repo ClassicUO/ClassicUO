@@ -1,9 +1,6 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
+using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Input
 {
@@ -14,16 +11,15 @@ namespace ClassicUO.Input
 
         public static void Update()
         {
-            KeyboardState current = Keyboard.GetState();
+            var current = Keyboard.GetState();
 
-            Keys[] oldkeys = _prevKeyboardState.GetPressedKeys();
-            Keys[] newkeys = current.GetPressedKeys();
+            var oldkeys = _prevKeyboardState.GetPressedKeys();
+            var newkeys = current.GetPressedKeys();
 
-            foreach (Keys k in newkeys)
-            {
+            foreach (var k in newkeys)
                 if (current.IsKeyDown(k))
                 {
-                    Keys old = oldkeys.FirstOrDefault(s => s == k);
+                    var old = oldkeys.FirstOrDefault(s => s == k);
                     if (!_prevKeyboardState.IsKeyDown(old))
                     {
                         // pressed 1st time: FIRE!
@@ -36,13 +32,11 @@ namespace ClassicUO.Input
                         KeyPressed?.Invoke(null, arg);
                     }
                 }
-            }
 
-            foreach (Keys k in oldkeys)
-            {
+            foreach (var k in oldkeys)
                 if (current.IsKeyUp(k))
                 {
-                    Keys old = oldkeys.FirstOrDefault(s => s == k);
+                    var old = oldkeys.FirstOrDefault(s => s == k);
                     if (!_prevKeyboardState.IsKeyUp(old))
                     {
                         // released 1st time: FIRE!
@@ -50,7 +44,6 @@ namespace ClassicUO.Input
                         KeyUp?.Invoke(null, arg);
                     }
                 }
-            }
 
             _prevKeyboardState = current;
         }

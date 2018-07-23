@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Map
+﻿namespace Map
 {
     public class Class1
     {

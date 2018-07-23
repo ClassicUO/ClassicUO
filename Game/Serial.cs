@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 
 namespace ClassicUO.Game
 {
@@ -10,31 +8,72 @@ namespace ClassicUO.Game
         public static readonly Serial Invalid = new Serial(0);
         public static readonly Serial MinusOne = new Serial(0xFFFFFFFF);
 
-        public Serial(uint serial) { Value = serial; }
+        public Serial(uint serial)
+        {
+            Value = serial;
+        }
 
-        public bool IsMobile { get { return Value > 0 && Value < 0x40000000; } }
-        public bool IsItem { get { return Value >= 0x40000000 && Value < 0x80000000; } }
-        public bool IsValid { get { return Value > 0 && Value < 0x80000000; } }
+        public bool IsMobile => Value > 0 && Value < 0x40000000;
+        public bool IsItem => Value >= 0x40000000 && Value < 0x80000000;
+        public bool IsValid => Value > 0 && Value < 0x80000000;
         public uint Value { get; }
 
-        public static implicit operator Serial(in uint value) { return new Serial(value); }
-        public static implicit operator uint(in Serial serial) { return serial.Value; }
-        public static bool operator ==(in Serial s1, in Serial s2) { return s1.Value == s2.Value; }
-        public static bool operator !=(in Serial s1, in Serial s2) { return s1.Value != s2.Value; }
-        public static bool operator <(in Serial s1, in Serial s2) { return s1.Value < s2.Value; }
-        public static bool operator >(in Serial s1, in Serial s2) { return s1.Value > s2.Value; }
+        public static implicit operator Serial(in uint value)
+        {
+            return new Serial(value);
+        }
 
-        public int CompareTo(object obj) { return Value.CompareTo(obj); }
-        public int CompareTo(uint other) { return Value.CompareTo(other); }
+        public static implicit operator uint(in Serial serial)
+        {
+            return serial.Value;
+        }
 
-        public override string ToString() { return string.Format("0x{0:X8}", Value); }
-        public override int GetHashCode() { return Value.GetHashCode(); }
+        public static bool operator ==(in Serial s1, in Serial s2)
+        {
+            return s1.Value == s2.Value;
+        }
+
+        public static bool operator !=(in Serial s1, in Serial s2)
+        {
+            return s1.Value != s2.Value;
+        }
+
+        public static bool operator <(in Serial s1, in Serial s2)
+        {
+            return s1.Value < s2.Value;
+        }
+
+        public static bool operator >(in Serial s1, in Serial s2)
+        {
+            return s1.Value > s2.Value;
+        }
+
+        public int CompareTo(object obj)
+        {
+            return Value.CompareTo(obj);
+        }
+
+        public int CompareTo(uint other)
+        {
+            return Value.CompareTo(other);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("0x{0:X8}", Value);
+        }
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
+
         public override bool Equals(object obj)
         {
             if (obj is Serial)
-                return this == (Serial)obj;
+                return this == (Serial) obj;
             if (obj is uint)
-                return Value == (uint)obj;
+                return Value == (uint) obj;
             return false;
         }
 

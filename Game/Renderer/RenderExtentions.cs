@@ -1,14 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Renderer
 {
     public static class RenderExtentions
     {
         public static Vector3 GetHueVector(int hue)
-            => GetHueVector(hue, false, false, false);
+        {
+            return GetHueVector(hue, false, false, false);
+        }
 
         public static Vector3 GetHueVector(int hue, bool partial, bool transparent, bool noLighting)
         {

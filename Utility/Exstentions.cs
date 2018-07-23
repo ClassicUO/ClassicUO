@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ClassicUO.Utility
 {
@@ -34,11 +34,11 @@ namespace ClassicUO.Utility
         {
             return task.ContinueWith(t =>
             {
-                t.Exception?.Handle((e) =>
+                t.Exception?.Handle(e =>
                 {
                     try
                     {
-                        using (StreamWriter txt = new StreamWriter("crash.log", true))
+                        using (var txt = new StreamWriter("crash.log", true))
                         {
                             txt.AutoFlush = true;
                             txt.WriteLine("Exception @ {0}", DateTime.Now.ToString("MM-dd-yy HH:mm:ss.ffff"));
@@ -50,6 +50,7 @@ namespace ClassicUO.Utility
                     catch
                     {
                     }
+
                     return true;
                 });
             }, TaskContinuationOptions.OnlyOnFaulted);
@@ -58,7 +59,7 @@ namespace ClassicUO.Utility
 
         public static void Resize<T>(this List<T> list, int size, T element = default)
         {
-            int count = list.Count;
+            var count = list.Count;
 
             if (size < count)
             {
@@ -66,7 +67,7 @@ namespace ClassicUO.Utility
             }
             else if (size > count)
             {
-                if (size > list.Capacity)   // Optimization
+                if (size > list.Capacity) // Optimization
                     list.Capacity = size;
 
                 list.AddRange(Enumerable.Repeat(element, size - count));

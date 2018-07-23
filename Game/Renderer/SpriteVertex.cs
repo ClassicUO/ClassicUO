@@ -1,8 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Renderer
 {
@@ -24,12 +21,14 @@ namespace ClassicUO.Game.Renderer
         VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
 
 
-        public readonly static VertexDeclaration VertexDeclaration = new VertexDeclaration
+        public static readonly VertexDeclaration VertexDeclaration = new VertexDeclaration
         (
-          new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0), // position
-          new VertexElement(sizeof(float) * 3, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0), // normal
-          new VertexElement(sizeof(float) * 6, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 0), // tex coord
-          new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1) // hue
+            new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0), // position
+            new VertexElement(sizeof(float) * 3, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0), // normal
+            new VertexElement(sizeof(float) * 6, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate,
+                0), // tex coord
+            new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate,
+                1) // hue
         );
 
         public static readonly SpriteVertex[] PolyBuffer =
@@ -48,12 +47,11 @@ namespace ClassicUO.Game.Renderer
             new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 1, 0))
         };
 
-        public static int SizeInBytes { get { return sizeof(float) * 12; } }
+        public static int SizeInBytes => sizeof(float) * 12;
 
         public override string ToString()
         {
             return string.Format("VPNTH: <{0}> <{1}>", Position.ToString(), TextureCoordinate.ToString());
         }
     }
-
 }

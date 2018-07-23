@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace ClassicUO.Game.Network
 {
@@ -15,7 +13,7 @@ namespace ClassicUO.Game.Network
             _capacity = capacity;
             _arraySize = arraysize;
             _freeSegment = new Queue<byte[]>(capacity);
-            for (int i = 0; i < capacity; i++)
+            for (var i = 0; i < capacity; i++)
                 _freeSegment.Enqueue(new byte[arraysize]);
         }
 
@@ -24,13 +22,13 @@ namespace ClassicUO.Game.Network
             lock (this)
             {
                 if (_freeSegment.Count > 0)
-                    return _freeSegment.Dequeue();
-                else
                 {
-                    for (int i = 0; i < _capacity; i++)
-                        _freeSegment.Enqueue(new byte[_arraySize]);
                     return _freeSegment.Dequeue();
                 }
+
+                for (var i = 0; i < _capacity; i++)
+                    _freeSegment.Enqueue(new byte[_arraySize]);
+                return _freeSegment.Dequeue();
             }
         }
 
@@ -39,7 +37,9 @@ namespace ClassicUO.Game.Network
             if (segment == null)
                 return;
             lock (this)
+            {
                 _freeSegment.Enqueue(segment);
+            }
         }
     }
 }

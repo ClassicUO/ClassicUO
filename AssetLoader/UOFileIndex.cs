@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.AssetsLoader
+﻿namespace ClassicUO.AssetsLoader
 {
     public struct UOFileIndex3D
     {
         public UOFileIndex3D(in long offset, in int length, in int extra = 0)
         {
-            Offset = offset; Length = length; Extra = extra;
+            Offset = offset;
+            Length = length;
+            Extra = extra;
         }
 
         public long Offset;
@@ -20,7 +18,11 @@ namespace ClassicUO.AssetsLoader
     {
         public UOFileIndex5D(in int file, in int index, in int offset, in int length, in int extra = 0)
         {
-            File = file; Index = index; Offset = offset; Length = length; Extra = extra;
+            File = file;
+            Index = index;
+            Offset = offset;
+            Length = length;
+            Extra = extra;
         }
 
         public int File;

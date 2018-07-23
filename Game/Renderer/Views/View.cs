@@ -1,20 +1,16 @@
-﻿using ClassicUO.Game.Renderer;
+﻿using System;
+using ClassicUO.AssetsLoader;
 using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Renderer.Views
 {
     public abstract class View : IDisposable
     {
-        protected static float PI = (float)Math.PI;
+        protected static float PI = (float) Math.PI;
 
         public View()
         {
-
         }
 
         public View(in WorldObject parent)
@@ -35,9 +31,15 @@ namespace ClassicUO.Game.Renderer.Views
         protected bool IsFlipped { get; set; }
         protected float Rotation { get; set; }
 
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         public virtual void Update(in double frameMS)
-        {        
-           
+        {
         }
 
         public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
@@ -53,11 +55,11 @@ namespace ClassicUO.Game.Renderer.Views
             {
                 float w = Bounds.Width / 2;
                 float h = Bounds.Height / 2;
-                Vector3 center = position - new Vector3(Bounds.X - 44 + w, Bounds.Y + h, 0);
-                float sinx = (float)Math.Sin(Rotation) * w;
-                float cosx = (float)Math.Cos(Rotation) * w;
-                float siny = (float)Math.Sin(Rotation) * h;
-                float cosy = (float)Math.Cos(Rotation) * h;
+                var center = position - new Vector3(Bounds.X - 44 + w, Bounds.Y + h, 0);
+                var sinx = (float) Math.Sin(Rotation) * w;
+                var cosx = (float) Math.Cos(Rotation) * w;
+                var siny = (float) Math.Sin(Rotation) * h;
+                var cosy = (float) Math.Cos(Rotation) * h;
 
                 vertex = SpriteVertex.PolyBufferFlipped;
                 vertex[0].Position = center;
@@ -105,15 +107,11 @@ namespace ClassicUO.Game.Renderer.Views
             }
 
 
-
-
             if (vertex[0].Hue != HueVector)
-            {
                 vertex[0].Hue =
                     vertex[1].Hue =
-                    vertex[2].Hue =
-                    vertex[3].Hue = HueVector;
-            }
+                        vertex[2].Hue =
+                            vertex[3].Hue = HueVector;
 
 
             if (!spriteBatch.DrawSprite(Texture, vertex))
@@ -126,12 +124,10 @@ namespace ClassicUO.Game.Renderer.Views
 
         protected virtual void MousePick(in SpriteVertex[] vertex)
         {
-
         }
 
         protected virtual void MessageOverHead(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-
         }
 
 
@@ -140,23 +136,15 @@ namespace ClassicUO.Game.Renderer.Views
             Dispose();
         }
 
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         protected virtual void Dispose(in bool disposing)
         {
             if (disposing)
-            {
-                if (Texture != null && Texture.IsDisposed) // disping happen into TextureManager.cs, here we clean up the referement
+                if (Texture != null && Texture.IsDisposed
+                ) // disping happen into TextureManager.cs, here we clean up the referement
                 {
                     Texture.Dispose();
                     Texture = null;
                 }
-            }
         }
 
         public static bool IsNoDrawable(in ushort g)
@@ -177,15 +165,14 @@ namespace ClassicUO.Game.Renderer.Views
                 if (g >= 0x2198 && g <= 0x21A4)
                     return true;
 
-                long flags = (long)AssetsLoader.TileData.StaticData[g].Flags;
+                var flags = (long) TileData.StaticData[g].Flags;
 
-                if (!AssetsLoader.TileData.IsNoDiagonal(flags) ||
-                    (AssetsLoader.TileData.IsAnimated(flags) && World.Player != null && World.Player.Race == RaceType.GARGOYLE))
+                if (!TileData.IsNoDiagonal(flags) ||
+                    TileData.IsAnimated(flags) && World.Player != null && World.Player.Race == RaceType.GARGOYLE)
                     return false;
             }
 
             return true;
         }
-
     }
 }

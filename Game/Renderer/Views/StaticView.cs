@@ -1,9 +1,5 @@
-﻿using ClassicUO.Game.Renderer;
-using ClassicUO.Game.WorldObjects;
+﻿using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Renderer.Views
 {
@@ -22,7 +18,8 @@ namespace ClassicUO.Game.Renderer.Views
             if (Texture == null || Texture.IsDisposed)
             {
                 Texture = TextureManager.GetOrCreateStaticTexture(WorldObject.Graphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + (WorldObject.Position.Z * 4), Texture.Width, Texture.Height);
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4,
+                    Texture.Width, Texture.Height);
             }
 
             return base.Draw(spriteBatch, position);

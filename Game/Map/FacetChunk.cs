@@ -1,9 +1,7 @@
-﻿using ClassicUO.Game.WorldObjects;
-using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
+using ClassicUO.AssetsLoader;
+using ClassicUO.Game.WorldObjects;
 
 namespace ClassicUO.Game.Map
 {
@@ -11,25 +9,25 @@ namespace ClassicUO.Game.Map
     {
         public FacetChunk(in Position location) : this(location.X, location.Y)
         {
-
         }
 
         public FacetChunk(in ushort x, in ushort y)
         {
-            X = x; Y = y;
+            X = x;
+            Y = y;
 
             Tiles = new Tile[8][];
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 Tiles[i] = new Tile[8];
-                for (int j = 0; j < 8; j++)
+                for (var j = 0; j < 8; j++)
                     Tiles[i][j] = new Tile();
             }
         }
 
         public ushort X { get; private set; }
         public ushort Y { get; private set; }
-        public Tile[][] Tiles { get; private set; }
+        public Tile[][] Tiles { get; }
 
 
         public void Load(in int map)
@@ -40,51 +38,47 @@ namespace ClassicUO.Game.Map
 
             unsafe
             {
-                AssetsLoader.MapBlock block = Marshal.PtrToStructure<AssetsLoader.MapBlock>((IntPtr)im.MapAddress);
+                var block = Marshal.PtrToStructure<MapBlock>((IntPtr) im.MapAddress);
 
-                int bx = X * 8;
-                int by = Y * 8;
+                var bx = X * 8;
+                var by = Y * 8;
 
-                for (int x = 0; x < 8; x++)
+                for (var x = 0; x < 8; x++)
+                for (var y = 0; y < 8; y++)
                 {
-                    for (int y = 0; y < 8; y++)
-                    {
-                        int pos = y * 8 + x;
+                    var pos = y * 8 + x;
 
-                        ushort tileID = (ushort)(block.Cells[pos].TileID & 0x3FFF);
-                        sbyte z = block.Cells[pos].Z;
+                    var tileID = (ushort) (block.Cells[pos].TileID & 0x3FFF);
+                    var z = block.Cells[pos].Z;
 
-                        Tiles[x][y].Graphic = tileID;
-                        Tiles[x][y].Position = new Position((ushort)(bx + x), (ushort)(by + y), z);
-                    }
+                    Tiles[x][y].Graphic = tileID;
+                    Tiles[x][y].Position = new Position((ushort) (bx + x), (ushort) (by + y), z);
                 }
 
-                AssetsLoader.StaticsBlock* sb = (AssetsLoader.StaticsBlock*)im.StaticAddress;
+                var sb = (StaticsBlock*) im.StaticAddress;
                 if (sb != null)
                 {
-                    int count = (int)im.StaticCount;
+                    var count = (int) im.StaticCount;
 
-                    for (int i = 0; i < count; i++, sb++)
-                    {
+                    for (var i = 0; i < count; i++, sb++)
                         if (sb->Color > 0 && sb->Color != 0xFFFF)
                         {
                             ushort x = sb->X;
                             ushort y = sb->Y;
 
-                            int pos = (y * 8) + x;
+                            var pos = y * 8 + x;
                             if (pos >= 64)
                                 continue;
 
-                            sbyte z = sb->Z;
+                            var z = sb->Z;
 
-                            Static staticObject = new Static(sb->Color, sb->Hue, pos)
+                            var staticObject = new Static(sb->Color, sb->Hue, pos)
                             {
-                                Position = new Position((ushort)(bx + x), (ushort)(by + y), z)        
+                                Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
                             };
 
                             Tiles[x][y].AddWorldObject(staticObject);
                         }
-                    }
                 }
             }
         }
@@ -104,29 +98,29 @@ namespace ClassicUO.Game.Map
             return Marshal.PtrToStructure<AssetsLoader.MapBlock>((IntPtr)blockIndex.MapAddress).Cells[my * 8 + mx].Z;
         }*/
 
-        private AssetsLoader.IndexMap GetIndex(in int map)
-            => GetIndex(map, X, Y);
-
-        private AssetsLoader.IndexMap GetIndex(in int map, in int x, in int y)
+        private IndexMap GetIndex(in int map)
         {
-            int block = (x * AssetsLoader.Map.MapBlocksSize[map][1]) + y;
+            return GetIndex(map, X, Y);
+        }
+
+        private IndexMap GetIndex(in int map, in int x, in int y)
+        {
+            var block = x * AssetsLoader.Map.MapBlocksSize[map][1] + y;
             return AssetsLoader.Map.BlockData[map][block];
         }
 
         // we wants to avoid reallocation, so use a reset method
         public void SetTo(in ushort x, in ushort y)
         {
-            X = x; Y = y;
+            X = x;
+            Y = y;
         }
 
         public void Unload()
         {
-            for (int i = 0; i < 8; i++)
-            {
-                for (int j = 0; j < 8; j++)
-                    Tiles[i][j].Clear();
-            }
+            for (var i = 0; i < 8; i++)
+            for (var j = 0; j < 8; j++)
+                Tiles[i][j].Clear();
         }
-
     }
 }

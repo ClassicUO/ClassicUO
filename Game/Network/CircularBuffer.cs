@@ -1,24 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Network
 {
     internal sealed class CircularBuffer
     {
+        private byte[] _buffer;
         private int _head;
         private int _tail;
-        private int _size;
-        private byte[] _buffer;
-
-        /// <summary>
-        /// Gets the length of the byte queue
-        /// </summary>
-        public int Length => _size;
 
 
         /// <summary>
-        /// Constructs a new instance of a byte queue.
+        ///     Constructs a new instance of a byte queue.
         /// </summary>
         public CircularBuffer()
         {
@@ -26,28 +18,33 @@ namespace ClassicUO.Game.Network
         }
 
         /// <summary>
-        /// Clears the byte queue
+        ///     Gets the length of the byte queue
+        /// </summary>
+        public int Length { get; private set; }
+
+        /// <summary>
+        ///     Clears the byte queue
         /// </summary>
         internal void Clear()
         {
             _head = 0;
             _tail = 0;
-            _size = 0;
+            Length = 0;
         }
 
 
         /// <summary>
-        /// Extends the capacity of the bytequeue
+        ///     Extends the capacity of the bytequeue
         /// </summary>
         private void SetCapacity(in int capacity)
         {
-            byte[] newBuffer = new byte[capacity];
+            var newBuffer = new byte[capacity];
 
-            if (_size > 0)
+            if (Length > 0)
             {
                 if (_head < _tail)
                 {
-                    Buffer.BlockCopy(_buffer, _head, newBuffer, 0, _size);
+                    Buffer.BlockCopy(_buffer, _head, newBuffer, 0, Length);
                 }
                 else
                 {
@@ -57,24 +54,24 @@ namespace ClassicUO.Game.Network
             }
 
             _head = 0;
-            _tail = _size;
+            _tail = Length;
             _buffer = newBuffer;
         }
 
         /// <summary>
-        /// Enqueues a buffer to the queue and inserts it to a correct position
+        ///     Enqueues a buffer to the queue and inserts it to a correct position
         /// </summary>
         /// <param name="buffer">Buffer to enqueue</param>
         /// <param name="offset">The zero-based byte offset in the buffer</param>
         /// <param name="size">The number of bytes to enqueue</param>
         internal void Enqueue(in byte[] buffer, in int offset, in int size)
         {
-            if ((_size + size) > _buffer.Length)
-                SetCapacity((_size + size + 2047) & ~2047);
+            if (Length + size > _buffer.Length)
+                SetCapacity((Length + size + 2047) & ~2047);
 
             if (_head < _tail)
             {
-                int rightLength = (_buffer.Length - _tail);
+                var rightLength = _buffer.Length - _tail;
 
                 if (rightLength >= size)
                 {
@@ -92,11 +89,11 @@ namespace ClassicUO.Game.Network
             }
 
             _tail = (_tail + size) % _buffer.Length;
-            _size += size;
+            Length += size;
         }
 
         /// <summary>
-        /// Dequeues a buffer from the queue
+        ///     Dequeues a buffer from the queue
         /// </summary>
         /// <param name="buffer">Buffer to enqueue</param>
         /// <param name="offset">The zero-based byte offset in the buffer</param>
@@ -104,8 +101,8 @@ namespace ClassicUO.Game.Network
         /// <returns>Number of bytes dequeued</returns>
         internal int Dequeue(in byte[] buffer, in int offset, int size)
         {
-            if (size > _size)
-                size = _size;
+            if (size > Length)
+                size = Length;
 
             if (size == 0)
                 return 0;
@@ -116,7 +113,7 @@ namespace ClassicUO.Game.Network
             }
             else
             {
-                int rightLength = (_buffer.Length - _head);
+                var rightLength = _buffer.Length - _head;
 
                 if (rightLength >= size)
                 {
@@ -130,9 +127,9 @@ namespace ClassicUO.Game.Network
             }
 
             _head = (_head + size) % _buffer.Length;
-            _size -= size;
+            Length -= size;
 
-            if (_size == 0)
+            if (Length == 0)
             {
                 _head = 0;
                 _tail = 0;
@@ -143,15 +140,15 @@ namespace ClassicUO.Game.Network
 
         public byte GetID()
         {
-            if (_size >= 1)
+            if (Length >= 1)
                 return _buffer[_head];
             return 0xFF;
         }
 
         public int GetLength()
         {
-            if (_size >= 3)
-                return (_buffer[(_head + 2) % _buffer.Length] | (_buffer[(_head + 1) % _buffer.Length] << 8));
+            if (Length >= 3)
+                return _buffer[(_head + 2) % _buffer.Length] | (_buffer[(_head + 1) % _buffer.Length] << 8);
             // return (_buffer[(_head + 1) % _buffer.Length] << 8) | _buffer[(_head + 2) % _buffer.Length];
             return 0;
         }

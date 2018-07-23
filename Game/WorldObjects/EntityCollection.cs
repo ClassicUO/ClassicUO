@@ -9,10 +9,21 @@ namespace ClassicUO.Game.WorldObjects
 {
     public class EntityCollection<T> : IEnumerable<T> where T : Entity
     {
-        private readonly ConcurrentDictionary<Serial, T> _entities = new ConcurrentDictionary<Serial, T>();
         private readonly List<T> _added = new List<T>(), _removed = new List<T>();
+        private readonly ConcurrentDictionary<Serial, T> _entities = new ConcurrentDictionary<Serial, T>();
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _entities.Select(e => e.Value).GetEnumerator();
+        }
 
         public event EventHandler<CollectionChangedEventArgs<T>> Added, Removed;
+
         public void ProcessDelta()
         {
             if (_added.Count > 0)
@@ -30,11 +41,14 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
-        public bool Contains(in Serial serial) => _entities.ContainsKey(serial);
+        public bool Contains(in Serial serial)
+        {
+            return _entities.ContainsKey(serial);
+        }
 
         public T Get(in Serial serial)
         {
-            _entities.TryGetValue(serial, out T entity);
+            _entities.TryGetValue(serial, out var entity);
             return entity;
         }
 
@@ -48,7 +62,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public T Remove(in Serial serial)
         {
-            if (_entities.TryRemove(serial, out T entity))
+            if (_entities.TryRemove(serial, out var entity))
                 _removed.Add(entity);
             return entity;
         }
@@ -59,19 +73,28 @@ namespace ClassicUO.Game.WorldObjects
             _entities.Clear();
             ProcessDelta();
         }
-
-        IEnumerator IEnumerable.GetEnumerator() { return GetEnumerator(); }
-        public IEnumerator<T> GetEnumerator() { return _entities.Select(e => e.Value).GetEnumerator(); }
     }
 
 
     public class CollectionChangedEventArgs<T> : EventArgs, IEnumerable<T>
     {
         private readonly IReadOnlyList<T> _data;
-        public CollectionChangedEventArgs(IEnumerable<T> list) => _data = list.ToArray();
+
+        public CollectionChangedEventArgs(IEnumerable<T> list)
+        {
+            _data = list.ToArray();
+        }
+
         public int Count => _data.Count;
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        public IEnumerator<T> GetEnumerator() => _data.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _data.GetEnumerator();
+        }
     }
 }

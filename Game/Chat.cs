@@ -1,8 +1,6 @@
-﻿using ClassicUO.Game.WorldObjects;
+﻿using System;
+using ClassicUO.Game.WorldObjects;
 using ClassicUO.Utility;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game
 {
@@ -48,16 +46,19 @@ namespace ClassicUO.Game
     public static class Chat
     {
         private const ushort defaultHue = 0x0017;
-        private static readonly Mobile _system = new Mobile(Serial.Invalid) { Graphic = Graphic.Invariant, Name = "System" };
 
-       // public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
-       // public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PMessageUnicode(entity.Serial, entity.Graphic, type, hue, font, _language, entity.Name ?? string.Empty, message).SendToClient();
+        private static readonly Mobile _system =
+            new Mobile(Serial.Invalid) {Graphic = Graphic.Invariant, Name = "System"};
+
+        // public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
+        // public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PMessageUnicode(entity.Serial, entity.Graphic, type, hue, font, _language, entity.Name ?? string.Empty, message).SendToClient();
         //public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PMessageUnicodeRequest(type, hue, font, _language, message).SendToServer();
         //public static void SayParty(string message) => new PPartyMessage(message).SendToServer();
 
 
         public static event EventHandler<UOMessageEventArgs> Message;
         public static event EventHandler<UOMessageEventArgs> LocalizedMessage;
+
         public static void OnMessage(Entity entity, UOMessageEventArgs args)
         {
             Message.Raise(args, entity ?? _system);
@@ -93,14 +94,13 @@ namespace ClassicUO.Game
             Affix = affix;
         }
 
-        public string Text { get; private set; }
-        public Hue Hue { get; private set; }
-        public MessageType Type { get; private set; }
-        public MessageFont Font { get; private set; }
-        public string Language { get; private set; }
-        public uint Cliloc { get; private set; }
-        public AffixType AffixType { get; private set; }
-        public string Affix { get; private set; }
+        public string Text { get; }
+        public Hue Hue { get; }
+        public MessageType Type { get; }
+        public MessageFont Font { get; }
+        public string Language { get; }
+        public uint Cliloc { get; }
+        public AffixType AffixType { get; }
+        public string Affix { get; }
     }
-
 }

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.Game.WorldObjects
+﻿namespace ClassicUO.Game.WorldObjects
 {
-    public sealed class Multi 
+    public sealed class Multi
     {
         public Multi(in Item parent)
         {
@@ -32,6 +28,6 @@ namespace ClassicUO.Game.WorldObjects
 
         public Graphic Graphic { get; }
         public uint Flags { get; }
-        public  Position Position { get; set; }
+        public Position Position { get; set; }
     }
 }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Renderer.Views;
-using ClassicUO.Game.Renderer;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.WorldObjects
 {
@@ -11,14 +7,19 @@ namespace ClassicUO.Game.WorldObjects
     {
         public Static(Graphic tileID, Hue hue, int index) : base(World.Map)
         {
-            Graphic = tileID; Hue = hue; Index = index;
+            Graphic = tileID;
+            Hue = hue;
+            Index = index;
         }
 
         public int Index { get; }
         public override Position Position { get; set; }
-        public new StaticView ViewObject => (StaticView)base.ViewObject;
-        public AssetsLoader.StaticTiles ItemData => AssetsLoader.TileData.StaticData[Graphic];
+        public new StaticView ViewObject => (StaticView) base.ViewObject;
+        public StaticTiles ItemData => TileData.StaticData[Graphic];
 
-        protected override View CreateView() => new StaticView(this);
+        protected override View CreateView()
+        {
+            return new StaticView(this);
+        }
     }
 }

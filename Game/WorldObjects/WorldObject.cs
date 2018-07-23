@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.WorldObjects
 {
     public abstract class WorldObject //: IDisposable
     {
+        private Tile _tile;
         private View _viewObject;
-        private Map.Tile _tile;
 
-        public WorldObject(in Map.Facet map)
+        public WorldObject(in Facet map)
         {
             Map = map;
             Position = Position.Invalid;
@@ -20,24 +20,11 @@ namespace ClassicUO.Game.WorldObjects
         public virtual Hue Hue { get; set; }
         public virtual Graphic Graphic { get; set; }
 
-        public View ViewObject
-        {
-            get
-            {
-                if (_viewObject == null)
-                    _viewObject = CreateView();
-                return _viewObject;
-            }
-        }
-
-        protected virtual View CreateView()
-        {
-            return null;
-        }
+        public View ViewObject => _viewObject ?? (_viewObject = CreateView());
 
         public sbyte AnimIndex { get; set; }
 
-        public Map.Tile Tile
+        public Tile Tile
         {
             get => _tile;
             set
@@ -49,21 +36,18 @@ namespace ClassicUO.Game.WorldObjects
                     _tile = value;
 
                     _tile?.AddWorldObject(this);
-
                 }
             }
         }
 
 
-        public Map.Facet Map { get; private set; }
+        public Facet Map { get; set; }
 
-        public void SetMap(in Map.Facet map)
+        public bool IsDisposed { get; private set; }
+
+        protected virtual View CreateView()
         {
-            if (map != Map)
-            {
-                Map = map;
-                //Position.Tile = Position.NullTile;
-            }
+            return null;
         }
 
         protected void DisposeView()
@@ -75,10 +59,8 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
-        public bool IsDisposed { get; private set; }
-
         public virtual void Dispose()
-        {           
+        {
             IsDisposed = true;
             Tile = null;
         }
@@ -89,9 +71,10 @@ namespace ClassicUO.Game.WorldObjects
             {
                 if (this == World.Player && Map.Index >= 0)
                 {
-                    Map.Center = new Microsoft.Xna.Framework.Point(x, y);
-                    Utility.Log.Message(Utility.LogTypes.Info, Map.Center.ToString());
+                    Map.Center = new Point(x, y);
+                    Log.Message(LogTypes.Info, Map.Center.ToString());
                 }
+
                 Tile = Map.GetTile(x, y);
             }
             else
@@ -119,6 +102,5 @@ namespace ClassicUO.Game.WorldObjects
         //{
         //    Dispose();
         //}
-
     }
 }

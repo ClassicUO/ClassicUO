@@ -1,12 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 
 namespace ClassicUO.AssetsLoader
 {
     public static class Verdata
     {
+        static Verdata()
+        {
+            var path = Path.Combine(FileManager.UoFolderPath, "verdata.mul");
+
+            if (!System.IO.File.Exists(path))
+            {
+                Patches = new UOFileIndex5D[0];
+                File = null;
+            }
+            else
+            {
+                File = new UOFileMul("verdata.mul");
+                Patches = new UOFileIndex5D[File.ReadInt()];
+
+                Patches = File.ReadArray<UOFileIndex5D>(File.ReadInt());
+
+                /* for (int i = 0; i < Patches.Length; i++)
+                 {
+                     Patches[i].File = File.ReadInt();
+                     Patches[i].Index = File.ReadInt();
+                     Patches[i].Offset = File.ReadInt();
+                     Patches[i].Length = File.ReadInt();
+                     Patches[i].Extra = File.ReadInt();
+                 }*/
+            }
+        }
 
         // FileIDs
         //0 - map0.mul
@@ -29,34 +52,7 @@ namespace ClassicUO.AssetsLoader
         //30 - tiledata.mul
         //31 - animdata.mul 
 
-        public static UOFileIndex5D[] Patches { get; private set; }
-        public static UOFileMul File { get; private set; }
-
-        static Verdata()
-        {
-            string path = Path.Combine(FileManager.UoFolderPath, "verdata.mul");
-
-            if (!System.IO.File.Exists(path))
-            {
-                Patches = new UOFileIndex5D[0];
-                File = null;
-            }
-            else
-            {
-                File = new UOFileMul("verdata.mul");
-                Patches = new UOFileIndex5D[File.ReadInt()];
-
-                Patches = File.ReadArray<UOFileIndex5D>(File.ReadInt());
-
-               /* for (int i = 0; i < Patches.Length; i++)
-                {
-                    Patches[i].File = File.ReadInt();
-                    Patches[i].Index = File.ReadInt();
-                    Patches[i].Offset = File.ReadInt();
-                    Patches[i].Length = File.ReadInt();
-                    Patches[i].Extra = File.ReadInt();
-                }*/
-            }
-        }
+        public static UOFileIndex5D[] Patches { get; }
+        public static UOFileMul File { get; }
     }
 }

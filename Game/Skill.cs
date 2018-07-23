@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.Game
+﻿namespace ClassicUO.Game
 {
     public enum SkillLock : byte
     {
@@ -25,14 +21,17 @@ namespace ClassicUO.Game
         public ushort BaseFixed { get; internal set; }
         public ushort CapFixed { get; internal set; }
 
-        public double Value { get { return ValueFixed / 10.0; } }
-        public double Base { get { return BaseFixed / 10.0; } }
-        public double Cap { get { return CapFixed / 10.0; } }
+        public double Value => ValueFixed / 10.0;
+        public double Base => BaseFixed / 10.0;
+        public double Cap => CapFixed / 10.0;
 
         public bool IsClickable { get; }
         public string Name { get; }
         public int Index { get; }
 
-        public override string ToString() => Name;
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

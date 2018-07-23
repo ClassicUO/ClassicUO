@@ -1,13 +1,8 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-
-using ClassicUO;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Renderer
 {
@@ -17,37 +12,48 @@ namespace ClassicUO.Game.Renderer
         private const int INITIAL_TEXTURE_COUNT = 0x800;
         private const float MAX_ACCURATE_SINGLE_FLOAT = 65536;
 
-        private float _z;
-        private readonly Microsoft.Xna.Framework.Game _game;
-        private readonly short[] _indexBuffer = new short[MAX_VERTICES_PER_DRAW * 6];
-        private readonly Queue<List<SpriteVertex>> _vertexQueue = new Queue<List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
-        private readonly Dictionary<Texture2D, List<SpriteVertex>> _drawingQueue = new Dictionary<Texture2D, List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
-        private BoundingBox _drawingArea = new BoundingBox();
-        private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
-        private readonly SpriteVertex[] _vertexBuffer = new SpriteVertex[MAX_VERTICES_PER_DRAW];
-        private readonly Effect _effect;
+        private readonly Dictionary<Texture2D, List<SpriteVertex>> _drawingQueue =
+            new Dictionary<Texture2D, List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
+
         private readonly DepthStencilState _dss = new DepthStencilState
         {
             DepthBufferEnable = true,
             DepthBufferWriteEnable = true
         };
 
+        private readonly Effect _effect;
+        private readonly Microsoft.Xna.Framework.Game _game;
+        private readonly short[] _indexBuffer = new short[MAX_VERTICES_PER_DRAW * 6];
+        private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
+        private readonly SpriteVertex[] _vertexBuffer = new SpriteVertex[MAX_VERTICES_PER_DRAW];
+        private readonly Queue<List<SpriteVertex>> _vertexQueue = new Queue<List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
+        private BoundingBox _drawingArea;
+
+        private readonly EffectParameter _drawLightingEffect;
+        private readonly EffectParameter _projectionMatrixEffect;
+        private readonly EffectParameter _worldMatrixEffect;
+        private readonly EffectParameter _viewportEffect;
+        private readonly EffectTechnique _huesTechnique;
+
+        private float _z;
+
 
         public SpriteBatch3D(in Microsoft.Xna.Framework.Game game)
         {
             _game = game;
 
-            for (int i = 0; i < MAX_VERTICES_PER_DRAW; i++)
+            for (var i = 0; i < MAX_VERTICES_PER_DRAW; i++)
             {
-                _indexBuffer[i * 6] = (short)(i * 4);
-                _indexBuffer[i * 6 + 1] = (short)(i * 4 + 1);
-                _indexBuffer[i * 6 + 2] = (short)(i * 4 + 2);
-                _indexBuffer[i * 6 + 3] = (short)(i * 4 + 2);
-                _indexBuffer[i * 6 + 4] = (short)(i * 4 + 1);
-                _indexBuffer[i * 6 + 5] = (short)(i * 4 + 3);
+                _indexBuffer[i * 6] = (short) (i * 4);
+                _indexBuffer[i * 6 + 1] = (short) (i * 4 + 1);
+                _indexBuffer[i * 6 + 2] = (short) (i * 4 + 2);
+                _indexBuffer[i * 6 + 3] = (short) (i * 4 + 2);
+                _indexBuffer[i * 6 + 4] = (short) (i * 4 + 1);
+                _indexBuffer[i * 6 + 5] = (short) (i * 4 + 3);
             }
 
-            _effect = new Effect(GraphicsDevice, File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, "IsometricWorld.fxc")));
+            _effect = new Effect(GraphicsDevice,
+                File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, "IsometricWorld.fxc")));
             _effect.Parameters["HuesPerTexture"].SetValue(3000f);
 
             _drawLightingEffect = _effect.Parameters["DrawLighting"];
@@ -61,11 +67,20 @@ namespace ClassicUO.Game.Renderer
 
         public GraphicsDevice GraphicsDevice => _game?.GraphicsDevice;
         public Matrix ProjectionMatrixWorld => Matrix.Identity;
-        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
+
+        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width,
+            GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
 
 
-        public void SetLightDirection(in Vector3 dir) => _effect.Parameters["lightDirection"].SetValue(dir);
-        public void SetLightIntensity(in float inte) => _effect.Parameters["lightIntensity"].SetValue(inte);
+        public void SetLightDirection(in Vector3 dir)
+        {
+            _effect.Parameters["lightDirection"].SetValue(dir);
+        }
+
+        public void SetLightIntensity(in float inte)
+        {
+            _effect.Parameters["lightIntensity"].SetValue(inte);
+        }
 
 
         public void BeginDraw()
@@ -81,26 +96,25 @@ namespace ClassicUO.Game.Renderer
                 return false;
 
             for (byte i = 0; i < 4; i++)
-            {
                 if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
                 {
                     vertices[0].Position.Z =
                         vertices[1].Position.Z =
-                        vertices[2].Position.Z =
-                        vertices[3].Position.Z = GetZ();
+                            vertices[2].Position.Z =
+                                vertices[3].Position.Z = GetZ();
 
                     GetVertexList(texture).AddRange(vertices);
 
                     return true;
                 }
-            }
+
             return false;
         }
 
-        public float GetZ() => _z++;
-
-        private EffectParameter _drawLightingEffect, _projectionMatrixEffect, _worldMatrixEffect, _viewportEffect;
-        private EffectTechnique _huesTechnique;
+        public float GetZ()
+        {
+            return _z++;
+        }
 
         public void EndDraw(in bool light = false)
         {
@@ -131,10 +145,11 @@ namespace ClassicUO.Game.Renderer
 
             while (enumerator.MoveNext())
             {
-                Texture2D texture = enumerator.Current.Key;
+                var texture = enumerator.Current.Key;
                 var list = enumerator.Current.Value;
 
-                list.CopyTo(0, _vertexBuffer, 0, list.Count <= MAX_VERTICES_PER_DRAW ? list.Count : MAX_VERTICES_PER_DRAW);
+                list.CopyTo(0, _vertexBuffer, 0,
+                    list.Count <= MAX_VERTICES_PER_DRAW ? list.Count : MAX_VERTICES_PER_DRAW);
 
                 GraphicsDevice.Textures[0] = texture;
                 GraphicsDevice.DrawUserIndexedPrimitives(
@@ -183,6 +198,7 @@ namespace ClassicUO.Game.Renderer
                 {
                     list = new List<SpriteVertex>(1024);
                 }
+
                 _drawingQueue[texture] = list;
             }
 

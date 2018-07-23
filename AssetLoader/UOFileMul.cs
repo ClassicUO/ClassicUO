@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.AssetsLoader;
-
-namespace ClassicUO.AssetsLoader
+﻿namespace ClassicUO.AssetsLoader
 {
     public class UOFileMul : UOFile
     {
-        private readonly UOFileIdxMul _idxFile;
         private readonly int _count, _patch;
+        private readonly UOFileIdxMul _idxFile;
 
         public UOFileMul(in string file, in string idxfile, in int count, in int patch = -1) : base(file)
         {
@@ -31,24 +26,23 @@ namespace ClassicUO.AssetsLoader
 
             if (_idxFile != null)
             {
-
-                int count = (int)_idxFile.Length / 12;
+                var count = (int) _idxFile.Length / 12;
 
                 Entries = new UOFileIndex3D[count];
 
-                for (int i = 0; i < count; i++)
+                for (var i = 0; i < count; i++)
                     Entries[i] = new UOFileIndex3D(_idxFile.ReadInt(), _idxFile.ReadInt(), _idxFile.ReadInt());
 
                 var patches = Verdata.Patches;
 
-                for (int i = 0; i < patches.Length; i++)
+                for (var i = 0; i < patches.Length; i++)
                 {
                     var patch = patches[i];
 
                     if (patch.File == _patch && patch.Index >= 0 &&
                         patch.Index < Entries.Length)
                     {
-                        UOFileIndex3D entry = Entries[patch.Index];
+                        var entry = Entries[patch.Index];
                         entry.Offset = patch.Offset;
                         entry.Length = patch.Length | (1 << 31);
                         entry.Extra = patch.Extra;
@@ -59,7 +53,10 @@ namespace ClassicUO.AssetsLoader
 
         private class UOFileIdxMul : UOFile
         {
-            public UOFileIdxMul(in string idxpath) : base(idxpath) { Load(); }
+            public UOFileIdxMul(in string idxpath) : base(idxpath)
+            {
+                Load();
+            }
         }
     }
 }

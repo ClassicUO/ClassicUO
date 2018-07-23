@@ -1,8 +1,6 @@
-﻿using ClassicUO.Input;
+﻿using System;
+using ClassicUO.Input;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.UI
 {
@@ -16,9 +14,9 @@ namespace ClassicUO.UI
         public bool IsPressed { get; set; }
 
         /// <summary>
-        /// 0: Normal,
-        /// 1: Mouse over button
-        /// 2: Clicked
+        ///     0: Normal,
+        ///     1: Mouse over button
+        ///     2: Clicked
         /// </summary>
         public Texture2D[] Textures { get; }
 

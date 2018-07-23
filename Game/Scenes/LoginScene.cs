@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.Game.Scenes
+﻿namespace ClassicUO.Game.Scenes
 {
     public sealed class LoginScene : Scene
     {
-        public LoginScene()
-        {
-
-        }
-
         private bool OnBeforeLogin()
         {
             return true;

@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-using System.Threading.Tasks;
-using ClassicUO.AssetsLoader;
 using System.Runtime.InteropServices;
 
 namespace ClassicUO.AssetsLoader
 {
-    public unsafe abstract class UOFile : DataReader
+    public abstract unsafe class UOFile : DataReader
     {
         private MemoryMappedViewAccessor _accessor;
 
@@ -23,6 +19,7 @@ namespace ClassicUO.AssetsLoader
         }
 
         public string Path { get; }
+
         //public long Length => _length;
         public UOFileIndex3D[] Entries { get; protected set; }
         //public long Position { get => _position; set => _position = value; }
@@ -31,10 +28,10 @@ namespace ClassicUO.AssetsLoader
 
         protected virtual void Load()
         {
-            FileInfo fileInfo = new FileInfo(Path);
+            var fileInfo = new FileInfo(Path);
             if (!fileInfo.Exists)
                 throw new UOFileException(Path + " not exists.");
-            long size = fileInfo.Length;
+            var size = fileInfo.Length;
             if (size > 0)
             {
                 var file = MemoryMappedFile.CreateFromFile(fileInfo.FullName, FileMode.Open);
@@ -58,10 +55,11 @@ namespace ClassicUO.AssetsLoader
                     _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
                     throw new UOFileException("Something goes wrong...");
                 }
-
             }
             else
+            {
                 throw new UOFileException($"{Path} size must has > 0");
+            }
         }
 
         /*internal byte ReadByte() => _reader.ReadByte();
@@ -83,16 +81,16 @@ namespace ClassicUO.AssetsLoader
         internal long Seek(int count) => _reader.BaseStream.Seek(count, SeekOrigin.Begin);
         internal long Seek(long count) => _reader.BaseStream.Seek(count, SeekOrigin.Begin);*/
 
-         //internal byte ReadByte() => _ptr[_position++];
-         //internal sbyte ReadSByte() => (sbyte)ReadByte();
-         //internal bool ReadBool() => ReadByte() != 0;
-         //internal short ReadShort() => (short)(ReadByte() | (ReadByte() << 8));
-         //internal ushort ReadUShort() => (ushort)ReadShort();
-         //internal int ReadInt() => (ReadByte() | (ReadByte() << 8) | (ReadByte() << 16) | (ReadByte() << 24));
-         //internal uint ReadUInt() => (uint)ReadInt();
-         //internal long ReadLong() => (ReadByte() | ((long)ReadByte() << 8) | ((long)ReadByte() << 16) | ((long)ReadByte() << 24) | ((long)ReadByte() << 32) | ((long)ReadByte() << 40) | ((long)ReadByte() << 48) | ((long)ReadByte() << 56));
-         //internal ulong ReadULong() => (ulong)ReadLong();
-       /*  internal byte[] ReadArray(int count)
+        //internal byte ReadByte() => _ptr[_position++];
+        //internal sbyte ReadSByte() => (sbyte)ReadByte();
+        //internal bool ReadBool() => ReadByte() != 0;
+        //internal short ReadShort() => (short)(ReadByte() | (ReadByte() << 8));
+        //internal ushort ReadUShort() => (ushort)ReadShort();
+        //internal int ReadInt() => (ReadByte() | (ReadByte() << 8) | (ReadByte() << 16) | (ReadByte() << 24));
+        //internal uint ReadUInt() => (uint)ReadInt();
+        //internal long ReadLong() => (ReadByte() | ((long)ReadByte() << 8) | ((long)ReadByte() << 16) | ((long)ReadByte() << 24) | ((long)ReadByte() << 32) | ((long)ReadByte() << 40) | ((long)ReadByte() << 48) | ((long)ReadByte() << 56));
+        //internal ulong ReadULong() => (ulong)ReadLong();
+        /*  internal byte[] ReadArray(int count)
          {
              byte[] buffer = new byte[count];
 
@@ -101,7 +99,7 @@ namespace ClassicUO.AssetsLoader
              return buffer;
          }*/
 
-      /*  internal byte ReadByte() => _accessor.ReadByte(_position++);
+        /*  internal byte ReadByte() => _accessor.ReadByte(_position++);
         internal sbyte ReadSByte() => _accessor.ReadSByte(_position++);
         internal bool ReadBool() => _accessor.ReadBoolean(_position++);
         internal short ReadShort() { var r = _accessor.ReadInt16(_position); _position += 2; return r; }
@@ -114,22 +112,19 @@ namespace ClassicUO.AssetsLoader
 
         internal void Fill(in byte[] buffer, in int count)
         {
-            for (int i = 0; i < count; i++)
-            {
-                buffer[i] = ReadByte();
-            }
+            for (var i = 0; i < count; i++) buffer[i] = ReadByte();
         }
 
         internal T[] ReadArray<T>(in int count) where T : struct
         {
-            T[] t = ReadArray<T>(Position, count);
-            Position += (Marshal.SizeOf<T>() * count);
+            var t = ReadArray<T>(Position, count);
+            Position += Marshal.SizeOf<T>() * count;
             return t;
         }
 
         internal T[] ReadArray<T>(in long position, in int count) where T : struct
         {
-            T[] array = new T[count];
+            var array = new T[count];
             _accessor.ReadArray(position, array, 0, count);
             return array;
         }
@@ -146,19 +141,13 @@ namespace ClassicUO.AssetsLoader
 
         internal (int, int, bool) SeekByEntryIndex(in int entryidx)
         {
-            if (entryidx < 0 || entryidx >= Entries.Length)
-            {
-                return (0, 0, false);
-            }
+            if (entryidx < 0 || entryidx >= Entries.Length) return (0, 0, false);
 
-            UOFileIndex3D e = Entries[entryidx];
-            if (e.Offset < 0)
-            {
-                return (0, 0, false);
-            }
+            var e = Entries[entryidx];
+            if (e.Offset < 0) return (0, 0, false);
 
-            int length = e.Length & 0x7FFFFFFF;
-            int extra = e.Extra;
+            var length = e.Length & 0x7FFFFFFF;
+            var extra = e.Extra;
 
             if ((e.Length & (1 << 31)) != 0)
             {
@@ -166,10 +155,7 @@ namespace ClassicUO.AssetsLoader
                 return (length, extra, true);
             }
 
-            if (e.Length < 0)
-            {
-                return (0, 0, false);
-            }
+            if (e.Length < 0) return (0, 0, false);
 
             Seek(e.Offset);
             return (length, extra, false);
@@ -178,6 +164,8 @@ namespace ClassicUO.AssetsLoader
 
     public class UOFileException : Exception
     {
-        public UOFileException(in string text) : base(text) { }
+        public UOFileException(in string text) : base(text)
+        {
+        }
     }
 }

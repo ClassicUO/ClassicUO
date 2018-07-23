@@ -1,21 +1,14 @@
-﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Renderer
 {
     public sealed class IsometricLight
     {
-        private int _personal = 9;
-        private int _overall = 9;
         private float _direction = 4.12f;
         private float _height = -0.75f;
-
-        public IsometricLight()
-        {
-
-        }
+        private int _overall = 9;
+        private int _personal = 9;
 
         public int Personal
         {
@@ -62,12 +55,13 @@ namespace ClassicUO.Game.Renderer
 
         private void Recalculate()
         {
-            float light = Math.Min(30 - Overall + Personal, 30f);
+            var light = Math.Min(30 - Overall + Personal, 30f);
             light = Math.Max(light, 0);
             IsometricLevel = light / 30;
 
             _direction = 1.2f;
-            IsometricDirection = Vector3.Normalize(new Vector3((float)Math.Cos(_direction), (float)Math.Sin(_direction), 1f)); 
+            IsometricDirection =
+                Vector3.Normalize(new Vector3((float) Math.Cos(_direction), (float) Math.Sin(_direction), 1f));
         }
     }
 }

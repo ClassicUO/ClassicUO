@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -16,18 +15,14 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Load()
         {
-
         }
 
         public virtual void Unload()
         {
-
         }
 
         public void Update()
         {
-
         }
-
     }
 }

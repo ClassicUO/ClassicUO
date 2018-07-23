@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Macro
+﻿namespace Macro
 {
     public class Class1
     {

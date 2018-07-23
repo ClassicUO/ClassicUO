@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -9,6 +7,7 @@ namespace ClassicUO.AssetsLoader
     public static class Hues
     {
         private static UOFileMul _file;
+
         private static readonly byte[] _table = new byte[32]
         {
             0x00, 0x08, 0x10, 0x18, 0x20, 0x29, 0x31, 0x39,
@@ -25,75 +24,70 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "hues.mul");
+            var path = Path.Combine(FileManager.UoFolderPath, "hues.mul");
             if (!File.Exists(path))
                 throw new FileNotFoundException();
 
             _file = new UOFileMul(path);
 
 
-            int groupSize = Marshal.SizeOf<HuesGroup>();
+            var groupSize = Marshal.SizeOf<HuesGroup>();
 
-            int entrycount = (int)_file.Length / groupSize;
+            var entrycount = (int) _file.Length / groupSize;
 
             HuesCount = entrycount * 8;
             HuesRange = new HuesGroup[entrycount];
 
-            ulong addr = (ulong)_file.StartAddress;
+            var addr = (ulong) _file.StartAddress;
 
-            for (int i = 0; i < entrycount; i++)
-                HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr)(addr + (ulong)(i * groupSize)));
+            for (var i = 0; i < entrycount; i++)
+                HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr) (addr + (ulong) (i * groupSize)));
 
             path = Path.Combine(FileManager.UoFolderPath, "radarcol.mul");
             if (!File.Exists(path))
                 throw new FileNotFoundException();
 
-            UOFileMul radarcol = new UOFileMul(path);
+            var radarcol = new UOFileMul(path);
 
-            RadarCol = radarcol.ReadArray<ushort>((int)radarcol.Length / 2);
-        }       
+            RadarCol = radarcol.ReadArray<ushort>((int) radarcol.Length / 2);
+        }
 
         public static void CreateHuesPalette()
         {
             Palette = new FloatHues[HuesCount];
-            int entrycount = HuesCount / 8;
-            for (int i = 0; i < entrycount; i++)
+            var entrycount = HuesCount / 8;
+            for (var i = 0; i < entrycount; i++)
+            for (var j = 0; j < 8; j++)
             {
-                for (int j = 0; j < 8; j++)
+                var idx = i * 8 + j;
+
+                Palette[idx].Palette = new float[32 * 3];
+
+                for (var h = 0; h < 32; h++)
                 {
-                    int idx = (i * 8) + j;
-
-                    Palette[idx].Palette = new float[32 * 3];
-
-                    for (int h = 0; h < 32; h++)
-                    {
-                        int idx1 = h * 3;
-                        ushort c = HuesRange[i].Entries[j].ColorTable[h];
-                        Palette[idx].Palette[idx1] = (((c >> 10) & 0x1F) / 31.0f);
-                        Palette[idx].Palette[idx1 + 1] = (((c >> 5) & 0x1F) / 31.0f);
-                        Palette[idx].Palette[idx1 + 2] = ((c & 0x1F) / 31.0f);
-                    }
+                    var idx1 = h * 3;
+                    var c = HuesRange[i].Entries[j].ColorTable[h];
+                    Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
+                    Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
+                    Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
                 }
             }
         }
 
         public static uint[] CreateShaderColors()
         {
-            uint[] hues = new uint[32 * 2 * 3000];
+            var hues = new uint[32 * 2 * 3000];
             var len = HuesRange.Length;
 
-            for (int r = 0; r < len; r++)
+            for (var r = 0; r < len; r++)
+            for (var y = 0; y < 8; y++)
+            for (var x = 0; x < 32; x++)
             {
-                for (int y = 0; y < 8; y++)
-                {
-                    for (int x = 0; x < 32; x++)
-                    {
-                        int idx = (r * 8 * 32) + (y * 32) + x;
+                var idx = r * 8 * 32 + y * 32 + x;
 
-                        hues[idx] = Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
-                    }
-                }
+                hues[idx] = Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
             }
+
             return hues;
         }
 
@@ -103,19 +97,20 @@ namespace ClassicUO.AssetsLoader
             {
                 if (color >= HuesCount)
                 {
-                    color %= (ushort)HuesCount;
+                    color %= (ushort) HuesCount;
                     if (color <= 0)
                         color = 1;
                 }
 
                 return Palette[color - 1].Palette;
             }
+
             return null;
         }
 
-        public static unsafe void SetHuesBlock(int index, IntPtr ptr)
+        public static void SetHuesBlock(int index, IntPtr ptr)
         {
-            VerdataHuesGroup group = Marshal.PtrToStructure<VerdataHuesGroup>((IntPtr)ptr);
+            var group = Marshal.PtrToStructure<VerdataHuesGroup>(ptr);
             SetHuesBlock(index, group);
         }
 
@@ -125,35 +120,39 @@ namespace ClassicUO.AssetsLoader
                 return;
 
             HuesRange[index].Header = group.Header;
-            for (int i = 0; i < 8; i++)
-            {
-                HuesRange[index].Entries[i].ColorTable = group.Entries[i].ColorTable;
-            }
+            for (var i = 0; i < 8; i++) HuesRange[index].Entries[i].ColorTable = group.Entries[i].ColorTable;
         }
 
         public static uint Color16To32(ushort c)
-            => (uint)(_table[(c >> 10) & 0x1F] |
-                     (_table[(c >> 5) & 0x1F] << 8) |
-                     (_table[c & 0x1F] << 16));
+        {
+            return (uint) (_table[(c >> 10) & 0x1F] |
+                           (_table[(c >> 5) & 0x1F] << 8) |
+                           (_table[c & 0x1F] << 16));
+        }
 
         public static ushort Color32To16(int c)
-            => (ushort)((((c & 0xFF) * 32) / 256) |
-                       (((((c >> 16) & 0xff) * 32) / 256) << 10) |
-                       (((((c >> 8) & 0xff) * 32) / 256) << 5));
+        {
+            return (ushort) (((c & 0xFF) * 32 / 256) |
+                             ((((c >> 16) & 0xff) * 32 / 256) << 10) |
+                             ((((c >> 8) & 0xff) * 32 / 256) << 5));
+        }
 
-        public static ushort ConvertToGray(ushort c) 
-            => (ushort)(((c & 0x1F) * 299 + ((c >> 5) & 0x1F) * 587 + ((c >> 10) & 0x1F) * 114) / 1000);
+        public static ushort ConvertToGray(ushort c)
+        {
+            return (ushort) (((c & 0x1F) * 299 + ((c >> 5) & 0x1F) * 587 + ((c >> 10) & 0x1F) * 114) / 1000);
+        }
 
         public static ushort GetColor16(ushort c, ushort color)
         {
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                int g = color / 8;
-                int e = color % 8;
+                var g = color / 8;
+                var e = color % 8;
 
                 return HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F];
             }
+
             return c;
         }
 
@@ -162,11 +161,12 @@ namespace ClassicUO.AssetsLoader
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                int g = color / 8;
-                int e = color % 8;
+                var g = color / 8;
+                var e = color % 8;
 
                 return Color16To32(HuesRange[g].Entries[e].ColorTable[c]);
             }
+
             return 0xFF010101;
         }
 
@@ -175,11 +175,12 @@ namespace ClassicUO.AssetsLoader
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                int g = color / 8;
-                int e = color % 8;
+                var g = color / 8;
+                var e = color % 8;
 
                 return HuesRange[g].Entries[e].ColorTable[8];
             }
+
             return Color16To32(c);
         }
 
@@ -188,11 +189,12 @@ namespace ClassicUO.AssetsLoader
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                int g = color / 8;
-                int e = color % 8;
+                var g = color / 8;
+                var e = color % 8;
 
                 return Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
             }
+
             return Color16To32(c);
         }
 
@@ -201,36 +203,43 @@ namespace ClassicUO.AssetsLoader
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                int g = color / 8;
-                int e = color % 8;
+                var g = color / 8;
+                var e = color % 8;
 
-                uint cl = Color16To32(c);
+                var cl = Color16To32(c);
 
-                 (byte B, byte G, byte R, byte A) = GetBGRA(cl);
+                var (B, G, R, A) = GetBGRA(cl);
 
                 if (R == G && B == G)
                     return Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
 
                 return cl;
             }
+
             return Color16To32(c);
         }
 
         public static ushort GetRadarColorData(int c)
-            => c < RadarCol.Length ? RadarCol[c] : (ushort)0;
+        {
+            return c < RadarCol.Length ? RadarCol[c] : (ushort) 0;
+        }
 
 
-        public static (byte, byte, byte, byte) GetBGRA(in uint cl)  
-            => (
-                (byte)(cl & 0xFF) ,          // B
-                (byte)((cl >> 8) & 0xFF),    // G
-                (byte)((cl >> 16) & 0xFF),   // R
-                (byte)((cl >> 24) & 0xFF)    // A
-               );
+        public static (byte, byte, byte, byte) GetBGRA(in uint cl)
+        {
+            return (
+                (byte) (cl & 0xFF), // B
+                (byte) ((cl >> 8) & 0xFF), // G
+                (byte) ((cl >> 16) & 0xFF), // R
+                (byte) ((cl >> 24) & 0xFF) // A
+            );
+        }
 
-        public static uint RgbaToArgb(in uint rgba) => (rgba >> 8) | (rgba << 24);
+        public static uint RgbaToArgb(in uint rgba)
+        {
+            return (rgba >> 8) | (rgba << 24);
+        }
     }
-
 
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -238,8 +247,10 @@ namespace ClassicUO.AssetsLoader
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public ushort[] ColorTable;
+
         public ushort TableStart;
         public ushort TableEnd;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
         public char[] Name;
     }
@@ -248,6 +259,7 @@ namespace ClassicUO.AssetsLoader
     public struct HuesGroup
     {
         public uint Header;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         public HuesBlock[] Entries;
     }
@@ -258,10 +270,13 @@ namespace ClassicUO.AssetsLoader
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public ushort[] ColorTable;
+
         public ushort TableStart;
         public ushort TableEnd;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
         public char[] Name;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public ushort[] Unk;
     }
@@ -270,6 +285,7 @@ namespace ClassicUO.AssetsLoader
     public struct VerdataHuesGroup
     {
         public uint Header;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         public HuesBlock[] Entries;
     }

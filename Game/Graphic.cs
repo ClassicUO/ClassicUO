@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 
 namespace ClassicUO.Game
 {
@@ -11,32 +9,75 @@ namespace ClassicUO.Game
         public static Graphic Invalid = new Graphic(-1);
 
         private readonly ushort _value;
-        public Graphic(in ushort graphic) { _value = graphic; }
-        public Graphic(in int graphic)
+
+        public Graphic(in ushort graphic)
         {
-            _value = (ushort)graphic;
+            _value = graphic;
         }
 
-        public bool IsInvariant { get { return _value == Invariant; } }
+        public Graphic(in int graphic)
+        {
+            _value = (ushort) graphic;
+        }
 
-        public static implicit operator Graphic(in ushort value) { return new Graphic(value); }
-        public static implicit operator ushort(in Graphic color) { return color._value; }
-        public static bool operator ==(in Graphic g1, in Graphic g2) { return g1.IsInvariant || g2.IsInvariant || g1._value == g2._value; }
-        public static bool operator !=(in Graphic g1, in Graphic g2) { return !g1.IsInvariant && !g2.IsInvariant && g1._value != g2._value; }
-        public static bool operator <(in Graphic g1, in Graphic g2) { return g1._value < g2._value; }
-        public static bool operator >(in Graphic g1, in Graphic g2) { return g1._value > g2._value; }
+        public bool IsInvariant => _value == Invariant;
 
-        public int CompareTo(object obj) { return _value.CompareTo(obj); }
-        public int CompareTo(ushort other) { return _value.CompareTo(other); }
+        public static implicit operator Graphic(in ushort value)
+        {
+            return new Graphic(value);
+        }
 
-        public override string ToString() { return string.Format("0x{0:X4}", _value); }
-        public override int GetHashCode() { return _value.GetHashCode(); }
+        public static implicit operator ushort(in Graphic color)
+        {
+            return color._value;
+        }
+
+        public static bool operator ==(in Graphic g1, in Graphic g2)
+        {
+            return g1.IsInvariant || g2.IsInvariant || g1._value == g2._value;
+        }
+
+        public static bool operator !=(in Graphic g1, in Graphic g2)
+        {
+            return !g1.IsInvariant && !g2.IsInvariant && g1._value != g2._value;
+        }
+
+        public static bool operator <(in Graphic g1, in Graphic g2)
+        {
+            return g1._value < g2._value;
+        }
+
+        public static bool operator >(in Graphic g1, in Graphic g2)
+        {
+            return g1._value > g2._value;
+        }
+
+        public int CompareTo(object obj)
+        {
+            return _value.CompareTo(obj);
+        }
+
+        public int CompareTo(ushort other)
+        {
+            return _value.CompareTo(other);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("0x{0:X4}", _value);
+        }
+
+        public override int GetHashCode()
+        {
+            return _value.GetHashCode();
+        }
+
         public override bool Equals(object obj)
         {
             if (obj is Graphic)
-                return this == (Graphic)obj;
+                return this == (Graphic) obj;
             if (obj is ushort)
-                return _value == (ushort)obj;
+                return _value == (ushort) obj;
             return false;
         }
 

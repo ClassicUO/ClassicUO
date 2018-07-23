@@ -1,13 +1,11 @@
 ﻿using ClassicUO.Game.WorldObjects;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Renderer.Views
 {
     public static class LayerOrder
     {
         public const int USED_LAYER_COUNT = 25;
+
         public static Layer[,] UsedLayers { get; } = new Layer[8, USED_LAYER_COUNT]
         {
             {
@@ -83,7 +81,6 @@ namespace ClassicUO.Game.Renderer.Views
                 Layer.Earrings, Layer.LeftHand, Layer.Cloak, Layer.Helm,
                 Layer.RightHand
             }
-
         };
     }
 }

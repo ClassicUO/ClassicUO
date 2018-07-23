@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.Renderer;
+﻿using ClassicUO.AssetsLoader;
 using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Renderer.Views
 {
     public class MobileView : View
     {
-     
-
         public MobileView(in Mobile mobile) : base(mobile)
         {
-
         }
 
-        public new Mobile WorldObject => (Mobile)base.WorldObject;
+        public new Mobile WorldObject => (Mobile) base.WorldObject;
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
@@ -26,42 +19,45 @@ namespace ClassicUO.Game.Renderer.Views
 
             spriteBatch.GetZ();
 
-            bool mirror = false;
-            byte dir = (byte)WorldObject.GetAnimationDirection();
-            AssetsLoader.Animations.GetAnimDirection(ref dir, ref mirror);
+            var mirror = false;
+            var dir = (byte) WorldObject.GetAnimationDirection();
+            Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
             byte animGroup = 0;
             Hue color = 0;
             Graphic graphic = 0;
-            AssetsLoader.EquipConvData? convertedItem = null;
+            EquipConvData? convertedItem = null;
 
-            for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
+            for (var i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
             {
-
-                Layer layer = LayerOrder.UsedLayers[dir, i];
+                var layer = LayerOrder.UsedLayers[dir, i];
 
                 if (layer == Layer.Mount)
                 {
                     if (WorldObject.IsHuman)
                     {
-                        Item mount = WorldObject.Equipment[(int)Layer.Mount];
+                        var mount = WorldObject.Equipment[(int) Layer.Mount];
                         if (mount != null)
                         {
                             graphic = mount.GetMountAnimation();
-                            int mountedHeightOffset = 0;
+                            var mountedHeightOffset = 0;
 
-                            if (graphic < AssetsLoader.Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                                mountedHeightOffset = AssetsLoader.Animations.DataIndex[graphic].MountedHeightOffset;
+                            if (graphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                                mountedHeightOffset = Animations.DataIndex[graphic].MountedHeightOffset;
 
                             animGroup = WorldObject.GetAnimationGroup(graphic);
                             color = mount.Hue;
                         }
                         else
+                        {
                             continue;
+                        }
                     }
                     else
+                    {
                         continue;
+                    }
                 }
                 else if (layer == Layer.Invalid)
                 {
@@ -74,40 +70,37 @@ namespace ClassicUO.Game.Renderer.Views
                     if (!WorldObject.IsHuman)
                         continue;
 
-                    Item item = WorldObject.Equipment[(int)layer];
+                    var item = WorldObject.Equipment[(int) layer];
                     if (item == null)
                         continue;
 
                     graphic = item.ItemData.AnimID;
 
-                    if (AssetsLoader.Animations.EquipConversions.TryGetValue(item.Graphic, out var map))
-                    {
+                    if (Animations.EquipConversions.TryGetValue(item.Graphic, out var map))
                         if (map.TryGetValue(item.ItemData.AnimID, out var data))
                         {
                             convertedItem = data;
                             graphic = data.Graphic;
                         }
-                    }
+
                     color = item.Hue;
                 }
 
 
-                sbyte animIndex = WorldObject.AnimIndex;
+                var animIndex = WorldObject.AnimIndex;
 
-                AssetsLoader.Animations.AnimID = graphic;
-                AssetsLoader.Animations.AnimGroup = animGroup;
-                AssetsLoader.Animations.Direction = dir;
+                Animations.AnimID = graphic;
+                Animations.AnimGroup = animGroup;
+                Animations.Direction = dir;
 
-                ref var direction = ref AssetsLoader.Animations.DataIndex[AssetsLoader.Animations.AnimID].Groups[AssetsLoader.Animations.AnimGroup].Direction[AssetsLoader.Animations.Direction];
+                ref var direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup]
+                    .Direction[Animations.Direction];
 
-                if (direction.FrameCount == 0 && !AssetsLoader.Animations.LoadDirectionGroup(ref direction))
+                if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction))
                     continue;
 
                 int fc = direction.FrameCount;
-                if (fc > 0 && animIndex >= fc)
-                {
-                    animIndex = 0;
-                }
+                if (fc > 0 && animIndex >= fc) animIndex = 0;
 
                 if (animIndex < direction.FrameCount)
                 {
@@ -119,30 +112,29 @@ namespace ClassicUO.Game.Renderer.Views
 
                     int drawCenterY = frame.CenterY;
                     int drawX;
-                    int drawY = drawCenterY + (WorldObject.Position.Z * 4) - 22 - (int)(WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
+                    var drawY = drawCenterY + WorldObject.Position.Z * 4 - 22 -
+                                (int) (WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
 
                     if (IsFlipped)
-                    {
-                        drawX = -22 + (int)(WorldObject.Offset.X);
-                    }
+                        drawX = -22 + (int) WorldObject.Offset.X;
                     else
-                    {
-                        drawX = -22 - (int)(WorldObject.Offset.X);
-                    }
+                        drawX = -22 - (int) WorldObject.Offset.X;
 
 
-                    int x = (drawX + frame.CenterX);
-                    int y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
+                    var x = drawX + frame.CenterX;
+                    var y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
 
                     if (color <= 0)
                     {
                         if (direction.Address != direction.PatchedAddress)
-                            color = AssetsLoader.Animations.DataIndex[AssetsLoader.Animations.AnimID].Color;
+                            color = Animations.DataIndex[Animations.AnimID].Color;
 
                         if (color <= 0 && convertedItem.HasValue)
                             color = convertedItem.Value.Color;
                     }
-                    Texture = TextureManager.GetOrCreateAnimTexture(graphic, AssetsLoader.Animations.AnimGroup, dir, animIndex, direction.Frames);
+
+                    Texture = TextureManager.GetOrCreateAnimTexture(graphic, Animations.AnimGroup, dir, animIndex,
+                        direction.Frames);
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
                     HueVector = RenderExtentions.GetHueVector(color);
 

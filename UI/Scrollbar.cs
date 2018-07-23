@@ -1,14 +1,11 @@
 ﻿using ClassicUO.Input;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.UI
 {
     public sealed class Scrollbar : Control
     {
-        const int BASE_WIDTH = 5;
+        private const int BASE_WIDTH = 5;
 
         private readonly ScrollbarRail _rail;
         private int _delta;
@@ -44,7 +41,8 @@ namespace ClassicUO.UI
         {
             private readonly Scrollbar _scrollbar;
 
-            public ScrollbarRail(Panel parent, Scrollbar scrollbar) : base(parent, scrollbar.X, scrollbar.Y, scrollbar.Width, scrollbar.Height)
+            public ScrollbarRail(Panel parent, Scrollbar scrollbar) : base(parent, scrollbar.X, scrollbar.Y,
+                scrollbar.Width, scrollbar.Height)
             {
                 _scrollbar = scrollbar;
             }
@@ -54,7 +52,5 @@ namespace ClassicUO.UI
                 _scrollbar.OnMouseWheel(e);
             }
         }
-
-
     }
 }

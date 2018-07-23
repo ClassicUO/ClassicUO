@@ -1,8 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Renderer
 {
@@ -12,7 +9,6 @@ namespace ClassicUO.Game.Renderer
 
         public SpriteBatchUI(in Microsoft.Xna.Framework.Game game) : base(game)
         {
-
         }
 
 
@@ -62,10 +58,10 @@ namespace ClassicUO.Game.Renderer
 
         public bool Draw2D(in Texture2D texture, in Vector3 position, in Rectangle sourceRect, in Vector3 hue)
         {
-            float minX = sourceRect.X / (float)texture.Width;
-            float maxX = (sourceRect.X + sourceRect.Width) / (float)texture.Width;
-            float minY = sourceRect.Y / (float)texture.Height;
-            float maxY = (sourceRect.Y + sourceRect.Height) / (float)texture.Height;
+            var minX = sourceRect.X / (float) texture.Width;
+            var maxX = (sourceRect.X + sourceRect.Width) / (float) texture.Width;
+            var minY = sourceRect.Y / (float) texture.Height;
+            var maxY = (sourceRect.Y + sourceRect.Height) / (float) texture.Height;
 
             _vertexBuffer[0].Position.X = position.X;
             _vertexBuffer[0].Position.Y = position.Y;
@@ -114,8 +110,10 @@ namespace ClassicUO.Game.Renderer
 
         public bool Draw2D(in Texture2D texture, in Rectangle destRect, in Rectangle sourceRect, in Vector3 hue)
         {
-            float minX = sourceRect.X / (float)texture.Width, maxX = (sourceRect.X + sourceRect.Width) / (float)texture.Width;
-            float minY = sourceRect.Y / (float)texture.Height, maxY = (sourceRect.Y + sourceRect.Height) / (float)texture.Height;
+            float minX = sourceRect.X / (float) texture.Width,
+                maxX = (sourceRect.X + sourceRect.Width) / (float) texture.Width;
+            float minY = sourceRect.Y / (float) texture.Height,
+                maxY = (sourceRect.Y + sourceRect.Height) / (float) texture.Height;
 
             _vertexBuffer[0].Position.X = destRect.X;
             _vertexBuffer[0].Position.Y = destRect.Y;
@@ -208,32 +206,26 @@ namespace ClassicUO.Game.Renderer
 
         public bool Draw2DTiled(in Texture2D texture, in Rectangle destRect, in Vector3 hue)
         {
-            int y = destRect.Y;
-            int h = destRect.Height;
+            var y = destRect.Y;
+            var h = destRect.Height;
             Rectangle sRect;
 
             while (h > 0)
             {
-                int x = destRect.X;
-                int w = destRect.Width;
+                var x = destRect.X;
+                var w = destRect.Width;
                 if (h < texture.Height)
-                {
                     sRect = new Rectangle(0, 0, texture.Width, h);
-                }
                 else
-                {
                     sRect = new Rectangle(0, 0, texture.Width, texture.Height);
-                }
                 while (w > 0)
                 {
-                    if (w < texture.Width)
-                    {
-                        sRect.Width = w;
-                    }
+                    if (w < texture.Width) sRect.Width = w;
                     Draw2D(texture, new Vector3(x, y, 0), sRect, hue);
                     w -= texture.Width;
                     x += texture.Width;
                 }
+
                 h -= texture.Height;
                 y += texture.Height;
             }

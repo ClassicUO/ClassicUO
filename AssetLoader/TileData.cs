@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.IO;
 
 namespace ClassicUO.AssetsLoader
 {
@@ -13,19 +12,18 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "tiledata.mul");
+            var path = Path.Combine(FileManager.UoFolderPath, "tiledata.mul");
             if (!File.Exists(path))
                 throw new FileNotFoundException();
 
-            UOFileMul tiledata = new UOFileMul(path);
+            var tiledata = new UOFileMul(path);
 
 
-            bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
+            var isold = FileManager.ClientVersion < ClientVersions.CV_7090;
 
-            int staticscount = !isold ? 
-                (int)(tiledata.Length - (512 * Marshal.SizeOf<LandGroupNew>())) / Marshal.SizeOf<StaticGroupNew>()
-                :
-                (int)(tiledata.Length - (512 * Marshal.SizeOf<LandGroupOld>())) / Marshal.SizeOf<StaticGroupOld>();
+            var staticscount = !isold
+                ? (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupNew>()) / Marshal.SizeOf<StaticGroupNew>()
+                : (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupOld>()) / Marshal.SizeOf<StaticGroupOld>();
 
             if (staticscount > 2048)
                 staticscount = 2048;
@@ -35,14 +33,14 @@ namespace ClassicUO.AssetsLoader
             LandData = new LandTiles[512 * 32];
             StaticData = new StaticTiles[staticscount * 32];
 
-            byte[] bufferString = new byte[20];
+            var bufferString = new byte[20];
 
-            for (int i = 0; i < 512; i++)
+            for (var i = 0; i < 512; i++)
             {
                 tiledata.Skip(4);
-                for (int j = 0; j < 32; j++)
+                for (var j = 0; j < 32; j++)
                 {
-                    int idx = (i * 32) + j;
+                    var idx = i * 32 + j;
                     LandData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     LandData[idx].TexID = tiledata.ReadUShort();
 
@@ -51,12 +49,12 @@ namespace ClassicUO.AssetsLoader
                 }
             }
 
-            for (int i = 0; i < staticscount; i++)
+            for (var i = 0; i < staticscount; i++)
             {
                 tiledata.Skip(4);
-                for (int j = 0; j < 32; j++)
+                for (var j = 0; j < 32; j++)
                 {
-                    int idx = (i * 32) + j;
+                    var idx = i * 32 + j;
                     StaticData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     StaticData[idx].Weight = tiledata.ReadByte();
                     StaticData[idx].Layer = tiledata.ReadByte();
@@ -73,38 +71,165 @@ namespace ClassicUO.AssetsLoader
         }
 
 
-        public static bool IsBackground(in long flags) => (flags & 0x00000001) != 0;
-        public static bool IsWeapon(in long flags) => (flags & 0x00000002) != 0;
-        public static bool IsTransparent(in long flags) => (flags & 0x00000004) != 0;
-        public static bool IsTranslucent(in long flags) => (flags & 0x00000008) != 0;
-        public static bool IsWall(in long flags) => (flags & 0x00000010) != 0;
-        public static bool IsDamaging(in long flags) => (flags & 0x00000020) != 0;
-        public static bool IsImpassable(in long flags) => (flags & 0x00000040) != 0;
-        public static bool IsWet(in long flags) => (flags & 0x00000080) != 0;
-        public static bool IsUnknown(in long flags) => (flags & 0x00000100) != 0;
-        public static bool IsSurface(in long flags) => (flags & 0x00000200) != 0;
-        public static bool IsBridge(in long flags) => (flags & 0x00000400) != 0;
-        public static bool IsStackable(in long flags) => (flags & 0x00000800) != 0;
-        public static bool IsWindow(in long flags) => (flags & 0x00001000) != 0;
-        public static bool IsNoShoot(in long flags) => (flags & 0x00002000) != 0;
-        public static bool IsPrefixA(in long flags) => (flags & 0x00004000) != 0;
-        public static bool IsPrefixAn(in long flags) => (flags & 0x00008000) != 0;
-        public static bool IsInternal(in long flags) => (flags & 0x00010000) != 0;
-        public static bool IsFoliage(in long flags) => (flags & 0x00020000) != 0;
-        public static bool IsPartialHue(in long flags) => (flags & 0x00040000) != 0;
-        public static bool IsUnknown1(in long flags) => (flags & 0x00080000) != 0;
-        public static bool IsMap(in long flags) => (flags & 0x00100000) != 0;
-        public static bool IsContainer(in long flags) => (flags & 0x00200000) != 0;
-        public static bool IsWearable(in long flags) => (flags & 0x00400000) != 0;
-        public static bool IsLightSource(in long flags) => (flags & 0x00800000) != 0;
-        public static bool IsAnimated(in long flags) => (flags & 0x01000000) != 0;
-        public static bool IsNoDiagonal(in long flags) => (flags & 0x02000000) != 0;
-        public static bool IsUnknown2(in long flags) => (flags & 0x04000000) != 0;
-        public static bool IsArmor(in long flags) => (flags & 0x08000000) != 0;
-        public static bool IsRoof(in long flags) => (flags & 0x10000000) != 0;
-        public static bool IsDoor(in long flags) => (flags & 0x20000000) != 0;
-        public static bool IsStairBack(in long flags) => (flags & 0x40000000) != 0;
-        public static bool IsStairRight(in long flags) => (flags & 0x80000000) != 0;      
+        public static bool IsBackground(in long flags)
+        {
+            return (flags & 0x00000001) != 0;
+        }
+
+        public static bool IsWeapon(in long flags)
+        {
+            return (flags & 0x00000002) != 0;
+        }
+
+        public static bool IsTransparent(in long flags)
+        {
+            return (flags & 0x00000004) != 0;
+        }
+
+        public static bool IsTranslucent(in long flags)
+        {
+            return (flags & 0x00000008) != 0;
+        }
+
+        public static bool IsWall(in long flags)
+        {
+            return (flags & 0x00000010) != 0;
+        }
+
+        public static bool IsDamaging(in long flags)
+        {
+            return (flags & 0x00000020) != 0;
+        }
+
+        public static bool IsImpassable(in long flags)
+        {
+            return (flags & 0x00000040) != 0;
+        }
+
+        public static bool IsWet(in long flags)
+        {
+            return (flags & 0x00000080) != 0;
+        }
+
+        public static bool IsUnknown(in long flags)
+        {
+            return (flags & 0x00000100) != 0;
+        }
+
+        public static bool IsSurface(in long flags)
+        {
+            return (flags & 0x00000200) != 0;
+        }
+
+        public static bool IsBridge(in long flags)
+        {
+            return (flags & 0x00000400) != 0;
+        }
+
+        public static bool IsStackable(in long flags)
+        {
+            return (flags & 0x00000800) != 0;
+        }
+
+        public static bool IsWindow(in long flags)
+        {
+            return (flags & 0x00001000) != 0;
+        }
+
+        public static bool IsNoShoot(in long flags)
+        {
+            return (flags & 0x00002000) != 0;
+        }
+
+        public static bool IsPrefixA(in long flags)
+        {
+            return (flags & 0x00004000) != 0;
+        }
+
+        public static bool IsPrefixAn(in long flags)
+        {
+            return (flags & 0x00008000) != 0;
+        }
+
+        public static bool IsInternal(in long flags)
+        {
+            return (flags & 0x00010000) != 0;
+        }
+
+        public static bool IsFoliage(in long flags)
+        {
+            return (flags & 0x00020000) != 0;
+        }
+
+        public static bool IsPartialHue(in long flags)
+        {
+            return (flags & 0x00040000) != 0;
+        }
+
+        public static bool IsUnknown1(in long flags)
+        {
+            return (flags & 0x00080000) != 0;
+        }
+
+        public static bool IsMap(in long flags)
+        {
+            return (flags & 0x00100000) != 0;
+        }
+
+        public static bool IsContainer(in long flags)
+        {
+            return (flags & 0x00200000) != 0;
+        }
+
+        public static bool IsWearable(in long flags)
+        {
+            return (flags & 0x00400000) != 0;
+        }
+
+        public static bool IsLightSource(in long flags)
+        {
+            return (flags & 0x00800000) != 0;
+        }
+
+        public static bool IsAnimated(in long flags)
+        {
+            return (flags & 0x01000000) != 0;
+        }
+
+        public static bool IsNoDiagonal(in long flags)
+        {
+            return (flags & 0x02000000) != 0;
+        }
+
+        public static bool IsUnknown2(in long flags)
+        {
+            return (flags & 0x04000000) != 0;
+        }
+
+        public static bool IsArmor(in long flags)
+        {
+            return (flags & 0x08000000) != 0;
+        }
+
+        public static bool IsRoof(in long flags)
+        {
+            return (flags & 0x10000000) != 0;
+        }
+
+        public static bool IsDoor(in long flags)
+        {
+            return (flags & 0x20000000) != 0;
+        }
+
+        public static bool IsStairBack(in long flags)
+        {
+            return (flags & 0x40000000) != 0;
+        }
+
+        public static bool IsStairRight(in long flags)
+        {
+            return (flags & 0x80000000) != 0;
+        }
     }
 
 
@@ -120,6 +245,7 @@ namespace ClassicUO.AssetsLoader
     public struct LandGroup
     {
         public uint Unknown;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public LandTiles[] Tiles;
     }
@@ -144,6 +270,7 @@ namespace ClassicUO.AssetsLoader
     public struct LandGroupOld
     {
         public uint Unknown;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public LandTilesOld[] Tiles;
     }
@@ -153,6 +280,7 @@ namespace ClassicUO.AssetsLoader
     {
         public uint Flags;
         public ushort TexID;
+
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
         public string Name;
     }
@@ -161,6 +289,7 @@ namespace ClassicUO.AssetsLoader
     public struct StaticGroupOld
     {
         public uint Unk;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public StaticTilesOld[] Tiles;
     }
@@ -176,10 +305,10 @@ namespace ClassicUO.AssetsLoader
         public ushort Hue;
         public ushort LightIndex;
         public byte Height;
+
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
         public string Name;
     }
-
 
 
     // new 
@@ -188,6 +317,7 @@ namespace ClassicUO.AssetsLoader
     public struct LandGroupNew
     {
         public uint Unknown;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public LandTilesNew[] Tiles;
     }
@@ -197,6 +327,7 @@ namespace ClassicUO.AssetsLoader
     {
         public TileFlag Flags;
         public ushort TexID;
+
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
         public string Name;
     }
@@ -205,6 +336,7 @@ namespace ClassicUO.AssetsLoader
     public struct StaticGroupNew
     {
         public uint Unk;
+
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public StaticTilesNew[] Tiles;
     }
@@ -220,6 +352,7 @@ namespace ClassicUO.AssetsLoader
         public ushort Hue;
         public ushort LightIndex;
         public byte Height;
+
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
         public string Name;
     }
@@ -391,6 +524,6 @@ namespace ClassicUO.AssetsLoader
         /// <summary>
         ///     Not yet documented.
         /// </summary>
-        StairRight = unchecked(0x80000000)
+        StairRight = 0x80000000
     }
 }

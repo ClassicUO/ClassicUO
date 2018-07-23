@@ -1,9 +1,7 @@
-﻿using ClassicUO.AssetsLoader;
+﻿using System.Collections.Generic;
+using ClassicUO.AssetsLoader;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Renderer
 {
@@ -31,9 +29,11 @@ namespace ClassicUO.Game.Renderer
             List<WebLinkRect> links;
 
             if (IsUnicode)
-                (data, Width, Height, linesCount, links) = Fonts.GenerateUnicode(Font, Text, Color, cell, maxWidth, aling, flags);
+                (data, Width, Height, linesCount, links) =
+                    Fonts.GenerateUnicode(Font, Text, Color, cell, maxWidth, aling, flags);
             else
-                (data, Width, Height, linesCount, _isPartialHue) = Fonts.GenerateASCII(Font, Text, Color, maxWidth, aling, flags);
+                (data, Width, Height, linesCount, _isPartialHue) =
+                    Fonts.GenerateASCII(Font, Text, Color, maxWidth, aling, flags);
 
 
             if (Texture != null)
@@ -49,7 +49,8 @@ namespace ClassicUO.Game.Renderer
 
         public void Draw(in SpriteBatchUI spriteBatch, in Point position)
         {
-            spriteBatch.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height), RenderExtentions.GetHueVector(0, _isPartialHue, false, false)  );
+            spriteBatch.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height),
+                RenderExtentions.GetHueVector(0, _isPartialHue, false, false));
             // Draw(spriteBatch, new Rectangle(position.X, position.Y, Width, Height), 0, 0);
         }
 
@@ -64,21 +65,22 @@ namespace ClassicUO.Game.Renderer
             sourceRect.X = scrollX;
             sourceRect.Y = scrollY;
 
-            int maxX = sourceRect.X + destRect.Width;
+            var maxX = sourceRect.X + destRect.Width;
             if (maxX <= Width)
                 sourceRect.Width = destRect.Width;
             else
                 destRect.Width = sourceRect.Width = Width - sourceRect.X;
 
-            int maxY = sourceRect.Y + destRect.Height;
+            var maxY = sourceRect.Y + destRect.Height;
             if (maxY <= Height)
                 sourceRect.Height = destRect.Height;
             else
                 destRect.Height = sourceRect.Height = Height - sourceRect.Y;
 
 
-
-            spriteBatch.Draw2D(Texture, destRect, sourceRect, new Vector3(0, 0, 0) /*new Vector3(Color, _isPartialHue ? -2 : -1, 0)*/ /*RenderExtentions.GetHueVector(0, _isPartialHue, false ,false)*/ );
+            spriteBatch.Draw2D(Texture, destRect, sourceRect,
+                new Vector3(0, 0,
+                    0) /*new Vector3(Color, _isPartialHue ? -2 : -1, 0)*/ /*RenderExtentions.GetHueVector(0, _isPartialHue, false ,false)*/);
         }
     }
 }

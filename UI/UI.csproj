@@ -12,7 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AssetLoader\AssetLoader.csproj" />
     <ProjectReference Include="..\Input\Input.csproj" />
   </ItemGroup>
 

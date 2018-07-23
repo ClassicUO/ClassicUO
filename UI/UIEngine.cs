@@ -1,11 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using ClassicUO.Input;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ClassicUO.Input;
 
 namespace ClassicUO.UI
 {
@@ -13,10 +11,10 @@ namespace ClassicUO.UI
 
     public sealed class UIEngine
     {
+        private Game _game;
         private Control _lastFocused;
-        private Microsoft.Xna.Framework.Game _game;
 
-        public UIEngine(Microsoft.Xna.Framework.Game game)
+        public UIEngine(Game game)
         {
             _game = game;
             Controls = new List<Control>();
@@ -27,7 +25,6 @@ namespace ClassicUO.UI
 
         public void Initialize()
         {
-
         }
 
 
@@ -60,7 +57,8 @@ namespace ClassicUO.UI
 
                 return false;
             }
-            foreach (Control c in Controls)
+
+            foreach (var c in Controls)
                 GetControl(c, func, ref control);
 
             if (control != null)
@@ -77,7 +75,6 @@ namespace ClassicUO.UI
 
                 control?.OnMouseButton(arg);
             }
-
         }
 
         private void DoMouseMoveEvents(MouseEventArgs arg)
@@ -94,28 +91,26 @@ namespace ClassicUO.UI
                             s.OnMouseEnter(arg);
                         return true;
                     }
-                    else if (s.MouseIsOver)
+
+                    if (s.MouseIsOver)
+                    {
                         s.OnMouseLeft(arg);
+                    }
                 }
+
                 return false;
             }
 
-            foreach (Control c in Controls)
+            foreach (var c in Controls)
                 GetControl(c, func, ref control);
 
             if (control != null)
             {
-                
-                
                 if (control.IsMovable && control.CanDragNow)
-                {
                     control.MoveTo(
-
-                         arg.Offset.X, 
-                         arg.Offset.Y
-
-                        );
-                }
+                        arg.Offset.X,
+                        arg.Offset.Y
+                    );
 
                 control.OnMouseMove(arg);
             }
@@ -130,7 +125,7 @@ namespace ClassicUO.UI
                 return s.IsEnabled && s.IsVisible && s.Rectangle.Contains(arg.Location.X, arg.Location.Y);
             }
 
-            foreach (Control c in Controls)
+            foreach (var c in Controls)
                 GetControl(c, func, ref control);
 
             control?.OnMouseWheel(arg);
@@ -145,9 +140,9 @@ namespace ClassicUO.UI
         private void GetControl(Control parent, Func<Control, bool> condition, ref Control founded)
         {
             //for (int i = parent.Children.Count - 1; i >= 0; i--)
-            for (int i = 0; i < parent.Children.Count; i++)
+            for (var i = 0; i < parent.Children.Count; i++)
             {
-                Control c = parent.Children[i];
+                var c = parent.Children[i];
                 if (condition(c))
                 {
                     founded = c;
@@ -158,7 +153,5 @@ namespace ClassicUO.UI
             if (founded == null && condition(parent))
                 founded = parent;
         }
-
-
     }
 }

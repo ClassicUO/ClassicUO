@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.Game
+﻿namespace ClassicUO.Game
 {
     public struct Property
     {
@@ -12,7 +8,7 @@ namespace ClassicUO.Game
             Args = args;
         }
 
-        public uint Cliloc { get; private set; }
-        public string Args { get; private set; }
+        public uint Cliloc { get; }
+        public string Args { get; }
     }
 }

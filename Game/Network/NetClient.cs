@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Net;
 using System.Net.Sockets;
 
@@ -8,39 +6,38 @@ namespace ClassicUO.Game.Network
 {
     public sealed class NetClient
     {
-        public static NetClient Socket { get; } = new NetClient();
-
-        public static event EventHandler Connected, Disconnected;
-        public static event EventHandler<Packet> PacketReceived, PacketSended;
-
-        const int BUFF_SIZE = 0x10000;
+        private const int BUFF_SIZE = 0x10000;
 
         private static readonly BufferPool _pool = new BufferPool(10, BUFF_SIZE);
-
-        private Socket _socket;
-        private SocketAsyncEventArgs _sendEventArgs, _recvEventArgs;
-        private byte[] _recvBuffer, _incompletePacketBuffer;
-        private bool _isDisposing, _isCompressionEnabled, _sending;
-        private SendQueue _sendQueue;
         private readonly object _sendLock = new object();
         private CircularBuffer _circularBuffer;
 
         private int _incompletePacketLength;
+        private bool _isDisposing, _isCompressionEnabled, _sending;
+        private byte[] _recvBuffer, _incompletePacketBuffer;
+        private SocketAsyncEventArgs _sendEventArgs, _recvEventArgs;
+        private SendQueue _sendQueue;
+
+        private Socket _socket;
 
         private NetClient()
         {
         }
 
+        public static NetClient Socket { get; } = new NetClient();
+
         public bool IsConnected => _socket != null && _socket.Connected;
 
+        public static event EventHandler Connected, Disconnected;
+        public static event EventHandler<Packet> PacketReceived, PacketSended;
 
 
         public void Connect(in string ip, in ushort port)
         {
             _isDisposing = _sending = false;
 
-            IPAddress address = ResolveIP(ip);
-            IPEndPoint endpoint = new IPEndPoint(address, port);
+            var address = ResolveIP(ip);
+            var endpoint = new IPEndPoint(address, port);
 
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             //_socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.Debug, 1);
@@ -58,7 +55,7 @@ namespace ClassicUO.Game.Network
             _recvEventArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
 
 
-            SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs();
+            var connectEventArgs = new SocketAsyncEventArgs();
             connectEventArgs.Completed += (sender, e) =>
             {
                 if (e.SocketError == SocketError.Success)
@@ -83,19 +80,24 @@ namespace ClassicUO.Game.Network
             {
                 _socket.Shutdown(SocketShutdown.Both);
             }
-            catch { }
+            catch
+            {
+            }
+
             _socket.Close();
 
             if (_recvBuffer != null)
-            {
                 lock (_pool)
+                {
                     _pool.AddFreeSegment(_recvBuffer);
-            }
+                }
+
             if (_incompletePacketBuffer != null)
-            {
                 lock (_pool)
+                {
                     _pool.AddFreeSegment(_incompletePacketBuffer);
-            }
+                }
+
             _incompletePacketBuffer = null;
             _incompletePacketLength = 0;
             _recvBuffer = null;
@@ -115,12 +117,15 @@ namespace ClassicUO.Game.Network
             Disconnected?.Invoke(null, EventArgs.Empty);
         }
 
-        public void EnableCompression() => _isCompressionEnabled = true;
+        public void EnableCompression()
+        {
+            _isCompressionEnabled = true;
+        }
 
         public void Send(PacketWriter p)
         {
-            byte[] data = p.ToArray();
-            Packet packet = new Packet(data, p.Length);
+            var data = p.ToArray();
+            var packet = new Packet(data, p.Length);
             PacketSended?.Invoke(null, packet);
 
             if (!packet.Filter)
@@ -144,11 +149,11 @@ namespace ClassicUO.Game.Network
 
             lock (_circularBuffer)
             {
-                int length = _circularBuffer.Length;
+                var length = _circularBuffer.Length;
 
                 while (length > 0 && IsConnected)
                 {
-                    byte id = _circularBuffer.GetID();
+                    var id = _circularBuffer.GetID();
                     int packetlength = PacketsTable.GetPacketLength(id);
                     if (packetlength == -1)
                     {
@@ -161,10 +166,10 @@ namespace ClassicUO.Game.Network
                     if (length < packetlength)
                         break;
 
-                    byte[] data = BUFF_SIZE >= packetlength ? _pool.GetFreeSegment() : new byte[packetlength];
+                    var data = BUFF_SIZE >= packetlength ? _pool.GetFreeSegment() : new byte[packetlength];
                     packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
 
-                    Packet packet = new Packet(data, packetlength);
+                    var packet = new Packet(data, packetlength);
                     PacketReceived?.Invoke(null, packet);
 
                     length = _circularBuffer.Length;
@@ -177,7 +182,7 @@ namespace ClassicUO.Game.Network
 
         private void Send(in byte[] data)
         {
-            if(_socket == null)
+            if (_socket == null)
                 return;
 
             if (data != null)
@@ -192,7 +197,9 @@ namespace ClassicUO.Game.Network
                     lock (_sendLock)
                     {
                         lock (_sendQueue)
+                        {
                             gram = _sendQueue.Enqueue(data, 0, data.Length);
+                        }
 
                         if (gram != null && !_sending)
                         {
@@ -246,7 +253,9 @@ namespace ClassicUO.Game.Network
                     else
                     {
                         lock (_sendLock)
+                        {
                             _sending = false;
+                        }
                     }
 
                     break;
@@ -263,17 +272,17 @@ namespace ClassicUO.Game.Network
 
         private void ProcessRecv(in SocketAsyncEventArgs e)
         {
-            int bytesLen = e.BytesTransferred;
+            var bytesLen = e.BytesTransferred;
 
             if (bytesLen > 0 && e.SocketError == SocketError.Success)
             {
-                byte[] buffer = _recvBuffer;
+                var buffer = _recvBuffer;
 
                 if (_isCompressionEnabled)
                 {
-                    byte[] source = _pool.GetFreeSegment();
-                    int incompletelength = _incompletePacketLength;
-                    int sourcelength = incompletelength + bytesLen;
+                    var source = _pool.GetFreeSegment();
+                    var incompletelength = _incompletePacketLength;
+                    var sourcelength = incompletelength + bytesLen;
 
                     if (incompletelength > 0)
                     {
@@ -284,11 +293,12 @@ namespace ClassicUO.Game.Network
                     // if outbounds exception, BUFF_SIZE must be increased
                     Buffer.BlockCopy(buffer, 0, source, incompletelength, bytesLen);
 
-                    int processedOffset = 0;
-                    int sourceOffset = 0;
-                    int offset = 0;
+                    var processedOffset = 0;
+                    var sourceOffset = 0;
+                    var offset = 0;
 
-                    while (Huffman.DecompressChunk(ref source, ref sourceOffset, sourcelength, ref buffer, offset, out int outSize))
+                    while (Huffman.DecompressChunk(ref source, ref sourceOffset, sourcelength, ref buffer, offset,
+                        out var outSize))
                     {
                         processedOffset = sourceOffset;
                         offset += outSize;
@@ -302,17 +312,21 @@ namespace ClassicUO.Game.Network
                     }
                     else
                     {
-                        int l = sourcelength - processedOffset;
+                        var l = sourcelength - processedOffset;
                         Buffer.BlockCopy(source, processedOffset, _incompletePacketBuffer, _incompletePacketLength, l);
                         _incompletePacketLength += l;
-                    } 
+                    }
                 }
 
                 lock (_circularBuffer)
+                {
                     _circularBuffer.Enqueue(buffer, 0, bytesLen);
+                }
             }
             else
+            {
                 Disconnect();
+            }
         }
 
         private void StartSend()
@@ -325,10 +339,11 @@ namespace ClassicUO.Game.Network
         {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
-
             }
             else
+            {
                 Disconnect();
+            }
         }
 
         private void Flush()
@@ -362,22 +377,21 @@ namespace ClassicUO.Game.Network
 
         private IPAddress ResolveIP(in string addr)
         {
-            IPAddress result = IPAddress.None;
+            var result = IPAddress.None;
             if (string.IsNullOrEmpty(addr))
                 return result;
 
             if (!IPAddress.TryParse(addr, out result))
-            {
                 try
                 {
-                    IPHostEntry hostEntry = Dns.GetHostEntry(addr);
+                    var hostEntry = Dns.GetHostEntry(addr);
                     if (hostEntry.AddressList.Length != 0)
                         result = hostEntry.AddressList[hostEntry.AddressList.Length - 1];
                 }
                 catch
                 {
                 }
-            }
+
             return result;
         }
     }

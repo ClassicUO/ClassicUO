@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Network
 {
@@ -10,14 +8,18 @@ namespace ClassicUO.Game.Network
 
         public PacketWriter(in byte id)
         {
-            short len = PacketsTable.GetPacketLength(id);
+            var len = PacketsTable.GetPacketLength(id);
             IsDynamic = len < 0;
-            _data = new byte[(IsDynamic ? 3 : len)];
+            _data = new byte[IsDynamic ? 3 : len];
             _data[0] = id;
             Position = IsDynamic ? 3 : 1;
         }
 
-        protected override byte this[int index] { get => _data[index]; set => _data[index] = value; }
+        protected override byte this[int index]
+        {
+            get => _data[index];
+            set => _data[index] = value;
+        }
 
         public override int Length => _data.Length;
 
@@ -34,8 +36,8 @@ namespace ClassicUO.Game.Network
         {
             if (IsDynamic)
             {
-                this[1] = (byte)(Position >> 8);
-                this[2] = (byte)Position;
+                this[1] = (byte) (Position >> 8);
+                this[2] = (byte) Position;
             }
         }
 
@@ -45,10 +47,8 @@ namespace ClassicUO.Game.Network
                 throw new ArgumentOutOfRangeException("length");
 
             if (IsDynamic)
-            {
                 while (Position + length > Length)
                     Array.Resize(ref _data, Position + length);
-            }
             else if (Position + length > Length)
                 throw new ArgumentOutOfRangeException("length");
         }
