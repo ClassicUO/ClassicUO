@@ -13,27 +13,37 @@ namespace ClassicUO.Game
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
         public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
         public static PlayerMobile Player { get; set; }
+        public static Map.Facet Map { get; private set; }
 
-        private static Map.Facet _map;
-        public static Map.Facet Map
+        public static int MapIndex
         {
-            get => _map;
+            get => Map == null ? -1 : Map.Index;
             set
             {
-                if (value == null)
-                    return;
-                if (_map == null || _map.Index != value.Index)
+                if (MapIndex != value)
                 {
-                    _map = null;
-                    _map = value; 
+                    Clear(true);
 
-                    var position = Player.Position;
-                    Player.Position = Position.Invalid;
-                    Player.Position = position;
-                    Player.ProcessDelta();
+                    if (Map != null)
+                    {
+                        var position = Player.Position;
+                        Player.SetMap(null);
+                        Map = null;
+                        Map = new Map.Facet(value);
+                        Player.SetMap(Map);
+                        Player.Position = position;
+                        Player.ClearSteps();
+                        Player.ProcessDelta();
+                    }
+                    else
+                    {
+                        Map = new Map.Facet(value);
+                        Player.SetMap(Map);
+                    }
                 }
             }
         }
+
 
         public static bool InGame => Player != null && Map != null;
 
@@ -55,7 +65,10 @@ namespace ClassicUO.Game
                     mob.ViewObject.Update(frameMS);
 
                     if (mob.Distance > DISTANCE_POV)
+                    {
+                        mob.Dispose();
                         RemoveMobile(mob);
+                    }
                 }
 
                 foreach (Item item in Items)
@@ -63,7 +76,10 @@ namespace ClassicUO.Game
                     item.ViewObject.Update(frameMS);
 
                     if (item.Distance > DISTANCE_POV)
+                    {
+                        item.Dispose();
                         RemoveItem(item);
+                    }
                 }
             }
         }
@@ -134,7 +150,6 @@ namespace ClassicUO.Game
             foreach (Item i in item.Items)
                 RemoveItem(i);
             item.Items.Clear();
-            item.Tile = null;
             return true;
         }
 
@@ -147,16 +162,40 @@ namespace ClassicUO.Game
             foreach (Item i in mobile.Items)
                 RemoveItem(i);
             mobile.Items.Clear();
-            mobile.Tile = null;
             return true;
         }
 
-        public static void Clear()
+        public static void Clear(in bool noplayer = false)
         {
-            Map = null;
-            Player = null;
-            Items.Clear();
-            Mobiles.Clear();
+            if (!noplayer)
+            {
+                Map = null;
+                Player = null;
+            }
+
+            foreach (var item in Items)
+            {
+                if (noplayer)
+                {
+                    if (item.RootContainer == Player)
+                        continue;
+                }
+                item.Dispose();
+                RemoveItem(item);
+            }
+            foreach (var mob in Mobiles)
+            {
+                if (noplayer)
+                {
+                    if (mob == Player)
+                        continue;
+                }
+                mob.Dispose();
+                RemoveMobile(mob);
+            }
+
+            //Items.Clear();
+            //Mobiles.Clear();
         }
     }
 }

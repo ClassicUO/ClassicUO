@@ -451,6 +451,7 @@ namespace ClassicUO.Game.Network
             if ((x & 0x8000) != 0)
                 item.Direction = (Direction)p.ReadByte();//wtf???
 
+            //item.Position.Set((ushort)(x & 0x7FFF), (ushort)(y & 0x3FFF), p.ReadSByte());
             item.Position = new Position((ushort)(x & 0x7FFF), (ushort)(y & 0x3FFF), p.ReadSByte());
 
             if ((y & 0x8000) != 0)
@@ -473,6 +474,7 @@ namespace ClassicUO.Game.Network
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
             World.Player.Position = new Position(p.ReadUShort(), p.ReadUShort(), (sbyte)p.ReadUShort());
+            //World.Player.Position.Set(p.ReadUShort(), p.ReadUShort(), (sbyte)p.ReadUShort());
             World.Player.Direction = (Direction)p.ReadByte();
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
@@ -530,8 +532,7 @@ namespace ClassicUO.Game.Network
             ushort y = p.ReadUShort();
             p.Skip(2);
             var direction = (Direction)p.ReadByte();
-            var position = new Position(x, y, p.ReadSByte());
-            //OnPlayerMoved();
+            sbyte z = p.ReadSByte();
 
             int endX = 0, endY = 0;
             sbyte endZ = 0;
@@ -546,13 +547,13 @@ namespace ClassicUO.Game.Network
                 if (endDir != direction)
                 {
                     World.Player.ResetRequestedSteps();
-                    World.Player.EnqueueStep(position, direction & Direction.Up, (direction & Direction.Running) == Direction.Running);
+                    World.Player.EnqueueStep(x, y, z, direction & Direction.Up, (direction & Direction.Running) == Direction.Running);
                 }
             }
             else
             {
                 World.Player.ResetSteps();
-                World.Player.Position = position;
+                World.Player.Position = new Position(x, y ,z);
                 World.Player.Direction = direction;
             }
 
@@ -905,9 +906,11 @@ namespace ClassicUO.Game.Network
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
             mobile.Graphic = p.ReadUShort();
 
-            Position position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            int x = p.ReadUShort();
+            int y = p.ReadUShort();
+            sbyte z = p.ReadSByte();
             Direction direction = (Direction)p.ReadByte();
-            //mobile.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            //mobile.Position.Set(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
             //mobile.Direction = (Direction)p.ReadByte();
             mobile.Hue = p.ReadUShort();
             mobile.Flags = (Flags)p.ReadByte();
@@ -921,13 +924,13 @@ namespace ClassicUO.Game.Network
 
             if (World.Get(mobile) == null)
             {
-                mobile.Position = position;
+                mobile.Position = new Position((ushort)x, (ushort)y, z);
                 mobile.Direction = direction;
             }
 
-            if (!mobile.EnqueueStep(position, direction & Direction.Up, (direction & Direction.Running) == Direction.Running))
+            if (!mobile.EnqueueStep(x, y ,z, direction & Direction.Up, (direction & Direction.Running) == Direction.Running))
             {
-                mobile.Position = position;
+                mobile.Position = new Position((ushort)x, (ushort)y, z);
                 mobile.Direction = direction;
                 mobile.ClearSteps();
             }
@@ -943,7 +946,9 @@ namespace ClassicUO.Game.Network
         {
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
             mobile.Graphic = p.ReadUShort();
-            var position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
+            sbyte z = p.ReadSByte();
             var direction = (Direction)p.ReadByte();
             mobile.Hue = p.ReadUShort();
             mobile.Flags = (Flags)p.ReadByte();
@@ -999,13 +1004,13 @@ namespace ClassicUO.Game.Network
 
             if (World.Get(mobile) == null)
             {
-                mobile.Position = position;
+                mobile.Position = new Position(x, y ,z);
                 mobile.Direction = direction;
             }
 
-            if (!mobile.EnqueueStep(position, direction & Direction.Up, (direction & Direction.Running) == Direction.Running))
+            if (!mobile.EnqueueStep(x, y, z, direction & Direction.Up, (direction & Direction.Running) == Direction.Running))
             {
-                mobile.Position = position;
+                mobile.Position = new Position(x, y, z);
                 mobile.Direction = direction;
                 mobile.ClearSteps();
             }
@@ -1224,30 +1229,30 @@ namespace ClassicUO.Game.Network
 
         private static void CharacterList(Packet p)
         {
-            int locCount = p.ReadByte();
-            if (FileManager.ClientVersion >= ClientVersions.CV_70130)
-            {
-                for (int i = 0; i < locCount; i++)
-                {
-                    byte cityIdx = p.ReadByte();
-                    string cityName = p.ReadASCII(32);
-                    string cityArea = p.ReadASCII(32);
-                    Position cityPosition = new Position((ushort)p.ReadUInt(), (ushort)p.ReadUInt(), (sbyte)p.ReadUInt());
-                    uint mapIdx = p.ReadUInt();
-                    uint cliloc = p.ReadUInt();
-                    p.Skip(4);
+            //int locCount = p.ReadByte();
+            //if (FileManager.ClientVersion >= ClientVersions.CV_70130)
+            //{
+            //    for (int i = 0; i < locCount; i++)
+            //    {
+            //        byte cityIdx = p.ReadByte();
+            //        string cityName = p.ReadASCII(32);
+            //        string cityArea = p.ReadASCII(32);
+            //        Position cityPosition.Set((ushort)p.ReadUInt(), (ushort)p.ReadUInt(), (sbyte)p.ReadUInt());
+            //        uint mapIdx = p.ReadUInt();
+            //        uint cliloc = p.ReadUInt();
+            //        p.Skip(4);
 
-                }
-            }
-            else
-            {
-                for (int i = 0; i < locCount; i++)
-                {
-                    byte cityIdx = p.ReadByte();
-                    string cityName = p.ReadASCII(31);
-                    string cityArea = p.ReadASCII(31);
-                }
-            }
+            //    }
+            //}
+            //else
+            //{
+            //    for (int i = 0; i < locCount; i++)
+            //    {
+            //        byte cityIdx = p.ReadByte();
+            //        string cityName = p.ReadASCII(31);
+            //        string cityArea = p.ReadASCII(31);
+            //    }
+            //}
         }
 
         private static void AttackCharacter(Packet p)
@@ -1370,7 +1375,7 @@ namespace ClassicUO.Game.Network
                 case 6: //party
                     break;
                 case 8: // map change
-                    World.Map = new Map.Facet(p.ReadByte());
+                    World.MapIndex = p.ReadByte();
                     break;
                 case 0x0C: // close statusbar gump
                     serial = p.ReadUInt();

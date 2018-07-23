@@ -228,6 +228,14 @@ namespace ClassicUO.Game.WorldObjects
         public Item[] Equipment { get; } = new Item[(int)Layer.Bank + 1];
 
 
+        protected override void OnTileChanged(int x, int y)
+        {
+            base.OnTileChanged(x, y);
+            if (Tile == null)
+                return;
+        }
+
+
         public bool IsMounted => Equipment[(int)Layer.Mount] != null;
         public bool IsRunning => (Direction & Direction.Running) == Direction.Running;
         public double MoveSequence { get; set; }
@@ -235,7 +243,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public void ClearSteps() { _steps.Clear(); Offset = Vector3.Zero; }
 
-        public bool EnqueueStep(in Position position, in Direction direction, in bool run)
+        public bool EnqueueStep(in int x, in int y, in sbyte z, in Direction direction, in bool run)
         {
             if (_steps.Count >= MAX_STEP_COUNT) return false;
 
@@ -245,13 +253,13 @@ namespace ClassicUO.Game.WorldObjects
 
             GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
 
-            if (endX == position.X && endY == position.Y && endZ == position.Z && endDir == direction)
+            if (endX == x && endY == y && endZ == z && endDir == direction)
                 return true;
 
             if (!IsMoving)
                 LastStepTime = World.Ticks;
 
-            Direction moveDir = CalculateDirection(endX, endY, position.X, position.Y);
+            Direction moveDir = CalculateDirection(endX, endY, x, y);
 
             Step step = new Step();
 
@@ -263,14 +271,14 @@ namespace ClassicUO.Game.WorldObjects
 
                     _steps.AddToBack(step);
                 }
-                step.X = position.X; step.Y = position.Y; step.Z = position.Z; step.Direction = (byte)moveDir; step.Run = run;
+                step.X = x; step.Y = y; step.Z = z; step.Direction = (byte)moveDir; step.Run = run;
                 _steps.AddToBack(step);
             }
 
 
             if (moveDir != direction)
             {
-                step.X = position.X; step.Y = position.Y; step.Z = position.Z; step.Direction = (byte)direction; step.Run = run;
+                step.X = x; step.Y = y; step.Z = z; step.Direction = (byte)direction; step.Run = run;
                 _steps.AddToBack(step);
             }
 
@@ -1043,9 +1051,6 @@ namespace ClassicUO.Game.WorldObjects
 
                         Offset = new Vector3((sbyte)x, (sbyte)y, (int)(((step.Z - Position.Z) * frameOffset) * (4.0f / framesPerTile)));
 
-                        if (this == World.Player)
-                            World.Map.Center = new Point((short)step.X, (short)step.Y);
-
                         turnOnly = false;
                     }
                     else
@@ -1111,7 +1116,6 @@ namespace ClassicUO.Game.WorldObjects
                             break;
                     }
                 }
-
 
                 bool mirror = false;
                 Animations.GetAnimDirection(ref dir, ref mirror);

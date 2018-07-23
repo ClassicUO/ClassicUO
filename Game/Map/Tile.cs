@@ -13,7 +13,7 @@ namespace ClassicUO.Game.Map
     {
         private readonly List<WorldObject> _objectsOnTile;
 
-        public Tile()
+        public Tile() : base(World.Map)
         {
             _objectsOnTile = new List<WorldObject>();
             _objectsOnTile.Add(this);
@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Map
             _objectsOnTile.Add(this);
             DisposeView();
             Graphic = 0;
-            Position = new Position(0, 0);
+            Position = Position.Invalid;
         }
 
         public void Sort()
@@ -65,6 +65,67 @@ namespace ClassicUO.Game.Map
                     j--;
                 }
             }
+        }
+
+        private static List<WorldObject> _itemsAtZ = new List<WorldObject>();
+
+        public List<WorldObject> GetItemsBetweenZ(in int z0, in int z1)
+        {
+            var items = _itemsAtZ;
+            _itemsAtZ.Clear();
+
+            for (int i = 0; i < ObjectsOnTiles.Count; i++)
+            {
+                if (Utility.MathHelper.InRange(ObjectsOnTiles[i].Position.Z, z0, z1))
+                {
+                    if (ObjectsOnTiles[i] is Item || ObjectsOnTiles[i] is Static)
+                        items.Add(ObjectsOnTiles[i]);
+                }
+            }
+            return items;
+        }
+
+        public bool IsZUnderObjectOrGround(in sbyte z, out WorldObject entity, out WorldObject ground)
+        {
+            List<WorldObject> list = _objectsOnTile;
+
+            entity = null; ground = null;
+
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                if (list[i].Position.Z <= z)
+                    continue;
+
+                if (list[i] is Item it)
+                {
+                    AssetsLoader.StaticTiles itemdata = it.ItemData;
+
+                    if (AssetsLoader.TileData.IsRoof((long)itemdata.Flags) ||
+                        AssetsLoader.TileData.IsSurface((long)itemdata.Flags) ||
+                        (AssetsLoader.TileData.IsWall((long)itemdata.Flags) && AssetsLoader.TileData.IsImpassable((long)itemdata.Flags)))
+                    {
+                        if (entity == null || list[i].Position.Z < entity.Position.Z)
+                            entity = list[i];
+                    }
+                }
+                else if (list[i] is Static st)
+                {
+                    AssetsLoader.StaticTiles itemdata = st.ItemData;
+
+                    if (AssetsLoader.TileData.IsRoof((long)itemdata.Flags) ||
+                       AssetsLoader.TileData.IsSurface((long)itemdata.Flags) ||
+                       (AssetsLoader.TileData.IsWall((long)itemdata.Flags) && AssetsLoader.TileData.IsImpassable((long)itemdata.Flags)))
+                    {
+                        if (entity == null || list[i].Position.Z < entity.Position.Z)
+                            entity = list[i];
+                    }
+                }
+                else if (list[i] is Tile tile && tile.ViewObject.SortZ >= z + 12)
+                {
+                    ground = list[i];
+                }
+            }
+            return entity != null || ground != null;
         }
 
         public T[] GetWorldObjects<T>() where T: WorldObject
@@ -115,7 +176,7 @@ namespace ClassicUO.Game.Map
             else if (e is Item item)
             {
                 return (item.Position.Z,
-                        ((item.Graphic & AssetsLoader.FileManager.GraphicMask) == 0x2006) ? 4 : 2,
+                        item.IsCorpse ? 4 : 2,
                         (item.ItemData.Height > 0 ? 1 : 0) + (AssetsLoader.TileData.IsBackground((long)item.ItemData.Flags) ? 0 : 1),
                         (int)item.Serial.Value);
             }

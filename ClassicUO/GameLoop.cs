@@ -379,15 +379,6 @@ namespace ClassicUO
 
             if (Game.World.Map != null && Game.World.Player != null)
             {
-
-                //if (Game.World.Player.Position.X != _currentX || Game.World.Player.Position.Y != _y)
-                //{
-                //    _currentX = (ushort)Game.World.Map.Center.X;
-                //    _y = (ushort)Game.World.Map.Center.Y;
-                //    _z = Game.World.Player.Position.Z;
-                //}
-
-
                 Game.World.Update(gameTime.TotalGameTime.Ticks);
 
                 if (DateTime.Now > _timePing)
@@ -398,6 +389,62 @@ namespace ClassicUO
             }
 
             base.Update(gameTime);
+        }
+
+        private void CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface)
+        {
+            maxItemZ = 255;
+            drawTerrain = true;
+            underSurface = false;
+
+            Game.Map.Tile tile = Game.World.Map.GetTile(Game.World.Map.Center.X, Game.World.Map.Center.Y);
+            if (tile != null && tile.IsZUnderObjectOrGround(Game.World.Player.Position.Z, out var underObject, out var underGround))
+            {
+                drawTerrain = underGround == null;
+                if (underObject != null)
+                {
+                    if (underObject is Game.WorldObjects.Item item)
+                    {
+                        if (AssetsLoader.TileData.IsRoof((long)item.ItemData.Flags))
+                            maxItemZ = Game.World.Player.Position.Z - (Game.World.Player.Position.Z % 20) + 20;
+                        else if (AssetsLoader.TileData.IsSurface((long)item.ItemData.Flags) || (AssetsLoader.TileData.IsWall((long)item.ItemData.Flags) && AssetsLoader.TileData.IsDoor((long)item.ItemData.Flags)))
+                            maxItemZ = item.Position.Z;
+                        else
+                        {
+                            int z = Game.World.Player.Position.Z + ((item.ItemData.Height > 20) ? item.ItemData.Height : 20);
+                            maxItemZ = z;
+                        }
+                    }
+                    else if (underObject is Game.WorldObjects.Static sta)
+                    {
+                        if (AssetsLoader.TileData.IsRoof((long)sta.ItemData.Flags))
+                            maxItemZ = Game.World.Player.Position.Z - (Game.World.Player.Position.Z % 20) + 20;
+                        else if (AssetsLoader.TileData.IsSurface((long)sta.ItemData.Flags) || (AssetsLoader.TileData.IsWall((long)sta.ItemData.Flags) && AssetsLoader.TileData.IsDoor((long)sta.ItemData.Flags)))
+                            maxItemZ = sta.Position.Z;
+                        else
+                        {
+                            int z = Game.World.Player.Position.Z + ((sta.ItemData.Height > 20) ? sta.ItemData.Height : 20);
+                            maxItemZ = z;
+                        }
+                    }
+
+                    if ( (underObject is Game.WorldObjects.Item i && AssetsLoader.TileData.IsRoof((long)i.ItemData.Flags)) ||
+                         (underObject is Game.WorldObjects.Static s && AssetsLoader.TileData.IsRoof((long)s.ItemData.Flags)))
+                    {
+                        bool isSE = true;
+                        if ((tile = Game.World.Map.GetTile(Game.World.Map.Center.X + 1, Game.World.Map.Center.Y)) != null)
+                        {
+                            tile.IsZUnderObjectOrGround(Game.World.Player.Position.Z, out underObject, out underGround);
+                            isSE = underObject != null;
+                        }
+
+                        if (!isSE)
+                            maxItemZ = 255;
+                    }
+
+                    underSurface = maxItemZ != 255;
+                }
+            }
         }
 
         protected override void Draw(GameTime gameTime)
@@ -416,17 +463,16 @@ namespace ClassicUO
 
                 }
 
-                _spriteBatch.BeginDraw();
-                _spriteBatch.SetLightIntensity(Game.World.Light.IsometricLevel);
-                _spriteBatch.SetLightDirection(Game.World.Light.IsometricDirection);
+                
 
 
                 (Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center) = GetViewPort();
 
-                //if (Game.World.Map.Center != center)
-                //{
-                //    Game.World.Map.Center = center;
-                //}
+                CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
+
+                _spriteBatch.BeginDraw();
+                _spriteBatch.SetLightIntensity(Game.World.Light.IsometricLevel);
+                _spriteBatch.SetLightDirection(Game.World.Light.IsometricDirection);
 
                 int minX = minChunkTile.X;
                 int minY = minChunkTile.Y;
@@ -434,7 +480,6 @@ namespace ClassicUO
                 int maxY = maxChunkTile.Y;
 
                 int mapBlockHeight = AssetsLoader.Map.MapBlocksSize[Game.World.Map.Index][1];
-
 
                 for (int i = 0; i < 2; i++)
                 {
@@ -458,28 +503,46 @@ namespace ClassicUO
                             y = maxY;
                         }
 
-
-
                         while (true)
                         {
                             if (x < minX || x > maxX || y < minY || y > maxY)
                                 break;
 
-
-
+                            bool draw = true;
 
                             Game.Map.Tile tile = Game.World.Map.GetTile((short)x, (short)y);
+
                             if (tile != null)
                             {
-
                                 Vector3 position = new Vector3(
-                               ((x - y) * 22f) - offset.X ,
+                               ((x - y) * 22f) - offset.X,
                                ((x + y) * 22f /*- (Game.World.Player.Position.Z * 4)*/) - offset.Y, 0);
-
 
                                 for (int k = 0; k < tile.ObjectsOnTiles.Count; k++)
                                 {
-                                    tile.ObjectsOnTiles[k].ViewObject.Draw(_spriteBatch, position);
+                                    var o = tile.ObjectsOnTiles[k];
+
+
+                                    if (!drawTerrain)
+                                    {
+                                        if (o is Game.Map.Tile || o.Position.Z > tile.Position.Z)
+                                            draw = false;
+                                    }
+
+                                    if ( (o.Position.Z >= maxItemZ ||
+                                         (maxItemZ != 255 && 
+                                                ((o is Game.WorldObjects.Item item && AssetsLoader.TileData.IsRoof((long)item.ItemData.Flags) || (o is Game.WorldObjects.Static st && AssetsLoader.TileData.IsRoof((long)st.ItemData.Flags))))))
+
+                                        && !(o is Game.Map.Tile)  )
+                                        continue;
+
+                                    if (draw)
+                                    {
+
+                                        o.ViewObject.Draw(_spriteBatch, position);
+                                    }
+
+
                                 }
 
                             }

@@ -21,6 +21,9 @@ namespace ClassicUO.Game.Renderer.Views
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
+            if (WorldObject.IsDisposed)
+                return false;
+
             spriteBatch.GetZ();
 
             bool mirror = false;

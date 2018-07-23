@@ -44,7 +44,6 @@ namespace ClassicUO.Game.WorldObjects
         private Graphic _graphic;
         private Hue _hue;
         private string _name;
-        private Position _position;
         private Direction _direction;
         private Flags _flags;
 
@@ -54,7 +53,7 @@ namespace ClassicUO.Game.WorldObjects
         protected Delta _delta;
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
 
-        protected Entity(in Serial serial)
+        protected Entity(in Serial serial) : base(World.Map)
         {
             Serial = serial;
             Items = new EntityCollection<Item>();
@@ -65,20 +64,6 @@ namespace ClassicUO.Game.WorldObjects
         public EntityCollection<Item> Items { get; }
         public Serial Serial { get; }
         public IEnumerable<Property> Properties => _properties.Select(s => s.Value);
-
-        private int _mapIndex;
-        public int MapIndex
-        {
-            get => _mapIndex;
-            set
-            {
-                if (_mapIndex != value)
-                {
-                    _mapIndex = value;
-                    _delta |= Delta.Position;
-                }
-            }
-        }
 
         public override Graphic Graphic
         {
@@ -133,6 +118,7 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
+        private Position _position;
         public override Position Position
         {
             get => _position;
@@ -213,7 +199,7 @@ namespace ClassicUO.Game.WorldObjects
         public static implicit operator uint(Entity entity) { return entity.Serial; }
         public override int GetHashCode() { return Serial.GetHashCode(); }
         public virtual bool Exists { get { return World.Contains(Serial); } }
-        public int DistanceTo(Entity entity) { return _position.DistanceTo(entity._position); }
+        public int DistanceTo(Entity entity) { return Position.DistanceTo(entity.Position); }
         public int Distance { get { return DistanceTo(World.Player); } }
 
 

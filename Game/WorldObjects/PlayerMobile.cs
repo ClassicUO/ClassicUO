@@ -1012,22 +1012,13 @@ namespace ClassicUO.Game.WorldObjects
 
         protected override void OnPositionChanged(object sender, EventArgs e)
         {
-            if (World.Map != null)
+            
+            if (World.Map != null && World.Map.Index >= 0)
             {
-                if (World.Map.Center == Point.Zero)
-                    World.Map.Center = new Point((short)Position.X, (short)Position.Y);
-
+                World.Map.Center = new Point((short)Position.X, (short)Position.Y);
                 base.OnPositionChanged(sender, e);
-
-                if (Tile == null)
-                    World.Map.Center = Point.Zero;
-
-                //if (Tile == null)
-                //{
-                //    World.Map.Center = new Point(World.Player.Position.X, World.Player.Position.Y);
-                //    base.OnPositionChanged(sender, e);
-                //}
             }
+            
         }
 
 
@@ -1124,13 +1115,13 @@ namespace ClassicUO.Game.WorldObjects
                     {
                         s.Anim = true;
                         _requestedSteps[i] = s;
-                        EnqueueStep(new Position((ushort)s.X, (ushort)s.Y, s.Z), (Direction)s.Direction, s.Run);
+                        EnqueueStep(s.X, s.Y, s.Z, (Direction)s.Direction, s.Run);
 
                     }
                 }
 
                 step.Anim = true;
-                EnqueueStep(new Position((ushort)step.X, (ushort)step.Y, step.Z), (Direction)step.Direction, step.Run);
+                EnqueueStep(step.X, step.Y, step.Z, (Direction)step.Direction, step.Run);
             }
 
             _requestedSteps.AddToBack(step);
@@ -1172,7 +1163,7 @@ namespace ClassicUO.Game.WorldObjects
                         _movementState = PlayerMovementState.ANIMATE_ON_CONFIRM;
                 }
 
-                EnqueueStep(new Position((ushort)step.X, (ushort)step.Y, step.Z), (Direction)step.Direction, step.Run);
+                EnqueueStep(step.X, step.Y, step.Z, (Direction)step.Direction, step.Run);
             }
         }
 
@@ -1183,7 +1174,7 @@ namespace ClassicUO.Game.WorldObjects
                 if (step.Seq == seq)
                 {
                     ResetSteps();
-                    Position = position;
+                    Position = new Position(position.X, position.Y, position.Z);
                     Direction = dir;
 
                     ProcessDelta();

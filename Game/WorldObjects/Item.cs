@@ -120,8 +120,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
-        private readonly Item[] _equipmentCorpse = new Item[(int)Layer.Bank + 1];
-        public Item[] Equipment => IsCorpse ? null : _equipmentCorpse;
+        public Item[] Equipment { get; } = new Item[(int)Layer.Bank + 1];
 
 
         public Graphic DisplayedGraphic

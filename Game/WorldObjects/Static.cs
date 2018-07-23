@@ -9,7 +9,7 @@ namespace ClassicUO.Game.WorldObjects
 {
     public class Static : WorldObject
     {
-        public Static(Graphic tileID, Hue hue, int index)
+        public Static(Graphic tileID, Hue hue, int index) : base(World.Map)
         {
             Graphic = tileID; Hue = hue; Index = index;
         }

@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Renderer.Views
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            if (!AllowedToDraw)
+            if (!AllowedToDraw || WorldObject.IsDisposed)
                 return false;
 
             if (WorldObject.IsCorpse)

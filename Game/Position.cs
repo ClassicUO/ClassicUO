@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,7 +10,7 @@ namespace ClassicUO.Game
         public static Position Invalid = new Position(0xFFFF, 0xFFFF);
 
         public Position(in ushort x, in ushort y, in sbyte z = 0)
-            : this()
+         : this()
         {
             X = x;
             Y = y;
@@ -20,6 +21,7 @@ namespace ClassicUO.Game
         public ushort X { get; set; }
         public ushort Y { get; set; }
         public sbyte Z { get; set; }
+
 
         public static bool operator ==(in Position p1, in Position p2) { return p1.X == p2.X && p1.Y == p2.Y && p1.Z == p2.Z; }
         public static bool operator !=(in Position p1, in Position p2) { return p1.X != p2.X || p1.Y != p2.Y || p1.Z != p2.Z; }

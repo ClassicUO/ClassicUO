@@ -176,12 +176,15 @@ namespace ClassicUO.Game.Renderer
         public TextureDuration Texture { get; private set; }
         public Point ScreenPosition => MouseManager.ScreenPosition;
 
+        private Texture2D _blackTexture;
 
         public void Update(in double frameMS)
         {
             if (Texture == null || Texture.IsDisposed || _needGraphicUpdate)
             {
                 Texture = TextureManager.GetOrCreateStaticTexture(Graphic);
+                _blackTexture = new Texture2D(TextureManager.Device, 1, 1);
+                _blackTexture.SetData(new Color[] { Color.Black });
                 _needGraphicUpdate = false;
             }
             else
@@ -209,7 +212,7 @@ namespace ClassicUO.Game.Renderer
                 _textR.Draw(sb, new Point((int)v.X, (int)v.Y + 20));
 
                 //        // tooltip testing, very nice!
-                //        //sb.Draw2D(_blackTexture, new Rectangle(ScreenPosition.X + _cursorOffset[0, id] - 100, ScreenPosition.Y + _cursorOffset[1, id] - 50, 100, 50), new Vector3(0, 1, 0.3f));
+               // sb.Draw2D(_blackTexture, new Rectangle(ScreenPosition.X + _cursorOffset[0, id] - 100, ScreenPosition.Y + _cursorOffset[1, id] - 50, 100, 50), new Vector3(0, 1, 0.3f));
             }
         }
 
