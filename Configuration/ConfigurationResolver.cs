@@ -10,13 +10,13 @@ namespace ClassicUO.Configuration
             if (!File.Exists(file))
                 return null;
 
-            var settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
+            T settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
             return settings;
         }
 
         public static void Save<T>(in T obj, in string file) where T : class
         {
-            var t = JsonConvert.SerializeObject(obj, Formatting.Indented);
+            string t = JsonConvert.SerializeObject(obj, Formatting.Indented);
             File.WriteAllText(file, t);
         }
     }

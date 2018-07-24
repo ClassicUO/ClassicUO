@@ -10,8 +10,8 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            var path = Path.Combine(FileManager.UoFolderPath, "Multi.mul");
-            var pathidx = Path.Combine(FileManager.UoFolderPath, "Multi.idx");
+            string path = Path.Combine(FileManager.UoFolderPath, "Multi.mul");
+            string pathidx = Path.Combine(FileManager.UoFolderPath, "Multi.idx");
 
             if (File.Exists(path) && File.Exists(pathidx))
                 _file = new UOFileMul(path, pathidx, 0x2000, 14);
@@ -32,8 +32,8 @@ namespace ClassicUO.AssetsLoader
         public static int GetCount(int graphic)
         {
             graphic &= FileManager.GraphicMask;
-            var (length, extra, patcher) = _file.SeekByEntryIndex(graphic);
-            var count = length / _itemOffset;
+            (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
+            int count = length / _itemOffset;
             return count;
         }
     }

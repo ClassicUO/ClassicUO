@@ -40,13 +40,13 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            var hashes = new Dictionary<ulong, UOPAnimationData>();
+            Dictionary<ulong, UOPAnimationData> hashes = new Dictionary<ulong, UOPAnimationData>();
 
-            for (var i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
-                var pathmul = Path.Combine(FileManager.UoFolderPath,
+                string pathmul = Path.Combine(FileManager.UoFolderPath,
                     "anim" + (i == 0 ? "" : (i + 1).ToString()) + ".mul");
-                var pathidx = Path.Combine(FileManager.UoFolderPath,
+                string pathidx = Path.Combine(FileManager.UoFolderPath,
                     "anim" + (i == 0 ? "" : (i + 1).ToString()) + ".idx");
 
                 if (File.Exists(pathmul) && File.Exists(pathidx))
@@ -54,7 +54,7 @@ namespace ClassicUO.AssetsLoader
 
                 if (i > 0 && FileManager.ClientVersion >= ClientVersions.CV_7000)
                 {
-                    var pathuop = Path.Combine(FileManager.UoFolderPath, string.Format("AnimationFrame{0}.uop", i));
+                    string pathuop = Path.Combine(FileManager.UoFolderPath, string.Format("AnimationFrame{0}.uop", i));
                     if (File.Exists(pathuop))
                     {
                         _filesUop[i - 1] = new UOFileUopAnimation(pathuop, i - 1);
@@ -65,9 +65,9 @@ namespace ClassicUO.AssetsLoader
 
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
             {
-                var typeNames = new string[5] {"monster", "sea_monster", "animal", "human", "equipment"};
+                string[] typeNames = new string[5] {"monster", "sea_monster", "animal", "human", "equipment"};
 
-                using (var reader =
+                using (StreamReader reader =
                     new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "mobtypes.txt"))))
                 {
                     string line;
@@ -78,9 +78,9 @@ namespace ClassicUO.AssetsLoader
                         if (line.Length <= 0 || line.Length < 3 || line[0] == '#')
                             continue;
 
-                        var parts = line.Split(new[] {'\t', ' '}, StringSplitOptions.RemoveEmptyEntries);
+                        string[] parts = line.Split(new[] {'\t', ' '}, StringSplitOptions.RemoveEmptyEntries);
 
-                        var id = int.Parse(parts[0]);
+                        int id = int.Parse(parts[0]);
                         if (id >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             continue;
 
@@ -88,16 +88,16 @@ namespace ClassicUO.AssetsLoader
                         {
                         }
 
-                        var testType = parts[1].ToLower();
+                        string testType = parts[1].ToLower();
 
-                        var commentIdx = parts[2].IndexOf('#');
+                        int commentIdx = parts[2].IndexOf('#');
                         if (commentIdx > 0)
                             parts[2] = parts[2].Substring(0, commentIdx - 1);
                         else if (commentIdx == 0)
                             continue;
 
-                        var number = uint.Parse(parts[2], NumberStyles.HexNumber);
-                        for (var i = 0; i < 5; i++)
+                        uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
+                        for (int i = 0; i < 5; i++)
                             if (testType == typeNames[i])
                             {
                                 DataIndex[id].Type = (ANIMATION_GROUPS_TYPE) i;
@@ -109,23 +109,23 @@ namespace ClassicUO.AssetsLoader
             }
 
 
-            var animIdxBlockSize = Marshal.SizeOf<AnimIdxBlock>();
+            int animIdxBlockSize = Marshal.SizeOf<AnimIdxBlock>();
 
-            var idxfile0 = _files[0].IdxFile;
-            var maxAddress0 = (long) idxfile0.StartAddress + idxfile0.Length;
-            var idxfile2 = _files[1].IdxFile;
-            var maxAddress2 = (long) idxfile2.StartAddress + idxfile2.Length;
-            var idxfile3 = _files[2].IdxFile;
-            var maxAddress3 = (long) idxfile3.StartAddress + idxfile3.Length;
-            var idxfile4 = _files[3].IdxFile;
-            var maxAddress4 = (long) idxfile4.StartAddress + idxfile4.Length;
-            var idxfile5 = _files[4].IdxFile;
-            var maxAddress5 = (long) idxfile5.StartAddress + idxfile5.Length;
+            UOFile idxfile0 = _files[0].IdxFile;
+            long maxAddress0 = (long) idxfile0.StartAddress + idxfile0.Length;
+            UOFile idxfile2 = _files[1].IdxFile;
+            long maxAddress2 = (long) idxfile2.StartAddress + idxfile2.Length;
+            UOFile idxfile3 = _files[2].IdxFile;
+            long maxAddress3 = (long) idxfile3.StartAddress + idxfile3.Length;
+            UOFile idxfile4 = _files[3].IdxFile;
+            long maxAddress4 = (long) idxfile4.StartAddress + idxfile4.Length;
+            UOFile idxfile5 = _files[4].IdxFile;
+            long maxAddress5 = (long) idxfile5.StartAddress + idxfile5.Length;
 
-            for (var i = 0; i < MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
+            for (int i = 0; i < MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
             {
-                var groupTye = ANIMATION_GROUPS_TYPE.UNKNOWN;
-                var findID = 0;
+                ANIMATION_GROUPS_TYPE groupTye = ANIMATION_GROUPS_TYPE.UNKNOWN;
+                int findID = 0;
 
                 if (i >= 200)
                 {
@@ -148,7 +148,7 @@ namespace ClassicUO.AssetsLoader
 
                 DataIndex[i].Graphic = (ushort) i;
 
-                var count = 0;
+                int count = 0;
 
                 switch (groupTye)
                 {
@@ -168,7 +168,7 @@ namespace ClassicUO.AssetsLoader
 
                 DataIndex[i].Type = groupTye;
 
-                var address = _files[0].IdxFile.StartAddress + findID;
+                IntPtr address = _files[0].IdxFile.StartAddress + findID;
 
                 if (i == 46)
                 {
@@ -183,11 +183,11 @@ namespace ClassicUO.AssetsLoader
                     if (j >= count)
                         continue;
 
-                    var offset = j * 5;
+                    int offset = j * 5;
                     for (byte d = 0; d < 5; d++)
                         unsafe
                         {
-                            var aidx = (AnimIdxBlock*) (address + (offset + d) * animIdxBlockSize);
+                            AnimIdxBlock* aidx = (AnimIdxBlock*) (address + (offset + d) * animIdxBlockSize);
                             if ((long) aidx >= maxAddress0)
                                 break;
 
@@ -213,27 +213,27 @@ namespace ClassicUO.AssetsLoader
                     if (line.Length <= 0 || line[0] == '#' || !char.IsNumber(line[0]))
                         continue;
 
-                    var parts = line.Split(new[] {'\t', ' ', '#'}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = line.Split(new[] {'\t', ' ', '#'}, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length < 2)
                         continue;
 
-                    var group = ushort.Parse(parts[0]);
+                    ushort group = ushort.Parse(parts[0]);
 
-                    var first = parts[1].IndexOf("{");
-                    var last = parts[1].IndexOf("}");
+                    int first = parts[1].IndexOf("{");
+                    int last = parts[1].IndexOf("}");
 
-                    var replaceGroup = int.Parse(parts[1].Substring(first + 1, last - 1));
+                    int replaceGroup = int.Parse(parts[1].Substring(first + 1, last - 1));
 
                     _groupReplaces[idx].Add(new Tuple<ushort, byte>(group, (byte) replaceGroup));
                 }
             }
 
-            using (var reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Anim1.def"))))
+            using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Anim1.def"))))
             {
                 readAnimDef(reader, 0);
             }
 
-            using (var reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Anim2.def"))))
+            using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Anim2.def"))))
             {
                 readAnimDef(reader, 1);
             }
@@ -242,7 +242,7 @@ namespace ClassicUO.AssetsLoader
             if (FileManager.ClientVersion < ClientVersions.CV_305D)
                 return;
 
-            using (var reader =
+            using (StreamReader reader =
                 new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Equipconv.def"))))
             {
                 string line;
@@ -252,29 +252,29 @@ namespace ClassicUO.AssetsLoader
                     if (line.Length <= 0 || line[0] == '#' || !char.IsNumber(line[0]))
                         continue;
 
-                    var parts = line.Split(new[] {'\t', ' '}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = line.Split(new[] {'\t', ' '}, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length >= 5)
                     {
-                        var body = (ushort) int.Parse(parts[0]);
+                        ushort body = (ushort) int.Parse(parts[0]);
                         if (body >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             continue;
-                        var graphic = (ushort) int.Parse(parts[1]);
+                        ushort graphic = (ushort) int.Parse(parts[1]);
                         if (graphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             continue;
-                        var newgraphic = (ushort) int.Parse(parts[2]);
+                        ushort newgraphic = (ushort) int.Parse(parts[2]);
                         if (newgraphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             newgraphic = graphic;
 
-                        var gump = (ushort) int.Parse(parts[3]);
+                        ushort gump = (ushort) int.Parse(parts[3]);
                         if (gump > ushort.MaxValue)
                             continue;
                         if (gump == 0)
                             gump = graphic;
                         else if (gump == 0xFFFF)
                             gump = newgraphic;
-                        var color = (ushort) int.Parse(parts[4]);
+                        ushort color = (ushort) int.Parse(parts[4]);
 
-                        if (!_equipConv.TryGetValue(body, out var dict))
+                        if (!_equipConv.TryGetValue(body, out Dictionary<ushort, EquipConvData> dict))
                         {
                             _equipConv.Add(body, new Dictionary<ushort, EquipConvData>());
 
@@ -287,7 +287,7 @@ namespace ClassicUO.AssetsLoader
                 }
             }
 
-            using (var reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Bodyconv.def"))))
+            using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Bodyconv.def"))))
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
@@ -296,10 +296,10 @@ namespace ClassicUO.AssetsLoader
                     if (line.Length <= 0 || line[0] == '#' || !char.IsNumber(line[0]))
                         continue;
 
-                    var parts = line.Split(new[] {'\t', ' ', '#'}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = line.Split(new[] {'\t', ' ', '#'}, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length >= 2)
                     {
-                        var index = ushort.Parse(parts[0]);
+                        ushort index = ushort.Parse(parts[0]);
                         if (index >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             continue;
                         int[] anim = {int.Parse(parts[1]), -1, -1, -1};
@@ -314,11 +314,11 @@ namespace ClassicUO.AssetsLoader
                             }
                         }
 
-                        var startAnimID = -1;
-                        var animFile = 0;
+                        int startAnimID = -1;
+                        int animFile = 0;
                         ushort realAnimID = 0;
                         sbyte mountedHeightOffset = 0;
-                        var groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
+                        ANIMATION_GROUPS_TYPE groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
                         if (anim[0] != -1 && maxAddress2 != 0)
                         {
@@ -421,7 +421,7 @@ namespace ClassicUO.AssetsLoader
                         {
                             startAnimID = startAnimID * animIdxBlockSize;
 
-                            var currentIdxFile = _files[animFile].IdxFile;
+                            UOFile currentIdxFile = _files[animFile].IdxFile;
 
                             if ((uint) startAnimID < currentIdxFile.Length)
                             {
@@ -447,7 +447,7 @@ namespace ClassicUO.AssetsLoader
                                     DataIndex[index].Type = groupType;
                                 }
 
-                                var count = 0;
+                                int count = 0;
 
                                 switch (DataIndex[index].Type)
                                 {
@@ -466,16 +466,16 @@ namespace ClassicUO.AssetsLoader
                                 }
 
 
-                                var address = currentIdxFile.StartAddress + startAnimID;
-                                var maxaddress = currentIdxFile.StartAddress + (int) currentIdxFile.Length;
+                                IntPtr address = currentIdxFile.StartAddress + startAnimID;
+                                IntPtr maxaddress = currentIdxFile.StartAddress + (int) currentIdxFile.Length;
 
-                                for (var j = 0; j < count; j++)
+                                for (int j = 0; j < count; j++)
                                 {
-                                    var offset = j * 5;
+                                    int offset = j * 5;
                                     for (byte d = 0; d < 5; d++)
                                         unsafe
                                         {
-                                            var aidx = (AnimIdxBlock*) (address + (offset + d) * animIdxBlockSize);
+                                            AnimIdxBlock* aidx = (AnimIdxBlock*) (address + (offset + d) * animIdxBlockSize);
                                             if ((long) aidx >= (long) maxaddress)
                                                 break;
 
@@ -494,7 +494,7 @@ namespace ClassicUO.AssetsLoader
                 }
             }
 
-            using (var reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Body.def"))))
+            using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Body.def"))))
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
@@ -503,25 +503,25 @@ namespace ClassicUO.AssetsLoader
                     if (line.Length <= 0 || line[0] == '#' || !char.IsNumber(line[0]))
                         continue;
 
-                    var first = line.IndexOf("{");
-                    var last = line.IndexOf("}");
+                    int first = line.IndexOf("{");
+                    int last = line.IndexOf("}");
 
-                    var part0 = line.Substring(0, first);
-                    var part1 = line.Substring(first + 1, last - first - 1);
-                    var part2 = line.Substring(last + 1);
+                    string part0 = line.Substring(0, first);
+                    string part1 = line.Substring(first + 1, last - first - 1);
+                    string part2 = line.Substring(last + 1);
 
-                    var comma = part1.IndexOf(',');
+                    int comma = part1.IndexOf(',');
                     if (comma > -1)
                         part1 = part1.Substring(0, comma).Trim();
 
-                    var index = ushort.Parse(part0);
+                    ushort index = ushort.Parse(part0);
                     if (index >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
-                    var checkIndex = ushort.Parse(part1);
+                    ushort checkIndex = ushort.Parse(part1);
                     if (checkIndex >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
-                    var count = 0;
+                    int count = 0;
                     int[] ignoreGroups = {-1, -1};
 
                     switch (DataIndex[checkIndex].Type)
@@ -547,7 +547,7 @@ namespace ClassicUO.AssetsLoader
                             break;
                     }
 
-                    for (var j = 0; j < count; j++)
+                    for (int j = 0; j < count; j++)
                     {
                         if (j == ignoreGroups[0] || j == ignoreGroups[1])
                             continue;
@@ -594,7 +594,7 @@ namespace ClassicUO.AssetsLoader
                 }
             }
 
-            using (var reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Corpse.def"))))
+            using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Corpse.def"))))
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
@@ -603,23 +603,23 @@ namespace ClassicUO.AssetsLoader
                     if (line.Length <= 0 || line[0] == '#' || !char.IsNumber(line[0]))
                         continue;
 
-                    var parts = line.Split(new[] {'\t', ' '}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = line.Split(new[] {'\t', ' '}, StringSplitOptions.RemoveEmptyEntries);
 
-                    var first = line.IndexOf("{");
-                    var last = line.IndexOf("}");
+                    int first = line.IndexOf("{");
+                    int last = line.IndexOf("}");
 
-                    var part0 = line.Substring(0, first);
-                    var part1 = line.Substring(first + 1, last - first - 1);
-                    var part2 = line.Substring(last + 1);
+                    string part0 = line.Substring(0, first);
+                    string part1 = line.Substring(first + 1, last - first - 1);
+                    string part2 = line.Substring(last + 1);
 
-                    var comma = part1.IndexOf(',');
+                    int comma = part1.IndexOf(',');
                     if (comma > -1)
                         part1 = part1.Substring(0, comma).Trim();
 
-                    var index = ushort.Parse(part0);
+                    ushort index = ushort.Parse(part0);
                     if (index >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
-                    var checkIndex = ushort.Parse(part1);
+                    ushort checkIndex = ushort.Parse(part1);
                     if (checkIndex >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
 
@@ -693,12 +693,12 @@ namespace ClassicUO.AssetsLoader
 
             byte maxGroup = 0;
 
-            for (var animID = 0; animID < MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
+            for (int animID = 0; animID < MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
             for (byte grpID = 0; grpID < 100; grpID++)
             {
-                var hashstring = string.Format("build/animationlegacyframe/{0:D6}/{1:D2}.bin", animID, grpID);
-                var hash = UOFileUop.CreateHash(hashstring);
-                if (hashes.TryGetValue(hash, out var data))
+                string hashstring = string.Format("build/animationlegacyframe/{0:D6}/{1:D2}.bin", animID, grpID);
+                ulong hash = UOFileUop.CreateHash(hashstring);
+                if (hashes.TryGetValue(hash, out UOPAnimationData data))
                 {
                     if (grpID > maxGroup)
                         maxGroup = grpID;
@@ -722,11 +722,11 @@ namespace ClassicUO.AssetsLoader
 
         public static void UpdateAnimationTable(in uint flags)
         {
-            for (var i = 0; i < MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
-            for (var g = 0; g < 100; g++)
-            for (var d = 0; d < 5; d++)
+            for (int i = 0; i < MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
+            for (int g = 0; g < 100; g++)
+            for (int d = 0; d < 5; d++)
             {
-                var replace = DataIndex[i].Groups[g].Direction[d].FileIndex >= 3;
+                bool replace = DataIndex[i].Groups[g].Direction[d].FileIndex >= 3;
 
                 if (DataIndex[i].Groups[g].Direction[d].FileIndex == 1)
                     replace = (flags & 0x08) != 0;
@@ -839,11 +839,11 @@ namespace ClassicUO.AssetsLoader
 
         public static bool AnimationExists(in ushort graphic, in byte group)
         {
-            var result = false;
+            bool result = false;
 
             if (graphic < MAX_ANIMATIONS_DATA_INDEX_COUNT && group < 100)
             {
-                var d = DataIndex[graphic].Groups[group].Direction[0];
+                AnimationDirection d = DataIndex[graphic].Groups[group].Direction[0];
                 result = d.Address != 0 || d.IsUOP;
             }
 
@@ -857,7 +857,7 @@ namespace ClassicUO.AssetsLoader
             if (animDir.Address == 0)
                 return false;
 
-            var file = _files[animDir.FileIndex];
+            UOFileMul file = _files[animDir.FileIndex];
             //byte[] animData = file.ReadArray<byte>(animDir.Address, (int)animDir.Size);
 
             // long to int can loss data
@@ -902,8 +902,8 @@ namespace ClassicUO.AssetsLoader
 
         private static unsafe bool TryReadUOPAnimDimension(ref AnimationDirection animDirection)
         {
-            ref var dataindex = ref DataIndex[AnimID].Groups[AnimGroup];
-            var animData = dataindex.UOPAnimData;
+            ref AnimationGroup dataindex = ref DataIndex[AnimID].Groups[AnimGroup];
+            UOPAnimationData animData = dataindex.UOPAnimData;
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 &&
                 animData.Offset == 0)
             {
@@ -911,11 +911,11 @@ namespace ClassicUO.AssetsLoader
                 return false;
             }
 
-            var decLen = (int) animData.DecompressedLength;
-            var file = _filesUop[animData.FileIndex];
+            int decLen = (int) animData.DecompressedLength;
+            UOFileUopAnimation file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
-            var buffer = file.ReadArray<byte>((int) animData.CompressedLength);
-            var decbuffer = new byte[decLen];
+            byte[] buffer = file.ReadArray<byte>((int) animData.CompressedLength);
+            byte[] decbuffer = new byte[decLen];
 
             if (!Zlib.Decompress(buffer, 0, decbuffer, decLen))
             {
@@ -926,17 +926,17 @@ namespace ClassicUO.AssetsLoader
             _reader.SetData(decbuffer, decLen);
 
             _reader.Skip(8);
-            var dcsize = _reader.ReadInt();
-            var animID = _reader.ReadInt();
+            int dcsize = _reader.ReadInt();
+            int animID = _reader.ReadInt();
             _reader.Skip(16);
-            var frameCount = _reader.ReadInt();
-            var dataStart = _reader.StartAddress + _reader.ReadInt();
+            int frameCount = _reader.ReadInt();
+            IntPtr dataStart = _reader.StartAddress + _reader.ReadInt();
             _reader.SetData(dataStart);
-            var pixelDataOffsets = new List<UOPFrameData>();
+            List<UOPFrameData> pixelDataOffsets = new List<UOPFrameData>();
 
-            for (var i = 0; i < frameCount; i++)
+            for (int i = 0; i < frameCount; i++)
             {
-                var data = new UOPFrameData
+                UOPFrameData data = new UOPFrameData
                 {
                     DataStart = _reader.PositionAddress
                 };
@@ -945,7 +945,7 @@ namespace ClassicUO.AssetsLoader
                 data.FrameID = _reader.ReadShort();
                 _reader.Skip(8);
                 data.PixelDataOffset = _reader.ReadUInt();
-                var vsize = pixelDataOffsets.Count;
+                int vsize = pixelDataOffsets.Count;
                 if (vsize + 1 != data.FrameID)
                     while (vsize + 1 != data.FrameID)
                     {
@@ -956,7 +956,7 @@ namespace ClassicUO.AssetsLoader
                 pixelDataOffsets.Add(data);
             }
 
-            var vectorSize = pixelDataOffsets.Count;
+            int vectorSize = pixelDataOffsets.Count;
             if (vectorSize < 50)
                 while (vectorSize != 50)
                 {
@@ -965,27 +965,27 @@ namespace ClassicUO.AssetsLoader
                 }
 
             animDirection.FrameCount = (byte) (pixelDataOffsets.Count / 5);
-            var dirFrameStartIdx = animDirection.FrameCount * Direction;
+            int dirFrameStartIdx = animDirection.FrameCount * Direction;
             if (animDirection.Frames == null)
                 animDirection.Frames = new AnimationFrame[animDirection.FrameCount];
 
-            for (var i = 0; i < animDirection.FrameCount; i++)
+            for (int i = 0; i < animDirection.FrameCount; i++)
             {
                 if (animDirection.Frames[i].Pixels != null && animDirection.Frames[i].Pixels.Length > 0)
                     continue;
 
-                var frameData = pixelDataOffsets[i + dirFrameStartIdx];
+                UOPFrameData frameData = pixelDataOffsets[i + dirFrameStartIdx];
                 if (frameData.DataStart == null || frameData.DataStart == IntPtr.Zero)
                     continue;
 
                 _reader.SetData(frameData.DataStart + (int) frameData.PixelDataOffset);
-                var palette = (ushort*) _reader.StartAddress;
+                ushort* palette = (ushort*) _reader.StartAddress;
                 _reader.Skip(512);
 
-                var imageCenterX = _reader.ReadShort();
-                var imageCenterY = _reader.ReadShort();
-                var imageWidth = _reader.ReadShort();
-                var imageHeight = _reader.ReadShort();
+                short imageCenterX = _reader.ReadShort();
+                short imageCenterY = _reader.ReadShort();
+                short imageWidth = _reader.ReadShort();
+                short imageHeight = _reader.ReadShort();
 
                 animDirection.Frames[i].CenterX = imageCenterX;
                 animDirection.Frames[i].CenterY = imageCenterY;
@@ -996,33 +996,33 @@ namespace ClassicUO.AssetsLoader
                     continue;
                 }
 
-                var textureSize = imageWidth * imageHeight;
-                var pixels = new ushort[textureSize];
+                int textureSize = imageWidth * imageHeight;
+                ushort[] pixels = new ushort[textureSize];
 
-                var header = _reader.ReadUInt();
+                uint header = _reader.ReadUInt();
 
-                var pos = _reader.PositionAddress.ToInt64();
-                var end = (_reader.StartAddress + (int) _reader.Length).ToInt64();
+                long pos = _reader.PositionAddress.ToInt64();
+                long end = (_reader.StartAddress + (int) _reader.Length).ToInt64();
 
                 while (header != 0x7FFF7FFF && pos < end)
                 {
-                    var runLength = (ushort) (header & 0x0FFF);
+                    ushort runLength = (ushort) (header & 0x0FFF);
 
-                    var x = (int) ((header >> 22) & 0x03FF);
+                    int x = (int) ((header >> 22) & 0x03FF);
                     if ((x & 0x0200) > 0)
                         x |= unchecked((int) 0xFFFFFE00);
 
-                    var y = (int) ((header >> 12) & 0x3FF);
+                    int y = (int) ((header >> 12) & 0x3FF);
                     if ((y & 0x0200) > 0)
                         y |= unchecked((int) 0xFFFFFE00);
 
                     x += imageCenterX;
                     y += imageCenterY + imageHeight;
 
-                    var block = y * imageWidth + x;
-                    for (var k = 0; k < runLength; k++)
+                    int block = y * imageWidth + x;
+                    for (int k = 0; k < runLength; k++)
                     {
-                        var val = palette[_reader.ReadByte()];
+                        ushort val = palette[_reader.ReadByte()];
                         if (val > 0)
                             val |= 0x8000;
                         pixels[block++] = val;
@@ -1042,34 +1042,34 @@ namespace ClassicUO.AssetsLoader
 
         private static unsafe void ReadFramesPixelData(ref AnimationDirection animDir)
         {
-            var palette = (ushort*) _reader.StartAddress;
+            ushort* palette = (ushort*) _reader.StartAddress;
             _reader.Skip(512);
-            var dataStart = _reader.PositionAddress;
+            IntPtr dataStart = _reader.PositionAddress;
 
-            var frameCount = _reader.ReadUInt();
+            uint frameCount = _reader.ReadUInt();
 
             animDir.FrameCount = (byte) frameCount;
 
-            var frameOffset = (uint*) _reader.PositionAddress;
+            uint* frameOffset = (uint*) _reader.PositionAddress;
             animDir.Frames = new AnimationFrame[frameCount];
 
-            for (var i = 0; i < frameCount; i++)
+            for (int i = 0; i < frameCount; i++)
             {
                 if (animDir.Frames[i].Pixels != null && animDir.Frames[i].Pixels.Length > 0)
                     continue;
 
                 _reader.SetData(dataStart + (int) frameOffset[i]);
 
-                var imageCenterX = _reader.ReadShort();
+                short imageCenterX = _reader.ReadShort();
                 animDir.Frames[i].CenterX = imageCenterX;
 
-                var imageCenterY = _reader.ReadShort();
+                short imageCenterY = _reader.ReadShort();
                 animDir.Frames[i].CenterY = imageCenterY;
 
-                var imageWidth = _reader.ReadShort();
+                short imageWidth = _reader.ReadShort();
                 animDir.Frames[i].Width = imageWidth;
 
-                var imageHeight = _reader.ReadShort();
+                short imageHeight = _reader.ReadShort();
                 animDir.Frames[i].Heigth = imageHeight;
 
                 if (imageWidth <= 0 || imageHeight <= 0)
@@ -1078,34 +1078,34 @@ namespace ClassicUO.AssetsLoader
                     continue;
                 }
 
-                var wantSize = imageWidth * imageHeight;
+                int wantSize = imageWidth * imageHeight;
 
-                var pixels = new ushort[wantSize];
+                ushort[] pixels = new ushort[wantSize];
 
-                var header = _reader.ReadUInt();
+                uint header = _reader.ReadUInt();
 
-                var pos = _reader.PositionAddress.ToInt64();
-                var end = (_reader.StartAddress + (int) _reader.Length).ToInt64();
+                long pos = _reader.PositionAddress.ToInt64();
+                long end = (_reader.StartAddress + (int) _reader.Length).ToInt64();
 
                 while (header != 0x7FFF7FFF && pos < end)
                 {
-                    var runLength = (ushort) (header & 0x0FFF);
+                    ushort runLength = (ushort) (header & 0x0FFF);
 
-                    var x = (int) ((header >> 22) & 0x03FF);
+                    int x = (int) ((header >> 22) & 0x03FF);
                     if ((x & 0x0200) > 0)
                         x |= unchecked((int) 0xFFFFFE00);
 
-                    var y = (int) ((header >> 12) & 0x3FF);
+                    int y = (int) ((header >> 12) & 0x3FF);
                     if ((y & 0x0200) > 0)
                         y |= unchecked((int) 0xFFFFFE00);
 
                     x += imageCenterX;
                     y += imageCenterY + imageHeight;
 
-                    var block = y * imageWidth + x;
-                    for (var k = 0; k < runLength; k++)
+                    int block = y * imageWidth + x;
+                    for (int k = 0; k < runLength; k++)
                     {
-                        var val = palette[_reader.ReadByte()];
+                        ushort val = palette[_reader.ReadByte()];
                         if (val > 0)
                             pixels[block] = (ushort) (0x8000 | val);
                         else
@@ -1258,29 +1258,29 @@ namespace ClassicUO.AssetsLoader
                 throw new ArgumentException("Bad uop file");
 
             Skip(8);
-            var nextblock = ReadLong();
+            long nextblock = ReadLong();
             Skip(4);
 
             Seek(nextblock);
 
             do
             {
-                var fileCount = ReadInt();
+                int fileCount = ReadInt();
                 nextblock = ReadLong();
 
-                for (var i = 0; i < fileCount; i++)
+                for (int i = 0; i < fileCount; i++)
                 {
-                    var offset = ReadLong();
-                    var headerLength = ReadInt();
-                    var compressedLength = ReadInt();
-                    var decompressedLength = ReadInt();
-                    var hash = ReadULong();
+                    long offset = ReadLong();
+                    int headerLength = ReadInt();
+                    int compressedLength = ReadInt();
+                    int decompressedLength = ReadInt();
+                    ulong hash = ReadULong();
                     Skip(6);
 
                     if (offset == 0)
                         continue;
 
-                    var data = new UOPAnimationData
+                    UOPAnimationData data = new UOPAnimationData
                     {
                         Offset = (uint) (offset + headerLength),
                         CompressedLength = (uint) compressedLength,
@@ -1354,7 +1354,7 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            var path = Path.Combine(FileManager.UoFolderPath, "bodyconv.def");
+            string path = Path.Combine(FileManager.UoFolderPath, "bodyconv.def");
             if (!File.Exists(path))
                 return;
 
@@ -1364,7 +1364,7 @@ namespace ClassicUO.AssetsLoader
                 list4 = new List<int>();
             int max1 = 0, max2 = 0, max3 = 0, max4 = 0;
 
-            using (var reader = new StreamReader(path))
+            using (StreamReader reader = new StreamReader(path))
             {
                 string line;
 
@@ -1374,7 +1374,7 @@ namespace ClassicUO.AssetsLoader
                     if (line.Length == 0 || line[0] == '#' || line.StartsWith("\"#"))
                         continue;
 
-                    var values = Regex.Split(line, @"\t|\s+", RegexOptions.IgnoreCase);
+                    string[] values = Regex.Split(line, @"\t|\s+", RegexOptions.IgnoreCase);
 
                     /*  int index = Convert.ToInt32(values[0]);
   
@@ -1494,8 +1494,8 @@ namespace ClassicUO.AssetsLoader
                       }
                       */
 
-                    var original = System.Convert.ToInt32(values[0]);
-                    var anim2 = System.Convert.ToInt32(values[1]);
+                    int original = System.Convert.ToInt32(values[0]);
+                    int anim2 = System.Convert.ToInt32(values[1]);
                     int anim3 = -1, anim4 = -1, anim5 = -1;
 
                     if (values.Length >= 3)
@@ -1551,41 +1551,41 @@ namespace ClassicUO.AssetsLoader
 
             Table[0] = new int[max1 + 1];
 
-            for (var i = 0; i < Table[0].Length; ++i)
+            for (int i = 0; i < Table[0].Length; ++i)
                 Table[0][i] = -1;
 
-            for (var i = 0; i < list1.Count; i += 2)
+            for (int i = 0; i < list1.Count; i += 2)
                 Table[0][list1[i]] = list1[i + 1];
 
             Table[1] = new int[max2 + 1];
 
-            for (var i = 0; i < Table[1].Length; ++i)
+            for (int i = 0; i < Table[1].Length; ++i)
                 Table[1][i] = -1;
 
-            for (var i = 0; i < list2.Count; i += 2)
+            for (int i = 0; i < list2.Count; i += 2)
                 Table[1][list2[i]] = list2[i + 1];
 
             Table[2] = new int[max3 + 1];
 
-            for (var i = 0; i < Table[2].Length; ++i)
+            for (int i = 0; i < Table[2].Length; ++i)
                 Table[2][i] = -1;
 
-            for (var i = 0; i < list3.Count; i += 2)
+            for (int i = 0; i < list3.Count; i += 2)
                 Table[2][list3[i]] = list3[i + 1];
 
             Table[3] = new int[max4 + 1];
 
-            for (var i = 0; i < Table[3].Length; ++i)
+            for (int i = 0; i < Table[3].Length; ++i)
                 Table[3][i] = -1;
 
-            for (var i = 0; i < list4.Count; i += 2)
+            for (int i = 0; i < list4.Count; i += 2)
                 Table[3][list4[i]] = list4[i + 1];
         }
 
         public static bool HasBody(int body)
         {
             if (body >= 0)
-                for (var i = 0; i < Table.Length; i++)
+                for (int i = 0; i < Table.Length; i++)
                     if (body < Table[i].Length && Table[i][body] != -1)
                         return true;
             return false;
@@ -1594,7 +1594,7 @@ namespace ClassicUO.AssetsLoader
         public static int Convert(ref int body)
         {
             if (body >= 0)
-                for (var i = 0; i < Table.Length; i++)
+                for (int i = 0; i < Table.Length; i++)
                     if (body < Table[i].Length && Table[i][body] != -1)
                     {
                         body = Table[i][body];
@@ -1611,8 +1611,8 @@ namespace ClassicUO.AssetsLoader
 
             if (index >= 0)
             {
-                var t = Table[type - 2];
-                for (var i = 0; i < t.Length; i++)
+                int[] t = Table[type - 2];
+                for (int i = 0; i < t.Length; i++)
                     if (t[i] == index)
                         return i;
             }

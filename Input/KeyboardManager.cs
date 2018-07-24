@@ -11,36 +11,36 @@ namespace ClassicUO.Input
 
         public static void Update()
         {
-            var current = Keyboard.GetState();
+            KeyboardState current = Keyboard.GetState();
 
-            var oldkeys = _prevKeyboardState.GetPressedKeys();
-            var newkeys = current.GetPressedKeys();
+            Keys[] oldkeys = _prevKeyboardState.GetPressedKeys();
+            Keys[] newkeys = current.GetPressedKeys();
 
-            foreach (var k in newkeys)
+            foreach (Keys k in newkeys)
                 if (current.IsKeyDown(k))
                 {
-                    var old = oldkeys.FirstOrDefault(s => s == k);
+                    Keys old = oldkeys.FirstOrDefault(s => s == k);
                     if (!_prevKeyboardState.IsKeyDown(old))
                     {
                         // pressed 1st time: FIRE!
-                        var arg = new KeyboardEventArgs(k, KeyState.Down);
+                        KeyboardEventArgs arg = new KeyboardEventArgs(k, KeyState.Down);
                         KeyDown?.Invoke(null, arg);
                     }
                     else
                     {
-                        var arg = new KeyboardEventArgs(k, KeyState.Down);
+                        KeyboardEventArgs arg = new KeyboardEventArgs(k, KeyState.Down);
                         KeyPressed?.Invoke(null, arg);
                     }
                 }
 
-            foreach (var k in oldkeys)
+            foreach (Keys k in oldkeys)
                 if (current.IsKeyUp(k))
                 {
-                    var old = oldkeys.FirstOrDefault(s => s == k);
+                    Keys old = oldkeys.FirstOrDefault(s => s == k);
                     if (!_prevKeyboardState.IsKeyUp(old))
                     {
                         // released 1st time: FIRE!
-                        var arg = new KeyboardEventArgs(k, KeyState.Up);
+                        KeyboardEventArgs arg = new KeyboardEventArgs(k, KeyState.Up);
                         KeyUp?.Invoke(null, arg);
                     }
                 }

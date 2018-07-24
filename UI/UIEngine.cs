@@ -58,7 +58,7 @@ namespace ClassicUO.UI
                 return false;
             }
 
-            foreach (var c in Controls)
+            foreach (Control c in Controls)
                 GetControl(c, func, ref control);
 
             if (control != null)
@@ -92,16 +92,13 @@ namespace ClassicUO.UI
                         return true;
                     }
 
-                    if (s.MouseIsOver)
-                    {
-                        s.OnMouseLeft(arg);
-                    }
+                    if (s.MouseIsOver) s.OnMouseLeft(arg);
                 }
 
                 return false;
             }
 
-            foreach (var c in Controls)
+            foreach (Control c in Controls)
                 GetControl(c, func, ref control);
 
             if (control != null)
@@ -125,7 +122,7 @@ namespace ClassicUO.UI
                 return s.IsEnabled && s.IsVisible && s.Rectangle.Contains(arg.Location.X, arg.Location.Y);
             }
 
-            foreach (var c in Controls)
+            foreach (Control c in Controls)
                 GetControl(c, func, ref control);
 
             control?.OnMouseWheel(arg);
@@ -140,9 +137,9 @@ namespace ClassicUO.UI
         private void GetControl(Control parent, Func<Control, bool> condition, ref Control founded)
         {
             //for (int i = parent.Children.Count - 1; i >= 0; i--)
-            for (var i = 0; i < parent.Children.Count; i++)
+            for (int i = 0; i < parent.Children.Count; i++)
             {
-                var c = parent.Children[i];
+                Control c = parent.Children[i];
                 if (condition(c))
                 {
                     founded = c;

@@ -8,7 +8,7 @@ namespace ClassicUO.Game.Network
 
         public PacketWriter(in byte id)
         {
-            var len = PacketsTable.GetPacketLength(id);
+            short len = PacketsTable.GetPacketLength(id);
             IsDynamic = len < 0;
             _data = new byte[IsDynamic ? 3 : len];
             _data[0] = id;

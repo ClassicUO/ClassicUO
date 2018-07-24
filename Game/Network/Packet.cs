@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Network
         public string ReadASCII()
         {
             EnsureSize(1);
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             char c;
 
             while ((c = (char) ReadByte()) != '\0')
@@ -95,10 +95,10 @@ namespace ClassicUO.Game.Network
         public string ReadASCII(in int length)
         {
             EnsureSize(length);
-            var sb = new StringBuilder(length);
+            StringBuilder sb = new StringBuilder(length);
             char c;
 
-            for (var i = 0; i < length; i++)
+            for (int i = 0; i < length; i++)
             {
                 c = (char) ReadByte();
                 if (c != '\0')
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.Network
         public string ReadUnicode()
         {
             EnsureSize(2);
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             char c;
 
             while ((c = (char) ReadUShort()) != '\0')
@@ -123,9 +123,9 @@ namespace ClassicUO.Game.Network
         public string ReadUnicode(in int length)
         {
             EnsureSize(length);
-            var sb = new StringBuilder(length);
+            StringBuilder sb = new StringBuilder(length);
             char c;
-            for (var i = 0; i < length; i++)
+            for (int i = 0; i < length; i++)
             {
                 c = (char) ReadUShort();
                 if (c != '\0')
@@ -140,10 +140,10 @@ namespace ClassicUO.Game.Network
             EnsureSize(length);
             length /= 2;
 
-            var sb = new StringBuilder(length);
+            StringBuilder sb = new StringBuilder(length);
             char c;
 
-            for (var i = 0; i < length; i++)
+            for (int i = 0; i < length; i++)
             {
                 c = (char) ReadUShortReversed();
                 if (c != '\0')

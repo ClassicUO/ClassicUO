@@ -55,7 +55,7 @@ namespace ClassicUO.Game.Renderer
 
         private void Recalculate()
         {
-            var light = Math.Min(30 - Overall + Personal, 30f);
+            float light = Math.Min(30 - Overall + Personal, 30f);
             light = Math.Max(light, 0);
             IsometricLevel = light / 30;
 

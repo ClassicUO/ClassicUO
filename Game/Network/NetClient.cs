@@ -36,8 +36,8 @@ namespace ClassicUO.Game.Network
         {
             _isDisposing = _sending = false;
 
-            var address = ResolveIP(ip);
-            var endpoint = new IPEndPoint(address, port);
+            IPAddress address = ResolveIP(ip);
+            IPEndPoint endpoint = new IPEndPoint(address, port);
 
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             //_socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.Debug, 1);
@@ -55,7 +55,7 @@ namespace ClassicUO.Game.Network
             _recvEventArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
 
 
-            var connectEventArgs = new SocketAsyncEventArgs();
+            SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs();
             connectEventArgs.Completed += (sender, e) =>
             {
                 if (e.SocketError == SocketError.Success)
@@ -124,8 +124,8 @@ namespace ClassicUO.Game.Network
 
         public void Send(PacketWriter p)
         {
-            var data = p.ToArray();
-            var packet = new Packet(data, p.Length);
+            byte[] data = p.ToArray();
+            Packet packet = new Packet(data, p.Length);
             PacketSended?.Invoke(null, packet);
 
             if (!packet.Filter)
@@ -149,11 +149,11 @@ namespace ClassicUO.Game.Network
 
             lock (_circularBuffer)
             {
-                var length = _circularBuffer.Length;
+                int length = _circularBuffer.Length;
 
                 while (length > 0 && IsConnected)
                 {
-                    var id = _circularBuffer.GetID();
+                    byte id = _circularBuffer.GetID();
                     int packetlength = PacketsTable.GetPacketLength(id);
                     if (packetlength == -1)
                     {
@@ -166,10 +166,10 @@ namespace ClassicUO.Game.Network
                     if (length < packetlength)
                         break;
 
-                    var data = BUFF_SIZE >= packetlength ? _pool.GetFreeSegment() : new byte[packetlength];
+                    byte[] data = BUFF_SIZE >= packetlength ? _pool.GetFreeSegment() : new byte[packetlength];
                     packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
 
-                    var packet = new Packet(data, packetlength);
+                    Packet packet = new Packet(data, packetlength);
                     PacketReceived?.Invoke(null, packet);
 
                     length = _circularBuffer.Length;
@@ -272,17 +272,17 @@ namespace ClassicUO.Game.Network
 
         private void ProcessRecv(in SocketAsyncEventArgs e)
         {
-            var bytesLen = e.BytesTransferred;
+            int bytesLen = e.BytesTransferred;
 
             if (bytesLen > 0 && e.SocketError == SocketError.Success)
             {
-                var buffer = _recvBuffer;
+                byte[] buffer = _recvBuffer;
 
                 if (_isCompressionEnabled)
                 {
-                    var source = _pool.GetFreeSegment();
-                    var incompletelength = _incompletePacketLength;
-                    var sourcelength = incompletelength + bytesLen;
+                    byte[] source = _pool.GetFreeSegment();
+                    int incompletelength = _incompletePacketLength;
+                    int sourcelength = incompletelength + bytesLen;
 
                     if (incompletelength > 0)
                     {
@@ -293,12 +293,12 @@ namespace ClassicUO.Game.Network
                     // if outbounds exception, BUFF_SIZE must be increased
                     Buffer.BlockCopy(buffer, 0, source, incompletelength, bytesLen);
 
-                    var processedOffset = 0;
-                    var sourceOffset = 0;
-                    var offset = 0;
+                    int processedOffset = 0;
+                    int sourceOffset = 0;
+                    int offset = 0;
 
                     while (Huffman.DecompressChunk(ref source, ref sourceOffset, sourcelength, ref buffer, offset,
-                        out var outSize))
+                        out int outSize))
                     {
                         processedOffset = sourceOffset;
                         offset += outSize;
@@ -312,7 +312,7 @@ namespace ClassicUO.Game.Network
                     }
                     else
                     {
-                        var l = sourcelength - processedOffset;
+                        int l = sourcelength - processedOffset;
                         Buffer.BlockCopy(source, processedOffset, _incompletePacketBuffer, _incompletePacketLength, l);
                         _incompletePacketLength += l;
                     }
@@ -377,14 +377,14 @@ namespace ClassicUO.Game.Network
 
         private IPAddress ResolveIP(in string addr)
         {
-            var result = IPAddress.None;
+            IPAddress result = IPAddress.None;
             if (string.IsNullOrEmpty(addr))
                 return result;
 
             if (!IPAddress.TryParse(addr, out result))
                 try
                 {
-                    var hostEntry = Dns.GetHostEntry(addr);
+                    IPHostEntry hostEntry = Dns.GetHostEntry(addr);
                     if (hostEntry.AddressList.Length != 0)
                         result = hostEntry.AddressList[hostEntry.AddressList.Length - 1];
                 }

@@ -38,7 +38,7 @@ namespace ClassicUO.Utility
                 {
                     try
                     {
-                        using (var txt = new StreamWriter("crash.log", true))
+                        using (StreamWriter txt = new StreamWriter("crash.log", true))
                         {
                             txt.AutoFlush = true;
                             txt.WriteLine("Exception @ {0}", DateTime.Now.ToString("MM-dd-yy HH:mm:ss.ffff"));
@@ -59,7 +59,7 @@ namespace ClassicUO.Utility
 
         public static void Resize<T>(this List<T> list, int size, T element = default)
         {
-            var count = list.Count;
+            int count = list.Count;
 
             if (size < count)
             {

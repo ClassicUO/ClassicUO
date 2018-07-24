@@ -49,6 +49,7 @@ namespace ClassicUO.Game.WorldObjects
         private readonly Ability[] _ability = new Ability[2] {Ability.None, Ability.None};
 
         private readonly Deque<Step> _requestedSteps = new Deque<Step>();
+        private readonly List<Skill> _sklls;
         private ushort _damageMax;
         private ushort _damageMin;
         private ushort _dexterity;
@@ -67,7 +68,6 @@ namespace ClassicUO.Game.WorldObjects
         private ushort _resistFire;
         private ushort _resistPhysical;
         private ushort _resistPoison;
-        private readonly List<Skill> _sklls;
         private ushort _strength;
         private uint _tithingPoints;
         private ushort _weight;
@@ -342,7 +342,7 @@ namespace ClassicUO.Game.WorldObjects
         {
             if (id < Skills.Count)
             {
-                var skill = Skills[id];
+                Skill skill = Skills[id];
                 skill.ValueFixed = realValue;
                 skill.BaseFixed = baseValue;
                 skill.Lock = skillLock;
@@ -355,7 +355,7 @@ namespace ClassicUO.Game.WorldObjects
         {
             if (id < Skills.Count)
             {
-                var skill = Skills[id];
+                Skill skill = Skills[id];
                 skill.Lock = skillLock;
                 _delta |= Delta.Skills;
             }
@@ -363,8 +363,8 @@ namespace ClassicUO.Game.WorldObjects
 
         public void UpdateAbilities()
         {
-            var right = GetItemAtLayer(Layer.RightHand);
-            var left = GetItemAtLayer(Layer.LeftHand);
+            Item right = GetItemAtLayer(Layer.RightHand);
+            Item left = GetItemAtLayer(Layer.LeftHand);
 
             _ability[0] = Ability.None;
             _ability[1] = Ability.None;
@@ -388,9 +388,9 @@ namespace ClassicUO.Game.WorldObjects
                 graphics[1] = right.Graphic;
             }
 
-            for (var i = 0; i < graphics.Length; i++)
+            for (int i = 0; i < graphics.Length; i++)
             {
-                var g = graphics[i];
+                Graphic g = graphics[i];
 
                 switch (g)
                 {
@@ -1045,7 +1045,7 @@ namespace ClassicUO.Game.WorldObjects
 
             int x = 0, y = 0;
             sbyte z = 0;
-            var oldDirection = Direction.NONE;
+            Direction oldDirection = Direction.NONE;
 
             if (_requestedSteps.Count <= 0)
             {
@@ -1053,7 +1053,7 @@ namespace ClassicUO.Game.WorldObjects
             }
             else
             {
-                var step1 = _requestedSteps.Back();
+                Step step1 = _requestedSteps.Back();
                 x = step1.X;
                 y = step1.Y;
                 z = step1.Z;
@@ -1064,10 +1064,10 @@ namespace ClassicUO.Game.WorldObjects
             direction = direction & Direction.Up;
 
             ushort walkTime;
-            var newDirection = direction;
-            var newX = x;
-            var newY = y;
-            var newZ = z;
+            Direction newDirection = direction;
+            int newX = x;
+            int newY = y;
+            sbyte newZ = z;
 
             if (oldDirection == newDirection)
             {
@@ -1107,7 +1107,7 @@ namespace ClassicUO.Game.WorldObjects
             if (run)
                 direction |= Direction.Running;
 
-            var step = new Step
+            Step step = new Step
             {
                 X = x,
                 Y = y,
@@ -1120,9 +1120,9 @@ namespace ClassicUO.Game.WorldObjects
 
             if (_movementState == PlayerMovementState.ANIMATE_IMMEDIATELY)
             {
-                for (var i = 0; i < _requestedSteps.Count; i++)
+                for (int i = 0; i < _requestedSteps.Count; i++)
                 {
-                    var s = _requestedSteps[i];
+                    Step s = _requestedSteps[i];
                     if (!s.Anim)
                     {
                         s.Anim = true;
@@ -1154,7 +1154,7 @@ namespace ClassicUO.Game.WorldObjects
             if (_requestedSteps.Count <= 0)
                 return;
 
-            var step = _requestedSteps.Front();
+            Step step = _requestedSteps.Front();
             if (step.Seq != seq)
                 return;
 
@@ -1164,7 +1164,7 @@ namespace ClassicUO.Game.WorldObjects
             {
                 int endX = 0, endY = 0;
                 sbyte endZ = 0;
-                var endDir = Direction.NONE;
+                Direction endDir = Direction.NONE;
 
                 GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
 
@@ -1178,7 +1178,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public void DenyWalk(in byte seq, in Direction dir, in Position position)
         {
-            foreach (var step in _requestedSteps)
+            foreach (Step step in _requestedSteps)
                 if (step.Seq == seq)
                 {
                     ResetSteps();

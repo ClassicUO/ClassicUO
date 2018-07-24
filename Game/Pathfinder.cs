@@ -38,7 +38,7 @@ namespace ClassicUO.Game
 
         public static bool CanWalk(in Mobile m, ref int newX, ref int newY, ref sbyte newZ, ref Direction newDir)
         {
-            var (tileX, tileY) = OffsetTile(m.Position, newDir);
+            (int tileX, int tileY) = OffsetTile(m.Position, newDir);
 
             return GetNextTile(m, m.Position, tileX, tileY, out newDir, out newX, out newY, out newZ);
         }
@@ -47,10 +47,10 @@ namespace ClassicUO.Game
             out Direction direction, out int nextX, out int nextY, out sbyte nextZ)
         {
             direction = GetNextDirection(current, goalX, goalY);
-            var initialDir = direction;
+            Direction initialDir = direction;
 
             (nextX, nextY) = OffsetTile(current, direction);
-            var moveIsOK = CheckMovement(m, current, direction, out nextZ);
+            bool moveIsOK = CheckMovement(m, current, direction, out nextZ);
 
             if (!moveIsOK)
             {
@@ -66,8 +66,7 @@ namespace ClassicUO.Game
                 moveIsOK = CheckMovement(m, current, direction, out nextZ);
             }
 
-            if (moveIsOK) return true;
-            return false;
+            return moveIsOK;
         }
 
         private static Direction GetNextDirection(in Position current, in int goalX, in int goalY)
@@ -148,7 +147,7 @@ namespace ClassicUO.Game
 
         private static int GetNextZ(in Mobile mobile, in Position loc, in Direction d)
         {
-            if (CheckMovement(mobile, loc, d, out var newZ, true))
+            if (CheckMovement(mobile, loc, d, out sbyte newZ, true))
                 return newZ;
             return loc.Z;
         }
@@ -157,7 +156,7 @@ namespace ClassicUO.Game
         public static bool CheckMovement(in Mobile mobile, in Position loc, in Direction d, out sbyte newZ,
             bool forceOK = false)
         {
-            var map = World.Map;
+            Facet map = World.Map;
 
             if (map == null)
             {
@@ -172,7 +171,7 @@ namespace ClassicUO.Game
             int xRight = xStart, yRight = yStart;
             int xLeft = xStart, yLeft = yStart;
 
-            var checkDiagonals = ((int) d & 0x1) == 0x1;
+            bool checkDiagonals = ((int) d & 0x1) == 0x1;
 
             OffsetXY(d, ref xForward, ref yForward);
             OffsetXY((Direction) (((int) d - 1) & 0x7), ref xLeft, ref yLeft);
@@ -186,24 +185,24 @@ namespace ClassicUO.Game
             }
 
 
-            var itemsStart = _poolsItems[0];
-            var itemsForward = _poolsItems[1];
-            var itemsLeft = _poolsItems[2];
-            var itemsRight = _poolsItems[3];
+            List<Item> itemsStart = _poolsItems[0];
+            List<Item> itemsForward = _poolsItems[1];
+            List<Item> itemsLeft = _poolsItems[2];
+            List<Item> itemsRight = _poolsItems[3];
 
-            var staticStart = _poolsStatics[0];
-            var staticForward = _poolsStatics[1];
-            var staticLeft = _poolsStatics[2];
-            var staticRight = _poolsStatics[3];
+            List<Static> staticStart = _poolsStatics[0];
+            List<Static> staticForward = _poolsStatics[1];
+            List<Static> staticLeft = _poolsStatics[2];
+            List<Static> staticRight = _poolsStatics[3];
 
-            var reqFlags = IMPASSABLE_SURFACE;
+            const long REQ_FLAGS = IMPASSABLE_SURFACE;
 
             if (checkDiagonals)
             {
-                var tileStart = map.GetTile(xStart, yStart);
-                var tileForward = map.GetTile(xForward, yForward);
-                var tileLeft = map.GetTile(xLeft, yLeft);
-                var tileRight = map.GetTile(xRight, yRight);
+                Tile tileStart = map.GetTile(xStart, yStart);
+                Tile tileForward = map.GetTile(xForward, yForward);
+                Tile tileLeft = map.GetTile(xLeft, yLeft);
+                Tile tileRight = map.GetTile(xRight, yRight);
 
                 if (tileForward == null || tileStart == null || tileLeft == null || tileRight == null)
                 {
@@ -211,26 +210,26 @@ namespace ClassicUO.Game
                     return false;
                 }
 
-                var tiles = _tiles;
+                List<Tile> tiles = _tiles;
                 tiles.Add(tileStart);
                 tiles.Add(tileForward);
                 tiles.Add(tileLeft);
                 tiles.Add(tileRight);
 
-                for (var i = 0; i < tiles.Count; ++i)
+                for (int i = 0; i < tiles.Count; ++i)
                 {
-                    var tile = tiles[i];
+                    Tile tile = tiles[i];
 
-                    for (var j = 0; j < tile.ObjectsOnTiles.Count; ++j)
+                    for (int j = 0; j < tile.ObjectsOnTiles.Count; ++j)
                     {
-                        var entity = tile.ObjectsOnTiles[j];
+                        WorldObject entity = tile.ObjectsOnTiles[j];
 
                         // if (ignoreMovableImpassables && item.Movable && item.ItemData.Impassable)
                         //     continue;
 
                         if (entity is Item item)
                         {
-                            if (((long) item.ItemData.Flags & reqFlags) == 0)
+                            if (((long) item.ItemData.Flags & REQ_FLAGS) == 0)
                                 continue;
 
                             if (tile == tileStart && item.Position.X == xStart && item.Position.Y == yStart &&
@@ -248,7 +247,7 @@ namespace ClassicUO.Game
                         }
                         else if (entity is Static stat)
                         {
-                            if (((long) stat.ItemData.Flags & reqFlags) == 0)
+                            if (((long) stat.ItemData.Flags & REQ_FLAGS) == 0)
                                 continue;
 
                             if (tile == tileStart && stat.Position.X == xStart && stat.Position.Y == yStart &&
@@ -269,8 +268,8 @@ namespace ClassicUO.Game
             }
             else
             {
-                var tileStart = map.GetTile(xStart, yStart);
-                var tileForward = map.GetTile(xForward, yForward);
+                Tile tileStart = map.GetTile(xStart, yStart);
+                Tile tileForward = map.GetTile(xForward, yForward);
                 if (tileForward == null || tileStart == null)
                 {
                     newZ = loc.Z;
@@ -279,16 +278,16 @@ namespace ClassicUO.Game
 
                 if (tileStart == tileForward)
                 {
-                    for (var i = 0; i < tileStart.ObjectsOnTiles.Count; i++)
+                    for (int i = 0; i < tileStart.ObjectsOnTiles.Count; i++)
                     {
-                        var entity = tileStart.ObjectsOnTiles[i];
+                        WorldObject entity = tileStart.ObjectsOnTiles[i];
 
                         // if (ignoreMovableImpassables && item.Movable && item.ItemData.Impassable)
                         //     continue;
 
                         if (entity is Item item)
                         {
-                            if (((long) item.ItemData.Flags & reqFlags) == 0)
+                            if (((long) item.ItemData.Flags & REQ_FLAGS) == 0)
                                 continue;
 
                             if (item.Position.X == xStart && item.Position.Y == yStart && item.Graphic < 0x4000)
@@ -299,7 +298,7 @@ namespace ClassicUO.Game
                         }
                         else if (entity is Static stat)
                         {
-                            if (((long) stat.ItemData.Flags & reqFlags) == 0)
+                            if (((long) stat.ItemData.Flags & REQ_FLAGS) == 0)
                                 continue;
 
                             if (stat.Position.X == xStart && stat.Position.Y == yStart && stat.Graphic < 0x4000)
@@ -312,16 +311,16 @@ namespace ClassicUO.Game
                 }
                 else
                 {
-                    for (var i = 0; i < tileForward.ObjectsOnTiles.Count; i++)
+                    for (int i = 0; i < tileForward.ObjectsOnTiles.Count; i++)
                     {
-                        var entity = tileForward.ObjectsOnTiles[i];
+                        WorldObject entity = tileForward.ObjectsOnTiles[i];
 
                         // if (ignoreMovableImpassables && item.Movable && item.ItemData.Impassable)
                         //     continue;
 
                         if (entity is Item item)
                         {
-                            if (((long) item.ItemData.Flags & reqFlags) == 0)
+                            if (((long) item.ItemData.Flags & REQ_FLAGS) == 0)
                                 continue;
 
                             if (item.Position.X == xForward && item.Position.Y == yForward && item.Graphic < 0x4000)
@@ -329,7 +328,7 @@ namespace ClassicUO.Game
                         }
                         else if (entity is Static stat)
                         {
-                            if (((long) stat.ItemData.Flags & reqFlags) == 0)
+                            if (((long) stat.ItemData.Flags & REQ_FLAGS) == 0)
                                 continue;
 
                             if (stat.Position.X == xForward && stat.Position.Y == yForward && stat.Graphic < 0x4000)
@@ -337,16 +336,16 @@ namespace ClassicUO.Game
                         }
                     }
 
-                    for (var i = 0; i < tileStart.ObjectsOnTiles.Count; i++)
+                    for (int i = 0; i < tileStart.ObjectsOnTiles.Count; i++)
                     {
-                        var entity = tileStart.ObjectsOnTiles[i];
+                        WorldObject entity = tileStart.ObjectsOnTiles[i];
 
                         // if (ignoreMovableImpassables && item.Movable && item.ItemData.Impassable)
                         //     continue;
 
                         if (entity is Item item)
                         {
-                            if (((long) item.ItemData.Flags & reqFlags) == 0)
+                            if (((long) item.ItemData.Flags & REQ_FLAGS) == 0)
                                 continue;
 
                             if (item.Position.X == xStart && item.Position.Y == yStart && item.Graphic < 0x4000)
@@ -354,7 +353,7 @@ namespace ClassicUO.Game
                         }
                         else if (entity is Static stat)
                         {
-                            if (((long) stat.ItemData.Flags & reqFlags) == 0)
+                            if (((long) stat.ItemData.Flags & REQ_FLAGS) == 0)
                                 continue;
 
                             if (stat.Position.X == xStart && stat.Position.Y == yStart && stat.Graphic < 0x4000)
@@ -364,17 +363,17 @@ namespace ClassicUO.Game
                 }
             }
 
-            GetStartZ(mobile, loc, itemsStart, staticStart, out var startZ, out var startTop);
+            GetStartZ(mobile, loc, itemsStart, staticStart, out sbyte startZ, out sbyte startTop);
 
-            var moveIsOk = Check(mobile, itemsForward, staticForward, xForward, yForward, startTop, startZ, out newZ) ||
+            bool moveIsOk = Check(mobile, itemsForward, staticForward, xForward, yForward, startTop, startZ, out newZ) ||
                            forceOK;
 
             if (moveIsOk && checkDiagonals)
-                if (!Check(mobile, itemsLeft, staticLeft, xLeft, yLeft, startTop, startZ, out var hold) &&
+                if (!Check(mobile, itemsLeft, staticLeft, xLeft, yLeft, startTop, startZ, out sbyte hold) &&
                     !Check(mobile, itemsRight, staticRight, xRight, yRight, startTop, startZ, out hold))
                     moveIsOk = false;
 
-            for (var i = 0; i < (checkDiagonals ? 4 : 2); i++)
+            for (int i = 0; i < (checkDiagonals ? 4 : 2); i++)
             {
                 if (_poolsItems[i].Count > 0)
                     _poolsItems[i].Clear();
@@ -428,24 +427,25 @@ namespace ClassicUO.Game
         {
             int xCheck = loc.X, yCheck = loc.Y;
 
-            var mapTile = World.Map.GetTile(xCheck, yCheck);
+            Tile mapTile = World.Map.GetTile(xCheck, yCheck);
             if (mapTile == null)
             {
                 zLow = sbyte.MinValue;
                 zTop = sbyte.MinValue;
+                return;
             }
 
-            var landBlocks = TileData.IsImpassable((long) TileData.LandData[mapTile.Graphic].Flags);
+            bool landBlocks = TileData.IsImpassable((long) TileData.LandData[mapTile.Graphic].Flags);
 
             sbyte landLow = 0, landTop = 0;
-            var landCenter = World.Map.GetAverageZ((short) xCheck, (short) yCheck, ref landLow, ref landTop);
+            int landCenter = World.Map.GetAverageZ((short) xCheck, (short) yCheck, ref landLow, ref landTop);
 
-            var considerLand = !mapTile.IsIgnored;
+            bool considerLand = !mapTile.IsIgnored;
 
-            var zCenter = 0;
+            int zCenter = 0;
             zLow = 0;
             zTop = 0;
-            var isSet = false;
+            bool isSet = false;
 
             if (considerLand && !landBlocks && loc.Z >= landCenter)
             {
@@ -458,14 +458,14 @@ namespace ClassicUO.Game
                 isSet = true;
             }
 
-            var staticTiles = mapTile.GetWorldObjects<Static>();
+            Static[] staticTiles = mapTile.GetWorldObjects<Static>();
 
-            for (var i = 0; i < staticTiles.Length; i++)
+            for (int i = 0; i < staticTiles.Length; i++)
             {
-                var tile = staticTiles[i];
-                var id = tile.ItemData;
+                Static tile = staticTiles[i];
+                StaticTiles id = tile.ItemData;
 
-                var calcTop = tile.Position.Z + ((id.Flags & 0x00000400) != 0 ? id.Height / 2 : id.Height);
+                int calcTop = tile.Position.Z + ((id.Flags & 0x00000400) != 0 ? id.Height / 2 : id.Height);
 
                 if ((!isSet || calcTop >= zCenter) && (id.Flags & 0x00000200) != 0 && loc.Z >= calcTop)
                 {
@@ -476,7 +476,7 @@ namespace ClassicUO.Game
                     zLow = tile.Position.Z;
                     zCenter = calcTop;
 
-                    var top = (sbyte) (tile.Position.Z + id.Height);
+                    sbyte top = (sbyte) (tile.Position.Z + id.Height);
 
                     if (!isSet || top > zTop)
                         zTop = top;
@@ -485,12 +485,12 @@ namespace ClassicUO.Game
                 }
             }
 
-            for (var i = 0; i < itemList.Count; i++)
+            for (int i = 0; i < itemList.Count; i++)
             {
-                var item = itemList[i];
-                var id = item.ItemData;
+                Item item = itemList[i];
+                StaticTiles id = item.ItemData;
 
-                var calcTop = item.Position.Z + ((id.Flags & 0x00000400) != 0 ? id.Height / 2 : id.Height);
+                int calcTop = item.Position.Z + ((id.Flags & 0x00000400) != 0 ? id.Height / 2 : id.Height);
 
                 if ((!isSet || calcTop >= zCenter) && (id.Flags & 0x00000200) != 0 && loc.Z >= calcTop)
                 {
@@ -501,7 +501,7 @@ namespace ClassicUO.Game
                     zLow = item.Position.Z;
                     zCenter = calcTop;
 
-                    var top = (sbyte) (item.Position.Z + id.Height);
+                    sbyte top = (sbyte) (item.Position.Z + id.Height);
 
                     if (!isSet || top > zTop)
                         zTop = top;
@@ -510,12 +510,12 @@ namespace ClassicUO.Game
                 }
             }
 
-            for (var i = 0; i < staticList.Count; i++)
+            for (int i = 0; i < staticList.Count; i++)
             {
-                var item = staticList[i];
-                var id = item.ItemData;
+                Static item = staticList[i];
+                StaticTiles id = item.ItemData;
 
-                var calcTop = item.Position.Z + ((id.Flags & 0x00000400) != 0 ? id.Height / 2 : id.Height);
+                int calcTop = item.Position.Z + ((id.Flags & 0x00000400) != 0 ? id.Height / 2 : id.Height);
 
                 if ((!isSet || calcTop >= zCenter) && (id.Flags & 0x00000200) != 0 && loc.Z >= calcTop)
                 {
@@ -526,7 +526,7 @@ namespace ClassicUO.Game
                     zLow = item.Position.Z;
                     zCenter = calcTop;
 
-                    var top = (sbyte) (item.Position.Z + id.Height);
+                    sbyte top = (sbyte) (item.Position.Z + id.Height);
 
                     if (!isSet || top > zTop)
                         zTop = top;
@@ -544,13 +544,13 @@ namespace ClassicUO.Game
         private static bool IsOK(in bool ignoreDoors, in int ourZ, in int ourTop, in Static[] tiles,
             in List<Item> items, in List<Static> statics)
         {
-            for (var i = 0; i < tiles.Length; ++i)
+            for (int i = 0; i < tiles.Length; ++i)
             {
-                var item = tiles[i];
+                Static item = tiles[i];
                 if ((item.ItemData.Flags & IMPASSABLE_SURFACE) != 0) // Impassable || Surface
                 {
                     int checkZ = item.Position.Z;
-                    var checkTop = checkZ + ((item.ItemData.Flags & 0x00000400) != 0
+                    int checkTop = checkZ + ((item.ItemData.Flags & 0x00000400) != 0
                                        ? item.ItemData.Height / 2
                                        : item.ItemData.Height);
 
@@ -559,12 +559,12 @@ namespace ClassicUO.Game
                 }
             }
 
-            for (var i = 0; i < items.Count; ++i)
+            for (int i = 0; i < items.Count; ++i)
             {
-                var item = items[i];
-                var itemID = item.Graphic & FileManager.GraphicMask;
-                var itemData = TileData.StaticData[itemID];
-                var flags = itemData.Flags;
+                Item item = items[i];
+                int itemID = item.Graphic & FileManager.GraphicMask;
+                StaticTiles itemData = TileData.StaticData[itemID];
+                ulong flags = itemData.Flags;
 
                 if ((flags & IMPASSABLE_SURFACE) != 0) // Impassable || Surface
                 {
@@ -573,7 +573,7 @@ namespace ClassicUO.Game
                         continue;
 
                     int checkZ = item.Position.Z;
-                    var checkTop = checkZ + ((item.ItemData.Flags & 0x00000400) != 0
+                    int checkTop = checkZ + ((item.ItemData.Flags & 0x00000400) != 0
                                        ? item.ItemData.Height / 2
                                        : item.ItemData.Height);
 
@@ -582,12 +582,12 @@ namespace ClassicUO.Game
                 }
             }
 
-            for (var i = 0; i < statics.Count; ++i)
+            for (int i = 0; i < statics.Count; ++i)
             {
-                var item = statics[i];
-                var itemID = item.Graphic & FileManager.GraphicMask;
-                var itemData = TileData.StaticData[itemID];
-                var flags = itemData.Flags;
+                Static item = statics[i];
+                int itemID = item.Graphic & FileManager.GraphicMask;
+                StaticTiles itemData = TileData.StaticData[itemID];
+                ulong flags = itemData.Flags;
 
                 if ((flags & IMPASSABLE_SURFACE) != 0) // Impassable || Surface
                 {
@@ -596,7 +596,7 @@ namespace ClassicUO.Game
                         continue;
 
                     int checkZ = item.Position.Z;
-                    var checkTop = checkZ + ((item.ItemData.Flags & 0x00000400) != 0
+                    int checkTop = checkZ + ((item.ItemData.Flags & 0x00000400) != 0
                                        ? item.ItemData.Height / 2
                                        : item.ItemData.Height);
 
@@ -613,31 +613,31 @@ namespace ClassicUO.Game
         {
             newZ = 0;
 
-            var mapTile = World.Map.GetTile(x, y);
+            Tile mapTile = World.Map.GetTile(x, y);
             if (mapTile == null)
                 return false;
 
-            var id = TileData.LandData[mapTile.Graphic];
+            LandTiles id = TileData.LandData[mapTile.Graphic];
 
-            var tiles = mapTile.GetWorldObjects<Static>();
-            var landBlocks = (id.Flags & 0x00000040) != 0;
-            var considerLand = !mapTile.IsIgnored;
+            Static[] tiles = mapTile.GetWorldObjects<Static>();
+            bool landBlocks = (id.Flags & 0x00000040) != 0;
+            bool considerLand = !mapTile.IsIgnored;
 
             sbyte landCenter = 0;
             sbyte landLow = 0, landTop = 0;
             landCenter = (sbyte) World.Map.GetAverageZ((short) x, (short) y, ref landLow, ref landTop);
 
-            var moveIsOk = false;
+            bool moveIsOk = false;
 
-            var stepTop = startTop + STEP_HEIGHT;
-            var checkTop = startZ + PERSON_HEIGHT;
+            int stepTop = startTop + STEP_HEIGHT;
+            int checkTop = startZ + PERSON_HEIGHT;
 
-            var ignoreDoors = m.IsDead || m.Graphic == 0x3DB;
+            bool ignoreDoors = m.IsDead || m.Graphic == 0x3DB;
 
 
-            for (var i = 0; i < tiles.Length; ++i)
+            for (int i = 0; i < tiles.Length; ++i)
             {
-                var tile = tiles[i];
+                Static tile = tiles[i];
 
                 if ((tile.ItemData.Flags & IMPASSABLE_SURFACE) == 0x00000200
                 ) //  || (canSwim && (flags & TileFlag.Wet) != 0) Surface && !Impassable
@@ -646,16 +646,16 @@ namespace ClassicUO.Game
                     //     continue;
 
                     int itemZ = tile.Position.Z;
-                    var itemTop = itemZ;
-                    var ourZ = (sbyte) (itemZ + ((tile.ItemData.Flags & 0x00000400) != 0
+                    int itemTop = itemZ;
+                    sbyte ourZ = (sbyte) (itemZ + ((tile.ItemData.Flags & 0x00000400) != 0
                                             ? tile.ItemData.Height / 2
                                             : tile.ItemData.Height));
-                    var ourTop = ourZ + PERSON_HEIGHT;
-                    var testTop = checkTop;
+                    int ourTop = ourZ + PERSON_HEIGHT;
+                    int testTop = checkTop;
 
                     if (moveIsOk)
                     {
-                        var cmp = Math.Abs(ourZ - m.Position.Z) - Math.Abs(newZ - m.Position.Z);
+                        int cmp = Math.Abs(ourZ - m.Position.Z) - Math.Abs(newZ - m.Position.Z);
 
                         if (cmp > 0 || cmp == 0 && ourZ > newZ)
                             continue;
@@ -669,7 +669,7 @@ namespace ClassicUO.Game
 
                     if (stepTop >= itemTop)
                     {
-                        var landCheck = itemZ;
+                        int landCheck = itemZ;
 
                         if (tile.ItemData.Height >= STEP_HEIGHT)
                             landCheck += STEP_HEIGHT;
@@ -688,11 +688,11 @@ namespace ClassicUO.Game
                 }
             }
 
-            for (var i = 0; i < items.Count; ++i)
+            for (int i = 0; i < items.Count; ++i)
             {
-                var item = items[i];
-                var itemData = item.ItemData;
-                var flags = itemData.Flags;
+                Item item = items[i];
+                StaticTiles itemData = item.ItemData;
+                ulong flags = itemData.Flags;
 
                 if ((flags & IMPASSABLE_SURFACE) == 0x00000200) // Surface && !Impassable && !Movable
                 {
@@ -702,16 +702,16 @@ namespace ClassicUO.Game
                     //     continue;
 
                     int itemZ = item.Position.Z;
-                    var itemTop = itemZ;
-                    var ourZ = (sbyte) (itemZ + ((item.ItemData.Flags & 0x00000400) != 0
+                    int itemTop = itemZ;
+                    sbyte ourZ = (sbyte) (itemZ + ((item.ItemData.Flags & 0x00000400) != 0
                                             ? item.ItemData.Height / 2
                                             : item.ItemData.Height));
-                    var ourTop = ourZ + PERSON_HEIGHT;
-                    var testTop = checkTop;
+                    int ourTop = ourZ + PERSON_HEIGHT;
+                    int testTop = checkTop;
 
                     if (moveIsOk)
                     {
-                        var cmp = Math.Abs(ourZ - m.Position.Z) - Math.Abs(newZ - m.Position.Z);
+                        int cmp = Math.Abs(ourZ - m.Position.Z) - Math.Abs(newZ - m.Position.Z);
 
                         if (cmp > 0 || cmp == 0 && ourZ > newZ)
                             continue;
@@ -725,7 +725,7 @@ namespace ClassicUO.Game
 
                     if (stepTop >= itemTop)
                     {
-                        var landCheck = itemZ;
+                        int landCheck = itemZ;
 
                         if (itemData.Height >= STEP_HEIGHT)
                             landCheck += STEP_HEIGHT;
@@ -747,18 +747,18 @@ namespace ClassicUO.Game
 
             if (considerLand && !landBlocks && stepTop >= landLow)
             {
-                var ourZ = landCenter;
-                var ourTop = ourZ + PERSON_HEIGHT;
-                var testTop = checkTop;
+                sbyte ourZ = landCenter;
+                int ourTop = ourZ + PERSON_HEIGHT;
+                int testTop = checkTop;
 
                 if (ourZ + PERSON_HEIGHT > testTop)
                     testTop = ourZ + PERSON_HEIGHT;
 
-                var shouldCheck = true;
+                bool shouldCheck = true;
 
                 if (moveIsOk)
                 {
-                    var cmp = Math.Abs(ourZ - m.Position.Z) - Math.Abs(newZ - m.Position.Z);
+                    int cmp = Math.Abs(ourZ - m.Position.Z) - Math.Abs(newZ - m.Position.Z);
 
                     if (cmp > 0 || cmp == 0 && ourZ > newZ)
                         shouldCheck = false;

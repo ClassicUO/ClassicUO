@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Network
 
         public Gram CheckFlushReady()
         {
-            var gram = _buffered;
+            Gram gram = _buffered;
             _pending.Enqueue(_buffered);
             _buffered = null;
             return gram;
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.Network
             if (buffer.Length - offset < length)
                 throw new ArgumentException("Offset and length do not point to a valid segment within the buffer.");
 
-            var existingBytes = _pending.Count * _CoalesceBufferSize + (_buffered?.Length ?? 0);
+            int existingBytes = _pending.Count * _CoalesceBufferSize + (_buffered?.Length ?? 0);
 
             if (existingBytes + length > PendingCap) throw new CapacityExceededException();
 
@@ -90,7 +90,7 @@ namespace ClassicUO.Game.Network
             {
                 if (_buffered == null) _buffered = Gram.Acquire();
 
-                var bytesWritten = _buffered.Write(buffer, offset, length);
+                int bytesWritten = _buffered.Write(buffer, offset, length);
 
                 offset += bytesWritten;
                 length -= bytesWritten;
@@ -154,7 +154,7 @@ namespace ClassicUO.Game.Network
 
             public int Write(in byte[] buffer, in int offset, in int length)
             {
-                var write = Math.Min(length, Available);
+                int write = Math.Min(length, Available);
 
                 System.Buffer.BlockCopy(buffer, offset, Buffer, Length, write);
 

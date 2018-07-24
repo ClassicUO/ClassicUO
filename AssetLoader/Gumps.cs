@@ -10,7 +10,7 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            var path = Path.Combine(FileManager.UoFolderPath, "gumpartLegacyMUL.uop");
+            string path = Path.Combine(FileManager.UoFolderPath, "gumpartLegacyMUL.uop");
             if (File.Exists(path))
             {
                 _file = new UOFileUop(path, ".tga", GUMP_COUNT, true);
@@ -18,16 +18,16 @@ namespace ClassicUO.AssetsLoader
             else
             {
                 path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");
-                var pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
+                string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
 
                 if (File.Exists(path) && File.Exists(pathidx)) _file = new UOFileMul(path, pathidx, GUMP_COUNT, 12);
             }
 
-            var pathdef = Path.Combine(FileManager.UoFolderPath, "gump.def");
+            string pathdef = Path.Combine(FileManager.UoFolderPath, "gump.def");
             if (!File.Exists(pathdef))
                 return;
 
-            using (var reader = new StreamReader(File.OpenRead(pathdef)))
+            using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
@@ -35,13 +35,13 @@ namespace ClassicUO.AssetsLoader
                     line = line.Trim();
                     if (line.Length <= 0 || line[0] == '#')
                         continue;
-                    var defs = line.Replace('\t', ' ').Split(' ');
+                    string[] defs = line.Replace('\t', ' ').Split(' ');
                     if (defs.Length != 3)
                         continue;
 
-                    var ingump = int.Parse(defs[0]);
-                    var outgump = int.Parse(defs[1].Replace("{", string.Empty).Replace("}", string.Empty));
-                    var outhue = int.Parse(defs[2]);
+                    int ingump = int.Parse(defs[0]);
+                    int outgump = int.Parse(defs[1].Replace("{", string.Empty).Replace("}", string.Empty));
+                    int outhue = int.Parse(defs[2]);
 
                     _file.Entries[ingump] = _file.Entries[outgump];
                 }
@@ -51,7 +51,7 @@ namespace ClassicUO.AssetsLoader
 
         public static unsafe ushort[] GetGump(int index, out int width, out int height)
         {
-            var (length, extra, patcher) = _file.SeekByEntryIndex(index);
+            (int length, int extra, bool patcher) = _file.SeekByEntryIndex(index);
 
             if (extra == -1)
             {
@@ -66,27 +66,27 @@ namespace ClassicUO.AssetsLoader
             if (width <= 0 || height <= 0)
                 return null;
 
-            var pixels = new ushort[width * height];
-            var lookuplist = (int*) _file.PositionAddress;
+            ushort[] pixels = new ushort[width * height];
+            int* lookuplist = (int*) _file.PositionAddress;
 
-            for (var y = 0; y < height; y++)
+            for (int y = 0; y < height; y++)
             {
-                var gsize = 0;
+                int gsize = 0;
                 if (y < height - 1)
                     gsize = lookuplist[y + 1] - lookuplist[y];
                 else
                     gsize = length / 4 - lookuplist[y];
 
-                var gmul = (GumpBlock*) (_file.PositionAddress + lookuplist[y] * 4);
+                GumpBlock* gmul = (GumpBlock*) (_file.PositionAddress + lookuplist[y] * 4);
 
-                var pos = y * width;
+                int pos = y * width;
 
-                for (var i = 0; i < gsize; i++)
+                for (int i = 0; i < gsize; i++)
                 {
-                    var val = gmul[i].Value;
-                    var a = (ushort) ((val > 0 ? 0x8000 : 0) | val);
+                    ushort val = gmul[i].Value;
+                    ushort a = (ushort) ((val > 0 ? 0x8000 : 0) | val);
                     int count = gmul[i].Run;
-                    for (var j = 0; j < count; j++)
+                    for (int j = 0; j < count; j++)
                         pixels[pos++] = a;
                 }
             }

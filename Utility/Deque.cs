@@ -48,7 +48,7 @@ namespace ClassicUO.Utility
         /// <param name="collection">The collection.</param>
         public Deque(IEnumerable<T> collection)
         {
-            var count = collection.Count();
+            int count = collection.Count();
             if (count > 0)
             {
                 _buffer = new T[count];
@@ -105,11 +105,11 @@ namespace ClassicUO.Utility
                     return;
 
                 // Create the new buffer and copy our existing range.
-                var newBuffer = new T[value];
+                T[] newBuffer = new T[value];
                 if (IsSplit)
                 {
                     // The existing buffer is split, so we have to copy it in parts
-                    var length = Capacity - _offset;
+                    int length = Capacity - _offset;
                     Array.Copy(_buffer, _offset, newBuffer, 0, length);
                     Array.Copy(_buffer, 0, newBuffer, length, Count - length);
                 }
@@ -225,7 +225,7 @@ namespace ClassicUO.Utility
         /// <returns>The value of <see cref="_offset" /> after it was incremented.</returns>
         private int PostIncrement(int value)
         {
-            var ret = _offset;
+            int ret = _offset;
             _offset += value;
             _offset %= Capacity;
             return ret;
@@ -273,7 +273,7 @@ namespace ClassicUO.Utility
         /// <returns>The former last element.</returns>
         private T DoRemoveFromBack()
         {
-            var ret = _buffer[DequeIndexToBufferIndex(Count - 1)];
+            T ret = _buffer[DequeIndexToBufferIndex(Count - 1)];
             --Count;
             return ret;
         }
@@ -308,9 +308,9 @@ namespace ClassicUO.Utility
                 // Move lower items down: [0, index) -> [Capacity - collectionCount, Capacity - collectionCount + index)
                 // This clears out the low "index" number of items, moving them "collectionCount" places down;
                 //   after rotation, there will be a "collectionCount"-sized hole at "index".
-                var copyCount = index;
-                var writeIndex = Capacity - collectionCount;
-                for (var j = 0; j != copyCount; ++j)
+                int copyCount = index;
+                int writeIndex = Capacity - collectionCount;
+                for (int j = 0; j != copyCount; ++j)
                     _buffer[DequeIndexToBufferIndex(writeIndex + j)] = _buffer[DequeIndexToBufferIndex(j)];
 
                 // Rotate to the new view
@@ -321,15 +321,15 @@ namespace ClassicUO.Utility
                 // Inserting into the second half of the list
 
                 // Move higher items up: [index, count) -> [index + collectionCount, collectionCount + count)
-                var copyCount = Count - index;
-                var writeIndex = index + collectionCount;
-                for (var j = copyCount - 1; j != -1; --j)
+                int copyCount = Count - index;
+                int writeIndex = index + collectionCount;
+                for (int j = copyCount - 1; j != -1; --j)
                     _buffer[DequeIndexToBufferIndex(writeIndex + j)] = _buffer[DequeIndexToBufferIndex(index + j)];
             }
 
             // Copy new items into place
-            var i = index;
-            foreach (var item in collection)
+            int i = index;
+            foreach (T item in collection)
             {
                 _buffer[DequeIndexToBufferIndex(i)] = item;
                 ++i;
@@ -369,9 +369,9 @@ namespace ClassicUO.Utility
                 // Removing from first half of list
 
                 // Move lower items up: [0, index) -> [collectionCount, collectionCount + index)
-                var copyCount = index;
-                var writeIndex = collectionCount;
-                for (var j = copyCount - 1; j != -1; --j)
+                int copyCount = index;
+                int writeIndex = collectionCount;
+                for (int j = copyCount - 1; j != -1; --j)
                     _buffer[DequeIndexToBufferIndex(writeIndex + j)] = _buffer[DequeIndexToBufferIndex(j)];
 
                 // Rotate to new view
@@ -382,9 +382,9 @@ namespace ClassicUO.Utility
                 // Removing from second half of list
 
                 // Move higher items down: [index + collectionCount, count) -> [index, count - collectionCount)
-                var copyCount = Count - collectionCount - index;
-                var readIndex = index + collectionCount;
-                for (var j = 0; j != copyCount; ++j)
+                int copyCount = Count - collectionCount - index;
+                int readIndex = index + collectionCount;
+                for (int j = 0; j != copyCount; ++j)
                     _buffer[DequeIndexToBufferIndex(index + j)] = _buffer[DequeIndexToBufferIndex(readIndex + j)];
             }
 
@@ -432,7 +432,7 @@ namespace ClassicUO.Utility
         /// </exception>
         public void InsertRange(int index, IEnumerable<T> collection)
         {
-            var collectionCount = collection.Count();
+            int collectionCount = collection.Count();
             CheckNewIndexArgument(Count, index);
 
             // Overflow-safe check for "this.Count + collectionCount > this.Capacity"
@@ -516,7 +516,7 @@ namespace ClassicUO.Utility
             {
                 get
                 {
-                    var array = new T[deque.Count];
+                    T[] array = new T[deque.Count];
                     ((ICollection<T>) deque).CopyTo(array, 0);
                     return array;
                 }
@@ -592,9 +592,9 @@ namespace ClassicUO.Utility
         /// <returns>The index of <paramref name="item" /> if found in this list; otherwise, -1.</returns>
         public int IndexOf(T item)
         {
-            var comparer = EqualityComparer<T>.Default;
-            var ret = 0;
-            foreach (var sourceItem in this)
+            EqualityComparer<T> comparer = EqualityComparer<T>.Default;
+            int ret = 0;
+            foreach (T sourceItem in this)
             {
                 if (comparer.Equals(item, sourceItem))
                     return ret;
@@ -654,9 +654,9 @@ namespace ClassicUO.Utility
             if (array == null)
                 throw new ArgumentNullException("array", "Array is null");
 
-            var count = Count;
+            int count = Count;
             CheckRangeArguments(array.Length, arrayIndex, count);
-            for (var i = 0; i != count; ++i) array[arrayIndex + i] = this[i];
+            for (int i = 0; i != count; ++i) array[arrayIndex + i] = this[i];
         }
 
         /// <summary>
@@ -672,7 +672,7 @@ namespace ClassicUO.Utility
         /// </exception>
         public bool Remove(T item)
         {
-            var index = IndexOf(item);
+            int index = IndexOf(item);
             if (index == -1)
                 return false;
 
@@ -688,8 +688,8 @@ namespace ClassicUO.Utility
         /// </returns>
         public IEnumerator<T> GetEnumerator()
         {
-            var count = Count;
-            for (var i = 0; i != count; ++i) yield return DoGetItem(i);
+            int count = Count;
+            for (int i = 0; i != count; ++i) yield return DoGetItem(i);
         }
 
         /// <summary>
@@ -718,7 +718,7 @@ namespace ClassicUO.Utility
 
             if (item == null)
             {
-                var type = typeof(T);
+                Type type = typeof(T);
                 if (type.IsClass && !type.IsPointer)
                     return true; // classes, arrays, and delegates
                 if (type.IsInterface)
@@ -788,7 +788,7 @@ namespace ClassicUO.Utility
                 throw new ArgumentNullException("array", "Destination array cannot be null.");
             CheckRangeArguments(array.Length, index, Count);
 
-            for (var i = 0; i != Count; ++i)
+            for (int i = 0; i != Count; ++i)
                 try
                 {
                     array.SetValue(this[i], index + i);

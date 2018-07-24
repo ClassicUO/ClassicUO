@@ -24,30 +24,30 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            var path = Path.Combine(FileManager.UoFolderPath, "hues.mul");
+            string path = Path.Combine(FileManager.UoFolderPath, "hues.mul");
             if (!File.Exists(path))
                 throw new FileNotFoundException();
 
             _file = new UOFileMul(path);
 
 
-            var groupSize = Marshal.SizeOf<HuesGroup>();
+            int groupSize = Marshal.SizeOf<HuesGroup>();
 
-            var entrycount = (int) _file.Length / groupSize;
+            int entrycount = (int) _file.Length / groupSize;
 
             HuesCount = entrycount * 8;
             HuesRange = new HuesGroup[entrycount];
 
-            var addr = (ulong) _file.StartAddress;
+            ulong addr = (ulong) _file.StartAddress;
 
-            for (var i = 0; i < entrycount; i++)
+            for (int i = 0; i < entrycount; i++)
                 HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr) (addr + (ulong) (i * groupSize)));
 
             path = Path.Combine(FileManager.UoFolderPath, "radarcol.mul");
             if (!File.Exists(path))
                 throw new FileNotFoundException();
 
-            var radarcol = new UOFileMul(path);
+            UOFileMul radarcol = new UOFileMul(path);
 
             RadarCol = radarcol.ReadArray<ushort>((int) radarcol.Length / 2);
         }
@@ -55,18 +55,18 @@ namespace ClassicUO.AssetsLoader
         public static void CreateHuesPalette()
         {
             Palette = new FloatHues[HuesCount];
-            var entrycount = HuesCount / 8;
-            for (var i = 0; i < entrycount; i++)
-            for (var j = 0; j < 8; j++)
+            int entrycount = HuesCount / 8;
+            for (int i = 0; i < entrycount; i++)
+            for (int j = 0; j < 8; j++)
             {
-                var idx = i * 8 + j;
+                int idx = i * 8 + j;
 
                 Palette[idx].Palette = new float[32 * 3];
 
-                for (var h = 0; h < 32; h++)
+                for (int h = 0; h < 32; h++)
                 {
-                    var idx1 = h * 3;
-                    var c = HuesRange[i].Entries[j].ColorTable[h];
+                    int idx1 = h * 3;
+                    ushort c = HuesRange[i].Entries[j].ColorTable[h];
                     Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
                     Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
                     Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
@@ -76,14 +76,14 @@ namespace ClassicUO.AssetsLoader
 
         public static uint[] CreateShaderColors()
         {
-            var hues = new uint[32 * 2 * 3000];
-            var len = HuesRange.Length;
+            uint[] hues = new uint[32 * 2 * 3000];
+            int len = HuesRange.Length;
 
-            for (var r = 0; r < len; r++)
-            for (var y = 0; y < 8; y++)
-            for (var x = 0; x < 32; x++)
+            for (int r = 0; r < len; r++)
+            for (int y = 0; y < 8; y++)
+            for (int x = 0; x < 32; x++)
             {
-                var idx = r * 8 * 32 + y * 32 + x;
+                int idx = r * 8 * 32 + y * 32 + x;
 
                 hues[idx] = Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
             }
@@ -110,7 +110,7 @@ namespace ClassicUO.AssetsLoader
 
         public static void SetHuesBlock(int index, IntPtr ptr)
         {
-            var group = Marshal.PtrToStructure<VerdataHuesGroup>(ptr);
+            VerdataHuesGroup group = Marshal.PtrToStructure<VerdataHuesGroup>(ptr);
             SetHuesBlock(index, group);
         }
 
@@ -120,7 +120,7 @@ namespace ClassicUO.AssetsLoader
                 return;
 
             HuesRange[index].Header = group.Header;
-            for (var i = 0; i < 8; i++) HuesRange[index].Entries[i].ColorTable = group.Entries[i].ColorTable;
+            for (int i = 0; i < 8; i++) HuesRange[index].Entries[i].ColorTable = group.Entries[i].ColorTable;
         }
 
         public static uint Color16To32(ushort c)
@@ -147,8 +147,8 @@ namespace ClassicUO.AssetsLoader
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                var g = color / 8;
-                var e = color % 8;
+                int g = color / 8;
+                int e = color % 8;
 
                 return HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F];
             }
@@ -161,8 +161,8 @@ namespace ClassicUO.AssetsLoader
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                var g = color / 8;
-                var e = color % 8;
+                int g = color / 8;
+                int e = color % 8;
 
                 return Color16To32(HuesRange[g].Entries[e].ColorTable[c]);
             }
@@ -175,8 +175,8 @@ namespace ClassicUO.AssetsLoader
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                var g = color / 8;
-                var e = color % 8;
+                int g = color / 8;
+                int e = color % 8;
 
                 return HuesRange[g].Entries[e].ColorTable[8];
             }
@@ -189,8 +189,8 @@ namespace ClassicUO.AssetsLoader
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                var g = color / 8;
-                var e = color % 8;
+                int g = color / 8;
+                int e = color % 8;
 
                 return Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
             }
@@ -203,12 +203,12 @@ namespace ClassicUO.AssetsLoader
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                var g = color / 8;
-                var e = color % 8;
+                int g = color / 8;
+                int e = color % 8;
 
-                var cl = Color16To32(c);
+                uint cl = Color16To32(c);
 
-                var (B, G, R, A) = GetBGRA(cl);
+                (byte B, byte G, byte R, byte A) = GetBGRA(cl);
 
                 if (R == G && B == G)
                     return Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);

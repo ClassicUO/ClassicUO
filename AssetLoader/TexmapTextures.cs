@@ -9,8 +9,8 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            var path = Path.Combine(FileManager.UoFolderPath, "texmaps.mul");
-            var pathidx = Path.Combine(FileManager.UoFolderPath, "texidx.mul");
+            string path = Path.Combine(FileManager.UoFolderPath, "texmaps.mul");
+            string pathidx = Path.Combine(FileManager.UoFolderPath, "texidx.mul");
 
             if (!File.Exists(path) || !File.Exists(pathidx)) throw new FileNotFoundException();
 
@@ -41,7 +41,7 @@ namespace ClassicUO.AssetsLoader
 
         public static ushort[] GetTextmapTexture(ushort index, out int size)
         {
-            var (length, extra, patched) = _file.SeekByEntryIndex(index);
+            (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
 
             if (length <= 0)
             {
@@ -50,12 +50,12 @@ namespace ClassicUO.AssetsLoader
             }
 
             size = extra == 0 ? 64 : 128;
-            var pixels = new ushort[size * size];
+            ushort[] pixels = new ushort[size * size];
 
-            for (var i = 0; i < size; i++)
+            for (int i = 0; i < size; i++)
             {
-                var pos = i * size;
-                for (var j = 0; j < size; j++) pixels[pos + j] = (ushort) (0x8000 | _file.ReadUShort());
+                int pos = i * size;
+                for (int j = 0; j < size; j++) pixels[pos + j] = (ushort) (0x8000 | _file.ReadUShort());
             }
 
             return pixels;

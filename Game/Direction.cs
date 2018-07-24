@@ -28,14 +28,14 @@ namespace ClassicUO.Game
 
         public static Direction DirectionFromVectors(Vector2 fromPosition, Vector2 toPosition)
         {
-            var Angle = Math.Atan2(toPosition.Y - fromPosition.Y, toPosition.X - fromPosition.X);
+            double Angle = Math.Atan2(toPosition.Y - fromPosition.Y, toPosition.X - fromPosition.X);
             if (Angle < 0)
                 Angle = Math.PI + (Math.PI + Angle);
-            var piPerSegment = Math.PI * 2f / 8f;
-            var segmentValue = Math.PI * 2f / 16f;
-            var direction = int.MaxValue;
+            double piPerSegment = Math.PI * 2f / 8f;
+            double segmentValue = Math.PI * 2f / 16f;
+            int direction = int.MaxValue;
 
-            for (var i = 0; i < 8; i++)
+            for (int i = 0; i < 8; i++)
             {
                 if (Angle >= segmentValue && Angle <= segmentValue + piPerSegment)
                 {

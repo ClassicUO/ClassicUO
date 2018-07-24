@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Network
         public void WriteASCII(in string value)
         {
             EnsureSize(value.Length + 1);
-            foreach (var c in value)
+            foreach (char c in value)
                 WriteByte((byte) c);
             WriteByte(0);
         }
@@ -71,7 +71,7 @@ namespace ClassicUO.Game.Network
             if (value.Length > length)
                 throw new ArgumentOutOfRangeException();
 
-            for (var i = 0; i < value.Length; i++)
+            for (int i = 0; i < value.Length; i++)
                 WriteByte((byte) value[i]);
 
             if (value.Length < length)
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Network
         public void WriteUnicode(in string value)
         {
             EnsureSize((value.Length + 1) * 2);
-            foreach (var c in value)
+            foreach (char c in value)
             {
                 WriteByte((byte) (c >> 8));
                 WriteByte((byte) c);
@@ -99,7 +99,7 @@ namespace ClassicUO.Game.Network
             if (value.Length > length)
                 throw new ArgumentOutOfRangeException();
 
-            for (var i = 0; i < value.Length; i++)
+            for (int i = 0; i < value.Length; i++)
             {
                 WriteByte((byte) (value[i] >> 8));
                 WriteByte((byte) value[i]);

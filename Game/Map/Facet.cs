@@ -34,16 +34,11 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public Tile GetTile(in int x, in int y)
-        {
-            return GetTile((short) x, (short) y);
-        }
-
         public Tile GetTile(in short x, in short y)
         {
-            var cellX = x / 8;
-            var cellY = y / 8;
-            var cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
+            int cellX = x / 8;
+            int cellY = y / 8;
+            int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
             // int cellindex = (cellX * AssetsLoader.Map.MapBlocksSize[Index][1]) + cellY;
 
             if (x < 0 || y < 0)
@@ -55,9 +50,13 @@ namespace ClassicUO.Game.Map
         }
 
 
+        public Tile GetTile(int x, int y) => GetTile((short)x, (short)y);
+
+
+
         public sbyte GetTileZ(in short x, in short y)
         {
-            var tile = GetTile(x, y);
+            Tile tile = GetTile(x, y);
             if (tile == null)
             {
                 //int cellX = x / 8;
@@ -72,12 +71,12 @@ namespace ClassicUO.Game.Map
                 if (x < 0 || y < 0)
                     return -125;
 
-                var blockIndex = GetIndex(x / 8, y / 8);
+                IndexMap blockIndex = GetIndex(x / 8, y / 8);
                 if (blockIndex.MapAddress == 0)
                     return -125;
 
-                var mx = x % 8;
-                var my = y % 8;
+                int mx = x % 8;
+                int my = y % 8;
 
                 return Marshal.PtrToStructure<MapBlock>((IntPtr) blockIndex.MapAddress).Cells[my * 8 + mx].Z;
             }
@@ -87,7 +86,7 @@ namespace ClassicUO.Game.Map
 
         private IndexMap GetIndex(in int blockX, in int blockY)
         {
-            var block = blockX * AssetsLoader.Map.MapBlocksSize[Index][1] + blockY;
+            int block = blockX * AssetsLoader.Map.MapBlocksSize[Index][1] + blockY;
             return AssetsLoader.Map.BlockData[Index][block];
         }
 
@@ -127,7 +126,7 @@ namespace ClassicUO.Game.Map
 
         private static int FloorAverage(in int a, in int b)
         {
-            var v = a + b;
+            int v = a + b;
 
             if (v < 0)
                 --v;
@@ -139,10 +138,10 @@ namespace ClassicUO.Game.Map
         {
             const int XY_OFFSET = 30;
 
-            var minBlockX = (centerX - XY_OFFSET) / 8 - 1;
-            var minBlockY = (centerY - XY_OFFSET) / 8 - 1;
-            var maxBlockX = (centerX + XY_OFFSET) / 8 + 2;
-            var maxBlockY = (centerY + XY_OFFSET) / 8 + 2;
+            int minBlockX = (centerX - XY_OFFSET) / 8 - 1;
+            int minBlockY = (centerY - XY_OFFSET) / 8 - 1;
+            int maxBlockX = (centerX + XY_OFFSET) / 8 + 2;
+            int maxBlockY = (centerY + XY_OFFSET) / 8 + 2;
 
             if (minBlockX < 0)
                 minBlockX = 0;
@@ -153,14 +152,14 @@ namespace ClassicUO.Game.Map
             if (maxBlockY >= AssetsLoader.Map.MapBlocksSize[Index][1])
                 maxBlockY = AssetsLoader.Map.MapBlocksSize[Index][1] - 1;
 
-            for (var i = minBlockX; i <= maxBlockX; i++)
+            for (int i = minBlockX; i <= maxBlockX; i++)
                 // int index = i * AssetsLoader.Map.MapBlocksSize[Index][1];
 
-            for (var j = minBlockY; j <= maxBlockY; j++)
+            for (int j = minBlockY; j <= maxBlockY; j++)
             {
                 // int cellindex = index + j; 
 
-                var cellindex = j % MAX_CHUNKS * MAX_CHUNKS + i % MAX_CHUNKS;
+                int cellindex = j % MAX_CHUNKS * MAX_CHUNKS + i % MAX_CHUNKS;
 
                 if (Chunks[cellindex] == null ||
                     Chunks[cellindex].X != i ||

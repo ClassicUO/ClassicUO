@@ -24,12 +24,12 @@ namespace ClassicUO.Game.Renderer
 
         private readonly int[,] _cursorOffset = new int[2, 16];
 
+        private readonly TextRenderer _textR;
+
         private Texture2D _blackTexture;
         private Graphic _graphic = 0x2073;
 
         private bool _needGraphicUpdate;
-
-        private readonly TextRenderer _textR;
 
         public CursorRenderer()
         {
@@ -46,10 +46,10 @@ namespace ClassicUO.Game.Renderer
                 _textR.GenerateTexture(0, 0, TEXT_ALIGN_TYPE.TS_CENTER, 0);
             };
 
-            for (var i = 0; i < 2; i++)
-            for (var j = 0; j < 16; j++)
+            for (int i = 0; i < 2; i++)
+            for (int j = 0; j < 16; j++)
             {
-                var id = _cursorData[i, j];
+                ushort id = _cursorData[i, j];
 
                 Texture2D texture = TextureManager.GetOrCreateStaticTexture(id);
 
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.Renderer
 
             if (id < 16)
             {
-                var v = new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id],
+                Vector3 v = new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id],
                     0);
                 sb.Draw2D(Texture, v, RenderExtentions.GetHueVector(2655));
 

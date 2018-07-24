@@ -49,15 +49,15 @@ namespace ClassicUO.Game.Map
 
         public void Sort()
         {
-            for (var i = 0; i < _objectsOnTile.Count - 1; i++)
+            for (int i = 0; i < _objectsOnTile.Count - 1; i++)
             {
-                var j = i + 1;
+                int j = i + 1;
                 while (j > 0)
                 {
-                    var result = Compare(_objectsOnTile[j - 1], _objectsOnTile[j]);
+                    int result = Compare(_objectsOnTile[j - 1], _objectsOnTile[j]);
                     if (result > 0)
                     {
-                        var temp = _objectsOnTile[j - 1];
+                        WorldObject temp = _objectsOnTile[j - 1];
                         _objectsOnTile[j - 1] = _objectsOnTile[j];
                         _objectsOnTile[j] = temp;
                     }
@@ -69,10 +69,10 @@ namespace ClassicUO.Game.Map
 
         public List<WorldObject> GetItemsBetweenZ(in int z0, in int z1)
         {
-            var items = _itemsAtZ;
+            List<WorldObject> items = _itemsAtZ;
             _itemsAtZ.Clear();
 
-            for (var i = 0; i < ObjectsOnTiles.Count; i++)
+            for (int i = 0; i < ObjectsOnTiles.Count; i++)
                 if (MathHelper.InRange(ObjectsOnTiles[i].Position.Z, z0, z1))
                     if (ObjectsOnTiles[i] is Item || ObjectsOnTiles[i] is Static)
                         items.Add(ObjectsOnTiles[i]);
@@ -81,19 +81,19 @@ namespace ClassicUO.Game.Map
 
         public bool IsZUnderObjectOrGround(in sbyte z, out WorldObject entity, out WorldObject ground)
         {
-            var list = _objectsOnTile;
+            List<WorldObject> list = _objectsOnTile;
 
             entity = null;
             ground = null;
 
-            for (var i = list.Count - 1; i >= 0; i--)
+            for (int i = list.Count - 1; i >= 0; i--)
             {
                 if (list[i].Position.Z <= z)
                     continue;
 
                 if (list[i] is Item it)
                 {
-                    var itemdata = it.ItemData;
+                    StaticTiles itemdata = it.ItemData;
 
                     if (AssetsLoader.TileData.IsRoof((long) itemdata.Flags) ||
                         AssetsLoader.TileData.IsSurface((long) itemdata.Flags) ||
@@ -104,7 +104,7 @@ namespace ClassicUO.Game.Map
                 }
                 else if (list[i] is Static st)
                 {
-                    var itemdata = st.ItemData;
+                    StaticTiles itemdata = st.ItemData;
 
                     if (AssetsLoader.TileData.IsRoof((long) itemdata.Flags) ||
                         AssetsLoader.TileData.IsSurface((long) itemdata.Flags) ||
@@ -136,13 +136,13 @@ namespace ClassicUO.Game.Map
 
         private static int Compare(in WorldObject x, in WorldObject y)
         {
-            var (xZ, xType, xThreshold, xTierbreaker) = GetSortValues(x);
-            var (yZ, yType, yThreshold, yTierbreaker) = GetSortValues(y);
+            (int xZ, int xType, int xThreshold, int xTierbreaker) = GetSortValues(x);
+            (int yZ, int yType, int yThreshold, int yTierbreaker) = GetSortValues(y);
 
             xZ += xThreshold;
             yZ += yThreshold;
 
-            var comparison = xZ - yZ;
+            int comparison = xZ - yZ;
             if (comparison == 0)
                 comparison = xType - yType;
             if (comparison == 0)
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.Map
 
             if (e is Static staticitem)
             {
-                var itemdata = AssetsLoader.TileData.StaticData[staticitem.Graphic];
+                StaticTiles itemdata = AssetsLoader.TileData.StaticData[staticitem.Graphic];
 
                 return (staticitem.Position.Z,
                     1,

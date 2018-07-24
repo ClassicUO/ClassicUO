@@ -24,23 +24,23 @@ namespace ClassicUO.AssetsLoader
             if (SkillsCount > 0)
                 return;
 
-            var path = Path.Combine(FileManager.UoFolderPath, "Skills.mul");
-            var pathidx = Path.Combine(FileManager.UoFolderPath, "Skills.idx");
+            string path = Path.Combine(FileManager.UoFolderPath, "Skills.mul");
+            string pathidx = Path.Combine(FileManager.UoFolderPath, "Skills.idx");
 
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
 
             _file = new UOFileMul(path, pathidx, 56, 16);
 
-            var i = 0;
+            int i = 0;
             while (_file.Position < _file.Length) GetSkill(i++);
         }
 
         public static SkillEntry GetSkill(int index)
         {
-            if (!_skills.TryGetValue(index, out var value))
+            if (!_skills.TryGetValue(index, out SkillEntry value))
             {
-                var (length, extra, patched) = _file.SeekByEntryIndex(index);
+                (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
                 if (length == 0)
                     return default;
 

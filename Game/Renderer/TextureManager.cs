@@ -40,10 +40,10 @@ namespace ClassicUO.Game.Renderer
         {
             if (_updateIndex == 0)
             {
-                for (var g = 0; g < _animTextureCache.Length; g++)
-                for (var group = 0; group < _animTextureCache[g]?.Length; group++)
-                for (var dir = 0; dir < _animTextureCache[g][group]?.Length; dir++)
-                for (var idx = 0; idx < _animTextureCache[g][group][dir]?.Length; idx++)
+                for (int g = 0; g < _animTextureCache.Length; g++)
+                for (int group = 0; group < _animTextureCache[g]?.Length; group++)
+                for (int dir = 0; dir < _animTextureCache[g][group]?.Length; dir++)
+                for (int idx = 0; idx < _animTextureCache[g][group][dir]?.Length; idx++)
                     if (World.Ticks - _animTextureCache[g][group][dir][idx]?.Ticks >= TEXTURE_TIME_LIFE)
                     {
                         _animTextureCache[g][group][dir][idx].Dispose();
@@ -56,7 +56,7 @@ namespace ClassicUO.Game.Renderer
             {
                 void check(in TextureDuration[] array)
                 {
-                    for (var i = 0; i < array.Length; i++)
+                    for (int i = 0; i < array.Length; i++)
                         if (World.Ticks - array[i]?.Ticks >= TEXTURE_TIME_LIFE)
                         {
                             array[i].Dispose();
@@ -93,12 +93,12 @@ namespace ClassicUO.Game.Renderer
                 _animTextureCache[g][group][dir] = new TextureDuration[50];
 
             if (_animTextureCache[g][group][dir][index] == null)
-                for (var i = 0; i < frames.Length; i++)
+                for (int i = 0; i < frames.Length; i++)
                 {
                     if (frames[i].Width <= 0 || frames[i].Heigth <= 0)
                         continue;
 
-                    var texture = new TextureDuration(frames[i].Width, frames[i].Heigth, false)
+                    TextureDuration texture = new TextureDuration(frames[i].Width, frames[i].Heigth, false)
                     {
                         Ticks = World.Ticks
                     };
@@ -115,9 +115,9 @@ namespace ClassicUO.Game.Renderer
         {
             if (_staticTextureCache[g] == null)
             {
-                var pixels = Art.ReadStaticArt(g, out var w, out var h);
+                ushort[] pixels = Art.ReadStaticArt(g, out short w, out short h);
 
-                var texture = _staticTextureCache[g] ?? new TextureDuration(w, h, false)
+                TextureDuration texture = _staticTextureCache[g] ?? new TextureDuration(w, h, false)
                 {
                     Ticks = World.Ticks
                 };
@@ -133,8 +133,8 @@ namespace ClassicUO.Game.Renderer
         {
             if (_landTextureCache[g] == null)
             {
-                var pixels = Art.ReadLandArt(g);
-                var texture = new TextureDuration(44, 44, false)
+                ushort[] pixels = Art.ReadLandArt(g);
+                TextureDuration texture = new TextureDuration(44, 44, false)
                 {
                     Ticks = World.Ticks
                 };
@@ -149,8 +149,8 @@ namespace ClassicUO.Game.Renderer
         {
             if (_gumpTextureCache[g] == null)
             {
-                var pixels = Gumps.GetGump(g, out var w, out var h);
-                var texture = new TextureDuration(w, h, false)
+                ushort[] pixels = Gumps.GetGump(g, out int w, out int h);
+                TextureDuration texture = new TextureDuration(w, h, false)
                 {
                     Ticks = World.Ticks
                 };
@@ -165,8 +165,8 @@ namespace ClassicUO.Game.Renderer
         {
             if (_textmapTextureCache[g] == null)
             {
-                var pixels = TextmapTextures.GetTextmapTexture(g, out var size);
-                var texture = new TextureDuration(size, size, false)
+                ushort[] pixels = TextmapTextures.GetTextmapTexture(g, out int size);
+                TextureDuration texture = new TextureDuration(size, size, false)
                 {
                     Ticks = World.Ticks
                 };

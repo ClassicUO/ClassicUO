@@ -1,4 +1,5 @@
-﻿using ClassicUO.AssetsLoader;
+﻿using System.Collections.Generic;
+using ClassicUO.AssetsLoader;
 using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
 
@@ -19,8 +20,8 @@ namespace ClassicUO.Game.Renderer.Views
 
             spriteBatch.GetZ();
 
-            var mirror = false;
-            var dir = (byte) WorldObject.GetAnimationDirection();
+            bool mirror = false;
+            byte dir = (byte) WorldObject.GetAnimationDirection();
             Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
@@ -29,19 +30,19 @@ namespace ClassicUO.Game.Renderer.Views
             Graphic graphic = 0;
             EquipConvData? convertedItem = null;
 
-            for (var i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
+            for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
             {
-                var layer = LayerOrder.UsedLayers[dir, i];
+                Layer layer = LayerOrder.UsedLayers[dir, i];
 
                 if (layer == Layer.Mount)
                 {
                     if (WorldObject.IsHuman)
                     {
-                        var mount = WorldObject.Equipment[(int) Layer.Mount];
+                        Item mount = WorldObject.Equipment[(int) Layer.Mount];
                         if (mount != null)
                         {
                             graphic = mount.GetMountAnimation();
-                            var mountedHeightOffset = 0;
+                            int mountedHeightOffset = 0;
 
                             if (graphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                 mountedHeightOffset = Animations.DataIndex[graphic].MountedHeightOffset;
@@ -70,14 +71,14 @@ namespace ClassicUO.Game.Renderer.Views
                     if (!WorldObject.IsHuman)
                         continue;
 
-                    var item = WorldObject.Equipment[(int) layer];
+                    Item item = WorldObject.Equipment[(int) layer];
                     if (item == null)
                         continue;
 
                     graphic = item.ItemData.AnimID;
 
-                    if (Animations.EquipConversions.TryGetValue(item.Graphic, out var map))
-                        if (map.TryGetValue(item.ItemData.AnimID, out var data))
+                    if (Animations.EquipConversions.TryGetValue(item.Graphic, out Dictionary<ushort, EquipConvData> map))
+                        if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                         {
                             convertedItem = data;
                             graphic = data.Graphic;
@@ -87,13 +88,13 @@ namespace ClassicUO.Game.Renderer.Views
                 }
 
 
-                var animIndex = WorldObject.AnimIndex;
+                sbyte animIndex = WorldObject.AnimIndex;
 
                 Animations.AnimID = graphic;
                 Animations.AnimGroup = animGroup;
                 Animations.Direction = dir;
 
-                ref var direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup]
+                ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup]
                     .Direction[Animations.Direction];
 
                 if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction))
@@ -104,7 +105,7 @@ namespace ClassicUO.Game.Renderer.Views
 
                 if (animIndex < direction.FrameCount)
                 {
-                    var frame = direction.Frames[animIndex];
+                    AnimationFrame frame = direction.Frames[animIndex];
 
                     if (frame.Pixels == null || frame.Pixels.Length <= 0)
                         return false;
@@ -112,7 +113,7 @@ namespace ClassicUO.Game.Renderer.Views
 
                     int drawCenterY = frame.CenterY;
                     int drawX;
-                    var drawY = drawCenterY + WorldObject.Position.Z * 4 - 22 -
+                    int drawY = drawCenterY + WorldObject.Position.Z * 4 - 22 -
                                 (int) (WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
 
                     if (IsFlipped)
@@ -121,8 +122,8 @@ namespace ClassicUO.Game.Renderer.Views
                         drawX = -22 - (int) WorldObject.Offset.X;
 
 
-                    var x = drawX + frame.CenterX;
-                    var y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
+                    int x = drawX + frame.CenterX;
+                    int y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
 
                     if (color <= 0)
                     {

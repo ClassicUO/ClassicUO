@@ -28,7 +28,7 @@ namespace ClassicUO.Game
 
                     if (Map != null)
                     {
-                        var position = Player.Position;
+                        Position position = Player.Position;
                         Player.Map = null;
                         Map = null;
                         Map = new Facet(value);
@@ -57,7 +57,7 @@ namespace ClassicUO.Game
         {
             if (Player != null)
             {
-                foreach (var mob in Mobiles)
+                foreach (Mobile mob in Mobiles)
                 {
                     mob.ViewObject.Update(frameMS);
 
@@ -68,7 +68,7 @@ namespace ClassicUO.Game
                     }
                 }
 
-                foreach (var item in Items)
+                foreach (Item item in Items)
                 {
                     item.ViewObject.Update(frameMS);
 
@@ -84,13 +84,13 @@ namespace ClassicUO.Game
 
         public static House GetHouse(in Serial serial)
         {
-            _houses.TryGetValue(serial, out var h);
+            _houses.TryGetValue(serial, out House h);
             return h;
         }
 
         public static House GetOrCreateHouse(in Serial serial)
         {
-            if (_houses.TryGetValue(serial, out var house))
+            if (_houses.TryGetValue(serial, out House house))
                 return house;
             return new House(serial);
         }
@@ -102,7 +102,7 @@ namespace ClassicUO.Game
 
         public static void RemoveHouse(in Serial house)
         {
-            _houses.TryRemove(house, out var h);
+            _houses.TryRemove(house, out House h);
         }
 
 
@@ -136,14 +136,14 @@ namespace ClassicUO.Game
 
         public static bool RemoveItem(Serial serial)
         {
-            var item = Items.Remove(serial);
+            Item item = Items.Remove(serial);
             if (item == null)
             {
                 ToAdd.RemoveWhere(i => i == serial);
                 return false;
             }
 
-            foreach (var i in item.Items)
+            foreach (Item i in item.Items)
                 RemoveItem(i);
             item.Items.Clear();
             return true;
@@ -151,11 +151,11 @@ namespace ClassicUO.Game
 
         public static bool RemoveMobile(in Serial serial)
         {
-            var mobile = Mobiles.Remove(serial);
+            Mobile mobile = Mobiles.Remove(serial);
             if (mobile == null)
                 return false;
 
-            foreach (var i in mobile.Items)
+            foreach (Item i in mobile.Items)
                 RemoveItem(i);
             mobile.Items.Clear();
             return true;
@@ -169,7 +169,7 @@ namespace ClassicUO.Game
                 Player = null;
             }
 
-            foreach (var item in Items)
+            foreach (Item item in Items)
             {
                 if (noplayer)
                     if (item.RootContainer == Player)
@@ -178,7 +178,7 @@ namespace ClassicUO.Game
                 RemoveItem(item);
             }
 
-            foreach (var mob in Mobiles)
+            foreach (Mobile mob in Mobiles)
             {
                 if (noplayer)
                     if (mob == Player)

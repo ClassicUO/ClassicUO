@@ -17,7 +17,7 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            var filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
+            string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
 
             if (File.Exists(filepath))
             {
@@ -26,7 +26,7 @@ namespace ClassicUO.AssetsLoader
             else
             {
                 filepath = Path.Combine(FileManager.UoFolderPath, "art.mul");
-                var idxpath = Path.Combine(FileManager.UoFolderPath, "artidx.mul");
+                string idxpath = Path.Combine(FileManager.UoFolderPath, "artidx.mul");
                 if (File.Exists(filepath) && File.Exists(idxpath))
                     _file = new UOFileMul(filepath, idxpath, ART_COUNT);
             }
@@ -36,7 +36,7 @@ namespace ClassicUO.AssetsLoader
         {
             graphic &= FileManager.GraphicMask;
 
-            var (length, extra, patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
+            (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
 
             _file.Skip(4);
 
@@ -46,15 +46,15 @@ namespace ClassicUO.AssetsLoader
             if (width <= 0 || height <= 0)
                 return new ushort[0];
 
-            var pixels = new ushort[width * height];
+            ushort[] pixels = new ushort[width * height];
 
-            var ptr = (ushort*) _file.PositionAddress;
+            ushort* ptr = (ushort*) _file.PositionAddress;
 
-            var lineoffsets = ptr;
-            var datastart = (byte*) ptr + height * 2;
+            ushort* lineoffsets = ptr;
+            byte* datastart = (byte*) ptr + height * 2;
 
-            var x = 0;
-            var y = 0;
+            int x = 0;
+            int y = 0;
             ushort xoffs = 0;
             ushort run = 0;
 
@@ -74,10 +74,10 @@ namespace ClassicUO.AssetsLoader
                 if (xoffs + run != 0)
                 {
                     x += xoffs;
-                    var pos = y * width + x;
-                    for (var j = 0; j < run; j++)
+                    int pos = y * width + x;
+                    for (int j = 0; j < run; j++)
                     {
-                        var val = *ptr++;
+                        ushort val = *ptr++;
                         if (val > 0)
                             val = (ushort) (0x8000 | val);
                         pixels[pos++] = val;
@@ -96,13 +96,13 @@ namespace ClassicUO.AssetsLoader
             if (graphic >= 0x2053 && graphic <= 0x2062
                 || graphic >= 0x206A && graphic <= 0x2079)
             {
-                for (var i = 0; i < width; i++)
+                for (int i = 0; i < width; i++)
                 {
                     pixels[i] = 0;
                     pixels[(height - 1) * width + i] = 0;
                 }
 
-                for (var i = 0; i < height; i++)
+                for (int i = 0; i < height; i++)
                 {
                     pixels[i * width] = 0;
                     pixels[i * width + width - 1] = 0;
@@ -116,17 +116,17 @@ namespace ClassicUO.AssetsLoader
         {
             graphic &= FileManager.GraphicMask;
 
-            var (length, extra, patcher) = _file.SeekByEntryIndex(graphic);
+            (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
 
-            for (var i = 0; i < 22; i++)
+            for (int i = 0; i < 22; i++)
             {
-                var start = 22 - (i + 1);
-                var pos = i * 44 + start;
-                var end = start + (i + 1) * 2;
+                int start = 22 - (i + 1);
+                int pos = i * 44 + start;
+                int end = start + (i + 1) * 2;
 
-                for (var j = start; j < end; j++)
+                for (int j = start; j < end; j++)
                 {
-                    var val = _file.ReadUShort();
+                    ushort val = _file.ReadUShort();
                     if (val > 0)
                         val = (ushort) (0x8000 | val);
 
@@ -134,14 +134,14 @@ namespace ClassicUO.AssetsLoader
                 }
             }
 
-            for (var i = 0; i < 22; i++)
+            for (int i = 0; i < 22; i++)
             {
-                var pos = (i + 22) * 44 + i;
-                var end = i + (22 - i) * 2;
+                int pos = (i + 22) * 44 + i;
+                int end = i + (22 - i) * 2;
 
-                for (var j = i; j < end; j++)
+                for (int j = i; j < end; j++)
                 {
-                    var val = _file.ReadUShort();
+                    ushort val = _file.ReadUShort();
                     if (val > 0)
                         val = (ushort) (0x8000 | val);
 

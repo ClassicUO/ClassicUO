@@ -56,8 +56,8 @@ namespace ClassicUO.Game
 
         public double DistanceToSqrt(in Position position)
         {
-            var a = position.X - X;
-            var b = position.Y - Y;
+            int a = position.X - X;
+            int b = position.Y - Y;
             return Math.Sqrt(a * a + b * b);
         }
 
@@ -78,7 +78,7 @@ namespace ClassicUO.Game
 
         public static Position Parse(in string str)
         {
-            var args = str.Split('.');
+            string[] args = str.Split('.');
             return new Position(ushort.Parse(args[0]), ushort.Parse(args[1]), sbyte.Parse(args[2]));
         }
     }

@@ -13,7 +13,7 @@ namespace ClassicUO.Game.Network
 
             WriteUInt(SEED);
 
-            for (var i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
                 WriteUInt(version[i]);
         }
     }
@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Network
     {
         public PCreateCharacter(in string name) : base(0x00)
         {
-            var skillcount = 3;
+            int skillcount = 3;
 
             if (FileManager.ClientVersion >= ClientVersions.CV_70160)
             {
@@ -544,9 +544,9 @@ namespace ClassicUO.Game.Network
             WriteByte((byte) (subject.Length + 1));
             WriteASCII(subject);
 
-            var lines = message.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] lines = message.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
 
-            for (var i = 0; i < lines.Length; i++)
+            for (int i = 0; i < lines.Length; i++)
             {
                 WriteByte((byte) lines[i].Length);
                 WriteASCII(lines[i]);
@@ -710,7 +710,7 @@ namespace ClassicUO.Game.Network
     {
         public PMegaClilocRequest(in List<Serial> list) : base(0xD6)
         {
-            for (var i = 0; i < list.Count && i < 50; i++)
+            for (int i = 0; i < list.Count && i < 50; i++)
                 WriteUInt(list[i]);
         }
     }

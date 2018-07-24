@@ -28,13 +28,13 @@ namespace ClassicUO.AssetsLoader
 
         protected virtual void Load()
         {
-            var fileInfo = new FileInfo(Path);
+            FileInfo fileInfo = new FileInfo(Path);
             if (!fileInfo.Exists)
                 throw new UOFileException(Path + " not exists.");
-            var size = fileInfo.Length;
+            long size = fileInfo.Length;
             if (size > 0)
             {
-                var file = MemoryMappedFile.CreateFromFile(fileInfo.FullName, FileMode.Open);
+                MemoryMappedFile file = MemoryMappedFile.CreateFromFile(fileInfo.FullName, FileMode.Open);
                 if (file == null)
                     throw new UOFileException("Something goes wrong with file mapping creation '" + Path + "'");
                 //var stream = file.CreateViewStream(0, size, MemoryMappedFileAccess.Read);
@@ -112,19 +112,19 @@ namespace ClassicUO.AssetsLoader
 
         internal void Fill(in byte[] buffer, in int count)
         {
-            for (var i = 0; i < count; i++) buffer[i] = ReadByte();
+            for (int i = 0; i < count; i++) buffer[i] = ReadByte();
         }
 
         internal T[] ReadArray<T>(in int count) where T : struct
         {
-            var t = ReadArray<T>(Position, count);
+            T[] t = ReadArray<T>(Position, count);
             Position += Marshal.SizeOf<T>() * count;
             return t;
         }
 
         internal T[] ReadArray<T>(in long position, in int count) where T : struct
         {
-            var array = new T[count];
+            T[] array = new T[count];
             _accessor.ReadArray(position, array, 0, count);
             return array;
         }
@@ -143,11 +143,11 @@ namespace ClassicUO.AssetsLoader
         {
             if (entryidx < 0 || entryidx >= Entries.Length) return (0, 0, false);
 
-            var e = Entries[entryidx];
+            UOFileIndex3D e = Entries[entryidx];
             if (e.Offset < 0) return (0, 0, false);
 
-            var length = e.Length & 0x7FFFFFFF;
-            var extra = e.Extra;
+            int length = e.Length & 0x7FFFFFFF;
+            int extra = e.Extra;
 
             if ((e.Length & (1 << 31)) != 0)
             {

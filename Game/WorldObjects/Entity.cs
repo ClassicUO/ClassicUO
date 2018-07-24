@@ -70,7 +70,7 @@ namespace ClassicUO.Game.WorldObjects
             get => _hue;
             set
             {
-                var fixedColor = (ushort) (value & 0x3FFF);
+                ushort fixedColor = (ushort) (value & 0x3FFF);
 
                 if (fixedColor > 0)
                 {
@@ -151,8 +151,8 @@ namespace ClassicUO.Game.WorldObjects
         public void UpdateProperties(IEnumerable<Property> props)
         {
             _properties.Clear();
-            var temp = 0;
-            foreach (var p in props)
+            int temp = 0;
+            foreach (Property p in props)
                 _properties.TryAdd(temp++, p);
             _delta |= Delta.Properties;
         }
@@ -174,7 +174,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public void ProcessDelta()
         {
-            var d = _delta;
+            Delta d = _delta;
             OnProcessDelta(d);
             Items.ProcessDelta();
             _delta = Delta.None;

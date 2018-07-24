@@ -6,7 +6,7 @@ namespace ClassicUO.AssetsLoader
     {
         static Verdata()
         {
-            var path = Path.Combine(FileManager.UoFolderPath, "verdata.mul");
+            string path = Path.Combine(FileManager.UoFolderPath, "verdata.mul");
 
             if (!System.IO.File.Exists(path))
             {

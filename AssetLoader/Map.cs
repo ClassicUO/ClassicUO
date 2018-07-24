@@ -27,9 +27,9 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            var path = string.Empty;
+            string path = string.Empty;
 
-            for (var i = 0; i < MAPS_COUNT; i++)
+            for (int i = 0; i < MAPS_COUNT; i++)
             {
                 path = Path.Combine(FileManager.UoFolderPath, string.Format("map{0}LegacyMUL.uop", i));
                 if (File.Exists(path))
@@ -60,55 +60,55 @@ namespace ClassicUO.AssetsLoader
             }*/
 
 
-            var mapblocksize = Marshal.SizeOf<MapBlock>();
-            var staticidxblocksize = Marshal.SizeOf<StaidxBlock>();
-            var staticblocksize = Marshal.SizeOf<StaticsBlock>();
+            int mapblocksize = Marshal.SizeOf<MapBlock>();
+            int staticidxblocksize = Marshal.SizeOf<StaidxBlock>();
+            int staticblocksize = Marshal.SizeOf<StaticsBlock>();
 
 
             if (MapsDefaultSize[0][0] / 8 * (MapsDefaultSize[0][1] / 8) != _filesMap[0].Length / mapblocksize)
                 MapsDefaultSize[0][0] = MapsDefaultSize[1][0] = 6144;
 
-            for (var i = 0; i < MAPS_COUNT; i++)
+            for (int i = 0; i < MAPS_COUNT; i++)
             {
                 MapBlocksSize[i] = new int[2] {MapsDefaultSize[i][0] / 8, MapsDefaultSize[i][1] / 8};
 
 
-                var width = MapBlocksSize[i][0];
-                var height = MapBlocksSize[i][1];
+                int width = MapBlocksSize[i][0];
+                int height = MapBlocksSize[i][1];
 
-                var maxblockcount = width * height;
+                int maxblockcount = width * height;
 
                 BlockData[i] = new IndexMap[maxblockcount];
 
-                var file = _filesMap[i];
+                UOFile file = _filesMap[i];
                 UOFile fileidx = _filesIdxStatics[i];
                 UOFile staticfile = _filesStatics[i];
 
-                var staticidxaddress = (ulong) fileidx.StartAddress;
-                var endstaticidxaddress = staticidxaddress + (ulong) fileidx.Length;
+                ulong staticidxaddress = (ulong) fileidx.StartAddress;
+                ulong endstaticidxaddress = staticidxaddress + (ulong) fileidx.Length;
 
-                var staticaddress = (ulong) staticfile.StartAddress;
-                var endstaticaddress = staticaddress + (ulong) staticfile.Length;
+                ulong staticaddress = (ulong) staticfile.StartAddress;
+                ulong endstaticaddress = staticaddress + (ulong) staticfile.Length;
 
-                var mapddress = (ulong) file.StartAddress;
-                var endmapaddress = mapddress + (ulong) file.Length;
+                ulong mapddress = (ulong) file.StartAddress;
+                ulong endmapaddress = mapddress + (ulong) file.Length;
 
                 ulong uopoffset = 0;
-                var fileNumber = -1;
+                int fileNumber = -1;
 
-                var isuop = file is UOFileUop;
+                bool isuop = file is UOFileUop;
 
-                for (var block = 0; block < maxblockcount; block++)
+                for (int block = 0; block < maxblockcount; block++)
                 {
                     ulong realmapaddress = 0, realstaticaddress = 0;
                     uint realstaticcount = 0;
 
-                    var blocknum = block;
+                    int blocknum = block;
 
                     if (isuop)
                     {
                         blocknum &= 4095;
-                        var shifted = block >> 12;
+                        int shifted = block >> 12;
 
                         if (fileNumber != shifted)
                         {
@@ -119,22 +119,22 @@ namespace ClassicUO.AssetsLoader
                         }
                     }
 
-                    var address = mapddress + uopoffset + (ulong) (blocknum * mapblocksize);
+                    ulong address = mapddress + uopoffset + (ulong) (blocknum * mapblocksize);
 
                     if (address < endmapaddress)
                         realmapaddress = address;
 
-                    var stidxaddress = staticidxaddress + (ulong) (block * staticidxblocksize);
-                    var bb = fileidx.ReadStruct<StaidxBlock>(block * staticidxblocksize);
+                    ulong stidxaddress = staticidxaddress + (ulong) (block * staticidxblocksize);
+                    StaidxBlock bb = fileidx.ReadStruct<StaidxBlock>(block * staticidxblocksize);
 
                     if (stidxaddress < endstaticidxaddress
                         && bb.Size > 0 && bb.Position != 0xFFFFFFFF)
                     {
-                        var address1 = staticaddress + bb.Position;
+                        ulong address1 = staticaddress + bb.Position;
 
                         if (address1 < endstaticaddress)
                         {
-                            var sss = staticfile.ReadStruct<StaticsBlock>(bb.Position);
+                            StaticsBlock sss = staticfile.ReadStruct<StaticsBlock>(bb.Position);
                             realstaticaddress = address1;
                             realstaticcount = (uint) (bb.Size / staticblocksize);
 

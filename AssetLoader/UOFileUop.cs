@@ -28,53 +28,53 @@ namespace ClassicUO.AssetsLoader
 
             if (ReadUInt() != UOP_MAGIC_NUMBER)
                 throw new ArgumentException("Bad uop file");
-            var version = ReadInt();
+            int version = ReadInt();
             Skip(4);
-            var nextBlock = ReadLong();
+            long nextBlock = ReadLong();
             Skip(4);
 
-            var count = ReadInt();
+            int count = ReadInt();
             if (_count <= 0)
                 _count = count;
 
             Entries = new UOFileIndex3D[_count];
-            var hashes = new Dictionary<ulong, int>();
+            Dictionary<ulong, int> hashes = new Dictionary<ulong, int>();
 
-            var pattern = System.IO.Path.GetFileNameWithoutExtension(Path).ToLowerInvariant();
+            string pattern = System.IO.Path.GetFileNameWithoutExtension(Path).ToLowerInvariant();
 
-            for (var i = 0; i < _count; i++)
+            for (int i = 0; i < _count; i++)
             {
-                var file = string.Format("build/{0}/{1:D8}{2}", pattern, i, _extension);
-                var hash = CreateHash(file);
+                string file = string.Format("build/{0}/{1:D8}{2}", pattern, i, _extension);
+                ulong hash = CreateHash(file);
                 if (!hashes.ContainsKey(hash))
                     hashes.Add(hash, i);
             }
 
             Seek(nextBlock);
 
-            var total = 0;
+            int total = 0;
 
             do
             {
-                var filesCount = ReadInt();
+                int filesCount = ReadInt();
                 nextBlock = ReadLong();
                 total += filesCount;
 
-                for (var i = 0; i < filesCount; i++)
+                for (int i = 0; i < filesCount; i++)
                 {
-                    var offset = ReadLong();
-                    var headerLength = ReadInt();
-                    var compressedLength = ReadInt();
-                    var decompressedLength = ReadInt();
-                    var hash = ReadULong();
+                    long offset = ReadLong();
+                    int headerLength = ReadInt();
+                    int compressedLength = ReadInt();
+                    int decompressedLength = ReadInt();
+                    ulong hash = ReadULong();
                     Skip(4);
-                    var flag = ReadShort();
+                    short flag = ReadShort();
 
-                    var length = flag == 1 ? compressedLength : decompressedLength;
+                    int length = flag == 1 ? compressedLength : decompressedLength;
                     if (offset == 0)
                         continue;
 
-                    if (hashes.TryGetValue(hash, out var idx))
+                    if (hashes.TryGetValue(hash, out int idx))
                     {
                         if (idx < 0 || idx > Entries.Length)
                             throw new IndexOutOfRangeException(
@@ -84,12 +84,12 @@ namespace ClassicUO.AssetsLoader
                         // extra?
                         if (_hasExtra)
                         {
-                            var curpos = Position;
+                            long curpos = Position;
                             Seek(offset + headerLength);
 
-                            var extra = ReadArray<byte>(8);
-                            var extra1 = (ushort) ((extra[3] << 24) | (extra[2] << 16) | (extra[1] << 8) | extra[0]);
-                            var extra2 = (ushort) ((extra[7] << 24) | (extra[6] << 16) | (extra[5] << 8) | extra[4]);
+                            byte[] extra = ReadArray<byte>(8);
+                            ushort extra1 = (ushort) ((extra[3] << 24) | (extra[2] << 16) | (extra[1] << 8) | extra[0]);
+                            ushort extra2 = (ushort) ((extra[7] << 24) | (extra[6] << 16) | (extra[5] << 8) | extra[4]);
 
                             Entries[idx].Offset += 8;
                             Entries[idx].Extra = (extra1 << 16) | extra2;
@@ -114,9 +114,9 @@ namespace ClassicUO.AssetsLoader
         {
             long pos = 0;
 
-            foreach (var t in Entries)
+            foreach (UOFileIndex3D t in Entries)
             {
-                var currpos = pos + t.Length;
+                long currpos = pos + t.Length;
                 if (offset < currpos)
                     return t.Offset + (offset - pos);
                 pos = currpos;
@@ -132,7 +132,7 @@ namespace ClassicUO.AssetsLoader
             eax = ecx = edx = ebx = esi = edi = 0;
             ebx = edi = esi = (uint) s.Length + 0xDEADBEEF;
 
-            var i = 0;
+            int i = 0;
 
             for (i = 0; i + 12 < s.Length; i += 12)
             {

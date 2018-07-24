@@ -9,8 +9,8 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            var path = Path.Combine(FileManager.UoFolderPath, "light.mul");
-            var pathidx = Path.Combine(FileManager.UoFolderPath, "lightidx.mul");
+            string path = Path.Combine(FileManager.UoFolderPath, "light.mul");
+            string pathidx = Path.Combine(FileManager.UoFolderPath, "lightidx.mul");
 
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
@@ -20,19 +20,19 @@ namespace ClassicUO.AssetsLoader
 
         public static ushort[] GetLight(int idx, out int width, out int height)
         {
-            var (length, extra, patched) = _file.SeekByEntryIndex(idx);
+            (int length, int extra, bool patched) = _file.SeekByEntryIndex(idx);
 
             width = extra & 0xFFFF;
             height = (extra >> 16) & 0xFFFF;
 
-            var pixels = new ushort[width * height];
+            ushort[] pixels = new ushort[width * height];
 
-            for (var i = 0; i < height; i++)
+            for (int i = 0; i < height; i++)
             {
-                var pos = i * width;
-                for (var j = 0; j < width; j++)
+                int pos = i * width;
+                for (int j = 0; j < width; j++)
                 {
-                    var val = _file.ReadUShort();
+                    ushort val = _file.ReadUShort();
                     val = (ushort) ((val << 10) | (val << 5) | val);
                     pixels[pos + j] = (ushort) ((val > 0 ? 0x8000 : 0) | val);
                 }

@@ -98,12 +98,12 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            var fonts = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "fonts.mul"));
+            UOFileMul fonts = new UOFileMul(Path.Combine(FileManager.UoFolderPath, "fonts.mul"));
 
-            var uniFonts = new UOFileMul[20];
-            for (var i = 0; i < 20; i++)
+            UOFileMul[] uniFonts = new UOFileMul[20];
+            for (int i = 0; i < 20; i++)
             {
-                var path = Path.Combine(FileManager.UoFolderPath, "unifont" + (i == 0 ? "" : i.ToString()) + ".mul");
+                string path = Path.Combine(FileManager.UoFolderPath, "unifont" + (i == 0 ? "" : i.ToString()) + ".mul");
                 if (File.Exists(path))
                 {
                     uniFonts[i] = new UOFileMul(path);
@@ -112,22 +112,22 @@ namespace ClassicUO.AssetsLoader
                 }
             }
 
-            var fontHeaderSize = Marshal.SizeOf<FontHeader>();
+            int fontHeaderSize = Marshal.SizeOf<FontHeader>();
             FontCount = 0;
 
             while (fonts.Position < fonts.Length)
             {
-                var exit = false;
+                bool exit = false;
                 fonts.Skip(1);
 
                 unsafe
                 {
-                    for (var i = 0; i < 224; i++)
+                    for (int i = 0; i < 224; i++)
                     {
-                        var fh = (FontHeader*) fonts.PositionAddress;
+                        FontHeader* fh = (FontHeader*) fonts.PositionAddress;
                         fonts.Skip(fontHeaderSize);
 
-                        var bcount = fh->Width * fh->Height * 2;
+                        int bcount = fh->Width * fh->Height * 2;
                         if (fonts.Position + bcount > fonts.Length)
                         {
                             exit = true;
@@ -153,16 +153,16 @@ namespace ClassicUO.AssetsLoader
             _font = new FontData[FontCount];
             fonts.Seek(0);
 
-            for (var i = 0; i < FontCount; i++)
+            for (int i = 0; i < FontCount; i++)
             {
                 _font[i].Header = fonts.ReadByte();
                 _font[i].Chars = new FontCharacterData[224];
-                for (var j = 0; j < 224; j++)
+                for (int j = 0; j < 224; j++)
                 {
                     _font[i].Chars[j].Width = fonts.ReadByte();
                     _font[i].Chars[j].Height = fonts.ReadByte();
                     fonts.Skip(1);
-                    var dataSize = _font[i].Chars[j].Width * _font[i].Chars[j].Height;
+                    int dataSize = _font[i].Chars[j].Width * _font[i].Chars[j].Height;
                     _font[i].Chars[j].Data = fonts.ReadArray<ushort>(dataSize).ToList();
                 }
             }
@@ -174,7 +174,7 @@ namespace ClassicUO.AssetsLoader
                 _unicodeFontSize[1] = _unicodeFontSize[0];
             }
 
-            for (var i = 0; i < 256; i++)
+            for (int i = 0; i < 256; i++)
                 if (_fontIndex[i] >= 0xE0)
                     _fontIndex[i] = _fontIndex[' '];
         }
@@ -184,16 +184,16 @@ namespace ClassicUO.AssetsLoader
         {
             if (font >= FontCount || string.IsNullOrEmpty(str))
                 return 0;
-            var fd = _font[font];
-            var textLength = 0;
-            foreach (var c in str)
+            FontData fd = _font[font];
+            int textLength = 0;
+            foreach (char c in str)
                 textLength += fd.Chars[_fontIndex[(byte) c]].Width;
             return textLength;
         }
 
         private static int GetHeightASCII(MultilinesFontInfo info)
         {
-            var textHeight = 0;
+            int textHeight = 0;
 
             while (info != null)
             {
@@ -207,18 +207,18 @@ namespace ClassicUO.AssetsLoader
         public static (uint[], int, int, int, bool) GenerateASCII(in byte font, in string str, in ushort color,
             int width, in TEXT_ALIGN_TYPE align, in ushort flags)
         {
-            var linesCount = 0;
+            int linesCount = 0;
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0)
             {
                 linesCount--;
                 if (width <= 0 || string.IsNullOrEmpty(str))
                     return (null, 0, 0, linesCount, false);
 
-                var realWidth = GetWidthASCII(font, str);
+                int realWidth = GetWidthASCII(font, str);
 
                 if (realWidth > width)
                 {
-                    var newstr = GetTextByWidthASCII(font, str, width, (flags & UOFONT_CROPPED) != 0);
+                    string newstr = GetTextByWidthASCII(font, str, width, (flags & UOFONT_CROPPED) != 0);
                     return GeneratePixelsASCII(font, newstr, color, width, align, flags);
                 }
             }
@@ -231,15 +231,15 @@ namespace ClassicUO.AssetsLoader
             if (font >= FontCount || string.IsNullOrEmpty(str))
                 return string.Empty;
 
-            var fd = _font[font];
+            FontData fd = _font[font];
 
             if (isCropped)
                 width -= fd.Chars[_fontIndex[(byte) '.']].Width * 3;
 
-            var textLength = 0;
-            var result = "";
+            int textLength = 0;
+            string result = "";
 
-            foreach (var c in str)
+            foreach (char c in str)
             {
                 textLength += fd.Chars[_fontIndex[(byte) c]].Width;
                 if (textLength > width)
@@ -261,26 +261,26 @@ namespace ClassicUO.AssetsLoader
             if (font >= FontCount)
                 return (null, 0, 0, 0, false);
 
-            var len = str.Length;
+            int len = str.Length;
             if (len <= 0)
                 return (null, 0, 0, 0, false);
 
-            var fd = _font[font];
+            FontData fd = _font[font];
             if (width <= 0)
                 width = GetWidthASCII(font, str);
             if (width <= 0)
                 return (null, 0, 0, 0, false);
 
-            var info = GetInfoASCII(font, str, len, align, flags, width);
+            MultilinesFontInfo info = GetInfoASCII(font, str, len, align, flags, width);
             if (info == null)
                 return (null, 0, 0, 0, false);
 
             width += 4;
-            var height = GetHeightASCII(info);
+            int height = GetHeightASCII(info);
 
             if (height <= 0)
             {
-                var ptr1 = info;
+                MultilinesFontInfo ptr1 = info;
                 while (ptr1 != null)
                 {
                     info = ptr1;
@@ -292,22 +292,22 @@ namespace ClassicUO.AssetsLoader
                 return (null, 0, 0, 0, false);
             }
 
-            var blocksize = height * width;
+            int blocksize = height * width;
             pData = new uint[blocksize];
 
-            var lineOffsY = 0;
-            var ptr = info;
+            int lineOffsY = 0;
+            MultilinesFontInfo ptr = info;
 
-            var partialHue = font != 5 && font != 8 && !UnusePartialHue;
-            var font6OffsetY = font == 6 ? 7 : 0;
+            bool partialHue = font != 5 && font != 8 && !UnusePartialHue;
+            int font6OffsetY = font == 6 ? 7 : 0;
 
-            var linesCount = 0; // this value should be added to TextTexture.LinesCount += linesCount
+            int linesCount = 0; // this value should be added to TextTexture.LinesCount += linesCount
 
             while (ptr != null)
             {
                 info = ptr;
                 linesCount++;
-                var w = 0;
+                int w = 0;
                 if (ptr.Align == TEXT_ALIGN_TYPE.TS_CENTER)
                 {
                     w = (w - 10 - ptr.Width) / 2;
@@ -325,30 +325,30 @@ namespace ClassicUO.AssetsLoader
                     w = ptr.IndentionOffset;
                 }
 
-                var count = ptr.Data.Count;
+                int count = ptr.Data.Count;
 
-                for (var i = 0; i < count; i++)
+                for (int i = 0; i < count; i++)
                 {
-                    var index = (byte) ptr.Data[i].Item;
-                    var offsY = GetFontOffsetY(font, index);
+                    byte index = (byte) ptr.Data[i].Item;
+                    int offsY = GetFontOffsetY(font, index);
 
-                    var fcd = fd.Chars[_fontIndex[index]];
+                    FontCharacterData fcd = fd.Chars[_fontIndex[index]];
                     int dw = fcd.Width;
                     int dh = fcd.Height;
 
-                    var charColor = color;
+                    ushort charColor = color;
 
-                    for (var y = 0; y < dh; y++)
+                    for (int y = 0; y < dh; y++)
                     {
-                        var testrY = y + lineOffsY + offsY;
+                        int testrY = y + lineOffsY + offsY;
                         if (testrY >= height)
                             break;
 
-                        for (var x = 0; x < dw; x++)
+                        for (int x = 0; x < dw; x++)
                         {
                             if (x + w >= width)
                                 break;
-                            var pic = fcd.Data[y * dw + x];
+                            ushort pic = fcd.Data[y * dw + x];
 
                             if (pic > 0)
                             {
@@ -359,7 +359,7 @@ namespace ClassicUO.AssetsLoader
                                 else
                                     pcl = Hues.GetColor(pic, charColor);
 
-                                var block = testrY * width + x + w;
+                                int block = testrY * width + x + w;
 
                                 pData[block] = Hues.RgbaToArgb((pcl << 8) | 0xFF);
                             }
@@ -402,27 +402,27 @@ namespace ClassicUO.AssetsLoader
         {
             if (font >= FontCount)
                 return null;
-            var fd = _font[font];
+            FontData fd = _font[font];
 
-            var info = new MultilinesFontInfo();
+            MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
             info.Align = align;
 
-            var ptr = info;
+            MultilinesFontInfo ptr = info;
 
-            var indentionOffset = 0;
+            int indentionOffset = 0;
             ptr.IndentionOffset = 0;
 
-            var isFixed = (flags & UOFONT_FIXED) != 0;
-            var isCropped = (flags & UOFONT_CROPPED) != 0;
+            bool isFixed = (flags & UOFONT_FIXED) != 0;
+            bool isCropped = (flags & UOFONT_CROPPED) != 0;
 
-            var charCount = 0;
-            var lastSpace = 0;
-            var readWidth = 0;
+            int charCount = 0;
+            int lastSpace = 0;
+            int readWidth = 0;
 
-            for (var i = 0; i < len; i++)
+            for (int i = 0; i < len; i++)
             {
-                var si = str[i];
+                char si = str[i];
                 if (si == '\r' || si == '\n')
                 {
                     if (si == '\r' || isFixed || isCropped)
@@ -439,7 +439,7 @@ namespace ClassicUO.AssetsLoader
                     charCount = 0;
                 }
 
-                var fcd = fd.Chars[_fontIndex[(byte) si]];
+                FontCharacterData fcd = fd.Chars[_fontIndex[(byte) si]];
 
                 if (si == '\n' || ptr.Width + readWidth + fcd.Width > width)
                 {
@@ -459,7 +459,7 @@ namespace ClassicUO.AssetsLoader
                             ptr.MaxHeight = 14;
 
                         ptr.Data.Resize(ptr.CharCount); // = new List<MultilinesFontData>(ptr.CharCount);
-                        var newptr = new MultilinesFontInfo();
+                        MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
                         ptr = newptr;
@@ -484,7 +484,7 @@ namespace ClassicUO.AssetsLoader
                         if (ptr.MaxHeight <= 0)
                             ptr.MaxHeight = 14;
 
-                        var newptr = new MultilinesFontInfo();
+                        MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
                         ptr = newptr;
@@ -503,7 +503,7 @@ namespace ClassicUO.AssetsLoader
                     {
                         if (isFixed)
                         {
-                            var mfd1 = new MultilinesFontData
+                            MultilinesFontData mfd1 = new MultilinesFontData
                             {
                                 Item = si,
                                 Flags = flags,
@@ -537,7 +537,7 @@ namespace ClassicUO.AssetsLoader
                         if (isFixed || isCropped)
                             break;
 
-                        var newptr = new MultilinesFontInfo();
+                        MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
 
                         ptr.Next = newptr;
@@ -551,7 +551,7 @@ namespace ClassicUO.AssetsLoader
                     }
                 }
 
-                var mfd = new MultilinesFontData
+                MultilinesFontData mfd = new MultilinesFontData
                 {
                     Item = si,
                     Flags = flags,
@@ -609,11 +609,11 @@ namespace ClassicUO.AssetsLoader
                 if (width <= 0 || string.IsNullOrEmpty(str))
                     return (null, 0, 0, 0, null);
 
-                var realWidth = GetWidthUnicode(font, str);
+                int realWidth = GetWidthUnicode(font, str);
 
                 if (realWidth > width)
                 {
-                    var newstring = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0);
+                    string newstring = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0);
                     return GeneratePixelsUnicode(font, newstring, color, cell, width, align, flags);
                 }
             }
@@ -626,27 +626,27 @@ namespace ClassicUO.AssetsLoader
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
                 return string.Empty;
 
-            var table = (uint*) _unicodeFontAddress[font];
+            uint* table = (uint*) _unicodeFontAddress[font];
 
             if (isCropped)
             {
-                var offset = table['.'];
+                uint offset = table['.'];
 
                 if (offset > 0 && offset != 0xFFFFFFFF)
                     width -= *(byte*) ((IntPtr) table + (int) offset + 2) * 3;
             }
 
-            var textLength = 0;
-            var result = "";
+            int textLength = 0;
+            string result = "";
 
-            foreach (var c in str)
+            foreach (char c in str)
             {
-                var offset = table[c];
+                uint offset = table[c];
                 sbyte charWidth = 0;
 
                 if (offset > 0 && offset != 0xFFFFFFFF)
                 {
-                    var ptr = (byte*) ((IntPtr) table + (int) offset);
+                    byte* ptr = (byte*) ((IntPtr) table + (int) offset);
                     charWidth = (sbyte) (ptr[0] + ptr[2] + 1);
                 }
                 else if (c == ' ')
@@ -673,16 +673,16 @@ namespace ClassicUO.AssetsLoader
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
                 return 0;
 
-            var table = (uint*) _unicodeFontAddress[font];
-            var textLength = 0;
-            var maxTextLenght = 0;
+            uint* table = (uint*) _unicodeFontAddress[font];
+            int textLength = 0;
+            int maxTextLenght = 0;
 
-            foreach (var c in str)
+            foreach (char c in str)
             {
-                var offset = table[c];
+                uint offset = table[c];
                 if (offset > 0 && offset != 0xFFFFFFFF)
                 {
-                    var ptr = (byte*) ((IntPtr) table + (int) offset);
+                    byte* ptr = (byte*) ((IntPtr) table + (int) offset);
                     textLength += ptr[0] + ptr[2] + 1;
                 }
                 else if (c == ' ')
@@ -715,34 +715,34 @@ namespace ClassicUO.AssetsLoader
 
             if (IsUsingHTML) return GetInfoHTML(font, str, len, align, flags, width);
 
-            var table = (uint*) _unicodeFontAddress[font];
-            var info = new MultilinesFontInfo();
+            uint* table = (uint*) _unicodeFontAddress[font];
+            MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
             info.Align = align;
 
-            var ptr = info;
+            MultilinesFontInfo ptr = info;
 
-            var indetionOffset = 0;
+            int indetionOffset = 0;
             ptr.IndentionOffset = 0;
 
-            var charCount = 0;
-            var lastSpace = 0;
-            var readWidth = 0;
+            int charCount = 0;
+            int lastSpace = 0;
+            int readWidth = 0;
 
-            var isFixed = (flags & UOFONT_FIXED) != 0;
-            var isCropped = (flags & UOFONT_CROPPED) != 0;
+            bool isFixed = (flags & UOFONT_FIXED) != 0;
+            bool isCropped = (flags & UOFONT_CROPPED) != 0;
 
-            var current_align = align;
-            var current_flags = flags;
-            var current_font = font;
-            var charcolor = 0xFFFFFFFF;
-            var current_charcolor = 0xFFFFFFFF;
-            var lastspace_charcolor = 0xFFFFFFFF;
-            var lastaspace_current_charcolor = 0xFFFFFFFF;
+            TEXT_ALIGN_TYPE current_align = align;
+            ushort current_flags = flags;
+            byte current_font = font;
+            uint charcolor = 0xFFFFFFFF;
+            uint current_charcolor = 0xFFFFFFFF;
+            uint lastspace_charcolor = 0xFFFFFFFF;
+            uint lastaspace_current_charcolor = 0xFFFFFFFF;
 
-            for (var i = 0; i < len; i++)
+            for (int i = 0; i < len; i++)
             {
-                var si = str[i];
+                char si = str[i];
                 if (si == '\r' || si == '\n')
                 {
                     if (isFixed || isCropped)
@@ -754,7 +754,7 @@ namespace ClassicUO.AssetsLoader
                 if ((table[si] <= 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n')
                     continue;
 
-                var data = (byte*) ((IntPtr) table + (int) table[si]);
+                byte* data = (byte*) ((IntPtr) table + (int) table[si]);
 
                 if (si == ' ')
                 {
@@ -786,7 +786,7 @@ namespace ClassicUO.AssetsLoader
 
                         ptr.Data.Resize(ptr.CharCount);
 
-                        var newptr = new MultilinesFontInfo();
+                        MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
                         ptr = newptr;
@@ -811,7 +811,7 @@ namespace ClassicUO.AssetsLoader
                         if (ptr.MaxHeight <= 0)
                             ptr.MaxHeight = 14;
 
-                        var newptr = new MultilinesFontInfo();
+                        MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
                         ptr = newptr;
@@ -830,7 +830,7 @@ namespace ClassicUO.AssetsLoader
                     {
                         if (isFixed)
                         {
-                            var mfd1 = new MultilinesFontData
+                            MultilinesFontData mfd1 = new MultilinesFontData
                             {
                                 Item = si,
                                 Flags = current_flags,
@@ -866,7 +866,7 @@ namespace ClassicUO.AssetsLoader
                         if (isFixed || isCropped)
                             break;
 
-                        var newptr = new MultilinesFontInfo();
+                        MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
 
@@ -881,7 +881,7 @@ namespace ClassicUO.AssetsLoader
                     }
                 }
 
-                var mfd = new MultilinesFontData
+                MultilinesFontData mfd = new MultilinesFontData
                 {
                     Item = si,
                     Flags = current_flags,
@@ -926,11 +926,11 @@ namespace ClassicUO.AssetsLoader
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
                 return (null, 0, 0, 0, null);
 
-            var len = str.Length;
+            int len = str.Length;
             if (len <= 0)
                 return (null, 0, 0, 0, null);
 
-            var oldWidth = width;
+            int oldWidth = width;
             if (width <= 0)
             {
                 width = GetWidthUnicode(font, str);
@@ -938,7 +938,7 @@ namespace ClassicUO.AssetsLoader
                     return (null, 0, 0, 0, null);
             }
 
-            var info = GetInfoUnicode(font, str, len, align, flags, width);
+            MultilinesFontInfo info = GetInfoUnicode(font, str, len, align, flags, width);
             if (info == null)
                 return (null, 0, 0, 0, null);
 
@@ -946,13 +946,13 @@ namespace ClassicUO.AssetsLoader
             {
                 while (info != null)
                 {
-                    var ptr1 = info.Next;
+                    MultilinesFontInfo ptr1 = info.Next;
                     info.Data.Clear();
                     info = null;
                     info = ptr1;
                 }
 
-                var newWidth = width - (_leftMargin + _rightMargin);
+                int newWidth = width - (_leftMargin + _rightMargin);
 
                 if (newWidth < 10)
                     newWidth = 10;
@@ -963,7 +963,7 @@ namespace ClassicUO.AssetsLoader
 
             if (oldWidth <= 0 && RecalculateWidthByInfo)
             {
-                var ptr1 = info;
+                MultilinesFontInfo ptr1 = info;
                 width = 0;
                 while (ptr1 != null)
                 {
@@ -975,12 +975,12 @@ namespace ClassicUO.AssetsLoader
 
             width += 4;
 
-            var height = GetHeightUnicode(info);
+            int height = GetHeightUnicode(info);
             if (height <= 0)
             {
                 while (info != null)
                 {
-                    var ptr1 = info;
+                    MultilinesFontInfo ptr1 = info;
                     info = info.Next;
                     ptr1.Data.Clear();
                     ptr1 = null;
@@ -990,13 +990,13 @@ namespace ClassicUO.AssetsLoader
             }
 
             height += _topMargin + _bottomMargin + 4;
-            var blocksize = height * width;
+            int blocksize = height * width;
             pData = new uint[blocksize];
 
-            var table = (uint*) _unicodeFontAddress[font];
-            var lineOffsY = 1 + _topMargin;
+            uint* table = (uint*) _unicodeFontAddress[font];
+            int lineOffsY = 1 + _topMargin;
 
-            var ptr = info;
+            MultilinesFontInfo ptr = info;
 
             uint datacolor = 0;
 
@@ -1006,25 +1006,25 @@ namespace ClassicUO.AssetsLoader
                 datacolor = /*Hues.GetPolygoneColor(cell, color) << 8 | 0xFF;*/
                     Hues.RgbaToArgb((Hues.GetPolygoneColor(cell, color) << 8) | 0xFF);
 
-            var isItalic = (flags & UOFONT_ITALIC) != 0;
-            var isSolid = (flags & UOFONT_SOLID) != 0;
-            var isBlackBorder = (flags & UOFONT_BLACK_BORDER) != 0;
-            var isUnderline = (flags & UOFONT_UNDERLINE) != 0;
-            var blackColor = Hues.RgbaToArgb(0x010101FF);
+            bool isItalic = (flags & UOFONT_ITALIC) != 0;
+            bool isSolid = (flags & UOFONT_SOLID) != 0;
+            bool isBlackBorder = (flags & UOFONT_BLACK_BORDER) != 0;
+            bool isUnderline = (flags & UOFONT_UNDERLINE) != 0;
+            uint blackColor = Hues.RgbaToArgb(0x010101FF);
 
-            var isLink = false;
-            var linkStartX = 0;
-            var linkStartY = 0;
+            bool isLink = false;
+            int linkStartX = 0;
+            int linkStartY = 0;
 
-            var linesCount = 0;
-            var links = new List<WebLinkRect>();
+            int linesCount = 0;
+            List<WebLinkRect> links = new List<WebLinkRect>();
 
             while (ptr != null)
             {
                 info = ptr;
                 linesCount++;
 
-                var w = _leftMargin;
+                int w = _leftMargin;
 
                 if (ptr.Align == TEXT_ALIGN_TYPE.TS_CENTER)
                 {
@@ -1045,12 +1045,12 @@ namespace ClassicUO.AssetsLoader
 
                 ushort oldLink = 0;
 
-                var dataSize = ptr.Data.Count;
+                int dataSize = ptr.Data.Count;
 
-                for (var i = 0; i < dataSize; i++)
+                for (int i = 0; i < dataSize; i++)
                 {
-                    var data = ptr.Data[i];
-                    var si = data.Item;
+                    MultilinesFontData data = ptr.Data[i];
+                    char si = data.Item;
 
                     table = (uint*) _unicodeFontAddress[data.Font];
 
@@ -1067,11 +1067,11 @@ namespace ClassicUO.AssetsLoader
                     else if (data.LinkID <= 0 || i + 1 == dataSize)
                     {
                         isLink = false;
-                        var linkHeight = lineOffsY - linkStartY;
+                        int linkHeight = lineOffsY - linkStartY;
                         if (linkHeight < 14)
                             linkHeight = 14;
 
-                        var ofsX = 0;
+                        int ofsX = 0;
 
                         if (si == ' ')
                         {
@@ -1082,11 +1082,11 @@ namespace ClassicUO.AssetsLoader
                         }
                         else
                         {
-                            var xData = (byte*) ((IntPtr) table + (int) table[si]);
+                            byte* xData = (byte*) ((IntPtr) table + (int) table[si]);
                             ofsX = (sbyte) xData[2];
                         }
 
-                        var wlr = new WebLinkRect
+                        WebLinkRect wlr = new WebLinkRect
                         {
                             LinkID = oldLink,
                             StartX = linkStartX,
@@ -1102,11 +1102,11 @@ namespace ClassicUO.AssetsLoader
                     if ((table[si] <= 0 || table[si] == 0xFFFFFFFF) && si != ' ')
                         continue;
 
-                    var ddata = (byte*) ((IntPtr) table + (int) table[si]);
-                    var offsX = 0;
-                    var offsY = 0;
-                    var dw = 0;
-                    var dh = 0;
+                    byte* ddata = (byte*) ((IntPtr) table + (int) table[si]);
+                    int offsX = 0;
+                    int offsY = 0;
+                    int dw = 0;
+                    int dh = 0;
 
                     if (si == ' ')
                     {
@@ -1123,9 +1123,9 @@ namespace ClassicUO.AssetsLoader
                         ddata = (byte*) ((IntPtr) ddata + 4);
                     }
 
-                    var tmpW = w;
-                    var charcolor = datacolor;
-                    var isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 &&
+                    int tmpW = w;
+                    uint charcolor = datacolor;
+                    bool isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 &&
                                        ((charcolor >> 8) & 0xFF) <= 8;
                     if (si != ' ')
                     {
@@ -1145,37 +1145,37 @@ namespace ClassicUO.AssetsLoader
                             }
                         }
 
-                        var scanlineCount = (dw - 1) / 8 + 1;
-                        for (var y = 0; y < dh; y++)
+                        int scanlineCount = (dw - 1) / 8 + 1;
+                        for (int y = 0; y < dh; y++)
                         {
-                            var testY = offsY + lineOffsY + y;
+                            int testY = offsY + lineOffsY + y;
                             if (testY >= height)
                                 break;
 
-                            var scanlines = ddata;
+                            byte* scanlines = ddata;
                             //ddata += scanlineCount;
 
                             ddata = (byte*) ((IntPtr) ddata + scanlineCount);
 
-                            var italicOffset = 0;
+                            int italicOffset = 0;
                             if (isItalic)
                                 italicOffset = (int) ((dh - y) / ITALIC_FONT_KOEFFICIENT);
 
-                            var testX = w + offsX + italicOffset + (isSolid ? 1 : 0);
+                            int testX = w + offsX + italicOffset + (isSolid ? 1 : 0);
 
-                            for (var c = 0; c < scanlineCount; c++)
-                            for (var j = 0; j < 8; j++)
+                            for (int c = 0; c < scanlineCount; c++)
+                            for (int j = 0; j < 8; j++)
                             {
-                                var x = c * 8 + j;
+                                int x = c * 8 + j;
                                 if (x >= dw)
                                     break;
 
-                                var nowX = testX + x;
+                                int nowX = testX + x;
                                 if (nowX >= width)
                                     break;
 
-                                var cl = (byte) (scanlines[c] & (1 << (7 - j)));
-                                var block = testY * width + nowX;
+                                byte cl = (byte) (scanlines[c] & (1 << (7 - j)));
+                                int block = testY * width + nowX;
 
                                 if (cl > 0)
                                     pData[block] = charcolor;
@@ -1184,48 +1184,48 @@ namespace ClassicUO.AssetsLoader
 
                         if (isSolid)
                         {
-                            var solidColor = Hues.RgbaToArgb(blackColor);
+                            uint solidColor = Hues.RgbaToArgb(blackColor);
 
                             if (solidColor == charcolor)
                                 solidColor++;
 
-                            var minXOk = w + offsX > 0 ? -1 : 0;
-                            var maxXOk = w + offsX + dw < width ? 1 : 0;
+                            int minXOk = w + offsX > 0 ? -1 : 0;
+                            int maxXOk = w + offsX + dw < width ? 1 : 0;
 
                             maxXOk += dw;
 
-                            for (var cy = 0; cy < dh; cy++)
+                            for (int cy = 0; cy < dh; cy++)
                             {
-                                var testY = offsY + lineOffsY + cy;
+                                int testY = offsY + lineOffsY + cy;
 
                                 if (testY >= height)
                                     break;
 
-                                var italicOffset = 0;
+                                int italicOffset = 0;
                                 if (isItalic && cy < dh)
                                     italicOffset = (int) ((dh - cy) / ITALIC_FONT_KOEFFICIENT);
 
-                                for (var cx = minXOk; cx < maxXOk; cx++)
+                                for (int cx = minXOk; cx < maxXOk; cx++)
                                 {
-                                    var testX = cx + w + offsX + italicOffset;
+                                    int testX = cx + w + offsX + italicOffset;
 
                                     if (testX >= width)
                                         break;
 
-                                    var block = testY * width + testX;
+                                    int block = testY * width + testX;
 
                                     if (pData[block] <= 0 && pData[block] != solidColor)
                                     {
-                                        var endX = cx < dw ? 2 : 1;
+                                        int endX = cx < dw ? 2 : 1;
 
                                         if (endX == 2 && testX + 1 >= width)
                                             endX--;
 
-                                        for (var x = 0; x < endX; x++)
+                                        for (int x = 0; x < endX; x++)
                                         {
-                                            var nowX = testX + x;
+                                            int nowX = testX + x;
 
-                                            var testBlock = testY * width + nowX;
+                                            int testBlock = testY * width + nowX;
 
                                             if (pData[testBlock] > 0 && pData[testBlock] != solidColor)
                                             {
@@ -1237,25 +1237,25 @@ namespace ClassicUO.AssetsLoader
                                 }
                             }
 
-                            for (var cy = 0; cy < dh; cy++)
+                            for (int cy = 0; cy < dh; cy++)
                             {
-                                var testY = offsY + lineOffsY + cy;
+                                int testY = offsY + lineOffsY + cy;
 
                                 if (testY >= height)
                                     break;
 
-                                var italicOffset = 0;
+                                int italicOffset = 0;
                                 if (isItalic)
                                     italicOffset = (int) ((dh - cy) / ITALIC_FONT_KOEFFICIENT);
 
-                                for (var cx = 0; cx < dw; cx++)
+                                for (int cx = 0; cx < dw; cx++)
                                 {
-                                    var testX = cx + w + offsX + italicOffset;
+                                    int testX = cx + w + offsX + italicOffset;
 
                                     if (testX >= width)
                                         break;
 
-                                    var block = testY * width + testX;
+                                    int block = testY * width + testX;
 
                                     if (pData[block] == solidColor)
                                         pData[block] = charcolor;
@@ -1266,52 +1266,52 @@ namespace ClassicUO.AssetsLoader
 
                         if (isBlackBorder && !isBlackPixel)
                         {
-                            var minXOk = w + offsX > 0 ? -1 : 0;
-                            var minYOk = offsY + lineOffsY > 0 ? -1 : 0;
-                            var maxXOk = w + offsX + dw < width ? 1 : 0;
-                            var maxYOk = offsY + lineOffsY + dh < height ? 1 : 0;
+                            int minXOk = w + offsX > 0 ? -1 : 0;
+                            int minYOk = offsY + lineOffsY > 0 ? -1 : 0;
+                            int maxXOk = w + offsX + dw < width ? 1 : 0;
+                            int maxYOk = offsY + lineOffsY + dh < height ? 1 : 0;
 
                             maxXOk += dw;
                             maxYOk += dh;
 
-                            for (var cy = minYOk; cy < maxYOk; cy++)
+                            for (int cy = minYOk; cy < maxYOk; cy++)
                             {
-                                var testY = offsY + lineOffsY + cy;
+                                int testY = offsY + lineOffsY + cy;
 
                                 if (testY >= height)
                                     break;
 
-                                var italicOffset = 0;
+                                int italicOffset = 0;
                                 if (isItalic && cy >= 0 && cy < dh)
                                     italicOffset = (int) ((dh - cy) / ITALIC_FONT_KOEFFICIENT);
 
-                                for (var cx = minXOk; cx < maxXOk; cx++)
+                                for (int cx = minXOk; cx < maxXOk; cx++)
                                 {
-                                    var testX = cx + w + offsX + italicOffset;
+                                    int testX = cx + w + offsX + italicOffset;
 
                                     if (testX >= width)
                                         break;
 
-                                    var block = testY * width + testX;
+                                    int block = testY * width + testX;
 
                                     if (pData[block] <= 0 && pData[block] != blackColor)
                                     {
-                                        var startX = cx > 0 ? -1 : 0;
-                                        var startY = cy > 0 ? -1 : 0;
-                                        var endX = cx < dw - 1 ? 2 : 1;
-                                        var endY = cy < dh - 1 ? 2 : 1;
+                                        int startX = cx > 0 ? -1 : 0;
+                                        int startY = cy > 0 ? -1 : 0;
+                                        int endX = cx < dw - 1 ? 2 : 1;
+                                        int endY = cy < dh - 1 ? 2 : 1;
 
                                         if (endX == 2 && testX + 1 >= width)
                                             endX--;
 
-                                        var passed = false;
+                                        bool passed = false;
 
-                                        for (var x = startX; x < endX; x++)
+                                        for (int x = startX; x < endX; x++)
                                         {
-                                            var nowX = testX + x;
-                                            for (var y = startY; y < endY; y++)
+                                            int nowX = testX + x;
+                                            for (int y = startY; y < endY; y++)
                                             {
-                                                var testBlock = (testY + y) * width + nowX;
+                                                int testBlock = (testY + y) * width + nowX;
                                                 if (pData[testBlock] > 0 && pData[testBlock] != blackColor)
                                                 {
                                                     pData[block] = blackColor;
@@ -1351,24 +1351,24 @@ namespace ClassicUO.AssetsLoader
 
                     if (isUnderline)
                     {
-                        var minXOk = tmpW + offsX > 0 ? -1 : 0;
-                        var maxXOk = w + offsX + dw < width ? 1 : 0;
+                        int minXOk = tmpW + offsX > 0 ? -1 : 0;
+                        int maxXOk = w + offsX + dw < width ? 1 : 0;
 
-                        var aData = (byte*) ((IntPtr) table + (int) table[(byte) 'a']);
+                        byte* aData = (byte*) ((IntPtr) table + (int) table[(byte) 'a']);
 
-                        var testY = lineOffsY + aData[1] + aData[3];
+                        int testY = lineOffsY + aData[1] + aData[3];
 
                         if (testY >= height)
                             break;
 
-                        for (var cx = minXOk; cx < dw + maxXOk; cx++)
+                        for (int cx = minXOk; cx < dw + maxXOk; cx++)
                         {
-                            var testX = cx + tmpW + offsX + (isSolid ? 1 : 0);
+                            int testX = cx + tmpW + offsX + (isSolid ? 1 : 0);
 
                             if (testX >= width)
                                 break;
 
-                            var block = testY * width + testX;
+                            int block = testY * width + testX;
 
                             pData[block] = charcolor;
                         }
@@ -1385,10 +1385,10 @@ namespace ClassicUO.AssetsLoader
             {
                 _backgroundColor |= 0xFF;
 
-                for (var y = 0; y < height; y++)
+                for (int y = 0; y < height; y++)
                 {
-                    var yPos = y * width;
-                    for (var x = 0; x < width; x++)
+                    int yPos = y * width;
+                    for (int x = 0; x < width; x++)
                         if (pData[yPos + x] <= 0)
                             pData[yPos + x] = Hues.RgbaToArgb(_backgroundColor);
                 }
@@ -1400,34 +1400,34 @@ namespace ClassicUO.AssetsLoader
         private static unsafe MultilinesFontInfo GetInfoHTML(in byte font, in string str, int len,
             in TEXT_ALIGN_TYPE align, in ushort flags, in int width)
         {
-            var htmlData = GetHTMLData(font, str, ref len, align, flags);
+            HTMLChar[] htmlData = GetHTMLData(font, str, ref len, align, flags);
 
             if (htmlData.Length <= 0)
                 return null;
 
-            var info = new MultilinesFontInfo();
+            MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
             info.Align = align;
 
-            var ptr = info;
-            var indentionOffset = 0;
+            MultilinesFontInfo ptr = info;
+            int indentionOffset = 0;
 
             ptr.IndentionOffset = indentionOffset;
 
-            var charCount = 0;
-            var lastSpace = 0;
-            var readWidth = 0;
+            int charCount = 0;
+            int lastSpace = 0;
+            int readWidth = 0;
 
-            var isFixed = (flags & UOFONT_FIXED) != 0;
-            var isCropped = (flags & UOFONT_CROPPED) != 0;
+            bool isFixed = (flags & UOFONT_FIXED) != 0;
+            bool isCropped = (flags & UOFONT_CROPPED) != 0;
 
             if (len > 0)
                 ptr.Align = htmlData[0].Align;
 
-            for (var i = 0; i < len; i++)
+            for (int i = 0; i < len; i++)
             {
-                var si = htmlData[i].Char;
-                var table = (uint*) _unicodeFontAddress[htmlData[i].Font];
+                char si = htmlData[i].Char;
+                uint* table = (uint*) _unicodeFontAddress[htmlData[i].Font];
 
                 if ((byte) si == 0x000D || si == '\n')
                 {
@@ -1439,7 +1439,7 @@ namespace ClassicUO.AssetsLoader
                 if ((table[si] <= 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n')
                     continue;
 
-                var data = (byte*) ((IntPtr) table + (int) table[(byte) si]);
+                byte* data = (byte*) ((IntPtr) table + (int) table[(byte) si]);
 
                 if (si == ' ')
                 {
@@ -1450,7 +1450,7 @@ namespace ClassicUO.AssetsLoader
                     charCount = 0;
                 }
 
-                var solidWidth = htmlData[i].Flags & UOFONT_SOLID;
+                int solidWidth = htmlData[i].Flags & UOFONT_SOLID;
                 if (ptr.Width + readWidth + data[0] + data[2] + solidWidth > width || si == '\n')
                 {
                     if (lastSpace == ptr.CharStart && lastSpace <= 0 && si != '\n')
@@ -1470,7 +1470,7 @@ namespace ClassicUO.AssetsLoader
 
                         ptr.Data.Resize(ptr.CharCount);
 
-                        var newptr = new MultilinesFontInfo();
+                        MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
                         ptr = newptr;
@@ -1495,7 +1495,7 @@ namespace ClassicUO.AssetsLoader
 
                         ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
 
-                        var newptr = new MultilinesFontInfo();
+                        MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
                         ptr = newptr;
@@ -1515,7 +1515,7 @@ namespace ClassicUO.AssetsLoader
                     {
                         if (isFixed)
                         {
-                            var mfd1 = new MultilinesFontData
+                            MultilinesFontData mfd1 = new MultilinesFontData
                             {
                                 Item = si,
                                 Flags = htmlData[i].Flags,
@@ -1552,7 +1552,7 @@ namespace ClassicUO.AssetsLoader
                         if (isFixed || isCropped)
                             break;
 
-                        var newptr = new MultilinesFontInfo();
+                        MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
                         ptr = newptr;
@@ -1566,7 +1566,7 @@ namespace ClassicUO.AssetsLoader
                     }
                 }
 
-                var mfd = new MultilinesFontData
+                MultilinesFontData mfd = new MultilinesFontData
                 {
                     Item = si,
                     Flags = htmlData[i].Flags,
@@ -1594,16 +1594,16 @@ namespace ClassicUO.AssetsLoader
         private static HTMLChar[] GetHTMLData(in byte font, in string str, ref int len, in TEXT_ALIGN_TYPE align,
             in ushort flags)
         {
-            var data = new HTMLChar[0];
+            HTMLChar[] data = new HTMLChar[0];
 
             if (len < 1)
                 return data;
 
             data = new HTMLChar[len];
 
-            var newlen = 0;
+            int newlen = 0;
 
-            var info = new HTMLDataInfo
+            HTMLDataInfo info = new HTMLDataInfo
             {
                 Tag = HTML_TAG_TYPE.HTT_NONE,
                 Align = align,
@@ -1612,19 +1612,19 @@ namespace ClassicUO.AssetsLoader
                 Color = _HTMLColor,
                 Link = 0
             };
-            var stack = new List<HTMLDataInfo>();
+            List<HTMLDataInfo> stack = new List<HTMLDataInfo>();
             stack.Add(info);
 
-            var currentInfo = info;
+            HTMLDataInfo currentInfo = info;
 
-            for (var i = 0; i < len; i++)
+            for (int i = 0; i < len; i++)
             {
-                var si = str[i];
+                char si = str[i];
 
                 if (si == '<')
                 {
-                    var endTag = false;
-                    var newInfo = new HTMLDataInfo
+                    bool endTag = false;
+                    HTMLDataInfo newInfo = new HTMLDataInfo
                     {
                         Tag = HTML_TAG_TYPE.HTT_NONE,
                         Align = TEXT_ALIGN_TYPE.TS_LEFT,
@@ -1634,7 +1634,7 @@ namespace ClassicUO.AssetsLoader
                         Link = 0
                     };
 
-                    var tag = ParseHTMLTag(str, len, ref i, ref endTag, newInfo);
+                    HTML_TAG_TYPE tag = ParseHTMLTag(str, len, ref i, ref endTag, newInfo);
 
                     if (tag == HTML_TAG_TYPE.HTT_NONE)
                         continue;
@@ -1660,8 +1660,8 @@ namespace ClassicUO.AssetsLoader
                     }
                     else if (stack.Count > 1)
                     {
-                        var index = -1;
-                        for (var j = stack.Count - 1; j > 1; j--)
+                        int index = -1;
+                        for (int j = stack.Count - 1; j > 1; j--)
                             if (stack[j].Tag == tag)
                             {
                                 stack.RemoveAt(j); // MAYBE ERROR?
@@ -1713,7 +1713,7 @@ namespace ClassicUO.AssetsLoader
 
         private static HTMLDataInfo GetCurrentHTMLInfo(in List<HTMLDataInfo> list)
         {
-            var info = new HTMLDataInfo
+            HTMLDataInfo info = new HTMLDataInfo
             {
                 Tag = HTML_TAG_TYPE.HTT_NONE,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
@@ -1723,9 +1723,9 @@ namespace ClassicUO.AssetsLoader
                 Link = 0
             };
 
-            for (var i = 0; i < list.Count; i++)
+            for (int i = 0; i < list.Count; i++)
             {
-                var current = list[i];
+                HTMLDataInfo current = list[i];
 
                 switch (current.Tag)
                 {
@@ -1787,7 +1787,7 @@ namespace ClassicUO.AssetsLoader
         private static HTML_TAG_TYPE ParseHTMLTag(in string str, in int len, ref int i, ref bool endTag,
             HTMLDataInfo info)
         {
-            var tag = HTML_TAG_TYPE.HTT_NONE;
+            HTML_TAG_TYPE tag = HTML_TAG_TYPE.HTT_NONE;
             i++;
 
             if (i < len && str[i] == '/')
@@ -1799,15 +1799,15 @@ namespace ClassicUO.AssetsLoader
             while (str[i] == ' ' && i < len)
                 i++;
 
-            var j = i;
+            int j = i;
             for (; i < len; i++)
                 if (str[i] == ' ' || str[i] == '>')
                     break;
 
             if (j != i && i < len)
             {
-                var cmdLen = i - j;
-                var cmd = str.Substring(j, cmdLen);
+                int cmdLen = i - j;
+                string cmd = str.Substring(j, cmdLen);
 
                 cmd = cmd.ToLower();
                 j = i;
@@ -1895,7 +1895,7 @@ namespace ClassicUO.AssetsLoader
                             case HTML_TAG_TYPE.HTT_A:
                             case HTML_TAG_TYPE.HTT_DIV:
 
-                                var content = "";
+                                string content = "";
                                 cmdLen = i - j;
                                 content = content.Substring(j, cmdLen);
 
@@ -1912,16 +1912,16 @@ namespace ClassicUO.AssetsLoader
 
         private static void GetHTMLInfoFromContent(ref HTMLDataInfo info, in string content)
         {
-            var strings = content.Split(new[] {' ', '=', '\\'}, StringSplitOptions.RemoveEmptyEntries);
-            var size = strings.Length;
+            string[] strings = content.Split(new[] {' ', '=', '\\'}, StringSplitOptions.RemoveEmptyEntries);
+            int size = strings.Length;
 
-            for (var i = 0; i < size; i += 2)
+            for (int i = 0; i < size; i += 2)
             {
                 if (i + 1 >= size)
                     break;
 
-                var str = strings[i].ToLower();
-                var value = strings[i + 1];
+                string str = strings[i].ToLower();
+                string value = strings[i + 1];
                 TrimHTMLString(ref value);
 
                 if (value.Length <= 0)
@@ -1968,7 +1968,7 @@ namespace ClassicUO.AssetsLoader
                         }
                         else if (str == "size")
                         {
-                            var font = byte.Parse(value);
+                            byte font = byte.Parse(value);
                             if (font == 0 || font == 4)
                                 info.Font = 1;
                             else if (font < 4)
@@ -2015,7 +2015,7 @@ namespace ClassicUO.AssetsLoader
             ushort linkID = 0;
             KeyValuePair<ushort, WebLink>? l = null;
 
-            foreach (var ll in _webLinks)
+            foreach (KeyValuePair<ushort, WebLink> ll in _webLinks)
                 if (ll.Value.Link == link)
                 {
                     l = ll;
@@ -2049,7 +2049,7 @@ namespace ClassicUO.AssetsLoader
                         ? Convert.ToUInt32(str.Substring(3), 16)
                         : Convert.ToUInt32(str.Substring(1), 10);
 
-                    var clrBuf = (byte*) color;
+                    byte* clrBuf = (byte*) color;
                     color = (uint) ((clrBuf[0] << 24) | (clrBuf[1] << 16) | (clrBuf[2] << 8) | 0xFF);
                 }
                 else
@@ -2128,7 +2128,7 @@ namespace ClassicUO.AssetsLoader
 
         private static HTMLDataInfo GetHTMLInfoFromTag(in HTML_TAG_TYPE tag)
         {
-            var info = new HTMLDataInfo
+            HTMLDataInfo info = new HTMLDataInfo
             {
                 Tag = tag,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
@@ -2200,7 +2200,7 @@ namespace ClassicUO.AssetsLoader
 
         private static int GetHeightUnicode(MultilinesFontInfo info)
         {
-            var textHeight = 0;
+            int textHeight = 0;
             for (; info != null; info = info.Next)
                 if (IsUsingHTML)
                     textHeight += MAX_HTML_TEXT_HEIGHT;

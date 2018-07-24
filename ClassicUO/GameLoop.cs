@@ -70,57 +70,57 @@ namespace ClassicUO
 
         private (Point, Point, Vector2, Vector2, Point, Point) GetViewPort()
         {
-            var scale = 1;
+            int scale = 1;
 
-            var winGamePosX = 0;
-            var winGamePosY = 0;
+            int winGamePosX = 0;
+            int winGamePosY = 0;
 
-            var winGameWidth = _graphics.PreferredBackBufferWidth;
-            var winGameHeight = _graphics.PreferredBackBufferHeight;
+            int winGameWidth = _graphics.PreferredBackBufferWidth;
+            int winGameHeight = _graphics.PreferredBackBufferHeight;
 
-            var winGameCenterX = winGamePosX + winGameWidth / 2;
-            var winGameCenterY = winGamePosY + winGameHeight / 2 + World.Player.Position.Z * 4;
+            int winGameCenterX = winGamePosX + winGameWidth / 2;
+            int winGameCenterY = winGamePosY + winGameHeight / 2 + World.Player.Position.Z * 4;
 
             winGameCenterX -= (int) World.Player.Offset.X;
             winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
 
-            var winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX + 22;
-            var winDrawOffsetY = (World.Player.Position.X + World.Player.Position.Y) * 22 - winGameCenterY + 22;
+            int winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX + 22;
+            int winDrawOffsetY = (World.Player.Position.X + World.Player.Position.Y) * 22 - winGameCenterY + 22;
 
             float left = winGamePosX;
-            var right = winGameWidth + left;
+            float right = winGameWidth + left;
             float top = winGamePosY;
-            var bottom = winGameHeight + top;
+            float bottom = winGameHeight + top;
 
-            var newRight = right * scale;
-            var newBottom = bottom * scale;
+            float newRight = right * scale;
+            float newBottom = bottom * scale;
 
-            var winGameScaledOffsetX = (int) (left * scale - (newRight - right));
-            var winGameScaledOffsetY = (int) (top * scale - (newBottom - bottom));
+            int winGameScaledOffsetX = (int) (left * scale - (newRight - right));
+            int winGameScaledOffsetY = (int) (top * scale - (newBottom - bottom));
 
-            var winGameScaledWidth = (int) (newRight - winGameScaledOffsetX);
-            var winGameScaledHeight = (int) (newBottom - winGameScaledOffsetY);
+            int winGameScaledWidth = (int) (newRight - winGameScaledOffsetX);
+            int winGameScaledHeight = (int) (newBottom - winGameScaledOffsetY);
 
 
-            var width = (winGameWidth / 44 + 1) * scale;
-            var height = (winGameHeight / 44 + 1) * scale;
+            int width = (winGameWidth / 44 + 1) * scale;
+            int height = (winGameHeight / 44 + 1) * scale;
 
             if (width < height)
                 width = height;
             else
                 height = width;
 
-            var realMinRangeX = World.Player.Position.X - width;
+            int realMinRangeX = World.Player.Position.X - width;
             if (realMinRangeX < 0)
                 realMinRangeX = 0;
-            var realMaxRangeX = World.Player.Position.X + width;
+            int realMaxRangeX = World.Player.Position.X + width;
             if (realMaxRangeX >= Map.MapsDefaultSize[World.Map.Index][0])
                 realMaxRangeX = Map.MapsDefaultSize[World.Map.Index][0];
 
-            var realMinRangeY = World.Player.Position.Y - height;
+            int realMinRangeY = World.Player.Position.Y - height;
             if (realMinRangeY < 0)
                 realMinRangeY = 0;
-            var realMaxRangeY = World.Player.Position.Y + height;
+            int realMaxRangeY = World.Player.Position.Y + height;
             if (realMaxRangeY >= Map.MapsDefaultSize[World.Map.Index][1])
                 realMaxRangeY = Map.MapsDefaultSize[World.Map.Index][1];
 
@@ -138,17 +138,17 @@ namespace ClassicUO
             //if (maxBlockY >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1])
             //    maxBlockY = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1] - 1;
 
-            var drawOffset = scale * 40;
+            int drawOffset = scale * 40;
 
             float maxX = winGamePosX + winGameWidth + drawOffset;
             float maxY = winGamePosY + winGameHeight + drawOffset;
-            var newMaxX = maxX * scale;
-            var newMaxY = maxY * scale;
+            float newMaxX = maxX * scale;
+            float newMaxY = maxY * scale;
 
-            var minPixelsX = (int) ((winGamePosX - drawOffset) * scale - (newMaxX - maxX));
-            var maxPixelsX = (int) newMaxX;
-            var minPixelsY = (int) ((winGamePosY - drawOffset) * scale - (newMaxY - maxY));
-            var maxPixlesY = (int) newMaxY;
+            int minPixelsX = (int) ((winGamePosX - drawOffset) * scale - (newMaxX - maxX));
+            int maxPixelsX = (int) newMaxX;
+            int minPixelsY = (int) ((winGamePosY - drawOffset) * scale - (newMaxY - maxY));
+            int maxPixlesY = (int) newMaxY;
 
             return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY),
                 new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY),
@@ -187,9 +187,9 @@ namespace ClassicUO
             Configuration.ConfigurationResolver.Save(settings1, "settings.json");
             */
 
-            var settings = ConfigurationResolver.Load<Settings>("settings.json");
+            Settings settings = ConfigurationResolver.Load<Settings>("settings.json");
 
-            var parts = settings.ClientVersion.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = settings.ClientVersion.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
 
 
             byte[] clientVersionBuffer =
@@ -216,7 +216,7 @@ namespace ClassicUO
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
 
 
-            var textureHue0 = new Texture2D(GraphicsDevice, 32, 3000);
+            Texture2D textureHue0 = new Texture2D(GraphicsDevice, 32, 3000);
             textureHue0.SetData(Hues.CreateShaderColors());
             GraphicsDevice.Textures[1] = textureHue0;
 
@@ -224,8 +224,8 @@ namespace ClassicUO
             _crossTexture = new Texture2D(GraphicsDevice, 1, 1);
             _crossTexture.SetData(new[] {Color.Red});
 
-            var username = settings.Username;
-            var password = settings.Password;
+            string username = settings.Username;
+            string password = settings.Password;
 
             NetClient.PacketReceived += (sender, e) =>
             {
@@ -275,10 +275,10 @@ namespace ClassicUO
                 if (World.Map != null && World.Player != null)
                     if (e.Button == MouseButton.Right)
                     {
-                        var center = new Point(_graphics.PreferredBackBufferWidth / 2,
+                        Point center = new Point(_graphics.PreferredBackBufferWidth / 2,
                             _graphics.PreferredBackBufferHeight / 2);
 
-                        var direction = DirectionHelper.DirectionFromPoints(center, e.Location);
+                        Direction direction = DirectionHelper.DirectionFromPoints(center, e.Location);
 
                         World.Player.Walk(direction, true);
                     }
@@ -326,9 +326,9 @@ namespace ClassicUO
             drawTerrain = true;
             underSurface = false;
 
-            var tile = World.Map.GetTile(World.Map.Center.X, World.Map.Center.Y);
+            Tile tile = World.Map.GetTile(World.Map.Center.X, World.Map.Center.Y);
             if (tile != null &&
-                tile.IsZUnderObjectOrGround(World.Player.Position.Z, out var underObject, out var underGround))
+                tile.IsZUnderObjectOrGround(World.Player.Position.Z, out WorldObject underObject, out WorldObject underGround))
             {
                 drawTerrain = underGround == null;
                 if (underObject != null)
@@ -347,7 +347,7 @@ namespace ClassicUO
                         }
                         else
                         {
-                            var z = World.Player.Position.Z + (item.ItemData.Height > 20 ? item.ItemData.Height : 20);
+                            int z = World.Player.Position.Z + (item.ItemData.Height > 20 ? item.ItemData.Height : 20);
                             maxItemZ = z;
                         }
                     }
@@ -365,7 +365,7 @@ namespace ClassicUO
                         }
                         else
                         {
-                            var z = World.Player.Position.Z + (sta.ItemData.Height > 20 ? sta.ItemData.Height : 20);
+                            int z = World.Player.Position.Z + (sta.ItemData.Height > 20 ? sta.ItemData.Height : 20);
                             maxItemZ = z;
                         }
                     }
@@ -373,7 +373,7 @@ namespace ClassicUO
                     if (underObject is Item i && TileData.IsRoof((long) i.ItemData.Flags) ||
                         underObject is Static s && TileData.IsRoof((long) s.ItemData.Flags))
                     {
-                        var isSE = true;
+                        bool isSE = true;
                         if ((tile = World.Map.GetTile(World.Map.Center.X + 1, World.Map.Center.Y)) != null)
                         {
                             tile.IsZUnderObjectOrGround(World.Player.Position.Z, out underObject, out underGround);
@@ -393,7 +393,7 @@ namespace ClassicUO
         {
             if (World.Player != null && World.Map != null)
             {
-                var scale = 1;
+                int scale = 1;
 
                 if (_targetRender == null || _targetRender.Width != _graphics.PreferredBackBufferWidth / scale ||
                     _targetRender.Height != _graphics.PreferredBackBufferHeight / scale)
@@ -408,25 +408,25 @@ namespace ClassicUO
                 }
 
 
-                var (minChunkTile, maxChunkTile, minPixel, maxPixel, offset, center) = GetViewPort();
+                (Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center) = GetViewPort();
 
-                CheckIfUnderEntity(out var maxItemZ, out var drawTerrain, out var underSurface);
+                CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
 
                 _spriteBatch.BeginDraw();
                 _spriteBatch.SetLightIntensity(World.Light.IsometricLevel);
                 _spriteBatch.SetLightDirection(World.Light.IsometricDirection);
 
-                var minX = minChunkTile.X;
-                var minY = minChunkTile.Y;
-                var maxX = maxChunkTile.X;
-                var maxY = maxChunkTile.Y;
+                int minX = minChunkTile.X;
+                int minY = minChunkTile.Y;
+                int maxX = maxChunkTile.X;
+                int maxY = maxChunkTile.Y;
 
-                var mapBlockHeight = Map.MapBlocksSize[World.Map.Index][1];
+                int mapBlockHeight = Map.MapBlocksSize[World.Map.Index][1];
 
-                for (var i = 0; i < 2; i++)
+                for (int i = 0; i < 2; i++)
                 {
-                    var minValue = minY;
-                    var maxValue = maxY;
+                    int minValue = minY;
+                    int maxValue = maxY;
 
                     if (i > 0)
                     {
@@ -434,10 +434,10 @@ namespace ClassicUO
                         maxValue = maxX;
                     }
 
-                    for (var lead = minValue; lead < maxValue; lead++)
+                    for (int lead = minValue; lead < maxValue; lead++)
                     {
-                        var x = minX;
-                        var y = lead;
+                        int x = minX;
+                        int y = lead;
 
                         if (i > 0)
                         {
@@ -450,20 +450,20 @@ namespace ClassicUO
                             if (x < minX || x > maxX || y < minY || y > maxY)
                                 break;
 
-                            var draw = true;
+                            bool draw = true;
 
-                            var tile = World.Map.GetTile((short) x, (short) y);
+                            Tile tile = World.Map.GetTile((short) x, (short) y);
 
                             if (tile != null)
                             {
-                                var position = new Vector3(
+                                Vector3 position = new Vector3(
                                     (x - y) * 22f - offset.X,
                                     (x + y) * 22f - offset.Y, 0);
 
 
-                                for (var k = 0; k < tile.ObjectsOnTiles.Count; k++)
+                                for (int k = 0; k < tile.ObjectsOnTiles.Count; k++)
                                 {
-                                    var o = tile.ObjectsOnTiles[k];
+                                    WorldObject o = tile.ObjectsOnTiles[k];
 
 
                                     if (!drawTerrain)

@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Network
         /// </summary>
         private void SetCapacity(in int capacity)
         {
-            var newBuffer = new byte[capacity];
+            byte[] newBuffer = new byte[capacity];
 
             if (Length > 0)
             {
@@ -71,7 +71,7 @@ namespace ClassicUO.Game.Network
 
             if (_head < _tail)
             {
-                var rightLength = _buffer.Length - _tail;
+                int rightLength = _buffer.Length - _tail;
 
                 if (rightLength >= size)
                 {
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.Network
             }
             else
             {
-                var rightLength = _buffer.Length - _head;
+                int rightLength = _buffer.Length - _head;
 
                 if (rightLength >= size)
                 {

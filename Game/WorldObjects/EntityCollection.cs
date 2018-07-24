@@ -28,14 +28,14 @@ namespace ClassicUO.Game.WorldObjects
         {
             if (_added.Count > 0)
             {
-                var list = new CollectionChangedEventArgs<T>(_added);
+                CollectionChangedEventArgs<T> list = new CollectionChangedEventArgs<T>(_added);
                 _added.Clear();
                 Added.Raise(list);
             }
 
             if (_removed.Count > 0)
             {
-                var list = new CollectionChangedEventArgs<T>(_removed);
+                CollectionChangedEventArgs<T> list = new CollectionChangedEventArgs<T>(_removed);
                 _removed.Clear();
                 Removed.Raise(list);
             }
@@ -48,7 +48,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public T Get(in Serial serial)
         {
-            _entities.TryGetValue(serial, out var entity);
+            _entities.TryGetValue(serial, out T entity);
             return entity;
         }
 
@@ -62,7 +62,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public T Remove(in Serial serial)
         {
-            if (_entities.TryRemove(serial, out var entity))
+            if (_entities.TryRemove(serial, out T entity))
                 _removed.Add(entity);
             return entity;
         }

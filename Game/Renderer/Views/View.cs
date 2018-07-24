@@ -55,11 +55,11 @@ namespace ClassicUO.Game.Renderer.Views
             {
                 float w = Bounds.Width / 2;
                 float h = Bounds.Height / 2;
-                var center = position - new Vector3(Bounds.X - 44 + w, Bounds.Y + h, 0);
-                var sinx = (float) Math.Sin(Rotation) * w;
-                var cosx = (float) Math.Cos(Rotation) * w;
-                var siny = (float) Math.Sin(Rotation) * h;
-                var cosy = (float) Math.Cos(Rotation) * h;
+                Vector3 center = position - new Vector3(Bounds.X - 44 + w, Bounds.Y + h, 0);
+                float sinx = (float) Math.Sin(Rotation) * w;
+                float cosx = (float) Math.Cos(Rotation) * w;
+                float siny = (float) Math.Sin(Rotation) * h;
+                float cosy = (float) Math.Cos(Rotation) * h;
 
                 vertex = SpriteVertex.PolyBufferFlipped;
                 vertex[0].Position = center;
@@ -165,7 +165,7 @@ namespace ClassicUO.Game.Renderer.Views
                 if (g >= 0x2198 && g <= 0x21A4)
                     return true;
 
-                var flags = (long) TileData.StaticData[g].Flags;
+                long flags = (long) TileData.StaticData[g].Flags;
 
                 if (!TileData.IsNoDiagonal(flags) ||
                     TileData.IsAnimated(flags) && World.Player != null && World.Player.Race == RaceType.GARGOYLE)

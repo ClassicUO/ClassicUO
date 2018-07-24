@@ -58,10 +58,10 @@ namespace ClassicUO.Game.Renderer
 
         public bool Draw2D(in Texture2D texture, in Vector3 position, in Rectangle sourceRect, in Vector3 hue)
         {
-            var minX = sourceRect.X / (float) texture.Width;
-            var maxX = (sourceRect.X + sourceRect.Width) / (float) texture.Width;
-            var minY = sourceRect.Y / (float) texture.Height;
-            var maxY = (sourceRect.Y + sourceRect.Height) / (float) texture.Height;
+            float minX = sourceRect.X / (float) texture.Width;
+            float maxX = (sourceRect.X + sourceRect.Width) / (float) texture.Width;
+            float minY = sourceRect.Y / (float) texture.Height;
+            float maxY = (sourceRect.Y + sourceRect.Height) / (float) texture.Height;
 
             _vertexBuffer[0].Position.X = position.X;
             _vertexBuffer[0].Position.Y = position.Y;
@@ -206,14 +206,14 @@ namespace ClassicUO.Game.Renderer
 
         public bool Draw2DTiled(in Texture2D texture, in Rectangle destRect, in Vector3 hue)
         {
-            var y = destRect.Y;
-            var h = destRect.Height;
+            int y = destRect.Y;
+            int h = destRect.Height;
             Rectangle sRect;
 
             while (h > 0)
             {
-                var x = destRect.X;
-                var w = destRect.Width;
+                int x = destRect.X;
+                int w = destRect.Width;
                 if (h < texture.Height)
                     sRect = new Rectangle(0, 0, texture.Width, h);
                 else

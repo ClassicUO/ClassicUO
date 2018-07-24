@@ -60,7 +60,7 @@ namespace ClassicUO.Game.WorldObjects
         {
             get
             {
-                if (_itemData == null || !_itemData.HasValue)
+                if (!_itemData.HasValue)
                 {
                     _itemData = TileData.StaticData[Graphic & 0xFFFF];
                     Name = _itemData.Value.Name;
@@ -155,14 +155,14 @@ namespace ClassicUO.Game.WorldObjects
                             short maxX = 0;
                             short maxY = 0;
 
-                            var count = AssetsLoader.Multi.GetCount(Graphic);
-                            var components = new MultiComponent[count];
+                            int count = AssetsLoader.Multi.GetCount(Graphic);
+                            MultiComponent[] components = new MultiComponent[count];
 
-                            for (var i = 0; i < count; i++)
+                            for (int i = 0; i < count; i++)
                             {
-                                var pbm = AssetsLoader.Multi.GetMulti(i);
+                                MultiBlock pbm = AssetsLoader.Multi.GetMulti(i);
 
-                                var component = new MultiComponent(pbm.ID, (ushort) (Position.X + pbm.X),
+                                MultiComponent component = new MultiComponent(pbm.ID, (ushort) (Position.X + pbm.X),
                                     (ushort) (Position.Y + pbm.Y), (sbyte) (Position.Z + pbm.Z), pbm.Flags);
 
                                 if (pbm.X < minX)
@@ -205,7 +205,7 @@ namespace ClassicUO.Game.WorldObjects
         {
             get
             {
-                var item = this;
+                Item item = this;
                 while (item.Container.IsItem)
                     item = World.Items.Get(item.Container);
                 return item.Container.IsMobile ? item.Container : item;
@@ -230,7 +230,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public Graphic GetMountAnimation()
         {
-            var graphic = Graphic;
+            Graphic graphic = Graphic;
 
             if (Layer == Layer.Mount)
             {
@@ -492,15 +492,15 @@ namespace ClassicUO.Game.WorldObjects
         {
             if (IsCorpse)
             {
-                var dir = (byte) Layer;
+                byte dir = (byte) Layer;
 
                 if (_lastAnimationChangeTime < World.Ticks)
                 {
-                    var frameIndex = (sbyte) (AnimIndex + 1);
+                    sbyte frameIndex = (sbyte) (AnimIndex + 1);
 
-                    var id = GetMountAnimation();
+                    Graphic id = GetMountAnimation();
 
-                    var mirror = false;
+                    bool mirror = false;
 
                     Animations.GetAnimDirection(ref dir, ref mirror);
 
@@ -508,7 +508,8 @@ namespace ClassicUO.Game.WorldObjects
                     {
                         int animGroup = Animations.GetDieGroupIndex(id, UsedLayer);
 
-                        ref var direction = ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+                        ref AnimationDirection direction =
+                            ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
 
                         if (direction.FrameCount == 0)
                             Animations.LoadDirectionGroup(ref direction);

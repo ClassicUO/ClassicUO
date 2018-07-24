@@ -18,7 +18,7 @@ namespace ClassicUO.AssetsLoader
             if (_keywords.Count > 0)
                 return;
 
-            var path = Path.Combine(FileManager.UoFolderPath, "speech.mul");
+            string path = Path.Combine(FileManager.UoFolderPath, "speech.mul");
             if (!File.Exists(path))
                 throw new FileNotFoundException();
 
@@ -26,8 +26,8 @@ namespace ClassicUO.AssetsLoader
 
             while (_file.Position < _file.Length)
             {
-                var id = (ushort) ((_file.ReadByte() << 8) | _file.ReadByte());
-                var length = (ushort) ((_file.ReadByte() << 8) | _file.ReadByte());
+                ushort id = (ushort) ((_file.ReadByte() << 8) | _file.ReadByte());
+                ushort length = (ushort) ((_file.ReadByte() << 8) | _file.ReadByte());
 
                 if (length > 128)
                     length = 128;

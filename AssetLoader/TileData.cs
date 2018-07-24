@@ -12,16 +12,16 @@ namespace ClassicUO.AssetsLoader
 
         public static void Load()
         {
-            var path = Path.Combine(FileManager.UoFolderPath, "tiledata.mul");
+            string path = Path.Combine(FileManager.UoFolderPath, "tiledata.mul");
             if (!File.Exists(path))
                 throw new FileNotFoundException();
 
-            var tiledata = new UOFileMul(path);
+            UOFileMul tiledata = new UOFileMul(path);
 
 
-            var isold = FileManager.ClientVersion < ClientVersions.CV_7090;
+            bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
 
-            var staticscount = !isold
+            int staticscount = !isold
                 ? (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupNew>()) / Marshal.SizeOf<StaticGroupNew>()
                 : (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupOld>()) / Marshal.SizeOf<StaticGroupOld>();
 
@@ -33,14 +33,14 @@ namespace ClassicUO.AssetsLoader
             LandData = new LandTiles[512 * 32];
             StaticData = new StaticTiles[staticscount * 32];
 
-            var bufferString = new byte[20];
+            byte[] bufferString = new byte[20];
 
-            for (var i = 0; i < 512; i++)
+            for (int i = 0; i < 512; i++)
             {
                 tiledata.Skip(4);
-                for (var j = 0; j < 32; j++)
+                for (int j = 0; j < 32; j++)
                 {
-                    var idx = i * 32 + j;
+                    int idx = i * 32 + j;
                     LandData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     LandData[idx].TexID = tiledata.ReadUShort();
 
@@ -49,12 +49,12 @@ namespace ClassicUO.AssetsLoader
                 }
             }
 
-            for (var i = 0; i < staticscount; i++)
+            for (int i = 0; i < staticscount; i++)
             {
                 tiledata.Skip(4);
-                for (var j = 0; j < 32; j++)
+                for (int j = 0; j < 32; j++)
                 {
-                    var idx = i * 32 + j;
+                    int idx = i * 32 + j;
                     StaticData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     StaticData[idx].Weight = tiledata.ReadByte();
                     StaticData[idx].Layer = tiledata.ReadByte();

@@ -21,9 +21,9 @@ namespace ClassicUO
 
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
 
-            using (var game = new GameLoop())
+            using (GameLoop game = new GameLoop())
             {
-                var isHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
+                bool isHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
                 if (isHighDPI)
                     Debug.WriteLine("HiDPI Enabled");
 

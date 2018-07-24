@@ -155,7 +155,7 @@ namespace ClassicUO.UI
                 X += offsetX;
                 Y += offsetY;
 
-                foreach (var c in Children)
+                foreach (Control c in Children)
                     c.MoveTo(offsetX, offsetY);
             }
         }

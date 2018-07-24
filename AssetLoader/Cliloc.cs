@@ -14,28 +14,28 @@ namespace ClassicUO.AssetsLoader
         {
             _entries = new Dictionary<int, StringEntry>();
 
-            var path = Path.Combine(FileManager.UoFolderPath, "Cliloc.ENU");
+            string path = Path.Combine(FileManager.UoFolderPath, "Cliloc.ENU");
             if (!File.Exists(path))
                 return;
 
-            using (var reader = new BinaryReader(new FileStream(path, FileMode.Open, FileAccess.Read)))
+            using (BinaryReader reader = new BinaryReader(new FileStream(path, FileMode.Open, FileAccess.Read)))
             {
                 reader.ReadInt32();
                 reader.ReadInt16();
-                var buffer = new byte[1024];
+                byte[] buffer = new byte[1024];
 
                 while (reader.BaseStream.Length != reader.BaseStream.Position)
                 {
-                    var number = reader.ReadInt32();
-                    var flag = reader.ReadByte();
+                    int number = reader.ReadInt32();
+                    byte flag = reader.ReadByte();
                     int length = reader.ReadInt16();
                     if (length > buffer.Length)
                         buffer = new byte[(length + 1023) & ~1023];
 
                     reader.Read(buffer, 0, length);
-                    var text = Encoding.UTF8.GetString(buffer, 0, length);
+                    string text = Encoding.UTF8.GetString(buffer, 0, length);
 
-                    var entry = new StringEntry(number, text);
+                    StringEntry entry = new StringEntry(number, text);
                     _entries[number] = entry;
                 }
             }
@@ -43,13 +43,13 @@ namespace ClassicUO.AssetsLoader
 
         public static string GetString(int number)
         {
-            var e = GetEntry(number);
+            StringEntry e = GetEntry(number);
             return e.Text;
         }
 
         public static StringEntry GetEntry(int number)
         {
-            _entries.TryGetValue(number, out var res);
+            _entries.TryGetValue(number, out StringEntry res);
             return res;
         }
     }

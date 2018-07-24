@@ -88,15 +88,15 @@ namespace ClassicUO.Game.Renderer.Views
 
         private void UpdateStreched(in Facet map)
         {
-            var surroundingTilesZ = new float[_surroundingIndexes.Length];
-            for (var i = 0; i < _surroundingIndexes.Length; i++)
+            float[] surroundingTilesZ = new float[_surroundingIndexes.Length];
+            for (int i = 0; i < _surroundingIndexes.Length; i++)
                 surroundingTilesZ[i] = map.GetTileZ((short) (WorldObject.Position.X + _surroundingIndexes[i].X),
                     (short) (WorldObject.Position.Y + _surroundingIndexes[i].Y));
 
-            var currentZ = WorldObject.Position.Z;
-            var leftZ = (sbyte) surroundingTilesZ[6];
-            var rightZ = (sbyte) surroundingTilesZ[3];
-            var bottomZ = (sbyte) surroundingTilesZ[7];
+            sbyte currentZ = WorldObject.Position.Z;
+            sbyte leftZ = (sbyte) surroundingTilesZ[6];
+            sbyte rightZ = (sbyte) surroundingTilesZ[3];
+            sbyte bottomZ = (sbyte) surroundingTilesZ[7];
 
             if (!(currentZ == leftZ && currentZ == rightZ && currentZ == bottomZ))
             {
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.Renderer.Views
             _vertex[2].Normal = _normals[2];
             _vertex[3].Normal = _normals[3];
 
-            var hue = RenderExtentions.GetHueVector(WorldObject.Hue);
+            Vector3 hue = RenderExtentions.GetHueVector(WorldObject.Hue);
             if (_vertex[0].Hue != hue)
                 _vertex[0].Hue =
                     _vertex[1].Hue =
@@ -142,7 +142,7 @@ namespace ClassicUO.Game.Renderer.Views
 
         private Vector3 CalculateNormal(in float a, in float b, in float c, in float d)
         {
-            var v = new Vector3(a - b, 1f, c - d);
+            Vector3 v = new Vector3(a - b, 1f, c - d);
             v.Normalize();
             return v;
         }

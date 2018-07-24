@@ -13,11 +13,11 @@ namespace ClassicUO.AssetsLoader
             set
             {
                 _uofolderpath = value;
-                var client = new FileInfo(Path.Combine(value, "client.exe"));
+                FileInfo client = new FileInfo(Path.Combine(value, "client.exe"));
                 if (!client.Exists)
                     throw new FileNotFoundException();
 
-                var versInfo = FileVersionInfo.GetVersionInfo(client.FullName);
+                FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(client.FullName);
 
                 ClientVersion = (ClientVersions) ((versInfo.ProductMajorPart << 24) |
                                                   (versInfo.ProductMinorPart << 16) | (versInfo.ProductBuildPart << 8) |

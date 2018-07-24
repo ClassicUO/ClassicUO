@@ -277,14 +277,14 @@ namespace ClassicUO.Game.Network
 
         private int PutBit(ref byte b, in int bit)
         {
-            var bit_num = 1 << (bit - 1);
+            int bit_num = 1 << (bit - 1);
             b |= (byte) bit_num;
             return 1;
         }
 
         private static int RemoveBit(ref byte b, in int bit)
         {
-            var bit_num = 0;
+            int bit_num = 0;
 
             if (GetBit(b, bit) != -1)
             {
@@ -302,15 +302,15 @@ namespace ClassicUO.Game.Network
 
             destLength = 0;
 
-            var end = srcOffset + srcLength;
-            var node = 0;
-            var destPos = destOffset;
-            var bitNum = 8;
+            int end = srcOffset + srcLength;
+            int node = 0;
+            int destPos = destOffset;
+            int bitNum = 8;
 
             while (srcOffset < end)
             {
-                var leaf = GetBit(src[srcOffset], bitNum);
-                var leafValue = dec_tree[node, leaf];
+                int leaf = GetBit(src[srcOffset], bitNum);
+                int leafValue = dec_tree[node, leaf];
 
                 // all numbers below 1 (0..-256) are codewords
                 // if the halt codeword has been found, skip this byte

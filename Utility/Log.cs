@@ -37,7 +37,7 @@ namespace ClassicUO.Utility
         {
             Console.Write(DateTime.Now.ToString("HH:mm:ss") + " | ");
 
-            var prev = Console.ForegroundColor;
+            ConsoleColor prev = Console.ForegroundColor;
             Console.ForegroundColor = _logMsgColor[type];
             Console.Write(_logMsgFormat[type]);
             Console.ForegroundColor = prev;

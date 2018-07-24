@@ -65,13 +65,13 @@ namespace ClassicUO.Game.Renderer
             sourceRect.X = scrollX;
             sourceRect.Y = scrollY;
 
-            var maxX = sourceRect.X + destRect.Width;
+            int maxX = sourceRect.X + destRect.Width;
             if (maxX <= Width)
                 sourceRect.Width = destRect.Width;
             else
                 destRect.Width = sourceRect.Width = Width - sourceRect.X;
 
-            var maxY = sourceRect.Y + destRect.Height;
+            int maxY = sourceRect.Y + destRect.Height;
             if (maxY <= Height)
                 sourceRect.Height = destRect.Height;
             else

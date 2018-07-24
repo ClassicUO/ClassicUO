@@ -15,6 +15,8 @@ namespace ClassicUO.Game.Renderer
         private readonly Dictionary<Texture2D, List<SpriteVertex>> _drawingQueue =
             new Dictionary<Texture2D, List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
 
+        private readonly EffectParameter _drawLightingEffect;
+
         private readonly DepthStencilState _dss = new DepthStencilState
         {
             DepthBufferEnable = true,
@@ -23,17 +25,15 @@ namespace ClassicUO.Game.Renderer
 
         private readonly Effect _effect;
         private readonly Microsoft.Xna.Framework.Game _game;
+        private readonly EffectTechnique _huesTechnique;
         private readonly short[] _indexBuffer = new short[MAX_VERTICES_PER_DRAW * 6];
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
+        private readonly EffectParameter _projectionMatrixEffect;
         private readonly SpriteVertex[] _vertexBuffer = new SpriteVertex[MAX_VERTICES_PER_DRAW];
         private readonly Queue<List<SpriteVertex>> _vertexQueue = new Queue<List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
-        private BoundingBox _drawingArea;
-
-        private readonly EffectParameter _drawLightingEffect;
-        private readonly EffectParameter _projectionMatrixEffect;
-        private readonly EffectParameter _worldMatrixEffect;
         private readonly EffectParameter _viewportEffect;
-        private readonly EffectTechnique _huesTechnique;
+        private readonly EffectParameter _worldMatrixEffect;
+        private BoundingBox _drawingArea;
 
         private float _z;
 
@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Renderer
         {
             _game = game;
 
-            for (var i = 0; i < MAX_VERTICES_PER_DRAW; i++)
+            for (int i = 0; i < MAX_VERTICES_PER_DRAW; i++)
             {
                 _indexBuffer[i * 6] = (short) (i * 4);
                 _indexBuffer[i * 6 + 1] = (short) (i * 4 + 1);
@@ -141,12 +141,12 @@ namespace ClassicUO.Game.Renderer
             _effect.CurrentTechnique = _huesTechnique;
             _effect.CurrentTechnique.Passes[0].Apply();
 
-            var enumerator = _drawingQueue.GetEnumerator();
+            Dictionary<Texture2D, List<SpriteVertex>>.Enumerator enumerator = _drawingQueue.GetEnumerator();
 
             while (enumerator.MoveNext())
             {
-                var texture = enumerator.Current.Key;
-                var list = enumerator.Current.Value;
+                Texture2D texture = enumerator.Current.Key;
+                List<SpriteVertex> list = enumerator.Current.Value;
 
                 list.CopyTo(0, _vertexBuffer, 0,
                     list.Count <= MAX_VERTICES_PER_DRAW ? list.Count : MAX_VERTICES_PER_DRAW);
@@ -187,7 +187,7 @@ namespace ClassicUO.Game.Renderer
 
         private List<SpriteVertex> GetVertexList(in Texture2D texture)
         {
-            if (!_drawingQueue.TryGetValue(texture, out var list))
+            if (!_drawingQueue.TryGetValue(texture, out List<SpriteVertex> list))
             {
                 if (_vertexQueue.Count > 0)
                 {
