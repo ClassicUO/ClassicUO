@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using ClassicUO.AssetsLoader;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.WorldObjects;
 using ClassicUO.Utility;
 using Multi = ClassicUO.Game.WorldObjects.Multi;
@@ -64,6 +65,8 @@ namespace ClassicUO.Game.Network
             {
                 for (int i = 0; i < _handlers[p.ID].Count; i++)
                 {
+                    Log.Message(LogTypes.Trace, string.Format(">> Received\t\tID:   0x{0:X2}\t\t Length:   {1}", p.ID, p.Length));
+
                     p.MoveToData();
                     _handlers[p.ID][i].Callback(p);
                 }
@@ -462,6 +465,9 @@ namespace ClassicUO.Game.Network
 
             item.IsMulti = item.Graphic >= 0x4000;
 
+            if (item.IsMulti)
+                item.Graphic -= 0x4000;
+
             item.Container = Serial.Invalid;
             item.ProcessDelta();
             if (World.Items.Add(item))
@@ -784,7 +790,8 @@ namespace ClassicUO.Game.Network
 
         private static void PersonalLightLevel(Packet p)
         {
-            if (World.Player == p.ReadUInt()) World.Light.Personal = 0; // p.ReadByte();
+            World.Light.Personal = 0;
+            // if (World.Player == p.ReadUInt()) World.Light.Personal = 0; // p.ReadByte();
         }
 
         private static void LightLevel(Packet p)
@@ -1574,15 +1581,14 @@ namespace ClassicUO.Game.Network
 
         private static void CustomHouse(Packet p)
         {
+            Log.Message(LogTypes.Info, "CUSTOM HOUSE RECV");
+
             bool compressed = p.ReadByte() == 0x03;
             bool enableReponse = p.ReadBool();
             Item foundation = World.Items.Get(p.ReadUInt());
             uint revision = p.ReadUInt();
 
-            if (foundation == null)
-                return;
-
-            Multi multi = foundation.Multi;
+            Multi multi = foundation?.Multi;
             if (multi == null)
                 return;
 
@@ -1633,11 +1639,22 @@ namespace ClassicUO.Game.Network
                                 z = stream.ReadByte();
 
                                 if (id != 0)
-                                    house.Items.Add(new Static(id, 0, 0)
+                                {
+                                    Tile tile = World.Map.GetTile((ushort) (multi.MinX + x), (ushort) (multi.MinY + y));
+                                    
+                                    tile.AddWorldObject(new Static(id, 0, 0)
                                     {
-                                        Position = new Position((ushort) (multi.MinX + x), (ushort) (multi.MinY + y),
-                                            (sbyte) (foundation.Position.Z + z))
+                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y),
+                                            (sbyte)(foundation.Position.Z + z))
                                     });
+
+                                    //house.Items.Add(new Static(id, 0, 0)
+                                    //{
+                                    //    Position = new Position((ushort) (multi.MinX + x), (ushort) (multi.MinY + y),
+                                    //        (sbyte) (foundation.Position.Z + z))
+                                    //});
+
+                                }
                             }
 
                             break;
@@ -1654,11 +1671,23 @@ namespace ClassicUO.Game.Network
                                 y = stream.ReadByte();
 
                                 if (id != 0)
-                                    house.Items.Add(new Static(id, 0, 0)
+                                {
+
+                                    Tile tile = World.Map.GetTile((ushort)(multi.MinX + x), (ushort)(multi.MinY + y));
+
+                                    tile.AddWorldObject(new Static(id, 0, 0)
                                     {
-                                        Position = new Position((ushort) (multi.MinX + x), (ushort) (multi.MinY + y),
-                                            (sbyte) (foundation.Position.Z + z))
+                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y),
+                                            (sbyte)(foundation.Position.Z + z))
                                     });
+
+                                    //house.Items.Add(new Static(id, 0, 0)
+                                    //{
+                                    //    Position = new Position((ushort) (multi.MinX + x), (ushort) (multi.MinY + y),
+                                    //        (sbyte) (foundation.Position.Z + z))
+                                    //});
+
+                                }
                             }
 
                             break;
@@ -1697,16 +1726,26 @@ namespace ClassicUO.Game.Network
                                 y = (byte) (i / multiHeight + offY);
 
                                 if (id != 0)
-                                    house.Items.Add(new Static(id, 0, 0)
+                                {
+                                    Tile tile = World.Map.GetTile((ushort)(multi.MinX + x), (ushort)(multi.MinY + y));
+
+                                    tile.AddWorldObject(new Static(id, 0, 0)
                                     {
-                                        Position = new Position((ushort) (multi.MinX + x), (ushort) (multi.MinY + y),
-                                            (sbyte) (foundation.Position.Z + z))
+                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y),
+                                            (sbyte)(foundation.Position.Z + z))
                                     });
+
+                                    //house.Items.Add(new Static(id, 0, 0)
+                                    //{
+                                    //    Position = new Position((ushort) (multi.MinX + x), (ushort) (multi.MinY + y),
+                                    //        (sbyte) (foundation.Position.Z + z))
+                                    //});
+
+                                }
                             }
 
                             break;
-                        default:
-                            break;
+
                     }
                 }
             }
@@ -1811,22 +1850,12 @@ namespace ClassicUO.Game.Network
             byte type = p.ReadByte();
             Item item = World.GetOrCreateItem(p.ReadUInt());
 
-            ushort g = p.ReadUShort();
-            if (type == 2)
-            {
-                g |= 0x4000;
-                item.IsMulti = true;
-            }
-
-            item.Graphic = g;
+            item.Graphic = p.ReadUShort();          
             item.Direction = (Direction) p.ReadByte();
-
             item.Amount = p.ReadUShort();
             p.Skip(2); //amount again? wtf???
-
             item.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
             p.Skip(1); //light? wtf?
-
             item.Hue = p.ReadUShort();
             item.Flags = (Flags) p.ReadByte();
 
@@ -1834,9 +1863,19 @@ namespace ClassicUO.Game.Network
                 p.ReadUShort(); //unknown
 
             item.Container = Serial.Invalid;
+
+
+            if (type == 2)
+            {
+                //item.Graphic |= 0x4000;
+                item.IsMulti = true;
+            }
+
             item.ProcessDelta();
             if (World.Items.Add(item))
                 World.Items.ProcessDelta();
+
+
 
             if (TileData.IsAnimated((long)item.ItemData.Flags))
                 item.Effect = new AnimatedItemEffect(item.Position.X, item.Position.Y, item.Position.Z, item.Graphic, item.Hue, -1);

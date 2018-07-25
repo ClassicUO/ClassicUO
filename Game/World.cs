@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer;
 using ClassicUO.Game.WorldObjects;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game
 {
@@ -20,7 +21,7 @@ namespace ClassicUO.Game
 
         public static int MapIndex
         {
-            get => Map == null ? -1 : Map.Index;
+            get => Map?.Index ?? -1;
             set
             {
                 if (MapIndex != value)
@@ -42,6 +43,7 @@ namespace ClassicUO.Game
                     {
                         Map = new Facet(value);
                         Player.Map = Map;
+                        Map.Center = new Point(Player.Position.X, Player.Position.Y);
                     }
                 }
             }
@@ -186,7 +188,6 @@ namespace ClassicUO.Game
                 if (noplayer)
                     if (item.RootContainer == Player)
                         continue;
-                item.Dispose();
                 RemoveItem(item);
             }
 
@@ -195,12 +196,8 @@ namespace ClassicUO.Game
                 if (noplayer)
                     if (mob == Player)
                         continue;
-                mob.Dispose();
                 RemoveMobile(mob);
             }
-
-            //Items.Clear();
-            //Mobiles.Clear();
         }
     }
 }

@@ -64,7 +64,7 @@ namespace ClassicUO.Game.WorldObjects
             {
                 if (!_itemData.HasValue)
                 {
-                    _itemData = TileData.StaticData[Graphic & 0xFFFF];
+                    _itemData = TileData.StaticData[ IsMulti ? Graphic + 0x4000 : Graphic  /*& 0xFFFF]*/];
                     Name = _itemData.Value.Name;
                 }
 
@@ -175,6 +175,8 @@ namespace ClassicUO.Game.WorldObjects
                                     minY = pbm.Y;
                                 if (pbm.Y > maxY)
                                     maxY = pbm.Y;
+
+                                components[i] = component;
                             }
 
                             Multi = new Multi(this)

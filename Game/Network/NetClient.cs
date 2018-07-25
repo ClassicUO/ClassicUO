@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
@@ -31,6 +33,28 @@ namespace ClassicUO.Game.Network
         public static event EventHandler Connected, Disconnected;
         public static event EventHandler<Packet> PacketReceived, PacketSended;
 
+        public uint ClientAddress
+        {
+            get
+            {
+                IPHostEntry localEntry = Dns.GetHostEntry(Dns.GetHostName());
+                uint address;
+
+                if (localEntry.AddressList.Length > 0)
+                {
+#pragma warning disable 618
+                    address = (uint)localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
+#pragma warning restore 618
+                }
+                else
+                {
+                    address = 0x100007f;
+                }
+
+                return ((address & 0xff) << 0x18) | ((address & 65280) << 8) | ((address >> 8) & 65280) | ((address >> 0x18) & 0xff);
+            }
+        }
+
 
         public void Connect(in string ip, in ushort port)
         {
@@ -48,10 +72,10 @@ namespace ClassicUO.Game.Network
             _circularBuffer = new CircularBuffer();
 
             _sendEventArgs = new SocketAsyncEventArgs();
-            _sendEventArgs.Completed += IO_Socket;
+            _sendEventArgs.Completed += SocketSended;
 
             _recvEventArgs = new SocketAsyncEventArgs();
-            _recvEventArgs.Completed += IO_Socket;
+            _recvEventArgs.Completed += SocketReceived;
             _recvEventArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
 
 
@@ -137,7 +161,7 @@ namespace ClassicUO.Game.Network
         {
             if (IsConnected)
             {
-                ExtractPackets();
+                ExtractPackets();      
                 Flush();
             }
         }
@@ -192,10 +216,9 @@ namespace ClassicUO.Game.Network
 
                 try
                 {
-                    SendQueue.Gram gram;
-
                     lock (_sendLock)
                     {
+                        SendQueue.Gram gram;
                         lock (_sendQueue)
                         {
                             gram = _sendQueue.Enqueue(data, 0, data.Length);
@@ -217,6 +240,43 @@ namespace ClassicUO.Game.Network
             else
             {
                 Disconnect();
+            }
+        }
+
+        private void SocketReceived(object sender, SocketAsyncEventArgs e)
+        {
+            ProcessRecv(e);
+            if (!_isDisposing)
+                StartRecv();
+        }
+
+        private void SocketSended(object sender, SocketAsyncEventArgs e)
+        {
+            ProcessSend(e);
+
+            if (_isDisposing)
+                return;
+
+            SendQueue.Gram gram;
+
+            lock (_sendQueue)
+            {
+                gram = _sendQueue.Dequeue();
+                if (gram == null && _sendQueue.IsFlushReady)
+                    gram = _sendQueue.CheckFlushReady();
+            }
+
+            if (gram != null)
+            {
+                _sendEventArgs.SetBuffer(gram.Buffer, 0, gram.Length);
+                StartSend();
+            }
+            else
+            {
+                lock (_sendLock)
+                {
+                    _sending = false;
+                }
             }
         }
 
@@ -279,53 +339,54 @@ namespace ClassicUO.Game.Network
                 byte[] buffer = _recvBuffer;
 
                 if (_isCompressionEnabled)
-                {
-                    byte[] source = _pool.GetFreeSegment();
-                    int incompletelength = _incompletePacketLength;
-                    int sourcelength = incompletelength + bytesLen;
-
-                    if (incompletelength > 0)
-                    {
-                        Buffer.BlockCopy(_incompletePacketBuffer, 0, source, 0, _incompletePacketLength);
-                        _incompletePacketLength = 0;
-                    }
-
-                    // if outbounds exception, BUFF_SIZE must be increased
-                    Buffer.BlockCopy(buffer, 0, source, incompletelength, bytesLen);
-
-                    int processedOffset = 0;
-                    int sourceOffset = 0;
-                    int offset = 0;
-
-                    while (Huffman.DecompressChunk(ref source, ref sourceOffset, sourcelength, ref buffer, offset,
-                        out int outSize))
-                    {
-                        processedOffset = sourceOffset;
-                        offset += outSize;
-                    }
-
-                    bytesLen = offset;
-
-                    if (processedOffset >= sourcelength)
-                    {
-                        _pool.AddFreeSegment(source);
-                    }
-                    else
-                    {
-                        int l = sourcelength - processedOffset;
-                        Buffer.BlockCopy(source, processedOffset, _incompletePacketBuffer, _incompletePacketLength, l);
-                        _incompletePacketLength += l;
-                    }
-                }
+                    DecompressBuffer(ref buffer, ref bytesLen);
 
                 lock (_circularBuffer)
-                {
                     _circularBuffer.Enqueue(buffer, 0, bytesLen);
-                }
+
             }
             else
             {
                 Disconnect();
+            }
+        }
+
+        private void DecompressBuffer(ref byte[] buffer, ref int length)
+        {
+            byte[] source = _pool.GetFreeSegment();
+            int incompletelength = _incompletePacketLength;
+            int sourcelength = incompletelength + length;
+
+            if (incompletelength > 0)
+            {
+                Buffer.BlockCopy(_incompletePacketBuffer, 0, source, 0, _incompletePacketLength);
+                _incompletePacketLength = 0;
+            }
+
+            // if outbounds exception, BUFF_SIZE must be increased
+            Buffer.BlockCopy(buffer, 0, source, incompletelength, length);
+
+            int processedOffset = 0;
+            int sourceOffset = 0;
+            int offset = 0;
+
+            while (Huffman.DecompressChunk(ref source, ref sourceOffset, sourcelength, ref buffer, offset, out int outSize))
+            {
+                processedOffset = sourceOffset;
+                offset += outSize;
+            }
+
+            length = offset;
+
+            if (processedOffset >= sourcelength)
+            {
+                _pool.AddFreeSegment(source);
+            }
+            else
+            {
+                int l = sourcelength - processedOffset;
+                Buffer.BlockCopy(source, processedOffset, _incompletePacketBuffer, _incompletePacketLength, l);
+                _incompletePacketLength += l;
             }
         }
 

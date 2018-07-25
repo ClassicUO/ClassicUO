@@ -5,6 +5,7 @@ namespace ClassicUO.Game.WorldObjects
 {
     public class Static : WorldObject
     {
+        private StaticTiles? _itemData;
         public Static(Graphic tileID, Hue hue, int index) : base(World.Map)
         {
             Graphic = tileID;
@@ -15,7 +16,21 @@ namespace ClassicUO.Game.WorldObjects
         public int Index { get; }
         public override Position Position { get; set; }
         public new StaticView ViewObject => (StaticView) base.ViewObject;
-        public StaticTiles ItemData => TileData.StaticData[Graphic];
+        public string Name { get; private set; }
+
+        public StaticTiles ItemData
+        {
+            get
+            {
+                if (!_itemData.HasValue)
+                {
+                    _itemData = TileData.StaticData[Graphic];
+                    Name = _itemData.Value.Name;
+                }
+
+                return _itemData.Value;
+            }
+        } 
 
         protected override View CreateView()
         {

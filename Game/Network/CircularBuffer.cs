@@ -14,7 +14,7 @@ namespace ClassicUO.Game.Network
         /// </summary>
         public CircularBuffer()
         {
-            _buffer = new byte[2048];
+            _buffer = new byte[0x10000];
         }
 
         /// <summary>

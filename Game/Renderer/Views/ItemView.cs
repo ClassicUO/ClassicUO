@@ -52,6 +52,7 @@ namespace ClassicUO.Game.Renderer.Views
             if (WorldObject.IsCorpse)
                 return DrawCorpse(spriteBatch, position);
 
+
             if (_originalGraphic != WorldObject.DisplayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _originalGraphic = WorldObject.DisplayedGraphic;
@@ -67,6 +68,7 @@ namespace ClassicUO.Game.Renderer.Views
                     TileData.IsPartialHue((long) WorldObject.ItemData.Flags), false, false);
             }
 
+           
 
             if (WorldObject.Amount > 1 && TileData.IsStackable((long)WorldObject.ItemData.Flags) &&
                 WorldObject.DisplayedGraphic == WorldObject.Graphic)
@@ -92,12 +94,20 @@ namespace ClassicUO.Game.Renderer.Views
 
             base.Draw(spriteBatch, position);
 
-            if (WorldObject.Effect != null)
-                WorldObject.Effect.ViewObject.Draw(spriteBatch, position);
-
+            WorldObject.Effect?.ViewObject.Draw(spriteBatch, position);
+            if (WorldObject.IsMulti)
+            {
+                MessageOverHead(spriteBatch, position);
+            }
             return true;
         }
 
+        protected override void MessageOverHead(in SpriteBatch3D spriteBatch, in Vector3 position)
+        {
+            base.MessageOverHead(in spriteBatch, in position);
+            Text.Draw((SpriteBatchUI)spriteBatch, new Point((int)position.X, (int)position.Y));
+
+        }
 
         private bool DrawCorpse(in SpriteBatch3D spriteBatch, in Vector3 position)
         {

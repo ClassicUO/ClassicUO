@@ -143,7 +143,6 @@ namespace ClassicUO
 
             NetClient.PacketReceived += (sender, e) =>
             {
-                //Log.Message(LogTypes.Trace, string.Format(">> Received\t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
 
                 switch (e.ID)
                 {
@@ -158,8 +157,7 @@ namespace ClassicUO
                         NetClient.Socket.Send(new PSecondLogin(username, password, e.ReadUInt()));
                         break;
                     case 0xA9:
-                        NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName,
-                            BitConverter.ToUInt32(new byte[] {127, 0, 0, 1}, 0)));
+                        NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName, NetClient.Socket.ClientAddress));
                         break;
                     case 0xBD:
                         NetClient.Socket.Send(new PClientVersion(clientVersionBuffer));
