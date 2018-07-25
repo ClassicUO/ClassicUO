@@ -9,11 +9,8 @@ namespace ClassicUO.Game.Renderer.Views
     {
         protected static float PI = (float) Math.PI;
 
-        public View()
-        {
-        }
 
-        public View(in WorldObject parent)
+        protected View(in WorldObject parent)
         {
             WorldObject = parent;
             AllowedToDraw = true;
@@ -31,6 +28,11 @@ namespace ClassicUO.Game.Renderer.Views
         protected bool IsFlipped { get; set; }
         protected float Rotation { get; set; }
 
+        protected TextRenderer Text { get; } = new TextRenderer
+        {
+            Color = 33,
+            IsUnicode = false
+        };
 
         public void Dispose()
         {
@@ -53,8 +55,8 @@ namespace ClassicUO.Game.Renderer.Views
 
             if (Rotation != 0)
             {
-                float w = Bounds.Width / 2;
-                float h = Bounds.Height / 2;
+                float w = Bounds.Width / 2f;
+                float h = Bounds.Height / 2f;
                 Vector3 center = position - new Vector3(Bounds.X - 44 + w, Bounds.Y + h, 0);
                 float sinx = (float) Math.Sin(Rotation) * w;
                 float cosx = (float) Math.Cos(Rotation) * w;
@@ -122,12 +124,33 @@ namespace ClassicUO.Game.Renderer.Views
             return true;
         }
 
+        public ulong DepthValue { get; private set; }
+
+        protected void CalculateRenderDepth(in sbyte z, in byte priority, in byte byte7, in byte byte8)
+        {
+            ulong tmp = 0;
+            tmp |= (ulong) ((WorldObject.Position.X + WorldObject.Position.Y) & 0xFFFF);
+            tmp <<= 8;
+            byte tmpZ = (byte) (((int) z + 128) & 0xFF);
+            tmp |= tmpZ;
+            tmp <<= 8;
+            tmp |= (ulong) (priority & 0xFF);
+            tmp <<= 8;
+            tmp |= (ulong) (byte7 & 0xFF);
+            tmp <<= 8;
+            tmp |= (ulong) (byte8 & 0xFF);
+
+            DepthValue = tmp;
+        }
+
         protected virtual void MousePick(in SpriteVertex[] vertex)
         {
         }
 
         protected virtual void MessageOverHead(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
+            Text.Text = $"SortZ: {SortZ}";
+            Text.GenerateTexture(0, 0, TEXT_ALIGN_TYPE.TS_CENTER, 0);
         }
 
 

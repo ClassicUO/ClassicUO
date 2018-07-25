@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ClassicUO.AssetsLoader;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer.Views;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -439,6 +440,9 @@ namespace ClassicUO.Game.WorldObjects
 
         public bool EnqueueStep(in int x, in int y, in sbyte z, in Direction direction, in bool run)
         {
+            if (Deferred != null)
+                Deferred.Tile = null;
+
             if (_steps.Count >= MAX_STEP_COUNT) return false;
 
             int endX = 0, endY = 0;
@@ -1154,6 +1158,8 @@ namespace ClassicUO.Game.WorldObjects
             return LastStepTime > (uint) (World.Ticks - WALKING_DELAY) && _steps.Count <= 0;
         }
 
+
+
         public override void ProcessAnimation()
         {
             byte dir = (byte) GetAnimationDirection();
@@ -1186,6 +1192,12 @@ namespace ClassicUO.Game.WorldObjects
                         Offset = new Vector3((sbyte) x, (sbyte) y,
                             (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
 
+
+                        if (Deferred?.Tile != null)
+                            Deferred.Tile = null;
+                        Tile tile = World.Map.GetTile(step.X, step.Y);
+                        Deferred = new DeferredEntity(this, step.Z, tile);
+
                         turnOnly = false;
                     }
                     else
@@ -1207,6 +1219,12 @@ namespace ClassicUO.Game.WorldObjects
                                 // oUCH!!!!
                             }
                         }
+
+
+                        if (Deferred != null)
+                            Deferred.Tile = null;
+                        Deferred = null;
+                        
 
                         Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
                         Direction = (Direction) step.Direction;

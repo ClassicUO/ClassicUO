@@ -30,6 +30,11 @@ namespace ClassicUO.Game.Renderer.Views
             Graphic graphic = 0;
             EquipConvData? convertedItem = null;
 
+            byte order = 0;
+            byte ss;
+
+            yOffset = 0;
+
             for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
             {
                 Layer layer = LayerOrder.UsedLayers[dir, i];
@@ -49,6 +54,9 @@ namespace ClassicUO.Game.Renderer.Views
 
                             animGroup = WorldObject.GetAnimationGroup(graphic);
                             color = mount.Hue;
+
+                            order = 29;
+                            ss = (byte)(mount.Serial & 0xFF);
                         }
                         else
                         {
@@ -65,6 +73,9 @@ namespace ClassicUO.Game.Renderer.Views
                     graphic = WorldObject.GetMountAnimation();
                     animGroup = WorldObject.GetAnimationGroup();
                     color = WorldObject.Hue;
+
+                    order = 30;
+                    ss = (byte)(WorldObject.Serial & 0xFF);
                 }
                 else
                 {
@@ -85,6 +96,9 @@ namespace ClassicUO.Game.Renderer.Views
                         }
 
                     color = item.Hue;
+
+                    order = 40;
+                    ss = (byte)(item.Serial & 0xFF);
                 }
 
 
@@ -113,7 +127,7 @@ namespace ClassicUO.Game.Renderer.Views
 
                     int drawCenterY = frame.CenterY;
                     int drawX;
-                    int drawY = drawCenterY + WorldObject.Position.Z * 4 - 22 -
+                    int drawY = drawCenterY + (int)(WorldObject.Offset.Z / 4 + WorldObject.Position.Z * 4) - 22 -
                                 (int) (WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
 
                     if (IsFlipped)
@@ -134,23 +148,58 @@ namespace ClassicUO.Game.Renderer.Views
                             color = convertedItem.Value.Color;
                     }
 
+                    //if (yOffset > y)
+                    //    yOffset = y;
+
+
                     Texture = TextureManager.GetOrCreateAnimTexture(graphic, Animations.AnimGroup, dir, animIndex,
                         direction.Frames);
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
                     HueVector = RenderExtentions.GetHueVector(color);
 
+                    if (layer == Layer.Invalid)
+                        yOffset = y;
+
+                    //Vector3 vv = position;
+                    //vv.Z = WorldObject.Position.Z + 7;
+
+
+                    //CalculateRenderDepth((sbyte)vv.Z, order, (byte)layer, ss);
+
                     base.Draw(spriteBatch, position);
+
                 }
             }
 
+            //Vector3 vv = new Vector3
+            //{
+            //    X = position.X + WorldObject.Offset.X,
+            //    Y = position.Y - (int)(WorldObject.Offset.Z / 4 + WorldObject.Position.Z * 4) - 22 -
+            //        (int)(WorldObject.Offset.Y - WorldObject.Offset.Z - 3) + yOffset,
+            //    Z = position.Z
+            //};
+
+            ////yOffset = -(yOffset + 44);
+
+            //MessageOverHead(spriteBatch, vv);
+
             return true;
         }
+
+        private int yOffset;
 
         public override void Update(in double frameMS)
         {
             WorldObject.ProcessAnimation();
 
             base.Update(frameMS);
+        }
+
+        protected override void MessageOverHead(in SpriteBatch3D spriteBatch, in Vector3 position)
+        {
+            base.MessageOverHead(in spriteBatch, in position);
+
+            Text.Draw((SpriteBatchUI)spriteBatch, new Point((int)position.X, (int)position.Y));
         }
     }
 }

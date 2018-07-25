@@ -10,6 +10,8 @@ namespace ClassicUO.Game.Renderer.Views
             AllowedToDraw = !IsNoDrawable(st.Graphic);
         }
 
+        public new Static WorldObject => (Static) base.WorldObject;
+
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             if (!AllowedToDraw)
@@ -21,6 +23,21 @@ namespace ClassicUO.Game.Renderer.Views
                 Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4,
                     Texture.Width, Texture.Height);
             }
+
+            //var vv = position;
+            //vv.Z = WorldObject.Position.Z;
+
+            //if (AssetsLoader.TileData.IsBackground((long)WorldObject.ItemData.Flags) &&
+            //    AssetsLoader.TileData.IsSurface((long)WorldObject.ItemData.Flags))
+            //    vv.Z += 4;
+            //else if (AssetsLoader.TileData.IsBackground((long)WorldObject.ItemData.Flags))
+            //    vv.Z += 2;
+            //else if (AssetsLoader.TileData.IsSurface((long)WorldObject.ItemData.Flags))
+            //    vv.Z += 5;
+            //else
+            //    vv.Z += 6;
+
+            //CalculateRenderDepth((sbyte)vv.Z, 10, WorldObject.ItemData.Height, (byte)WorldObject.Index);
 
             return base.Draw(spriteBatch, position);
         }

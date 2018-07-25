@@ -11,6 +11,7 @@ using ClassicUO.Input;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO
 {
@@ -66,93 +67,6 @@ namespace ClassicUO
 
                 _graphics.ApplyChanges();
             };
-        }
-
-        private (Point, Point, Vector2, Vector2, Point, Point) GetViewPort()
-        {
-            int scale = 1;
-
-            int winGamePosX = 0;
-            int winGamePosY = 0;
-
-            int winGameWidth = _graphics.PreferredBackBufferWidth;
-            int winGameHeight = _graphics.PreferredBackBufferHeight;
-
-            int winGameCenterX = winGamePosX + winGameWidth / 2;
-            int winGameCenterY = winGamePosY + winGameHeight / 2 + World.Player.Position.Z * 4;
-
-            winGameCenterX -= (int) World.Player.Offset.X;
-            winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
-
-            int winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX + 22;
-            int winDrawOffsetY = (World.Player.Position.X + World.Player.Position.Y) * 22 - winGameCenterY + 22;
-
-            float left = winGamePosX;
-            float right = winGameWidth + left;
-            float top = winGamePosY;
-            float bottom = winGameHeight + top;
-
-            float newRight = right * scale;
-            float newBottom = bottom * scale;
-
-            int winGameScaledOffsetX = (int) (left * scale - (newRight - right));
-            int winGameScaledOffsetY = (int) (top * scale - (newBottom - bottom));
-
-            int winGameScaledWidth = (int) (newRight - winGameScaledOffsetX);
-            int winGameScaledHeight = (int) (newBottom - winGameScaledOffsetY);
-
-
-            int width = (winGameWidth / 44 + 1) * scale;
-            int height = (winGameHeight / 44 + 1) * scale;
-
-            if (width < height)
-                width = height;
-            else
-                height = width;
-
-            int realMinRangeX = World.Player.Position.X - width;
-            if (realMinRangeX < 0)
-                realMinRangeX = 0;
-            int realMaxRangeX = World.Player.Position.X + width;
-            if (realMaxRangeX >= Map.MapsDefaultSize[World.Map.Index][0])
-                realMaxRangeX = Map.MapsDefaultSize[World.Map.Index][0];
-
-            int realMinRangeY = World.Player.Position.Y - height;
-            if (realMinRangeY < 0)
-                realMinRangeY = 0;
-            int realMaxRangeY = World.Player.Position.Y + height;
-            if (realMaxRangeY >= Map.MapsDefaultSize[World.Map.Index][1])
-                realMaxRangeY = Map.MapsDefaultSize[World.Map.Index][1];
-
-            //int minBlockX = (realMinRangeX / 8) - 1;
-            //int minBlockY = (realMinRangeY / 8) - 1;
-            //int maxBlockX = (realMaxRangeX / 8) + 1;
-            //int maxBlockY = (realMaxRangeY / 8) + 1;
-
-            //if (minBlockX < 0)
-            //    minBlockX = 0;
-            //if (minBlockY < 0)
-            //    minBlockY = 0;
-            //if (maxBlockX >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0])
-            //    maxBlockX = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0] - 1;
-            //if (maxBlockY >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1])
-            //    maxBlockY = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1] - 1;
-
-            int drawOffset = scale * 40;
-
-            float maxX = winGamePosX + winGameWidth + drawOffset;
-            float maxY = winGamePosY + winGameHeight + drawOffset;
-            float newMaxX = maxX * scale;
-            float newMaxY = maxY * scale;
-
-            int minPixelsX = (int) ((winGamePosX - drawOffset) * scale - (newMaxX - maxX));
-            int maxPixelsX = (int) newMaxX;
-            int minPixelsY = (int) ((winGamePosY - drawOffset) * scale - (newMaxY - maxY));
-            int maxPixlesY = (int) newMaxY;
-
-            return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY),
-                new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY),
-                new Point(winDrawOffsetX, winDrawOffsetY), new Point(winGameCenterX, winGameCenterY));
         }
 
         protected override void Initialize()
@@ -320,7 +234,7 @@ namespace ClassicUO
             base.Update(gameTime);
         }
 
-        private void CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface)
+        private static void CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface)
         {
             maxItemZ = 255;
             drawTerrain = true;
@@ -389,6 +303,143 @@ namespace ClassicUO
             }
         }
 
+        private (Point, Point, Vector2, Vector2, Point, Point) GetViewPort()
+        {
+            int scale = 1;
+
+            int winGamePosX = 0;
+            int winGamePosY = 0;
+
+            int winGameWidth = _graphics.PreferredBackBufferWidth;
+            int winGameHeight = _graphics.PreferredBackBufferHeight;
+
+            int winGameCenterX = winGamePosX + winGameWidth / 2;
+            int winGameCenterY = winGamePosY + winGameHeight / 2 + World.Player.Position.Z * 4;
+
+            winGameCenterX -= (int)World.Player.Offset.X;
+            winGameCenterY -= (int)(World.Player.Offset.Y - World.Player.Offset.Z);
+
+            int winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX + 22;
+            int winDrawOffsetY = (World.Player.Position.X + World.Player.Position.Y) * 22 - winGameCenterY + 22;
+
+            float left = winGamePosX;
+            float right = winGameWidth + left;
+            float top = winGamePosY;
+            float bottom = winGameHeight + top;
+
+            float newRight = right * scale;
+            float newBottom = bottom * scale;
+
+            int winGameScaledOffsetX = (int)(left * scale - (newRight - right));
+            int winGameScaledOffsetY = (int)(top * scale - (newBottom - bottom));
+
+            int winGameScaledWidth = (int)(newRight - winGameScaledOffsetX);
+            int winGameScaledHeight = (int)(newBottom - winGameScaledOffsetY);
+
+
+            int width = (winGameWidth / 44 + 1) * scale;
+            int height = (winGameHeight / 44 + 1) * scale;
+
+            if (width < height)
+                width = height;
+            else
+                height = width;
+
+            int realMinRangeX = World.Player.Position.X - width;
+            if (realMinRangeX < 0)
+                realMinRangeX = 0;
+            int realMaxRangeX = World.Player.Position.X + width;
+            if (realMaxRangeX >= Map.MapsDefaultSize[World.Map.Index][0])
+                realMaxRangeX = Map.MapsDefaultSize[World.Map.Index][0];
+
+            int realMinRangeY = World.Player.Position.Y - height;
+            if (realMinRangeY < 0)
+                realMinRangeY = 0;
+            int realMaxRangeY = World.Player.Position.Y + height;
+            if (realMaxRangeY >= Map.MapsDefaultSize[World.Map.Index][1])
+                realMaxRangeY = Map.MapsDefaultSize[World.Map.Index][1];
+
+            //int minBlockX = (realMinRangeX / 8) - 1;
+            //int minBlockY = (realMinRangeY / 8) - 1;
+            //int maxBlockX = (realMaxRangeX / 8) + 1;
+            //int maxBlockY = (realMaxRangeY / 8) + 1;
+
+            //if (minBlockX < 0)
+            //    minBlockX = 0;
+            //if (minBlockY < 0)
+            //    minBlockY = 0;
+            //if (maxBlockX >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0])
+            //    maxBlockX = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0] - 1;
+            //if (maxBlockY >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1])
+            //    maxBlockY = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1] - 1;
+
+            int drawOffset = scale * 40;
+
+            float maxX = winGamePosX + winGameWidth + drawOffset;
+            float maxY = winGamePosY + winGameHeight + drawOffset;
+            float newMaxX = maxX * scale;
+            float newMaxY = maxY * scale;
+
+            int minPixelsX = (int)((winGamePosX - drawOffset) * scale - (newMaxX - maxX));
+            int maxPixelsX = (int)newMaxX;
+            int minPixelsY = (int)((winGamePosY - drawOffset) * scale - (newMaxY - maxY));
+            int maxPixlesY = (int)newMaxY;
+
+            return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY),
+                new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY),
+                new Point(winDrawOffsetX, winDrawOffsetY), new Point(winGameCenterX, winGameCenterY));
+        }
+
+        private (Point firstTile, Vector2 renderOffset, Point renderDimensions) GetViewPort2()
+        {
+            int scale = 1;
+
+            Point renderDimensions = new Point
+            {
+                X = _graphics.PreferredBackBufferWidth / scale / 44 + 6,
+                Y = _graphics.PreferredBackBufferHeight / scale / 44 + 10
+            };
+
+            int renderDimensionDiff = Math.Abs(renderDimensions.X - renderDimensions.Y);
+            renderDimensionDiff -= renderDimensionDiff % 2;
+
+            int firstZOffset = World.Player.Position.Z > 0 ? (int) Math.Abs((World.Player.Position.Z + World.Player.Offset.Z) / 11) : 0;
+
+            Point firstTile = new Point
+            {
+                X = World.Player.Position.X - firstZOffset,
+                Y = World.Player.Position.Y - renderDimensions.Y - firstZOffset
+            };
+
+            if (renderDimensions.Y > renderDimensions.X)
+            {
+                firstTile.X -= renderDimensionDiff / 2;
+                firstTile.Y -= renderDimensionDiff / 2;
+            }
+            else
+            {
+                firstTile.X += renderDimensionDiff / 2;
+                firstTile.Y -= renderDimensionDiff / 2;
+            }
+
+            Vector2 renderOffset = new Vector2
+            {
+                X = (((_graphics.PreferredBackBufferWidth / scale + renderDimensions.Y * 44) / 2 - 22f)
+                     - (int) (World.Player.Offset.X * 1))
+                    - ((firstTile.X - firstTile.Y) * 22f)
+                    + renderDimensionDiff * 22f,
+
+                Y = (_graphics.PreferredBackBufferHeight / scale / 2 - renderDimensions.Y * 44 / 2)
+                    + (World.Player.Position.Z + World.Player.Offset.Z) * 4
+                    - (int) (World.Player.Offset.Y * 1)
+                    - (firstTile.X + firstTile.Y) * 22f
+                    - 22f
+                    - firstZOffset * 44f
+            };
+
+            return (firstTile, renderOffset, renderDimensions);
+        }
+
         protected override void Draw(GameTime gameTime)
         {
             if (World.Player != null && World.Map != null)
@@ -398,12 +449,11 @@ namespace ClassicUO
                 if (_targetRender == null || _targetRender.Width != _graphics.PreferredBackBufferWidth / scale ||
                     _targetRender.Height != _graphics.PreferredBackBufferHeight / scale)
                 {
-                    if (_targetRender != null)
-                        _targetRender.Dispose();
+                    _targetRender?.Dispose();
 
                     _targetRender = new RenderTarget2D(GraphicsDevice, _graphics.PreferredBackBufferWidth / scale,
                         _graphics.PreferredBackBufferHeight / scale,
-                        false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0,
+                        false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8 , 0,
                         RenderTargetUsage.DiscardContents);
                 }
 
@@ -412,9 +462,37 @@ namespace ClassicUO
 
                 CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
 
+                //(Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort2();
+
                 _spriteBatch.BeginDraw();
                 _spriteBatch.SetLightIntensity(World.Light.IsometricLevel);
                 _spriteBatch.SetLightDirection(World.Light.IsometricDirection);
+
+
+                //for (int y = 0; y < renderDimensions.Y * 2 + 1 + 10; y++)
+                //{
+                //    Vector3 position = new Vector3
+                //    {
+                //        X = (firstTile.X - firstTile.Y + y % 2) * 22f + renderOffset.X,
+                //        Y = (firstTile.X + firstTile.Y + y) * 22f + renderOffset.Y
+                //    };
+
+                //    Point firstTileInRow = new Point(firstTile.X + ((y + 1) / 2), firstTile.Y + (y / 2));
+
+                //    for (int x = 0; x < renderDimensions.X + 1; x++, position.X -= 44f)
+                //    {
+                //        Tile tile = World.Map.GetTile(firstTileInRow.X - x, firstTileInRow.Y + x);
+                //        if (tile != null)
+                //        {
+                //            for (int k = 0; k < tile.ObjectsOnTiles.Count; k++)
+                //            {
+                //                var obj = tile.ObjectsOnTiles[k];
+
+                //                obj.ViewObject.Draw(_spriteBatch, position);
+                //            }
+                //        }
+                //    }
+                //}
 
                 int minX = minChunkTile.X;
                 int minY = minChunkTile.Y;
@@ -422,6 +500,25 @@ namespace ClassicUO
                 int maxY = maxChunkTile.Y;
 
                 int mapBlockHeight = Map.MapBlocksSize[World.Map.Index][1];
+
+
+                Vector3 playerVector = new Vector3(World.Player.Position.X, World.Player.Position.Y, World.Player.Position.Z);
+
+                Vector3 camera = new Vector3
+                {
+                    X = maxX,
+                    Y = maxY,
+                };
+                camera.Z = Vector3.Distance(playerVector, camera);
+
+
+                Vector3 off = new Vector3(offset.X, offset.Y, 0);
+
+                //foreach (Mobile mobile in World.Mobiles)
+                //{
+                //    mobile.ViewObject.Draw(_spriteBatch, mobile.ScreenPosition - off);
+                //}
+
 
                 for (int i = 0; i < 2; i++)
                 {
@@ -452,33 +549,62 @@ namespace ClassicUO
 
                             bool draw = true;
 
-                            Tile tile = World.Map.GetTile((short) x, (short) y);
+                            Tile tile = World.Map.GetTile((short)x, (short)y);
 
                             if (tile != null)
                             {
-                                Vector3 position = new Vector3(
-                                    (x - y) * 22f - offset.X,
-                                    (x + y) * 22f - offset.Y, 0);
+                                //Vector3 position = new Vector3(
+                                //    (x - y) * 22f - offset.X,
+                                //    (x + y) * 22f - offset.Y, 0);
 
 
                                 for (int k = 0; k < tile.ObjectsOnTiles.Count; k++)
                                 {
-                                    WorldObject o = tile.ObjectsOnTiles[k];
+
+                                    WorldObject obj = tile.ObjectsOnTiles[k];
+
+                                    Vector3 vv = new Vector3(obj.ScreenPosition.X - offset.X, obj.ScreenPosition.Y - offset.Y, obj.ScreenPosition.Z);
 
 
-                                    if (!drawTerrain)
-                                        if (o is Tile || o.Position.Z > tile.Position.Z)
-                                            draw = false;
+                                    obj.ViewObject.Draw(_spriteBatch, vv);
 
-                                    if ((o.Position.Z >= maxItemZ ||
-                                         maxItemZ != 255 &&
-                                         (o is Item item && TileData.IsRoof((long) item.ItemData.Flags) ||
-                                          o is Static st && TileData.IsRoof((long) st.ItemData.Flags)))
-                                        && !(o is Tile))
-                                        continue;
+                                    //position.Z = obj.Position.Z * 4;
+
+                                    //Vector3 objWorldCoordinates = new Vector3(obj.Position.X, obj.Position.Y, obj.Position.Z);
+
+                                    //Vector3 position = new Vector3
+                                    //{
+                                    //    X = obj.ScreenPosition.X - offset.X,
+                                    //    Y = obj.ScreenPosition.Y - offset.Y,
+                                    //    Z = obj.ScreenPosition.Z - Vector3.Distance(camera, objWorldCoordinates)
+                                    //};
 
 
-                                    if (draw) o.ViewObject.Draw(_spriteBatch, position);
+                                    //obj.ViewObject.Draw(_spriteBatch, position);
+
+
+                                    //WorldObject o = tile.ObjectsOnTiles[k];
+
+                                    //Vector3 position = new Vector3()
+                                    //{
+                                    //    X = o.ScreenPosition.X - offset.X,
+                                    //    Y = o.ScreenPosition.Y - offset.Y,
+                                    //};
+
+
+                                    //if (!drawTerrain)
+                                    //    if (o is Tile || o.Position.Z > tile.Position.Z)
+                                    //        draw = false;
+
+                                    //if ((o.Position.Z >= maxItemZ ||
+                                    //     maxItemZ != 255 &&
+                                    //     (o is Item item && TileData.IsRoof((long)item.ItemData.Flags) ||
+                                    //      o is Static st && TileData.IsRoof((long)st.ItemData.Flags)))
+                                    //    && !(o is Tile))
+                                    //    continue;
+
+
+                                    //if (draw) o.ViewObject.Draw(_spriteBatch, position);
                                 }
                             }
 
@@ -488,8 +614,8 @@ namespace ClassicUO
                     }
                 }
 
-                //foreach (var obj in worldObjects)
-                //    obj.Item2.ViewObject.Draw(_spriteBatch, obj.Item1);
+
+
 
                 _spriteBatch.GraphicsDevice.SetRenderTarget(_targetRender);
                 _spriteBatch.GraphicsDevice.Clear(Color.Black);

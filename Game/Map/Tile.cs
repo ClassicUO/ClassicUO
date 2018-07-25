@@ -49,6 +49,8 @@ namespace ClassicUO.Game.Map
 
         public void Sort()
         {
+            //_objectsOnTile.Sort((s, a) => s.ViewObject.DepthValue.CompareTo(a.ViewObject.DepthValue));
+
             for (int i = 0; i < _objectsOnTile.Count - 1; i++)
             {
                 int j = i + 1;
@@ -124,7 +126,7 @@ namespace ClassicUO.Game.Map
 
         public T[] GetWorldObjects<T>() where T : WorldObject
         {
-            return _objectsOnTile.OfType<T>().Cast<T>().ToArray();
+            return _objectsOnTile.OfType<T>().ToArray();
         }
 
         // create view only when TileID is initialized
@@ -182,6 +184,9 @@ namespace ClassicUO.Game.Map
                     3 /* is sitting */,
                     2,
                     mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);
+            if (e is DeferredEntity def)
+                return (def.Position.Z,
+                    2, 1, 0);
 
             return (0, 0, 0, 0);
         }

@@ -39,7 +39,7 @@ namespace ClassicUO.Game
 
         public static bool operator !=(in Graphic g1, in Graphic g2)
         {
-            return !g1.IsInvariant && !g2.IsInvariant && g1._value != g2._value;
+            return /*!g1.IsInvariant && !g2.IsInvariant && */g1._value != g2._value;
         }
 
         public static bool operator <(in Graphic g1, in Graphic g2)

@@ -17,6 +17,7 @@ namespace ClassicUO.Game
         public static PlayerMobile Player { get; set; }
         public static Facet Map { get; private set; }
 
+
         public static int MapIndex
         {
             get => Map == null ? -1 : Map.Index;
@@ -72,7 +73,7 @@ namespace ClassicUO.Game
                 {
                     item.ViewObject.Update(frameMS);
 
-                    if (item.Distance > DISTANCE_POV)
+                    if (item.Distance > DISTANCE_POV && item.OnGround)
                     {
                         item.Dispose();
                         RemoveItem(item);
@@ -143,6 +144,15 @@ namespace ClassicUO.Game
                 return false;
             }
 
+            if (item.RootContainer.IsMobile && item.Layer != Layer.Invalid)
+            {
+                var mobile = Mobiles.Get(item.RootContainer);
+                if (mobile != null)
+                    mobile.Equipment[(int) item.Layer] = null;
+            }
+
+            item.Dispose();
+
             foreach (Item i in item.Items)
                 RemoveItem(i);
             item.Items.Clear();
@@ -154,6 +164,8 @@ namespace ClassicUO.Game
             Mobile mobile = Mobiles.Remove(serial);
             if (mobile == null)
                 return false;
+
+            mobile.Dispose();
 
             foreach (Item i in mobile.Items)
                 RemoveItem(i);

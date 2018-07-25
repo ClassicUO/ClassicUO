@@ -44,6 +44,7 @@ namespace ClassicUO.AssetsLoader
             Skills.Load();
             TextmapTextures.Load();
             SpecialKeywords.Load();
+            AnimData.Load();
         }
     }
 }

@@ -53,8 +53,10 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
-        public new ItemView ViewObject => (ItemView) base.ViewObject;
+        public new ItemView ViewObject => Graphic <= 0 ? null : (ItemView) base.ViewObject;
 
+
+        public WorldEffect Effect { get; set; }
 
         public StaticTiles ItemData
         {

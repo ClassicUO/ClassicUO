@@ -36,6 +36,8 @@ namespace ClassicUO.Game.Renderer.Views
 
                 AllowedToDraw = true;
                 item.DisplayedGraphic = item.Amount;
+
+                item.Deferred = new DeferredEntity(item, item.Position.Z, item.Tile);
             }
         }
 
@@ -66,14 +68,34 @@ namespace ClassicUO.Game.Renderer.Views
             }
 
 
-            if (WorldObject.Amount > 1 && TileData.IsStackable((long) WorldObject.ItemData.Flags) &&
+            if (WorldObject.Amount > 1 && TileData.IsStackable((long)WorldObject.ItemData.Flags) &&
                 WorldObject.DisplayedGraphic == WorldObject.Graphic)
             {
                 Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
                 base.Draw(spriteBatch, offsetDrawPosition);
             }
 
-            return base.Draw(spriteBatch, position);
+            //var vv = position;
+            //vv.Z = WorldObject.Position.Z;
+
+            //if (AssetsLoader.TileData.IsBackground((long)WorldObject.ItemData.Flags) &&
+            //    AssetsLoader.TileData.IsSurface((long)WorldObject.ItemData.Flags))
+            //    vv.Z += 4;
+            //else if (AssetsLoader.TileData.IsBackground((long)WorldObject.ItemData.Flags))
+            //    vv.Z += 2;
+            //else if (AssetsLoader.TileData.IsSurface((long)WorldObject.ItemData.Flags))
+            //    vv.Z += 5;
+            //else
+            //    vv.Z += 6;
+
+            //CalculateRenderDepth((sbyte)vv.Z, 20, WorldObject.ItemData.Height, (byte)(WorldObject.Serial & 0xFF));
+
+            base.Draw(spriteBatch, position);
+
+            if (WorldObject.Effect != null)
+                WorldObject.Effect.ViewObject.Draw(spriteBatch, position);
+
+            return true;
         }
 
 
@@ -166,6 +188,10 @@ namespace ClassicUO.Game.Renderer.Views
             return true;
         }
 
+        public override void Update(in double frameMS)
+        {
+            WorldObject.Effect?.UpdateAnimation(frameMS);
+        }
 
         protected override void MousePick(in SpriteVertex[] vertex)
         {

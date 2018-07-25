@@ -145,7 +145,7 @@ namespace ClassicUO.Game
         }
 
 
-        private static int GetNextZ(in Mobile mobile, in Position loc, in Direction d)
+        public static int GetNextZ(in Mobile mobile, in Position loc, in Direction d)
         {
             if (CheckMovement(mobile, loc, d, out sbyte newZ, true))
                 return newZ;

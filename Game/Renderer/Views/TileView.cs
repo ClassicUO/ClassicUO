@@ -64,9 +64,13 @@ namespace ClassicUO.Game.Renderer.Views
                 _needUpdateStrechedTile = false;
             }
 
-            if (!IsStretched)
-                return base.Draw(spriteBatch, position);
-            return Draw3DStretched(spriteBatch, position);
+            //var vv = position;
+            //vv.Z = WorldObject.Position.Z;
+
+            //CalculateRenderDepth((sbyte)vv.Z, 0, 0, 0);
+
+
+            return !IsStretched ? base.Draw(spriteBatch, position) : Draw3DStretched(spriteBatch, position);
         }
 
         private bool Draw3DStretched(in SpriteBatch3D spriteBatch, in Vector3 position)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -92,23 +93,39 @@ namespace ClassicUO.Game.Renderer
 
         public bool DrawSprite(in Texture2D texture, in SpriteVertex[] vertices)
         {
-            if (texture == null || vertices.Length != 4)
+            if (texture == null)
                 return false;
 
+            bool draw = false;
+
             for (byte i = 0; i < 4; i++)
+            {
                 if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
                 {
-                    vertices[0].Position.Z =
-                        vertices[1].Position.Z =
-                            vertices[2].Position.Z =
-                                vertices[3].Position.Z = GetZ();
+                    
+                    draw = true;
+                    break;
 
-                    GetVertexList(texture).AddRange(vertices);
-
-                    return true;
                 }
+            }
 
-            return false;
+            if (!draw)
+                return false;
+
+            vertices[0].Position.Z =
+                vertices[1].Position.Z =
+                    vertices[2].Position.Z =
+                        vertices[3].Position.Z = GetZ();
+
+            //var z = GetZ();
+
+            //vertices[0].Position.Z += z;
+            //vertices[1].Position.Z += z;
+            //vertices[2].Position.Z += z;
+            //vertices[3].Position.Z += z;
+
+            GetVertexList(texture).AddRange(vertices);
+            return true;
         }
 
         public float GetZ()

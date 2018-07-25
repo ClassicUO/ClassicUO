@@ -10,13 +10,28 @@ namespace ClassicUO.Game.WorldObjects
         private Tile _tile;
         private View _viewObject;
 
-        public WorldObject(in Facet map)
+        protected WorldObject(in Facet map)
         {
             Map = map;
-            Position = Position.Invalid;
         }
 
-        public virtual Position Position { get; set; }
+        /// <summary>
+        /// Multiply X * 22, Y * 22.
+        /// Z is used to do Depth testing
+        /// </summary>
+        public Vector3 ScreenPosition
+        {
+            get
+            {
+                float screenX = (Position.X - Position.Y) * 22; 
+                float screenY = (Position.X + Position.Y) * 22 /*- Position.Z * 4*/;
+
+                return new Vector3(screenX, screenY, 0);
+            }
+        }
+
+
+        public virtual Position Position { get; set; } = Position.Invalid;
         public virtual Hue Hue { get; set; }
         public virtual Graphic Graphic { get; set; }
 
@@ -61,9 +76,18 @@ namespace ClassicUO.Game.WorldObjects
 
         public virtual void Dispose()
         {
+            if (IsDisposed)
+                return;
+            
             IsDisposed = true;
+
+            if (Deferred != null)
+                Deferred.Tile = null;
+            Deferred = null;
             Tile = null;
         }
+
+        public DeferredEntity Deferred { get; set; }
 
         protected virtual void OnTileChanged(int x, int y)
         {

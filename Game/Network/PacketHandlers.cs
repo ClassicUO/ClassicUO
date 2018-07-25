@@ -466,6 +466,9 @@ namespace ClassicUO.Game.Network
             item.ProcessDelta();
             if (World.Items.Add(item))
                 World.Items.ProcessDelta();
+
+            if (TileData.IsAnimated((long)item.ItemData.Flags))
+                item.Effect = new AnimatedItemEffect(item.Position.X, item.Position.Y, item.Position.Z, item.Graphic, item.Hue, -1);
         }
 
         private static void EnterWorld(Packet p)
@@ -697,6 +700,7 @@ namespace ClassicUO.Game.Network
             item.Amount = 1;
 
             Mobile mobile = World.Mobiles.Get(item.Container);
+            mobile.Equipment[(int) item.Layer] = item;
             mobile?.Items.Add(item);
             item.ProcessDelta();
             if (World.Items.Add(item))
@@ -1833,6 +1837,9 @@ namespace ClassicUO.Game.Network
             item.ProcessDelta();
             if (World.Items.Add(item))
                 World.Items.ProcessDelta();
+
+            if (TileData.IsAnimated((long)item.ItemData.Flags))
+                item.Effect = new AnimatedItemEffect(item.Position.X, item.Position.Y, item.Position.Z, item.Graphic, item.Hue, -1);
         }
 
         private static bool ReadContainerContent(Packet p)

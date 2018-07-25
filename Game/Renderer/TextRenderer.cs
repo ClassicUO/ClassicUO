@@ -8,13 +8,27 @@ namespace ClassicUO.Game.Renderer
     public sealed class TextRenderer
     {
         private bool _isPartialHue;
+        private bool _textChanged;
+        private string _text;
 
         public TextRenderer(in string text = "")
         {
-            Text = text;
+            _text = text;
+            _textChanged = true;
         }
 
-        public string Text { get; set; }
+        public string Text
+        {
+            get => _text;
+            set
+            {
+                if (_text != value)
+                {
+                    _text = value;
+                    _textChanged = true;
+                }
+            } 
+        }
         public int Width { get; set; }
         public int Height { get; set; }
         public TextTexture Texture { get; private set; }
@@ -24,6 +38,11 @@ namespace ClassicUO.Game.Renderer
 
         public void GenerateTexture(in int maxWidth, in ushort flags, in TEXT_ALIGN_TYPE aling, in byte cell)
         {
+            if (!_textChanged)
+                return;
+
+            _textChanged = false;
+
             uint[] data;
             int linesCount;
             List<WebLinkRect> links;
@@ -36,8 +55,7 @@ namespace ClassicUO.Game.Renderer
                     Fonts.GenerateASCII(Font, Text, Color, maxWidth, aling, flags);
 
 
-            if (Texture != null)
-                Texture.Dispose();
+            Texture?.Dispose();
 
             if (data == null || data.Length <= 0)
                 return;
@@ -49,9 +67,9 @@ namespace ClassicUO.Game.Renderer
 
         public void Draw(in SpriteBatchUI spriteBatch, in Point position)
         {
-            spriteBatch.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height),
-                RenderExtentions.GetHueVector(0, _isPartialHue, false, false));
-            // Draw(spriteBatch, new Rectangle(position.X, position.Y, Width, Height), 0, 0);
+            //spriteBatch.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height),
+            //    RenderExtentions.GetHueVector(0, _isPartialHue, false, false));
+            Draw(spriteBatch, new Rectangle(position.X, position.Y, Width, Height), 0, 0);
         }
 
 
@@ -79,8 +97,7 @@ namespace ClassicUO.Game.Renderer
 
 
             spriteBatch.Draw2D(Texture, destRect, sourceRect,
-                new Vector3(0, 0,
-                    0) /*new Vector3(Color, _isPartialHue ? -2 : -1, 0)*/ /*RenderExtentions.GetHueVector(0, _isPartialHue, false ,false)*/);
+                RenderExtentions.GetHueVector(0, _isPartialHue, false, false));
         }
     }
 }
