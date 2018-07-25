@@ -529,9 +529,12 @@ namespace ClassicUO.Game.Network
 
         private static void UpdatePlayer(Packet p)
         {
+            if (World.Player == null)
+                return;
+
             if (p.ReadUInt() != World.Player)
                 throw new Exception("OnMobileStatus");
-            //World.MovementsQueue.Clear();
+
             World.Player.Graphic = (ushort) (p.ReadUShort() + p.ReadSByte());
             World.Player.Hue = p.ReadUShort();
             World.Player.Flags = (Flags) p.ReadByte();
@@ -565,8 +568,6 @@ namespace ClassicUO.Game.Network
                 World.Player.Direction = direction;
             }
 
-            //World.Player.MoveTo(position, direction);
-
             World.Player.ProcessDelta();
         }
 
@@ -580,9 +581,6 @@ namespace ClassicUO.Game.Network
             Position position = new Position(x, y, z);
 
             World.Player.DenyWalk(seq, direction, position);
-
-            //World.Player.MovementRejected(seq, position, direction);
-
             World.Player.ProcessDelta();
         }
 
@@ -592,8 +590,6 @@ namespace ClassicUO.Game.Network
             World.Player.Notoriety = (Notoriety) (p.ReadByte() & ~0x40);
 
             World.Player.ConfirmWalk(seq);
-            //World.Player.MovementACKReceived(seq);
-
             World.Player.ProcessDelta();
         }
 
@@ -1308,8 +1304,8 @@ namespace ClassicUO.Game.Network
 
         private static void AssistVersion(Packet p)
         {
-            uint version = p.ReadUInt();
-            //new PAssistVersion().SendToServer();
+            //uint version = p.ReadUInt();
+
         }
 
         private static void ExtendedCommand(Packet p)
@@ -1473,6 +1469,8 @@ namespace ClassicUO.Game.Network
                 case 0x1D: // house revision state
                     serial = p.ReadUInt();
                     uint revision = p.ReadUInt();
+
+                    new PCustomHouseDataRequest(serial).SendToServer();
 
                     break;
                 case 0x20:
@@ -1808,26 +1806,22 @@ namespace ClassicUO.Game.Network
 
         private static void NewCharacterAnimation(Packet p)
         {
-            Serial serial = p.ReadUInt();
-            Entity e = World.Get(serial);
-            if (e == null)
-                throw new Exception();
-            //Mobile mobile = World.Mobiles.Get();
-            //if (mobile == null)
-            //    throw new Exception();
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (mobile == null)
+                return;
 
-            //ushort type = p.ReadUShort();
-            //ushort action = p.ReadUShort();
-            //byte mode = p.ReadByte();
-            //byte group = Mobile.GetObjectNewAnimation(mobile, type, action, mode);
+            ushort type = p.ReadUShort();
+            ushort action = p.ReadUShort();
+            byte mode = p.ReadByte();
+            byte group = Mobile.GetObjectNewAnimation(mobile, type, action, mode);
 
-            //mobile.SetAnimation(group);
-            //mobile.AnimationRepeatMode = 1;
-            //mobile.AnimationDirection = true;
+            mobile.SetAnimation(group);
+            mobile.AnimationRepeatMode = 1;
+            mobile.AnimationDirection = true;
 
-            //if ((type == 1 || type == 2) && mobile.Graphic == 0x015)
-            //    mobile.AnimationRepeat = true;
-            //mobile.AnimationFromServer = true;
+            if ((type == 1 || type == 2) && mobile.Graphic == 0x015)
+                mobile.AnimationRepeat = true;
+            mobile.AnimationFromServer = true;
         }
 
         private static void KREncryptionResponse(Packet p)
@@ -1874,7 +1868,6 @@ namespace ClassicUO.Game.Network
             item.ProcessDelta();
             if (World.Items.Add(item))
                 World.Items.ProcessDelta();
-
 
 
             if (TileData.IsAnimated((long)item.ItemData.Flags))

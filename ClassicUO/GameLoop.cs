@@ -162,6 +162,9 @@ namespace ClassicUO
                     case 0xBD:
                         NetClient.Socket.Send(new PClientVersion(clientVersionBuffer));
                         break;
+                    case 0xBE:
+                        NetClient.Socket.Send(new PAssistVersion(clientVersionBuffer, e.ReadUInt()));
+                        break;
                 }
             };
 

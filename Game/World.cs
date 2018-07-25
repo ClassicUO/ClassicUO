@@ -42,8 +42,11 @@ namespace ClassicUO.Game
                     else
                     {
                         Map = new Facet(value);
-                        Player.Map = Map;
-                        Map.Center = new Point(Player.Position.X, Player.Position.Y);
+                        if (Player != null)
+                        {
+                            Player.Map = Map;
+                            Map.Center = new Point(Player.Position.X, Player.Position.Y);
+                        }
                     }
                 }
             }

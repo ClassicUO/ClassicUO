@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Network
 {
@@ -72,10 +73,10 @@ namespace ClassicUO.Game.Network
             _circularBuffer = new CircularBuffer();
 
             _sendEventArgs = new SocketAsyncEventArgs();
-            _sendEventArgs.Completed += SocketSended;
+            _sendEventArgs.Completed += IO_Socket;
 
             _recvEventArgs = new SocketAsyncEventArgs();
-            _recvEventArgs.Completed += SocketReceived;
+            _recvEventArgs.Completed += IO_Socket;
             _recvEventArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
 
 
@@ -178,6 +179,7 @@ namespace ClassicUO.Game.Network
                 while (length > 0 && IsConnected)
                 {
                     byte id = _circularBuffer.GetID();
+                    Log.Message(LogTypes.Info, string.Format("ID: 0x{0:X2}", id));
                     int packetlength = PacketsTable.GetPacketLength(id);
                     if (packetlength == -1)
                     {
@@ -243,43 +245,6 @@ namespace ClassicUO.Game.Network
             }
         }
 
-        private void SocketReceived(object sender, SocketAsyncEventArgs e)
-        {
-            ProcessRecv(e);
-            if (!_isDisposing)
-                StartRecv();
-        }
-
-        private void SocketSended(object sender, SocketAsyncEventArgs e)
-        {
-            ProcessSend(e);
-
-            if (_isDisposing)
-                return;
-
-            SendQueue.Gram gram;
-
-            lock (_sendQueue)
-            {
-                gram = _sendQueue.Dequeue();
-                if (gram == null && _sendQueue.IsFlushReady)
-                    gram = _sendQueue.CheckFlushReady();
-            }
-
-            if (gram != null)
-            {
-                _sendEventArgs.SetBuffer(gram.Buffer, 0, gram.Length);
-                StartSend();
-            }
-            else
-            {
-                lock (_sendLock)
-                {
-                    _sending = false;
-                }
-            }
-        }
-
         private void IO_Socket(object sender, SocketAsyncEventArgs e)
         {
             switch (e.LastOperation)
@@ -326,8 +291,19 @@ namespace ClassicUO.Game.Network
 
         private void StartRecv()
         {
-            if (!_socket.ReceiveAsync(_recvEventArgs))
-                IO_Socket(null, _recvEventArgs);
+            bool ok = false;
+
+            do
+            {
+                //if (!_socket.ReceiveAsync(_recvEventArgs))
+                //    IO_Socket(null, _recvEventArgs);
+
+                ok = !_socket.ReceiveAsync(_recvEventArgs);
+                if (ok)
+                    ProcessRecv(_recvEventArgs);
+
+            } while (ok);
+
         }
 
         private void ProcessRecv(in SocketAsyncEventArgs e)
