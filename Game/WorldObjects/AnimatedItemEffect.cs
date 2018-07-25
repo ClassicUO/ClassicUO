@@ -13,6 +13,8 @@ namespace ClassicUO.Game.WorldObjects
             Graphic = graphic;
             Hue = hue;
             Duration = duration;
+
+            Load();
         }
 
         public AnimatedItemEffect(in WorldObject source, in Graphic graphic, in Hue hue, in int duration) : this(graphic, hue, duration)
@@ -52,10 +54,10 @@ namespace ClassicUO.Game.WorldObjects
                         item.Position = new Position((ushort)sourceX, (ushort)sourceY, zSrc);
                     SetSource(item);
                 }
+
             }
         }
 
-        public new Graphic Graphic { get; set; }
         public int Duration { get; set; }
         public new AnimatedEffectView ViewObject => (AnimatedEffectView)base.ViewObject;
 
@@ -69,6 +71,7 @@ namespace ClassicUO.Game.WorldObjects
         public override void UpdateAnimation(in double ms)
         {
             base.UpdateAnimation(in ms);
+
             if (LastChangeFrameTime >= Duration && Duration >= 0)
                 Dispose();
             else

@@ -7,9 +7,7 @@ namespace ClassicUO.Game.WorldObjects
 {
     public abstract class WorldEffect : WorldObject
     {
-        private List<WorldEffect> _children;
-        private double _timeActiveMS;
-
+        private readonly List<WorldEffect> _children;
 
         protected WorldEffect() : base(World.Map)
         {
@@ -29,17 +27,40 @@ namespace ClassicUO.Game.WorldObjects
         protected int TargetY { get; set; }
         protected int TargetZ { get; set; }
 
+        protected AnimDataFrame AnimDataFrame { get; set; }
 
 
         public int Speed { get; set; }
         public long LastChangeFrameTime { get; set; }
+        public bool IsEnabled { get; set; }
+        public Graphic AnimationGraphic { get; set; }
 
+
+        public void Load()
+        {
+            AnimDataFrame = AnimData.CalculateCurrentGraphic(Graphic);
+            IsEnabled = true;
+            AnimIndex = (sbyte)AnimDataFrame.FrameStart;
+            Speed = AnimDataFrame.FrameInterval * 45;
+        }
 
         public virtual void UpdateAnimation(in double ms)
         {
+            if (IsEnabled)
+            {
+                if (LastChangeFrameTime < World.Ticks)
+                {
+                    AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                    AnimIndex++;
 
+                    if (AnimIndex >= AnimDataFrame.FrameCount)
+                        AnimIndex = (sbyte) AnimDataFrame.FrameStart;
 
-
+                    LastChangeFrameTime = World.Ticks + Speed;
+                }
+            }
+            else if (Graphic != AnimationGraphic)
+                AnimationGraphic = Graphic;
         }
 
 
