@@ -65,8 +65,6 @@ namespace ClassicUO.Game.Network
             {
                 for (int i = 0; i < _handlers[p.ID].Count; i++)
                 {
-                    Log.Message(LogTypes.Trace, string.Format(">> Received\t\tID:   0x{0:X2}\t\t Length:   {1}", p.ID, p.Length));
-
                     p.MoveToData();
                     _handlers[p.ID][i].Callback(p);
                 }
@@ -1619,7 +1617,8 @@ namespace ClassicUO.Game.Network
                 byte[] decompressedBytes = new byte[dlen];
                 Zlib.Decompress(compressedBytes, 0, decompressedBytes, (int) dlen);
 
-                using (BinaryReader stream = new BinaryReader(new MemoryStream(decompressedBytes)))
+                Packet stream = new Packet(decompressedBytes, (int) dlen);
+               // using (BinaryReader stream = new BinaryReader(new MemoryStream(decompressedBytes)))
                 {
                     p.Skip(clen);
 
@@ -1631,27 +1630,23 @@ namespace ClassicUO.Game.Network
                         case 0:
                             for (uint i = 0; i < decompressedBytes.Length / 5; i++)
                             {
-                                id = stream.ReadUInt16();
+                                id = stream.ReadUShort();
                                 x = stream.ReadByte();
                                 y = stream.ReadByte();
                                 z = stream.ReadByte();
 
+                                x += (byte)-minX;
+                                y += (byte)-minY;
+
                                 if (id != 0)
                                 {
-                                    Tile tile = World.Map.GetTile((ushort) (multi.MinX + x), (ushort) (multi.MinY + y));
-                                    
-                                    tile.AddWorldObject(new Static(id, 0, 0)
+                                    Tile tile = World.Map.GetTile((ushort)(minX + foundation.Position.X + x), (ushort)(minY + foundation.Position.Y + y));
+
+                                    tile.AddWorldObject(
+                                        new Static(id, 0, 0)
                                     {
-                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y),
-                                            (sbyte)(foundation.Position.Z + z))
+                                        Position = new Position(tile.Position.X, tile.Position.Y, (sbyte)(foundation.Position.Z + z))
                                     });
-
-                                    //house.Items.Add(new Static(id, 0, 0)
-                                    //{
-                                    //    Position = new Position((ushort) (multi.MinX + x), (ushort) (multi.MinY + y),
-                                    //        (sbyte) (foundation.Position.Z + z))
-                                    //});
-
                                 }
                             }
 
@@ -1664,27 +1659,23 @@ namespace ClassicUO.Game.Network
 
                             for (uint i = 0; i < decompressedBytes.Length / 4; i++)
                             {
-                                id = stream.ReadUInt16();
+                                id = stream.ReadUShort();
                                 x = stream.ReadByte();
                                 y = stream.ReadByte();
 
+
+                                //x += (byte)-minX;
+                                //y += (byte)-minY;
+
                                 if (id != 0)
                                 {
-
-                                    Tile tile = World.Map.GetTile((ushort)(multi.MinX + x), (ushort)(multi.MinY + y));
+                                    Tile tile = World.Map.GetTile((ushort)(minX + foundation.Position.X + x), (ushort)(minY + foundation.Position.Y + y));
 
                                     tile.AddWorldObject(new Static(id, 0, 0)
                                     {
-                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y),
+                                        Position = new Position(tile.Position.X, tile.Position.Y,
                                             (sbyte)(foundation.Position.Z + z))
                                     });
-
-                                    //house.Items.Add(new Static(id, 0, 0)
-                                    //{
-                                    //    Position = new Position((ushort) (multi.MinX + x), (ushort) (multi.MinY + y),
-                                    //        (sbyte) (foundation.Position.Z + z))
-                                    //});
-
                                 }
                             }
 
@@ -1719,25 +1710,22 @@ namespace ClassicUO.Game.Network
 
                             for (uint i = 0; i < decompressedBytes.Length / 2; i++)
                             {
-                                id = stream.ReadUInt16();
+                                id = stream.ReadUShort();
                                 x = (byte) (i / multiHeight + offX);
-                                y = (byte) (i / multiHeight + offY);
+                                y = (byte) (i % multiHeight + offY);
+
+                                x += (byte)-minX;
+                                y += (byte)-minY;
 
                                 if (id != 0)
                                 {
-                                    Tile tile = World.Map.GetTile((ushort)(multi.MinX + x), (ushort)(multi.MinY + y));
+                                    Tile tile = World.Map.GetTile((ushort)(minX + foundation.Position.X + x), (ushort)(minY + foundation.Position.Y + y));
 
-                                    tile.AddWorldObject(new Static(id, 0, 0)
+                                     tile.AddWorldObject(new Static(id, 0, 0)
                                     {
-                                        Position = new Position((ushort)(multi.MinX + x), (ushort)(multi.MinY + y),
+                                        Position = new Position(tile.Position.X, tile.Position.Y,
                                             (sbyte)(foundation.Position.Z + z))
                                     });
-
-                                    //house.Items.Add(new Static(id, 0, 0)
-                                    //{
-                                    //    Position = new Position((ushort) (multi.MinX + x), (ushort) (multi.MinY + y),
-                                    //        (sbyte) (foundation.Position.Z + z))
-                                    //});
 
                                 }
                             }

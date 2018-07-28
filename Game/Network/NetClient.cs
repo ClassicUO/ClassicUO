@@ -179,7 +179,6 @@ namespace ClassicUO.Game.Network
                 while (length > 0 && IsConnected)
                 {
                     byte id = _circularBuffer.GetID();
-                    Log.Message(LogTypes.Info, string.Format("ID: 0x{0:X2}", id));
                     int packetlength = PacketsTable.GetPacketLength(id);
                     if (packetlength == -1)
                     {

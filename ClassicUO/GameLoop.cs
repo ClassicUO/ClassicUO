@@ -26,10 +26,12 @@ namespace ClassicUO
 
         private RenderTarget2D _targetRender;
 
-        private TextRenderer _textRenderer = new TextRenderer("Select which shard to play on:")
+        private FpsCounter _fpsCounter;
+
+        private TextRenderer _textRenderer = new TextRenderer()
         {
-            IsUnicode = true,
-            Color = 847
+            IsUnicode = false,
+            Color = 33
         };
 
         private Texture2D _texture, _crossTexture, _gump, _textentry;
@@ -134,6 +136,9 @@ namespace ClassicUO
             textureHue0.SetData(Hues.CreateShaderColors());
             GraphicsDevice.Textures[1] = textureHue0;
 
+            _textRenderer.GenerateTexture(0, 0, TEXT_ALIGN_TYPE.TS_CENTER, 0);
+
+            _fpsCounter = new FpsCounter();
 
             _crossTexture = new Texture2D(GraphicsDevice, 1, 1);
             _crossTexture.SetData(new[] {Color.Red});
@@ -215,6 +220,7 @@ namespace ClassicUO
         protected override void Update(GameTime gameTime)
         {
             World.Ticks = (long) gameTime.TotalGameTime.TotalMilliseconds;
+            _fpsCounter.Update(gameTime);
 
             NetClient.Socket.Slice();
             TextureManager.Update();
@@ -445,6 +451,9 @@ namespace ClassicUO
         {
             if (World.Player != null && World.Map != null)
             {
+                _fpsCounter.IncreaseFrame();
+
+
                 int scale = 1;
 
                 if (_targetRender == null || _targetRender.Width != _graphics.PreferredBackBufferWidth / scale ||
@@ -638,6 +647,10 @@ namespace ClassicUO
             //_textRenderer.Draw(_spriteBatch, new Point(100, 150));
 
             //_mouseManager.Draw(_spriteBatch);
+
+            _textRenderer.Text = "FPS: " + _fpsCounter.FPS;
+            _textRenderer.GenerateTexture(0, 0, TEXT_ALIGN_TYPE.TS_CENTER, 0);
+            _textRenderer.Draw(_spriteBatch, new Point(12, 12));
 
             _gameCursor.Draw(_spriteBatch);
 
