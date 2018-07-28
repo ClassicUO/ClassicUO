@@ -21,7 +21,7 @@ namespace ClassicUO.Game.Renderer.Views
             spriteBatch.GetZ();
 
             bool mirror = false;
-            byte dir = (byte) WorldObject.GetAnimationDirection();
+            byte dir = (byte) WorldObject.GetDirectionForAnimation();
             Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
@@ -52,7 +52,7 @@ namespace ClassicUO.Game.Renderer.Views
                             if (graphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                 mountedHeightOffset = Animations.DataIndex[graphic].MountedHeightOffset;
 
-                            animGroup = WorldObject.GetAnimationGroup(graphic);
+                            animGroup = WorldObject.GetGroupForAnimation(graphic);
                             color = mount.Hue;
 
                             order = 29;
@@ -70,8 +70,8 @@ namespace ClassicUO.Game.Renderer.Views
                 }
                 else if (layer == Layer.Invalid)
                 {
-                    graphic = WorldObject.GetMountAnimation();
-                    animGroup = WorldObject.GetAnimationGroup();
+                    graphic = WorldObject.GetGraphicForAnimation();
+                    animGroup = WorldObject.GetGroupForAnimation();
                     color = WorldObject.Hue;
 
                     order = 30;

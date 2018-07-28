@@ -847,7 +847,7 @@ namespace ClassicUO.Game
         //            stepState = PATH_STEP_STATE.PSS_FLYING;
         //        else
         //        {
-        //            Item mount = World.Player.GetItemAtLayer(Layer.Mount);
+        //            Item mount = World.Player.Equipment[(int)Layer.Mount);
         //            if (mount != null && mount.Graphic == 0x3EB3)
         //                stepState = PATH_STEP_STATE.PSS_ON_SEA_HORSE;
         //        }

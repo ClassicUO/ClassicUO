@@ -363,8 +363,8 @@ namespace ClassicUO.Game.WorldObjects
 
         public void UpdateAbilities()
         {
-            Item right = GetItemAtLayer(Layer.RightHand);
-            Item left = GetItemAtLayer(Layer.LeftHand);
+            Item right = Equipment[(int)Layer.RightHand];
+            Item left = Equipment[(int)Layer.LeftHand];
 
             _ability[0] = Ability.None;
             _ability[1] = Ability.None;
@@ -1145,7 +1145,7 @@ namespace ClassicUO.Game.WorldObjects
 
             _lastStepRequestedTime = World.Ticks + walkTime;
 
-            GetAnimationGroup();
+            GetGroupForAnimation();
             return true;
         }
 
