@@ -119,7 +119,7 @@ namespace ClassicUO.Game.Renderer.Views
 
                 if (animIndex < direction.FrameCount)
                 {
-                    AnimationFrame frame = direction.Frames[animIndex];
+                    ref AnimationFrame frame = ref direction.Frames[animIndex];
 
                     if (frame.Pixels == null || frame.Pixels.Length <= 0)
                         return false;
@@ -152,8 +152,8 @@ namespace ClassicUO.Game.Renderer.Views
                     //    yOffset = y;
 
 
-                    Texture = TextureManager.GetOrCreateAnimTexture(graphic, Animations.AnimGroup, dir, animIndex,
-                        direction.Frames);
+                    //Texture = TextureManager.GetOrCreateAnimTexture(graphic, Animations.AnimGroup, dir, animIndex, direction.Frames);
+                    Texture = TextureManager.GetOrCreateAnimTexture(frame);
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
                     HueVector = RenderExtentions.GetHueVector(color);
 

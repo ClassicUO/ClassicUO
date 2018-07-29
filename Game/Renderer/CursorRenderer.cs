@@ -186,7 +186,7 @@ namespace ClassicUO.Game.Renderer
             }
         }
 
-        public TextureDuration Texture { get; private set; }
+        public SpriteTexture Texture { get; private set; }
         public Point ScreenPosition => MouseManager.ScreenPosition;
 
         public void Update(in double frameMS)

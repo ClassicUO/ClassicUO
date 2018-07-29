@@ -149,18 +149,19 @@ namespace ClassicUO.Game
                 return false;
             }
 
-            if (item.RootContainer.IsMobile && item.Layer != Layer.Invalid)
+            if (item.Layer != Layer.Invalid && item.RootContainer.IsMobile)
             {
                 var mobile = Mobiles.Get(item.RootContainer);
                 if (mobile != null)
                     mobile.Equipment[(int) item.Layer] = null;
             }
 
-            item.Dispose();
 
             foreach (Item i in item.Items)
                 RemoveItem(i);
             item.Items.Clear();
+
+            item.Dispose();
             return true;
         }
 
@@ -170,11 +171,12 @@ namespace ClassicUO.Game
             if (mobile == null)
                 return false;
 
-            mobile.Dispose();
 
             foreach (Item i in mobile.Items)
                 RemoveItem(i);
             mobile.Items.Clear();
+
+            mobile.Dispose();
             return true;
         }
 

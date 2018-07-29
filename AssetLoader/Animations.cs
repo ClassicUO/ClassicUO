@@ -1055,8 +1055,10 @@ namespace ClassicUO.AssetsLoader
 
             for (int i = 0; i < frameCount; i++)
             {
-                if (animDir.Frames[i].Pixels != null && animDir.Frames[i].Pixels.Length > 0)
+                if ( animDir.Frames[i] != null && animDir.Frames[i].Pixels != null && animDir.Frames[i].Pixels.Length > 0)
                     continue;
+
+                animDir.Frames[i] = new AnimationFrame();
 
                 _reader.SetData(dataStart + (int) frameOffset[i]);
 
@@ -1658,7 +1660,7 @@ namespace ClassicUO.AssetsLoader
         public AnimationFrame[] Frames;
     }
 
-    public struct AnimationFrame
+    public class AnimationFrame
     {
         public short CenterX, CenterY;
         public ushort[] Pixels;

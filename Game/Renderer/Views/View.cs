@@ -21,7 +21,8 @@ namespace ClassicUO.Game.Renderer.Views
         public bool AllowedToDraw { get; set; }
         public sbyte SortZ { get; protected set; }
 
-        public TextureDuration Texture { get; set; }
+        public SpriteTexture Texture { get; set; }
+        public int TextureID { get; set; }
         protected Rectangle Bounds { get; set; }
         protected Vector3 HueVector { get; set; }
         protected bool HasShadow { get; set; }
