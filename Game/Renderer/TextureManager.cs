@@ -61,55 +61,13 @@ namespace ClassicUO.Game.Renderer
 
             if (_updateIndex == 0)
             {
-                List<AnimationFrame> toremove = new List<AnimationFrame>();
+                var list = _animations.Where(s => World.Ticks - s.Value.Ticks >= TEXTURE_TIME_LIFE).ToList();
 
-                foreach (var k in _animations)
+                foreach (var t in list)
                 {
-                    if (World.Ticks - k.Value.Ticks >= TEXTURE_TIME_LIFE)
-                    {
-                        k.Value.Dispose();
-                        toremove.Add(k.Key);
-                    }
+                    t.Value.Dispose();
+                    _animations.Remove(t.Key);
                 }
-
-                //foreach (var k in _animTextureCache)
-                //{
-                //    bool rem = true;
-                //    for (int group = 0; group < 100; group++)
-                //    {
-                //        var sprites = k.Value;
-
-                //        if (sprites[group] != null)
-                //        {
-                //            for (int dir = 0; dir < 5; dir++)
-                //            {
-                //                if (sprites[group][dir] != null)
-                //                {
-                //                    for (int i = 0; i < 25; i++)
-                //                    {
-                //                        var texture = sprites[group][dir][i];
-                //                        if (texture != null)
-                //                        {
-                //                            if (World.Ticks - texture.Ticks >= TEXTURE_TIME_LIFE)
-                //                            {
-                //                                texture.Dispose();
-                //                                texture = null;                                           
-                //                            }
-                //                            else if (rem)
-                //                                rem = false;
-                //                        }
-                //                    }
-                //                }
-                //            }
-                //        }
-                //    }
-
-                //    if (rem)
-                //        toremove.Add(k.Key);
-                //}
-
-                foreach (var t in toremove)
-                    _animations.Remove(t);
 
                 _updateIndex++;
             }
@@ -140,48 +98,6 @@ namespace ClassicUO.Game.Renderer
                 else
                     _updateIndex = 0;
             }
-
-            //if (_updateIndex == 0)
-            //{
-            //    for (int g = 0; g < _animTextureCache.Length; g++)
-            //    for (int group = 0; group < _animTextureCache[g]?.Length; group++)
-            //    for (int dir = 0; dir < _animTextureCache[g][group]?.Length; dir++)
-            //    for (int idx = 0; idx < _animTextureCache[g][group][dir]?.Length; idx++)
-            //        if (World.Ticks - _animTextureCache[g][group][dir][idx]?.Ticks >= TEXTURE_TIME_LIFE)
-            //        {
-            //            _animTextureCache[g][group][dir][idx].Dispose();
-            //            _animTextureCache[g][group][dir][idx] = null;
-            //        }
-
-            //    _updateIndex++;
-            //}
-            //else if (_updateIndex > 0)
-            //{
-            //    void check(in SpriteTexture[] array)
-            //    {
-            //        for (int i = 0; i < array.Length; i++)
-            //            if (World.Ticks - array[i]?.Ticks >= TEXTURE_TIME_LIFE)
-            //            {
-            //                array[i].Dispose();
-            //                array[i] = null;
-            //            }
-
-            //        _updateIndex++;
-            //    }
-
-            //    if (_updateIndex == 1)
-            //        check(_staticTextureCache);
-            //    else if (_updateIndex == 2)
-            //        check(_landTextureCache);
-            //    else if (_updateIndex == 3)
-            //        check(_gumpTextureCache);
-            //    else if (_updateIndex == 4)
-            //        check(_lightTextureCache);
-            //    else if (_updateIndex == 5)
-            //        check(_textmapTextureCache);
-            //    else
-            //        _updateIndex = 0;
-            //}
         }
 
         public static SpriteTexture GetOrCreateAnimTexture(in AnimationFrame frame)
@@ -201,41 +117,7 @@ namespace ClassicUO.Game.Renderer
             return sprite;
         }
 
-        public static SpriteTexture GetOrCreateAnimTexture(in ushort g, in byte group, in byte dir, in int index,
-            in AnimationFrame[] frames)
-        {
-
-            if (!_animTextureCache.TryGetValue(g, out var sprites) || sprites[group] == null || sprites[group][dir] == null 
-                || sprites[group][dir][index] == null)
-            {
-
-                if (sprites == null)
-                {
-                    sprites = new SpriteTexture[100][][];
-                    _animTextureCache[g] = sprites;
-                }
-                if (sprites[group] == null)
-                    sprites[group] = new SpriteTexture[5][];
-                if (sprites[group][dir] == null)
-                    sprites[group][dir] = new SpriteTexture[25];
-
-                if (sprites[group][dir][index] == null)
-                {
-                    SpriteTexture texture = new SpriteTexture(frames[index].Width, frames[index].Heigth, false)
-                    {
-                        Ticks = World.Ticks
-                    };
-
-                    texture.SetData(frames[index].Pixels);
-                    sprites[group][dir][index] = texture;
-                    
-                }
-            }
-
-            sprites[group][dir][index].Ticks = World.Ticks;
-            return sprites[group][dir][index];
-        }
-
+     
         public static SpriteTexture GetOrCreateStaticTexture(in ushort g)
         {
             if (!_staticTextureCache.TryGetValue(g, out var texture))

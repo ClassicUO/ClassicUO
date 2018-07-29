@@ -187,8 +187,7 @@ namespace ClassicUO.Game.Renderer.Views
                     int x = drawX + frame.CenterX;
                     int y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
 
-                    Texture = TextureManager.GetOrCreateAnimTexture(WorldObject.DisplayedGraphic, Animations.AnimGroup,
-                        dir, animIndex, direction.Frames);
+                    Texture = TextureManager.GetOrCreateAnimTexture(frame);
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
                     HueVector = RenderExtentions.GetHueVector(color);
                     base.Draw(spriteBatch, position);
