@@ -435,6 +435,9 @@ namespace ClassicUO.Game.Network
 
         private static void UpdateItem(Packet p)
         {
+            if (World.Player == null)
+                return;
+            
             uint serial = p.ReadUInt();
             Item item = World.GetOrCreateItem(serial & 0x7FFFFFFF);
 
@@ -882,6 +885,9 @@ namespace ClassicUO.Game.Network
 
         private static void UpdateCharacter(Packet p)
         {
+            if (World.Player == null)
+                return;
+            
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
             mobile.Graphic = p.ReadUShort();
 
@@ -923,6 +929,9 @@ namespace ClassicUO.Game.Network
 
         private static void UpdateObject(Packet p)
         {
+            if (World.Player == null)
+                return;
+
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
             mobile.Graphic = p.ReadUShort();
             ushort x = p.ReadUShort();

@@ -148,6 +148,7 @@ namespace ClassicUO
 
             NetClient.PacketReceived += (sender, e) =>
             {
+                Log.Message(LogTypes.Trace, string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
 
                 switch (e.ID)
                 {
