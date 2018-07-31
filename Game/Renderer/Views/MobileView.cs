@@ -16,7 +16,6 @@ namespace ClassicUO.Game.Renderer.Views
 
         public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-
             if (WorldObject.IsDisposed)
                 return false;
 
@@ -31,6 +30,8 @@ namespace ClassicUO.Game.Renderer.Views
             EquipConvData? convertedItem = null;
 
             yOffset = 0;
+
+            int mountOffset = 0;
 
             for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
             {
@@ -47,10 +48,9 @@ namespace ClassicUO.Game.Renderer.Views
                         if (mount != null)
                         {
                             graphic = mount.GetMountAnimation();
-                            int mountedHeightOffset = 0;
 
                             if (graphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                                mountedHeightOffset = Animations.DataIndex[graphic].MountedHeightOffset;
+                                mountOffset = Animations.DataIndex[graphic].MountedHeightOffset;
 
                             animGroup = WorldObject.GetGroupForAnimation(graphic);
                             color = mount.Hue;
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Renderer.Views
 
                     int drawCenterY = frame.CenterY;
                     int drawX;
-                    int drawY = drawCenterY + (int)(WorldObject.Offset.Z / 4 + WorldObject.Position.Z * 4) - 22 -
+                    int drawY = mountOffset + drawCenterY + (int)(WorldObject.Offset.Z / 4 + WorldObject.Position.Z * 4) - 22 -
                                 (int)(WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
 
                     if (IsFlipped)

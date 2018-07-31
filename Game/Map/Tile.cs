@@ -12,6 +12,7 @@ namespace ClassicUO.Game.Map
         private static readonly List<WorldObject> _itemsAtZ = new List<WorldObject>();
         private readonly List<WorldObject> _objectsOnTile;
         private bool _needSort;
+        private LandTiles? _tileData;
 
         public Tile() : base(World.Map)
         {
@@ -26,6 +27,7 @@ namespace ClassicUO.Game.Map
             {
                 if (_needSort)
                 {
+                    //RemoveDuplicates();
                     Sort();
                     _needSort = false;
                 }
@@ -34,15 +36,44 @@ namespace ClassicUO.Game.Map
             }
         }
 
+
         public override Position Position { get; set; }
         public new TileView ViewObject => (TileView) base.ViewObject;
         public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
 
-        public LandTiles TileData => AssetsLoader.TileData.LandData[Graphic];
+        public LandTiles TileData
+        {
+            get
+            {
+                if (!_tileData.HasValue)
+                    _tileData = AssetsLoader.TileData.LandData[Graphic];
+                return _tileData.Value;
+            }
+        }
 
         public void AddWorldObject(in WorldObject obj)
         {
+            //if (obj is Item item)
+            //{
+            //    for (int i = 0; i < _objectsOnTile.Count; i++)
+            //    {
+            //        if (_objectsOnTile[i] is Item item2)
+            //        {
+            //            if (item.Graphic == item2.Graphic && item.Position.Z == item2.Position.Z)
+            //            {
+            //                _objectsOnTile.RemoveAt(i);
+            //                i--;
+            //            }
+            //        }
+            //    }
+            //}
+
             _objectsOnTile.Add(obj);
+
+            if (_objectsOnTile.Count > 100)
+            {
+
+            }
 
             _needSort = true;
         }
@@ -56,17 +87,78 @@ namespace ClassicUO.Game.Map
 
         public void Clear()
         {
-            _objectsOnTile.Clear();
-            _objectsOnTile.Add(this);
+            for (int i = 0; i < _objectsOnTile.Count; i++)
+            {
+                var obj = _objectsOnTile[i];
+
+                if (obj != World.Player && !(obj is Tile))
+                {
+                    int count = _objectsOnTile.Count;
+                    obj.Dispose();
+                    if (count == _objectsOnTile.Count)
+                    {
+                       _objectsOnTile.RemoveAt(i);
+                    }
+
+                    i--;
+                }
+            }
+
             DisposeView();
-            Graphic = 0;
-            Position = Position.Invalid;
+            //Graphic = 0;
+            //Position = Position.Invalid;
         }
 
-        public void Sort()
+        private void RemoveDuplicates()
         {
-            //_objectsOnTile.Sort((s, a) => s.ViewObject.DepthValue.CompareTo(a.ViewObject.DepthValue));
+            int[] toremove = new int[0x100];
+            int index = 0;
 
+            for (int i = 0; i < _objectsOnTile.Count; i++)
+            {
+                for (int j = 0; j < index; j++)
+                {
+                    if (toremove[j] == i)
+                        continue;
+                }
+
+                if (_objectsOnTile[i] is Static st)
+                {
+                    for (int j = i + 1; j < _objectsOnTile.Count; j++)
+                    {
+                        if (_objectsOnTile[i].Position.Z == _objectsOnTile[j].Position.Z)
+                        {
+                            if (_objectsOnTile[j] is Static stj && st.Graphic == stj.Graphic)
+                            {
+                                toremove[index++] = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else if (_objectsOnTile[i] is Item item)
+                {
+                    for (int j = i + 1; j < _objectsOnTile.Count; j++)
+                    {
+                        if (_objectsOnTile[i].Position.Z == _objectsOnTile[j].Position.Z)
+                        {
+                            if (_objectsOnTile[j] is Static stj && item.ItemData.Name == stj.ItemData.Name ||
+                                _objectsOnTile[j] is Item itemj && item.Serial == itemj.Serial)
+                            {
+                                toremove[index++] = j;
+                              
+                            }
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < index; i++)
+                _objectsOnTile.RemoveAt(toremove[i] - i);
+        }
+
+        private void Sort()
+        {
             for (int i = 0; i < _objectsOnTile.Count - 1; i++)
             {
                 int j = i + 1;
@@ -148,7 +240,7 @@ namespace ClassicUO.Game.Map
         // create view only when TileID is initialized
         protected override View CreateView()
         {
-            return Graphic <= 0 ? null : new TileView(this);
+            return /*Graphic <= 0 ? null :*/ new TileView(this);
         }
 
 

@@ -171,7 +171,6 @@ namespace ClassicUO.Game
             if (mobile == null)
                 return false;
 
-
             foreach (Item i in mobile.Items)
                 RemoveItem(i);
             mobile.Items.Clear();

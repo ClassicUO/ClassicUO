@@ -1089,6 +1089,8 @@ namespace ClassicUO.Game.WorldObjects
             }
             else
             {
+                if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection)) return false;
+
                 if (oldDirection == newDirection)
                 {
                     direction = newDirection;
@@ -1194,6 +1196,8 @@ namespace ClassicUO.Game.WorldObjects
         public void ResetSteps()
         {
             _requestedSteps.Clear();
+            _steps.Clear();
+
             SequenceNumber = 0;
             _lastStepRequestedTime = 0;
 

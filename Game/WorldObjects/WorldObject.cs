@@ -50,7 +50,13 @@ namespace ClassicUO.Game.WorldObjects
 
                     _tile = value;
 
-                    _tile?.AddWorldObject(this);
+                    if (_tile != null)
+                        _tile.AddWorldObject(this);
+                    else
+                    {
+                        if (this != World.Player && !IsDisposed)
+                            Dispose();
+                    }
                 }
             }
         }
@@ -80,7 +86,7 @@ namespace ClassicUO.Game.WorldObjects
                 return;
             
             IsDisposed = true;
-
+            DisposeView();
             //if (Deferred != null)
             //    Deferred.Tile = null;
             //Deferred = null;

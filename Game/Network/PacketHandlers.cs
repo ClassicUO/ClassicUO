@@ -545,6 +545,9 @@ namespace ClassicUO.Game.Network
             Direction direction = (Direction) p.ReadByte();
             sbyte z = p.ReadSByte();
 
+
+            Direction dir = direction & Direction.Up;
+
             int endX = 0, endY = 0;
             sbyte endZ = 0;
             Direction endDir = Direction.NONE;
@@ -555,11 +558,10 @@ namespace ClassicUO.Game.Network
 
             if (endX == x && endY == y)
             {
-                if (endDir != direction)
+                if (endDir != dir)
                 {
                     World.Player.ResetRequestedSteps();
-                    World.Player.EnqueueStep(x, y, z, direction & Direction.Up,
-                        (direction & Direction.Running) == Direction.Running);
+                    World.Player.EnqueueStep(x, y, z, dir, (direction & Direction.Running) != 0);
                 }
             }
             else
@@ -996,22 +998,20 @@ namespace ClassicUO.Game.Network
             {
                 mobile.Position = new Position(x, y, z);
                 mobile.Direction = direction;
-            }
+            }         
 
-            if (!mobile.EnqueueStep(x, y, z, direction & Direction.Up,
-                (direction & Direction.Running) == Direction.Running))
+            if (!mobile.EnqueueStep(x, y, z, direction & Direction.Up, (direction & Direction.Running) == Direction.Running))
             {
                 mobile.Position = new Position(x, y, z);
                 mobile.Direction = direction;
                 mobile.ClearSteps();
             }
 
-
             mobile.ProcessDelta();
             if (World.Mobiles.Add(mobile))
                 World.Mobiles.ProcessDelta();
             World.Items.ProcessDelta();
-
+        
             new PClickRequest(mobile).SendToServer();
         }
 

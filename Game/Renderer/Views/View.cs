@@ -23,7 +23,6 @@ namespace ClassicUO.Game.Renderer.Views
         public sbyte SortZ { get; protected set; }
 
         public SpriteTexture Texture { get; set; }
-        public int TextureID { get; set; }
         protected Rectangle Bounds { get; set; }
         protected Vector3 HueVector { get; set; }
         protected bool HasShadow { get; set; }
@@ -50,14 +49,14 @@ namespace ClassicUO.Game.Renderer.Views
 
         protected void PreDraw(in Vector3 position)
         {
-            Tile tile = null;
-            Direction check = Direction.NONE;
+            Tile tile;
+            Direction check;
 
             int offset = (int)Math.Ceiling(TextureWidth / 44f) / 2;
-            if (offset < 1)
+            //if (offset < 1)
                 offset = 1;
 
-            if (WorldObject is Mobile mobile && mobile.IsMoving)
+            if (WorldObject is Mobile mobile && mobile.IsWalking)
             {
                 Direction dir = mobile.Direction;
 
@@ -81,7 +80,7 @@ namespace ClassicUO.Game.Renderer.Views
             }
             else
             {                
-                tile = World.Map.GetTile(WorldObject.Position.X, WorldObject.Position.Y + offset);
+                tile = World.Map.GetTile(WorldObject.Position.X, WorldObject.Position.Y + 1);
                 check = Direction.South;
             }
 
@@ -90,7 +89,12 @@ namespace ClassicUO.Game.Renderer.Views
                 if (WorldObject is Mobile mob)
                 {
                     sbyte z = (sbyte) Pathfinder.GetNextZ(mob, mob.Position, check);
-                    DeferredEntity deferred = new DeferredEntity(mob, position, z);
+                    DeferredEntity deferred = new DeferredEntity(mob, position, z, "MOBILE DEF");
+                    tile.AddWorldObject(deferred);
+                }
+                else
+                {
+                    DeferredEntity deferred = new DeferredEntity(WorldObject, position, WorldObject.Position.Z, "ITEM DEF");
                     tile.AddWorldObject(deferred);
                 }
             }

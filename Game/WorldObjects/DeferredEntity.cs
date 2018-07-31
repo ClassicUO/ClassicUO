@@ -9,20 +9,26 @@ namespace ClassicUO.Game.WorldObjects
 {
     public class DeferredEntity : WorldObject
     {
-        private readonly Entity _entity;
+        private readonly WorldObject _entity;
         private readonly Vector3 _position;
+        private readonly string _description;
 
-        public DeferredEntity(in Entity entity, in Vector3 position, in sbyte z) : base(World.Map)
+        public DeferredEntity(in WorldObject entity, in Vector3 position, in sbyte z, in string des) : base(World.Map)
         {
             _entity = entity;
             _position = position;
             Position = new Position(0xFFFF, 0xFFFF, z);
             //Tile = tile;
+
+            _description = des;
         }
 
 
         protected override View CreateView() => new DeferredView(this, _entity.ViewObject, _position);
 
-        
+        public override string ToString()
+        {
+            return _description;
+        }
     }
 }

@@ -21,11 +21,17 @@ namespace ClassicUO.Game.Renderer.Views
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
+            PreDraw(position);
+            return DrawInternal(spriteBatch, position);
+        }
+
+        public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
+        {
             if (WorldObject.AnimationGraphic != _displayedGraphic)
             {
                 _displayedGraphic = WorldObject.AnimationGraphic;
                 Texture = TextureManager.GetOrCreateStaticTexture(WorldObject.AnimationGraphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4, Texture.Width, Texture.Height);               
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4, Texture.Width, Texture.Height);
             }
 
             HueVector = RenderExtentions.GetHueVector(WorldObject.Hue);

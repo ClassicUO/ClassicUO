@@ -165,16 +165,19 @@ namespace ClassicUO.Game.Map
                     Chunks[cellindex].X != i ||
                     Chunks[cellindex].Y != j)
                 {
-                    if (Chunks[cellindex] == null)
-                    {
-                        Chunks[cellindex] = new FacetChunk((ushort) i, (ushort) j);
-                    }
-                    else
-                    {
+                    if (Chunks[cellindex] != null)
                         Chunks[cellindex].Unload();
-                        Chunks[cellindex].SetTo((ushort) i, (ushort) j);
-                    }
+                        //if (Chunks[cellindex] == null)
+                        //{
+                        //    Chunks[cellindex] = new FacetChunk((ushort) i, (ushort) j);
+                        //}
+                        //else
+                        //{
+                        //    Chunks[cellindex].Unload();
+                        //    Chunks[cellindex].SetTo((ushort) i, (ushort) j);
+                        //}
 
+                    Chunks[cellindex] = new FacetChunk((ushort)i, (ushort)j);
                     Chunks[cellindex].Load(Index);
                 }
             }

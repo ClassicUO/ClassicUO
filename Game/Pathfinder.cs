@@ -43,8 +43,7 @@ namespace ClassicUO.Game
             return GetNextTile(m, m.Position, tileX, tileY, out newDir, out newX, out newY, out newZ);
         }
 
-        public static bool GetNextTile(in Mobile m, in Position current, in int goalX, in int goalY,
-            out Direction direction, out int nextX, out int nextY, out sbyte nextZ)
+        public static bool GetNextTile(in Mobile m, in Position current, in int goalX, in int goalY, out Direction direction, out int nextX, out int nextY, out sbyte nextZ)
         {
             direction = GetNextDirection(current, goalX, goalY);
             Direction initialDir = direction;
@@ -54,14 +53,14 @@ namespace ClassicUO.Game
 
             if (!moveIsOK)
             {
-                direction = (Direction) (((int) direction - 1) & 0x87);
+                direction = (Direction) (((byte) direction - 1) & 0x87);
                 (nextX, nextY) = OffsetTile(current, direction);
                 moveIsOK = CheckMovement(m, current, direction, out nextZ);
             }
 
             if (!moveIsOK)
             {
-                direction = (Direction) (((int) direction + 2) & 0x87);
+                direction = (Direction) (((byte) direction + 2) & 0x87);
                 (nextX, nextY) = OffsetTile(current, direction);
                 moveIsOK = CheckMovement(m, current, direction, out nextZ);
             }
@@ -265,6 +264,9 @@ namespace ClassicUO.Game
                         }
                     }
                 }
+
+                if (_tiles.Count > 0)
+                    _tiles.Clear();
             }
             else
             {
@@ -369,7 +371,7 @@ namespace ClassicUO.Game
                            forceOK;
 
             if (moveIsOk && checkDiagonals)
-                if (!Check(mobile, itemsLeft, staticLeft, xLeft, yLeft, startTop, startZ, out sbyte hold) &&
+                if (!Check(mobile, itemsLeft, staticLeft, xLeft, yLeft, startTop, startZ, out sbyte hold) ||
                     !Check(mobile, itemsRight, staticRight, xRight, yRight, startTop, startZ, out hold))
                     moveIsOk = false;
 
@@ -422,8 +424,7 @@ namespace ClassicUO.Game
             }
         }
 
-        private static void GetStartZ(in WorldObject e, in Position loc, in List<Item> itemList,
-            in List<Static> staticList, out sbyte zLow, out sbyte zTop)
+        private static void GetStartZ(in WorldObject e, in Position loc, in List<Item> itemList, in List<Static> staticList, out sbyte zLow, out sbyte zTop)
         {
             int xCheck = loc.X, yCheck = loc.Y;
 
@@ -435,7 +436,7 @@ namespace ClassicUO.Game
                 return;
             }
 
-            bool landBlocks = TileData.IsImpassable((long) TileData.LandData[mapTile.Graphic].Flags);
+            bool landBlocks = TileData.IsImpassable((long)mapTile.TileData.Flags);
 
             sbyte landLow = 0, landTop = 0;
             int landCenter = World.Map.GetAverageZ((short) xCheck, (short) yCheck, ref landLow, ref landTop);
@@ -617,7 +618,7 @@ namespace ClassicUO.Game
             if (mapTile == null)
                 return false;
 
-            LandTiles id = TileData.LandData[mapTile.Graphic];
+            LandTiles id = mapTile.TileData;
 
             Static[] tiles = mapTile.GetWorldObjects<Static>();
             bool landBlocks = (id.Flags & 0x00000040) != 0;
@@ -911,7 +912,7 @@ namespace ClassicUO.Game
 
         //    Tile tile = World.Map.GetTile(x, y);
 
-        //    var objects = tile.ObjectsOnTiles;
+        //    var objects = tile.ObjectsOnTilesNoSort;
 
         //    foreach (var obj in objects)
         //    {

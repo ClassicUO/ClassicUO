@@ -19,11 +19,6 @@ namespace ClassicUO.Game.Renderer.Views
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            if (_baseView.WorldObject is Mobile mobile)
-            {
-
-            }
-
             return _baseView.DrawInternal(spriteBatch, _position);
         }
     }

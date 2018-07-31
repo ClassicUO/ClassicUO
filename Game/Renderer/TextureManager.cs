@@ -58,7 +58,6 @@ namespace ClassicUO.Game.Renderer
 
         public static void Update()
         {
-
             if (_updateIndex == 0)
             {
                 var list = _animations.Where(s => World.Ticks - s.Value.Ticks >= TEXTURE_TIME_LIFE).ToList();
@@ -79,7 +78,7 @@ namespace ClassicUO.Game.Renderer
                     foreach (var t in toremove)
                     {
                         dict[t.Key].Dispose();
-                        dict[t.Key] = null;
+                        //dict[t.Key] = null;
                         dict.Remove(t.Key);
                     }
                     _updateIndex++;
@@ -132,6 +131,8 @@ namespace ClassicUO.Game.Renderer
                 texture.SetData(pixels);
                 _staticTextureCache[g] = texture;
             }
+            else
+                texture.Ticks = World.Ticks;
 
             return texture;
         }
@@ -148,6 +149,8 @@ namespace ClassicUO.Game.Renderer
                 texture.SetData(pixels);
                 _landTextureCache[g] = texture;
             }
+            else
+                texture.Ticks = World.Ticks;
 
             return texture;
         }
@@ -164,6 +167,8 @@ namespace ClassicUO.Game.Renderer
                 texture.SetData(pixels);
                 _gumpTextureCache[g] = texture;
             }
+            else
+                texture.Ticks = World.Ticks;
 
             return texture;
         }
@@ -180,6 +185,8 @@ namespace ClassicUO.Game.Renderer
                 texture.SetData(pixels);
                 _textmapTextureCache[g] = texture;
             }
+            else
+                texture.Ticks = World.Ticks;
 
             return texture;
         }

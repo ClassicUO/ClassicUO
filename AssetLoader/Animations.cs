@@ -971,11 +971,11 @@ namespace ClassicUO.AssetsLoader
 
             for (int i = 0; i < animDirection.FrameCount; i++)
             {
-                if (animDirection.Frames[i].Pixels != null && animDirection.Frames[i].Pixels.Length > 0)
+                if (animDirection.Frames[i] != null && animDirection.Frames[i].Width > 0 && animDirection.Frames[i].Heigth > 0)
                     continue;
 
                 UOPFrameData frameData = pixelDataOffsets[i + dirFrameStartIdx];
-                if (frameData.DataStart == null || frameData.DataStart == IntPtr.Zero)
+                if (frameData.DataStart == IntPtr.Zero)
                     continue;
 
                 _reader.SetData(frameData.DataStart + (int) frameData.PixelDataOffset);
@@ -987,8 +987,11 @@ namespace ClassicUO.AssetsLoader
                 short imageWidth = _reader.ReadShort();
                 short imageHeight = _reader.ReadShort();
 
-                animDirection.Frames[i].CenterX = imageCenterX;
-                animDirection.Frames[i].CenterY = imageCenterY;
+                animDirection.Frames[i] = new AnimationFrame
+                {
+                    CenterX = imageCenterX,
+                    CenterY = imageCenterY
+                };
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {

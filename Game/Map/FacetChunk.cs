@@ -27,7 +27,7 @@ namespace ClassicUO.Game.Map
 
         public ushort X { get; private set; }
         public ushort Y { get; private set; }
-        public Tile[][] Tiles { get; }
+        public Tile[][] Tiles { get; private set; }
 
 
         public void Load(in int map)
@@ -83,21 +83,6 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        /*public float GetTileZ(in int map, in short x, in short y)
-        {
-            if (x < 0 || y < 0)
-                return -125;
-
-            var blockIndex = GetIndex(map, x / 8, y / 8);
-            if (blockIndex.MapAddress == 0)
-                return -125;
-
-            int mx = x % 8;
-            int my = y % 8;
-
-            return Marshal.PtrToStructure<AssetsLoader.MapBlock>((IntPtr)blockIndex.MapAddress).Cells[my * 8 + mx].Z;
-        }*/
-
         private IndexMap GetIndex(in int map)
         {
             return GetIndex(map, X, Y);
@@ -110,17 +95,26 @@ namespace ClassicUO.Game.Map
         }
 
         // we wants to avoid reallocation, so use a reset method
-        public void SetTo(in ushort x, in ushort y)
-        {
-            X = x;
-            Y = y;
-        }
+        //public void SetTo(in ushort x, in ushort y)
+        //{
+        //    X = x;
+        //    Y = y;
+        //}
 
         public void Unload()
         {
             for (int i = 0; i < 8; i++)
-            for (int j = 0; j < 8; j++)
-                Tiles[i][j].Clear();
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    Tiles[i][j].Clear();
+
+                    Tiles[i][j].Dispose();
+                    Tiles[i][j] = null;
+                }
+            }
+
+            Tiles = null;
         }
     }
 }

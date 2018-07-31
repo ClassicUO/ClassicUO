@@ -415,7 +415,7 @@ namespace ClassicUO
             int renderDimensionDiff = Math.Abs(renderDimensions.X - renderDimensions.Y);
             renderDimensionDiff -= renderDimensionDiff % 2;
 
-            int firstZOffset = World.Player.Position.Z > 0 ? (int) Math.Abs((World.Player.Position.Z + World.Player.Offset.Z) / 11) : 0;
+            int firstZOffset = World.Player.Position.Z > 0 ? (int) Math.Abs((World.Player.Position.Z + World.Player.Offset.Z / 4) / 11) : 0;
 
             Point firstTile = new Point
             {
@@ -473,7 +473,7 @@ namespace ClassicUO
                 }
 
 
-               // (Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center) = GetViewPort();
+                //(Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center) = GetViewPort();
 
                 CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
 
@@ -505,7 +505,7 @@ namespace ClassicUO
                         Tile tile = World.Map.GetTile(firstTileInRow.X - x, firstTileInRow.Y + x);
                         if (tile != null)
                         {
-                            var objects = tile.ObjectsOnTiles;
+                            IReadOnlyList<WorldObject> objects = tile.ObjectsOnTiles;
                             bool draw = true;
 
                             for (int k = 0; k < objects.Count; k++)
@@ -532,13 +532,10 @@ namespace ClassicUO
                                     obj.ViewObject.Draw(_spriteBatch, position);
                             }
 
-                            foreach (var def in toremove)
+                            foreach (WorldObject def in toremove)
                                 tile.RemoveWorldObject(def);
                             toremove.Clear();
                         }
-
-                        //Log.Message(LogTypes.Info, $"FIRST:    {tile.Position.X} {tile.Position.Y}");
-
                     }
                 }
 
