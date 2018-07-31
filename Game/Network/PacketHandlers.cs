@@ -437,37 +437,112 @@ namespace ClassicUO.Game.Network
         {
             if (World.Player == null)
                 return;
-            
-            uint serial = p.ReadUInt();
-            Item item = World.GetOrCreateItem(serial & 0x7FFFFFFF);
 
-            ushort graphic = (ushort) (p.ReadUShort() & 0x3FFF);
-            item.Amount = (serial & 0x80000000) != 0 ? p.ReadUShort() : (ushort) 1;
+            uint serial = p.ReadUInt();
+            ushort count = 0;
+            byte graphicInc = 0;
+            byte direction = 0;
+            ushort hue = 0;
+            byte flags = 0;
+
+            if ((serial & 0x80000000) != 0)
+            {
+                serial &= 0x7FFFFFFF;
+                count = 1;
+            }
+
+            Item item = World.GetOrCreateItem(serial);
+            ushort graphic = p.ReadUShort();
 
             if ((graphic & 0x8000) != 0)
-                item.Graphic = (ushort) (graphic & (0x7FFF + p.ReadSByte()));
+            {
+                graphic &= 0x7FFF;
+                graphicInc = p.ReadByte();
+            }
+
+            if (count > 0)
+                count = p.ReadUShort();
             else
-                item.Graphic = (ushort) (graphic & 0x7FFF);
+                count++;
 
             ushort x = p.ReadUShort();
-            ushort y = p.ReadUShort();
-
             if ((x & 0x8000) != 0)
-                item.Direction = (Direction) p.ReadByte(); //wtf???
+            {
+                x &= 0x7FFF;
+                direction = 1;
+            }
 
-            //item.Position.Set((ushort)(x & 0x7FFF), (ushort)(y & 0x3FFF), p.ReadSByte());
-            item.Position = new Position((ushort) (x & 0x7FFF), (ushort) (y & 0x3FFF), p.ReadSByte());
-
+            ushort y = p.ReadUShort();
             if ((y & 0x8000) != 0)
-                item.Hue = p.ReadUShort();
+            {
+                y &= 0x7FFF;
+                hue = 1;
+            }
 
             if ((y & 0x4000) != 0)
-                item.Flags = (Flags) p.ReadByte();
+            {
+                y &= 0x3FFF;
+                flags = 1;
+            }
 
-            item.IsMulti = item.Graphic >= 0x4000;
+            if (direction > 0)
+                direction = p.ReadByte();
 
-            if (item.IsMulti)
+            sbyte z = p.ReadSByte();
+
+            if (hue > 0)
+                hue = p.ReadUShort();
+
+            if (flags > 0)
+                flags = p.ReadByte();
+
+            if (graphic != 0x2006)
+                graphic += graphicInc;
+
+            item.Graphic = graphic;
+            item.Amount = count;
+            item.Position = new Position(x, y, z);
+            item.Hue = hue;
+            item.Flags = (Flags)flags;
+            item.Direction = (Direction) direction;
+
+            if (graphic >= 0x4000)
+            {
+                item.IsMulti = true;
                 item.Graphic -= 0x4000;
+            }
+
+
+            //uint serial = p.ReadUInt();
+            //Item item = World.GetOrCreateItem(serial & 0x7FFFFFFF);
+
+            //ushort graphic = (ushort) (p.ReadUShort() & 0x3FFF);
+            //item.Amount = (serial & 0x80000000) != 0 ? p.ReadUShort() : (ushort) 1;
+
+            //if ((graphic & 0x8000) != 0)
+            //    item.Graphic = (ushort) (graphic & (0x7FFF + p.ReadSByte()));
+            //else
+            //    item.Graphic = (ushort) (graphic & 0x7FFF);
+
+            //ushort x = p.ReadUShort();
+            //ushort y = p.ReadUShort();
+
+            //if ((x & 0x8000) != 0)
+            //    item.Direction = (Direction) p.ReadByte(); //wtf???
+
+            ////item.Position.Set((ushort)(x & 0x7FFF), (ushort)(y & 0x3FFF), p.ReadSByte());
+            //item.Position = new Position((ushort) (x & 0x7FFF), (ushort) (y & 0x3FFF), p.ReadSByte());
+
+            //if ((y & 0x8000) != 0)
+            //    item.Hue = p.ReadUShort();
+
+            //if ((y & 0x4000) != 0)
+            //    item.Flags = (Flags) p.ReadByte();
+
+            //item.IsMulti = item.Graphic >= 0x4000;
+
+            //if (item.IsMulti)
+            //    item.Graphic -= 0x4000;
 
             item.Container = Serial.Invalid;
             item.ProcessDelta();
@@ -1841,12 +1916,13 @@ namespace ClassicUO.Game.Network
             byte type = p.ReadByte();
             Item item = World.GetOrCreateItem(p.ReadUInt());
 
-            item.Graphic = p.ReadUShort();          
-            item.Direction = (Direction) p.ReadByte();
+            item.Graphic = p.ReadUShort();
+            ushort graphicInc = p.ReadByte();
+            //item.Direction = (Direction)p.ReadByte();
             item.Amount = p.ReadUShort();
             p.Skip(2); //amount again? wtf???
             item.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
-            p.Skip(1); //light? wtf?
+            item.Direction = (Direction)p.ReadByte();
             item.Hue = p.ReadUShort();
             item.Flags = (Flags) p.ReadByte();
 
@@ -1861,6 +1937,9 @@ namespace ClassicUO.Game.Network
                 //item.Graphic |= 0x4000;
                 item.IsMulti = true;
             }
+
+            if (item.Graphic != 0x2006)
+                item.Graphic += graphicInc;
 
             item.ProcessDelta();
             if (World.Items.Add(item))

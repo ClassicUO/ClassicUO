@@ -199,7 +199,7 @@ namespace ClassicUO.Game.WorldObjects
 
         public Multi Multi { get; private set; }
 
-        public bool IsCorpse => MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) || Graphic == 0x2006;
+        public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
 
         public override bool Exists => World.Contains(Serial);
 
@@ -514,6 +514,10 @@ namespace ClassicUO.Game.WorldObjects
 
                         ref AnimationDirection direction =
                             ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+
+                        Animations.AnimID = id;
+                        Animations.AnimGroup = (byte)animGroup;
+                        Animations.Direction = dir;
 
                         if (direction.FrameCount == 0)
                             Animations.LoadDirectionGroup(ref direction);

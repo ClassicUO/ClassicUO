@@ -23,8 +23,8 @@ namespace ClassicUO.Game.Renderer.Views
                 Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4,
                     Texture.Width, Texture.Height);
 
-                if (AssetsLoader.TileData.IsFoliage((long)WorldObject.ItemData.Flags))
-                    HueVector = RenderExtentions.GetHueVector(0, false, true, false);
+                //if (AssetsLoader.TileData.IsFoliage((long)WorldObject.ItemData.Flags))
+                //    HueVector = RenderExtentions.GetHueVector(0, false, true, false);
             }
 
             //var vv = position;

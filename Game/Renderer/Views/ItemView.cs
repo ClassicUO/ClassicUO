@@ -15,6 +15,7 @@ namespace ClassicUO.Game.Renderer.Views
             if (TileData.IsWet((long) item.ItemData.Flags))
                 SortZ++;
 
+
             if (!item.IsCorpse)
             {
                 AllowedToDraw = item.Graphic > 2 && item.DisplayedGraphic > 2 && !IsNoDrawable(item.Graphic);
@@ -25,7 +26,7 @@ namespace ClassicUO.Game.Renderer.Views
                 if ((item.Direction & Direction.Running) != 0)
                 {
                     item.UsedLayer = true;
-                    item.Direction &= Direction.Running;
+                    item.Direction &= (Direction)0x7F;
                 }
                 else
                 {
@@ -50,54 +51,61 @@ namespace ClassicUO.Game.Renderer.Views
                 return false;
 
             if (WorldObject.IsCorpse)
-                return DrawCorpse(spriteBatch, position);
-
-
-            if (_originalGraphic != WorldObject.DisplayedGraphic || Texture == null || Texture.IsDisposed)
             {
-                _originalGraphic = WorldObject.DisplayedGraphic;
-                Texture = TextureManager.GetOrCreateStaticTexture(_originalGraphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4,
-                    Texture.Width, Texture.Height);
+                PreDraw(position);
+                return DrawInternal(spriteBatch, position);
             }
 
-            if (_hue != WorldObject.Hue)
+            if (WorldObject.Effect == null)
             {
-                _hue = WorldObject.Hue;
-                HueVector = RenderExtentions.GetHueVector(_hue,
-                    TileData.IsPartialHue((long) WorldObject.ItemData.Flags), false, false);
+
+
+
+                if (_originalGraphic != WorldObject.DisplayedGraphic || Texture == null || Texture.IsDisposed)
+                {
+                    _originalGraphic = WorldObject.DisplayedGraphic;
+                    Texture = TextureManager.GetOrCreateStaticTexture(_originalGraphic);
+                    Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4,
+                        Texture.Width, Texture.Height);
+                }
+
+                if (_hue != WorldObject.Hue)
+                {
+                    _hue = WorldObject.Hue;
+                    HueVector = RenderExtentions.GetHueVector(_hue,
+                        TileData.IsPartialHue((long) WorldObject.ItemData.Flags), false, false);
+                }
+
+
+
+                if (WorldObject.Amount > 1 && TileData.IsStackable((long) WorldObject.ItemData.Flags) &&
+                    WorldObject.DisplayedGraphic == WorldObject.Graphic)
+                {
+                    Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
+                    base.Draw(spriteBatch, offsetDrawPosition);
+                }
+
+                //var vv = position;
+                //vv.Z = WorldObject.Position.Z;
+
+                //if (AssetsLoader.TileData.IsBackground((long)WorldObject.ItemData.Flags) &&
+                //    AssetsLoader.TileData.IsSurface((long)WorldObject.ItemData.Flags))
+                //    vv.Z += 4;
+                //else if (AssetsLoader.TileData.IsBackground((long)WorldObject.ItemData.Flags))
+                //    vv.Z += 2;
+                //else if (AssetsLoader.TileData.IsSurface((long)WorldObject.ItemData.Flags))
+                //    vv.Z += 5;
+                //else
+                //    vv.Z += 6;
+
+                //CalculateRenderDepth((sbyte)vv.Z, 20, WorldObject.ItemData.Height, (byte)(WorldObject.Serial & 0xFF));
+
+
+                base.Draw(spriteBatch, position);
             }
-
-           
-
-            if (WorldObject.Amount > 1 && TileData.IsStackable((long)WorldObject.ItemData.Flags) &&
-                WorldObject.DisplayedGraphic == WorldObject.Graphic)
+            else
             {
-                Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
-                base.Draw(spriteBatch, offsetDrawPosition);
-            }
-
-            //var vv = position;
-            //vv.Z = WorldObject.Position.Z;
-
-            //if (AssetsLoader.TileData.IsBackground((long)WorldObject.ItemData.Flags) &&
-            //    AssetsLoader.TileData.IsSurface((long)WorldObject.ItemData.Flags))
-            //    vv.Z += 4;
-            //else if (AssetsLoader.TileData.IsBackground((long)WorldObject.ItemData.Flags))
-            //    vv.Z += 2;
-            //else if (AssetsLoader.TileData.IsSurface((long)WorldObject.ItemData.Flags))
-            //    vv.Z += 5;
-            //else
-            //    vv.Z += 6;
-
-            //CalculateRenderDepth((sbyte)vv.Z, 20, WorldObject.ItemData.Height, (byte)(WorldObject.Serial & 0xFF));
-
-            base.Draw(spriteBatch, position);
-
-            WorldObject.Effect?.ViewObject.Draw(spriteBatch, position);
-            if (WorldObject.IsMulti)
-            {
-                MessageOverHead(spriteBatch, position);
+                WorldObject.Effect.ViewObject.Draw(spriteBatch, position);
             }
             return true;
         }
@@ -106,14 +114,14 @@ namespace ClassicUO.Game.Renderer.Views
         {
             base.MessageOverHead(in spriteBatch, in position);
             Text.Draw((SpriteBatchUI)spriteBatch, new Point((int)position.X, (int)position.Y));
-
         }
 
-        private bool DrawCorpse(in SpriteBatch3D spriteBatch, in Vector3 position)
+
+        public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             spriteBatch.GetZ();
 
-            byte dir = (byte) ((byte) WorldObject.Layer & 0x7F & 7);
+            byte dir = (byte)(((byte)WorldObject.Layer & 0x7F) & 7);
             bool mirror = false;
 
             Animations.GetAnimDirection(ref dir, ref mirror);
@@ -122,7 +130,7 @@ namespace ClassicUO.Game.Renderer.Views
 
             Animations.Direction = dir;
 
-            byte animIndex = (byte) WorldObject.AnimIndex;
+            byte animIndex = (byte)WorldObject.AnimIndex;
             Graphic graphic = 0;
             EquipConvData? convertedItem = null;
             Hue color = 0;
@@ -142,7 +150,7 @@ namespace ClassicUO.Game.Renderer.Views
                 }
                 else
                 {
-                    Item item = WorldObject.Equipment[(int) layer];
+                    Item item = WorldObject.Equipment[(int)layer];
                     if (item == null)
                         continue;
 
@@ -160,13 +168,14 @@ namespace ClassicUO.Game.Renderer.Views
 
                 Animations.AnimID = graphic;
 
-                ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup]
-                    .Direction[Animations.Direction];
+                ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup].Direction[Animations.Direction];
                 if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction))
                     return false;
 
                 int fc = direction.FrameCount;
-                if (fc > 0 && animIndex >= fc) animIndex = (byte) (fc - 1);
+
+                if (fc > 0 && animIndex >= fc)
+                    animIndex = (byte) (fc - 1);
 
                 if (animIndex < direction.FrameCount)
                 {
@@ -197,9 +206,15 @@ namespace ClassicUO.Game.Renderer.Views
             return true;
         }
 
+
         public override void Update(in double frameMS)
         {
-            WorldObject.Effect?.UpdateAnimation(frameMS);
+            if (WorldObject.IsCorpse)
+            {
+                WorldObject.ProcessAnimation();
+            }
+            else
+                WorldObject.Effect?.UpdateAnimation(frameMS);
         }
 
         protected override void MousePick(in SpriteVertex[] vertex)
