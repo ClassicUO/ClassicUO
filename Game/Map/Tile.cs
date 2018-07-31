@@ -11,6 +11,7 @@ namespace ClassicUO.Game.Map
     {
         private static readonly List<WorldObject> _itemsAtZ = new List<WorldObject>();
         private readonly List<WorldObject> _objectsOnTile;
+        private bool _needSort;
 
         public Tile() : base(World.Map)
         {
@@ -19,7 +20,20 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public IReadOnlyList<WorldObject> ObjectsOnTiles => _objectsOnTile;
+        public IReadOnlyList<WorldObject> ObjectsOnTiles
+        {
+            get
+            {
+                if (_needSort)
+                {
+                    Sort();
+                    _needSort = false;
+                }
+
+                return _objectsOnTile;
+            }
+        }
+
         public override Position Position { get; set; }
         public new TileView ViewObject => (TileView) base.ViewObject;
         public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
@@ -30,13 +44,15 @@ namespace ClassicUO.Game.Map
         {
             _objectsOnTile.Add(obj);
 
-            Sort();
+            _needSort = true;
         }
 
         public void RemoveWorldObject(in WorldObject obj)
         {
             _objectsOnTile.Remove(obj);
         }
+
+        public void ForceSort() => _needSort = true;
 
         public void Clear()
         {

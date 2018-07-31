@@ -17,7 +17,7 @@ namespace ClassicUO.Input
         public static event EventHandler<MouseWheelEventArgs> MouseWheel;
 
         public static void Update()
-        {
+        {      
             MouseState current = Mouse.GetState();
 
             if (IsMouseButtonDown(current.LeftButton, _prevMouseState.LeftButton))

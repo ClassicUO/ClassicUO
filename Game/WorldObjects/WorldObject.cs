@@ -81,33 +81,15 @@ namespace ClassicUO.Game.WorldObjects
             
             IsDisposed = true;
 
-            if (Deferred != null)
-                Deferred.Tile = null;
-            Deferred = null;
+            //if (Deferred != null)
+            //    Deferred.Tile = null;
+            //Deferred = null;
             Tile = null;
         }
 
-        public DeferredEntity Deferred { get; set; }
+        //public DeferredEntity Deferred { get; set; }
 
-        protected virtual void OnTileChanged(int x, int y)
-        {
-            if (Map != null)
-            {
-                if (this == World.Player && Map.Index >= 0)
-                {
-                    Map.Center = new Point(x, y);
-                    Log.Message(LogTypes.Info, Map.Center.ToString());
-                }
-
-                Tile = Map.GetTile(x, y);
-            }
-            else
-            {
-                if (this != World.Player)
-                    Dispose();
-            }
-        }
-
+       
         //public void Dispose()
         //{
         //    Dispose(true);

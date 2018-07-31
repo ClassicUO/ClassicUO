@@ -13,25 +13,22 @@ namespace ClassicUO.Game.Renderer.Views
 
         public new Mobile WorldObject => (Mobile) base.WorldObject;
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+
+        public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
+
             if (WorldObject.IsDisposed)
                 return false;
 
             spriteBatch.GetZ();
 
             bool mirror = false;
-            byte dir = (byte) WorldObject.GetDirectionForAnimation();
+            byte dir = (byte)WorldObject.GetDirectionForAnimation();
             Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
             byte animGroup = 0;
-            Hue color = 0;
-            Graphic graphic = 0;
             EquipConvData? convertedItem = null;
-
-            byte order = 0;
-            byte ss;
 
             yOffset = 0;
 
@@ -39,11 +36,14 @@ namespace ClassicUO.Game.Renderer.Views
             {
                 Layer layer = LayerOrder.UsedLayers[dir, i];
 
+                Hue color = 0;
+                Graphic graphic = 0;
+
                 if (layer == Layer.Mount)
                 {
                     if (WorldObject.IsHuman)
                     {
-                        Item mount = WorldObject.Equipment[(int) Layer.Mount];
+                        Item mount = WorldObject.Equipment[(int)Layer.Mount];
                         if (mount != null)
                         {
                             graphic = mount.GetMountAnimation();
@@ -54,9 +54,6 @@ namespace ClassicUO.Game.Renderer.Views
 
                             animGroup = WorldObject.GetGroupForAnimation(graphic);
                             color = mount.Hue;
-
-                            order = 29;
-                            ss = (byte)(mount.Serial & 0xFF);
                         }
                         else
                         {
@@ -73,16 +70,13 @@ namespace ClassicUO.Game.Renderer.Views
                     graphic = WorldObject.GetGraphicForAnimation();
                     animGroup = WorldObject.GetGroupForAnimation();
                     color = WorldObject.Hue;
-
-                    order = 30;
-                    ss = (byte)(WorldObject.Serial & 0xFF);
                 }
                 else
                 {
                     if (!WorldObject.IsHuman)
                         continue;
 
-                    Item item = WorldObject.Equipment[(int) layer];
+                    Item item = WorldObject.Equipment[(int)layer];
                     if (item == null)
                         continue;
 
@@ -96,9 +90,6 @@ namespace ClassicUO.Game.Renderer.Views
                         }
 
                     color = item.Hue;
-
-                    order = 40;
-                    ss = (byte)(item.Serial & 0xFF);
                 }
 
 
@@ -128,12 +119,12 @@ namespace ClassicUO.Game.Renderer.Views
                     int drawCenterY = frame.CenterY;
                     int drawX;
                     int drawY = drawCenterY + (int)(WorldObject.Offset.Z / 4 + WorldObject.Position.Z * 4) - 22 -
-                                (int) (WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
+                                (int)(WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
 
                     if (IsFlipped)
-                        drawX = -22 + (int) WorldObject.Offset.X;
+                        drawX = -22 + (int)WorldObject.Offset.X;
                     else
-                        drawX = -22 - (int) WorldObject.Offset.X;
+                        drawX = -22 - (int)WorldObject.Offset.X;
 
 
                     int x = drawX + frame.CenterX;
@@ -152,10 +143,15 @@ namespace ClassicUO.Game.Renderer.Views
                     //    yOffset = y;
 
 
-                    //Texture = TextureManager.GetOrCreateAnimTexture(graphic, Animations.AnimGroup, dir, animIndex, direction.Frames);
                     Texture = TextureManager.GetOrCreateAnimTexture(frame);
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
                     HueVector = RenderExtentions.GetHueVector(color);
+
+
+                    if ((layer == Layer.Mount || (!WorldObject.IsHuman && layer == Layer.Invalid)) && TextureWidth != Texture.Width)
+                    {
+                        TextureWidth = Texture.Width;
+                    }
 
                     if (layer == Layer.Invalid)
                         yOffset = y;
@@ -184,6 +180,12 @@ namespace ClassicUO.Game.Renderer.Views
             //MessageOverHead(spriteBatch, vv);
 
             return true;
+        }
+
+        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        {
+            PreDraw(position);
+            return DrawInternal(spriteBatch, position);
         }
 
         private int yOffset;

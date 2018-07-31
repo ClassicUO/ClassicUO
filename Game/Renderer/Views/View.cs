@@ -1,5 +1,6 @@
 ﻿using System;
 using ClassicUO.AssetsLoader;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
 
@@ -29,6 +30,8 @@ namespace ClassicUO.Game.Renderer.Views
         protected bool IsFlipped { get; set; }
         protected float Rotation { get; set; }
 
+        protected int TextureWidth { get; set; } = 1;
+
         protected TextRenderer Text { get; } = new TextRenderer
         {
             Color = 33,
@@ -43,6 +46,54 @@ namespace ClassicUO.Game.Renderer.Views
 
         public virtual void Update(in double frameMS)
         {
+        }
+
+        protected void PreDraw(in Vector3 position)
+        {
+            Tile tile = null;
+            Direction check = Direction.NONE;
+
+            int offset = (int)Math.Ceiling(TextureWidth / 44f) / 2;
+            if (offset < 1)
+                offset = 1;
+
+            if (WorldObject is Mobile mobile && mobile.IsMoving)
+            {
+                Direction dir = mobile.Direction;
+
+                if ((dir & Direction.Up) == Direction.Left ||
+                    (dir & Direction.Up) == Direction.South ||
+                    (dir & Direction.Up) == Direction.East)
+                {
+                    tile = World.Map.GetTile(WorldObject.Position.X, WorldObject.Position.Y + offset);
+                    check = dir & Direction.Up;
+                }
+                else if ((dir & Direction.Up) == Direction.Down)
+                {
+                    tile = World.Map.GetTile(WorldObject.Position.X + offset, WorldObject.Position.Y + offset);
+                    check = Direction.Down;
+                }
+                else
+                {
+                    tile = World.Map.GetTile(WorldObject.Position.X + offset, WorldObject.Position.Y);
+                    check = Direction.East;
+                }
+            }
+            else
+            {                
+                tile = World.Map.GetTile(WorldObject.Position.X, WorldObject.Position.Y + offset);
+                check = Direction.South;
+            }
+
+            if (tile != null)
+            {
+                if (WorldObject is Mobile mob)
+                {
+                    sbyte z = (sbyte) Pathfinder.GetNextZ(mob, mob.Position, check);
+                    DeferredEntity deferred = new DeferredEntity(mob, position, z);
+                    tile.AddWorldObject(deferred);
+                }
+            }
         }
 
         public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
@@ -123,6 +174,11 @@ namespace ClassicUO.Game.Renderer.Views
             MousePick(vertex);
 
             return true;
+        }
+
+        public virtual bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
+        {
+            return false;
         }
 
         public ulong DepthValue { get; private set; }

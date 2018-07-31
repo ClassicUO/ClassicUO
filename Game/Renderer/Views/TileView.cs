@@ -109,7 +109,7 @@ namespace ClassicUO.Game.Renderer.Views
                 if (sort != SortZ)
                 {
                     SortZ = sort;
-                    map.GetTile((short) WorldObject.Position.X, (short) WorldObject.Position.Y).Sort() /*.ForceSort()*/;
+                    map.GetTile((short) WorldObject.Position.X, (short) WorldObject.Position.Y).ForceSort();
                 }
             }
 

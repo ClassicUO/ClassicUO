@@ -418,24 +418,34 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
-        protected override void OnTileChanged(int x, int y)
-        {
-            base.OnTileChanged(x, y);
-            if (Tile == null)
-                return;
-        }
-
-
         public void ClearSteps()
         {
             _steps.Clear();
             Offset = Vector3.Zero;
         }
 
+
+        public void GetNextZ(out int x, out int y, out sbyte z, out Direction dir)
+        {
+            if (_steps.Count > 0)
+            {
+                var step = _steps.Front();
+                dir = (Direction)step.Direction;
+                x = step.X;
+                y = step.Y;
+                z = step.Z;
+                return;
+            }
+            dir = Direction;
+            x = Position.X;
+            y = Position.Y;
+            z = Position.Z;
+        }
+
         public bool EnqueueStep(in int x, in int y, in sbyte z, in Direction direction, in bool run)
         {
-            if (Deferred != null)
-                Deferred.Tile = null;
+            //if (Deferred != null)
+            //    Deferred.Tile = null;
 
             if (_steps.Count >= MAX_STEP_COUNT) return false;
 
@@ -589,10 +599,10 @@ namespace ClassicUO.Game.WorldObjects
                             (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
 
 
-                        if (Deferred?.Tile != null)
-                            Deferred.Tile = null;
-                        Tile tile = World.Map.GetTile(step.X, step.Y);
-                        Deferred = new DeferredEntity(this, step.Z, tile);
+                        //if (Deferred?.Tile != null)
+                        //    Deferred.Tile = null;
+                        //Tile tile = World.Map.GetTile(step.X, step.Y);
+                        //Deferred = new DeferredEntity(this, step.Z, tile);
 
                         turnOnly = false;
                     }
@@ -617,10 +627,10 @@ namespace ClassicUO.Game.WorldObjects
                         }
 
 
-                        if (Deferred != null)
-                            Deferred.Tile = null;
-                        Deferred = null;
-                        
+                        //if (Deferred != null)
+                        //    Deferred.Tile = null;
+                        //Deferred = null;
+
 
                         Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
                         Direction = (Direction) step.Direction;

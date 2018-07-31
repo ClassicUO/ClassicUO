@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using ClassicUO.AssetsLoader;
 using ClassicUO.Configuration;
@@ -148,7 +149,7 @@ namespace ClassicUO
 
             NetClient.PacketReceived += (sender, e) =>
             {
-                Log.Message(LogTypes.Trace, string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
+                //Log.Message(LogTypes.Trace, string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
 
                 switch (e.ID)
                 {
@@ -225,7 +226,10 @@ namespace ClassicUO
 
             NetClient.Socket.Slice();
             TextureManager.Update();
-            MouseManager.Update();
+
+            if (IsActive)
+                MouseManager.Update();
+
             _gameCursor.Update(gameTime.TotalGameTime.Ticks);
 
             if (World.Map != null && World.Player != null)
@@ -404,8 +408,8 @@ namespace ClassicUO
 
             Point renderDimensions = new Point
             {
-                X = _graphics.PreferredBackBufferWidth / scale / 44 + 6,
-                Y = _graphics.PreferredBackBufferHeight / scale / 44 + 10
+                X = _graphics.PreferredBackBufferWidth / scale / 44 + 3,
+                Y = _graphics.PreferredBackBufferHeight / scale / 44 + 6
             };
 
             int renderDimensionDiff = Math.Abs(renderDimensions.X - renderDimensions.Y);
@@ -438,7 +442,7 @@ namespace ClassicUO
                     + renderDimensionDiff * 22f,
 
                 Y = (_graphics.PreferredBackBufferHeight / scale / 2 - renderDimensions.Y * 44 / 2)
-                    + (World.Player.Position.Z + World.Player.Offset.Z) * 4
+                    + (World.Player.Position.Z + World.Player.Offset.Z / 4) * 4
                     - (int) (World.Player.Offset.Y * 1)
                     - (firstTile.X + firstTile.Y) * 22f
                     - 22f
@@ -469,162 +473,177 @@ namespace ClassicUO
                 }
 
 
-                (Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center) = GetViewPort();
+               // (Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center) = GetViewPort();
 
                 CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
 
-                //(Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort2();
+                (Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort2();
 
                 _spriteBatch.BeginDraw();
                 _spriteBatch.SetLightIntensity(World.Light.IsometricLevel);
                 _spriteBatch.SetLightDirection(World.Light.IsometricDirection);
 
+                List<WorldObject> toremove = new List<WorldObject>();
 
-                //for (int y = 0; y < renderDimensions.Y * 2 + 1 + 10; y++)
-                //{
-                //    Vector3 position = new Vector3
-                //    {
-                //        X = (firstTile.X - firstTile.Y + y % 2) * 22f + renderOffset.X,
-                //        Y = (firstTile.X + firstTile.Y + y) * 22f + renderOffset.Y
-                //    };
+                //int minX = minChunkTile.X;
+                //int minY = minChunkTile.Y;
+                //int maxX = maxChunkTile.X;
+                //int maxY = maxChunkTile.Y;
 
-                //    Point firstTileInRow = new Point(firstTile.X + ((y + 1) / 2), firstTile.Y + (y / 2));
-
-                //    for (int x = 0; x < renderDimensions.X + 1; x++, position.X -= 44f)
-                //    {
-                //        Tile tile = World.Map.GetTile(firstTileInRow.X - x, firstTileInRow.Y + x);
-                //        if (tile != null)
-                //        {
-                //            for (int k = 0; k < tile.ObjectsOnTiles.Count; k++)
-                //            {
-                //                var obj = tile.ObjectsOnTiles[k];
-
-                //                obj.ViewObject.Draw(_spriteBatch, position);
-                //            }
-                //        }
-                //    }
-                //}
-
-                int minX = minChunkTile.X;
-                int minY = minChunkTile.Y;
-                int maxX = maxChunkTile.X;
-                int maxY = maxChunkTile.Y;
-
-                int mapBlockHeight = Map.MapBlocksSize[World.Map.Index][1];
-
-
-                Vector3 playerVector = new Vector3(World.Player.Position.X, World.Player.Position.Y, World.Player.Position.Z);
-
-                Vector3 camera = new Vector3
+                for (int y = 0; y < renderDimensions.Y * 2 + 1 + 10; y++)
                 {
-                    X = maxX,
-                    Y = maxY,
-                };
-                camera.Z = Vector3.Distance(playerVector, camera);
-
-
-                Vector3 off = new Vector3(offset.X, offset.Y, 0);
-
-                //foreach (Mobile mobile in World.Mobiles)
-                //{
-                //    mobile.ViewObject.Draw(_spriteBatch, mobile.ScreenPosition - off);
-                //}
-
-
-                for (int i = 0; i < 2; i++)
-                {
-                    int minValue = minY;
-                    int maxValue = maxY;
-
-                    if (i > 0)
+                    Vector3 position = new Vector3
                     {
-                        minValue = minX;
-                        maxValue = maxX;
-                    }
+                        X = (firstTile.X - firstTile.Y + y % 2) * 22f + renderOffset.X,
+                        Y = (firstTile.X + firstTile.Y + y) * 22f + renderOffset.Y
+                    };
 
-                    for (int lead = minValue; lead < maxValue; lead++)
+                    Point firstTileInRow = new Point(firstTile.X + (y + 1) / 2, firstTile.Y + y / 2);
+
+                    for (int x = 0; x < renderDimensions.X + 1; x++, position.X -= 44f)
                     {
-                        int x = minX;
-                        int y = lead;
-
-                        if (i > 0)
+                        Tile tile = World.Map.GetTile(firstTileInRow.X - x, firstTileInRow.Y + x);
+                        if (tile != null)
                         {
-                            x = lead;
-                            y = maxY;
-                        }
-
-                        while (true)
-                        {
-                            if (x < minX || x > maxX || y < minY || y > maxY)
-                                break;
-
+                            var objects = tile.ObjectsOnTiles;
                             bool draw = true;
 
-                            Tile tile = World.Map.GetTile((short)x, (short)y);
-
-                            if (tile != null)
+                            for (int k = 0; k < objects.Count; k++)
                             {
-                                //Vector3 position = new Vector3(
-                                //    (x - y) * 22f - offset.X,
-                                //    (x + y) * 22f - offset.Y, 0);
+                                var obj = objects[k];
 
+                                if (obj is DeferredEntity)
+                                    toremove.Add(obj);
 
-                                for (int k = 0; k < tile.ObjectsOnTiles.Count; k++)
+                                if (!drawTerrain)
                                 {
-
-                                    WorldObject obj = tile.ObjectsOnTiles[k];
-
-                                    Vector3 vv = new Vector3(obj.ScreenPosition.X - offset.X, obj.ScreenPosition.Y - offset.Y, obj.ScreenPosition.Z);
-
-
-                                    obj.ViewObject.Draw(_spriteBatch, vv);
-
-                                    //position.Z = obj.Position.Z * 4;
-
-                                    //Vector3 objWorldCoordinates = new Vector3(obj.Position.X, obj.Position.Y, obj.Position.Z);
-
-                                    //Vector3 position = new Vector3
-                                    //{
-                                    //    X = obj.ScreenPosition.X - offset.X,
-                                    //    Y = obj.ScreenPosition.Y - offset.Y,
-                                    //    Z = obj.ScreenPosition.Z - Vector3.Distance(camera, objWorldCoordinates)
-                                    //};
-
-
-                                    //obj.ViewObject.Draw(_spriteBatch, position);
-
-
-                                    //WorldObject o = tile.ObjectsOnTiles[k];
-
-                                    //Vector3 position = new Vector3()
-                                    //{
-                                    //    X = o.ScreenPosition.X - offset.X,
-                                    //    Y = o.ScreenPosition.Y - offset.Y,
-                                    //};
-
-
-                                    //if (!drawTerrain)
-                                    //    if (o is Tile || o.Position.Z > tile.Position.Z)
-                                    //        draw = false;
-
-                                    //if ((o.Position.Z >= maxItemZ ||
-                                    //     maxItemZ != 255 &&
-                                    //     (o is Item item && TileData.IsRoof((long)item.ItemData.Flags) ||
-                                    //      o is Static st && TileData.IsRoof((long)st.ItemData.Flags)))
-                                    //    && !(o is Tile))
-                                    //    continue;
-
-
-                                    //if (draw) o.ViewObject.Draw(_spriteBatch, position);
+                                    if (obj is Tile || obj.Position.Z > tile.Position.Z)
+                                        draw = false;
                                 }
+
+                                if ((obj.Position.Z >= maxItemZ ||
+                                     maxItemZ != 255 &&
+                                     (obj is Item item && TileData.IsRoof((long)item.ItemData.Flags) ||
+                                      obj is Static st && TileData.IsRoof((long)st.ItemData.Flags)))
+                                    && !(obj is Tile))
+                                    continue;
+
+                                if (draw)
+                                    obj.ViewObject.Draw(_spriteBatch, position);
                             }
 
-                            x++;
-                            y--;
+                            foreach (var def in toremove)
+                                tile.RemoveWorldObject(def);
+                            toremove.Clear();
                         }
+
+                        //Log.Message(LogTypes.Info, $"FIRST:    {tile.Position.X} {tile.Position.Y}");
+
                     }
                 }
 
+
+                //for (int i = 0; i < 2; i++)
+                //{
+                //    int minValue = minY;
+                //    int maxValue = maxY;
+
+                //    if (i > 0)
+                //    {
+                //        minValue = minX;
+                //        maxValue = maxX;
+                //    }
+
+                //    for (int lead = minValue; lead < maxValue; lead++)
+                //    {
+                //        int x = minX;
+                //        int y = lead;
+
+                //        if (i > 0)
+                //        {
+                //            x = lead;
+                //            y = maxY;
+                //        }
+
+                //        while (true)
+                //        {
+                //            if (x < minX || x > maxX || y < minY || y > maxY)
+                //                break;
+
+                //            bool draw = true;
+
+                //            Tile tile = World.Map.GetTile((short)x, (short)y);
+
+                //            if (tile != null)
+                //            {
+                //                //Vector3 position = new Vector3(
+                //                //    (x - y) * 22f - offset.X,
+                //                //    (x + y) * 22f - offset.Y, 0);
+
+                //                var objects = tile.ObjectsOnTiles;
+                //                for (int k = 0; k < objects.Count; k++)
+                //                {
+
+                //                    WorldObject obj = objects[k];
+
+                //                    Vector3 vv = new Vector3(obj.ScreenPosition.X - offset.X, obj.ScreenPosition.Y - offset.Y, obj.ScreenPosition.Z);
+
+                //                    if (obj is DeferredEntity)
+                //                        toremove.Add(obj);
+
+                //                    obj.ViewObject.Draw(_spriteBatch, vv);
+
+                //                    //position.Z = obj.Position.Z * 4;
+
+                //                    //Vector3 objWorldCoordinates = new Vector3(obj.Position.X, obj.Position.Y, obj.Position.Z);
+
+                //                    //Vector3 position = new Vector3
+                //                    //{
+                //                    //    X = obj.ScreenPosition.X - offset.X,
+                //                    //    Y = obj.ScreenPosition.Y - offset.Y,
+                //                    //    Z = obj.ScreenPosition.Z - Vector3.Distance(camera, objWorldCoordinates)
+                //                    //};
+
+
+                //                    //obj.ViewObject.Draw(_spriteBatch, position);
+
+
+                //                    //WorldObject o = tile.ObjectsOnTiles[k];
+
+                //                    //Vector3 position = new Vector3()
+                //                    //{
+                //                    //    X = o.ScreenPosition.X - offset.X,
+                //                    //    Y = o.ScreenPosition.Y - offset.Y,
+                //                    //};
+
+
+                //                    //if (!drawTerrain)
+                //                    //    if (o is Tile || o.Position.Z > tile.Position.Z)
+                //                    //        draw = false;
+
+                //                    //if ((o.Position.Z >= maxItemZ ||
+                //                    //     maxItemZ != 255 &&
+                //                    //     (o is Item item && TileData.IsRoof((long)item.ItemData.Flags) ||
+                //                    //      o is Static st && TileData.IsRoof((long)st.ItemData.Flags)))
+                //                    //    && !(o is Tile))
+                //                    //    continue;
+
+
+                //                    //if (draw) o.ViewObject.Draw(_spriteBatch, position);
+                //                }
+
+
+                //                foreach (var def in toremove)
+                //                    tile.RemoveWorldObject(def);
+                //                toremove.Clear();
+                //            }
+
+                //            x++;
+                //            y--;
+
+                //        }
+                //    }
+                //}
 
 
 

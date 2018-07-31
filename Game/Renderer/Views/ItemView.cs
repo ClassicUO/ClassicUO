@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Renderer.Views
                 AllowedToDraw = true;
                 item.DisplayedGraphic = item.Amount;
 
-                item.Deferred = new DeferredEntity(item, item.Position.Z, item.Tile);
+                //item.Deferred = new DeferredEntity(item, item.Position.Z, item.Tile);
             }
         }
 
