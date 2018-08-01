@@ -12,7 +12,7 @@ namespace ClassicUO.UI
         private Control _parent;
         private Rectangle _rectangle;
 
-        protected Control(Control parent = null)
+        protected Control(in Control parent = null)
         {
             Parent = parent;
             _children = new List<Control>();
@@ -20,13 +20,13 @@ namespace ClassicUO.UI
             IsVisible = true;
         }
 
-        protected Control(Control parent, int x, int y) : this(parent)
+        protected Control(in Control parent, in int x, in int y) : this(parent)
         {
             X = x;
             Y = y;
         }
 
-        protected Control(Control parent, int x, int y, int width, int height) : this(parent, x, y)
+        protected Control(in Control parent, in int x, in int y, in int width, in int height) : this(parent, x, y)
         {
             X = x;
             Y = y;
@@ -110,13 +110,13 @@ namespace ClassicUO.UI
         public event EventHandler<KeyboardEventArgs> Keyboard;
 
 
-        public void AddChildren(Control c)
+        public void AddChildren(in Control c)
         {
             c.Parent = this;
             _children.Add(c);
         }
 
-        public void RemoveChildren(Control c)
+        public void RemoveChildren(in Control c)
         {
             c.Parent = null;
             _children.Remove(c);
@@ -138,7 +138,7 @@ namespace ClassicUO.UI
             _children.ForEach(s => s.Update(time));
         }
 
-        public void MoveTo(int offsetX, int offsetY)
+        public void MoveTo(in int offsetX, in int offsetY)
         {
             if (IsMovable)
             {
@@ -160,34 +160,34 @@ namespace ClassicUO.UI
         }
 
 
-        public virtual void OnMouseButton(MouseEventArgs e)
+        public virtual void OnMouseButton(in MouseEventArgs e)
         {
             MouseButton?.Invoke(this, e);
         }
 
-        public virtual void OnMouseEnter(MouseEventArgs e)
+        public virtual void OnMouseEnter(in MouseEventArgs e)
         {
             MouseIsOver = true;
             MouseEnter?.Invoke(this, e);
         }
 
-        public virtual void OnMouseLeft(MouseEventArgs e)
+        public virtual void OnMouseLeft(in MouseEventArgs e)
         {
             MouseIsOver = false;
             MouseLeft?.Invoke(this, e);
         }
 
-        public virtual void OnMouseMove(MouseEventArgs e)
+        public virtual void OnMouseMove(in MouseEventArgs e)
         {
             MouseMove?.Invoke(this, e);
         }
 
-        public virtual void OnMouseWheel(MouseWheelEventArgs e)
+        public virtual void OnMouseWheel(in MouseWheelEventArgs e)
         {
             MouseWheel?.Invoke(this, e);
         }
 
-        public virtual void OnKeyboard(KeyboardEventArgs e)
+        public virtual void OnKeyboard(in KeyboardEventArgs e)
         {
             Keyboard?.Invoke(this, e);
         }

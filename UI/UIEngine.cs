@@ -14,7 +14,7 @@ namespace ClassicUO.UI
         private Game _game;
         private Control _lastFocused;
 
-        public UIEngine(Game game)
+        public UIEngine(in Game game)
         {
             _game = game;
             Controls = new List<Control>();
@@ -125,12 +125,12 @@ namespace ClassicUO.UI
         }
 
 
-        private void DoKeyboardEvents(KeyboardEventArgs arg)
+        private void DoKeyboardEvents(in KeyboardEventArgs arg)
         {
             _lastFocused?.OnKeyboard(arg);
         }
 
-        private void GetControl(Control parent, Func<Control, bool> condition, ref Control founded)
+        private void GetControl(in Control parent, in Func<Control, bool> condition, ref Control founded)
         {
             //for (int i = parent.Children.Count - 1; i >= 0; i--)
             for (int i = 0; i < parent.Children.Count; i++)

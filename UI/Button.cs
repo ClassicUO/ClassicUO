@@ -6,7 +6,7 @@ namespace ClassicUO.UI
 {
     public class Button : Control
     {
-        public Button(Control parent, int x, int y, int width, int height) : base(parent, x, y, width, height)
+        public Button(in Control parent, in int x, in int y, in int width, in int height) : base(parent, x, y, width, height)
         {
             Textures = new Texture2D[3];
         }
@@ -23,7 +23,7 @@ namespace ClassicUO.UI
 
         public event EventHandler<EventArgs> ButtonClick;
 
-        public override void OnMouseButton(MouseEventArgs e)
+        public override void OnMouseButton(in MouseEventArgs e)
         {
             base.OnMouseButton(e);
             ButtonClick?.Invoke(this, EventArgs.Empty);

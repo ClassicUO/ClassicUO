@@ -10,7 +10,7 @@ namespace ClassicUO.UI
         private readonly ScrollbarRail _rail;
         private int _delta;
 
-        public Scrollbar(Panel parent, int x, int y) : base(parent, x, y, BASE_WIDTH, parent.Height)
+        public Scrollbar(in Panel parent, in int x, in  int y) : base(parent, x, y, BASE_WIDTH, parent.Height)
         {
             _rail = new ScrollbarRail(parent, this);
         }
@@ -18,12 +18,12 @@ namespace ClassicUO.UI
 
         public Texture2D Texture { get; set; }
 
-        public override void OnMouseMove(MouseEventArgs e)
+        public override void OnMouseMove(in MouseEventArgs e)
         {
             base.OnMouseMove(e);
         }
 
-        public override void OnMouseWheel(MouseWheelEventArgs e)
+        public override void OnMouseWheel(in MouseWheelEventArgs e)
         {
             switch (e.Direction)
             {
@@ -41,12 +41,12 @@ namespace ClassicUO.UI
         {
             private readonly Scrollbar _scrollbar;
 
-            public ScrollbarRail(Panel parent, Scrollbar scrollbar) : base(parent, scrollbar.X, scrollbar.Y, scrollbar.Width, scrollbar.Height)
+            public ScrollbarRail(in Panel parent, in Scrollbar scrollbar) : base(parent, scrollbar.X, scrollbar.Y, scrollbar.Width, scrollbar.Height)
             {
                 _scrollbar = scrollbar;
             }
 
-            public override void OnMouseWheel(MouseWheelEventArgs e)
+            public override void OnMouseWheel(in MouseWheelEventArgs e)
             {
                 _scrollbar.OnMouseWheel(e);
             }
