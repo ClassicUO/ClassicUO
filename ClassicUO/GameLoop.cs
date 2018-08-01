@@ -470,7 +470,7 @@ namespace ClassicUO
                         Tile tile = World.Map.GetTile(firstTileInRow.X - x, firstTileInRow.Y + x);
                         if (tile != null)
                         {
-                            IReadOnlyList<WorldObject> objects = tile.ObjectsOnTiles;
+                            var objects = tile.ObjectsOnTiles;
                             bool draw = true;
 
                             for (int k = 0; k < objects.Count; k++)
@@ -493,8 +493,9 @@ namespace ClassicUO
                                     obj.ViewObject.Draw(_spriteBatch, position);
                             }
 
-                            foreach (WorldObject def in toremove)
-                                tile.RemoveWorldObject(def);
+                            foreach (var d in toremove)
+                                tile.RemoveWorldObject(d);
+
                             toremove.Clear();
                         }
                     }

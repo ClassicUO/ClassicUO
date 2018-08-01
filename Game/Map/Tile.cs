@@ -16,18 +16,18 @@ namespace ClassicUO.Game.Map
 
         public Tile() : base(World.Map)
         {
-            _objectsOnTile = new List<WorldObject>();
-            _objectsOnTile.Add(this);
+            _objectsOnTile = new List<WorldObject>(1);
+            _objectsOnTile.Add(this);     
         }
 
 
-        public IReadOnlyList<WorldObject> ObjectsOnTiles
+        public List<WorldObject> ObjectsOnTiles
         {
             get
             {
                 if (_needSort)
                 {
-                    //RemoveDuplicates();
+                    RemoveDuplicates();
                     Sort();
                     _needSort = false;
                 }
@@ -53,26 +53,22 @@ namespace ClassicUO.Game.Map
 
         public void AddWorldObject(in WorldObject obj)
         {
-            //if (obj is Item item)
-            //{
-            //    for (int i = 0; i < _objectsOnTile.Count; i++)
-            //    {
-            //        if (_objectsOnTile[i] is Item item2)
-            //        {
-            //            if (item.Graphic == item2.Graphic && item.Position.Z == item2.Position.Z)
-            //            {
-            //                _objectsOnTile.RemoveAt(i);
-            //                i--;
-            //            }
-            //        }
-            //    }
-            //}
+            if (obj is Item || obj is Static)
+            {
+                for (int i = 0; i < _objectsOnTile.Count; i++)
+                {
+                    if (_objectsOnTile[i] is Item || _objectsOnTile[i] is Static)
+                    {
+                        if (obj.Graphic == _objectsOnTile[i].Graphic && obj.Position.Z == _objectsOnTile[i].Position.Z)
+                        {
+                            _objectsOnTile.RemoveAt(i);
+                            i--;
+                        }
+                    }
+                }
+            }
 
             _objectsOnTile.Add(obj);
-
-            if (_objectsOnTile.Count > 100)
-            {
-            }
 
             _needSort = true;
         }
@@ -103,9 +99,12 @@ namespace ClassicUO.Game.Map
                 }
             }
 
+            //_objectsOnTile.Clear();
+            //_objectsOnTile.Add(this);
             DisposeView();
-            //Graphic = 0;
-            //Position = Position.Invalid;
+            Graphic = 0;
+            Position = Position.Invalid;
+            _needSort = false;
         }
 
         private void RemoveDuplicates()
@@ -115,12 +114,6 @@ namespace ClassicUO.Game.Map
 
             for (int i = 0; i < _objectsOnTile.Count; i++)
             {
-                for (int j = 0; j < index; j++)
-                {
-                    if (toremove[j] == i)
-                        continue;
-                }
-
                 if (_objectsOnTile[i] is Static st)
                 {
                     for (int j = i + 1; j < _objectsOnTile.Count; j++)
@@ -174,7 +167,7 @@ namespace ClassicUO.Game.Map
 
         public List<WorldObject> GetItemsBetweenZ(in int z0, in int z1)
         {
-            List<WorldObject> items = _itemsAtZ;
+            var items = _itemsAtZ;
             _itemsAtZ.Clear();
 
             for (int i = 0; i < ObjectsOnTiles.Count; i++)
@@ -191,7 +184,7 @@ namespace ClassicUO.Game.Map
 
         public bool IsZUnderObjectOrGround(in sbyte z, out WorldObject entity, out WorldObject ground)
         {
-            List<WorldObject> list = _objectsOnTile;
+            var list = _objectsOnTile;
 
             entity = null;
             ground = null;
@@ -235,7 +228,7 @@ namespace ClassicUO.Game.Map
         // create view only when TileID is initialized
         protected override View CreateView()
         {
-            return /*Graphic <= 0 ? null :*/ new TileView(this);
+            return Graphic <= 0 || Position == Position.Invalid? null : new TileView(this);
         }
 
 
@@ -269,13 +262,14 @@ namespace ClassicUO.Game.Map
 
                 return (staticitem.Position.Z, 1, (itemdata.Height > 0 ? 1 : 0) + (AssetsLoader.TileData.IsBackground((long) itemdata.Flags) ? 0 : 1), staticitem.Index);
             }
-
             if (e is Item item)
                 return (item.Position.Z, item.IsCorpse ? 4 : 2, (item.ItemData.Height > 0 ? 1 : 0) + (AssetsLoader.TileData.IsBackground((long) item.ItemData.Flags) ? 0 : 1), (int) item.Serial.Value);
             if (e is Mobile mobile)
                 return (mobile.Position.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);
             if (e is DeferredEntity def)
                 return (def.Position.Z, 2, 1, 0);
+            if (e is WorldEffect effect)
+                return (effect.Position.Z, 4, 2, 0);
 
             return (0, 0, 0, 0);
         }

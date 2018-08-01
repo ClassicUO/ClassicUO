@@ -19,7 +19,13 @@ namespace ClassicUO.Game.Renderer
         private readonly DepthStencilState _dss = new DepthStencilState
         {
             DepthBufferEnable = true,
-            DepthBufferWriteEnable = true
+            DepthBufferWriteEnable = true,
+
+            //StencilEnable =  true,
+            //StencilFunction = CompareFunction.Always,
+            //ReferenceStencil = 1,
+            //StencilPass = StencilOperation.Increment,
+            //StencilFail = StencilOperation.Keep
         };
 
         private readonly Effect _effect;
@@ -165,24 +171,8 @@ namespace ClassicUO.Game.Renderer
                 _vertexQueue.Enqueue(list);
             }
 
-            //foreach (KeyValuePair<Texture2D, List<SpriteVertex>> k in _drawingQueue)
-            //{
-            //    k.Value.CopyTo(0, _vertexBuffer, 0, Math.Min(k.Value.Count, MAX_VERTICES_PER_DRAW));
+            enumerator.Dispose();
 
-            //    GraphicsDevice.Textures[0] = k.Key;
-            //    GraphicsDevice.DrawUserIndexedPrimitives
-            //    (
-            //        PrimitiveType.TriangleList,
-            //        _vertexBuffer,
-            //        0,
-            //        Math.Min(k.Value.Count, MAX_VERTICES_PER_DRAW),
-            //        _indexBuffer,
-            //        0, k.Value.Count / 2
-            //    );
-
-            //    k.Value.Clear();
-            //    _vertexQueue.Enqueue(k.Value);
-            //}
             _drawingQueue.Clear();
         }
 

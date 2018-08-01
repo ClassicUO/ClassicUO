@@ -7,10 +7,6 @@ namespace ClassicUO.Game.Map
 {
     public sealed class FacetChunk
     {
-        public FacetChunk(in Position location) : this(location.X, location.Y)
-        {
-        }
-
         public FacetChunk(in ushort x, in ushort y)
         {
             X = x;
@@ -25,8 +21,8 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public ushort X { get; }
-        public ushort Y { get; }
+        public ushort X { get; private set; }
+        public ushort Y { get; private set; }
         public Tile[][] Tiles { get; private set; }
 
 
@@ -44,15 +40,17 @@ namespace ClassicUO.Game.Map
                 int by = Y * 8;
 
                 for (int x = 0; x < 8; x++)
-                for (int y = 0; y < 8; y++)
                 {
-                    int pos = y * 8 + x;
+                    for (int y = 0; y < 8; y++)
+                    {
+                        int pos = y * 8 + x;
 
-                    ushort tileID = (ushort) (block.Cells[pos].TileID & 0x3FFF);
-                    sbyte z = block.Cells[pos].Z;
+                        ushort tileID = (ushort) (block.Cells[pos].TileID & 0x3FFF);
+                        sbyte z = block.Cells[pos].Z;
 
-                    Tiles[x][y].Graphic = tileID;
-                    Tiles[x][y].Position = new Position((ushort) (bx + x), (ushort) (by + y), z);
+                        Tiles[x][y].Graphic = tileID;
+                        Tiles[x][y].Position = new Position((ushort) (bx + x), (ushort) (by + y), z);
+                    }
                 }
 
                 StaticsBlock* sb = (StaticsBlock*) im.StaticAddress;
@@ -97,21 +95,23 @@ namespace ClassicUO.Game.Map
         }
 
         // we wants to avoid reallocation, so use a reset method
-        //public void SetTo(in ushort x, in ushort y)
-        //{
-        //    X = x;
-        //    Y = y;
-        //}
+        public void SetTo(in ushort x, in ushort y)
+        {
+            X = x;
+            Y = y;
+        }
 
         public void Unload()
         {
             for (int i = 0; i < 8; i++)
-            for (int j = 0; j < 8; j++)
             {
-                Tiles[i][j].Clear();
+                for (int j = 0; j < 8; j++)
+                {
+                    Tiles[i][j].Clear();
 
-                Tiles[i][j].Dispose();
-                Tiles[i][j] = null;
+                    Tiles[i][j].Dispose();
+                    Tiles[i][j] = null;
+                }
             }
 
             Tiles = null;

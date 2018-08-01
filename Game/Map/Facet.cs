@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Map
         {
             int cellX = x / 8;
             int cellY = y / 8;
-            int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
+            int cellindex = (cellY % MAX_CHUNKS) * MAX_CHUNKS + (cellX % MAX_CHUNKS);
             // int cellindex = (cellX * AssetsLoader.Map.MapBlocksSize[Index][1]) + cellY;
 
             if (x < 0 || y < 0)
@@ -155,24 +155,27 @@ namespace ClassicUO.Game.Map
             {
                 // int cellindex = index + j; 
 
-                int cellindex = j % MAX_CHUNKS * MAX_CHUNKS + i % MAX_CHUNKS;
+                int cellindex = (j % MAX_CHUNKS) * MAX_CHUNKS + (i % MAX_CHUNKS);
 
                 if (Chunks[cellindex] == null || Chunks[cellindex].X != i || Chunks[cellindex].Y != j)
                 {
-                    if (Chunks[cellindex] != null)
-                        Chunks[cellindex].Unload();
-                    //if (Chunks[cellindex] == null)
-                    //{
-                    //    Chunks[cellindex] = new FacetChunk((ushort) i, (ushort) j);
-                    //}
-                    //else
-                    //{
-                    //    Chunks[cellindex].Unload();
-                    //    Chunks[cellindex].SetTo((ushort) i, (ushort) j);
-                    //}
+                        if (Chunks[cellindex] != null)
+                            Chunks[cellindex].Unload();
+                        Chunks[cellindex] = new FacetChunk((ushort)i, (ushort)j);
 
-                    Chunks[cellindex] = new FacetChunk((ushort) i, (ushort) j);
-                    Chunks[cellindex].Load(Index);
+                        //if (Chunks[cellindex] == null)
+                        //{
+                        //    Chunks[cellindex] = new FacetChunk((ushort)i, (ushort)j);
+                        //}
+                        //else
+                        //{
+                        //    Chunks[cellindex].Unload();
+                        //    Chunks[cellindex].SetTo((ushort)i, (ushort)j);
+                        //}
+
+
+
+                        Chunks[cellindex].Load(Index);
                 }
             }
         }

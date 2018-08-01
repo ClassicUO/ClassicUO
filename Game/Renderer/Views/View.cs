@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Renderer.Views
 {
-    public abstract class View : IDisposable
+    public abstract class View //: IDisposable
     {
         protected static float PI = (float) Math.PI;
 
@@ -39,11 +39,11 @@ namespace ClassicUO.Game.Renderer.Views
 
         public ulong DepthValue { get; private set; }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+        //public void Dispose()
+        //{
+        //    //Dispose(true);
+        //    //GC.SuppressFinalize(this);
+        //}
 
         public virtual void Update(in double frameMS)
         {
@@ -89,12 +89,12 @@ namespace ClassicUO.Game.Renderer.Views
                 if (WorldObject is Mobile mob)
                 {
                     sbyte z = (sbyte) Pathfinder.GetNextZ(mob, mob.Position, check);
-                    DeferredEntity deferred = new DeferredEntity(mob, position, z, "MOBILE DEF");
+                    DeferredEntity deferred = new DeferredEntity(mob, position, z);
                     tile.AddWorldObject(deferred);
                 }
                 else
-                {
-                    DeferredEntity deferred = new DeferredEntity(WorldObject, position, WorldObject.Position.Z, "ITEM DEF");
+                {                 
+                    DeferredEntity deferred = new DeferredEntity(WorldObject, position, WorldObject.Position.Z);
                     tile.AddWorldObject(deferred);
                 }
             }
@@ -210,22 +210,22 @@ namespace ClassicUO.Game.Renderer.Views
         }
 
 
-        ~View()
-        {
-            Dispose();
-        }
+        //~View()
+        //{
+        //    Dispose();
+        //}
 
-        protected virtual void Dispose(in bool disposing)
-        {
-            if (disposing)
-            {
-                if (Texture != null && Texture.IsDisposed) // disping happen into TextureManager.cs, here we clean up the referement
-                {
-                    Texture.Dispose();
-                    Texture = null;
-                }
-            }
-        }
+        //protected virtual void Dispose(in bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        if (Texture != null && Texture.IsDisposed) // disping happen into TextureManager.cs, here we clean up the referement
+        //        {
+        //            //Texture.Dispose();
+        //            //Texture = null;
+        //        }
+        //    }
+        //}
 
         public static bool IsNoDrawable(in ushort g)
         {

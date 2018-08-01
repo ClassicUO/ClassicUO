@@ -74,7 +74,7 @@ namespace ClassicUO.Game.WorldObjects
         {
             if (_viewObject != null)
             {
-                _viewObject.Dispose();
+                //_viewObject.Dispose();
                 _viewObject = null;
             }
         }
@@ -86,13 +86,8 @@ namespace ClassicUO.Game.WorldObjects
 
             IsDisposed = true;
             DisposeView();
-            //if (Deferred != null)
-            //    Deferred.Tile = null;
-            //Deferred = null;
             Tile = null;
         }
-
-        //public DeferredEntity Deferred { get; set; }
 
 
         //public void Dispose()
