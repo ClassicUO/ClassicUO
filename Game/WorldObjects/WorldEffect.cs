@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using ClassicUO.AssetsLoader;
 
 namespace ClassicUO.Game.WorldObjects
@@ -40,7 +38,7 @@ namespace ClassicUO.Game.WorldObjects
         {
             AnimDataFrame = AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
-            AnimIndex = (sbyte)AnimDataFrame.FrameStart;
+            AnimIndex = (sbyte) AnimDataFrame.FrameStart;
             Speed = AnimDataFrame.FrameInterval * 45;
         }
 
@@ -60,7 +58,9 @@ namespace ClassicUO.Game.WorldObjects
                 }
             }
             else if (Graphic != AnimationGraphic)
+            {
                 AnimationGraphic = Graphic;
+            }
         }
 
 
@@ -76,7 +76,10 @@ namespace ClassicUO.Game.WorldObjects
             return (Source.Position.X, Source.Position.Y, Source.Position.Z);
         }
 
-        public void SetSource(in WorldObject source) => Source = source;
+        public void SetSource(in WorldObject source)
+        {
+            Source = source;
+        }
 
         public void SetSource(in int x, in int y, in int z)
         {
@@ -93,7 +96,10 @@ namespace ClassicUO.Game.WorldObjects
             return (Target.Position.X, Target.Position.Y, Target.Position.Z);
         }
 
-        public void SetTarget(in WorldObject target) => Target = target;
+        public void SetTarget(in WorldObject target)
+        {
+            Target = target;
+        }
 
         public void SetTarget(in int x, in int y, in int z)
         {
@@ -109,6 +115,5 @@ namespace ClassicUO.Game.WorldObjects
             Target = null;
             base.Dispose();
         }
-
     }
 }

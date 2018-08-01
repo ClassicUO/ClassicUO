@@ -19,9 +19,7 @@ namespace ClassicUO.AssetsLoader
 
                 FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(client.FullName);
 
-                ClientVersion = (ClientVersions) ((versInfo.ProductMajorPart << 24) |
-                                                  (versInfo.ProductMinorPart << 16) | (versInfo.ProductBuildPart << 8) |
-                                                  versInfo.ProductPrivatePart);
+                ClientVersion = (ClientVersions) ((versInfo.ProductMajorPart << 24) | (versInfo.ProductMinorPart << 16) | (versInfo.ProductBuildPart << 8) | versInfo.ProductPrivatePart);
             }
         }
 

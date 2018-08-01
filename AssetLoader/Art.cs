@@ -93,8 +93,7 @@ namespace ClassicUO.AssetsLoader
                 }
             }
 
-            if (graphic >= 0x2053 && graphic <= 0x2062
-                || graphic >= 0x206A && graphic <= 0x2079)
+            if (graphic >= 0x2053 && graphic <= 0x2062 || graphic >= 0x206A && graphic <= 0x2079)
             {
                 for (int i = 0; i < width; i++)
                 {

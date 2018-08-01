@@ -1,14 +1,13 @@
-﻿using ClassicUO.AssetsLoader;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using ClassicUO.AssetsLoader;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Renderer
 {
     public class SpriteTexture : Texture2D
-    {      
-        public SpriteTexture(in int width, in int height, bool is32bit = true) : base(TextureManager.Device, width,
-            height, false, is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551)
+    {
+        public SpriteTexture(in int width, in int height, bool is32bit = true) : base(TextureManager.Device, width, height, false, is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551)
         {
             ID = TextureManager.NextID;
         }
@@ -42,18 +41,12 @@ namespace ClassicUO.Game.Renderer
         private static readonly Dictionary<AnimationFrame, SpriteTexture> _animations = new Dictionary<AnimationFrame, SpriteTexture>();
 
 
+        private static int _first;
+
+
         public static GraphicsDevice Device { get; set; }
 
-
-        private static int _first = 0;
-
-        public static int NextID
-        {
-            get
-            {
-                return _first++;
-            }
-        }
+        public static int NextID => _first++;
 
 
         public static void Update()
@@ -71,7 +64,7 @@ namespace ClassicUO.Game.Renderer
                 _updateIndex++;
             }
             else
-            {       
+            {
                 void check(in Dictionary<ushort, SpriteTexture> dict)
                 {
                     var toremove = dict.Where(s => World.Ticks - s.Value.Ticks >= TEXTURE_TIME_LIFE).ToList();
@@ -81,6 +74,7 @@ namespace ClassicUO.Game.Renderer
                         //dict[t.Key] = null;
                         dict.Remove(t.Key);
                     }
+
                     _updateIndex++;
                 }
 
@@ -111,12 +105,14 @@ namespace ClassicUO.Game.Renderer
                 _animations[frame] = sprite;
             }
             else
+            {
                 sprite.Ticks = World.Ticks;
+            }
 
             return sprite;
         }
 
-     
+
         public static SpriteTexture GetOrCreateStaticTexture(in ushort g)
         {
             if (!_staticTextureCache.TryGetValue(g, out var texture))
@@ -132,7 +128,9 @@ namespace ClassicUO.Game.Renderer
                 _staticTextureCache[g] = texture;
             }
             else
+            {
                 texture.Ticks = World.Ticks;
+            }
 
             return texture;
         }
@@ -150,7 +148,9 @@ namespace ClassicUO.Game.Renderer
                 _landTextureCache[g] = texture;
             }
             else
+            {
                 texture.Ticks = World.Ticks;
+            }
 
             return texture;
         }
@@ -168,7 +168,9 @@ namespace ClassicUO.Game.Renderer
                 _gumpTextureCache[g] = texture;
             }
             else
+            {
                 texture.Ticks = World.Ticks;
+            }
 
             return texture;
         }
@@ -186,7 +188,9 @@ namespace ClassicUO.Game.Renderer
                 _textmapTextureCache[g] = texture;
             }
             else
+            {
                 texture.Ticks = World.Ticks;
+            }
 
             return texture;
         }

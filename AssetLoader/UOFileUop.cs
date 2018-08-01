@@ -77,8 +77,7 @@ namespace ClassicUO.AssetsLoader
                     if (hashes.TryGetValue(hash, out int idx))
                     {
                         if (idx < 0 || idx > Entries.Length)
-                            throw new IndexOutOfRangeException(
-                                "hashes dictionary and files collection have different count of entries!");
+                            throw new IndexOutOfRangeException("hashes dictionary and files collection have different count of entries!");
                         Entries[idx] = new UOFileIndex3D(offset + headerLength, length);
 
                         // extra?
@@ -100,9 +99,7 @@ namespace ClassicUO.AssetsLoader
                     }
                     else
                     {
-                        throw new ArgumentException(string.Format(
-                            "File with hash 0x{0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!",
-                            hash));
+                        throw new ArgumentException(string.Format("File with hash 0x{0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!", hash));
                     }
                 }
 

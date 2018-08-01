@@ -50,8 +50,10 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public Tile GetTile(int x, int y) => GetTile((short)x, (short)y);
-
+        public Tile GetTile(int x, int y)
+        {
+            return GetTile((short) x, (short) y);
+        }
 
 
         public sbyte GetTileZ(in short x, in short y)
@@ -90,8 +92,7 @@ namespace ClassicUO.Game.Map
             return AssetsLoader.Map.BlockData[Index][block];
         }
 
-        public int GetAverageZ(in sbyte top, in sbyte left, in sbyte right, in sbyte bottom, ref sbyte low,
-            ref sbyte high)
+        public int GetAverageZ(in sbyte top, in sbyte left, in sbyte right, in sbyte bottom, ref sbyte low, ref sbyte high)
         {
             high = top;
             if (left > high)
@@ -116,12 +117,7 @@ namespace ClassicUO.Game.Map
 
         public int GetAverageZ(short x, short y, ref sbyte low, ref sbyte top)
         {
-            return GetAverageZ(
-                GetTileZ(x, y),
-                GetTileZ(x, (short) (y + 1)),
-                GetTileZ((short) (x + 1), y),
-                GetTileZ((short) (x + 1), (short) (y + 1)),
-                ref low, ref top);
+            return GetAverageZ(GetTileZ(x, y), GetTileZ(x, (short) (y + 1)), GetTileZ((short) (x + 1), y), GetTileZ((short) (x + 1), (short) (y + 1)), ref low, ref top);
         }
 
         private static int FloorAverage(in int a, in int b)
@@ -161,23 +157,21 @@ namespace ClassicUO.Game.Map
 
                 int cellindex = j % MAX_CHUNKS * MAX_CHUNKS + i % MAX_CHUNKS;
 
-                if (Chunks[cellindex] == null ||
-                    Chunks[cellindex].X != i ||
-                    Chunks[cellindex].Y != j)
+                if (Chunks[cellindex] == null || Chunks[cellindex].X != i || Chunks[cellindex].Y != j)
                 {
                     if (Chunks[cellindex] != null)
                         Chunks[cellindex].Unload();
-                        //if (Chunks[cellindex] == null)
-                        //{
-                        //    Chunks[cellindex] = new FacetChunk((ushort) i, (ushort) j);
-                        //}
-                        //else
-                        //{
-                        //    Chunks[cellindex].Unload();
-                        //    Chunks[cellindex].SetTo((ushort) i, (ushort) j);
-                        //}
+                    //if (Chunks[cellindex] == null)
+                    //{
+                    //    Chunks[cellindex] = new FacetChunk((ushort) i, (ushort) j);
+                    //}
+                    //else
+                    //{
+                    //    Chunks[cellindex].Unload();
+                    //    Chunks[cellindex].SetTo((ushort) i, (ushort) j);
+                    //}
 
-                    Chunks[cellindex] = new FacetChunk((ushort)i, (ushort)j);
+                    Chunks[cellindex] = new FacetChunk((ushort) i, (ushort) j);
                     Chunks[cellindex].Load(Index);
                 }
             }

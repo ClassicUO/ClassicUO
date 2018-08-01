@@ -1,13 +1,11 @@
-﻿using ClassicUO.AssetsLoader;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using ClassicUO.AssetsLoader;
 
 namespace ClassicUO.Game.WorldObjects
 {
     public partial class Mobile
     {
-
         public Graphic GetGraphicForAnimation()
         {
             ushort g = Graphic;
@@ -16,10 +14,10 @@ namespace ClassicUO.Game.WorldObjects
             {
                 case 0x0192:
                 case 0x0193:
-                    {
-                        g -= 2;
-                        break;
-                    }
+                {
+                    g -= 2;
+                    break;
+                }
             }
 
             return g;
@@ -29,11 +27,11 @@ namespace ClassicUO.Game.WorldObjects
         {
             Direction dir = Direction & Direction.Up;
 
-            if (_steps.Count > 0) dir = (Direction)_steps.Front().Direction & Direction.Up;
+            if (_steps.Count > 0) dir = (Direction) _steps.Front().Direction & Direction.Up;
             return dir;
         }
 
-          public void GetGroupForAnimation(in ANIMATION_GROUPS group, ref byte animation)
+        public void GetGroupForAnimation(in ANIMATION_GROUPS group, ref byte animation)
         {
             if ((sbyte) group > 0 && animation < (byte) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT)
                 animation = _animAssociateTable[animation, (sbyte) group - 1];
@@ -106,21 +104,20 @@ namespace ClassicUO.Game.WorldObjects
                 {
                     if (isRun)
                     {
-                        if (Equipment[(int)Layer.Mount] != null)
+                        if (Equipment[(int) Layer.Mount] != null)
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
-                        else if (Equipment[(int)Layer.LeftHand] != null || Equipment[(int)Layer.RightHand] != null)
+                        else if (Equipment[(int) Layer.LeftHand] != null || Equipment[(int) Layer.RightHand] != null)
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
                         else
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED;
 
                         if (!IsHuman && !Animations.AnimationExists(graphic, result))
                         {
-                            if (Equipment[(int)Layer.Mount] != null)
+                            if (Equipment[(int) Layer.Mount] != null)
                             {
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
                             }
-                            else if ((Equipment[(int)Layer.LeftHand] != null ||
-                                      Equipment[(int)Layer.RightHand] != null) && !IsDead)
+                            else if ((Equipment[(int) Layer.LeftHand] != null || Equipment[(int) Layer.RightHand] != null) && !IsDead)
                             {
                                 if (inWar)
                                     result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
@@ -139,12 +136,11 @@ namespace ClassicUO.Game.WorldObjects
                     }
                     else
                     {
-                        if (Equipment[(int)Layer.Mount] != null)
+                        if (Equipment[(int) Layer.Mount] != null)
                         {
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
                         }
-                        else if ((Equipment[(int)Layer.LeftHand] != null || Equipment[(int)Layer.RightHand] != null) &&
-                                 !IsDead)
+                        else if ((Equipment[(int) Layer.LeftHand] != null || Equipment[(int) Layer.RightHand] != null) && !IsDead)
                         {
                             if (inWar)
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
@@ -163,15 +159,15 @@ namespace ClassicUO.Game.WorldObjects
                 }
                 else if (AnimationGroup == 0xFF)
                 {
-                    if (Equipment[(int)Layer.Mount] != null)
+                    if (Equipment[(int) Layer.Mount] != null)
                     {
                         result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
                     }
                     else if (inWar && !IsDead)
                     {
-                        if (Equipment[(int)Layer.LeftHand] != null)
+                        if (Equipment[(int) Layer.LeftHand] != null)
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
-                        else if (Equipment[(int)Layer.RightHand] != null)
+                        else if (Equipment[(int) Layer.RightHand] != null)
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK;
                         else
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
@@ -219,52 +215,50 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
-
-
         private static void CorrectAnimationGroup(in ushort graphic, in ANIMATION_GROUPS group, ref byte animation)
         {
             if (group == ANIMATION_GROUPS.AG_LOW)
             {
-                switch ((LOW_ANIMATION_GROUP)animation)
+                switch ((LOW_ANIMATION_GROUP) animation)
                 {
                     case LOW_ANIMATION_GROUP.LAG_DIE_2:
-                        animation = (byte)LOW_ANIMATION_GROUP.LAG_DIE_1;
+                        animation = (byte) LOW_ANIMATION_GROUP.LAG_DIE_1;
                         break;
                     case LOW_ANIMATION_GROUP.LAG_FIDGET_2:
-                        animation = (byte)LOW_ANIMATION_GROUP.LAG_FIDGET_1;
+                        animation = (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1;
                         break;
                     case LOW_ANIMATION_GROUP.LAG_ATTACK_3:
                     case LOW_ANIMATION_GROUP.LAG_ATTACK_2:
-                        animation = (byte)LOW_ANIMATION_GROUP.LAG_ATTACK_1;
+                        animation = (byte) LOW_ANIMATION_GROUP.LAG_ATTACK_1;
                         break;
                 }
 
                 if (!Animations.AnimationExists(graphic, animation))
-                    animation = (byte)LOW_ANIMATION_GROUP.LAG_STAND;
+                    animation = (byte) LOW_ANIMATION_GROUP.LAG_STAND;
             }
             else if (group == ANIMATION_GROUPS.AG_HIGHT)
             {
-                switch ((HIGHT_ANIMATION_GROUP)animation)
+                switch ((HIGHT_ANIMATION_GROUP) animation)
                 {
                     case HIGHT_ANIMATION_GROUP.HAG_DIE_2:
-                        animation = (byte)HIGHT_ANIMATION_GROUP.HAG_DIE_1;
+                        animation = (byte) HIGHT_ANIMATION_GROUP.HAG_DIE_1;
                         break;
                     case HIGHT_ANIMATION_GROUP.HAG_FIDGET_2:
-                        animation = (byte)HIGHT_ANIMATION_GROUP.HAG_FIDGET_1;
+                        animation = (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1;
                         break;
                     case HIGHT_ANIMATION_GROUP.HAG_ATTACK_3:
                     case HIGHT_ANIMATION_GROUP.HAG_ATTACK_2:
-                        animation = (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_1;
+                        animation = (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1;
                         break;
                     case HIGHT_ANIMATION_GROUP.HAG_MISC_4:
                     case HIGHT_ANIMATION_GROUP.HAG_MISC_3:
                     case HIGHT_ANIMATION_GROUP.HAG_MISC_2:
-                        animation = (byte)HIGHT_ANIMATION_GROUP.HAG_MISC_1;
+                        animation = (byte) HIGHT_ANIMATION_GROUP.HAG_MISC_1;
                         break;
                 }
 
                 if (!Animations.AnimationExists(graphic, animation))
-                    animation = (byte)HIGHT_ANIMATION_GROUP.HAG_STAND;
+                    animation = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
             }
         }
 
@@ -286,15 +280,11 @@ namespace ClassicUO.Game.WorldObjects
             ANIMATION_GROUPS group = Animations.GetGroupIndex(mobile.Graphic);
 
             if (group == ANIMATION_GROUPS.AG_LOW)
-                return (byte)(getReplacedGroup(Animations.GroupReplaces[0], index,
-                                   (ushort)LOW_ANIMATION_GROUP.LAG_WALK) %
-                               (ushort)LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT);
+                return (byte) (getReplacedGroup(Animations.GroupReplaces[0], index, (ushort) LOW_ANIMATION_GROUP.LAG_WALK) % (ushort) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT);
             if (group == ANIMATION_GROUPS.AG_PEOPLE)
-                return (byte)(getReplacedGroup(Animations.GroupReplaces[1], index,
-                                   (ushort)PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED) %
-                               (ushort)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT);
+                return (byte) (getReplacedGroup(Animations.GroupReplaces[1], index, (ushort) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED) % (ushort) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT);
 
-            return (byte)(index % (ushort)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
+            return (byte) (index % (ushort) HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
         }
 
         public static byte GetObjectNewAnimation(in Mobile mobile, in ushort type, in ushort action, in byte mode)
@@ -367,7 +357,7 @@ namespace ClassicUO.Game.WorldObjects
                 }
                 else if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.Equipment[(int)Layer.Mount] != null)
+                    if (mobile.Equipment[(int) Layer.Mount] != null)
                     {
                         if (action > 0)
                         {
@@ -424,7 +414,7 @@ namespace ClassicUO.Game.WorldObjects
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {
-                if (type <= ANIMATION_GROUPS_TYPE.ANIMAL || mobile.Equipment[(int)Layer.Mount] != null)
+                if (type <= ANIMATION_GROUPS_TYPE.ANIMAL || mobile.Equipment[(int) Layer.Mount] != null)
                     return 0xFF;
                 return 30;
             }
@@ -475,7 +465,7 @@ namespace ClassicUO.Game.WorldObjects
             {
                 if (type > ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.Equipment[(int)Layer.Mount] != null)
+                    if (mobile.Equipment[(int) Layer.Mount] != null)
                         return 0xFF;
                     return 20;
                 }
@@ -504,7 +494,7 @@ namespace ClassicUO.Game.WorldObjects
 
             if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
             {
-                if (mobile.Equipment[(int)Layer.Mount] != null)
+                if (mobile.Equipment[(int) Layer.Mount] != null)
                     return 0xFF;
 
                 if (mode % 2 != 0)
@@ -538,7 +528,7 @@ namespace ClassicUO.Game.WorldObjects
                 {
                     if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
                         return 3;
-                    if (mobile.Equipment[(int)Layer.Mount] != null)
+                    if (mobile.Equipment[(int) Layer.Mount] != null)
                         return 0xFF;
                     return 34;
                 }
@@ -551,7 +541,7 @@ namespace ClassicUO.Game.WorldObjects
 
         private static byte GetObjectNewAnimationType_7(in Mobile mobile, in ushort action, in byte mode)
         {
-            if (mobile.Equipment[(int)Layer.Mount] != null)
+            if (mobile.Equipment[(int) Layer.Mount] != null)
                 return 0xFF;
 
             if (action > 0)
@@ -581,7 +571,7 @@ namespace ClassicUO.Game.WorldObjects
                 {
                     if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
                         return 9;
-                    return mobile.Equipment[(int)Layer.Mount] != null ? (byte)0xFF : (byte)33;
+                    return mobile.Equipment[(int) Layer.Mount] != null ? (byte) 0xFF : (byte) 33;
                 }
 
                 return 3;
@@ -598,7 +588,7 @@ namespace ClassicUO.Game.WorldObjects
             if ((ia.Flags & 0x80000000) != 0)
                 type = ia.Type;
 
-            return type != ANIMATION_GROUPS_TYPE.MONSTER ? (byte)0xFF : (byte)20;
+            return type != ANIMATION_GROUPS_TYPE.MONSTER ? (byte) 0xFF : (byte) 20;
         }
 
         private static byte GetObjectNewAnimationType_11(in Mobile mobile, in ushort action, in byte mode)
@@ -613,7 +603,7 @@ namespace ClassicUO.Game.WorldObjects
             {
                 if (type >= ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
-                    if (mobile.Equipment[(int)Layer.Mount] != null)
+                    if (mobile.Equipment[(int) Layer.Mount] != null)
                         return 0xFF;
                     switch (action)
                     {

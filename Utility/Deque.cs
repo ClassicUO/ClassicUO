@@ -63,8 +63,7 @@ namespace ClassicUO.Utility
         /// <summary>
         ///     Initializes a new instance of the <see cref="Deque&lt;T&gt;" /> class.
         /// </summary>
-        public Deque()
-            : this(DefaultCapacity)
+        public Deque() : this(DefaultCapacity)
         {
         }
 
@@ -820,8 +819,7 @@ namespace ClassicUO.Utility
         private static void CheckNewIndexArgument(int sourceLength, int index)
         {
             if (index < 0 || index > sourceLength)
-                throw new ArgumentOutOfRangeException("index",
-                    "Invalid new index " + index + " for source length " + sourceLength);
+                throw new ArgumentOutOfRangeException("index", "Invalid new index " + index + " for source length " + sourceLength);
         }
 
         /// <summary>
@@ -837,8 +835,7 @@ namespace ClassicUO.Utility
         private static void CheckExistingIndexArgument(int sourceLength, int index)
         {
             if (index < 0 || index >= sourceLength)
-                throw new ArgumentOutOfRangeException("index",
-                    "Invalid existing index " + index + " for source length " + sourceLength);
+                throw new ArgumentOutOfRangeException("index", "Invalid existing index " + index + " for source length " + sourceLength);
         }
 
         /// <summary>
@@ -860,8 +857,7 @@ namespace ClassicUO.Utility
             if (count < 0) throw new ArgumentOutOfRangeException("count", "Invalid count " + count);
 
             if (sourceLength - offset < count)
-                throw new ArgumentException("Invalid offset (" + offset + ") or count + (" + count +
-                                            ") for source length " + sourceLength);
+                throw new ArgumentException("Invalid offset (" + offset + ") or count + (" + count + ") for source length " + sourceLength);
         }
 
         #endregion

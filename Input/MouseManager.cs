@@ -17,110 +17,93 @@ namespace ClassicUO.Input
         public static event EventHandler<MouseWheelEventArgs> MouseWheel;
 
         public static void Update()
-        {      
+        {
             MouseState current = Mouse.GetState();
 
             if (IsMouseButtonDown(current.LeftButton, _prevMouseState.LeftButton))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.Left, ButtonState.Pressed);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.Left, ButtonState.Pressed);
                 MouseDown.Raise(arg);
             }
             else if (IsMouseButtonDown(current.RightButton, _prevMouseState.RightButton))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.Right, ButtonState.Pressed);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.Right, ButtonState.Pressed);
                 MouseDown.Raise(arg);
             }
             else if (IsMouseButtonDown(current.MiddleButton, _prevMouseState.MiddleButton))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.Middle, ButtonState.Pressed);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.Middle, ButtonState.Pressed);
                 MouseDown.Raise(arg);
             }
             else if (IsMouseButtonDown(current.XButton1, _prevMouseState.XButton1))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.XButton1, ButtonState.Pressed);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.XButton1, ButtonState.Pressed);
                 MouseDown.Raise(arg);
             }
             else if (IsMouseButtonDown(current.XButton2, _prevMouseState.XButton2))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.XButton2, ButtonState.Pressed);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.XButton2, ButtonState.Pressed);
                 MouseDown.Raise(arg);
             }
 
 
             if (IsMouseButtonUp(current.LeftButton, _prevMouseState.LeftButton))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.Left, ButtonState.Released);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.Left, ButtonState.Released);
                 MouseUp.Raise(arg);
             }
             else if (IsMouseButtonUp(current.RightButton, _prevMouseState.RightButton))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.Right, ButtonState.Released);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.Right, ButtonState.Released);
                 MouseUp.Raise(arg);
             }
             else if (IsMouseButtonUp(current.MiddleButton, _prevMouseState.MiddleButton))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.Middle, ButtonState.Released);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.Middle, ButtonState.Released);
                 MouseUp.Raise(arg);
             }
             else if (IsMouseButtonUp(current.XButton1, _prevMouseState.XButton1))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.XButton1, ButtonState.Released);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.XButton1, ButtonState.Released);
                 MouseUp.Raise(arg);
             }
             else if (IsMouseButtonUp(current.XButton2, _prevMouseState.XButton2))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.XButton2, ButtonState.Released);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.XButton2, ButtonState.Released);
                 MouseUp.Raise(arg);
             }
 
 
             if (IsMouseButtonPressed(current.LeftButton, _prevMouseState.LeftButton))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.Left, ButtonState.Pressed);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.Left, ButtonState.Pressed);
                 MousePressed.Raise(arg);
             }
             else if (IsMouseButtonPressed(current.RightButton, _prevMouseState.RightButton))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.Right, ButtonState.Pressed);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.Right, ButtonState.Pressed);
                 MousePressed.Raise(arg);
             }
             else if (IsMouseButtonPressed(current.MiddleButton, _prevMouseState.MiddleButton))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.Middle, ButtonState.Pressed);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.Middle, ButtonState.Pressed);
                 MousePressed.Raise(arg);
             }
             else if (IsMouseButtonPressed(current.XButton1, _prevMouseState.XButton1))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.XButton1, ButtonState.Pressed);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.XButton1, ButtonState.Pressed);
                 MousePressed.Raise(arg);
             }
             else if (IsMouseButtonPressed(current.XButton2, _prevMouseState.XButton2))
             {
-                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    MouseButton.XButton2, ButtonState.Pressed);
+                MouseEventArgs arg = new MouseEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, MouseButton.XButton2, ButtonState.Pressed);
                 MousePressed.Raise(arg);
             }
 
 
             if (current.ScrollWheelValue != _prevMouseState.ScrollWheelValue)
             {
-                MouseWheelEventArgs arg = new MouseWheelEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y,
-                    current.ScrollWheelValue == 0 ? WheelDirection.None :
-                    current.ScrollWheelValue > 0 ? WheelDirection.Up : WheelDirection.Down);
+                MouseWheelEventArgs arg = new MouseWheelEventArgs(current.X, current.Y, _prevMouseState.X, _prevMouseState.Y, current.ScrollWheelValue == 0 ? WheelDirection.None : current.ScrollWheelValue > 0 ? WheelDirection.Up : WheelDirection.Down);
                 MouseWheel.Raise(arg);
             }
 

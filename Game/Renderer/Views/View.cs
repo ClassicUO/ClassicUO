@@ -37,6 +37,8 @@ namespace ClassicUO.Game.Renderer.Views
             IsUnicode = false
         };
 
+        public ulong DepthValue { get; private set; }
+
         public void Dispose()
         {
             Dispose(true);
@@ -52,17 +54,15 @@ namespace ClassicUO.Game.Renderer.Views
             Tile tile;
             Direction check;
 
-            int offset = (int)Math.Ceiling(TextureWidth / 44f) / 2;
+            int offset = (int) Math.Ceiling(TextureWidth / 44f) / 2;
             //if (offset < 1)
-                offset = 1;
+            offset = 1;
 
             if (WorldObject is Mobile mobile && mobile.IsWalking)
             {
                 Direction dir = mobile.Direction;
 
-                if ((dir & Direction.Up) == Direction.Left ||
-                    (dir & Direction.Up) == Direction.South ||
-                    (dir & Direction.Up) == Direction.East)
+                if ((dir & Direction.Up) == Direction.Left || (dir & Direction.Up) == Direction.South || (dir & Direction.Up) == Direction.East)
                 {
                     tile = World.Map.GetTile(WorldObject.Position.X, WorldObject.Position.Y + offset);
                     check = dir & Direction.Up;
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Renderer.Views
                 }
             }
             else
-            {                
+            {
                 tile = World.Map.GetTile(WorldObject.Position.X, WorldObject.Position.Y + 1);
                 check = Direction.South;
             }
@@ -166,10 +166,7 @@ namespace ClassicUO.Game.Renderer.Views
 
 
             if (vertex[0].Hue != HueVector)
-                vertex[0].Hue =
-                    vertex[1].Hue =
-                        vertex[2].Hue =
-                            vertex[3].Hue = HueVector;
+                vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
 
             if (!spriteBatch.DrawSprite(Texture, vertex))
@@ -185,14 +182,12 @@ namespace ClassicUO.Game.Renderer.Views
             return false;
         }
 
-        public ulong DepthValue { get; private set; }
-
         protected void CalculateRenderDepth(in sbyte z, in byte priority, in byte byte7, in byte byte8)
         {
             ulong tmp = 0;
             tmp |= (ulong) ((WorldObject.Position.X + WorldObject.Position.Y) & 0xFFFF);
             tmp <<= 8;
-            byte tmpZ = (byte) (((int) z + 128) & 0xFF);
+            byte tmpZ = (byte) ((z + 128) & 0xFF);
             tmp |= tmpZ;
             tmp <<= 8;
             tmp |= (ulong) (priority & 0xFF);
@@ -223,8 +218,7 @@ namespace ClassicUO.Game.Renderer.Views
         protected virtual void Dispose(in bool disposing)
         {
             if (disposing)
-                if (Texture != null && Texture.IsDisposed
-                ) // disping happen into TextureManager.cs, here we clean up the referement
+                if (Texture != null && Texture.IsDisposed) // disping happen into TextureManager.cs, here we clean up the referement
                 {
                     Texture.Dispose();
                     Texture = null;
@@ -251,8 +245,7 @@ namespace ClassicUO.Game.Renderer.Views
 
                 long flags = (long) TileData.StaticData[g].Flags;
 
-                if (!TileData.IsNoDiagonal(flags) ||
-                    TileData.IsAnimated(flags) && World.Player != null && World.Player.Race == RaceType.GARGOYLE)
+                if (!TileData.IsNoDiagonal(flags) || TileData.IsAnimated(flags) && World.Player != null && World.Player.Race == RaceType.GARGOYLE)
                     return false;
             }
 

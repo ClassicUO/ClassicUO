@@ -72,7 +72,6 @@ namespace ClassicUO.Game.Map
 
             if (_objectsOnTile.Count > 100)
             {
-
             }
 
             _needSort = true;
@@ -83,7 +82,10 @@ namespace ClassicUO.Game.Map
             _objectsOnTile.Remove(obj);
         }
 
-        public void ForceSort() => _needSort = true;
+        public void ForceSort()
+        {
+            _needSort = true;
+        }
 
         public void Clear()
         {
@@ -95,10 +97,7 @@ namespace ClassicUO.Game.Map
                 {
                     int count = _objectsOnTile.Count;
                     obj.Dispose();
-                    if (count == _objectsOnTile.Count)
-                    {
-                       _objectsOnTile.RemoveAt(i);
-                    }
+                    if (count == _objectsOnTile.Count) _objectsOnTile.RemoveAt(i);
 
                     i--;
                 }
@@ -117,40 +116,22 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < _objectsOnTile.Count; i++)
             {
                 for (int j = 0; j < index; j++)
-                {
                     if (toremove[j] == i)
                         continue;
-                }
 
                 if (_objectsOnTile[i] is Static st)
-                {
                     for (int j = i + 1; j < _objectsOnTile.Count; j++)
-                    {
                         if (_objectsOnTile[i].Position.Z == _objectsOnTile[j].Position.Z)
-                        {
                             if (_objectsOnTile[j] is Static stj && st.Graphic == stj.Graphic)
                             {
                                 toremove[index++] = i;
                                 break;
                             }
-                        }
-                    }
-                }
                 else if (_objectsOnTile[i] is Item item)
-                {
                     for (int j = i + 1; j < _objectsOnTile.Count; j++)
-                    {
                         if (_objectsOnTile[i].Position.Z == _objectsOnTile[j].Position.Z)
-                        {
-                            if (_objectsOnTile[j] is Static stj && item.ItemData.Name == stj.ItemData.Name ||
-                                _objectsOnTile[j] is Item itemj && item.Serial == itemj.Serial)
-                            {
+                            if (_objectsOnTile[j] is Static stj && item.ItemData.Name == stj.ItemData.Name || _objectsOnTile[j] is Item itemj && item.Serial == itemj.Serial)
                                 toremove[index++] = j;
-                              
-                            }
-                        }
-                    }
-                }
             }
 
             for (int i = 0; i < index; i++)
@@ -205,10 +186,7 @@ namespace ClassicUO.Game.Map
                 {
                     StaticTiles itemdata = it.ItemData;
 
-                    if (AssetsLoader.TileData.IsRoof((long) itemdata.Flags) ||
-                        AssetsLoader.TileData.IsSurface((long) itemdata.Flags) ||
-                        AssetsLoader.TileData.IsWall((long) itemdata.Flags) &&
-                        AssetsLoader.TileData.IsImpassable((long) itemdata.Flags))
+                    if (AssetsLoader.TileData.IsRoof((long) itemdata.Flags) || AssetsLoader.TileData.IsSurface((long) itemdata.Flags) || AssetsLoader.TileData.IsWall((long) itemdata.Flags) && AssetsLoader.TileData.IsImpassable((long) itemdata.Flags))
                         if (entity == null || list[i].Position.Z < entity.Position.Z)
                             entity = list[i];
                 }
@@ -216,10 +194,7 @@ namespace ClassicUO.Game.Map
                 {
                     StaticTiles itemdata = st.ItemData;
 
-                    if (AssetsLoader.TileData.IsRoof((long) itemdata.Flags) ||
-                        AssetsLoader.TileData.IsSurface((long) itemdata.Flags) ||
-                        AssetsLoader.TileData.IsWall((long) itemdata.Flags) &&
-                        AssetsLoader.TileData.IsImpassable((long) itemdata.Flags))
+                    if (AssetsLoader.TileData.IsRoof((long) itemdata.Flags) || AssetsLoader.TileData.IsSurface((long) itemdata.Flags) || AssetsLoader.TileData.IsWall((long) itemdata.Flags) && AssetsLoader.TileData.IsImpassable((long) itemdata.Flags))
                         if (entity == null || list[i].Position.Z < entity.Position.Z)
                             entity = list[i];
                 }
@@ -266,35 +241,21 @@ namespace ClassicUO.Game.Map
         private static (int, int, int, int) GetSortValues(in WorldObject e)
         {
             if (e is Tile tile)
-                return (tile.ViewObject.SortZ,
-                    0,
-                    0,
-                    0);
+                return (tile.ViewObject.SortZ, 0, 0, 0);
 
             if (e is Static staticitem)
             {
                 StaticTiles itemdata = AssetsLoader.TileData.StaticData[staticitem.Graphic];
 
-                return (staticitem.Position.Z,
-                    1,
-                    (itemdata.Height > 0 ? 1 : 0) + (AssetsLoader.TileData.IsBackground((long) itemdata.Flags) ? 0 : 1),
-                    staticitem.Index);
+                return (staticitem.Position.Z, 1, (itemdata.Height > 0 ? 1 : 0) + (AssetsLoader.TileData.IsBackground((long) itemdata.Flags) ? 0 : 1), staticitem.Index);
             }
 
             if (e is Item item)
-                return (item.Position.Z,
-                    item.IsCorpse ? 4 : 2,
-                    (item.ItemData.Height > 0 ? 1 : 0) +
-                    (AssetsLoader.TileData.IsBackground((long) item.ItemData.Flags) ? 0 : 1),
-                    (int) item.Serial.Value);
+                return (item.Position.Z, item.IsCorpse ? 4 : 2, (item.ItemData.Height > 0 ? 1 : 0) + (AssetsLoader.TileData.IsBackground((long) item.ItemData.Flags) ? 0 : 1), (int) item.Serial.Value);
             if (e is Mobile mobile)
-                return (mobile.Position.Z,
-                    3 /* is sitting */,
-                    2,
-                    mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);
+                return (mobile.Position.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);
             if (e is DeferredEntity def)
-                return (def.Position.Z,
-                    2, 1, 0);
+                return (def.Position.Z, 2, 1, 0);
 
             return (0, 0, 0, 0);
         }

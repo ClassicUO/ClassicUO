@@ -90,9 +90,7 @@ namespace ClassicUO.AssetsLoader
 
         internal long ReadLong()
         {
-            return ReadByte() | ((long) ReadByte() << 8) | ((long) ReadByte() << 16) | ((long) ReadByte() << 24) |
-                   ((long) ReadByte() << 32) | ((long) ReadByte() << 40) | ((long) ReadByte() << 48) |
-                   ((long) ReadByte() << 56);
+            return ReadByte() | ((long) ReadByte() << 8) | ((long) ReadByte() << 16) | ((long) ReadByte() << 24) | ((long) ReadByte() << 32) | ((long) ReadByte() << 40) | ((long) ReadByte() << 48) | ((long) ReadByte() << 56);
         }
 
         internal ulong ReadULong()

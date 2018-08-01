@@ -1,6 +1,5 @@
 ﻿using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer.Views;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.WorldObjects
@@ -16,14 +15,14 @@ namespace ClassicUO.Game.WorldObjects
         }
 
         /// <summary>
-        /// Multiply X * 22, Y * 22.
-        /// Z is used to do Depth testing
+        ///     Multiply X * 22, Y * 22.
+        ///     Z is used to do Depth testing
         /// </summary>
         public Vector3 ScreenPosition
         {
             get
             {
-                float screenX = (Position.X - Position.Y) * 22; 
+                float screenX = (Position.X - Position.Y) * 22;
                 float screenY = (Position.X + Position.Y) * 22 /*- Position.Z * 4*/;
 
                 return new Vector3(screenX, screenY, 0);
@@ -51,7 +50,9 @@ namespace ClassicUO.Game.WorldObjects
                     _tile = value;
 
                     if (_tile != null)
+                    {
                         _tile.AddWorldObject(this);
+                    }
                     else
                     {
                         if (this != World.Player && !IsDisposed)
@@ -84,7 +85,7 @@ namespace ClassicUO.Game.WorldObjects
         {
             if (IsDisposed)
                 return;
-            
+
             IsDisposed = true;
             DisposeView();
             //if (Deferred != null)
@@ -95,7 +96,7 @@ namespace ClassicUO.Game.WorldObjects
 
         //public DeferredEntity Deferred { get; set; }
 
-       
+
         //public void Dispose()
         //{
         //    Dispose(true);

@@ -64,7 +64,7 @@ namespace ClassicUO.Game.WorldObjects
             {
                 if (!_itemData.HasValue)
                 {
-                    _itemData = TileData.StaticData[ IsMulti ? Graphic + 0x4000 : Graphic  /*& 0xFFFF]*/];
+                    _itemData = TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic /*& 0xFFFF]*/];
                     Name = _itemData.Value.Name;
                 }
 
@@ -164,8 +164,7 @@ namespace ClassicUO.Game.WorldObjects
                             {
                                 MultiBlock pbm = AssetsLoader.Multi.GetMulti(i);
 
-                                MultiComponent component = new MultiComponent(pbm.ID, (ushort) (Position.X + pbm.X),
-                                    (ushort) (Position.Y + pbm.Y), (sbyte) (Position.Z + pbm.Z), pbm.Flags);
+                                MultiComponent component = new MultiComponent(pbm.ID, (ushort) (Position.X + pbm.X), (ushort) (Position.Y + pbm.Y), (sbyte) (Position.Z + pbm.Z), pbm.Flags);
 
                                 if (pbm.X < minX)
                                     minX = pbm.X;
@@ -512,11 +511,10 @@ namespace ClassicUO.Game.WorldObjects
                     {
                         int animGroup = Animations.GetDieGroupIndex(id, UsedLayer);
 
-                        ref AnimationDirection direction =
-                            ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+                        ref AnimationDirection direction = ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
 
                         Animations.AnimID = id;
-                        Animations.AnimGroup = (byte)animGroup;
+                        Animations.AnimGroup = (byte) animGroup;
                         Animations.Direction = dir;
 
                         if (direction.FrameCount == 0)

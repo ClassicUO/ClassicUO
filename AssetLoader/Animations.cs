@@ -17,12 +17,10 @@ namespace ClassicUO.AssetsLoader
 
         private static readonly List<Tuple<ushort, byte>>[] _groupReplaces = new List<Tuple<ushort, byte>>[2]
         {
-            new List<Tuple<ushort, byte>>(),
-            new List<Tuple<ushort, byte>>()
+            new List<Tuple<ushort, byte>>(), new List<Tuple<ushort, byte>>()
         };
 
-        private static readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv =
-            new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
+        private static readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
 
         private static byte _animGroupCount = (int) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
         private static readonly DataReader _reader = new DataReader();
@@ -44,10 +42,8 @@ namespace ClassicUO.AssetsLoader
 
             for (int i = 0; i < 5; i++)
             {
-                string pathmul = Path.Combine(FileManager.UoFolderPath,
-                    "anim" + (i == 0 ? "" : (i + 1).ToString()) + ".mul");
-                string pathidx = Path.Combine(FileManager.UoFolderPath,
-                    "anim" + (i == 0 ? "" : (i + 1).ToString()) + ".idx");
+                string pathmul = Path.Combine(FileManager.UoFolderPath, "anim" + (i == 0 ? "" : (i + 1).ToString()) + ".mul");
+                string pathidx = Path.Combine(FileManager.UoFolderPath, "anim" + (i == 0 ? "" : (i + 1).ToString()) + ".idx");
 
                 if (File.Exists(pathmul) && File.Exists(pathidx))
                     _files[i] = new UOFileMul(pathmul, pathidx, 0, i == 0 ? 6 : 0);
@@ -67,8 +63,7 @@ namespace ClassicUO.AssetsLoader
             {
                 string[] typeNames = new string[5] {"monster", "sea_monster", "animal", "human", "equipment"};
 
-                using (StreamReader reader =
-                    new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "mobtypes.txt"))))
+                using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "mobtypes.txt"))))
                 {
                     string line;
                     while ((line = reader.ReadLine()) != null)
@@ -191,13 +186,11 @@ namespace ClassicUO.AssetsLoader
                             if ((long) aidx >= maxAddress0)
                                 break;
 
-                            if (aidx->Size > 0 && aidx->Position != 0xFFFFFFFF &&
-                                aidx->Size != 0xFFFFFFFF)
+                            if (aidx->Size > 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                             {
                                 DataIndex[i].Groups[j].Direction[d].BaseAddress = aidx->Position;
                                 DataIndex[i].Groups[j].Direction[d].BaseSize = aidx->Size;
-                                DataIndex[i].Groups[j].Direction[d].Address =
-                                    DataIndex[i].Groups[j].Direction[d].BaseAddress;
+                                DataIndex[i].Groups[j].Direction[d].Address = DataIndex[i].Groups[j].Direction[d].BaseAddress;
                                 DataIndex[i].Groups[j].Direction[d].Size = DataIndex[i].Groups[j].Direction[d].BaseSize;
                             }
                         }
@@ -242,8 +235,7 @@ namespace ClassicUO.AssetsLoader
             if (FileManager.ClientVersion < ClientVersions.CV_305D)
                 return;
 
-            using (StreamReader reader =
-                new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Equipconv.def"))))
+            using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Equipconv.def"))))
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
@@ -427,8 +419,7 @@ namespace ClassicUO.AssetsLoader
                             {
                                 DataIndex[index].MountedHeightOffset = mountedHeightOffset;
 
-                                if (FileManager.ClientVersion < ClientVersions.CV_500A ||
-                                    groupType == ANIMATION_GROUPS_TYPE.UNKNOWN)
+                                if (FileManager.ClientVersion < ClientVersions.CV_500A || groupType == ANIMATION_GROUPS_TYPE.UNKNOWN)
                                 {
                                     if (realAnimID >= 200)
                                     {
@@ -479,8 +470,7 @@ namespace ClassicUO.AssetsLoader
                                             if ((long) aidx >= (long) maxaddress)
                                                 break;
 
-                                            if (aidx->Size > 0 && aidx->Position != 0xFFFFFFFF &&
-                                                aidx->Size != 0xFFFFFFFF)
+                                            if (aidx->Size > 0 && aidx->Position != 0xFFFFFFFF && aidx->Size != 0xFFFFFFFF)
                                             {
                                                 DataIndex[index].Groups[j].Direction[d].PatchedAddress = aidx->Position;
                                                 DataIndex[index].Groups[j].Direction[d].PatchedSize = aidx->Size;
@@ -554,35 +544,24 @@ namespace ClassicUO.AssetsLoader
 
                         for (byte d = 0; d < 5; d++)
                         {
-                            DataIndex[index].Groups[j].Direction[d].BaseAddress =
-                                DataIndex[checkIndex].Groups[j].Direction[d].BaseAddress;
-                            DataIndex[index].Groups[j].Direction[d].BaseSize =
-                                DataIndex[checkIndex].Groups[j].Direction[d].BaseSize;
-                            DataIndex[index].Groups[j].Direction[d].Address =
-                                DataIndex[index].Groups[j].Direction[d].BaseAddress;
-                            DataIndex[index].Groups[j].Direction[d].Size =
-                                DataIndex[index].Groups[j].Direction[d].BaseSize;
+                            DataIndex[index].Groups[j].Direction[d].BaseAddress = DataIndex[checkIndex].Groups[j].Direction[d].BaseAddress;
+                            DataIndex[index].Groups[j].Direction[d].BaseSize = DataIndex[checkIndex].Groups[j].Direction[d].BaseSize;
+                            DataIndex[index].Groups[j].Direction[d].Address = DataIndex[index].Groups[j].Direction[d].BaseAddress;
+                            DataIndex[index].Groups[j].Direction[d].Size = DataIndex[index].Groups[j].Direction[d].BaseSize;
 
                             if (DataIndex[index].Groups[j].Direction[d].PatchedAddress <= 0)
                             {
-                                DataIndex[index].Groups[j].Direction[d].PatchedAddress =
-                                    DataIndex[checkIndex].Groups[j].Direction[d].PatchedAddress;
-                                DataIndex[index].Groups[j].Direction[d].PatchedSize =
-                                    DataIndex[checkIndex].Groups[j].Direction[d].PatchedSize;
-                                DataIndex[index].Groups[j].Direction[d].FileIndex =
-                                    DataIndex[checkIndex].Groups[j].Direction[d].FileIndex;
+                                DataIndex[index].Groups[j].Direction[d].PatchedAddress = DataIndex[checkIndex].Groups[j].Direction[d].PatchedAddress;
+                                DataIndex[index].Groups[j].Direction[d].PatchedSize = DataIndex[checkIndex].Groups[j].Direction[d].PatchedSize;
+                                DataIndex[index].Groups[j].Direction[d].FileIndex = DataIndex[checkIndex].Groups[j].Direction[d].FileIndex;
                             }
 
                             if (DataIndex[index].Groups[j].Direction[d].BaseAddress <= 0)
                             {
-                                DataIndex[index].Groups[j].Direction[d].BaseAddress =
-                                    DataIndex[index].Groups[j].Direction[d].PatchedAddress;
-                                DataIndex[index].Groups[j].Direction[d].BaseSize =
-                                    DataIndex[index].Groups[j].Direction[d].PatchedSize;
-                                DataIndex[index].Groups[j].Direction[d].Address =
-                                    DataIndex[index].Groups[j].Direction[d].BaseAddress;
-                                DataIndex[index].Groups[j].Direction[d].Size =
-                                    DataIndex[index].Groups[j].Direction[d].BaseSize;
+                                DataIndex[index].Groups[j].Direction[d].BaseAddress = DataIndex[index].Groups[j].Direction[d].PatchedAddress;
+                                DataIndex[index].Groups[j].Direction[d].BaseSize = DataIndex[index].Groups[j].Direction[d].PatchedSize;
+                                DataIndex[index].Groups[j].Direction[d].Address = DataIndex[index].Groups[j].Direction[d].BaseAddress;
+                                DataIndex[index].Groups[j].Direction[d].Size = DataIndex[index].Groups[j].Direction[d].BaseSize;
                             }
                         }
                     }
@@ -651,35 +630,24 @@ namespace ClassicUO.AssetsLoader
                     for (byte j = 0; j < 2; j++)
                     for (byte d = 0; d < 5; d++)
                     {
-                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress =
-                            DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
-                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize =
-                            DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseSize;
-                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address =
-                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
-                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size =
-                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
+                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
+                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseSize;
+                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
+                        DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
 
                         if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress <= 0)
                         {
-                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress = DataIndex[checkIndex]
-                                .Groups[ignoreGroups[j]].Direction[d].PatchedAddress;
-                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedSize =
-                                DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].PatchedSize;
-                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex =
-                                DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].FileIndex;
+                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].PatchedAddress;
+                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedSize = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].PatchedSize;
+                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].FileIndex = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].FileIndex;
                         }
 
                         if (DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress <= 0)
                         {
-                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress =
-                                DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress;
-                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize =
-                                DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedSize;
-                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address =
-                                DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
-                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size =
-                                DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
+                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedAddress;
+                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].PatchedSize;
+                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Address = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
+                            DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
                         }
                     }
 
@@ -904,8 +872,7 @@ namespace ClassicUO.AssetsLoader
         {
             ref AnimationGroup dataindex = ref DataIndex[AnimID].Groups[AnimGroup];
             UOPAnimationData animData = dataindex.UOPAnimData;
-            if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 &&
-                animData.Offset == 0)
+            if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {
                 Log.Message(LogTypes.Warning, "uop animData is null");
                 return false;
@@ -1058,7 +1025,7 @@ namespace ClassicUO.AssetsLoader
 
             for (int i = 0; i < frameCount; i++)
             {
-                if ( animDir.Frames[i] != null && animDir.Frames[i].Pixels != null && animDir.Frames[i].Pixels.Length > 0)
+                if (animDir.Frames[i] != null && animDir.Frames[i].Pixels != null && animDir.Frames[i].Pixels.Length > 0)
                     continue;
 
                 animDir.Frames[i] = new AnimationFrame();
@@ -1347,14 +1314,10 @@ namespace ClassicUO.AssetsLoader
             new[] {0x3EBE, 0x31F}, // Armored Swamp Dragon
             new[] {0x3F6F, 0x9}, // Daemon
             new[] {0x3EC3, 0x02D4}, // beetle
-            new[] {0x3EC5, 0xD5},
-            new[] {0x3F3A, 0xD5},
-            new[] {0x3E90, 0x114}, // reptalon
+            new[] {0x3EC5, 0xD5}, new[] {0x3F3A, 0xD5}, new[] {0x3E90, 0x114}, // reptalon
             new[] {0x3E91, 0x115}, // cu sidhe
             new[] {0x3E92, 0x11C}, // MondainSteed01
-            new[] {0x3EC6, 0x1B0},
-            new[] {0x3EC7, 0x4E6},
-            new[] {0x3EC8, 0x4E7}
+            new[] {0x3EC6, 0x1B0}, new[] {0x3EC7, 0x4E6}, new[] {0x3EC8, 0x4E7}
         };
 
         public static void Load()
@@ -1363,10 +1326,7 @@ namespace ClassicUO.AssetsLoader
             if (!File.Exists(path))
                 return;
 
-            List<int> list1 = new List<int>(),
-                list2 = new List<int>(),
-                list3 = new List<int>(),
-                list4 = new List<int>();
+            List<int> list1 = new List<int>(), list2 = new List<int>(), list3 = new List<int>(), list4 = new List<int>();
             int max1 = 0, max2 = 0, max3 = 0, max4 = 0;
 
             using (StreamReader reader = new StreamReader(path))

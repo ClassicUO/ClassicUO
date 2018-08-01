@@ -242,8 +242,7 @@ namespace ClassicUO.Game.Network
 
     public sealed class PUnicodeSpeechRequest : PacketWriter
     {
-        public PUnicodeSpeechRequest(in string text, in MessageType type, in MessageFont font, in Hue hue,
-            in string lang) : base(0xAD)
+        public PUnicodeSpeechRequest(in string text, in MessageType type, in MessageFont font, in Hue hue, in string lang) : base(0xAD)
         {
             WriteByte((byte) type);
             WriteUShort(hue);
@@ -535,8 +534,7 @@ namespace ClassicUO.Game.Network
 
     public sealed class PBulletinBoardPostMessage : PacketWriter
     {
-        public PBulletinBoardPostMessage(in Serial serial, in Serial msgserial, in string subject, in string message) :
-            base(0x71)
+        public PBulletinBoardPostMessage(in Serial serial, in Serial msgserial, in string subject, in string message) : base(0x71)
         {
             WriteByte(0x05);
             WriteUInt(serial);
@@ -569,8 +567,7 @@ namespace ClassicUO.Game.Network
         public PAssistVersion(in byte[] clientversion, in uint version) : base(0xBE)
         {
             WriteUInt(version);
-            WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2],
-                clientversion[3]));
+            WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2], clientversion[3]));
         }
     }
 

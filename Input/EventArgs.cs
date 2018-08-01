@@ -23,8 +23,7 @@ namespace ClassicUO.Input
 
     public sealed class MouseEventArgs : EventArgs
     {
-        public MouseEventArgs(int x, int y, int offx, int offy, MouseButton button = MouseButton.None,
-            ButtonState state = ButtonState.Released)
+        public MouseEventArgs(int x, int y, int offx, int offy, MouseButton button = MouseButton.None, ButtonState state = ButtonState.Released)
         {
             Location = new Point(x, y);
             Button = button;

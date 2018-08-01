@@ -47,8 +47,7 @@ namespace ClassicUO.Game
     {
         private const ushort defaultHue = 0x0017;
 
-        private static readonly Mobile _system =
-            new Mobile(Serial.Invalid) {Graphic = Graphic.Invariant, Name = "System"};
+        private static readonly Mobile _system = new Mobile(Serial.Invalid) {Graphic = Graphic.Invariant, Name = "System"};
 
         // public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
         // public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PMessageUnicode(entity.Serial, entity.Graphic, type, hue, font, _language, entity.Name ?? string.Empty, message).SendToClient();
@@ -82,8 +81,7 @@ namespace ClassicUO.Game
             AffixType = AffixType.None;
         }
 
-        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font,
-            uint cliloc, AffixType affixType = AffixType.None, string affix = null)
+        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, uint cliloc, AffixType affixType = AffixType.None, string affix = null)
         {
             Text = text;
             Hue = hue;

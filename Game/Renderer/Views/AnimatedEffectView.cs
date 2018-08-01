@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.AssetsLoader;
-using ClassicUO.Game.WorldObjects;
+﻿using ClassicUO.Game.WorldObjects;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Renderer.Views
@@ -15,8 +11,7 @@ namespace ClassicUO.Game.Renderer.Views
         {
         }
 
-        public new AnimatedItemEffect WorldObject => (AnimatedItemEffect)base.WorldObject;
-
+        public new AnimatedItemEffect WorldObject => (AnimatedItemEffect) base.WorldObject;
 
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)

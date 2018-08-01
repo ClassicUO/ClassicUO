@@ -41,8 +41,7 @@ namespace ClassicUO.UI
         {
             private readonly Scrollbar _scrollbar;
 
-            public ScrollbarRail(Panel parent, Scrollbar scrollbar) : base(parent, scrollbar.X, scrollbar.Y,
-                scrollbar.Width, scrollbar.Height)
+            public ScrollbarRail(Panel parent, Scrollbar scrollbar) : base(parent, scrollbar.X, scrollbar.Y, scrollbar.Width, scrollbar.Height)
             {
                 _scrollbar = scrollbar;
             }

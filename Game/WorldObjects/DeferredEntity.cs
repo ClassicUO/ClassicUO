@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.Map;
-using ClassicUO.Game.Renderer.Views;
+﻿using ClassicUO.Game.Renderer.Views;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.WorldObjects
 {
     public class DeferredEntity : WorldObject
     {
+        private readonly string _description;
         private readonly WorldObject _entity;
         private readonly Vector3 _position;
-        private readonly string _description;
 
         public DeferredEntity(in WorldObject entity, in Vector3 position, in sbyte z, in string des) : base(World.Map)
         {
@@ -24,7 +20,10 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
-        protected override View CreateView() => new DeferredView(this, _entity.ViewObject, _position);
+        protected override View CreateView()
+        {
+            return new DeferredView(this, _entity.ViewObject, _position);
+        }
 
         public override string ToString()
         {

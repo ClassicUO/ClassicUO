@@ -60,8 +60,7 @@ namespace ClassicUO.Game.Renderer
             IsometricLevel = light / 30;
 
             _direction = 1.2f;
-            IsometricDirection =
-                Vector3.Normalize(new Vector3((float) Math.Cos(_direction), (float) Math.Sin(_direction), 1f));
+            IsometricDirection = Vector3.Normalize(new Vector3((float) Math.Cos(_direction), (float) Math.Sin(_direction), 1f));
         }
     }
 }

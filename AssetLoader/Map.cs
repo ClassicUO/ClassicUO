@@ -17,12 +17,7 @@ namespace ClassicUO.AssetsLoader
 
         public static int[][] MapsDefaultSize { get; } = new int[MAPS_COUNT][]
         {
-            new int[2] {7168, 4096},
-            new int[2] {7168, 4096},
-            new int[2] {2304, 1600},
-            new int[2] {2560, 2048},
-            new int[2] {1448, 1448},
-            new int[2] {1280, 4096}
+            new int[2] {7168, 4096}, new int[2] {7168, 4096}, new int[2] {2304, 1600}, new int[2] {2560, 2048}, new int[2] {1448, 1448}, new int[2] {1280, 4096}
         };
 
         public static void Load()
@@ -127,8 +122,7 @@ namespace ClassicUO.AssetsLoader
                     ulong stidxaddress = staticidxaddress + (ulong) (block * staticidxblocksize);
                     StaidxBlock bb = fileidx.ReadStruct<StaidxBlock>(block * staticidxblocksize);
 
-                    if (stidxaddress < endstaticidxaddress
-                        && bb.Size > 0 && bb.Position != 0xFFFFFFFF)
+                    if (stidxaddress < endstaticidxaddress && bb.Size > 0 && bb.Position != 0xFFFFFFFF)
                     {
                         ulong address1 = staticaddress + bb.Position;
 

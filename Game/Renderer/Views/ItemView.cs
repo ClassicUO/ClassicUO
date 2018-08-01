@@ -26,7 +26,7 @@ namespace ClassicUO.Game.Renderer.Views
                 if ((item.Direction & Direction.Running) != 0)
                 {
                     item.UsedLayer = true;
-                    item.Direction &= (Direction)0x7F;
+                    item.Direction &= (Direction) 0x7F;
                 }
                 else
                 {
@@ -58,28 +58,21 @@ namespace ClassicUO.Game.Renderer.Views
 
             if (WorldObject.Effect == null)
             {
-
-
-
                 if (_originalGraphic != WorldObject.DisplayedGraphic || Texture == null || Texture.IsDisposed)
                 {
                     _originalGraphic = WorldObject.DisplayedGraphic;
                     Texture = TextureManager.GetOrCreateStaticTexture(_originalGraphic);
-                    Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4,
-                        Texture.Width, Texture.Height);
+                    Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4, Texture.Width, Texture.Height);
                 }
 
                 if (_hue != WorldObject.Hue)
                 {
                     _hue = WorldObject.Hue;
-                    HueVector = RenderExtentions.GetHueVector(_hue,
-                        TileData.IsPartialHue((long) WorldObject.ItemData.Flags), false, false);
+                    HueVector = RenderExtentions.GetHueVector(_hue, TileData.IsPartialHue((long) WorldObject.ItemData.Flags), false, false);
                 }
 
 
-
-                if (WorldObject.Amount > 1 && TileData.IsStackable((long) WorldObject.ItemData.Flags) &&
-                    WorldObject.DisplayedGraphic == WorldObject.Graphic)
+                if (WorldObject.Amount > 1 && TileData.IsStackable((long) WorldObject.ItemData.Flags) && WorldObject.DisplayedGraphic == WorldObject.Graphic)
                 {
                     Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
                     base.Draw(spriteBatch, offsetDrawPosition);
@@ -107,13 +100,14 @@ namespace ClassicUO.Game.Renderer.Views
             {
                 WorldObject.Effect.ViewObject.Draw(spriteBatch, position);
             }
+
             return true;
         }
 
         protected override void MessageOverHead(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             base.MessageOverHead(in spriteBatch, in position);
-            Text.Draw((SpriteBatchUI)spriteBatch, new Point((int)position.X, (int)position.Y));
+            Text.Draw((SpriteBatchUI) spriteBatch, new Point((int) position.X, (int) position.Y));
         }
 
 
@@ -121,7 +115,7 @@ namespace ClassicUO.Game.Renderer.Views
         {
             spriteBatch.GetZ();
 
-            byte dir = (byte)(((byte)WorldObject.Layer & 0x7F) & 7);
+            byte dir = (byte) ((byte) WorldObject.Layer & 0x7F & 7);
             bool mirror = false;
 
             Animations.GetAnimDirection(ref dir, ref mirror);
@@ -130,7 +124,7 @@ namespace ClassicUO.Game.Renderer.Views
 
             Animations.Direction = dir;
 
-            byte animIndex = (byte)WorldObject.AnimIndex;
+            byte animIndex = (byte) WorldObject.AnimIndex;
             Graphic graphic = 0;
             EquipConvData? convertedItem = null;
             Hue color = 0;
@@ -144,13 +138,12 @@ namespace ClassicUO.Game.Renderer.Views
                 if (layer == Layer.Invalid)
                 {
                     graphic = WorldObject.DisplayedGraphic;
-                    Animations.AnimGroup =
-                        Animations.GetDieGroupIndex(WorldObject.GetMountAnimation(), WorldObject.UsedLayer);
+                    Animations.AnimGroup = Animations.GetDieGroupIndex(WorldObject.GetMountAnimation(), WorldObject.UsedLayer);
                     color = WorldObject.Hue;
                 }
                 else
                 {
-                    Item item = WorldObject.Equipment[(int)layer];
+                    Item item = WorldObject.Equipment[(int) layer];
                     if (item == null)
                         continue;
 
@@ -210,9 +203,7 @@ namespace ClassicUO.Game.Renderer.Views
         public override void Update(in double frameMS)
         {
             if (WorldObject.IsCorpse)
-            {
                 WorldObject.ProcessAnimation();
-            }
             else
                 WorldObject.Effect?.UpdateAnimation(frameMS);
         }

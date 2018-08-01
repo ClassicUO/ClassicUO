@@ -39,8 +39,7 @@
                 {
                     UOFileIndex5D patch = patches[i];
 
-                    if (patch.File == _patch && patch.Index >= 0 &&
-                        patch.Index < Entries.Length)
+                    if (patch.File == _patch && patch.Index >= 0 && patch.Index < Entries.Length)
                     {
                         UOFileIndex3D entry = Entries[patch.Index];
                         entry.Offset = patch.Offset;

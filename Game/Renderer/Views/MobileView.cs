@@ -7,6 +7,8 @@ namespace ClassicUO.Game.Renderer.Views
 {
     public class MobileView : View
     {
+        private int yOffset;
+
         public MobileView(in Mobile mobile) : base(mobile)
         {
         }
@@ -22,7 +24,7 @@ namespace ClassicUO.Game.Renderer.Views
             spriteBatch.GetZ();
 
             bool mirror = false;
-            byte dir = (byte)WorldObject.GetDirectionForAnimation();
+            byte dir = (byte) WorldObject.GetDirectionForAnimation();
             Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
@@ -44,7 +46,7 @@ namespace ClassicUO.Game.Renderer.Views
                 {
                     if (WorldObject.IsHuman)
                     {
-                        Item mount = WorldObject.Equipment[(int)Layer.Mount];
+                        Item mount = WorldObject.Equipment[(int) Layer.Mount];
                         if (mount != null)
                         {
                             graphic = mount.GetMountAnimation();
@@ -76,7 +78,7 @@ namespace ClassicUO.Game.Renderer.Views
                     if (!WorldObject.IsHuman)
                         continue;
 
-                    Item item = WorldObject.Equipment[(int)layer];
+                    Item item = WorldObject.Equipment[(int) layer];
                     if (item == null)
                         continue;
 
@@ -99,8 +101,7 @@ namespace ClassicUO.Game.Renderer.Views
                 Animations.AnimGroup = animGroup;
                 Animations.Direction = dir;
 
-                ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup]
-                    .Direction[Animations.Direction];
+                ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup].Direction[Animations.Direction];
 
                 if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction))
                     continue;
@@ -118,13 +119,12 @@ namespace ClassicUO.Game.Renderer.Views
 
                     int drawCenterY = frame.CenterY;
                     int drawX;
-                    int drawY = mountOffset + drawCenterY + (int)(WorldObject.Offset.Z / 4 + WorldObject.Position.Z * 4) - 22 -
-                                (int)(WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
+                    int drawY = mountOffset + drawCenterY + (int) (WorldObject.Offset.Z / 4 + WorldObject.Position.Z * 4) - 22 - (int) (WorldObject.Offset.Y - WorldObject.Offset.Z - 3);
 
                     if (IsFlipped)
-                        drawX = -22 + (int)WorldObject.Offset.X;
+                        drawX = -22 + (int) WorldObject.Offset.X;
                     else
-                        drawX = -22 - (int)WorldObject.Offset.X;
+                        drawX = -22 - (int) WorldObject.Offset.X;
 
 
                     int x = drawX + frame.CenterX;
@@ -148,10 +148,7 @@ namespace ClassicUO.Game.Renderer.Views
                     HueVector = RenderExtentions.GetHueVector(color);
 
 
-                    if ((layer == Layer.Mount || (!WorldObject.IsHuman && layer == Layer.Invalid)) && TextureWidth != Texture.Width)
-                    {
-                        TextureWidth = Texture.Width;
-                    }
+                    if ((layer == Layer.Mount || !WorldObject.IsHuman && layer == Layer.Invalid) && TextureWidth != Texture.Width) TextureWidth = Texture.Width;
 
                     if (layer == Layer.Invalid)
                         yOffset = y;
@@ -163,7 +160,6 @@ namespace ClassicUO.Game.Renderer.Views
                     //CalculateRenderDepth((sbyte)vv.Z, order, (byte)layer, ss);
 
                     base.Draw(spriteBatch, position);
-
                 }
             }
 
@@ -188,8 +184,6 @@ namespace ClassicUO.Game.Renderer.Views
             return DrawInternal(spriteBatch, position);
         }
 
-        private int yOffset;
-
         public override void Update(in double frameMS)
         {
             WorldObject.ProcessAnimation();
@@ -201,7 +195,7 @@ namespace ClassicUO.Game.Renderer.Views
         {
             base.MessageOverHead(in spriteBatch, in position);
 
-            Text.Draw((SpriteBatchUI)spriteBatch, new Point((int)position.X, (int)position.Y));
+            Text.Draw((SpriteBatchUI) spriteBatch, new Point((int) position.X, (int) position.Y));
         }
     }
 }

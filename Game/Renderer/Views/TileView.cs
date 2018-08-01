@@ -7,20 +7,14 @@ namespace ClassicUO.Game.Renderer.Views
     {
         private static readonly Point[] _surroundingIndexes =
         {
-            new Point(0, -1), new Point(1, -1),
-            new Point(-1, 0), new Point(1, 0), new Point(2, 0),
-            new Point(-1, 1), new Point(0, 1), new Point(1, 1), new Point(2, 1),
-            new Point(0, 2), new Point(1, 2)
+            new Point(0, -1), new Point(1, -1), new Point(-1, 0), new Point(1, 0), new Point(2, 0), new Point(-1, 1), new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(0, 2), new Point(1, 2)
         };
 
         private readonly Vector3[] _normals = new Vector3[4];
 
         private readonly SpriteVertex[] _vertex =
         {
-            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)),
-            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)),
-            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)),
-            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0))
+            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0))
         };
 
         private bool _needUpdateStrechedTile = true;
@@ -94,8 +88,7 @@ namespace ClassicUO.Game.Renderer.Views
         {
             float[] surroundingTilesZ = new float[_surroundingIndexes.Length];
             for (int i = 0; i < _surroundingIndexes.Length; i++)
-                surroundingTilesZ[i] = map.GetTileZ((short) (WorldObject.Position.X + _surroundingIndexes[i].X),
-                    (short) (WorldObject.Position.Y + _surroundingIndexes[i].Y));
+                surroundingTilesZ[i] = map.GetTileZ((short) (WorldObject.Position.X + _surroundingIndexes[i].X), (short) (WorldObject.Position.Y + _surroundingIndexes[i].Y));
 
             sbyte currentZ = WorldObject.Position.Z;
             sbyte leftZ = (sbyte) surroundingTilesZ[6];
@@ -113,18 +106,10 @@ namespace ClassicUO.Game.Renderer.Views
                 }
             }
 
-            _normals[0] = CalculateNormal(
-                surroundingTilesZ[2], surroundingTilesZ[3],
-                surroundingTilesZ[0], surroundingTilesZ[6]);
-            _normals[1] = CalculateNormal(
-                WorldObject.Position.Z, surroundingTilesZ[4],
-                surroundingTilesZ[1], surroundingTilesZ[7]);
-            _normals[2] = CalculateNormal(
-                surroundingTilesZ[5], surroundingTilesZ[7],
-                WorldObject.Position.Z, surroundingTilesZ[9]);
-            _normals[3] = CalculateNormal(
-                surroundingTilesZ[6], surroundingTilesZ[8],
-                surroundingTilesZ[3], surroundingTilesZ[10]);
+            _normals[0] = CalculateNormal(surroundingTilesZ[2], surroundingTilesZ[3], surroundingTilesZ[0], surroundingTilesZ[6]);
+            _normals[1] = CalculateNormal(WorldObject.Position.Z, surroundingTilesZ[4], surroundingTilesZ[1], surroundingTilesZ[7]);
+            _normals[2] = CalculateNormal(surroundingTilesZ[5], surroundingTilesZ[7], WorldObject.Position.Z, surroundingTilesZ[9]);
+            _normals[3] = CalculateNormal(surroundingTilesZ[6], surroundingTilesZ[8], surroundingTilesZ[3], surroundingTilesZ[10]);
 
             _vertex0_yOffset = new Vector3(22, -(currentZ * 4), 0);
             _vertex1_yOffset = new Vector3(44f, 22 - rightZ * 4, 0);
@@ -138,10 +123,7 @@ namespace ClassicUO.Game.Renderer.Views
 
             Vector3 hue = RenderExtentions.GetHueVector(WorldObject.Hue);
             if (_vertex[0].Hue != hue)
-                _vertex[0].Hue =
-                    _vertex[1].Hue =
-                        _vertex[2].Hue =
-                            _vertex[3].Hue = hue;
+                _vertex[0].Hue = _vertex[1].Hue = _vertex[2].Hue = _vertex[3].Hue = hue;
         }
 
         private Vector3 CalculateNormal(in float a, in float b, in float c, in float d)

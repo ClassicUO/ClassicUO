@@ -110,10 +110,8 @@ namespace ClassicUO.Game.Renderer
 
         public bool Draw2D(in Texture2D texture, in Rectangle destRect, in Rectangle sourceRect, in Vector3 hue)
         {
-            float minX = sourceRect.X / (float) texture.Width,
-                maxX = (sourceRect.X + sourceRect.Width) / (float) texture.Width;
-            float minY = sourceRect.Y / (float) texture.Height,
-                maxY = (sourceRect.Y + sourceRect.Height) / (float) texture.Height;
+            float minX = sourceRect.X / (float) texture.Width, maxX = (sourceRect.X + sourceRect.Width) / (float) texture.Width;
+            float minY = sourceRect.Y / (float) texture.Height, maxY = (sourceRect.Y + sourceRect.Height) / (float) texture.Height;
 
             _vertexBuffer[0].Position.X = destRect.X;
             _vertexBuffer[0].Position.Y = destRect.Y;

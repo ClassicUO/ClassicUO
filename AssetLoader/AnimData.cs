@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace ClassicUO.AssetsLoader
 {
@@ -14,10 +12,7 @@ namespace ClassicUO.AssetsLoader
         {
             string path = Path.Combine(FileManager.UoFolderPath, "animdata.mul");
 
-            if (File.Exists(path))
-            {
-                _file = new UOFileMul(path);
-            }
+            if (File.Exists(path)) _file = new UOFileMul(path);
         }
 
 
@@ -27,7 +22,7 @@ namespace ClassicUO.AssetsLoader
 
             if (address != IntPtr.Zero)
             {
-                int addr = (int)((graphic * 68) + 4 * ((graphic / 8) + 1));
+                int addr = graphic * 68 + 4 * (graphic / 8 + 1);
 
                 AnimDataFrame pad = Marshal.PtrToStructure<AnimDataFrame>(address + addr);
 
@@ -45,7 +40,6 @@ namespace ClassicUO.AssetsLoader
 
             return default;
         }
-
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -53,6 +47,7 @@ namespace ClassicUO.AssetsLoader
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
         public sbyte[] FrameData;
+
         public byte Unknown;
         public byte FrameCount;
         public byte FrameInterval;

@@ -20,8 +20,7 @@ namespace ClassicUO.Game.Renderer.Views
             if (Texture == null || Texture.IsDisposed)
             {
                 Texture = TextureManager.GetOrCreateStaticTexture(WorldObject.Graphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4,
-                    Texture.Width, Texture.Height);
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4, Texture.Width, Texture.Height);
 
                 //if (AssetsLoader.TileData.IsFoliage((long)WorldObject.ItemData.Flags))
                 //    HueVector = RenderExtentions.GetHueVector(0, false, true, false);

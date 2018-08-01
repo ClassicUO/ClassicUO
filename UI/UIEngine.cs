@@ -49,8 +49,7 @@ namespace ClassicUO.UI
 
                 if (s.IsEnabled && s.IsVisible && s.Rectangle.Contains(arg.Location.X, arg.Location.Y))
                 {
-                    if (s.IsMovable && !s.CanDragNow && arg.Button == MouseButton.Left
-                        && arg.ButtonState == ButtonState.Pressed)
+                    if (s.IsMovable && !s.CanDragNow && arg.Button == MouseButton.Left && arg.ButtonState == ButtonState.Pressed)
                         s.CanDragNow = true;
                     return true;
                 }
@@ -104,10 +103,7 @@ namespace ClassicUO.UI
             if (control != null)
             {
                 if (control.IsMovable && control.CanDragNow)
-                    control.MoveTo(
-                        arg.Offset.X,
-                        arg.Offset.Y
-                    );
+                    control.MoveTo(arg.Offset.X, arg.Offset.Y);
 
                 control.OnMouseMove(arg);
             }

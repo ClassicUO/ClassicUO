@@ -6,8 +6,7 @@ namespace ClassicUO.Game
     {
         public static Position Invalid = new Position(0xFFFF, 0xFFFF);
 
-        public Position(in ushort x, in ushort y, in sbyte z = 0)
-            : this()
+        public Position(in ushort x, in ushort y, in sbyte z = 0) : this()
         {
             X = x;
             Y = y;

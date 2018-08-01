@@ -71,12 +71,9 @@ namespace ClassicUO.Game.Network
         {
             if (buffer == null) throw new ArgumentNullException("buffer");
             if (!(offset >= 0 && offset < buffer.Length))
-                throw new ArgumentOutOfRangeException(
-                    "offset", offset,
-                    "Offset must be greater than or equal to zero and less than the size of the buffer.");
+                throw new ArgumentOutOfRangeException("offset", offset, "Offset must be greater than or equal to zero and less than the size of the buffer.");
             if (length < 0 || length > buffer.Length)
-                throw new ArgumentOutOfRangeException(
-                    "length", length, "Length cannot be less than zero or greater than the size of the buffer.");
+                throw new ArgumentOutOfRangeException("length", length, "Length cannot be less than zero or greater than the size of the buffer.");
             if (buffer.Length - offset < length)
                 throw new ArgumentException("Offset and length do not point to a valid segment within the buffer.");
 
@@ -177,8 +174,7 @@ namespace ClassicUO.Game.Network
     [Serializable]
     public sealed class CapacityExceededException : Exception
     {
-        public CapacityExceededException()
-            : base("Too much data pending.")
+        public CapacityExceededException() : base("Too much data pending.")
         {
         }
     }

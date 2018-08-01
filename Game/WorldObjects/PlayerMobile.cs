@@ -363,8 +363,8 @@ namespace ClassicUO.Game.WorldObjects
 
         public void UpdateAbilities()
         {
-            Item right = Equipment[(int)Layer.RightHand];
-            Item left = Equipment[(int)Layer.LeftHand];
+            Item right = Equipment[(int) Layer.RightHand];
+            Item left = Equipment[(int) Layer.LeftHand];
 
             _ability[0] = Ability.None;
             _ability[1] = Ability.None;

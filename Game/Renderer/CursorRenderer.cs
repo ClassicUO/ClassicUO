@@ -10,15 +10,10 @@ namespace ClassicUO.Game.Renderer
         private static readonly ushort[,] _cursorData = new ushort[2, 16]
         {
             {
-                0x206A, 0x206B, 0x206C, 0x206D, 0x206E, 0x206F,
-                0x2070, 0x2071, 0x2072, 0x2073, 0x2074, 0x2075,
-                0x2076, 0x2077, 0x2078, 0x2079
+                0x206A, 0x206B, 0x206C, 0x206D, 0x206E, 0x206F, 0x2070, 0x2071, 0x2072, 0x2073, 0x2074, 0x2075, 0x2076, 0x2077, 0x2078, 0x2079
             },
             {
-                0x2053, 0x2054, 0x2055, 0x2056, 0x2057, 0x2058,
-                0x2059, 0x205A, 0x205B, 0x205C, 0x205D, 0x205E,
-                0x205F, 0x2060, 0x2061,
-                0x2062
+                0x2053, 0x2054, 0x2055, 0x2056, 0x2057, 0x2058, 0x2059, 0x205A, 0x205B, 0x205C, 0x205D, 0x205E, 0x205F, 0x2060, 0x2061, 0x2062
             }
         };
 
@@ -215,8 +210,7 @@ namespace ClassicUO.Game.Renderer
 
             if (id < 16)
             {
-                Vector3 v = new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id],
-                    0);
+                Vector3 v = new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0);
                 sb.Draw2D(Texture, v, RenderExtentions.GetHueVector(2655));
 
                 _textR.Draw(sb, new Point((int) v.X, (int) v.Y + 20));

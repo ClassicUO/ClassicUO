@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -13,8 +12,7 @@ namespace ClassicUO.Game.Renderer
         private const int INITIAL_TEXTURE_COUNT = 0x800;
         private const float MAX_ACCURATE_SINGLE_FLOAT = 65536;
 
-        private readonly Dictionary<Texture2D, List<SpriteVertex>> _drawingQueue =
-            new Dictionary<Texture2D, List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
+        private readonly Dictionary<Texture2D, List<SpriteVertex>> _drawingQueue = new Dictionary<Texture2D, List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
 
         private readonly EffectParameter _drawLightingEffect;
 
@@ -53,8 +51,7 @@ namespace ClassicUO.Game.Renderer
                 _indexBuffer[i * 6 + 5] = (short) (i * 4 + 3);
             }
 
-            _effect = new Effect(GraphicsDevice,
-                File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, "IsometricWorld.fxc")));
+            _effect = new Effect(GraphicsDevice, File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, "IsometricWorld.fxc")));
             _effect.Parameters["HuesPerTexture"].SetValue(3000f);
 
             _drawLightingEffect = _effect.Parameters["DrawLighting"];
@@ -69,8 +66,7 @@ namespace ClassicUO.Game.Renderer
         public GraphicsDevice GraphicsDevice => _game?.GraphicsDevice;
         public Matrix ProjectionMatrixWorld => Matrix.Identity;
 
-        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width,
-            GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
+        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
 
 
         public void SetLightDirection(in Vector3 dir)
@@ -99,23 +95,16 @@ namespace ClassicUO.Game.Renderer
             bool draw = false;
 
             for (byte i = 0; i < 4; i++)
-            {
                 if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
                 {
-                    
                     draw = true;
                     break;
-
                 }
-            }
 
             if (!draw)
                 return false;
 
-            vertices[0].Position.Z =
-                vertices[1].Position.Z =
-                    vertices[2].Position.Z =
-                        vertices[3].Position.Z = GetZ();
+            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
 
             //var z = GetZ();
 
@@ -165,17 +154,10 @@ namespace ClassicUO.Game.Renderer
                 Texture2D texture = enumerator.Current.Key;
                 List<SpriteVertex> list = enumerator.Current.Value;
 
-                list.CopyTo(0, _vertexBuffer, 0,
-                    list.Count <= MAX_VERTICES_PER_DRAW ? list.Count : MAX_VERTICES_PER_DRAW);
+                list.CopyTo(0, _vertexBuffer, 0, list.Count <= MAX_VERTICES_PER_DRAW ? list.Count : MAX_VERTICES_PER_DRAW);
 
                 GraphicsDevice.Textures[0] = texture;
-                GraphicsDevice.DrawUserIndexedPrimitives(
-                    PrimitiveType.TriangleList,
-                    _vertexBuffer,
-                    0,
-                    Math.Min(list.Count, MAX_VERTICES_PER_DRAW),
-                    _indexBuffer,
-                    0, list.Count / 2);
+                GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, _vertexBuffer, 0, Math.Min(list.Count, MAX_VERTICES_PER_DRAW), _indexBuffer, 0, list.Count / 2);
 
                 list.Clear();
                 _vertexQueue.Enqueue(list);

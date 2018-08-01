@@ -18,9 +18,7 @@ namespace ClassicUO.AssetsLoader
             else
                 throw new FileNotFoundException();
 
-            _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090
-                ? Marshal.SizeOf<MultiBlockNew>()
-                : Marshal.SizeOf<MultiBlock>();
+            _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? Marshal.SizeOf<MultiBlockNew>() : Marshal.SizeOf<MultiBlock>();
         }
 
         public static unsafe MultiBlock GetMulti(int index)

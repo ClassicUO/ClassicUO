@@ -55,8 +55,8 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 {	
 	// Get the initial pixel and discard it if the alpha == 0
 	float4 color = tex2D(DrawSampler, IN.TexCoord);
-	if (color.a == 0)
-		discard;
+	
+	clip(color.a <= 0 ? -1 : 1);
 
 	// flag for no lighting
 	bool drawLighting = true;
@@ -162,6 +162,9 @@ technique HueTechnique
 {
 	pass p0
 	{
+		AlphaBlendEnable = TRUE;
+        DestBlend = INVSRCALPHA;
+        SrcBlend = SRCALPHA;
 		VertexShader = compile vs_2_0 VertexShaderFunction();
 		PixelShader = compile ps_2_0 PixelShader_Hue();
 	}

@@ -25,8 +25,8 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public ushort X { get; private set; }
-        public ushort Y { get; private set; }
+        public ushort X { get; }
+        public ushort Y { get; }
         public Tile[][] Tiles { get; private set; }
 
 
@@ -104,14 +104,12 @@ namespace ClassicUO.Game.Map
         public void Unload()
         {
             for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 8; j++)
             {
-                for (int j = 0; j < 8; j++)
-                {
-                    Tiles[i][j].Clear();
+                Tiles[i][j].Clear();
 
-                    Tiles[i][j].Dispose();
-                    Tiles[i][j] = null;
-                }
+                Tiles[i][j].Dispose();
+                Tiles[i][j] = null;
             }
 
             Tiles = null;

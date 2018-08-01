@@ -8,8 +8,8 @@ namespace ClassicUO.Game.Renderer
     public sealed class TextRenderer
     {
         private bool _isPartialHue;
-        private bool _textChanged;
         private string _text;
+        private bool _textChanged;
 
         public TextRenderer(in string text = "")
         {
@@ -27,8 +27,9 @@ namespace ClassicUO.Game.Renderer
                     _text = value;
                     _textChanged = true;
                 }
-            } 
+            }
         }
+
         public int Width { get; set; }
         public int Height { get; set; }
         public TextTexture Texture { get; private set; }
@@ -48,11 +49,9 @@ namespace ClassicUO.Game.Renderer
             List<WebLinkRect> links;
 
             if (IsUnicode)
-                (data, Width, Height, linesCount, links) =
-                    Fonts.GenerateUnicode(Font, Text, Color, cell, maxWidth, aling, flags);
+                (data, Width, Height, linesCount, links) = Fonts.GenerateUnicode(Font, Text, Color, cell, maxWidth, aling, flags);
             else
-                (data, Width, Height, linesCount, _isPartialHue) =
-                    Fonts.GenerateASCII(Font, Text, Color, maxWidth, aling, flags);
+                (data, Width, Height, linesCount, _isPartialHue) = Fonts.GenerateASCII(Font, Text, Color, maxWidth, aling, flags);
 
 
             Texture?.Dispose();
@@ -96,8 +95,7 @@ namespace ClassicUO.Game.Renderer
                 destRect.Height = sourceRect.Height = Height - sourceRect.Y;
 
 
-            spriteBatch.Draw2D(Texture, destRect, sourceRect,
-                RenderExtentions.GetHueVector(0, _isPartialHue, false, false));
+            spriteBatch.Draw2D(Texture, destRect, sourceRect, RenderExtentions.GetHueVector(0, _isPartialHue, false, false));
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using ClassicUO.AssetsLoader;
@@ -503,7 +502,7 @@ namespace ClassicUO.Game.Network
             item.Amount = count;
             item.Position = new Position(x, y, z);
             item.Hue = hue;
-            item.Flags = (Flags)flags;
+            item.Flags = (Flags) flags;
             item.Direction = (Direction) direction;
 
             if (graphic >= 0x4000)
@@ -549,7 +548,7 @@ namespace ClassicUO.Game.Network
             if (World.Items.Add(item))
                 World.Items.ProcessDelta();
 
-            if (TileData.IsAnimated((long)item.ItemData.Flags))
+            if (TileData.IsAnimated((long) item.ItemData.Flags))
                 item.Effect = new AnimatedItemEffect(item.Position.X, item.Position.Y, item.Position.Z, item.Graphic, item.Hue, -1);
         }
 
@@ -815,14 +814,12 @@ namespace ClassicUO.Game.Network
 
                 case 2:
                     while ((id = p.ReadUShort()) > 0)
-                        World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (SkillLock) p.ReadByte(),
-                            p.ReadUShort());
+                        World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (SkillLock) p.ReadByte(), p.ReadUShort());
                     break;
 
                 case 0xDF:
                     id = p.ReadUShort();
-                    World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (SkillLock) p.ReadByte(),
-                        p.ReadUShort());
+                    World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (SkillLock) p.ReadByte(), p.ReadUShort());
                     break;
 
                 case 0xFF:
@@ -916,12 +913,7 @@ namespace ClassicUO.Game.Network
             bool repeat = p.ReadBool();
             byte delay = p.ReadByte();
 
-            mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile, action),
-                delay,
-                (byte) frameCount,
-                (byte) repeatMode,
-                repeat,
-                frameDirection);
+            mobile.SetAnimation(Mobile.GetReplacedObjectAnimation(mobile, action), delay, (byte) frameCount, (byte) repeatMode, repeat, frameDirection);
             mobile.AnimationFromServer = true;
         }
 
@@ -964,7 +956,7 @@ namespace ClassicUO.Game.Network
         {
             if (World.Player == null)
                 return;
-            
+
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
             mobile.Graphic = p.ReadUShort();
 
@@ -990,8 +982,7 @@ namespace ClassicUO.Game.Network
                 mobile.Direction = direction;
             }
 
-            if (!mobile.EnqueueStep(x, y, z, direction & Direction.Up,
-                (direction & Direction.Running) == Direction.Running))
+            if (!mobile.EnqueueStep(x, y, z, direction & Direction.Up, (direction & Direction.Running) == Direction.Running))
             {
                 mobile.Position = new Position((ushort) x, (ushort) y, z);
                 mobile.Direction = direction;
@@ -1073,7 +1064,7 @@ namespace ClassicUO.Game.Network
             {
                 mobile.Position = new Position(x, y, z);
                 mobile.Direction = direction;
-            }         
+            }
 
             if (!mobile.EnqueueStep(x, y, z, direction & Direction.Up, (direction & Direction.Running) == Direction.Running))
             {
@@ -1086,7 +1077,7 @@ namespace ClassicUO.Game.Network
             if (World.Mobiles.Add(mobile))
                 World.Mobiles.ProcessDelta();
             World.Items.ProcessDelta();
-        
+
             new PClickRequest(mobile).SendToServer();
         }
 
@@ -1387,7 +1378,6 @@ namespace ClassicUO.Game.Network
         private static void AssistVersion(Packet p)
         {
             //uint version = p.ReadUInt();
-
         }
 
         private static void ExtendedCommand(Packet p)
@@ -1702,7 +1692,7 @@ namespace ClassicUO.Game.Network
                 Zlib.Decompress(compressedBytes, 0, decompressedBytes, (int) dlen);
 
                 Packet stream = new Packet(decompressedBytes, (int) dlen);
-               // using (BinaryReader stream = new BinaryReader(new MemoryStream(decompressedBytes)))
+                // using (BinaryReader stream = new BinaryReader(new MemoryStream(decompressedBytes)))
                 {
                     p.Skip(clen);
 
@@ -1719,17 +1709,16 @@ namespace ClassicUO.Game.Network
                                 y = stream.ReadByte();
                                 z = stream.ReadByte();
 
-                                x += (byte)-minX;
-                                y += (byte)-minY;
+                                x += (byte) -minX;
+                                y += (byte) -minY;
 
                                 if (id != 0)
                                 {
-                                    Tile tile = World.Map.GetTile((ushort)(minX + foundation.Position.X + x), (ushort)(minY + foundation.Position.Y + y));
+                                    Tile tile = World.Map.GetTile((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y));
 
-                                    tile.AddWorldObject(
-                                        new Static(id, 0, 0)
+                                    tile.AddWorldObject(new Static(id, 0, 0)
                                     {
-                                        Position = new Position(tile.Position.X, tile.Position.Y, (sbyte)(foundation.Position.Z + z))
+                                        Position = new Position(tile.Position.X, tile.Position.Y, (sbyte) (foundation.Position.Z + z))
                                     });
                                 }
                             }
@@ -1753,12 +1742,11 @@ namespace ClassicUO.Game.Network
 
                                 if (id != 0)
                                 {
-                                    Tile tile = World.Map.GetTile((ushort)(minX + foundation.Position.X + x), (ushort)(minY + foundation.Position.Y + y));
+                                    Tile tile = World.Map.GetTile((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y));
 
                                     tile.AddWorldObject(new Static(id, 0, 0)
                                     {
-                                        Position = new Position(tile.Position.X, tile.Position.Y,
-                                            (sbyte)(foundation.Position.Z + z))
+                                        Position = new Position(tile.Position.X, tile.Position.Y, (sbyte) (foundation.Position.Z + z))
                                     });
                                 }
                             }
@@ -1798,24 +1786,21 @@ namespace ClassicUO.Game.Network
                                 x = (byte) (i / multiHeight + offX);
                                 y = (byte) (i % multiHeight + offY);
 
-                                x += (byte)-minX;
-                                y += (byte)-minY;
+                                x += (byte) -minX;
+                                y += (byte) -minY;
 
                                 if (id != 0)
                                 {
-                                    Tile tile = World.Map.GetTile((ushort)(minX + foundation.Position.X + x), (ushort)(minY + foundation.Position.Y + y));
+                                    Tile tile = World.Map.GetTile((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y));
 
-                                     tile.AddWorldObject(new Static(id, 0, 0)
+                                    tile.AddWorldObject(new Static(id, 0, 0)
                                     {
-                                        Position = new Position(tile.Position.X, tile.Position.Y,
-                                            (sbyte)(foundation.Position.Z + z))
+                                        Position = new Position(tile.Position.X, tile.Position.Y, (sbyte) (foundation.Position.Z + z))
                                     });
-
                                 }
                             }
 
                             break;
-
                     }
                 }
             }
@@ -1922,7 +1907,7 @@ namespace ClassicUO.Game.Network
             item.Amount = p.ReadUShort();
             p.Skip(2); //amount again? wtf???
             item.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
-            item.Direction = (Direction)p.ReadByte();
+            item.Direction = (Direction) p.ReadByte();
             item.Hue = p.ReadUShort();
             item.Flags = (Flags) p.ReadByte();
 
@@ -1932,11 +1917,7 @@ namespace ClassicUO.Game.Network
             item.Container = Serial.Invalid;
 
 
-            if (type == 2)
-            {
-                //item.Graphic |= 0x4000;
-                item.IsMulti = true;
-            }
+            if (type == 2) item.IsMulti = true;
 
             if (item.Graphic != 0x2006)
                 item.Graphic += graphicInc;
@@ -1946,7 +1927,7 @@ namespace ClassicUO.Game.Network
                 World.Items.ProcessDelta();
 
 
-            if (TileData.IsAnimated((long)item.ItemData.Flags))
+            if (TileData.IsAnimated((long) item.ItemData.Flags))
                 item.Effect = new AnimatedItemEffect(item.Position.X, item.Position.Y, item.Position.Z, item.Graphic, item.Hue, -1);
         }
 

@@ -65,22 +65,7 @@ namespace ClassicUO.AssetsLoader
 
         private static readonly byte[] _fontIndex =
         {
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-            16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
-            32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
-            48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
-            64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-            80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 136, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 152, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-            160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175,
-            176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191,
-            192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
-            208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 136, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 152, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223
         };
 
         private static uint _webLinkColor;
@@ -204,8 +189,7 @@ namespace ClassicUO.AssetsLoader
             return textHeight;
         }
 
-        public static (uint[], int, int, int, bool) GenerateASCII(in byte font, in string str, in ushort color,
-            int width, in TEXT_ALIGN_TYPE align, in ushort flags)
+        public static (uint[], int, int, int, bool) GenerateASCII(in byte font, in string str, in ushort color, int width, in TEXT_ALIGN_TYPE align, in ushort flags)
         {
             int linesCount = 0;
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0)
@@ -253,8 +237,7 @@ namespace ClassicUO.AssetsLoader
             return result;
         }
 
-        private static (uint[], int, int, int, bool) GeneratePixelsASCII(in byte font, in string str, in ushort color,
-            int width, in TEXT_ALIGN_TYPE align, in ushort flags)
+        private static (uint[], int, int, int, bool) GeneratePixelsASCII(in byte font, in string str, in ushort color, int width, in TEXT_ALIGN_TYPE align, in ushort flags)
         {
             uint[] pData;
 
@@ -397,8 +380,7 @@ namespace ClassicUO.AssetsLoader
             return 0;
         }
 
-        public static MultilinesFontInfo GetInfoASCII(in byte font, in string str, in int len, in TEXT_ALIGN_TYPE align,
-            in ushort flags, in int width)
+        public static MultilinesFontInfo GetInfoASCII(in byte font, in string str, in int len, in TEXT_ALIGN_TYPE align, in ushort flags, in int width)
         {
             if (font >= FontCount)
                 return null;
@@ -592,8 +574,7 @@ namespace ClassicUO.AssetsLoader
         }
 
 
-        public static void SetUseHTML(in bool value, uint htmlStartColor = 0xFFFFFFFF,
-            in bool backgroundCanBeColored = false)
+        public static void SetUseHTML(in bool value, uint htmlStartColor = 0xFFFFFFFF, in bool backgroundCanBeColored = false)
         {
             IsUsingHTML = value;
             _HTMLColor = htmlStartColor;
@@ -601,8 +582,7 @@ namespace ClassicUO.AssetsLoader
         }
 
 
-        public static (uint[], int, int, int, List<WebLinkRect>) GenerateUnicode(in byte font, in string str,
-            in ushort color, in byte cell, int width, in TEXT_ALIGN_TYPE align, in ushort flags)
+        public static (uint[], int, int, int, List<WebLinkRect>) GenerateUnicode(in byte font, in string str, in ushort color, in byte cell, int width, in TEXT_ALIGN_TYPE align, in ushort flags)
         {
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0)
             {
@@ -699,8 +679,7 @@ namespace ClassicUO.AssetsLoader
             return Math.Max(maxTextLenght, textLength);
         }
 
-        private static unsafe MultilinesFontInfo GetInfoUnicode(in byte font, in string str, in int len,
-            in TEXT_ALIGN_TYPE align, in ushort flags, in int width)
+        private static unsafe MultilinesFontInfo GetInfoUnicode(in byte font, in string str, in int len, in TEXT_ALIGN_TYPE align, in ushort flags, in int width)
         {
             _webLinkColor = 0xFF0000FF;
             _visitedWebLinkColor = 0x0000FFFF;
@@ -919,8 +898,7 @@ namespace ClassicUO.AssetsLoader
             return info;
         }
 
-        private static unsafe (uint[], int, int, int, List<WebLinkRect>) GeneratePixelsUnicode(in byte font,
-            in string str, in ushort color, in byte cell, int width, in TEXT_ALIGN_TYPE align, in ushort flags)
+        private static unsafe (uint[], int, int, int, List<WebLinkRect>) GeneratePixelsUnicode(in byte font, in string str, in ushort color, in byte cell, int width, in TEXT_ALIGN_TYPE align, in ushort flags)
         {
             uint[] pData;
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
@@ -1125,8 +1103,7 @@ namespace ClassicUO.AssetsLoader
 
                     int tmpW = w;
                     uint charcolor = datacolor;
-                    bool isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 &&
-                                       ((charcolor >> 8) & 0xFF) <= 8;
+                    bool isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
                     if (si != ' ')
                     {
                         if (IsUsingHTML && i < ptr.Data.Count)
@@ -1139,9 +1116,7 @@ namespace ClassicUO.AssetsLoader
                             if (data.Color != 0xFFFFFFFF)
                             {
                                 charcolor = data.Color;
-                                isBlackPixel =
-                                    ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 &&
-                                    ((charcolor >> 8) & 0xFF) <= 8;
+                                isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
                             }
                         }
 
@@ -1342,9 +1317,7 @@ namespace ClassicUO.AssetsLoader
                             if (data.Color != 0xFFFFFFFF)
                             {
                                 charcolor = data.Color;
-                                isBlackPixel =
-                                    ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 &&
-                                    ((charcolor >> 8) & 0xFF) <= 8;
+                                isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
                             }
                         }
                     }
@@ -1397,8 +1370,7 @@ namespace ClassicUO.AssetsLoader
             return (pData, width, height, linesCount, links);
         }
 
-        private static unsafe MultilinesFontInfo GetInfoHTML(in byte font, in string str, int len,
-            in TEXT_ALIGN_TYPE align, in ushort flags, in int width)
+        private static unsafe MultilinesFontInfo GetInfoHTML(in byte font, in string str, int len, in TEXT_ALIGN_TYPE align, in ushort flags, in int width)
         {
             HTMLChar[] htmlData = GetHTMLData(font, str, ref len, align, flags);
 
@@ -1591,8 +1563,7 @@ namespace ClassicUO.AssetsLoader
             return info;
         }
 
-        private static HTMLChar[] GetHTMLData(in byte font, in string str, ref int len, in TEXT_ALIGN_TYPE align,
-            in ushort flags)
+        private static HTMLChar[] GetHTMLData(in byte font, in string str, ref int len, in TEXT_ALIGN_TYPE align, in ushort flags)
         {
             HTMLChar[] data = new HTMLChar[0];
 
@@ -1784,8 +1755,7 @@ namespace ClassicUO.AssetsLoader
             return info;
         }
 
-        private static HTML_TAG_TYPE ParseHTMLTag(in string str, in int len, ref int i, ref bool endTag,
-            HTMLDataInfo info)
+        private static HTML_TAG_TYPE ParseHTMLTag(in string str, in int len, ref int i, ref bool endTag, HTMLDataInfo info)
         {
             HTML_TAG_TYPE tag = HTML_TAG_TYPE.HTT_NONE;
             i++;
@@ -2045,9 +2015,7 @@ namespace ClassicUO.AssetsLoader
             {
                 if (str[0] == '#')
                 {
-                    color = str.Substring(1).StartsWith("0x")
-                        ? Convert.ToUInt32(str.Substring(3), 16)
-                        : Convert.ToUInt32(str.Substring(1), 10);
+                    color = str.Substring(1).StartsWith("0x") ? Convert.ToUInt32(str.Substring(3), 16) : Convert.ToUInt32(str.Substring(1), 10);
 
                     byte* clrBuf = (byte*) color;
                     color = (uint) ((clrBuf[0] << 24) | (clrBuf[1] << 16) | (clrBuf[2] << 8) | 0xFF);

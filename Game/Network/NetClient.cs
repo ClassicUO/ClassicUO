@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Network
 {
@@ -31,9 +29,6 @@ namespace ClassicUO.Game.Network
 
         public bool IsConnected => _socket != null && _socket.Connected;
 
-        public static event EventHandler Connected, Disconnected;
-        public static event EventHandler<Packet> PacketReceived, PacketSended;
-
         public uint ClientAddress
         {
             get
@@ -44,7 +39,7 @@ namespace ClassicUO.Game.Network
                 if (localEntry.AddressList.Length > 0)
                 {
 #pragma warning disable 618
-                    address = (uint)localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
+                    address = (uint) localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
 #pragma warning restore 618
                 }
                 else
@@ -55,6 +50,9 @@ namespace ClassicUO.Game.Network
                 return ((address & 0xff) << 0x18) | ((address & 65280) << 8) | ((address >> 8) & 65280) | ((address >> 0x18) & 0xff);
             }
         }
+
+        public static event EventHandler Connected, Disconnected;
+        public static event EventHandler<Packet> PacketReceived, PacketSended;
 
 
         public void Connect(in string ip, in ushort port)
@@ -162,7 +160,7 @@ namespace ClassicUO.Game.Network
         {
             if (IsConnected)
             {
-                ExtractPackets();      
+                ExtractPackets();
                 Flush();
             }
         }
@@ -300,9 +298,7 @@ namespace ClassicUO.Game.Network
                 ok = !_socket.ReceiveAsync(_recvEventArgs);
                 if (ok)
                     ProcessRecv(_recvEventArgs);
-
             } while (ok);
-
         }
 
         private void ProcessRecv(in SocketAsyncEventArgs e)
@@ -317,8 +313,9 @@ namespace ClassicUO.Game.Network
                     DecompressBuffer(ref buffer, ref bytesLen);
 
                 lock (_circularBuffer)
+                {
                     _circularBuffer.Enqueue(buffer, 0, bytesLen);
-
+                }
             }
             else
             {

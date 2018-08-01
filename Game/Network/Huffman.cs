@@ -295,8 +295,7 @@ namespace ClassicUO.Game.Network
             return 1;
         }
 
-        public static bool DecompressChunk(ref byte[] src, ref int srcOffset, in int srcLength, ref byte[] dest,
-            in int destOffset, out int destLength)
+        public static bool DecompressChunk(ref byte[] src, ref int srcOffset, in int srcLength, ref byte[] dest, in int destOffset, out int destLength)
         {
             Array.Clear(dest, destOffset, dest.Length - destOffset);
 
