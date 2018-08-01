@@ -6,6 +6,41 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.UI
 {
+    public interface IControl
+    {
+        Point Position { get; set; }
+        Rectangle Bounds { get; set; }
+        bool IsVisible { get; set; }
+        bool IsEnabled { get; set; }
+        bool IsFocused { get; set; }
+        bool MouseIsOver { get; set; }
+        bool IsMovable { get; set; }
+        IReadOnlyList<IControl> Children { get; }
+        bool CanDrawNow { get; set; }
+        int X { get; set; }
+        int Y { get; set; }
+        int Width { get; set; }
+        int Height { get; set; }
+        IControl Parent { get; set; }
+
+
+        event EventHandler<MouseEventArgs> MouseButton, MouseMove, MouseEnter, MouseLeft;
+        event EventHandler<MouseWheelEventArgs> MouseWheel;
+        event EventHandler<KeyboardEventArgs> Keyboard;
+
+        void AddChild(in IControl child);
+        void RemoveChild(in IControl child);
+        void SetFocus();
+        void RemoveFocus();
+        void Clear();
+
+        void MoveTo(in int x, in int Y);
+
+        
+    }
+
+
+
     public abstract class Control
     {
         private readonly List<Control> _children;
@@ -128,15 +163,15 @@ namespace ClassicUO.UI
             _children.Clear();
         }
 
-        internal virtual void Draw(GameTime time, SpriteBatch spriteBatch)
-        {
-            _children.ForEach(s => s.Draw(time, spriteBatch));
-        }
+        //public virtual void Draw(GameTime time, SpriteBatch spriteBatch)
+        //{
+        //    _children.ForEach(s => s.Draw(time, spriteBatch));
+        //}
 
-        internal virtual void Update(GameTime time)
-        {
-            _children.ForEach(s => s.Update(time));
-        }
+        //public virtual void Update(GameTime time)
+        //{
+        //    _children.ForEach(s => s.Update(time));
+        //}
 
         public void MoveTo(in int offsetX, in int offsetY)
         {

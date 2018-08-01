@@ -12,6 +12,7 @@ using ClassicUO.Input;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO
 {
@@ -66,6 +67,17 @@ namespace ClassicUO
 
                 _graphics.ApplyChanges();
             };
+
+            //TextInputEXT.TextInput += c =>
+            //{
+            //    Log.Message(LogTypes.Error, c.ToString());
+            //};
+            //TextInputEXT.StartTextInput();
+
+            //KeyboardManager.KeyPressed += (sender, e) =>
+            //{
+            //    Log.Message(LogTypes.Info, e.Key.ToString());
+            //};
         }
 
         protected override void Initialize()
@@ -222,7 +234,10 @@ namespace ClassicUO
             TextureManager.Update();
 
             if (IsActive)
+            {
                 MouseManager.Update();
+                KeyboardManager.Update();
+            }
 
             _gameCursor.Update(gameTime.TotalGameTime.Ticks);
 

@@ -153,7 +153,7 @@ namespace ClassicUO.Game.Renderer
         {
             if (!_gumpTextureCache.TryGetValue(g, out var texture))
             {
-                ushort[] pixels = Gumps.GetGump(g, out int w, out int h);
+                ushort[] pixels = AssetsLoader.Gumps.GetGump(g, out int w, out int h);
                 texture = new SpriteTexture(w, h, false)
                 {
                     Ticks = World.Ticks

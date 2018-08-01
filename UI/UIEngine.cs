@@ -28,15 +28,15 @@ namespace ClassicUO.UI
         }
 
 
-        public void Draw(GameTime time, SpriteBatch spriteBatch)
-        {
-            Controls.ForEach(s => s.Draw(time, spriteBatch));
-        }
+        //public void Draw(GameTime time, SpriteBatch spriteBatch)
+        //{
+        //    Controls.ForEach(s => s.Draw(time, spriteBatch));
+        //}
 
-        public void Update(GameTime time)
-        {
-            Controls.ForEach(s => s.Update(time));
-        }
+        //public void Update(GameTime time)
+        //{
+        //    Controls.ForEach(s => s.Update(time));
+        //}
 
         private void DoMouseButtonEvents(MouseEventArgs arg)
         {
