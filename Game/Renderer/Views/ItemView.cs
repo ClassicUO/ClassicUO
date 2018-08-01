@@ -17,9 +17,7 @@ namespace ClassicUO.Game.Renderer.Views
 
 
             if (!item.IsCorpse)
-            {
                 AllowedToDraw = item.Graphic > 2 && item.DisplayedGraphic > 2 && !IsNoDrawable(item.Graphic);
-            }
             else
             {
                 item.AnimIndex = 99;
@@ -29,9 +27,7 @@ namespace ClassicUO.Game.Renderer.Views
                     item.Direction &= (Direction) 0x7F;
                 }
                 else
-                {
                     item.UsedLayer = false;
-                }
 
                 item.Layer = (Layer) item.Direction;
 
@@ -97,9 +93,7 @@ namespace ClassicUO.Game.Renderer.Views
                 base.Draw(spriteBatch, position);
             }
             else
-            {
                 WorldObject.Effect.ViewObject.Draw(spriteBatch, position);
-            }
 
             return true;
         }
@@ -150,11 +144,13 @@ namespace ClassicUO.Game.Renderer.Views
                     graphic = item.ItemData.AnimID;
 
                     if (Animations.EquipConversions.TryGetValue(item.Graphic, out Dictionary<ushort, EquipConvData> map))
+                    {
                         if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                         {
                             convertedItem = data;
                             graphic = data.Graphic;
                         }
+                    }
 
                     color = item.Hue;
                 }

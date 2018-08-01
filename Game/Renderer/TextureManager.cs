@@ -105,9 +105,7 @@ namespace ClassicUO.Game.Renderer
                 _animations[frame] = sprite;
             }
             else
-            {
                 sprite.Ticks = World.Ticks;
-            }
 
             return sprite;
         }
@@ -128,9 +126,7 @@ namespace ClassicUO.Game.Renderer
                 _staticTextureCache[g] = texture;
             }
             else
-            {
                 texture.Ticks = World.Ticks;
-            }
 
             return texture;
         }
@@ -148,9 +144,7 @@ namespace ClassicUO.Game.Renderer
                 _landTextureCache[g] = texture;
             }
             else
-            {
                 texture.Ticks = World.Ticks;
-            }
 
             return texture;
         }
@@ -168,9 +162,7 @@ namespace ClassicUO.Game.Renderer
                 _gumpTextureCache[g] = texture;
             }
             else
-            {
                 texture.Ticks = World.Ticks;
-            }
 
             return texture;
         }
@@ -188,9 +180,7 @@ namespace ClassicUO.Game.Renderer
                 _textmapTextureCache[g] = texture;
             }
             else
-            {
                 texture.Ticks = World.Ticks;
-            }
 
             return texture;
         }

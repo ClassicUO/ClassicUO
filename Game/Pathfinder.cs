@@ -356,8 +356,10 @@ namespace ClassicUO.Game
             bool moveIsOk = Check(mobile, itemsForward, staticForward, xForward, yForward, startTop, startZ, out newZ) || forceOK;
 
             if (moveIsOk && checkDiagonals)
+            {
                 if (!Check(mobile, itemsLeft, staticLeft, xLeft, yLeft, startTop, startZ, out sbyte hold) || !Check(mobile, itemsRight, staticRight, xRight, yRight, startTop, startZ, out hold))
                     moveIsOk = false;
+            }
 
             for (int i = 0; i < (checkDiagonals ? 4 : 2); i++)
             {

@@ -55,9 +55,7 @@ namespace ClassicUO.Utility
                 DoInsertRange(0, collection, count);
             }
             else
-            {
                 _buffer = new T[DefaultCapacity];
-            }
         }
 
         /// <summary>
@@ -788,6 +786,7 @@ namespace ClassicUO.Utility
             CheckRangeArguments(array.Length, index, Count);
 
             for (int i = 0; i != Count; ++i)
+            {
                 try
                 {
                     array.SetValue(this[i], index + i);
@@ -796,6 +795,7 @@ namespace ClassicUO.Utility
                 {
                     throw new ArgumentException("Destination array is of incorrect type.", ex);
                 }
+            }
         }
 
         bool ICollection.IsSynchronized => false;

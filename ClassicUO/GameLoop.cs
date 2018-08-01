@@ -18,6 +18,13 @@ namespace ClassicUO
     public class GameLoop : Microsoft.Xna.Framework.Game
     {
         private readonly GraphicsDeviceManager _graphics;
+
+        private readonly TextRenderer _textRenderer = new TextRenderer
+        {
+            IsUnicode = false,
+            Color = 33
+        };
+
         private DateTime _delay = DateTime.Now;
 
         private FpsCounter _fpsCounter;
@@ -27,12 +34,6 @@ namespace ClassicUO
         private Stopwatch _stopwatch;
 
         private RenderTarget2D _targetRender;
-
-        private readonly TextRenderer _textRenderer = new TextRenderer
-        {
-            IsUnicode = false,
-            Color = 33
-        };
 
         private Texture2D _texture, _crossTexture, _gump, _textentry;
 
@@ -187,6 +188,7 @@ namespace ClassicUO
             MouseManager.MousePressed += (sender, e) =>
             {
                 if (World.Map != null && World.Player != null)
+                {
                     if (e.Button == MouseButton.Right)
                     {
                         Point center = new Point(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
@@ -195,6 +197,7 @@ namespace ClassicUO
 
                         World.Player.Walk(direction, true);
                     }
+                }
             };
 
 
@@ -252,13 +255,9 @@ namespace ClassicUO
                     if (underObject is Item item)
                     {
                         if (TileData.IsRoof((long) item.ItemData.Flags))
-                        {
                             maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
-                        }
                         else if (TileData.IsSurface((long) item.ItemData.Flags) || TileData.IsWall((long) item.ItemData.Flags) && TileData.IsDoor((long) item.ItemData.Flags))
-                        {
                             maxItemZ = item.Position.Z;
-                        }
                         else
                         {
                             int z = World.Player.Position.Z + (item.ItemData.Height > 20 ? item.ItemData.Height : 20);
@@ -268,13 +267,9 @@ namespace ClassicUO
                     else if (underObject is Static sta)
                     {
                         if (TileData.IsRoof((long) sta.ItemData.Flags))
-                        {
                             maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
-                        }
                         else if (TileData.IsSurface((long) sta.ItemData.Flags) || TileData.IsWall((long) sta.ItemData.Flags) && TileData.IsDoor((long) sta.ItemData.Flags))
-                        {
                             maxItemZ = sta.Position.Z;
-                        }
                         else
                         {
                             int z = World.Player.Position.Z + (sta.ItemData.Height > 20 ? sta.ItemData.Height : 20);
@@ -486,8 +481,10 @@ namespace ClassicUO
                                     toremove.Add(obj);
 
                                 if (!drawTerrain)
+                                {
                                     if (obj is Tile || obj.Position.Z > tile.Position.Z)
                                         draw = false;
+                                }
 
                                 if ((obj.Position.Z >= maxItemZ || maxItemZ != 255 && (obj is Item item && TileData.IsRoof((long) item.ItemData.Flags) || obj is Static st && TileData.IsRoof((long) st.ItemData.Flags))) && !(obj is Tile))
                                     continue;

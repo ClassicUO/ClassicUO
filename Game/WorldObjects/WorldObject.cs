@@ -50,9 +50,7 @@ namespace ClassicUO.Game.WorldObjects
                     _tile = value;
 
                     if (_tile != null)
-                    {
                         _tile.AddWorldObject(this);
-                    }
                     else
                     {
                         if (this != World.Player && !IsDisposed)

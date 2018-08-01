@@ -42,9 +42,7 @@ namespace ClassicUO.Game.Renderer.Views
             if (Texture == null || Texture.IsDisposed)
             {
                 if (IsStretched)
-                {
                     Texture = TextureManager.GetOrCreateTexmapTexture(WorldObject.TileData.TexID);
-                }
                 else
                 {
                     Texture = TextureManager.GetOrCreateLandTexture(WorldObject.Graphic);

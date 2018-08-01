@@ -98,9 +98,7 @@ namespace ClassicUO.AssetsLoader
                         }
                     }
                     else
-                    {
                         throw new ArgumentException(string.Format("File with hash 0x{0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!", hash));
-                    }
                 }
 
                 Seek(nextBlock);

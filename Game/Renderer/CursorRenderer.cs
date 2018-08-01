@@ -60,13 +60,9 @@ namespace ClassicUO.Game.Renderer
                         float dh = texture.Height;
 
                         if (id == 0x206A)
-                        {
                             offX = -4f;
-                        }
                         else if (id == 0x206B)
-                        {
                             offX = -dw + 3f;
-                        }
                         else if (id == 0x206C)
                         {
                             offX = -dw + 3f;
@@ -83,17 +79,11 @@ namespace ClassicUO.Game.Renderer
                             offY = -dh;
                         }
                         else if (id == 0x206F)
-                        {
                             offY = -dh + 4f;
-                        }
                         else if (id == 0x2070)
-                        {
                             offY = -dh + 4f;
-                        }
                         else if (id == 0x2075)
-                        {
                             offY = -4f;
-                        }
                         else if (id == 0x2076)
                         {
                             offX = -12f;
@@ -105,13 +95,8 @@ namespace ClassicUO.Game.Renderer
                             offY = -(dh / 2f);
                         }
                         else if (id == 0x2078)
-                        {
                             offY = -(dh * 0.66f);
-                        }
-                        else if (id == 0x2079)
-                        {
-                            offY = -(dh / 2f);
-                        }
+                        else if (id == 0x2079) offY = -(dh / 2f);
 
                         switch (id)
                         {
@@ -194,9 +179,7 @@ namespace ClassicUO.Game.Renderer
                 _needGraphicUpdate = false;
             }
             else
-            {
                 Texture.Ticks = World.Ticks;
-            }
         }
 
         public void Draw(in SpriteBatchUI sb)

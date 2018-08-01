@@ -12,9 +12,7 @@ namespace ClassicUO.AssetsLoader
         {
             string path = Path.Combine(FileManager.UoFolderPath, "gumpartLegacyMUL.uop");
             if (File.Exists(path))
-            {
                 _file = new UOFileUop(path, ".tga", GUMP_COUNT, true);
-            }
             else
             {
                 path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");

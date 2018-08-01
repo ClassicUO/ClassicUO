@@ -28,9 +28,7 @@ namespace ClassicUO.AssetsLoader
             {
                 path = Path.Combine(FileManager.UoFolderPath, string.Format("map{0}LegacyMUL.uop", i));
                 if (File.Exists(path))
-                {
                     _filesMap[i] = new UOFileUop(path, ".dat");
-                }
                 else
                 {
                     path = Path.Combine(FileManager.UoFolderPath, string.Format("map{0}.mul", i));

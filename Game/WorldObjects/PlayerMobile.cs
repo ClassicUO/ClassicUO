@@ -375,13 +375,9 @@ namespace ClassicUO.Game.WorldObjects
             Graphic[] graphics = {0x00, 0x00};
 
             if (right == null && left != null)
-            {
                 graphics[0] = left.Graphic;
-            }
             else if (right != null && left == null)
-            {
                 graphics[1] = right.Graphic;
-            }
             else
             {
                 graphics[0] = left.Graphic;
@@ -1048,9 +1044,7 @@ namespace ClassicUO.Game.WorldObjects
             Direction oldDirection = Direction.NONE;
 
             if (_requestedSteps.Count <= 0)
-            {
                 GetEndPosition(ref x, ref y, ref z, ref oldDirection);
-            }
             else
             {
                 Step step1 = _requestedSteps.Back();
@@ -1171,8 +1165,10 @@ namespace ClassicUO.Game.WorldObjects
                 GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
 
                 if (step.Direction == (byte) endDir)
+                {
                     if (_movementState == PlayerMovementState.ANIMATE_ON_CONFIRM)
                         _movementState = PlayerMovementState.ANIMATE_ON_CONFIRM;
+                }
 
                 EnqueueStep(step.X, step.Y, step.Z, (Direction) step.Direction, step.Run);
             }
@@ -1181,6 +1177,7 @@ namespace ClassicUO.Game.WorldObjects
         public void DenyWalk(in byte seq, in Direction dir, in Position position)
         {
             foreach (Step step in _requestedSteps)
+            {
                 if (step.Seq == seq)
                 {
                     ResetSteps();
@@ -1191,6 +1188,7 @@ namespace ClassicUO.Game.WorldObjects
 
                     break;
                 }
+            }
         }
 
         public void ResetSteps()

@@ -116,22 +116,36 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < _objectsOnTile.Count; i++)
             {
                 for (int j = 0; j < index; j++)
+                {
                     if (toremove[j] == i)
                         continue;
+                }
 
                 if (_objectsOnTile[i] is Static st)
+                {
                     for (int j = i + 1; j < _objectsOnTile.Count; j++)
+                    {
                         if (_objectsOnTile[i].Position.Z == _objectsOnTile[j].Position.Z)
+                        {
                             if (_objectsOnTile[j] is Static stj && st.Graphic == stj.Graphic)
                             {
                                 toremove[index++] = i;
                                 break;
                             }
+                        }
+                    }
+                }
                 else if (_objectsOnTile[i] is Item item)
+                {
                     for (int j = i + 1; j < _objectsOnTile.Count; j++)
+                    {
                         if (_objectsOnTile[i].Position.Z == _objectsOnTile[j].Position.Z)
+                        {
                             if (_objectsOnTile[j] is Static stj && item.ItemData.Name == stj.ItemData.Name || _objectsOnTile[j] is Item itemj && item.Serial == itemj.Serial)
                                 toremove[index++] = j;
+                        }
+                    }
+                }
             }
 
             for (int i = 0; i < index; i++)
@@ -164,9 +178,14 @@ namespace ClassicUO.Game.Map
             _itemsAtZ.Clear();
 
             for (int i = 0; i < ObjectsOnTiles.Count; i++)
+            {
                 if (MathHelper.InRange(ObjectsOnTiles[i].Position.Z, z0, z1))
+                {
                     if (ObjectsOnTiles[i] is Item || ObjectsOnTiles[i] is Static)
                         items.Add(ObjectsOnTiles[i]);
+                }
+            }
+
             return items;
         }
 
@@ -187,21 +206,22 @@ namespace ClassicUO.Game.Map
                     StaticTiles itemdata = it.ItemData;
 
                     if (AssetsLoader.TileData.IsRoof((long) itemdata.Flags) || AssetsLoader.TileData.IsSurface((long) itemdata.Flags) || AssetsLoader.TileData.IsWall((long) itemdata.Flags) && AssetsLoader.TileData.IsImpassable((long) itemdata.Flags))
+                    {
                         if (entity == null || list[i].Position.Z < entity.Position.Z)
                             entity = list[i];
+                    }
                 }
                 else if (list[i] is Static st)
                 {
                     StaticTiles itemdata = st.ItemData;
 
                     if (AssetsLoader.TileData.IsRoof((long) itemdata.Flags) || AssetsLoader.TileData.IsSurface((long) itemdata.Flags) || AssetsLoader.TileData.IsWall((long) itemdata.Flags) && AssetsLoader.TileData.IsImpassable((long) itemdata.Flags))
+                    {
                         if (entity == null || list[i].Position.Z < entity.Position.Z)
                             entity = list[i];
+                    }
                 }
-                else if (list[i] is Tile tile && tile.ViewObject.SortZ >= z + 12)
-                {
-                    ground = list[i];
-                }
+                else if (list[i] is Tile tile && tile.ViewObject.SortZ >= z + 12) ground = list[i];
             }
 
             return entity != null || ground != null;

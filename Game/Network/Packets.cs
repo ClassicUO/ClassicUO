@@ -494,9 +494,7 @@ namespace ClassicUO.Game.Network
                 WriteUInt(serial);
             }
             else
-            {
                 WriteByte(0x04);
-            }
 
             WriteUnicode(text);
         }

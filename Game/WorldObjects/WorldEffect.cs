@@ -57,10 +57,7 @@ namespace ClassicUO.Game.WorldObjects
                     LastChangeFrameTime = World.Ticks + Speed;
                 }
             }
-            else if (Graphic != AnimationGraphic)
-            {
-                AnimationGraphic = Graphic;
-            }
+            else if (Graphic != AnimationGraphic) AnimationGraphic = Graphic;
         }
 
 

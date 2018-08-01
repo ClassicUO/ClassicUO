@@ -61,6 +61,7 @@ namespace ClassicUO.Game.Map
                     int count = (int) im.StaticCount;
 
                     for (int i = 0; i < count; i++, sb++)
+                    {
                         if (sb->Color > 0 && sb->Color != 0xFFFF)
                         {
                             ushort x = sb->X;
@@ -79,6 +80,7 @@ namespace ClassicUO.Game.Map
 
                             Tiles[x][y].AddWorldObject(staticObject);
                         }
+                    }
                 }
             }
         }

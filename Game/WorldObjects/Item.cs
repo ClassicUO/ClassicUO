@@ -189,9 +189,7 @@ namespace ClassicUO.Game.WorldObjects
                         }
                     }
                     else
-                    {
                         Multi = null;
-                    }
                 }
             }
         }
@@ -482,10 +480,7 @@ namespace ClassicUO.Game.WorldObjects
                 if (ItemData.AnimID != 0)
                     graphic = ItemData.AnimID;
             }
-            else if (IsCorpse)
-            {
-                return Amount;
-            }
+            else if (IsCorpse) return Amount;
 
             return graphic;
         }

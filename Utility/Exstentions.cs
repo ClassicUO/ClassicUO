@@ -62,9 +62,7 @@ namespace ClassicUO.Utility
             int count = list.Count;
 
             if (size < count)
-            {
                 list.RemoveRange(size, count - size);
-            }
             else if (size > count)
             {
                 if (size > list.Capacity) // Optimization

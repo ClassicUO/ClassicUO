@@ -696,9 +696,7 @@ namespace ClassicUO.Game.Network
 
             Entity entity = World.Get(source);
             if (entity == null)
-            {
                 source = 0;
-            }
             else
             {
                 sourceX = entity.Position.X;
@@ -708,9 +706,7 @@ namespace ClassicUO.Game.Network
 
             Entity destEntity = World.Get(dest);
             if (destEntity == null)
-            {
                 dest = 0;
-            }
             else
             {
                 destX = destEntity.Position.X;
@@ -1048,9 +1044,7 @@ namespace ClassicUO.Game.Network
                     item.Hue = p.ReadUShort();
                 }
                 else
-                {
                     item.Graphic = (ushort) (graphic & 0x3FFF);
-                }
 
                 item.Amount = 1;
                 item.Container = mobile;
@@ -1100,6 +1094,7 @@ namespace ClassicUO.Game.Network
             int slots = p.ReadByte();
 
             if (slots > 0)
+            {
                 for (int i = 0; i < slots; i++)
                 {
                     string name = p.ReadASCII(30);
@@ -1109,6 +1104,7 @@ namespace ClassicUO.Game.Network
                     {
                     }
                 }
+            }
         }
 
         private static void OpenPaperdoll(Packet p)
@@ -1532,9 +1528,11 @@ namespace ClassicUO.Game.Network
                             spells |= (uint) (p.ReadByte() << (i * 8));
 
                         for (int i = 0; i < 32; i++)
+                        {
                             if ((spells & (1 << i)) > 0)
                             {
                             }
+                        }
                     }
 
                     break;

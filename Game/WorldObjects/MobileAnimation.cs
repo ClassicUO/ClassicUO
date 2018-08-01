@@ -84,8 +84,10 @@ namespace ClassicUO.Game.WorldObjects
                 {
                     result = (byte) HIGHT_ANIMATION_GROUP.HAG_WALK;
                     if (isRun)
+                    {
                         if (Animations.AnimationExists(graphic, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY))
                             result = (byte) HIGHT_ANIMATION_GROUP.HAG_FLY;
+                    }
                 }
                 else if (AnimationGroup == 0xFF)
                 {
@@ -114,9 +116,7 @@ namespace ClassicUO.Game.WorldObjects
                         if (!IsHuman && !Animations.AnimationExists(graphic, result))
                         {
                             if (Equipment[(int) Layer.Mount] != null)
-                            {
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
-                            }
                             else if ((Equipment[(int) Layer.LeftHand] != null || Equipment[(int) Layer.RightHand] != null) && !IsDead)
                             {
                                 if (inWar)
@@ -125,21 +125,15 @@ namespace ClassicUO.Game.WorldObjects
                                     result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
                             }
                             else if (inWar && !IsDead)
-                            {
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
-                            }
                             else
-                            {
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
-                            }
                         }
                     }
                     else
                     {
                         if (Equipment[(int) Layer.Mount] != null)
-                        {
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
-                        }
                         else if ((Equipment[(int) Layer.LeftHand] != null || Equipment[(int) Layer.RightHand] != null) && !IsDead)
                         {
                             if (inWar)
@@ -148,21 +142,15 @@ namespace ClassicUO.Game.WorldObjects
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
                         }
                         else if (inWar && !IsDead)
-                        {
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
-                        }
                         else
-                        {
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
-                        }
                     }
                 }
                 else if (AnimationGroup == 0xFF)
                 {
                     if (Equipment[(int) Layer.Mount] != null)
-                    {
                         result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
-                    }
                     else if (inWar && !IsDead)
                     {
                         if (Equipment[(int) Layer.LeftHand] != null)
@@ -173,14 +161,13 @@ namespace ClassicUO.Game.WorldObjects
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
                     }
                     else
-                    {
                         result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
-                    }
 
                     AnimIndex = 0;
                 }
 
                 if (Race == RaceType.GARGOYLE)
+                {
                     if (IsFlying)
                     {
                         if (result == 0 || result == 1)
@@ -209,6 +196,7 @@ namespace ClassicUO.Game.WorldObjects
                             result = 75;
                         else if (result >= 260 && result <= 270) result = 75;
                     }
+                }
             }
 
             return result;
@@ -267,12 +255,14 @@ namespace ClassicUO.Game.WorldObjects
             ushort getReplacedGroup(in IReadOnlyList<Tuple<ushort, byte>> list, in ushort idx, in ushort walkIdx)
             {
                 foreach (Tuple<ushort, byte> item in list)
+                {
                     if (item.Item1 == idx)
                     {
                         if (item.Item2 == 0xFF)
                             return walkIdx;
                         return item.Item2;
                     }
+                }
 
                 return idx;
             }
@@ -550,9 +540,7 @@ namespace ClassicUO.Game.WorldObjects
                     return 33;
             }
             else
-            {
                 return 32;
-            }
 
             return 0;
         }

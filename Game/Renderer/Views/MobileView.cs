@@ -58,14 +58,10 @@ namespace ClassicUO.Game.Renderer.Views
                             color = mount.Hue;
                         }
                         else
-                        {
                             continue;
-                        }
                     }
                     else
-                    {
                         continue;
-                    }
                 }
                 else if (layer == Layer.Invalid)
                 {
@@ -85,11 +81,13 @@ namespace ClassicUO.Game.Renderer.Views
                     graphic = item.ItemData.AnimID;
 
                     if (Animations.EquipConversions.TryGetValue(item.Graphic, out Dictionary<ushort, EquipConvData> map))
+                    {
                         if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                         {
                             convertedItem = data;
                             graphic = data.Graphic;
                         }
+                    }
 
                     color = item.Hue;
                 }

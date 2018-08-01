@@ -17,6 +17,7 @@ namespace ClassicUO.Input
             Keys[] newkeys = current.GetPressedKeys();
 
             foreach (Keys k in newkeys)
+            {
                 if (current.IsKeyDown(k))
                 {
                     Keys old = oldkeys.FirstOrDefault(s => s == k);
@@ -32,8 +33,10 @@ namespace ClassicUO.Input
                         KeyPressed?.Invoke(null, arg);
                     }
                 }
+            }
 
             foreach (Keys k in oldkeys)
+            {
                 if (current.IsKeyUp(k))
                 {
                     Keys old = oldkeys.FirstOrDefault(s => s == k);
@@ -44,6 +47,7 @@ namespace ClassicUO.Input
                         KeyUp?.Invoke(null, arg);
                     }
                 }
+            }
 
             _prevKeyboardState = current;
         }

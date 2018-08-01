@@ -95,11 +95,13 @@ namespace ClassicUO.Game.Renderer
             bool draw = false;
 
             for (byte i = 0; i < 4; i++)
+            {
                 if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
                 {
                     draw = true;
                     break;
                 }
+            }
 
             if (!draw)
                 return false;
@@ -194,9 +196,7 @@ namespace ClassicUO.Game.Renderer
                     list.Clear();
                 }
                 else
-                {
                     list = new List<SpriteVertex>(1024);
-                }
 
                 _drawingQueue[texture] = list;
             }

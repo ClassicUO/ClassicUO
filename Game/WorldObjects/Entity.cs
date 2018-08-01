@@ -79,9 +79,7 @@ namespace ClassicUO.Game.WorldObjects
                     fixedColor |= (ushort) (value & 0xC000);
                 }
                 else
-                {
                     fixedColor = (ushort) (value & 0x8000);
-                }
 
 
                 if (_hue != fixedColor)

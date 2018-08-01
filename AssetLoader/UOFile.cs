@@ -57,9 +57,7 @@ namespace ClassicUO.AssetsLoader
                 }
             }
             else
-            {
                 throw new UOFileException($"{Path} size must has > 0");
-            }
         }
 
         /*internal byte ReadByte() => _reader.ReadByte();

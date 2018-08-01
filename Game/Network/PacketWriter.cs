@@ -47,8 +47,10 @@ namespace ClassicUO.Game.Network
                 throw new ArgumentOutOfRangeException("length");
 
             if (IsDynamic)
+            {
                 while (Position + length > Length)
                     Array.Resize(ref _data, Position + length);
+            }
             else if (Position + length > Length)
                 throw new ArgumentOutOfRangeException("length");
         }

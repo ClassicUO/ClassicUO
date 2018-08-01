@@ -160,8 +160,10 @@ namespace ClassicUO.AssetsLoader
             }
 
             for (int i = 0; i < 256; i++)
+            {
                 if (_fontIndex[i] >= 0xE0)
                     _fontIndex[i] = _fontIndex[' '];
+            }
         }
 
 
@@ -303,10 +305,7 @@ namespace ClassicUO.AssetsLoader
                     if (w == 0)
                         w = 0;
                 }
-                else if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (flags & UOFONT_INDENTION) != 0)
-                {
-                    w = ptr.IndentionOffset;
-                }
+                else if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (flags & UOFONT_INDENTION) != 0) w = ptr.IndentionOffset;
 
                 int count = ptr.Data.Count;
 
@@ -629,10 +628,7 @@ namespace ClassicUO.AssetsLoader
                     byte* ptr = (byte*) ((IntPtr) table + (int) offset);
                     charWidth = (sbyte) (ptr[0] + ptr[2] + 1);
                 }
-                else if (c == ' ')
-                {
-                    charWidth = UNICODE_SPACE_WIDTH;
-                }
+                else if (c == ' ') charWidth = UNICODE_SPACE_WIDTH;
 
                 if (charWidth > 0)
                 {
@@ -666,9 +662,7 @@ namespace ClassicUO.AssetsLoader
                     textLength += ptr[0] + ptr[2] + 1;
                 }
                 else if (c == ' ')
-                {
                     textLength += UNICODE_SPACE_WIDTH;
-                }
                 else if (c == '\n' || c == '\r')
                 {
                     maxTextLenght = Math.Max(maxTextLenght, textLength);
@@ -981,8 +975,10 @@ namespace ClassicUO.AssetsLoader
             if (color == 0xFFFF)
                 datacolor = /*0xFFFFFFFE;*/ Hues.RgbaToArgb(0xFFFFFFFE);
             else
+            {
                 datacolor = /*Hues.GetPolygoneColor(cell, color) << 8 | 0xFF;*/
                     Hues.RgbaToArgb((Hues.GetPolygoneColor(cell, color) << 8) | 0xFF);
+            }
 
             bool isItalic = (flags & UOFONT_ITALIC) != 0;
             bool isSolid = (flags & UOFONT_SOLID) != 0;
@@ -1016,10 +1012,7 @@ namespace ClassicUO.AssetsLoader
                     if (w < 0)
                         w = 0;
                 }
-                else if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (flags & UOFONT_INDENTION) != 0)
-                {
-                    w += ptr.IndentionOffset;
-                }
+                else if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (flags & UOFONT_INDENTION) != 0) w += ptr.IndentionOffset;
 
                 ushort oldLink = 0;
 
@@ -1052,9 +1045,7 @@ namespace ClassicUO.AssetsLoader
                         int ofsX = 0;
 
                         if (si == ' ')
-                        {
                             ofsX = UNICODE_SPACE_WIDTH;
-                        }
                         else if ((table[si] <= 0 || table[si] == 0xFFFFFFFF) && si != ' ')
                         {
                         }
@@ -1362,8 +1353,10 @@ namespace ClassicUO.AssetsLoader
                 {
                     int yPos = y * width;
                     for (int x = 0; x < width; x++)
+                    {
                         if (pData[yPos + x] <= 0)
                             pData[yPos + x] = Hues.RgbaToArgb(_backgroundColor);
+                    }
                 }
             }
 
@@ -1616,9 +1609,7 @@ namespace ClassicUO.AssetsLoader
                             newInfo.Font = stack.LastOrDefault().Font;
 
                         if (tag != HTML_TAG_TYPE.HTT_BODY)
-                        {
                             stack.Add(newInfo);
-                        }
                         else
                         {
                             stack.Clear();
@@ -1633,11 +1624,13 @@ namespace ClassicUO.AssetsLoader
                     {
                         int index = -1;
                         for (int j = stack.Count - 1; j > 1; j--)
+                        {
                             if (stack[j].Tag == tag)
                             {
                                 stack.RemoveAt(j); // MAYBE ERROR?
                                 break;
                             }
+                        }
                     }
 
                     currentInfo = GetCurrentHTMLInfo(stack);
@@ -1771,8 +1764,10 @@ namespace ClassicUO.AssetsLoader
 
             int j = i;
             for (; i < len; i++)
+            {
                 if (str[i] == ' ' || str[i] == '>')
                     break;
+            }
 
             if (j != i && i < len)
             {
@@ -1858,6 +1853,7 @@ namespace ClassicUO.AssetsLoader
                     info = GetHTMLInfoFromTag(tag);
 
                     if (i < len && j != i)
+                    {
                         switch (tag)
                         {
                             case HTML_TAG_TYPE.HTT_BODY:
@@ -1874,6 +1870,7 @@ namespace ClassicUO.AssetsLoader
 
                                 break;
                         }
+                    }
                 }
             }
 
@@ -1933,9 +1930,7 @@ namespace ClassicUO.AssetsLoader
                         break;
                     case HTML_TAG_TYPE.HTT_BASEFONT:
                         if (str == "color")
-                        {
                             info.Color = GetHTMLColorFromText(ref value);
-                        }
                         else if (str == "size")
                         {
                             byte font = byte.Parse(value);
@@ -1986,11 +1981,13 @@ namespace ClassicUO.AssetsLoader
             KeyValuePair<ushort, WebLink>? l = null;
 
             foreach (KeyValuePair<ushort, WebLink> ll in _webLinks)
+            {
                 if (ll.Value.Link == link)
                 {
                     l = ll;
                     break;
                 }
+            }
 
             if (l == null || !l.HasValue)
             {
@@ -2170,10 +2167,12 @@ namespace ClassicUO.AssetsLoader
         {
             int textHeight = 0;
             for (; info != null; info = info.Next)
+            {
                 if (IsUsingHTML)
                     textHeight += MAX_HTML_TEXT_HEIGHT;
                 else
                     textHeight += info.MaxHeight;
+            }
 
             return textHeight;
         }

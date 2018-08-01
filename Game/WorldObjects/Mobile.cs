@@ -614,6 +614,7 @@ namespace ClassicUO.Game.WorldObjects
 
                 Item mount = Equipment[(int) Layer.Mount];
                 if (mount != null)
+                {
                     switch (animGroup)
                     {
                         case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
@@ -623,6 +624,7 @@ namespace ClassicUO.Game.WorldObjects
                             animGroup = GetGroupForAnimation(id);
                             break;
                     }
+                }
 
                 bool mirror = false;
                 Animations.GetAnimDirection(ref dir, ref mirror);
@@ -665,15 +667,10 @@ namespace ClassicUO.Game.WorldObjects
                                             repCount--;
                                             AnimationRepeatMode = repCount;
                                         }
-                                        else if (repCount == 1)
-                                        {
-                                            SetAnimation(0xFF);
-                                        }
+                                        else if (repCount == 1) SetAnimation(0xFF);
                                     }
                                     else
-                                    {
                                         SetAnimation(0xFF);
-                                    }
                                 }
                             }
                             else
@@ -693,15 +690,10 @@ namespace ClassicUO.Game.WorldObjects
                                             repCount--;
                                             AnimationRepeatMode = repCount;
                                         }
-                                        else if (repCount == 1)
-                                        {
-                                            SetAnimation(0xFF);
-                                        }
+                                        else if (repCount == 1) SetAnimation(0xFF);
                                     }
                                     else
-                                    {
                                         SetAnimation(0xFF);
-                                    }
                                 }
                             }
                         }

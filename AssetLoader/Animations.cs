@@ -93,12 +93,14 @@ namespace ClassicUO.AssetsLoader
 
                         uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
                         for (int i = 0; i < 5; i++)
+                        {
                             if (testType == typeNames[i])
                             {
                                 DataIndex[id].Type = (ANIMATION_GROUPS_TYPE) i;
                                 DataIndex[id].Flags = 0x80000000 | number;
                                 break;
                             }
+                        }
                     }
                 }
             }
@@ -180,6 +182,7 @@ namespace ClassicUO.AssetsLoader
 
                     int offset = j * 5;
                     for (byte d = 0; d < 5; d++)
+                    {
                         unsafe
                         {
                             AnimIdxBlock* aidx = (AnimIdxBlock*) (address + (offset + d) * animIdxBlockSize);
@@ -194,6 +197,7 @@ namespace ClassicUO.AssetsLoader
                                 DataIndex[i].Groups[j].Direction[d].Size = DataIndex[i].Groups[j].Direction[d].BaseSize;
                             }
                         }
+                    }
                 }
             }
 
@@ -386,9 +390,7 @@ namespace ClassicUO.AssetsLoader
                             mountedHeightOffset = -9;
 
                             if (realAnimID == 34)
-                            {
                                 startAnimID = (realAnimID - 200) * 65 + 22000;
-                            }
                             else if (realAnimID >= 200)
                             {
                                 if (realAnimID >= 400)
@@ -429,14 +431,9 @@ namespace ClassicUO.AssetsLoader
                                             DataIndex[index].Type = ANIMATION_GROUPS_TYPE.ANIMAL;
                                     }
                                     else
-                                    {
                                         DataIndex[index].Type = ANIMATION_GROUPS_TYPE.MONSTER;
-                                    }
                                 }
-                                else if (groupType != ANIMATION_GROUPS_TYPE.UNKNOWN)
-                                {
-                                    DataIndex[index].Type = groupType;
-                                }
+                                else if (groupType != ANIMATION_GROUPS_TYPE.UNKNOWN) DataIndex[index].Type = groupType;
 
                                 int count = 0;
 
@@ -464,6 +461,7 @@ namespace ClassicUO.AssetsLoader
                                 {
                                     int offset = j * 5;
                                     for (byte d = 0; d < 5; d++)
+                                    {
                                         unsafe
                                         {
                                             AnimIdxBlock* aidx = (AnimIdxBlock*) (address + (offset + d) * animIdxBlockSize);
@@ -477,6 +475,7 @@ namespace ClassicUO.AssetsLoader
                                                 DataIndex[index].Groups[j].Direction[d].FileIndex = animFile;
                                             }
                                         }
+                                    }
                                 }
                             }
                         }
@@ -914,22 +913,26 @@ namespace ClassicUO.AssetsLoader
                 data.PixelDataOffset = _reader.ReadUInt();
                 int vsize = pixelDataOffsets.Count;
                 if (vsize + 1 != data.FrameID)
+                {
                     while (vsize + 1 != data.FrameID)
                     {
                         pixelDataOffsets.Add(new UOPFrameData());
                         vsize++;
                     }
+                }
 
                 pixelDataOffsets.Add(data);
             }
 
             int vectorSize = pixelDataOffsets.Count;
             if (vectorSize < 50)
+            {
                 while (vectorSize != 50)
                 {
                     pixelDataOffsets.Add(new UOPFrameData());
                     vectorSize++;
                 }
+            }
 
             animDirection.FrameCount = (byte) (pixelDataOffsets.Count / 5);
             int dirFrameStartIdx = animDirection.FrameCount * Direction;
@@ -1550,21 +1553,30 @@ namespace ClassicUO.AssetsLoader
         public static bool HasBody(int body)
         {
             if (body >= 0)
+            {
                 for (int i = 0; i < Table.Length; i++)
+                {
                     if (body < Table[i].Length && Table[i][body] != -1)
                         return true;
+                }
+            }
+
             return false;
         }
 
         public static int Convert(ref int body)
         {
             if (body >= 0)
+            {
                 for (int i = 0; i < Table.Length; i++)
+                {
                     if (body < Table[i].Length && Table[i][body] != -1)
                     {
                         body = Table[i][body];
                         return i + 2;
                     }
+                }
+            }
 
             return 1;
         }
@@ -1578,8 +1590,10 @@ namespace ClassicUO.AssetsLoader
             {
                 int[] t = Table[type - 2];
                 for (int i = 0; i < t.Length; i++)
+                {
                     if (t[i] == index)
                         return i;
+                }
             }
 
             return -1;

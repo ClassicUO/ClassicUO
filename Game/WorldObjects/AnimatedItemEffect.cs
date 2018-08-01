@@ -65,9 +65,7 @@ namespace ClassicUO.Game.WorldObjects
             base.UpdateAnimation(in ms);
 
             if (LastChangeFrameTime >= Duration && Duration >= 0)
-            {
                 Dispose();
-            }
             else
             {
                 (int x, int y, int z) = GetSource();

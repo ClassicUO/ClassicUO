@@ -145,8 +145,10 @@ namespace ClassicUO.UI
                 Console.WriteLine("OFFSET: {0},{1}", offsetX, offsetY);
 
                 if (Parent != null)
+                {
                     if (X + offsetX > Parent.Width || Y + offsetY > Parent.Height || X + offsetX < Parent.X || Y + offsetY < Parent.Y)
                         return;
+                }
 
 
                 X += offsetX;

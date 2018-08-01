@@ -190,16 +190,22 @@ namespace ClassicUO.Game
             foreach (Item item in Items)
             {
                 if (noplayer)
+                {
                     if (item.RootContainer == Player)
                         continue;
+                }
+
                 RemoveItem(item);
             }
 
             foreach (Mobile mob in Mobiles)
             {
                 if (noplayer)
+                {
                     if (mob == Player)
                         continue;
+                }
+
                 RemoveMobile(mob);
             }
         }

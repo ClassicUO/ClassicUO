@@ -20,9 +20,7 @@ namespace ClassicUO.AssetsLoader
             string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
 
             if (File.Exists(filepath))
-            {
                 _file = new UOFileUop(filepath, ".tga", ART_COUNT);
-            }
             else
             {
                 filepath = Path.Combine(FileManager.UoFolderPath, "art.mul");

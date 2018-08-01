@@ -18,10 +18,7 @@ namespace ClassicUO.Game.Renderer
             if ((hue & 0x8000) != 0)
                 partial = true;
 
-            if (hue == 0)
-                return new Vector3(0, 0, transparent ? ALPHA : 0);
-
-            return new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), transparent ? ALPHA : 0);
+            return hue == 0 ? new Vector3(0, 0, transparent ? ALPHA : 0) : new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), transparent ? ALPHA : 0);
         }
     }
 }
