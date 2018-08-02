@@ -14,6 +14,8 @@ namespace ClassicUO.Game.Renderer
 
         public long Ticks { get; set; }
         public int ID { get; }
+
+        public bool IsOld => World.Ticks - Ticks >= 3000;
     }
 
     public static class TextureManager

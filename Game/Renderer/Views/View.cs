@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Renderer.Views
 {
-    public abstract class View //: IDisposable
+    public abstract class View
     {
         protected static float PI = (float) Math.PI;
 
@@ -40,11 +40,6 @@ namespace ClassicUO.Game.Renderer.Views
 
         public ulong DepthValue { get; private set; }
 
-        //public void Dispose()
-        //{
-        //    //Dispose(true);
-        //    //GC.SuppressFinalize(this);
-        //}
 
         public virtual void Update(in double frameMS)
         {
@@ -89,8 +84,13 @@ namespace ClassicUO.Game.Renderer.Views
                 check = Direction.South;
             }
 
-            if (tile != null /*&& Pool.AvailableCount > 0*/ && tile.ViewObject.Texture != null && World.Ticks - tile.ViewObject.Texture.Ticks < 3000)
+            if (tile != null /*&& Pool.AvailableCount > 0*/ /*&& tile.ViewObject.Texture != null && World.Ticks - tile.ViewObject.Texture.Ticks < 3000*/)
             {
+                if (tile.ViewObject != null && tile.ViewObject.Texture != null && tile.ViewObject.Texture.IsOld)
+                {
+
+                }
+
                 if (WorldObject is Mobile mob)
                 {
                     sbyte z = (sbyte) Pathfinder.GetNextZ(mob, mob.Position, check);
@@ -224,24 +224,6 @@ namespace ClassicUO.Game.Renderer.Views
             Text.Text = $"SortZ: {SortZ}";
             Text.GenerateTexture(0, 0, TEXT_ALIGN_TYPE.TS_CENTER, 0);
         }
-
-
-        //~View()
-        //{
-        //    Dispose();
-        //}
-
-        //protected virtual void Dispose(in bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        if (Texture != null && Texture.IsDisposed) // disping happen into TextureManager.cs, here we clean up the referement
-        //        {
-        //            //Texture.Dispose();
-        //            //Texture = null;
-        //        }
-        //    }
-        //}
 
         public static bool IsNoDrawable(in ushort g)
         {

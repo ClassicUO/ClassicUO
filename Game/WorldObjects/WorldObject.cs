@@ -14,30 +14,12 @@ namespace ClassicUO.Game.WorldObjects
             Map = map;
         }
 
-        /// <summary>
-        ///     Multiply X * 22, Y * 22.
-        ///     Z is used to do Depth testing
-        /// </summary>
-        public Vector3 ScreenPosition
-        {
-            get
-            {
-                float screenX = (Position.X - Position.Y) * 22;
-                float screenY = (Position.X + Position.Y) * 22 /*- Position.Z * 4*/;
-
-                return new Vector3(screenX, screenY, 0);
-            }
-        }
-
 
         public virtual Position Position { get; set; } = Position.Invalid;
         public virtual Hue Hue { get; set; }
         public virtual Graphic Graphic { get; set; }
-
         public View ViewObject => _viewObject ?? (_viewObject = CreateView());
-
         public sbyte AnimIndex { get; set; }
-
         public Tile Tile
         {
             get => _tile;
@@ -59,11 +41,9 @@ namespace ClassicUO.Game.WorldObjects
                 }
             }
         }
-
-
         public Facet Map { get; set; }
-
         public bool IsDisposed { get; private set; }
+
 
         protected virtual View CreateView()
         {
@@ -85,28 +65,8 @@ namespace ClassicUO.Game.WorldObjects
                 return;
 
             IsDisposed = true;
-            DisposeView();
+            //DisposeView();
             Tile = null;
         }
-
-
-        //public void Dispose()
-        //{
-        //    Dispose(true);
-        //    GC.SuppressFinalize(this);
-        //}
-
-        //protected virtual void Dispose(in bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        DisposeView();
-        //    }
-        //}
-
-        //~WorldObject()
-        //{
-        //    Dispose();
-        //}
     }
 }

@@ -504,9 +504,7 @@ namespace ClassicUO
                                 var obj = objects[k];
 
                                 if (obj is DeferredEntity )
-                                {
                                     toremove.Add(obj);
-                                }
 
                                 if (!drawTerrain)
                                 {
