@@ -31,6 +31,12 @@ namespace ClassicUO.Utility
             _instantiationFunction = instantiationFunc;
             _freeItems = new Deque<T>(capacity);
             IsFullPolicy = isFullPolicy;
+
+            while (_freeItems.Count < capacity)
+            {
+                Capacity++;
+                _freeItems.AddToBack(CreateObject());
+            }
         }
 
         public ObjectPoolIsFullPolicy IsFullPolicy { get; }

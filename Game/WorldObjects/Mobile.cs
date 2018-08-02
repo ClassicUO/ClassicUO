@@ -398,18 +398,29 @@ namespace ClassicUO.Game.WorldObjects
             z = Position.Z;
         }
 
-        public bool EnqueueStep(in int x, in int y, in sbyte z, in Direction direction, in bool run)
+        public bool EnqueueStep(in int x, in int y, in sbyte z, Direction direction, in bool run)
         {
             //if (Deferred != null)
             //    Deferred.Tile = null;
 
+            if (Serial == 0x0002353F)
+            {
+
+            }
+
             if (_steps.Count >= MAX_STEP_COUNT) return false;
+
+            Direction dirRun = run ? Direction.Running : Direction.North;
+
+            direction = direction & Direction.Up;
 
             int endX = 0, endY = 0;
             sbyte endZ = 0;
             Direction endDir = Direction.NONE;
 
             GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
+
+            endDir = endDir & Direction.Up;
 
             if (endX == x && endY == y && endZ == z && endDir == direction)
                 return true;
@@ -428,7 +439,7 @@ namespace ClassicUO.Game.WorldObjects
                     step.X = endX;
                     step.Y = endY;
                     step.Z = endZ;
-                    step.Direction = (byte) moveDir;
+                    step.Direction = (byte) (moveDir | dirRun);
                     step.Run = run;
 
                     _steps.AddToBack(step);
@@ -437,7 +448,7 @@ namespace ClassicUO.Game.WorldObjects
                 step.X = x;
                 step.Y = y;
                 step.Z = z;
-                step.Direction = (byte) moveDir;
+                step.Direction = (byte)(moveDir | dirRun);
                 step.Run = run;
                 _steps.AddToBack(step);
             }
@@ -448,7 +459,7 @@ namespace ClassicUO.Game.WorldObjects
                 step.X = x;
                 step.Y = y;
                 step.Z = z;
-                step.Direction = (byte) direction;
+                step.Direction = (byte)(direction | dirRun);
                 step.Run = run;
                 _steps.AddToBack(step);
             }

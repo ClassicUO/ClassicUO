@@ -2,6 +2,7 @@
 using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.WorldObjects;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Renderer.Views
@@ -49,6 +50,10 @@ namespace ClassicUO.Game.Renderer.Views
         {
         }
 
+
+        public static ObjectPool<DeferredEntity> Pool { get; }= new ObjectPool<DeferredEntity>(() => new DeferredEntity(), 1000, ObjectPoolIsFullPolicy.KillExisting);
+
+
         protected void PreDraw(in Vector3 position)
         {
             Tile tile;
@@ -84,17 +89,28 @@ namespace ClassicUO.Game.Renderer.Views
                 check = Direction.South;
             }
 
-            if (tile != null)
+            if (tile != null /*&& Pool.AvailableCount > 0*/ && tile.ViewObject.Texture != null && World.Ticks - tile.ViewObject.Texture.Ticks < 3000)
             {
                 if (WorldObject is Mobile mob)
                 {
                     sbyte z = (sbyte) Pathfinder.GetNextZ(mob, mob.Position, check);
-                    DeferredEntity deferred = new DeferredEntity(mob, position, z);
+                    var deferred = Pool.New();
+                    deferred.AtPosition = position;
+                    deferred.Entity = mob;
+                    deferred.Z = z;
+                    deferred.Position = new Position(0xFFFF, 0xFFFF, z);
+                    //DeferredEntity deferred = new DeferredEntity(mob, position, z);
                     tile.AddWorldObject(deferred);
                 }
                 else
-                {                 
-                    DeferredEntity deferred = new DeferredEntity(WorldObject, position, WorldObject.Position.Z);
+                {
+                    var deferred = Pool.New();
+                    deferred.AtPosition = position;
+                    deferred.Entity = WorldObject;
+                    deferred.Z = WorldObject.Position.Z;
+                    deferred.Position = new Position(0xFFFF, 0xFFFF, WorldObject.Position.Z);
+
+                    // DeferredEntity deferred = new DeferredEntity(WorldObject, position, WorldObject.Position.Z);
                     tile.AddWorldObject(deferred);
                 }
             }

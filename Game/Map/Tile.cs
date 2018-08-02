@@ -91,9 +91,13 @@ namespace ClassicUO.Game.Map
 
                 if (obj != World.Player && !(obj is Tile))
                 {
+                    if (obj is DeferredEntity def)
+                        def.Return();
+
                     int count = _objectsOnTile.Count;
                     obj.Dispose();
                     if (count == _objectsOnTile.Count) _objectsOnTile.RemoveAt(i);
+
 
                     i--;
                 }

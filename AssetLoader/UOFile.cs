@@ -35,8 +35,6 @@ namespace ClassicUO.AssetsLoader
             if (size > 0)
             {
                 MemoryMappedFile file = MemoryMappedFile.CreateFromFile(fileInfo.FullName, FileMode.Open);
-                if (file == null)
-                    throw new UOFileException("Something goes wrong with file mapping creation '" + Path + "'");
                 //var stream = file.CreateViewStream(0, size, MemoryMappedFileAccess.Read);
                 //_reader = new BinaryReader(stream);
                 _accessor = file.CreateViewAccessor(0, size, MemoryMappedFileAccess.Read);

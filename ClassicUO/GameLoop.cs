@@ -7,6 +7,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Network;
 using ClassicUO.Game.Renderer;
+using ClassicUO.Game.Renderer.Views;
 using ClassicUO.Game.WorldObjects;
 using ClassicUO.Input;
 using ClassicUO.Utility;
@@ -310,7 +311,7 @@ namespace ClassicUO
             }
         }
 
-        private (Point, Point, Vector2, Vector2, Point, Point) GetViewPort()
+        private (Point, Point, Vector2, Vector2, Point, Point, Point, int) GetViewPort()
         {
             int scale = 1;
 
@@ -366,19 +367,19 @@ namespace ClassicUO
             if (realMaxRangeY >= Map.MapsDefaultSize[World.Map.Index][1])
                 realMaxRangeY = Map.MapsDefaultSize[World.Map.Index][1];
 
-            //int minBlockX = (realMinRangeX / 8) - 1;
-            //int minBlockY = (realMinRangeY / 8) - 1;
-            //int maxBlockX = (realMaxRangeX / 8) + 1;
-            //int maxBlockY = (realMaxRangeY / 8) + 1;
+            int minBlockX = (realMinRangeX / 8) - 1;
+            int minBlockY = (realMinRangeY / 8) - 1;
+            int maxBlockX = (realMaxRangeX / 8) + 1;
+            int maxBlockY = (realMaxRangeY / 8) + 1;
 
-            //if (minBlockX < 0)
-            //    minBlockX = 0;
-            //if (minBlockY < 0)
-            //    minBlockY = 0;
-            //if (maxBlockX >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0])
-            //    maxBlockX = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0] - 1;
-            //if (maxBlockY >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1])
-            //    maxBlockY = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1] - 1;
+            if (minBlockX < 0)
+                minBlockX = 0;
+            if (minBlockY < 0)
+                minBlockY = 0;
+            if (maxBlockX >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0])
+                maxBlockX = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][0] - 1;
+            if (maxBlockY >= AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1])
+                maxBlockY = AssetsLoader.Map.MapsDefaultSize[Game.World.Map.Index][1] - 1;
 
             int drawOffset = scale * 40;
 
@@ -392,7 +393,15 @@ namespace ClassicUO
             int minPixelsY = (int) ((winGamePosY - drawOffset) * scale - (newMaxY - maxY));
             int maxPixlesY = (int) newMaxY;
 
-            return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY), new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY), new Point(winDrawOffsetX, winDrawOffsetY), new Point(winGameCenterX, winGameCenterY));
+            return (
+                new Point(realMinRangeX, realMinRangeY), 
+                new Point(realMaxRangeX, realMaxRangeY), 
+                new Vector2(minPixelsX, minPixelsY), 
+                new Vector2(maxPixelsX, maxPixlesY),
+                new Point(winDrawOffsetX, winDrawOffsetY), 
+                new Point(winGameCenterX, winGameCenterY),
+                new Point(realMinRangeX + width - 1, realMinRangeY - 1),
+                Math.Max(width, height));
         }
 
         private (Point firstTile, Vector2 renderOffset, Point renderDimensions) GetViewPort2()
@@ -401,14 +410,14 @@ namespace ClassicUO
 
             Point renderDimensions = new Point
             {
-                X = _graphics.PreferredBackBufferWidth / scale / 44 + 3,
-                Y = _graphics.PreferredBackBufferHeight / scale / 44 + 6
+                X = _graphics.PreferredBackBufferWidth / scale / 44 + 5,
+                Y = _graphics.PreferredBackBufferHeight / scale / 44 + 5
             };
 
             int renderDimensionDiff = Math.Abs(renderDimensions.X - renderDimensions.Y);
             renderDimensionDiff -= renderDimensionDiff % 2;
 
-            int firstZOffset = World.Player.Position.Z > 0 ? (int) Math.Abs((World.Player.Position.Z + World.Player.Offset.Z / 4) / 11) : 0;
+            int firstZOffset = World.Player.Position.Z > 0 ? (int)Math.Abs((World.Player.Position.Z + World.Player.Offset.Z / 4) / 11) : 0;
 
             Point firstTile = new Point
             {
@@ -429,8 +438,8 @@ namespace ClassicUO
 
             Vector2 renderOffset = new Vector2
             {
-                X = (_graphics.PreferredBackBufferWidth / scale + renderDimensions.Y * 44) / 2 - 22f - (int) (World.Player.Offset.X * 1) - (firstTile.X - firstTile.Y) * 22f + renderDimensionDiff * 22f,
-                Y = _graphics.PreferredBackBufferHeight / scale / 2 - renderDimensions.Y * 44 / 2 + (World.Player.Position.Z + World.Player.Offset.Z / 4) * 4 - (int) (World.Player.Offset.Y * 1) - (firstTile.X + firstTile.Y) * 22f - 22f - firstZOffset * 44f
+                X = (_graphics.PreferredBackBufferWidth / scale + renderDimensions.Y * 44) / 2 - 22f - (int)(World.Player.Offset.X * 1) - (firstTile.X - firstTile.Y) * 22f + renderDimensionDiff * 22f,
+                Y = _graphics.PreferredBackBufferHeight / scale / 2 - renderDimensions.Y * 44 / 2 + (World.Player.Position.Z + World.Player.Offset.Z / 4) * 4 - (int)(World.Player.Offset.Y * 1) - (firstTile.X + firstTile.Y) * 22f - 22f - firstZOffset * 44f
             };
 
             return (firstTile, renderOffset, renderDimensions);
@@ -453,7 +462,7 @@ namespace ClassicUO
                 }
 
 
-                //(Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center) = GetViewPort();
+                //(Point minChunkTile, Point maxChunkTile, Vector2 minPixel, Vector2 maxPixel, Point renderOffset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
 
                 CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
 
@@ -469,6 +478,8 @@ namespace ClassicUO
                 //int minY = minChunkTile.Y;
                 //int maxX = maxChunkTile.X;
                 //int maxY = maxChunkTile.Y;
+
+
 
                 for (int y = 0; y < renderDimensions.Y * 2 + 1 + 10; y++)
                 {
@@ -492,8 +503,10 @@ namespace ClassicUO
                             {
                                 var obj = objects[k];
 
-                                if (obj is DeferredEntity)
+                                if (obj is DeferredEntity )
+                                {
                                     toremove.Add(obj);
+                                }
 
                                 if (!drawTerrain)
                                 {
@@ -501,15 +514,19 @@ namespace ClassicUO
                                         draw = false;
                                 }
 
-                                if ((obj.Position.Z >= maxItemZ || maxItemZ != 255 && (obj is Item item && TileData.IsRoof((long) item.ItemData.Flags) || obj is Static st && TileData.IsRoof((long) st.ItemData.Flags))) && !(obj is Tile))
+                                if ((obj.Position.Z >= maxItemZ || maxItemZ != 255 && (obj is Item item && TileData.IsRoof((long)item.ItemData.Flags) || obj is Static st && TileData.IsRoof((long)st.ItemData.Flags))) && !(obj is Tile))
                                     continue;
 
                                 if (draw)
-                                    obj.ViewObject.Draw(_spriteBatch, position);
+                                    obj.ViewObject?.Draw(_spriteBatch, position);
                             }
 
                             foreach (var d in toremove)
+                            {
+                                ((DeferredEntity)d).Return();
                                 tile.RemoveWorldObject(d);
+                            }
+
 
                             toremove.Clear();
                         }
