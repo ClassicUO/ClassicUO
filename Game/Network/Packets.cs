@@ -1011,4 +1011,16 @@ namespace ClassicUO.Game.Network
             WriteByte(0);
         }
     }
+
+    public sealed class PClientViewRange : PacketWriter
+    {
+        public PClientViewRange(byte range) : base(0xC8)
+        {
+            if (range < 5)
+                range = 5;
+            else if (range > 24)
+                range = 24;
+            WriteByte(range);
+        }
+    }
 }

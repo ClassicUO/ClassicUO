@@ -71,10 +71,7 @@ namespace ClassicUO.Game.Map
 
                             sbyte z = sb->Z;
 
-                            Static staticObject = new Static(sb->Color, sb->Hue, pos)
-                            {
-                                Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
-                            };
+                            Static staticObject = new Static(sb->Color, sb->Hue, pos) {Position = new Position((ushort) (bx + x), (ushort) (by + y), z)};
 
                             Tiles[x][y].AddWorldObject(staticObject);
                         }

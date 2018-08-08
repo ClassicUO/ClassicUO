@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.Renderer;
+﻿using ClassicUO.Game.Renderer;
 using ClassicUO.UI;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -25,13 +22,9 @@ namespace ClassicUO.Game.Gumps
             foreach (Control c in Children)
             {
                 if (c is GumpControl gump)
-                {
                     gump.Update();
-                }
                 else
-                {
                     Log.Message(LogTypes.Warning, $"{c} is not a GumpControl!!");
-                }
             }
         }
 
@@ -48,11 +41,8 @@ namespace ClassicUO.Game.Gumps
                     }
                 }
                 else
-                {
                     Log.Message(LogTypes.Warning, $"{c} is not a GumpControl!!");
-                }
             }
         }
-
     }
 }

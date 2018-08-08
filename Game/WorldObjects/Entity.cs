@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using ClassicUO.Game.WorldObjects.Interfaces;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.WorldObjects
@@ -20,7 +21,7 @@ namespace ClassicUO.Game.WorldObjects
         Hidden = 0x80
     }
 
-    public abstract class Entity : WorldObject
+    public abstract class Entity : GameObject, IDeferreable
     {
         protected const float CHARACTER_ANIMATION_DELAY = 80;
 
@@ -144,6 +145,8 @@ namespace ClassicUO.Game.WorldObjects
 
         public virtual bool Exists => World.Contains(Serial);
         public int Distance => DistanceTo(World.Player);
+
+        public DeferredEntity DeferredObject { get; set; }
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
 
         public void UpdateProperties(IEnumerable<Property> props)
@@ -155,7 +158,7 @@ namespace ClassicUO.Game.WorldObjects
             _delta |= Delta.Properties;
         }
 
-        protected virtual void OnProcessDelta(Delta d)
+        protected virtual void OnProcessDelta(in Delta d)
         {
             if (d.HasFlag(Delta.Appearance))
                 AppearanceChanged.Raise(this);
@@ -178,17 +181,28 @@ namespace ClassicUO.Game.WorldObjects
             _delta = Delta.None;
         }
 
+        public override void Dispose()
+        {
+            if (DeferredObject != null)
+            {
+                DeferredObject.Reset();
+                DeferredObject = null;
+            }
+
+            base.Dispose();
+        }
+
         protected virtual void OnPositionChanged(object sender, EventArgs e)
         {
             Tile = World.Map.GetTile((short) Position.X, (short) Position.Y);
         }
 
-        public static implicit operator Serial(Entity entity)
+        public static implicit operator Serial(in Entity entity)
         {
             return entity.Serial;
         }
 
-        public static implicit operator uint(Entity entity)
+        public static implicit operator uint(in Entity entity)
         {
             return entity.Serial;
         }
@@ -198,7 +212,7 @@ namespace ClassicUO.Game.WorldObjects
             return Serial.GetHashCode();
         }
 
-        public int DistanceTo(Entity entity)
+        public int DistanceTo(in Entity entity)
         {
             return Position.DistanceTo(entity.Position);
         }

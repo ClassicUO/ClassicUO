@@ -7,15 +7,7 @@ namespace ClassicUO.Game.Renderer
 {
     public sealed class CursorRenderer
     {
-        private static readonly ushort[,] _cursorData = new ushort[2, 16]
-        {
-            {
-                0x206A, 0x206B, 0x206C, 0x206D, 0x206E, 0x206F, 0x2070, 0x2071, 0x2072, 0x2073, 0x2074, 0x2075, 0x2076, 0x2077, 0x2078, 0x2079
-            },
-            {
-                0x2053, 0x2054, 0x2055, 0x2056, 0x2057, 0x2058, 0x2059, 0x205A, 0x205B, 0x205C, 0x205D, 0x205E, 0x205F, 0x2060, 0x2061, 0x2062
-            }
-        };
+        private static readonly ushort[,] _cursorData = new ushort[2, 16] {{0x206A, 0x206B, 0x206C, 0x206D, 0x206E, 0x206F, 0x2070, 0x2071, 0x2072, 0x2073, 0x2074, 0x2075, 0x2076, 0x2077, 0x2078, 0x2079}, {0x2053, 0x2054, 0x2055, 0x2056, 0x2057, 0x2058, 0x2059, 0x205A, 0x205B, 0x205C, 0x205D, 0x205E, 0x205F, 0x2060, 0x2061, 0x2062}};
 
         private readonly int[,] _cursorOffset = new int[2, 16];
 
@@ -28,12 +20,7 @@ namespace ClassicUO.Game.Renderer
 
         public CursorRenderer()
         {
-            _textR = new TextRenderer
-            {
-                Font = 0,
-                Color = 2655,
-                IsUnicode = false
-            };
+            _textR = new TextRenderer {Font = 0, Color = 2655, IsUnicode = false};
 
             MouseManager.MouseMove += (sender, e) =>
             {

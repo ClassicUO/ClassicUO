@@ -9,7 +9,6 @@ float lightIntensity;
 const float HuesPerTexture = 3000;
 const float ToGrayScale = 3;
 
-uniform float hue[96];
 
 
 sampler DrawSampler : register(s0);
@@ -34,6 +33,27 @@ struct PS_INPUT
 	float3 Hue		: TEXCOORD2;
 };
 
+struct VS_OUT
+{
+	float4 Pos      : POSITION0;
+	float  Depth    : TEXCOORD0;
+};
+
+VS_OUT vsDepthMap( float4 inPosition : POSITION )
+{
+	VS_OUT output;
+	
+	output.Pos = mul( inPosition, ProjectionMatrix);
+	output.Depth = output.Pos.z;
+	
+	return output;
+}
+
+float4 psDepthMap( VS_OUT input ) : COLOR0
+{
+	return float4( input.Depth, input.Depth, input.Depth, 1.0f );
+}
+
 PS_INPUT VertexShaderFunction(VS_INPUT IN)
 {
 	PS_INPUT OUT;
@@ -55,8 +75,8 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 {	
 	// Get the initial pixel and discard it if the alpha == 0
 	float4 color = tex2D(DrawSampler, IN.TexCoord);
-	
-	clip(color.a <= 0 ? -1 : 1);
+	if (color.a <= 0)
+		clip(-1);
 
 	// flag for no lighting
 	bool drawLighting = true;
@@ -194,5 +214,18 @@ technique ShadowSetTechnique
 	{
 		VertexShader = compile vs_2_0 VertexShaderFunction();
 		PixelShader = compile ps_2_0 PixelShader_ShadowSet();
+	}
+}
+
+technique BuildDepth
+{
+	pass p0
+	{
+		Lighting = False;
+		CullMode = CCW;
+		
+		VertexShader = compile vs_2_0 vsDepthMap();
+		PixelShader  = compile ps_2_0 psDepthMap();
+		
 	}
 }

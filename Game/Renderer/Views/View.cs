@@ -2,7 +2,7 @@
 using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.WorldObjects;
-using ClassicUO.Utility;
+using ClassicUO.Game.WorldObjects.Interfaces;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Renderer.Views
@@ -12,14 +12,14 @@ namespace ClassicUO.Game.Renderer.Views
         protected static float PI = (float) Math.PI;
 
 
-        protected View(in WorldObject parent)
+        protected View(in GameObject parent)
         {
-            WorldObject = parent;
+            GameObject = parent;
             AllowedToDraw = true;
             SortZ = parent.Position.Z;
         }
 
-        public WorldObject WorldObject { get; }
+        public GameObject GameObject { get; }
         public bool AllowedToDraw { get; set; }
         public sbyte SortZ { get; protected set; }
 
@@ -29,16 +29,9 @@ namespace ClassicUO.Game.Renderer.Views
         protected bool HasShadow { get; set; }
         protected bool IsFlipped { get; set; }
         protected float Rotation { get; set; }
-
         protected int TextureWidth { get; set; } = 1;
 
-        protected TextRenderer Text { get; } = new TextRenderer
-        {
-            Color = 33,
-            IsUnicode = false
-        };
-
-        public ulong DepthValue { get; private set; }
+        protected TextRenderer Text { get; } = new TextRenderer {Color = 33, IsUnicode = false};
 
 
         public virtual void Update(in double frameMS)
@@ -46,75 +39,79 @@ namespace ClassicUO.Game.Renderer.Views
         }
 
 
-        public static ObjectPool<DeferredEntity> Pool { get; }= new ObjectPool<DeferredEntity>(() => new DeferredEntity(), 1000, ObjectPoolIsFullPolicy.KillExisting);
-
-
-        protected void PreDraw(in Vector3 position)
+        protected bool PreDraw(in Vector3 position)
         {
-            Tile tile;
-            Direction check;
-
-            int offset = (int) Math.Ceiling(TextureWidth / 44f) / 2;
-            //if (offset < 1)
-            offset = 1;
-
-            if (WorldObject is Mobile mobile && mobile.IsWalking)
+            if (GameObject is IDeferreable deferreable)
             {
-                Direction dir = mobile.Direction;
+                Tile tile;
+                Direction check;
 
-                if ((dir & Direction.Up) == Direction.Left || (dir & Direction.Up) == Direction.South || (dir & Direction.Up) == Direction.East)
+                //int offset = (int)Math.Ceiling(TextureWidth / 44f) / 2;
+                //if (offset < 1)
+                const int offset = 1;
+
+                if (GameObject is Mobile mobile && mobile.IsWalking)
                 {
-                    tile = World.Map.GetTile(WorldObject.Position.X, WorldObject.Position.Y + offset);
-                    check = dir & Direction.Up;
-                }
-                else if ((dir & Direction.Up) == Direction.Down)
-                {
-                    tile = World.Map.GetTile(WorldObject.Position.X + offset, WorldObject.Position.Y + offset);
-                    check = Direction.Down;
+                    Direction dir = mobile.Direction;
+
+                    if ((dir & Direction.Up) == Direction.Left || (dir & Direction.Up) == Direction.South || (dir & Direction.Up) == Direction.East)
+                    {
+                        tile = World.Map.GetTile(GameObject.Position.X, GameObject.Position.Y + offset);
+                        check = dir & Direction.Up;
+                    }
+                    else if ((dir & Direction.Up) == Direction.Down)
+                    {
+                        tile = World.Map.GetTile(GameObject.Position.X + offset, GameObject.Position.Y + offset);
+                        check = Direction.Down;
+                    }
+                    else
+                    {
+                        tile = World.Map.GetTile(GameObject.Position.X + offset, GameObject.Position.Y);
+                        check = Direction.East;
+                    }
                 }
                 else
                 {
-                    tile = World.Map.GetTile(WorldObject.Position.X + offset, WorldObject.Position.Y);
-                    check = Direction.East;
+                    tile = World.Map.GetTile(GameObject.Position.X, GameObject.Position.Y + 1);
+                    check = Direction.South;
+                }
+
+                if (tile != null)
+                {
+                    if (deferreable.DeferredObject == null)
+                        deferreable.DeferredObject = new DeferredEntity();
+                    else
+                        deferreable.DeferredObject.Reset();
+
+                    deferreable.DeferredObject.AtPosition = position;
+                    deferreable.DeferredObject.Entity = GameObject;
+                    deferreable.DeferredObject.AssociatedTile = tile;
+                    deferreable.DeferredObject.Map = World.Map;
+
+                    if (GameObject is Mobile mob)
+                    {
+                        if (!Pathfinder.TryGetNextZ(mob, mob.Position, check, out var z))
+                            return false;
+
+
+                        deferreable.DeferredObject.Z = z;
+                        deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, z);
+                    }
+                    else
+                    {
+                        deferreable.DeferredObject.Z = GameObject.Position.Z;
+                        deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, GameObject.Position.Z);
+                    }
+
+                    tile.AddWorldObject(deferreable.DeferredObject);
+
+                    return true;
                 }
             }
-            else
-            {
-                tile = World.Map.GetTile(WorldObject.Position.X, WorldObject.Position.Y + 1);
-                check = Direction.South;
-            }
 
-            if (tile != null /*&& Pool.AvailableCount > 0*/ /*&& tile.ViewObject.Texture != null && World.Ticks - tile.ViewObject.Texture.Ticks < 3000*/)
-            {
-                if (tile.ViewObject != null && tile.ViewObject.Texture != null && tile.ViewObject.Texture.IsOld)
-                {
-
-                }
-
-                if (WorldObject is Mobile mob)
-                {
-                    sbyte z = (sbyte) Pathfinder.GetNextZ(mob, mob.Position, check);
-                    var deferred = Pool.New();
-                    deferred.AtPosition = position;
-                    deferred.Entity = mob;
-                    deferred.Z = z;
-                    deferred.Position = new Position(0xFFFF, 0xFFFF, z);
-                    //DeferredEntity deferred = new DeferredEntity(mob, position, z);
-                    tile.AddWorldObject(deferred);
-                }
-                else
-                {
-                    var deferred = Pool.New();
-                    deferred.AtPosition = position;
-                    deferred.Entity = WorldObject;
-                    deferred.Z = WorldObject.Position.Z;
-                    deferred.Position = new Position(0xFFFF, 0xFFFF, WorldObject.Position.Z);
-
-                    // DeferredEntity deferred = new DeferredEntity(WorldObject, position, WorldObject.Position.Z);
-                    tile.AddWorldObject(deferred);
-                }
-            }
+            return false;
         }
+
 
         public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
@@ -184,7 +181,6 @@ namespace ClassicUO.Game.Renderer.Views
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
-
             if (!spriteBatch.DrawSprite(Texture, vertex))
                 return false;
 
@@ -196,23 +192,6 @@ namespace ClassicUO.Game.Renderer.Views
         public virtual bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             return false;
-        }
-
-        protected void CalculateRenderDepth(in sbyte z, in byte priority, in byte byte7, in byte byte8)
-        {
-            ulong tmp = 0;
-            tmp |= (ulong) ((WorldObject.Position.X + WorldObject.Position.Y) & 0xFFFF);
-            tmp <<= 8;
-            byte tmpZ = (byte) ((z + 128) & 0xFF);
-            tmp |= tmpZ;
-            tmp <<= 8;
-            tmp |= (ulong) (priority & 0xFF);
-            tmp <<= 8;
-            tmp |= (ulong) (byte7 & 0xFF);
-            tmp <<= 8;
-            tmp |= (ulong) (byte8 & 0xFF);
-
-            DepthValue = tmp;
         }
 
         protected virtual void MousePick(in SpriteVertex[] vertex)

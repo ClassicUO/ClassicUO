@@ -1,25 +1,24 @@
 ﻿using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer.Views;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.WorldObjects
 {
-    public abstract class WorldObject //: IDisposable
+    public abstract class GameObject
     {
         private Tile _tile;
-        private View _viewObject;
+        private View _view;
 
-        protected WorldObject(in Facet map)
+        protected GameObject(in Facet map)
         {
             Map = map;
         }
 
-
         public virtual Position Position { get; set; } = Position.Invalid;
         public virtual Hue Hue { get; set; }
         public virtual Graphic Graphic { get; set; }
-        public View ViewObject => _viewObject ?? (_viewObject = CreateView());
+        public View View => _view ?? (_view = CreateView());
         public sbyte AnimIndex { get; set; }
+
         public Tile Tile
         {
             get => _tile;
@@ -41,6 +40,7 @@ namespace ClassicUO.Game.WorldObjects
                 }
             }
         }
+
         public Facet Map { get; set; }
         public bool IsDisposed { get; private set; }
 
@@ -52,10 +52,10 @@ namespace ClassicUO.Game.WorldObjects
 
         protected void DisposeView()
         {
-            if (_viewObject != null)
+            if (_view != null)
             {
-                //_viewObject.Dispose();
-                _viewObject = null;
+                //_view.Dispose();
+                _view = null;
             }
         }
 

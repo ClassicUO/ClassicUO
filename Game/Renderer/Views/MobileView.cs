@@ -13,7 +13,7 @@ namespace ClassicUO.Game.Renderer.Views
         {
         }
 
-        public new Mobile WorldObject => (Mobile) base.WorldObject;
+        public Mobile WorldObject => (Mobile) GameObject;
 
 
         public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
@@ -34,6 +34,9 @@ namespace ClassicUO.Game.Renderer.Views
             yOffset = 0;
 
             int mountOffset = 0;
+
+            //Vector3 vv = position;
+            //vv.Z = (position.X + position.Y) + 0.001f * (GameObject.IsometricPosition.Z + .7f);
 
             for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
             {
@@ -56,6 +59,9 @@ namespace ClassicUO.Game.Renderer.Views
 
                             animGroup = WorldObject.GetGroupForAnimation(graphic);
                             color = mount.Hue;
+
+
+                            //CalculateRenderDepth((sbyte)vv.Z, 20, mount.ItemData.Height, (byte)(mount.Serial & 0xFF));
                         }
                         else
                             continue;
@@ -68,6 +74,8 @@ namespace ClassicUO.Game.Renderer.Views
                     graphic = WorldObject.GetGraphicForAnimation();
                     animGroup = WorldObject.GetGroupForAnimation();
                     color = WorldObject.Hue;
+
+                    //CalculateRenderDepth((sbyte)vv.Z, 30, 0, (byte)(GameObject.Serial & 0xFF));
                 }
                 else
                 {
@@ -90,6 +98,8 @@ namespace ClassicUO.Game.Renderer.Views
                     }
 
                     color = item.Hue;
+
+                    //CalculateRenderDepth((sbyte)vv.Z, 20, item.ItemData.Height, (byte)(item.Serial & 0xFF));
                 }
 
 
@@ -151,11 +161,6 @@ namespace ClassicUO.Game.Renderer.Views
                     if (layer == Layer.Invalid)
                         yOffset = y;
 
-                    //Vector3 vv = position;
-                    //vv.Z = WorldObject.Position.Z + 7;
-
-
-                    //CalculateRenderDepth((sbyte)vv.Z, order, (byte)layer, ss);
 
                     base.Draw(spriteBatch, position);
                 }
@@ -163,9 +168,9 @@ namespace ClassicUO.Game.Renderer.Views
 
             //Vector3 vv = new Vector3
             //{
-            //    X = position.X + WorldObject.Offset.X,
-            //    Y = position.Y - (int)(WorldObject.Offset.Z / 4 + WorldObject.Position.Z * 4) - 22 -
-            //        (int)(WorldObject.Offset.Y - WorldObject.Offset.Z - 3) + yOffset,
+            //    X = position.X + GameObject.Offset.X,
+            //    Y = position.Y - (int)(GameObject.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 -
+            //        (int)(GameObject.Offset.Y - GameObject.Offset.Z - 3) + yOffset,
             //    Z = position.Z
             //};
 
@@ -178,15 +183,18 @@ namespace ClassicUO.Game.Renderer.Views
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            PreDraw(position);
-            return DrawInternal(spriteBatch, position);
+            if (!PreDraw(position))
+                return DrawInternal(spriteBatch, position);
+
+            return false;
         }
 
         public override void Update(in double frameMS)
         {
-            WorldObject.ProcessAnimation();
-
             base.Update(frameMS);
+
+
+            WorldObject.ProcessAnimation();
         }
 
         protected override void MessageOverHead(in SpriteBatch3D spriteBatch, in Vector3 position)

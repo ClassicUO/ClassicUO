@@ -16,17 +16,7 @@ namespace ClassicUO.Game.Renderer
 
         private readonly EffectParameter _drawLightingEffect;
 
-        private readonly DepthStencilState _dss = new DepthStencilState
-        {
-            DepthBufferEnable = true,
-            DepthBufferWriteEnable = true,
-
-            //StencilEnable =  true,
-            //StencilFunction = CompareFunction.Always,
-            //ReferenceStencil = 1,
-            //StencilPass = StencilOperation.Increment,
-            //StencilFail = StencilOperation.Keep
-        };
+        private readonly DepthStencilState _dss = new DepthStencilState {DepthBufferEnable = true, DepthBufferWriteEnable = true};
 
         private readonly Effect _effect;
         private readonly Microsoft.Xna.Framework.Game _game;
@@ -125,9 +115,14 @@ namespace ClassicUO.Game.Renderer
             return true;
         }
 
-        public float GetZ()
+        public float GetZ(in float z = 0)
         {
-            return _z++;
+            return z > 0 ? _z += z : _z++;
+        }
+
+        public void ResetZ()
+        {
+            _z = 0;
         }
 
         public void EndDraw(in bool light = false)
@@ -149,8 +144,8 @@ namespace ClassicUO.Game.Renderer
             _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
             //_effect.Parameters["hues"].SetValue(AssetsLoader.Hues.GetColorForShader(38));
 
-            GraphicsDevice.DepthStencilState = _dss;
 
+            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
             _effect.CurrentTechnique = _huesTechnique;
             _effect.CurrentTechnique.Passes[0].Apply();

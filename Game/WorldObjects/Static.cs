@@ -1,9 +1,10 @@
 ﻿using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Game.WorldObjects.Interfaces;
 
 namespace ClassicUO.Game.WorldObjects
 {
-    public class Static : WorldObject
+    public class Static : GameObject, IDynamicItem
     {
         private StaticTiles? _itemData;
 
@@ -15,9 +16,9 @@ namespace ClassicUO.Game.WorldObjects
         }
 
         public int Index { get; }
-        public override Position Position { get; set; }
-        public new StaticView ViewObject => (StaticView) base.ViewObject;
+        public new StaticView View => (StaticView) base.View;
         public string Name { get; private set; }
+        public override Position Position { get; set; }
 
         public StaticTiles ItemData
         {
@@ -31,6 +32,11 @@ namespace ClassicUO.Game.WorldObjects
 
                 return _itemData.Value;
             }
+        }
+
+        public bool IsAtWorld(in int x, in int y)
+        {
+            return Position.X == x && Position.Y == y;
         }
 
         protected override View CreateView()

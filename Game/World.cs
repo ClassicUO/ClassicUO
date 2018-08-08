@@ -9,14 +9,13 @@ namespace ClassicUO.Game
 {
     public static class World
     {
-        private const int DISTANCE_POV = 24;
-
         private static readonly ConcurrentDictionary<Serial, House> _houses = new ConcurrentDictionary<Serial, House>();
         public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
         public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
         public static PlayerMobile Player { get; set; }
         public static Facet Map { get; private set; }
+        public static byte ViewRange { get; set; } = 24;
 
 
         public static int MapIndex
@@ -65,9 +64,9 @@ namespace ClassicUO.Game
             {
                 foreach (Mobile mob in Mobiles)
                 {
-                    mob.ViewObject.Update(frameMS);
+                    mob.View.Update(frameMS);
 
-                    if (mob.Distance > DISTANCE_POV)
+                    if (mob.Distance > ViewRange)
                     {
                         mob.Dispose();
                         RemoveMobile(mob);
@@ -76,9 +75,9 @@ namespace ClassicUO.Game
 
                 foreach (Item item in Items)
                 {
-                    item.ViewObject.Update(frameMS);
+                    item.View.Update(frameMS);
 
-                    if (item.Distance > DISTANCE_POV && item.OnGround)
+                    if (item.Distance > ViewRange && item.OnGround)
                     {
                         item.Dispose();
                         RemoveItem(item);

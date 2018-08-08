@@ -2,7 +2,7 @@
 
 namespace ClassicUO.Game.WorldObjects
 {
-    public class AnimatedItemEffect : WorldEffect
+    public class AnimatedItemEffect : GameEffect
     {
         public AnimatedItemEffect(in Graphic graphic, in Hue hue, in int duration)
         {
@@ -13,7 +13,7 @@ namespace ClassicUO.Game.WorldObjects
             Load();
         }
 
-        public AnimatedItemEffect(in WorldObject source, in Graphic graphic, in Hue hue, in int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(in GameObject source, in Graphic graphic, in Hue hue, in int duration) : this(graphic, hue, duration)
         {
             SetSource(source);
         }
@@ -31,7 +31,7 @@ namespace ClassicUO.Game.WorldObjects
         {
             sbyte zSrc = (sbyte) sourceZ;
 
-            WorldObject source = World.Get(sourceSerial);
+            GameObject source = World.Get(sourceSerial);
             if (source != null)
             {
                 if (sourceSerial.IsMobile)
@@ -52,7 +52,7 @@ namespace ClassicUO.Game.WorldObjects
         }
 
         public int Duration { get; set; }
-        public new AnimatedEffectView ViewObject => (AnimatedEffectView) base.ViewObject;
+        public new AnimatedEffectView View => (AnimatedEffectView) base.View;
 
 
         protected override View CreateView()

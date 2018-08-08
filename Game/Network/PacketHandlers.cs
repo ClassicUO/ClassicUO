@@ -248,6 +248,7 @@ namespace ClassicUO.Game.Network
             //ToServer.Add(0xC5, InvalidMapRequest);
             ToClient.Add(0xC6, InvalidMapEnable);
             ToClient.Add(0xC7, GraphicEffect);
+            ToClient.Add(0xC8, ClientViewRange);
             ToClient.Add(0xCA, GetUserServerPingGodClientR); //ToServer.Add(0xCA, GetUserServerPingGodClientS);
             ToClient.Add(0xCB, GlobalQueCount);
             ToClient.Add(0xCC, DisplayClilocString);
@@ -620,7 +621,7 @@ namespace ClassicUO.Game.Network
             sbyte z = p.ReadSByte();
 
 
-           // Direction dir = direction & Direction.Up;
+            // Direction dir = direction & Direction.Up;
 
             int endX = 0, endY = 0;
             sbyte endZ = 0;
@@ -638,10 +639,7 @@ namespace ClassicUO.Game.Network
             }
             else if ((endDir & Direction.Up) != (direction & Direction.Up))
                 World.Player.EnqueueStep(x, y, z, direction, (direction & Direction.Running) != 0);
-            else if (World.Player.Tile == null)
-            {
-                World.Player.Tile = World.Map.GetTile(x, y);
-            }
+            else if (World.Player.Tile == null) World.Player.Tile = World.Map.GetTile(x, y);
 
             //if (endX == x && endY == y)
             //{
@@ -928,6 +926,11 @@ namespace ClassicUO.Game.Network
 
         private static void GraphicEffect(Packet p)
         {
+        }
+
+        private static void ClientViewRange(Packet p)
+        {
+            //World.ViewRange = p.ReadByte();
         }
 
         private static void BulletinBoardData(Packet p)
@@ -1727,10 +1730,7 @@ namespace ClassicUO.Game.Network
                                 {
                                     Tile tile = World.Map.GetTile((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y));
 
-                                    tile.AddWorldObject(new Static(id, 0, 0)
-                                    {
-                                        Position = new Position(tile.Position.X, tile.Position.Y, (sbyte) (foundation.Position.Z + z))
-                                    });
+                                    tile.AddWorldObject(new Static(id, 0, 0) {Position = new Position(tile.Position.X, tile.Position.Y, (sbyte) (foundation.Position.Z + z))});
                                 }
                             }
 
@@ -1755,10 +1755,7 @@ namespace ClassicUO.Game.Network
                                 {
                                     Tile tile = World.Map.GetTile((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y));
 
-                                    tile.AddWorldObject(new Static(id, 0, 0)
-                                    {
-                                        Position = new Position(tile.Position.X, tile.Position.Y, (sbyte) (foundation.Position.Z + z))
-                                    });
+                                    tile.AddWorldObject(new Static(id, 0, 0) {Position = new Position(tile.Position.X, tile.Position.Y, (sbyte) (foundation.Position.Z + z))});
                                 }
                             }
 
@@ -1804,10 +1801,7 @@ namespace ClassicUO.Game.Network
                                 {
                                     Tile tile = World.Map.GetTile((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y));
 
-                                    tile.AddWorldObject(new Static(id, 0, 0)
-                                    {
-                                        Position = new Position(tile.Position.X, tile.Position.Y, (sbyte) (foundation.Position.Z + z))
-                                    });
+                                    tile.AddWorldObject(new Static(id, 0, 0) {Position = new Position(tile.Position.X, tile.Position.Y, (sbyte) (foundation.Position.Z + z))});
                                 }
                             }
 

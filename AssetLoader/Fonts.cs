@@ -63,10 +63,7 @@ namespace ClassicUO.AssetsLoader
         private static readonly int[] offsetCharTable = {2, 0, 2, 2, 0, 0, 2, 2, 0, 0};
         private static readonly int[] offsetSymbolTable = {1, 0, 1, 1, -1, 0, 1, 1, 0, 0};
 
-        private static readonly byte[] _fontIndex =
-        {
-            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 136, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 152, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223
-        };
+        private static readonly byte[] _fontIndex = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 136, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 152, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223};
 
         private static uint _webLinkColor;
         private static uint _visitedWebLinkColor;
@@ -484,14 +481,7 @@ namespace ClassicUO.AssetsLoader
                     {
                         if (isFixed)
                         {
-                            MultilinesFontData mfd1 = new MultilinesFontData
-                            {
-                                Item = si,
-                                Flags = flags,
-                                Font = font,
-                                LinkID = 0,
-                                Color = 0xFFFFFFFF
-                            };
+                            MultilinesFontData mfd1 = new MultilinesFontData {Item = si, Flags = flags, Font = font, LinkID = 0, Color = 0xFFFFFFFF};
 
                             ptr.Data.Add(mfd1);
 
@@ -532,14 +522,7 @@ namespace ClassicUO.AssetsLoader
                     }
                 }
 
-                MultilinesFontData mfd = new MultilinesFontData
-                {
-                    Item = si,
-                    Flags = flags,
-                    Font = font,
-                    LinkID = 0,
-                    Color = 0xFFFFFFFF
-                };
+                MultilinesFontData mfd = new MultilinesFontData {Item = si, Flags = flags, Font = font, LinkID = 0, Color = 0xFFFFFFFF};
                 ptr.Data.Add(mfd);
                 readWidth += fcd.Width;
                 if (fcd.Height > ptr.MaxHeight)
@@ -803,14 +786,7 @@ namespace ClassicUO.AssetsLoader
                     {
                         if (isFixed)
                         {
-                            MultilinesFontData mfd1 = new MultilinesFontData
-                            {
-                                Item = si,
-                                Flags = current_flags,
-                                Font = current_font,
-                                LinkID = 0,
-                                Color = current_charcolor
-                            };
+                            MultilinesFontData mfd1 = new MultilinesFontData {Item = si, Flags = current_flags, Font = current_font, LinkID = 0, Color = current_charcolor};
 
                             ptr.Data.Add(mfd1);
                             readWidth += data[0] + data[2] + 1;
@@ -854,14 +830,7 @@ namespace ClassicUO.AssetsLoader
                     }
                 }
 
-                MultilinesFontData mfd = new MultilinesFontData
-                {
-                    Item = si,
-                    Flags = current_flags,
-                    Font = current_font,
-                    LinkID = 0,
-                    Color = current_charcolor
-                };
+                MultilinesFontData mfd = new MultilinesFontData {Item = si, Flags = current_flags, Font = current_font, LinkID = 0, Color = current_charcolor};
                 ptr.Data.Add(mfd);
 
                 if (si == ' ')
@@ -1055,14 +1024,7 @@ namespace ClassicUO.AssetsLoader
                             ofsX = (sbyte) xData[2];
                         }
 
-                        WebLinkRect wlr = new WebLinkRect
-                        {
-                            LinkID = oldLink,
-                            StartX = linkStartX,
-                            StartY = linkStartY,
-                            EndX = w - ofsX,
-                            EndY = linkHeight
-                        };
+                        WebLinkRect wlr = new WebLinkRect {LinkID = oldLink, StartX = linkStartX, StartY = linkStartY, EndX = w - ofsX, EndY = linkHeight};
 
                         links.Add(wlr);
                         oldLink = 0;
@@ -1480,14 +1442,7 @@ namespace ClassicUO.AssetsLoader
                     {
                         if (isFixed)
                         {
-                            MultilinesFontData mfd1 = new MultilinesFontData
-                            {
-                                Item = si,
-                                Flags = htmlData[i].Flags,
-                                Font = htmlData[i].Font,
-                                LinkID = htmlData[i].LinkID,
-                                Color = htmlData[i].Color
-                            };
+                            MultilinesFontData mfd1 = new MultilinesFontData {Item = si, Flags = htmlData[i].Flags, Font = htmlData[i].Font, LinkID = htmlData[i].LinkID, Color = htmlData[i].Color};
 
                             ptr.Data.Add(mfd1);
                             ;
@@ -1531,14 +1486,7 @@ namespace ClassicUO.AssetsLoader
                     }
                 }
 
-                MultilinesFontData mfd = new MultilinesFontData
-                {
-                    Item = si,
-                    Flags = htmlData[i].Flags,
-                    Font = htmlData[i].Font,
-                    LinkID = htmlData[i].LinkID,
-                    Color = htmlData[i].Color
-                };
+                MultilinesFontData mfd = new MultilinesFontData {Item = si, Flags = htmlData[i].Flags, Font = htmlData[i].Font, LinkID = htmlData[i].LinkID, Color = htmlData[i].Color};
                 ptr.Data.Add(mfd);
 
                 if (si == ' ')
@@ -1567,15 +1515,7 @@ namespace ClassicUO.AssetsLoader
 
             int newlen = 0;
 
-            HTMLDataInfo info = new HTMLDataInfo
-            {
-                Tag = HTML_TAG_TYPE.HTT_NONE,
-                Align = align,
-                Flags = flags,
-                Font = font,
-                Color = _HTMLColor,
-                Link = 0
-            };
+            HTMLDataInfo info = new HTMLDataInfo {Tag = HTML_TAG_TYPE.HTT_NONE, Align = align, Flags = flags, Font = font, Color = _HTMLColor, Link = 0};
             List<HTMLDataInfo> stack = new List<HTMLDataInfo>();
             stack.Add(info);
 
@@ -1588,15 +1528,7 @@ namespace ClassicUO.AssetsLoader
                 if (si == '<')
                 {
                     bool endTag = false;
-                    HTMLDataInfo newInfo = new HTMLDataInfo
-                    {
-                        Tag = HTML_TAG_TYPE.HTT_NONE,
-                        Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                        Flags = 0,
-                        Font = 0xFF,
-                        Color = 0,
-                        Link = 0
-                    };
+                    HTMLDataInfo newInfo = new HTMLDataInfo {Tag = HTML_TAG_TYPE.HTT_NONE, Align = TEXT_ALIGN_TYPE.TS_LEFT, Flags = 0, Font = 0xFF, Color = 0, Link = 0};
 
                     HTML_TAG_TYPE tag = ParseHTMLTag(str, len, ref i, ref endTag, newInfo);
 
@@ -1677,15 +1609,7 @@ namespace ClassicUO.AssetsLoader
 
         private static HTMLDataInfo GetCurrentHTMLInfo(in List<HTMLDataInfo> list)
         {
-            HTMLDataInfo info = new HTMLDataInfo
-            {
-                Tag = HTML_TAG_TYPE.HTT_NONE,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                Flags = 0,
-                Font = 0xFF,
-                Color = 0,
-                Link = 0
-            };
+            HTMLDataInfo info = new HTMLDataInfo {Tag = HTML_TAG_TYPE.HTT_NONE, Align = TEXT_ALIGN_TYPE.TS_LEFT, Flags = 0, Font = 0xFF, Color = 0, Link = 0};
 
             for (int i = 0; i < list.Count; i++)
             {
@@ -2093,15 +2017,7 @@ namespace ClassicUO.AssetsLoader
 
         private static HTMLDataInfo GetHTMLInfoFromTag(in HTML_TAG_TYPE tag)
         {
-            HTMLDataInfo info = new HTMLDataInfo
-            {
-                Tag = tag,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                Flags = 0,
-                Font = 0xFF,
-                Color = 0,
-                Link = 0
-            };
+            HTMLDataInfo info = new HTMLDataInfo {Tag = tag, Align = TEXT_ALIGN_TYPE.TS_LEFT, Flags = 0, Font = 0xFF, Color = 0, Link = 0};
 
             switch (tag)
             {

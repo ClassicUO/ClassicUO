@@ -47,12 +47,7 @@ namespace ClassicUO.AssetsLoader
                 //SkillEntryI entry = _file.ReadStruct<SkillEntryI>(_file.Position );
 
 
-                value = new SkillEntry
-                {
-                    HasButton = _file.ReadBool(),
-                    Name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)),
-                    Index = index
-                };
+                value = new SkillEntry {HasButton = _file.ReadBool(), Name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)), Index = index};
 
                 _skills[index] = value;
             }

@@ -24,22 +24,11 @@ namespace ClassicUO.Game.Renderer
 
         private static int _updateIndex;
 
-        private static readonly Dictionary<ushort, SpriteTexture[][][]> _animTextureCache = new Dictionary<ushort, SpriteTexture[][][]>();
-        //private static readonly SpriteTexture[] _staticTextureCache = new SpriteTexture[Art.ART_COUNT];
-        //private static readonly SpriteTexture[] _landTextureCache = new SpriteTexture[Art.ART_COUNT];
-        //private static readonly SpriteTexture[] _gumpTextureCache = new SpriteTexture[Gumps.GUMP_COUNT];
-        //private static readonly SpriteTexture[] _textmapTextureCache = new SpriteTexture[TextmapTextures.TEXTMAP_COUNT];
-        ////private static readonly SpriteTexture[] _soundTextureCache = new SpriteTexture[]
-        //private static readonly SpriteTexture[] _lightTextureCache = new SpriteTexture[Light.LIGHT_COUNT];
-
-
         private static readonly Dictionary<ushort, SpriteTexture> _staticTextureCache = new Dictionary<ushort, SpriteTexture>();
         private static readonly Dictionary<ushort, SpriteTexture> _landTextureCache = new Dictionary<ushort, SpriteTexture>();
         private static readonly Dictionary<ushort, SpriteTexture> _gumpTextureCache = new Dictionary<ushort, SpriteTexture>();
         private static readonly Dictionary<ushort, SpriteTexture> _textmapTextureCache = new Dictionary<ushort, SpriteTexture>();
         private static readonly Dictionary<ushort, SpriteTexture> _lightTextureCache = new Dictionary<ushort, SpriteTexture>();
-
-
         private static readonly Dictionary<AnimationFrame, SpriteTexture> _animations = new Dictionary<AnimationFrame, SpriteTexture>();
 
 
@@ -47,7 +36,6 @@ namespace ClassicUO.Game.Renderer
 
 
         public static GraphicsDevice Device { get; set; }
-
         public static int NextID => _first++;
 
 
@@ -73,7 +61,6 @@ namespace ClassicUO.Game.Renderer
                     foreach (var t in toremove)
                     {
                         dict[t.Key].Dispose();
-                        //dict[t.Key] = null;
                         dict.Remove(t.Key);
                     }
 
@@ -99,10 +86,7 @@ namespace ClassicUO.Game.Renderer
         {
             if (!_animations.TryGetValue(frame, out var sprite))
             {
-                sprite = new SpriteTexture(frame.Width, frame.Heigth, false)
-                {
-                    Ticks = World.Ticks
-                };
+                sprite = new SpriteTexture(frame.Width, frame.Heigth, false) {Ticks = World.Ticks};
                 sprite.SetData(frame.Pixels);
                 _animations[frame] = sprite;
             }
@@ -119,10 +103,7 @@ namespace ClassicUO.Game.Renderer
             {
                 ushort[] pixels = Art.ReadStaticArt(g, out short w, out short h);
 
-                texture = new SpriteTexture(w, h, false)
-                {
-                    Ticks = World.Ticks
-                };
+                texture = new SpriteTexture(w, h, false) {Ticks = World.Ticks};
 
                 texture.SetData(pixels);
                 _staticTextureCache[g] = texture;
@@ -138,10 +119,7 @@ namespace ClassicUO.Game.Renderer
             if (!_landTextureCache.TryGetValue(g, out var texture))
             {
                 ushort[] pixels = Art.ReadLandArt(g);
-                texture = new SpriteTexture(44, 44, false)
-                {
-                    Ticks = World.Ticks
-                };
+                texture = new SpriteTexture(44, 44, false) {Ticks = World.Ticks};
                 texture.SetData(pixels);
                 _landTextureCache[g] = texture;
             }
@@ -156,10 +134,7 @@ namespace ClassicUO.Game.Renderer
             if (!_gumpTextureCache.TryGetValue(g, out var texture))
             {
                 ushort[] pixels = AssetsLoader.Gumps.GetGump(g, out int w, out int h);
-                texture = new SpriteTexture(w, h, false)
-                {
-                    Ticks = World.Ticks
-                };
+                texture = new SpriteTexture(w, h, false) {Ticks = World.Ticks};
                 texture.SetData(pixels);
                 _gumpTextureCache[g] = texture;
             }
@@ -174,10 +149,7 @@ namespace ClassicUO.Game.Renderer
             if (!_textmapTextureCache.TryGetValue(g, out var texture))
             {
                 ushort[] pixels = TextmapTextures.GetTextmapTexture(g, out int size);
-                texture = new SpriteTexture(size, size, false)
-                {
-                    Ticks = World.Ticks
-                };
+                texture = new SpriteTexture(size, size, false) {Ticks = World.Ticks};
                 texture.SetData(pixels);
                 _textmapTextureCache[g] = texture;
             }

@@ -1,7 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-namespace ClassicUO.UI
+﻿namespace ClassicUO.UI
 {
     //public class Panel : Control
     //{

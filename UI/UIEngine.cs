@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.UI

@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Renderer.Views
             }
         }
 
-        public new Item WorldObject => (Item) base.WorldObject;
+        public Item WorldObject => (Item) GameObject;
 
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
@@ -48,8 +48,10 @@ namespace ClassicUO.Game.Renderer.Views
 
             if (WorldObject.IsCorpse)
             {
-                PreDraw(position);
-                return DrawInternal(spriteBatch, position);
+                if (!PreDraw(position))
+                    return DrawInternal(spriteBatch, position);
+
+                return false;
             }
 
             if (WorldObject.Effect == null)
@@ -75,25 +77,29 @@ namespace ClassicUO.Game.Renderer.Views
                 }
 
                 //var vv = position;
-                //vv.Z = WorldObject.Position.Z;
+                //vv.Z = position.X + position.Y;
 
-                //if (AssetsLoader.TileData.IsBackground((long)WorldObject.ItemData.Flags) &&
-                //    AssetsLoader.TileData.IsSurface((long)WorldObject.ItemData.Flags))
-                //    vv.Z += 4;
-                //else if (AssetsLoader.TileData.IsBackground((long)WorldObject.ItemData.Flags))
-                //    vv.Z += 2;
-                //else if (AssetsLoader.TileData.IsSurface((long)WorldObject.ItemData.Flags))
-                //    vv.Z += 5;
+                //if (AssetsLoader.TileData.IsBackground((long)GameObject.ItemData.Flags) &&
+                //    AssetsLoader.TileData.IsSurface((long)GameObject.ItemData.Flags))
+                //    vv.Z += 0.001f * (GameObject.IsometricPosition.Z + 0.4f);
+                //else if (AssetsLoader.TileData.IsBackground((long)GameObject.ItemData.Flags))
+                //    vv.Z += 0.001f * (GameObject.IsometricPosition.Z + 0.2f);
+                //else if (AssetsLoader.TileData.IsSurface((long)GameObject.ItemData.Flags))
+                //    vv.Z += 0.001f * (GameObject.IsometricPosition.Z + 0.5f);
                 //else
-                //    vv.Z += 6;
+                //    vv.Z += 0.001f * (GameObject.IsometricPosition.Z + 0.6f);
 
-                //CalculateRenderDepth((sbyte)vv.Z, 20, WorldObject.ItemData.Height, (byte)(WorldObject.Serial & 0xFF));
+
+                //CalculateRenderDepth((sbyte)vv.Z, 20, GameObject.ItemData.Height, (byte)(GameObject.Serial & 0xFF));
 
 
                 base.Draw(spriteBatch, position);
             }
             else
-                WorldObject.Effect.ViewObject.Draw(spriteBatch, position);
+            {
+                if (!WorldObject.Effect.IsDisposed)
+                    WorldObject.Effect.View.Draw(spriteBatch, position);
+            }
 
             return true;
         }
@@ -195,13 +201,18 @@ namespace ClassicUO.Game.Renderer.Views
             return true;
         }
 
-
         public override void Update(in double frameMS)
         {
             if (WorldObject.IsCorpse)
                 WorldObject.ProcessAnimation();
-            else
-                WorldObject.Effect?.UpdateAnimation(frameMS);
+
+            if (WorldObject.Effect != null)
+            {
+                if (WorldObject.Effect.IsDisposed)
+                    WorldObject.Effect = null;
+                else
+                    WorldObject.Effect.UpdateAnimation(frameMS);
+            }
         }
 
         protected override void MousePick(in SpriteVertex[] vertex)

@@ -15,10 +15,7 @@ namespace ClassicUO.AssetsLoader
         private static readonly UOFileMul[] _files = new UOFileMul[5];
         private static readonly UOFileUopAnimation[] _filesUop = new UOFileUopAnimation[4];
 
-        private static readonly List<Tuple<ushort, byte>>[] _groupReplaces = new List<Tuple<ushort, byte>>[2]
-        {
-            new List<Tuple<ushort, byte>>(), new List<Tuple<ushort, byte>>()
-        };
+        private static readonly List<Tuple<ushort, byte>>[] _groupReplaces = new List<Tuple<ushort, byte>>[2] {new List<Tuple<ushort, byte>>(), new List<Tuple<ushort, byte>>()};
 
         private static readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
 
@@ -902,10 +899,7 @@ namespace ClassicUO.AssetsLoader
 
             for (int i = 0; i < frameCount; i++)
             {
-                UOPFrameData data = new UOPFrameData
-                {
-                    DataStart = _reader.PositionAddress
-                };
+                UOPFrameData data = new UOPFrameData {DataStart = _reader.PositionAddress};
 
                 _reader.Skip(2);
                 data.FrameID = _reader.ReadShort();
@@ -957,11 +951,7 @@ namespace ClassicUO.AssetsLoader
                 short imageWidth = _reader.ReadShort();
                 short imageHeight = _reader.ReadShort();
 
-                animDirection.Frames[i] = new AnimationFrame
-                {
-                    CenterX = imageCenterX,
-                    CenterY = imageCenterY
-                };
+                animDirection.Frames[i] = new AnimationFrame {CenterX = imageCenterX, CenterY = imageCenterY};
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {
@@ -1255,13 +1245,7 @@ namespace ClassicUO.AssetsLoader
                     if (offset == 0)
                         continue;
 
-                    UOPAnimationData data = new UOPAnimationData
-                    {
-                        Offset = (uint) (offset + headerLength),
-                        CompressedLength = (uint) compressedLength,
-                        DecompressedLength = (uint) decompressedLength,
-                        FileIndex = _indexFile
-                    };
+                    UOPAnimationData data = new UOPAnimationData {Offset = (uint) (offset + headerLength), CompressedLength = (uint) compressedLength, DecompressedLength = (uint) decompressedLength, FileIndex = _indexFile};
 
                     hashes.Add(hash, data);
                 }

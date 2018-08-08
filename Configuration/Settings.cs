@@ -15,9 +15,11 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "password")]
         public string Password { get; set; }
 
-        [JsonProperty(PropertyName = "ip")] public string IP { get; set; }
+        [JsonProperty(PropertyName = "ip")]
+        public string IP { get; set; }
 
-        [JsonProperty(PropertyName = "port")] public ushort Port { get; set; }
+        [JsonProperty(PropertyName = "port")]
+        public ushort Port { get; set; }
 
         [JsonProperty(PropertyName = "lastcharactername")]
         public string LastCharacterName { get; set; }

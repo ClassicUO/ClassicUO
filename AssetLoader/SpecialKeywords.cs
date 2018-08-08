@@ -32,11 +32,7 @@ namespace ClassicUO.AssetsLoader
                 if (length > 128)
                     length = 128;
 
-                _keywords.Add(new KeywordEntry
-                {
-                    Code = id,
-                    Text = Encoding.UTF8.GetString(_file.ReadArray<byte>(length))
-                });
+                _keywords.Add(new KeywordEntry {Code = id, Text = Encoding.UTF8.GetString(_file.ReadArray<byte>(length))});
             }
         }
     }

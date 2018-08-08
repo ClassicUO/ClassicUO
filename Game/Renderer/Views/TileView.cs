@@ -5,17 +5,11 @@ namespace ClassicUO.Game.Renderer.Views
 {
     public class TileView : View
     {
-        private static readonly Point[] _surroundingIndexes =
-        {
-            new Point(0, -1), new Point(1, -1), new Point(-1, 0), new Point(1, 0), new Point(2, 0), new Point(-1, 1), new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(0, 2), new Point(1, 2)
-        };
+        private static readonly Point[] _surroundingIndexes = {new Point(0, -1), new Point(1, -1), new Point(-1, 0), new Point(1, 0), new Point(2, 0), new Point(-1, 1), new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(0, 2), new Point(1, 2)};
 
         private readonly Vector3[] _normals = new Vector3[4];
 
-        private readonly SpriteVertex[] _vertex =
-        {
-            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0))
-        };
+        private readonly SpriteVertex[] _vertex = {new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0))};
 
         private bool _needUpdateStrechedTile = true;
         private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
@@ -30,7 +24,7 @@ namespace ClassicUO.Game.Renderer.Views
 
 
         public bool IsStretched { get; }
-        public new Tile WorldObject => (Tile) base.WorldObject;
+        public Tile WorldObject => (Tile) GameObject;
 
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
@@ -57,10 +51,10 @@ namespace ClassicUO.Game.Renderer.Views
             }
 
             //var vv = position;
-            //vv.Z = WorldObject.Position.Z;
+            //vv.Z = (position.X + position.Y) + 0.001f * GameObject.IsometricPosition.Z;
+
 
             //CalculateRenderDepth((sbyte)vv.Z, 0, 0, 0);
-
 
             return !IsStretched ? base.Draw(spriteBatch, position) : Draw3DStretched(spriteBatch, position);
         }
@@ -95,8 +89,8 @@ namespace ClassicUO.Game.Renderer.Views
 
             if (!(currentZ == leftZ && currentZ == rightZ && currentZ == bottomZ))
             {
-                sbyte low = 0, high = 0, sort = 0;
-                sort = (sbyte) map.GetAverageZ(WorldObject.Position.Z, leftZ, rightZ, bottomZ, ref low, ref high);
+                sbyte low = 0, high = 0;
+                sbyte sort = (sbyte) map.GetAverageZ(WorldObject.Position.Z, leftZ, rightZ, bottomZ, ref low, ref high);
                 if (sort != SortZ)
                 {
                     SortZ = sort;

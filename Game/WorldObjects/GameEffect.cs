@@ -1,21 +1,22 @@
 ﻿using System.Collections.Generic;
 using ClassicUO.AssetsLoader;
+using ClassicUO.Game.WorldObjects.Interfaces;
 
 namespace ClassicUO.Game.WorldObjects
 {
-    public abstract class WorldEffect : WorldObject
+    public abstract class GameEffect : GameObject, IDeferreable
     {
-        private readonly List<WorldEffect> _children;
+        private readonly List<GameEffect> _children;
 
-        protected WorldEffect() : base(World.Map)
+        protected GameEffect() : base(World.Map)
         {
-            _children = new List<WorldEffect>();
+            _children = new List<GameEffect>();
         }
 
-        public IReadOnlyList<WorldEffect> Children => _children;
+        public IReadOnlyList<GameEffect> Children => _children;
 
-        protected WorldObject Source { get; set; }
-        protected WorldObject Target { get; set; }
+        protected GameObject Source { get; set; }
+        protected GameObject Target { get; set; }
 
         protected int SourceX { get; set; }
         protected int SourceY { get; set; }
@@ -32,6 +33,8 @@ namespace ClassicUO.Game.WorldObjects
         public long LastChangeFrameTime { get; set; }
         public bool IsEnabled { get; set; }
         public Graphic AnimationGraphic { get; set; }
+
+        public DeferredEntity DeferredObject { get; set; }
 
 
         public void Load()
@@ -61,7 +64,7 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
-        public void AddChildEffect(in WorldEffect effect)
+        public void AddChildEffect(in GameEffect effect)
         {
             _children.Add(effect);
         }
@@ -73,7 +76,7 @@ namespace ClassicUO.Game.WorldObjects
             return (Source.Position.X, Source.Position.Y, Source.Position.Z);
         }
 
-        public void SetSource(in WorldObject source)
+        public void SetSource(in GameObject source)
         {
             Source = source;
         }
@@ -93,7 +96,7 @@ namespace ClassicUO.Game.WorldObjects
             return (Target.Position.X, Target.Position.Y, Target.Position.Z);
         }
 
-        public void SetTarget(in WorldObject target)
+        public void SetTarget(in GameObject target)
         {
             Target = target;
         }

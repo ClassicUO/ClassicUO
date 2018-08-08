@@ -340,9 +340,9 @@ namespace ClassicUO.Game.WorldObjects
 
         public void UpdateSkill(int id, ushort realValue, ushort baseValue, SkillLock skillLock, ushort cap)
         {
-            if (id < Skills.Count)
+            if (id < _sklls.Count)
             {
-                Skill skill = Skills[id];
+                Skill skill = _sklls[id];
                 skill.ValueFixed = realValue;
                 skill.BaseFixed = baseValue;
                 skill.Lock = skillLock;
@@ -353,9 +353,9 @@ namespace ClassicUO.Game.WorldObjects
 
         public void UpdateSkillLock(int id, SkillLock skillLock)
         {
-            if (id < Skills.Count)
+            if (id < _sklls.Count)
             {
-                Skill skill = Skills[id];
+                Skill skill = _sklls[id];
                 skill.Lock = skillLock;
                 _delta |= Delta.Skills;
             }
@@ -374,9 +374,9 @@ namespace ClassicUO.Game.WorldObjects
 
             Graphic[] graphics = {0x00, 0x00};
 
-            if (right == null && left != null)
+            if (right == null)
                 graphics[0] = left.Graphic;
-            else if (right != null && left == null)
+            else if (left == null)
                 graphics[1] = right.Graphic;
             else
             {
@@ -1015,7 +1015,7 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
-        protected override void OnProcessDelta(Delta d)
+        protected override void OnProcessDelta(in Delta d)
         {
             base.OnProcessDelta(d);
             if (d.HasFlag(Delta.Stats))
@@ -1103,15 +1103,7 @@ namespace ClassicUO.Game.WorldObjects
             if (run)
                 direction |= Direction.Running;
 
-            Step step = new Step
-            {
-                X = x,
-                Y = y,
-                Z = z,
-                Direction = (byte) direction,
-                Run = run,
-                Seq = SequenceNumber
-            };
+            Step step = new Step {X = x, Y = y, Z = z, Direction = (byte) direction, Run = run, Seq = SequenceNumber};
 
 
             if (_movementState == PlayerMovementState.ANIMATE_IMMEDIATELY)
@@ -1194,7 +1186,7 @@ namespace ClassicUO.Game.WorldObjects
         public void ResetSteps()
         {
             _requestedSteps.Clear();
-            _steps.Clear();
+            Steps.Clear();
 
             SequenceNumber = 0;
             _lastStepRequestedTime = 0;

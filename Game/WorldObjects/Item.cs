@@ -1,6 +1,7 @@
 ﻿using System;
 using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Game.WorldObjects.Interfaces;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.WorldObjects
@@ -39,7 +40,7 @@ namespace ClassicUO.Game.WorldObjects
         Bank = 0x1D
     }
 
-    public class Item : Entity
+    public class Item : Entity, IDynamicItem
     {
         private ushort _amount;
         private Serial _container;
@@ -53,24 +54,8 @@ namespace ClassicUO.Game.WorldObjects
         }
 
 
-        public new ItemView ViewObject => /*Graphic <= 0 ? null :*/ (ItemView) base.ViewObject;
-
-
-        public WorldEffect Effect { get; set; }
-
-        public StaticTiles ItemData
-        {
-            get
-            {
-                if (!_itemData.HasValue)
-                {
-                    _itemData = TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic /*& 0xFFFF]*/];
-                    Name = _itemData.Value.Name;
-                }
-
-                return _itemData.Value;
-            }
-        }
+        public new ItemView View => /*Graphic <= 0 ? null :*/ (ItemView) base.View;
+        public GameEffect Effect { get; set; }
 
         public ushort Amount
         {
@@ -178,14 +163,7 @@ namespace ClassicUO.Game.WorldObjects
                                 components[i] = component;
                             }
 
-                            Multi = new Multi(this)
-                            {
-                                MinX = minX,
-                                MaxX = maxX,
-                                MinY = minY,
-                                MaxY = maxY,
-                                Components = components
-                            };
+                            Multi = new Multi(this) {MinX = minX, MaxX = maxX, MinY = minY, MaxY = maxY, Components = components};
                         }
                     }
                     else
@@ -213,6 +191,25 @@ namespace ClassicUO.Game.WorldObjects
             }
         }
 
+        public StaticTiles ItemData
+        {
+            get
+            {
+                if (!_itemData.HasValue)
+                {
+                    _itemData = TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic /*& 0xFFFF]*/];
+                    Name = _itemData.Value.Name;
+                }
+
+                return _itemData.Value;
+            }
+        }
+
+        public bool IsAtWorld(in int x, in int y)
+        {
+            return Position.X == x && Position.Y == y;
+        }
+
 
         public event EventHandler OwnerChanged;
 
@@ -221,7 +218,7 @@ namespace ClassicUO.Game.WorldObjects
             return new ItemView(this);
         }
 
-        protected override void OnProcessDelta(Delta d)
+        protected override void OnProcessDelta(in Delta d)
         {
             base.OnProcessDelta(d);
             if (d.HasFlag(Delta.Ownership))
@@ -485,6 +482,12 @@ namespace ClassicUO.Game.WorldObjects
             return graphic;
         }
 
+
+        public override void Dispose()
+        {
+            Effect?.Dispose();
+            base.Dispose();
+        }
 
         public override void ProcessAnimation()
         {

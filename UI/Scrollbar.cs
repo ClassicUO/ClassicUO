@@ -1,7 +1,4 @@
-﻿using ClassicUO.Input;
-using Microsoft.Xna.Framework.Graphics;
-
-namespace ClassicUO.UI
+﻿namespace ClassicUO.UI
 {
     //public sealed class Scrollbar : Control
     //{

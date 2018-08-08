@@ -1,24 +1,23 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Utility
 {
     public class Bag<T> : IEnumerable<T>
     {
-        private T[] _items;
         private readonly bool _isPrimitive;
-
-        public int Capacity => _items.Length;
-        public bool IsEmpty => Count == 0;
-        public int Count { get; private set; }
+        private T[] _items;
 
         public Bag(in int capacity = 16)
         {
             _isPrimitive = typeof(T).IsPrimitive;
             _items = new T[capacity];
         }
+
+        public int Capacity => _items.Length;
+        public bool IsEmpty => Count == 0;
+        public int Count { get; private set; }
 
         public T this[in int index]
         {
@@ -30,6 +29,16 @@ namespace ClassicUO.Utility
                     Count = index + 1;
                 _items[index] = value;
             }
+        }
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return new BagEnumerator(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new BagEnumerator(this);
         }
 
         public void Add(in T element)
@@ -112,20 +121,10 @@ namespace ClassicUO.Utility
             if (capacity < _items.Length)
                 return;
 
-            var newCapacity = Math.Max((int)(_items.Length * 1.5), capacity);
+            var newCapacity = Math.Max((int) (_items.Length * 1.5), capacity);
             var oldElements = _items;
             _items = new T[newCapacity];
             Array.Copy(oldElements, 0, _items, 0, oldElements.Length);
-        }
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
-            return new BagEnumerator(this);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return new BagEnumerator(this);
         }
 
         internal struct BagEnumerator : IEnumerator<T>

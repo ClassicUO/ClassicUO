@@ -15,10 +15,7 @@ namespace ClassicUO.AssetsLoader
 
         public static int[][] MapBlocksSize { get; } = new int[MAPS_COUNT][];
 
-        public static int[][] MapsDefaultSize { get; } = new int[MAPS_COUNT][]
-        {
-            new int[2] {7168, 4096}, new int[2] {7168, 4096}, new int[2] {2304, 1600}, new int[2] {2560, 2048}, new int[2] {1448, 1448}, new int[2] {1280, 4096}
-        };
+        public static int[][] MapsDefaultSize { get; } = new int[MAPS_COUNT][] {new int[2] {7168, 4096}, new int[2] {7168, 4096}, new int[2] {2304, 1600}, new int[2] {2560, 2048}, new int[2] {1448, 1448}, new int[2] {1280, 4096}};
 
         public static void Load()
         {

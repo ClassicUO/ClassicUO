@@ -193,20 +193,14 @@ namespace ClassicUO.Utility
             get
             {
                 var arrayIndex = GetArrayIndex(index);
-                if (arrayIndex == -1)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(index), "Index was out of range. Must be non-negative and less than the size of the collection.");
-                }
+                if (arrayIndex == -1) throw new ArgumentOutOfRangeException(nameof(index), "Index was out of range. Must be non-negative and less than the size of the collection.");
 
                 return _items[arrayIndex];
             }
             set
             {
                 var arrayIndex = GetArrayIndex(index);
-                if (arrayIndex == -1)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(index), "Index was out of range. Must be non-negative and less than the size of the collection.");
-                }
+                if (arrayIndex == -1) throw new ArgumentOutOfRangeException(nameof(index), "Index was out of range. Must be non-negative and less than the size of the collection.");
 
                 _items[arrayIndex] = value;
             }
@@ -480,10 +474,7 @@ namespace ClassicUO.Utility
             if (arrayIndex < 0)
                 throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Index was less than the array's lower bound.");
 
-            if (arrayIndex >= array.Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Index was greater than the array's upper bound.");
-            }
+            if (arrayIndex >= array.Length) throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Index was greater than the array's upper bound.");
 
             if (array.Length - arrayIndex < Count)
                 throw new ArgumentException("Destination array was not long enough.");
