@@ -2,7 +2,7 @@
 using ClassicUO.Game.Renderer.Views;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.WorldObjects
+namespace ClassicUO.Game.GameObjects
 {
     public class DeferredEntity : GameObject
     {

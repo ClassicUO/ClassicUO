@@ -1,9 +1,10 @@
-﻿using ClassicUO.Game.Map;
+﻿using System;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer.Views;
 
-namespace ClassicUO.Game.WorldObjects
+namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameObject
+    public abstract class GameObject : IDisposable
     {
         private Tile _tile;
         private View _view;

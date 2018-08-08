@@ -1,4 +1,4 @@
-﻿using ClassicUO.Game.WorldObjects;
+﻿using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game
 {

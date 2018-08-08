@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ClassicUO.Game.WorldObjects
+namespace ClassicUO.Game.GameObjects
 {
     public class House : Item
     {

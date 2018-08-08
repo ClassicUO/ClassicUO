@@ -1,7 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ClassicUO.AssetsLoader;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.GameObjects.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using IDrawable = ClassicUO.Game.GameObjects.Interfaces.IDrawable;
+using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Renderer
 {
@@ -64,7 +69,7 @@ namespace ClassicUO.Game.Renderer
             Texture.LinesCount = linesCount;
         }
 
-        public void Draw(in SpriteBatchUI spriteBatch, in Point position)
+        public void Draw(in SpriteBatch3D spriteBatch, in Point position)
         {
             //spriteBatch.Draw2D(Texture, new Rectangle(position.X, position.Y, Width, Height),
             //    RenderExtentions.GetHueVector(0, _isPartialHue, false, false));
@@ -72,7 +77,7 @@ namespace ClassicUO.Game.Renderer
         }
 
 
-        public void Draw(in SpriteBatchUI spriteBatch, Rectangle destRect, in int scrollX, in int scrollY)
+        public void Draw(in SpriteBatch3D spriteBatch, Rectangle destRect, in int scrollX, in int scrollY)
         {
             if (string.IsNullOrEmpty(Text))
                 return;
@@ -96,6 +101,109 @@ namespace ClassicUO.Game.Renderer
 
 
             spriteBatch.Draw2D(Texture, destRect, sourceRect, RenderExtentions.GetHueVector(0, _isPartialHue, false, false));
+        }
+    }
+
+
+    public enum FontStyle : int
+    {
+        Solid = 0x01,
+        Italic = 0x02,
+        Indention = 0x04,
+        BlackBorder = 0x08,
+        Underline = 0x10,
+        Cropped = 0x40,
+        BQ = 0x80
+    }
+
+    public class GameText : IDrawable, IUpdateable, IDisposable
+    {
+        private string _text;
+        private Rectangle _bounds;
+
+        public GameText(in string text = "")
+        {
+            _text = text;
+        }
+
+        public SpriteTexture Texture { get; set; }
+        public bool IsUnicode { get; set; }
+        public Hue Hue { get; set; }
+        public bool IsPartialHue { get; set; }
+        public byte Font { get; set; }
+        public TEXT_ALIGN_TYPE Align { get; set; }
+        public byte MaxWidth { get; set; } 
+        public FontStyle FontStyle { get; set; }
+
+        public string Text
+        {
+            get => _text;
+            set
+            {
+                if (_text != value)
+                {
+                    _text = value;
+
+                }
+            }
+        }
+
+        public Rectangle Bounds
+        {
+            get => _bounds;
+            set => _bounds = value;
+        }
+
+        public int X
+        {
+            get => _bounds.X;
+            set => _bounds.X = value;
+        }
+
+        public int Y
+        {
+            get => _bounds.Y;
+            set => _bounds.Y = value;
+        }
+
+        public int Width
+        {
+            get => _bounds.Width;
+            set => _bounds.Width = value;
+        }
+
+        public int Height
+        {
+            get => _bounds.Height;
+            set => _bounds.Height = value;
+        }
+
+        public bool AllowedToDraw { get; set; }
+
+        public Vector3 HueVector { get; set; }
+
+        public bool IsDisposed { get; set; }
+
+
+
+
+        public void Update(in double frameMS)
+        {
+
+        }
+
+        public bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        {
+            HueVector = RenderExtentions.GetHueVector(Hue, IsPartialHue, false, false);
+            return spriteBatch.Draw2D(Texture, Bounds, HueVector);
+        }
+
+        public virtual void Dispose()
+        {
+            if (IsDisposed)
+                return;
+
+            IsDisposed = true;
         }
     }
 }

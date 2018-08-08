@@ -20,7 +20,7 @@ namespace ClassicUO.Game.Renderer
 
         public CursorRenderer()
         {
-            _textR = new TextRenderer {Font = 0, Color = 2655, IsUnicode = false};
+            _textR = new TextRenderer {Font = 3, Color = 2655, IsUnicode = false};
 
             MouseManager.MouseMove += (sender, e) =>
             {
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.Renderer
                 Texture.Ticks = World.Ticks;
         }
 
-        public void Draw(in SpriteBatchUI sb)
+        public void Draw(in SpriteBatch3D sb)
         {
             ushort id = Graphic;
 

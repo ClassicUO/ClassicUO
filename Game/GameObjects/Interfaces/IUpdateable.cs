@@ -4,8 +4,8 @@ using System.Text;
 
 namespace ClassicUO.Game.GameObjects.Interfaces
 {
-    public interface IDeferreable
+    public interface IUpdateable
     {
-        DeferredEntity DeferredObject { get; set; }
+        void Update(in double frameMS);
     }
 }

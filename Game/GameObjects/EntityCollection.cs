@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Utility;
 
-namespace ClassicUO.Game.WorldObjects
+namespace ClassicUO.Game.GameObjects
 {
     public class EntityCollection<T> : IEnumerable<T> where T : Entity
     {

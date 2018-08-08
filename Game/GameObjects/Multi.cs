@@ -1,4 +1,4 @@
-﻿namespace ClassicUO.Game.WorldObjects
+﻿namespace ClassicUO.Game.GameObjects
 {
     public sealed class Multi
     {

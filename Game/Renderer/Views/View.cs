@@ -1,13 +1,15 @@
 ﻿using System;
 using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Map;
-using ClassicUO.Game.WorldObjects;
-using ClassicUO.Game.WorldObjects.Interfaces;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.GameObjects.Interfaces;
 using Microsoft.Xna.Framework;
+using IDrawable = ClassicUO.Game.GameObjects.Interfaces.IDrawable;
+using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Renderer.Views
 {
-    public abstract class View
+    public abstract class View : IDrawable, IUpdateable
     {
         protected static float PI = (float) Math.PI;
 
@@ -25,7 +27,7 @@ namespace ClassicUO.Game.Renderer.Views
 
         public SpriteTexture Texture { get; set; }
         protected Rectangle Bounds { get; set; }
-        protected Vector3 HueVector { get; set; }
+        public Vector3 HueVector { get; set; }
         protected bool HasShadow { get; set; }
         protected bool IsFlipped { get; set; }
         protected float Rotation { get; set; }

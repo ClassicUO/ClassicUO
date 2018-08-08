@@ -1,6 +1,6 @@
 ﻿using ClassicUO.AssetsLoader;
 
-namespace ClassicUO.Game.WorldObjects.Interfaces
+namespace ClassicUO.Game.GameObjects.Interfaces
 {
     public interface IDynamicItem
     {

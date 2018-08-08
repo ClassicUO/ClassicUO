@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ClassicUO.AssetsLoader;
-using ClassicUO.Game.WorldObjects;
+using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Network
 {

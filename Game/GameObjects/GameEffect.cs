@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using ClassicUO.AssetsLoader;
-using ClassicUO.Game.WorldObjects.Interfaces;
+using ClassicUO.Game.GameObjects.Interfaces;
 
-namespace ClassicUO.Game.WorldObjects
+namespace ClassicUO.Game.GameObjects
 {
     public abstract class GameEffect : GameObject, IDeferreable
     {

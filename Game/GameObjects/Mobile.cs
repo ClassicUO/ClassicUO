@@ -5,7 +5,7 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using MathHelper = ClassicUO.Utility.MathHelper;
 
-namespace ClassicUO.Game.WorldObjects
+namespace ClassicUO.Game.GameObjects
 {
     [Flags]
     public enum Notoriety : byte

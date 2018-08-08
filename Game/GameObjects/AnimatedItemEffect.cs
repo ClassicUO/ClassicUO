@@ -1,6 +1,6 @@
 ﻿using ClassicUO.Game.Renderer.Views;
 
-namespace ClassicUO.Game.WorldObjects
+namespace ClassicUO.Game.GameObjects
 {
     public class AnimatedItemEffect : GameEffect
     {

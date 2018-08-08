@@ -1,5 +1,5 @@
 ﻿using System;
-using ClassicUO.Game.WorldObjects;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game

@@ -21,11 +21,14 @@ namespace ClassicUO.Game.Renderer
         VertexDeclaration IVertexType.VertexDeclaration => VertexDeclaration;
 
 
-        public static readonly VertexDeclaration VertexDeclaration = new VertexDeclaration(new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0), // position
-            new VertexElement(sizeof(float) * 3, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0), // normal
-            new VertexElement(sizeof(float) * 6, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 0), // tex coord
-            new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1) // hue
-        );
+        public static readonly VertexDeclaration VertexDeclaration =
+            new VertexDeclaration
+            (
+                new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0), // position
+                new VertexElement(sizeof(float) * 3, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0), // normal
+                new VertexElement(sizeof(float) * 6, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 0), // tex coord
+                new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1) // hue
+            );
 
         public static readonly SpriteVertex[] PolyBuffer = {new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 1, 0))};
 

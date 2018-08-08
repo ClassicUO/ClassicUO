@@ -1,10 +1,10 @@
 ﻿using System;
 using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Renderer.Views;
-using ClassicUO.Game.WorldObjects.Interfaces;
+using ClassicUO.Game.GameObjects.Interfaces;
 using ClassicUO.Utility;
 
-namespace ClassicUO.Game.WorldObjects
+namespace ClassicUO.Game.GameObjects
 {
     public enum Layer : byte
     {

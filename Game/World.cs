@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer;
-using ClassicUO.Game.WorldObjects;
+using ClassicUO.Game.GameObjects;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game

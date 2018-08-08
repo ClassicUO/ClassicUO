@@ -4,7 +4,7 @@ using ClassicUO.Game.Network;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.WorldObjects
+namespace ClassicUO.Game.GameObjects
 {
     public enum Ability : ushort
     {

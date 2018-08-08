@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Map;
-using ClassicUO.Game.WorldObjects;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Utility;
-using Multi = ClassicUO.Game.WorldObjects.Multi;
+using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.Network
 {

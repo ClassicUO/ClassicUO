@@ -28,7 +28,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public virtual void Draw(in SpriteBatchUI spriteBatch, in Point position)
+        public virtual void Draw(in SpriteBatch3D spriteBatch, in Point position)
         {
             foreach (Control c in Children)
             {

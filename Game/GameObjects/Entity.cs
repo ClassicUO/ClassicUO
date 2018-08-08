@@ -2,10 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using ClassicUO.Game.WorldObjects.Interfaces;
+using ClassicUO.Game.GameObjects.Interfaces;
 using ClassicUO.Utility;
 
-namespace ClassicUO.Game.WorldObjects
+namespace ClassicUO.Game.GameObjects
 {
     [Flags]
     public enum Flags : byte

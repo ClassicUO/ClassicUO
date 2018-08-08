@@ -14,8 +14,6 @@ namespace ClassicUO.Game.Renderer
 
         public long Ticks { get; set; }
         public int ID { get; }
-
-        public bool IsOld => World.Ticks - Ticks >= 3000;
     }
 
     public static class TextureManager
@@ -30,6 +28,7 @@ namespace ClassicUO.Game.Renderer
         private static readonly Dictionary<ushort, SpriteTexture> _textmapTextureCache = new Dictionary<ushort, SpriteTexture>();
         private static readonly Dictionary<ushort, SpriteTexture> _lightTextureCache = new Dictionary<ushort, SpriteTexture>();
         private static readonly Dictionary<AnimationFrame, SpriteTexture> _animations = new Dictionary<AnimationFrame, SpriteTexture>();
+        private static readonly Dictionary<GameText, SpriteTexture> _textTextureCache = new Dictionary<GameText, SpriteTexture>();
 
 
         private static int _first;
@@ -152,6 +151,29 @@ namespace ClassicUO.Game.Renderer
                 texture = new SpriteTexture(size, size, false) {Ticks = World.Ticks};
                 texture.SetData(pixels);
                 _textmapTextureCache[g] = texture;
+            }
+            else
+                texture.Ticks = World.Ticks;
+
+            return texture;
+        }
+
+        public static SpriteTexture GetOrCreateStringTextTexture(in GameText gt)
+        {
+            if (!_textTextureCache.TryGetValue(gt, out var texture))
+            {
+                uint[] data;
+                int linesCount;
+                List<WebLinkRect> links;
+
+                //if (gt.IsUnicode)
+                //    (data, Width, Height, linesCount, links) = Fonts.GenerateUnicode(Font, Text, Color, cell, maxWidth, aling, flags);
+                //else
+                //{
+                //    (data, Width, Height, linesCount, _isPartialHue) = Fonts.GenerateASCII(Font, Text, Color, maxWidth, aling, flags);
+
+                //}
+
             }
             else
                 texture.Ticks = World.Ticks;

@@ -7,7 +7,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Network;
 using ClassicUO.Game.Renderer;
-using ClassicUO.Game.WorldObjects;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -25,7 +25,7 @@ namespace ClassicUO
 
         private FpsCounter _fpsCounter;
         private CursorRenderer _gameCursor;
-        private SpriteBatchUI _spriteBatch;
+        private SpriteBatch3D _spriteBatch;
 
         private Stopwatch _stopwatch;
 
@@ -80,7 +80,7 @@ namespace ClassicUO
             Window.AllowUserResizing = true;
 
 
-            _spriteBatch = new SpriteBatchUI(this);
+            _spriteBatch = new SpriteBatch3D(this);
 
             TextureManager.Device = GraphicsDevice;
             TextureManager.Device.DepthStencilState = DepthStencilState.Default;

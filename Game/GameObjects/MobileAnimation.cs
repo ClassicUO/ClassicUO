@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using ClassicUO.AssetsLoader;
 
-namespace ClassicUO.Game.WorldObjects
+namespace ClassicUO.Game.GameObjects
 {
     public partial class Mobile
     {

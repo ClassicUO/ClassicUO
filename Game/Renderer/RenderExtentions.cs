@@ -4,12 +4,9 @@ namespace ClassicUO.Game.Renderer
 {
     public static class RenderExtentions
     {
-        private const float ALPHA = .8f;
+        private const float ALPHA = .5f;
 
-        public static Vector3 GetHueVector(int hue)
-        {
-            return GetHueVector(hue, false, false, false);
-        }
+        public static Vector3 GetHueVector(int hue) => GetHueVector(hue, false, false, false);
 
         public static Vector3 GetHueVector(in int hue, bool partial, bool transparent, in bool noLighting)
         {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using ClassicUO.AssetsLoader;
-using ClassicUO.Game.WorldObjects;
+using ClassicUO.Game.GameObjects;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Renderer.Views
@@ -201,7 +201,7 @@ namespace ClassicUO.Game.Renderer.Views
         {
             base.MessageOverHead(in spriteBatch, in position);
 
-            Text.Draw((SpriteBatchUI) spriteBatch, new Point((int) position.X, (int) position.Y));
+            Text.Draw(spriteBatch, new Point((int) position.X, (int) position.Y));
         }
     }
 }

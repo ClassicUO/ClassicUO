@@ -2,8 +2,8 @@
 using System.Linq;
 using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Renderer.Views;
-using ClassicUO.Game.WorldObjects;
-using ClassicUO.Game.WorldObjects.Interfaces;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.GameObjects.Interfaces;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Map
