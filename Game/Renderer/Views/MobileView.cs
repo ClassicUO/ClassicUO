@@ -200,8 +200,6 @@ namespace ClassicUO.Game.Renderer.Views
         protected override void MessageOverHead(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             base.MessageOverHead(in spriteBatch, in position);
-
-            Text.Draw(spriteBatch, new Point((int) position.X, (int) position.Y));
         }
     }
 }

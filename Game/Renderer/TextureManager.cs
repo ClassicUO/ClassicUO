@@ -52,6 +52,17 @@ namespace ClassicUO.Game.Renderer
 
                 _updateIndex++;
             }
+            else if (_updateIndex == 1)
+            {
+                var list = _textTextureCache.Where(s => World.Ticks - s.Value.Ticks >= TEXTURE_TIME_LIFE).ToList();
+
+                foreach (var t in list)
+                {
+                    t.Value.Dispose();
+                    _textTextureCache.Remove(t.Key);
+                }
+                _updateIndex++;
+            }
             else
             {
                 void check(in Dictionary<ushort, SpriteTexture> dict)
@@ -66,15 +77,15 @@ namespace ClassicUO.Game.Renderer
                     _updateIndex++;
                 }
 
-                if (_updateIndex == 1)
+                if (_updateIndex == 2)
                     check(_staticTextureCache);
-                else if (_updateIndex == 2)
-                    check(_landTextureCache);
                 else if (_updateIndex == 3)
-                    check(_gumpTextureCache);
+                    check(_landTextureCache);
                 else if (_updateIndex == 4)
-                    check(_textmapTextureCache);
+                    check(_gumpTextureCache);
                 else if (_updateIndex == 5)
+                    check(_textmapTextureCache);
+                else if (_updateIndex == 6)
                     check(_lightTextureCache);
                 else
                     _updateIndex = 0;
@@ -166,14 +177,14 @@ namespace ClassicUO.Game.Renderer
                 int linesCount;
                 List<WebLinkRect> links;
 
-                //if (gt.IsUnicode)
-                //    (data, Width, Height, linesCount, links) = Fonts.GenerateUnicode(Font, Text, Color, cell, maxWidth, aling, flags);
-                //else
-                //{
-                //    (data, Width, Height, linesCount, _isPartialHue) = Fonts.GenerateASCII(Font, Text, Color, maxWidth, aling, flags);
+                if (gt.IsUnicode)
+                    (data, gt.Width, gt.Height, linesCount, links) = Fonts.GenerateUnicode(gt.Font, gt.Text, gt.Hue, gt.Cell, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
+                else
+                    (data, gt.Width, gt.Height, linesCount, gt.IsPartialHue) = Fonts.GenerateASCII(gt.Font, gt.Text, gt.Hue, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
 
-                //}
-
+                texture = new SpriteTexture(gt.Width, gt.Height);
+                texture.SetData(data);
+                _textTextureCache[gt] = texture;
             }
             else
                 texture.Ticks = World.Ticks;

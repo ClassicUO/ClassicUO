@@ -11,8 +11,6 @@ namespace ClassicUO.Game.Renderer
 
         private readonly int[,] _cursorOffset = new int[2, 16];
 
-        private readonly TextRenderer _textR;
-
         private Texture2D _blackTexture;
         private Graphic _graphic = 0x2073;
 
@@ -20,14 +18,6 @@ namespace ClassicUO.Game.Renderer
 
         public CursorRenderer()
         {
-            _textR = new TextRenderer {Font = 3, Color = 2655, IsUnicode = false};
-
-            MouseManager.MouseMove += (sender, e) =>
-            {
-                _textR.Text = $"({e.Location.X},{e.Location.Y})";
-                _textR.GenerateTexture(0, 0, TEXT_ALIGN_TYPE.TS_CENTER, 0);
-            };
-
             for (int i = 0; i < 2; i++)
             for (int j = 0; j < 16; j++)
             {
@@ -183,7 +173,6 @@ namespace ClassicUO.Game.Renderer
                 Vector3 v = new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0);
                 sb.Draw2D(Texture, v, RenderExtentions.GetHueVector(2655));
 
-                _textR.Draw(sb, new Point((int) v.X, (int) v.Y + 20));
 
                 //        // tooltip testing, very nice!
                 // sb.Draw2D(_blackTexture, new Rectangle(ScreenPosition.X + _cursorOffset[0, id] - 100, ScreenPosition.Y + _cursorOffset[1, id] - 50, 100, 50), new Vector3(0, 1, 0.3f));

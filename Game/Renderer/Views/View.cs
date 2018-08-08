@@ -33,8 +33,6 @@ namespace ClassicUO.Game.Renderer.Views
         protected float Rotation { get; set; }
         protected int TextureWidth { get; set; } = 1;
 
-        protected TextRenderer Text { get; } = new TextRenderer {Color = 33, IsUnicode = false};
-
 
         public virtual void Update(in double frameMS)
         {
@@ -202,8 +200,6 @@ namespace ClassicUO.Game.Renderer.Views
 
         protected virtual void MessageOverHead(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            Text.Text = $"SortZ: {SortZ}";
-            Text.GenerateTexture(0, 0, TEXT_ALIGN_TYPE.TS_CENTER, 0);
         }
 
         public static bool IsNoDrawable(in ushort g)

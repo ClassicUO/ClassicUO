@@ -18,22 +18,17 @@ namespace ClassicUO
     public class GameLoop : Microsoft.Xna.Framework.Game
     {
         private readonly GraphicsDeviceManager _graphics;
-
-        private readonly TextRenderer _textRenderer = new TextRenderer {IsUnicode = false, Color = 33};
-
         private DateTime _delay = DateTime.Now;
-
         private FpsCounter _fpsCounter;
         private CursorRenderer _gameCursor;
         private SpriteBatch3D _spriteBatch;
-
         private Stopwatch _stopwatch;
-
         private RenderTarget2D _targetRender;
-
         private Texture2D _texture, _crossTexture, _gump, _textentry;
-
         private DateTime _timePing;
+
+        private GameText _gameTextTRY;
+
 
         public GameLoop()
         {
@@ -136,8 +131,6 @@ namespace ClassicUO
             textureHue0.SetData(Hues.CreateShaderColors());
             GraphicsDevice.Textures[1] = textureHue0;
 
-            _textRenderer.GenerateTexture(0, 0, TEXT_ALIGN_TYPE.TS_CENTER, 0);
-
             _fpsCounter = new FpsCounter();
 
             _crossTexture = new Texture2D(GraphicsDevice, 1, 1);
@@ -211,6 +204,14 @@ namespace ClassicUO
 
 
             _gameCursor = new CursorRenderer();
+
+            _gameTextTRY = new GameText()
+            {
+                IsUnicode = false,
+                Align = TEXT_ALIGN_TYPE.TS_CENTER,
+                Hue = 28,
+                Text = "CIAONE COJONE"
+            };
 
             // END TEST
 
@@ -649,9 +650,8 @@ namespace ClassicUO
 
             //_mouseManager.Draw(_spriteBatch);
 
-            _textRenderer.Text = "FPS: " + _fpsCounter.FPS;
-            _textRenderer.GenerateTexture(0, 0, TEXT_ALIGN_TYPE.TS_CENTER, 0);
-            _textRenderer.Draw(_spriteBatch, new Point(12, 12));
+            _gameTextTRY.Text = "FPS: " + _fpsCounter.FPS;
+            _gameTextTRY.Draw(_spriteBatch, new Vector3(Window.ClientBounds.Width - _gameTextTRY.Width - 12, 12, 0));
 
             _gameCursor.Draw(_spriteBatch);
 
