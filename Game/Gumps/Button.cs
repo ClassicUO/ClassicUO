@@ -100,6 +100,9 @@ namespace ClassicUO.Game.Gumps
 
         public override void Dispose()
         {
+            _gText.Dispose();
+            _gText = null;
+
             for (int i = 0; i < _textures.Length; i++)
             {
                 _textures[i].Dispose();
