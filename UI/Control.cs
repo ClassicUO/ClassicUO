@@ -37,7 +37,7 @@ namespace ClassicUO.UI
     }
 
 
-    public abstract class Control
+    public abstract class Control  : IDisposable
     {
         private readonly List<Control> _children;
         private Control _parent;
@@ -76,6 +76,8 @@ namespace ClassicUO.UI
             get => _rectangle;
             set => _rectangle = value;
         }
+
+        public bool IsDisposed { get; private set; }
 
         public bool IsVisible { get; set; }
         public bool IsEnabled { get; set; }
@@ -221,6 +223,14 @@ namespace ClassicUO.UI
         public virtual void OnKeyboard(in KeyboardEventArgs e)
         {
             Keyboard?.Invoke(this, e);
+        }
+
+        public virtual void Dispose()
+        {
+            if (IsDisposed)
+                return;
+
+            IsDisposed = true;
         }
     }
 }
