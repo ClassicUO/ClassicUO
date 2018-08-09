@@ -18,6 +18,7 @@ namespace ClassicUO.Game.Gumps
 
         private readonly SpriteTexture[] _textures = new SpriteTexture[3];
         private int _curentState = NORMAL;
+        private GameText _gText;
 
 
         public Button(in GumpControl parent, in ushort normal, in ushort pressed, in ushort over = 0) : base(parent)
@@ -30,10 +31,23 @@ namespace ClassicUO.Game.Gumps
             ref var t = ref _textures[NORMAL];
 
             Bounds = t.Bounds;
+
+            _gText = new GameText()
+            {
+
+            };
+
         }
 
 
         public event EventHandler Click; 
+
+        public string Text
+        {
+            get => _gText.Text;
+            set => _gText.Text = value;
+        }
+
 
 
         public override void Update(in double frameMS)
@@ -46,6 +60,11 @@ namespace ClassicUO.Game.Gumps
         {
             if (IsDisposed)
                 return false;
+
+            if (Text != string.Empty)
+            {
+                _gText.Draw(spriteBatch, position);
+            }
 
             if (Texture != _textures[_curentState])
                 Texture = _textures[_curentState];
