@@ -175,7 +175,7 @@ namespace ClassicUO.Game.Renderer
 
 
                 //        // tooltip testing, very nice!
-                // sb.Draw2D(_blackTexture, new Rectangle(ScreenPosition.X + _cursorOffset[0, id] - 100, ScreenPosition.Y + _cursorOffset[1, id] - 50, 100, 50), new Vector3(0, 1, 0.3f));
+                // sb.Draw2D(_blackTexture, new Bounds(ScreenPosition.X + _cursorOffset[0, id] - 100, ScreenPosition.Y + _cursorOffset[1, id] - 50, 100, 50), new Vector3(0, 1, 0.3f));
             }
         }
     }

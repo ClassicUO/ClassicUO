@@ -19,7 +19,6 @@ namespace ClassicUO.Game.Gumps
 
 
         public bool AllowedToDraw { get; set; }
-        [Obsolete("Don't use! Every class that inherits this class has own texture/textures", true)]
         public SpriteTexture Texture { get; set; }
         public Vector3 HueVector { get; set; }
 
@@ -41,8 +40,12 @@ namespace ClassicUO.Game.Gumps
 
         public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            if (IsDisposed)
+            if (IsDisposed || Texture == null)
                 return false;
+
+            Texture.Ticks = World.Ticks;
+
+            spriteBatch.Draw2D(Texture, Bounds, HueVector);
 
             foreach (Control c in Children)
             {

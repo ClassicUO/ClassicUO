@@ -46,7 +46,7 @@ namespace ClassicUO.UI
                 if (arg.Button == MouseButton.Left && arg.ButtonState == ButtonState.Released && s.CanDragNow)
                     s.CanDragNow = false;
 
-                if (s.IsEnabled && s.IsVisible && s.Rectangle.Contains(arg.Location.X, arg.Location.Y))
+                if (s.IsEnabled && s.IsVisible && s.Bounds.Contains(arg.Location.X, arg.Location.Y))
                 {
                     if (s.IsMovable && !s.CanDragNow && arg.Button == MouseButton.Left && arg.ButtonState == ButtonState.Pressed)
                         s.CanDragNow = true;
@@ -83,7 +83,7 @@ namespace ClassicUO.UI
             {
                 if (s.IsEnabled && s.IsVisible)
                 {
-                    if (s.Rectangle.Contains(arg.Location.X, arg.Location.Y) || s.CanDragNow)
+                    if (s.Bounds.Contains(arg.Location.X, arg.Location.Y) || s.CanDragNow)
                     {
                         if (!s.MouseIsOver)
                             s.OnMouseEnter(arg);
@@ -114,7 +114,7 @@ namespace ClassicUO.UI
 
             bool func(Control s)
             {
-                return s.IsEnabled && s.IsVisible && s.Rectangle.Contains(arg.Location.X, arg.Location.Y);
+                return s.IsEnabled && s.IsVisible && s.Bounds.Contains(arg.Location.X, arg.Location.Y);
             }
 
             foreach (Control c in Controls)

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Game.Renderer;
 using ClassicUO.Input;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Game.Gumps
 {
@@ -27,8 +29,11 @@ namespace ClassicUO.Game.Gumps
 
             ref var t = ref _textures[NORMAL];
 
-            Rectangle = t.Bounds;
+            Bounds = t.Bounds;
         }
+
+
+        public event EventHandler Click; 
 
 
         public override void Update(in double frameMS)
@@ -39,12 +44,50 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
+            if (IsDisposed)
+                return false;
+
+            if (Texture != _textures[_curentState])
+                Texture = _textures[_curentState];
+
             return base.Draw(in spriteBatch, in position);
         }
 
-        public override void OnMouseMove(in MouseEventArgs e)
+
+        public override void OnMouseEnter(in MouseEventArgs e)
         {
-            base.OnMouseMove(in e);
+            if (_textures[OVER] != null)
+                _curentState = OVER;
+        }
+
+        public override void OnMouseLeft(in MouseEventArgs e)
+        {
+            _curentState = NORMAL;
+        }
+
+        public override void OnMouseButton(in MouseEventArgs e)
+        {
+            if (e.Button == Input.MouseButton.Left)
+            {
+                if (e.ButtonState == ButtonState.Pressed)
+                {
+                    _curentState = PRESSED;
+                    Click.Raise();
+                }
+                else
+                    _curentState = NORMAL;
+            }
+        }
+
+        public override void Dispose()
+        {
+            for (int i = 0; i < _textures.Length; i++)
+            {
+                _textures[i].Dispose();
+                _textures[i] = null;
+            }
+
+            base.Dispose();
         }
     }
 }

@@ -16,7 +16,7 @@
 
     //    internal override void Draw(GameTime time, SpriteBatch spriteBatch)
     //    {
-    //        spriteBatch.Draw(Texture, Rectangle, Color.Red);
+    //        spriteBatch.Draw(Texture, Bounds, Color.Red);
 
     //        base.Draw(time, spriteBatch);
     //    }

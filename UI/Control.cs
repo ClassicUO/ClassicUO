@@ -41,7 +41,7 @@ namespace ClassicUO.UI
     {
         private readonly List<Control> _children;
         private Control _parent;
-        private Rectangle _rectangle;
+        private Rectangle _bounds;
 
         protected Control(in Control parent = null)
         {
@@ -67,14 +67,14 @@ namespace ClassicUO.UI
 
         public Point Location
         {
-            get => _rectangle.Location;
-            set => _rectangle.Location = value;
+            get => _bounds.Location;
+            set => _bounds.Location = value;
         }
 
-        public Rectangle Rectangle
+        public Rectangle Bounds
         {
-            get => _rectangle;
-            set => _rectangle = value;
+            get => _bounds;
+            set => _bounds = value;
         }
 
         public bool IsDisposed { get; private set; }
@@ -90,26 +90,26 @@ namespace ClassicUO.UI
 
         public int Width
         {
-            get => _rectangle.Width;
-            set => _rectangle.Width = value;
+            get => _bounds.Width;
+            set => _bounds.Width = value;
         }
 
         public int Height
         {
-            get => _rectangle.Height;
-            set => _rectangle.Height = value;
+            get => _bounds.Height;
+            set => _bounds.Height = value;
         }
 
         public int X
         {
-            get => _rectangle.X;
-            set => _rectangle.X = value;
+            get => _bounds.X;
+            set => _bounds.X = value;
         }
 
         public int Y
         {
-            get => _rectangle.Y;
-            set => _rectangle.Y = value;
+            get => _bounds.Y;
+            set => _bounds.Y = value;
         }
 
         public Control Parent
