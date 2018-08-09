@@ -52,7 +52,6 @@ namespace ClassicUO.Game.Gumps
 
         public override void Update(in double frameMS)
         {
-
             base.Update(in frameMS);
         }
 

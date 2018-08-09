@@ -35,6 +35,8 @@ namespace ClassicUO
             TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
             _graphics = new GraphicsDeviceManager(this);
 
+            //IsFixedTimeStep = false;
+
             _graphics.PreparingDeviceSettings += (sender, e) => { e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents; };
 
 
