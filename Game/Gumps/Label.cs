@@ -12,7 +12,7 @@ namespace ClassicUO.Game.Gumps
 
         public Label(in GumpControl parent) : base(parent)
         {
-            _gText = new GameText() { };
+            _gText = new GameText() { }; 
         }
 
 
