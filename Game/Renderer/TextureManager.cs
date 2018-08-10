@@ -178,9 +178,9 @@ namespace ClassicUO.Game.Renderer
                 List<WebLinkRect> links;
 
                 if (gt.IsUnicode)
-                    (data, gt.Width, gt.Height, linesCount, links) = Fonts.GenerateUnicode(gt.Font, gt.Text, gt.Hue, gt.Cell, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
+                    (data, gt.Width, gt.Height, linesCount, links) = Fonts.GenerateUnicode(gt.Font, gt.Text, 0, gt.Cell, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
                 else
-                    (data, gt.Width, gt.Height, linesCount, gt.IsPartialHue) = Fonts.GenerateASCII(gt.Font, gt.Text, gt.Hue, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
+                    (data, gt.Width, gt.Height, linesCount, gt.IsPartialHue) = Fonts.GenerateASCII(gt.Font, gt.Text, 0, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
 
                 texture = new SpriteTexture(gt.Width, gt.Height);
                 texture.SetData(data);

@@ -32,11 +32,7 @@ namespace ClassicUO.Game.Renderer.Views
             EquipConvData? convertedItem = null;
 
             yOffset = 0;
-
             int mountOffset = 0;
-
-            //Vector3 vv = position;
-            //vv.Z = (position.X + position.Y) + 0.001f * (GameObject.IsometricPosition.Z + .7f);
 
             for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
             {
@@ -59,9 +55,6 @@ namespace ClassicUO.Game.Renderer.Views
 
                             animGroup = WorldObject.GetGroupForAnimation(graphic);
                             color = mount.Hue;
-
-
-                            //CalculateRenderDepth((sbyte)vv.Z, 20, mount.ItemData.Height, (byte)(mount.Serial & 0xFF));
                         }
                         else
                             continue;
@@ -74,8 +67,6 @@ namespace ClassicUO.Game.Renderer.Views
                     graphic = WorldObject.GetGraphicForAnimation();
                     animGroup = WorldObject.GetGroupForAnimation();
                     color = WorldObject.Hue;
-
-                    //CalculateRenderDepth((sbyte)vv.Z, 30, 0, (byte)(GameObject.Serial & 0xFF));
                 }
                 else
                 {
@@ -98,8 +89,6 @@ namespace ClassicUO.Game.Renderer.Views
                     }
 
                     color = item.Hue;
-
-                    //CalculateRenderDepth((sbyte)vv.Z, 20, item.ItemData.Height, (byte)(item.Serial & 0xFF));
                 }
 
 
@@ -183,10 +172,7 @@ namespace ClassicUO.Game.Renderer.Views
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            if (!PreDraw(position))
-                return DrawInternal(spriteBatch, position);
-
-            return false;
+            return !PreDraw(position) && DrawInternal(spriteBatch, position);
         }
 
         public override void Update(in double frameMS)

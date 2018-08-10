@@ -48,10 +48,7 @@ namespace ClassicUO.Game.Renderer.Views
 
             if (WorldObject.IsCorpse)
             {
-                if (!PreDraw(position))
-                    return DrawInternal(spriteBatch, position);
-
-                return false;
+                return !PreDraw(position) && DrawInternal(spriteBatch, position);
             }
 
             if (WorldObject.Effect == null)

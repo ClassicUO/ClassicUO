@@ -211,7 +211,7 @@ namespace ClassicUO
             {
                 IsUnicode = false,
                 Align = TEXT_ALIGN_TYPE.TS_CENTER,
-                Hue = 28,
+                Hue = 38,
                 Text = "CIAONE COJONE"
             };
 

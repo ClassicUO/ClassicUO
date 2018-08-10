@@ -16,10 +16,7 @@ namespace ClassicUO.Game.Renderer.Views
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            if (!PreDraw(position))
-                return DrawInternal(spriteBatch, position);
-
-            return false;
+            return !PreDraw(position) && DrawInternal(spriteBatch, position);
         }
 
         public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
@@ -32,8 +29,6 @@ namespace ClassicUO.Game.Renderer.Views
             }
 
             HueVector = RenderExtentions.GetHueVector(WorldObject.Hue);
-            //Vector3 vv = position;
-            //vv.Z = (position.X + position.Y) + 0.001f * (GameObject.IsometricPosition.Z + .7f);
 
             return base.Draw(in spriteBatch, in position);
         }
