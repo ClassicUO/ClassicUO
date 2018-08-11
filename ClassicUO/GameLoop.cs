@@ -215,6 +215,9 @@ namespace ClassicUO
                 Text = "CIAONE COJONE"
             };
 
+            _gump = TextureManager.GetOrCreateGumpTexture(0x64);
+
+
             // END TEST
 
             base.LoadContent();
@@ -654,6 +657,8 @@ namespace ClassicUO
 
             _gameTextTRY.Text = "FPS: " + _fpsCounter.FPS;
             _gameTextTRY.Draw(_spriteBatch, new Vector3(Window.ClientBounds.Width - _gameTextTRY.Width - 12, 12, 0));
+
+            //_spriteBatch.Draw2D(_gump, new Rectangle(100, 100, _gump.Width, _gump.Height), Vector3.Zero);
 
             _gameCursor.Draw(_spriteBatch);
 

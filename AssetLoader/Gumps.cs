@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace ClassicUO.AssetsLoader
@@ -46,6 +47,13 @@ namespace ClassicUO.AssetsLoader
             }
         }
 
+        public static int PaddedRowWidth(int bitsPerPixel, int w, int padToNBytes)
+        {
+            if (padToNBytes == 0)
+                throw new ArgumentOutOfRangeException("padToNBytes", "pad value must be greater than 0.");
+            int padBits = 8 * padToNBytes;
+            return ((w * bitsPerPixel + (padBits - 1)) / padBits) * padToNBytes;
+        }
 
         public static unsafe ushort[] GetGump(int index, out int width, out int height)
         {
@@ -64,8 +72,13 @@ namespace ClassicUO.AssetsLoader
             if (width <= 0 || height <= 0)
                 return null;
 
+
+            width = PaddedRowWidth(16, width, 4) / 2;
+
+            IntPtr dataStart = _file.PositionAddress;
+
             ushort[] pixels = new ushort[width * height];
-            int* lookuplist = (int*) _file.PositionAddress;
+            int* lookuplist = (int*)dataStart;
 
             for (int y = 0; y < height; y++)
             {
@@ -75,17 +88,32 @@ namespace ClassicUO.AssetsLoader
                 else
                     gsize = length / 4 - lookuplist[y];
 
-                GumpBlock* gmul = (GumpBlock*) (_file.PositionAddress + lookuplist[y] * 4);
+                GumpBlock* gmul = (GumpBlock*) (dataStart + lookuplist[y] * 4);
 
                 int pos = y * width;
+                int x = 0;
 
                 for (int i = 0; i < gsize; i++)
-                {
+                {                   
                     ushort val = gmul[i].Value;
-                    ushort a = (ushort) ((val > 0 ? 0x8000 : 0) | val);
                     int count = gmul[i].Run;
-                    for (int j = 0; j < count; j++)
-                        pixels[pos++] = a;
+
+                    if (val > 0)
+                    {
+                        for (int j = 0; j < count; j++)
+                        {
+                            pixels[pos + x++] = (ushort)(0x8000 | val);
+                        }
+                    }
+                    else
+                    {
+                        x += count;
+                    }
+
+                    //ushort a = (ushort) ((val > 0 ? 0x8000 : 0) | val);
+                    //int count = gmul[i].Run;
+                    //for (int j = 0; j < count; j++)
+                    //    pixels[pos++] = a;
                 }
             }
 
@@ -93,7 +121,7 @@ namespace ClassicUO.AssetsLoader
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private struct GumpBlock
+        private readonly struct GumpBlock
         {
             public readonly ushort Value;
             public readonly ushort Run;

@@ -86,12 +86,16 @@ namespace ClassicUO.AssetsLoader
                             long curpos = Position;
                             Seek(offset + headerLength);
 
-                            byte[] extra = ReadArray<byte>(8);
-                            ushort extra1 = (ushort) ((extra[3] << 24) | (extra[2] << 16) | (extra[1] << 8) | extra[0]);
-                            ushort extra2 = (ushort) ((extra[7] << 24) | (extra[6] << 16) | (extra[5] << 8) | extra[4]);
+                             //byte[] extra = ReadArray<byte>(8);
+                            //ushort extra1 = (ushort) ((extra[3] << 24) | (extra[2] << 16) | (extra[1] << 8) | extra[0]);
+                            //ushort extra2 = (ushort) ((extra[7] << 24) | (extra[6] << 16) | (extra[5] << 8) | extra[4]);
+
+
+                            int extra1 = ReadInt();
+                            int extra2 = ReadInt();
 
                             Entries[idx].Offset += 8;
-                            Entries[idx].Extra = (extra1 << 16) | extra2;
+                            Entries[idx].Extra = extra1 << 16 | extra2;
                             Entries[idx].Length -= 8;
 
                             Seek(curpos);
