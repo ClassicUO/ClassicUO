@@ -217,6 +217,8 @@ namespace ClassicUO
 
             _gump = TextureManager.GetOrCreateGumpTexture(0x64);
 
+            _texture = new Texture2D(GraphicsDevice, 1, 1);
+            _texture.SetData(new Color[1] { Color.White});
 
             // END TEST
 
@@ -465,16 +467,12 @@ namespace ClassicUO
                 _spriteBatch.SetLightDirection(World.Light.IsometricDirection);
 
                 List<DeferredEntity> toremove = new List<DeferredEntity>();
-                //List<KeyValuePair<GameObject, int>> special = new List<KeyValuePair<GameObject, int>>();
 
 
                 int minX = minTile.X;
                 int minY = minTile.Y;
                 int maxX = maxTile.X;
                 int maxY = maxTile.Y;
-
-
-                //int rendered = 0;
 
 
                 for (int y = minY; y < maxY; y++)
@@ -508,69 +506,6 @@ namespace ClassicUO
                         toremove.Clear();
                     }
                 }
-
-
-                //for (int y = 0; y < renderDimensions.Y * 2 + 11; y++)
-                //{
-                //    Vector3 position = new Vector3
-                //    {
-                //        X = (firstTile.X - firstTile.Y + y % 2) * 22f + renderOffset.X,
-                //        Y = (firstTile.X + firstTile.Y + y) * 22f + renderOffset.Y
-                //    };
-
-                //    Point firstTileInRow = new Point(firstTile.X + (y + 1) / 2, firstTile.Y + y / 2);
-
-                //    for (int x = 0; x < renderDimensions.X + 1; x++)
-                //    {
-                //        Tile tile = World.Map.GetTile(firstTileInRow.X - x, firstTileInRow.Y + x);
-                //        if (tile != null)
-                //        {
-                //            var objects = tile.ObjectsOnTiles;
-
-                //            if (objects.Count > 100)
-                //            {
-
-                //            }
-
-                //            for (int k = 0; k < objects.Count; k++)
-                //            {
-                //                var obj = objects[k];
-
-                //                if (obj is DeferredEntity)
-                //                    toremove.Add(obj);
-
-                //                if (!drawTerrain)
-                //                {
-                //                    if (obj is Tile || obj.Position.Z > tile.Position.Z)
-                //                        break;
-                //                }
-
-                //                if ((obj.Position.Z >= maxItemZ || maxItemZ != 255 && (obj is Item item && TileData.IsRoof((long)item.ItemData.Flags) || obj is Static st && TileData.IsRoof((long)st.ItemData.Flags))) && !(obj is Tile))
-                //                    continue;
-
-
-                //                obj.View?.Draw(_spriteBatch, position);
-
-
-                //            }
-
-                //            foreach (var d in toremove)
-                //            {
-                //                tile.RemoveWorldObject(d);
-                //            }
-
-
-                //            toremove.Clear();
-
-                //            position.X -= 44f;
-                //        }
-                //    }
-                //}
-
-                // List<GameObject> renderList = new List<GameObject>();
-
-
-                //_renderListCount = 0;
 
 
                 //for (int i = 0; i < 2; i++)
@@ -660,9 +595,12 @@ namespace ClassicUO
 
             //_spriteBatch.Draw2D(_gump, new Rectangle(100, 100, _gump.Width, _gump.Height), Vector3.Zero);
 
-            _gameCursor.Draw(_spriteBatch);
+            //_spriteBatch.DrawLine(_texture, new Vector2(0, 120), new Vector2(Window.ClientBounds.Width, 120), Vector3.Zero);
+            //_spriteBatch.DrawRectangle(_texture, new Rectangle(2, 120, 100, 100), Vector3.Zero);
 
+            _gameCursor.Draw(_spriteBatch);
             _spriteBatch.EndDraw();
+
 
 
             base.Draw(gameTime);

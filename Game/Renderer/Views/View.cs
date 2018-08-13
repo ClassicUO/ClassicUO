@@ -90,9 +90,8 @@ namespace ClassicUO.Game.Renderer.Views
 
                     if (GameObject is Mobile mob)
                     {
-                        if (!Pathfinder.TryGetNextZ(mob, mob.Position, check, out var z))
+                        if (!Pathfinder.TryGetNextZ(mob, mob.Position, check, out sbyte z))
                             return false;
-
 
                         deferreable.DeferredObject.Z = z;
                         deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, z);

@@ -102,7 +102,7 @@ namespace ClassicUO.UI
             if (control != null)
             {
                 if (control.IsMovable && control.CanDragNow)
-                    control.MoveTo(arg.Offset.X, arg.Offset.Y);
+                    control.MoveOf(arg.Offset.X, arg.Offset.Y);
 
                 control.OnMouseMove(arg);
             }

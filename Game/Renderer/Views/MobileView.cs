@@ -2,6 +2,7 @@
 using ClassicUO.AssetsLoader;
 using ClassicUO.Game.GameObjects;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Renderer.Views
 {
@@ -20,6 +21,12 @@ namespace ClassicUO.Game.Renderer.Views
         {
             if (WorldObject.IsDisposed)
                 return false;
+
+            if (_texture == null)
+            {
+                _texture = new Texture2D(TextureManager.Device, 1, 1);
+                _texture.SetData(new Color[1] { Color.White });
+            }
 
             spriteBatch.GetZ();
 
@@ -152,6 +159,28 @@ namespace ClassicUO.Game.Renderer.Views
 
 
                     base.Draw(spriteBatch, position);
+
+
+                    if (layer == Layer.Invalid)
+                    {
+                        Direction dd = (Direction) dir;
+
+                        int posX = (int) position.X;
+                        int posY = (int) position.Y;
+
+                        if (IsFlipped)
+                        {
+                            posX += x + 44 - Bounds.Width  ;
+                            posY += y;
+                        }
+                        else
+                        {
+                            posX -= x;
+                            posY += y;
+                        }
+
+                        spriteBatch.DrawRectangle(_texture, new Rectangle(posX, posY, Bounds.Width, Bounds.Height), Vector3.Zero);
+                    }
                 }
             }
 
@@ -169,6 +198,8 @@ namespace ClassicUO.Game.Renderer.Views
 
             return true;
         }
+
+        private static Texture2D _texture;
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {

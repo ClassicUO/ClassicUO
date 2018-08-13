@@ -1,5 +1,6 @@
 ﻿using ClassicUO.Game.Map;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Renderer.Views
 {
@@ -30,8 +31,7 @@ namespace ClassicUO.Game.Renderer.Views
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             if (!AllowedToDraw)
-                return false;
-
+                return false; 
 
             if (Texture == null || Texture.IsDisposed)
             {
@@ -58,6 +58,7 @@ namespace ClassicUO.Game.Renderer.Views
 
             return !IsStretched ? base.Draw(spriteBatch, position) : Draw3DStretched(spriteBatch, position);
         }
+
 
         private bool Draw3DStretched(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
@@ -116,6 +117,7 @@ namespace ClassicUO.Game.Renderer.Views
             Vector3 hue = RenderExtentions.GetHueVector(WorldObject.Hue);
             if (_vertex[0].Hue != hue)
                 _vertex[0].Hue = _vertex[1].Hue = _vertex[2].Hue = _vertex[3].Hue = hue;
+         
         }
 
         private Vector3 CalculateNormal(in float a, in float b, in float c, in float d)

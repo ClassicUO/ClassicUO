@@ -1002,7 +1002,7 @@ namespace ClassicUO.Game.Network
             }
 
             //if (mobile.Position == Position.Invalid)
-            //    mobile.MoveTo(position, direction);
+            //    mobile.MoveOf(position, direction);
             //else
             //    mobile.EnqueueMovement(position, direction);
         }

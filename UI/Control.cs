@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 
@@ -171,7 +172,7 @@ namespace ClassicUO.UI
         //    _children.ForEach(s => s.Update(time));
         //}
 
-        public void MoveTo(in int offsetX, in int offsetY)
+        public void MoveOf(in int offsetX, in int offsetY)
         {
             if (IsMovable)
             {
@@ -188,9 +189,11 @@ namespace ClassicUO.UI
                 Y += offsetY;
 
                 foreach (Control c in Children)
-                    c.MoveTo(offsetX, offsetY);
+                    c.MoveOf(offsetX, offsetY);
             }
         }
+
+        public T[] GetControls<T>() where T : Control => Children.OfType<T>().ToArray();
 
 
         public virtual void OnMouseButton(in MouseEventArgs e)

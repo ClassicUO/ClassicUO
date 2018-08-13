@@ -71,5 +71,13 @@ namespace ClassicUO.Utility
                 list.AddRange(Enumerable.Repeat(element, size - count));
             }
         }
+
+        public static void ForEach<T>(this T[] array, in Action<T> func)
+        {
+            foreach (T c in array)
+            {
+                func(c);
+            }
+        }
     }
 }

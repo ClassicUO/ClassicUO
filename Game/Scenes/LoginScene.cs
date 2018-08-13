@@ -1,9 +1,18 @@
-﻿namespace ClassicUO.Game.Scenes
+﻿using ClassicUO.Game.Gumps;
+
+namespace ClassicUO.Game.Scenes
 {
     public sealed class LoginScene : Scene
     {
+        public LoginScene()
+        {
+
+        }
+
+
         private bool OnBeforeLogin()
         {
+            
             return true;
         }
 
