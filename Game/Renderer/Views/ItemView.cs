@@ -101,10 +101,6 @@ namespace ClassicUO.Game.Renderer.Views
             return true;
         }
 
-        protected override void MessageOverHead(in SpriteBatch3D spriteBatch, in Vector3 position)
-        {
-            base.MessageOverHead(in spriteBatch, in position);
-        }
 
 
         public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)

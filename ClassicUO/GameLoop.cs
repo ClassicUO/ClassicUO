@@ -591,7 +591,7 @@ namespace ClassicUO
             //_mouseManager.Draw(_spriteBatch);
 
             _gameTextTRY.Text = "FPS: " + _fpsCounter.FPS;
-            _gameTextTRY.Draw(_spriteBatch, new Vector3(Window.ClientBounds.Width - _gameTextTRY.Width - 12, 12, 0));
+            _gameTextTRY.View.Draw(_spriteBatch, new Vector3(Window.ClientBounds.Width - _gameTextTRY.Width - 12, 0, 0));
 
             //_spriteBatch.Draw2D(_gump, new Rectangle(100, 100, _gump.Width, _gump.Height), Vector3.Zero);
 

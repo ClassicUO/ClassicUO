@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.GameObjects;
@@ -36,6 +38,21 @@ namespace ClassicUO.Game.Renderer.Views
 
         public virtual void Update(in double frameMS)
         {
+            if (GameObject.IsDisposed)
+                return;
+
+            for (int i = 0; i < GameObject.OverHeads.Count; i++)
+            {
+                var gt = GameObject.OverHeads[i];
+
+                gt.View.Update(frameMS);
+
+                if (gt.IsDisposed)
+                {
+                    GameObject.OverHeads.RemoveAt(i);
+                    i--;
+                }
+            }
         }
 
 
@@ -110,7 +127,6 @@ namespace ClassicUO.Game.Renderer.Views
 
             return false;
         }
-
 
         public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
@@ -193,12 +209,21 @@ namespace ClassicUO.Game.Renderer.Views
             return false;
         }
 
+       
+
         protected virtual void MousePick(in SpriteVertex[] vertex)
         {
         }
 
-        protected virtual void MessageOverHead(in SpriteBatch3D spriteBatch, in Vector3 position)
+        protected virtual void MessageOverHead(in SpriteBatch3D spriteBatch, in Vector3 position, int offY)
         {
+            for (int i = 0; i < GameObject.OverHeads.Count; i++)
+            {
+                var v = GameObject.OverHeads[i].View;
+                v.Bounds = new Rectangle(v.Texture.Width / 2 - 22, offY + v.Texture.Height, v.Texture.Width, v.Texture.Height);
+
+                offY += v.Texture.Height;
+            }
         }
 
         public static bool IsNoDrawable(in ushort g)

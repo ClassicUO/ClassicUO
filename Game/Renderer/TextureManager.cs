@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.AssetsLoader;
+using ClassicUO.Game.GameObjects;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Renderer

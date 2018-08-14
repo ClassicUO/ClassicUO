@@ -1626,6 +1626,8 @@ namespace ClassicUO.AssetsLoader
         public short CenterX, CenterY;
         public ushort[] Pixels;
         public short Width, Heigth;
+
+        public bool IsValid => Width > 0 && Heigth > 0;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

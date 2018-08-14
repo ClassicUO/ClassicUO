@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Renderer;
 using ClassicUO.Input;
 using ClassicUO.Utility;
@@ -62,7 +63,7 @@ namespace ClassicUO.Game.Gumps
 
             if (Text != string.Empty)
             {
-                _gText.Draw(spriteBatch, position);
+                _gText.View.Draw(spriteBatch, position);
             }
 
             if (Texture != _textures[_curentState])

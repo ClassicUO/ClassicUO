@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -30,7 +31,7 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            _gText.Draw(spriteBatch, position);
+            _gText.View.Draw(spriteBatch, position);
             return base.Draw(in spriteBatch, in position);
         }
     }

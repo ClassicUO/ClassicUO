@@ -17,6 +17,7 @@ namespace ClassicUO.Game
         public static Facet Map { get; private set; }
         public static byte ViewRange { get; set; } = 24;
 
+        public static List<GameText> OverHeads { get; } = new List<GameText>();
 
         public static int MapIndex
         {
@@ -180,6 +181,8 @@ namespace ClassicUO.Game
 
         public static void Clear(in bool noplayer = false)
         {
+            OverHeads.Clear();
+
             if (!noplayer)
             {
                 Map = null;

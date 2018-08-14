@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer.Views;
 
@@ -19,6 +21,8 @@ namespace ClassicUO.Game.GameObjects
         public virtual Graphic Graphic { get; set; }
         public View View => _view ?? (_view = CreateView());
         public sbyte AnimIndex { get; set; }
+        public List<GameText> OverHeads { get; } = new List<GameText>();
+
 
         public Tile Tile
         {
@@ -49,6 +53,33 @@ namespace ClassicUO.Game.GameObjects
         protected virtual View CreateView()
         {
             return null;
+        }
+
+        public GameText AddGameText(in MessageType type, in string text, in byte font, in Hue hue, in bool isunicode)
+        {
+            GameText overhead;
+
+            for (int i = 0; i < OverHeads.Count; i++)
+            {
+                overhead = OverHeads[i];
+
+                if (type == MessageType.Label && overhead.Text == text && overhead.Font == font && overhead.Hue == hue && overhead.IsUnicode == isunicode && overhead.MessageType == type && !overhead.IsDisposed)
+                {
+                    Hue = hue;
+                    OverHeads.RemoveAt(i);
+
+                    return overhead;
+                }
+            }
+
+            overhead = new GameText(this, text) {Hue = hue, Font = font, IsUnicode = isunicode};
+
+            return overhead;
+        }
+
+        private void InsertGameText(in GameText gameText)
+        {
+            OverHeads.Insert(OverHeads.Count == 0 || OverHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
         protected void DisposeView()
