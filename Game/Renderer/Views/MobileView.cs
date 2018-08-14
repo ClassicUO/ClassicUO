@@ -162,25 +162,7 @@ namespace ClassicUO.Game.Renderer.Views
 
 
                     if (layer == Layer.Invalid)
-                    {
-                        Direction dd = (Direction) dir;
-
-                        int posX = (int) position.X;
-                        int posY = (int) position.Y;
-
-                        if (IsFlipped)
-                        {
-                            posX += x + 44 - Bounds.Width  ;
-                            posY += y;
-                        }
-                        else
-                        {
-                            posX -= x;
-                            posY += y;
-                        }
-
-                        spriteBatch.DrawRectangle(_texture, new Rectangle(posX, posY, Bounds.Width, Bounds.Height), Vector3.Zero);
-                    }
+                        spriteBatch.DrawRectangle(_texture, new Rectangle((int)position.X + (IsFlipped ? x + 44 - Bounds.Width : -x) , (int)position.Y + y, Bounds.Width, Bounds.Height), RenderExtentions.GetHueVector(38));
                 }
             }
 

@@ -388,55 +388,32 @@ namespace ClassicUO.Game.Renderer
 
         public bool DrawLine(in Texture2D texture, in Vector2 start, in Vector2 end, in Vector3 hue)
         {
-            SpriteVertex[] vertices = new SpriteVertex[4];
-
             int offX = start.X == end.X ? 1 : 0;
             int offY = start.Y == end.Y ? 1 : 0;
 
-            vertices[0].Position.X = start.X;
-            vertices[0].Position.Y = start.Y;
-            vertices[0].Normal = new Vector3(0, 0 , 1);
-            vertices[0].TextureCoordinate = new Vector3(0, 0, 0);
+            _vertexBufferUI[0].Position.X = start.X;
+            _vertexBufferUI[0].Position.Y = start.Y;
+            _vertexBufferUI[0].Normal = new Vector3(0, 0 , 1);
+            _vertexBufferUI[0].TextureCoordinate = new Vector3(0, 0, 0);
 
-            vertices[1].Position.X = end.X + offX;
-            vertices[1].Position.Y = start.Y + offY;
-            vertices[1].Normal = new Vector3(0, 0, 1);
-            vertices[1].TextureCoordinate = new Vector3(1, 0, 0);
+            _vertexBufferUI[1].Position.X = end.X + offX;
+            _vertexBufferUI[1].Position.Y = start.Y + offY;
+            _vertexBufferUI[1].Normal = new Vector3(0, 0, 1);
+            _vertexBufferUI[1].TextureCoordinate = new Vector3(1, 0, 0);
 
-            vertices[2].Position.X = start.X + offX;
-            vertices[2].Position.Y = end.Y + offY;
-            vertices[2].Normal = new Vector3(0, 0, 1);
-            vertices[2].TextureCoordinate = new Vector3(0, 1, 0);
+            _vertexBufferUI[2].Position.X = start.X + offX;
+            _vertexBufferUI[2].Position.Y = end.Y + offY;
+            _vertexBufferUI[2].Normal = new Vector3(0, 0, 1);
+            _vertexBufferUI[2].TextureCoordinate = new Vector3(0, 1, 0);
 
-            vertices[3].Position.X = end.X;
-            vertices[3].Position.Y = end.Y;
-            vertices[3].Normal = new Vector3(0, 0, 1);
-            vertices[3].TextureCoordinate = new Vector3(1, 1, 0);
+            _vertexBufferUI[3].Position.X = end.X;
+            _vertexBufferUI[3].Position.Y = end.Y;
+            _vertexBufferUI[3].Normal = new Vector3(0, 0, 1);
+            _vertexBufferUI[3].TextureCoordinate = new Vector3(1, 1, 0);
 
-            vertices[0].Hue = vertices[1].Hue = vertices[2].Hue = vertices[3].Hue = hue;
+            _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
 
-            if (texture == null)
-                return false;
-
-            bool draw = false;
-
-            for (byte i = 0; i < 4; i++)
-            {
-                if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
-                {
-                    draw = true;
-                    break;
-                }
-            }
-
-            if (!draw)
-                return false;
-
-            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = _z;
-
-            GetVertexList(texture).AddRange(vertices);
-            return true;
-
+            return DrawSprite(texture, _vertexBufferUI);
         }
 
         private List<SpriteVertex> GetVertexList(in Texture2D texture)
