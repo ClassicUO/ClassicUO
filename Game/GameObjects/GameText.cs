@@ -39,7 +39,7 @@ namespace ClassicUO.Game.GameObjects
         public TEXT_ALIGN_TYPE Align { get; set; }
         public byte MaxWidth { get; set; } 
         public FontStyle FontStyle { get; set; }
-        public byte Cell { get; set; }
+        public byte Cell { get; set; } = 30;
         public string Text { get; set; }
         public MessageType MessageType { get; set; }
         public GameObject Parent { get; }

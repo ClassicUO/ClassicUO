@@ -1325,9 +1325,9 @@ namespace ClassicUO.Game.Network
             Serial serial = p.ReadUInt();
             Entity entity = World.Mobiles.Get(serial);
             ushort graphic = p.ReadUShort();
-            MessageType type = (MessageType) p.ReadByte();
+            MessageType type = (MessageType)p.ReadByte();
             Hue hue = p.ReadUShort();
-            MessageFont font = (MessageFont) p.ReadUShort();
+            MessageFont font = (MessageFont)p.ReadUShort();
             string lang = p.ReadASCII(4);
             string name = p.ReadASCII(30);
             string text = p.ReadUnicode();
@@ -1337,6 +1337,7 @@ namespace ClassicUO.Game.Network
                 entity.Graphic = graphic;
                 entity.Name = name;
                 entity.ProcessDelta();
+                Chat.OnMessage(entity, new UOMessageEventArgs(text, hue, type, 0, true, lang));
             }
         }
 

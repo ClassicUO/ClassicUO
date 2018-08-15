@@ -935,7 +935,7 @@ namespace ClassicUO.AssetsLoader
 
             for (int i = 0; i < animDirection.FrameCount; i++)
             {
-                if (animDirection.Frames[i] != null && animDirection.Frames[i].Width > 0 && animDirection.Frames[i].Heigth > 0)
+                if (animDirection.Frames[i] != null && animDirection.Frames[i].Width > 0 && animDirection.Frames[i].Height > 0)
                     continue;
 
                 UOPFrameData frameData = pixelDataOffsets[i + dirFrameStartIdx];
@@ -996,7 +996,7 @@ namespace ClassicUO.AssetsLoader
 
                 animDirection.Frames[i].Pixels = pixels;
                 animDirection.Frames[i].Width = imageWidth;
-                animDirection.Frames[i].Heigth = imageHeight;
+                animDirection.Frames[i].Height = imageHeight;
             }
 
             return true;
@@ -1035,7 +1035,7 @@ namespace ClassicUO.AssetsLoader
                 animDir.Frames[i].Width = imageWidth;
 
                 short imageHeight = _reader.ReadShort();
-                animDir.Frames[i].Heigth = imageHeight;
+                animDir.Frames[i].Height = imageHeight;
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {
@@ -1625,9 +1625,9 @@ namespace ClassicUO.AssetsLoader
     {
         public short CenterX, CenterY;
         public ushort[] Pixels;
-        public short Width, Heigth;
+        public short Width, Height;
 
-        public bool IsValid => Width > 0 && Heigth > 0;
+        public bool IsValid => Width > 0 && Height > 0;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

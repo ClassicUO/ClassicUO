@@ -199,6 +199,7 @@ namespace ClassicUO.AssetsLoader
                 uint cl = Color16To32(c);
 
                 (byte B, byte G, byte R, byte A) = GetBGRA(cl);
+                //(byte R, byte G, byte B, byte A) = GetBGRA(cl);
 
                 if (R == G && B == G)
                     return Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);

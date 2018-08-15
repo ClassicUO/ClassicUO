@@ -863,7 +863,6 @@ namespace ClassicUO.AssetsLoader
 
         private static unsafe (uint[], int, int, int, List<WebLinkRect>) GeneratePixelsUnicode(in byte font, in string str, in ushort color, in byte cell, int width, in TEXT_ALIGN_TYPE align, in ushort flags)
         {
-            uint[] pData;
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
                 return (null, 0, 0, 0, null);
 
@@ -932,7 +931,7 @@ namespace ClassicUO.AssetsLoader
 
             height += _topMargin + _bottomMargin + 4;
             int blocksize = height * width;
-            pData = new uint[blocksize];
+            uint[] pData = new uint[blocksize];
 
             uint* table = (uint*) _unicodeFontAddress[font];
             int lineOffsY = 1 + _topMargin;
@@ -946,7 +945,7 @@ namespace ClassicUO.AssetsLoader
             else
             {
                 datacolor = /*Hues.GetPolygoneColor(cell, color) << 8 | 0xFF;*/
-                    Hues.RgbaToArgb((Hues.GetPolygoneColor(cell, color) << 8) | 0xFF);
+                    Hues.RgbaToArgb(Hues.GetPolygoneColor(cell, color) << 8 | 0xFF);
             }
 
             bool isItalic = (flags & UOFONT_ITALIC) != 0;
@@ -1056,7 +1055,10 @@ namespace ClassicUO.AssetsLoader
 
                     int tmpW = w;
                     uint charcolor = datacolor;
-                    bool isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
+                    //bool isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
+
+                    bool isBlackPixel = ((charcolor >> 0) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8;
+
                     if (si != ' ')
                     {
                         if (IsUsingHTML && i < ptr.Data.Count)
@@ -1068,8 +1070,9 @@ namespace ClassicUO.AssetsLoader
 
                             if (data.Color != 0xFFFFFFFF)
                             {
-                                charcolor = data.Color;
-                                isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
+                                charcolor = Hues.RgbaToArgb(data.Color);
+                                //isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
+                                isBlackPixel = ((charcolor >> 0) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8;
                             }
                         }
 
@@ -1112,7 +1115,7 @@ namespace ClassicUO.AssetsLoader
 
                         if (isSolid)
                         {
-                            uint solidColor = Hues.RgbaToArgb(blackColor);
+                            uint solidColor = blackColor;
 
                             if (solidColor == charcolor)
                                 solidColor++;
@@ -1269,8 +1272,8 @@ namespace ClassicUO.AssetsLoader
                             isUnderline = (data.Flags & UOFONT_UNDERLINE) != 0;
                             if (data.Color != 0xFFFFFFFF)
                             {
-                                charcolor = data.Color;
-                                isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
+                                charcolor = Hues.RgbaToArgb(data.Color);
+                                isBlackPixel = ((charcolor >> 0) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8;
                             }
                         }
                     }

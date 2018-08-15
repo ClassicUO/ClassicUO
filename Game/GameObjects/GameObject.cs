@@ -10,10 +10,12 @@ namespace ClassicUO.Game.GameObjects
     {
         private Tile _tile;
         private View _view;
+        private List<GameText> _overHeads;
 
         protected GameObject(in Facet map)
         {
             Map = map;
+            _overHeads = new List<GameText>();
         }
 
         public virtual Position Position { get; set; } = Position.Invalid;
@@ -21,7 +23,7 @@ namespace ClassicUO.Game.GameObjects
         public virtual Graphic Graphic { get; set; }
         public View View => _view ?? (_view = CreateView());
         public sbyte AnimIndex { get; set; }
-        public List<GameText> OverHeads { get; } = new List<GameText>();
+        public IReadOnlyList<GameText> OverHeads => _overHeads;
 
 
         public Tile Tile
@@ -65,21 +67,23 @@ namespace ClassicUO.Game.GameObjects
 
                 if (type == MessageType.Label && overhead.Text == text && overhead.Font == font && overhead.Hue == hue && overhead.IsUnicode == isunicode && overhead.MessageType == type && !overhead.IsDisposed)
                 {
-                    Hue = hue;
-                    OverHeads.RemoveAt(i);
-
+                    overhead.Hue = hue;
+                    _overHeads.RemoveAt(i);
+                    InsertGameText(overhead);
                     return overhead;
                 }
             }
 
-            overhead = new GameText(this, text) {Hue = hue, Font = font, IsUnicode = isunicode};
-
+            overhead = new GameText(this, text) {Hue = hue, Font = font, IsUnicode = isunicode, FontStyle = FontStyle.BlackBorder};
+            InsertGameText(overhead);
             return overhead;
         }
 
+        public void RemoveGameTextAt(in int idx) => _overHeads.RemoveAt(idx);
+
         private void InsertGameText(in GameText gameText)
         {
-            OverHeads.Insert(OverHeads.Count == 0 || OverHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
+            _overHeads.Insert(OverHeads.Count == 0 || OverHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
         protected void DisposeView()

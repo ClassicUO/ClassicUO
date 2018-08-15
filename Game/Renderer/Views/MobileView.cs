@@ -8,7 +8,7 @@ namespace ClassicUO.Game.Renderer.Views
 {
     public class MobileView : View
     {
-        private ViewLayer[] _frames;
+        private readonly ViewLayer[] _frames;
         private int _layerCount;
 
         private static Texture2D _texture;
@@ -46,31 +46,20 @@ namespace ClassicUO.Game.Renderer.Views
             Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
-
             SetupLayers(dir);
 
             ref var bodyFrame = ref _frames[0].Frame;
 
-
             int drawCenterY = bodyFrame.CenterY;
             int drawX;
-            int drawY = /*mountOffset +*/ drawCenterY + (int)(GameObject.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 - (int)(GameObject.Offset.Y - GameObject.Offset.Z - 3);
+            int drawY = /*mountOffset +*/ drawCenterY + (int) (GameObject.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 - (int)(GameObject.Offset.Y - GameObject.Offset.Z - 3);
 
             if (IsFlipped)
-                drawX = -22 + (int)GameObject.Offset.X;
+                drawX = -22 + (int)(GameObject.Offset.X);
             else
-                drawX = -22 - (int)GameObject.Offset.X;
-
-
-
-            //byte animGroup = 0;
-            //EquipConvData? convertedItem = null;
+                drawX = -22 - (int)(GameObject.Offset.X);
 
             int yOffset = 0;
-            //int mountOffset = 0;
-
-            //int bodyWidth = 0;
-            //int bodyHeight = 0;
 
             for (int i = 0; i < _layerCount; i++)
             {
@@ -81,177 +70,49 @@ namespace ClassicUO.Game.Renderer.Views
                     continue;
 
                 int x = drawX + frame.CenterX;
-                int y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
+                int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
 
                 if (yOffset > y)
                     yOffset = y;
 
 
                 Texture = TextureManager.GetOrCreateAnimTexture(frame);
-                Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
+                Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                 HueVector = RenderExtentions.GetHueVector(vl.Hue);
 
                 base.Draw(spriteBatch, position);
             }
 
-            //for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
-            //{
-            //    Layer layer = LayerOrder.UsedLayers[dir, i];
 
-            //    Hue color = 0;
-            //    Graphic graphic = 0;
+            spriteBatch.DrawRectangle(_texture, 
+                new Rectangle
+                (
+                    (int)position.X + (IsFlipped ? drawX + bodyFrame.CenterX + 44 - bodyFrame.Width : -(drawX + bodyFrame.CenterX)), 
+                    (int)position.Y - (drawY + (bodyFrame.Height + bodyFrame.CenterY)), 
+                    bodyFrame.Width, 
+                    bodyFrame.Height
+                ), 
 
-            //    if (layer == Layer.Mount)
-            //    {
-            //        if (GameObject.IsHuman)
-            //        {
-            //            Item mount = GameObject.Equipment[(int)Layer.Mount];
-            //            if (mount != null)
-            //            {
-            //                graphic = mount.GetMountAnimation();
-
-            //                if (graphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-            //                    mountOffset = Animations.DataIndex[graphic].MountedHeightOffset;
-
-            //                animGroup = GameObject.GetGroupForAnimation(graphic);
-            //                color = mount.Hue;
-            //            }
-            //            else
-            //                continue;
-            //        }
-            //        else
-            //            continue;
-            //    }
-            //    else if (layer == Layer.Invalid)
-            //    {
-            //        graphic = GameObject.GetGraphicForAnimation();
-            //        animGroup = GameObject.GetGroupForAnimation();
-            //        color = GameObject.Hue;
-            //    }
-            //    else
-            //    {
-            //        if (!GameObject.IsHuman)
-            //            continue;
-
-            //        Item item = GameObject.Equipment[(int)layer];
-            //        if (item == null)
-            //            continue;
-
-            //        graphic = item.ItemData.AnimID;
-
-            //        if (Animations.EquipConversions.TryGetValue(item.Graphic, out Dictionary<ushort, EquipConvData> map))
-            //        {
-            //            if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
-            //            {
-            //                convertedItem = data;
-            //                graphic = data.Graphic;
-            //            }
-            //        }
-
-            //        color = item.Hue;
-            //    }
-
-
-            //    sbyte animIndex = GameObject.AnimIndex;
-
-            //    Animations.AnimID = graphic;
-            //    Animations.AnimGroup = animGroup;
-            //    Animations.Direction = dir;
-
-            //    ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup].Direction[Animations.Direction];
-
-            //    if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction))
-            //        continue;
-
-            //    int fc = direction.FrameCount;
-            //    if (fc > 0 && animIndex >= fc) animIndex = 0;
-
-            //    if (animIndex < direction.FrameCount)
-            //    {
-            //        ref AnimationFrame frame = ref direction.Frames[animIndex];
-
-            //        if (frame.Pixels == null || frame.Pixels.Length <= 0)
-            //            return false;
-
-
-            //        int drawCenterY = frame.CenterY;
-            //        int drawX;
-            //        int drawY = mountOffset + drawCenterY + (int)(GameObject.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 - (int)(GameObject.Offset.Y - GameObject.Offset.Z - 3);
-
-            //        if (IsFlipped)
-            //            drawX = -22 + (int)GameObject.Offset.X;
-            //        else
-            //            drawX = -22 - (int)GameObject.Offset.X;
-
-
-            //        int x = drawX + frame.CenterX;
-            //        int y = -drawY - (frame.Heigth + frame.CenterY) + drawCenterY;
-
-            //        if (color <= 0)
-            //        {
-            //            if (direction.Address != direction.PatchedAddress)
-            //                color = Animations.DataIndex[Animations.AnimID].Color;
-
-            //            if (color <= 0 && convertedItem.HasValue)
-            //                color = convertedItem.Value.Color;
-            //        }
-
-            //        if (yOffset > y)
-            //            yOffset = y;
-
-
-            //        Texture = TextureManager.GetOrCreateAnimTexture(frame);
-            //        Bounds = new Rectangle(x, -y, frame.Width, frame.Heigth);
-            //        HueVector = RenderExtentions.GetHueVector(color);
-
-
-            //        if ((layer == Layer.Mount || !GameObject.IsHuman && layer == Layer.Invalid) && TextureWidth != Texture.Width) TextureWidth = Texture.Width;
-
-            //        if (layer == Layer.Invalid)
-            //            yOffset = y;
-
-
-            //        base.Draw(spriteBatch, position);
-
-
-            //        if (layer == Layer.Invalid)
-            //        {
-            //            bodyWidth = Texture.Width;
-            //            bodyHeight = Texture.Height;
-            //            //spriteBatch.DrawRectangle(_texture, new Rectangle((int)position.X + (IsFlipped ? x + 44 - Bounds.Width : -x) , (int)position.Y + y, Bounds.Width, Bounds.Height), RenderExtentions.GetHueVector(38));
-            //        }
-            //    }
-            //}
+                RenderExtentions.GetHueVector(38));
 
 
             Vector3 overheadPosition = new Vector3
             {
                 X = position.X + GameObject.Offset.X,
-                Y = position.Y - (int)(GameObject.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 -
-                    (int)(GameObject.Offset.Y - GameObject.Offset.Z - 3) + yOffset,
+                Y = position.Y - (int)(GameObject.Offset.Z / 4 + GameObject.Position.Z * 4),
                 Z = position.Z
             };
 
             if (bodyFrame.IsValid)
             {
-                yOffset = bodyFrame.Heigth + drawY - (int) GameObject.Offset.X;
+                yOffset = bodyFrame.Height + drawY - (int) (GameObject.Offset.Z / 4 + GameObject.Position.Z * 4);
             }
             else
             {
                 yOffset -= -(yOffset + 44);
             }
 
-            //if (bodyWidth > 0 && bodyHeight > 0)
-            //{
-            //    yOffset = bodyHeight + draw
-            //}
-
-            ////yOffset = -(yOffset + 44);
-
-            //MessageOverHead(spriteBatch, vv);
-
             MessageOverHead(spriteBatch, overheadPosition, GameObject.IsMounted ? yOffset + 16 : yOffset);
-
             return true;
         }
 

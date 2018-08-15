@@ -209,10 +209,12 @@ namespace ClassicUO
 
             _gameTextTRY = new GameText()
             {
-                IsUnicode = false,
+                IsUnicode = true,
                 Align = TEXT_ALIGN_TYPE.TS_CENTER,
                 Hue = 38,
-                Text = "CIAONE COJONE"
+                Text = "CIAONE COJONE",
+                FontStyle = FontStyle.BlackBorder,
+                Font = 1,
             };
 
             _gump = TextureManager.GetOrCreateGumpTexture(0x64);
@@ -581,6 +583,7 @@ namespace ClassicUO
             _spriteBatch.BeginDraw();
 
             _spriteBatch.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
+            GameTextRenderer.Render(_spriteBatch);
 
             //_spriteBatch.Draw2D(_crossTexture, new Bounds(_graphics.PreferredBackBufferWidth / 2  - 5, _graphics.PreferredBackBufferHeight / 2 - 5, 10, 10), Vector3.Zero);
 
@@ -591,7 +594,7 @@ namespace ClassicUO
             //_mouseManager.Draw(_spriteBatch);
 
             _gameTextTRY.Text = "FPS: " + _fpsCounter.FPS;
-            _gameTextTRY.View.Draw(_spriteBatch, new Vector3(Window.ClientBounds.Width - _gameTextTRY.Width - 12, 0, 0));
+            _gameTextTRY.View.Draw(_spriteBatch, new Vector3(Window.ClientBounds.Width - _gameTextTRY.Width - 12, _gameTextTRY.Height, 0));
 
             //_spriteBatch.Draw2D(_gump, new Rectangle(100, 100, _gump.Width, _gump.Height), Vector3.Zero);
 

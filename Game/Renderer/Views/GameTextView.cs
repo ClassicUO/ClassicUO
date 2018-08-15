@@ -13,6 +13,10 @@ namespace ClassicUO.Game.Renderer.Views
         public GameTextView(in GameText parent) : base(parent)
         {
             _text = parent.Text;
+
+            Texture = TextureManager.GetOrCreateStringTextTexture(GameObject);
+            //Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height, Texture.Width, Texture.Height);
+
         }
 
         public new GameText GameObject => (GameText) base.GameObject;
@@ -39,16 +43,15 @@ namespace ClassicUO.Game.Renderer.Views
             if (_text != GameObject.Text || Texture == null || Texture.IsDisposed)
             {
                 Texture = TextureManager.GetOrCreateStringTextTexture(GameObject);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height, Texture.Width, Texture.Height);
+                //Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height, Texture.Width, Texture.Height);
 
                 _text = GameObject.Text;
             }
             
             Texture.Ticks = World.Ticks;
-            HueVector = RenderExtentions.GetHueVector(GameObject.Hue, GameObject.IsPartialHue, false, false);
+            //HueVector = RenderExtentions.GetHueVector(0, GameObject.IsPartialHue, false, false);
 
             return base.Draw(spriteBatch, position);
-            //return spriteBatch.Draw2D(Texture, new Rectangle(GameObject.X + (int)position.X, GameObject.Y + (int)position.Y, GameObject.Width, GameObject.Height), HueVector);
         }
 
        

@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Renderer.Views
 
                 if (gt.IsDisposed)
                 {
-                    GameObject.OverHeads.RemoveAt(i);
+                    GameObject.RemoveGameTextAt(i);
                     i--;
                 }
             }
@@ -221,7 +221,7 @@ namespace ClassicUO.Game.Renderer.Views
             {
                 var v = GameObject.OverHeads[i].View;
                 v.Bounds = new Rectangle(v.Texture.Width / 2 - 22, offY + v.Texture.Height, v.Texture.Width, v.Texture.Height);
-
+                GameTextRenderer.AddView(v, position);
                 offY += v.Texture.Height;
             }
         }

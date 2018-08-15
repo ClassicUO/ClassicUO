@@ -60,6 +60,7 @@ namespace ClassicUO.Game
 
         public static void OnMessage(Entity entity, UOMessageEventArgs args)
         {
+            entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
             Message.Raise(args, entity ?? _system);
         }
 
@@ -71,7 +72,7 @@ namespace ClassicUO.Game
 
     public class UOMessageEventArgs : EventArgs
     {
-        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, string lang = null)
+        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, in bool unicode = false, string lang = null)
         {
             Text = text;
             Hue = hue;
@@ -79,9 +80,10 @@ namespace ClassicUO.Game
             Font = font;
             Language = lang;
             AffixType = AffixType.None;
+            IsUnicode = unicode;
         }
 
-        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, uint cliloc, AffixType affixType = AffixType.None, string affix = null)
+        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, uint cliloc, in bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
         {
             Text = text;
             Hue = hue;
@@ -90,6 +92,7 @@ namespace ClassicUO.Game
             Cliloc = cliloc;
             AffixType = affixType;
             Affix = affix;
+            IsUnicode = unicode;
         }
 
         public string Text { get; }
@@ -100,5 +103,6 @@ namespace ClassicUO.Game
         public uint Cliloc { get; }
         public AffixType AffixType { get; }
         public string Affix { get; }
+        public bool IsUnicode { get; }
     }
 }
