@@ -8,6 +8,7 @@ using ClassicUO.Game.Map;
 using ClassicUO.Game.Network;
 using ClassicUO.Game.Renderer;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.GameObjects.Interfaces;
 using ClassicUO.Input;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -18,7 +19,6 @@ namespace ClassicUO
     public class GameLoop : Microsoft.Xna.Framework.Game
     {
         private readonly GraphicsDeviceManager _graphics;
-        private DateTime _delay = DateTime.Now;
         private FpsCounter _fpsCounter;
         private CursorRenderer _gameCursor;
         private SpriteBatch3D _spriteBatch;
@@ -28,7 +28,6 @@ namespace ClassicUO
         private DateTime _timePing;
 
         private GameText _gameTextTRY;
-
 
         public GameLoop()
         {
@@ -235,16 +234,18 @@ namespace ClassicUO
         protected override void Update(GameTime gameTime)
         {
             World.Ticks = (long) gameTime.TotalGameTime.TotalMilliseconds;
-            _fpsCounter.Update(gameTime);
-
-            NetClient.Socket.Slice();
-            TextureManager.Update();
-
             if (IsActive)
             {
                 MouseManager.Update();
                 KeyboardManager.Update();
             }
+
+
+            _fpsCounter.Update(gameTime);
+
+            NetClient.Socket.Slice();
+            TextureManager.Update();
+          
 
             _gameCursor.Update(gameTime.TotalGameTime.Ticks);
 
@@ -441,13 +442,13 @@ namespace ClassicUO
             return (firstTile, renderOffset, renderDimensions);
         }
 
+
         protected override void Draw(GameTime gameTime)
         {
             if (World.Player != null && World.Map != null)
             {
                 _fpsCounter.IncreaseFrame();
-
-
+              
                 int scale = 1;
 
                 if (_targetRender == null || _targetRender.Width != _graphics.PreferredBackBufferWidth / scale || _targetRender.Height != _graphics.PreferredBackBufferHeight / scale)
@@ -489,6 +490,8 @@ namespace ClassicUO
 
                         var objects = tile.ObjectsOnTiles;
 
+                        bool draw = true;
+
                         for (int k = 0; k < objects.Count; k++)
                         {
                             var obj = objects[k];
@@ -496,7 +499,19 @@ namespace ClassicUO
                             if (obj is DeferredEntity d)
                                 toremove.Add(d);
 
-                            obj.View.Draw(_spriteBatch, isometricPosition);
+                            if (!drawTerrain)
+                            {
+                                if (obj is Tile || obj.Position.Z > tile.Position.Z)
+                                    draw = false;
+                            }
+
+                            if ((obj.Position.Z >= maxItemZ
+                                || maxItemZ != 255 && obj is IDynamicItem dyn && TileData.IsRoof((long) dyn.ItemData.Flags)) 
+                                && !(obj is Tile))
+                                continue;
+
+                            if (draw)
+                                obj.View.Draw(_spriteBatch, isometricPosition);
                         }
 
                         foreach (var o in toremove)

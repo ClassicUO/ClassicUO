@@ -251,7 +251,8 @@ namespace ClassicUO.Game.Renderer.Views
                     Frame = frame,
                     Graphic = graphic
                 };
-                
+
+                TextureWidth = frame.Width;
             }
         }
 

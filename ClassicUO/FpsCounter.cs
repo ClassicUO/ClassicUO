@@ -8,8 +8,9 @@ namespace ClassicUO
         private int _totalFrames;
 
         public int FPS { get; private set; }
+        public double CurrentFpsTime => _currentFpsTime;
 
-        public void Update(GameTime gameTime)
+        public void Update(in GameTime gameTime)
         {
             _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
 
