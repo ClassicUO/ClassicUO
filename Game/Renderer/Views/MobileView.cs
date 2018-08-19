@@ -84,17 +84,30 @@ namespace ClassicUO.Game.Renderer.Views
             }
 
 
-            spriteBatch.DrawRectangle(_texture, 
-                new Rectangle
-                (
-                    (int)position.X + (IsFlipped ? drawX + bodyFrame.CenterX + 44 - bodyFrame.Width : -(drawX + bodyFrame.CenterX)), 
-                    (int)position.Y - (drawY + (bodyFrame.Height + bodyFrame.CenterY)), 
-                    bodyFrame.Width, 
-                    bodyFrame.Height
-                ), 
+            //spriteBatch.DrawRectangle(_texture, 
+            //    new Rectangle
+            //    (
+            //        (int)position.X + (IsFlipped ? drawX + bodyFrame.CenterX + 44 - bodyFrame.Width : -(drawX + bodyFrame.CenterX)), 
+            //        (int)position.Y - (drawY + (bodyFrame.Height + bodyFrame.CenterY)), 
+            //        bodyFrame.Width, 
+            //        bodyFrame.Height
+            //    ), 
 
-                RenderExtentions.GetHueVector(38));
+            //    RenderExtentions.GetHueVector(38));
 
+            //int xx = drawX + bodyFrame.CenterX;
+            //int yy = -drawY - (bodyFrame.Height + bodyFrame.CenterY) + drawCenterY;
+
+            //spriteBatch.DrawRectangle(_texture,
+            //    new Rectangle
+            //    (
+            //        (int)position.X - xx,
+            //        (int)position.Y + yy - (GameObject.IsMounted ? 16 : 0),
+            //        bodyFrame.Width,
+            //        bodyFrame.Height + (GameObject.IsMounted ? 16 : 0)
+            //    ),
+
+            //    RenderExtentions.GetHueVector(38));
 
             Vector3 overheadPosition = new Vector3
             {

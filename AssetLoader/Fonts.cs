@@ -164,7 +164,7 @@ namespace ClassicUO.AssetsLoader
         }
 
 
-        private static int GetWidthASCII(in byte font, in string str)
+        public static int GetWidthASCII(in byte font, in string str)
         {
             if (font >= FontCount || string.IsNullOrEmpty(str))
                 return 0;
@@ -173,6 +173,30 @@ namespace ClassicUO.AssetsLoader
             foreach (char c in str)
                 textLength += fd.Chars[_fontIndex[(byte) c]].Width;
             return textLength;
+        }
+
+        public static int GetWidthExASCII(in byte font, in string text, in int maxwidth, in TEXT_ALIGN_TYPE align, in ushort flags)
+        {
+            if (font > FontCount || string.IsNullOrEmpty(text))
+                return 0;
+
+            MultilinesFontInfo info = GetInfoASCII(font, text, text.Length, align, flags, maxwidth);
+
+            int textWidth = 0;
+
+            while (info != null)
+            {
+                if (info.Width > textWidth)
+                    textWidth = info.Width;
+
+                MultilinesFontInfo ptr = info;
+                info = info.Next;
+
+                ptr.Data.Clear();
+                ptr = null;
+            }
+
+            return textWidth;
         }
 
         private static int GetHeightASCII(MultilinesFontInfo info)
@@ -627,7 +651,7 @@ namespace ClassicUO.AssetsLoader
             return result;
         }
 
-        private static unsafe int GetWidthUnicode(in byte font, in string str)
+        public static unsafe int GetWidthUnicode(in byte font, in string str)
         {
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
                 return 0;
@@ -654,6 +678,31 @@ namespace ClassicUO.AssetsLoader
             }
 
             return Math.Max(maxTextLenght, textLength);
+        }
+
+        public static int GetWidthExUnicode(in byte font, in string text, in int maxwidth, in TEXT_ALIGN_TYPE align, in ushort flags)
+        {
+            if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(text))
+                return 0;
+
+            MultilinesFontInfo info = GetInfoUnicode(font, text, text.Length, align, flags, maxwidth);
+
+            int textWidth = 0;
+
+
+            while (info != null)
+            {
+                if (info.Width > textWidth)
+                    textWidth = info.Width;
+
+                MultilinesFontInfo ptr = info;
+
+                info = info.Next;
+                ptr.Data.Clear();
+                ptr = null;
+            }
+
+            return textWidth;
         }
 
         private static unsafe MultilinesFontInfo GetInfoUnicode(in byte font, in string str, in int len, in TEXT_ALIGN_TYPE align, in ushort flags, in int width)

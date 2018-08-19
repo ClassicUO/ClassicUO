@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer.Views;
 
@@ -74,7 +75,19 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            overhead = new GameText(this, text) {Hue = hue, Font = font, IsUnicode = isunicode, FontStyle = FontStyle.BlackBorder};
+            int width = isunicode ? Fonts.GetWidthUnicode(font, text) : Fonts.GetWidthASCII(font, text);
+
+            if (width > 200)
+            {
+                width = isunicode ?
+                    Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder)
+                    :
+                    Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
+            }
+            else
+                width = 0;
+
+            overhead = new GameText(this, text) { MaxWidth = (byte)width, Hue = hue, Font = font, IsUnicode = isunicode, FontStyle = FontStyle.BlackBorder};
             InsertGameText(overhead);
             return overhead;
         }

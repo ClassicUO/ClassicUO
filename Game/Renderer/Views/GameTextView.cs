@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Renderer.Views
             if (_text != GameObject.Text || Texture == null || Texture.IsDisposed)
             {
                 Texture = TextureManager.GetOrCreateStringTextTexture(GameObject);
-                //Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height, Texture.Width, Texture.Height);
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height, Texture.Width, Texture.Height);
 
                 _text = GameObject.Text;
             }
