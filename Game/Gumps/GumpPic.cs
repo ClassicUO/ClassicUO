@@ -8,7 +8,7 @@ namespace ClassicUO.Game.Gumps
     {
         private Graphic _lastGump;
 
-        public GumpPicBase(in GumpControl parent) : base(parent)
+        public GumpPicBase() : base()
         {
             // can drag
         }
@@ -25,7 +25,8 @@ namespace ClassicUO.Game.Gumps
                 _lastGump = Graphic;
 
                 Texture = TextureManager.GetOrCreateGumpTexture(Graphic);
-                Bounds = Texture.Bounds;
+                Width = Texture.Width;
+                Height = Texture.Height;
             }
 
             base.Update(frameMS);
@@ -35,12 +36,12 @@ namespace ClassicUO.Game.Gumps
     public class GumpPic : GumpPicBase
     {
 
-        public GumpPic(in GumpControl parent, in Graphic graphic) : base(parent)
+        public GumpPic(in Graphic graphic) : base()
         {
             Graphic = graphic;
         }
 
-        public GumpPic(in GumpControl parent, in string[] parts) : this(parent, Graphic.Parse(parts[3]))
+        public GumpPic(in string[] parts) : this(Graphic.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -49,12 +50,10 @@ namespace ClassicUO.Game.Gumps
                 Hue = Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1));
         }
 
-        public Hue Hue { get; set; }
-
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            spriteBatch.Draw2D(Texture, Bounds, RenderExtentions.GetHueVector(Hue));
+            spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Hue));
             return base.Draw(spriteBatch, position);
         }
     }

@@ -1,15 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using ClassicUO.Game.Renderer;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace ClassicUO.Game.Gumps
 {
     public static class GumpManager
     {
-        public static GumpControl Create(in string layout, in string[] lines)
+        private static readonly List<GumpControl> _gumps = new List<GumpControl>();
+
+
+        public static GumpControl Create(in Serial sender, in Serial gumpID, in int x, in int y, in string layout, in string[] lines)
         {
             List<string> pieces = new List<string>();
             int index = 0;
-            GumpControl gump = new GumpControl(null);
+            GumpControl gump = new GumpControl()
+            {
+                LocalSerial = sender,
+                ServerSerial = gumpID,
+                X = x,
+                Y = y,
+            };
 
             while (index < layout.Length)
             {
@@ -32,25 +42,27 @@ namespace ClassicUO.Game.Gumps
                     switch (gparams[0].ToLower())
                     {
                         case "button":
-                            new Button(gump, gparams);
+                            gump.AddChildren(new Button(gparams));
                             break;
                         case "buttontileart":
-                            new Button(gump, gparams);
-                            new StaticPic(gump, Graphic.Parse(gparams[8]), Hue.Parse(gparams[9]))
+                            gump.AddChildren(new Button(gparams));
+                            gump.AddChildren(new StaticPic(Graphic.Parse(gparams[8]), Hue.Parse(gparams[9]))
                             {
                                 X = int.Parse(gparams[1]) + int.Parse(gparams[10]),
                                 Y = int.Parse(gparams[2]) + int.Parse(gparams[11])
-                            };
+                            });
                             break;
                         case "checkertrans":
-                            new CheckerTrans(gump, gparams);
+                            gump.AddChildren(new CheckerTrans(gparams));
                             break;
                         case "croppedtext":
-                            new CroppedText(gump, gparams, lines);
+                            gump.AddChildren(new CroppedText(gparams, lines));
                             break;
                         case "gumppic":
+                            gump.AddChildren(new GumpPic(gparams));
                             break;
                         case "gumppictiled":
+                            gump.AddChildren(new GumpPicTiled(gparams));
                             break;
                         case "htmlgump":
                             break;
@@ -104,8 +116,26 @@ namespace ClassicUO.Game.Gumps
             }
 
 
-
+            _gumps.Add(gump);
             return gump;
+        }
+
+        public static void Update(in double ms)
+        {
+            for (int i = 0; i < _gumps.Count; i++)
+            {
+                _gumps[i].Update(ms);
+            }
+        }
+
+        public static void Render(in SpriteBatch3D spriteBatch)
+        {
+            for (int i = 0; i < _gumps.Count; i++)
+            {
+                var g = _gumps[i];
+                g.Draw(spriteBatch,
+                    new Microsoft.Xna.Framework.Vector3(g.X, g.Y, 0));
+            }
         }
     }
 }

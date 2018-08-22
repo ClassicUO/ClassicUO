@@ -9,7 +9,7 @@ namespace ClassicUO.Game.Gumps
 {
     public class GumpControl : Control, IDrawable, IUpdateable
     {
-        public GumpControl(in GumpControl parent) : base(parent)
+        public GumpControl(in GumpControl parent = null) : base(parent)
         {
             AllowedToDraw = true;
         }
@@ -45,14 +45,14 @@ namespace ClassicUO.Game.Gumps
 
         public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            if (IsDisposed || Texture == null)
+            if (IsDisposed || (Texture == null && Children.Count <= 0))
             {
                 return false;
             }
 
-            Texture.Ticks = World.Ticks;
+            if (Texture != null)
+                Texture.Ticks = World.Ticks;
 
-            spriteBatch.Draw2D(Texture, Bounds, HueVector);
 
             foreach (Control c in Children)
             {

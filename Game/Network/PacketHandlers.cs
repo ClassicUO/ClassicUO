@@ -1,5 +1,6 @@
 ﻿using ClassicUO.AssetsLoader;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Map;
 using ClassicUO.Utility;
 using System;
@@ -2023,18 +2024,33 @@ namespace ClassicUO.Game.Network
             string layout = Encoding.UTF8.GetString(decData);
 
             uint linesNum = p.ReadUInt();
+            string[] lines = new string[0];
+
             if (linesNum > 0)
             {
                 uint clineLength = p.ReadUInt() - 4;
                 uint dlineLength = p.ReadUInt();
 
-                byte[] linesdata = new byte[clineLength];
-                for (int i = 0; i < linesdata.Length; i++)
+                data = new byte[clineLength];
+                for (int i = 0; i < data.Length; i++)
                 {
-                    linesdata[i] = p.ReadByte();
+                    data[i] = p.ReadByte();
                 }
 
+                decData = new byte[dlineLength];
+                Zlib.Decompress(data, 0, decData, (int)dlen);
 
+                lines = new string[linesNum];
+
+                for (int i = 0, index = 0; i < linesNum; i++)
+                {
+
+                    int length = decData[index++] + decData[index++];
+                    byte[] text = new byte[length * 2];
+                    Buffer.BlockCopy(decData, index, text, 0, text.Length);
+                    index += length * 2;
+                    lines[i] = Encoding.BigEndianUnicode.GetString(text);
+                }
 
                 /*Packet dp = GetDecompressedData(linesdata, (int)dlineLength);
 
@@ -2045,7 +2061,7 @@ namespace ClassicUO.Game.Network
                 }*/
             }
 
-            //GumpManager.Create(layout);
+            GumpManager.Create(sender, gumpID, (int)x, (int)y, layout, lines);
         }
 
         private static void UpdateMobileStatus(Packet p)

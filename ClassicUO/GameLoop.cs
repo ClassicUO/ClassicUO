@@ -249,8 +249,8 @@ namespace ClassicUO
             NetClient.Socket.Slice();
             TextureManager.Update();
 
-
-            _gameCursor.Update(gameTime.TotalGameTime.Ticks);
+            Game.Gumps.GumpManager.Update(gameTime.ElapsedGameTime.Milliseconds);
+            _gameCursor.Update(gameTime.ElapsedGameTime.Milliseconds);
 
             if (World.Map != null && World.Player != null)
             {
@@ -619,6 +619,7 @@ namespace ClassicUO
             //_spriteBatch.DrawLine(_texture, new Vector2(0, 120), new Vector2(Window.ClientBounds.Width, 120), Vector3.Zero);
             //_spriteBatch.DrawRectangle(_texture, new Rectangle(2, 120, 100, 100), Vector3.Zero);
 
+            Game.Gumps.GumpManager.Render(_spriteBatch);
             _gameCursor.Draw(_spriteBatch);
             _spriteBatch.EndDraw();
 

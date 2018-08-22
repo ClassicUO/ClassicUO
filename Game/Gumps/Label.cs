@@ -8,7 +8,7 @@ namespace ClassicUO.Game.Gumps
     {
         private readonly GameText _gText;
 
-        public Label(in GumpControl parent) : base(parent)
+        public Label() : base()
         {
             _gText = new GameText() { IsPersistent = true };
         }

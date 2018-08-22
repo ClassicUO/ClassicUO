@@ -5,7 +5,7 @@ namespace ClassicUO.Game.Gumps
 {
     public class RadioButton : Checkbox
     {
-        public RadioButton(in GumpControl parent, in ushort inactive, in ushort active) : base(parent, inactive, active)
+        public RadioButton(in ushort inactive, in ushort active) : base(inactive, active)
         {
 
         }

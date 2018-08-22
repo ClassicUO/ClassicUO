@@ -17,16 +17,17 @@ namespace ClassicUO.Game.Gumps
                     _transparentTexture.SetData(new Color[1] { Color.Black });
                 }
 
+                _transparentTexture.Ticks = World.Ticks;
                 return _transparentTexture;
             }
         }
 
-        public CheckerTrans(in GumpControl parent) : base(parent)
+        public CheckerTrans() : base()
         {
 
         }
 
-        public CheckerTrans(in GumpControl parent, in string[] parts) : this(parent)
+        public CheckerTrans(in string[] parts) : this()
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -36,7 +37,7 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            spriteBatch.Draw2DTiled(_transparentTexture, Bounds, RenderExtentions.GetHueVector(0, false, true, false));
+            spriteBatch.Draw2DTiled(_transparentTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, true, false));
             return base.Draw(spriteBatch, position);
         }
     }

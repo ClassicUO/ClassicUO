@@ -13,13 +13,14 @@ namespace ClassicUO.Game.Gumps
         private readonly SpriteTexture[] _textures = new SpriteTexture[2];
 
 
-        public Checkbox(in GumpControl parent, in ushort inactive, in ushort active) : base(parent)
+        public Checkbox(in ushort inactive, in ushort active) : base()
         {
             _textures[INACTIVE] = TextureManager.GetOrCreateGumpTexture(inactive);
             _textures[ACTIVE] = TextureManager.GetOrCreateGumpTexture(active);
 
             ref var t = ref _textures[INACTIVE];
-            Bounds = t.Bounds;
+            Width = t.Width;
+            Height = t.Height;
         }
 
 
@@ -28,6 +29,9 @@ namespace ClassicUO.Game.Gumps
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             bool ok = base.Draw(in spriteBatch, in position);
+
+            for (int i = 0; i < _textures.Length; i++)
+                _textures[i].Ticks = World.Ticks;
 
             spriteBatch.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
 

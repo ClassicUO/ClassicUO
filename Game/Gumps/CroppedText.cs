@@ -9,12 +9,12 @@ namespace ClassicUO.Game.Gumps
         private GameText _gameText;
         private readonly int _index;
 
-        public CroppedText(in GumpControl parent) : base(parent)
+        public CroppedText() : base()
         {
             _gameText = new GameText() { IsPersistent = true };
         }
 
-        public CroppedText(in GumpControl parent, in string[] parts, in string[] lines) : this(parent)
+        public CroppedText(in string[] parts, in string[] lines) : this()
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

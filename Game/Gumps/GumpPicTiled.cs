@@ -1,25 +1,28 @@
 ﻿using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace ClassicUO.Game.Gumps
 {
-    public class StaticPic : GumpControl
+    public class GumpPicTiled : GumpControl
     {
         private readonly Graphic _graphic;
 
-        public StaticPic(in Graphic graphic, in Hue hue) : base()
+
+        public GumpPicTiled(in Graphic graphic) : base()
         {
             _graphic = graphic;
-            Hue = hue;
         }
 
-        public StaticPic(in GumpControl parent, in string[] parts) : this(Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue)0)
+        public GumpPicTiled(in string[] parts) : this(Graphic.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
+            Width = int.Parse(parts[3]);
+            Height = int.Parse(parts[4]);
         }
-
-        public Hue Hue { get; set; }
 
 
         public override void Update(in double frameMS)
@@ -27,15 +30,13 @@ namespace ClassicUO.Game.Gumps
             if (Texture == null)
             {
                 Texture = TextureManager.GetOrCreateGumpTexture(_graphic);
-                Width = Texture.Width;
-                Height = Texture.Height;
             }
             base.Update(frameMS);
         }
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Hue, false, false, true));
+            spriteBatch.Draw2DTiled(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), Vector3.Zero);
             return base.Draw(spriteBatch, position);
         }
 

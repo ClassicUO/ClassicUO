@@ -7,7 +7,7 @@ namespace ClassicUO.Game.Gumps
     {
         private readonly SpriteTexture[] _frame = new SpriteTexture[9];
 
-        public Panel(in GumpControl parent, in ushort background) : base(parent)
+        public Panel(in ushort background) : base()
         {
             for (int i = 0; i < _frame.Length; i++)
             {

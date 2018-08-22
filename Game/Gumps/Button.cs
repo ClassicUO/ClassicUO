@@ -20,7 +20,7 @@ namespace ClassicUO.Game.Gumps
         private GameText _gText;
 
 
-        public Button(in GumpControl parent, in int buttonID, in ushort normal, in ushort pressed, in ushort over = 0) : base(parent)
+        public Button(in int buttonID, in ushort normal, in ushort pressed, in ushort over = 0) : base()
         {
             ButtonID = buttonID;
             _textures[NORMAL] = TextureManager.GetOrCreateGumpTexture(normal);
@@ -32,7 +32,8 @@ namespace ClassicUO.Game.Gumps
 
             ref var t = ref _textures[NORMAL];
 
-            Bounds = t.Bounds;
+            Width = t.Width;
+            Height = t.Height;
 
             _gText = new GameText()
             {
@@ -42,8 +43,8 @@ namespace ClassicUO.Game.Gumps
 
         }
 
-        public Button(in GumpControl parent, in string[] parts) :
-            this(parent, parts.Length > 7 ? int.Parse(parts[7]) : 0, ushort.Parse(parts[3]), ushort.Parse(parts[4]))
+        public Button(in string[] parts) :
+            this(parts.Length > 7 ? int.Parse(parts[7]) : 0, ushort.Parse(parts[3]), ushort.Parse(parts[4]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -84,7 +85,13 @@ namespace ClassicUO.Game.Gumps
             //if (Texture != _textures[_curentState])
             //    Texture = _textures[_curentState];
 
-            spriteBatch.Draw2D(_textures[_curentState], Bounds, Vector3.Zero);
+            for (int i = 0; i < _textures.Length; i++)
+            {
+                if (_textures[i] != null)
+                    _textures[i].Ticks = World.Ticks;
+            }
+
+            spriteBatch.Draw2D(_textures[_curentState], new Rectangle((int)position.X, (int)position.Y, Width, Height), Vector3.Zero);
 
             return base.Draw(in spriteBatch, in position);
         }
