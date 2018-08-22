@@ -46,17 +46,17 @@ namespace ClassicUO.AssetsLoader
 
             ushort[] pixels = new ushort[width * height];
 
-            ushort* ptr = (ushort*) _file.PositionAddress;
+            ushort* ptr = (ushort*)_file.PositionAddress;
 
             ushort* lineoffsets = ptr;
-            byte* datastart = (byte*) ptr + height * 2;
+            byte* datastart = (byte*)ptr + height * 2;
 
             int x = 0;
             int y = 0;
             ushort xoffs = 0;
             ushort run = 0;
 
-            ptr = (ushort*) (datastart + lineoffsets[0] * 2);
+            ptr = (ushort*)(datastart + lineoffsets[0] * 2);
 
             while (y < height)
             {
@@ -77,7 +77,7 @@ namespace ClassicUO.AssetsLoader
                     {
                         ushort val = *ptr++;
                         if (val > 0)
-                            val = (ushort) (0x8000 | val);
+                            val = (ushort)(0x8000 | val);
                         pixels[pos++] = val;
                     }
 
@@ -87,7 +87,7 @@ namespace ClassicUO.AssetsLoader
                 {
                     x = 0;
                     y++;
-                    ptr = (ushort*) (datastart + lineoffsets[y] * 2);
+                    ptr = (ushort*)(datastart + lineoffsets[y] * 2);
                 }
             }
 
@@ -125,7 +125,7 @@ namespace ClassicUO.AssetsLoader
                 {
                     ushort val = _file.ReadUShort();
                     if (val > 0)
-                        val = (ushort) (0x8000 | val);
+                        val = (ushort)(0x8000 | val);
 
                     _landArray[pos++] = val;
                 }
@@ -140,7 +140,7 @@ namespace ClassicUO.AssetsLoader
                 {
                     ushort val = _file.ReadUShort();
                     if (val > 0)
-                        val = (ushort) (0x8000 | val);
+                        val = (ushort)(0x8000 | val);
 
                     _landArray[pos++] = val;
                 }

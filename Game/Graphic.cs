@@ -17,7 +17,7 @@ namespace ClassicUO.Game
 
         public Graphic(in int graphic)
         {
-            _value = (ushort) graphic;
+            _value = (ushort)graphic;
         }
 
         public bool IsInvariant => _value == Invariant;
@@ -75,16 +75,25 @@ namespace ClassicUO.Game
         public override bool Equals(object obj)
         {
             if (obj is Graphic)
-                return this == (Graphic) obj;
+            {
+                return this == (Graphic)obj;
+            }
+
             if (obj is ushort)
-                return _value == (ushort) obj;
+            {
+                return _value == (ushort)obj;
+            }
+
             return false;
         }
 
         public static Graphic Parse(in string str)
         {
             if (str.StartsWith("0x"))
+            {
                 return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+            }
+
             return ushort.Parse(str);
         }
     }

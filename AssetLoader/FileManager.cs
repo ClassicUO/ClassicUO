@@ -19,13 +19,13 @@ namespace ClassicUO.AssetsLoader
 
                 FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(client.FullName);
 
-                ClientVersion = (ClientVersions) ((versInfo.ProductMajorPart << 24) | (versInfo.ProductMinorPart << 16) | (versInfo.ProductBuildPart << 8) | versInfo.ProductPrivatePart);
+                ClientVersion = (ClientVersions)((versInfo.ProductMajorPart << 24) | (versInfo.ProductMinorPart << 16) | (versInfo.ProductBuildPart << 8) | versInfo.ProductPrivatePart);
             }
         }
 
         public static ClientVersions ClientVersion { get; private set; }
         public static bool IsUOPInstallation => ClientVersion >= ClientVersions.CV_70240;
-        public static ushort GraphicMask => IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
+        public static ushort GraphicMask => IsUOPInstallation ? (ushort)0xFFFF : (ushort)0x3FFF;
 
 
         public static void LoadFiles()

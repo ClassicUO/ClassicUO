@@ -1,9 +1,9 @@
-﻿using System;
+﻿using ClassicUO.Utility;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -55,7 +55,10 @@ namespace ClassicUO.Game.GameObjects
         public bool Add(in T entity)
         {
             if (!_entities.TryAdd(entity.Serial, entity))
+            {
                 return false;
+            }
+
             _added.Add(entity);
             return true;
         }
@@ -63,7 +66,10 @@ namespace ClassicUO.Game.GameObjects
         public T Remove(in Serial serial)
         {
             if (_entities.TryRemove(serial, out T entity))
+            {
                 _removed.Add(entity);
+            }
+
             return entity;
         }
 

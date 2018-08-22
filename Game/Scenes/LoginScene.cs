@@ -1,6 +1,4 @@
-﻿using ClassicUO.Game.Gumps;
-
-namespace ClassicUO.Game.Scenes
+﻿namespace ClassicUO.Game.Scenes
 {
     public sealed class LoginScene : Scene
     {
@@ -12,7 +10,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool OnBeforeLogin()
         {
-            
+
             return true;
         }
 

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using ClassicUO.AssetsLoader;
+﻿using ClassicUO.AssetsLoader;
 using ClassicUO.Game.GameObjects;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.Network
 {
@@ -14,7 +14,9 @@ namespace ClassicUO.Game.Network
             WriteUInt(SEED);
 
             for (int i = 0; i < 4; i++)
+            {
                 WriteUInt(version[i]);
+            }
         }
     }
 
@@ -147,7 +149,7 @@ namespace ClassicUO.Game.Network
         public PEquipRequest(in Serial serial, in Layer layer, in Serial container) : base(0x13)
         {
             WriteUInt(serial);
-            WriteByte((byte) layer);
+            WriteByte((byte)layer);
             WriteUInt(container);
         }
     }
@@ -233,9 +235,9 @@ namespace ClassicUO.Game.Network
     {
         public PASCIISpeechRequest(in string text, in MessageType type, in MessageFont font, in Hue hue) : base(0x03)
         {
-            WriteByte((byte) type);
+            WriteByte((byte)type);
             WriteUShort(hue);
-            WriteUShort((ushort) font);
+            WriteUShort((ushort)font);
             WriteASCII(text);
         }
     }
@@ -244,9 +246,9 @@ namespace ClassicUO.Game.Network
     {
         public PUnicodeSpeechRequest(in string text, in MessageType type, in MessageFont font, in Hue hue, in string lang) : base(0xAD)
         {
-            WriteByte((byte) type);
+            WriteByte((byte)type);
             WriteUShort(hue);
-            WriteUShort((ushort) font);
+            WriteUShort((ushort)font);
             WriteASCII(lang, 4);
             WriteUnicode(text);
         }
@@ -260,7 +262,7 @@ namespace ClassicUO.Game.Network
             {
                 WriteUShort(0x1C);
                 WriteUShort(0x02);
-                WriteUShort((ushort) idx);
+                WriteUShort((ushort)idx);
             }
             else
             {
@@ -419,7 +421,7 @@ namespace ClassicUO.Game.Network
             WriteByte(1);
             WriteUInt(serial);
             WriteUShort(0x01);
-            WriteUShort((ushort) len);
+            WriteUShort((ushort)len);
             WriteUnicode(text, len);
         }
     }
@@ -494,7 +496,9 @@ namespace ClassicUO.Game.Network
                 WriteUInt(serial);
             }
             else
+            {
                 WriteByte(0x04);
+            }
 
             WriteUnicode(text);
         }
@@ -537,14 +541,14 @@ namespace ClassicUO.Game.Network
             WriteByte(0x05);
             WriteUInt(serial);
             WriteUInt(msgserial);
-            WriteByte((byte) (subject.Length + 1));
+            WriteByte((byte)(subject.Length + 1));
             WriteASCII(subject);
 
-            string[] lines = message.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] lines = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < lines.Length; i++)
             {
-                WriteByte((byte) lines[i].Length);
+                WriteByte((byte)lines[i].Length);
                 WriteASCII(lines[i]);
             }
         }
@@ -706,7 +710,9 @@ namespace ClassicUO.Game.Network
         public PMegaClilocRequest(in List<Serial> list) : base(0xD6)
         {
             for (int i = 0; i < list.Count && i < 50; i++)
+            {
                 WriteUInt(list[i]);
+            }
         }
     }
 
@@ -716,7 +722,7 @@ namespace ClassicUO.Game.Network
         {
             WriteUShort(0x1A);
             WriteByte(stat);
-            WriteByte((byte) state);
+            WriteByte((byte)state);
         }
     }
 
@@ -820,7 +826,7 @@ namespace ClassicUO.Game.Network
     {
         public PWalkRequest(in Direction direction, in byte seq) : base(0x02)
         {
-            WriteByte((byte) direction);
+            WriteByte((byte)direction);
             WriteByte(seq);
             WriteUInt(0);
         }
@@ -1017,9 +1023,14 @@ namespace ClassicUO.Game.Network
         public PClientViewRange(byte range) : base(0xC8)
         {
             if (range < 5)
+            {
                 range = 5;
+            }
             else if (range > 24)
+            {
                 range = 24;
+            }
+
             WriteByte(range);
         }
     }

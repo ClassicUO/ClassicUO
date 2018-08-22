@@ -36,7 +36,9 @@ namespace ClassicUO.Game.Network
             lock (_UnusedBuffers)
             {
                 if (buffer != null && buffer.Length == _CoalesceBufferSize)
+                {
                     _UnusedBuffers.AddFreeSegment(buffer);
+                }
             }
         }
 
@@ -56,7 +58,10 @@ namespace ClassicUO.Game.Network
             {
                 _pending.Dequeue().Release();
 
-                if (_pending.Count > 0) gram = _pending.Peek();
+                if (_pending.Count > 0)
+                {
+                    gram = _pending.Peek();
+                }
             }
 
             return gram;
@@ -69,23 +74,41 @@ namespace ClassicUO.Game.Network
 
         public Gram Enqueue(in byte[] buffer, int offset, int length)
         {
-            if (buffer == null) throw new ArgumentNullException("buffer");
+            if (buffer == null)
+            {
+                throw new ArgumentNullException("buffer");
+            }
+
             if (!(offset >= 0 && offset < buffer.Length))
+            {
                 throw new ArgumentOutOfRangeException("offset", offset, "Offset must be greater than or equal to zero and less than the size of the buffer.");
+            }
+
             if (length < 0 || length > buffer.Length)
+            {
                 throw new ArgumentOutOfRangeException("length", length, "Length cannot be less than zero or greater than the size of the buffer.");
+            }
+
             if (buffer.Length - offset < length)
+            {
                 throw new ArgumentException("Offset and length do not point to a valid segment within the buffer.");
+            }
 
             int existingBytes = _pending.Count * _CoalesceBufferSize + (_buffered?.Length ?? 0);
 
-            if (existingBytes + length > PendingCap) throw new CapacityExceededException();
+            if (existingBytes + length > PendingCap)
+            {
+                throw new CapacityExceededException();
+            }
 
             Gram gram = null;
 
             while (length > 0)
             {
-                if (_buffered == null) _buffered = Gram.Acquire();
+                if (_buffered == null)
+                {
+                    _buffered = Gram.Acquire();
+                }
 
                 int bytesWritten = _buffered.Write(buffer, offset, length);
 
@@ -94,7 +117,10 @@ namespace ClassicUO.Game.Network
 
                 if (_buffered.IsFull)
                 {
-                    if (_pending.Count == 0) gram = _buffered;
+                    if (_pending.Count == 0)
+                    {
+                        gram = _buffered;
+                    }
 
                     _pending.Enqueue(_buffered);
                     _buffered = null;
@@ -112,7 +138,10 @@ namespace ClassicUO.Game.Network
                 _buffered = null;
             }
 
-            while (_pending.Count > 0) _pending.Dequeue().Release();
+            while (_pending.Count > 0)
+            {
+                _pending.Dequeue().Release();
+            }
         }
 
         public class Gram
@@ -138,9 +167,13 @@ namespace ClassicUO.Game.Network
                     Gram gram;
 
                     if (_Pool.Count > 0)
+                    {
                         gram = _Pool.Pop();
+                    }
                     else
+                    {
                         gram = new Gram();
+                    }
 
                     gram.Buffer = AcquireBuffer();
                     gram.Length = 0;

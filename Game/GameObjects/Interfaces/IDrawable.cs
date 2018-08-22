@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.Renderer;
+﻿using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects.Interfaces

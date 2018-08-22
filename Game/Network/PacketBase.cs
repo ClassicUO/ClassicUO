@@ -33,35 +33,38 @@ namespace ClassicUO.Game.Network
 
         public void WriteSByte(in sbyte v)
         {
-            WriteByte((byte) v);
+            WriteByte((byte)v);
         }
 
         public void WriteBool(in bool v)
         {
-            WriteByte(v ? (byte) 0x01 : (byte) 0x00);
+            WriteByte(v ? (byte)0x01 : (byte)0x00);
         }
 
         public void WriteUShort(in ushort v)
         {
             EnsureSize(2);
-            WriteByte((byte) (v >> 8));
-            WriteByte((byte) v);
+            WriteByte((byte)(v >> 8));
+            WriteByte((byte)v);
         }
 
         public void WriteUInt(in uint v)
         {
             EnsureSize(4);
-            WriteByte((byte) (v >> 24));
-            WriteByte((byte) (v >> 16));
-            WriteByte((byte) (v >> 8));
-            WriteByte((byte) v);
+            WriteByte((byte)(v >> 24));
+            WriteByte((byte)(v >> 16));
+            WriteByte((byte)(v >> 8));
+            WriteByte((byte)v);
         }
 
         public void WriteASCII(in string value)
         {
             EnsureSize(value.Length + 1);
             foreach (char c in value)
-                WriteByte((byte) c);
+            {
+                WriteByte((byte)c);
+            }
+
             WriteByte(0);
         }
 
@@ -69,10 +72,14 @@ namespace ClassicUO.Game.Network
         {
             EnsureSize(length);
             if (value.Length > length)
+            {
                 throw new ArgumentOutOfRangeException();
+            }
 
             for (int i = 0; i < value.Length; i++)
-                WriteByte((byte) value[i]);
+            {
+                WriteByte((byte)value[i]);
+            }
 
             if (value.Length < length)
             {
@@ -86,8 +93,8 @@ namespace ClassicUO.Game.Network
             EnsureSize((value.Length + 1) * 2);
             foreach (char c in value)
             {
-                WriteByte((byte) (c >> 8));
-                WriteByte((byte) c);
+                WriteByte((byte)(c >> 8));
+                WriteByte((byte)c);
             }
 
             WriteUShort(0);
@@ -97,12 +104,14 @@ namespace ClassicUO.Game.Network
         {
             EnsureSize(length);
             if (value.Length > length)
+            {
                 throw new ArgumentOutOfRangeException();
+            }
 
             for (int i = 0; i < value.Length; i++)
             {
-                WriteByte((byte) (value[i] >> 8));
-                WriteByte((byte) value[i]);
+                WriteByte((byte)(value[i] >> 8));
+                WriteByte((byte)value[i]);
             }
 
             if (value.Length < length)

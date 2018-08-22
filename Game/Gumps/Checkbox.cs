@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.Renderer;
+﻿using ClassicUO.Game.Renderer;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -14,7 +11,7 @@ namespace ClassicUO.Game.Gumps
         private const int ACTIVE = 1;
 
         private readonly SpriteTexture[] _textures = new SpriteTexture[2];
-        
+
 
         public Checkbox(in GumpControl parent, in ushort inactive, in ushort active) : base(parent)
         {
@@ -41,7 +38,9 @@ namespace ClassicUO.Game.Gumps
         public override void OnMouseButton(in MouseEventArgs e)
         {
             if (e.ButtonState == ButtonState.Released && e.Button == Input.MouseButton.Left)
+            {
                 IsChecked = !IsChecked;
+            }
         }
     }
 }

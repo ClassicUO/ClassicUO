@@ -26,13 +26,13 @@ namespace ClassicUO.AssetsLoader
 
             while (_file.Position < _file.Length)
             {
-                ushort id = (ushort) ((_file.ReadByte() << 8) | _file.ReadByte());
-                ushort length = (ushort) ((_file.ReadByte() << 8) | _file.ReadByte());
+                ushort id = (ushort)((_file.ReadByte() << 8) | _file.ReadByte());
+                ushort length = (ushort)((_file.ReadByte() << 8) | _file.ReadByte());
 
                 if (length > 128)
                     length = 128;
 
-                _keywords.Add(new KeywordEntry {Code = id, Text = Encoding.UTF8.GetString(_file.ReadArray<byte>(length))});
+                _keywords.Add(new KeywordEntry { Code = id, Text = Encoding.UTF8.GetString(_file.ReadArray<byte>(length)) });
             }
         }
     }

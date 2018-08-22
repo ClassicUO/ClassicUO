@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.GameObjects;
+﻿using ClassicUO.Game.GameObjects;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Renderer.Views
@@ -19,15 +16,22 @@ namespace ClassicUO.Game.Renderer.Views
 
         }
 
-        public new GameText GameObject => (GameText) base.GameObject;
+        public new GameText GameObject => (GameText)base.GameObject;
 
 
 
         public override void Update(in double frameMS)
         {
-            
-
             base.Update(in frameMS);
+
+            if (GameObject.IsPersistent)
+                return;
+
+            GameObject.Timeout -= (int)frameMS;
+            if (GameObject.Timeout <= 0)
+            {
+                GameObject.Dispose();
+            }
         }
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
@@ -38,7 +42,9 @@ namespace ClassicUO.Game.Renderer.Views
         public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             if (!AllowedToDraw)
+            {
                 return false;
+            }
 
             if (_text != GameObject.Text || Texture == null || Texture.IsDisposed)
             {
@@ -47,13 +53,13 @@ namespace ClassicUO.Game.Renderer.Views
 
                 _text = GameObject.Text;
             }
-            
+
             Texture.Ticks = World.Ticks;
             //HueVector = RenderExtentions.GetHueVector(0, GameObject.IsPartialHue, false, false);
 
             return base.Draw(spriteBatch, position);
         }
 
-       
+
     }
 }

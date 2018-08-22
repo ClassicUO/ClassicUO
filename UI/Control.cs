@@ -1,8 +1,8 @@
-﻿using System;
+﻿using ClassicUO.Input;
+using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using ClassicUO.Input;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.UI
 {
@@ -38,7 +38,7 @@ namespace ClassicUO.UI
     }
 
 
-    public abstract class Control  : IDisposable
+    public abstract class Control : IDisposable
     {
         private readonly List<Control> _children;
         private Control _parent;
@@ -85,6 +85,10 @@ namespace ClassicUO.UI
         public bool IsFocused { get; protected set; }
         public bool MouseIsOver { get; protected set; }
         public bool IsMovable { get; set; }
+        public bool CanCloseWithRightClick { get; set; }
+        public bool CanCloseWithEsc { get; set; }
+        public bool IsEditable { get; set; }
+
         public IReadOnlyList<Control> Children => _children;
 
         internal bool CanDragNow { get; set; }
@@ -119,11 +123,12 @@ namespace ClassicUO.UI
             set
             {
                 if (value == null)
-                    _parent?.RemoveChildren(this);
+                    _parent?._children.Remove(this);
                 else
-                    value?.AddChildren(this);
+                    value._children.Add(this);
 
                 _parent = value;
+
             }
         }
 

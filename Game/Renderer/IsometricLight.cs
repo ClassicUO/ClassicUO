@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using System;
 
 namespace ClassicUO.Game.Renderer
 {
@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Renderer
             IsometricLevel = light / 30;
 
             _direction = 1.2f;
-            IsometricDirection = Vector3.Normalize(new Vector3((float) Math.Cos(_direction), (float) Math.Sin(_direction), 1f));
+            IsometricDirection = Vector3.Normalize(new Vector3((float)Math.Cos(_direction), (float)Math.Sin(_direction), 1f));
         }
     }
 }

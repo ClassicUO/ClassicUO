@@ -21,7 +21,7 @@ namespace ClassicUO.AssetsLoader
 
             bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
 
-            int staticscount = !isold ? (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupNew>()) / Marshal.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupOld>()) / Marshal.SizeOf<StaticGroupOld>();
+            int staticscount = !isold ? (int)(tiledata.Length - 512 * Marshal.SizeOf<LandGroupNew>()) / Marshal.SizeOf<StaticGroupNew>() : (int)(tiledata.Length - 512 * Marshal.SizeOf<LandGroupOld>()) / Marshal.SizeOf<StaticGroupOld>();
 
             if (staticscount > 2048)
                 staticscount = 2048;

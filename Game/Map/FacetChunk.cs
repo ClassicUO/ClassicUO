@@ -1,7 +1,7 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using ClassicUO.AssetsLoader;
+﻿using ClassicUO.AssetsLoader;
 using ClassicUO.Game.GameObjects;
+using System;
+using System.Runtime.InteropServices;
 
 namespace ClassicUO.Game.Map
 {
@@ -17,7 +17,9 @@ namespace ClassicUO.Game.Map
             {
                 Tiles[i] = new Tile[8];
                 for (int j = 0; j < 8; j++)
+                {
                     Tiles[i][j] = new Tile();
+                }
             }
         }
 
@@ -30,11 +32,13 @@ namespace ClassicUO.Game.Map
         {
             IndexMap im = GetIndex(map);
             if (im.MapAddress == 0)
+            {
                 throw new Exception();
+            }
 
             unsafe
             {
-                MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr) im.MapAddress);
+                MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr)im.MapAddress);
 
                 int bx = X * 8;
                 int by = Y * 8;
@@ -45,18 +49,18 @@ namespace ClassicUO.Game.Map
                     {
                         int pos = y * 8 + x;
 
-                        ushort tileID = (ushort) (block.Cells[pos].TileID & 0x3FFF);
+                        ushort tileID = (ushort)(block.Cells[pos].TileID & 0x3FFF);
                         sbyte z = block.Cells[pos].Z;
 
                         Tiles[x][y].Graphic = tileID;
-                        Tiles[x][y].Position = new Position((ushort) (bx + x), (ushort) (by + y), z);
+                        Tiles[x][y].Position = new Position((ushort)(bx + x), (ushort)(by + y), z);
                     }
                 }
 
-                StaticsBlock* sb = (StaticsBlock*) im.StaticAddress;
+                StaticsBlock* sb = (StaticsBlock*)im.StaticAddress;
                 if (sb != null)
                 {
-                    int count = (int) im.StaticCount;
+                    int count = (int)im.StaticCount;
 
                     for (int i = 0; i < count; i++, sb++)
                     {
@@ -67,11 +71,13 @@ namespace ClassicUO.Game.Map
 
                             int pos = y * 8 + x;
                             if (pos >= 64)
+                            {
                                 continue;
+                            }
 
                             sbyte z = sb->Z;
 
-                            Static staticObject = new Static(sb->Color, sb->Hue, pos) {Position = new Position((ushort) (bx + x), (ushort) (by + y), z)};
+                            Static staticObject = new Static(sb->Color, sb->Hue, pos) { Position = new Position((ushort)(bx + x), (ushort)(by + y), z) };
 
                             Tiles[x][y].AddWorldObject(staticObject);
                         }

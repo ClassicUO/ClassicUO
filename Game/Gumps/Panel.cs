@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.Renderer;
+﻿using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
@@ -13,7 +10,9 @@ namespace ClassicUO.Game.Gumps
         public Panel(in GumpControl parent, in ushort background) : base(parent)
         {
             for (int i = 0; i < _frame.Length; i++)
+            {
                 _frame[i] = TextureManager.GetOrCreateGumpTexture((ushort)(background + i));
+            }
         }
 
 

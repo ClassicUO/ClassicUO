@@ -30,22 +30,22 @@ namespace ClassicUO.Game
 
         public static Position operator +(in Position p1, in Position p2)
         {
-            return new Position((ushort) (p1.X + p2.X), (ushort) (p1.Y + p2.Y), (sbyte) (p1.Z + p2.Z));
+            return new Position((ushort)(p1.X + p2.X), (ushort)(p1.Y + p2.Y), (sbyte)(p1.Z + p2.Z));
         }
 
         public static Position operator -(in Position p1, in Position p2)
         {
-            return new Position((ushort) (p1.X - p2.X), (ushort) (p1.Y - p2.Y), (sbyte) (p1.Z - p2.Z));
+            return new Position((ushort)(p1.X - p2.X), (ushort)(p1.Y - p2.Y), (sbyte)(p1.Z - p2.Z));
         }
 
         public static Position operator *(in Position p1, in Position p2)
         {
-            return new Position((ushort) (p1.X * p2.X), (ushort) (p1.Y * p2.Y), (sbyte) (p1.Z * p2.Z));
+            return new Position((ushort)(p1.X * p2.X), (ushort)(p1.Y * p2.Y), (sbyte)(p1.Z * p2.Z));
         }
 
         public static Position operator /(in Position p1, in Position p2)
         {
-            return new Position((ushort) (p1.X / p2.X), (ushort) (p1.Y / p2.Y), (sbyte) (p1.Z / p2.Z));
+            return new Position((ushort)(p1.X / p2.X), (ushort)(p1.Y / p2.Y), (sbyte)(p1.Z / p2.Z));
         }
 
         public int DistanceTo(in Position position)
@@ -67,7 +67,7 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            return obj is Position && this == (Position) obj;
+            return obj is Position && this == (Position)obj;
         }
 
         public override string ToString()

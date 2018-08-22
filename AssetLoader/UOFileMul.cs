@@ -26,7 +26,7 @@
 
             if (_idxFile != null)
             {
-                int count = (int) _idxFile.Length / 12;
+                int count = (int)_idxFile.Length / 12;
 
                 Entries = new UOFileIndex3D[count];
 

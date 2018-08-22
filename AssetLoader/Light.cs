@@ -33,8 +33,8 @@ namespace ClassicUO.AssetsLoader
                 for (int j = 0; j < width; j++)
                 {
                     ushort val = _file.ReadUShort();
-                    val = (ushort) ((val << 10) | (val << 5) | val);
-                    pixels[pos + j] = (ushort) ((val > 0 ? 0x8000 : 0) | val);
+                    val = (ushort)((val << 10) | (val << 5) | val);
+                    pixels[pos + j] = (ushort)((val > 0 ? 0x8000 : 0) | val);
                 }
             }
 

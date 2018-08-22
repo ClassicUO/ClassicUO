@@ -43,7 +43,9 @@ namespace ClassicUO.Game.Network
             if (Length > 0)
             {
                 if (_head < _tail)
+                {
                     Buffer.BlockCopy(_buffer, _head, newBuffer, 0, Length);
+                }
                 else
                 {
                     Buffer.BlockCopy(_buffer, _head, newBuffer, 0, _buffer.Length - _head);
@@ -65,14 +67,18 @@ namespace ClassicUO.Game.Network
         internal void Enqueue(in byte[] buffer, in int offset, in int size)
         {
             if (Length + size > _buffer.Length)
+            {
                 SetCapacity((Length + size + 2047) & ~2047);
+            }
 
             if (_head < _tail)
             {
                 int rightLength = _buffer.Length - _tail;
 
                 if (rightLength >= size)
+                {
                     Buffer.BlockCopy(buffer, offset, _buffer, _tail, size);
+                }
                 else
                 {
                     Buffer.BlockCopy(buffer, offset, _buffer, _tail, rightLength);
@@ -80,7 +86,9 @@ namespace ClassicUO.Game.Network
                 }
             }
             else
+            {
                 Buffer.BlockCopy(buffer, offset, _buffer, _tail, size);
+            }
 
             _tail = (_tail + size) % _buffer.Length;
             Length += size;
@@ -96,19 +104,27 @@ namespace ClassicUO.Game.Network
         internal int Dequeue(in byte[] buffer, in int offset, int size)
         {
             if (size > Length)
+            {
                 size = Length;
+            }
 
             if (size == 0)
+            {
                 return 0;
+            }
 
             if (_head < _tail)
+            {
                 Buffer.BlockCopy(_buffer, _head, buffer, offset, size);
+            }
             else
             {
                 int rightLength = _buffer.Length - _head;
 
                 if (rightLength >= size)
+                {
                     Buffer.BlockCopy(_buffer, _head, buffer, offset, size);
+                }
                 else
                 {
                     Buffer.BlockCopy(_buffer, _head, buffer, offset, rightLength);
@@ -131,14 +147,19 @@ namespace ClassicUO.Game.Network
         public byte GetID()
         {
             if (Length >= 1)
+            {
                 return _buffer[_head];
+            }
+
             return 0xFF;
         }
 
         public int GetLength()
         {
             if (Length >= 3)
+            {
                 return _buffer[(_head + 2) % _buffer.Length] | (_buffer[(_head + 1) % _buffer.Length] << 8);
+            }
             // return (_buffer[(_head + 1) % _buffer.Length] << 8) | _buffer[(_head + 2) % _buffer.Length];
             return 0;
         }

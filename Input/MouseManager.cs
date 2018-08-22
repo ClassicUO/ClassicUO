@@ -1,7 +1,7 @@
-﻿using System;
-using ClassicUO.Utility;
+﻿using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace ClassicUO.Input
 {

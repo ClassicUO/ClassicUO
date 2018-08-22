@@ -8,7 +8,7 @@ namespace ClassicUO.AssetsLoader
     {
         private static UOFileMul _file;
 
-        private static readonly byte[] _table = new byte[32] {0x00, 0x08, 0x10, 0x18, 0x20, 0x29, 0x31, 0x39, 0x41, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x73, 0x7B, 0x83, 0x8B, 0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBD, 0xC5, 0xCD, 0xD5, 0xDE, 0xE6, 0xEE, 0xF6, 0xFF};
+        private static readonly byte[] _table = new byte[32] { 0x00, 0x08, 0x10, 0x18, 0x20, 0x29, 0x31, 0x39, 0x41, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x73, 0x7B, 0x83, 0x8B, 0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBD, 0xC5, 0xCD, 0xD5, 0xDE, 0xE6, 0xEE, 0xF6, 0xFF };
 
 
         public static HuesGroup[] HuesRange { get; private set; }
@@ -27,15 +27,15 @@ namespace ClassicUO.AssetsLoader
 
             int groupSize = Marshal.SizeOf<HuesGroup>();
 
-            int entrycount = (int) _file.Length / groupSize;
+            int entrycount = (int)_file.Length / groupSize;
 
             HuesCount = entrycount * 8;
             HuesRange = new HuesGroup[entrycount];
 
-            ulong addr = (ulong) _file.StartAddress;
+            ulong addr = (ulong)_file.StartAddress;
 
             for (int i = 0; i < entrycount; i++)
-                HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr) (addr + (ulong) (i * groupSize)));
+                HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr)(addr + (ulong)(i * groupSize)));
 
             path = Path.Combine(FileManager.UoFolderPath, "radarcol.mul");
             if (!File.Exists(path))
@@ -43,7 +43,7 @@ namespace ClassicUO.AssetsLoader
 
             UOFileMul radarcol = new UOFileMul(path);
 
-            RadarCol = radarcol.ReadArray<ushort>((int) radarcol.Length / 2);
+            RadarCol = radarcol.ReadArray<ushort>((int)radarcol.Length / 2);
         }
 
         public static void CreateHuesPalette()
@@ -51,21 +51,21 @@ namespace ClassicUO.AssetsLoader
             Palette = new FloatHues[HuesCount];
             int entrycount = HuesCount / 8;
             for (int i = 0; i < entrycount; i++)
-            for (int j = 0; j < 8; j++)
-            {
-                int idx = i * 8 + j;
-
-                Palette[idx].Palette = new float[32 * 3];
-
-                for (int h = 0; h < 32; h++)
+                for (int j = 0; j < 8; j++)
                 {
-                    int idx1 = h * 3;
-                    ushort c = HuesRange[i].Entries[j].ColorTable[h];
-                    Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
-                    Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
-                    Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
+                    int idx = i * 8 + j;
+
+                    Palette[idx].Palette = new float[32 * 3];
+
+                    for (int h = 0; h < 32; h++)
+                    {
+                        int idx1 = h * 3;
+                        ushort c = HuesRange[i].Entries[j].ColorTable[h];
+                        Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
+                        Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
+                        Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
+                    }
                 }
-            }
         }
 
         public static uint[] CreateShaderColors()
@@ -74,13 +74,13 @@ namespace ClassicUO.AssetsLoader
             int len = HuesRange.Length;
 
             for (int r = 0; r < len; r++)
-            for (int y = 0; y < 8; y++)
-            for (int x = 0; x < 32; x++)
-            {
-                int idx = r * 8 * 32 + y * 32 + x;
+                for (int y = 0; y < 8; y++)
+                    for (int x = 0; x < 32; x++)
+                    {
+                        int idx = r * 8 * 32 + y * 32 + x;
 
-                hues[idx] = Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
-            }
+                        hues[idx] = Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
+                    }
 
             return hues;
         }
@@ -91,7 +91,7 @@ namespace ClassicUO.AssetsLoader
             {
                 if (color >= HuesCount)
                 {
-                    color %= (ushort) HuesCount;
+                    color %= (ushort)HuesCount;
                     if (color <= 0)
                         color = 1;
                 }
@@ -119,17 +119,17 @@ namespace ClassicUO.AssetsLoader
 
         public static uint Color16To32(ushort c)
         {
-            return (uint) (_table[(c >> 10) & 0x1F] | (_table[(c >> 5) & 0x1F] << 8) | (_table[c & 0x1F] << 16));
+            return (uint)(_table[(c >> 10) & 0x1F] | (_table[(c >> 5) & 0x1F] << 8) | (_table[c & 0x1F] << 16));
         }
 
         public static ushort Color32To16(int c)
         {
-            return (ushort) (((c & 0xFF) * 32 / 256) | ((((c >> 16) & 0xff) * 32 / 256) << 10) | ((((c >> 8) & 0xff) * 32 / 256) << 5));
+            return (ushort)(((c & 0xFF) * 32 / 256) | ((((c >> 16) & 0xff) * 32 / 256) << 10) | ((((c >> 8) & 0xff) * 32 / 256) << 5));
         }
 
         public static ushort ConvertToGray(ushort c)
         {
-            return (ushort) (((c & 0x1F) * 299 + ((c >> 5) & 0x1F) * 587 + ((c >> 10) & 0x1F) * 114) / 1000);
+            return (ushort)(((c & 0x1F) * 299 + ((c >> 5) & 0x1F) * 587 + ((c >> 10) & 0x1F) * 114) / 1000);
         }
 
         public static ushort GetColor16(ushort c, ushort color)
@@ -212,16 +212,16 @@ namespace ClassicUO.AssetsLoader
 
         public static ushort GetRadarColorData(int c)
         {
-            return c < RadarCol.Length ? RadarCol[c] : (ushort) 0;
+            return c < RadarCol.Length ? RadarCol[c] : (ushort)0;
         }
 
 
         public static (byte, byte, byte, byte) GetBGRA(in uint cl)
         {
-            return ((byte) (cl & 0xFF), // B
-                    (byte) ((cl >> 8) & 0xFF), // G
-                    (byte) ((cl >> 16) & 0xFF), // R
-                    (byte) ((cl >> 24) & 0xFF) // A
+            return ((byte)(cl & 0xFF), // B
+                    (byte)((cl >> 8) & 0xFF), // G
+                    (byte)((cl >> 16) & 0xFF), // R
+                    (byte)((cl >> 24) & 0xFF) // A
                 );
         }
 

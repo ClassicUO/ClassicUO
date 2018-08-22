@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using ClassicUO.Input;
+﻿using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.UI
 {
@@ -10,7 +10,7 @@ namespace ClassicUO.UI
 
     public sealed class UIEngine
     {
-        private Game _game;
+        private readonly Game _game;
         private Control _lastFocused;
 
         public UIEngine(in Game game)

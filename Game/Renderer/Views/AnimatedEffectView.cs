@@ -11,7 +11,7 @@ namespace ClassicUO.Game.Renderer.Views
         {
         }
 
-        public AnimatedItemEffect WorldObject => (AnimatedItemEffect) GameObject;
+        public AnimatedItemEffect WorldObject => (AnimatedItemEffect)GameObject;
 
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
@@ -38,7 +38,9 @@ namespace ClassicUO.Game.Renderer.Views
             base.Update(frameMS);
 
             if (!WorldObject.IsDisposed)
+            {
                 WorldObject.UpdateAnimation(frameMS);
+            }
         }
     }
 }

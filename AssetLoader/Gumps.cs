@@ -88,13 +88,13 @@ namespace ClassicUO.AssetsLoader
                 else
                     gsize = length / 4 - lookuplist[y];
 
-                GumpBlock* gmul = (GumpBlock*) (dataStart + lookuplist[y] * 4);
+                GumpBlock* gmul = (GumpBlock*)(dataStart + lookuplist[y] * 4);
 
                 int pos = y * width;
                 int x = 0;
 
                 for (int i = 0; i < gsize; i++)
-                {                   
+                {
                     ushort val = gmul[i].Value;
                     int count = gmul[i].Run;
 

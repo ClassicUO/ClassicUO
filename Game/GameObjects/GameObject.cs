@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ClassicUO.AssetsLoader;
+﻿using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer.Views;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -39,11 +38,15 @@ namespace ClassicUO.Game.GameObjects
                     _tile = value;
 
                     if (_tile != null)
+                    {
                         _tile.AddWorldObject(this);
+                    }
                     else
                     {
                         if (this != World.Player && !IsDisposed)
+                        {
                             Dispose();
+                        }
                     }
                 }
             }
@@ -78,11 +81,15 @@ namespace ClassicUO.Game.GameObjects
             int width = isunicode ? Fonts.GetWidthUnicode(font, text) : Fonts.GetWidthASCII(font, text);
 
             if (width > 200)
-                width = isunicode ? Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
+            {
+                width = isunicode ? Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder) : Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort)FontStyle.BlackBorder);
+            }
             else
+            {
                 width = 0;
+            }
 
-            overhead = new GameText(this, text) { MaxWidth = (byte)width, Hue = hue, Font = font, IsUnicode = isunicode, FontStyle = FontStyle.BlackBorder};
+            overhead = new GameText(this, text) { MaxWidth = (byte)width, Hue = hue, Font = font, IsUnicode = isunicode, FontStyle = FontStyle.BlackBorder };
             InsertGameText(overhead);
             return overhead;
         }
@@ -106,7 +113,9 @@ namespace ClassicUO.Game.GameObjects
         public virtual void Dispose()
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             IsDisposed = true;
             //DisposeView();

@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using ClassicUO.AssetsLoader;
+﻿using ClassicUO.AssetsLoader;
 using ClassicUO.Game.GameObjects.Interfaces;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -41,7 +41,7 @@ namespace ClassicUO.Game.GameObjects
         {
             AnimDataFrame = AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
-            AnimIndex = (sbyte) AnimDataFrame.FrameStart;
+            AnimIndex = (sbyte)AnimDataFrame.FrameStart;
             Speed = AnimDataFrame.FrameInterval * 45;
         }
 
@@ -51,16 +51,21 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (LastChangeFrameTime < World.Ticks)
                 {
-                    AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                    AnimationGraphic = (Graphic)(Graphic + AnimDataFrame.FrameData[AnimIndex]);
                     AnimIndex++;
 
                     if (AnimIndex >= AnimDataFrame.FrameCount)
-                        AnimIndex = (sbyte) AnimDataFrame.FrameStart;
+                    {
+                        AnimIndex = (sbyte)AnimDataFrame.FrameStart;
+                    }
 
                     LastChangeFrameTime = World.Ticks + Speed;
                 }
             }
-            else if (Graphic != AnimationGraphic) AnimationGraphic = Graphic;
+            else if (Graphic != AnimationGraphic)
+            {
+                AnimationGraphic = Graphic;
+            }
         }
 
 
@@ -72,7 +77,10 @@ namespace ClassicUO.Game.GameObjects
         protected (int x, int y, int z) GetSource()
         {
             if (Source == null)
+            {
                 return (SourceX, SourceY, SourceZ);
+            }
+
             return (Source.Position.X, Source.Position.Y, Source.Position.Z);
         }
 
@@ -92,7 +100,10 @@ namespace ClassicUO.Game.GameObjects
         protected (int x, int y, int z) GetTarget()
         {
             if (Target == null)
+            {
                 return (TargetX, TargetY, TargetZ);
+            }
+
             return (Target.Position.X, Target.Position.Y, Target.Position.Z);
         }
 

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Renderer.Views;
+﻿using ClassicUO.Game.Renderer.Views;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.Renderer
 {
@@ -11,7 +8,7 @@ namespace ClassicUO.Game.Renderer
     {
         private static readonly List<ViewWithDrawInfo> _views = new List<ViewWithDrawInfo>();
 
-        public static void AddView(in View view, in Vector3 position) => _views.Add(new ViewWithDrawInfo() { View = view, DrawPosition = position});
+        public static void AddView(in View view, in Vector3 position) => _views.Add(new ViewWithDrawInfo() { View = view, DrawPosition = position });
 
         public static void Render(in SpriteBatch3D spriteBatch)
         {

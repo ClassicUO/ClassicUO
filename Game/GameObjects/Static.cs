@@ -1,6 +1,6 @@
 ﻿using ClassicUO.AssetsLoader;
-using ClassicUO.Game.Renderer.Views;
 using ClassicUO.Game.GameObjects.Interfaces;
+using ClassicUO.Game.Renderer.Views;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -16,7 +16,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public int Index { get; }
-        public new StaticView View => (StaticView) base.View;
+        public new StaticView View => (StaticView)base.View;
         public string Name { get; private set; }
         public override Position Position { get; set; }
 

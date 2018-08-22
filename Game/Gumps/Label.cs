@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.GameObjects;
+﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -13,7 +10,7 @@ namespace ClassicUO.Game.Gumps
 
         public Label(in GumpControl parent) : base(parent)
         {
-            _gText = new GameText() { }; 
+            _gText = new GameText() { IsPersistent = true };
         }
 
 

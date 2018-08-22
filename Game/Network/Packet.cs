@@ -20,13 +20,19 @@ namespace ClassicUO.Game.Network
             get
             {
                 if (index < 0 || index >= Length)
+                {
                     throw new ArgumentOutOfRangeException("index");
+                }
+
                 return _data[index];
             }
             set
             {
                 if (index < 0 || index >= Length)
+                {
                     throw new ArgumentOutOfRangeException("index");
+                }
+
                 _data[index] = value;
                 IsChanged = true;
             }
@@ -50,7 +56,9 @@ namespace ClassicUO.Game.Network
         protected override void EnsureSize(in int length)
         {
             if (length < 0 || Position + length > Length)
+            {
                 throw new ArgumentOutOfRangeException("length");
+            }
         }
 
         public byte ReadByte()
@@ -61,7 +69,7 @@ namespace ClassicUO.Game.Network
 
         public sbyte ReadSByte()
         {
-            return (sbyte) ReadByte();
+            return (sbyte)ReadByte();
         }
 
         public bool ReadBool()
@@ -72,13 +80,13 @@ namespace ClassicUO.Game.Network
         public ushort ReadUShort()
         {
             EnsureSize(2);
-            return (ushort) ((ReadByte() << 8) | ReadByte());
+            return (ushort)((ReadByte() << 8) | ReadByte());
         }
 
         public uint ReadUInt()
         {
             EnsureSize(4);
-            return (uint) ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
+            return (uint)((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
         }
 
         public string ReadASCII()
@@ -87,8 +95,11 @@ namespace ClassicUO.Game.Network
             StringBuilder sb = new StringBuilder();
             char c;
 
-            while ((c = (char) ReadByte()) != '\0')
+            while ((c = (char)ReadByte()) != '\0')
+            {
                 sb.Append(c);
+            }
+
             return sb.ToString();
         }
 
@@ -100,9 +111,11 @@ namespace ClassicUO.Game.Network
 
             for (int i = 0; i < length; i++)
             {
-                c = (char) ReadByte();
+                c = (char)ReadByte();
                 if (c != '\0')
+                {
                     sb.Append(c);
+                }
             }
 
             return sb.ToString();
@@ -114,8 +127,10 @@ namespace ClassicUO.Game.Network
             StringBuilder sb = new StringBuilder();
             char c;
 
-            while ((c = (char) ReadUShort()) != '\0')
+            while ((c = (char)ReadUShort()) != '\0')
+            {
                 sb.Append(c);
+            }
 
             return sb.ToString();
         }
@@ -127,9 +142,11 @@ namespace ClassicUO.Game.Network
             char c;
             for (int i = 0; i < length; i++)
             {
-                c = (char) ReadUShort();
+                c = (char)ReadUShort();
                 if (c != '\0')
+                {
                     sb.Append(c);
+                }
             }
 
             return sb.ToString();
@@ -145,9 +162,11 @@ namespace ClassicUO.Game.Network
 
             for (int i = 0; i < length; i++)
             {
-                c = (char) ReadUShortReversed();
+                c = (char)ReadUShortReversed();
                 if (c != '\0')
+                {
                     sb.Append(c);
+                }
             }
 
             return sb.ToString();
@@ -155,7 +174,7 @@ namespace ClassicUO.Game.Network
 
         public ushort ReadUShortReversed()
         {
-            return (ushort) (ReadByte() | (ReadByte() << 8));
+            return (ushort)(ReadByte() | (ReadByte() << 8));
         }
     }
 }

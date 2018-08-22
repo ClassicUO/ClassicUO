@@ -73,16 +73,25 @@ namespace ClassicUO.Game
         public override bool Equals(object obj)
         {
             if (obj is Hue)
-                return this == (Hue) obj;
+            {
+                return this == (Hue)obj;
+            }
+
             if (obj is ushort)
-                return _value == (ushort) obj;
+            {
+                return _value == (ushort)obj;
+            }
+
             return false;
         }
 
         public static Hue Parse(in string str)
         {
             if (str.StartsWith("0x"))
+            {
                 return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+            }
+
             return ushort.Parse(str);
         }
     }

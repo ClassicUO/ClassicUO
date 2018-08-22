@@ -10,12 +10,14 @@ namespace ClassicUO.Game.Renderer.Views
             AllowedToDraw = !IsNoDrawable(st.Graphic);
         }
 
-        public Static WorldObject => (Static) GameObject;
+        public Static WorldObject => (Static)GameObject;
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             if (!AllowedToDraw)
+            {
                 return false;
+            }
 
             if (Texture == null || Texture.IsDisposed)
             {

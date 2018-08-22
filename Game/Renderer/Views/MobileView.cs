@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using ClassicUO.AssetsLoader;
+﻿using ClassicUO.AssetsLoader;
 using ClassicUO.Game.GameObjects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.Renderer.Views
 {
@@ -23,7 +23,7 @@ namespace ClassicUO.Game.Renderer.Views
 
 
 
-        public new Mobile GameObject => (Mobile) base.GameObject;
+        public new Mobile GameObject => (Mobile)base.GameObject;
 
 
 
@@ -31,7 +31,9 @@ namespace ClassicUO.Game.Renderer.Views
         public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             if (GameObject.IsDisposed)
+            {
                 return false;
+            }
 
             if (_texture == null)
             {
@@ -52,12 +54,16 @@ namespace ClassicUO.Game.Renderer.Views
 
             int drawCenterY = bodyFrame.CenterY;
             int drawX;
-            int drawY = /*mountOffset +*/ drawCenterY + (int) (GameObject.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 - (int)(GameObject.Offset.Y - GameObject.Offset.Z - 3);
+            int drawY = /*mountOffset +*/ drawCenterY + (int)(GameObject.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 - (int)(GameObject.Offset.Y - GameObject.Offset.Z - 3);
 
             if (IsFlipped)
+            {
                 drawX = -22 + (int)(GameObject.Offset.X);
+            }
             else
+            {
                 drawX = -22 - (int)(GameObject.Offset.X);
+            }
 
             int yOffset = 0;
 
@@ -67,14 +73,17 @@ namespace ClassicUO.Game.Renderer.Views
                 var frame = vl.Frame;
 
                 if (!frame.IsValid)
+                {
                     continue;
+                }
 
                 int x = drawX + frame.CenterX;
                 int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
 
                 if (yOffset > y)
+                {
                     yOffset = y;
-
+                }
 
                 Texture = TextureManager.GetOrCreateAnimTexture(frame);
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
@@ -118,7 +127,7 @@ namespace ClassicUO.Game.Renderer.Views
 
             if (bodyFrame.IsValid)
             {
-                yOffset = bodyFrame.Height + drawY - (int) (GameObject.Offset.Z / 4 + GameObject.Position.Z * 4);
+                yOffset = bodyFrame.Height + drawY - (int)(GameObject.Offset.Z / 4 + GameObject.Position.Z * 4);
             }
             else
             {
@@ -152,13 +161,15 @@ namespace ClassicUO.Game.Renderer.Views
 
             if (GameObject.IsHuman)
             {
-                bool hasOuterTorso = GameObject.Equipment[(int) Layer.OuterTorso] != null && GameObject.Equipment[(int) Layer.OuterTorso].ItemData.AnimID != 0;
+                bool hasOuterTorso = GameObject.Equipment[(int)Layer.OuterTorso] != null && GameObject.Equipment[(int)Layer.OuterTorso].ItemData.AnimID != 0;
 
                 for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
                 {
                     Layer layer = LayerOrder.UsedLayers[dir, i];
                     if (hasOuterTorso && (layer == Layer.InnerTorso || layer == Layer.MiddleTorso))
+                    {
                         continue;
+                    }
 
                     if (layer == Layer.Invalid)
                     {
@@ -167,7 +178,7 @@ namespace ClassicUO.Game.Renderer.Views
                     else
                     {
                         Item item;
-                        if ( (item = GameObject.Equipment[(int) layer]) != null)
+                        if ((item = GameObject.Equipment[(int)layer]) != null)
                         {
                             if (layer == Layer.Mount)
                             {
@@ -185,7 +196,10 @@ namespace ClassicUO.Game.Renderer.Views
                                 if (item.ItemData.AnimID != 0)
                                 {
                                     if (GameObject.IsDead && (layer == Layer.Hair || layer == Layer.FacialHair))
+                                    {
                                         continue;
+                                    }
+
                                     EquipConvData? convertedItem = null;
                                     Graphic graphic = item.ItemData.AnimID;
                                     Hue hue = item.Hue;
@@ -213,7 +227,7 @@ namespace ClassicUO.Game.Renderer.Views
         }
 
         private void AddLayer(in byte dir, in Graphic graphic, Hue hue, in bool mounted = false, in EquipConvData? convertedItem = null)
-        {         
+        {
             sbyte animIndex = GameObject.AnimIndex;
             byte animGroup = GameObject.GetGroupForAnimation(graphic);
 
@@ -224,25 +238,39 @@ namespace ClassicUO.Game.Renderer.Views
             ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup].Direction[Animations.Direction];
 
             if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction))
+            {
                 return;
+            }
 
             int fc = direction.FrameCount;
-            if (fc > 0 && animIndex >= fc) animIndex = 0;
+            if (fc > 0 && animIndex >= fc)
+            {
+                animIndex = 0;
+            }
 
             if (animIndex < direction.FrameCount)
             {
                 ref AnimationFrame frame = ref direction.Frames[animIndex];
 
-                if (frame.Pixels == null || frame.Pixels.Length <= 0)
-                    return;
+                if ((frame.Pixels == null || frame.Pixels.Length <= 0))
+                {
+                    if (!Animations.LoadDirectionGroup(ref direction))
+                    {
+                        return;
+                    }
+                }
 
                 if (hue == 0)
                 {
                     if (direction.Address != direction.PatchedAddress)
+                    {
                         hue = Animations.DataIndex[Animations.AnimID].Color;
+                    }
 
                     if (hue <= 0 && convertedItem.HasValue)
+                    {
                         hue = convertedItem.Value.Color;
+                    }
                 }
 
                 _frames[_layerCount++] = new ViewLayer()

@@ -121,7 +121,7 @@ namespace ClassicUO.Utility
             if (capacity < _items.Length)
                 return;
 
-            var newCapacity = Math.Max((int) (_items.Length * 1.5), capacity);
+            var newCapacity = Math.Max((int)(_items.Length * 1.5), capacity);
             var oldElements = _items;
             _items = new T[newCapacity];
             Array.Copy(oldElements, 0, _items, 0, oldElements.Length);

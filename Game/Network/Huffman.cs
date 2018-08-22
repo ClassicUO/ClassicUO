@@ -278,7 +278,7 @@ namespace ClassicUO.Game.Network
         private int PutBit(ref byte b, in int bit)
         {
             int bit_num = 1 << (bit - 1);
-            b |= (byte) bit_num;
+            b |= (byte)bit_num;
             return 1;
         }
 
@@ -289,7 +289,7 @@ namespace ClassicUO.Game.Network
             if (GetBit(b, bit) != -1)
             {
                 bit_num = 1 << (bit - 1);
-                b ^= (byte) bit_num;
+                b ^= (byte)bit_num;
             }
 
             return 1;
@@ -323,7 +323,7 @@ namespace ClassicUO.Game.Network
 
                 if (leafValue < 1)
                 {
-                    dest[destPos] = (byte) -leafValue;
+                    dest[destPos] = (byte)-leafValue;
                     leafValue = 0;
                     destPos++;
                 }
@@ -340,7 +340,10 @@ namespace ClassicUO.Game.Network
 
                 // check to see if the current codeword has no end
                 // if not, make it an incomplete byte
-                if (srcOffset == srcLength) return false;
+                if (srcOffset == srcLength)
+                {
+                    return false;
+                }
             }
 
             destLength = destPos - destOffset;

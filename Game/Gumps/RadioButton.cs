@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ClassicUO.Input;
 using System.Linq;
-using System.Text;
-using ClassicUO.Input;
 
 namespace ClassicUO.Game.Gumps
 {
@@ -21,7 +18,10 @@ namespace ClassicUO.Game.Gumps
             set
             {
                 if (value)
+                {
                     HandleClick();
+                }
+
                 base.IsChecked = value;
             }
         }
@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Gumps
             Parent?.GetControls<RadioButton>()
                 .Where(s => s.GroupIndex == GroupIndex)
                 .ToList()
-                .ForEach( s => s.IsChecked = false);
+                .ForEach(s => s.IsChecked = false);
         }
     }
 }

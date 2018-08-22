@@ -1,9 +1,9 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer;
-using ClassicUO.Game.GameObjects;
 using Microsoft.Xna.Framework;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game
 {
@@ -97,7 +97,10 @@ namespace ClassicUO.Game
         public static House GetOrCreateHouse(in Serial serial)
         {
             if (_houses.TryGetValue(serial, out House house))
+            {
                 return house;
+            }
+
             return new House(serial);
         }
 
@@ -115,18 +118,30 @@ namespace ClassicUO.Game
         public static bool Contains(in Serial serial)
         {
             if (serial.IsItem)
+            {
                 return Items.Contains(serial);
+            }
+
             if (serial.IsMobile)
+            {
                 return Mobiles.Contains(serial);
+            }
+
             return false;
         }
 
         public static Entity Get(in Serial serial)
         {
             if (serial.IsItem)
+            {
                 return Items.Get(serial);
+            }
+
             if (serial.IsMobile)
+            {
                 return Mobiles.Get(serial);
+            }
+
             return null;
         }
 
@@ -153,12 +168,17 @@ namespace ClassicUO.Game
             {
                 var mobile = Mobiles.Get(item.RootContainer);
                 if (mobile != null)
-                    mobile.Equipment[(int) item.Layer] = null;
+                {
+                    mobile.Equipment[(int)item.Layer] = null;
+                }
             }
 
 
             foreach (Item i in item.Items)
+            {
                 RemoveItem(i);
+            }
+
             item.Items.Clear();
 
             item.Dispose();
@@ -169,10 +189,15 @@ namespace ClassicUO.Game
         {
             Mobile mobile = Mobiles.Remove(serial);
             if (mobile == null)
+            {
                 return false;
+            }
 
             foreach (Item i in mobile.Items)
+            {
                 RemoveItem(i);
+            }
+
             mobile.Items.Clear();
 
             mobile.Dispose();
@@ -194,7 +219,9 @@ namespace ClassicUO.Game
                 if (noplayer)
                 {
                     if (item.RootContainer == Player)
+                    {
                         continue;
+                    }
                 }
 
                 RemoveItem(item);
@@ -205,7 +232,9 @@ namespace ClassicUO.Game
                 if (noplayer)
                 {
                     if (mob == Player)
+                    {
                         continue;
+                    }
                 }
 
                 RemoveMobile(mob);

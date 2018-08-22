@@ -284,10 +284,13 @@ namespace ClassicUO.Game.Network
             }
 
             if (version >= ClientVersions.CV_5090)
+            {
                 _packetsTable[0xE1] = -1;
+            }
             else
+            {
                 _packetsTable[0xE1] = 0x09;
-
+            }
 
             if (version >= ClientVersions.CV_6013)
             {
@@ -333,9 +336,13 @@ namespace ClassicUO.Game.Network
             }
 
             if (version >= ClientVersions.CV_60142)
+            {
                 _packetsTable[0xB9] = 0x05;
+            }
             else
+            {
                 _packetsTable[0xB9] = 0x03;
+            }
 
             if (version >= ClientVersions.CV_7000)
             {
@@ -368,9 +375,13 @@ namespace ClassicUO.Game.Network
             }
 
             if (version >= ClientVersions.CV_70180)
+            {
                 _packetsTable[0x00] = 0x6A;
+            }
             else
+            {
                 _packetsTable[0x00] = 0x68;
+            }
         }
     }
 }

@@ -71,16 +71,25 @@ namespace ClassicUO.Game
         public override bool Equals(object obj)
         {
             if (obj is Serial)
-                return this == (Serial) obj;
+            {
+                return this == (Serial)obj;
+            }
+
             if (obj is uint)
-                return Value == (uint) obj;
+            {
+                return Value == (uint)obj;
+            }
+
             return false;
         }
 
         public static Serial Parse(in string str)
         {
             if (str.StartsWith("0x"))
+            {
                 return uint.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
+            }
+
             return uint.Parse(str);
         }
     }

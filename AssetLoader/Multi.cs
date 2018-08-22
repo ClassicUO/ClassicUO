@@ -23,7 +23,7 @@ namespace ClassicUO.AssetsLoader
 
         public static unsafe MultiBlock GetMulti(int index)
         {
-            return *((MultiBlock*) (_file.PositionAddress + index * _itemOffset));
+            return *((MultiBlock*)(_file.PositionAddress + index * _itemOffset));
         }
 
 

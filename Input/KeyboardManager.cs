@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework.Input;
+using System;
 using System.Linq;
-using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Input
 {

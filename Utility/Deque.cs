@@ -524,7 +524,7 @@ namespace ClassicUO.Utility
         /// </remarks>
         public void TrimExcess()
         {
-            if (Count > (int) (_items.Length * 0.9))
+            if (Count > (int)(_items.Length * 0.9))
                 return;
             Capacity = Count;
         }

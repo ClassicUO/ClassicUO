@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using ClassicUO.AssetsLoader;
+﻿using ClassicUO.AssetsLoader;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.GameObjects.Interfaces;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Network;
 using ClassicUO.Game.Renderer;
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.GameObjects.Interfaces;
 using ClassicUO.Input;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ClassicUO
 {
@@ -24,7 +24,10 @@ namespace ClassicUO
         private SpriteBatch3D _spriteBatch;
         private Stopwatch _stopwatch;
         private RenderTarget2D _targetRender;
-        private Texture2D _texture, _crossTexture, _gump, _textentry;
+        private Texture2D _texture;
+        private Texture2D _crossTexture;
+        private Texture2D _gump;
+        private readonly Texture2D _textentry;
         private DateTime _timePing;
 
         private GameText _gameTextTRY;
@@ -107,10 +110,10 @@ namespace ClassicUO
 
             Settings settings = ConfigurationResolver.Load<Settings>("settings.json");
 
-            string[] parts = settings.ClientVersion.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] parts = settings.ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 
 
-            byte[] clientVersionBuffer = {byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])};
+            byte[] clientVersionBuffer = { byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3]) };
 
 
             FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
@@ -135,7 +138,7 @@ namespace ClassicUO
             _fpsCounter = new FpsCounter();
 
             _crossTexture = new Texture2D(GraphicsDevice, 1, 1);
-            _crossTexture.SetData(new[] {Color.Red});
+            _crossTexture.SetData(new[] { Color.Red });
 
             string username = settings.Username;
             string password = settings.Password;
@@ -219,7 +222,7 @@ namespace ClassicUO
             _gump = TextureManager.GetOrCreateGumpTexture(0x64);
 
             _texture = new Texture2D(GraphicsDevice, 1, 1);
-            _texture.SetData(new Color[1] { Color.White});
+            _texture.SetData(new Color[1] { Color.White });
 
             // END TEST
 
@@ -233,7 +236,7 @@ namespace ClassicUO
 
         protected override void Update(GameTime gameTime)
         {
-            World.Ticks = (long) gameTime.TotalGameTime.TotalMilliseconds;
+            World.Ticks = (long)gameTime.TotalGameTime.TotalMilliseconds;
             if (IsActive)
             {
                 MouseManager.Update();
@@ -245,13 +248,13 @@ namespace ClassicUO
 
             NetClient.Socket.Slice();
             TextureManager.Update();
-          
+
 
             _gameCursor.Update(gameTime.TotalGameTime.Ticks);
 
             if (World.Map != null && World.Player != null)
             {
-                World.Update(gameTime.TotalGameTime.Ticks);
+                World.Update(gameTime.ElapsedGameTime.Milliseconds);
 
                 if (DateTime.Now > _timePing)
                 {
@@ -277,9 +280,9 @@ namespace ClassicUO
                 {
                     if (underObject is Item item)
                     {
-                        if (TileData.IsRoof((long) item.ItemData.Flags))
+                        if (TileData.IsRoof((long)item.ItemData.Flags))
                             maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
-                        else if (TileData.IsSurface((long) item.ItemData.Flags) || TileData.IsWall((long) item.ItemData.Flags) && TileData.IsDoor((long) item.ItemData.Flags))
+                        else if (TileData.IsSurface((long)item.ItemData.Flags) || TileData.IsWall((long)item.ItemData.Flags) && TileData.IsDoor((long)item.ItemData.Flags))
                             maxItemZ = item.Position.Z;
                         else
                         {
@@ -289,9 +292,9 @@ namespace ClassicUO
                     }
                     else if (underObject is Static sta)
                     {
-                        if (TileData.IsRoof((long) sta.ItemData.Flags))
+                        if (TileData.IsRoof((long)sta.ItemData.Flags))
                             maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
-                        else if (TileData.IsSurface((long) sta.ItemData.Flags) || TileData.IsWall((long) sta.ItemData.Flags) && TileData.IsDoor((long) sta.ItemData.Flags))
+                        else if (TileData.IsSurface((long)sta.ItemData.Flags) || TileData.IsWall((long)sta.ItemData.Flags) && TileData.IsDoor((long)sta.ItemData.Flags))
                             maxItemZ = sta.Position.Z;
                         else
                         {
@@ -300,7 +303,7 @@ namespace ClassicUO
                         }
                     }
 
-                    if (underObject is Item i && TileData.IsRoof((long) i.ItemData.Flags) || underObject is Static s && TileData.IsRoof((long) s.ItemData.Flags))
+                    if (underObject is Item i && TileData.IsRoof((long)i.ItemData.Flags) || underObject is Static s && TileData.IsRoof((long)s.ItemData.Flags))
                     {
                         bool isSE = true;
                         if ((tile = World.Map.GetTile(World.Map.Center.X + 1, World.Map.Center.Y)) != null)
@@ -331,8 +334,8 @@ namespace ClassicUO
             int winGameCenterX = winGamePosX + winGameWidth / 2;
             int winGameCenterY = winGamePosY + winGameHeight / 2 + World.Player.Position.Z * 4;
 
-            winGameCenterX -= (int) World.Player.Offset.X;
-            winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
+            winGameCenterX -= (int)World.Player.Offset.X;
+            winGameCenterY -= (int)(World.Player.Offset.Y - World.Player.Offset.Z);
 
             int winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX + 22;
             int winDrawOffsetY = (World.Player.Position.X + World.Player.Position.Y) * 22 - winGameCenterY + 22;
@@ -345,11 +348,11 @@ namespace ClassicUO
             float newRight = right * scale;
             float newBottom = bottom * scale;
 
-            int winGameScaledOffsetX = (int) (left * scale - (newRight - right));
-            int winGameScaledOffsetY = (int) (top * scale - (newBottom - bottom));
+            int winGameScaledOffsetX = (int)(left * scale - (newRight - right));
+            int winGameScaledOffsetY = (int)(top * scale - (newBottom - bottom));
 
-            int winGameScaledWidth = (int) (newRight - winGameScaledOffsetX);
-            int winGameScaledHeight = (int) (newBottom - winGameScaledOffsetY);
+            int winGameScaledWidth = (int)(newRight - winGameScaledOffsetX);
+            int winGameScaledHeight = (int)(newBottom - winGameScaledOffsetY);
 
 
             int width = (winGameWidth / 44 + 1) * scale;
@@ -395,10 +398,10 @@ namespace ClassicUO
             float newMaxX = maxX * scale;
             float newMaxY = maxY * scale;
 
-            int minPixelsX = (int) ((winGamePosX - drawOffset) * scale - (newMaxX - maxX));
-            int maxPixelsX = (int) newMaxX;
-            int minPixelsY = (int) ((winGamePosY - drawOffset) * scale - (newMaxY - maxY));
-            int maxPixlesY = (int) newMaxY;
+            int minPixelsX = (int)((winGamePosX - drawOffset) * scale - (newMaxX - maxX));
+            int maxPixelsX = (int)newMaxX;
+            int minPixelsY = (int)((winGamePosY - drawOffset) * scale - (newMaxY - maxY));
+            int maxPixlesY = (int)newMaxY;
 
             return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY), new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY), new Point(winDrawOffsetX, winDrawOffsetY), new Point(winGameCenterX, winGameCenterY), new Point(realMinRangeX + width - 1, realMinRangeY - 1), Math.Max(width, height));
         }
@@ -407,7 +410,7 @@ namespace ClassicUO
         {
             int scale = 1;
 
-            Point renderDimensions = new Point {X = _graphics.PreferredBackBufferWidth / scale / 44 + 5, Y = _graphics.PreferredBackBufferHeight / scale / 44 + 5};
+            Point renderDimensions = new Point { X = _graphics.PreferredBackBufferWidth / scale / 44 + 5, Y = _graphics.PreferredBackBufferHeight / scale / 44 + 5 };
 
             int width = renderDimensions.X;
             int height = renderDimensions.Y;
@@ -422,9 +425,9 @@ namespace ClassicUO
             int renderDimensionDiff = Math.Abs(renderDimensions.X - renderDimensions.Y);
             renderDimensionDiff -= renderDimensionDiff % 2;
 
-            int firstZOffset = World.Player.Position.Z > 0 ? (int) Math.Abs((World.Player.Position.Z + World.Player.Offset.Z / 4) / 11) : 0;
+            int firstZOffset = World.Player.Position.Z > 0 ? (int)Math.Abs((World.Player.Position.Z + World.Player.Offset.Z / 4) / 11) : 0;
 
-            Point firstTile = new Point {X = World.Player.Position.X - firstZOffset, Y = World.Player.Position.Y - renderDimensions.Y - firstZOffset};
+            Point firstTile = new Point { X = World.Player.Position.X - firstZOffset, Y = World.Player.Position.Y - renderDimensions.Y - firstZOffset };
 
             if (renderDimensions.Y > renderDimensions.X)
             {
@@ -437,7 +440,7 @@ namespace ClassicUO
                 firstTile.Y -= renderDimensionDiff / 2;
             }
 
-            Vector2 renderOffset = new Vector2 {X = (_graphics.PreferredBackBufferWidth / scale + renderDimensions.Y * 44) / 2 - 22f - (int) (World.Player.Offset.X * 1) - (firstTile.X - firstTile.Y) * 22f + renderDimensionDiff * 22f, Y = _graphics.PreferredBackBufferHeight / scale / 2 - renderDimensions.Y * 44 / 2 + (World.Player.Position.Z + World.Player.Offset.Z / 4) * 4 - (int) (World.Player.Offset.Y * 1) - (firstTile.X + firstTile.Y) * 22f - 22f - firstZOffset * 44f};
+            Vector2 renderOffset = new Vector2 { X = (_graphics.PreferredBackBufferWidth / scale + renderDimensions.Y * 44) / 2 - 22f - (int)(World.Player.Offset.X * 1) - (firstTile.X - firstTile.Y) * 22f + renderDimensionDiff * 22f, Y = _graphics.PreferredBackBufferHeight / scale / 2 - renderDimensions.Y * 44 / 2 + (World.Player.Position.Z + World.Player.Offset.Z / 4) * 4 - (int)(World.Player.Offset.Y * 1) - (firstTile.X + firstTile.Y) * 22f - 22f - firstZOffset * 44f };
 
             return (firstTile, renderOffset, renderDimensions);
         }
@@ -448,7 +451,7 @@ namespace ClassicUO
             if (World.Player != null && World.Map != null)
             {
                 _fpsCounter.IncreaseFrame();
-              
+
                 int scale = 1;
 
                 if (_targetRender == null || _targetRender.Width != _graphics.PreferredBackBufferWidth / scale || _targetRender.Height != _graphics.PreferredBackBufferHeight / scale)
@@ -506,7 +509,7 @@ namespace ClassicUO
                             }
 
                             if ((obj.Position.Z >= maxItemZ
-                                || maxItemZ != 255 && obj is IDynamicItem dyn && TileData.IsRoof((long) dyn.ItemData.Flags)) 
+                                || maxItemZ != 255 && obj is IDynamicItem dyn && TileData.IsRoof((long)dyn.ItemData.Flags))
                                 && !(obj is Tile))
                                 continue;
 

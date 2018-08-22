@@ -26,7 +26,9 @@ namespace ClassicUO.Game.Network
         public override byte[] ToArray()
         {
             if (Length > Position)
+            {
                 Array.Resize(ref _data, Position);
+            }
 
             WriteSize();
             return _data;
@@ -36,23 +38,29 @@ namespace ClassicUO.Game.Network
         {
             if (IsDynamic)
             {
-                this[1] = (byte) (Position >> 8);
-                this[2] = (byte) Position;
+                this[1] = (byte)(Position >> 8);
+                this[2] = (byte)Position;
             }
         }
 
         protected override void EnsureSize(in int length)
         {
             if (length < 0)
+            {
                 throw new ArgumentOutOfRangeException("length");
+            }
 
             if (IsDynamic)
             {
                 while (Position + length > Length)
+                {
                     Array.Resize(ref _data, Position + length);
+                }
             }
             else if (Position + length > Length)
+            {
                 throw new ArgumentOutOfRangeException("length");
+            }
         }
 
         public void SendToClient()

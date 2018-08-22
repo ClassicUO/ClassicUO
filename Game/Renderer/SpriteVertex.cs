@@ -30,9 +30,9 @@ namespace ClassicUO.Game.Renderer
                 new VertexElement(sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.TextureCoordinate, 1) // hue
             );
 
-        public static readonly SpriteVertex[] PolyBuffer = {new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 1, 0))};
+        public static readonly SpriteVertex[] PolyBuffer = { new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 1, 0)) };
 
-        public static readonly SpriteVertex[] PolyBufferFlipped = {new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 1, 0))};
+        public static readonly SpriteVertex[] PolyBufferFlipped = { new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(0, 0, 1), new Vector3(1, 1, 0)) };
 
         public static int SizeInBytes => sizeof(float) * 12;
 

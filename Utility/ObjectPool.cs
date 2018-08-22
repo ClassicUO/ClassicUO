@@ -51,7 +51,7 @@ namespace ClassicUO.Utility
             while (node != null)
             {
                 yield return node;
-                node = (T) node.NextNode;
+                node = (T)node.NextNode;
             }
         }
 
@@ -82,7 +82,7 @@ namespace ClassicUO.Utility
                         case ObjectPoolIsFullPolicy.KillExisting:
                             if (_headNode == null)
                                 return null;
-                            var newHeadNode = (T) _headNode.NextNode;
+                            var newHeadNode = (T)_headNode.NextNode;
                             _headNode.Return();
                             _freeItems.RemoveFromBack(out poolable);
                             _headNode = newHeadNode;
@@ -117,10 +117,10 @@ namespace ClassicUO.Utility
         {
             Debug.Assert(item != null);
 
-            var poolable1 = (T) item;
+            var poolable1 = (T)item;
 
-            var previousNode = (T) item.PreviousNode;
-            var nextNode = (T) item.NextNode;
+            var previousNode = (T)item.PreviousNode;
+            var nextNode = (T)item.NextNode;
 
             if (previousNode != null)
                 previousNode.NextNode = nextNode;
@@ -137,7 +137,7 @@ namespace ClassicUO.Utility
 
             _freeItems.AddToBack(poolable1);
 
-            ItemReturned?.Invoke((T) item);
+            ItemReturned?.Invoke((T)item);
         }
 
         private void Use(T item)

@@ -4,7 +4,7 @@ namespace ClassicUO.Utility
 {
     public static class Zlib
     {
-        private static readonly byte[] _zlibHeader = {0x78, 0x9C};
+        private static readonly byte[] _zlibHeader = { 0x78, 0x9C };
 
         public static bool Decompress(byte[] source, int offset, byte[] dest, int length)
         {

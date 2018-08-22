@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.Game.GameObjects.Interfaces
+﻿namespace ClassicUO.Game.GameObjects.Interfaces
 {
     public interface IUpdateable
     {

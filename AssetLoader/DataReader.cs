@@ -9,8 +9,8 @@ namespace ClassicUO.AssetsLoader
         internal long Position { get; set; }
         internal long Length { get; private set; }
 
-        internal IntPtr StartAddress => (IntPtr) _data;
-        internal IntPtr PositionAddress => (IntPtr) (_data + Position);
+        internal IntPtr StartAddress => (IntPtr)_data;
+        internal IntPtr PositionAddress => (IntPtr)(_data + Position);
 
         internal void SetData(byte* data, long length)
         {
@@ -29,12 +29,12 @@ namespace ClassicUO.AssetsLoader
 
         internal void SetData(IntPtr data, long length)
         {
-            SetData((byte*) data, length);
+            SetData((byte*)data, length);
         }
 
         internal void SetData(IntPtr data)
         {
-            SetData((byte*) data, Length);
+            SetData((byte*)data, Length);
         }
 
 
@@ -60,7 +60,7 @@ namespace ClassicUO.AssetsLoader
 
         internal sbyte ReadSByte()
         {
-            return (sbyte) ReadByte();
+            return (sbyte)ReadByte();
         }
 
         internal bool ReadBool()
@@ -70,12 +70,12 @@ namespace ClassicUO.AssetsLoader
 
         internal short ReadShort()
         {
-            return (short) (ReadByte() | (ReadByte() << 8));
+            return (short)(ReadByte() | (ReadByte() << 8));
         }
 
         internal ushort ReadUShort()
         {
-            return (ushort) ReadShort();
+            return (ushort)ReadShort();
         }
 
         internal int ReadInt()
@@ -85,17 +85,17 @@ namespace ClassicUO.AssetsLoader
 
         internal uint ReadUInt()
         {
-            return (uint) ReadInt();
+            return (uint)ReadInt();
         }
 
         internal long ReadLong()
         {
-            return ReadByte() | ((long) ReadByte() << 8) | ((long) ReadByte() << 16) | ((long) ReadByte() << 24) | ((long) ReadByte() << 32) | ((long) ReadByte() << 40) | ((long) ReadByte() << 48) | ((long) ReadByte() << 56);
+            return ReadByte() | ((long)ReadByte() << 8) | ((long)ReadByte() << 16) | ((long)ReadByte() << 24) | ((long)ReadByte() << 32) | ((long)ReadByte() << 40) | ((long)ReadByte() << 48) | ((long)ReadByte() << 56);
         }
 
         internal ulong ReadULong()
         {
-            return (ulong) ReadLong();
+            return (ulong)ReadLong();
         }
     }
 }

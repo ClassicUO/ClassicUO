@@ -14,17 +14,25 @@ namespace ClassicUO.Game.Network
             _arraySize = arraysize;
             _freeSegment = new Queue<byte[]>(capacity);
             for (int i = 0; i < capacity; i++)
+            {
                 _freeSegment.Enqueue(new byte[arraysize]);
+            }
         }
 
         public byte[] GetFreeSegment()
         {
             lock (this)
             {
-                if (_freeSegment.Count > 0) return _freeSegment.Dequeue();
+                if (_freeSegment.Count > 0)
+                {
+                    return _freeSegment.Dequeue();
+                }
 
                 for (int i = 0; i < _capacity; i++)
+                {
                     _freeSegment.Enqueue(new byte[_arraySize]);
+                }
+
                 return _freeSegment.Dequeue();
             }
         }
@@ -32,7 +40,10 @@ namespace ClassicUO.Game.Network
         public void AddFreeSegment(in byte[] segment)
         {
             if (segment == null)
+            {
                 return;
+            }
+
             lock (this)
             {
                 _freeSegment.Enqueue(segment);

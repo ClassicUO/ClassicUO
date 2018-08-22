@@ -29,30 +29,36 @@ namespace ClassicUO.Game.GameObjects
 
         public AnimatedItemEffect(in Serial sourceSerial, in int sourceX, in int sourceY, in int sourceZ, in Graphic graphic, in Hue hue, in int duration) : this(graphic, hue, duration)
         {
-            sbyte zSrc = (sbyte) sourceZ;
+            sbyte zSrc = (sbyte)sourceZ;
 
             GameObject source = World.Get(sourceSerial);
             if (source != null)
             {
                 if (sourceSerial.IsMobile)
                 {
-                    Mobile mob = (Mobile) source;
+                    Mobile mob = (Mobile)source;
                     if (mob != World.Player && !mob.IsMoving && (sourceX != 0 || sourceY != 0 || sourceZ != 0))
-                        mob.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
+                    {
+                        mob.Position = new Position((ushort)sourceX, (ushort)sourceY, zSrc);
+                    }
+
                     SetSource(mob);
                 }
                 else if (sourceSerial.IsItem)
                 {
-                    Item item = (Item) source;
+                    Item item = (Item)source;
                     if (sourceX != 0 || sourceY != 0 || sourceZ != 0)
-                        item.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
+                    {
+                        item.Position = new Position((ushort)sourceX, (ushort)sourceY, zSrc);
+                    }
+
                     SetSource(item);
                 }
             }
         }
 
         public int Duration { get; set; }
-        public new AnimatedEffectView View => (AnimatedEffectView) base.View;
+        public new AnimatedEffectView View => (AnimatedEffectView)base.View;
 
 
         protected override View CreateView()
@@ -65,11 +71,13 @@ namespace ClassicUO.Game.GameObjects
             base.UpdateAnimation(in ms);
 
             if (LastChangeFrameTime >= Duration && Duration >= 0)
+            {
                 Dispose();
+            }
             else
             {
                 (int x, int y, int z) = GetSource();
-                Position = new Position((ushort) x, (ushort) y, (sbyte) z);
+                Position = new Position((ushort)x, (ushort)y, (sbyte)z);
             }
         }
     }

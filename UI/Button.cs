@@ -1,6 +1,6 @@
-﻿using System;
-using ClassicUO.Input;
+﻿using ClassicUO.Input;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace ClassicUO.UI
 {

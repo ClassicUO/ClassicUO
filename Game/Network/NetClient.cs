@@ -39,11 +39,13 @@ namespace ClassicUO.Game.Network
                 if (localEntry.AddressList.Length > 0)
                 {
 #pragma warning disable 618
-                    address = (uint) localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
+                    address = (uint)localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
 #pragma warning restore 618
                 }
                 else
+                {
                     address = 0x100007f;
+                }
 
                 return ((address & 0xff) << 0x18) | ((address & 65280) << 8) | ((address >> 8) & 65280) | ((address >> 0x18) & 0xff);
             }
@@ -92,7 +94,10 @@ namespace ClassicUO.Game.Network
         public void Disconnect()
         {
             if (_isDisposing)
+            {
                 return;
+            }
+
             _isDisposing = true;
 
             Flush();
@@ -134,7 +139,9 @@ namespace ClassicUO.Game.Network
             lock (_sendQueue)
             {
                 if (!_sendQueue.IsEmpty)
+                {
                     _sendQueue.Clear();
+                }
             }
 
             _circularBuffer = null;
@@ -154,7 +161,9 @@ namespace ClassicUO.Game.Network
             PacketSended?.Invoke(null, packet);
 
             if (!packet.Filter)
+            {
                 Send(packet.ToArray());
+            }
         }
 
 
@@ -170,7 +179,9 @@ namespace ClassicUO.Game.Network
         private void ExtractPackets()
         {
             if (!IsConnected || _circularBuffer == null || _circularBuffer.Length <= 0)
+            {
                 return;
+            }
 
             lock (_circularBuffer)
             {
@@ -183,13 +194,19 @@ namespace ClassicUO.Game.Network
                     if (packetlength == -1)
                     {
                         if (length >= 3)
+                        {
                             packetlength = _circularBuffer.GetLength();
+                        }
                         else
+                        {
                             break;
+                        }
                     }
 
                     if (length < packetlength)
+                    {
                         break;
+                    }
 
                     byte[] data = BUFF_SIZE >= packetlength ? _pool.GetFreeSegment() : new byte[packetlength];
                     packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
@@ -200,7 +217,9 @@ namespace ClassicUO.Game.Network
                     length = _circularBuffer.Length;
 
                     if (BUFF_SIZE >= packetlength)
+                    {
                         _pool.AddFreeSegment(data);
+                    }
                 }
             }
         }
@@ -208,12 +227,16 @@ namespace ClassicUO.Game.Network
         private void Send(in byte[] data)
         {
             if (_socket == null)
+            {
                 return;
+            }
 
             if (data != null)
             {
                 if (data.Length <= 0)
+                {
                     return;
+                }
 
                 try
                 {
@@ -239,7 +262,9 @@ namespace ClassicUO.Game.Network
                 }
             }
             else
+            {
                 Disconnect();
+            }
         }
 
         private void IO_Socket(object sender, SocketAsyncEventArgs e)
@@ -249,14 +274,19 @@ namespace ClassicUO.Game.Network
                 case SocketAsyncOperation.Receive:
                     ProcessRecv(e);
                     if (!_isDisposing)
+                    {
                         StartRecv();
+                    }
+
                     break;
 
                 case SocketAsyncOperation.Send:
                     ProcessSend(e);
 
                     if (_isDisposing)
+                    {
                         return;
+                    }
 
                     SendQueue.Gram gram;
 
@@ -264,7 +294,9 @@ namespace ClassicUO.Game.Network
                     {
                         gram = _sendQueue.Dequeue();
                         if (gram == null && _sendQueue.IsFlushReady)
+                        {
                             gram = _sendQueue.CheckFlushReady();
+                        }
                     }
 
                     if (gram != null)
@@ -297,7 +329,9 @@ namespace ClassicUO.Game.Network
 
                 ok = !_socket.ReceiveAsync(_recvEventArgs);
                 if (ok)
+                {
                     ProcessRecv(_recvEventArgs);
+                }
             } while (ok);
         }
 
@@ -310,7 +344,9 @@ namespace ClassicUO.Game.Network
                 byte[] buffer = _recvBuffer;
 
                 if (_isCompressionEnabled)
+                {
                     DecompressBuffer(ref buffer, ref bytesLen);
+                }
 
                 lock (_circularBuffer)
                 {
@@ -318,7 +354,9 @@ namespace ClassicUO.Game.Network
                 }
             }
             else
+            {
                 Disconnect();
+            }
         }
 
         private void DecompressBuffer(ref byte[] buffer, ref int length)
@@ -349,7 +387,9 @@ namespace ClassicUO.Game.Network
             length = offset;
 
             if (processedOffset >= sourcelength)
+            {
                 _pool.AddFreeSegment(source);
+            }
             else
             {
                 int l = sourcelength - processedOffset;
@@ -361,7 +401,9 @@ namespace ClassicUO.Game.Network
         private void StartSend()
         {
             if (!_socket.SendAsync(_sendEventArgs))
+            {
                 IO_Socket(null, _sendEventArgs);
+            }
         }
 
         private void ProcessSend(in SocketAsyncEventArgs e)
@@ -370,25 +412,34 @@ namespace ClassicUO.Game.Network
             {
             }
             else
+            {
                 Disconnect();
+            }
         }
 
         private void Flush()
         {
             if (_socket == null)
+            {
                 return;
+            }
 
             lock (_sendLock)
             {
                 if (_sending)
+                {
                     return;
+                }
 
                 SendQueue.Gram gram;
 
                 lock (_sendQueue)
                 {
                     if (!_sendQueue.IsFlushReady)
+                    {
                         return;
+                    }
+
                     gram = _sendQueue.CheckFlushReady();
                 }
 
@@ -406,7 +457,9 @@ namespace ClassicUO.Game.Network
         {
             IPAddress result = IPAddress.None;
             if (string.IsNullOrEmpty(addr))
+            {
                 return result;
+            }
 
             if (!IPAddress.TryParse(addr, out result))
             {
@@ -414,7 +467,9 @@ namespace ClassicUO.Game.Network
                 {
                     IPHostEntry hostEntry = Dns.GetHostEntry(addr);
                     if (hostEntry.AddressList.Length != 0)
+                    {
                         result = hostEntry.AddressList[hostEntry.AddressList.Length - 1];
+                    }
                 }
                 catch
                 {

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Renderer
 {
@@ -14,7 +14,7 @@ namespace ClassicUO.Game.Renderer
 
         private readonly Dictionary<Texture2D, List<SpriteVertex>> _drawingQueue = new Dictionary<Texture2D, List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
         private readonly EffectParameter _drawLightingEffect;
-        private readonly DepthStencilState _dss = new DepthStencilState {DepthBufferEnable = true, DepthBufferWriteEnable = true};
+        private readonly DepthStencilState _dss = new DepthStencilState { DepthBufferEnable = true, DepthBufferWriteEnable = true };
         private readonly Effect _effect;
         private readonly Microsoft.Xna.Framework.Game _game;
         private readonly EffectTechnique _huesTechnique;
@@ -35,12 +35,12 @@ namespace ClassicUO.Game.Renderer
 
             for (int i = 0; i < MAX_VERTICES_PER_DRAW; i++)
             {
-                _indexBuffer[i * 6] = (short) (i * 4);
-                _indexBuffer[i * 6 + 1] = (short) (i * 4 + 1);
-                _indexBuffer[i * 6 + 2] = (short) (i * 4 + 2);
-                _indexBuffer[i * 6 + 3] = (short) (i * 4 + 2);
-                _indexBuffer[i * 6 + 4] = (short) (i * 4 + 1);
-                _indexBuffer[i * 6 + 5] = (short) (i * 4 + 3);
+                _indexBuffer[i * 6] = (short)(i * 4);
+                _indexBuffer[i * 6 + 1] = (short)(i * 4 + 1);
+                _indexBuffer[i * 6 + 2] = (short)(i * 4 + 2);
+                _indexBuffer[i * 6 + 3] = (short)(i * 4 + 2);
+                _indexBuffer[i * 6 + 4] = (short)(i * 4 + 1);
+                _indexBuffer[i * 6 + 5] = (short)(i * 4 + 3);
             }
 
             _effect = new Effect(GraphicsDevice, File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, "IsometricWorld.fxc")));
@@ -82,7 +82,9 @@ namespace ClassicUO.Game.Renderer
         public bool DrawSprite(in Texture2D texture, in SpriteVertex[] vertices)
         {
             if (texture == null)
+            {
                 return false;
+            }
 
             bool draw = false;
 
@@ -96,7 +98,9 @@ namespace ClassicUO.Game.Renderer
             }
 
             if (!draw)
+            {
                 return false;
+            }
 
             vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
 
@@ -131,7 +135,7 @@ namespace ClassicUO.Game.Renderer
             //_effect.Parameters["hues"].SetValue(AssetsLoader.Hues.GetColorForShader(38));
 
 
-            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+            GraphicsDevice.DepthStencilState = _dss;
 
             _effect.CurrentTechnique = _huesTechnique;
             _effect.CurrentTechnique.Passes[0].Apply();
@@ -358,12 +362,21 @@ namespace ClassicUO.Game.Renderer
                 int x = destRect.X;
                 int w = destRect.Width;
                 if (h < texture.Height)
+                {
                     sRect = new Rectangle(0, 0, texture.Width, h);
+                }
                 else
+                {
                     sRect = new Rectangle(0, 0, texture.Width, texture.Height);
+                }
+
                 while (w > 0)
                 {
-                    if (w < texture.Width) sRect.Width = w;
+                    if (w < texture.Width)
+                    {
+                        sRect.Width = w;
+                    }
+
                     Draw2D(texture, new Vector3(x, y, 0), sRect, hue);
                     w -= texture.Width;
                     x += texture.Width;
@@ -393,7 +406,7 @@ namespace ClassicUO.Game.Renderer
 
             _vertexBufferUI[0].Position.X = start.X;
             _vertexBufferUI[0].Position.Y = start.Y;
-            _vertexBufferUI[0].Normal = new Vector3(0, 0 , 1);
+            _vertexBufferUI[0].Normal = new Vector3(0, 0, 1);
             _vertexBufferUI[0].TextureCoordinate = new Vector3(0, 0, 0);
 
             _vertexBufferUI[1].Position.X = end.X + offX;
@@ -426,9 +439,11 @@ namespace ClassicUO.Game.Renderer
                     list.Clear();
                 }
                 else
+                {
                     list = new List<SpriteVertex>(1024);
+                }
 
-                _drawingQueue[texture] = list;
+                _drawingQueue.Add(texture, list);
             }
 
             return list;

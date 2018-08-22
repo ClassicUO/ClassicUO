@@ -1,18 +1,15 @@
-﻿using System;
-using System.Linq;
-using ClassicUO.Game.Renderer;
+﻿using ClassicUO.Game.Renderer;
 using ClassicUO.UI;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using IDrawable = ClassicUO.Game.GameObjects.Interfaces.IDrawable;
 using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Gumps
 {
-    public abstract class GumpControl : Control, IDrawable, IUpdateable
+    public class GumpControl : Control, IDrawable, IUpdateable
     {
-        protected GumpControl(in GumpControl parent) : base(parent)
+        public GumpControl(in GumpControl parent) : base(parent)
         {
             AllowedToDraw = true;
         }
@@ -22,26 +19,36 @@ namespace ClassicUO.Game.Gumps
         public SpriteTexture Texture { get; set; }
         public Vector3 HueVector { get; set; }
 
+        public Serial ServerSerial { get; set; }
+        public Serial LocalSerial { get; set; }
 
 
         public virtual void Update(in double frameMS)
         {
             if (IsDisposed)
+            {
                 return;
+            }
 
             foreach (Control c in Children)
             {
                 if (c is GumpControl gump)
+                {
                     gump.Update(frameMS);
+                }
                 else
+                {
                     Log.Message(LogTypes.Warning, $"{c} is not a GumpControl!!");
+                }
             }
         }
 
         public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             if (IsDisposed || Texture == null)
+            {
                 return false;
+            }
 
             Texture.Ticks = World.Ticks;
 
@@ -58,18 +65,20 @@ namespace ClassicUO.Game.Gumps
                     }
                 }
                 else
+                {
                     Log.Message(LogTypes.Warning, $"{c} is not a GumpControl!!");
+                }
             }
 
             return true;
         }
 
         public override void Dispose()
-        {        
+        {
             for (int i = 0; i < Children.Count; i++)
             {
-                var c = Children[i];                
-                c.Dispose();              
+                var c = Children[i];
+                c.Dispose();
             }
 
             base.Dispose();

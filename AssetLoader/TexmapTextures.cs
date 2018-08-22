@@ -55,7 +55,7 @@ namespace ClassicUO.AssetsLoader
             for (int i = 0; i < size; i++)
             {
                 int pos = i * size;
-                for (int j = 0; j < size; j++) pixels[pos + j] = (ushort) (0x8000 | _file.ReadUShort());
+                for (int j = 0; j < size; j++) pixels[pos + j] = (ushort)(0x8000 | _file.ReadUShort());
             }
 
             return pixels;

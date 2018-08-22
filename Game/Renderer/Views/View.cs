@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ClassicUO.AssetsLoader;
-using ClassicUO.Game.Map;
+﻿using ClassicUO.AssetsLoader;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Interfaces;
+using ClassicUO.Game.Map;
 using Microsoft.Xna.Framework;
+using System;
 using IDrawable = ClassicUO.Game.GameObjects.Interfaces.IDrawable;
 using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
 
@@ -13,7 +11,7 @@ namespace ClassicUO.Game.Renderer.Views
 {
     public abstract class View : IDrawable, IUpdateable
     {
-        protected static float PI = (float) Math.PI;
+        protected static float PI = (float)Math.PI;
 
 
         protected View(in GameObject parent)
@@ -39,7 +37,9 @@ namespace ClassicUO.Game.Renderer.Views
         public virtual void Update(in double frameMS)
         {
             if (GameObject.IsDisposed)
+            {
                 return;
+            }
 
             for (int i = 0; i < GameObject.OverHeads.Count; i++)
             {
@@ -65,8 +65,10 @@ namespace ClassicUO.Game.Renderer.Views
 
                 int offset = (int)Math.Ceiling(TextureWidth / 44f) / 2;
                 if (offset < 1)
+                {
                     offset = 1;
-                    //const int offset = 1;
+                }
+                //const int offset = 1;
 
                 if (GameObject is Mobile mobile && mobile.IsWalking)
                 {
@@ -97,9 +99,13 @@ namespace ClassicUO.Game.Renderer.Views
                 if (tile != null)
                 {
                     if (deferreable.DeferredObject == null)
+                    {
                         deferreable.DeferredObject = new DeferredEntity();
+                    }
                     else
+                    {
                         deferreable.DeferredObject.Reset();
+                    }
 
                     deferreable.DeferredObject.AtPosition = position;
                     deferreable.DeferredObject.Entity = GameObject;
@@ -109,7 +115,9 @@ namespace ClassicUO.Game.Renderer.Views
                     if (GameObject is Mobile mob)
                     {
                         if (!Pathfinder.TryGetNextZ(mob, mob.Position, check, out sbyte z))
+                        {
                             return false;
+                        }
 
                         deferreable.DeferredObject.Z = z;
                         deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, z);
@@ -132,7 +140,9 @@ namespace ClassicUO.Game.Renderer.Views
         public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
             if (Texture == null || !AllowedToDraw)
+            {
                 return false;
+            }
 
             Texture.Ticks = World.Ticks;
 
@@ -143,10 +153,10 @@ namespace ClassicUO.Game.Renderer.Views
                 float w = Bounds.Width / 2f;
                 float h = Bounds.Height / 2f;
                 Vector3 center = position - new Vector3(Bounds.X - 44 + w, Bounds.Y + h, 0);
-                float sinx = (float) Math.Sin(Rotation) * w;
-                float cosx = (float) Math.Cos(Rotation) * w;
-                float siny = (float) Math.Sin(Rotation) * h;
-                float cosy = (float) Math.Cos(Rotation) * h;
+                float sinx = (float)Math.Sin(Rotation) * w;
+                float cosx = (float)Math.Cos(Rotation) * w;
+                float siny = (float)Math.Sin(Rotation) * h;
+                float cosy = (float)Math.Cos(Rotation) * h;
 
                 vertex = SpriteVertex.PolyBufferFlipped;
                 vertex[0].Position = center;
@@ -195,10 +205,14 @@ namespace ClassicUO.Game.Renderer.Views
 
 
             if (vertex[0].Hue != HueVector)
+            {
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
+            }
 
             if (!spriteBatch.DrawSprite(Texture, vertex))
+            {
                 return false;
+            }
 
             MousePick(vertex);
 
@@ -210,7 +224,7 @@ namespace ClassicUO.Game.Renderer.Views
             return false;
         }
 
-       
+
 
         protected virtual void MousePick(in SpriteVertex[] vertex)
         {
@@ -243,12 +257,16 @@ namespace ClassicUO.Game.Renderer.Views
             if (g != 0x63D3)
             {
                 if (g >= 0x2198 && g <= 0x21A4)
+                {
                     return true;
+                }
 
-                long flags = (long) TileData.StaticData[g].Flags;
+                long flags = (long)TileData.StaticData[g].Flags;
 
                 if (!TileData.IsNoDiagonal(flags) || TileData.IsAnimated(flags) && World.Player != null && World.Player.Race == RaceType.GARGOYLE)
+                {
                     return false;
+                }
             }
 
             return true;
