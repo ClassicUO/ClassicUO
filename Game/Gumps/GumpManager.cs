@@ -1,4 +1,5 @@
 ﻿using ClassicUO.Game.Renderer;
+using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,40 @@ namespace ClassicUO.Game.Gumps
 {
     public static class GumpManager
     {
+        enum InputMouseType
+        {
+            MouseDown,
+            MouseUp,
+            MousePressed,
+            MouseMove,
+
+            MouseWheel
+        }
+
+
         private static readonly List<GumpControl> _gumps = new List<GumpControl>();
+
+
+        private static readonly Queue<InputMouseType> _typeQueue = new Queue<InputMouseType>();
+        private static readonly Queue<MouseEventArgs>[] _mouseEventsTriggered = new Queue<MouseEventArgs>[4]
+        {
+            new Queue<MouseEventArgs>(), new Queue<MouseEventArgs>(), new Queue<MouseEventArgs>(), new Queue<MouseEventArgs>()
+        };
+        private static readonly Queue<MouseWheelEventArgs> _mouseEventsWheelTriggered = new Queue<MouseWheelEventArgs>();
+
+
+        static GumpManager()
+        {
+            MouseManager.MouseDown += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MouseDown); _mouseEventsTriggered[(int)InputMouseType.MouseDown].Enqueue(e); };
+            MouseManager.MouseUp += (sender, e) =>
+            {
+                _typeQueue.Enqueue(InputMouseType.MouseUp); _mouseEventsTriggered[(int)InputMouseType.MouseUp].Enqueue(e);
+            };
+            MouseManager.MousePressed += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MousePressed); _mouseEventsTriggered[(int)InputMouseType.MousePressed].Enqueue(e); };
+            MouseManager.MouseMove += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MouseMove); _mouseEventsTriggered[(int)InputMouseType.MouseMove].Enqueue(e); };
+            MouseManager.MouseWheel += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MouseWheel); _mouseEventsWheelTriggered.Enqueue(e); };
+        }
+
 
 
         public static GumpControl Create(in Serial sender, in Serial gumpID, in int x, in int y, in string layout, in string[] lines)
@@ -132,6 +166,12 @@ namespace ClassicUO.Game.Gumps
             }
 
             HandleMouseInput();
+
+            // cleaning
+            _typeQueue.Clear();
+            for (InputMouseType t = InputMouseType.MouseDown; t <= InputMouseType.MouseMove; t++)
+                _mouseEventsTriggered[(int)t].Clear();
+            _mouseEventsWheelTriggered.Clear();
         }
 
         public static void Render(in SpriteBatch3D spriteBatch)
@@ -147,16 +187,31 @@ namespace ClassicUO.Game.Gumps
 
         private static void HandleMouseInput()
         {
+            GumpControl gump = null;
+
             for (int i = 0; i < _gumps.Count; i++)
             {
-                var g = _gumps[i];
-                GumpControl gump = HitTest(g, Input.MouseManager.ScreenPosition);
+                gump = HitTest(_gumps[i], MouseManager.ScreenPosition);
+            }
 
-                if (gump != null)
+
+            if (gump != null)
+            {
+                while (_typeQueue.Count > 0)
                 {
-                    Console.WriteLine(gump);
-                }
+                    var t = _typeQueue.Dequeue();
 
+                    switch (t)
+                    {
+                        case InputMouseType.MouseWheel:
+                            var evw = _mouseEventsWheelTriggered.Dequeue();
+                            gump.OnMouseWheel(evw);
+                            break;
+                        default:
+                            var ev = _mouseEventsTriggered[(int)t].Dequeue();
+                            break;
+                    }
+                }
             }
         }
 

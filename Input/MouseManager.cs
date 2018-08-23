@@ -2,9 +2,10 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Input
-{
+{       
     public static class MouseManager
     {
         private static MouseState _prevMouseState = Mouse.GetState();
@@ -15,6 +16,7 @@ namespace ClassicUO.Input
 
         public static event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MousePressed;
         public static event EventHandler<MouseWheelEventArgs> MouseWheel;
+
 
         public static void Update()
         {
