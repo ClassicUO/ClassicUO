@@ -1,6 +1,7 @@
 ﻿using ClassicUO.AssetsLoader;
 using ClassicUO.Game.Renderer.Views;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -38,7 +39,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsPartialHue { get; set; }
         public byte Font { get; set; }
         public TEXT_ALIGN_TYPE Align { get; set; }
-        public byte MaxWidth { get; set; }
+        public int MaxWidth { get; set; }
         public FontStyle FontStyle { get; set; }
         public byte Cell { get; set; } = 30;
         public string Text { get; set; }
@@ -47,6 +48,10 @@ namespace ClassicUO.Game.GameObjects
 
         public long Timeout { get; set; }
         public bool IsPersistent { get; set; }
+
+        public bool IsHTML { get; set; }
+
+        public List<WebLink> Links { get; set; }
 
         public Rectangle Bounds
         {
@@ -85,6 +90,7 @@ namespace ClassicUO.Game.GameObjects
             return new GameTextView(this);
         }
 
+        public new GameTextView View => (GameTextView)base.View;
 
 
         public override int GetHashCode()

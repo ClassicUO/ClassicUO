@@ -23,7 +23,7 @@ namespace ClassicUO.Game.Gumps
             Hue = Hue.Parse(parts[5]);
             _index = int.Parse(parts[6]);
 
-            _gameText.MaxWidth = (byte)Width;
+            _gameText.MaxWidth = Width;
 
             Text = lines[_index];
         }

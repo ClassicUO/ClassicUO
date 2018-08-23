@@ -13,7 +13,6 @@ namespace ClassicUO.Game.Renderer.Views
 
             Texture = TextureManager.GetOrCreateStringTextTexture(GameObject);
             //Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height, Texture.Width, Texture.Height);
-
         }
 
         public new GameText GameObject => (GameText)base.GameObject;
@@ -49,7 +48,7 @@ namespace ClassicUO.Game.Renderer.Views
             if (_text != GameObject.Text || Texture == null || Texture.IsDisposed)
             {
                 Texture = TextureManager.GetOrCreateStringTextTexture(GameObject);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height, Texture.Width, Texture.Height);
+                //Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height, Texture.Width, Texture.Height);
 
                 _text = GameObject.Text;
             }
@@ -57,9 +56,32 @@ namespace ClassicUO.Game.Renderer.Views
             Texture.Ticks = World.Ticks;
             //HueVector = RenderExtentions.GetHueVector(0, GameObject.IsPartialHue, false, false);
 
-            return base.Draw(spriteBatch, position);
-        }
+            Rectangle src = new Rectangle();
+            Rectangle dest = new Rectangle((int)position.X, (int)position.Y, GameObject.Width, GameObject.Height);
 
+            src.X = 0; src.Y = 0;
+
+            int maxX = src.X + dest.Width;
+            if (maxX <= GameObject.Width)
+                src.Width = dest.Width;
+            else
+            {
+                src.Width = GameObject.Width - src.X;
+                dest.Width = src.Width;
+            }
+
+            int maxY = src.Y + dest.Height;
+            if (maxY <= GameObject.Height)
+                src.Height = dest.Height;
+            else
+            {
+                src.Height = GameObject.Height - src.Y;
+                dest.Height = src.Height;
+            }
+
+            return GameObject.Parent == null ?  spriteBatch.Draw2D(Texture, dest, src , Vector3.Zero) : base.Draw(spriteBatch, position);
+        }
+         
 
     }
 }

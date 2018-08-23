@@ -580,7 +580,7 @@ namespace ClassicUO.AssetsLoader
         }
 
 
-        public static void SetUseHTML(in bool value, uint htmlStartColor = 0xFFFFFFFF, in bool backgroundCanBeColored = false)
+        public static void SetUseHTML(in bool value, in uint htmlStartColor = 0xFFFFFFFF, in bool backgroundCanBeColored = false)
         {
             IsUsingHTML = value;
             _HTMLColor = htmlStartColor;
@@ -718,7 +718,8 @@ namespace ClassicUO.AssetsLoader
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
                 return null;
 
-            if (IsUsingHTML) return GetInfoHTML(font, str, len, align, flags, width);
+            if (IsUsingHTML)
+                return GetInfoHTML(font, str, len, align, flags, width);
 
             uint* table = (uint*)_unicodeFontAddress[font];
             MultilinesFontInfo info = new MultilinesFontInfo();
@@ -1412,13 +1413,14 @@ namespace ClassicUO.AssetsLoader
                 {
                     if ((byte)si == 0x000D || isFixed || isCropped)
                         si = (char)0;
-                    else si = '\n';
+                    else
+                        si = '\n';
                 }
 
                 if ((table[si] <= 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n')
                     continue;
 
-                byte* data = (byte*)((IntPtr)table + (int)table[(byte)si]);
+                byte* data = (byte*)((IntPtr)table + (int)table[si]);
 
                 if (si == ' ')
                 {
@@ -1463,8 +1465,7 @@ namespace ClassicUO.AssetsLoader
                         ptr.IndentionOffset = indentionOffset;
                         continue;
                     }
-
-                    if (lastSpace + 1 == ptr.CharStart && !isFixed && !isCropped)
+                    else if (lastSpace + 1 == ptr.CharStart && !isFixed && !isCropped)
                     {
                         ptr.Width += readWidth;
                         ptr.CharCount += charCount;
@@ -1497,8 +1498,8 @@ namespace ClassicUO.AssetsLoader
                             MultilinesFontData mfd1 = new MultilinesFontData { Item = si, Flags = htmlData[i].Flags, Font = htmlData[i].Font, LinkID = htmlData[i].LinkID, Color = htmlData[i].Color };
 
                             ptr.Data.Add(mfd1);
-                            ;
-                            readWidth += (sbyte)data[0] + (sbyte)data[2] + 1;
+                            
+                            readWidth += data[0] + data[2] + 1;
                             ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
 
                             charCount++;
@@ -1529,7 +1530,7 @@ namespace ClassicUO.AssetsLoader
                         ptr.Next = newptr;
                         ptr = newptr;
                         ptr.Align = htmlData[i].Align;
-                        ptr.CharCount = i;
+                        ptr.CharStart = i;
 
                         if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (htmlData[i].Flags & UOFONT_INDENTION) != 0)
                             indentionOffset = 14;
@@ -1582,7 +1583,7 @@ namespace ClassicUO.AssetsLoader
                     bool endTag = false;
                     HTMLDataInfo newInfo = new HTMLDataInfo { Tag = HTML_TAG_TYPE.HTT_NONE, Align = TEXT_ALIGN_TYPE.TS_LEFT, Flags = 0, Font = 0xFF, Color = 0, Link = 0 };
 
-                    HTML_TAG_TYPE tag = ParseHTMLTag(str, len, ref i, ref endTag, newInfo);
+                    HTML_TAG_TYPE tag = ParseHTMLTag(str, len, ref i, ref endTag, ref newInfo);
 
                     if (tag == HTML_TAG_TYPE.HTT_NONE)
                         continue;
@@ -1607,7 +1608,7 @@ namespace ClassicUO.AssetsLoader
                     else if (stack.Count > 1)
                     {
                         int index = -1;
-                        for (int j = stack.Count - 1; j > 1; j--)
+                        for (int j = stack.Count - 1; j >= 1; j--)
                         {
                             if (stack[j].Tag == tag)
                             {
@@ -1642,7 +1643,7 @@ namespace ClassicUO.AssetsLoader
                     }
                 }
 
-                if ((byte)si > 0)
+                if (si > 0)
                 {
                     data[newlen].Char = si;
                     data[newlen].Font = currentInfo.Font;
@@ -1661,7 +1662,8 @@ namespace ClassicUO.AssetsLoader
 
         private static HTMLDataInfo GetCurrentHTMLInfo(in List<HTMLDataInfo> list)
         {
-            HTMLDataInfo info = new HTMLDataInfo { Tag = HTML_TAG_TYPE.HTT_NONE, Align = TEXT_ALIGN_TYPE.TS_LEFT, Flags = 0, Font = 0xFF, Color = 0, Link = 0 };
+           HTMLDataInfo info = new HTMLDataInfo { Tag = HTML_TAG_TYPE.HTT_NONE, Align = TEXT_ALIGN_TYPE.TS_LEFT, Flags = 0, Font = 0xFF, Color = 0, Link = 0 };
+
 
             for (int i = 0; i < list.Count; i++)
             {
@@ -1685,7 +1687,7 @@ namespace ClassicUO.AssetsLoader
                         break;
                     case HTML_TAG_TYPE.HTT_BIG:
                     case HTML_TAG_TYPE.HTT_SMALL:
-                        if (current.Font == 0xFF && _unicodeFontAddress[current.Font] != IntPtr.Zero)
+                        if (current.Font != 0xFF && _unicodeFontAddress[current.Font] != IntPtr.Zero)
                             info.Font = current.Font;
                         break;
                     case HTML_TAG_TYPE.HTT_BASEFONT:
@@ -1724,7 +1726,7 @@ namespace ClassicUO.AssetsLoader
             return info;
         }
 
-        private static HTML_TAG_TYPE ParseHTMLTag(in string str, in int len, ref int i, ref bool endTag, HTMLDataInfo info)
+        private static HTML_TAG_TYPE ParseHTMLTag(in string str, in int len, ref int i, ref bool endTag, ref HTMLDataInfo info)
         {
             HTML_TAG_TYPE tag = HTML_TAG_TYPE.HTT_NONE;
             i++;
@@ -1837,9 +1839,8 @@ namespace ClassicUO.AssetsLoader
                             case HTML_TAG_TYPE.HTT_A:
                             case HTML_TAG_TYPE.HTT_DIV:
 
-                                string content = "";
                                 cmdLen = i - j;
-                                content = content.Substring(j, cmdLen);
+                                string content = str.Substring(j, cmdLen);
 
                                 if (content.Length > 0)
                                     GetHTMLInfoFromContent(ref info, content);
@@ -1988,10 +1989,10 @@ namespace ClassicUO.AssetsLoader
             {
                 if (str[0] == '#')
                 {
-                    color = str.Substring(1).StartsWith("0x") ? Convert.ToUInt32(str.Substring(3), 16) : Convert.ToUInt32(str.Substring(1), 10);
+                    color = str.Substring(1).StartsWith("0x") ? Convert.ToUInt32(str.Substring(3), 16) : Convert.ToUInt32(str.Substring(1), 16);
 
-                    byte* clrBuf = (byte*)color;
-                    color = (uint)((clrBuf[0] << 24) | (clrBuf[1] << 16) | (clrBuf[2] << 8) | 0xFF);
+                    //byte* clrBuf = (byte*)color;
+                    //color = (uint)((clrBuf[0] << 24) | (clrBuf[1] << 16) | (clrBuf[2] << 8) | 0xFF);
                 }
                 else
                 {
@@ -2064,7 +2065,7 @@ namespace ClassicUO.AssetsLoader
         private static void TrimHTMLString(ref string str)
         {
             if (str.Length >= 2 && str[0] == '"' && str[str.Length - 1] == '"')
-                str = str.Remove(str.Length - 1).Remove(0);
+                str = str.Substring(1, str.Length - 2);
         }
 
         private static HTMLDataInfo GetHTMLInfoFromTag(in HTML_TAG_TYPE tag)

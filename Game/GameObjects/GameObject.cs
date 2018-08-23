@@ -89,7 +89,7 @@ namespace ClassicUO.Game.GameObjects
                 width = 0;
             }
 
-            overhead = new GameText(this, text) { MaxWidth = (byte)width, Hue = hue, Font = font, IsUnicode = isunicode, FontStyle = FontStyle.BlackBorder };
+            overhead = new GameText(this, text) { MaxWidth = width, Hue = hue, Font = font, IsUnicode = isunicode, FontStyle = FontStyle.BlackBorder };
             InsertGameText(overhead);
             return overhead;
         }

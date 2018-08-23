@@ -65,6 +65,7 @@ namespace ClassicUO.Game.Gumps
                             gump.AddChildren(new GumpPicTiled(gparams));
                             break;
                         case "htmlgump":
+                            gump.AddChildren(new HtmlGump(gparams, lines));
                             break;
                         case "page":
                             break;

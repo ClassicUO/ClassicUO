@@ -209,6 +209,9 @@ namespace ClassicUO.Game.Renderer
                 int linesCount;
                 List<WebLinkRect> links;
 
+                if (gt.IsHTML)
+                    Fonts.SetUseHTML(true, 0xFFFFFFFF);
+
                 if (gt.IsUnicode)
                 {
                     (data, gt.Width, gt.Height, linesCount, links) = Fonts.GenerateUnicode(gt.Font, gt.Text, gt.Hue, gt.Cell, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
@@ -221,6 +224,10 @@ namespace ClassicUO.Game.Renderer
                 texture = new SpriteTexture(gt.Width, gt.Height);
                 texture.SetData(data);
                 _textTextureCache[gt] = texture;
+
+
+                if (gt.IsHTML)
+                    Fonts.SetUseHTML(false);
             }
             else
             {

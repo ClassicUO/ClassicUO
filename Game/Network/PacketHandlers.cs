@@ -2028,37 +2028,28 @@ namespace ClassicUO.Game.Network
 
             if (linesNum > 0)
             {
-                uint clineLength = p.ReadUInt() - 4;
-                uint dlineLength = p.ReadUInt();
+                clen = p.ReadUInt() - 4;
+                dlen = p.ReadUInt();
 
-                data = new byte[clineLength];
+                data = new byte[clen];
                 for (int i = 0; i < data.Length; i++)
                 {
                     data[i] = p.ReadByte();
                 }
 
-                decData = new byte[dlineLength];
+                decData = new byte[dlen];
                 Zlib.Decompress(data, 0, decData, (int)dlen);
 
                 lines = new string[linesNum];
 
                 for (int i = 0, index = 0; i < linesNum; i++)
                 {
-
-                    int length = decData[index++] + decData[index++];
+                    int length = ((decData[index++] << 8) | decData[index++]);
                     byte[] text = new byte[length * 2];
                     Buffer.BlockCopy(decData, index, text, 0, text.Length);
-                    index += length * 2;
-                    lines[i] = Encoding.BigEndianUnicode.GetString(text);
+                    index += text.Length;
+                    lines[i] = Encoding.BigEndianUnicode.GetString(text);                  
                 }
-
-                /*Packet dp = GetDecompressedData(linesdata, (int)dlineLength);
-
-                for (int i = 0; i < linesNum; i++)
-                {
-                    ushort len = dp.ReadUShort();
-                    string text = dp.ReadUnicode(len);
-                }*/
             }
 
             GumpManager.Create(sender, gumpID, (int)x, (int)y, layout, lines);
