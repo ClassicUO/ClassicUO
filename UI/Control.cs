@@ -40,9 +40,7 @@ namespace ClassicUO.UI
 
     public abstract class Control : IDisposable
     {
-        private readonly List<Control> _children;
-        private Control _parent;
-        private Rectangle _bounds;
+
 
         protected Control(in Control parent = null)
         {
@@ -84,7 +82,7 @@ namespace ClassicUO.UI
         public bool IsEnabled { get; set; }
         public bool IsFocused { get; protected set; }
         public bool MouseIsOver { get; protected set; }
-        public bool IsMovable { get; set; }
+        public bool CanMove { get; set; }
         public bool CanCloseWithRightClick { get; set; }
         public bool CanCloseWithEsc { get; set; }
         public bool IsEditable { get; set; }
@@ -149,6 +147,30 @@ namespace ClassicUO.UI
         public event EventHandler<KeyboardEventArgs> Keyboard;
 
 
+        public Control[] HitTest(in Point position)
+        {
+            List<Control> results = new List<Control>();
+
+            bool inbouds = Bounds.Contains(position);
+
+            if (inbouds)
+            {
+                results.Insert(0, this);
+                foreach (var c in Children)
+                {
+                    var cl = c.HitTest(position);
+                    if (cl != null)
+                    {
+                        for (int i = cl.Length - 1; i >= 0; i--)
+                            results.Insert(0, cl[i]);
+                    }
+                }
+            }
+
+            return results.Count == 0 ? null : results.ToArray();
+        }
+
+
         public void AddChildren(in Control c)
         {
             c.Parent = this;
@@ -179,7 +201,7 @@ namespace ClassicUO.UI
 
         public void MoveOf(in int offsetX, in int offsetY)
         {
-            if (IsMovable)
+            if (CanMove)
             {
                 Console.WriteLine("OFFSET: {0},{1}", offsetX, offsetY);
 

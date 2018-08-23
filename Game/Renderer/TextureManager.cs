@@ -207,14 +207,13 @@ namespace ClassicUO.Game.Renderer
             {
                 uint[] data;
                 int linesCount;
-                List<WebLinkRect> links;
 
                 if (gt.IsHTML)
-                    Fonts.SetUseHTML(true, 0xFFFFFFFF);
+                    Fonts.SetUseHTML(true);
 
                 if (gt.IsUnicode)
                 {
-                    (data, gt.Width, gt.Height, linesCount, links) = Fonts.GenerateUnicode(gt.Font, gt.Text, gt.Hue, gt.Cell, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
+                    (data, gt.Width, gt.Height, linesCount, gt.Links) = Fonts.GenerateUnicode(gt.Font, gt.Text, gt.Hue, gt.Cell, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
                 }
                 else
                 {

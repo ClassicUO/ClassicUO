@@ -1,4 +1,6 @@
 ﻿using ClassicUO.Game.Renderer;
+using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -19,6 +21,7 @@ namespace ClassicUO.Game.Gumps
                 ServerSerial = gumpID,
                 X = x,
                 Y = y,
+                CanMove = true,
             };
 
             while (index < layout.Length)
@@ -127,6 +130,8 @@ namespace ClassicUO.Game.Gumps
             {
                 _gumps[i].Update(ms);
             }
+
+            HandleMouseInput();
         }
 
         public static void Render(in SpriteBatch3D spriteBatch)
@@ -135,8 +140,34 @@ namespace ClassicUO.Game.Gumps
             {
                 var g = _gumps[i];
                 g.Draw(spriteBatch,
-                    new Microsoft.Xna.Framework.Vector3(g.X, g.Y, 0));
+                    new Vector3(g.X, g.Y, 0));
             }
         }
+
+
+        private static void HandleMouseInput()
+        {
+            for (int i = 0; i < _gumps.Count; i++)
+            {
+                var g = _gumps[i];
+                GumpControl gump = HitTest(g, Input.MouseManager.ScreenPosition);
+
+                if (gump != null)
+                {
+                    Console.WriteLine(gump);
+                }
+
+            }
+        }
+
+
+        private static GumpControl HitTest(in GumpControl parent, in Point position)
+        {
+            var p = parent?.HitTest(position);
+            if (p != null && p.Length > 0)
+                return p[0];
+            return null;
+        }
+
     }
 }

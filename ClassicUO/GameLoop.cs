@@ -213,7 +213,6 @@ namespace ClassicUO
             {
                 IsUnicode = true,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                Hue = 38,
                 Text = "FPS: 0",
                 FontStyle = FontStyle.BlackBorder,
                 Font = 0,

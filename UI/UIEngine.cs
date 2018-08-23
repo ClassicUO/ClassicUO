@@ -1,5 +1,4 @@
 ﻿using ClassicUO.Input;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
@@ -8,14 +7,12 @@ namespace ClassicUO.UI
 {
     //http://www.sdltutorials.com/sdl-events
 
-    public sealed class UIEngine
+    public class UIEngine
     {
-        private readonly Game _game;
         private Control _lastFocused;
 
-        public UIEngine(in Game game)
+        public UIEngine()
         {
-            _game = game;
             Controls = new List<Control>();
         }
 
@@ -37,6 +34,7 @@ namespace ClassicUO.UI
         //    Controls.ForEach(s => s.Update(time));
         //}
 
+
         private void DoMouseButtonEvents(MouseEventArgs arg)
         {
             Control control = null;
@@ -48,7 +46,7 @@ namespace ClassicUO.UI
 
                 if (s.IsEnabled && s.IsVisible && s.Bounds.Contains(arg.Location.X, arg.Location.Y))
                 {
-                    if (s.IsMovable && !s.CanDragNow && arg.Button == MouseButton.Left && arg.ButtonState == ButtonState.Pressed)
+                    if (s.CanMove && !s.CanDragNow && arg.Button == MouseButton.Left && arg.ButtonState == ButtonState.Pressed)
                         s.CanDragNow = true;
                     return true;
                 }
@@ -101,7 +99,7 @@ namespace ClassicUO.UI
 
             if (control != null)
             {
-                if (control.IsMovable && control.CanDragNow)
+                if (control.CanMove && control.CanDragNow)
                     control.MoveOf(arg.Offset.X, arg.Offset.Y);
 
                 control.OnMouseMove(arg);

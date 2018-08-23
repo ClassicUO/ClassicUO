@@ -2048,7 +2048,7 @@ namespace ClassicUO.Game.Network
                     byte[] text = new byte[length * 2];
                     Buffer.BlockCopy(decData, index, text, 0, text.Length);
                     index += text.Length;
-                    lines[i] = Encoding.BigEndianUnicode.GetString(text);                  
+                    lines[i] = Encoding.BigEndianUnicode.GetString(text);
                 }
             }
 

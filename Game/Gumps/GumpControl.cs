@@ -1,26 +1,103 @@
 ﻿using ClassicUO.Game.Renderer;
-using ClassicUO.UI;
-using ClassicUO.Utility;
+using ClassicUO.Input;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using IDrawable = ClassicUO.Game.GameObjects.Interfaces.IDrawable;
 using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Gumps
 {
-    public class GumpControl : Control, IDrawable, IUpdateable
+    public class GumpControl : IDrawable, IUpdateable
     {
-        public GumpControl(in GumpControl parent = null) : base(parent)
+        private readonly List<GumpControl> _children;
+        private GumpControl _parent;
+        private Rectangle _bounds;
+
+
+        public GumpControl(in GumpControl parent = null)
         {
+            Parent = parent;
+            _children = new List<GumpControl>();
+            IsEnabled = true;
+            IsVisible = true;
             AllowedToDraw = true;
         }
+
+
+        public event EventHandler<MouseEventArgs> MouseButton, MouseMove, MouseEnter, MouseLeft;
+        public event EventHandler<MouseWheelEventArgs> MouseWheel;
+        public event EventHandler<KeyboardEventArgs> Keyboard;
 
 
         public bool AllowedToDraw { get; set; }
         public SpriteTexture Texture { get; set; }
         public Vector3 HueVector { get; set; }
-
         public Serial ServerSerial { get; set; }
         public Serial LocalSerial { get; set; }
+        public Point Location
+        {
+            get => _bounds.Location;
+            set => _bounds.Location = value;
+        }
+
+        public Rectangle Bounds
+        {
+            get => _bounds;
+            set => _bounds = value;
+        }
+
+        public bool IsDisposed { get; private set; }
+        public bool IsVisible { get; set; }
+        public bool IsEnabled { get; set; }
+        public bool IsFocused { get; protected set; }
+        public bool MouseIsOver { get; protected set; }
+        public bool CanMove { get; set; }
+        public bool CanCloseWithRightClick { get; set; }
+        public bool CanCloseWithEsc { get; set; }
+        public bool IsEditable { get; set; }
+        public IReadOnlyList<GumpControl> Children => _children;
+        internal bool CanDragNow { get; set; }
+
+        public int Width
+        {
+            get => _bounds.Width;
+            set => _bounds.Width = value;
+        }
+
+        public int Height
+        {
+            get => _bounds.Height;
+            set => _bounds.Height = value;
+        }
+
+        public int X
+        {
+            get => _bounds.X;
+            set => _bounds.X = value;
+        }
+
+        public int Y
+        {
+            get => _bounds.Y;
+            set => _bounds.Y = value;
+        }
+
+        public GumpControl Parent
+        {
+            get => _parent;
+            set
+            {
+                if (value == null)
+                    _parent?._children.Remove(this);
+                else
+                    value._children.Add(this);
+
+                _parent = value;
+
+            }
+        }
 
 
         public virtual void Update(in double frameMS)
@@ -30,16 +107,24 @@ namespace ClassicUO.Game.Gumps
                 return;
             }
 
-            foreach (Control c in Children)
+            if (Children.Count > 0)
             {
-                if (c is GumpControl gump)
+                int w = 0, h = 0;
+
+                foreach (GumpControl c in Children)
                 {
-                    gump.Update(frameMS);
+                    c.Update(frameMS);
+
+                    if (w < c.Bounds.Right)
+                        w = c.Bounds.Right;
+                    if (h < c.Bounds.Bottom)
+                        h = c.Bounds.Bottom;
                 }
-                else
-                {
-                    Log.Message(LogTypes.Warning, $"{c} is not a GumpControl!!");
-                }
+
+                if (w != Width)
+                    Width = w;
+                if (h != Height)
+                    Height = h;
             }
         }
 
@@ -54,34 +139,143 @@ namespace ClassicUO.Game.Gumps
                 Texture.Ticks = World.Ticks;
 
 
-            foreach (Control c in Children)
+            foreach (GumpControl c in Children)
             {
-                if (c is GumpControl gump)
+                if (c.IsVisible)
                 {
-                    if (gump.IsVisible)
-                    {
-                        Vector3 offset = new Vector3(gump.X + position.X, gump.Y + position.Y, position.Z);
-                        gump.Draw(spriteBatch, offset);
-                    }
-                }
-                else
-                {
-                    Log.Message(LogTypes.Warning, $"{c} is not a GumpControl!!");
+                    Vector3 offset = new Vector3(c.X + position.X, c.Y + position.Y, position.Z);
+                    c.Draw(spriteBatch, offset);
                 }
             }
 
             return true;
         }
 
-        public override void Dispose()
+
+
+        internal void SetFocused()
         {
+            IsFocused = true;
+        }
+
+        internal void RemoveFocus()
+        {
+            IsFocused = false;
+        }
+
+
+
+        public GumpControl[] HitTest(in Point position)
+        {
+            List<GumpControl> results = new List<GumpControl>();
+
+            bool inbouds = Bounds.Contains(position);
+
+            if (inbouds)
+            {
+                results.Insert(0, this);
+                foreach (var c in Children)
+                {
+                    var cl = c.HitTest(position);
+                    if (cl != null)
+                    {
+                        for (int i = cl.Length - 1; i >= 0; i--)
+                            results.Insert(0, cl[i]);
+                    }
+                }
+            }
+
+            return results.Count == 0 ? null : results.ToArray();
+        }
+
+
+        public void AddChildren(in GumpControl c)
+        {
+            c.Parent = this;
+            _children.Add(c);
+        }
+
+        public void RemoveChildren(in GumpControl c)
+        {
+            c.Parent = null;
+            _children.Remove(c);
+        }
+
+        public void Clear()
+        {
+            _children.ForEach(s => s.Parent = null);
+            _children.Clear();
+        }
+
+        public void MoveOf(in int offsetX, in int offsetY)
+        {
+            if (CanMove)
+            {
+                Console.WriteLine("OFFSET: {0},{1}", offsetX, offsetY);
+
+                if (Parent != null)
+                {
+                    if (X + offsetX > Parent.Width || Y + offsetY > Parent.Height || X + offsetX < Parent.X || Y + offsetY < Parent.Y)
+                        return;
+                }
+
+
+                X += offsetX;
+                Y += offsetY;
+
+                foreach (GumpControl c in Children)
+                    c.MoveOf(offsetX, offsetY);
+            }
+        }
+
+        public T[] GetControls<T>() where T : GumpControl => Children.OfType<T>().ToArray();
+
+
+        public virtual void OnMouseButton(in MouseEventArgs e)
+        {
+            MouseButton?.Invoke(this, e);
+        }
+
+        public virtual void OnMouseEnter(in MouseEventArgs e)
+        {
+            MouseIsOver = true;
+            MouseEnter?.Invoke(this, e);
+        }
+
+        public virtual void OnMouseLeft(in MouseEventArgs e)
+        {
+            MouseIsOver = false;
+            MouseLeft?.Invoke(this, e);
+        }
+
+        public virtual void OnMouseMove(in MouseEventArgs e)
+        {
+            MouseMove?.Invoke(this, e);
+        }
+
+        public virtual void OnMouseWheel(in MouseWheelEventArgs e)
+        {
+            MouseWheel?.Invoke(this, e);
+        }
+
+        public virtual void OnKeyboard(in KeyboardEventArgs e)
+        {
+            Keyboard?.Invoke(this, e);
+        }
+
+        public virtual void Dispose()
+        {
+            if (IsDisposed)
+                return;
+
             for (int i = 0; i < Children.Count; i++)
             {
                 var c = Children[i];
                 c.Dispose();
             }
 
-            base.Dispose();
+            IsDisposed = true;
         }
+
     }
 }

@@ -27,16 +27,16 @@ namespace ClassicUO.Game.GameObjects
             Parent = parent;
             Text = text;
 
-
             Timeout = 2500 + (text.Substring(text.IndexOf('>') + 1).Length * 100);
             if (Timeout > 10000)
             {
                 Timeout = 10000;
             }
+
+            Hue = 0xFFFF;
         }
 
         public bool IsUnicode { get; set; }
-        public bool IsPartialHue { get; set; }
         public byte Font { get; set; }
         public TEXT_ALIGN_TYPE Align { get; set; }
         public int MaxWidth { get; set; }
@@ -45,13 +45,14 @@ namespace ClassicUO.Game.GameObjects
         public string Text { get; set; }
         public MessageType MessageType { get; set; }
         public GameObject Parent { get; }
-
         public long Timeout { get; set; }
         public bool IsPersistent { get; set; }
-
         public bool IsHTML { get; set; }
+        public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
+        public new GameTextView View => (GameTextView)base.View;
 
-        public List<WebLink> Links { get; set; }
+        public bool IsPartialHue { get; set; }
+
 
         public Rectangle Bounds
         {
@@ -84,14 +85,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-
-        protected override View CreateView()
-        {
-            return new GameTextView(this);
-        }
-
-        public new GameTextView View => (GameTextView)base.View;
-
+        protected override View CreateView() => new GameTextView(this);
 
         public override int GetHashCode()
         {

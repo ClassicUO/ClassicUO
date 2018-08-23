@@ -1498,7 +1498,7 @@ namespace ClassicUO.AssetsLoader
                             MultilinesFontData mfd1 = new MultilinesFontData { Item = si, Flags = htmlData[i].Flags, Font = htmlData[i].Font, LinkID = htmlData[i].LinkID, Color = htmlData[i].Color };
 
                             ptr.Data.Add(mfd1);
-                            
+
                             readWidth += data[0] + data[2] + 1;
                             ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
 
@@ -1662,7 +1662,7 @@ namespace ClassicUO.AssetsLoader
 
         private static HTMLDataInfo GetCurrentHTMLInfo(in List<HTMLDataInfo> list)
         {
-           HTMLDataInfo info = new HTMLDataInfo { Tag = HTML_TAG_TYPE.HTT_NONE, Align = TEXT_ALIGN_TYPE.TS_LEFT, Flags = 0, Font = 0xFF, Color = 0, Link = 0 };
+            HTMLDataInfo info = new HTMLDataInfo { Tag = HTML_TAG_TYPE.HTT_NONE, Align = TEXT_ALIGN_TYPE.TS_LEFT, Flags = 0, Font = 0xFF, Color = 0, Link = 0 };
 
 
             for (int i = 0; i < list.Count; i++)

@@ -1,5 +1,4 @@
-﻿using ClassicUO.AssetsLoader;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Renderer
 {
@@ -14,7 +13,7 @@ namespace ClassicUO.Game.Renderer
             if ((hue & 0x4000) != 0)
             {
                 transparent = true;
-                
+
 
                 //return new Vector3( 16843263 & 0x0FFF , (noLighting ? 4 : 0) + (partial ? 2 : 1), transparent ? ALPHA : 0); 
             }

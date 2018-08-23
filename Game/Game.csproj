@@ -15,7 +15,6 @@
     <ProjectReference Include="..\AssetLoader\AssetLoader.csproj" />
     <ProjectReference Include="..\Configuration\Configuration.csproj" />
     <ProjectReference Include="..\Input\Input.csproj" />
-    <ProjectReference Include="..\UI\UI.csproj" />
     <ProjectReference Include="..\Utility\Utility.csproj" />
   </ItemGroup>
 

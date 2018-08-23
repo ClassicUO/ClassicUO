@@ -79,9 +79,9 @@ namespace ClassicUO.Game.Renderer.Views
                 dest.Height = src.Height;
             }
 
-            return GameObject.Parent == null ?  spriteBatch.Draw2D(Texture, dest, src , Vector3.Zero) : base.Draw(spriteBatch, position);
+            return GameObject.Parent == null ? spriteBatch.Draw2D(Texture, dest, src, Vector3.Zero) : base.Draw(spriteBatch, position);
         }
-         
+
 
     }
 }

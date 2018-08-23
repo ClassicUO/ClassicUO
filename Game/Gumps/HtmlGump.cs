@@ -1,9 +1,6 @@
 ﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Gumps
 {
@@ -20,6 +17,8 @@ namespace ClassicUO.Game.Gumps
             int textIndex = int.Parse(parts[5]);
             HasBackground = parts[6] == "1";
             HasScrollbar = parts[7] != "0";
+            
+            
 
 
             _gameText.MaxWidth = (Width - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0));
