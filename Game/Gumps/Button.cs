@@ -41,6 +41,7 @@ namespace ClassicUO.Game.Gumps
                 IsPersistent = true
             };
 
+            CanMove = false;
         }
 
         public Button(in string[] parts) :
@@ -72,19 +73,6 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            if (IsDisposed)
-            {
-                return false;
-            }
-
-            if (Text != string.Empty)
-            {
-                _gText.View.Draw(spriteBatch, position);
-            }
-
-            //if (Texture != _textures[_curentState])
-            //    Texture = _textures[_curentState];
-
             for (int i = 0; i < _textures.Length; i++)
             {
                 if (_textures[i] != null)
@@ -92,6 +80,11 @@ namespace ClassicUO.Game.Gumps
             }
 
             spriteBatch.Draw2D(_textures[_curentState], new Rectangle((int)position.X, (int)position.Y, Width, Height), Vector3.Zero);
+
+            if (Text != string.Empty)
+            {
+                _gText.View.Draw(spriteBatch, position);
+            }
 
             return base.Draw(in spriteBatch, in position);
         }
@@ -128,16 +121,17 @@ namespace ClassicUO.Game.Gumps
 
         public override void Dispose()
         {
+            base.Dispose();
+
             _gText.Dispose();
             _gText = null;
 
             for (int i = 0; i < _textures.Length; i++)
             {
-                _textures[i].Dispose();
+                if (_textures[i] != null)
+                    _textures[i].Dispose();
                 _textures[i] = null;
             }
-
-            base.Dispose();
         }
     }
 }

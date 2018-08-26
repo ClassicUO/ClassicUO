@@ -11,6 +11,8 @@ namespace ClassicUO.Game.Gumps
         {
             _graphic = graphic;
             Hue = hue;
+
+            CanMove = true;
         }
 
         public StaticPic(in GumpControl parent, in string[] parts) : this(Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue)0)

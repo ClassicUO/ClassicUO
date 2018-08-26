@@ -10,7 +10,7 @@ namespace ClassicUO.Game.Gumps
 
         public GumpPicBase() : base()
         {
-            // can drag
+            CanMove = true;
         }
 
         public Graphic Graphic { get; set; }

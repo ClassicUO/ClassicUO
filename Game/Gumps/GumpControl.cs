@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Gumps
         public Point Location
         {
             get => _bounds.Location;
-            set => _bounds.Location = value;
+            set { X = value.X; Y = value.Y; }
         }
 
         public Rectangle Bounds
@@ -84,6 +84,9 @@ namespace ClassicUO.Game.Gumps
             set => _bounds.Y = value;
         }
 
+        public int ParentX => Parent != null ? Parent.X + Parent.ParentX : 0;
+        public int ParentY => Parent != null ? Parent.Y + Parent.ParentY : 0;
+
         public GumpControl Parent
         {
             get => _parent;
@@ -99,6 +102,16 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        public GumpControl RootParent
+        {
+            get
+            {
+                GumpControl p = this;
+                while (p.Parent != null)
+                    p = p.Parent;
+                return p;
+            }
+        }
 
         public virtual void Update(in double frameMS)
         {
@@ -169,7 +182,7 @@ namespace ClassicUO.Game.Gumps
         {
             List<GumpControl> results = new List<GumpControl>();
 
-            bool inbouds = Bounds.Contains(position);
+            bool inbouds = Bounds.Contains(position.X - ParentX, position.Y - ParentY);
 
             if (inbouds)
             {
@@ -192,40 +205,17 @@ namespace ClassicUO.Game.Gumps
         public void AddChildren(in GumpControl c)
         {
             c.Parent = this;
-            _children.Add(c);
         }
 
         public void RemoveChildren(in GumpControl c)
         {
             c.Parent = null;
-            _children.Remove(c);
         }
 
         public void Clear()
         {
             _children.ForEach(s => s.Parent = null);
             _children.Clear();
-        }
-
-        public void MoveOf(in int offsetX, in int offsetY)
-        {
-            if (CanMove)
-            {
-                Console.WriteLine("OFFSET: {0},{1}", offsetX, offsetY);
-
-                if (Parent != null)
-                {
-                    if (X + offsetX > Parent.Width || Y + offsetY > Parent.Height || X + offsetX < Parent.X || Y + offsetY < Parent.Y)
-                        return;
-                }
-
-
-                X += offsetX;
-                Y += offsetY;
-
-                foreach (GumpControl c in Children)
-                    c.MoveOf(offsetX, offsetY);
-            }
         }
 
         public T[] GetControls<T>() where T : GumpControl => Children.OfType<T>().ToArray();

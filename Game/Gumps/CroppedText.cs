@@ -26,6 +26,8 @@ namespace ClassicUO.Game.Gumps
             _gameText.MaxWidth = Width;
 
             Text = lines[_index];
+
+            CanMove = true;
         }
 
 

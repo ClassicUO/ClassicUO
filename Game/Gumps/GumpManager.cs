@@ -1,5 +1,6 @@
 ﻿using ClassicUO.Game.Renderer;
 using ClassicUO.Input;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ namespace ClassicUO.Game.Gumps
         };
         private static readonly Queue<MouseWheelEventArgs> _mouseEventsWheelTriggered = new Queue<MouseWheelEventArgs>();
 
+        private static GumpControl _moveOverControl;
 
         static GumpManager()
         {
@@ -56,6 +58,7 @@ namespace ClassicUO.Game.Gumps
                 X = x,
                 Y = y,
                 CanMove = true,
+                CanCloseWithRightClick = true
             };
 
             while (index < layout.Length)
@@ -192,11 +195,17 @@ namespace ClassicUO.Game.Gumps
             for (int i = 0; i < _gumps.Count; i++)
             {
                 gump = HitTest(_gumps[i], MouseManager.ScreenPosition);
+                if (gump != null)
+                    break;
             }
+
+            _moveOverControl = gump;
 
 
             if (gump != null)
             {
+                bool isdown = false;
+
                 while (_typeQueue.Count > 0)
                 {
                     var t = _typeQueue.Dequeue();
@@ -207,14 +216,44 @@ namespace ClassicUO.Game.Gumps
                             var evw = _mouseEventsWheelTriggered.Dequeue();
                             gump.OnMouseWheel(evw);
                             break;
-                        default:
+                        case InputMouseType.MouseDown:                          
+                        case InputMouseType.MouseUp:
+                        case InputMouseType.MousePressed:
                             var ev = _mouseEventsTriggered[(int)t].Dequeue();
+                            gump.OnMouseButton(ev);
+
+                            isdown = ev.Button == MouseButton.Left && ev.ButtonState == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
+    
+                            if (ev.Button == MouseButton.Right && t == InputMouseType.MouseUp && gump.RootParent.CanCloseWithRightClick)
+                            {
+                                gump.RootParent.Dispose();
+                            }
+
+                            break;
+                        case InputMouseType.MouseMove:
+                            ev = _mouseEventsTriggered[(int)t].Dequeue();
+
+                            if (isdown && gump.CanMove)
+                            {
+                                // TODO: add check to viewport
+
+                                gump.RootParent.X += ev.Offset.X;
+                                gump.RootParent.Y += ev.Offset.Y;                               
+                            }
+                            else
+                            {
+                                gump.OnMouseMove(ev);
+                            }
+
+                            break;
+                        default:
+                            Log.Message(LogTypes.Error, "WRONG MOUSE INPUT");
                             break;
                     }
                 }
+
             }
         }
-
 
         private static GumpControl HitTest(in GumpControl parent, in Point position)
         {
@@ -223,6 +262,7 @@ namespace ClassicUO.Game.Gumps
                 return p[0];
             return null;
         }
+
 
     }
 }

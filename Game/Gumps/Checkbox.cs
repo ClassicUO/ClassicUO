@@ -21,6 +21,8 @@ namespace ClassicUO.Game.Gumps
             ref var t = ref _textures[INACTIVE];
             Width = t.Width;
             Height = t.Height;
+
+            CanMove = false;
         }
 
 

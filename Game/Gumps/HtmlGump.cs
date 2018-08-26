@@ -1,5 +1,6 @@
 ﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Renderer;
+using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
@@ -34,8 +35,8 @@ namespace ClassicUO.Game.Gumps
                 IsUnicode = true,
                 Align = AssetsLoader.TEXT_ALIGN_TYPE.TS_LEFT,
                 Font = 1,
-                Hue = 0xFFFF
             };
+            CanMove = true;
         }
 
 
@@ -51,5 +52,6 @@ namespace ClassicUO.Game.Gumps
 
             return true;
         }
+
     }
 }

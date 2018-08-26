@@ -11,6 +11,7 @@ namespace ClassicUO.Game.Gumps
         public GumpPicTiled(in Graphic graphic) : base()
         {
             _graphic = graphic;
+            CanMove = true;
         }
 
         public GumpPicTiled(in string[] parts) : this(Graphic.Parse(parts[5]))
