@@ -63,7 +63,7 @@ namespace ClassicUO.Game.Renderer.Views
                 Tile tile;
                 Direction check;
 
-                int offset = (int)Math.Ceiling(TextureWidth / 44f) / 2;
+                int offset = 1; // (int)Math.Ceiling(TextureWidth / 44f) / 2;
                 if (offset < 1)
                 {
                     offset = 1;
