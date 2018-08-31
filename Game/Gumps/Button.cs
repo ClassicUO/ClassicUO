@@ -96,6 +96,8 @@ namespace ClassicUO.Game.Gumps
             {
                 _curentState = OVER;
             }
+            else
+                _curentState = NORMAL;
         }
 
         public override void OnMouseLeft(in MouseEventArgs e)

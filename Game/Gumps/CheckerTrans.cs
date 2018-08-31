@@ -13,7 +13,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (_transparentTexture == null)
                 {
-                    _transparentTexture = new SpriteTexture(32, 32);
+                    _transparentTexture = new SpriteTexture(1, 1);
                     _transparentTexture.SetData(new Color[1] { Color.Black });
                 }
 
@@ -24,7 +24,8 @@ namespace ClassicUO.Game.Gumps
 
         public CheckerTrans() : base()
         {
-
+            CanMove = true;
+            CanCloseWithRightClick = true;
         }
 
         public CheckerTrans(in string[] parts) : this()
@@ -37,7 +38,7 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            spriteBatch.Draw2DTiled(_transparentTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, true, false));
+            spriteBatch.Draw2D(TransparentTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, true, false));
             return base.Draw(spriteBatch, position);
         }
     }

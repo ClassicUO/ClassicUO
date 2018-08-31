@@ -110,6 +110,7 @@ namespace ClassicUO.Game.Gumps
                         case "page":
                             break;
                         case "resizepic":
+                            gump.AddChildren(new ResizePic(gparams));
                             break;
                         case "text":
                             break;
