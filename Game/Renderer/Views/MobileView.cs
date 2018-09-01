@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Renderer.Views
                 _texture.SetData(new Color[1] { Color.White });
             }
 
-            spriteBatch.GetZ();
+            spriteBatch.GetNextUniqueZ();
 
             bool mirror = false;
             byte dir = (byte)GameObject.GetDirectionForAnimation();
@@ -252,6 +252,7 @@ namespace ClassicUO.Game.Renderer.Views
             {
                 ref AnimationFrame frame = ref direction.Frames[animIndex];
 
+                
                 if ((frame.Pixels == null || frame.Pixels.Length <= 0))
                 {
                     if (!Animations.LoadDirectionGroup(ref direction))

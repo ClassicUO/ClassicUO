@@ -93,8 +93,8 @@ namespace ClassicUO
             // TEST
 
 
-            /* uncomment it and fill it to save your first settings
-            Configuration.Settings settings1 = new Configuration.Settings()
+            // uncomment it and fill it to save your first settings
+            /*Configuration.Settings settings1 = new Configuration.Settings()
             {
                 Username = "",
                 Password = "",
@@ -105,8 +105,8 @@ namespace ClassicUO
                 ClientVersion = "7.0.59.8"
             };
 
-            Configuration.ConfigurationResolver.Save(settings1, "settings.json");
-            */
+            Configuration.ConfigurationResolver.Save(settings1, "settings.json");*/
+            
 
             Settings settings = ConfigurationResolver.Load<Settings>("settings.json");
 
@@ -449,6 +449,7 @@ namespace ClassicUO
 
         protected override void Draw(GameTime gameTime)
         {
+           
             if (World.Player != null && World.Map != null)
             {
                 _fpsCounter.IncreaseFrame();
@@ -594,7 +595,7 @@ namespace ClassicUO
 
                 _spriteBatch.GraphicsDevice.SetRenderTarget(_targetRender);
                 _spriteBatch.GraphicsDevice.Clear(ClearOptions.DepthBuffer | ClearOptions.Target, Color.Black, 1, 0);
-                _spriteBatch.EndDraw(true);
+                _spriteBatch.FlushSprites(true);
                 _spriteBatch.GraphicsDevice.SetRenderTarget(null);
             }
 
@@ -622,7 +623,7 @@ namespace ClassicUO
 
             Game.Gumps.GumpManager.Render(_spriteBatch);
             _gameCursor.Draw(_spriteBatch);
-            _spriteBatch.EndDraw();
+            _spriteBatch.FlushSprites(true);
 
 
 

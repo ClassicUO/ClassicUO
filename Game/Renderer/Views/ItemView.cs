@@ -114,7 +114,7 @@ namespace ClassicUO.Game.Renderer.Views
 
         public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
         {
-            spriteBatch.GetZ();
+            spriteBatch.GetNextUniqueZ();
 
             byte dir = (byte)((byte)WorldObject.Layer & 0x7F & 7);
             bool mirror = false;
