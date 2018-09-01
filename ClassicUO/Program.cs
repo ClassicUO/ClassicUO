@@ -7,6 +7,7 @@ namespace ClassicUO
 {
     internal class Program
     {
+       
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
