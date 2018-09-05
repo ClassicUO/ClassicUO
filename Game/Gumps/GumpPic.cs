@@ -18,9 +18,9 @@ namespace ClassicUO.Game.Gumps
         public bool IsPaperdoll { get; set; }
 
 
-        public override void Update(in double frameMS)
+        public override void Update(double frameMS)
         {
-            if (Texture == null || Graphic != _lastGump)
+            if (Texture == null || Texture.IsDisposed || Graphic != _lastGump)
             {
                 _lastGump = Graphic;
 
@@ -36,12 +36,12 @@ namespace ClassicUO.Game.Gumps
     public class GumpPic : GumpPicBase
     {
 
-        public GumpPic(in Graphic graphic) : base()
+        public GumpPic(Graphic graphic) : base()
         {
             Graphic = graphic;
         }
 
-        public GumpPic(in string[] parts) : this(Graphic.Parse(parts[3]))
+        public GumpPic(string[] parts) : this(Graphic.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
             spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Hue));
             return base.Draw(spriteBatch, position);

@@ -7,7 +7,7 @@ namespace ClassicUO.Game.Map
 {
     public sealed class FacetChunk
     {
-        public FacetChunk(in ushort x, in ushort y)
+        public FacetChunk(ushort x,  ushort y)
         {
             X = x;
             Y = y;
@@ -28,7 +28,7 @@ namespace ClassicUO.Game.Map
         public Tile[][] Tiles { get; private set; }
 
 
-        public void Load(in int map)
+        public void Load(int map)
         {
             IndexMap im = GetIndex(map);
             if (im.MapAddress == 0)
@@ -36,7 +36,7 @@ namespace ClassicUO.Game.Map
                 throw new Exception();
             }
 
-            unsafe
+            //unsafe
             {
                 MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr)im.MapAddress);
 
@@ -57,48 +57,58 @@ namespace ClassicUO.Game.Map
                     }
                 }
 
-                StaticsBlock* sb = (StaticsBlock*)im.StaticAddress;
-                if (sb != null)
+                if (im.StaticAddress != 0 )
                 {
-                    int count = (int)im.StaticCount;
+                    int size = Marshal.SizeOf<StaticsBlock>();
+                    for (int i = 0; i < im.StaticCount; i++)
+                    
 
-                    for (int i = 0; i < count; i++, sb++)
+                    //StaticsBlock* sb = (StaticsBlock*)im.StaticAddress;
+                    //if (sb != null)
                     {
-                        if (sb->Color > 0 && sb->Color != 0xFFFF)
+
+                        var sb = Marshal.PtrToStructure<StaticsBlock>((IntPtr)im.StaticAddress + (i * size));
+
+                        int count = (int)im.StaticCount;
+
+                        //for (int i = 0; i < count; i++, sb++)
                         {
-                            ushort x = sb->X;
-                            ushort y = sb->Y;
-
-                            int pos = y * 8 + x;
-                            if (pos >= 64)
+                            if (sb.Color > 0 && sb.Color != 0xFFFF)
                             {
-                                continue;
+                                ushort x = sb.X;
+                                ushort y = sb.Y;
+
+                                int pos = y * 8 + x;
+                                if (pos >= 64)
+                                {
+                                    continue;
+                                }
+
+                                sbyte z = sb.Z;
+
+                                Static staticObject = new Static(sb.Color, sb.Hue, pos) { Position = new Position((ushort)(bx + x), (ushort)(by + y), z) };
+
+                                Tiles[x][y].AddGameObject(staticObject);
                             }
-
-                            sbyte z = sb->Z;
-
-                            Static staticObject = new Static(sb->Color, sb->Hue, pos) { Position = new Position((ushort)(bx + x), (ushort)(by + y), z) };
-
-                            Tiles[x][y].AddWorldObject(staticObject);
                         }
                     }
                 }
             }
         }
 
-        private IndexMap GetIndex(in int map)
+        private IndexMap GetIndex(int map)
         {
             return GetIndex(map, X, Y);
         }
 
-        private IndexMap GetIndex(in int map, in int x, in int y)
+        private IndexMap GetIndex(int map,  int x,  int y)
         {
             int block = x * IO.Resources.Map.MapBlocksSize[map][1] + y;
             return IO.Resources.Map.BlockData[map][block];
         }
 
         // we wants to avoid reallocation, so use a reset method
-        public void SetTo(in ushort x, in ushort y)
+        public void SetTo(ushort x,  ushort y)
         {
             X = x;
             Y = y;
@@ -112,12 +122,12 @@ namespace ClassicUO.Game.Map
                 {
                     Tiles[i][j].Clear();
 
-                    Tiles[i][j].Dispose();
-                    Tiles[i][j] = null;
+                    //Tiles[i][j].Dispose();
+                    //Tiles[i][j] = null;
                 }
             }
 
-            Tiles = null;
+            //Tiles = null;
         }
     }
 }

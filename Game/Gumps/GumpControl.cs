@@ -16,7 +16,7 @@ namespace ClassicUO.Game.Gumps
         private Rectangle _bounds;
 
 
-        public GumpControl(in GumpControl parent = null)
+        public GumpControl(GumpControl parent = null)
         {
             Parent = parent;
             _children = new List<GumpControl>();
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public virtual void Update(in double frameMS)
+        public virtual void Update(double frameMS)
         {
             if (IsDisposed)
             {
@@ -141,9 +141,9 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public virtual bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            if (IsDisposed || (Texture == null && Children.Count <= 0))
+            if (IsDisposed || ((Texture == null || Texture.IsDisposed) && Children.Count <= 0))
             {
                 return false;
             }
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.Gumps
 
 
 
-        public GumpControl[] HitTest(in Point position)
+        public GumpControl[] HitTest(Point position)
         {
             List<GumpControl> results = new List<GumpControl>();
 
@@ -202,12 +202,12 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public void AddChildren(in GumpControl c)
+        public void AddChildren(GumpControl c)
         {
             c.Parent = this;
         }
 
-        public void RemoveChildren(in GumpControl c)
+        public void RemoveChildren(GumpControl c)
         {
             c.Parent = null;
         }
@@ -221,34 +221,34 @@ namespace ClassicUO.Game.Gumps
         public T[] GetControls<T>() where T : GumpControl => Children.OfType<T>().ToArray();
 
 
-        public virtual void OnMouseButton(in MouseEventArgs e)
+        public virtual void OnMouseButton(MouseEventArgs e)
         {
             MouseButton?.Invoke(this, e);
         }
 
-        public virtual void OnMouseEnter(in MouseEventArgs e)
+        public virtual void OnMouseEnter(MouseEventArgs e)
         {
             MouseIsOver = true;
             MouseEnter?.Invoke(this, e);
         }
 
-        public virtual void OnMouseLeft(in MouseEventArgs e)
+        public virtual void OnMouseLeft(MouseEventArgs e)
         {
             MouseIsOver = false;
             MouseLeft?.Invoke(this, e);
         }
 
-        public virtual void OnMouseMove(in MouseEventArgs e)
+        public virtual void OnMouseMove(MouseEventArgs e)
         {
             MouseMove?.Invoke(this, e);
         }
 
-        public virtual void OnMouseWheel(in MouseWheelEventArgs e)
+        public virtual void OnMouseWheel(MouseWheelEventArgs e)
         {
             MouseWheel?.Invoke(this, e);
         }
 
-        public virtual void OnKeyboard(in KeyboardEventArgs e)
+        public virtual void OnKeyboard(KeyboardEventArgs e)
         {
             Keyboard?.Invoke(this, e);
         }

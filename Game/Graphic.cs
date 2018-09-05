@@ -10,44 +10,44 @@ namespace ClassicUO.Game
 
         private readonly ushort _value;
 
-        public Graphic(in ushort graphic)
+        public Graphic(ushort graphic)
         {
             _value = graphic;
         }
 
-        public Graphic(in int graphic)
+        public Graphic(int graphic)
         {
             _value = (ushort)graphic;
         }
 
         public bool IsInvariant => _value == Invariant;
 
-        public static implicit operator Graphic(in ushort value)
+        public static implicit operator Graphic(ushort value)
         {
             return new Graphic(value);
         }
 
-        public static implicit operator ushort(in Graphic color)
+        public static implicit operator ushort(Graphic color)
         {
             return color._value;
         }
 
-        public static bool operator ==(in Graphic g1, in Graphic g2)
+        public static bool operator ==(Graphic g1,  Graphic g2)
         {
             return g1.IsInvariant || g2.IsInvariant || g1._value == g2._value;
         }
 
-        public static bool operator !=(in Graphic g1, in Graphic g2)
+        public static bool operator !=(Graphic g1,  Graphic g2)
         {
             return /*!g1.IsInvariant && !g2.IsInvariant && */g1._value != g2._value;
         }
 
-        public static bool operator <(in Graphic g1, in Graphic g2)
+        public static bool operator <(Graphic g1,  Graphic g2)
         {
             return g1._value < g2._value;
         }
 
-        public static bool operator >(in Graphic g1, in Graphic g2)
+        public static bool operator >(Graphic g1,  Graphic g2)
         {
             return g1._value > g2._value;
         }
@@ -87,7 +87,7 @@ namespace ClassicUO.Game
             return false;
         }
 
-        public static Graphic Parse(in string str)
+        public static Graphic Parse(string str)
         {
             if (str.StartsWith("0x"))
             {

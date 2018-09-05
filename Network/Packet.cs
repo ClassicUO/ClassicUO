@@ -7,7 +7,7 @@ namespace ClassicUO.Network
     {
         private readonly byte[] _data;
 
-        public Packet(in byte[] data, in int length)
+        public Packet(byte[] data,  int length)
         {
             _data = data;
             Length = length;
@@ -53,7 +53,7 @@ namespace ClassicUO.Network
             Seek(IsDynamic ? 3 : 1);
         }
 
-        protected override void EnsureSize(in int length)
+        protected override void EnsureSize(int length)
         {
             if (length < 0 || Position + length > Length)
             {
@@ -103,7 +103,7 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
-        public string ReadASCII(in int length)
+        public string ReadASCII(int length)
         {
             EnsureSize(length);
             StringBuilder sb = new StringBuilder(length);
@@ -135,7 +135,7 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
-        public string ReadUnicode(in int length)
+        public string ReadUnicode(int length)
         {
             EnsureSize(length);
             StringBuilder sb = new StringBuilder(length);

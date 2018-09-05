@@ -5,24 +5,24 @@ namespace ClassicUO.Game.Renderer.Views
 {
     public class StaticView : View
     {
-        public StaticView(in Static st) : base(st)
+        public StaticView(Static st) : base(st)
         {
             AllowedToDraw = !IsNoDrawable(st.Graphic);
         }
 
-        public Static WorldObject => (Static)GameObject;
+        public new Static GameObject => (Static)base.GameObject;
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            if (!AllowedToDraw)
+            if (!AllowedToDraw || GameObject.IsDisposed)
             {
                 return false;
             }
 
             if (Texture == null || Texture.IsDisposed)
             {
-                Texture = TextureManager.GetOrCreateStaticTexture(WorldObject.Graphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4, Texture.Width, Texture.Height);
+                Texture = TextureManager.GetOrCreateStaticTexture(GameObject.Graphic);
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
 
                 //if (AssetsLoader.TileData.IsFoliage((long)GameObject.ItemData.Flags))
                 //    HueVector = RenderExtentions.GetHueVector(0, false, true, false);

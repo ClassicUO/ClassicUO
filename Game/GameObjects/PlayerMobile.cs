@@ -74,7 +74,7 @@ namespace ClassicUO.Game.GameObjects
         private ushort _weightMax;
 
 
-        public PlayerMobile(in Serial serial) : base(serial)
+        public PlayerMobile(Serial serial) : base(serial)
         {
             _sklls = new List<Skill>();
         }
@@ -1021,7 +1021,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        protected override void OnProcessDelta(in Delta d)
+        protected override void OnProcessDelta(Delta d)
         {
             base.OnProcessDelta(d);
             if (d.HasFlag(Delta.Stats))
@@ -1163,7 +1163,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        public void ConfirmWalk(in byte seq)
+        public void ConfirmWalk(byte seq)
         {
             if (_requestedSteps.Count <= 0)
             {
@@ -1198,7 +1198,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void DenyWalk(in byte seq, in Direction dir, in Position position)
+        public void DenyWalk(byte seq,  Direction dir,  Position position)
         {
             foreach (Step step in _requestedSteps)
             {

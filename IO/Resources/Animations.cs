@@ -200,7 +200,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            void readAnimDef(in StreamReader reader, in int idx)
+            void readAnimDef(StreamReader reader,  int idx)
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
@@ -685,7 +685,7 @@ namespace ClassicUO.IO.Resources
                 _animGroupCount = maxGroup;
         }
 
-        public static void Clear(in byte id, in byte group, in byte dir)
+        public static void Clear(byte id,  byte group,  byte dir)
         {
             ref var it = ref DataIndex[id].Groups[group].Direction[dir];
 
@@ -694,7 +694,7 @@ namespace ClassicUO.IO.Resources
             it.FrameCount = 0;
         }
 
-        public static void UpdateAnimationTable(in uint flags)
+        public static void UpdateAnimationTable(uint flags)
         {
             for (int i = 0; i < MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
                 for (int g = 0; g < 100; g++)
@@ -779,7 +779,7 @@ namespace ClassicUO.IO.Resources
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ANIMATION_GROUPS GetGroupIndex(in ushort graphic)
+        public static ANIMATION_GROUPS GetGroupIndex(ushort graphic)
         {
             if (graphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                 return ANIMATION_GROUPS.AG_HIGHT;
@@ -800,7 +800,7 @@ namespace ClassicUO.IO.Resources
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte GetDieGroupIndex(in ushort id, in bool second)
+        public static byte GetDieGroupIndex(ushort id,  bool second)
         {
             switch (DataIndex[id].Type)
             {
@@ -818,7 +818,7 @@ namespace ClassicUO.IO.Resources
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool AnimationExists(in ushort graphic, in byte group)
+        public static bool AnimationExists(ushort graphic,  byte group)
         {
             bool result = false;
 
@@ -846,11 +846,14 @@ namespace ClassicUO.IO.Resources
             _reader.SetData(file.StartAddress + (int)animDir.Address, animDir.Size);
 
             ReadFramesPixelData(ref animDir);
+
+            //_usedTextures.Add(new ToRemoveInfo() { AnimID = AnimID, Group = AnimGroup, Direction = Direction });
+
             return true;
         }
 
 
-        //public static AnimationFrame[] GetAnimationFrames(in ushort graphic, in byte group, in byte dir)
+        //public static AnimationFrame[] GetAnimationFrames(ushort graphic,  byte group,  byte dir)
         //{
         //    // TODO: REMOVE THESE
         //    AnimID = graphic;
@@ -950,11 +953,11 @@ namespace ClassicUO.IO.Resources
             animDirection.FrameCount = (byte)(pixelDataOffsets.Count / 5);
             int dirFrameStartIdx = animDirection.FrameCount * Direction;
             if (animDirection.Frames == null)
-                animDirection.Frames = new AnimationFrame[animDirection.FrameCount];
+                animDirection.Frames = new TextureAnimationFrame[animDirection.FrameCount];
 
             for (int i = 0; i < animDirection.FrameCount; i++)
             {
-                if (animDirection.Frames[i] != null && animDirection.Frames[i].IsValid)
+                if (animDirection.Frames[i] != null && !animDirection.Frames[i].IsDisposed)
                     continue;
 
                 UOPFrameData frameData = pixelDataOffsets[i + dirFrameStartIdx];
@@ -970,7 +973,7 @@ namespace ClassicUO.IO.Resources
                 short imageWidth = _reader.ReadShort();
                 short imageHeight = _reader.ReadShort();
 
-                animDirection.Frames[i] = new AnimationFrame() { CenterX = imageCenterX, CenterY = imageCenterY };
+                //animDirection.Frames[i] = new AnimationFrame() { CenterX = imageCenterX, CenterY = imageCenterY };
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {
@@ -1013,9 +1016,16 @@ namespace ClassicUO.IO.Resources
                     header = _reader.ReadUInt();
                 }
 
-                animDirection.Frames[i].Pixels = pixels;
-                animDirection.Frames[i].Width = imageWidth;
-                animDirection.Frames[i].Height = imageHeight;
+                //animDirection.Frames[i].Pixels = pixels;
+                //animDirection.Frames[i].Width = imageWidth;
+                //animDirection.Frames[i].Height = imageHeight;
+
+                ref var f = ref animDirection.Frames[i];
+                if (f == null)
+                    f = new TextureAnimationFrame((int)imageWidth, (int)imageHeight);
+                f.CenterX = imageCenterX;
+                f.CenterY = imageCenterY;
+                f.SetData(pixels);
             }
 
             return true;
@@ -1034,34 +1044,36 @@ namespace ClassicUO.IO.Resources
             animDir.FrameCount = (byte)frameCount;
 
             uint* frameOffset = (uint*)_reader.PositionAddress;
-            animDir.Frames = new AnimationFrame[frameCount];
+            animDir.Frames = new TextureAnimationFrame[frameCount];
+
+            animDir.LastAccessTime = Game.World.Ticks;
 
             for (int i = 0; i < frameCount; i++)
             {
 
-                if (animDir.Frames[i] != null && animDir.Frames[i].Pixels == null)
-                {
+                //if (animDir.Frames[i] != null && animDir.Frames[i].Pixels == null)
+                //{
 
-                }
+                //}
 
-                if (animDir.Frames[i] != null && animDir.Frames[i].IsValid)
+                if (animDir.Frames[i] != null /*&& !animDir.Frames[i].IsDisposed*/)
                     continue;
 
-                animDir.Frames[i] = new AnimationFrame();
+                //animDir.Frames[i] = new AnimationFrame();
 
                 _reader.SetData(dataStart + (int)frameOffset[i]);
 
                 short imageCenterX = _reader.ReadShort();
-                animDir.Frames[i].CenterX = imageCenterX;
+                //animDir.Frames[i].CenterX = imageCenterX;
 
                 short imageCenterY = _reader.ReadShort();
-                animDir.Frames[i].CenterY = imageCenterY;
+                //animDir.Frames[i].CenterY = imageCenterY;
 
                 short imageWidth = _reader.ReadShort();
-                animDir.Frames[i].Width = imageWidth;
+                //animDir.Frames[i].Width = imageWidth;
 
                 short imageHeight = _reader.ReadShort();
-                animDir.Frames[i].Height = imageHeight;
+                //animDir.Frames[i].Height = imageHeight;
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {
@@ -1108,10 +1120,61 @@ namespace ClassicUO.IO.Resources
                 }
 
 
-                animDir.Frames[i].Pixels = pixels;
+                ref var f = ref animDir.Frames[i];
+                if (f == null)
+                    f = new TextureAnimationFrame(imageWidth, imageHeight);
+                f.CenterX = imageCenterX;
+                f.CenterY = imageCenterY;
+                f.SetData(pixels);
+                
+                //animDir.Frames[i].Pixels = pixels;
             }
         }
 
+
+        public static void ClearUnusedTextures()
+        {
+            int count = 0;
+
+            for (int i = 0; i < _usedTextures.Count; i++)
+            {
+                var info = _usedTextures[i];
+
+                ref var dir = ref DataIndex[info.AnimID].Groups[info.Group].Direction[info.Direction];
+
+                if (Game.World.Ticks - dir.LastAccessTime >= 3000)
+                {
+                    for (int j = 0; j < dir.FrameCount; j++)
+                    {
+                        if (dir.Frames[j] != null)
+                        {
+                            dir.Frames[j].Dispose();
+                            dir.Frames[j] = null;
+                        }
+                    }
+
+                    dir.FrameCount = 0;
+                    dir.Frames = null;
+                    dir.LastAccessTime = 0;
+
+                    _usedTextures.RemoveAt(i);
+                    i++;
+                    if (++count >= 5)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        struct ToRemoveInfo
+        {
+            public int AnimID;
+            public int Group;
+            public int Direction;
+        }
+
+        private static readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>();
 
         private struct UOPFrameData
         {
@@ -1271,7 +1334,7 @@ namespace ClassicUO.IO.Resources
                     if (offset == 0)
                         continue;
 
-                    UOPAnimationData data = new UOPAnimationData { Offset = (uint)(offset + headerLength), CompressedLength = (uint)compressedLength, DecompressedLength = (uint)decompressedLength, FileIndex = _indexFile };
+                    UOPAnimationData data = new UOPAnimationData((uint)(offset + headerLength), (uint)compressedLength, (uint)decompressedLength, _indexFile );
 
                     hashes.Add(hash, data);
                 }
@@ -1644,27 +1707,41 @@ namespace ClassicUO.IO.Resources
         public bool IsUOP;
         public bool IsVerdata;
 
-        public AnimationFrame[] Frames;
+        public long LastAccessTime;
+
+        public TextureAnimationFrame[] Frames;
     }
 
-    public class AnimationFrame
+    /*public class AnimationFrame
     {
         public short CenterX, CenterY;
         public ushort[] Pixels;
         public short Width, Height;
 
         public bool IsValid => Width > 0 && Height > 0 && Pixels != null && Pixels.Length > 0;
+    }*/
+
+    public class TextureAnimationFrame : Game.Renderer.SpriteTexture
+    {
+
+        public TextureAnimationFrame(int width,  int height) : base(width, height, false)
+        {
+
+        }
+
+        public short CenterX { get; set; }
+        public short CenterY { get; set; }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct AnimIdxBlock
+    public readonly struct AnimIdxBlock
     {
-        public uint Position;
-        public uint Size;
-        public uint Unknown;
+        public readonly uint Position;
+        public readonly uint Size;
+        public readonly uint Unknown;
     }
 
-    public struct EquipConvData
+    public readonly struct EquipConvData
     {
         public EquipConvData(ushort graphic, ushort gump, ushort color)
         {
@@ -1673,16 +1750,21 @@ namespace ClassicUO.IO.Resources
             Color = color;
         }
 
-        public ushort Graphic;
-        public ushort Gump;
-        public ushort Color;
+        public readonly ushort Graphic;
+        public readonly ushort Gump;
+        public readonly ushort Color;
     }
 
-    public struct UOPAnimationData
+    public readonly struct UOPAnimationData
     {
-        public uint Offset;
-        public uint CompressedLength;
-        public uint DecompressedLength;
-        public int FileIndex;
+        public UOPAnimationData(uint offset, uint clen, uint dlen, int index)
+        {
+            Offset = offset; CompressedLength = clen; DecompressedLength = dlen; FileIndex = index;
+        }
+
+        public readonly uint Offset;
+        public readonly uint CompressedLength;
+        public readonly uint DecompressedLength;
+        public readonly int FileIndex;
     }
 }

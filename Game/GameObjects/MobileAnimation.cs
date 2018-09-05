@@ -37,7 +37,7 @@ namespace ClassicUO.Game.GameObjects
             return dir;
         }
 
-        public void GetGroupForAnimation(in ANIMATION_GROUPS group, ref byte animation)
+        public void GetGroupForAnimation(ANIMATION_GROUPS group, ref byte animation)
         {
             if ((sbyte)group > 0 && animation < (byte)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT)
             {
@@ -45,7 +45,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public byte GetGroupForAnimation(in ushort checkGraphic = 0)
+        public byte GetGroupForAnimation(ushort checkGraphic = 0)
         {
             Graphic graphic = checkGraphic;
             if (graphic == 0)
@@ -286,7 +286,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        private static void CorrectAnimationGroup(in ushort graphic, in ANIMATION_GROUPS group, ref byte animation)
+        private static void CorrectAnimationGroup(ushort graphic,  ANIMATION_GROUPS group, ref byte animation)
         {
             if (group == ANIMATION_GROUPS.AG_LOW)
             {
@@ -337,9 +337,9 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public static byte GetReplacedObjectAnimation(in Mobile mobile, in ushort index)
+        public static byte GetReplacedObjectAnimation(Mobile mobile,  ushort index)
         {
-            ushort getReplacedGroup(in IReadOnlyList<Tuple<ushort, byte>> list, in ushort idx, in ushort walkIdx)
+            ushort getReplacedGroup(IReadOnlyList<Tuple<ushort, byte>> list,  ushort idx,  ushort walkIdx)
             {
                 foreach (Tuple<ushort, byte> item in list)
                 {
@@ -372,7 +372,7 @@ namespace ClassicUO.Game.GameObjects
             return (byte)(index % (ushort)HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
         }
 
-        public static byte GetObjectNewAnimation(in Mobile mobile, in ushort type, in ushort action, in byte mode)
+        public static byte GetObjectNewAnimation(Mobile mobile,  ushort type,  ushort action,  byte mode)
         {
             if (mobile.Graphic >= Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
             {
@@ -409,7 +409,7 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
-        private static byte GetObjectNewAnimationType_0(in Mobile mobile, in ushort action, in byte mode)
+        private static byte GetObjectNewAnimationType_0(Mobile mobile,  ushort action,  byte mode)
         {
             if (action <= 10)
             {
@@ -505,7 +505,7 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
-        private static byte GetObjectNewAnimationType_1_2(in Mobile mobile, in ushort action, in byte mode)
+        private static byte GetObjectNewAnimationType_1_2(Mobile mobile,  ushort action,  byte mode)
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
@@ -533,7 +533,7 @@ namespace ClassicUO.Game.GameObjects
             return 16;
         }
 
-        private static byte GetObjectNewAnimationType_3(in Mobile mobile, in ushort action, in byte mode)
+        private static byte GetObjectNewAnimationType_3(Mobile mobile,  ushort action,  byte mode)
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
@@ -576,7 +576,7 @@ namespace ClassicUO.Game.GameObjects
             return 3;
         }
 
-        private static byte GetObjectNewAnimationType_4(in Mobile mobile, in ushort action, in byte mode)
+        private static byte GetObjectNewAnimationType_4(Mobile mobile,  ushort action,  byte mode)
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
@@ -604,7 +604,7 @@ namespace ClassicUO.Game.GameObjects
             return 10;
         }
 
-        private static byte GetObjectNewAnimationType_5(in Mobile mobile, in ushort action, in byte mode)
+        private static byte GetObjectNewAnimationType_5(Mobile mobile,  ushort action,  byte mode)
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
@@ -650,7 +650,7 @@ namespace ClassicUO.Game.GameObjects
             return 9;
         }
 
-        private static byte GetObjectNewAnimationType_6_14(in Mobile mobile, in ushort action, in byte mode)
+        private static byte GetObjectNewAnimationType_6_14(Mobile mobile,  ushort action,  byte mode)
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
@@ -683,7 +683,7 @@ namespace ClassicUO.Game.GameObjects
             return 11;
         }
 
-        private static byte GetObjectNewAnimationType_7(in Mobile mobile, in ushort action, in byte mode)
+        private static byte GetObjectNewAnimationType_7(Mobile mobile,  ushort action,  byte mode)
         {
             if (mobile.Equipment[(int)Layer.Mount] != null)
             {
@@ -705,7 +705,7 @@ namespace ClassicUO.Game.GameObjects
             return 0;
         }
 
-        private static byte GetObjectNewAnimationType_8(in Mobile mobile, in ushort action, in byte mode)
+        private static byte GetObjectNewAnimationType_8(Mobile mobile,  ushort action,  byte mode)
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
@@ -733,7 +733,7 @@ namespace ClassicUO.Game.GameObjects
             return 11;
         }
 
-        private static byte GetObjectNewAnimationType_9_10(in Mobile mobile, in ushort action, in byte mode)
+        private static byte GetObjectNewAnimationType_9_10(Mobile mobile,  ushort action,  byte mode)
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
@@ -746,7 +746,7 @@ namespace ClassicUO.Game.GameObjects
             return type != ANIMATION_GROUPS_TYPE.MONSTER ? (byte)0xFF : (byte)20;
         }
 
-        private static byte GetObjectNewAnimationType_11(in Mobile mobile, in ushort action, in byte mode)
+        private static byte GetObjectNewAnimationType_11(Mobile mobile,  ushort action,  byte mode)
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;

@@ -70,169 +70,169 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        public static bool IsBackground(in long flags)
+        public static bool IsBackground(long flags)
         {
             return (flags & 0x00000001) != 0;
         }
 
-        public static bool IsWeapon(in long flags)
+        public static bool IsWeapon(long flags)
         {
             return (flags & 0x00000002) != 0;
         }
 
-        public static bool IsTransparent(in long flags)
+        public static bool IsTransparent(long flags)
         {
             return (flags & 0x00000004) != 0;
         }
 
-        public static bool IsTranslucent(in long flags)
+        public static bool IsTranslucent(long flags)
         {
             return (flags & 0x00000008) != 0;
         }
 
-        public static bool IsWall(in long flags)
+        public static bool IsWall(long flags)
         {
             return (flags & 0x00000010) != 0;
         }
 
-        public static bool IsDamaging(in long flags)
+        public static bool IsDamaging(long flags)
         {
             return (flags & 0x00000020) != 0;
         }
 
-        public static bool IsImpassable(in long flags)
+        public static bool IsImpassable(long flags)
         {
             return (flags & 0x00000040) != 0;
         }
 
-        public static bool IsWet(in long flags)
+        public static bool IsWet(long flags)
         {
             return (flags & 0x00000080) != 0;
         }
 
-        public static bool IsUnknown(in long flags)
+        public static bool IsUnknown(long flags)
         {
             return (flags & 0x00000100) != 0;
         }
 
-        public static bool IsSurface(in long flags)
+        public static bool IsSurface(long flags)
         {
             return (flags & 0x00000200) != 0;
         }
 
-        public static bool IsBridge(in long flags)
+        public static bool IsBridge(long flags)
         {
             return (flags & 0x00000400) != 0;
         }
 
-        public static bool IsStackable(in long flags)
+        public static bool IsStackable(long flags)
         {
             return (flags & 0x00000800) != 0;
         }
 
-        public static bool IsWindow(in long flags)
+        public static bool IsWindow(long flags)
         {
             return (flags & 0x00001000) != 0;
         }
 
-        public static bool IsNoShoot(in long flags)
+        public static bool IsNoShoot(long flags)
         {
             return (flags & 0x00002000) != 0;
         }
 
-        public static bool IsPrefixA(in long flags)
+        public static bool IsPrefixA(long flags)
         {
             return (flags & 0x00004000) != 0;
         }
 
-        public static bool IsPrefixAn(in long flags)
+        public static bool IsPrefixAn(long flags)
         {
             return (flags & 0x00008000) != 0;
         }
 
-        public static bool IsInternal(in long flags)
+        public static bool IsInternal(long flags)
         {
             return (flags & 0x00010000) != 0;
         }
 
-        public static bool IsFoliage(in long flags)
+        public static bool IsFoliage(long flags)
         {
             return (flags & 0x00020000) != 0;
         }
 
-        public static bool IsPartialHue(in long flags)
+        public static bool IsPartialHue(long flags)
         {
             return (flags & 0x00040000) != 0;
         }
 
-        public static bool IsUnknown1(in long flags)
+        public static bool IsUnknown1(long flags)
         {
             return (flags & 0x00080000) != 0;
         }
 
-        public static bool IsMap(in long flags)
+        public static bool IsMap(long flags)
         {
             return (flags & 0x00100000) != 0;
         }
 
-        public static bool IsContainer(in long flags)
+        public static bool IsContainer(long flags)
         {
             return (flags & 0x00200000) != 0;
         }
 
-        public static bool IsWearable(in long flags)
+        public static bool IsWearable(long flags)
         {
             return (flags & 0x00400000) != 0;
         }
 
-        public static bool IsLightSource(in long flags)
+        public static bool IsLightSource(long flags)
         {
             return (flags & 0x00800000) != 0;
         }
 
-        public static bool IsAnimated(in long flags)
+        public static bool IsAnimated(long flags)
         {
             return (flags & 0x01000000) != 0;
         }
 
-        public static bool IsNoDiagonal(in long flags)
+        public static bool IsNoDiagonal(long flags)
         {
             return (flags & 0x02000000) != 0;
         }
 
-        public static bool IsUnknown2(in long flags)
+        public static bool IsUnknown2(long flags)
         {
             return (flags & 0x04000000) != 0;
         }
 
-        public static bool IsArmor(in long flags)
+        public static bool IsArmor(long flags)
         {
             return (flags & 0x08000000) != 0;
         }
 
-        public static bool IsRoof(in long flags)
+        public static bool IsRoof(long flags)
         {
             return (flags & 0x10000000) != 0;
         }
 
-        public static bool IsDoor(in long flags)
+        public static bool IsDoor(long flags)
         {
             return (flags & 0x20000000) != 0;
         }
 
-        public static bool IsStairBack(in long flags)
+        public static bool IsStairBack(long flags)
         {
             return (flags & 0x40000000) != 0;
         }
 
-        public static bool IsStairRight(in long flags)
+        public static bool IsStairRight(long flags)
         {
             return (flags & 0x80000000) != 0;
         }
     }
 
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct LandTiles
     {
         public ulong Flags;
@@ -241,15 +241,15 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct LandGroup
+    public readonly struct LandGroup
     {
-        public uint Unknown;
+        public readonly uint Unknown;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public LandTiles[] Tiles;
+        public readonly LandTiles[] Tiles;
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct StaticTiles
     {
         public ulong Flags;
@@ -266,94 +266,94 @@ namespace ClassicUO.IO.Resources
     // old
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct LandGroupOld
+    public readonly struct LandGroupOld
     {
-        public uint Unknown;
+        public readonly uint Unknown;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public LandTilesOld[] Tiles;
+        public readonly LandTilesOld[] Tiles;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct LandTilesOld
+    public readonly struct LandTilesOld
     {
-        public uint Flags;
-        public ushort TexID;
+        public readonly uint Flags;
+        public readonly ushort TexID;
 
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
-        public string Name;
+        public readonly string Name;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct StaticGroupOld
+    public readonly struct StaticGroupOld
     {
-        public uint Unk;
+        public readonly uint Unk;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public StaticTilesOld[] Tiles;
+        public readonly StaticTilesOld[] Tiles;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct StaticTilesOld
+    public readonly struct StaticTilesOld
     {
-        public uint Flags;
-        public byte Weight;
-        public byte Layer;
-        public int Count;
-        public ushort AnimID;
-        public ushort Hue;
-        public ushort LightIndex;
-        public byte Height;
+        public readonly uint Flags;
+        public readonly byte Weight;
+        public readonly byte Layer;
+        public readonly int Count;
+        public readonly ushort AnimID;
+        public readonly ushort Hue;
+        public readonly ushort LightIndex;
+        public readonly byte Height;
 
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
-        public string Name;
+        public readonly string Name;
     }
 
 
     // new 
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct LandGroupNew
+    public readonly struct LandGroupNew
     {
-        public uint Unknown;
+        public readonly uint Unknown;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public LandTilesNew[] Tiles;
+        public readonly LandTilesNew[] Tiles;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct LandTilesNew
+    public readonly struct LandTilesNew
     {
-        public TileFlag Flags;
-        public ushort TexID;
+        public readonly TileFlag Flags;
+        public readonly ushort TexID;
 
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
-        public string Name;
+        public readonly string Name;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct StaticGroupNew
+    public readonly struct StaticGroupNew
     {
-        public uint Unk;
+        public readonly uint Unk;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public StaticTilesNew[] Tiles;
+        public readonly StaticTilesNew[] Tiles;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct StaticTilesNew
+    public readonly struct StaticTilesNew
     {
-        public TileFlag Flags;
-        public byte Weight;
-        public byte Layer;
-        public int Count;
-        public ushort AnimID;
-        public ushort Hue;
-        public ushort LightIndex;
-        public byte Height;
+        public readonly TileFlag Flags;
+        public readonly byte Weight;
+        public readonly byte Layer;
+        public readonly int Count;
+        public readonly ushort AnimID;
+        public readonly ushort Hue;
+        public readonly ushort LightIndex;
+        public readonly byte Height;
 
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
-        public string Name;
+        public readonly string Name;
     }
 
 

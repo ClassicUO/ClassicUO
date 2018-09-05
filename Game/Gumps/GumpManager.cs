@@ -31,7 +31,7 @@ namespace ClassicUO.Game.Gumps
         };
         private static readonly Queue<MouseWheelEventArgs> _mouseEventsWheelTriggered = new Queue<MouseWheelEventArgs>();
 
-        private static GumpControl _moveOverControl;
+        private static GumpControl _mouseOverControl;
 
         static GumpManager()
         {
@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Gumps
 
 
 
-        public static GumpControl Create(in Serial sender, in Serial gumpID, in int x, in int y, in string layout, in string[] lines)
+        public static GumpControl Create(Serial sender,  Serial gumpID,  int x,  int y,  string layout,  string[] lines)
         {
             List<string> pieces = new List<string>();
             int index = 0;
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Gumps
             return gump;
         }
 
-        public static void Update(in double ms)
+        public static void Update(double ms)
         {
             for (int i = 0; i < _gumps.Count; i++)
             {
@@ -182,7 +182,7 @@ namespace ClassicUO.Game.Gumps
             _mouseEventsWheelTriggered.Clear();
         }
 
-        public static void Render(in SpriteBatch3D spriteBatch)
+        public static void Render(SpriteBatch3D spriteBatch)
         {
             for (int i = 0; i < _gumps.Count; i++)
             {
@@ -204,8 +204,21 @@ namespace ClassicUO.Game.Gumps
                     break;
             }
 
-            _moveOverControl = gump;
+            if (_mouseOverControl != null && gump != _mouseOverControl)
+            {
+                var arg = new MouseEventArgs(MouseManager.ScreenPosition.X, MouseManager.ScreenPosition.Y, 0, 0);
+                _mouseOverControl.OnMouseLeft(arg);
 
+                
+                if (_mouseOverControl.RootParent != null && (gump == null || gump.RootParent != _mouseOverControl.RootParent))
+                    _mouseOverControl.OnMouseLeft(arg);
+                
+                
+                if (gump != null)
+                    gump.OnMouseEnter(arg);
+            }
+
+            _mouseOverControl = gump;
 
             if (gump != null)
             {
@@ -227,14 +240,12 @@ namespace ClassicUO.Game.Gumps
                             var ev = _mouseEventsTriggered[(int)t].Dequeue();
                             gump.OnMouseButton(ev);
 
-                            if (ev.Button == MouseButton.Left)
-                                gump.OnMouseLeft(ev);
-
                             isdown = ev.Button == MouseButton.Left && ev.ButtonState == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
     
                             if (ev.Button == MouseButton.Right && t == InputMouseType.MouseUp && gump.RootParent.CanCloseWithRightClick)
                             {
                                 gump.RootParent.Dispose();
+                                _gumps.Remove(gump.RootParent);
                             }
 
                             break;
@@ -263,7 +274,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        private static GumpControl HitTest(in GumpControl parent, in Point position)
+        private static GumpControl HitTest(GumpControl parent,  Point position)
         {
             var p = parent?.HitTest(position);
             if (p != null && p.Length > 0)

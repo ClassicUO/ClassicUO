@@ -11,36 +11,17 @@ namespace ClassicUO.Game.Renderer.Views
         private readonly ViewLayer[] _frames;
         private int _layerCount;
 
-        private static Texture2D _texture;
-
-
-
-        public MobileView(in Mobile mobile) : base(mobile)
+        public MobileView(Mobile mobile) : base(mobile)
         {
             _frames = new ViewLayer[(int)Layer.InnerLegs];
         }
 
 
-
-
         public new Mobile GameObject => (Mobile)base.GameObject;
 
 
-
-
-        public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool DrawInternal(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            if (GameObject.IsDisposed)
-            {
-                return false;
-            }
-
-            if (_texture == null)
-            {
-                _texture = new Texture2D(TextureManager.Device, 1, 1);
-                _texture.SetData(new Color[1] { Color.White });
-            }
-
             spriteBatch.GetZ();
 
             bool mirror = false;
@@ -51,6 +32,8 @@ namespace ClassicUO.Game.Renderer.Views
             SetupLayers(dir);
 
             ref var bodyFrame = ref _frames[0].Frame;
+            if (bodyFrame == null)
+                return false;
 
             int drawCenterY = bodyFrame.CenterY;
             int drawX;
@@ -72,7 +55,7 @@ namespace ClassicUO.Game.Renderer.Views
                 ref var vl = ref _frames[i];
                 var frame = vl.Frame;
 
-                if (!frame.IsValid)
+                if (frame.IsDisposed)
                 {
                     continue;
                 }
@@ -85,7 +68,7 @@ namespace ClassicUO.Game.Renderer.Views
                     yOffset = y;
                 }
 
-                Texture = TextureManager.GetOrCreateAnimTexture(frame);
+                Texture = frame; // TextureManager.GetOrCreateAnimTexture(frame);
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                 HueVector = RenderExtentions.GetHueVector(vl.Hue);
 
@@ -125,7 +108,7 @@ namespace ClassicUO.Game.Renderer.Views
                 Z = position.Z
             };
 
-            if (bodyFrame.IsValid)
+            if (!bodyFrame.IsDisposed)
             {
                 yOffset = bodyFrame.Height + drawY - (int)(GameObject.Offset.Z / 4 + GameObject.Position.Z * 4);
             }
@@ -139,14 +122,14 @@ namespace ClassicUO.Game.Renderer.Views
         }
 
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            return !PreDraw(position) && DrawInternal(spriteBatch, position);
+            return  !GameObject.IsDisposed && !PreDraw(position) && DrawInternal(spriteBatch, position);
         }
 
 
 
-        public override void Update(in double frameMS)
+        public override void Update(double frameMS)
         {
             base.Update(frameMS);
 
@@ -155,7 +138,7 @@ namespace ClassicUO.Game.Renderer.Views
         }
 
 
-        private void SetupLayers(in byte dir)
+        private void SetupLayers(byte dir)
         {
             _layerCount = 0;
 
@@ -226,7 +209,7 @@ namespace ClassicUO.Game.Renderer.Views
             }
         }
 
-        private void AddLayer(in byte dir, in Graphic graphic, Hue hue, in bool mounted = false, in EquipConvData? convertedItem = null)
+        private void AddLayer(byte dir,  Graphic graphic, Hue hue,  bool mounted = false,  EquipConvData? convertedItem = null)
         {
             sbyte animIndex = GameObject.AnimIndex;
             byte animGroup = GameObject.GetGroupForAnimation(graphic);
@@ -242,6 +225,8 @@ namespace ClassicUO.Game.Renderer.Views
                 return;
             }
 
+            direction.LastAccessTime = World.Ticks;
+
             int fc = direction.FrameCount;
             if (fc > 0 && animIndex >= fc)
             {
@@ -250,14 +235,18 @@ namespace ClassicUO.Game.Renderer.Views
 
             if (animIndex < direction.FrameCount)
             {
-                ref AnimationFrame frame = ref direction.Frames[animIndex];
+                ref TextureAnimationFrame frame = ref direction.Frames[animIndex];
 
-                if ((frame.Pixels == null || frame.Pixels.Length <= 0))
+                if (frame == null || frame.IsDisposed)
                 {
                     if (!Animations.LoadDirectionGroup(ref direction))
                     {
                         return;
                     }
+
+                    frame = ref direction.Frames[animIndex];
+                    if (frame == null)
+                        return;
                 }
 
                 if (hue == 0)
@@ -287,7 +276,7 @@ namespace ClassicUO.Game.Renderer.Views
         struct ViewLayer
         {
             public Hue Hue;
-            public AnimationFrame Frame;
+            public TextureAnimationFrame Frame;
             public Graphic Graphic;
         }
     }

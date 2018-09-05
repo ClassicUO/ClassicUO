@@ -14,7 +14,7 @@ namespace ClassicUO.Game.Gumps
             _gameText = new GameText() { IsPersistent = true };
         }
 
-        public CroppedText(in string[] parts, in string[] lines) : this()
+        public CroppedText(string[] parts,  string[] lines) : this()
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -40,9 +40,9 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            _gameText.View.Draw(spriteBatch, position);
+            _gameText.GetView().Draw(spriteBatch, position);
             return base.Draw(spriteBatch, position);
         }
     }

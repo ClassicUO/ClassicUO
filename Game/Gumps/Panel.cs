@@ -7,7 +7,7 @@ namespace ClassicUO.Game.Gumps
     {
         private readonly SpriteTexture[] _frame = new SpriteTexture[9];
 
-        public Panel(in ushort background) : base()
+        public Panel(ushort background) : base()
         {
             for (int i = 0; i < _frame.Length; i++)
             {
@@ -16,7 +16,7 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
             int centerWidth = Width - _frame[0].Width - _frame[2].Width;
             int centerHeight = Height - _frame[0].Height - _frame[6].Height;
@@ -36,7 +36,7 @@ namespace ClassicUO.Game.Gumps
             spriteBatch.Draw2D(_frame[8], new Vector3(position.X + Width - _frame[8].Width, line3Y, 0), Vector3.Zero);
 
 
-            return base.Draw(in spriteBatch, in position);
+            return base.Draw(spriteBatch,  position);
         }
     }
 }

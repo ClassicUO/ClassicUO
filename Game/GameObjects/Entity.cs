@@ -41,7 +41,7 @@ namespace ClassicUO.Game.GameObjects
 
         private Position _position;
 
-        protected Entity(in Serial serial) : base(World.Map)
+        protected Entity(Serial serial) : base(World.Map)
         {
             Serial = serial;
             Items = new EntityCollection<Item>();
@@ -165,7 +165,7 @@ namespace ClassicUO.Game.GameObjects
             _delta |= Delta.Properties;
         }
 
-        protected virtual void OnProcessDelta(in Delta d)
+        protected virtual void OnProcessDelta(Delta d)
         {
             if (d.HasFlag(Delta.Appearance))
             {
@@ -205,6 +205,9 @@ namespace ClassicUO.Game.GameObjects
             }
 
             base.Dispose();
+
+            _properties.Clear();
+            PositionChanged -= OnPositionChanged;
         }
 
         protected virtual void OnPositionChanged(object sender, EventArgs e)
@@ -212,12 +215,12 @@ namespace ClassicUO.Game.GameObjects
             Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
         }
 
-        public static implicit operator Serial(in Entity entity)
+        public static implicit operator Serial(Entity entity)
         {
             return entity.Serial;
         }
 
-        public static implicit operator uint(in Entity entity)
+        public static implicit operator uint(Entity entity)
         {
             return entity.Serial;
         }
@@ -227,7 +230,7 @@ namespace ClassicUO.Game.GameObjects
             return Serial.GetHashCode();
         }
 
-        public int DistanceTo(in Entity entity)
+        public int DistanceTo(Entity entity)
         {
             return Position.DistanceTo(entity.Position);
         }

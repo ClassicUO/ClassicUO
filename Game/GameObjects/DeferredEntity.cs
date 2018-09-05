@@ -19,7 +19,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Reset()
         {
-            AssociatedTile.RemoveWorldObject(this);
+            AssociatedTile.RemoveGameObject(this);
             DisposeView();
             Map = null;
             Entity = null;
@@ -30,7 +30,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected override View CreateView()
         {
-            return Entity == null ? null : new DeferredView(this, Entity.View, AtPosition);
+            return Entity == null ? null : new DeferredView(this, Entity.GetView(), AtPosition);
         }
 
         public override void Dispose()

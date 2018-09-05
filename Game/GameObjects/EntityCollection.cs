@@ -41,18 +41,18 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool Contains(in Serial serial)
+        public bool Contains(Serial serial)
         {
             return _entities.ContainsKey(serial);
         }
 
-        public T Get(in Serial serial)
+        public T Get(Serial serial)
         {
             _entities.TryGetValue(serial, out T entity);
             return entity;
         }
 
-        public bool Add(in T entity)
+        public bool Add(T entity)
         {
             if (!_entities.TryAdd(entity.Serial, entity))
             {
@@ -63,7 +63,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        public T Remove(in Serial serial)
+        public T Remove(Serial serial)
         {
             if (_entities.TryRemove(serial, out T entity))
             {

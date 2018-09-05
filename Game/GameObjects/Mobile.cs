@@ -49,12 +49,12 @@ namespace ClassicUO.Game.GameObjects
         private ushort _stamina;
         private ushort _staminaMax;
 
-        public Mobile(in Serial serial) : base(serial)
+        public Mobile(Serial serial) : base(serial)
         {
             _lastAnimationChangeTime = World.Ticks;
         }
 
-        public new MobileView View => (MobileView)base.View;
+        //public new MobileView View => (MobileView)base.View;
 
         protected Deque<Step> Steps { get; } = new Deque<Step>();
 
@@ -246,13 +246,13 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void SetSAPoison(in bool value)
+        public void SetSAPoison(bool value)
         {
             _isSA_Poisoned = value;
         }
 
 
-        protected override void OnProcessDelta(in Delta d)
+        protected override void OnProcessDelta(Delta d)
         {
             base.OnProcessDelta(d);
             if (d.HasFlag(Delta.Hits))
@@ -297,7 +297,7 @@ namespace ClassicUO.Game.GameObjects
             z = Position.Z;
         }
 
-        public bool EnqueueStep(in int x, in int y, in sbyte z, Direction direction, in bool run)
+        public bool EnqueueStep(int x,  int y,  sbyte z, Direction direction,  bool run)
         {
             //if (Deferred != null)
             //    Deferred.Tile = null;
@@ -372,7 +372,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private static Direction CalculateDirection(in int curX, in int curY, in int newX, in int newY)
+        private static Direction CalculateDirection(int curX,  int curY,  int newX,  int newY)
         {
             int deltaX = newX - curX;
             int deltaY = newY - curY;
@@ -430,7 +430,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void SetAnimation(in byte id, in byte interval = 0, in byte frameCount = 0, in byte repeatCount = 0, in bool repeat = false, in bool frameDirection = false)
+        public void SetAnimation(byte id,  byte interval = 0,  byte frameCount = 0,  byte repeatCount = 0,  bool repeat = false,  bool frameDirection = false)
         {
             AnimationGroup = id;
             AnimIndex = 0;
@@ -567,6 +567,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (direction.Address != 0 || direction.IsUOP)
                     {
+                        direction.LastAccessTime = World.Ticks;
                         int fc = direction.FrameCount;
 
                         if (AnimationFromServer)
@@ -657,7 +658,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        private static void GetPixelOffset(in byte dir, ref float x, ref float y, in float framesPerTile)
+        private static void GetPixelOffset(byte dir, ref float x, ref float y,  float framesPerTile)
         {
             float step_NESW_D = 44.0f / framesPerTile;
             float step_NESW = 22.0f / framesPerTile;
@@ -754,7 +755,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected struct Step
         {
-            public Step(in int x, in int y, in sbyte z, in byte dir, in bool anim, in bool run, in byte seq)
+            public Step(int x,  int y,  sbyte z,  byte dir,  bool anim,  bool run,  byte seq)
             {
                 X = x;
                 Y = y;

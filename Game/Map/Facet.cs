@@ -12,7 +12,7 @@ namespace ClassicUO.Game.Map
 
         private Point _center;
 
-        public Facet(in int index)
+        public Facet(int index)
         {
             Index = index;
 
@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public Tile GetTile(in short x, in short y)
+        public Tile GetTile(short x,  short y)
         {
             int cellX = x / 8;
             int cellY = y / 8;
@@ -63,7 +63,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public sbyte GetTileZ(in short x, in short y)
+        public unsafe sbyte GetTileZ(short x,  short y)
         {
             Tile tile = GetTile(x, y);
             if (tile == null)
@@ -97,13 +97,13 @@ namespace ClassicUO.Game.Map
             return tile.Position.Z;
         }
 
-        private IndexMap GetIndex(in int blockX, in int blockY)
+        private IndexMap GetIndex(int blockX,  int blockY)
         {
             int block = blockX * IO.Resources.Map.MapBlocksSize[Index][1] + blockY;
             return IO.Resources.Map.BlockData[Index][block];
         }
 
-        public int GetAverageZ(in sbyte top, in sbyte left, in sbyte right, in sbyte bottom, ref sbyte low, ref sbyte high)
+        public int GetAverageZ(sbyte top,  sbyte left,  sbyte right,  sbyte bottom, ref sbyte low, ref sbyte high)
         {
             high = top;
             if (left > high)
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.Map
             return GetAverageZ(GetTileZ(x, y), GetTileZ(x, (short)(y + 1)), GetTileZ((short)(x + 1), y), GetTileZ((short)(x + 1), (short)(y + 1)), ref low, ref top);
         }
 
-        private static int FloorAverage(in int a, in int b)
+        private static int FloorAverage(int a,  int b)
         {
             int v = a + b;
 
@@ -162,7 +162,7 @@ namespace ClassicUO.Game.Map
             return v / 2;
         }
 
-        private void LoadChunks(in ushort centerX, in ushort centerY)
+        private void LoadChunks(ushort centerX,  ushort centerY)
         {
             for (int y = -CHUNKS_NUM; y <= CHUNKS_NUM; y++)
             {
@@ -186,18 +186,18 @@ namespace ClassicUO.Game.Map
 
                     if (tile == null || tile.X != cellX || tile.Y != cellY)
                     {
-                        tile?.Unload();
-                        tile = new FacetChunk((ushort)cellX, (ushort)cellY);
+                        //tile?.Unload();
+                        //tile = new FacetChunk((ushort)cellX, (ushort)cellY);
 
-                        //if (Chunks[cellindex] == null)
-                        //{
-                        //    Chunks[cellindex] = new FacetChunk((ushort)i, (ushort)j);
-                        //}
-                        //else
-                        //{
-                        //    Chunks[cellindex].Unload();
-                        //    Chunks[cellindex].SetTo((ushort)i, (ushort)j);
-                        //}
+                        if (tile == null)
+                        {
+                            tile = new FacetChunk((ushort)cellX, (ushort)cellY);
+                        }
+                        else
+                        {
+                            tile.Unload();
+                            tile.SetTo((ushort)cellX, (ushort)cellY);
+                        }
 
 
                         tile.Load(Index);

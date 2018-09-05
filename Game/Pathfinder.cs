@@ -33,14 +33,14 @@ namespace ClassicUO.Game
         private static readonly List<IDynamicItem>[] _pool = { new List<IDynamicItem>(), new List<IDynamicItem>(), new List<IDynamicItem>(), new List<IDynamicItem>() };
         private static readonly List<Tile> _tiles = new List<Tile>();
 
-        public static bool CanWalk(in Mobile m, ref int newX, ref int newY, ref sbyte newZ, ref Direction newDir)
+        public static bool CanWalk(Mobile m, ref int newX, ref int newY, ref sbyte newZ, ref Direction newDir)
         {
             (int tileX, int tileY) = OffsetTile(m.Position, newDir);
 
             return GetNextTile(m, m.Position, tileX, tileY, out newDir, out newX, out newY, out newZ);
         }
 
-        public static bool GetNextTile(in Mobile m, in Position current, in int goalX, in int goalY, out Direction direction, out int nextX, out int nextY, out sbyte nextZ)
+        public static bool GetNextTile(Mobile m,  Position current,  int goalX,  int goalY, out Direction direction, out int nextX, out int nextY, out sbyte nextZ)
         {
             direction = GetNextDirection(current, goalX, goalY);
             Direction initialDir = direction;
@@ -65,7 +65,7 @@ namespace ClassicUO.Game
             return moveIsOK;
         }
 
-        private static Direction GetNextDirection(in Position current, in int goalX, in int goalY)
+        private static Direction GetNextDirection(Position current,  int goalX,  int goalY)
         {
             Direction direction;
 
@@ -118,7 +118,7 @@ namespace ClassicUO.Game
             return direction;
         }
 
-        private static (int, int) OffsetTile(in Position position, Direction direction)
+        private static (int, int) OffsetTile(Position position, Direction direction)
         {
             int nextX = position.X;
             int nextY = position.Y;
@@ -159,7 +159,7 @@ namespace ClassicUO.Game
         }
 
 
-        public static int GetNextZ(in Mobile mobile, in Position loc, in Direction d)
+        public static int GetNextZ(Mobile mobile,  Position loc,  Direction d)
         {
             if (CheckMovement(mobile, loc, d, out sbyte newZ, true))
             {
@@ -169,13 +169,13 @@ namespace ClassicUO.Game
             return loc.Z;
         }
 
-        public static bool TryGetNextZ(in Mobile mobile, in Position loc, in Direction d, out sbyte z)
+        public static bool TryGetNextZ(Mobile mobile,  Position loc,  Direction d, out sbyte z)
         {
             return CheckMovement(mobile, loc, d, out z, true);
         }
 
         // servuo
-        public static bool CheckMovement(in Mobile mobile, in Position loc, in Direction d, out sbyte newZ, bool forceOK = false)
+        public static bool CheckMovement(Mobile mobile,  Position loc,  Direction d, out sbyte newZ, bool forceOK = false)
         {
             Facet map = World.Map;
 
@@ -386,7 +386,7 @@ namespace ClassicUO.Game
             return moveIsOk;
         }
 
-        private static void OffsetXY(in Direction d, ref int x, ref int y)
+        private static void OffsetXY(Direction d, ref int x, ref int y)
         {
             switch (d & Direction.Up)
             {
@@ -421,7 +421,7 @@ namespace ClassicUO.Game
             }
         }
 
-        private static void GetStartZ(in GameObject e, in Position loc, in List<IDynamicItem> itemList, out sbyte zLow, out sbyte zTop)
+        private static void GetStartZ(GameObject e,  Position loc,  List<IDynamicItem> itemList, out sbyte zLow, out sbyte zTop)
         {
             int xCheck = loc.X, yCheck = loc.Y;
 
@@ -458,7 +458,7 @@ namespace ClassicUO.Game
                 isSet = true;
             }
 
-            Static[] staticTiles = mapTile.GetWorldObjects<Static>();
+            Static[] staticTiles = mapTile.GetGameObjects<Static>();
 
             for (int i = 0; i < staticTiles.Length; i++)
             {
@@ -524,7 +524,7 @@ namespace ClassicUO.Game
             }
         }
 
-        private static bool IsOK(in bool ignoreDoors, in int ourZ, in int ourTop, in Static[] tiles, in List<IDynamicItem> items)
+        private static bool IsOK(bool ignoreDoors,  int ourZ,  int ourTop,  Static[] tiles,  List<IDynamicItem> items)
         {
             for (int i = 0; i < tiles.Length; ++i)
             {
@@ -568,7 +568,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        private static bool Check(in Mobile m, in List<IDynamicItem> items, in int x, int y, in int startTop, in sbyte startZ, out sbyte newZ)
+        private static bool Check(Mobile m,  List<IDynamicItem> items,  int x, int y,  int startTop,  sbyte startZ, out sbyte newZ)
         {
             newZ = 0;
 
@@ -580,7 +580,7 @@ namespace ClassicUO.Game
 
             LandTiles id = mapTile.TileData;
 
-            Static[] tiles = mapTile.GetWorldObjects<Static>();
+            Static[] tiles = mapTile.GetGameObjects<Static>();
             bool landBlocks = (id.Flags & 0x00000040) != 0;
             bool considerLand = !mapTile.IsIgnored;
 
@@ -784,7 +784,7 @@ namespace ClassicUO.Game
         //}
 
 
-        //private static void GetNewXY(in Direction direction, ref int x, ref int y)
+        //private static void GetNewXY(Direction direction, ref int x, ref int y)
         //{
         //    switch (direction & Direction.Up)
         //    {
@@ -819,7 +819,7 @@ namespace ClassicUO.Game
         //    }
         //}
 
-        //private static bool CalculateNewZ(in int x, in int y, ref sbyte z, in Direction direction)
+        //private static bool CalculateNewZ(int x,  int y, ref sbyte z,  Direction direction)
         //{
         //    PATH_STEP_STATE stepState = PATH_STEP_STATE.PSS_NORMAL;
 
@@ -846,7 +846,7 @@ namespace ClassicUO.Game
         //private static readonly int[] _offsetX = new int[10] { 0, 1, 1, 1, 0, -1, -1, -1, 0, 1 };
         //private static readonly int[] _offsetY = new int[10] { -1, -1, 0, 1, 1, 1, 0, -1, -1, -1 };
 
-        //private static int CalculateMinMaxZ(ref int minZ, ref int maxZ, int newX, int newY, in int currentZ, int newDirection, in int stepState)
+        //private static int CalculateMinMaxZ(ref int minZ, ref int maxZ, int newX, int newY,  int currentZ, int newDirection,  int stepState)
         //{
         //    minZ = -128;
         //    maxZ = currentZ;
@@ -875,13 +875,13 @@ namespace ClassicUO.Game
         //    }
         //}
 
-        //private static int CalculateCurrentAverageZ (in int direction)
+        //private static int CalculateCurrentAverageZ (int direction)
         //{
 
         //}
 
 
-        //private static bool CreateItemsList(in List<PathObject> list, in int x, in int y, in  int stepState)
+        //private static bool CreateItemsList(List<PathObject> list,  int x,  int y,   int stepState)
         //{
         //    //int blockX = x / 8;
         //    //int blockY = y / 8;
@@ -959,7 +959,7 @@ namespace ClassicUO.Game
 
     public class PathObject
     {
-        public PathObject(in uint flags, in int z, in int averageZ, in int height, in GameObject obj)
+        public PathObject(uint flags,  int z,  int averageZ,  int height,  GameObject obj)
         {
             Flags = flags;
             Z = z;

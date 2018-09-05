@@ -49,12 +49,12 @@ namespace ClassicUO.Game.GameObjects
         private StaticTiles? _itemData;
         private Layer _layer;
 
-        public Item(in Serial serial) : base(serial)
+        public Item(Serial serial) : base(serial)
         {
         }
 
 
-        public new ItemView View => /*Graphic <= 0 ? null :*/ (ItemView)base.View;
+        //public new ItemView View => /*Graphic <= 0 ? null :*/ (ItemView)base.View;
         public GameEffect Effect { get; set; }
 
         public ushort Amount
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool IsAtWorld(in int x, in int y)
+        public bool IsAtWorld(int x,  int y)
         {
             return Position.X == x && Position.Y == y;
         }
@@ -241,7 +241,7 @@ namespace ClassicUO.Game.GameObjects
             return new ItemView(this);
         }
 
-        protected override void OnProcessDelta(in Delta d)
+        protected override void OnProcessDelta(Delta d)
         {
             base.OnProcessDelta(d);
             if (d.HasFlag(Delta.Ownership))
@@ -552,6 +552,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (direction.Address != 0 || direction.IsUOP)
                         {
+                            direction.LastAccessTime = World.Ticks;
                             int fc = direction.FrameCount;
 
                             if (frameIndex >= fc)

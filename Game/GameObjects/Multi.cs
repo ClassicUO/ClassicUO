@@ -2,7 +2,7 @@
 {
     public sealed class Multi
     {
-        public Multi(in Item parent)
+        public Multi(Item parent)
         {
             Parent = parent;
         }
@@ -19,7 +19,7 @@
 
     public struct MultiComponent
     {
-        public MultiComponent(in Graphic graphic, in ushort x, in ushort y, in sbyte z, in uint flags)
+        public MultiComponent(Graphic graphic,  ushort x,  ushort y,  sbyte z,  uint flags)
         {
             Graphic = graphic;
             Position = new Position(x, y, z);

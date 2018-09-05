@@ -2,7 +2,7 @@
 {
     public struct Property
     {
-        public Property(in uint cliloc, in string args) : this()
+        public Property(uint cliloc,  string args) : this()
         {
             Cliloc = cliloc;
             Args = args;

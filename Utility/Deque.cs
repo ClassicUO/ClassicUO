@@ -459,7 +459,7 @@ namespace ClassicUO.Utility
         ///     available space from <paramref name="arrayIndex" /> to the end of the destination <paramref name="array" />.
         /// </exception>
         /// <remarks>
-        ///     This method uses <see cref="Array.Copy(Array, int, Array, int, int)" /> to copy the elements. The elements are
+        ///     This method uses <see cref="Array.Copy(Array, int,  Array, int,  t)" /> to copy the elements. The elements are
         ///     copied to the <see cref="Array" /> in the same order in which the enumerator iterates
         ///     through the <see cref="Deque{T}" />. This method is an O(n) operation, where n is <see cref="Count" />.
         /// </remarks>

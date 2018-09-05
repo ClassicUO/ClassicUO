@@ -264,7 +264,7 @@ namespace ClassicUO.Network
             -1 // ff
         };
 
-        public static short GetPacketLength(in int id)
+        public static short GetPacketLength(int id)
         {
             return _packetsTable[id];
         }

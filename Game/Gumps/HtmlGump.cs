@@ -10,7 +10,7 @@ namespace ClassicUO.Game.Gumps
     {
         private GameText _gameText;
 
-        public HtmlGump(in string[] parts, in string[] lines) : this()
+        public HtmlGump(string[] parts,  string[] lines) : this()
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -45,18 +45,18 @@ namespace ClassicUO.Game.Gumps
         public bool HasBackground { get; }
 
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
             base.Draw(spriteBatch, position);
 
-            _gameText.View.Draw(spriteBatch, position);
+            _gameText.GetView().Draw(spriteBatch, position);
 
             return true;
         }
 
-        public override void OnMouseLeft(in MouseEventArgs e)
+        public override void OnMouseButton(MouseEventArgs e)
         {
-            if (e.ButtonState == Microsoft.Xna.Framework.Input.ButtonState.Released)
+            if (e.Button == Input.MouseButton.Left && e.ButtonState == Microsoft.Xna.Framework.Input.ButtonState.Released)
             {
                 for (int i = 0; i < _gameText.Links.Count; i++)
                 {

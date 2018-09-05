@@ -162,7 +162,7 @@ namespace ClassicUO.Game.Renderer
         public SpriteTexture Texture { get; private set; }
         public Point ScreenPosition => MouseManager.ScreenPosition;
 
-        public void Update(in double frameMS)
+        public void Update(double frameMS)
         {
             if (Texture == null || Texture.IsDisposed || _needGraphicUpdate)
             {
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.Renderer
             }
         }
 
-        public void Draw(in SpriteBatch3D sb)
+        public void Draw(SpriteBatch3D sb)
         {
             ushort id = Graphic;
 

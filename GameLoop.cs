@@ -14,6 +14,8 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace ClassicUO
 {
@@ -32,6 +34,7 @@ namespace ClassicUO
         private DateTime _timePing;
 
         private GameText _gameTextTRY;
+        private int _objectDrawCount;
 
         public GameLoop()
         {
@@ -79,7 +82,6 @@ namespace ClassicUO
         {
             Window.AllowUserResizing = true;
 
-
             _spriteBatch = new SpriteBatch3D(this);
 
             TextureManager.Device = GraphicsDevice;
@@ -95,21 +97,21 @@ namespace ClassicUO
 
 
             //uncomment it and fill it to save your first settings
-           /* Settings settings1 = new Settings()
-            {
-                Username = "",
-                Password = "",
-                LastCharacterName = "",
-                IP = "",
-                Port = 2599,
-                UltimaOnlineDirectory = "",
-                ClientVersion = "7.0.59.8"
-            };
+            /* Settings settings1 = new Settings()
+             {
+                 Username = "",
+                 Password = "",
+                 LastCharacterName = "",
+                 IP = "",
+                 Port = 2599,
+                 UltimaOnlineDirectory = "",
+                 ClientVersion = "7.0.59.8"
+             };
 
-            ConfigurationResolver.Save(settings1, "settings.json");*/
-            
+             ConfigurationResolver.Save(settings1, "settings.json");*/
 
-            Settings settings = ConfigurationResolver.Load<Settings>("settings.json");
+
+            Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine( Environment.CurrentDirectory,  "settings.json"));
 
             string[] parts = settings.ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -487,6 +489,7 @@ namespace ClassicUO
                 //int centerX = World.Player.Position.X + 1;
                 //int centerY = World.Player.Position.Y - diffY + 1;
 
+                _objectDrawCount = 0;
 
                 for (int y = 0; y < renderDimensions.Y * 2 + 11; y++)
                 {
@@ -531,14 +534,15 @@ namespace ClassicUO
                                     && !(obj is Tile))
                                     continue;
 
-                                if (draw)
-                                    obj.View.Draw(_spriteBatch, dp);
+                                if (draw && obj.GetView().Draw(_spriteBatch, dp))
+                                    _objectDrawCount++;
+                                    
                             }
 
                             foreach (var o in toremove)
                             {
                                 o.Reset();
-                                tile.RemoveWorldObject(o);
+                                tile.RemoveGameObject(o);
                             }
 
                             toremove.Clear();
@@ -609,7 +613,7 @@ namespace ClassicUO
                             foreach (var o in toremove)
                             {
                                 o.Reset();
-                                tile.RemoveWorldObject(o);
+                                tile.RemoveGameObject(o);
                             }
 
                             toremove.Clear();
@@ -624,7 +628,7 @@ namespace ClassicUO
 
     */
                 _spriteBatch.GraphicsDevice.SetRenderTarget(_targetRender);
-                _spriteBatch.GraphicsDevice.Clear(ClearOptions.DepthBuffer | ClearOptions.Target, Color.Black, 1, 0);
+                _spriteBatch.GraphicsDevice.Clear(Color.Black);
                 _spriteBatch.EndDraw(true);
                 _spriteBatch.GraphicsDevice.SetRenderTarget(null);
             }
@@ -643,8 +647,8 @@ namespace ClassicUO
 
             //_mouseManager.Draw(_spriteBatch);
 
-            _gameTextTRY.Text = "FPS: " + _fpsCounter.FPS;
-            _gameTextTRY.View.Draw(_spriteBatch, new Vector3(Window.ClientBounds.Width - 100, 20, 0));
+            _gameTextTRY.Text = "FPS: " + _fpsCounter.FPS + "\r\nObjects: " + _objectDrawCount;
+            _gameTextTRY.GetView().Draw(_spriteBatch, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
 
             //_spriteBatch.Draw2D(_gump, new Rectangle(100, 100, _gump.Width, _gump.Height), Vector3.Zero);
 

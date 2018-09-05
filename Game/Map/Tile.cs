@@ -17,7 +17,7 @@ namespace ClassicUO.Game.Map
 
         public Tile() : base(World.Map)
         {
-            _objectsOnTile = new List<GameObject>(1);
+            _objectsOnTile = new List<GameObject>();
             _objectsOnTile.Add(this);
         }
 
@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Map
 
 
         public override Position Position { get; set; }
-        public new TileView View => (TileView)base.View;
+        //public new TileView View => (TileView)base.View;
         public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
 
         public LandTiles TileData
@@ -55,7 +55,7 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public void AddWorldObject(in GameObject obj)
+        public void AddGameObject(GameObject obj)
         {
             if (obj is IDynamicItem)
             {
@@ -77,7 +77,7 @@ namespace ClassicUO.Game.Map
             _needSort = true;
         }
 
-        public void RemoveWorldObject(in GameObject obj)
+        public void RemoveGameObject(GameObject obj)
         {
             _objectsOnTile.Remove(obj);
         }
@@ -109,11 +109,10 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            //_objectsOnTile.Clear();
-            //_objectsOnTile.Add(this);
             DisposeView();
             Graphic = 0;
             Position = Position.Invalid;
+            _tileData = null;
             _needSort = false;
         }
 
@@ -160,7 +159,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public List<GameObject> GetItemsBetweenZ(in int z0, in int z1)
+        public List<GameObject> GetItemsBetweenZ(int z0,  int z1)
         {
             var items = _itemsAtZ;
             _itemsAtZ.Clear();
@@ -179,7 +178,7 @@ namespace ClassicUO.Game.Map
             return items;
         }
 
-        public bool IsZUnderObjectOrGround(in sbyte z, out GameObject entity, out GameObject ground)
+        public bool IsZUnderObjectOrGround(sbyte z, out GameObject entity, out GameObject ground)
         {
             var list = _objectsOnTile;
 
@@ -205,7 +204,7 @@ namespace ClassicUO.Game.Map
                     }
                 }
 
-                else if (list[i] is Tile tile && tile.View.SortZ >= z + 12)
+                else if (list[i] is Tile tile && tile.GetView().SortZ >= z + 12)
                 {
                     ground = list[i];
                 }
@@ -214,7 +213,7 @@ namespace ClassicUO.Game.Map
             return entity != null || ground != null;
         }
 
-        public T[] GetWorldObjects<T>() where T : GameObject
+        public T[] GetGameObjects<T>() where T : GameObject
         {
             return _objectsOnTile.OfType<T>().ToArray();
         }

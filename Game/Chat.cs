@@ -72,7 +72,7 @@ namespace ClassicUO.Game
 
     public class UOMessageEventArgs : EventArgs
     {
-        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, in bool unicode = false, string lang = null)
+        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font,  bool unicode = false, string lang = null)
         {
             Text = text;
             Hue = hue;
@@ -83,7 +83,7 @@ namespace ClassicUO.Game
             IsUnicode = unicode;
         }
 
-        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, uint cliloc, in bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
+        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, uint cliloc,  bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
         {
             Text = text;
             Hue = hue;

@@ -45,7 +45,7 @@ namespace ClassicUO.Game.GameObjects
             Speed = AnimDataFrame.FrameInterval * 45;
         }
 
-        public virtual void UpdateAnimation(in double ms)
+        public virtual void UpdateAnimation(double ms)
         {
             if (IsEnabled)
             {
@@ -69,7 +69,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void AddChildEffect(in GameEffect effect)
+        public void AddChildEffect(GameEffect effect)
         {
             _children.Add(effect);
         }
@@ -84,12 +84,12 @@ namespace ClassicUO.Game.GameObjects
             return (Source.Position.X, Source.Position.Y, Source.Position.Z);
         }
 
-        public void SetSource(in GameObject source)
+        public void SetSource(GameObject source)
         {
             Source = source;
         }
 
-        public void SetSource(in int x, in int y, in int z)
+        public void SetSource(int x,  int y,  int z)
         {
             Source = null;
             SourceX = x;
@@ -107,12 +107,12 @@ namespace ClassicUO.Game.GameObjects
             return (Target.Position.X, Target.Position.Y, Target.Position.Z);
         }
 
-        public void SetTarget(in GameObject target)
+        public void SetTarget(GameObject target)
         {
             Target = target;
         }
 
-        public void SetTarget(in int x, in int y, in int z)
+        public void SetTarget(int x,  int y,  int z)
         {
             Target = null;
             TargetX = x;

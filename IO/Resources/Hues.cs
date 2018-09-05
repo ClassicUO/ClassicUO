@@ -103,20 +103,20 @@ namespace ClassicUO.IO.Resources
             return null;
         }
 
-        public static void SetHuesBlock(int index, IntPtr ptr)
-        {
-            VerdataHuesGroup group = Marshal.PtrToStructure<VerdataHuesGroup>(ptr);
-            SetHuesBlock(index, group);
-        }
+        //public static void SetHuesBlock(int index, IntPtr ptr)
+        //{
+        //    VerdataHuesGroup group = Marshal.PtrToStructure<VerdataHuesGroup>(ptr);
+        //    SetHuesBlock(index, group);
+        //}
 
-        public static void SetHuesBlock(int index, VerdataHuesGroup group)
-        {
-            if (index < 0 || index >= HuesCount)
-                return;
+        //public static void SetHuesBlock(int index, VerdataHuesGroup group)
+        //{
+        //    if (index < 0 || index >= HuesCount)
+        //        return;
 
-            HuesRange[index].Header = group.Header;
-            for (int i = 0; i < 8; i++) HuesRange[index].Entries[i].ColorTable = group.Entries[i].ColorTable;
-        }
+        //    HuesRange[index].Header = group.Header;
+        //    for (int i = 0; i < 8; i++) HuesRange[index].Entries[i].ColorTable = group.Entries[i].ColorTable;
+        //}
 
         public static uint Color16To32(ushort c)
         {
@@ -217,7 +217,7 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        public static (byte, byte, byte, byte) GetBGRA(in uint cl)
+        public static (byte, byte, byte, byte) GetBGRA(uint cl)
         {
             return ((byte)(cl & 0xFF), // B
                     (byte)((cl >> 8) & 0xFF), // G
@@ -226,7 +226,7 @@ namespace ClassicUO.IO.Resources
                 );
         }
 
-        public static uint RgbaToArgb(in uint rgba)
+        public static uint RgbaToArgb(uint rgba)
         {
             return (rgba >> 8) | (rgba << 24);
         }
@@ -234,56 +234,56 @@ namespace ClassicUO.IO.Resources
 
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct HuesBlock
+    public readonly struct HuesBlock
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public ushort[] ColorTable;
+        public readonly ushort[] ColorTable;
 
-        public ushort TableStart;
-        public ushort TableEnd;
+        public readonly ushort TableStart;
+        public readonly ushort TableEnd;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-        public char[] Name;
+        public readonly char[] Name;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct HuesGroup
+    public readonly struct HuesGroup
     {
-        public uint Header;
+        public readonly uint Header;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public HuesBlock[] Entries;
+        public readonly HuesBlock[] Entries;
     }
 
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct VerdataHuesBlock
+    public readonly struct VerdataHuesBlock
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public ushort[] ColorTable;
+        public readonly ushort[] ColorTable;
 
-        public ushort TableStart;
-        public ushort TableEnd;
+        public readonly ushort TableStart;
+        public readonly ushort TableEnd;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-        public char[] Name;
+        public readonly char[] Name;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
-        public ushort[] Unk;
+        public readonly ushort[] Unk;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct VerdataHuesGroup
+    public readonly struct VerdataHuesGroup
     {
-        public uint Header;
+        public readonly uint Header;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
-        public HuesBlock[] Entries;
+        public readonly HuesBlock[] Entries;
     }
 
     public struct FloatHues
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 96)]
+        //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 96)]
         public float[] Palette;
     }
 }

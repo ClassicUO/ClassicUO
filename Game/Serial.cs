@@ -18,32 +18,32 @@ namespace ClassicUO.Game
         public bool IsValid => Value > 0 && Value < 0x80000000;
         public uint Value { get; }
 
-        public static implicit operator Serial(in uint value)
+        public static implicit operator Serial(uint value)
         {
             return new Serial(value);
         }
 
-        public static implicit operator uint(in Serial serial)
+        public static implicit operator uint(Serial serial)
         {
             return serial.Value;
         }
 
-        public static bool operator ==(in Serial s1, in Serial s2)
+        public static bool operator ==(Serial s1,  Serial s2)
         {
             return s1.Value == s2.Value;
         }
 
-        public static bool operator !=(in Serial s1, in Serial s2)
+        public static bool operator !=(Serial s1,  Serial s2)
         {
             return s1.Value != s2.Value;
         }
 
-        public static bool operator <(in Serial s1, in Serial s2)
+        public static bool operator <(Serial s1,  Serial s2)
         {
             return s1.Value < s2.Value;
         }
 
-        public static bool operator >(in Serial s1, in Serial s2)
+        public static bool operator >(Serial s1,  Serial s2)
         {
             return s1.Value > s2.Value;
         }
@@ -83,7 +83,7 @@ namespace ClassicUO.Game
             return false;
         }
 
-        public static Serial Parse(in string str)
+        public static Serial Parse(string str)
         {
             if (str.StartsWith("0x"))
             {

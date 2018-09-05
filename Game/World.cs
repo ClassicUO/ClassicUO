@@ -59,13 +59,13 @@ namespace ClassicUO.Game
         public static IsometricLight Light { get; } = new IsometricLight();
 
 
-        public static void Update(in double frameMS)
+        public static void Update(double frameMS)
         {
             if (Player != null)
             {
                 foreach (Mobile mob in Mobiles)
                 {
-                    mob.View.Update(frameMS);
+                    mob.GetView().Update(frameMS);
 
                     if (mob.Distance > ViewRange)
                     {
@@ -76,7 +76,7 @@ namespace ClassicUO.Game
 
                 foreach (Item item in Items)
                 {
-                    item.View.Update(frameMS);
+                    item.GetView().Update(frameMS);
 
                     if (item.Distance > ViewRange && item.OnGround)
                     {
@@ -88,13 +88,13 @@ namespace ClassicUO.Game
         }
 
 
-        public static House GetHouse(in Serial serial)
+        public static House GetHouse(Serial serial)
         {
             _houses.TryGetValue(serial, out House h);
             return h;
         }
 
-        public static House GetOrCreateHouse(in Serial serial)
+        public static House GetOrCreateHouse(Serial serial)
         {
             if (_houses.TryGetValue(serial, out House house))
             {
@@ -104,18 +104,18 @@ namespace ClassicUO.Game
             return new House(serial);
         }
 
-        public static void AddOrUpdateHouse(in House house)
+        public static void AddOrUpdateHouse(House house)
         {
             _houses.TryAdd(house.Serial, house);
         }
 
-        public static void RemoveHouse(in Serial house)
+        public static void RemoveHouse(Serial house)
         {
             _houses.TryRemove(house, out House h);
         }
 
 
-        public static bool Contains(in Serial serial)
+        public static bool Contains(Serial serial)
         {
             if (serial.IsItem)
             {
@@ -130,7 +130,7 @@ namespace ClassicUO.Game
             return false;
         }
 
-        public static Entity Get(in Serial serial)
+        public static Entity Get(Serial serial)
         {
             if (serial.IsItem)
             {
@@ -145,12 +145,12 @@ namespace ClassicUO.Game
             return null;
         }
 
-        public static Item GetOrCreateItem(in Serial serial)
+        public static Item GetOrCreateItem(Serial serial)
         {
             return Items.Get(serial) ?? new Item(serial);
         }
 
-        public static Mobile GetOrCreateMobile(in Serial serial)
+        public static Mobile GetOrCreateMobile(Serial serial)
         {
             return Mobiles.Get(serial) ?? new Mobile(serial);
         }
@@ -185,7 +185,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        public static bool RemoveMobile(in Serial serial)
+        public static bool RemoveMobile(Serial serial)
         {
             Mobile mobile = Mobiles.Remove(serial);
             if (mobile == null)
@@ -204,7 +204,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        public static void Clear(in bool noplayer = false)
+        public static void Clear(bool noplayer = false)
         {
             OverHeads.Clear();
 

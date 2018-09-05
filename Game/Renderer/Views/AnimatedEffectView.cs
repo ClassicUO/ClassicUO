@@ -7,39 +7,39 @@ namespace ClassicUO.Game.Renderer.Views
     {
         private Graphic _displayedGraphic = Graphic.Invalid;
 
-        public AnimatedEffectView(in AnimatedItemEffect effect) : base(effect)
+        public AnimatedEffectView(AnimatedItemEffect effect) : base(effect)
         {
         }
 
-        public AnimatedItemEffect WorldObject => (AnimatedItemEffect)GameObject;
+        public new AnimatedItemEffect GameObject => (AnimatedItemEffect)base.GameObject;
 
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            return !PreDraw(position) && DrawInternal(spriteBatch, position);
+            return !GameObject.IsDisposed && !PreDraw(position) && DrawInternal(spriteBatch, position);
         }
 
-        public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool DrawInternal(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            if (WorldObject.AnimationGraphic != _displayedGraphic)
+            if (GameObject.AnimationGraphic != _displayedGraphic)
             {
-                _displayedGraphic = WorldObject.AnimationGraphic;
-                Texture = TextureManager.GetOrCreateStaticTexture(WorldObject.AnimationGraphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + WorldObject.Position.Z * 4, Texture.Width, Texture.Height);
+                _displayedGraphic = GameObject.AnimationGraphic;
+                Texture = TextureManager.GetOrCreateStaticTexture(GameObject.AnimationGraphic);
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
             }
 
-            HueVector = RenderExtentions.GetHueVector(WorldObject.Hue);
+            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 
-            return base.Draw(in spriteBatch, in position);
+            return base.Draw(spriteBatch,  position);
         }
 
-        public override void Update(in double frameMS)
+        public override void Update(double frameMS)
         {
             base.Update(frameMS);
 
-            if (!WorldObject.IsDisposed)
+            if (!GameObject.IsDisposed)
             {
-                WorldObject.UpdateAnimation(frameMS);
+                GameObject.UpdateAnimation(frameMS);
             }
         }
     }

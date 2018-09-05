@@ -9,7 +9,7 @@ namespace ClassicUO.Utility
         private readonly bool _isPrimitive;
         private T[] _items;
 
-        public Bag(in int capacity = 16)
+        public Bag(int capacity = 16)
         {
             _isPrimitive = typeof(T).IsPrimitive;
             _items = new T[capacity];
@@ -41,14 +41,14 @@ namespace ClassicUO.Utility
             return new BagEnumerator(this);
         }
 
-        public void Add(in T element)
+        public void Add(T element)
         {
             EnsureCapacity(Count + 1);
             _items[Count] = element;
             ++Count;
         }
 
-        public void AddRange(in Bag<T> range)
+        public void AddRange(Bag<T> range)
         {
             for (int index = 0, j = range.Count; j > index; ++index)
                 Add(range[index]);
@@ -66,7 +66,7 @@ namespace ClassicUO.Utility
                 Array.Clear(_items, 0, Count);
         }
 
-        public bool Contains(in T element)
+        public bool Contains(T element)
         {
             for (var index = Count - 1; index >= 0; --index)
             {
@@ -77,7 +77,7 @@ namespace ClassicUO.Utility
             return false;
         }
 
-        public T RemoveAt(in int index)
+        public T RemoveAt(int index)
         {
             var result = _items[index];
             --Count;
@@ -86,7 +86,7 @@ namespace ClassicUO.Utility
             return result;
         }
 
-        public bool Remove(in T element)
+        public bool Remove(T element)
         {
             for (var index = Count - 1; index >= 0; --index)
             {
@@ -103,7 +103,7 @@ namespace ClassicUO.Utility
             return false;
         }
 
-        public bool RemoveAll(in Bag<T> bag)
+        public bool RemoveAll(Bag<T> bag)
         {
             var isResult = false;
 
@@ -116,7 +116,7 @@ namespace ClassicUO.Utility
             return isResult;
         }
 
-        private void EnsureCapacity(in int capacity)
+        private void EnsureCapacity(int capacity)
         {
             if (capacity < _items.Length)
                 return;
@@ -132,7 +132,7 @@ namespace ClassicUO.Utility
             private volatile Bag<T> _bag;
             private volatile int _index;
 
-            public BagEnumerator(in Bag<T> bag)
+            public BagEnumerator(Bag<T> bag)
             {
                 _bag = bag;
                 _index = -1;

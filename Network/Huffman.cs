@@ -270,19 +270,19 @@ namespace ClassicUO.Network
         #endregion
 
 
-        private static int GetBit(in int buf, in int bit)
+        private static int GetBit(int buf,  int bit)
         {
             return (buf >> (bit - 1)) & 1;
         }
 
-        private int PutBit(ref byte b, in int bit)
+        private int PutBit(ref byte b,  int bit)
         {
             int bit_num = 1 << (bit - 1);
             b |= (byte)bit_num;
             return 1;
         }
 
-        private static int RemoveBit(ref byte b, in int bit)
+        private static int RemoveBit(ref byte b,  int bit)
         {
             int bit_num = 0;
 
@@ -295,7 +295,7 @@ namespace ClassicUO.Network
             return 1;
         }
 
-        public static bool DecompressChunk(ref byte[] src, ref int srcOffset, in int srcLength, ref byte[] dest, in int destOffset, out int destLength)
+        public static bool DecompressChunk(ref byte[] src, ref int srcOffset,  int srcLength, ref byte[] dest,  int destOffset, out int destLength)
         {
             Array.Clear(dest, destOffset, dest.Length - destOffset);
 
