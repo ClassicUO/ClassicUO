@@ -61,27 +61,28 @@ namespace ClassicUO.Game.GameObjects
         private string _name;
 
         private Position _position;
-        private Dictionary<Serial, Item> _items;
+       // private Dictionary<Serial, Item> _items;
 
         protected Entity(Serial serial) : base(World.Map)
         {
             Serial = serial;
-            _items = new Dictionary<Serial, Item>();
+            //_items = new Dictionary<Serial, Item>();
+            Items = new EntityCollection<Item>();
             _position = base.Position;
             //PositionChanged += OnPositionChanged;
         }
 
-        //public EntityCollection<Item> Items { get; }
-        public IReadOnlyDictionary<Serial, Item> Items => _items;
+        public EntityCollection<Item> Items { get; }
+        //public IReadOnlyDictionary<Serial, Item> Items => _items;
         public Serial Serial { get; }
         public IReadOnlyList<Property> Properties => (IReadOnlyList<Property>)_properties.Values;
 
-        public void AddItem(Item item)
-        {
-            _items[item.Serial] = item;
-        }
+        //public void AddItem(Item item)
+        //{
+        //    _items[item.Serial] = item;
+        //}
 
-        public void RemoveItem(Serial serial) => _items.Remove(serial);
+        //public void RemoveItem(Serial serial) => _items.Remove(serial);
 
         public override Graphic Graphic
         {
@@ -177,7 +178,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public virtual bool Exists => World.Exists(Serial);
+        public virtual bool Exists => World.Contains(Serial);
         public int Distance => DistanceTo(World.Player);
 
         public DeferredEntity DeferredObject { get; set; }
@@ -236,12 +237,9 @@ namespace ClassicUO.Game.GameObjects
             }
 
             foreach (var i in Items)
-                i.Value.Dispose();
+                i.Dispose();
 
-                //foreach(var item in Items)
-                //    World.RemoveItem(item);
-
-                //Items.Clear();
+            Items.Clear();
             _properties.Clear();
 
             base.Dispose();
