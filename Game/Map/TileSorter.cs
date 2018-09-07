@@ -71,6 +71,16 @@ namespace ClassicUO.Game.Map
                 comparison = xTierbreaker - yTierbreaker;
             }
 
+            if (comparison == 0)
+            {
+                comparison = x.PriorityZ - y.PriorityZ;
+            }
+
+            if (comparison != 0)
+            {
+
+            }
+
             return comparison;
         }
 

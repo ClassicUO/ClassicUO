@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Map
         public int MinZ { get; set; }
         public int AverageZ { get; set; }
         public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
-        public bool IsStretched { get; set; }
+        public bool IsStretched => !(TileData.TexID <= 0 && (TileData.Flags & 0x00000080) > 0);
         public Ground Ground { get; private set; }
 
         public List<GameObject> ObjectsOnTiles
@@ -53,7 +53,7 @@ namespace ClassicUO.Game.Map
             {
                 if (_needSort)
                 {
-                    RemoveDuplicates();
+                    RemoveDuplicates(); 
                     TileSorter.Sort(_objectsOnTile);
                     _needSort = false;
                 }
@@ -79,6 +79,7 @@ namespace ClassicUO.Game.Map
             }
         }
 
+
         public void AddGameObject(GameObject obj)
         {
             if (obj is IDynamicItem)
@@ -96,51 +97,52 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            short priorityZ = obj.Position.Z;
+            //short priorityZ = obj.Position.Z;
 
 
-            switch(obj)
-            {
-                case Tile tile:
-                    {
-                        tile.IsStretched = !(tile.TileData.TexID <= 0 && (tile.TileData.Flags & 0x00000080) > 0);
+            //switch(obj)
+            //{
+            //    case Tile tile:
+            //        {
+            //            if (tile.IsStretched)
+            //                priorityZ = (short)(AverageZ - 1);
+            //            else
+            //                priorityZ--;
+            //        }
+            //        break;
+            //    case Mobile mobile:
+            //        priorityZ++;
+            //        break;
+            //    case Item item:
+            //        if (item.IsCorpse)
+            //            priorityZ++;
+            //        else
+            //            goto default;
+            //        break;
+            //    case GameEffect effect:
+            //        priorityZ += 2;
+            //        break;
+            //    default:
+            //        {
+            //            IDynamicItem dyn = (IDynamicItem)obj;
 
-                        //var view = (TileView)tile.GetView();
-                        if (tile.IsStretched)
-                            priorityZ = (short)(AverageZ - 1);
-                        else
-                            priorityZ--;
-                    }
-                    break;
-                case Mobile mobile:
-                    priorityZ++;
-                    break;
-                case Item item:
-                    if (item.IsCorpse)
-                        priorityZ++;
-                    else
-                        goto default;
-                    break;
-                case GameEffect effect:
-                    priorityZ += 2;
-                    break;
-                default:
-                    {
-                        IDynamicItem dyn = (IDynamicItem)obj;
+            //            if (IO.Resources.TileData.IsBackground((long)dyn.ItemData.Flags))
+            //                priorityZ--;
 
-                        if (IO.Resources.TileData.IsBackground((long)dyn.ItemData.Flags))
-                            priorityZ--;
+            //            //if (IO.Resources.TileData.IsSurface((long)dyn.ItemData.Flags))
+            //            //    priorityZ++;
 
-                        if (dyn.ItemData.Height > 0)
-                            priorityZ++;
-                    }
-                    break;
-            }
+            //            if (dyn.ItemData.Height > 0)
+            //                priorityZ++;
+            //        }
+            //        break;
+            //}
 
 
-            obj.PriorityZ = priorityZ;
+            //obj.PriorityZ = priorityZ;
 
             _objectsOnTile.Add(obj);
+
 
             _needSort = true;
         }
