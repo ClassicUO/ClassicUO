@@ -607,7 +607,7 @@ namespace ClassicUO
 
                     Point firstTileInRow = new Point(firstTile.X + ((y + 1) / 2), firstTile.Y + (y / 2));
 
-                    for (int x = 0; x < renderDimensions.X + 1; x++, dp.X -= 44)
+                    for (int x = 0; x < renderDimensions.X + 1; x++)
                     {
                         int tileX = firstTileInRow.X - x;
                         int tileY = firstTileInRow.Y + x;
@@ -642,13 +642,14 @@ namespace ClassicUO
 
                             foreach (var o in toremove)
                             {
-                                //o.Reset();
+                                o.Reset();
                                 tile.RemoveGameObject(o);
                             }
 
                             toremove.Clear();
                         }
 
+                        dp.X -= 44f;
                     }
                 }
 

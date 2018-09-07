@@ -50,13 +50,13 @@ namespace ClassicUO.Game.GameObjects
 
         public void Reset()
         {
-            //AssociatedTile.RemoveGameObject(this);
-            //DisposeView();
-            //Map = null;
-            //Entity = null;
-            //AtPosition = Vector3.Zero;
-            //Position = Position.Invalid;
-            //Z = sbyte.MinValue;
+            AssociatedTile.RemoveGameObject(this);
+            DisposeView();
+            Map = null;
+            Entity = null;
+            AtPosition = Vector3.Zero;
+            Position = Position.Invalid;
+            Z = sbyte.MinValue;
         }
 
         protected override View CreateView()

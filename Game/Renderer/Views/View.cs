@@ -57,12 +57,12 @@ namespace ClassicUO.Game.Renderer.Views
 
         protected bool PreDraw(Vector3 position)
         {
-            //if (GameObject is IDeferreable deferreable)
+            if (GameObject is IDeferreable deferreable)
             {
                 Tile tile;
                 Direction check;
 
-                if (GameObject is Mobile mobile && mobile.IsWalking)
+                if (GameObject is Mobile mobile && mobile.IsMoving)
                 {
                     Direction dir = mobile.Direction;
 
@@ -90,21 +90,19 @@ namespace ClassicUO.Game.Renderer.Views
 
                 if (tile != null)
                 {
-                    //if (deferreable.DeferredObject == null)
-                    //{
-                    //    deferreable.DeferredObject = new DeferredEntity();
-                    //}
-                    //else
-                    //{
-                    //    deferreable.DeferredObject.Reset();
-                    //}
+                    if (deferreable.DeferredObject == null)
+                    {
+                        deferreable.DeferredObject = new DeferredEntity();
+                    }
+                    else
+                    {
+                        deferreable.DeferredObject.Reset();
+                    }
 
-                    DeferredEntity def = new DeferredEntity();
-
-                    def.AtPosition = position;
-                    def.Entity = GameObject;
-                    def.AssociatedTile = tile;
-                    def.Map = World.Map;
+                    deferreable.DeferredObject.AtPosition = position;
+                    deferreable.DeferredObject.Entity = GameObject;
+                    deferreable.DeferredObject.AssociatedTile = tile;
+                    deferreable.DeferredObject.Map = World.Map;
 
                     if (GameObject is Mobile mob)
                     {
@@ -113,16 +111,16 @@ namespace ClassicUO.Game.Renderer.Views
                             return false;
                         }
 
-                        def.Z = z;
-                        def.Position = new Position(0xFFFF, 0xFFFF, z);
+                        deferreable.DeferredObject.Z = z;
+                        deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, z);
                     }
                     else
                     {
-                        def.Z = GameObject.Position.Z;
-                        def.Position = new Position(0xFFFF, 0xFFFF, GameObject.Position.Z);
+                        deferreable.DeferredObject.Z = GameObject.Position.Z;
+                        deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, GameObject.Position.Z);
                     }
 
-                    tile.AddGameObject(def);
+                    tile.AddGameObject(deferreable.DeferredObject);
 
                     return true;
                 }
