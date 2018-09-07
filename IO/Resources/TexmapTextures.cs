@@ -1,4 +1,5 @@
 ﻿using ClassicUO.IO;
+using System;
 using System.IO;
 
 namespace ClassicUO.IO.Resources
@@ -43,7 +44,7 @@ namespace ClassicUO.IO.Resources
         private static readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
         private static readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
 
-        public static ushort[] GetTextmapTexture(ushort index, out int size)
+        public static Span<ushort> GetTextmapTexture(ushort index, out int size)
         {
             (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
 
@@ -53,7 +54,7 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
-            ushort[] pixels;
+            Span<ushort> pixels;
 
             if (extra == 0)
             {

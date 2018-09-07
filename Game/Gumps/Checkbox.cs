@@ -28,7 +28,7 @@ namespace ClassicUO.Game.Gumps
 
         public virtual bool IsChecked { get; set; }
 
-        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
             bool ok = base.Draw(spriteBatch,  position);
 

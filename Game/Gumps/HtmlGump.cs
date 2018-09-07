@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Gumps
         public bool HasBackground { get; }
 
 
-        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
             base.Draw(spriteBatch, position);
 

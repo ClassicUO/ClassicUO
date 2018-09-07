@@ -458,9 +458,9 @@ namespace ClassicUO.Game
                 isSet = true;
             }
 
-            Static[] staticTiles = mapTile.GetGameObjects<Static>();
+            List<Static> staticTiles = mapTile.GetStatics();
 
-            for (int i = 0; i < staticTiles.Length; i++)
+            for (int i = 0; i < staticTiles.Count; i++)
             {
                 Static tile = staticTiles[i];
                 StaticTiles id = tile.ItemData;
@@ -524,9 +524,9 @@ namespace ClassicUO.Game
             }
         }
 
-        private static bool IsOK(bool ignoreDoors,  int ourZ,  int ourTop,  Static[] tiles,  List<IDynamicItem> items)
+        private static bool IsOK(bool ignoreDoors,  int ourZ,  int ourTop,  List<Static> tiles,  List<IDynamicItem> items)
         {
-            for (int i = 0; i < tiles.Length; ++i)
+            for (int i = 0; i < tiles.Count; ++i)
             {
                 Static item = tiles[i];
                 if ((item.ItemData.Flags & IMPASSABLE_SURFACE) != 0) // Impassable || Surface
@@ -580,7 +580,7 @@ namespace ClassicUO.Game
 
             LandTiles id = mapTile.TileData;
 
-            Static[] tiles = mapTile.GetGameObjects<Static>();
+            List<Static> tiles = mapTile.GetStatics();
             bool landBlocks = (id.Flags & 0x00000040) != 0;
             bool considerLand = !mapTile.IsIgnored;
 
@@ -596,7 +596,7 @@ namespace ClassicUO.Game
             bool ignoreDoors = m.IsDead || m.Graphic == 0x3DB;
 
 
-            for (int i = 0; i < tiles.Length; ++i)
+            for (int i = 0; i < tiles.Count; ++i)
             {
                 Static tile = tiles[i];
 

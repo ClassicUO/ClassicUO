@@ -1,15 +1,15 @@
-﻿using ClassicUO.Game.Renderer;
+﻿using ClassicUO.Game.GameObjects.Interfaces;
+using ClassicUO.Game.Renderer;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using IDrawable = ClassicUO.Game.GameObjects.Interfaces.IDrawable;
 using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Gumps
 {
-    public class GumpControl : IDrawable, IUpdateable
+    public class GumpControl : IDrawableUI, IUpdateable
     {
         private readonly List<GumpControl> _children;
         private GumpControl _parent;
@@ -141,7 +141,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public virtual bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        public virtual bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
             if (IsDisposed || ((Texture == null || Texture.IsDisposed) && Children.Count <= 0))
             {

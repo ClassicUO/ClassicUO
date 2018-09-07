@@ -71,7 +71,7 @@ namespace ClassicUO.Game.Gumps
             base.Update(frameMS);
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
             for (int i = 0; i < _textures.Length; i++)
             {
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (_textures[i] != null)
                     _textures[i].Dispose();
-                _textures[i] = null;
+                //_textures[i] = null;
             }
         }
     }

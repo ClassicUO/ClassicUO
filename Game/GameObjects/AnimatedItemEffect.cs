@@ -80,5 +80,16 @@ namespace ClassicUO.Game.GameObjects
                 Position = new Position((ushort)x, (ushort)y, (sbyte)z);
             }
         }
+
+
+        public override void Update(double frameMS)
+        {
+            base.Update(frameMS);
+
+            if (!IsDisposed)
+            {
+                UpdateAnimation(frameMS);
+            }
+        }
     }
 }

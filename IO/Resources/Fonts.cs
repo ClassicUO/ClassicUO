@@ -1,4 +1,5 @@
-﻿using ClassicUO.IO;
+﻿using ClassicUO.Game.Renderer;
+using ClassicUO.IO;
 using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
@@ -213,25 +214,26 @@ namespace ClassicUO.IO.Resources
             return textHeight;
         }
 
-        public static (uint[], int, int, int,  bool) GenerateASCII(byte font,  string str,  ushort color, int width,  TEXT_ALIGN_TYPE align,  ushort flags)
+        public static bool GenerateASCII(out FontTexture ftexture, byte font,  string str,  ushort color, int width,  TEXT_ALIGN_TYPE align,  ushort flags)
         {
             int linesCount = 0;
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0)
             {
                 linesCount--;
+                ftexture = null;
                 if (width <= 0 || string.IsNullOrEmpty(str))
-                    return (null, 0, 0, linesCount, false);
+                    return false;
 
                 int realWidth = GetWidthASCII(font, str);
 
                 if (realWidth > width)
                 {
                     string newstr = GetTextByWidthASCII(font, str, width, (flags & UOFONT_CROPPED) != 0);
-                    return GeneratePixelsASCII(font, newstr, color, width, align, flags);
+                    return GeneratePixelsASCII(out ftexture, font, newstr, color, width, align, flags);
                 }
             }
 
-            return GeneratePixelsASCII(font, str, color, width, align, flags);
+            return GeneratePixelsASCII(out ftexture, font, str, color, width, align, flags);
         }
 
         private static string GetTextByWidthASCII(byte font,  string str, int width,  bool isCropped)
@@ -261,26 +263,27 @@ namespace ClassicUO.IO.Resources
             return result;
         }
 
-        private static (uint[], int, int, int,  bool) GeneratePixelsASCII(byte font,  string str,  ushort color, int width,  TEXT_ALIGN_TYPE align,  ushort flags)
+        private static unsafe bool GeneratePixelsASCII(out FontTexture ftexture, byte font,  string str,  ushort color, int width,  TEXT_ALIGN_TYPE align,  ushort flags)
         {
-            uint[] pData;
+            Span<uint> pData;
+            ftexture = null;
 
             if (font >= FontCount)
-                return (null, 0, 0, 0, false);
+                return false;
 
             int len = str.Length;
             if (len <= 0)
-                return (null, 0, 0, 0, false);
+                return false;
 
             FontData fd = _font[font];
             if (width <= 0)
                 width = GetWidthASCII(font, str);
             if (width <= 0)
-                return (null, 0, 0, 0, false);
+                return false;
 
             MultilinesFontInfo info = GetInfoASCII(font, str, len, align, flags, width);
             if (info == null)
-                return (null, 0, 0, 0, false);
+                return false;
 
             width += 4;
             int height = GetHeightASCII(info);
@@ -296,7 +299,7 @@ namespace ClassicUO.IO.Resources
                     info = null;
                 }
 
-                return (null, 0, 0, 0, false);
+                return false;
             }
 
             int blocksize = height * width;
@@ -379,7 +382,11 @@ namespace ClassicUO.IO.Resources
                 info = null;
             }
 
-            return (pData, width, height, linesCount, partialHue);
+            ftexture = new FontTexture(width, height, linesCount, null);
+            fixed (uint* ptrData = pData)
+                ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr)ptrData, pData.Length);
+
+            return partialHue;
         }
 
         public static int GetFontOffsetY(byte font,  byte index)
@@ -588,24 +595,37 @@ namespace ClassicUO.IO.Resources
             _HTMLBackgroundCanBeColored = backgroundCanBeColored;
         }
 
-
-        public static (uint[], int, int, int,  List<WebLinkRect>) GenerateUnicode(byte font,  string str,  ushort color,  byte cell, int width,  TEXT_ALIGN_TYPE align,  ushort flags)
+        public class FontTexture : SpriteTexture
         {
+            public FontTexture(int width, int height, int linescount, List<WebLinkRect> links) : base(width, height)
+            {
+                LinesCount = linescount;
+                Links = links;
+            }
+
+            public int LinesCount { get; }
+            public List<WebLinkRect> Links { get; }
+        }
+
+        public static void GenerateUnicode(out FontTexture ftexture, byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        {
+            ftexture = null;
+
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0)
             {
                 if (width <= 0 || string.IsNullOrEmpty(str))
-                    return (null, 0, 0, 0, null);
+                    return;
 
                 int realWidth = GetWidthUnicode(font, str);
 
                 if (realWidth > width)
                 {
                     string newstring = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0);
-                    return GeneratePixelsUnicode(font, newstring, color, cell, width, align, flags);
+                    GeneratePixelsUnicode(out ftexture, font, newstring, color, cell, width, align, flags);
                 }
             }
 
-            return GeneratePixelsUnicode(font, str, color, cell, width, align, flags);
+            GeneratePixelsUnicode(out ftexture, font, str, color, cell, width, align, flags);
         }
 
         private static unsafe string GetTextByWidthUnicode(byte font,  string str, int width,  bool isCropped)
@@ -912,26 +932,27 @@ namespace ClassicUO.IO.Resources
             return info;
         }
 
-        private static unsafe (uint[], int, int, int,  List<WebLinkRect>) GeneratePixelsUnicode(byte font,  string str,  ushort color,  byte cell, int width,  TEXT_ALIGN_TYPE align,  ushort flags)
+        private static unsafe void GeneratePixelsUnicode(out FontTexture ftexture, byte font,  string str,  ushort color,  byte cell, int width,  TEXT_ALIGN_TYPE align,  ushort flags)
         {
+            ftexture = null;
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
-                return (null, 0, 0, 0, null);
+                return;
 
             int len = str.Length;
             if (len <= 0)
-                return (null, 0, 0, 0, null);
+                return;
 
             int oldWidth = width;
             if (width <= 0)
             {
                 width = GetWidthUnicode(font, str);
                 if (width <= 0)
-                    return (null, 0, 0, 0, null);
+                    return;
             }
 
             MultilinesFontInfo info = GetInfoUnicode(font, str, len, align, flags, width);
             if (info == null)
-                return (null, 0, 0, 0, null);
+                return;
 
             if (IsUsingHTML && (_leftMargin > 0 || _rightMargin > 0))
             {
@@ -949,7 +970,7 @@ namespace ClassicUO.IO.Resources
                     newWidth = 10;
                 info = GetInfoUnicode(font, str, len, align, flags, newWidth);
                 if (info == null)
-                    return (null, 0, 0, 0, null);
+                    return;
             }
 
             if (oldWidth <= 0 && RecalculateWidthByInfo)
@@ -977,12 +998,12 @@ namespace ClassicUO.IO.Resources
                     ptr1 = null;
                 }
 
-                return (null, 0, 0, 0, null);
+                return;
             }
 
             height += _topMargin + _bottomMargin + 4;
             int blocksize = height * width;
-            uint[] pData = new uint[blocksize];
+            Span<uint> pData = new uint[blocksize];
 
             uint* table = (uint*)_unicodeFontAddress[font];
             int lineOffsY = 1 + _topMargin;
@@ -1376,7 +1397,9 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            return (pData, width, height, linesCount, links);
+            ftexture = new FontTexture(width, height, linesCount, links);
+            fixed (uint* ptrData = pData)
+                ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr)ptrData, pData.Length);
         }
 
         private static unsafe MultilinesFontInfo GetInfoHTML(byte font,  string str, int len,  TEXT_ALIGN_TYPE align,  ushort flags,  int width)

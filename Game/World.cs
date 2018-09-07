@@ -2,6 +2,7 @@
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -10,14 +11,12 @@ namespace ClassicUO.Game
     public static class World
     {
         private static readonly ConcurrentDictionary<Serial, House> _houses = new ConcurrentDictionary<Serial, House>();
-        public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
-        public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
-        public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
+        //public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
+        //public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
+        //public static EntityCollection<Mobile> Mobiles { get; } = new EntityCollection<Mobile>();
         public static PlayerMobile Player { get; set; }
         public static Facet Map { get; private set; }
         public static byte ViewRange { get; set; } = 24;
-
-        public static List<GameText> OverHeads { get; } = new List<GameText>();
 
         public static int MapIndex
         {
@@ -26,7 +25,9 @@ namespace ClassicUO.Game
             {
                 if (MapIndex != value)
                 {
-                    Clear(true);
+                    //Clear(true);
+
+                    Clear();
 
                     if (Map != null)
                     {
@@ -54,38 +55,180 @@ namespace ClassicUO.Game
 
 
         public static bool InGame => Player != null && Map != null;
-
         public static long Ticks { get; set; }
         public static IsometricLight Light { get; } = new IsometricLight();
 
 
-        public static void Update(double frameMS)
+        private static readonly Dictionary<Serial, Entity> _objects = new Dictionary<Serial, Entity>();
+        private static readonly Queue<Entity> _queuedObjects = new Queue<Entity>();
+        private static readonly Queue<Serial> _toRemove = new Queue<Serial>();
+        private static readonly List<Serial> _retained = new List<Serial>();
+        private static readonly Func<Serial, Mobile> _funcMobile = (s) => new Mobile(s);
+        private static readonly Func<Serial, PlayerMobile> _funcPlayerMobile = (s) => new PlayerMobile(s);
+        private static readonly Func<Serial, Item> _funcItem = (s) => new Item(s);
+        private static bool _isUpdating;
+
+        public static void Clear(bool clearPlayer = false)
         {
-            if (Player != null)
+            _retained.Clear();
+            if (!clearPlayer)
             {
-                foreach (Mobile mob in Mobiles)
+                if (Player != null)
+                    Retain(Player, _retained);
+            }
+
+            foreach (var e in _objects.Values)
+            {
+                if (!_retained.Contains(e.Serial))
+                    e.Dispose();
+            }
+        }
+
+        private static void Retain(Mobile mob, List<Serial> retained)
+        {
+            retained.Add(mob);
+
+            for (int i = (int)Layer.RightHand; i <= (int)Layer.Bank; i++)
+            {
+                var e = mob.Equipment[i];
+                if (e != null && !e.IsDisposed)
                 {
-                    mob.GetView().Update(frameMS);
+                    retained.Add(e);
 
-                    if (mob.Distance > ViewRange)
-                    {
-                        mob.Dispose();
-                        RemoveMobile(mob);
-                    }
-                }
-
-                foreach (Item item in Items)
-                {
-                    item.GetView().Update(frameMS);
-
-                    if (item.Distance > ViewRange && item.OnGround)
-                    {
-                        item.Dispose();
-                        RemoveItem(item);
-                    }
+                    if (e.Items.Count > 0)
+                        RecursiveRetain(e, retained);
                 }
             }
         }
+
+        private static void RecursiveRetain(Item container, List<Serial> retained)
+        {
+            foreach (var e in container.Items)
+            {
+                if (e.Value != null && !e.Value.IsDisposed)
+                {
+                    retained.Add(e.Key);
+                    if (e.Value.Items.Count > 0)
+                        RecursiveRetain(e.Value, retained);
+                }
+            }
+        }
+
+        public static T GetOrCreate<T>(Serial serial, bool createPlayer = false) where T : Entity
+        {
+            if (!serial.IsValid)
+                return default;
+
+            var obj = Get(serial);
+            if (obj == null)
+            {
+                if (createPlayer)
+                    obj = _funcPlayerMobile(serial);
+                else
+                {
+                    if (typeof(T) == typeof(Mobile))
+                        obj = _funcMobile(serial);
+                    else if (typeof(T) == typeof(Item))
+                        obj = _funcItem(serial);
+                    else
+                        throw new Exception("What kind of serial is it?");
+                }
+
+                if (_isUpdating)
+                    _queuedObjects.Enqueue((T)obj);
+                else
+                    _objects.Add(serial, (T)obj);
+            }
+
+            return (T)obj;
+        }
+
+
+        public static Entity Get(Serial serial)
+        {
+            if (_objects.TryGetValue(serial, out var entity) && entity.IsDisposed)
+            {
+                _objects.Remove(serial);
+                return null;
+            }
+            return entity;
+        }
+
+        public static T Get<T>(Serial serial) where T : Entity
+            => (T)Get(serial);
+
+
+        public static bool Exists(Serial serial) => Get(serial) != null;
+
+        public static void Remove(Serial serial)
+            => Get(serial)?.Dispose();
+
+
+        public static void Update(double frameMS)
+        {
+            if (Player == null)
+                return;
+
+            _isUpdating = true;
+
+            foreach (var k in _objects)
+            {
+                k.Value.Update(frameMS);
+
+                if (k.Value.Distance > ViewRange && ((k.Key.IsItem && ((Item)k.Value).OnGround) || k.Key.IsMobile))
+                    k.Value.Dispose();
+
+                if (k.Value.IsDisposed)
+                    _toRemove.Enqueue(k.Key);
+            }
+
+            while (_toRemove.Count > 0)
+                _objects.Remove(_toRemove.Dequeue());
+
+            _isUpdating = false;
+
+            while (_queuedObjects.Count > 0)
+            {
+                var e = _queuedObjects.Dequeue();
+                _objects.Add(e.Serial, e);
+            }
+        }
+
+
+        //public static void Update(double frameMS)
+        //{
+        //    //if (Player != null)
+        //    //{
+        //    //    foreach (var mob in Mobiles)
+        //    //    {
+        //    //        mob.Update(frameMS);
+
+        //    //        if (mob.Distance > ViewRange)
+        //    //        {
+        //    //            mob.Dispose();
+        //    //            RemoveMobile(mob);
+        //    //        }
+
+        //    //        if (mob.IsDisposed)
+        //    //            Mobiles.Remove(mob);
+        //    //    }
+
+        //    //    foreach (var item in Items)
+        //    //    {
+        //    //        item.Update(frameMS);
+
+        //    //        if (item.Distance > ViewRange && item.OnGround)
+        //    //        {
+        //    //            item.Dispose();
+        //    //            RemoveItem(item);
+        //    //        }
+
+        //    //        if (item.IsDisposed)
+        //    //            Items.Remove(item);
+        //    //    }
+
+        //    //}
+        //}
 
 
         public static House GetHouse(Serial serial)
@@ -115,130 +258,111 @@ namespace ClassicUO.Game
         }
 
 
-        public static bool Contains(Serial serial)
-        {
-            if (serial.IsItem)
-            {
-                return Items.Contains(serial);
-            }
+        //public static bool Contains(Serial serial)
+        //{
+        //    if (serial.IsItem)
+        //    {
+        //        return Items.Contains(serial);
+        //    }
 
-            if (serial.IsMobile)
-            {
-                return Mobiles.Contains(serial);
-            }
+        //    if (serial.IsMobile)
+        //    {
+        //        return Mobiles.Contains(serial);
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
 
-        public static Entity Get(Serial serial)
-        {
-            if (serial.IsItem)
-            {
-                return Items.Get(serial);
-            }
+        //public static Entity Get(Serial serial)
+        //{
+        //    if (serial.IsItem)
+        //    {
+        //        return Items.Get(serial);
+        //    }
 
-            if (serial.IsMobile)
-            {
-                return Mobiles.Get(serial);
-            }
+        //    if (serial.IsMobile)
+        //    {
+        //        return Mobiles.Get(serial);
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
-        public static Item GetOrCreateItem(Serial serial)
-        {
-            return Items.Get(serial) ?? new Item(serial);
-        }
+        //public static Item GetOrCreateItem(Serial serial)
+        //{
+        //    return Items.Get(serial) ?? new Item(serial);
+        //}
 
-        public static Mobile GetOrCreateMobile(Serial serial)
-        {
-            return Mobiles.Get(serial) ?? new Mobile(serial);
-        }
+        //public static Mobile GetOrCreateMobile(Serial serial)
+        //{
+        //    return Mobiles.Get(serial) ?? new Mobile(serial);
+        //}
 
-        public static bool RemoveItem(Serial serial)
-        {
-            Item item = Items.Remove(serial);
-            if (item == null)
-            {
-                ToAdd.RemoveWhere(i => i == serial);
-                return false;
-            }
+        //public static bool RemoveItem(Serial serial)
+        //{
+        //    Item item = Items.Get(serial);
+        //    if (item == null)
+        //    {
+        //        ToAdd.RemoveWhere(i => i == serial);
+        //        return false;
+        //    }
 
-            if (item.Layer != Layer.Invalid && item.RootContainer.IsMobile)
-            {
-                var mobile = Mobiles.Get(item.RootContainer);
-                if (mobile != null)
-                {
-                    mobile.Equipment[(int)item.Layer] = null;
-                }
-            }
+        //    if (item.Layer != Layer.Invalid && item.RootContainer.IsMobile)
+        //    {
+        //        var mobile = Mobiles.Get(item.RootContainer);
+        //        if (mobile != null)
+        //        {
+        //            mobile.Equipment[(int)item.Layer] = null;
+        //        }
+        //    }
 
+        //    item.Dispose();
+        //    return true;
+        //}
 
-            foreach (Item i in item.Items)
-            {
-                RemoveItem(i);
-            }
+        //public static bool RemoveMobile(Serial serial)
+        //{
+        //    Mobile mobile = Mobiles.Get(serial);
+        //    if (mobile == null)
+        //        return false;
 
-            item.Items.Clear();
+        //    mobile.Dispose();
+        //    return true;
+        //}
 
-            item.Dispose();
-            return true;
-        }
+        //public static void Clear(bool noplayer = false)
+        //{
+        //    if (!noplayer)
+        //    {
+        //        Map = null;
+        //        Player = null;
+        //    }
 
-        public static bool RemoveMobile(Serial serial)
-        {
-            Mobile mobile = Mobiles.Remove(serial);
-            if (mobile == null)
-            {
-                return false;
-            }
+        //    foreach (Item item in Items)
+        //    {
+        //        if (noplayer)
+        //        {
+        //            if (item.RootContainer == Player)
+        //            {
+        //                continue;
+        //            }
+        //        }
 
-            foreach (Item i in mobile.Items)
-            {
-                RemoveItem(i);
-            }
+        //        RemoveItem(item);
+        //    }
 
-            mobile.Items.Clear();
+        //    foreach (Mobile mob in Mobiles)
+        //    {
+        //        if (noplayer)
+        //        {
+        //            if (mob == Player)
+        //            {
+        //                continue;
+        //            }
+        //        }
 
-            mobile.Dispose();
-            return true;
-        }
-
-        public static void Clear(bool noplayer = false)
-        {
-            OverHeads.Clear();
-
-            if (!noplayer)
-            {
-                Map = null;
-                Player = null;
-            }
-
-            foreach (Item item in Items)
-            {
-                if (noplayer)
-                {
-                    if (item.RootContainer == Player)
-                    {
-                        continue;
-                    }
-                }
-
-                RemoveItem(item);
-            }
-
-            foreach (Mobile mob in Mobiles)
-            {
-                if (noplayer)
-                {
-                    if (mob == Player)
-                    {
-                        continue;
-                    }
-                }
-
-                RemoveMobile(mob);
-            }
-        }
+        //        RemoveMobile(mob);
+        //    }
+        //}
     }
 }

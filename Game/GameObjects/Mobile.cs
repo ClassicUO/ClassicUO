@@ -56,7 +56,7 @@ namespace ClassicUO.Game.GameObjects
 
         //public new MobileView View => (MobileView)base.View;
 
-        protected Deque<Step> Steps { get; } = new Deque<Step>();
+        public Deque<Step> Steps { get; } = new Deque<Step>();
 
         public RaceType Race
         {
@@ -211,7 +211,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsHuman => MathHelper.InRange(Graphic, 0x0190, 0x0193) || MathHelper.InRange(Graphic, 0x00B7, 0x00BA) || MathHelper.InRange(Graphic, 0x025D, 0x0260) || MathHelper.InRange(Graphic, 0x029A, 0x029B) || MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2;
 
-        public override bool Exists => World.Contains(Serial);
+        public override bool Exists => World.Exists(Serial);
 
 
         public Item[] Equipment { get; } = new Item[(int)Layer.Bank + 1];
@@ -251,24 +251,30 @@ namespace ClassicUO.Game.GameObjects
             _isSA_Poisoned = value;
         }
 
+        public override void Update(double frameMS)
+        {
+            base.Update(frameMS);
+            ProcessAnimation();
+        }
+
 
         protected override void OnProcessDelta(Delta d)
         {
             base.OnProcessDelta(d);
-            if (d.HasFlag(Delta.Hits))
-            {
-                HitsChanged.Raise(this);
-            }
+            //if (d.HasFlag(Delta.Hits))
+            //{
+            //    HitsChanged.Raise(this);
+            //}
 
-            if (d.HasFlag(Delta.Mana))
-            {
-                ManaChanged.Raise(this);
-            }
+            //if (d.HasFlag(Delta.Mana))
+            //{
+            //    ManaChanged.Raise(this);
+            //}
 
-            if (d.HasFlag(Delta.Stamina))
-            {
-                StaminaChanged.Raise(this);
-            }
+            //if (d.HasFlag(Delta.Stamina))
+            //{
+            //    StaminaChanged.Raise(this);
+            //}
         }
 
 
@@ -752,8 +758,16 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public override void Dispose()
+        {
+            base.Dispose();
 
-        protected struct Step
+            for (int i = 0; i < Equipment.Length; i++)
+                Equipment[i] = null;
+
+        }
+
+        public struct Step
         {
             public Step(int x,  int y,  sbyte z,  byte dir,  bool anim,  bool run,  byte seq)
             {

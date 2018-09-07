@@ -40,23 +40,30 @@ namespace ClassicUO.Game.Renderer
             if (gt.IsHTML)
                 Fonts.SetUseHTML(true);
 
+            Fonts.FontTexture ftexture;
+
             if (gt.IsUnicode)
             {
-                (data, gt.Width, gt.Height, linesCount, gt.Links) = Fonts.GenerateUnicode(gt.Font, gt.Text, gt.Hue, gt.Cell, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
+                Fonts.GenerateUnicode(out ftexture, gt.Font, gt.Text, gt.Hue, gt.Cell, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
             }
             else
             {
-                (data, gt.Width, gt.Height, linesCount, gt.IsPartialHue) = Fonts.GenerateASCII(gt.Font, gt.Text, gt.Hue, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
+                //(data, gt.Width, gt.Height, linesCount, gt.IsPartialHue) = Fonts.GenerateASCII(gt.Font, gt.Text, gt.Hue, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
+                gt.IsPartialHue = Fonts.GenerateASCII(out ftexture, gt.Font, gt.Text, gt.Hue, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
             }
 
-            var texture = new SpriteTexture(gt.Width, gt.Height);
-            texture.SetData(data);
+            gt.Width = ftexture.Width;
+            gt.Height = ftexture.Height;
+            gt.Links = ftexture.Links;
+
+            //var texture = new SpriteTexture(gt.Width, gt.Height);
+            //texture.SetData(data);
 
 
             if (gt.IsHTML)
                 Fonts.SetUseHTML(false);
 
-            return texture;
+            return ftexture;
         }
     }
 }

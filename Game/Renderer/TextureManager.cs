@@ -18,7 +18,7 @@ namespace ClassicUO.Game.Renderer
         //public int ID { get; }
     }
 
-    public static class TextureManager
+    public unsafe static class TextureManager
     {
         private const long TEXTURE_TIME_LIFE = 3000;
 
@@ -40,75 +40,114 @@ namespace ClassicUO.Game.Renderer
         public static int NextID => _first++;
 
 
+        private static long _nextGC = 5000;
+
         public static void Update()
         {
-            if (_updateIndex == 0)
+            IO.Resources.Animations.ClearUnusedTextures();
+
+            var list = _textTextureCache.Where(s => World.Ticks - s.Value.Ticks >= TEXTURE_TIME_LIFE).ToList();
+
+            foreach (var t in list)
             {
-                //var list = _animations.Where(s => World.Ticks - s.Value.Ticks >= TEXTURE_TIME_LIFE).ToList();
-
-                //foreach (var t in list)
-                //{
-                //    t.Value.Dispose();
-
-                //    //Array.Clear(t.Key.Pixels, 0, t.Key.Pixels.Length);
-                //    //t.Key.Pixels = null;
-                //    //t.Key.Width = 0;
-                //    //t.Key.Height = 0;
-
-                //    _animations.Remove(t.Key);
-
-                //}
-
-                IO.Resources.Animations.ClearUnusedTextures();
-
-                _updateIndex++;
+                t.Value.Dispose();
+                _textTextureCache.Remove(t.Key);
             }
-            else if (_updateIndex == 1)
-            {
-                var list = _textTextureCache.Where(s => World.Ticks - s.Value.Ticks >= TEXTURE_TIME_LIFE).ToList();
 
-                foreach (var t in list)
-                {
-                    t.Value.Dispose();
-                    _textTextureCache.Remove(t.Key);
-                }
-                _updateIndex++;
-            }
-            else
-            {
-               
+            CheckSpriteTexture(_staticTextureCache);
+            CheckSpriteTexture(_landTextureCache);
+            CheckSpriteTexture(_gumpTextureCache);
+            CheckSpriteTexture(_textmapTextureCache);
+            CheckSpriteTexture(_lightTextureCache);
+            World.Map?.ClearUnusedBlocks();
 
-                if (_updateIndex == 2)
-                {
-                    CheckSpriteTexture(_staticTextureCache);
-                }
-                else if (_updateIndex == 3)
-                {
-                    CheckSpriteTexture(_landTextureCache);
-                }
-                else if (_updateIndex == 4)
-                {
-                    CheckSpriteTexture(_gumpTextureCache);
-                }
-                else if (_updateIndex == 5)
-                {
-                    CheckSpriteTexture(_textmapTextureCache);
-                }
-                else if (_updateIndex == 6)
-                {
-                    CheckSpriteTexture(_lightTextureCache);
-                }
-                else
-                {
-                    _updateIndex = 0;
-                }
-            }
+
+            //if (World.Ticks - _nextGC >= 5000)
+            //{
+
+            //    Utility.Log.Message(Utility.LogTypes.Info, "GARBAGE!");
+            //    GC.AddMemoryPressure(sizeOfField);
+            //    GC.RemoveMemoryPressure(sizeOfField);
+            //    GC.Collect();
+            //    //GC.WaitForPendingFinalizers();
+            //    _nextGC = World.Ticks;
+            //}
+
+            //if (_updateIndex == 0)
+            //{
+            //    //var list = _animations.Where(s => World.Ticks - s.Value.Ticks >= TEXTURE_TIME_LIFE).ToList();
+
+            //    //foreach (var t in list)
+            //    //{
+            //    //    t.Value.Dispose();
+
+            //    //    //Array.Clear(t.Key.Pixels, 0, t.Key.Pixels.Length);
+            //    //    //t.Key.Pixels = null;
+            //    //    //t.Key.Width = 0;
+            //    //    //t.Key.Height = 0;
+
+            //    //    _animations.Remove(t.Key);
+
+            //    //}
+
+
+            //    _updateIndex++;
+            //}
+            //else if (_updateIndex == 1)
+            //{
+
+            //    _updateIndex++;
+            //}
+            //else
+            //{
+
+
+            //    if (_updateIndex == 2)
+            //    {
+            //        CheckSpriteTexture(_staticTextureCache);
+            //    }
+            //    else if (_updateIndex == 3)
+            //    {
+            //        CheckSpriteTexture(_landTextureCache);
+            //    }
+            //    else if (_updateIndex == 4)
+            //    {
+            //        CheckSpriteTexture(_gumpTextureCache);
+            //    }
+            //    else if (_updateIndex == 5)
+            //    {
+            //        CheckSpriteTexture(_textmapTextureCache);
+            //    }
+            //    else if (_updateIndex == 6)
+            //    {
+            //        CheckSpriteTexture(_lightTextureCache);
+            //    }
+            //    else if (_updateIndex == 7)
+            //    {
+            //        World.Map?.ClearUnusedBlocks();
+            //    }
+            //    else
+            //    {
+            //        _updateIndex = 0;
+            //    }
+            //}
         }
 
         private static void CheckSpriteTexture(Dictionary<ushort, SpriteTexture> dict)
         {
-            var toremove = dict.Where(s => World.Ticks - s.Value.Ticks >= TEXTURE_TIME_LIFE).ToList();
-            foreach (var t in toremove)
+
+            List<KeyValuePair<ushort, SpriteTexture>> list = new List<KeyValuePair<ushort, SpriteTexture>>();
+
+            foreach (var t in dict)
+            {
+                if (World.Ticks - t.Value.Ticks >= TEXTURE_TIME_LIFE)
+                {
+                    list.Add(t);
+                }
+            }
+
+            //var toremove = dict.Where(s => World.Ticks - s.Value.Ticks >= TEXTURE_TIME_LIFE).ToList();
+            foreach (var t in list)
             {
                 dict[t.Key].Dispose();
                 dict.Remove(t.Key);
@@ -138,11 +177,14 @@ namespace ClassicUO.Game.Renderer
         {
             if (!_staticTextureCache.TryGetValue(g, out var texture) || texture.IsDisposed)
             {
-                ushort[] pixels = Art.ReadStaticArt(g, out short w, out short h);
+                var pixels = Art.ReadStaticArt(g, out short w, out short h);
 
                 texture = new SpriteTexture(w, h, false) { Ticks = World.Ticks };
 
-                texture.SetData(pixels);
+                fixed(ushort* ptr = pixels)
+                    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
+ 
+                //texture.SetData(pixels);
                 _staticTextureCache[g] = texture;
             }
             else
@@ -157,9 +199,11 @@ namespace ClassicUO.Game.Renderer
         {
             if (!_landTextureCache.TryGetValue(g, out var texture) || texture.IsDisposed)
             {
-                ushort[] pixels = Art.ReadLandArt(g);
+                var pixels = Art.ReadLandArt(g);
                 texture = new SpriteTexture(44, 44, false) { Ticks = World.Ticks };
-                texture.SetData(pixels);
+                fixed (ushort* ptr = pixels)
+                    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
+                //texture.SetData(pixels);
                 _landTextureCache[g] = texture;
             }
             else
@@ -174,9 +218,11 @@ namespace ClassicUO.Game.Renderer
         {
             if (!_gumpTextureCache.TryGetValue(g, out var texture) || texture.IsDisposed)
             {
-                ushort[] pixels = IO.Resources.Gumps.GetGump(g, out int w, out int h);
+                var pixels = IO.Resources.Gumps.GetGump(g, out int w, out int h);
                 texture = new SpriteTexture(w, h, false) { Ticks = World.Ticks };
-                texture.SetData(pixels);
+                fixed (ushort* ptr = pixels)
+                    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
+                //texture.SetData(pixels);
                 _gumpTextureCache[g] = texture;
             }
             else
@@ -191,9 +237,10 @@ namespace ClassicUO.Game.Renderer
         {
             if (!_textmapTextureCache.TryGetValue(g, out var texture) || texture.IsDisposed)
             {
-                ushort[] pixels = TextmapTextures.GetTextmapTexture(g, out int size);
+                var pixels = TextmapTextures.GetTextmapTexture(g, out int size);
                 texture = new SpriteTexture(size, size, false) { Ticks = World.Ticks };
-                texture.SetData(pixels);
+                fixed (ushort* ptr = pixels)
+                    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
                 _textmapTextureCache[g] = texture;
             }
             else
@@ -208,28 +255,28 @@ namespace ClassicUO.Game.Renderer
         {
             if (!_textTextureCache.TryGetValue(gt, out var texture) || texture.IsDisposed)
             {
-                uint[] data;
-                int linesCount;
+                //uint[] data;
+                //int linesCount;
 
-                if (gt.IsHTML)
-                    Fonts.SetUseHTML(true);
+                //if (gt.IsHTML)
+                //    Fonts.SetUseHTML(true);
 
-                if (gt.IsUnicode)
-                {
-                    (data, gt.Width, gt.Height, linesCount, gt.Links) = Fonts.GenerateUnicode(gt.Font, gt.Text, gt.Hue, gt.Cell, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
-                }
-                else
-                {
-                    (data, gt.Width, gt.Height, linesCount, gt.IsPartialHue) = Fonts.GenerateASCII(gt.Font, gt.Text, gt.Hue, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
-                }
+                //if (gt.IsUnicode)
+                //{
+                //    (data, gt.Width, gt.Height, linesCount, gt.Links) = Fonts.GenerateUnicode(gt.Font, gt.Text, gt.Hue, gt.Cell, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
+                //}
+                //else
+                //{
+                //    (data, gt.Width, gt.Height, linesCount, gt.IsPartialHue) = Fonts.GenerateASCII(gt.Font, gt.Text, gt.Hue, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
+                //}
 
-                texture = new SpriteTexture(gt.Width, gt.Height);
-                texture.SetData(data);
-                _textTextureCache[gt] = texture;
+                //texture = new SpriteTexture(gt.Width, gt.Height);
+                //texture.SetData(data);
+                //_textTextureCache[gt] = texture;
 
 
-                if (gt.IsHTML)
-                    Fonts.SetUseHTML(false);
+                //if (gt.IsHTML)
+                //    Fonts.SetUseHTML(false);
             }
             else
             {

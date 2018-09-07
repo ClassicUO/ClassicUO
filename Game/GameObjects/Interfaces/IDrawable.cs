@@ -11,4 +11,13 @@ namespace ClassicUO.Game.GameObjects.Interfaces
 
         bool Draw(SpriteBatch3D spriteBatch,  Vector3 position);
     }
+
+    public interface IDrawableUI
+    {
+        bool AllowedToDraw { get; set; }
+        SpriteTexture Texture { get; set; }
+        Vector3 HueVector { get; set; }
+
+        bool Draw(SpriteBatchUI spriteBatch, Vector3 position);
+    }
 }

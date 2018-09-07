@@ -43,26 +43,24 @@ namespace ClassicUO.Game.Renderer.Views
             }
         }
 
-        public new Item GameObject => (Item)base.GameObject;
+        //public new Item GameObject => (Item)base.GameObject;
 
 
         public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
-            {
                 return false;
-            }
 
-            if (GameObject.IsCorpse)
-            {
-                return !PreDraw(position) && DrawInternal(spriteBatch, position);
-            }
+            Item item = (Item)GameObject;
 
-            if (GameObject.Effect == null)
+            if (item.IsCorpse)
+                return DrawInternal(spriteBatch, position);
+
+            if (item.Effect == null)
             {
-                if (_originalGraphic != GameObject.DisplayedGraphic || Texture == null || Texture.IsDisposed)
+                if (_originalGraphic != item.DisplayedGraphic || Texture == null || Texture.IsDisposed)
                 {
-                    _originalGraphic = GameObject.DisplayedGraphic;
+                    _originalGraphic = item.DisplayedGraphic;
                     Texture = TextureManager.GetOrCreateStaticTexture(_originalGraphic);
                     Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
                 }
@@ -70,41 +68,22 @@ namespace ClassicUO.Game.Renderer.Views
                 if (_hue != GameObject.Hue)
                 {
                     _hue = GameObject.Hue;
-                    HueVector = RenderExtentions.GetHueVector(_hue, TileData.IsPartialHue((long)GameObject.ItemData.Flags), false, false);
+                    HueVector = RenderExtentions.GetHueVector(_hue, TileData.IsPartialHue((long)item.ItemData.Flags), false, false);
                 }
 
 
-                if (GameObject.Amount > 1 && TileData.IsStackable((long)GameObject.ItemData.Flags) && GameObject.DisplayedGraphic == GameObject.Graphic)
+                if (item.Amount > 1 && TileData.IsStackable((long)item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
                 {
                     Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
                     base.Draw(spriteBatch, offsetDrawPosition);
                 }
 
-                //var vv = position;
-                //vv.Z = position.X + position.Y;
-
-                //if (AssetsLoader.TileData.IsBackground((long)GameObject.ItemData.Flags) &&
-                //    AssetsLoader.TileData.IsSurface((long)GameObject.ItemData.Flags))
-                //    vv.Z += 0.001f * (GameObject.IsometricPosition.Z + 0.4f);
-                //else if (AssetsLoader.TileData.IsBackground((long)GameObject.ItemData.Flags))
-                //    vv.Z += 0.001f * (GameObject.IsometricPosition.Z + 0.2f);
-                //else if (AssetsLoader.TileData.IsSurface((long)GameObject.ItemData.Flags))
-                //    vv.Z += 0.001f * (GameObject.IsometricPosition.Z + 0.5f);
-                //else
-                //    vv.Z += 0.001f * (GameObject.IsometricPosition.Z + 0.6f);
-
-
-                //CalculateRenderDepth((sbyte)vv.Z, 20, GameObject.ItemData.Height, (byte)(GameObject.Serial & 0xFF));
-
-
                 base.Draw(spriteBatch, position);
             }
             else
             {
-                if (!GameObject.Effect.IsDisposed)
-                {
-                    GameObject.Effect.GetView().Draw(spriteBatch, position);
-                }
+                if (!item.Effect.IsDisposed)
+                    item.Effect.GetView().Draw(spriteBatch, position);
             }
 
             return true;
@@ -114,9 +93,11 @@ namespace ClassicUO.Game.Renderer.Views
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch,  Vector3 position)
         {
+            Item item = (Item)GameObject;
+
             spriteBatch.GetZ();
 
-            byte dir = (byte)((byte)GameObject.Layer & 0x7F & 7);
+            byte dir = (byte)((byte)item.Layer & 0x7F & 7);
             bool mirror = false;
 
             Animations.GetAnimDirection(ref dir, ref mirror);
@@ -141,39 +122,37 @@ namespace ClassicUO.Game.Renderer.Views
 
                 if (layer == Layer.Invalid)
                 {
-                    graphic = GameObject.DisplayedGraphic;
-                    Animations.AnimGroup = Animations.GetDieGroupIndex(GameObject.GetMountAnimation(), GameObject.UsedLayer);
+                    graphic = item.DisplayedGraphic;
+                    Animations.AnimGroup = Animations.GetDieGroupIndex(item.GetMountAnimation(), item.UsedLayer);
                     color = GameObject.Hue;
                 }
                 else
                 {
-                    Item item = GameObject.Equipment[(int)layer];
-                    if (item == null)
+                    Item itemEquip = item.Equipment[(int)layer];
+                    if (itemEquip == null)
                     {
                         continue;
                     }
 
-                    graphic = item.ItemData.AnimID;
+                    graphic = itemEquip.ItemData.AnimID;
 
-                    if (Animations.EquipConversions.TryGetValue(item.Graphic, out Dictionary<ushort, EquipConvData> map))
+                    if (Animations.EquipConversions.TryGetValue(itemEquip.Graphic, out Dictionary<ushort, EquipConvData> map))
                     {
-                        if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                        if (map.TryGetValue(itemEquip.ItemData.AnimID, out EquipConvData data))
                         {
                             convertedItem = data;
                             graphic = data.Graphic;
                         }
                     }
 
-                    color = item.Hue;
+                    color = itemEquip.Hue;
                 }
 
                 Animations.AnimID = graphic;
 
                 ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup].Direction[Animations.Direction];
                 if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction))
-                {
                     return false;
-                }
 
                 direction.LastAccessTime = World.Ticks;
 
@@ -194,17 +173,13 @@ namespace ClassicUO.Game.Renderer.Views
                     }
 
                     int drawCenterY = frame.CenterY;
-                    int drawX;
+                    int drawX = -22;
                     int drawY = drawCenterY + GameObject.Position.Z * 4 - 22 - 3;
 
-                    if (IsFlipped)
-                    {
-                        drawX = -22;
-                    }
-                    else
-                    {
-                        drawX = -22;
-                    }
+                    //if (IsFlipped)
+                    //    drawX = -22;
+                    //else
+                    //    drawX = -22;
 
                     int x = drawX + frame.CenterX;
                     int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
@@ -217,26 +192,6 @@ namespace ClassicUO.Game.Renderer.Views
             }
 
             return true;
-        }
-
-        public override void Update(double frameMS)
-        {
-            if (GameObject.IsCorpse)
-            {
-                GameObject.ProcessAnimation();
-            }
-
-            if (GameObject.Effect != null)
-            {
-                if (GameObject.Effect.IsDisposed)
-                {
-                    GameObject.Effect = null;
-                }
-                else
-                {
-                    GameObject.Effect.UpdateAnimation(frameMS);
-                }
-            }
         }
 
         protected override void MousePick(SpriteVertex[] vertex)

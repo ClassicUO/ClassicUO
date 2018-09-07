@@ -196,7 +196,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
 
-        public override bool Exists => World.Contains(Serial);
+        public override bool Exists => World.Exists(Serial);
 
         public bool OnGround => !Container.IsValid;
 
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.GameObjects
                 Item item = this;
                 while (item.Container.IsItem)
                 {
-                    item = World.Items.Get(item.Container);
+                    item = World.Get<Item>(item.Container);
                 }
 
                 return item.Container.IsMobile ? item.Container : item;
@@ -238,16 +238,36 @@ namespace ClassicUO.Game.GameObjects
 
         protected override View CreateView()
         {
-            return new ItemView(this);
+            return /*Graphic <= 0 ? null : */ new ItemView(this);
+        }
+
+        public override void Update(double frameMS)
+        {
+            if (IsCorpse)
+            {
+                ProcessAnimation();
+            }
+
+            if (Effect != null)
+            {
+                if (Effect.IsDisposed)
+                {
+                    Effect = null;
+                }
+                else
+                {
+                    Effect.UpdateAnimation(frameMS);
+                }
+            }
         }
 
         protected override void OnProcessDelta(Delta d)
         {
             base.OnProcessDelta(d);
-            if (d.HasFlag(Delta.Ownership))
-            {
-                OwnerChanged.Raise(this);
-            }
+            //if (d.HasFlag(Delta.Ownership))
+            //{
+            //    OwnerChanged.Raise(this);
+            //}
         }
 
 
@@ -515,7 +535,14 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Dispose()
         {
+            if (IsMulti && Multi != null)
+            {
+                Array.Clear(Multi.Components, 0, 0);
+                Multi = null;
+            }
+            
             Effect?.Dispose();
+            Effect = null;
             base.Dispose();
         }
 

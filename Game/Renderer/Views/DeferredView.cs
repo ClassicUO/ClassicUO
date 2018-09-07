@@ -8,13 +8,13 @@ namespace ClassicUO.Game.Renderer.Views
         private readonly View _baseView;
         private readonly Vector3 _position;
 
-        public DeferredView(DeferredEntity deferred,  View baseView,  Vector3 position) : base(deferred)
+        public DeferredView(DeferredEntity deferred, View baseView, Vector3 position) : base(deferred)
         {
             _baseView = baseView;
             _position = position;
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position)
         {
             return _baseView.DrawInternal(spriteBatch, _position);
         }

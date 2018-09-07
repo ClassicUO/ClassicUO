@@ -44,7 +44,7 @@ namespace ClassicUO.Game.GameObjects
         public byte Cell { get; set; } = 30;
         public string Text { get; set; }
         public MessageType MessageType { get; set; }
-        public GameObject Parent { get; }
+        public GameObject Parent { get; private set; }
         public long Timeout { get; set; }
         public bool IsPersistent { get; set; }
         public bool IsHTML { get; set; }
@@ -91,6 +91,27 @@ namespace ClassicUO.Game.GameObjects
         //{
         //    return Text.GetHashCode() + base.GetHashCode();
         //}
+
+        public override void Update(double frameMS)
+        {
+            base.Update(frameMS);
+
+            if (IsPersistent)
+                return;
+
+            Timeout -= (int)frameMS;
+            if (Timeout <= 0)
+            {
+                Dispose();
+            }
+        }
+
+        public override void Dispose()
+        {
+            Parent = null;
+            Links.Clear();
+            base.Dispose();
+        }
 
     }
 }

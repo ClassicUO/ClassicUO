@@ -18,32 +18,14 @@ namespace ClassicUO.Game.Renderer.Views
         public new GameText GameObject => (GameText)base.GameObject;
 
 
-
-        public override void Update(double frameMS)
-        {
-            base.Update(frameMS);
-
-            if (GameObject.IsPersistent)
-                return;
-
-            GameObject.Timeout -= (int)frameMS;
-            if (GameObject.Timeout <= 0)
-            {
-                GameObject.Dispose();
-            }
-        }
-
         public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
-        {
-            return DrawInternal(spriteBatch,  position);
-        }
+            => DrawInternal(spriteBatch, position);
+
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch,  Vector3 position)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
-            {
                 return false;
-            }
 
             if (_text != GameObject.Text || Texture == null || Texture.IsDisposed)
             {
@@ -89,7 +71,7 @@ namespace ClassicUO.Game.Renderer.Views
                 dest.Height = src.Height;
             }
 
-            return GameObject.Parent == null ? spriteBatch.Draw2D(Texture, dest, src, Vector3.Zero) : base.Draw(spriteBatch, position);
+            return GameObject.Parent == null ? GameLoop.SpriteBatchUI.Draw2D(Texture, dest, src, Vector3.Zero) : base.Draw(spriteBatch, position);
         }
 
 

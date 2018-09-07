@@ -720,7 +720,6 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void GetAnimDirection(ref byte dir, ref bool mirror)
         {
             switch (dir)
@@ -751,8 +750,6 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void GetSittingAnimDirection(ref byte dir, ref bool mirror, ref int x, ref int y)
         {
             switch (dir)
@@ -778,7 +775,6 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ANIMATION_GROUPS GetGroupIndex(ushort graphic)
         {
             if (graphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
@@ -799,7 +795,6 @@ namespace ClassicUO.IO.Resources
             return ANIMATION_GROUPS.AG_HIGHT;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte GetDieGroupIndex(ushort id,  bool second)
         {
             switch (DataIndex[id].Type)
@@ -817,7 +812,6 @@ namespace ClassicUO.IO.Resources
             return 0;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool AnimationExists(ushort graphic,  byte group)
         {
             bool result = false;
@@ -831,7 +825,6 @@ namespace ClassicUO.IO.Resources
             return result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool LoadDirectionGroup(ref AnimationDirection animDir)
         {
             if (animDir.IsUOP)
@@ -847,7 +840,7 @@ namespace ClassicUO.IO.Resources
 
             ReadFramesPixelData(ref animDir);
 
-            //_usedTextures.Add(new ToRemoveInfo() { AnimID = AnimID, Group = AnimGroup, Direction = Direction });
+            _usedTextures.Add(new ToRemoveInfo() { AnimID = AnimID, Group = AnimGroup, Direction = Direction });
 
             return true;
         }
@@ -885,7 +878,6 @@ namespace ClassicUO.IO.Resources
         //}
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe bool TryReadUOPAnimDimension(ref AnimationDirection animDirection)
         {
             ref AnimationGroup dataindex = ref DataIndex[AnimID].Groups[AnimGroup];
@@ -982,7 +974,8 @@ namespace ClassicUO.IO.Resources
                 }
 
                 int textureSize = imageWidth * imageHeight;
-                ushort[] pixels = new ushort[textureSize];
+
+                Span<ushort> pixels = new ushort[textureSize];
 
                 uint header = _reader.ReadUInt();
 
@@ -1025,14 +1018,15 @@ namespace ClassicUO.IO.Resources
                     f = new TextureAnimationFrame((int)imageWidth, (int)imageHeight);
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
-                f.SetData(pixels);
+                fixed (ushort* ptr = pixels)
+                    f.SetDataPointerEXT(0, f.Bounds, (IntPtr)ptr, pixels.Length);
+                //f.SetData(pixels);
             }
 
             return true;
         }
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void ReadFramesPixelData(ref AnimationDirection animDir)
         {
             ushort* palette = (ushort*)_reader.StartAddress;
@@ -1083,7 +1077,7 @@ namespace ClassicUO.IO.Resources
 
                 int wantSize = imageWidth * imageHeight;
 
-                ushort[] pixels = new ushort[wantSize];
+                Span<ushort> pixels = new ushort[wantSize];
 
                 uint header = _reader.ReadUInt();
 
@@ -1125,7 +1119,9 @@ namespace ClassicUO.IO.Resources
                     f = new TextureAnimationFrame(imageWidth, imageHeight);
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
-                f.SetData(pixels);
+                fixed (ushort* ptr = pixels)
+                    f.SetDataPointerEXT(0, f.Bounds, (IntPtr)ptr, pixels.Length);
+                //f.SetData(pixels);
                 
                 //animDir.Frames[i].Pixels = pixels;
             }
@@ -1149,7 +1145,7 @@ namespace ClassicUO.IO.Resources
                         if (dir.Frames[j] != null)
                         {
                             dir.Frames[j].Dispose();
-                            dir.Frames[j] = null;
+                            //dir.Frames[j] = null;
                         }
                     }
 

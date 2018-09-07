@@ -18,11 +18,15 @@ namespace ClassicUO.Game.Map
         public Tile() : base(World.Map)
         {
             _objectsOnTile = new List<GameObject>();
-            _objectsOnTile.Add(this);
         }
 
+        public int MinZ { get; set; }
+        public int AverageZ { get; set; }
+        public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
+        public bool IsStretched { get; set; }
+        public Ground Ground { get; private set; }
 
-        public IReadOnlyList<GameObject> ObjectsOnTiles
+        public List<GameObject> ObjectsOnTiles
         {
             get
             {
@@ -40,7 +44,6 @@ namespace ClassicUO.Game.Map
 
         public override Position Position { get; set; }
         //public new TileView View => (TileView)base.View;
-        public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
 
         public LandTiles TileData
         {
@@ -72,6 +75,50 @@ namespace ClassicUO.Game.Map
                 }
             }
 
+            short priorityZ = obj.Position.Z;
+
+
+            switch(obj)
+            {
+                case Tile tile:
+                    {
+                        tile.IsStretched = !(tile.TileData.TexID <= 0 && (tile.TileData.Flags & 0x00000080) > 0);
+
+                        //var view = (TileView)tile.GetView();
+                        if (tile.IsStretched)
+                            priorityZ = (short)(AverageZ - 1);
+                        else
+                            priorityZ--;
+                    }
+                    break;
+                case Mobile mobile:
+                    priorityZ++;
+                    break;
+                case Item item:
+                    if (item.IsCorpse)
+                        priorityZ++;
+                    else
+                        goto default;
+                    break;
+                case GameEffect effect:
+                    priorityZ += 2;
+                    break;
+                default:
+                    {
+                        IDynamicItem dyn = (IDynamicItem)obj;
+
+                        if (IO.Resources.TileData.IsBackground((long)dyn.ItemData.Flags))
+                            priorityZ--;
+
+                        if (dyn.ItemData.Height > 0)
+                            priorityZ++;
+                    }
+                    break;
+            }
+
+
+            obj.PriorityZ = priorityZ;
+
             _objectsOnTile.Add(obj);
 
             _needSort = true;
@@ -93,27 +140,29 @@ namespace ClassicUO.Game.Map
             {
                 var obj = _objectsOnTile[i];
 
-                if (obj != World.Player && !(obj is Tile))
+                if (obj is Entity || obj is Tile)
+                    continue;
+
+                int count = _objectsOnTile.Count;
+
+                obj.Dispose();
+
+                if (count == _objectsOnTile.Count)
                 {
-                    int count = _objectsOnTile.Count;
-
-
-                    obj.Dispose();
-
-                    if (count == _objectsOnTile.Count)
-                    {
-                        _objectsOnTile.RemoveAt(i);
-                    }
-
-                    i--;
+                    _objectsOnTile.RemoveAt(i);
                 }
+
+                i--;           
             }
+
+            _objectsOnTile.Clear();
 
             DisposeView();
             Graphic = 0;
             Position = Position.Invalid;
             _tileData = null;
             _needSort = false;
+            _statics.Clear();
         }
 
         private void RemoveDuplicates()
@@ -213,10 +262,25 @@ namespace ClassicUO.Game.Map
             return entity != null || ground != null;
         }
 
-        public T[] GetGameObjects<T>() where T : GameObject
+        private readonly List<Static> _statics = new List<Static>();
+
+        public List<Static> GetStatics()
         {
-            return _objectsOnTile.OfType<T>().ToArray();
+            var items = _statics;
+            _statics.Clear();
+
+            for (int i = 0; i < _objectsOnTile.Count; i++)
+            {
+                if (_objectsOnTile[i] is Static st)
+                    items.Add(st);
+            }
+            return items;
         }
+
+        //public T[] GetGameObjects<T>() where T : GameObject
+        //{
+        //    return (T[])_objectsOnTile.OfType<T>();
+        //}
 
         // create view only when TileID is initialized
         protected override View CreateView()

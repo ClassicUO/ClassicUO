@@ -3,10 +3,12 @@ using ClassicUO.Game.Renderer.Views;
 using ClassicUO.IO.Resources;
 using System;
 using System.Collections.Generic;
+using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
+
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameObject : IDisposable
+    public abstract class GameObject : /*IDisposable,*/ IUpdateable
     {
         private Tile _tile;
         private View _view;
@@ -25,6 +27,9 @@ namespace ClassicUO.Game.GameObjects
         public sbyte AnimIndex { get; set; }
         public IReadOnlyList<GameText> OverHeads => _overHeads;
 
+        public int CurrentRenderIndex { get; set; }
+        public byte UseInRender { get; set; }
+        public short PriorityZ { get; set; }
 
         public Tile Tile
         {
@@ -108,29 +113,52 @@ namespace ClassicUO.Game.GameObjects
             _overHeads.Insert(OverHeads.Count == 0 || OverHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
-        protected void DisposeView()
-        {
-            if (_view != null)
-            {
-                if (_view.Texture != null /*&& !_view.Texture.IsDisposed*/)
-                {
-                    _view.Texture.Dispose();
-                    _view.Texture = null;
-                }
-                _view = null;
-            }
-        }
-
-        public virtual void Dispose()
+        public virtual void Update(double frameMS)
         {
             if (IsDisposed)
             {
                 return;
             }
 
+            for (int i = 0; i < OverHeads.Count; i++)
+            {
+                var gt = OverHeads[i];
+
+                gt.Update(frameMS);
+
+                if (gt.IsDisposed)
+                {
+                    RemoveGameTextAt(i);
+                    i--;
+                }
+            }
+        }
+
+        protected void DisposeView()
+        {
+            if (_view != null)
+            {
+                _view.Texture = null;
+                   //if (_view.Texture != null)
+                   //{
+                   //    if (!_view.Texture.IsDisposed)
+                   //        _view.Texture.Dispose();
+                   //    //_view.Texture = null;
+                   //}
+                   _view = null;
+            }
+        }
+
+        public virtual void Dispose()
+        {
+            if (IsDisposed)
+                return;
+
             IsDisposed = true;
             DisposeView();
             Tile = null;
+            _overHeads.ForEach(s => s.Dispose());
+            _overHeads.Clear();
         }
     }
 }

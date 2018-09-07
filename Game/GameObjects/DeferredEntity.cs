@@ -16,21 +16,31 @@ namespace ClassicUO.Game.GameObjects
         public sbyte Z { get; set; }
         public Tile AssociatedTile { get; set; }
 
+        private View GetBaseView(GameObject entity)
+        {
+            if (entity is Mobile)
+                return (MobileView)entity.GetView();
+            else if (entity is AnimatedItemEffect)
+                return (AnimatedEffectView)entity.GetView();
+            else if (entity is Item item && item.IsCorpse)
+                return (ItemView)entity.GetView();
+            return null;
+        }
 
         public void Reset()
         {
-            AssociatedTile.RemoveGameObject(this);
-            DisposeView();
-            Map = null;
-            Entity = null;
-            AtPosition = Vector3.Zero;
-            Position = Position.Invalid;
-            Z = sbyte.MinValue;
+            //AssociatedTile.RemoveGameObject(this);
+            //DisposeView();
+            //Map = null;
+            //Entity = null;
+            //AtPosition = Vector3.Zero;
+            //Position = Position.Invalid;
+            //Z = sbyte.MinValue;
         }
 
         protected override View CreateView()
         {
-            return Entity == null ? null : new DeferredView(this, Entity.GetView(), AtPosition);
+            return /*Entity == null ? null :*/ new DeferredView(this, GetBaseView(Entity), AtPosition);
         }
 
         public override void Dispose()

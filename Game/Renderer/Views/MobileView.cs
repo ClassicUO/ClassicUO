@@ -17,19 +17,28 @@ namespace ClassicUO.Game.Renderer.Views
         }
 
 
-        public new Mobile GameObject => (Mobile)base.GameObject;
+        //public new Mobile GameObject => (Mobile)base.GameObject;
 
 
-        public override bool DrawInternal(SpriteBatch3D spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+            => DrawInternal(spriteBatch, position);
+
+
+        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position)
         {
+            if (GameObject.IsDisposed)
+                return false;
+
             spriteBatch.GetZ();
 
+            Mobile mobile = (Mobile)GameObject;
+
             bool mirror = false;
-            byte dir = (byte)GameObject.GetDirectionForAnimation();
+            byte dir = (byte)mobile.GetDirectionForAnimation();
             Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
-            SetupLayers(dir);
+            SetupLayers(dir, ref mobile);
 
             ref var bodyFrame = ref _frames[0].Frame;
             if (bodyFrame == null)
@@ -37,15 +46,15 @@ namespace ClassicUO.Game.Renderer.Views
 
             int drawCenterY = bodyFrame.CenterY;
             int drawX;
-            int drawY = /*mountOffset +*/ drawCenterY + (int)(GameObject.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 - (int)(GameObject.Offset.Y - GameObject.Offset.Z - 3);
+            int drawY = /*mountOffset +*/ drawCenterY + (int)(mobile.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 - (int)(mobile.Offset.Y - mobile.Offset.Z - 3);
 
             if (IsFlipped)
             {
-                drawX = -22 + (int)(GameObject.Offset.X);
+                drawX = -22 + (int)(mobile.Offset.X);
             }
             else
             {
-                drawX = -22 - (int)(GameObject.Offset.X);
+                drawX = -22 - (int)(mobile.Offset.X);
             }
 
             int yOffset = 0;
@@ -103,48 +112,34 @@ namespace ClassicUO.Game.Renderer.Views
 
             Vector3 overheadPosition = new Vector3
             {
-                X = position.X + GameObject.Offset.X,
-                Y = position.Y - (int)(GameObject.Offset.Z / 4 + GameObject.Position.Z * 4),
+                X = position.X + mobile.Offset.X,
+                Y = position.Y - (int)(mobile.Offset.Z / 4 + GameObject.Position.Z * 4),
                 Z = position.Z
             };
 
             if (!bodyFrame.IsDisposed)
             {
-                yOffset = bodyFrame.Height + drawY - (int)(GameObject.Offset.Z / 4 + GameObject.Position.Z * 4);
+                yOffset = bodyFrame.Height + drawY - (int)(mobile.Offset.Z / 4 + GameObject.Position.Z * 4);
             }
             else
             {
                 yOffset -= -(yOffset + 44);
             }
 
-            MessageOverHead(spriteBatch, overheadPosition, GameObject.IsMounted ? yOffset + 16 : yOffset);
+            MessageOverHead(spriteBatch, overheadPosition, mobile.IsMounted ? yOffset + 16 : yOffset);
             return true;
         }
 
 
-        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
-        {
-            return  !GameObject.IsDisposed && !PreDraw(position) && DrawInternal(spriteBatch, position);
-        }
-
-
-
-        public override void Update(double frameMS)
-        {
-            base.Update(frameMS);
-
-
-            GameObject.ProcessAnimation();
-        }
-
-
-        private void SetupLayers(byte dir)
+        private void SetupLayers(byte dir, ref Mobile mobile)
         {
             _layerCount = 0;
 
-            if (GameObject.IsHuman)
+            
+
+            if (mobile.IsHuman)
             {
-                bool hasOuterTorso = GameObject.Equipment[(int)Layer.OuterTorso] != null && GameObject.Equipment[(int)Layer.OuterTorso].ItemData.AnimID != 0;
+                bool hasOuterTorso = mobile.Equipment[(int)Layer.OuterTorso] != null && mobile.Equipment[(int)Layer.OuterTorso].ItemData.AnimID != 0;
 
                 for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
                 {
@@ -156,29 +151,29 @@ namespace ClassicUO.Game.Renderer.Views
 
                     if (layer == Layer.Invalid)
                     {
-                        AddLayer(dir, GameObject.Graphic, GameObject.Hue);
+                        AddLayer(dir, GameObject.Graphic, GameObject.Hue, ref mobile);
                     }
                     else
                     {
                         Item item;
-                        if ((item = GameObject.Equipment[(int)layer]) != null)
+                        if ((item = mobile.Equipment[(int)layer]) != null)
                         {
                             if (layer == Layer.Mount)
                             {
-                                Item mount = GameObject.Equipment[(int)Layer.Mount];
+                                Item mount = mobile.Equipment[(int)Layer.Mount];
                                 if (mount != null)
                                 {
                                     //if (graphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                     //    mountOffset = Animations.DataIndex[graphic].MountedHeightOffset;
 
-                                    AddLayer(dir, mount.GetMountAnimation(), mount.Hue, true);
+                                    AddLayer(dir, mount.GetMountAnimation(), mount.Hue, ref mobile, true);
                                 }
                             }
                             else
                             {
                                 if (item.ItemData.AnimID != 0)
                                 {
-                                    if (GameObject.IsDead && (layer == Layer.Hair || layer == Layer.FacialHair))
+                                    if (mobile.IsDead && (layer == Layer.Hair || layer == Layer.FacialHair))
                                     {
                                         continue;
                                     }
@@ -196,7 +191,7 @@ namespace ClassicUO.Game.Renderer.Views
                                         }
                                     }
 
-                                    AddLayer(dir, graphic, hue, false, convertedItem);
+                                    AddLayer(dir, graphic, hue, ref mobile, false, convertedItem);
                                 }
                             }
                         }
@@ -205,14 +200,14 @@ namespace ClassicUO.Game.Renderer.Views
             }
             else
             {
-                AddLayer(dir, GameObject.Graphic, GameObject.Hue);
+                AddLayer(dir, GameObject.Graphic, GameObject.Hue, ref mobile);
             }
         }
 
-        private void AddLayer(byte dir,  Graphic graphic, Hue hue,  bool mounted = false,  EquipConvData? convertedItem = null)
+        private void AddLayer(byte dir,  Graphic graphic, Hue hue, ref Mobile mobile,  bool mounted = false,  EquipConvData? convertedItem = null)
         {
             sbyte animIndex = GameObject.AnimIndex;
-            byte animGroup = GameObject.GetGroupForAnimation(graphic);
+            byte animGroup = mobile.GetGroupForAnimation(graphic);
 
             Animations.AnimID = graphic;
             Animations.AnimGroup = animGroup;

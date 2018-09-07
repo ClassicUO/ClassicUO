@@ -1,4 +1,5 @@
-﻿using ClassicUO.Game.Map;
+﻿using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Map;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Renderer.Views
@@ -8,24 +9,24 @@ namespace ClassicUO.Game.Renderer.Views
         private static readonly Point[] _surroundingIndexes = { new Point(0, -1), new Point(1, -1), new Point(-1, 0), new Point(1, 0), new Point(2, 0), new Point(-1, 1), new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(0, 2), new Point(1, 2) };
 
         private readonly Vector3[] _normals = new Vector3[4];
-
-        private readonly SpriteVertex[] _vertex = { new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0)) };
-
+        private readonly SpriteVertex[] _vertex = new SpriteVertex[4]
+        {
+            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)),
+            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)),
+            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)),
+            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0))
+        };
         private bool _needUpdateStrechedTile = true;
         private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
 
 
         public TileView(Tile tile) : base(tile)
         {
-            IsStretched = !(tile.TileData.TexID <= 0 && (tile.TileData.Flags & 0x00000080) > 0);
-
             AllowedToDraw = !tile.IsIgnored;
         }
 
 
-        public bool IsStretched { get; }
-        public new Tile GameObject => (Tile)base.GameObject;
-
+        //public new Tile GameObject => (Tile)base.GameObject;
 
         public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
@@ -34,11 +35,13 @@ namespace ClassicUO.Game.Renderer.Views
                 return false;
             }
 
+            Tile tile = (Tile)GameObject;
+
             if (Texture == null || Texture.IsDisposed)
             {
-                if (IsStretched)
+                if (tile.IsStretched)
                 {
-                    Texture = TextureManager.GetOrCreateTexmapTexture(GameObject.TileData.TexID);
+                    Texture = TextureManager.GetOrCreateTexmapTexture(((Tile)GameObject).TileData.TexID);
                 }
                 else
                 {
@@ -52,8 +55,7 @@ namespace ClassicUO.Game.Renderer.Views
                 UpdateStreched(World.Map);
                 _needUpdateStrechedTile = false;
             }
-
-            return !IsStretched ? base.Draw(spriteBatch, position) : Draw3DStretched(spriteBatch, position);
+            return !tile.IsStretched ? base.Draw(spriteBatch, position) : Draw3DStretched(spriteBatch, position);
         }
 
 
@@ -91,10 +93,13 @@ namespace ClassicUO.Game.Renderer.Views
 
             if (!(currentZ == leftZ && currentZ == rightZ && currentZ == bottomZ))
             {
+                Tile tile = (Tile)GameObject;
                 sbyte low = 0, high = 0;
                 sbyte sort = (sbyte)map.GetAverageZ(GameObject.Position.Z, leftZ, rightZ, bottomZ, ref low, ref high);
+                tile.MinZ = low;
                 if (sort != SortZ)
                 {
+                    tile.AverageZ = sort;
                     SortZ = sort;
                     map.GetTile((short)GameObject.Position.X, (short)GameObject.Position.Y).ForceSort();
                 }
@@ -122,7 +127,7 @@ namespace ClassicUO.Game.Renderer.Views
             }
         }
 
-        private Vector3 CalculateNormal(float a,  float b,  float c,  float d)
+        private static Vector3 CalculateNormal(float a,  float b,  float c,  float d)
         {            
             return Vector3.Normalize(new Vector3(a - b, 1f, c - d));
         }

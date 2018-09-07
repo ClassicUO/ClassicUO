@@ -182,7 +182,7 @@ namespace ClassicUO.Game.Gumps
             _mouseEventsWheelTriggered.Clear();
         }
 
-        public static void Render(SpriteBatch3D spriteBatch)
+        public static void Render(SpriteBatchUI spriteBatch)
         {
             for (int i = 0; i < _gumps.Count; i++)
             {

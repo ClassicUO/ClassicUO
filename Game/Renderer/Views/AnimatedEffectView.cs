@@ -11,36 +11,27 @@ namespace ClassicUO.Game.Renderer.Views
         {
         }
 
-        public new AnimatedItemEffect GameObject => (AnimatedItemEffect)base.GameObject;
+        //public new AnimatedItemEffect GameObject => (AnimatedItemEffect)base.GameObject;
 
 
         public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            return !GameObject.IsDisposed && !PreDraw(position) && DrawInternal(spriteBatch, position);
+            return !GameObject.IsDisposed /*&& !PreDraw(position)*/ && DrawInternal(spriteBatch, position);
         }
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            if (GameObject.AnimationGraphic != _displayedGraphic)
+            AnimatedItemEffect effect = (AnimatedItemEffect)GameObject;
+            if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
-                _displayedGraphic = GameObject.AnimationGraphic;
-                Texture = TextureManager.GetOrCreateStaticTexture(GameObject.AnimationGraphic);
+                _displayedGraphic = effect.AnimationGraphic;
+                Texture = TextureManager.GetOrCreateStaticTexture(effect.AnimationGraphic);
                 Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
             }
 
             HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 
             return base.Draw(spriteBatch,  position);
-        }
-
-        public override void Update(double frameMS)
-        {
-            base.Update(frameMS);
-
-            if (!GameObject.IsDisposed)
-            {
-                GameObject.UpdateAnimation(frameMS);
-            }
         }
     }
 }

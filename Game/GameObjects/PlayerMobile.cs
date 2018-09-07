@@ -1149,13 +1149,9 @@ namespace ClassicUO.Game.GameObjects
             new PWalkRequest(direction, SequenceNumber).SendToServer();
 
             if (SequenceNumber == 0xFF)
-            {
                 SequenceNumber = 1;
-            }
             else
-            {
                 SequenceNumber++;
-            }
 
             _lastStepRequestedTime = World.Ticks + walkTime;
 

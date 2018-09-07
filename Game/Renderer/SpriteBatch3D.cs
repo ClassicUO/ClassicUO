@@ -9,17 +9,15 @@ namespace ClassicUO.Game.Renderer
 {
     public class SpriteBatch3D
     {
-        private const int MAX_VERTICES_PER_DRAW = 0x2000;
+        private const int MAX_VERTICES_PER_DRAW = 0x8000;
         private const int INITIAL_TEXTURE_COUNT = 0x800;
         private const float MAX_ACCURATE_SINGLE_FLOAT = 65536;
 
-        private readonly Dictionary<Texture2D, List<SpriteVertex>> _drawingQueue = new Dictionary<Texture2D, List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
         private readonly DepthStencilState _dss = new DepthStencilState { DepthBufferEnable = true, DepthBufferWriteEnable = true };
         private readonly Microsoft.Xna.Framework.Game _game;
         private readonly short[] _indexBuffer = new short[MAX_VERTICES_PER_DRAW * 6];
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
         private readonly SpriteVertex[] _vertexBuffer = new SpriteVertex[MAX_VERTICES_PER_DRAW];
-        private readonly Queue<List<SpriteVertex>> _vertexQueue = new Queue<List<SpriteVertex>>(INITIAL_TEXTURE_COUNT);
 
         private readonly EffectTechnique _huesTechnique;
         private readonly Effect _effect;
@@ -30,10 +28,10 @@ namespace ClassicUO.Game.Renderer
 
         private BoundingBox _drawingArea;
         private float _z;
-        private readonly SpriteVertex[] _vertexBufferUI = new SpriteVertex[4];
+        private readonly DrawCallInfo[] _drawCalls;
 
-
-        public SpriteBatch3D(Microsoft.Xna.Framework.Game game)
+        public SpriteBatch3D(Microsoft.
+            Xna.Framework.Game game)
         {
             _game = game;
 
@@ -56,6 +54,9 @@ namespace ClassicUO.Game.Renderer
             _viewportEffect = _effect.Parameters["Viewport"];
 
             _huesTechnique = _effect.Techniques["HueTechnique"];
+
+
+            _drawCalls = new DrawCallInfo[MAX_VERTICES_PER_DRAW];
         }
 
 
@@ -76,7 +77,6 @@ namespace ClassicUO.Game.Renderer
 
         public float GetZ() => _z++;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BeginDraw()
         {
             _z = 0;
@@ -103,30 +103,38 @@ namespace ClassicUO.Game.Renderer
             }
 
             if (!draw)
-            {
                 return false;
-            }
 
             vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
 
-            //var z = GetZ();
 
-            //vertices[0].Position.Z += z;
-            //vertices[1].Position.Z += z;
-            //vertices[2].Position.Z += z;
-            //vertices[3].Position.Z += z;
+            var call = new DrawCallInfo(texture, _callsCount, 4);
 
-            GetVertexList(texture).AddRange(vertices);
+            Array.Copy(vertices, 0,  _vertexBuffer, _callsCount, 4);
+            _callsCount += call.Count;
+
+            Enqueue(ref call);
+
+            //GetVertexList(texture).AddRange(vertices);
+
             return true;
         }
 
+        private int _callsCount = 0;
+        private int _enqueuedDrawCalls = 0;
+        private DynamicVertexBuffer _buffer;
+
+
         public void EndDraw(bool light = false)
         {
+            if (_enqueuedDrawCalls == 0)
+                return;
+
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
-
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
+
             //GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
             //GraphicsDevice.SamplerStates[3] = SamplerState.PointClamp;
 
@@ -138,323 +146,62 @@ namespace ClassicUO.Game.Renderer
             _worldMatrixEffect.SetValue(ProjectionMatrixWorld);
             _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
 
-
             GraphicsDevice.DepthStencilState = _dss;
+
 
             _effect.CurrentTechnique = _huesTechnique;
             _effect.CurrentTechnique.Passes[0].Apply();
 
-            using (IEnumerator<KeyValuePair<Texture2D, List<SpriteVertex>>> enumerator = _drawingQueue.GetEnumerator())
+            for (int i = 0; i < _enqueuedDrawCalls; i++)
             {
-                while (enumerator.MoveNext())
-                {
-                    Texture2D texture = enumerator.Current.Key;
-                    List<SpriteVertex> list = enumerator.Current.Value;
+                ref var call = ref _drawCalls[i];
+                GraphicsDevice.Textures[0] = call.Texture;
 
-                    GraphicsDevice.Textures[0] = texture;
-                    GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, CopyVerticesToArray(list), 0, Math.Min(list.Count, MAX_VERTICES_PER_DRAW), _indexBuffer, 0, list.Count / 2);
-
-                    list.Clear();
-                    _vertexQueue.Enqueue(list);
-                }
+                GraphicsDevice.DrawUserIndexedPrimitives(PrimitiveType.TriangleList, _vertexBuffer, call.StartIndex, call.Count, _indexBuffer, 0, call.Count / 2); 
             }
 
-            _drawingQueue.Clear();
+            Array.Clear(_drawCalls, 0, _enqueuedDrawCalls);
+            _enqueuedDrawCalls = 0;
+            _callsCount = 0;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private SpriteVertex[] CopyVerticesToArray(List<SpriteVertex> vertices)
+        private void Enqueue(ref DrawCallInfo call)
         {
-            int max = vertices.Count <= MAX_VERTICES_PER_DRAW ? vertices.Count : MAX_VERTICES_PER_DRAW;
-            vertices.CopyTo(0, _vertexBuffer , 0, max); 
-            return _vertexBuffer;
+            if (_enqueuedDrawCalls > 0 && call.TryMerge(ref _drawCalls[_enqueuedDrawCalls - 1]))
+                return;
+
+            _drawCalls[_enqueuedDrawCalls++] = call;
         }
 
-        public bool Draw2D(Texture2D texture, Vector3 position, Vector3 hue)
+
+        struct DrawCallInfo : IComparable<DrawCallInfo>
         {
-            _vertexBufferUI[0].Position.X = position.X;
-            _vertexBufferUI[0].Position.Y = position.Y;
-            _vertexBufferUI[0].Position.Z = 0;
-            _vertexBufferUI[0].Normal.X = 0;
-            _vertexBufferUI[0].Normal.Y = 0;
-            _vertexBufferUI[0].Normal.Z = 1;
-            _vertexBufferUI[0].TextureCoordinate = Vector3.Zero;
-
-            _vertexBufferUI[1].Position.X = position.X + texture.Width;
-            _vertexBufferUI[1].Position.Y = position.Y;
-            _vertexBufferUI[1].Position.Z = 0;
-            _vertexBufferUI[1].Normal.X = 0;
-            _vertexBufferUI[1].Normal.Y = 0;
-            _vertexBufferUI[1].Normal.Z = 1;
-            _vertexBufferUI[1].TextureCoordinate.X = 1;
-            _vertexBufferUI[1].TextureCoordinate.Y = 0;
-            _vertexBufferUI[1].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[2].Position.X = position.X;
-            _vertexBufferUI[2].Position.Y = position.Y + texture.Height;
-            _vertexBufferUI[2].Position.Z = 0;
-            _vertexBufferUI[2].Normal.X = 0;
-            _vertexBufferUI[2].Normal.Y = 0;
-            _vertexBufferUI[2].Normal.Z = 1;
-            _vertexBufferUI[2].TextureCoordinate.X = 0;
-            _vertexBufferUI[2].TextureCoordinate.Y = 1;
-            _vertexBufferUI[2].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[3].Position.X = position.X + texture.Width;
-            _vertexBufferUI[3].Position.Y = position.Y + texture.Height;
-            _vertexBufferUI[3].Position.Z = 0;
-            _vertexBufferUI[3].Normal.X = 0;
-            _vertexBufferUI[3].Normal.Y = 0;
-            _vertexBufferUI[3].Normal.Z = 1;
-            _vertexBufferUI[3].TextureCoordinate.X = 1;
-            _vertexBufferUI[3].TextureCoordinate.Y = 1;
-            _vertexBufferUI[3].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
-            return DrawSprite(texture, _vertexBufferUI);
-        }
-
-        public bool Draw2D(Texture2D texture, Vector3 position, Rectangle sourceRect,  Vector3 hue)
-        {
-            float minX = sourceRect.X / (float)texture.Width;
-            float maxX = (sourceRect.X + sourceRect.Width) / (float)texture.Width;
-            float minY = sourceRect.Y / (float)texture.Height;
-            float maxY = (sourceRect.Y + sourceRect.Height) / (float)texture.Height;
-
-            _vertexBufferUI[0].Position.X = position.X;
-            _vertexBufferUI[0].Position.Y = position.Y;
-            _vertexBufferUI[0].Position.Z = 0;
-            _vertexBufferUI[0].Normal.X = 0;
-            _vertexBufferUI[0].Normal.Y = 0;
-            _vertexBufferUI[0].Normal.Z = 1;
-            _vertexBufferUI[0].TextureCoordinate.X = minX;
-            _vertexBufferUI[0].TextureCoordinate.Y = minY;
-            _vertexBufferUI[0].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[1].Position.X = position.X + sourceRect.Width;
-            _vertexBufferUI[1].Position.Y = position.Y;
-            _vertexBufferUI[1].Position.Z = 0;
-            _vertexBufferUI[1].Normal.X = 0;
-            _vertexBufferUI[1].Normal.Y = 0;
-            _vertexBufferUI[1].Normal.Z = 1;
-            _vertexBufferUI[1].TextureCoordinate.X = maxX;
-            _vertexBufferUI[1].TextureCoordinate.Y = minY;
-            _vertexBufferUI[1].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[2].Position.X = position.X;
-            _vertexBufferUI[2].Position.Y = position.Y + sourceRect.Height;
-            _vertexBufferUI[2].Position.Z = 0;
-            _vertexBufferUI[2].Normal.X = 0;
-            _vertexBufferUI[2].Normal.Y = 0;
-            _vertexBufferUI[2].Normal.Z = 1;
-            _vertexBufferUI[2].TextureCoordinate.X = minX;
-            _vertexBufferUI[2].TextureCoordinate.Y = maxY;
-            _vertexBufferUI[2].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[3].Position.X = position.X + sourceRect.Width;
-            _vertexBufferUI[3].Position.Y = position.Y + sourceRect.Height;
-            _vertexBufferUI[3].Position.Z = 0;
-            _vertexBufferUI[3].Normal.X = 0;
-            _vertexBufferUI[3].Normal.Y = 0;
-            _vertexBufferUI[3].Normal.Z = 1;
-            _vertexBufferUI[3].TextureCoordinate.X = maxX;
-            _vertexBufferUI[3].TextureCoordinate.Y = maxY;
-            _vertexBufferUI[3].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
-
-            return DrawSprite(texture, _vertexBufferUI);
-        }
-
-        public bool Draw2D(Texture2D texture, Rectangle destRect, Rectangle sourceRect,  Vector3 hue)
-        {
-            float minX = sourceRect.X / (float)texture.Width, maxX = (sourceRect.X + sourceRect.Width) / (float)texture.Width;
-            float minY = sourceRect.Y / (float)texture.Height, maxY = (sourceRect.Y + sourceRect.Height) / (float)texture.Height;
-
-            _vertexBufferUI[0].Position.X = destRect.X;
-            _vertexBufferUI[0].Position.Y = destRect.Y;
-            _vertexBufferUI[0].Position.Z = 0;
-            _vertexBufferUI[0].Normal.X = 0;
-            _vertexBufferUI[0].Normal.Y = 0;
-            _vertexBufferUI[0].Normal.Z = 1;
-            _vertexBufferUI[0].TextureCoordinate.X = minX;
-            _vertexBufferUI[0].TextureCoordinate.Y = minY;
-            _vertexBufferUI[0].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[1].Position.X = destRect.X + destRect.Width;
-            _vertexBufferUI[1].Position.Y = destRect.Y;
-            _vertexBufferUI[1].Position.Z = 0;
-            _vertexBufferUI[1].Normal.X = 0;
-            _vertexBufferUI[1].Normal.Y = 0;
-            _vertexBufferUI[1].Normal.Z = 1;
-            _vertexBufferUI[1].TextureCoordinate.X = maxX;
-            _vertexBufferUI[1].TextureCoordinate.Y = minY;
-            _vertexBufferUI[1].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[2].Position.X = destRect.X;
-            _vertexBufferUI[2].Position.Y = destRect.Y + destRect.Height;
-            _vertexBufferUI[2].Position.Z = 0;
-            _vertexBufferUI[2].Normal.X = 0;
-            _vertexBufferUI[2].Normal.Y = 0;
-            _vertexBufferUI[2].Normal.Z = 1;
-            _vertexBufferUI[2].TextureCoordinate.X = minX;
-            _vertexBufferUI[2].TextureCoordinate.Y = maxY;
-            _vertexBufferUI[2].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[3].Position.X = destRect.X + destRect.Width;
-            _vertexBufferUI[3].Position.Y = destRect.Y + destRect.Height;
-            _vertexBufferUI[3].Position.Z = 0;
-            _vertexBufferUI[3].Normal.X = 0;
-            _vertexBufferUI[3].Normal.Y = 0;
-            _vertexBufferUI[3].Normal.Z = 1;
-            _vertexBufferUI[3].TextureCoordinate.X = maxX;
-            _vertexBufferUI[3].TextureCoordinate.Y = maxY;
-            _vertexBufferUI[3].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
-
-            return DrawSprite(texture, _vertexBufferUI);
-        }
-
-        public bool Draw2D(Texture2D texture, Rectangle destRect, Vector3 hue)
-        {
-            _vertexBufferUI[0].Position.X = destRect.X;
-            _vertexBufferUI[0].Position.Y = destRect.Y;
-            _vertexBufferUI[0].Position.Z = 0;
-            _vertexBufferUI[0].Normal.X = 0;
-            _vertexBufferUI[0].Normal.Y = 0;
-            _vertexBufferUI[0].Normal.Z = 1;
-            _vertexBufferUI[0].TextureCoordinate = Vector3.Zero;
-
-            _vertexBufferUI[1].Position.X = destRect.X + destRect.Width;
-            _vertexBufferUI[1].Position.Y = destRect.Y;
-            _vertexBufferUI[1].Position.Z = 0;
-            _vertexBufferUI[1].Normal.X = 0;
-            _vertexBufferUI[1].Normal.Y = 0;
-            _vertexBufferUI[1].Normal.Z = 1;
-            _vertexBufferUI[1].TextureCoordinate.X = 1;
-            _vertexBufferUI[1].TextureCoordinate.Y = 0;
-            _vertexBufferUI[1].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[2].Position.X = destRect.X;
-            _vertexBufferUI[2].Position.Y = destRect.Y + destRect.Height;
-            _vertexBufferUI[2].Position.Z = 0;
-            _vertexBufferUI[2].Normal.X = 0;
-            _vertexBufferUI[2].Normal.Y = 0;
-            _vertexBufferUI[2].Normal.Z = 1;
-            _vertexBufferUI[2].TextureCoordinate.X = 0;
-            _vertexBufferUI[2].TextureCoordinate.Y = 1;
-            _vertexBufferUI[2].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[3].Position.X = destRect.X + destRect.Width;
-            _vertexBufferUI[3].Position.Y = destRect.Y + destRect.Height;
-            _vertexBufferUI[3].Position.Z = 0;
-            _vertexBufferUI[3].Normal.X = 0;
-            _vertexBufferUI[3].Normal.Y = 0;
-            _vertexBufferUI[3].Normal.Z = 1;
-            _vertexBufferUI[3].TextureCoordinate.X = 1;
-            _vertexBufferUI[3].TextureCoordinate.Y = 1;
-            _vertexBufferUI[3].TextureCoordinate.Z = 0;
-
-            _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
-            return DrawSprite(texture, _vertexBufferUI);
-        }
-
-        public bool Draw2DTiled(Texture2D texture, Rectangle destRect, Vector3 hue)
-        {
-            int y = destRect.Y;
-            int h = destRect.Height;
-            Rectangle sRect;
-
-            while (h > 0)
+            public DrawCallInfo(Texture2D texture, int start, int count)
             {
-                int x = destRect.X;
-                int w = destRect.Width;
-                if (h < texture.Height)
-                {
-                    sRect = new Rectangle(0, 0, texture.Width, h);
-                }
-                else
-                {
-                    sRect = new Rectangle(0, 0, texture.Width, texture.Height);
-                }
-
-                while (w > 0)
-                {
-                    if (w < texture.Width)
-                    {
-                        sRect.Width = w;
-                    }
-
-                    Draw2D(texture, new Vector3(x, y, 0), sRect, hue);
-                    w -= texture.Width;
-                    x += texture.Width;
-                }
-
-                h -= texture.Height;
-                y += texture.Height;
+                Texture = texture;
+                TextureKey = (uint)RuntimeHelpers.GetHashCode(texture);
+                StartIndex = start;
+                Count = count;
             }
 
-            return true;
-        }
+            public readonly Texture2D Texture;
+            public readonly uint TextureKey;
+            public readonly int StartIndex;
+            public int Count;
 
-        public bool DrawRectangle(Texture2D texture, Rectangle rectangle, Vector3 hue)
-        {
-            DrawLine(texture, new Vector2(rectangle.X, rectangle.Y), new Vector2(rectangle.Right, rectangle.Y), hue);
-            DrawLine(texture, new Vector2(rectangle.Right, rectangle.Y), new Vector2(rectangle.Right, rectangle.Bottom), hue);
-            DrawLine(texture, new Vector2(rectangle.Right, rectangle.Bottom), new Vector2(rectangle.X, rectangle.Bottom), hue);
-            DrawLine(texture, new Vector2(rectangle.X, rectangle.Bottom), new Vector2(rectangle.X, rectangle.Y), hue);
-
-            return true;
-        }
-
-        public bool DrawLine(Texture2D texture, Vector2 start, Vector2 end, Vector3 hue)
-        {
-            int offX = start.X == end.X ? 1 : 0;
-            int offY = start.Y == end.Y ? 1 : 0;
-
-            _vertexBufferUI[0].Position.X = start.X;
-            _vertexBufferUI[0].Position.Y = start.Y;
-            _vertexBufferUI[0].Normal = new Vector3(0, 0, 1);
-            _vertexBufferUI[0].TextureCoordinate = new Vector3(0, 0, 0);
-
-            _vertexBufferUI[1].Position.X = end.X + offX;
-            _vertexBufferUI[1].Position.Y = start.Y + offY;
-            _vertexBufferUI[1].Normal = new Vector3(0, 0, 1);
-            _vertexBufferUI[1].TextureCoordinate = new Vector3(1, 0, 0);
-
-            _vertexBufferUI[2].Position.X = start.X + offX;
-            _vertexBufferUI[2].Position.Y = end.Y + offY;
-            _vertexBufferUI[2].Normal = new Vector3(0, 0, 1);
-            _vertexBufferUI[2].TextureCoordinate = new Vector3(0, 1, 0);
-
-            _vertexBufferUI[3].Position.X = end.X;
-            _vertexBufferUI[3].Position.Y = end.Y;
-            _vertexBufferUI[3].Normal = new Vector3(0, 0, 1);
-            _vertexBufferUI[3].TextureCoordinate = new Vector3(1, 1, 0);
-
-            _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
-
-            return DrawSprite(texture, _vertexBufferUI);
-        }
-
-        private List<SpriteVertex> GetVertexList(Texture2D texture)
-        {
-            if (!_drawingQueue.TryGetValue(texture, out List<SpriteVertex> list))
+            public bool TryMerge(ref DrawCallInfo callInfo)
             {
-                if (_vertexQueue.Count > 0)
-                {
-                    list = _vertexQueue.Dequeue();
-                    list.Clear();
-                }
-                else
-                {
-                    list = new List<SpriteVertex>(1024);
-                }
-
-                _drawingQueue.Add(texture, list);
+                if (TextureKey != callInfo.TextureKey)
+                    return false;
+                callInfo.Count += Count;
+                return true;
             }
-            return list;
+
+            public int CompareTo(DrawCallInfo other)
+            {
+                return TextureKey.CompareTo(other.TextureKey);
+            }
         }
+
     }
 }
