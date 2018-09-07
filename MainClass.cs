@@ -3,9 +3,8 @@
 //
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
-//	new technologies such as DirectX (MonoGame included). The foundation
-//	is originally licensed (GNU) on JuicyUO and the JuicyUO Development
-//	Team. (Copyright (c) 2015 JuicyUO Development Team)
+//	new technologies.  
+//  (Copyright (c) 2015 ClassicUO Development Team)
 //    
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -25,6 +24,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime;
 using System.Runtime.InteropServices;
+using ClassicUO.Game.Renderer;
+using ClassicUO.Input;
+using ClassicUO.Utility;
 
 namespace ClassicUO
 {
@@ -42,12 +44,23 @@ namespace ClassicUO
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
 
-
+           
+            
             using (GameLoop game = new GameLoop())
             {
+                //========================================================
+                //SERVICE STACK
+                Service.Register<Log>(new Log());
+                Service.Register<SpriteBatch3D>(new SpriteBatch3D(game));
+                Service.Register<SpriteBatchUI>(new SpriteBatchUI(game));
+                Service.Register<MouseManager>(new MouseManager());
+                Service.Register<KeyboardManager>(new KeyboardManager());
+                //========================================================
+
                 bool isHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
                 if (isHighDPI)
                     Debug.WriteLine("HiDPI Enabled");
+                
 
                 game.Run();
             }

@@ -1,4 +1,25 @@
-﻿using ClassicUO.Game.Renderer;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//  (Copyright (c) 2015 ClassicUO Development Team)
+//    
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using ClassicUO.Game.Renderer;
 using ClassicUO.Input;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -35,14 +56,14 @@ namespace ClassicUO.Game.Gumps
 
         static GumpManager()
         {
-            MouseManager.MouseDown += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MouseDown); _mouseEventsTriggered[(int)InputMouseType.MouseDown].Enqueue(e); };
-            MouseManager.MouseUp += (sender, e) =>
+            Service.Get<MouseManager>().MouseDown += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MouseDown); _mouseEventsTriggered[(int)InputMouseType.MouseDown].Enqueue(e); };
+            Service.Get<MouseManager>().MouseUp += (sender, e) =>
             {
                 _typeQueue.Enqueue(InputMouseType.MouseUp); _mouseEventsTriggered[(int)InputMouseType.MouseUp].Enqueue(e);
             };
-            MouseManager.MousePressed += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MousePressed); _mouseEventsTriggered[(int)InputMouseType.MousePressed].Enqueue(e); };
-            MouseManager.MouseMove += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MouseMove); _mouseEventsTriggered[(int)InputMouseType.MouseMove].Enqueue(e); };
-            MouseManager.MouseWheel += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MouseWheel); _mouseEventsWheelTriggered.Enqueue(e); };
+            Service.Get<MouseManager>().MousePressed += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MousePressed); _mouseEventsTriggered[(int)InputMouseType.MousePressed].Enqueue(e); };
+            Service.Get<MouseManager>().MouseMove += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MouseMove); _mouseEventsTriggered[(int)InputMouseType.MouseMove].Enqueue(e); };
+            Service.Get<MouseManager>().MouseWheel += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MouseWheel); _mouseEventsWheelTriggered.Enqueue(e); };
         }
 
 
@@ -199,14 +220,14 @@ namespace ClassicUO.Game.Gumps
 
             for (int i = 0; i < _gumps.Count; i++)
             {
-                gump = HitTest(_gumps[i], MouseManager.ScreenPosition);
+                gump = HitTest(_gumps[i], Service.Get<MouseManager>().ScreenPosition);
                 if (gump != null)
                     break;
             }
 
             if (_mouseOverControl != null && gump != _mouseOverControl)
             {
-                var arg = new MouseEventArgs(MouseManager.ScreenPosition.X, MouseManager.ScreenPosition.Y, 0, 0);
+                var arg = new MouseEventArgs(Service.Get<MouseManager>().ScreenPosition.X, Service.Get<MouseManager>().ScreenPosition.Y, 0, 0);
                 _mouseOverControl.OnMouseLeft(arg);
 
                 
@@ -266,7 +287,7 @@ namespace ClassicUO.Game.Gumps
 
                             break;
                         default:
-                            Log.Message(LogTypes.Error, "WRONG MOUSE INPUT");
+                            Service.Get<Log>().Message(LogTypes.Error, "WRONG MOUSE INPUT");
                             break;
                     }
                 }
