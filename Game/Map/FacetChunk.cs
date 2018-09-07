@@ -132,14 +132,27 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tiles[i][j].Clear();
 
-                    Tiles[i][j].Dispose();
-                    Tiles[i][j] = null;
+                    for (int k = 0; k < Tiles[i][j].ObjectsOnTiles.Count; k++)
+                    {
+                        var obj = Tiles[i][j].ObjectsOnTiles[k];
+                        if (obj is Tile || obj is Static)
+                        {
+                            int count = Tiles[i][j].ObjectsOnTiles.Count;
+                            obj.Dispose();
+                            if (count == Tiles[i][j].ObjectsOnTiles.Count)
+                                Tiles[i][j].ObjectsOnTiles.RemoveAt(k);
+                            k--;
+                        }
+                    }
+                    //Tiles[i][j].Clear();
+
+                    //Tiles[i][j].Dispose();
+                    //Tiles[i][j] = null;
                 }
             }
 
-            Tiles = null;
+            //Tiles = null;
         }
 
     }

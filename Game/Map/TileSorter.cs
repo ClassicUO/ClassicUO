@@ -72,18 +72,18 @@ namespace ClassicUO.Game.Map
         {
             switch (e)
             {
+                case GameEffect effect:
+                    return (effect.Position.Z, 4, 2, 0);
+                case DeferredEntity def:
+                    return (def.Position.Z, 2, 1, 0);
+                case Mobile mobile:
+                    return (mobile.Position.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int)mobile.Serial.Value);
                 case Tile tile:
                     return (tile.GetView().SortZ, 0, 0, 0);
                 case Static staticitem:
                     return (staticitem.Position.Z, 1, (staticitem.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground((long)staticitem.ItemData.Flags) ? 0 : 1), staticitem.Index);
                 case Item item:
-                    return (item.Position.Z, item.IsCorpse ? 4 : 2, (item.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground((long)item.ItemData.Flags) ? 0 : 1), (int)item.Serial.Value);
-                case Mobile mobile:
-                    return (mobile.Position.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int)mobile.Serial.Value);
-                case DeferredEntity def:
-                    return (def.Position.Z, 2, 1, 0);
-                case GameEffect effect:
-                    return (effect.Position.Z, 4, 2, 0);
+                    return (item.Position.Z, item.IsCorpse ? 4 : 2, (item.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground((long)item.ItemData.Flags) ? 0 : 1), (int)item.Serial.Value);             
                 default:
                     return (0, 0, 0, 0);
             }

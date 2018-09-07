@@ -239,10 +239,7 @@ namespace ClassicUO.Game.GameObjects
             foreach (var i in Items)
                 i.Dispose();
 
-                //foreach(var item in Items)
-                //    World.RemoveItem(item);
-
-                //Items.Clear();
+            Items.Clear();
             _properties.Clear();
 
             base.Dispose();

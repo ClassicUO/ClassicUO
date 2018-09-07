@@ -90,10 +90,10 @@ namespace ClassicUO.Game
                     mob.Update(frameMS);
 
                     if (mob.Distance > ViewRange)
-                    {
                         mob.Dispose();
-                        RemoveMobile(mob);
-                    }
+
+                    if (mob.IsDisposed)
+                        Mobiles.Remove(mob);
                 }
 
                 foreach (Item item in Items)
@@ -101,10 +101,10 @@ namespace ClassicUO.Game
                     item.Update(frameMS);
 
                     if (item.Distance > ViewRange && item.OnGround)
-                    {
                         item.Dispose();
-                        RemoveItem(item);
-                    }
+
+                    if (item.IsDisposed)
+                        Items.Remove(item);
                 }
             }
         }
@@ -179,7 +179,7 @@ namespace ClassicUO.Game
 
         public static bool RemoveItem(Serial serial)
         {
-            Item item = Items.Remove(serial);
+            Item item = Items.Get(serial);
             if (item == null)
             {
                 ToAdd.RemoveWhere(i => i == serial);
@@ -195,13 +195,10 @@ namespace ClassicUO.Game
                 }
             }
 
-
             foreach (Item i in item.Items)
             {
                 RemoveItem(i);
             }
-
-            item.Items.Clear();
 
             item.Dispose();
             return true;
@@ -209,7 +206,7 @@ namespace ClassicUO.Game
 
         public static bool RemoveMobile(Serial serial)
         {
-            Mobile mobile = Mobiles.Remove(serial);
+            Mobile mobile = Mobiles.Get(serial);
             if (mobile == null)
             {
                 return false;
@@ -220,8 +217,7 @@ namespace ClassicUO.Game
                 RemoveItem(i);
             }
 
-            mobile.Items.Clear();
-
+       
             mobile.Dispose();
             return true;
         }

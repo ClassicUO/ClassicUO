@@ -642,7 +642,7 @@ namespace ClassicUO
 
                             foreach (var o in toremove)
                             {
-                                o.Reset();
+                                //o.Reset();
                                 tile.RemoveGameObject(o);
                             }
 
