@@ -578,6 +578,8 @@ namespace ClassicUO
             Debug.WriteLine("DRAW");
             TextureManager.Update();
 
+            var sb3D = Service.Get<SpriteBatch3D>();
+
             if (World.Player != null && World.Map != null)
             {
                 _fpsCounter.IncreaseFrame();
@@ -586,9 +588,9 @@ namespace ClassicUO
                 (Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort2();
 
 
-                Service.Get<SpriteBatch3D>().BeginDraw();
-                Service.Get<SpriteBatch3D>().SetLightIntensity(World.Light.IsometricLevel);
-                Service.Get<SpriteBatch3D>().SetLightDirection(World.Light.IsometricDirection);
+                sb3D.BeginDraw();
+                sb3D.SetLightIntensity(World.Light.IsometricLevel);
+                sb3D.SetLightDirection(World.Light.IsometricDirection);
 
                 List<DeferredEntity> toremove = new List<DeferredEntity>();
 
@@ -635,7 +637,7 @@ namespace ClassicUO
                                     && !(obj is Tile))
                                     continue;
 
-                                if (draw && obj.GetView().Draw(SpriteBatch3D, dp))
+                                if (draw && obj.GetView().Draw(sb3D, dp))
                                     _renderListCount++;
                             }
 
@@ -662,19 +664,21 @@ namespace ClassicUO
                 //    Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X, (x + y) * 22 - _offset.Y, 0);
 
 
-                    obj.GetView().Draw(Service.Get<SpriteBatch3D>(), isometricPosition);
-                }
+                //    obj.GetView().Draw(Service.Get<SpriteBatch3D>(), isometricPosition);
+                //}
 
-                Service.Get<SpriteBatch3D>().GraphicsDevice.SetRenderTarget(_targetRender);
-                Service.Get<SpriteBatch3D>().GraphicsDevice.Clear(Color.Black);
-                Service.Get<SpriteBatch3D>().EndDraw(true);
-                Service.Get<SpriteBatch3D>().GraphicsDevice.SetRenderTarget(null);
+                sb3D.GraphicsDevice.SetRenderTarget(_targetRender);
+                sb3D.GraphicsDevice.Clear(Color.Black);
+                sb3D.EndDraw(true);
+                sb3D.GraphicsDevice.SetRenderTarget(null);
             }
 
-            Service.Get<SpriteBatchUI>().GraphicsDevice.Clear(Color.Transparent);
-            Service.Get<SpriteBatchUI>().BeginDraw();
+            var sbUI = Service.Get<SpriteBatchUI>();
 
-            Service.Get<SpriteBatchUI>().Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
+            sbUI.GraphicsDevice.Clear(Color.Transparent);
+            sbUI.BeginDraw();
+
+            sbUI.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
             GameTextRenderer.Render(Service.Get<SpriteBatch3D>());
 
             //_spriteBatch.Draw2D(_crossTexture, new Bounds(_graphics.PreferredBackBufferWidth / 2  - 5, _graphics.PreferredBackBufferHeight / 2 - 5, 10, 10), Vector3.Zero);
@@ -688,16 +692,16 @@ namespace ClassicUO
 
 
             _gameTextTRY.Text = "FPS: " + _fpsCounter.FPS + "\r\nObjects: " + _renderListCount;
-            _gameTextTRY.GetView().Draw(Service.Get<SpriteBatch3D>(), new Vector3(Window.ClientBounds.Width - 150, 20, 0));
+            _gameTextTRY.GetView().Draw(sb3D, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
 
             //_spriteBatch.Draw2D(_gump, new Rectangle(100, 100, _gump.Width, _gump.Height), Vector3.Zero);
 
             //_spriteBatch.DrawLine(_texture, new Vector2(0, 120), new Vector2(Window.ClientBounds.Width, 120), Vector3.Zero);
             //_spriteBatch.DrawRectangle(_texture, new Rectangle(2, 120, 100, 100), Vector3.Zero);
 
-            Game.Gumps.GumpManager.Render(Service.Get<SpriteBatchUI>());
-            _gameCursor.Draw(Service.Get<SpriteBatchUI>());
-            Service.Get<SpriteBatchUI>().EndDraw();
+            Game.Gumps.GumpManager.Render(sbUI);
+            _gameCursor.Draw(sbUI);
+            sbUI.EndDraw();
         }
 
         private int _renderIndex = 1, _renderListCount = 0;
