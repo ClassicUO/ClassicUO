@@ -1,4 +1,25 @@
-﻿using ClassicUO.Utility;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//  (Copyright (c) 2018 ClassicUO Development Team)
+//    
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -6,19 +27,24 @@ using System.Collections.Generic;
 
 namespace ClassicUO.Input
 {       
-    public static class MouseManager
+    public class MouseManager
     {
-        private static MouseState _prevMouseState = Mouse.GetState();
+        private MouseState _prevMouseState;
 
 
-        public static Point ScreenPosition { get; private set; }
+        public Point ScreenPosition { get; private set; }
 
 
-        public static event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MousePressed;
-        public static event EventHandler<MouseWheelEventArgs> MouseWheel;
+        public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MousePressed;
+        public event EventHandler<MouseWheelEventArgs> MouseWheel;
 
+        public MouseManager()
+        {
+            _prevMouseState = Mouse.GetState();
+        }
 
-        public static void Update()
+        
+        public void Update()
         {
             MouseState current = Mouse.GetState();
 
@@ -120,17 +146,17 @@ namespace ClassicUO.Input
         }
 
 
-        private static bool IsMouseButtonDown(ButtonState current, ButtonState prev)
+        private bool IsMouseButtonDown(ButtonState current, ButtonState prev)
         {
             return current == ButtonState.Pressed && prev == ButtonState.Released;
         }
 
-        private static bool IsMouseButtonUp(ButtonState current, ButtonState prev)
+        private bool IsMouseButtonUp(ButtonState current, ButtonState prev)
         {
             return current == ButtonState.Released && prev == ButtonState.Pressed;
         }
 
-        private static bool IsMouseButtonPressed(ButtonState current, ButtonState prev)
+        private bool IsMouseButtonPressed(ButtonState current, ButtonState prev)
         {
             return current == ButtonState.Pressed && prev == ButtonState.Pressed;
         }
