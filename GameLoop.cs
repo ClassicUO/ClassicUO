@@ -587,14 +587,12 @@ namespace ClassicUO
                 CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
                 (Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort2();
 
-
                 sb3D.BeginDraw();
                 sb3D.SetLightIntensity(World.Light.IsometricLevel);
                 sb3D.SetLightDirection(World.Light.IsometricDirection);
 
                 List<DeferredEntity> toremove = new List<DeferredEntity>();
-
-
+            
                 _renderListCount = 0;
 
                 for (int y = 0; y < renderDimensions.Y * 2 + 11; y++)
@@ -602,8 +600,8 @@ namespace ClassicUO
 
                     Vector3 dp = new Vector3
                     {
-                        X = (firstTile.X - firstTile.Y + (y % 2)) * 22 + renderOffset.X,
-                        Y = (firstTile.X + firstTile.Y + y) * 22 + renderOffset.Y
+                        X = (firstTile.X - firstTile.Y + (y % 2)) * 22f + renderOffset.X,
+                        Y = (firstTile.X + firstTile.Y + y) * 22f + renderOffset.Y
                     };
 
 
@@ -617,6 +615,7 @@ namespace ClassicUO
                         Tile tile = World.Map.GetTile(tileX, tileY);
                         if (tile != null)
                         {
+
                             var objects = tile.ObjectsOnTiles;
                             bool draw = true;
                             for (int k = 0; k < objects.Count; k++)
@@ -688,7 +687,7 @@ namespace ClassicUO
             //_textRenderer.Draw(_spriteBatch, new Point(100, 150));
 
             //_Service.Get<MouseManager>().Draw(_spriteBatch);
-            GarbageCollectionWatcher.Stop();
+            //GarbageCollectionWatcher.Stop();
 
 
             _gameTextTRY.Text = "FPS: " + _fpsCounter.FPS + "\r\nObjects: " + _renderListCount;
@@ -773,7 +772,7 @@ namespace ClassicUO
             int charX = entity.Position.X;
             int charY = entity.Position.Y;
 
-            Mobile mob = entity.Serial.IsMobile ? World.Get<Mobile>(entity) : null;
+            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.Get(entity) : null;
             int dropMaxZIndex = -1;
             if (mob != null)
             {

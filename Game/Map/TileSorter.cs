@@ -57,29 +57,13 @@ namespace ClassicUO.Game.Map
 
             int comparison = xZ - yZ;
             if (comparison == 0)
-            {
                 comparison = xType - yType;
-            }
 
             if (comparison == 0)
-            {
                 comparison = xThreshold - yThreshold;
-            }
 
             if (comparison == 0)
-            {
                 comparison = xTierbreaker - yTierbreaker;
-            }
-
-            if (comparison == 0)
-            {
-                comparison = x.PriorityZ - y.PriorityZ;
-            }
-
-            if (comparison != 0)
-            {
-
-            }
 
             return comparison;
         }

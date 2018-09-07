@@ -69,5 +69,7 @@ namespace ClassicUO.Game.GameObjects
             Reset();
             base.Dispose();
         }
+
+        public override string ToString() => $"{base.ToString()} | deferred";
     }
 }

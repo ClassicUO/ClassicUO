@@ -217,7 +217,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
 
-        public override bool Exists => World.Exists(Serial);
+        public override bool Exists => World.Contains(Serial);
 
         public bool OnGround => !Container.IsValid;
 
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.GameObjects
                 Item item = this;
                 while (item.Container.IsItem)
                 {
-                    item = World.Get<Item>(item.Container);
+                    item = World.Items.Get(item.Container);
                 }
 
                 return item.Container.IsMobile ? item.Container : item;
