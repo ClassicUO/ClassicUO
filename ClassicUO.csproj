@@ -19,9 +19,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Service\**" />
+    <EmbeddedResource Remove="Service\**" />
+    <None Remove="Service\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Audio\" />
     <Folder Include="Properties\" />
-    <Folder Include="Service\" />
   </ItemGroup>
 
   <ItemGroup>

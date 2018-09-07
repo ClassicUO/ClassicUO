@@ -1,10 +1,30 @@
-﻿using ClassicUO.Configuration;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//  (Copyright (c) 2018 ClassicUO Development Team)
+//    
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Interfaces;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Renderer;
-using ClassicUO.Game.Renderer.Views;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -16,7 +36,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
+
 
 namespace ClassicUO
 {
@@ -25,7 +45,6 @@ namespace ClassicUO
         private readonly GraphicsDeviceManager _graphics;
         private FpsCounter _fpsCounter;
         private CursorRenderer _gameCursor;
-        //private SpriteBatch3D _spriteBatch;
         private Stopwatch _stopwatch;
         private RenderTarget2D _targetRender;
         private Texture2D _texture;
@@ -37,10 +56,7 @@ namespace ClassicUO
         private GameText _gameTextTRY;
         private int _objectDrawCount;
 
-
-        public static SpriteBatchUI SpriteBatchUI { get; private set; }
-        public static SpriteBatch3D SpriteBatch3D { get; private set; }
-
+        
         public GameLoop()
         {
             TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
@@ -61,8 +77,7 @@ namespace ClassicUO
             _graphics.ApplyChanges();
 
 
-            Log.Message(LogTypes.Trace, "Gameloop initialized.");
-
+            
             Window.ClientSizeChanged += (sender, e) =>
             {
                 _graphics.PreferredBackBufferWidth = Window.ClientBounds.Width;
@@ -71,25 +86,13 @@ namespace ClassicUO
                 _graphics.ApplyChanges();
             };
 
-            //TextInputEXT.TextInput += c =>
-            //{
-            //    Log.Message(LogTypes.Error, c.ToString());
-            //};
-            //TextInputEXT.StartTextInput();
-
-            //KeyboardManager.KeyPressed += (sender, e) =>
-            //{
-            //    Log.Message(LogTypes.Info, e.Key.ToString());
-            //};
         }
 
         protected override void Initialize()
         {
             Window.AllowUserResizing = true;
 
-            SpriteBatch3D = new SpriteBatch3D(this);
-            SpriteBatchUI = new SpriteBatchUI(this);
-
+            
             TextureManager.Device = GraphicsDevice;
             TextureManager.Device.DepthStencilState = DepthStencilState.Default;
             _graphics.ApplyChanges();
@@ -103,7 +106,7 @@ namespace ClassicUO
 
 
             //uncomment it and fill it to save your first settings
-            /* Settings settings1 = new Settings()
+             /*Settings settings1 = new Settings()
              {
                  Username = "",
                  Password = "",
@@ -115,7 +118,6 @@ namespace ClassicUO
              };
 
              ConfigurationResolver.Save(settings1, "settings.json");*/
-
 
             Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine( Environment.CurrentDirectory,  "settings.json"));
 
@@ -129,11 +131,11 @@ namespace ClassicUO
 
 
             _stopwatch = Stopwatch.StartNew();
-            Log.Message(LogTypes.Trace, "Loading UO files...");
+            Service.Get<Log>().Message(LogTypes.Trace, "Loading UO files...");
 
             FileManager.LoadFiles();
 
-            Log.Message(LogTypes.Trace, "UO files loaded in " + _stopwatch.ElapsedMilliseconds + " ms");
+            Service.Get<Log>().Message(LogTypes.Trace, "UO files loaded in " + _stopwatch.ElapsedMilliseconds + " ms");
 
 
             PacketHandlers.LoadLoginHandlers();
@@ -154,7 +156,7 @@ namespace ClassicUO
 
             NetClient.PacketReceived += (sender, e) =>
             {
-                //Log.Message(LogTypes.Trace, string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
+                //Service.Get<Log>().Message(LogTypes.Trace, string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
 
                 switch (e.ID)
                 {
@@ -185,22 +187,22 @@ namespace ClassicUO
 
             //NetClient.PacketSended += (sender, e) =>
             //{
-            //    //Log.Message(LogTypes.Trace, string.Format("<< Sended\t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
+            //    //Service.Get<Log>().Message(LogTypes.Trace, string.Format("<< Sended\t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
             //};
 
             NetClient.Connected += (sender, e) =>
             {
-                Log.Message(LogTypes.Info, "Connected!");
+                Service.Get<Log>().Message(LogTypes.Info, "Connected!");
                 NetClient.Socket.Send(new PSeed(clientVersionBuffer));
                 NetClient.Socket.Send(new PFirstLogin(username, password));
             };
 
-            NetClient.Disconnected += (sender, e) => { Log.Message(LogTypes.Warning, "Disconnected!"); };
+            NetClient.Disconnected += (sender, e) => { Service.Get<Log>().Message(LogTypes.Warning, "Disconnected!"); };
 
 
             NetClient.Socket.Connect(settings.IP, settings.Port);
 
-            MouseManager.MousePressed += (sender, e) =>
+            Service.Get<MouseManager>().MousePressed += (sender, e) =>
             {
                 if (World.Map != null && World.Player != null)
                 {
@@ -250,8 +252,8 @@ namespace ClassicUO
             World.Ticks = (long)gameTime.TotalGameTime.TotalMilliseconds;
             if (IsActive)
             {
-                MouseManager.Update();
-                KeyboardManager.Update();
+                Service.Get<MouseManager>().Update();
+                Service.Get<KeyboardManager>().Update();
             }
 
 
@@ -580,9 +582,9 @@ namespace ClassicUO
 
                 //(Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort2();
 
-                SpriteBatch3D.BeginDraw();
-                SpriteBatch3D.SetLightIntensity(World.Light.IsometricLevel);
-                SpriteBatch3D.SetLightDirection(World.Light.IsometricDirection);
+                Service.Get<SpriteBatch3D>().BeginDraw();
+                Service.Get<SpriteBatch3D>().SetLightIntensity(World.Light.IsometricLevel);
+                Service.Get<SpriteBatch3D>().SetLightDirection(World.Light.IsometricDirection);
 
                 List<DeferredEntity> toremove = new List<DeferredEntity>();
 
@@ -655,21 +657,21 @@ namespace ClassicUO
 
                     Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X, (x + y) * 22 - _offset.Y, 0);
 
-                    obj.GetView().Draw(SpriteBatch3D, isometricPosition);
+                    obj.GetView().Draw(Service.Get<SpriteBatch3D>(), isometricPosition);
                 }
 
 
-                SpriteBatch3D.GraphicsDevice.SetRenderTarget(_targetRender);
-                SpriteBatch3D.GraphicsDevice.Clear(Color.Black);
-                SpriteBatch3D.EndDraw(true);
-                SpriteBatch3D.GraphicsDevice.SetRenderTarget(null);
+                Service.Get<SpriteBatch3D>().GraphicsDevice.SetRenderTarget(_targetRender);
+                Service.Get<SpriteBatch3D>().GraphicsDevice.Clear(Color.Black);
+                Service.Get<SpriteBatch3D>().EndDraw(true);
+                Service.Get<SpriteBatch3D>().GraphicsDevice.SetRenderTarget(null);
             }
 
-            SpriteBatchUI.GraphicsDevice.Clear(Color.Transparent);
-            SpriteBatchUI.BeginDraw();
+            Service.Get<SpriteBatchUI>().GraphicsDevice.Clear(Color.Transparent);
+            Service.Get<SpriteBatchUI>().BeginDraw();
 
-            SpriteBatchUI.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
-            GameTextRenderer.Render(SpriteBatch3D);
+            Service.Get<SpriteBatchUI>().Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
+            GameTextRenderer.Render(Service.Get<SpriteBatch3D>());
 
             //_spriteBatch.Draw2D(_crossTexture, new Bounds(_graphics.PreferredBackBufferWidth / 2  - 5, _graphics.PreferredBackBufferHeight / 2 - 5, 10, 10), Vector3.Zero);
 
@@ -677,20 +679,20 @@ namespace ClassicUO
 
             //_textRenderer.Draw(_spriteBatch, new Point(100, 150));
 
-            //_mouseManager.Draw(_spriteBatch);
+            //_Service.Get<MouseManager>().Draw(_spriteBatch);
             GarbageCollectionWatcher.Stop();
 
             _gameTextTRY.Text = "FPS: " + _fpsCounter.FPS + "\r\nObjects: " + _renderListCount;
-            _gameTextTRY.GetView().Draw(SpriteBatch3D, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
+            _gameTextTRY.GetView().Draw(Service.Get<SpriteBatch3D>(), new Vector3(Window.ClientBounds.Width - 150, 20, 0));
 
             //_spriteBatch.Draw2D(_gump, new Rectangle(100, 100, _gump.Width, _gump.Height), Vector3.Zero);
 
             //_spriteBatch.DrawLine(_texture, new Vector2(0, 120), new Vector2(Window.ClientBounds.Width, 120), Vector3.Zero);
             //_spriteBatch.DrawRectangle(_texture, new Rectangle(2, 120, 100, 100), Vector3.Zero);
 
-            Game.Gumps.GumpManager.Render(SpriteBatchUI);
-            _gameCursor.Draw(SpriteBatchUI);
-            SpriteBatchUI.EndDraw();
+            Game.Gumps.GumpManager.Render(Service.Get<SpriteBatchUI>());
+            _gameCursor.Draw(Service.Get<SpriteBatchUI>());
+            Service.Get<SpriteBatchUI>().EndDraw();
         }
 
         private int _renderIndex = 1, _renderListCount = 0;
