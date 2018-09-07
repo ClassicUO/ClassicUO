@@ -353,7 +353,7 @@ namespace ClassicUO.Game.GameObjects
 
 
         //protected override bool NoIterateAnimIndex() => false;
-        public override bool IsWalking => LastStepTime > World.Ticks - PLAYER_WALKING_DELAY;
+        protected override bool IsWalking => LastStepTime > World.Ticks - PLAYER_WALKING_DELAY;
         public byte SequenceNumber { get; set; }
 
 

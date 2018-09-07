@@ -252,7 +252,7 @@ namespace ClassicUO.Game.GameObjects
 
         public long LastStepTime { get; set; }
 
-        public virtual bool IsWalking => LastStepTime > World.Ticks - WALKING_DELAY;
+        protected virtual bool IsWalking => LastStepTime > World.Ticks - WALKING_DELAY;
         public byte AnimationGroup { get; set; } = 0xFF;
         internal bool IsMoving => Steps.Count > 0;
 
