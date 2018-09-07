@@ -8,13 +8,13 @@ namespace ClassicUO.Game.Gumps
         private readonly Graphic _graphic;
 
 
-        public GumpPicTiled(in Graphic graphic) : base()
+        public GumpPicTiled(Graphic graphic) : base()
         {
             _graphic = graphic;
             CanMove = true;
         }
 
-        public GumpPicTiled(in string[] parts) : this(Graphic.Parse(parts[5]))
+        public GumpPicTiled(string[] parts) : this(Graphic.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -23,16 +23,16 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public override void Update(in double frameMS)
+        public override void Update(double frameMS)
         {
-            if (Texture == null)
+            if (Texture == null || Texture.IsDisposed)
             {
                 Texture = TextureManager.GetOrCreateGumpTexture(_graphic);
             }
             base.Update(frameMS);
         }
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
             spriteBatch.Draw2DTiled(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), Vector3.Zero);
             return base.Draw(spriteBatch, position);

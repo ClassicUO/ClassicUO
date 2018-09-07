@@ -7,7 +7,7 @@ namespace ClassicUO.Game.Gumps
     {
         private readonly Graphic _graphic;
 
-        public StaticPic(in Graphic graphic, in Hue hue) : base()
+        public StaticPic(Graphic graphic,  Hue hue) : base()
         {
             _graphic = graphic;
             Hue = hue;
@@ -15,7 +15,7 @@ namespace ClassicUO.Game.Gumps
             CanMove = true;
         }
 
-        public StaticPic(in GumpControl parent, in string[] parts) : this(Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue)0)
+        public StaticPic(GumpControl parent,  string[] parts) : this(Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue)0)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -24,9 +24,9 @@ namespace ClassicUO.Game.Gumps
         public Hue Hue { get; set; }
 
 
-        public override void Update(in double frameMS)
+        public override void Update(double frameMS)
         {
-            if (Texture == null)
+            if (Texture == null || Texture.IsDisposed)
             {
                 Texture = TextureManager.GetOrCreateGumpTexture(_graphic);
                 Width = Texture.Width;
@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Gumps
             base.Update(frameMS);
         }
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
             spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Hue, false, false, true));
             return base.Draw(spriteBatch, position);

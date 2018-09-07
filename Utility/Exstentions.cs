@@ -72,7 +72,7 @@ namespace ClassicUO.Utility
             }
         }
 
-        public static void ForEach<T>(this T[] array, in Action<T> func)
+        public static void ForEach<T>(this T[] array,  Action<T> func)
         {
             foreach (T c in array)
             {

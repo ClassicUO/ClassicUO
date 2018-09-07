@@ -3,16 +3,18 @@ using ClassicUO.Game.Renderer.Views;
 using ClassicUO.IO.Resources;
 using System;
 using System.Collections.Generic;
+using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
+
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameObject : IDisposable
+    public abstract class GameObject : /*IDisposable,*/ IUpdateable
     {
         private Tile _tile;
         private View _view;
         private List<GameText> _overHeads;
 
-        protected GameObject(in Facet map)
+        protected GameObject(Facet map)
         {
             Map = map;
             _overHeads = new List<GameText>();
@@ -21,10 +23,13 @@ namespace ClassicUO.Game.GameObjects
         public virtual Position Position { get; set; } = Position.Invalid;
         public virtual Hue Hue { get; set; }
         public virtual Graphic Graphic { get; set; }
-        public View View => _view ?? (_view = CreateView());
+        //public View View => _view ?? (_view = CreateView());
         public sbyte AnimIndex { get; set; }
         public IReadOnlyList<GameText> OverHeads => _overHeads;
 
+        public int CurrentRenderIndex { get; set; }
+        public byte UseInRender { get; set; }
+        public short PriorityZ { get; set; }
 
         public Tile Tile
         {
@@ -33,13 +38,13 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (_tile != value)
                 {
-                    _tile?.RemoveWorldObject(this);
+                    _tile?.RemoveGameObject(this);
 
                     _tile = value;
 
                     if (_tile != null)
                     {
-                        _tile.AddWorldObject(this);
+                        _tile.AddGameObject(this);
                     }
                     else
                     {
@@ -61,7 +66,14 @@ namespace ClassicUO.Game.GameObjects
             return null;
         }
 
-        public GameText AddGameText(in MessageType type, in string text, in byte font, in Hue hue, in bool isunicode)
+        public View GetView()
+        {
+            if (_view == null)
+                _view = CreateView();
+            return _view;
+        }
+
+        public GameText AddGameText(MessageType type,  string text,  byte font,  Hue hue,  bool isunicode)
         {
             GameText overhead;
 
@@ -94,32 +106,59 @@ namespace ClassicUO.Game.GameObjects
             return overhead;
         }
 
-        public void RemoveGameTextAt(in int idx) => _overHeads.RemoveAt(idx);
+        public void RemoveGameTextAt(int idx) => _overHeads.RemoveAt(idx);
 
-        private void InsertGameText(in GameText gameText)
+        private void InsertGameText(GameText gameText)
         {
             _overHeads.Insert(OverHeads.Count == 0 || OverHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
-        protected void DisposeView()
-        {
-            if (_view != null)
-            {
-                //_view.Dispose();
-                _view = null;
-            }
-        }
-
-        public virtual void Dispose()
+        public virtual void Update(double frameMS)
         {
             if (IsDisposed)
             {
                 return;
             }
 
+            for (int i = 0; i < OverHeads.Count; i++)
+            {
+                var gt = OverHeads[i];
+
+                gt.Update(frameMS);
+
+                if (gt.IsDisposed)
+                {
+                    RemoveGameTextAt(i);
+                    i--;
+                }
+            }
+        }
+
+        protected void DisposeView()
+        {
+            if (_view != null)
+            {
+                _view.Texture = null;
+                   //if (_view.Texture != null)
+                   //{
+                   //    if (!_view.Texture.IsDisposed)
+                   //        _view.Texture.Dispose();
+                   //    //_view.Texture = null;
+                   //}
+                   _view = null;
+            }
+        }
+
+        public virtual void Dispose()
+        {
+            if (IsDisposed)
+                return;
+
             IsDisposed = true;
-            //DisposeView();
+            DisposeView();
             Tile = null;
+            _overHeads.ForEach(s => s.Dispose());
+            _overHeads.Clear();
         }
     }
 }

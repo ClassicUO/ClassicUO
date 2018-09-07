@@ -8,7 +8,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private StaticTiles? _itemData;
 
-        public Static(in Graphic tileID, in Hue hue, in int index) : base(World.Map)
+        public Static(Graphic tileID,  Hue hue,  int index) : base(World.Map)
         {
             Graphic = tileID;
             Hue = hue;
@@ -16,7 +16,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public int Index { get; }
-        public new StaticView View => (StaticView)base.View;
+        //public new StaticView View => (StaticView)base.View;
         public string Name { get; private set; }
         public override Position Position { get; set; }
 
@@ -34,7 +34,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool IsAtWorld(in int x, in int y)
+        public bool IsAtWorld(int x,  int y)
         {
             return Position.X == x && Position.Y == y;
         }

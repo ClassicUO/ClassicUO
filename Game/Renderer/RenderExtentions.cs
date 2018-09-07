@@ -8,7 +8,7 @@ namespace ClassicUO.Game.Renderer
 
         public static Vector3 GetHueVector(int hue) => GetHueVector(hue, false, false, false);
 
-        public static Vector3 GetHueVector(in int hue, bool partial, bool transparent, in bool noLighting)
+        public static Vector3 GetHueVector(int hue, bool partial, bool transparent,  bool noLighting)
         {
             if ((hue & 0x4000) != 0)
             {

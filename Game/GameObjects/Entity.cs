@@ -40,18 +40,27 @@ namespace ClassicUO.Game.GameObjects
         private string _name;
 
         private Position _position;
+        private Dictionary<Serial, Item> _items;
 
-        protected Entity(in Serial serial) : base(World.Map)
+        protected Entity(Serial serial) : base(World.Map)
         {
             Serial = serial;
-            Items = new EntityCollection<Item>();
-
-            PositionChanged += OnPositionChanged;
+            _items = new Dictionary<Serial, Item>();
+            _position = base.Position;
+            //PositionChanged += OnPositionChanged;
         }
 
-        public EntityCollection<Item> Items { get; }
+        //public EntityCollection<Item> Items { get; }
+        public IReadOnlyDictionary<Serial, Item> Items => _items;
         public Serial Serial { get; }
-        public IEnumerable<Property> Properties => _properties.Select(s => s.Value);
+        public IReadOnlyList<Property> Properties => (IReadOnlyList<Property>)_properties.Values;
+
+        public void AddItem(Item item)
+        {
+            _items[item.Serial] = item;
+        }
+
+        public void RemoveItem(Serial serial) => _items.Remove(serial);
 
         public override Graphic Graphic
         {
@@ -147,7 +156,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public virtual bool Exists => World.Contains(Serial);
+        public virtual bool Exists => World.Exists(Serial);
         public int Distance => DistanceTo(World.Player);
 
         public DeferredEntity DeferredObject { get; set; }
@@ -165,34 +174,35 @@ namespace ClassicUO.Game.GameObjects
             _delta |= Delta.Properties;
         }
 
-        protected virtual void OnProcessDelta(in Delta d)
+        protected virtual void OnProcessDelta(Delta d)
         {
-            if (d.HasFlag(Delta.Appearance))
-            {
-                AppearanceChanged.Raise(this);
-            }
+            //if (d.HasFlag(Delta.Appearance))
+            //{
+            //    AppearanceChanged.Raise(this);
+            //}
 
             if (d.HasFlag(Delta.Position))
             {
-                PositionChanged.Raise(this);
+                OnPositionChanged(null, EventArgs.Empty);
+                //PositionChanged.Raise(this);
             }
 
-            if (d.HasFlag(Delta.Attributes))
-            {
-                AttributesChanged.Raise(this);
-            }
+            //if (d.HasFlag(Delta.Attributes))
+            //{
+            //    AttributesChanged.Raise(this);
+            //}
 
-            if (d.HasFlag(Delta.Properties))
-            {
-                PropertiesChanged.Raise(this);
-            }
+            //if (d.HasFlag(Delta.Properties))
+            //{
+            //    PropertiesChanged.Raise(this);
+            //}
         }
 
         public void ProcessDelta()
         {
             Delta d = _delta;
             OnProcessDelta(d);
-            Items.ProcessDelta();
+            //Items.ProcessDelta();
             _delta = Delta.None;
         }
 
@@ -204,6 +214,15 @@ namespace ClassicUO.Game.GameObjects
                 DeferredObject = null;
             }
 
+            foreach (var i in Items)
+                i.Value.Dispose();
+
+                //foreach(var item in Items)
+                //    World.RemoveItem(item);
+
+                //Items.Clear();
+            _properties.Clear();
+
             base.Dispose();
         }
 
@@ -212,12 +231,12 @@ namespace ClassicUO.Game.GameObjects
             Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
         }
 
-        public static implicit operator Serial(in Entity entity)
+        public static implicit operator Serial(Entity entity)
         {
             return entity.Serial;
         }
 
-        public static implicit operator uint(in Entity entity)
+        public static implicit operator uint(Entity entity)
         {
             return entity.Serial;
         }
@@ -227,7 +246,7 @@ namespace ClassicUO.Game.GameObjects
             return Serial.GetHashCode();
         }
 
-        public int DistanceTo(in Entity entity)
+        public int DistanceTo(Entity entity)
         {
             return Position.DistanceTo(entity.Position);
         }

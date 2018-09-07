@@ -38,23 +38,23 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct MultiBlock
+    public readonly struct MultiBlock
     {
-        public ushort ID;
-        public short X;
-        public short Y;
-        public short Z;
-        public uint Flags;
+        public readonly ushort ID;
+        public readonly short X;
+        public readonly short Y;
+        public readonly short Z;
+        public readonly uint Flags;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct MultiBlockNew
+    public readonly struct MultiBlockNew
     {
-        public ushort ID;
-        public short X;
-        public short Y;
-        public short Z;
-        public uint Flags;
-        public int Unknown;
+        public readonly ushort ID;
+        public readonly short X;
+        public readonly short Y;
+        public readonly short Z;
+        public readonly uint Flags;
+        public readonly int Unknown;
     }
 }

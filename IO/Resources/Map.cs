@@ -1,4 +1,5 @@
 ﻿using ClassicUO.IO;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -13,12 +14,12 @@ namespace ClassicUO.IO.Resources
         private static readonly UOFileMul[] _filesIdxStatics = new UOFileMul[MAPS_COUNT];
 
         public static IndexMap[][] BlockData { get; } = new IndexMap[MAPS_COUNT][];
-
         public static int[][] MapBlocksSize { get; } = new int[MAPS_COUNT][];
-
         public static int[][] MapsDefaultSize { get; } = new int[MAPS_COUNT][] { new int[2] { 7168, 4096 }, new int[2] { 7168, 4096 }, new int[2] { 2304, 1600 }, new int[2] { 2560, 2048 }, new int[2] { 1448, 1448 }, new int[2] { 1280, 4096 } };
 
-        public static void Load()
+
+
+        public unsafe static void Load()
         {
             string path = string.Empty;
 
@@ -49,7 +50,6 @@ namespace ClassicUO.IO.Resources
             {
                 _mapsDefaultSize[0][0] = _mapsDefaultSize[1][0] = 6144;
             }*/
-
 
             int mapblocksize = Marshal.SizeOf<MapBlock>();
             int staticidxblocksize = Marshal.SizeOf<StaidxBlock>();
@@ -133,13 +133,16 @@ namespace ClassicUO.IO.Resources
                         }
                     }
 
-                    BlockData[i][block].OriginalMapAddress = realmapaddress;
-                    BlockData[i][block].OriginalStaticAddress = realstaticaddress;
-                    BlockData[i][block].OriginalStaticCount = realstaticcount;
+                    BlockData[i][block] = new IndexMap
+                    {
+                        OriginalMapAddress = realmapaddress,
+                        OriginalStaticAddress = realstaticaddress,
+                        OriginalStaticCount = realstaticcount,
 
-                    BlockData[i][block].MapAddress = realmapaddress;
-                    BlockData[i][block].StaticAddress = realstaticaddress;
-                    BlockData[i][block].StaticCount = realstaticcount;
+                        MapAddress = realmapaddress,
+                        StaticAddress = realstaticaddress,
+                        StaticCount = realstaticcount
+                    };
                 }
             }
         }
@@ -148,38 +151,38 @@ namespace ClassicUO.IO.Resources
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct StaticsBlock
     {
-        public ushort Color { get; }
-        public byte X { get; }
-        public byte Y { get; }
-        public sbyte Z { get; }
-        public ushort Hue { get; }
+        public readonly ushort Color;
+        public readonly byte X;
+        public readonly byte Y;
+        public readonly sbyte Z;
+        public readonly ushort Hue;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct StaidxBlock
     {
-        public uint Position { get; }
-        public uint Size { get; }
-        public uint Unknown { get; }
+        public readonly uint Position;
+        public readonly uint Size;
+        public readonly uint Unknown;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct MapCells
     {
-        public ushort TileID { get; }
-        public sbyte Z { get; }
+        public readonly ushort TileID;
+        public readonly sbyte Z;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct MapBlock
+    public unsafe readonly struct MapBlock
     {
-        public uint Header;
+        public readonly uint Header;
 
-        [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.Struct, SizeConst = 64)]
-        public MapCells[] Cells;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+        public readonly MapCells[] Cells;
     }
 
-    public struct IndexMap
+    public class IndexMap
     {
         public ulong OriginalMapAddress;
         public ulong OriginalStaticAddress;

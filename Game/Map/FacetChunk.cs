@@ -7,7 +7,7 @@ namespace ClassicUO.Game.Map
 {
     public sealed class FacetChunk
     {
-        public FacetChunk(in ushort x, in ushort y)
+        public FacetChunk(ushort x, ushort y)
         {
             X = x;
             Y = y;
@@ -21,24 +21,23 @@ namespace ClassicUO.Game.Map
                     Tiles[i][j] = new Tile();
                 }
             }
+
+            LastAccessTime = World.Ticks;
         }
 
         public ushort X { get; private set; }
         public ushort Y { get; private set; }
         public Tile[][] Tiles { get; private set; }
+        public long LastAccessTime { get; set; }
 
 
-        public void Load(in int map)
+        public unsafe void Load(int map)
         {
             IndexMap im = GetIndex(map);
-            if (im.MapAddress == 0)
-            {
-                throw new Exception();
-            }
-
-            unsafe
+            if (im.MapAddress != 0)
             {
                 MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr)im.MapAddress);
+
 
                 int bx = X * 8;
                 int by = Y * 8;
@@ -52,53 +51,55 @@ namespace ClassicUO.Game.Map
                         ushort tileID = (ushort)(block.Cells[pos].TileID & 0x3FFF);
                         sbyte z = block.Cells[pos].Z;
 
+
                         Tiles[x][y].Graphic = tileID;
                         Tiles[x][y].Position = new Position((ushort)(bx + x), (ushort)(by + y), z);
+
+                        Tiles[x][y].AddGameObject(Tiles[x][y]);
                     }
                 }
 
-                StaticsBlock* sb = (StaticsBlock*)im.StaticAddress;
-                if (sb != null)
+                if (im.StaticAddress != 0)
                 {
-                    int count = (int)im.StaticCount;
+                    StaticsBlock* sb = (StaticsBlock*)im.StaticAddress;
 
-                    for (int i = 0; i < count; i++, sb++)
+                    if (sb != null)
                     {
-                        if (sb->Color > 0 && sb->Color != 0xFFFF)
+                        int count = (int)im.StaticCount;
+
+                        for (int i = 0; i < count; i++, sb++)
                         {
-                            ushort x = sb->X;
-                            ushort y = sb->Y;
-
-                            int pos = y * 8 + x;
-                            if (pos >= 64)
+                            if (sb->Color > 0 && sb->Color != 0xFFFF)
                             {
-                                continue;
+                                ushort x = sb->X;
+                                ushort y = sb->Y;
+
+                                int pos = y * 8 + x;
+                                if (pos >= 64)
+                                    continue;
+
+                                sbyte z = sb->Z;
+                                Static staticObject = new Static(sb->Color, sb->Hue, pos) { Position = new Position((ushort)(bx + x), (ushort)(by + y), z) };
+
+                                Tiles[x][y].AddGameObject(staticObject);
                             }
-
-                            sbyte z = sb->Z;
-
-                            Static staticObject = new Static(sb->Color, sb->Hue, pos) { Position = new Position((ushort)(bx + x), (ushort)(by + y), z) };
-
-                            Tiles[x][y].AddWorldObject(staticObject);
                         }
+
                     }
                 }
             }
         }
 
-        private IndexMap GetIndex(in int map)
-        {
-            return GetIndex(map, X, Y);
-        }
+        private IndexMap GetIndex(int map) => GetIndex(map, X, Y);
 
-        private IndexMap GetIndex(in int map, in int x, in int y)
+        private IndexMap GetIndex(int map, int x, int y)
         {
             int block = x * IO.Resources.Map.MapBlocksSize[map][1] + y;
             return IO.Resources.Map.BlockData[map][block];
         }
 
         // we wants to avoid reallocation, so use a reset method
-        public void SetTo(in ushort x, in ushort y)
+        public void SetTo(ushort x, ushort y)
         {
             X = x;
             Y = y;
@@ -119,5 +120,6 @@ namespace ClassicUO.Game.Map
 
             Tiles = null;
         }
+
     }
 }

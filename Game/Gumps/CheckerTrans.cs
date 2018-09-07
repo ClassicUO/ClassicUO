@@ -28,7 +28,7 @@ namespace ClassicUO.Game.Gumps
             CanCloseWithRightClick = true;
         }
 
-        public CheckerTrans(in string[] parts) : this()
+        public CheckerTrans(string[] parts) : this()
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -36,7 +36,7 @@ namespace ClassicUO.Game.Gumps
             Height = int.Parse(parts[4]);
         }
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
             spriteBatch.Draw2D(TransparentTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, true, false));
             return base.Draw(spriteBatch, position);

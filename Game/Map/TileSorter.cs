@@ -6,7 +6,7 @@ namespace ClassicUO.Game.Map
 {
     public static class TileSorter
     {
-        public static void Sort(in List<GameObject> objects)
+        public static void Sort(List<GameObject> objects)
         {
             for (int i = 0; i < objects.Count - 1; i++)
             {
@@ -26,7 +26,7 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        private static int Compare(in GameObject x, in GameObject y)
+        private static int Compare(GameObject x,  GameObject y)
         {
             (int xZ, int xType, int xThreshold, int xTierbreaker) = GetSortValues(x);
             (int yZ, int yType, int yThreshold, int yTierbreaker) = GetSortValues(y);
@@ -53,12 +53,12 @@ namespace ClassicUO.Game.Map
             return comparison;
         }
 
-        private static (int, int, int, int) GetSortValues(in GameObject e)
+        private static (int, int, int, int) GetSortValues(GameObject e)
         {
             switch (e)
             {
                 case Tile tile:
-                    return (tile.View.SortZ, 0, 0, 0);
+                    return (tile.GetView().SortZ, 0, 0, 0);
                 case Static staticitem:
                     return (staticitem.Position.Z, 1, (staticitem.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground((long)staticitem.ItemData.Flags) ? 0 : 1), staticitem.Index);
                 case Item item:

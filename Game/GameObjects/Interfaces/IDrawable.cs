@@ -9,6 +9,15 @@ namespace ClassicUO.Game.GameObjects.Interfaces
         SpriteTexture Texture { get; set; }
         Vector3 HueVector { get; set; }
 
-        bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position);
+        bool Draw(SpriteBatch3D spriteBatch,  Vector3 position);
+    }
+
+    public interface IDrawableUI
+    {
+        bool AllowedToDraw { get; set; }
+        SpriteTexture Texture { get; set; }
+        Vector3 HueVector { get; set; }
+
+        bool Draw(SpriteBatchUI spriteBatch, Vector3 position);
     }
 }

@@ -2,7 +2,7 @@
 {
     public struct UOFileIndex3D
     {
-        public UOFileIndex3D(in long offset, in int length, in int extra = 0)
+        public UOFileIndex3D(long offset,  int length,  int extra = 0)
         {
             Offset = offset;
             Length = length;
@@ -16,7 +16,7 @@
 
     public struct UOFileIndex5D
     {
-        public UOFileIndex5D(in int file, in int index, in int offset, in int length, in int extra = 0)
+        public UOFileIndex5D(int file,  int index,  int offset,  int length,  int extra = 0)
         {
             File = file;
             Index = index;

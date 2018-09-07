@@ -12,14 +12,14 @@ namespace ClassicUO.IO
         internal IntPtr StartAddress => (IntPtr)_data;
         internal IntPtr PositionAddress => (IntPtr)(_data + Position);
 
-        internal void SetData(byte* data, long length)
+        internal void SetData(byte* data,  long length)
         {
             _data = data;
             Length = length;
             Position = 0;
         }
 
-        internal void SetData(byte[] data, long length)
+        internal void SetData(byte[] data,  long length)
         {
             fixed (byte* ptr = data)
             {
@@ -27,7 +27,7 @@ namespace ClassicUO.IO
             }
         }
 
-        internal void SetData(IntPtr data, long length)
+        internal void SetData(IntPtr data,  long length)
         {
             SetData((byte*)data, length);
         }

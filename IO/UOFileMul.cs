@@ -7,7 +7,7 @@ namespace ClassicUO.IO
         private readonly int _count, _patch;
         private readonly UOFileIdxMul _idxFile;
 
-        public UOFileMul(in string file, in string idxfile, in int count, in int patch = -1) : base(file)
+        public UOFileMul(string file,  string idxfile,  int count,  int patch = -1) : base(file)
         {
             _idxFile = new UOFileIdxMul(idxfile);
             _count = count;
@@ -15,7 +15,7 @@ namespace ClassicUO.IO
             Load();
         }
 
-        public UOFileMul(in string file) : base(file)
+        public UOFileMul(string file) : base(file)
         {
             Load();
         }
@@ -54,7 +54,7 @@ namespace ClassicUO.IO
 
         private class UOFileIdxMul : UOFile
         {
-            public UOFileIdxMul(in string idxpath) : base(idxpath)
+            public UOFileIdxMul(string idxpath) : base(idxpath)
             {
                 Load();
             }

@@ -9,7 +9,7 @@
 
     public sealed class Skill
     {
-        public Skill(in string name, in int index, in bool click)
+        public Skill(string name,  int index,  bool click)
         {
             Name = name;
             Index = index;

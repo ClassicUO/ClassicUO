@@ -56,7 +56,7 @@ namespace ClassicUO.IO.Resources
             return ((w * bitsPerPixel + (padBits - 1)) / padBits) * padToNBytes;
         }
 
-        public static unsafe ushort[] GetGump(int index, out int width, out int height)
+        public static unsafe Span<ushort> GetGump(int index, out int width, out int height)
         {
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(index);
 
@@ -78,7 +78,7 @@ namespace ClassicUO.IO.Resources
 
             IntPtr dataStart = _file.PositionAddress;
 
-            ushort[] pixels = new ushort[width * height];
+            Span<ushort> pixels = new ushort[width * height];
             int* lookuplist = (int*)dataStart;
 
             for (int y = 0; y < height; y++)

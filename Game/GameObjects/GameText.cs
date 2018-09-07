@@ -22,7 +22,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private Rectangle _bounds;
 
-        public GameText(in GameObject parent = null, in string text = "") : base(World.Map)
+        public GameText(GameObject parent = null,  string text = "") : base(World.Map)
         {
             Parent = parent;
             Text = text;
@@ -44,12 +44,12 @@ namespace ClassicUO.Game.GameObjects
         public byte Cell { get; set; } = 30;
         public string Text { get; set; }
         public MessageType MessageType { get; set; }
-        public GameObject Parent { get; }
+        public GameObject Parent { get; private set; }
         public long Timeout { get; set; }
         public bool IsPersistent { get; set; }
         public bool IsHTML { get; set; }
         public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
-        public new GameTextView View => (GameTextView)base.View;
+        //public new GameTextView View => (GameTextView)base.View;
 
         public bool IsPartialHue { get; set; }
 
@@ -87,9 +87,30 @@ namespace ClassicUO.Game.GameObjects
 
         protected override View CreateView() => new GameTextView(this);
 
-        public override int GetHashCode()
+        //public override int GetHashCode()
+        //{
+        //    return Text.GetHashCode() + base.GetHashCode();
+        //}
+
+        public override void Update(double frameMS)
         {
-            return Text.GetHashCode() + base.GetHashCode();
+            base.Update(frameMS);
+
+            if (IsPersistent)
+                return;
+
+            Timeout -= (int)frameMS;
+            if (Timeout <= 0)
+            {
+                Dispose();
+            }
+        }
+
+        public override void Dispose()
+        {
+            Parent = null;
+            Links.Clear();
+            base.Dispose();
         }
 
     }

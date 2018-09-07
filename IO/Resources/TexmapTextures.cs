@@ -1,4 +1,5 @@
 ﻿using ClassicUO.IO;
+using System;
 using System.IO;
 
 namespace ClassicUO.IO.Resources
@@ -17,7 +18,7 @@ namespace ClassicUO.IO.Resources
 
             _file = new UOFileMul(path, pathidx, TEXTMAP_COUNT, 10);
 
-            /*string pathdef = Path.Combine(FileManager.UoFolderPath, "texterr.def");
+            string pathdef = Path.Combine(FileManager.UoFolderPath, "texterr.def");
             if (File.Exists(pathdef))
             {
                 using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
@@ -37,10 +38,13 @@ namespace ClassicUO.IO.Resources
                         
                     }
                 }
-            }*/
+            }
         }
 
-        public static ushort[] GetTextmapTexture(ushort index, out int size)
+        private static readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
+        private static readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
+
+        public static Span<ushort> GetTextmapTexture(ushort index, out int size)
         {
             (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
 
@@ -50,8 +54,18 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
-            size = extra == 0 ? 64 : 128;
-            ushort[] pixels = new ushort[size * size];
+            Span<ushort> pixels;
+
+            if (extra == 0)
+            {
+                size = 64;
+                pixels = _textmapPixels64;
+            }
+            else
+            {
+                size = 128;
+                pixels = _textmapPixels128;
+            }            
 
             for (int i = 0; i < size; i++)
             {

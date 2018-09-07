@@ -5,16 +5,15 @@ using ClassicUO.IO.Resources;
 using Microsoft.Xna.Framework;
 using System;
 using IDrawable = ClassicUO.Game.GameObjects.Interfaces.IDrawable;
-using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Renderer.Views
 {
-    public abstract class View : IDrawable, IUpdateable
+    public abstract class View : IDrawable
     {
         protected static float PI = (float)Math.PI;
 
 
-        protected View(in GameObject parent)
+        protected View(GameObject parent)
         {
             GameObject = parent;
             AllowedToDraw = true;
@@ -34,41 +33,15 @@ namespace ClassicUO.Game.Renderer.Views
         protected int TextureWidth { get; set; } = 1;
 
 
-        public virtual void Update(in double frameMS)
+
+        protected bool PreDraw(Vector3 position)
         {
-            if (GameObject.IsDisposed)
-            {
-                return;
-            }
+            return true;
 
-            for (int i = 0; i < GameObject.OverHeads.Count; i++)
-            {
-                var gt = GameObject.OverHeads[i];
-
-                gt.View.Update(frameMS);
-
-                if (gt.IsDisposed)
-                {
-                    GameObject.RemoveGameTextAt(i);
-                    i--;
-                }
-            }
-        }
-
-
-        protected bool PreDraw(in Vector3 position)
-        {
-            if (GameObject is IDeferreable deferreable)
+            //if (GameObject is IDeferreable deferreable)
             {
                 Tile tile;
                 Direction check;
-
-                int offset = 1; // (int)Math.Ceiling(TextureWidth / 44f) / 2;
-                if (offset < 1)
-                {
-                    offset = 1;
-                }
-                //const int offset = 1;
 
                 if (GameObject is Mobile mobile && mobile.IsWalking)
                 {
@@ -76,17 +49,17 @@ namespace ClassicUO.Game.Renderer.Views
 
                     if ((dir & Direction.Up) == Direction.Left || (dir & Direction.Up) == Direction.South || (dir & Direction.Up) == Direction.East)
                     {
-                        tile = World.Map.GetTile(GameObject.Position.X, GameObject.Position.Y + offset);
+                        tile = World.Map.GetTile(GameObject.Position.X, GameObject.Position.Y + 1);
                         check = dir & Direction.Up;
                     }
                     else if ((dir & Direction.Up) == Direction.Down)
                     {
-                        tile = World.Map.GetTile(GameObject.Position.X + offset, GameObject.Position.Y + offset);
+                        tile = World.Map.GetTile(GameObject.Position.X + 1, GameObject.Position.Y + 1);
                         check = Direction.Down;
                     }
                     else
                     {
-                        tile = World.Map.GetTile(GameObject.Position.X + offset, GameObject.Position.Y);
+                        tile = World.Map.GetTile(GameObject.Position.X + 1, GameObject.Position.Y);
                         check = Direction.East;
                     }
                 }
@@ -98,19 +71,21 @@ namespace ClassicUO.Game.Renderer.Views
 
                 if (tile != null)
                 {
-                    if (deferreable.DeferredObject == null)
-                    {
-                        deferreable.DeferredObject = new DeferredEntity();
-                    }
-                    else
-                    {
-                        deferreable.DeferredObject.Reset();
-                    }
+                    //if (deferreable.DeferredObject == null)
+                    //{
+                    //    deferreable.DeferredObject = new DeferredEntity();
+                    //}
+                    //else
+                    //{
+                    //    deferreable.DeferredObject.Reset();
+                    //}
 
-                    deferreable.DeferredObject.AtPosition = position;
-                    deferreable.DeferredObject.Entity = GameObject;
-                    deferreable.DeferredObject.AssociatedTile = tile;
-                    deferreable.DeferredObject.Map = World.Map;
+                    DeferredEntity def = new DeferredEntity();
+
+                    def.AtPosition = position;
+                    def.Entity = GameObject;
+                    def.AssociatedTile = tile;
+                    def.Map = World.Map;
 
                     if (GameObject is Mobile mob)
                     {
@@ -119,16 +94,16 @@ namespace ClassicUO.Game.Renderer.Views
                             return false;
                         }
 
-                        deferreable.DeferredObject.Z = z;
-                        deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, z);
+                        def.Z = z;
+                        def.Position = new Position(0xFFFF, 0xFFFF, z);
                     }
                     else
                     {
-                        deferreable.DeferredObject.Z = GameObject.Position.Z;
-                        deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, GameObject.Position.Z);
+                        def.Z = GameObject.Position.Z;
+                        def.Position = new Position(0xFFFF, 0xFFFF, GameObject.Position.Z);
                     }
 
-                    tile.AddWorldObject(deferreable.DeferredObject);
+                    tile.AddGameObject(def);
 
                     return true;
                 }
@@ -137,9 +112,9 @@ namespace ClassicUO.Game.Renderer.Views
             return false;
         }
 
-        public virtual bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public virtual bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            if (Texture == null || !AllowedToDraw)
+            if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed)
             {
                 return false;
             }
@@ -214,34 +189,34 @@ namespace ClassicUO.Game.Renderer.Views
                 return false;
             }
 
-            MousePick(vertex);
+            //MousePick(vertex);
 
             return true;
         }
 
-        public virtual bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public virtual bool DrawInternal(SpriteBatch3D spriteBatch,  Vector3 position)
         {
             return false;
         }
 
 
 
-        protected virtual void MousePick(in SpriteVertex[] vertex)
+        protected virtual void MousePick(SpriteVertex[] vertex)
         {
         }
 
-        protected virtual void MessageOverHead(in SpriteBatch3D spriteBatch, in Vector3 position, int offY)
+        protected virtual void MessageOverHead(SpriteBatch3D spriteBatch,  Vector3 position, int offY)
         {
             for (int i = 0; i < GameObject.OverHeads.Count; i++)
             {
-                var v = GameObject.OverHeads[i].View;
+                var v = GameObject.OverHeads[i].GetView();
                 v.Bounds = new Rectangle(v.Texture.Width / 2 - 22, offY + v.Texture.Height, v.Texture.Width, v.Texture.Height);
                 GameTextRenderer.AddView(v, position);
                 offY += v.Texture.Height;
             }
         }
 
-        public static bool IsNoDrawable(in ushort g)
+        public static bool IsNoDrawable(ushort g)
         {
             switch (g)
             {

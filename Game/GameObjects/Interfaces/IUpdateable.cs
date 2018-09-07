@@ -2,6 +2,6 @@
 {
     public interface IUpdateable
     {
-        void Update(in double frameMS);
+        void Update(double frameMS);
     }
 }

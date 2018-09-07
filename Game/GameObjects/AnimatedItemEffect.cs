@@ -4,7 +4,7 @@ namespace ClassicUO.Game.GameObjects
 {
     public class AnimatedItemEffect : GameEffect
     {
-        public AnimatedItemEffect(in Graphic graphic, in Hue hue, in int duration)
+        public AnimatedItemEffect(Graphic graphic,  Hue hue,  int duration)
         {
             Graphic = graphic;
             Hue = hue;
@@ -13,21 +13,21 @@ namespace ClassicUO.Game.GameObjects
             Load();
         }
 
-        public AnimatedItemEffect(in GameObject source, in Graphic graphic, in Hue hue, in int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(GameObject source,  Graphic graphic,  Hue hue,  int duration) : this(graphic, hue, duration)
         {
             SetSource(source);
         }
 
-        public AnimatedItemEffect(in Serial source, in Graphic graphic, in Hue hue, in int duration) : this(source, 0, 0, 0, graphic, hue, duration)
+        public AnimatedItemEffect(Serial source,  Graphic graphic,  Hue hue,  int duration) : this(source, 0, 0, 0, graphic, hue, duration)
         {
         }
 
-        public AnimatedItemEffect(in int sourceX, in int sourceY, in int sourceZ, in Graphic graphic, in Hue hue, in int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(int sourceX,  int sourceY,  int sourceZ,  Graphic graphic,  Hue hue,  int duration) : this(graphic, hue, duration)
         {
             SetSource(sourceX, sourceY, sourceZ);
         }
 
-        public AnimatedItemEffect(in Serial sourceSerial, in int sourceX, in int sourceY, in int sourceZ, in Graphic graphic, in Hue hue, in int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(Serial sourceSerial,  int sourceX,  int sourceY,  int sourceZ,  Graphic graphic,  Hue hue,  int duration) : this(graphic, hue, duration)
         {
             sbyte zSrc = (sbyte)sourceZ;
 
@@ -58,7 +58,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public int Duration { get; set; }
-        public new AnimatedEffectView View => (AnimatedEffectView)base.View;
+        //public new AnimatedEffectView View => (AnimatedEffectView)base.View;
 
 
         protected override View CreateView()
@@ -66,9 +66,9 @@ namespace ClassicUO.Game.GameObjects
             return new AnimatedEffectView(this);
         }
 
-        public override void UpdateAnimation(in double ms)
+        public override void UpdateAnimation(double ms)
         {
-            base.UpdateAnimation(in ms);
+            base.UpdateAnimation(ms);
 
             if (LastChangeFrameTime >= Duration && Duration >= 0)
             {
@@ -78,6 +78,17 @@ namespace ClassicUO.Game.GameObjects
             {
                 (int x, int y, int z) = GetSource();
                 Position = new Position((ushort)x, (ushort)y, (sbyte)z);
+            }
+        }
+
+
+        public override void Update(double frameMS)
+        {
+            base.Update(frameMS);
+
+            if (!IsDisposed)
+            {
+                UpdateAnimation(frameMS);
             }
         }
     }

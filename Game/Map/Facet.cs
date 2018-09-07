@@ -1,27 +1,34 @@
 ﻿using ClassicUO.IO.Resources;
 using Microsoft.Xna.Framework;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace ClassicUO.Game.Map
 {
     public sealed class Facet
     {
-        private const int CHUNKS_NUM = 5;
-        private const int MAX_CHUNKS = CHUNKS_NUM * 2 + 1;
+        //private const int CHUNKS_NUM = 5;
+        //private const int MAX_CHUNKS = CHUNKS_NUM * 2 + 1;
+
+
+        private List<int> _usedIndices = new List<int>();
 
         private Point _center;
 
-        public Facet(in int index)
+        public Facet(int index)
         {
             Index = index;
 
-            Chunks = new FacetChunk[MAX_CHUNKS * MAX_CHUNKS];
+            //Chunks = new FacetChunk[MAX_CHUNKS * MAX_CHUNKS];
+
+            MapBlockIndex = IO.Resources.Map.MapBlocksSize[Index][0] * IO.Resources.Map.MapBlocksSize[Index][1];
+            Chunks = new FacetChunk[MapBlockIndex];
         }
 
         public int Index { get; }
-        public FacetChunk[] Chunks { get; }
-
+        public FacetChunk[] Chunks { get; private set; }
+        public int MapBlockIndex { get; set; }
         public Point Center
         {
             get => _center;
@@ -35,26 +42,40 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public Tile GetTile(in short x, in short y)
+
+        public Tile GetTile(short x,  short y)
         {
+            if (x < 0 || y < 0)
+                return null;
+
             int cellX = x / 8;
             int cellY = y / 8;
-            int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
-            // int cellindex = (cellX * AssetsLoader.Map.MapBlocksSize[Index][1]) + cellY;
 
-            if (x < 0 || y < 0)
+            int block = GetBlock(cellX, cellY);
+
+            ref var chuck = ref Chunks[block];
+
+            if (chuck == null)
             {
-                return null;
+                _usedIndices.Add(block);
+                chuck = new FacetChunk((ushort)cellX, (ushort)cellY);
+                chuck.Load(Index);
             }
+            chuck.LastAccessTime = World.Ticks;
+            return chuck.Tiles[x % 8][y % 8]; 
 
-            ref var tile = ref Chunks[cellindex];
+            //int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
+            //// int cellindex = (cellX * AssetsLoader.Map.MapBlocksSize[Index][1]) + cellY;
+     
 
-            if (tile == null || tile.X != cellX || tile.Y != cellY)
-            {
-                return null;
-            }
+            //ref var tile = ref Chunks[cellindex];
 
-            return tile.Tiles[x % 8][y % 8];
+            //if (tile == null || tile.X != cellX || tile.Y != cellY)
+            //{
+            //    return null;
+            //}
+
+            //return tile.Tiles[x % 8][y % 8];
         }
 
         public Tile GetTile(int x, int y)
@@ -63,7 +84,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public sbyte GetTileZ(in short x, in short y)
+        public unsafe sbyte GetTileZ(short x,  short y)
         {
             Tile tile = GetTile(x, y);
             if (tile == null)
@@ -97,13 +118,12 @@ namespace ClassicUO.Game.Map
             return tile.Position.Z;
         }
 
-        private IndexMap GetIndex(in int blockX, in int blockY)
-        {
-            int block = blockX * IO.Resources.Map.MapBlocksSize[Index][1] + blockY;
-            return IO.Resources.Map.BlockData[Index][block];
-        }
 
-        public int GetAverageZ(in sbyte top, in sbyte left, in sbyte right, in sbyte bottom, ref sbyte low, ref sbyte high)
+        private IndexMap GetIndex(int blockX,  int blockY) => IO.Resources.Map.BlockData[Index][GetBlock(blockX, blockY)];
+
+        private int GetBlock(int blockX, int blockY) => blockX * IO.Resources.Map.MapBlocksSize[Index][1] + blockY;
+
+        public int GetAverageZ(sbyte top,  sbyte left,  sbyte right,  sbyte bottom, ref sbyte low, ref sbyte high)
         {
             high = top;
             if (left > high)
@@ -145,113 +165,115 @@ namespace ClassicUO.Game.Map
             return FloorAverage(top, bottom);
         }
 
-        public int GetAverageZ(short x, short y, ref sbyte low, ref sbyte top)
-        {
-            return GetAverageZ(GetTileZ(x, y), GetTileZ(x, (short)(y + 1)), GetTileZ((short)(x + 1), y), GetTileZ((short)(x + 1), (short)(y + 1)), ref low, ref top);
-        }
+        public int GetAverageZ(short x, short y, ref sbyte low, ref sbyte top) => GetAverageZ(GetTileZ(x, y), GetTileZ(x, (short)(y + 1)), GetTileZ((short)(x + 1), y), GetTileZ((short)(x + 1), (short)(y + 1)), ref low, ref top);
 
-        private static int FloorAverage(in int a, in int b)
+        private static int FloorAverage(int a,  int b)
         {
             int v = a + b;
 
             if (v < 0)
-            {
                 --v;
-            }
-
             return v / 2;
         }
 
-        private void LoadChunks(in ushort centerX, in ushort centerY)
+
+        public void ClearUnusedBlocks()
         {
-            for (int y = -CHUNKS_NUM; y <= CHUNKS_NUM; y++)
+            int count = 0;
+            for (int i = 0; i < _usedIndices.Count; i++)
             {
-                int cellY = centerY / 8 + y;
-                if (cellY < 0)
+                ref var block = ref Chunks[_usedIndices[i]];
+                if (World.Ticks - block.LastAccessTime > 3000)
                 {
-                    cellY += IO.Resources.Map.MapBlocksSize[Index][1];
+                    block.Unload();
+                    block = null;
+                    _usedIndices.RemoveAt(i);
+                    i++;
+                    if (++count >= 5)
+                        break;
                 }
+            }
+        }
 
-                for (int x = -CHUNKS_NUM; x <= CHUNKS_NUM; x++)
+
+        private void LoadChunks(ushort centerX,  ushort centerY)
+        {
+            //for (int y = -CHUNKS_NUM; y <= CHUNKS_NUM; y++)
+            //{
+            //    int cellY = centerY / 8 + y;
+            //    if (cellY < 0)
+            //    {
+            //        cellY += IO.Resources.Map.MapBlocksSize[Index][1];
+            //    }
+
+            //    for (int x = -CHUNKS_NUM; x <= CHUNKS_NUM; x++)
+            //    {
+            //        int cellX = centerX / 8 + x;
+            //        if (cellX < 0)
+            //        {
+            //            cellX += IO.Resources.Map.MapBlocksSize[Index][0];
+            //        }
+
+            //        int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
+
+            //        ref var tile = ref Chunks[cellindex];
+
+            //        if (tile == null || tile.X != cellX || tile.Y != cellY)
+            //        {
+            //            if (tile == null)
+            //            {
+            //                tile = new FacetChunk((ushort)cellX, (ushort)cellY);
+            //            }
+            //            else
+            //            {
+            //                tile.Unload();
+            //                tile.SetTo((ushort)cellX, (ushort)cellY);
+            //            }
+
+
+            //            tile.Load(Index);
+            //        }
+            //    }
+            //}
+
+           
+
+
+            const int XY_OFFSET = 30;
+
+            int minBlockX = (centerX - XY_OFFSET) / 8 - 1;
+            int minBlockY = (centerY - XY_OFFSET) / 8 - 1;
+            int maxBlockX = (centerX + XY_OFFSET) / 8 + 2;
+            int maxBlockY = (centerY + XY_OFFSET) / 8 + 2;
+
+            if (minBlockX < 0)
+                minBlockX = 0;
+            if (minBlockY < 0)
+                minBlockY = 0;
+            if (maxBlockX >= IO.Resources.Map.MapBlocksSize[Index][0])
+                maxBlockX = IO.Resources.Map.MapBlocksSize[Index][0] - 1;
+            if (maxBlockY >= IO.Resources.Map.MapBlocksSize[Index][1])
+                maxBlockY = IO.Resources.Map.MapBlocksSize[Index][1] - 1;
+
+            for (int i = minBlockX; i <= maxBlockX; i++)
+            {
+                int index = i * IO.Resources.Map.MapBlocksSize[Index][1];
+
+                for (int j = minBlockY; j <= maxBlockY; j++)
                 {
-                    int cellX = centerX / 8 + x;
-                    if (cellX < 0)
-                    {
-                        cellX += IO.Resources.Map.MapBlocksSize[Index][0];
-                    }
-
-                    int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
+                    int cellindex = index + j; 
 
                     ref var tile = ref Chunks[cellindex];
 
-                    if (tile == null || tile.X != cellX || tile.Y != cellY)
+                    if (tile == null)
                     {
-                        tile?.Unload();
-                        tile = new FacetChunk((ushort)cellX, (ushort)cellY);
-
-                        //if (Chunks[cellindex] == null)
-                        //{
-                        //    Chunks[cellindex] = new FacetChunk((ushort)i, (ushort)j);
-                        //}
-                        //else
-                        //{
-                        //    Chunks[cellindex].Unload();
-                        //    Chunks[cellindex].SetTo((ushort)i, (ushort)j);
-                        //}
-
+                        _usedIndices.Add(cellindex);
+                        tile = new FacetChunk((ushort)i, (ushort)j);
 
                         tile.Load(Index);
                     }
                 }
             }
-
-
-            //const int XY_OFFSET = 30;
-
-            //int minBlockX = (centerX - XY_OFFSET) / 8 - 1;
-            //int minBlockY = (centerY - XY_OFFSET) / 8 - 1;
-            //int maxBlockX = (centerX + XY_OFFSET) / 8 + 2;
-            //int maxBlockY = (centerY + XY_OFFSET) / 8 + 2;
-
-            //if (minBlockX < 0)
-            //    minBlockX = 0;
-            //if (minBlockY < 0)
-            //    minBlockY = 0;
-            //if (maxBlockX >= AssetsLoader.Map.MapBlocksSize[Index][0])
-            //    maxBlockX = AssetsLoader.Map.MapBlocksSize[Index][0] - 1;
-            //if (maxBlockY >= AssetsLoader.Map.MapBlocksSize[Index][1])
-            //    maxBlockY = AssetsLoader.Map.MapBlocksSize[Index][1] - 1;
-
-            //for (int i = minBlockX; i <= maxBlockX; i++)
-            //    // int index = i * AssetsLoader.Map.MapBlocksSize[Index][1];
-
-            //for (int j = minBlockY; j <= maxBlockY; j++)
-            //{
-            //    // int cellindex = index + j; 
-
-            //    int cellindex = (j % MAX_CHUNKS) * MAX_CHUNKS + (i % MAX_CHUNKS);
-
-            //    ref var tile = ref Chunks[cellindex];
-
-            //    if (tile == null || tile.X != i || tile.Y != j)
-            //    {
-            //        tile?.Unload();
-            //        tile = new FacetChunk((ushort)i, (ushort)j);
-
-            //            //if (Chunks[cellindex] == null)
-            //            //{
-            //            //    Chunks[cellindex] = new FacetChunk((ushort)i, (ushort)j);
-            //            //}
-            //            //else
-            //            //{
-            //            //    Chunks[cellindex].Unload();
-            //            //    Chunks[cellindex].SetTo((ushort)i, (ushort)j);
-            //            //}
-
-
-            //        tile.Load(Index);
-            //    }
-            //}
         }
     }
 }

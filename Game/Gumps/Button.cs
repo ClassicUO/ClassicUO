@@ -20,7 +20,7 @@ namespace ClassicUO.Game.Gumps
         private GameText _gText;
 
 
-        public Button(in int buttonID, in ushort normal, in ushort pressed, in ushort over = 0) : base()
+        public Button(int buttonID,  ushort normal,  ushort pressed,  ushort over = 0) : base()
         {
             ButtonID = buttonID;
             _textures[NORMAL] = TextureManager.GetOrCreateGumpTexture(normal);
@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Gumps
             CanMove = false;
         }
 
-        public Button(in string[] parts) :
+        public Button(string[] parts) :
             this(parts.Length > 7 ? int.Parse(parts[7]) : 0, ushort.Parse(parts[3]), ushort.Parse(parts[4]))
         {
             X = int.Parse(parts[1]);
@@ -56,7 +56,7 @@ namespace ClassicUO.Game.Gumps
 
         public int ButtonID { get; }
 
-        public event EventHandler Click;
+        public event EventHandler<MouseEventArgs> Click;
 
         public string Text
         {
@@ -66,12 +66,12 @@ namespace ClassicUO.Game.Gumps
 
 
 
-        public override void Update(in double frameMS)
+        public override void Update(double frameMS)
         {
-            base.Update(in frameMS);
+            base.Update(frameMS);
         }
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
             for (int i = 0; i < _textures.Length; i++)
             {
@@ -83,14 +83,14 @@ namespace ClassicUO.Game.Gumps
 
             if (Text != string.Empty)
             {
-                _gText.View.Draw(spriteBatch, position);
+                _gText.GetView().Draw(spriteBatch, position);
             }
 
-            return base.Draw(in spriteBatch, in position);
+            return base.Draw(spriteBatch,  position);
         }
 
 
-        public override void OnMouseEnter(in MouseEventArgs e)
+        public override void OnMouseEnter(MouseEventArgs e)
         {
             if (_textures[OVER] != null)
             {
@@ -100,19 +100,19 @@ namespace ClassicUO.Game.Gumps
                 _curentState = NORMAL;
         }
 
-        public override void OnMouseLeft(in MouseEventArgs e)
+        public override void OnMouseLeft(MouseEventArgs e)
         {
             _curentState = NORMAL;
         }
 
-        public override void OnMouseButton(in MouseEventArgs e)
+        public override void OnMouseButton(MouseEventArgs e)
         {
             if (e.Button == Input.MouseButton.Left)
             {
                 if (e.ButtonState == ButtonState.Pressed)
                 {
                     _curentState = PRESSED;
-                    Click.Raise();
+                    Click.Raise(e);
                 }
                 else
                 {
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (_textures[i] != null)
                     _textures[i].Dispose();
-                _textures[i] = null;
+                //_textures[i] = null;
             }
         }
     }

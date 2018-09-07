@@ -19,7 +19,7 @@ namespace ClassicUO.Utility
         private static readonly Dictionary<LogTypes, ConsoleColor> _logMsgColor = new Dictionary<LogTypes, ConsoleColor> { { LogTypes.None, ConsoleColor.White }, { LogTypes.Trace, ConsoleColor.Green }, { LogTypes.Info, ConsoleColor.Cyan }, { LogTypes.Warning, ConsoleColor.Yellow }, { LogTypes.Error, ConsoleColor.Red } };
 
 
-        public static void Message(in LogTypes type, in string msg)
+        public static void Message(LogTypes type,  string msg)
         {
             Console.Write(DateTime.Now.ToString("HH:mm:ss") + " | ");
 

@@ -1,4 +1,5 @@
 ﻿using ClassicUO.IO;
+using System;
 using System.IO;
 
 namespace ClassicUO.IO.Resources
@@ -13,7 +14,7 @@ namespace ClassicUO.IO.Resources
         public const int ART_COUNT = 0x10000;
         private static UOFile _file;
 
-        private static readonly ushort[] _landArray = new ushort[44 * 44];
+        //private static readonly Span<ushort> _landArray = new ushort[44 * 44];
 
 
         public static void Load()
@@ -31,7 +32,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public static unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height)
+        public static unsafe Span<ushort> ReadStaticArt(ushort graphic, out short width, out short height)
         {
             graphic &= FileManager.GraphicMask;
 
@@ -110,11 +111,13 @@ namespace ClassicUO.IO.Resources
             return pixels;
         }
 
-        public static ushort[] ReadLandArt(ushort graphic)
+        public static Span<ushort> ReadLandArt(ushort graphic)
         {
             graphic &= FileManager.GraphicMask;
 
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
+
+            Span<ushort> pixels = new ushort[44 * 44];
 
             for (int i = 0; i < 22; i++)
             {
@@ -128,7 +131,7 @@ namespace ClassicUO.IO.Resources
                     if (val > 0)
                         val = (ushort)(0x8000 | val);
 
-                    _landArray[pos++] = val;
+                    pixels[pos++] = val;
                 }
             }
 
@@ -143,11 +146,11 @@ namespace ClassicUO.IO.Resources
                     if (val > 0)
                         val = (ushort)(0x8000 | val);
 
-                    _landArray[pos++] = val;
+                    pixels[pos++] = val;
                 }
             }
 
-            return _landArray;
+            return pixels;
         }
     }
 }

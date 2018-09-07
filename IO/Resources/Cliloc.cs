@@ -55,7 +55,7 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    public struct StringEntry
+    public readonly struct StringEntry
     {
         public StringEntry(int num, string text)
         {
@@ -63,19 +63,19 @@ namespace ClassicUO.IO.Resources
             Text = text;
         }
 
-        public int Number { get; }
-        public string Text { get; }
+        public readonly int Number;
+        public readonly string Text;
     }
 
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal struct ClilocEntry
+    internal readonly struct ClilocEntry
     {
-        public int Number;
-        public byte Flag;
-        public ushort Length;
+        public readonly int Number;
+        public readonly byte Flag;
+        public readonly ushort Length;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-        public char[] Name;
+        public readonly char[] Name;
     }
 }

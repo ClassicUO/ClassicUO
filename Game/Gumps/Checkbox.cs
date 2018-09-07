@@ -13,7 +13,7 @@ namespace ClassicUO.Game.Gumps
         private readonly SpriteTexture[] _textures = new SpriteTexture[2];
 
 
-        public Checkbox(in ushort inactive, in ushort active) : base()
+        public Checkbox(ushort inactive,  ushort active) : base()
         {
             _textures[INACTIVE] = TextureManager.GetOrCreateGumpTexture(inactive);
             _textures[ACTIVE] = TextureManager.GetOrCreateGumpTexture(active);
@@ -28,9 +28,9 @@ namespace ClassicUO.Game.Gumps
 
         public virtual bool IsChecked { get; set; }
 
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
-            bool ok = base.Draw(in spriteBatch, in position);
+            bool ok = base.Draw(spriteBatch,  position);
 
             for (int i = 0; i < _textures.Length; i++)
                 _textures[i].Ticks = World.Ticks;
@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public override void OnMouseButton(in MouseEventArgs e)
+        public override void OnMouseButton(MouseEventArgs e)
         {
             if (e.ButtonState == ButtonState.Released && e.Button == Input.MouseButton.Left)
             {

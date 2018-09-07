@@ -1,4 +1,5 @@
-﻿using ClassicUO.Game.Map;
+﻿using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Map;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Renderer.Views
@@ -8,42 +9,44 @@ namespace ClassicUO.Game.Renderer.Views
         private static readonly Point[] _surroundingIndexes = { new Point(0, -1), new Point(1, -1), new Point(-1, 0), new Point(1, 0), new Point(2, 0), new Point(-1, 1), new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(0, 2), new Point(1, 2) };
 
         private readonly Vector3[] _normals = new Vector3[4];
-
-        private readonly SpriteVertex[] _vertex = { new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)), new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0)) };
-
+        private readonly SpriteVertex[] _vertex = new SpriteVertex[4]
+        {
+            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 0, 0)),
+            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 0, 0)),
+            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(0, 1, 0)),
+            new SpriteVertex(new Vector3(), new Vector3(), new Vector3(1, 1, 0))
+        };
         private bool _needUpdateStrechedTile = true;
         private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
 
 
-        public TileView(in Tile tile) : base(tile)
+        public TileView(Tile tile) : base(tile)
         {
-            IsStretched = !(tile.TileData.TexID <= 0 && (tile.TileData.Flags & 0x00000080) > 0);
-
             AllowedToDraw = !tile.IsIgnored;
         }
 
 
-        public bool IsStretched { get; }
-        public Tile WorldObject => (Tile)GameObject;
+        //public new Tile GameObject => (Tile)base.GameObject;
 
-
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            if (!AllowedToDraw)
+            if (!AllowedToDraw || GameObject.IsDisposed)
             {
                 return false;
             }
 
+            Tile tile = (Tile)GameObject;
+
             if (Texture == null || Texture.IsDisposed)
             {
-                if (IsStretched)
+                if (tile.IsStretched)
                 {
-                    Texture = TextureManager.GetOrCreateTexmapTexture(WorldObject.TileData.TexID);
+                    Texture = TextureManager.GetOrCreateTexmapTexture(((Tile)GameObject).TileData.TexID);
                 }
                 else
                 {
-                    Texture = TextureManager.GetOrCreateLandTexture(WorldObject.Graphic);
-                    Bounds = new Rectangle(0, WorldObject.Position.Z * 4, 44, 44);
+                    Texture = TextureManager.GetOrCreateLandTexture(GameObject.Graphic);
+                    Bounds = new Rectangle(0, GameObject.Position.Z * 4, 44, 44);
                 }
             }
 
@@ -52,18 +55,11 @@ namespace ClassicUO.Game.Renderer.Views
                 UpdateStreched(World.Map);
                 _needUpdateStrechedTile = false;
             }
-
-            //var vv = position;
-            //vv.Z = (position.X + position.Y) + 0.001f * GameObject.IsometricPosition.Z;
-
-
-            //CalculateRenderDepth((sbyte)vv.Z, 0, 0, 0);
-
-            return !IsStretched ? base.Draw(spriteBatch, position) : Draw3DStretched(spriteBatch, position);
+            return !tile.IsStretched ? base.Draw(spriteBatch, position) : Draw3DStretched(spriteBatch, position);
         }
 
 
-        private bool Draw3DStretched(in SpriteBatch3D spriteBatch, in Vector3 position)
+        private bool Draw3DStretched(SpriteBatch3D spriteBatch,  Vector3 position)
         {
             Texture.Ticks = World.Ticks;
 
@@ -82,33 +78,36 @@ namespace ClassicUO.Game.Renderer.Views
             return true;
         }
 
-        private void UpdateStreched(in Facet map)
+        private void UpdateStreched(Facet map)
         {
             float[] surroundingTilesZ = new float[_surroundingIndexes.Length];
             for (int i = 0; i < _surroundingIndexes.Length; i++)
             {
-                surroundingTilesZ[i] = map.GetTileZ((short)(WorldObject.Position.X + _surroundingIndexes[i].X), (short)(WorldObject.Position.Y + _surroundingIndexes[i].Y));
+                surroundingTilesZ[i] = map.GetTileZ((short)(GameObject.Position.X + _surroundingIndexes[i].X), (short)(GameObject.Position.Y + _surroundingIndexes[i].Y));
             }
 
-            sbyte currentZ = WorldObject.Position.Z;
+            sbyte currentZ = GameObject.Position.Z;
             sbyte leftZ = (sbyte)surroundingTilesZ[6];
             sbyte rightZ = (sbyte)surroundingTilesZ[3];
             sbyte bottomZ = (sbyte)surroundingTilesZ[7];
 
             if (!(currentZ == leftZ && currentZ == rightZ && currentZ == bottomZ))
             {
+                Tile tile = (Tile)GameObject;
                 sbyte low = 0, high = 0;
-                sbyte sort = (sbyte)map.GetAverageZ(WorldObject.Position.Z, leftZ, rightZ, bottomZ, ref low, ref high);
+                sbyte sort = (sbyte)map.GetAverageZ(GameObject.Position.Z, leftZ, rightZ, bottomZ, ref low, ref high);
+                tile.MinZ = low;
                 if (sort != SortZ)
                 {
+                    tile.AverageZ = sort;
                     SortZ = sort;
-                    map.GetTile((short)WorldObject.Position.X, (short)WorldObject.Position.Y).ForceSort();
+                    map.GetTile((short)GameObject.Position.X, (short)GameObject.Position.Y).ForceSort();
                 }
             }
 
             _normals[0] = CalculateNormal(surroundingTilesZ[2], surroundingTilesZ[3], surroundingTilesZ[0], surroundingTilesZ[6]);
-            _normals[1] = CalculateNormal(WorldObject.Position.Z, surroundingTilesZ[4], surroundingTilesZ[1], surroundingTilesZ[7]);
-            _normals[2] = CalculateNormal(surroundingTilesZ[5], surroundingTilesZ[7], WorldObject.Position.Z, surroundingTilesZ[9]);
+            _normals[1] = CalculateNormal(GameObject.Position.Z, surroundingTilesZ[4], surroundingTilesZ[1], surroundingTilesZ[7]);
+            _normals[2] = CalculateNormal(surroundingTilesZ[5], surroundingTilesZ[7], GameObject.Position.Z, surroundingTilesZ[9]);
             _normals[3] = CalculateNormal(surroundingTilesZ[6], surroundingTilesZ[8], surroundingTilesZ[3], surroundingTilesZ[10]);
 
             _vertex0_yOffset = new Vector3(22, -(currentZ * 4), 0);
@@ -121,18 +120,16 @@ namespace ClassicUO.Game.Renderer.Views
             _vertex[2].Normal = _normals[2];
             _vertex[3].Normal = _normals[3];
 
-            Vector3 hue = RenderExtentions.GetHueVector(WorldObject.Hue);
+            Vector3 hue = RenderExtentions.GetHueVector(GameObject.Hue);
             if (_vertex[0].Hue != hue)
             {
                 _vertex[0].Hue = _vertex[1].Hue = _vertex[2].Hue = _vertex[3].Hue = hue;
             }
         }
 
-        private Vector3 CalculateNormal(in float a, in float b, in float c, in float d)
-        {
-            Vector3 v = new Vector3(a - b, 1f, c - d);
-            v.Normalize();
-            return v;
+        private static Vector3 CalculateNormal(float a,  float b,  float c,  float d)
+        {            
+            return Vector3.Normalize(new Vector3(a - b, 1f, c - d));
         }
     }
 }

@@ -23,6 +23,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime;
 using System.Runtime.InteropServices;
 
 namespace ClassicUO
@@ -40,6 +41,7 @@ namespace ClassicUO
 
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
+
 
             using (GameLoop game = new GameLoop())
             {

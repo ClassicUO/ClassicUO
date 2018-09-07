@@ -7,47 +7,39 @@ namespace ClassicUO.Game.Renderer.Views
     {
         private string _text;
 
-        public GameTextView(in GameText parent) : base(parent)
+        public GameTextView(GameText parent) : base(parent)
         {
             _text = parent.Text;
 
-            Texture = TextureManager.GetOrCreateStringTextTexture(GameObject);
+            Texture = GameTextRenderer.CreateTexture(GameObject); //TextureManager.GetOrCreateStringTextTexture(GameObject);
             //Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height, Texture.Width, Texture.Height);
         }
 
         public new GameText GameObject => (GameText)base.GameObject;
 
 
+        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+            => DrawInternal(spriteBatch, position);
 
-        public override void Update(in double frameMS)
+
+        public override bool DrawInternal(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            base.Update(in frameMS);
-
-            if (GameObject.IsPersistent)
-                return;
-
-            GameObject.Timeout -= (int)frameMS;
-            if (GameObject.Timeout <= 0)
-            {
-                GameObject.Dispose();
-            }
-        }
-
-        public override bool Draw(in SpriteBatch3D spriteBatch, in Vector3 position)
-        {
-            return DrawInternal(in spriteBatch, in position);
-        }
-
-        public override bool DrawInternal(in SpriteBatch3D spriteBatch, in Vector3 position)
-        {
-            if (!AllowedToDraw)
-            {
+            if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
-            }
 
             if (_text != GameObject.Text || Texture == null || Texture.IsDisposed)
             {
-                Texture = TextureManager.GetOrCreateStringTextTexture(GameObject);
+                if (Texture != null && !Texture.IsDisposed)
+                {
+                    Texture.Dispose();
+
+                    if (string.IsNullOrEmpty(GameObject.Text))
+                    {
+                        GameObject.Dispose();
+                        return false;
+                    }
+                }
+                Texture = GameTextRenderer.CreateTexture(GameObject);
                 //Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height, Texture.Width, Texture.Height);
 
                 _text = GameObject.Text;
@@ -79,7 +71,7 @@ namespace ClassicUO.Game.Renderer.Views
                 dest.Height = src.Height;
             }
 
-            return GameObject.Parent == null ? spriteBatch.Draw2D(Texture, dest, src, Vector3.Zero) : base.Draw(spriteBatch, position);
+            return GameObject.Parent == null ? GameLoop.SpriteBatchUI.Draw2D(Texture, dest, src, Vector3.Zero) : base.Draw(spriteBatch, position);
         }
 
 

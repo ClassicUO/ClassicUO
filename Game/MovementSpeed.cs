@@ -10,7 +10,7 @@ namespace ClassicUO.Game
         private const int STEP_DELAY_WALK = 400;
 
 
-        public static int TimeToCompleteMovement(in Mobile mobile, in bool run)
+        public static int TimeToCompleteMovement(Mobile mobile,  bool run)
         {
             if (mobile.IsMounted)
             {

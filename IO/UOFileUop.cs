@@ -11,7 +11,7 @@ namespace ClassicUO.IO
         private readonly bool _hasExtra;
         private int _count;
 
-        public UOFileUop(in string path, in string extension, in int count = 0, in bool hasextra = false) : base(path)
+        public UOFileUop(string path,  string extension,  int count = 0,  bool hasextra = false) : base(path)
         {
             _extension = extension;
             _count = count;
@@ -109,7 +109,7 @@ namespace ClassicUO.IO
             } while (nextBlock != 0);
         }
 
-        internal long GetOffsetFromUOP(in long offset)
+        internal long GetOffsetFromUOP(long offset)
         {
             long pos = 0;
 
@@ -124,7 +124,7 @@ namespace ClassicUO.IO
             return Length;
         }
 
-        internal static ulong CreateHash(in string s)
+        internal static ulong CreateHash(string s)
         {
             uint eax, ecx, edx, ebx, esi, edi;
 

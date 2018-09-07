@@ -162,7 +162,7 @@ namespace ClassicUO.Game.Renderer
         public SpriteTexture Texture { get; private set; }
         public Point ScreenPosition => MouseManager.ScreenPosition;
 
-        public void Update(in double frameMS)
+        public void Update(double frameMS)
         {
             if (Texture == null || Texture.IsDisposed || _needGraphicUpdate)
             {
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.Renderer
             }
         }
 
-        public void Draw(in SpriteBatch3D sb)
+        public void Draw(SpriteBatchUI sb)
         {
             ushort id = Graphic;
 
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.Renderer
             if (id < 16)
             {
                 Vector3 v = new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0);
-                sb.Draw2D(Texture, v, RenderExtentions.GetHueVector(2655));
+                sb.Draw2D(Texture, v, Vector3.Zero);
 
 
                 //        // tooltip testing, very nice!

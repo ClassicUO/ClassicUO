@@ -38,7 +38,7 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct KeywordEntry
     {
         public ushort Code;

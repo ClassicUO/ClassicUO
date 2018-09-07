@@ -5,7 +5,7 @@ namespace ClassicUO.Game.Gumps
 {
     public class RadioButton : Checkbox
     {
-        public RadioButton(in ushort inactive, in ushort active) : base(inactive, active)
+        public RadioButton(ushort inactive,  ushort active) : base(inactive, active)
         {
 
         }
@@ -27,10 +27,10 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public override void OnMouseButton(in MouseEventArgs e)
+        public override void OnMouseButton(MouseEventArgs e)
         {
             HandleClick();
-            base.OnMouseButton(in e);
+            base.OnMouseButton(e);
         }
 
 

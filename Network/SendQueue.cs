@@ -31,7 +31,7 @@ namespace ClassicUO.Network
             }
         }
 
-        public static void ReleaseBuffer(in byte[] buffer)
+        public static void ReleaseBuffer(byte[] buffer)
         {
             lock (_UnusedBuffers)
             {
@@ -67,12 +67,12 @@ namespace ClassicUO.Network
             return gram;
         }
 
-        public Gram Enqueue(in byte[] buffer, in int length)
+        public Gram Enqueue(byte[] buffer,  int length)
         {
             return Enqueue(buffer, 0, length);
         }
 
-        public Gram Enqueue(in byte[] buffer, int offset, int length)
+        public Gram Enqueue(byte[] buffer, int offset, int length)
         {
             if (buffer == null)
             {
@@ -182,7 +182,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            public int Write(in byte[] buffer, in int offset, in int length)
+            public int Write(byte[] buffer,  int offset,  int length)
             {
                 int write = Math.Min(length, Available);
 

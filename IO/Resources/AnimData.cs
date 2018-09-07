@@ -17,7 +17,7 @@ namespace ClassicUO.IO.Resources
         }
 
 
-        public static AnimDataFrame CalculateCurrentGraphic(in ushort graphic)
+        public static AnimDataFrame CalculateCurrentGraphic(ushort graphic)
         {
             IntPtr address = _file.StartAddress;
 
@@ -27,14 +27,14 @@ namespace ClassicUO.IO.Resources
 
                 AnimDataFrame pad = Marshal.PtrToStructure<AnimDataFrame>(address + addr);
 
-                if (pad.FrameCount == 0)
-                {
-                    pad.FrameCount = 1;
-                    pad.FrameData[0] = 0;
-                }
+                //if (pad.FrameCount == 0)
+                //{
+                //    pad.FrameCount = 1;
+                //    pad.FrameData[0] = 0;
+                //}
 
-                if (pad.FrameInterval == 0)
-                    pad.FrameInterval = 1;
+                //if (pad.FrameInterval == 0)
+                //    pad.FrameInterval = 1;
 
                 return pad;
             }
@@ -44,14 +44,14 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct AnimDataFrame
+    public readonly struct AnimDataFrame
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
-        public sbyte[] FrameData;
+        public readonly sbyte[] FrameData;
 
-        public byte Unknown;
-        public byte FrameCount;
-        public byte FrameInterval;
-        public byte FrameStart;
+        public readonly byte Unknown;
+        public readonly byte FrameCount;
+        public readonly byte FrameInterval;
+        public readonly byte FrameStart;
     }
 }
