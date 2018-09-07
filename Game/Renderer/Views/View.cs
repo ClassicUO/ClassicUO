@@ -36,8 +36,6 @@ namespace ClassicUO.Game.Renderer.Views
 
         protected bool PreDraw(Vector3 position)
         {
-            return true;
-
             //if (GameObject is IDeferreable deferreable)
             {
                 Tile tile;
@@ -180,14 +178,11 @@ namespace ClassicUO.Game.Renderer.Views
 
 
             if (vertex[0].Hue != HueVector)
-            {
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
-            }
+
 
             if (!spriteBatch.DrawSprite(Texture, vertex))
-            {
                 return false;
-            }
 
             //MousePick(vertex);
 
