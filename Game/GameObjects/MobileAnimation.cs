@@ -58,7 +58,7 @@ namespace ClassicUO.Game.GameObjects
             return dir;
         }
 
-        public void GetGroupForAnimation(ANIMATION_GROUPS group, ref byte animation)
+        public static void GetGroupForAnimation(ANIMATION_GROUPS group, ref byte animation)
         {
             if ((sbyte)group > 0 && animation < (byte)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT)
             {
@@ -66,18 +66,18 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public byte GetGroupForAnimation(ushort checkGraphic = 0)
+        public static byte GetGroupForAnimation(Mobile mobile, ushort checkGraphic = 0)
         {
             Graphic graphic = checkGraphic;
             if (graphic == 0)
             {
-                graphic = GetGraphicForAnimation();
+                graphic = mobile.GetGraphicForAnimation();
             }
 
             ANIMATION_GROUPS groupIndex = Animations.GetGroupIndex(graphic);
-            byte result = AnimationGroup;
+            byte result = mobile.AnimationGroup;
 
-            if (result != 0xFF && (Serial & 0x80000000) <= 0 && (!AnimationFromServer || checkGraphic > 0))
+            if (result != 0xFF && (mobile.Serial & 0x80000000) <= 0 && (!mobile.AnimationFromServer || checkGraphic > 0))
             {
                 GetGroupForAnimation(groupIndex, ref result);
 
@@ -87,13 +87,13 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            bool isWalking = IsWalking;
-            bool isRun = IsRunning;
+            bool isWalking = mobile.IsWalking;
+            bool isRun = mobile.IsRunning;
 
-            if (Steps.Count > 0)
+            if (mobile.Steps.Count > 0)
             {
                 isWalking = true;
-                isRun = Steps.Front().Run;
+                isRun = mobile.Steps.Front().Run;
             }
 
             if (groupIndex == ANIMATION_GROUPS.AG_LOW)
@@ -109,10 +109,10 @@ namespace ClassicUO.Game.GameObjects
                         result = (byte)LOW_ANIMATION_GROUP.LAG_WALK;
                     }
                 }
-                else if (AnimationGroup == 0xFF)
+                else if (mobile.AnimationGroup == 0xFF)
                 {
                     result = (byte)LOW_ANIMATION_GROUP.LAG_STAND;
-                    AnimIndex = 0;
+                    mobile.AnimIndex = 0;
                 }
             }
             else if (groupIndex == ANIMATION_GROUPS.AG_HIGHT)
@@ -128,10 +128,10 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
                 }
-                else if (AnimationGroup == 0xFF)
+                else if (mobile.AnimationGroup == 0xFF)
                 {
                     result = (byte)HIGHT_ANIMATION_GROUP.HAG_STAND;
-                    AnimIndex = 0;
+                    mobile.AnimIndex = 0;
                 }
 
                 if (graphic == 151)
@@ -141,17 +141,17 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (groupIndex == ANIMATION_GROUPS.AG_PEOPLE)
             {
-                bool inWar = InWarMode;
+                bool inWar = mobile.InWarMode;
 
                 if (isWalking)
                 {
                     if (isRun)
                     {
-                        if (Equipment[(int)Layer.Mount] != null)
+                        if (mobile.Equipment[(int)Layer.Mount] != null)
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
                         }
-                        else if (Equipment[(int)Layer.LeftHand] != null || Equipment[(int)Layer.RightHand] != null)
+                        else if (mobile.Equipment[(int)Layer.LeftHand] != null || mobile.Equipment[(int)Layer.RightHand] != null)
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
                         }
@@ -160,13 +160,13 @@ namespace ClassicUO.Game.GameObjects
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED;
                         }
 
-                        if (!IsHuman && !Animations.AnimationExists(graphic, result))
+                        if (!mobile.IsHuman && !Animations.AnimationExists(graphic, result))
                         {
-                            if (Equipment[(int)Layer.Mount] != null)
+                            if (mobile.Equipment[(int)Layer.Mount] != null)
                             {
                                 result = (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
                             }
-                            else if ((Equipment[(int)Layer.LeftHand] != null || Equipment[(int)Layer.RightHand] != null) && !IsDead)
+                            else if ((mobile.Equipment[(int)Layer.LeftHand] != null || mobile.Equipment[(int)Layer.RightHand] != null) && !mobile.IsDead)
                             {
                                 if (inWar)
                                 {
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.GameObjects
                                     result = (byte)PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
                                 }
                             }
-                            else if (inWar && !IsDead)
+                            else if (inWar && !mobile.IsDead)
                             {
                                 result = (byte)PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
                             }
@@ -189,11 +189,11 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        if (Equipment[(int)Layer.Mount] != null)
+                        if (mobile.Equipment[(int)Layer.Mount] != null)
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
                         }
-                        else if ((Equipment[(int)Layer.LeftHand] != null || Equipment[(int)Layer.RightHand] != null) && !IsDead)
+                        else if ((mobile.Equipment[(int)Layer.LeftHand] != null || mobile.Equipment[(int)Layer.RightHand] != null) && !mobile.IsDead)
                         {
                             if (inWar)
                             {
@@ -204,7 +204,7 @@ namespace ClassicUO.Game.GameObjects
                                 result = (byte)PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
                             }
                         }
-                        else if (inWar && !IsDead)
+                        else if (inWar && !mobile.IsDead)
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
                         }
@@ -214,19 +214,19 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
                 }
-                else if (AnimationGroup == 0xFF)
+                else if (mobile.AnimationGroup == 0xFF)
                 {
-                    if (Equipment[(int)Layer.Mount] != null)
+                    if (mobile.Equipment[(int)Layer.Mount] != null)
                     {
                         result = (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
                     }
-                    else if (inWar && !IsDead)
+                    else if (inWar && !mobile.IsDead)
                     {
-                        if (Equipment[(int)Layer.LeftHand] != null)
+                        if (mobile.Equipment[(int)Layer.LeftHand] != null)
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
                         }
-                        else if (Equipment[(int)Layer.RightHand] != null)
+                        else if (mobile.Equipment[(int)Layer.RightHand] != null)
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK;
                         }
@@ -240,12 +240,12 @@ namespace ClassicUO.Game.GameObjects
                         result = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
                     }
 
-                    AnimIndex = 0;
+                    mobile.AnimIndex = 0;
                 }
 
-                if (Race == RaceType.GARGOYLE)
+                if (mobile.Race == RaceType.GARGOYLE)
                 {
-                    if (IsFlying)
+                    if (mobile.IsFlying)
                     {
                         if (result == 0 || result == 1)
                         {

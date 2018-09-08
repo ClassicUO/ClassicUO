@@ -559,7 +559,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 Graphic id = GetGraphicForAnimation();
-                int animGroup = GetGroupForAnimation(id);
+                int animGroup = GetGroupForAnimation(this, id);
 
                 Item mount = Equipment[(int)Layer.Mount];
                 if (mount != null)
@@ -570,7 +570,7 @@ namespace ClassicUO.Game.GameObjects
                         case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
                         case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
                             id = mount.GetMountAnimation();
-                            animGroup = GetGroupForAnimation(id);
+                            animGroup = GetGroupForAnimation(this, id);
                             break;
                     }
                 }
