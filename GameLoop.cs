@@ -584,7 +584,7 @@ namespace ClassicUO
                 CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
                 (Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort2();
 
-                sb3D.BeginDraw();
+                sb3D.Begin();
                 sb3D.SetLightIntensity(World.Light.IsometricLevel);
                 sb3D.SetLightDirection(World.Light.IsometricDirection);
 
@@ -666,14 +666,14 @@ namespace ClassicUO
 
                 sb3D.GraphicsDevice.SetRenderTarget(_targetRender);
                 sb3D.GraphicsDevice.Clear(Color.Black);
-                sb3D.EndDraw(true);
+                sb3D.End(true);
                 sb3D.GraphicsDevice.SetRenderTarget(null);
             }
 
             var sbUI = Service.Get<SpriteBatchUI>();
 
             sbUI.GraphicsDevice.Clear(Color.Transparent);
-            sbUI.BeginDraw();
+            sbUI.Begin();
 
             sbUI.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
             GameTextRenderer.Render(sbUI);
@@ -704,7 +704,7 @@ namespace ClassicUO
 
             Game.Gumps.GumpManager.Render(sbUI);
             _gameCursor.Draw(sbUI);
-            sbUI.EndDraw();
+            sbUI.End();
         }
 
         private int _renderIndex = 1, _renderListCount = 0;

@@ -133,7 +133,7 @@ namespace ClassicUO.Game.Renderer
 
         public float GetZ() => _z++;
 
-        public void BeginDraw()
+        public void Begin()
         {
             if (_isStarted)
                 throw new Exception("");
@@ -205,7 +205,7 @@ namespace ClassicUO.Game.Renderer
             _drawCalls[_enqueuedDrawCalls++] = call;
         }
 
-        public void EndDraw(bool light = false)
+        public void End(bool light = false)
         {
             if (!_isStarted)
                 throw new Exception();
