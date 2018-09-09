@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.Map;
+using ClassicUO.Game.Renderer;
 using ClassicUO.Game.Renderer.Views;
 using ClassicUO.IO.Resources;
 using System;
@@ -33,12 +34,12 @@ namespace ClassicUO.Game.GameObjects
     {
         private Tile _tile;
         private View _view;
-        private List<GameText> _overHeads;
+        private List<TextOverhead> _overHeads;
 
         protected GameObject(Facet map)
         {
             Map = map;
-            _overHeads = new List<GameText>();
+            _overHeads = new List<TextOverhead>();
         }
 
         public virtual Position Position { get; set; } = Position.Invalid;
@@ -46,7 +47,7 @@ namespace ClassicUO.Game.GameObjects
         public virtual Graphic Graphic { get; set; }
         //public View View => _view ?? (_view = CreateView());
         public sbyte AnimIndex { get; set; }
-        public IReadOnlyList<GameText> OverHeads => _overHeads;
+        public IReadOnlyList<TextOverhead> OverHeads => _overHeads;
 
         public int CurrentRenderIndex { get; set; }
         public byte UseInRender { get; set; }
@@ -94,15 +95,15 @@ namespace ClassicUO.Game.GameObjects
             return _view;
         }
 
-        public GameText AddGameText(MessageType type,  string text,  byte font,  Hue hue,  bool isunicode)
+        public TextOverhead AddGameText(MessageType type, string text, byte font, Hue hue, bool isunicode)
         {
-            GameText overhead;
+            TextOverhead overhead;
 
             for (int i = 0; i < OverHeads.Count; i++)
             {
                 overhead = OverHeads[i];
 
-                if (type == MessageType.Label && overhead.Text == text && overhead.Font == font && overhead.Hue == hue && overhead.IsUnicode == isunicode && overhead.MessageType == type && !overhead.IsDisposed)
+                if (type == MessageType.Label && overhead.Text == text  && overhead.MessageType == type && !overhead.IsDisposed)
                 {
                     overhead.Hue = hue;
                     _overHeads.RemoveAt(i);
@@ -122,14 +123,14 @@ namespace ClassicUO.Game.GameObjects
                 width = 0;
             }
 
-            overhead = new GameText(this, text) { MaxWidth = width, Hue = hue, Font = font, IsUnicode = isunicode, FontStyle = FontStyle.BlackBorder };
+            overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder);
             InsertGameText(overhead);
             return overhead;
         }
 
         public void RemoveGameTextAt(int idx) => _overHeads.RemoveAt(idx);
 
-        private void InsertGameText(GameText gameText)
+        private void InsertGameText(TextOverhead gameText)
         {
             _overHeads.Insert(OverHeads.Count == 0 || OverHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }

@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Gumps
 {
     public class HtmlGump : GumpControl
     {
-        private GameText _gameText;
+        private RenderedText _gameText;
 
         public HtmlGump(string[] parts,  string[] lines) : this()
         {
@@ -51,9 +51,8 @@ namespace ClassicUO.Game.Gumps
 
         public HtmlGump() : base()
         {
-            _gameText = new GameText()
+            _gameText = new RenderedText()
             {
-                IsPersistent = true,
                 IsHTML = true,
                 IsUnicode = true,
                 Align = IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT,
@@ -71,7 +70,7 @@ namespace ClassicUO.Game.Gumps
         {
             base.Draw(spriteBatch, position);
 
-            _gameText.GetView().Draw(spriteBatch, position);
+            _gameText.Draw(spriteBatch, position);
 
             return true;
         }

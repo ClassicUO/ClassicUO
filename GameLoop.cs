@@ -36,7 +36,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-
+using System.Text;
 
 namespace ClassicUO
 {
@@ -53,7 +53,7 @@ namespace ClassicUO
         private readonly Texture2D _textentry;
         private DateTime _timePing;
 
-        private GameText _gameTextTRY;
+        private RenderedText _gameTextTRY;
 
         
         public GameLoop()
@@ -219,14 +219,13 @@ namespace ClassicUO
 
             _gameCursor = new CursorRenderer();
 
-            _gameTextTRY = new GameText()
+            _gameTextTRY = new RenderedText()
             {
                 IsUnicode = true,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 Text = "FPS: 0",
                 FontStyle = FontStyle.BlackBorder,
                 Font = 0,
-                IsPersistent = true,
                 IsHTML = false
             };
 
@@ -247,7 +246,6 @@ namespace ClassicUO
 
         protected override void Update(GameTime gameTime)
         {
-            Debug.WriteLine("UPDATE");
             World.Ticks = (long)gameTime.TotalGameTime.TotalMilliseconds;
             if (IsActive)
             {
@@ -575,7 +573,6 @@ namespace ClassicUO
 
         protected override void Draw(GameTime gameTime)
         {
-            Debug.WriteLine("DRAW");
             TextureManager.Update();
 
             var sb3D = Service.Get<SpriteBatch3D>();
@@ -679,7 +676,7 @@ namespace ClassicUO
             sbUI.BeginDraw();
 
             sbUI.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
-            GameTextRenderer.Render(Service.Get<SpriteBatch3D>());
+            GameTextRenderer.Render(sbUI);
 
             //_spriteBatch.Draw2D(_crossTexture, new Bounds(_graphics.PreferredBackBufferWidth / 2  - 5, _graphics.PreferredBackBufferHeight / 2 - 5, 10, 10), Vector3.Zero);
 
@@ -690,9 +687,14 @@ namespace ClassicUO
             //_Service.Get<MouseManager>().Draw(_spriteBatch);
             //GarbageCollectionWatcher.Stop();
 
+            StringBuilder sb = new StringBuilder();
+            sb.Append("FPS: "); sb.AppendLine(_fpsCounter.FPS.ToString());
+            sb.Append("Objects: "); sb.AppendLine(_renderListCount.ToString());
+            sb.Append("Calls: "); sb.AppendLine(sb3D.TotalCalls.ToString());
+            sb.Append("Merged: "); sb.AppendLine(sb3D.TotalMergin.ToString());
 
-            _gameTextTRY.Text = "FPS: " + _fpsCounter.FPS + "\r\nObjects: " + _renderListCount;
-            _gameTextTRY.GetView().Draw(sb3D, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
+            _gameTextTRY.Text = sb.ToString();
+            _gameTextTRY.Draw(sbUI, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
 
             //_spriteBatch.Draw2D(_gump, new Rectangle(100, 100, _gump.Width, _gump.Height), Vector3.Zero);
 

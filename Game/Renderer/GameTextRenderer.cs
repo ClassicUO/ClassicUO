@@ -33,7 +33,7 @@ namespace ClassicUO.Game.Renderer
 
         public static void AddView(View view,  Vector3 position) => _views.Add(new ViewWithDrawInfo() { View = view, DrawPosition = position });
 
-        public static void Render(SpriteBatch3D spriteBatch)
+        public static void Render(SpriteBatchUI spriteBatch)
         {
             if (_views.Count > 0)
             {
@@ -53,7 +53,7 @@ namespace ClassicUO.Game.Renderer
         }
 
 
-        public static SpriteTexture CreateTexture(in GameText gt)
+        public static SpriteTexture CreateTexture(in RenderedText gt)
         {
             uint[] data;
             int linesCount;

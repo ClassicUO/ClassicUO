@@ -27,11 +27,11 @@ namespace ClassicUO.Game.Gumps
 {
     public class Label : GumpControl
     {
-        private readonly GameText _gText;
+        private readonly RenderedText _gText;
 
         public Label() : base()
         {
-            _gText = new GameText() { IsPersistent = true };
+            _gText = new RenderedText();
         }
 
 
@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
-            _gText.GetView().Draw(spriteBatch, position);
+            _gText.Draw(spriteBatch, position);
             return base.Draw(spriteBatch,  position);
         }
     }

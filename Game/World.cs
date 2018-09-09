@@ -39,7 +39,7 @@ namespace ClassicUO.Game
         public static Facet Map { get; private set; }
         public static byte ViewRange { get; set; } = 24;
 
-        public static List<GameText> OverHeads { get; } = new List<GameText>();
+        public static List<RenderedText> OverHeads { get; } = new List<RenderedText>();
 
         public static int MapIndex
         {
