@@ -96,6 +96,9 @@ namespace ClassicUO
             TextureManager.Device.DepthStencilState = DepthStencilState.Default;
             _graphics.ApplyChanges();
 
+
+            InputManager.Initialize();
+
             base.Initialize();
         }
 
@@ -199,7 +202,7 @@ namespace ClassicUO
             NetClient.Disconnected += (sender, e) => { Service.Get<Log>().Message(LogTypes.Warning, "Disconnected!"); };
 
 
-            NetClient.Socket.Connect(settings.IP, settings.Port);
+            //NetClient.Socket.Connect(settings.IP, settings.Port);
 
             Service.Get<MouseManager>().MousePressed += (sender, e) =>
             {
