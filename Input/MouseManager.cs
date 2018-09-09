@@ -24,9 +24,42 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace ClassicUO.Input
 {       
+    public static class InputManager
+    {
+        private static SDL2.SDL.SDL_EventFilter _hookDel;
+        public static void Initialize()
+        {
+            _hookDel = new SDL2.SDL.SDL_EventFilter(HookFunc);
+
+            SDL2.SDL.SDL_AddEventWatch(_hookDel, IntPtr.Zero);
+        }
+
+        private static unsafe int HookFunc(IntPtr userdata, IntPtr ev)
+        {
+            SDL2.SDL.SDL_Event* e = (SDL2.SDL.SDL_Event*)ev;
+
+            switch(e->type)
+            {
+                case SDL2.SDL.SDL_EventType.SDL_KEYDOWN:
+                    break;
+                case SDL2.SDL.SDL_EventType.SDL_KEYUP:
+                    break;
+
+
+                case SDL2.SDL.SDL_EventType.SDL_TEXTINPUT:
+                    Console.WriteLine(Marshal.PtrToStringAnsi((IntPtr)e->text.text));
+                    break;
+            }
+
+
+            return 1;
+        }
+    }
+
     public class MouseManager
     {
         private MouseState _prevMouseState;
@@ -40,13 +73,13 @@ namespace ClassicUO.Input
 
         public MouseManager()
         {
-            _prevMouseState = Mouse.GetState();
+            _prevMouseState = Microsoft.Xna.Framework.Input.Mouse.GetState();
         }
 
         
         public void Update()
         {
-            MouseState current = Mouse.GetState();
+            MouseState current = Microsoft.Xna.Framework.Input.Mouse.GetState();
 
             if (IsMouseButtonDown(current.LeftButton, _prevMouseState.LeftButton))
             {
