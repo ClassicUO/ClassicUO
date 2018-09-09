@@ -403,7 +403,7 @@ namespace ClassicUO.IO.Resources
                 info = null;
             }
 
-            ftexture = new FontTexture(width, height, linesCount, null);
+            ftexture = new FontTexture($"font{font}{0}", width, height, linesCount, null);
             fixed (uint* ptrData = pData)
                 ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr)ptrData, pData.Length);
 
@@ -618,7 +618,7 @@ namespace ClassicUO.IO.Resources
 
         public class FontTexture : SpriteTexture
         {
-            public FontTexture(int width, int height, int linescount, List<WebLinkRect> links) : base(width, height)
+            public FontTexture(string name, int width, int height, int linescount, List<WebLinkRect> links) : base(name, width, height)
             {
                 LinesCount = linescount;
                 Links = links;
@@ -1418,7 +1418,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            ftexture = new FontTexture(width, height, linesCount, links);
+            ftexture = new FontTexture($"font{font}{1}", width, height, linesCount, links);
             fixed (uint* ptrData = pData)
                 ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr)ptrData, pData.Length);
         }

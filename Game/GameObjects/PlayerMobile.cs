@@ -1176,7 +1176,7 @@ namespace ClassicUO.Game.GameObjects
 
             _lastStepRequestedTime = World.Ticks + walkTime;
 
-            GetGroupForAnimation();
+            GetGroupForAnimation(this);
             return true;
         }
 

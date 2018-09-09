@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Gumps
 
         private readonly SpriteTexture[] _textures = new SpriteTexture[3];
         private int _curentState = NORMAL;
-        private GameText _gText;
+        private RenderedText _gText;
 
 
         public Button(int buttonID,  ushort normal,  ushort pressed,  ushort over = 0) : base()
@@ -56,10 +56,9 @@ namespace ClassicUO.Game.Gumps
             Width = t.Width;
             Height = t.Height;
 
-            _gText = new GameText()
+            _gText = new RenderedText()
             {
                 MaxWidth = 100,
-                IsPersistent = true
             };
 
             CanMove = false;
@@ -104,7 +103,7 @@ namespace ClassicUO.Game.Gumps
 
             if (Text != string.Empty)
             {
-                _gText.GetView().Draw(spriteBatch, position);
+                _gText.Draw(spriteBatch, position);
             }
 
             return base.Draw(spriteBatch,  position);

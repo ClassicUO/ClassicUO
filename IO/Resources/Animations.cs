@@ -1036,7 +1036,7 @@ namespace ClassicUO.IO.Resources
 
                 ref var f = ref animDirection.Frames[i];
                 if (f == null)
-                    f = new TextureAnimationFrame((int)imageWidth, (int)imageHeight);
+                    f = new TextureAnimationFrame($"anim{AnimID}{AnimGroup}{Direction}", (int)imageWidth, (int)imageHeight);
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
                 fixed (ushort* ptr = pixels)
@@ -1137,7 +1137,7 @@ namespace ClassicUO.IO.Resources
 
                 ref var f = ref animDir.Frames[i];
                 if (f == null)
-                    f = new TextureAnimationFrame(imageWidth, imageHeight);
+                    f = new TextureAnimationFrame($"anim{AnimID}{AnimGroup}{Direction}", imageWidth, imageHeight);
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
                 fixed (ushort* ptr = pixels)
@@ -1741,7 +1741,7 @@ namespace ClassicUO.IO.Resources
     public class TextureAnimationFrame : Game.Renderer.SpriteTexture
     {
 
-        public TextureAnimationFrame(int width,  int height) : base(width, height, false)
+        public TextureAnimationFrame(string name, int width,  int height) : base(name, width, height, false)
         {
 
         }

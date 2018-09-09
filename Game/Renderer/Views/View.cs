@@ -214,7 +214,6 @@ namespace ClassicUO.Game.Renderer.Views
         }
 
 
-
         protected virtual void MousePick(SpriteVertex[] vertex)
         {
         }

@@ -228,7 +228,7 @@ namespace ClassicUO.Game.Renderer.Views
         private void AddLayer(byte dir,  Graphic graphic, Hue hue, ref Mobile mobile,  bool mounted = false,  EquipConvData? convertedItem = null)
         {
             sbyte animIndex = GameObject.AnimIndex;
-            byte animGroup = mobile.GetGroupForAnimation(graphic);
+            byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic);
 
             Animations.AnimID = graphic;
             Animations.AnimGroup = animGroup;

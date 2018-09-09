@@ -20,51 +20,33 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Renderer.Views
 {
-    public class CroppedText : GumpControl
+    public class TextOverheadView : View
     {
-        private RenderedText _gameText;
-        private readonly int _index;
+        private RenderedText _text;
 
-        public CroppedText() : base()
+        public TextOverheadView(TextOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent)
         {
-            _gameText = new RenderedText();
+            _text = new RenderedText(parent.Text)
+            {
+                MaxWidth = maxwidth, Hue = hue, Font = font, IsUnicode = isunicode, FontStyle = style
+            };
+
+            Texture = _text.Texture;
         }
 
-        public CroppedText(string[] parts,  string[] lines) : this()
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position)
         {
-            X = int.Parse(parts[1]);
-            Y = int.Parse(parts[2]);
-            Width = int.Parse(parts[3]);
-            Height = int.Parse(parts[4]);
-            Hue = Hue.Parse(parts[5]);
-            _index = int.Parse(parts[6]);
+            if (!AllowedToDraw || GameObject.IsDisposed)
+                return false;
 
-            _gameText.MaxWidth = Width;
-
-            Text = lines[_index];
-
-            CanMove = true;
-        }
-
-
-        public Hue Hue { get; set; }
-
-        public string Text
-        {
-            get => _gameText.Text;
-            set => _gameText.Text = value;
-        }
-
-
-        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
-        {
-            _gameText.Draw(spriteBatch, position);
+            Texture.Ticks = World.Ticks;
+   
             return base.Draw(spriteBatch, position);
         }
+
     }
 }
