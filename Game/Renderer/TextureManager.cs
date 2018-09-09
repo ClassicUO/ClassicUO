@@ -31,35 +31,16 @@ namespace ClassicUO.Game.Renderer
 {
     public class SpriteTexture : Texture2D
     {
-    //    private static int _lastSortingKey;
-
-    //    private readonly int _sortingKey = Interlocked.Increment(ref _lastSortingKey);
-
-        public SpriteTexture(string name, int width,  int height,  bool is32bit = true) : base(TextureManager.Device, width, height, false, is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551)
+        public SpriteTexture(int width,  int height,  bool is32bit = true) : base(TextureManager.Device, width, height, false, is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551)
         {
-            Name = name;
         }
 
         public long Ticks { get; set; }
-        public string Name { get; }
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() ^ Width.GetHashCode() ^ Height.GetHashCode();
+            return base.GetHashCode();
         }
-
-        //public override int GetHashCode()
-        //{
-        //    unchecked // Overflow is fine, just wrap
-        //    {
-        //        int hash = 17;
-        //        // Suitable nullity checks etc, of course :)
-        //        hash = hash * 23 + Width.GetHashCode();
-        //        hash = hash * 23 + Height.GetHashCode();
-        //        hash = hash * 23 + this.Format.GetHashCode();
-        //        return hash;
-        //    }
-        //}
     }
 
     public unsafe static class TextureManager
@@ -219,7 +200,7 @@ namespace ClassicUO.Game.Renderer
             {
                 var pixels = Art.ReadStaticArt(g, out short w, out short h);
 
-                texture = new SpriteTexture($"static{g}", w, h, false) { Ticks = World.Ticks };
+                texture = new SpriteTexture(w, h, false) { Ticks = World.Ticks };
 
                 fixed(ushort* ptr = pixels)
                     texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
@@ -240,7 +221,7 @@ namespace ClassicUO.Game.Renderer
             if (!_landTextureCache.TryGetValue(g, out var texture) || texture.IsDisposed)
             {
                 var pixels = Art.ReadLandArt(g);
-                texture = new SpriteTexture($"land{g}", 44, 44, false) { Ticks = World.Ticks };
+                texture = new SpriteTexture(44, 44, false) { Ticks = World.Ticks };
                 fixed (ushort* ptr = pixels)
                     texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
                 //texture.SetData(pixels);
@@ -259,7 +240,7 @@ namespace ClassicUO.Game.Renderer
             if (!_gumpTextureCache.TryGetValue(g, out var texture) || texture.IsDisposed)
             {
                 var pixels = IO.Resources.Gumps.GetGump(g, out int w, out int h);
-                texture = new SpriteTexture($"gump{g}",w, h, false) { Ticks = World.Ticks };
+                texture = new SpriteTexture(w, h, false) { Ticks = World.Ticks };
                 fixed (ushort* ptr = pixels)
                     texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
                 //texture.SetData(pixels);
@@ -278,7 +259,7 @@ namespace ClassicUO.Game.Renderer
             if (!_textmapTextureCache.TryGetValue(g, out var texture) || texture.IsDisposed)
             {
                 var pixels = TextmapTextures.GetTextmapTexture(g, out int size);
-                texture = new SpriteTexture($"textmap{g}", size, size, false) { Ticks = World.Ticks };
+                texture = new SpriteTexture(size, size, false) { Ticks = World.Ticks };
                 fixed (ushort* ptr = pixels)
                     texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
                 _textmapTextureCache[g] = texture;

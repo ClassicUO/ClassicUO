@@ -34,7 +34,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (_transparentTexture == null)
                 {
-                    _transparentTexture = new SpriteTexture("transparent", 1, 1);
+                    _transparentTexture = new SpriteTexture(1, 1);
                     _transparentTexture.SetData(new Color[1] { Color.Black });
                 }
 

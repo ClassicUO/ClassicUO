@@ -690,8 +690,9 @@ namespace ClassicUO
             StringBuilder sb = new StringBuilder();
             sb.Append("FPS: "); sb.AppendLine(_fpsCounter.FPS.ToString());
             sb.Append("Objects: "); sb.AppendLine(_renderListCount.ToString());
-            sb.Append("Calls: "); sb.AppendLine(sb3D.TotalCalls.ToString());
-            sb.Append("Merged: "); sb.AppendLine(sb3D.TotalMergin.ToString());
+            sb.Append("Calls: "); sb.AppendLine(sb3D.Calls.ToString());
+            sb.Append("Merged: "); sb.AppendLine(sb3D.Merged.ToString());
+            sb.Append("Totals: "); sb.AppendLine(sb3D.TotalCalls.ToString());
 
             _gameTextTRY.Text = sb.ToString();
             _gameTextTRY.Draw(sbUI, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
