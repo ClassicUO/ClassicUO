@@ -47,15 +47,28 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public virtual bool IsChecked { get; set; }
+        public Checkbox(string[] parts, string[] lines) : this(ushort.Parse(parts[3]), ushort.Parse(parts[4]))
+        {
+            X = int.Parse(parts[1]);
+            Y = int.Parse(parts[2]);
+
+            IsChecked = parts[5] == "1";
+            LocalSerial = Serial.Parse(parts[6]);
+        }
+
+
+        public bool IsChecked { get; set; }
+
 
         public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
             bool ok = base.Draw(spriteBatch,  position);
 
             for (int i = 0; i < _textures.Length; i++)
-                _textures[i].Ticks = World.Ticks;
-
+            {
+                if (_textures[i] != null)
+                    _textures[i].Ticks = World.Ticks;
+            }
             spriteBatch.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
 
             return ok;

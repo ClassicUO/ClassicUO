@@ -51,6 +51,8 @@ namespace ClassicUO.Game.Gumps
                 CanCloseWithEsc = true,
             };
 
+            int group = 0;
+
             while (index < layout.Length)
             {
                 if (layout.Substring(index) == "\0")
@@ -122,10 +124,11 @@ namespace ClassicUO.Game.Gumps
                             gump.CanMove = false;
                             break;
                         case "group":
-                            break;
                         case "endgroup":
+                            group++;
                             break;
                         case "radio":
+                            gump.AddChildren(new RadioButton(group, gparams, lines));
                             break;
                         case "checkbox":
                             break;
