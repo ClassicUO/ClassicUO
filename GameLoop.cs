@@ -53,7 +53,7 @@ namespace ClassicUO
         private RenderedText _gameTextTRY;
 
         private bool _rightMousePressed;
-        private const float _interval = 1.0f / 144.0f; // draw and do heavy updates only 60 frames per second
+        private const float _interval = 1.0f / 144.0f;
         private float _time;
 
 

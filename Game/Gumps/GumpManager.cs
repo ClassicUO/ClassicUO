@@ -31,44 +31,9 @@ namespace ClassicUO.Game.Gumps
 {
     public static class GumpManager
     {
-        enum InputMouseType
-        {
-            MouseDown,
-            MouseUp,
-            MousePressed,
-            MouseMove,
-
-            MouseWheel
-        }
-
-
-        private static readonly List<GumpControl> _gumps = new List<GumpControl>();
-
-
-        private static readonly Queue<InputMouseType> _typeQueue = new Queue<InputMouseType>();
-        private static readonly Queue<MouseEventArgs>[] _mouseEventsTriggered = new Queue<MouseEventArgs>[4]
-        {
-            new Queue<MouseEventArgs>(), new Queue<MouseEventArgs>(), new Queue<MouseEventArgs>(), new Queue<MouseEventArgs>()
-        };
-        private static readonly Queue<MouseWheelEventArgs> _mouseEventsWheelTriggered = new Queue<MouseWheelEventArgs>();
-
+        private static readonly List<GumpControl> _gumps = new List<GumpControl>(); 
         private static GumpControl _mouseOverControl;
-        private static Point _lastClickedPosition;
         private static readonly GumpControl[] _mouseDownControls = new GumpControl[5];
-
-
-        //static GumpManager()
-        //{
-        //    Service.Get<MouseManager>().MouseDown += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MouseDown); _mouseEventsTriggered[(int)InputMouseType.MouseDown].Enqueue(e); };
-        //    Service.Get<MouseManager>().MouseUp += (sender, e) =>
-        //    {
-        //        _typeQueue.Enqueue(InputMouseType.MouseUp); _mouseEventsTriggered[(int)InputMouseType.MouseUp].Enqueue(e);
-        //    };
-        //    Service.Get<MouseManager>().MousePressed += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MousePressed); _mouseEventsTriggered[(int)InputMouseType.MousePressed].Enqueue(e); };
-        //    Service.Get<MouseManager>().MouseMove += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MouseMove); _mouseEventsTriggered[(int)InputMouseType.MouseMove].Enqueue(e); };
-        //    Service.Get<MouseManager>().MouseWheel += (sender, e) => { _typeQueue.Enqueue(InputMouseType.MouseWheel); _mouseEventsWheelTriggered.Enqueue(e); };
-        //}
-
 
 
         public static GumpControl Create(Serial sender,  Serial gumpID,  int x,  int y,  string layout,  string[] lines)
@@ -195,15 +160,12 @@ namespace ClassicUO.Game.Gumps
             for (int i = 0; i < _gumps.Count; i++)
             {
                 _gumps[i].Update(ms);
+
+                if (_gumps[i].IsDisposed)
+                    _gumps.RemoveAt(i++);
             }
 
             HandleMouseInput();
-
-            // cleaning
-            _typeQueue.Clear();
-            for (InputMouseType t = InputMouseType.MouseDown; t <= InputMouseType.MouseMove; t++)
-                _mouseEventsTriggered[(int)t].Clear();
-            _mouseEventsWheelTriggered.Clear();
         }
 
         public static void Render(SpriteBatchUI spriteBatch)
