@@ -76,7 +76,6 @@ namespace ClassicUO.Game.Gumps
 
         public int ButtonID { get; }
 
-        public event EventHandler<MouseEventArgs> Click;
 
         public string Text
         {
@@ -91,7 +90,7 @@ namespace ClassicUO.Game.Gumps
             base.Update(frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
         {
             for (int i = 0; i < _textures.Length; i++)
             {
@@ -99,7 +98,10 @@ namespace ClassicUO.Game.Gumps
                     _textures[i].Ticks = World.Ticks;
             }
 
-            spriteBatch.Draw2D(_textures[_curentState], new Rectangle((int)position.X, (int)position.Y, Width, Height), Vector3.Zero);
+            var texture = _curentState == PRESSED ? _textures[PRESSED] :
+                _textures[OVER] != null && MouseIsOver ? _textures[OVER] : _textures[NORMAL];
+
+            spriteBatch.Draw2D(texture, new Rectangle((int)position.X, (int)position.Y + (_curentState == PRESSED ? 1 : 0), Width, Height), Vector3.Zero);
 
             if (Text != string.Empty)
             {
@@ -110,36 +112,27 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public override void OnMouseEnter(MouseEventArgs e)
+        protected override void OnMouseDown(int x, int y, MouseButton button)
         {
-            if (_textures[OVER] != null)
+            if (button == MouseButton.Left)
+                _curentState = PRESSED;
+        } 
+
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            if (button == Input.MouseButton.Left)
             {
-                _curentState = OVER;
+                _curentState = PRESSED;
             }
-            else
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
                 _curentState = NORMAL;
         }
 
-        public override void OnMouseLeft(MouseEventArgs e)
-        {
-            _curentState = NORMAL;
-        }
 
-        public override void OnMouseButton(MouseEventArgs e)
-        {
-            if (e.Button == Input.MouseButtons.Left)
-            {
-                if (e.ButtonState == ButtonState.Pressed)
-                {
-                    _curentState = PRESSED;
-                    Click.Raise(e);
-                }
-                else
-                {
-                    _curentState = NORMAL;
-                }
-            }
-        }
 
         public override void Dispose()
         {

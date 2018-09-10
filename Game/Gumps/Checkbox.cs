@@ -61,13 +61,10 @@ namespace ClassicUO.Game.Gumps
             return ok;
         }
 
-
-        public override void OnMouseButton(MouseEventArgs e)
+        protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (e.ButtonState == ButtonState.Released && e.Button == Input.MouseButtons.Left)
-            {
-                IsChecked = !IsChecked;
-            }
+            IsChecked = !IsChecked;
         }
+
     }
 }

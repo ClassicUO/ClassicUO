@@ -238,7 +238,7 @@ namespace ClassicUO
 
                 foreach (var e in inputManager.GetMouseEvents())
                 {
-                    if (e.Button == MouseButtons.Right)
+                    if (e.Button == MouseButton.Right)
                         _rightMousePressed = e.EventType == MouseEvent.Down;
                    
                 }

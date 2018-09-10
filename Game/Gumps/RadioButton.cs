@@ -47,11 +47,10 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-
-        public override void OnMouseButton(MouseEventArgs e)
+        protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             HandleClick();
-            base.OnMouseButton(e);
+            base.OnMouseClick(x, y, button);
         }
 
 

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ClassicUO.Input
 {
-    public enum MouseButtons
+    public enum MouseButton
     {
         Left = 0,
         Right = 1,

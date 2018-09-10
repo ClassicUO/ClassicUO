@@ -22,6 +22,7 @@
 using ClassicUO.Game.GameObjects.Interfaces;
 using ClassicUO.Game.Renderer;
 using ClassicUO.Input;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public event EventHandler<MouseEventArgs> MouseButton, MouseMove, MouseEnter, MouseLeft;
+        public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseEnter, MouseLeft, MouseClick, MouseDoubleClick;
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
         public event EventHandler<KeyboardEventArgs> Keyboard;
 
@@ -241,42 +242,116 @@ namespace ClassicUO.Game.Gumps
         public T[] GetControls<T>() where T : GumpControl => Children.OfType<T>().ToArray();
 
 
-        public virtual void OnMouseButton(MouseEventArgs e)
-        {        
-            if (e.Button == MouseButtons.Right && e.ButtonState == Microsoft.Xna.Framework.Input.ButtonState.Released && RootParent.CanCloseWithRightClick)
+
+        private Point _lastClickPosition;
+        private float _maxTimeForDClick;
+
+        public void InvokeMouseDown(Point position, MouseButton button)
+        {
+            _lastClickPosition = position;
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            OnMouseDown(x, y, button);
+            MouseDown.Raise(new MouseEventArgs(x, y, button, Microsoft.Xna.Framework.Input.ButtonState.Pressed));
+        }
+
+        public void InvokeMouseUp(Point position, MouseButton button)
+        {
+            _lastClickPosition = position;
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            OnMouseUp(x, y, button);
+            MouseUp.Raise(new MouseEventArgs(x, y, button, Microsoft.Xna.Framework.Input.ButtonState.Released));
+        }
+
+        public void InvokeMouseEnter(Point position)
+        {
+            MouseIsOver = true;
+            if (Math.Abs(_lastClickPosition.X - position.X) + Math.Abs(_lastClickPosition.Y - position.Y) > 3)
+                _maxTimeForDClick = 0.0f;
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            OnMouseEnter(x, y);
+            MouseEnter.Raise(new MouseEventArgs(x, y));
+        }
+
+        public void InvokeMouseLeft(Point position)
+        {
+            MouseIsOver = false;
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            OnMouseLeft(x, y);
+            MouseLeft.Raise(new MouseEventArgs(x, y));
+        }
+
+        public void InvokeMouseClick(Point position, MouseButton button)
+        {
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            float ms = World.Ticks;
+
+            bool doubleClick = false;
+
+            if (_maxTimeForDClick != 0f)
+            {
+                if (ms <= _maxTimeForDClick)
+                {
+                    _maxTimeForDClick = 0;
+                    doubleClick = true;
+                }
+            }
+            else
+                _maxTimeForDClick = ms + 200;
+
+            if (button == MouseButton.Right && RootParent.CanCloseWithRightClick)
             {
                 RootParent.Dispose();
             }
             else
-                MouseButton?.Invoke(this, e);
+            {
+                if (doubleClick)
+                {
+                    OnMouseDoubleClick(x, y, button);
+                    MouseDoubleClick.Raise(new MouseEventArgs(x, y, button, Microsoft.Xna.Framework.Input.ButtonState.Pressed));
+                }
+                else
+                {
+                    OnMouseClick(x, y, button);
+                    MouseClick.Raise(new MouseEventArgs(x, y, button, Microsoft.Xna.Framework.Input.ButtonState.Pressed));
+                }
+            }
         }
 
-        public virtual void OnMouseEnter(MouseEventArgs e)
+        protected virtual void OnMouseDown(int x, int y, MouseButton button)
         {
-            MouseIsOver = true;
-            MouseEnter?.Invoke(this, e);
+
         }
 
-        public virtual void OnMouseLeft(MouseEventArgs e)
+        protected virtual void OnMouseUp(int x, int y, MouseButton button)
         {
-            MouseIsOver = false;
-            MouseLeft?.Invoke(this, e);
+
         }
 
-        public virtual void OnMouseMove(MouseEventArgs e)
+        protected virtual void OnMouseEnter(int x, int y)
         {
-            MouseMove?.Invoke(this, e);
+
         }
 
-        public virtual void OnMouseWheel(MouseWheelEventArgs e)
+        protected virtual void OnMouseLeft(int x, int y)
         {
-            MouseWheel?.Invoke(this, e);
+
         }
 
-        public virtual void OnKeyboard(KeyboardEventArgs e)
+        protected virtual void OnMouseClick(int x, int y, MouseButton button)
         {
-            Keyboard?.Invoke(this, e);
+
         }
+
+        protected virtual void OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+
+        }
+     
 
         public virtual void Dispose()
         {

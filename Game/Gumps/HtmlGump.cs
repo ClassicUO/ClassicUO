@@ -75,17 +75,15 @@ namespace ClassicUO.Game.Gumps
             return true;
         }
 
-        public override void OnMouseButton(MouseEventArgs e)
+        protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            base.OnMouseButton(e);
-
-            if (e.Button == Input.MouseButtons.Left && e.ButtonState == Microsoft.Xna.Framework.Input.ButtonState.Released)
+            if (button == MouseButton.Left)
             {
                 for (int i = 0; i < _gameText.Links.Count; i++)
                 {
                     var link = _gameText.Links[i];
                     Rectangle rect = new Rectangle(X + link.StartX, Y + link.StartY, link.EndX, link.EndY);
-                    bool inbounds = rect.Contains(e.Location.X - ParentX, e.Location.Y - ParentY);
+                    bool inbounds = rect.Contains(x, y);
                     if (inbounds && Fonts.GetWebLink(link.LinkID, out var result))
                     {
                         Service.Get<Log>().Message(Utility.LogTypes.Info, "LINK CLICKED: " + result.Link);
@@ -95,6 +93,7 @@ namespace ClassicUO.Game.Gumps
                 }
             }
         }
+
 
     }
 }

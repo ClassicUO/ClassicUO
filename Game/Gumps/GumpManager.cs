@@ -178,36 +178,37 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        private static bool _mouseLeftIsDown;
 
         private static void HandleMouseInput()
         {
             GumpControl gump = null;
             var inputManager = Service.Get<InputManager>();
-            //var position = Service.Get<MouseManager>().ScreenPosition;
             var position = inputManager.MousePosition;
 
-            for (int i = 0; i < _gumps.Count; i++)
+            if (_isDraggingControl)
+                gump = _draggingControl;
+            else
             {
-                gump = HitTest(_gumps[i], position);
-                if (gump != null)
-                    break;
+                for (int i = 0; i < _gumps.Count; i++)
+                {
+                    gump = HitTest(_gumps[i], position);
+                    if (gump != null)
+                        break;
+                }
             }
 
             if (_mouseOverControl != null && gump != _mouseOverControl)
             {
-                var arg = new MouseEventArgs(position.X, position.Y, 0, 0);
-                _mouseOverControl.OnMouseLeft(arg);
-
+                _mouseOverControl.InvokeMouseLeft(position);
                 
-                if (_mouseOverControl.RootParent != null && (gump == null || gump.RootParent != _mouseOverControl.RootParent))
-                    _mouseOverControl.OnMouseLeft(arg);               
+                if (_mouseOverControl.Parent != null && (gump == null || gump.RootParent != _mouseOverControl.RootParent))
+                    _mouseOverControl.InvokeMouseLeft(position);               
             }
 
 
             if (gump != null)
             {
-                gump.OnMouseEnter(new MouseEventArgs(position.X, position.Y));
+                gump.InvokeMouseEnter(position);
                 if (_mouseDownControls[0] == gump)
                     AttemptDragControl(gump, position);
 
@@ -220,7 +221,7 @@ namespace ClassicUO.Game.Gumps
             for ( int i = 0; i < 5; i++)
             {
                 if (_mouseDownControls[i] != null && _mouseDownControls[i] != gump)
-                    _mouseDownControls[i].OnMouseEnter(new MouseEventArgs(position.X, position.Y));
+                    _mouseDownControls[i].InvokeMouseEnter(position);
             }
 
 
@@ -234,7 +235,7 @@ namespace ClassicUO.Game.Gumps
                         if (gump != null)
                         {
                             MakeTopMostGump(gump);
-                            gump.OnMouseButton(new MouseEventArgs(position.X, position.Y, e.Button, Microsoft.Xna.Framework.Input.ButtonState.Pressed));
+                            gump.InvokeMouseDown(e.Position, e.Button);
 
                             _mouseDownControls[(int)e.Button] = gump;
                         }
@@ -245,21 +246,20 @@ namespace ClassicUO.Game.Gumps
 
                         EndDragControl(e.Position);
 
-                        var arg = new MouseEventArgs(position.X, position.Y, e.Button, Microsoft.Xna.Framework.Input.ButtonState.Released);
-
                         if (gump != null)
                         {
                             if (_mouseDownControls[btn] != null && gump == _mouseDownControls[btn])
-                                gump.OnMouseButton(new MouseEventArgs(position.X, position.Y, e.Button, Microsoft.Xna.Framework.Input.ButtonState.Pressed));
-                            gump.OnMouseButton(arg);
+                                gump.InvokeMouseClick(position, e.Button);
+
+                            gump.InvokeMouseUp(position, e.Button);
 
                             if (_mouseDownControls[btn] != null && gump != _mouseDownControls[btn])
-                                _mouseDownControls[btn].OnMouseButton(arg);
+                                _mouseDownControls[btn].InvokeMouseUp(position, e.Button);
                         }
                         else
                         {
                             if (_mouseDownControls[btn] != null)
-                                _mouseDownControls[btn].OnMouseButton(arg);
+                                _mouseDownControls[btn].InvokeMouseUp(position, e.Button);
                         }
                         _mouseDownControls[btn] = null;
                         break;
@@ -401,7 +401,7 @@ namespace ClassicUO.Game.Gumps
                 {
                     if (_mouseDownControls[i] != null && _mouseDownControls[i] != _draggingControl)
                     {
-                        _mouseDownControls[i].OnMouseButton(new MouseEventArgs(mousePosition.X, mousePosition.Y, (MouseButtons)i, Microsoft.Xna.Framework.Input.ButtonState.Released));
+                        _mouseDownControls[i].InvokeMouseUp(mousePosition, (MouseButton)i);
                         _mouseDownControls[i] = null;
                     }
                 }
