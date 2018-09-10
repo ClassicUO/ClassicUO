@@ -34,6 +34,13 @@ namespace ClassicUO.Game.Gumps
             _gText = new RenderedText();
         }
 
+        public Label(string[] parts, string[] lines) : this()
+        {
+            X = int.Parse(parts[1]);
+            Y = int.Parse(parts[2]);
+            Hue = Hue.Parse(parts[3]);
+            Text = lines[int.Parse(parts[4])];
+        }
 
         public string Text
         {

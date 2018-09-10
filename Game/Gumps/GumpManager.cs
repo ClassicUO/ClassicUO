@@ -105,6 +105,7 @@ namespace ClassicUO.Game.Gumps
                             gump.AddChildren(new ResizePic(gparams));
                             break;
                         case "text":
+                            gump.AddChildren(new Label(gparams, lines));
                             break;
                         case "textentry":
                             break;
@@ -131,6 +132,9 @@ namespace ClassicUO.Game.Gumps
                             gump.AddChildren(new RadioButton(group, gparams, lines));
                             break;
                         case "checkbox":
+                            gump.AddChildren(new Checkbox(gparams, lines));
+
+
                             break;
                         case "xmfhtmlgump":
                             break;
