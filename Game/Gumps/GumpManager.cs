@@ -162,7 +162,7 @@ namespace ClassicUO.Game.Gumps
                 _gumps[i].Update(ms);
 
                 if (_gumps[i].IsDisposed)
-                    _gumps.RemoveAt(i++);
+                    _gumps.RemoveAt(i--);
             }
 
             HandleMouseInput();

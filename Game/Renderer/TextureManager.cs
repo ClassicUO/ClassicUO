@@ -55,7 +55,7 @@ namespace ClassicUO.Game.Renderer
         private static readonly Dictionary<ushort, SpriteTexture> _textmapTextureCache = new Dictionary<ushort, SpriteTexture>();
         private static readonly Dictionary<ushort, SpriteTexture> _lightTextureCache = new Dictionary<ushort, SpriteTexture>();
         private static readonly Dictionary<TextureAnimationFrame, SpriteTexture> _animations = new Dictionary<TextureAnimationFrame, SpriteTexture>();
-        private static readonly Dictionary<RenderedText, SpriteTexture> _textTextureCache = new Dictionary<RenderedText, SpriteTexture>();
+        //private static readonly Dictionary<RenderedText, SpriteTexture> _textTextureCache = new Dictionary<RenderedText, SpriteTexture>();
 
 
 
@@ -65,15 +65,15 @@ namespace ClassicUO.Game.Renderer
 
         public static void Update()
         {
-            IO.Resources.Animations.ClearUnusedTextures();
+            Animations.ClearUnusedTextures();
 
-            var list = _textTextureCache.Where(s => World.Ticks - s.Value.Ticks >= TEXTURE_TIME_LIFE).ToList();
+            //var list = _textTextureCache.Where(s => World.Ticks - s.Value.Ticks >= TEXTURE_TIME_LIFE).ToList();
 
-            foreach (var t in list)
-            {
-                t.Value.Dispose();
-                _textTextureCache.Remove(t.Key);
-            }
+            //foreach (var t in list)
+            //{
+            //    t.Value.Dispose();
+            //    _textTextureCache.Remove(t.Key);
+            //}
 
             CheckSpriteTexture(_staticTextureCache);
             CheckSpriteTexture(_landTextureCache);
@@ -272,39 +272,39 @@ namespace ClassicUO.Game.Renderer
             return texture;
         }
 
-        public static SpriteTexture GetOrCreateStringTextTexture(RenderedText gt)
-        {
-            if (!_textTextureCache.TryGetValue(gt, out var texture) || texture.IsDisposed)
-            {
-                //uint[] data;
-                //int linesCount;
+        //public static SpriteTexture GetOrCreateStringTextTexture(RenderedText gt)
+        //{
+        //    if (!_textTextureCache.TryGetValue(gt, out var texture) || texture.IsDisposed)
+        //    {
+        //        //uint[] data;
+        //        //int linesCount;
 
-                //if (gt.IsHTML)
-                //    Fonts.SetUseHTML(true);
+        //        //if (gt.IsHTML)
+        //        //    Fonts.SetUseHTML(true);
 
-                //if (gt.IsUnicode)
-                //{
-                //    (data, gt.Width, gt.Height, linesCount, gt.Links) = Fonts.GenerateUnicode(gt.Font, gt.Text, gt.Hue, gt.Cell, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
-                //}
-                //else
-                //{
-                //    (data, gt.Width, gt.Height, linesCount, gt.IsPartialHue) = Fonts.GenerateASCII(gt.Font, gt.Text, gt.Hue, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
-                //}
+        //        //if (gt.IsUnicode)
+        //        //{
+        //        //    (data, gt.Width, gt.Height, linesCount, gt.Links) = Fonts.GenerateUnicode(gt.Font, gt.Text, gt.Hue, gt.Cell, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
+        //        //}
+        //        //else
+        //        //{
+        //        //    (data, gt.Width, gt.Height, linesCount, gt.IsPartialHue) = Fonts.GenerateASCII(gt.Font, gt.Text, gt.Hue, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
+        //        //}
 
-                //texture = new SpriteTexture(gt.Width, gt.Height);
-                //texture.SetData(data);
-                //_textTextureCache[gt] = texture;
+        //        //texture = new SpriteTexture(gt.Width, gt.Height);
+        //        //texture.SetData(data);
+        //        //_textTextureCache[gt] = texture;
 
 
-                //if (gt.IsHTML)
-                //    Fonts.SetUseHTML(false);
-            }
-            else
-            {
-                texture.Ticks = World.Ticks;
-            }
+        //        //if (gt.IsHTML)
+        //        //    Fonts.SetUseHTML(false);
+        //    }
+        //    else
+        //    {
+        //        texture.Ticks = World.Ticks;
+        //    }
 
-            return texture;
-        }
+        //    return texture;
+        //}
     }
 }

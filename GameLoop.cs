@@ -56,6 +56,7 @@ namespace ClassicUO
         private const float _interval = 1.0f / 144.0f;
         private float _time;
 
+        private Texture2D _texture;
 
         public GameLoop()
         {
@@ -211,6 +212,10 @@ namespace ClassicUO
                 IsHTML = false
             };
 
+
+            _texture = new Texture2D(TextureManager.Device, 1, 1);
+            _texture.SetData(new Color[1] { Color.White });
+
             // END TEST
 
             base.LoadContent();
@@ -231,15 +236,8 @@ namespace ClassicUO
 
                 inputManager.Update(World.Ticks);
 
-                foreach (var e in inputManager.GetKeyboardEvents())
-                {
-                    Console.WriteLine("KEYBOARD:     EVENT: {0}  -  KEY: {1}  - MOD: {2}", e.EventType, e.KeyCode, e.Mod);
-                }
-
                 foreach (var e in inputManager.GetMouseEvents())
                 {
-                    Console.WriteLine("MOUSE:        EVENT: {0}  -  KEY: {1}  - MOD: {2}", e.EventType, e.Button, e.Mod);
-
                     if (e.Button == MouseButtons.Right)
                         _rightMousePressed = e.EventType == MouseEvent.Down;
                    
@@ -708,8 +706,8 @@ namespace ClassicUO
 
             //_spriteBatch.Draw2D(_gump, new Rectangle(100, 100, _gump.Width, _gump.Height), Vector3.Zero);
 
-            //_spriteBatch.DrawLine(_texture, new Vector2(0, 120), new Vector2(Window.ClientBounds.Width, 120), Vector3.Zero);
-            //_spriteBatch.DrawRectangle(_texture, new Rectangle(2, 120, 100, 100), Vector3.Zero);
+            //sbUI.DrawLine(_texture, new Vector2(10, 120), new Vector2(Window.ClientBounds.Width - 10, 120), Vector3.Zero);
+            //sbUI.DrawRectangle(_texture, new Rectangle(2, 120, 100, 100), Vector3.Zero);
 
             Game.Gumps.GumpManager.Render(sbUI);
             _gameCursor.Draw(sbUI);
@@ -782,46 +780,46 @@ namespace ClassicUO
 
         private void AddOffsetCharacterTileToRenderList(Entity entity, bool useObjectHandles)
         {
-            int charX = entity.Position.X;
-            int charY = entity.Position.Y;
+            //int charX = entity.Position.X;
+            //int charY = entity.Position.Y;
 
-            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.Get(entity) : null;
-            int dropMaxZIndex = -1;
-            if (mob != null)
-            {
-                if (mob.Steps.Count > 0 && (mob.Steps.Back().Direction & 7) == 2)
-                    dropMaxZIndex = 0;
-            }
+            //Mobile mob = entity.Serial.IsMobile ? World.Mobiles.Get(entity) : null;
+            //int dropMaxZIndex = -1;
+            //if (mob != null)
+            //{
+            //    if (mob.Steps.Count > 0 && (mob.Steps.Back().Direction & 7) == 2)
+            //        dropMaxZIndex = 0;
+            //}
 
-            _coordinates[0, 0] = charX + 1; _coordinates[0, 1] = charY - 1;
-            _coordinates[1, 0] = charX + 1; _coordinates[1, 1] = charY - 2;
-            _coordinates[2, 0] = charX + 2; _coordinates[2, 1] = charY - 2;
-            _coordinates[3, 0] = charX - 1; _coordinates[3, 1] = charY + 2;
-            _coordinates[4, 0] = charX;     _coordinates[4, 1] = charY + 1;
-            _coordinates[5, 0] = charX + 1; _coordinates[5, 1] = charY;
-            _coordinates[6, 0] = charX + 2; _coordinates[6, 1] = charY - 1;
-            _coordinates[7, 0] = charX + 1; _coordinates[7, 1] = charY + 1;
+            //_coordinates[0, 0] = charX + 1; _coordinates[0, 1] = charY - 1;
+            //_coordinates[1, 0] = charX + 1; _coordinates[1, 1] = charY - 2;
+            //_coordinates[2, 0] = charX + 2; _coordinates[2, 1] = charY - 2;
+            //_coordinates[3, 0] = charX - 1; _coordinates[3, 1] = charY + 2;
+            //_coordinates[4, 0] = charX;     _coordinates[4, 1] = charY + 1;
+            //_coordinates[5, 0] = charX + 1; _coordinates[5, 1] = charY;
+            //_coordinates[6, 0] = charX + 2; _coordinates[6, 1] = charY - 1;
+            //_coordinates[7, 0] = charX + 1; _coordinates[7, 1] = charY + 1;
 
 
-            int maxZ = entity.PriorityZ;
+            //int maxZ = entity.PriorityZ;
 
-            for (int i = 0; i < _coordinates.Length / _coordinates.Rank; i++)
-            {
-                int x = _coordinates[i, 0];
-                int y = _coordinates[i, 1];
+            //for (int i = 0; i < _coordinates.Length / _coordinates.Rank; i++)
+            //{
+            //    int x = _coordinates[i, 0];
+            //    int y = _coordinates[i, 1];
 
-                if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
-                    continue;
+            //    if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
+            //        continue;
 
-                Tile tile = World.Map.GetTile(x, y);
+            //    Tile tile = World.Map.GetTile(x, y);
 
-                int currentMaxZ = maxZ;
+            //    int currentMaxZ = maxZ;
 
-                if (i == dropMaxZIndex)
-                    currentMaxZ += 20;
+            //    if (i == dropMaxZIndex)
+            //        currentMaxZ += 20;
 
-                AddTileToRenderList(tile, tile.ObjectsOnTiles, x, y, useObjectHandles, currentMaxZ);
-            }
+            //    AddTileToRenderList(tile, tile.ObjectsOnTiles, x, y, useObjectHandles, currentMaxZ);
+            //}
         }
 
     }
