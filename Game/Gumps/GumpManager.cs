@@ -170,7 +170,7 @@ namespace ClassicUO.Game.Gumps
 
         public static void Render(SpriteBatchUI spriteBatch)
         {
-            for (int i = 0; i < _gumps.Count; i++)
+            for (int i = _gumps.Count - 1; i >= 0; i--)
             {
                 var g = _gumps[i];
                 g.Draw(spriteBatch,

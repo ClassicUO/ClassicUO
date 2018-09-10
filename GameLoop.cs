@@ -60,7 +60,7 @@ namespace ClassicUO
 
         public GameLoop()
         {
-            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 300.0f);
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0f / 300.0f);
             _graphics = new GraphicsDeviceManager(this);
 
             //IsFixedTimeStep = false;
@@ -684,6 +684,7 @@ namespace ClassicUO
 
             sbUI.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
             GameTextRenderer.Render(sbUI);
+            Game.Gumps.GumpManager.Render(sbUI);
 
             //_spriteBatch.Draw2D(_crossTexture, new Bounds(_graphics.PreferredBackBufferWidth / 2  - 5, _graphics.PreferredBackBufferHeight / 2 - 5, 10, 10), Vector3.Zero);
 
@@ -709,7 +710,7 @@ namespace ClassicUO
             //sbUI.DrawLine(_texture, new Vector2(10, 120), new Vector2(Window.ClientBounds.Width - 10, 120), Vector3.Zero);
             //sbUI.DrawRectangle(_texture, new Rectangle(2, 120, 100, 100), Vector3.Zero);
 
-            Game.Gumps.GumpManager.Render(sbUI);
+            
             _gameCursor.Draw(sbUI);
             sbUI.End();
         }

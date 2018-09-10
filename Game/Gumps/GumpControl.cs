@@ -36,7 +36,6 @@ namespace ClassicUO.Game.Gumps
         private GumpControl _parent;
         private Rectangle _bounds;
 
-
         public GumpControl(GumpControl parent = null)
         {
             Parent = parent;

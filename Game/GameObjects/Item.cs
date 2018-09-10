@@ -30,8 +30,8 @@ namespace ClassicUO.Game.GameObjects
     public enum Layer : byte
     {
         Invalid = 0x00,
-        RightHand = 0x01,
-        LeftHand = 0x02,
+        OneHanded = 0x01,
+        TwoHanded = 0x02,
         Shoes = 0x03,
         Pants = 0x04,
         Shirt = 0x05,
