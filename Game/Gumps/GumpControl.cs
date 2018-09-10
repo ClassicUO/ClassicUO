@@ -36,6 +36,9 @@ namespace ClassicUO.Game.Gumps
         private readonly List<GumpControl> _children;
         private GumpControl _parent;
         private Rectangle _bounds;
+        private Point _lastClickPosition;
+        private float _maxTimeForDClick;
+
 
         public GumpControl(GumpControl parent = null)
         {
@@ -243,8 +246,7 @@ namespace ClassicUO.Game.Gumps
 
 
 
-        private Point _lastClickPosition;
-        private float _maxTimeForDClick;
+
 
         public void InvokeMouseDown(Point position, MouseButton button)
         {
