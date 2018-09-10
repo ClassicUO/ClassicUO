@@ -187,7 +187,7 @@ namespace ClassicUO.Game.Renderer
         public SpriteTexture Texture { get; private set; }
         public Point ScreenPosition => _inputManager.MousePosition;
 
-        public void Update(double frameMS)
+        public void Update(double totalMS, double frameMS)
         {
             if (Texture == null || Texture.IsDisposed || _needGraphicUpdate)
             {

@@ -44,13 +44,13 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public override void Update(double frameMS)
+        public override void Update(double totalMS, double frameMS)
         {
             if (Texture == null || Texture.IsDisposed)
             {
                 Texture = TextureManager.GetOrCreateGumpTexture(_graphic);
             }
-            base.Update(frameMS);
+            base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)

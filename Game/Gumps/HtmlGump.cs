@@ -31,6 +31,7 @@ namespace ClassicUO.Game.Gumps
     public class HtmlGump : GumpControl
     {
         private RenderedText _gameText;
+        private IScrollBar _scrollBar;
 
         public HtmlGump(string[] parts,  string[] lines) : this()
         {
@@ -41,12 +42,42 @@ namespace ClassicUO.Game.Gumps
             int textIndex = int.Parse(parts[5]);
             HasBackground = parts[6] == "1";
             HasScrollbar = parts[7] != "0";
-            
-            
+            UseFlagScrollbar = HasScrollbar && parts[7] == "2";
 
 
             _gameText.MaxWidth = (Width - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0));
             _gameText.Text = lines[textIndex];
+
+            if (HasBackground)
+            {
+                AddChildren(new ResizePic(0x2486)
+                {
+                    Width = Width - (HasScrollbar ? 15 : 0),
+                    Height = Height,
+                    AcceptMouseInput = false
+                });
+            }
+
+            if (HasScrollbar)
+            {
+                if (UseFlagScrollbar)
+                {
+                    _scrollBar = new ScrollFlag(this);
+                    _scrollBar.Location = new Point(Width - 14, 0);
+                }
+                else
+                {
+                    _scrollBar = new ScrollBar(this, Width - 14, 0, Height);
+                }
+
+                _scrollBar.Height = Height;
+                _scrollBar.MinValue = 0;
+                _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
+                ScrollY = _scrollBar.Value;
+            }
+
+            if (Width != _gameText.Width)
+                Width = _gameText.Width;
         }
 
         public HtmlGump() : base()
@@ -55,7 +86,7 @@ namespace ClassicUO.Game.Gumps
             {
                 IsHTML = true,
                 IsUnicode = true,
-                Align = IO.Resources.TEXT_ALIGN_TYPE.TS_LEFT,
+                Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 Font = 1,
             };
             CanMove = true;
@@ -64,13 +95,30 @@ namespace ClassicUO.Game.Gumps
 
         public bool HasScrollbar { get; }
         public bool HasBackground { get; }
+        public bool UseFlagScrollbar { get; }
+        public int ScrollX { get; set; }
+        public int ScrollY { get; set; }
 
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            if (HasScrollbar)
+            {
+                _scrollBar.Height = Height;
+                _scrollBar.MinValue = 0;
+                _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
+                ScrollY = _scrollBar.Value;
+            }
+
+            base.Update(totalMS, frameMS);
+        }
 
         public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
             base.Draw(spriteBatch, position);
 
-            _gameText.Draw(spriteBatch, position);
+            _gameText.Draw(spriteBatch, 
+                new Rectangle((int)position.X + (HasBackground ? 4 : 0), (int)position.Y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0)), ScrollX, ScrollY);
 
             return true;
         }

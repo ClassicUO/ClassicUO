@@ -124,6 +124,9 @@ namespace ClassicUO.Game.Gumps
                             gump.AddChildren(new GumpPicTiled(gparams));
                             break;
                         case "htmlgump":
+                        case "xmfhtmlgump":
+                        case "xmfhtmlgumpcolor":
+                        case "xmfhtmltok":
                             gump.AddChildren(new HtmlGump(gparams, lines));
                             break;
                         case "page":
@@ -161,12 +164,6 @@ namespace ClassicUO.Game.Gumps
                         case "checkbox":
                             gump.AddChildren(new Checkbox(gparams, lines));
                             break;
-                        case "xmfhtmlgump":
-                            break;
-                        case "xmfhtmlgumpcolor":
-                            break;
-                        case "xmfhtmltok":
-                            break;
                         case "tooltip":
                             break;
                         case "noresize":
@@ -187,11 +184,11 @@ namespace ClassicUO.Game.Gumps
             return gump;
         }
 
-        public static void Update(double ms)
+        public static void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _gumps.Count; i++)
             {
-                _gumps[i].Update(ms);
+                _gumps[i].Update(totalMS, frameMS);
 
                 if (_gumps[i].IsDisposed)
                     _gumps.RemoveAt(i--);

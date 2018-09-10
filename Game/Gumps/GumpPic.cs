@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Gumps
         public bool IsPaperdoll { get; set; }
 
 
-        public override void Update(double frameMS)
+        public override void Update(double totalMS, double frameMS)
         {
             if (Texture == null || Texture.IsDisposed || Graphic != _lastGump)
             {
@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Gumps
                 Height = Texture.Height;
             }
 
-            base.Update(frameMS);
+            base.Update(totalMS, frameMS);
         }
     }
 

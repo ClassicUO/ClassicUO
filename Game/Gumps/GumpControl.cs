@@ -164,7 +164,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public virtual void Update(double frameMS)
+        public virtual void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
             {
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.Gumps
 
                 foreach (GumpControl c in Children)
                 {
-                    c.Update(frameMS);
+                    c.Update(totalMS, frameMS);
 
                     if (w < c.Bounds.Right)
                         w = c.Bounds.Right;
@@ -427,6 +427,11 @@ namespace ClassicUO.Game.Gumps
         protected virtual void OnKeyUp(SDL2.SDL.SDL_Keycode key, SDL2.SDL.SDL_Keymod mod)
         {
 
+        }
+
+        protected virtual bool Contains(int x, int y)
+        {
+            return true;
         }
 
         public virtual void Dispose()

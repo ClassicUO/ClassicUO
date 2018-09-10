@@ -135,7 +135,7 @@ namespace ClassicUO.Game.GameObjects
             _overHeads.Insert(OverHeads.Count == 0 || OverHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
-        public virtual void Update(double frameMS)
+        public virtual void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
             {
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 var gt = OverHeads[i];
 
-                gt.Update(frameMS);
+                gt.Update(totalMS, frameMS);
 
                 if (gt.IsDisposed)
                 {

@@ -262,7 +262,7 @@ namespace ClassicUO.Game.GameObjects
             return /*Graphic <= 0 ? null : */ new ItemView(this);
         }
 
-        public override void Update(double frameMS)
+        public override void Update(double totalMS, double frameMS)
         {
             if (IsCorpse)
             {

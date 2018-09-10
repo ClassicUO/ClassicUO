@@ -103,9 +103,9 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public override void Update(double frameMS)
+        public override void Update(double totalMS, double frameMS)
         {
-            base.Update(frameMS);
+            base.Update(totalMS, frameMS);
 
             if (!IsDisposed)
             {

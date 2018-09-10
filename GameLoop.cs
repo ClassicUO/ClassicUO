@@ -53,7 +53,7 @@ namespace ClassicUO
         private RenderedText _gameTextTRY;
 
         private bool _rightMousePressed;
-        private const float _interval = 1.0f / 144.0f;
+        private const float _interval = 1000.0f / 144.0f;
         private float _time;
 
         private Texture2D _texture;
@@ -254,7 +254,7 @@ namespace ClassicUO
             }
 
 
-            _time += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            _time += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
             if (_time > _interval)
                 _time = _time % _interval; // or while (time > interval) time -= interval;
@@ -266,9 +266,9 @@ namespace ClassicUO
 
             NetClient.Socket.Slice();
 
-            _gameCursor.Update(gameTime.ElapsedGameTime.Milliseconds);
+            _gameCursor.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.Milliseconds);
 
-            Game.Gumps.GumpManager.Update(gameTime.ElapsedGameTime.Milliseconds);
+            Game.Gumps.GumpManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.Milliseconds);
 
             if (World.InGame)
             {
@@ -281,7 +281,7 @@ namespace ClassicUO
                     _targetRender = new RenderTarget2D(GraphicsDevice, _graphics.PreferredBackBufferWidth / scale, _graphics.PreferredBackBufferHeight / scale, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
                 }
 
-                World.Update(gameTime.ElapsedGameTime.Milliseconds);
+                World.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.Milliseconds);
 
                 if (DateTime.Now > _timePing)
                 {

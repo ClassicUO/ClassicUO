@@ -39,9 +39,9 @@ namespace ClassicUO.Game.GameObjects
             return new TextOverheadView(this, _maxWidth, _hue, _font, _isUnicode, _style);
         }
 
-        public override void Update(double frameMS)
+        public override void Update(double totalMS, double frameMS)
         {
-            base.Update(frameMS);
+            base.Update(totalMS, frameMS);
 
             if (IsPersistent || IsDisposed)
                 return;

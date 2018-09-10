@@ -63,7 +63,7 @@ namespace ClassicUO.Game.Gumps
 
         
 
-        public override void Update(double frameMS)
+        public override void Update(double totalMS, double frameMS)
         {
             if (GumpManager.KeyboardFocusControl == this)
             {
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.Gumps
                 _caratBlink = false;
             }
 
-            base.Update(frameMS);
+            base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
