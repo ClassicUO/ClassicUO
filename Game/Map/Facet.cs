@@ -100,9 +100,7 @@ namespace ClassicUO.Game.Map
         }
 
         public Tile GetTile(int x, int y)
-        {
-            return GetTile((short)x, (short)y);
-        }
+            => GetTile((short)x, (short)y);
 
 
         public unsafe sbyte GetTileZ(short x,  short y)
@@ -209,7 +207,7 @@ namespace ClassicUO.Game.Map
                     block.Unload();
                     block = null;
                     _usedIndices.RemoveAt(i);
-                    i++;
+                    i--;
                     if (++count >= 5)
                         break;
                 }

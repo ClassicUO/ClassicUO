@@ -36,6 +36,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace ClassicUO
@@ -47,18 +48,19 @@ namespace ClassicUO
         private CursorRenderer _gameCursor;
         private Stopwatch _stopwatch;
         private RenderTarget2D _targetRender;
-        private Texture2D _texture;
-        private Texture2D _crossTexture;
-        private Texture2D _gump;
-        private readonly Texture2D _textentry;
         private DateTime _timePing;
 
         private RenderedText _gameTextTRY;
 
-        
+        private bool _rightMousePressed;
+        private const float _interval = 1.0f / 144.0f;
+        private float _time;
+
+        private Texture2D _texture;
+
         public GameLoop()
         {
-            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 300.0f);
             _graphics = new GraphicsDeviceManager(this);
 
             //IsFixedTimeStep = false;
@@ -74,7 +76,6 @@ namespace ClassicUO
             _graphics.PreferredBackBufferWidth = 800;
             _graphics.PreferredBackBufferHeight = 600;
             _graphics.ApplyChanges();
-
 
             
             Window.ClientSizeChanged += (sender, e) =>
@@ -147,16 +148,13 @@ namespace ClassicUO
 
             _fpsCounter = new FpsCounter();
 
-            _crossTexture = new Texture2D(GraphicsDevice, 1, 1);
-            _crossTexture.SetData(new[] { Color.Red });
-
             string username = settings.Username;
             string password = settings.Password;
 
             NetClient.PacketReceived += (sender, e) =>
             {
                 //Service.Get<Log>().Message(LogTypes.Trace, string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
-
+                
                 switch (e.ID)
                 {
                     case 0xA8:
@@ -201,22 +199,7 @@ namespace ClassicUO
 
             NetClient.Socket.Connect(settings.IP, settings.Port);
 
-            Service.Get<MouseManager>().MousePressed += (sender, e) =>
-            {
-                if (World.Map != null && World.Player != null)
-                {
-                    if (e.Button == MouseButton.Right)
-                    {
-                        Point center = new Point(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
-
-                        Direction direction = DirectionHelper.DirectionFromPoints(center, e.Location);
-
-                        World.Player.Walk(direction, true);
-                    }
-                }
-            };
-
-
+           
             _gameCursor = new CursorRenderer();
 
             _gameTextTRY = new RenderedText()
@@ -229,9 +212,8 @@ namespace ClassicUO
                 IsHTML = false
             };
 
-            _gump = TextureManager.GetOrCreateGumpTexture(0x64);
 
-            _texture = new Texture2D(GraphicsDevice, 1, 1);
+            _texture = new Texture2D(TextureManager.Device, 1, 1);
             _texture.SetData(new Color[1] { Color.White });
 
             // END TEST
@@ -244,14 +226,40 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
+       
         protected override void Update(GameTime gameTime)
-        {
+        {         
             World.Ticks = (long)gameTime.TotalGameTime.TotalMilliseconds;
             if (IsActive)
             {
-                Service.Get<MouseManager>().Update();
-                Service.Get<KeyboardManager>().Update();
+                var inputManager = Service.Get<InputManager>();
+
+                inputManager.Update(World.Ticks);
+
+                foreach (var e in inputManager.GetMouseEvents())
+                {
+                    if (e.Button == MouseButtons.Right)
+                        _rightMousePressed = e.EventType == MouseEvent.Down;
+                   
+                }
+
+                if (World.InGame && _rightMousePressed)
+                {
+                    Point center = new Point(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
+
+                    Direction direction = DirectionHelper.DirectionFromPoints(center, inputManager.MousePosition);
+
+                    World.Player.Walk(direction, true);
+                }
             }
+
+
+            _time += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_time > _interval)
+                _time = _time % _interval; // or while (time > interval) time -= interval;
+            else
+                SuppressDraw();
 
 
             _fpsCounter.Update(gameTime);
@@ -262,7 +270,7 @@ namespace ClassicUO
 
             Game.Gumps.GumpManager.Update(gameTime.ElapsedGameTime.Milliseconds);
 
-            if (World.Map != null && World.Player != null)
+            if (World.InGame)
             {
                 int scale = 1;
 
@@ -570,21 +578,20 @@ namespace ClassicUO
             return (firstTile, renderOffset, renderDimensions);
         }
 
-
         protected override void Draw(GameTime gameTime)
         {
             TextureManager.Update();
 
             var sb3D = Service.Get<SpriteBatch3D>();
 
-            if (World.Player != null && World.Map != null)
+            if (World.InGame)
             {
                 _fpsCounter.IncreaseFrame();
 
                 CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
                 (Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort2();
 
-                sb3D.BeginDraw();
+                sb3D.Begin();
                 sb3D.SetLightIntensity(World.Light.IsometricLevel);
                 sb3D.SetLightDirection(World.Light.IsometricDirection);
 
@@ -666,14 +673,14 @@ namespace ClassicUO
 
                 sb3D.GraphicsDevice.SetRenderTarget(_targetRender);
                 sb3D.GraphicsDevice.Clear(Color.Black);
-                sb3D.EndDraw(true);
+                sb3D.End(true);
                 sb3D.GraphicsDevice.SetRenderTarget(null);
             }
 
             var sbUI = Service.Get<SpriteBatchUI>();
 
             sbUI.GraphicsDevice.Clear(Color.Transparent);
-            sbUI.BeginDraw();
+            sbUI.Begin();
 
             sbUI.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
             GameTextRenderer.Render(sbUI);
@@ -699,12 +706,12 @@ namespace ClassicUO
 
             //_spriteBatch.Draw2D(_gump, new Rectangle(100, 100, _gump.Width, _gump.Height), Vector3.Zero);
 
-            //_spriteBatch.DrawLine(_texture, new Vector2(0, 120), new Vector2(Window.ClientBounds.Width, 120), Vector3.Zero);
-            //_spriteBatch.DrawRectangle(_texture, new Rectangle(2, 120, 100, 100), Vector3.Zero);
+            //sbUI.DrawLine(_texture, new Vector2(10, 120), new Vector2(Window.ClientBounds.Width - 10, 120), Vector3.Zero);
+            //sbUI.DrawRectangle(_texture, new Rectangle(2, 120, 100, 100), Vector3.Zero);
 
             Game.Gumps.GumpManager.Render(sbUI);
             _gameCursor.Draw(sbUI);
-            sbUI.EndDraw();
+            sbUI.End();
         }
 
         private int _renderIndex = 1, _renderListCount = 0;
@@ -773,46 +780,46 @@ namespace ClassicUO
 
         private void AddOffsetCharacterTileToRenderList(Entity entity, bool useObjectHandles)
         {
-            int charX = entity.Position.X;
-            int charY = entity.Position.Y;
+            //int charX = entity.Position.X;
+            //int charY = entity.Position.Y;
 
-            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.Get(entity) : null;
-            int dropMaxZIndex = -1;
-            if (mob != null)
-            {
-                if (mob.Steps.Count > 0 && (mob.Steps.Back().Direction & 7) == 2)
-                    dropMaxZIndex = 0;
-            }
+            //Mobile mob = entity.Serial.IsMobile ? World.Mobiles.Get(entity) : null;
+            //int dropMaxZIndex = -1;
+            //if (mob != null)
+            //{
+            //    if (mob.Steps.Count > 0 && (mob.Steps.Back().Direction & 7) == 2)
+            //        dropMaxZIndex = 0;
+            //}
 
-            _coordinates[0, 0] = charX + 1; _coordinates[0, 1] = charY - 1;
-            _coordinates[1, 0] = charX + 1; _coordinates[1, 1] = charY - 2;
-            _coordinates[2, 0] = charX + 2; _coordinates[2, 1] = charY - 2;
-            _coordinates[3, 0] = charX - 1; _coordinates[3, 1] = charY + 2;
-            _coordinates[4, 0] = charX;     _coordinates[4, 1] = charY + 1;
-            _coordinates[5, 0] = charX + 1; _coordinates[5, 1] = charY;
-            _coordinates[6, 0] = charX + 2; _coordinates[6, 1] = charY - 1;
-            _coordinates[7, 0] = charX + 1; _coordinates[7, 1] = charY + 1;
+            //_coordinates[0, 0] = charX + 1; _coordinates[0, 1] = charY - 1;
+            //_coordinates[1, 0] = charX + 1; _coordinates[1, 1] = charY - 2;
+            //_coordinates[2, 0] = charX + 2; _coordinates[2, 1] = charY - 2;
+            //_coordinates[3, 0] = charX - 1; _coordinates[3, 1] = charY + 2;
+            //_coordinates[4, 0] = charX;     _coordinates[4, 1] = charY + 1;
+            //_coordinates[5, 0] = charX + 1; _coordinates[5, 1] = charY;
+            //_coordinates[6, 0] = charX + 2; _coordinates[6, 1] = charY - 1;
+            //_coordinates[7, 0] = charX + 1; _coordinates[7, 1] = charY + 1;
 
 
-            int maxZ = entity.PriorityZ;
+            //int maxZ = entity.PriorityZ;
 
-            for (int i = 0; i < _coordinates.Length / _coordinates.Rank; i++)
-            {
-                int x = _coordinates[i, 0];
-                int y = _coordinates[i, 1];
+            //for (int i = 0; i < _coordinates.Length / _coordinates.Rank; i++)
+            //{
+            //    int x = _coordinates[i, 0];
+            //    int y = _coordinates[i, 1];
 
-                if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
-                    continue;
+            //    if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
+            //        continue;
 
-                Tile tile = World.Map.GetTile(x, y);
+            //    Tile tile = World.Map.GetTile(x, y);
 
-                int currentMaxZ = maxZ;
+            //    int currentMaxZ = maxZ;
 
-                if (i == dropMaxZIndex)
-                    currentMaxZ += 20;
+            //    if (i == dropMaxZIndex)
+            //        currentMaxZ += 20;
 
-                AddTileToRenderList(tile, tile.ObjectsOnTiles, x, y, useObjectHandles, currentMaxZ);
-            }
+            //    AddTileToRenderList(tile, tile.ObjectsOnTiles, x, y, useObjectHandles, currentMaxZ);
+            //}
         }
 
     }

@@ -77,7 +77,9 @@ namespace ClassicUO.Game.Gumps
 
         public override void OnMouseButton(MouseEventArgs e)
         {
-            if (e.Button == Input.MouseButton.Left && e.ButtonState == Microsoft.Xna.Framework.Input.ButtonState.Released)
+            base.OnMouseButton(e);
+
+            if (e.Button == Input.MouseButtons.Left && e.ButtonState == Microsoft.Xna.Framework.Input.ButtonState.Released)
             {
                 for (int i = 0; i < _gameText.Links.Count; i++)
                 {

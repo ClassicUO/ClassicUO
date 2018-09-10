@@ -2114,6 +2114,7 @@ namespace ClassicUO.Network
         {
             if (p.ReadByte() == 0xFE)
             {
+                Service.Get<Log>().Message(LogTypes.Info, "Razor ACK sended");
                 new PRazorAnswer().SendToServer();
             }
         }

@@ -127,7 +127,7 @@ namespace ClassicUO.Game.Gumps
 
         public override void OnMouseButton(MouseEventArgs e)
         {
-            if (e.Button == Input.MouseButton.Left)
+            if (e.Button == Input.MouseButtons.Left)
             {
                 if (e.ButtonState == ButtonState.Pressed)
                 {

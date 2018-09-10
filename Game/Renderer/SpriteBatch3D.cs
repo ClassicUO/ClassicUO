@@ -133,7 +133,7 @@ namespace ClassicUO.Game.Renderer
 
         public float GetZ() => _z++;
 
-        public void BeginDraw()
+        public void Begin()
         {
             if (_isStarted)
                 throw new Exception("");
@@ -205,7 +205,7 @@ namespace ClassicUO.Game.Renderer
             _drawCalls[_enqueuedDrawCalls++] = call;
         }
 
-        public void EndDraw(bool light = false)
+        public void End(bool light = false)
         {
             if (!_isStarted)
                 throw new Exception();
@@ -257,13 +257,13 @@ namespace ClassicUO.Game.Renderer
             for (int i = 1; i < _enqueuedDrawCalls; i++)
             {
                 currentDrawCall = _drawCalls[i];
-                start = currentDrawCall.StartIndex;
                 drawCallIndexCount = currentDrawCall.PrimitiveCount * 3;
-                Array.Copy(_indices, start, _sortedIndices, sortedIndexCount, drawCallIndexCount);
-                sortedIndexCount += drawCallIndexCount;
+                Array.Copy(_indices, currentDrawCall.StartIndex, _sortedIndices, sortedIndexCount, drawCallIndexCount);
 
+                sortedIndexCount += drawCallIndexCount;
                 if (currentDrawCall.TryMerge(ref _drawCalls[newDrawCallCount - 1]))
                 {
+                    
                     Merged++;
                     continue;
                 }
@@ -296,6 +296,7 @@ namespace ClassicUO.Game.Renderer
             GraphicsDevice.DepthStencilState = _dss;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void InternalDraw()
         {
             _effect.CurrentTechnique = _huesTechnique;

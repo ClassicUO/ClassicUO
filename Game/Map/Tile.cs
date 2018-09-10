@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Map
         public bool IsStretched => !(TileData.TexID <= 0 && (TileData.Flags & 0x00000080) > 0);
         public Ground Ground { get; private set; }
 
-        public List<GameObject> ObjectsOnTiles
+        public IReadOnlyList<GameObject> ObjectsOnTiles
         {
             get
             {
@@ -159,33 +159,49 @@ namespace ClassicUO.Game.Map
 
         public void Clear()
         {
-            for (int i = 0; i < _objectsOnTile.Count; i++)
+
+            for (int k = 0; k < _objectsOnTile.Count; k++)
             {
-                var obj = _objectsOnTile[i];
-
-                if (obj is Entity || obj is Tile)
-                    continue;
-
-                int count = _objectsOnTile.Count;
-
-                obj.Dispose();
-
-                if (count == _objectsOnTile.Count)
+                var obj = _objectsOnTile[k];
+                if (obj is Tile || obj is Static)
                 {
-                    _objectsOnTile.RemoveAt(i);
+                    int count = _objectsOnTile.Count;
+                    obj.Dispose();
+                    if (count == _objectsOnTile.Count)
+                        _objectsOnTile.RemoveAt(k);
+                    k--;
                 }
-
-                i--;           
             }
 
-            _objectsOnTile.Clear();
-
-            DisposeView();
-            Graphic = 0;
-            Position = Position.Invalid;
-            _tileData = null;
-            _needSort = false;
             _statics.Clear();
+
+            //for (int i = 0; i < _objectsOnTile.Count; i++)
+            //{
+            //    var obj = _objectsOnTile[i];
+
+            //    if (obj is Entity || obj is Tile)
+            //        continue;
+
+            //    int count = _objectsOnTile.Count;
+
+            //    obj.Dispose();
+
+            //    if (count == _objectsOnTile.Count)
+            //    {
+            //        _objectsOnTile.RemoveAt(i);
+            //    }
+
+            //    i--;           
+            //}
+
+            //_objectsOnTile.Clear();
+
+            //DisposeView();
+            //Graphic = 0;
+            //Position = Position.Invalid;
+            //_tileData = null;
+            //_needSort = false;
+            //_statics.Clear();
         }
 
         private void RemoveDuplicates()
