@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Renderer.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
         {
-            return !GameObject.IsDisposed /*&& !PreDraw(position)*/ && DrawInternal(spriteBatch, position);
+            return !GameObject.IsDisposed && !PreDraw(position) && DrawInternal(spriteBatch, position);
         }
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch,  Vector3 position)
