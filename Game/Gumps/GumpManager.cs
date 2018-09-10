@@ -32,9 +32,36 @@ namespace ClassicUO.Game.Gumps
     public static class GumpManager
     {
         private static readonly List<GumpControl> _gumps = new List<GumpControl>(); 
-        private static GumpControl _mouseOverControl;
+        private static GumpControl _mouseOverControl, _keyboardFocusControl;
         private static readonly GumpControl[] _mouseDownControls = new GumpControl[5];
+       
 
+        public static GumpControl KeyboardFocusControl
+        {
+            get
+            {
+                if (_keyboardFocusControl == null)
+                {
+                    foreach (var c in _gumps)
+                    {
+                        if (!c.IsDisposed && c.IsVisible && c.IsEditable && c.AcceptKeyboardInput)
+                        {
+                            _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
+                            if (_keyboardFocusControl != null)
+                                break;
+                        }
+                    }
+                }
+
+                return _keyboardFocusControl;
+            }
+            set
+            {
+                _keyboardFocusControl = value;
+            }
+        }
+
+        
 
         public static GumpControl Create(Serial sender,  Serial gumpID,  int x,  int y,  string layout,  string[] lines)
         {
@@ -48,7 +75,7 @@ namespace ClassicUO.Game.Gumps
                 Y = y,
                 CanMove = true,
                 CanCloseWithRightClick = true,
-                CanCloseWithEsc = true,
+                CanCloseWithEsc = true,              
             };
 
             int group = 0;
@@ -133,8 +160,6 @@ namespace ClassicUO.Game.Gumps
                             break;
                         case "checkbox":
                             gump.AddChildren(new Checkbox(gparams, lines));
-
-
                             break;
                         case "xmfhtmlgump":
                             break;
@@ -172,6 +197,7 @@ namespace ClassicUO.Game.Gumps
                     _gumps.RemoveAt(i--);
             }
 
+            HandleKeyboardInput();
             HandleMouseInput();
         }
 
@@ -185,6 +211,36 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+
+        private static void HandleKeyboardInput()
+        {
+            if (KeyboardFocusControl != null)
+            {
+                if (_keyboardFocusControl.IsDisposed)
+                    _keyboardFocusControl = null;
+                else
+                {
+                    var events = Service.Get<InputManager>().GetKeyboardEvents();
+
+                    foreach (var e in events)
+                    {
+                        switch (e.EventType)
+                        {
+                            case KeyboardEvent.Press:
+                            case KeyboardEvent.Down:
+                                _keyboardFocusControl.InvokeKeyDown(e.KeyCode, e.Mod);
+                                break;
+                            case KeyboardEvent.Up:
+                                _keyboardFocusControl.InvokeKeyUp(e.KeyCode, e.Mod);
+                                break;
+                            case KeyboardEvent.TextInput:
+                                _keyboardFocusControl.InvokeTextInput(e.KeyChar);
+                                break;                        
+                        }
+                    }
+                }
+            }
+        }
 
         private static void HandleMouseInput()
         {

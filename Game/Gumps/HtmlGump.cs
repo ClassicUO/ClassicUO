@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Gumps
                 for (int i = 0; i < _gameText.Links.Count; i++)
                 {
                     var link = _gameText.Links[i];
-                    Rectangle rect = new Rectangle(X + link.StartX, Y + link.StartY, link.EndX, link.EndY);
+                    Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
                     bool inbounds = rect.Contains(x, y);
                     if (inbounds && Fonts.GetWebLink(link.LinkID, out var result))
                     {

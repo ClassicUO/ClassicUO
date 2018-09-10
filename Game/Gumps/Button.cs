@@ -62,6 +62,7 @@ namespace ClassicUO.Game.Gumps
             };
 
             CanMove = false;
+            AcceptMouseInput = true;
         }
 
         public Button(string[] parts) :

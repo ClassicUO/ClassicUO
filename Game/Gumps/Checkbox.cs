@@ -44,6 +44,7 @@ namespace ClassicUO.Game.Gumps
             Height = t.Height;
 
             CanMove = false;
+            AcceptMouseInput = true;
         }
 
 

@@ -38,6 +38,7 @@ namespace ClassicUO.Game.Gumps
         private Rectangle _bounds;
         private Point _lastClickPosition;
         private float _maxTimeForDClick;
+        private bool _acceptKeyboardInput, _acceptMouseInput;
 
 
         public GumpControl(GumpControl parent = null)
@@ -47,6 +48,8 @@ namespace ClassicUO.Game.Gumps
             IsEnabled = true;
             IsVisible = true;
             AllowedToDraw = true;
+
+            AcceptMouseInput = true;
         }
 
 
@@ -82,7 +85,31 @@ namespace ClassicUO.Game.Gumps
         public bool CanCloseWithEsc { get; set; }
         public bool IsEditable { get; set; }
         public IReadOnlyList<GumpControl> Children => _children;
-        internal bool CanDragNow { get; set; }
+
+        public virtual bool AcceptKeyboardInput
+        {
+            get
+            {
+                if (!IsEnabled || IsDisposed || !IsVisible)
+                    return false;
+
+                if (_acceptKeyboardInput)
+                    return true;
+
+                foreach (var c in _children)
+                    if (c.AcceptKeyboardInput)
+                        return true;
+
+                return false;
+            }
+            set => _acceptKeyboardInput = value;       
+        }
+
+        public virtual bool AcceptMouseInput
+        {
+            get => IsEnabled && !IsDisposed && _acceptMouseInput;
+            set => _acceptMouseInput = value;
+        }
 
         public int Width
         {
@@ -210,7 +237,9 @@ namespace ClassicUO.Game.Gumps
 
             if (inbouds)
             {
-                results.Insert(0, this);
+                if (AcceptMouseInput)
+                    results.Insert(0, this);
+
                 foreach (var c in Children)
                 {
                     var cl = c.HitTest(position);
@@ -223,6 +252,20 @@ namespace ClassicUO.Game.Gumps
             }
 
             return results.Count == 0 ? null : results.ToArray();
+        }
+
+        public GumpControl GetFirstControlAcceptKeyboardInput()
+        {
+            if (_acceptKeyboardInput)
+                return this;
+            if (_children == null || _children.Count == 0)
+                return null;
+            foreach (var c in _children)
+            {
+                if (c.AcceptKeyboardInput)
+                    return c.GetFirstControlAcceptKeyboardInput();
+            }
+            return null;
         }
 
 
@@ -324,6 +367,23 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        public void InvokeTextInput(char c)
+        {
+            OnTextInput(c);
+        }
+
+        public void InvokeKeyDown(SDL2.SDL.SDL_Keycode key, SDL2.SDL.SDL_Keymod mod)
+        {
+            OnKeyDown(key, mod);
+        }
+
+        public void InvokeKeyUp(SDL2.SDL.SDL_Keycode key, SDL2.SDL.SDL_Keymod mod)
+        {
+            OnKeyUp(key, mod);
+        }
+
+
+
         protected virtual void OnMouseDown(int x, int y, MouseButton button)
         {
 
@@ -353,7 +413,21 @@ namespace ClassicUO.Game.Gumps
         {
 
         }
+
+        protected virtual void OnTextInput(char c)
+        {
+            
+        }
      
+        protected virtual void OnKeyDown(SDL2.SDL.SDL_Keycode key, SDL2.SDL.SDL_Keymod mod)
+        {
+
+        }
+
+        protected virtual void OnKeyUp(SDL2.SDL.SDL_Keycode key, SDL2.SDL.SDL_Keymod mod)
+        {
+
+        }
 
         public virtual void Dispose()
         {
