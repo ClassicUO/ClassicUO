@@ -243,8 +243,13 @@ namespace ClassicUO.Game.Gumps
 
 
         public virtual void OnMouseButton(MouseEventArgs e)
-        {
-            MouseButton?.Invoke(this, e);
+        {        
+            if (e.Button == MouseButtons.Right && e.ButtonState == Microsoft.Xna.Framework.Input.ButtonState.Released && RootParent.CanCloseWithRightClick)
+            {
+                RootParent.Dispose();
+            }
+            else
+                MouseButton?.Invoke(this, e);
         }
 
         public virtual void OnMouseEnter(MouseEventArgs e)

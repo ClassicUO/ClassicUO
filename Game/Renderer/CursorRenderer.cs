@@ -36,8 +36,12 @@ namespace ClassicUO.Game.Renderer
 
         private bool _needGraphicUpdate;
 
+        private InputManager _inputManager;
+
         public CursorRenderer()
         {
+            _inputManager = Service.Get<InputManager>();
+
             for (int i = 0; i < 2; i++)
             {
                 for (int j = 0; j < 16; j++)
@@ -181,7 +185,7 @@ namespace ClassicUO.Game.Renderer
         }
 
         public SpriteTexture Texture { get; private set; }
-        public Point ScreenPosition => Service.Get<MouseManager>().ScreenPosition;
+        public Point ScreenPosition => _inputManager.MousePosition;
 
         public void Update(double frameMS)
         {

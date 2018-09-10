@@ -36,6 +36,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace ClassicUO
@@ -47,18 +48,18 @@ namespace ClassicUO
         private CursorRenderer _gameCursor;
         private Stopwatch _stopwatch;
         private RenderTarget2D _targetRender;
-        private Texture2D _texture;
-        private Texture2D _crossTexture;
-        private Texture2D _gump;
-        private readonly Texture2D _textentry;
         private DateTime _timePing;
 
         private RenderedText _gameTextTRY;
 
-        
+        private bool _rightMousePressed;
+        private const float _interval = 1.0f / 144.0f; // draw and do heavy updates only 60 frames per second
+        private float _time;
+
+
         public GameLoop()
         {
-            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 144.0f);
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 300.0f);
             _graphics = new GraphicsDeviceManager(this);
 
             //IsFixedTimeStep = false;
@@ -74,7 +75,6 @@ namespace ClassicUO
             _graphics.PreferredBackBufferWidth = 800;
             _graphics.PreferredBackBufferHeight = 600;
             _graphics.ApplyChanges();
-
 
             
             Window.ClientSizeChanged += (sender, e) =>
@@ -95,9 +95,6 @@ namespace ClassicUO
             TextureManager.Device = GraphicsDevice;
             TextureManager.Device.DepthStencilState = DepthStencilState.Default;
             _graphics.ApplyChanges();
-
-
-            InputManager.Initialize();
 
             base.Initialize();
         }
@@ -150,16 +147,13 @@ namespace ClassicUO
 
             _fpsCounter = new FpsCounter();
 
-            _crossTexture = new Texture2D(GraphicsDevice, 1, 1);
-            _crossTexture.SetData(new[] { Color.Red });
-
             string username = settings.Username;
             string password = settings.Password;
 
             NetClient.PacketReceived += (sender, e) =>
             {
                 //Service.Get<Log>().Message(LogTypes.Trace, string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
-
+                
                 switch (e.ID)
                 {
                     case 0xA8:
@@ -202,24 +196,9 @@ namespace ClassicUO
             NetClient.Disconnected += (sender, e) => { Service.Get<Log>().Message(LogTypes.Warning, "Disconnected!"); };
 
 
-            //NetClient.Socket.Connect(settings.IP, settings.Port);
+            NetClient.Socket.Connect(settings.IP, settings.Port);
 
-            Service.Get<MouseManager>().MousePressed += (sender, e) =>
-            {
-                if (World.Map != null && World.Player != null)
-                {
-                    if (e.Button == MouseButton.Right)
-                    {
-                        Point center = new Point(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
-
-                        Direction direction = DirectionHelper.DirectionFromPoints(center, e.Location);
-
-                        World.Player.Walk(direction, true);
-                    }
-                }
-            };
-
-
+           
             _gameCursor = new CursorRenderer();
 
             _gameTextTRY = new RenderedText()
@@ -232,11 +211,6 @@ namespace ClassicUO
                 IsHTML = false
             };
 
-            _gump = TextureManager.GetOrCreateGumpTexture(0x64);
-
-            _texture = new Texture2D(GraphicsDevice, 1, 1);
-            _texture.SetData(new Color[1] { Color.White });
-
             // END TEST
 
             base.LoadContent();
@@ -247,14 +221,47 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
+       
         protected override void Update(GameTime gameTime)
-        {
+        {         
             World.Ticks = (long)gameTime.TotalGameTime.TotalMilliseconds;
             if (IsActive)
             {
-                Service.Get<MouseManager>().Update();
-                Service.Get<KeyboardManager>().Update();
+                var inputManager = Service.Get<InputManager>();
+
+                inputManager.Update(World.Ticks);
+
+                foreach (var e in inputManager.GetKeyboardEvents())
+                {
+                    Console.WriteLine("KEYBOARD:     EVENT: {0}  -  KEY: {1}  - MOD: {2}", e.EventType, e.KeyCode, e.Mod);
+                }
+
+                foreach (var e in inputManager.GetMouseEvents())
+                {
+                    Console.WriteLine("MOUSE:        EVENT: {0}  -  KEY: {1}  - MOD: {2}", e.EventType, e.Button, e.Mod);
+
+                    if (e.Button == MouseButtons.Right)
+                        _rightMousePressed = e.EventType == MouseEvent.Down;
+                   
+                }
+
+                if (World.InGame && _rightMousePressed)
+                {
+                    Point center = new Point(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
+
+                    Direction direction = DirectionHelper.DirectionFromPoints(center, inputManager.MousePosition);
+
+                    World.Player.Walk(direction, true);
+                }
             }
+
+
+            _time += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_time > _interval)
+                _time = _time % _interval; // or while (time > interval) time -= interval;
+            else
+                SuppressDraw();
 
 
             _fpsCounter.Update(gameTime);
@@ -265,7 +272,7 @@ namespace ClassicUO
 
             Game.Gumps.GumpManager.Update(gameTime.ElapsedGameTime.Milliseconds);
 
-            if (World.Map != null && World.Player != null)
+            if (World.InGame)
             {
                 int scale = 1;
 
@@ -573,14 +580,13 @@ namespace ClassicUO
             return (firstTile, renderOffset, renderDimensions);
         }
 
-
         protected override void Draw(GameTime gameTime)
         {
             TextureManager.Update();
 
             var sb3D = Service.Get<SpriteBatch3D>();
 
-            if (World.Player != null && World.Map != null)
+            if (World.InGame)
             {
                 _fpsCounter.IncreaseFrame();
 

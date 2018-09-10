@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Gumps
 
         public override void OnMouseButton(MouseEventArgs e)
         {
-            if (e.ButtonState == ButtonState.Released && e.Button == Input.MouseButton.Left)
+            if (e.ButtonState == ButtonState.Released && e.Button == Input.MouseButtons.Left)
             {
                 IsChecked = !IsChecked;
             }

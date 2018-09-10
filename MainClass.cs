@@ -50,11 +50,10 @@ namespace ClassicUO
             {
                 //========================================================
                 //SERVICE STACK
-                Service.Register<Log>(new Log());
-                Service.Register<SpriteBatch3D>(new SpriteBatch3D(game));
-                Service.Register<SpriteBatchUI>(new SpriteBatchUI(game));
-                Service.Register<MouseManager>(new MouseManager());
-                Service.Register<KeyboardManager>(new KeyboardManager());
+                Service.Register(new Log());
+                Service.Register(new SpriteBatch3D(game));
+                Service.Register(new SpriteBatchUI(game));
+                Service.Register(new InputManager());
                 //========================================================
 
                 bool isHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";

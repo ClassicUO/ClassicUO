@@ -27,7 +27,7 @@ namespace ClassicUO
 {
     public static class Service
     {
-        static readonly Dictionary<Type, object> m_Services = new Dictionary<Type, object>();
+        static readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
         private static Log _logger;
 
         static Service()
@@ -38,12 +38,12 @@ namespace ClassicUO
         public static T Register<T>(T service)
         {
             Type type = typeof(T);
-            if (m_Services.ContainsKey(type))
+            if (_services.ContainsKey(type))
             {
                 _logger.Message(LogTypes.Error, string.Format("Attempted to register service of type {0} twice.", type.Name));
-                m_Services.Remove(type);
+                _services.Remove(type);
             }
-            m_Services.Add(type, service);
+            _services.Add(type, service);
             _logger.Message(LogTypes.Trace, string.Format("Initialized service : {0}", type.Name));
             return service;
         }
@@ -51,9 +51,9 @@ namespace ClassicUO
         public static void Unregister<T>()
         {
             Type type = typeof(T);
-            if (m_Services.ContainsKey(type))
+            if (_services.ContainsKey(type))
             {
-                m_Services.Remove(type);
+                _services.Remove(type);
             }
             else
             {
@@ -64,16 +64,15 @@ namespace ClassicUO
         public static bool Has<T>()
         {
             Type type = typeof(T);
-            return m_Services.ContainsKey(type);
+            return _services.ContainsKey(type);
         }
 
         public static T Get<T>(bool failIfNotRegistered = true)
         {
             Type type = typeof(T);
-            if (m_Services.ContainsKey(type))
-            {
-                return (T)m_Services[type];
-            }
+            if (_services.TryGetValue(type, out var v))
+                return (T)v;
+
             if (failIfNotRegistered)
             {
                 _logger.Message(LogTypes.Error, string.Format("Attempted to get service service of type {0}, but no service of this type is registered.", type.Name));
