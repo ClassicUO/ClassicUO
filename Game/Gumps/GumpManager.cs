@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Gumps
                 {
                     foreach (var c in _gumps)
                     {
-                        if (!c.IsDisposed && c.IsVisible && c.IsEditable && c.AcceptKeyboardInput)
+                        if (!c.IsDisposed && c.IsVisible && c.IsEnabled && c.AcceptKeyboardInput)
                         {
                             _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
                             if (_keyboardFocusControl != null)
@@ -134,13 +134,13 @@ namespace ClassicUO.Game.Gumps
                         case "text":
                             gump.AddChildren(new Label(gparams, lines));
                             break;
-                        case "textentry":
-                            break;
                         case "textentrylimited":
-                            break;
-                        case "tilepic":
+                        case "textentry":
+                            gump.AddChildren(new TextBox(gparams, lines));
                             break;
                         case "tilepichue":
+                        case "tilepic":
+                            gump.AddChildren(new StaticPic(gparams));
                             break;
                         case "noclose":
                             gump.CanCloseWithRightClick = false;

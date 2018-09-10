@@ -28,7 +28,7 @@ namespace ClassicUO.Game.Gumps
     {
         private readonly Graphic _graphic;
 
-        public StaticPic(Graphic graphic,  Hue hue) : base()
+        public StaticPic(Graphic graphic, Hue hue) : base()
         {
             _graphic = graphic;
             Hue = hue;
@@ -36,7 +36,7 @@ namespace ClassicUO.Game.Gumps
             CanMove = true;
         }
 
-        public StaticPic(GumpControl parent,  string[] parts) : this(Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue)0)
+        public StaticPic(string[] parts) : this(Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue)0)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

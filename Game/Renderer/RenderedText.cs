@@ -133,14 +133,23 @@ namespace ClassicUO.Game.Renderer
         public Vector3 HueVector { get; set; }
 
         public bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+            => Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0 ,0);
+
+        public bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY)
         {
             if (string.IsNullOrEmpty(Text))
                 return false;
 
             Rectangle src = new Rectangle();
-            Rectangle dst = new Rectangle((int)position.X, (int)position.Y, Width, Height);
 
-            if (dst.Width <= Width)
+            if (offsetX > Width || offsetX < -MaxWidth || offsetY > Height || offsetY < -Height)
+                return false;
+
+            src.X = offsetX;
+            src.Y = offsetY;
+
+            int maxX = src.X + dst.Width;
+            if (maxX <= Width)
                 src.Width = dst.Width;
             else
             {
@@ -148,7 +157,8 @@ namespace ClassicUO.Game.Renderer
                 dst.Width = src.Width;
             }
 
-            if (dst.Height <= Height)
+            int maxY = src.Y + dst.Height;
+            if (maxY <= Height)
                 src.Height = dst.Height;
             else
             {
@@ -172,16 +182,15 @@ namespace ClassicUO.Game.Renderer
             }
             else
             {
-                //(data, gt.Width, gt.Height, linesCount, gt.IsPartialHue) = Fonts.GenerateASCII(gt.Font, gt.Text, gt.Hue, gt.MaxWidth, gt.Align, (ushort)gt.FontStyle);
                 IsPartialHue = Fonts.GenerateASCII(out ftexture, Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle);
             }
 
-            Width = ftexture.Width;
-            Height = ftexture.Height;
-            Links = ftexture.Links;
-
-            //var texture = new SpriteTexture(gt.Width, gt.Height);
-            //texture.SetData(data);
+            if (ftexture != null)
+            {
+                Width = ftexture.Width;
+                Height = ftexture.Height;
+                Links = ftexture.Links;
+            }
 
 
             if (IsHTML)
