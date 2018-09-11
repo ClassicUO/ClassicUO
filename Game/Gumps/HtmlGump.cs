@@ -102,13 +102,13 @@ namespace ClassicUO.Game.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (HasScrollbar)
-            {
-                _scrollBar.Height = Height;
-                _scrollBar.MinValue = 0;
-                _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
-                ScrollY = _scrollBar.Value;
-            }
+            //if (HasScrollbar)
+            //{
+            //    _scrollBar.Height = Height;
+            //    _scrollBar.MinValue = 0;
+            //    _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
+            //    ScrollY = _scrollBar.Value;
+            //}
 
             base.Update(totalMS, frameMS);
         }

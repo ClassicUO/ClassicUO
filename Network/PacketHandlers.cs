@@ -1009,7 +1009,7 @@ namespace ClassicUO.Network
             ushort frameCount = p.ReadUShort();
             frameCount = 0;
             ushort repeatMode = p.ReadUShort();
-            bool frameDirection = p.ReadBool();
+            bool frameDirection = !p.ReadBool();
             bool repeat = p.ReadBool();
             byte delay = p.ReadByte();
 
@@ -2083,11 +2083,12 @@ namespace ClassicUO.Network
 
         private static void NewCharacterAnimation(Packet p)
         {
+            if (World.Player == null)
+                return;
+
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
             if (mobile == null)
-            {
                 return;
-            }
 
             ushort type = p.ReadUShort();
             ushort action = p.ReadUShort();

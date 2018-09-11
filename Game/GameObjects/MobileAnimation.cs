@@ -464,13 +464,10 @@ namespace ClassicUO.Game.GameObjects
                 else if (type == ANIMATION_GROUPS_TYPE.SEA_MONSTER)
                 {
                     if (mode % 2 != 0)
-                    {
                         return 6;
-                    }
-
                     return 5;
                 }
-                else if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+                else if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
                     if (mobile.Equipment[(int)Layer.Mount] != null)
                     {
@@ -516,9 +513,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if (mode % 2 != 0)
-                {
                     return 6;
-                }
 
                 return 5;
             }
@@ -532,9 +527,7 @@ namespace ClassicUO.Game.GameObjects
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
 
             if ((ia.Flags & 0x80000000) != 0)
-            {
                 type = ia.Type;
-            }
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {

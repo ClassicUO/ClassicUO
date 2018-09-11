@@ -560,6 +560,11 @@ namespace ClassicUO.Game.GameObjects
 
                 Graphic id = GetGraphicForAnimation();
                 int animGroup = GetGroupForAnimation(this, id);
+                if (animGroup == 64 || animGroup == 65)
+                {
+                    animGroup = InWarMode ? 65 : 64;
+                    AnimationGroup = (byte)animGroup;
+                }
 
                 Item mount = Equipment[(int)Layer.Mount];
                 if (mount != null)
