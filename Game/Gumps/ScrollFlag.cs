@@ -20,7 +20,7 @@ namespace ClassicUO.Game.Gumps
 
         public ScrollFlag(GumpControl parent, int x, int y, int height) : this(parent)
         {
-            _texture = TextureManager.GetOrCreateGumpTexture(0x0828);
+            _texture = IO.Resources.Gumps.GetGumpTexture(0x0828);
             Width = _texture.Width;
             Height = _texture.Height;
 

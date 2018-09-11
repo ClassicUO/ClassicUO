@@ -27,16 +27,16 @@ namespace ClassicUO.Game.Gumps
         public ScrollBar(GumpControl parent, int x, int y, int height) : base(parent)
         {
             _textureUpButton = new SpriteTexture[2];
-            _textureUpButton[0] = TextureManager.GetOrCreateGumpTexture(251);
-            _textureUpButton[1] = TextureManager.GetOrCreateGumpTexture(250);
+            _textureUpButton[0] = IO.Resources.Gumps.GetGumpTexture(251);
+            _textureUpButton[1] = IO.Resources.Gumps.GetGumpTexture(250);
             _textureDownButton = new SpriteTexture[2];
-            _textureDownButton[0] = TextureManager.GetOrCreateGumpTexture(253);
-            _textureDownButton[1] = TextureManager.GetOrCreateGumpTexture(252);
+            _textureDownButton[0] = IO.Resources.Gumps.GetGumpTexture(253);
+            _textureDownButton[1] = IO.Resources.Gumps.GetGumpTexture(252);
             _textureBackground = new SpriteTexture[3];
-            _textureBackground[0] = TextureManager.GetOrCreateGumpTexture(257);
-            _textureBackground[1] = TextureManager.GetOrCreateGumpTexture(256);
-            _textureBackground[2] = TextureManager.GetOrCreateGumpTexture(255);
-            _textureSlider = TextureManager.GetOrCreateGumpTexture(254);
+            _textureBackground[0] = IO.Resources.Gumps.GetGumpTexture(257);
+            _textureBackground[1] = IO.Resources.Gumps.GetGumpTexture(256);
+            _textureBackground[2] = IO.Resources.Gumps.GetGumpTexture(255);
+            _textureSlider = IO.Resources.Gumps.GetGumpTexture(254);
             Width = _textureBackground[0].Width;
             Height = height;
             Location = new Point(x, y);

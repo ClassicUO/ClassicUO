@@ -32,10 +32,20 @@ namespace ClassicUO.Game.Gumps
         {
             for (int i = 0; i < _frame.Length; i++)
             {
-                _frame[i] = TextureManager.GetOrCreateGumpTexture((ushort)(background + i));
+                _frame[i] = IO.Resources.Gumps.GetGumpTexture((ushort)(background + i));
             }
         }
 
+        public override void Update(double totalMS, double frameMS)
+        {
+            for (int i = 0; i < _frame.Length; i++)
+            {
+                if (_frame[i] != null)
+                    _frame[i].Ticks = World.Ticks;
+            }
+
+            base.Update(totalMS, frameMS);
+        }
 
         public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {

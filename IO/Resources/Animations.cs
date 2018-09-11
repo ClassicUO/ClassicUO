@@ -1175,7 +1175,7 @@ namespace ClassicUO.IO.Resources
                     dir.LastAccessTime = 0;
 
                     _usedTextures.RemoveAt(i);
-                    i++;
+                    i--;
                     if (++count >= 5)
                     {
                         break;

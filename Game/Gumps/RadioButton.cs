@@ -26,11 +26,6 @@ namespace ClassicUO.Game.Gumps
 {
     public class RadioButton : Checkbox
     {
-        //public RadioButton(ushort inactive,  ushort active) : base(inactive, active)
-        //{
-
-        //}
-
         public RadioButton(int group, string[] parts, string[] lines) : base(parts, lines)
         {
             GroupIndex = group;

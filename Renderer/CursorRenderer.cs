@@ -49,7 +49,7 @@ namespace ClassicUO.Renderer
                 {
                     ushort id = _cursorData[i, j];
 
-                    Texture2D texture = TextureManager.GetOrCreateStaticTexture(id);
+                    Texture2D texture = IO.Resources.Art.GetStaticTexture(id);
 
 
                     if (i == 0)
@@ -192,9 +192,9 @@ namespace ClassicUO.Renderer
         {
             if (Texture == null || Texture.IsDisposed || _needGraphicUpdate)
             {
-                Texture = TextureManager.GetOrCreateStaticTexture(Graphic);
-                _blackTexture = new Texture2D(TextureManager.Device, 1, 1);
-                _blackTexture.SetData(new[] { Color.Black });
+                Texture = IO.Resources.Art.GetStaticTexture(Graphic);
+                //_blackTexture = new Texture2D(TextureManager.Device, 1, 1);
+                //_blackTexture.SetData(new[] { Color.Black });
                 _needGraphicUpdate = false;
             }
             else

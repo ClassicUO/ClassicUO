@@ -66,11 +66,11 @@ namespace ClassicUO.Game.Views
             {
                 if (tile.IsStretched)
                 {
-                    Texture = TextureManager.GetOrCreateTexmapTexture(((Tile)GameObject).TileData.TexID);
+                    Texture = IO.Resources.TextmapTextures.GetTextmapTexture(((Tile)GameObject).TileData.TexID);
                 }
                 else
                 {
-                    Texture = TextureManager.GetOrCreateLandTexture(GameObject.Graphic);
+                    Texture = IO.Resources.Art.GetLandTexture(GameObject.Graphic);
                     Bounds = new Rectangle(0, GameObject.Position.Z * 4, 44, 44);
                 }
             }
