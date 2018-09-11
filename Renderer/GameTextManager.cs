@@ -19,17 +19,37 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
+using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
-namespace ClassicUO.Game.GameObjects.Interfaces
+namespace ClassicUO.Renderer
 {
-    public interface IDynamicItem
+    public static class GameTextManager
     {
-        StaticTiles ItemData { get; }
+        private static readonly List<ViewWithDrawInfo> _views = new List<ViewWithDrawInfo>();
 
-        Graphic Graphic { get; set; }
-        Position Position { get; set; }
+        public static void AddView(View view,  Vector3 position) => _views.Add(new ViewWithDrawInfo() { View = view, DrawPosition = position });
 
-        bool IsAtWorld(int x,  int y);
+        public static void Render(SpriteBatchUI spriteBatch)
+        {
+            if (_views.Count > 0)
+            {
+                for (int i = 0; i < _views.Count; i++)
+                {
+                    _views[i].View.Draw(spriteBatch, _views[i].DrawPosition);
+                }
+
+                _views.Clear();
+            }
+        }
+
+        struct ViewWithDrawInfo
+        {
+            public View View;
+            public Vector3 DrawPosition;
+        }
     }
 }

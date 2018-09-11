@@ -600,7 +600,7 @@ namespace ClassicUO.Network
 
             if (TileData.IsAnimated((long)item.ItemData.Flags))
             {
-                item.Effect = new AnimatedItemEffect(item.Position.X, item.Position.Y, item.Position.Z, item.Graphic, item.Hue, -1);
+                item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
             }
         }
 
@@ -2167,7 +2167,7 @@ namespace ClassicUO.Network
 
             if (TileData.IsAnimated((long)item.ItemData.Flags))
             {
-                item.Effect = new AnimatedItemEffect(item.Position.X, item.Position.Y, item.Position.Z, item.Graphic, item.Hue, -1);
+                item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
             }
         }
 

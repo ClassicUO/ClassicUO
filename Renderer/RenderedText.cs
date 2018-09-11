@@ -19,14 +19,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.GameObjects.Interfaces;
-using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Game;
+using ClassicUO.Renderer;
+using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
-using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
+using IUpdateable = ClassicUO.Renderer.IUpdateable;
 
-namespace ClassicUO.Game.Renderer
+namespace ClassicUO.Renderer
 {
     public enum FontStyle : int
     {

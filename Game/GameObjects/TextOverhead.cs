@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using ClassicUO.Game.Renderer;
-using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Renderer;
+using ClassicUO.Game.Views;
 
 namespace ClassicUO.Game.GameObjects
 {

@@ -24,7 +24,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime;
 using System.Runtime.InteropServices;
-using ClassicUO.Game.Renderer;
+using ClassicUO.Renderer;
 using ClassicUO.Input;
 using ClassicUO.Utility;
 

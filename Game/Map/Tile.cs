@@ -20,8 +20,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.GameObjects.Interfaces;
-using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Renderer;
+using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using System.Collections.Generic;
@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Map
         public int MinZ { get; set; }
         public int AverageZ { get; set; }
         public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
-        public bool IsStretched => !(TileData.TexID <= 0 && (TileData.Flags & 0x00000080) > 0);
+        public bool IsStretched { get; set; }
         public Ground Ground { get; private set; }
 
         public IReadOnlyList<GameObject> ObjectsOnTiles
@@ -100,12 +100,15 @@ namespace ClassicUO.Game.Map
             //short priorityZ = obj.Position.Z;
 
 
-            //switch(obj)
+            //switch (obj)
             //{
             //    case Tile tile:
             //        {
             //            if (tile.IsStretched)
-            //                priorityZ = (short)(AverageZ - 1);
+            //            {
+            //                //tile.GetView();
+            //                priorityZ = (short)(tile.AverageZ - 1);
+            //            }
             //            else
             //                priorityZ--;
             //        }
@@ -122,15 +125,18 @@ namespace ClassicUO.Game.Map
             //    case GameEffect effect:
             //        priorityZ += 2;
             //        break;
+            //    case DeferredEntity deferred:
+            //        if (deferred.Entity is Mobile)
+            //            priorityZ++;
+            //        else if (deferred.Entity is GameEffect)
+            //            priorityZ += 2;
+            //        break;
             //    default:
             //        {
             //            IDynamicItem dyn = (IDynamicItem)obj;
 
             //            if (IO.Resources.TileData.IsBackground((long)dyn.ItemData.Flags))
             //                priorityZ--;
-
-            //            //if (IO.Resources.TileData.IsSurface((long)dyn.ItemData.Flags))
-            //            //    priorityZ++;
 
             //            if (dyn.ItemData.Height > 0)
             //                priorityZ++;
@@ -140,6 +146,29 @@ namespace ClassicUO.Game.Map
 
 
             //obj.PriorityZ = priorityZ;
+
+
+
+            //GameObject found = null;
+            //var objFirst = _objectsOnTile.Count > 0 ? _objectsOnTile[0] : null;
+            //if (objFirst != null)
+            //{
+            //    for (int i = 0; i < _objectsOnTile.Count - 1; i++)
+            //    {
+            //        int test = _objectsOnTile[i].PriorityZ;
+            //        if (test > priorityZ || (test == priorityZ && obj is Tile && !(objFirst is Tile)))
+            //            break;
+
+            //        found = objFirst;
+            //        objFirst = _objectsOnTile[i + 1];
+            //    }
+            //}
+
+            //if (found != null)
+            //{
+
+            //}
+
 
             _objectsOnTile.Add(obj);
 

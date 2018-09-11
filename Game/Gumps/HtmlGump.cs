@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Renderer;
+using ClassicUO.Renderer;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;

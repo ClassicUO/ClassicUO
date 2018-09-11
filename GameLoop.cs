@@ -22,9 +22,9 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.GameObjects.Interfaces;
+using ClassicUO.Renderer;
 using ClassicUO.Game.Map;
-using ClassicUO.Game.Renderer;
+using ClassicUO.Renderer;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -226,7 +226,22 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
-       
+        private Point _tileSelected;
+
+        public static Point GetTileCoordinates(Vector2 point, Vector2 relativeTo = new Vector2())
+        {
+            point -= relativeTo;
+            point.X += 44 / 2;
+            point.Y += 44 / 2;
+            return new Point((int)Math.Floor(point.X / 44), (int)Math.Floor(point.Y / 44));
+        }
+        public static Vector2 CartesianToIsometric(Vector2 Cart)
+        {
+            return new Vector2(
+                        Cart.X - Cart.Y,
+                        (Cart.X + Cart.Y) / 2);
+        }
+
         protected override void Update(GameTime gameTime)
         {         
             World.Ticks = (long)gameTime.TotalGameTime.TotalMilliseconds;
@@ -256,8 +271,13 @@ namespace ClassicUO
 
             _time += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
+            bool allowBigUpdate = false;
+
             if (_time > _interval)
+            {
                 _time = _time % _interval; // or while (time > interval) time -= interval;
+                allowBigUpdate = true;
+            }
             else
                 SuppressDraw();
 
@@ -290,6 +310,12 @@ namespace ClassicUO
                 }
 
 
+                if (!allowBigUpdate)
+                    return;
+
+                //var ss = Service.Get<InputManager>();
+                //_tileSelected = GetTileCoordinates(CartesianToIsometric( new Vector2(ss.MousePosition.X, ss.MousePosition.Y)));
+                //Console.WriteLine(_tileSelected);
 
                 //(Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
 
@@ -310,6 +336,48 @@ namespace ClassicUO
 
                 //_minTile = minTile;
                 //_maxTile = maxTile;
+
+                //int n = maxX - minX;
+
+                //for (int i = 0; i < n; i++)
+                //{
+                //    for(int j = 0; j < i + 1; j++)
+                //    {
+                //        int indexX = j;
+                //        int indexY = i - j;
+
+                //        int x = minX + indexX;
+                //        int y = minY + indexY;
+
+                //        Tile tile = World.Map.GetTile(x, y);
+                //        if (tile != null)
+                //        {
+                //            var objects = (List<GameObject>)tile.ObjectsOnTiles;
+                //            AddTileToRenderList(tile, objects, x, y, false, 150);
+                //        }
+
+                //    }
+                //}
+
+                //for (int i = 1; i < n + 1; i++)
+                //{
+                //    for (int j = 0; j < n - i; j++)
+                //    {
+                //        int indexX = j + i;
+                //        int indexY = n - j - 1;
+
+                //        int x = minX + indexX;
+                //        int y = minY + indexY;
+
+                //        Tile tile = World.Map.GetTile(x, y);
+                //        if (tile != null)
+                //        {
+                //            var objects = (List<GameObject>)tile.ObjectsOnTiles;
+                //            AddTileToRenderList(tile, objects, x, y, false, 150);
+                //        }
+                //    }
+                //}
+
 
                 //for (int i = 0; i < 2; i++)
                 //{
@@ -340,34 +408,8 @@ namespace ClassicUO
                 //            Tile tile = World.Map.GetTile(x, y);
                 //            if (tile != null)
                 //            {
-                //                //Vector3 isometricPosition = new Vector3((x - y) * 22 - offset.X, (x + y) * 22 - offset.Y, 0);
-
-                //                var objects = tile.ObjectsOnTiles;
-
+                //                var objects = (List<GameObject>)tile.ObjectsOnTiles;
                 //                AddTileToRenderList(tile, objects, x, y, false, 150);
-
-                //                //bool draw = true;
-
-                //                //for (int k = 0; k < objects.Count; k++)
-                //                //{
-                //                //    var obj = objects[k];
-
-
-                //                //    if (!drawTerrain)
-                //                //    {
-                //                //        if (obj is Tile || obj.Position.Z > tile.Position.Z)
-                //                //            draw = false;
-                //                //    }
-
-                //                //    if ((obj.Position.Z >= maxItemZ
-                //                //        || maxItemZ != 255 && obj is IDynamicItem dyn && TileData.IsRoof((long)dyn.ItemData.Flags))
-                //                //        && !(obj is Tile))
-                //                //        continue;
-
-                //                //    if (draw && obj.GetView().Draw(_spriteBatch, isometricPosition))
-                //                //        _objectDrawCount++;
-
-                //                //}
                 //            }
 
                 //            x++;
@@ -456,8 +498,8 @@ namespace ClassicUO
             winGameCenterX -= (int)World.Player.Offset.X;
             winGameCenterY -= (int)(World.Player.Offset.Y - World.Player.Offset.Z);
 
-            int winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX + 22;
-            int winDrawOffsetY = (World.Player.Position.X + World.Player.Position.Y) * 22 - winGameCenterY + 22;
+            int winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX;
+            int winDrawOffsetY = (World.Player.Position.X + World.Player.Position.Y) * 22 - winGameCenterY;
 
             float left = winGamePosX;
             float right = winGameWidth + left;
@@ -578,6 +620,9 @@ namespace ClassicUO
             return (firstTile, renderOffset, renderDimensions);
         }
 
+        private GameObject _selectedObject;
+
+
         protected override void Draw(GameTime gameTime)
         {
             TextureManager.Update();
@@ -596,9 +641,10 @@ namespace ClassicUO
                 sb3D.SetLightDirection(World.Light.IsometricDirection);
 
                 List<DeferredEntity> toremove = new List<DeferredEntity>();
-            
+
                 _renderListCount = 0;
 
+ 
                 for (int y = 0; y < renderDimensions.Y * 2 + 11; y++)
                 {
 
@@ -611,7 +657,7 @@ namespace ClassicUO
 
                     Point firstTileInRow = new Point(firstTile.X + ((y + 1) / 2), firstTile.Y + (y / 2));
 
-                    for (int x = 0; x < renderDimensions.X + 1; x++)
+                    for (int x = 0; x < renderDimensions.X + 1; x++, dp.X -= 44f)
                     {
                         int tileX = firstTileInRow.X - x;
                         int tileY = firstTileInRow.Y + x;
@@ -619,7 +665,6 @@ namespace ClassicUO
                         Tile tile = World.Map.GetTile(tileX, tileY);
                         if (tile != null)
                         {
-
                             var objects = tile.ObjectsOnTiles;
                             bool draw = true;
                             for (int k = 0; k < objects.Count; k++)
@@ -640,7 +685,12 @@ namespace ClassicUO
                                     && !(obj is Tile))
                                     continue;
 
-                                if (draw && obj.GetView().Draw(sb3D, dp))
+                                var view = obj.GetView();
+
+                                //if (MouseOverList<SpriteBatch3D>.IsMouseInObjectIsometric(vertices, Service.Get<InputManager>().MousePosition))
+                                //    vertices[0].Hue = vertices[1].Hue = vertices[2].Hue = vertices[3].Hue = RenderExtentions.GetHueVector(33);
+
+                                if (draw && view.Draw(sb3D, dp))
                                     _renderListCount++;
                             }
 
@@ -652,24 +702,35 @@ namespace ClassicUO
 
                             toremove.Clear();
                         }
-
-                        dp.X -= 44f;
                     }
                 }
 
 
-                //while (_renderList.Count > 0)
+
+
+                //int i = 0;
+                //while (i < _renderList.Count)
                 //{
-                //    var obj = _renderList.Dequeue();
+                //    var obj = _renderList[i++];
 
                 //    int x = obj.Position.X;
                 //    int y = obj.Position.Y;
 
-                //    Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X, (x + y) * 22 - _offset.Y, 0);
+                //    if (obj.Graphic == 0xcee)
+                //    {
+                //        if (((Item)obj).Serial == 0x40018e84 )
+                //        {
 
+                //        }
+                //    }
 
-                //    obj.GetView().Draw(Service.Get<SpriteBatch3D>(), isometricPosition);
+                //    Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
+
+                //    obj.GetView().Draw(sb3D, isometricPosition);
+
                 //}
+
+                //_renderList.Clear();
 
                 sb3D.GraphicsDevice.SetRenderTarget(_targetRender);
                 sb3D.GraphicsDevice.Clear(Color.Black);
@@ -683,7 +744,7 @@ namespace ClassicUO
             sbUI.Begin();
 
             sbUI.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
-            GameTextRenderer.Render(sbUI);
+            GameTextManager.Render(sbUI);
             Game.Gumps.GumpManager.Render(sbUI);
 
             //_spriteBatch.Draw2D(_crossTexture, new Bounds(_graphics.PreferredBackBufferWidth / 2  - 5, _graphics.PreferredBackBufferHeight / 2 - 5, 10, 10), Vector3.Zero);
@@ -716,25 +777,25 @@ namespace ClassicUO
         }
 
         private int _renderIndex = 1, _renderListCount = 0;
-        private Queue<GameObject> _renderList = new Queue<GameObject>(10000);
+        private List<GameObject> _renderList = new List<GameObject>();
         private Point _offset, _maxTile, _minTile;
         private Vector2 _minPixel, _maxPixel;
 
-        private void AddTileToRenderList(Tile tile, List<GameObject> objList, int worldX, int wolrdY, bool useObjectHandles, int maxZ)
+        private void AddTileToRenderList(Tile tile, List<GameObject> objList, int worldX, int worldY, bool useObjectHandles, int maxZ)
         {
             for (int i = 0; i < objList.Count; i++)
             {
                 var obj = objList[i];
 
-                if (obj.CurrentRenderIndex == _renderIndex || !obj.GetView().AllowedToDraw)
+                if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
                     continue;
 
                 obj.UseInRender = 0xFF;
-                int drawX = (obj.Position.X - obj.Position.Y) * 22 - (_offset.X - 22);
-                int drawY = ((obj.Position.X + obj.Position.Y) * 22 - (obj.Position.Z * 4)) - (_offset.Y - 22);
+                int drawX = (obj.Position.X - obj.Position.Y) * 22 - _offset.X;
+                int drawY = ((obj.Position.X + obj.Position.Y) * 22 - (obj.Position.Z * 4)) - _offset.Y;
 
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
-                    continue;
+                    break;
 
                 int z = obj.Position.Z;
                 int maxObjectZ = obj.PriorityZ;
@@ -752,6 +813,7 @@ namespace ClassicUO
 
                 if (obj is IDynamicItem dyn1 && TileData.IsInternal((long)dyn1.ItemData.Flags))
                     continue;
+                //else if (!(obj is Tile) && z >= )
 
                 int testMinZ = drawY + (z * 4);
                 int testMaxZ = drawY;
@@ -770,7 +832,7 @@ namespace ClassicUO
                 else if (obj is Item item && item.IsCorpse)
                     AddOffsetCharacterTileToRenderList(item, useObjectHandles);
 
-                _renderList.Enqueue(obj);
+                _renderList.Add(obj);
                 obj.UseInRender = (byte)_renderIndex;
                 _renderListCount++;
             }
@@ -781,46 +843,46 @@ namespace ClassicUO
 
         private void AddOffsetCharacterTileToRenderList(Entity entity, bool useObjectHandles)
         {
-            //int charX = entity.Position.X;
-            //int charY = entity.Position.Y;
+            int charX = entity.Position.X;
+            int charY = entity.Position.Y;
 
-            //Mobile mob = entity.Serial.IsMobile ? World.Mobiles.Get(entity) : null;
-            //int dropMaxZIndex = -1;
-            //if (mob != null)
-            //{
-            //    if (mob.Steps.Count > 0 && (mob.Steps.Back().Direction & 7) == 2)
-            //        dropMaxZIndex = 0;
-            //}
+            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.Get(entity) : null;
+            int dropMaxZIndex = -1;
+            if (mob != null)
+            {
+                if (mob.Steps.Count > 0 && (mob.Steps.Back().Direction & 7) == 2)
+                    dropMaxZIndex = 0;
+            }
 
-            //_coordinates[0, 0] = charX + 1; _coordinates[0, 1] = charY - 1;
-            //_coordinates[1, 0] = charX + 1; _coordinates[1, 1] = charY - 2;
-            //_coordinates[2, 0] = charX + 2; _coordinates[2, 1] = charY - 2;
-            //_coordinates[3, 0] = charX - 1; _coordinates[3, 1] = charY + 2;
-            //_coordinates[4, 0] = charX;     _coordinates[4, 1] = charY + 1;
-            //_coordinates[5, 0] = charX + 1; _coordinates[5, 1] = charY;
-            //_coordinates[6, 0] = charX + 2; _coordinates[6, 1] = charY - 1;
-            //_coordinates[7, 0] = charX + 1; _coordinates[7, 1] = charY + 1;
+            _coordinates[0, 0] = charX + 1; _coordinates[0, 1] = charY - 1;
+            _coordinates[1, 0] = charX + 1; _coordinates[1, 1] = charY - 2;
+            _coordinates[2, 0] = charX + 2; _coordinates[2, 1] = charY - 2;
+            _coordinates[3, 0] = charX - 1; _coordinates[3, 1] = charY + 2;
+            _coordinates[4, 0] = charX; _coordinates[4, 1] = charY + 1;
+            _coordinates[5, 0] = charX + 1; _coordinates[5, 1] = charY;
+            _coordinates[6, 0] = charX + 2; _coordinates[6, 1] = charY - 1;
+            _coordinates[7, 0] = charX + 1; _coordinates[7, 1] = charY + 1;
 
 
-            //int maxZ = entity.PriorityZ;
+            int maxZ = entity.PriorityZ;
 
-            //for (int i = 0; i < _coordinates.Length / _coordinates.Rank; i++)
-            //{
-            //    int x = _coordinates[i, 0];
-            //    int y = _coordinates[i, 1];
+            for (int i = 0; i < _coordinates.Length / _coordinates.Rank; i++)
+            {
+                int x = _coordinates[i, 0];
+                int y = _coordinates[i, 1];
 
-            //    if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
-            //        continue;
+                if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
+                    continue;
 
-            //    Tile tile = World.Map.GetTile(x, y);
+                Tile tile = World.Map.GetTile(x, y);
 
-            //    int currentMaxZ = maxZ;
+                int currentMaxZ = maxZ;
 
-            //    if (i == dropMaxZIndex)
-            //        currentMaxZ += 20;
+                if (i == dropMaxZIndex)
+                    currentMaxZ += 20;
 
-            //    AddTileToRenderList(tile, tile.ObjectsOnTiles, x, y, useObjectHandles, currentMaxZ);
-            //}
+                AddTileToRenderList(tile, (List<GameObject>)tile.ObjectsOnTiles, x, y, useObjectHandles, currentMaxZ);
+            }
         }
 
     }

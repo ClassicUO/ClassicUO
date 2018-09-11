@@ -21,7 +21,7 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 
-namespace ClassicUO.Game.Renderer.Views
+namespace ClassicUO.Game.Views
 {
     public static class LayerOrder
     {

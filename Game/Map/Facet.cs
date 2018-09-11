@@ -142,6 +142,7 @@ namespace ClassicUO.Game.Map
 
         private int GetBlock(int blockX, int blockY) => blockX * IO.Resources.Map.MapBlocksSize[Index][1] + blockY;
 
+
         public int GetAverageZ(sbyte top,  sbyte left,  sbyte right,  sbyte bottom, ref sbyte low, ref sbyte high)
         {
             high = top;
@@ -175,6 +176,24 @@ namespace ClassicUO.Game.Map
             {
                 low = bottom;
             }
+
+            //if (top < low)
+            //    low = top;
+            //if (right < low)
+            //    low = right;
+            //if (bottom < low)
+            //    low = bottom;
+
+            //if (Math.Abs(high - right) <= Math.Abs(bottom - top))
+            //    return (high + right) >> 1;
+            //else
+            //    return (bottom + top) >> 1;
+
+
+            //if (Math.Abs(left - right) <= Math.Abs(bottom - top))
+            //    return (left + right) >> 1;
+            //else
+            //    return (bottom + top) >> 1;
 
             if (Math.Abs(top - bottom) > Math.Abs(left - right))
             {

@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.Map;
-using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Game.Views;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects

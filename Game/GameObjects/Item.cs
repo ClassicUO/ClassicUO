@@ -19,8 +19,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.GameObjects.Interfaces;
-using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Renderer;
+using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using System;

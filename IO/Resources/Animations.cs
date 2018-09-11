@@ -1738,7 +1738,7 @@ namespace ClassicUO.IO.Resources
         public bool IsValid => Width > 0 && Height > 0 && Pixels != null && Pixels.Length > 0;
     }*/
 
-    public class TextureAnimationFrame : Game.Renderer.SpriteTexture
+    public class TextureAnimationFrame : Renderer.SpriteTexture
     {
 
         public TextureAnimationFrame(int width,  int height) : base(width, height, false)

@@ -19,35 +19,32 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.GameObjects;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Renderer.Views
+namespace ClassicUO.Renderer
 {
-    public class StaticView : View
+    public static class RenderExtentions
     {
-        public StaticView(Static st) : base(st)
-        {
-            AllowedToDraw = !IsNoDrawable(st.Graphic);
-        }
+        private const float ALPHA = .5f;
 
-        //public new Static GameObject => (Static)base.GameObject;
+        public static Vector3 GetHueVector(int hue) => GetHueVector(hue, false, false, false);
 
-        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        public static Vector3 GetHueVector(int hue, bool partial, bool transparent,  bool noLighting)
         {
-            if (!AllowedToDraw || GameObject.IsDisposed)
+            if ((hue & 0x4000) != 0)
             {
-                return false;
+                transparent = true;
+
+
+                //return new Vector3( 16843263 & 0x0FFF , (noLighting ? 4 : 0) + (partial ? 2 : 1), transparent ? ALPHA : 0); 
             }
 
-            if (Texture == null || Texture.IsDisposed)
+            if ((hue & 0x8000) != 0)
             {
-                Texture = TextureManager.GetOrCreateStaticTexture(GameObject.Graphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
+                partial = true;
             }
 
-
-            return base.Draw(spriteBatch, position);
+            return hue == 0 ? new Vector3(0, 0, transparent ? ALPHA : 0) : new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), transparent ? ALPHA : 0);
         }
     }
 }

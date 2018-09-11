@@ -19,32 +19,17 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using Microsoft.Xna.Framework;
+using ClassicUO.IO.Resources;
 
-namespace ClassicUO.Game.Renderer
+namespace ClassicUO.Game.GameObjects
 {
-    public static class RenderExtentions
+    public interface IDynamicItem
     {
-        private const float ALPHA = .5f;
+        StaticTiles ItemData { get; }
 
-        public static Vector3 GetHueVector(int hue) => GetHueVector(hue, false, false, false);
+        Graphic Graphic { get; set; }
+        Position Position { get; set; }
 
-        public static Vector3 GetHueVector(int hue, bool partial, bool transparent,  bool noLighting)
-        {
-            if ((hue & 0x4000) != 0)
-            {
-                transparent = true;
-
-
-                //return new Vector3( 16843263 & 0x0FFF , (noLighting ? 4 : 0) + (partial ? 2 : 1), transparent ? ALPHA : 0); 
-            }
-
-            if ((hue & 0x8000) != 0)
-            {
-                partial = true;
-            }
-
-            return hue == 0 ? new Vector3(0, 0, transparent ? ALPHA : 0) : new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), transparent ? ALPHA : 0);
-        }
+        bool IsAtWorld(int x,  int y);
     }
 }

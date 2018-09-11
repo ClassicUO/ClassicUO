@@ -19,26 +19,36 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.Renderer;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.GameObjects.Interfaces
+namespace ClassicUO.Game.Views
 {
-    public interface IDrawable
+    public class StaticView : View
     {
-        bool AllowedToDraw { get; set; }
-        SpriteTexture Texture { get; set; }
-        Vector3 HueVector { get; set; }
+        public StaticView(Static st) : base(st)
+        {
+            AllowedToDraw = !IsNoDrawable(st.Graphic);
+        }
 
-        bool Draw(SpriteBatch3D spriteBatch,  Vector3 position);
-    }
+        //public new Static GameObject => (Static)base.GameObject;
 
-    public interface IDrawableUI
-    {
-        bool AllowedToDraw { get; set; }
-        SpriteTexture Texture { get; set; }
-        Vector3 HueVector { get; set; }
+        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        {
+            if (!AllowedToDraw || GameObject.IsDisposed)
+            {
+                return false;
+            }
 
-        bool Draw(SpriteBatchUI spriteBatch, Vector3 position);
+            if (Texture == null || Texture.IsDisposed)
+            {
+                Texture = TextureManager.GetOrCreateStaticTexture(GameObject.Graphic);
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
+            }
+
+
+            return base.Draw(spriteBatch, position);
+        }
     }
 }

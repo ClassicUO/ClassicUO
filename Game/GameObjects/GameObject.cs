@@ -20,12 +20,12 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.Map;
-using ClassicUO.Game.Renderer;
-using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Renderer;
+using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 using System;
 using System.Collections.Generic;
-using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
+using IUpdateable = ClassicUO.Renderer.IUpdateable;
 
 
 namespace ClassicUO.Game.GameObjects

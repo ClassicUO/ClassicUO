@@ -19,15 +19,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.GameObjects.Interfaces;
-using ClassicUO.Game.Renderer;
+using ClassicUO.Renderer;
+using ClassicUO.Renderer;
 using ClassicUO.Input;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
+using IUpdateable = ClassicUO.Renderer.IUpdateable;
 
 namespace ClassicUO.Game.Gumps
 {
