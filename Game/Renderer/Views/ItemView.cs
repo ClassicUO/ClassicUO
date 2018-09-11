@@ -81,6 +81,9 @@ namespace ClassicUO.Game.Renderer.Views
             {
                 if (_originalGraphic != item.DisplayedGraphic || Texture == null || Texture.IsDisposed)
                 {
+                    if (Texture != null && !Texture.IsDisposed)
+                        Texture.Dispose();
+
                     _originalGraphic = item.DisplayedGraphic;
                     Texture = TextureManager.GetOrCreateStaticTexture(_originalGraphic);
                     Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
