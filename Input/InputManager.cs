@@ -186,26 +186,26 @@ namespace ClassicUO.Input
                     OnMouseUp(new InputMouseEvent(MouseEvent.Up, CovertMouseButton(e->button.button), e->button.clicks, e->button.x, e->button.y, 0, SDL_Keymod.KMOD_NONE));
                     break;
                 case SDL_EventType.SDL_MOUSEMOTION:
-                    OnMouseMove(new InputMouseEvent(MouseEvent.Move, MouseButtons.None, 0, e->motion.x, e->motion.y, 0, SDL_Keymod.KMOD_NONE));
+                    OnMouseMove(new InputMouseEvent(MouseEvent.Move, MouseButton.None, 0, e->motion.x, e->motion.y, 0, SDL_Keymod.KMOD_NONE));
                     break;
                 case SDL_EventType.SDL_MOUSEWHEEL:
-                    OnMouseWheel(new InputMouseEvent(MouseEvent.WheelScroll, MouseButtons.Middle, 0, e->wheel.x, e->wheel.y, 0, SDL_Keymod.KMOD_NONE));
+                    OnMouseWheel(new InputMouseEvent(MouseEvent.WheelScroll, MouseButton.Middle, 0, e->wheel.x, e->wheel.y, 0, SDL_Keymod.KMOD_NONE));
                     break;
             }
 
             return 1;
         }
 
-        private MouseButtons CovertMouseButton(byte button)
+        private MouseButton CovertMouseButton(byte button)
         {
             switch (button)
             {
-                case 1: return MouseButtons.Left;
-                case 2: return MouseButtons.Middle;
-                case 3: return MouseButtons.Right;
-                case 4: return MouseButtons.XButton1;
-                case 5: return MouseButtons.XButton2;
-                default: return MouseButtons.None;
+                case 1: return MouseButton.Left;
+                case 2: return MouseButton.Middle;
+                case 3: return MouseButton.Right;
+                case 4: return MouseButton.XButton1;
+                case 5: return MouseButton.XButton2;
+                default: return MouseButton.None;
             }   
         }
 

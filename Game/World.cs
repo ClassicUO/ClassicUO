@@ -21,7 +21,7 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
-using ClassicUO.Game.Renderer;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Concurrent;
@@ -81,13 +81,13 @@ namespace ClassicUO.Game
         public static IsometricLight Light { get; } = new IsometricLight();
 
 
-        public static void Update(double frameMS)
+        public static void Update(double totalMS, double frameMS)
         {
             if (Player != null)
             {
                 foreach (Mobile mob in Mobiles)
                 {
-                    mob.Update(frameMS);
+                    mob.Update(totalMS, frameMS);
 
                     if (mob.Distance > ViewRange)
                         mob.Dispose();
@@ -98,7 +98,7 @@ namespace ClassicUO.Game
 
                 foreach (Item item in Items)
                 {
-                    item.Update(frameMS);
+                    item.Update(totalMS, frameMS);
 
                     if (item.Distance > ViewRange && item.OnGround)
                         item.Dispose();
@@ -415,7 +415,7 @@ namespace ClassicUO.Game
     //        => Get(serial)?.Dispose();
 
 
-    //    public static void Update(double frameMS)
+    //    public static void Update(double totalMS, double frameMS)
     //    {
     //        if (Player == null)
     //            return;
@@ -446,7 +446,7 @@ namespace ClassicUO.Game
     //    }
 
 
-    //    //public static void Update(double frameMS)
+    //    //public static void Update(double totalMS, double frameMS)
     //    //{
     //    //    //if (Player != null)
     //    //    //{

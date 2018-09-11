@@ -151,7 +151,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
                         }
-                        else if (mobile.Equipment[(int)Layer.LeftHand] != null || mobile.Equipment[(int)Layer.RightHand] != null)
+                        else if (mobile.Equipment[(int)Layer.TwoHanded] != null || mobile.Equipment[(int)Layer.OneHanded] != null)
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
                         }
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.GameObjects
                             {
                                 result = (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
                             }
-                            else if ((mobile.Equipment[(int)Layer.LeftHand] != null || mobile.Equipment[(int)Layer.RightHand] != null) && !mobile.IsDead)
+                            else if ((mobile.Equipment[(int)Layer.TwoHanded] != null || mobile.Equipment[(int)Layer.OneHanded] != null) && !mobile.IsDead)
                             {
                                 if (inWar)
                                 {
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
                         }
-                        else if ((mobile.Equipment[(int)Layer.LeftHand] != null || mobile.Equipment[(int)Layer.RightHand] != null) && !mobile.IsDead)
+                        else if ((mobile.Equipment[(int)Layer.TwoHanded] != null || mobile.Equipment[(int)Layer.OneHanded] != null) && !mobile.IsDead)
                         {
                             if (inWar)
                             {
@@ -222,11 +222,11 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else if (inWar && !mobile.IsDead)
                     {
-                        if (mobile.Equipment[(int)Layer.LeftHand] != null)
+                        if (mobile.Equipment[(int)Layer.TwoHanded] != null)
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
                         }
-                        else if (mobile.Equipment[(int)Layer.RightHand] != null)
+                        else if (mobile.Equipment[(int)Layer.OneHanded] != null)
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK;
                         }
@@ -464,13 +464,10 @@ namespace ClassicUO.Game.GameObjects
                 else if (type == ANIMATION_GROUPS_TYPE.SEA_MONSTER)
                 {
                     if (mode % 2 != 0)
-                    {
                         return 6;
-                    }
-
                     return 5;
                 }
-                else if (type == ANIMATION_GROUPS_TYPE.ANIMAL)
+                else if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
                 {
                     if (mobile.Equipment[(int)Layer.Mount] != null)
                     {
@@ -516,9 +513,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if (mode % 2 != 0)
-                {
                     return 6;
-                }
 
                 return 5;
             }
@@ -532,9 +527,7 @@ namespace ClassicUO.Game.GameObjects
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
 
             if ((ia.Flags & 0x80000000) != 0)
-            {
                 type = ia.Type;
-            }
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
             {

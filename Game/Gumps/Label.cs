@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Renderer;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
@@ -34,6 +34,13 @@ namespace ClassicUO.Game.Gumps
             _gText = new RenderedText();
         }
 
+        public Label(string[] parts, string[] lines) : this()
+        {
+            X = int.Parse(parts[1]);
+            Y = int.Parse(parts[2]);
+            Hue = Hue.Parse(parts[3]);
+            Text = lines[int.Parse(parts[4])];
+        }
 
         public string Text
         {

@@ -7,11 +7,11 @@ namespace ClassicUO.Input
 {
     public class InputMouseEvent : InputEvent
     {
-        private readonly MouseButtons _button;
+        private readonly MouseButton _button;
         private readonly int _clicks;
         private readonly int _data;
         
-        public InputMouseEvent(MouseEvent type, MouseButtons button, int clicks, int x, int y, int data, SDL2.SDL.SDL_Keymod mod) : base(mod)
+        public InputMouseEvent(MouseEvent type, MouseButton button, int clicks, int x, int y, int data, SDL2.SDL.SDL_Keymod mod) : base(mod)
         {
             EventType = type;
             _button = button;
@@ -36,7 +36,7 @@ namespace ClassicUO.Input
         public int Y { get; }
         public MouseEvent EventType { get; }
         public Point Position => new Point(X, Y);
-        public MouseButtons Button => _button;
+        public MouseButton Button => _button;
         //{
         //    get
         //    {

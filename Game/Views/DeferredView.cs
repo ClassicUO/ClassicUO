@@ -19,10 +19,26 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-namespace ClassicUO.Game.GameObjects.Interfaces
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
+
+namespace ClassicUO.Game.Views
 {
-    public interface IDeferreable
+    public class DeferredView : View
     {
-        DeferredEntity DeferredObject { get; set; }
+        private readonly View _baseView;
+        private readonly Vector3 _position;
+
+        public DeferredView(DeferredEntity deferred, View baseView, Vector3 position) : base(deferred)
+        {
+            _baseView = baseView;
+            _position = position;
+        }
+
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position)
+        {
+            return _baseView.DrawInternal(spriteBatch, _position);
+        }
     }
 }

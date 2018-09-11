@@ -19,14 +19,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.GameObjects.Interfaces;
-using ClassicUO.Game.Renderer;
+using ClassicUO.Renderer;
+using ClassicUO.Renderer;
 using ClassicUO.Input;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using IUpdateable = ClassicUO.Game.GameObjects.Interfaces.IUpdateable;
+using IUpdateable = ClassicUO.Renderer.IUpdateable;
 
 namespace ClassicUO.Game.Gumps
 {
@@ -35,6 +36,9 @@ namespace ClassicUO.Game.Gumps
         private readonly List<GumpControl> _children;
         private GumpControl _parent;
         private Rectangle _bounds;
+        private Point _lastClickPosition;
+        private float _maxTimeForDClick;
+        private bool _acceptKeyboardInput, _acceptMouseInput;
 
 
         public GumpControl(GumpControl parent = null)
@@ -44,10 +48,12 @@ namespace ClassicUO.Game.Gumps
             IsEnabled = true;
             IsVisible = true;
             AllowedToDraw = true;
+
+            AcceptMouseInput = true;
         }
 
 
-        public event EventHandler<MouseEventArgs> MouseButton, MouseMove, MouseEnter, MouseLeft;
+        public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseEnter, MouseLeft, MouseClick, MouseDoubleClick;
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
         public event EventHandler<KeyboardEventArgs> Keyboard;
 
@@ -79,7 +85,31 @@ namespace ClassicUO.Game.Gumps
         public bool CanCloseWithEsc { get; set; }
         public bool IsEditable { get; set; }
         public IReadOnlyList<GumpControl> Children => _children;
-        internal bool CanDragNow { get; set; }
+
+        public virtual bool AcceptKeyboardInput
+        {
+            get
+            {
+                if (!IsEnabled || IsDisposed || !IsVisible)
+                    return false;
+
+                if (_acceptKeyboardInput)
+                    return true;
+
+                foreach (var c in _children)
+                    if (c.AcceptKeyboardInput)
+                        return true;
+
+                return false;
+            }
+            set => _acceptKeyboardInput = value;       
+        }
+
+        public virtual bool AcceptMouseInput
+        {
+            get => IsEnabled && !IsDisposed && _acceptMouseInput;
+            set => _acceptMouseInput = value;
+        }
 
         public int Width
         {
@@ -134,7 +164,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public virtual void Update(double frameMS)
+        public virtual void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
             {
@@ -147,7 +177,7 @@ namespace ClassicUO.Game.Gumps
 
                 foreach (GumpControl c in Children)
                 {
-                    c.Update(frameMS);
+                    c.Update(totalMS, frameMS);
 
                     if (w < c.Bounds.Right)
                         w = c.Bounds.Right;
@@ -207,7 +237,9 @@ namespace ClassicUO.Game.Gumps
 
             if (inbouds)
             {
-                results.Insert(0, this);
+                if (AcceptMouseInput)
+                    results.Insert(0, this);
+
                 foreach (var c in Children)
                 {
                     var cl = c.HitTest(position);
@@ -220,6 +252,20 @@ namespace ClassicUO.Game.Gumps
             }
 
             return results.Count == 0 ? null : results.ToArray();
+        }
+
+        public GumpControl GetFirstControlAcceptKeyboardInput()
+        {
+            if (_acceptKeyboardInput)
+                return this;
+            if (_children == null || _children.Count == 0)
+                return null;
+            foreach (var c in _children)
+            {
+                if (c.AcceptKeyboardInput)
+                    return c.GetFirstControlAcceptKeyboardInput();
+            }
+            return null;
         }
 
 
@@ -242,41 +288,150 @@ namespace ClassicUO.Game.Gumps
         public T[] GetControls<T>() where T : GumpControl => Children.OfType<T>().ToArray();
 
 
-        public virtual void OnMouseButton(MouseEventArgs e)
-        {        
-            if (e.Button == MouseButtons.Right && e.ButtonState == Microsoft.Xna.Framework.Input.ButtonState.Released && RootParent.CanCloseWithRightClick)
+
+
+
+        public void InvokeMouseDown(Point position, MouseButton button)
+        {
+            _lastClickPosition = position;
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            OnMouseDown(x, y, button);
+            MouseDown.Raise(new MouseEventArgs(x, y, button, Microsoft.Xna.Framework.Input.ButtonState.Pressed));
+        }
+
+        public void InvokeMouseUp(Point position, MouseButton button)
+        {
+            _lastClickPosition = position;
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            OnMouseUp(x, y, button);
+            MouseUp.Raise(new MouseEventArgs(x, y, button, Microsoft.Xna.Framework.Input.ButtonState.Released));
+        }
+
+        public void InvokeMouseEnter(Point position)
+        {
+            MouseIsOver = true;
+            if (Math.Abs(_lastClickPosition.X - position.X) + Math.Abs(_lastClickPosition.Y - position.Y) > 3)
+                _maxTimeForDClick = 0.0f;
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            OnMouseEnter(x, y);
+            MouseEnter.Raise(new MouseEventArgs(x, y));
+        }
+
+        public void InvokeMouseLeft(Point position)
+        {
+            MouseIsOver = false;
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            OnMouseLeft(x, y);
+            MouseLeft.Raise(new MouseEventArgs(x, y));
+        }
+
+        public void InvokeMouseClick(Point position, MouseButton button)
+        {
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            float ms = World.Ticks;
+
+            bool doubleClick = false;
+
+            if (_maxTimeForDClick != 0f)
+            {
+                if (ms <= _maxTimeForDClick)
+                {
+                    _maxTimeForDClick = 0;
+                    doubleClick = true;
+                }
+            }
+            else
+                _maxTimeForDClick = ms + 200;
+
+            if (button == MouseButton.Right && RootParent.CanCloseWithRightClick)
             {
                 RootParent.Dispose();
             }
             else
-                MouseButton?.Invoke(this, e);
+            {
+                if (doubleClick)
+                {
+                    OnMouseDoubleClick(x, y, button);
+                    MouseDoubleClick.Raise(new MouseEventArgs(x, y, button, Microsoft.Xna.Framework.Input.ButtonState.Pressed));
+                }
+                else
+                {
+                    OnMouseClick(x, y, button);
+                    MouseClick.Raise(new MouseEventArgs(x, y, button, Microsoft.Xna.Framework.Input.ButtonState.Pressed));
+                }
+            }
         }
 
-        public virtual void OnMouseEnter(MouseEventArgs e)
+        public void InvokeTextInput(char c)
         {
-            MouseIsOver = true;
-            MouseEnter?.Invoke(this, e);
+            OnTextInput(c);
         }
 
-        public virtual void OnMouseLeft(MouseEventArgs e)
+        public void InvokeKeyDown(SDL2.SDL.SDL_Keycode key, SDL2.SDL.SDL_Keymod mod)
         {
-            MouseIsOver = false;
-            MouseLeft?.Invoke(this, e);
+            OnKeyDown(key, mod);
         }
 
-        public virtual void OnMouseMove(MouseEventArgs e)
+        public void InvokeKeyUp(SDL2.SDL.SDL_Keycode key, SDL2.SDL.SDL_Keymod mod)
         {
-            MouseMove?.Invoke(this, e);
+            OnKeyUp(key, mod);
         }
 
-        public virtual void OnMouseWheel(MouseWheelEventArgs e)
+
+
+        protected virtual void OnMouseDown(int x, int y, MouseButton button)
         {
-            MouseWheel?.Invoke(this, e);
+
         }
 
-        public virtual void OnKeyboard(KeyboardEventArgs e)
+        protected virtual void OnMouseUp(int x, int y, MouseButton button)
         {
-            Keyboard?.Invoke(this, e);
+
+        }
+
+        protected virtual void OnMouseEnter(int x, int y)
+        {
+
+        }
+
+        protected virtual void OnMouseLeft(int x, int y)
+        {
+
+        }
+
+        protected virtual void OnMouseClick(int x, int y, MouseButton button)
+        {
+
+        }
+
+        protected virtual void OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+
+        }
+
+        protected virtual void OnTextInput(char c)
+        {
+            
+        }
+     
+        protected virtual void OnKeyDown(SDL2.SDL.SDL_Keycode key, SDL2.SDL.SDL_Keymod mod)
+        {
+
+        }
+
+        protected virtual void OnKeyUp(SDL2.SDL.SDL_Keycode key, SDL2.SDL.SDL_Keymod mod)
+        {
+
+        }
+
+        protected virtual bool Contains(int x, int y)
+        {
+            return true;
         }
 
         public virtual void Dispose()

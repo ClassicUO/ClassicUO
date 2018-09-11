@@ -21,10 +21,11 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
-namespace ClassicUO.Game.Renderer.Views
+namespace ClassicUO.Game.Views
 {
     public class ItemView : View
     {
@@ -81,6 +82,9 @@ namespace ClassicUO.Game.Renderer.Views
             {
                 if (_originalGraphic != item.DisplayedGraphic || Texture == null || Texture.IsDisposed)
                 {
+                    if (Texture != null && !Texture.IsDisposed)
+                        Texture.Dispose();
+
                     _originalGraphic = item.DisplayedGraphic;
                     Texture = TextureManager.GetOrCreateStaticTexture(_originalGraphic);
                     Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
@@ -89,7 +93,8 @@ namespace ClassicUO.Game.Renderer.Views
                 if (_hue != GameObject.Hue)
                 {
                     _hue = GameObject.Hue;
-                    HueVector = RenderExtentions.GetHueVector(_hue, TileData.IsPartialHue((long)item.ItemData.Flags), false, false);
+
+                    HueVector = RenderExtentions.GetHueVector(_hue, TileData.IsPartialHue((long)item.ItemData.Flags), TileData.IsTransparent((long)item.ItemData.Flags), false);
                 }
 
 

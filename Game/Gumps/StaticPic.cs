@@ -19,7 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.Renderer;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
@@ -28,7 +28,7 @@ namespace ClassicUO.Game.Gumps
     {
         private readonly Graphic _graphic;
 
-        public StaticPic(Graphic graphic,  Hue hue) : base()
+        public StaticPic(Graphic graphic, Hue hue) : base()
         {
             _graphic = graphic;
             Hue = hue;
@@ -36,7 +36,7 @@ namespace ClassicUO.Game.Gumps
             CanMove = true;
         }
 
-        public StaticPic(GumpControl parent,  string[] parts) : this(Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue)0)
+        public StaticPic(string[] parts) : this(Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue)0)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Gumps
         public Hue Hue { get; set; }
 
 
-        public override void Update(double frameMS)
+        public override void Update(double totalMS, double frameMS)
         {
             if (Texture == null || Texture.IsDisposed)
             {
@@ -53,7 +53,7 @@ namespace ClassicUO.Game.Gumps
                 Width = Texture.Width;
                 Height = Texture.Height;
             }
-            base.Update(frameMS);
+            base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)

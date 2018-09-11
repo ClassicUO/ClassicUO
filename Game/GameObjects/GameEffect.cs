@@ -19,7 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.GameObjects.Interfaces;
+using ClassicUO.Renderer;
 using ClassicUO.IO.Resources;
 using System.Collections.Generic;
 
@@ -54,7 +54,7 @@ namespace ClassicUO.Game.GameObjects
         public long LastChangeFrameTime { get; set; }
         public bool IsEnabled { get; set; }
         public Graphic AnimationGraphic { get; set; }
-
+        public bool IsMoving => Target != null || (TargetX != 0 && TargetY != 0);
         public DeferredEntity DeferredObject { get; set; }
 
 

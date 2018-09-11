@@ -19,37 +19,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Renderer.Views;
-using ClassicUO.IO.Resources;
-using Microsoft.Xna.Framework;
-using System.Collections.Generic;
-
-namespace ClassicUO.Game.Renderer
+namespace ClassicUO.Game.GameObjects
 {
-    public static class GameTextRenderer
+    public interface IDeferreable
     {
-        private static readonly List<ViewWithDrawInfo> _views = new List<ViewWithDrawInfo>();
-
-        public static void AddView(View view,  Vector3 position) => _views.Add(new ViewWithDrawInfo() { View = view, DrawPosition = position });
-
-        public static void Render(SpriteBatchUI spriteBatch)
-        {
-            if (_views.Count > 0)
-            {
-                for (int i = 0; i < _views.Count; i++)
-                {
-                    _views[i].View.Draw(spriteBatch, _views[i].DrawPosition);
-                }
-
-                _views.Clear();
-            }
-        }
-
-        struct ViewWithDrawInfo
-        {
-            public View View;
-            public Vector3 DrawPosition;
-        }
+        DeferredEntity DeferredObject { get; set; }
     }
 }

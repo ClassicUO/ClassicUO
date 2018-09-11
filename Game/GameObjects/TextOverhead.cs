@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using ClassicUO.Game.Renderer;
-using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Renderer;
+using ClassicUO.Game.Views;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -39,9 +39,9 @@ namespace ClassicUO.Game.GameObjects
             return new TextOverheadView(this, _maxWidth, _hue, _font, _isUnicode, _style);
         }
 
-        public override void Update(double frameMS)
+        public override void Update(double totalMS, double frameMS)
         {
-            base.Update(frameMS);
+            base.Update(totalMS, frameMS);
 
             if (IsPersistent || IsDisposed)
                 return;

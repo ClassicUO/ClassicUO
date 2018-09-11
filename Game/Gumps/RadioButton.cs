@@ -26,32 +26,25 @@ namespace ClassicUO.Game.Gumps
 {
     public class RadioButton : Checkbox
     {
-        public RadioButton(ushort inactive,  ushort active) : base(inactive, active)
-        {
+        //public RadioButton(ushort inactive,  ushort active) : base(inactive, active)
+        //{
 
+        //}
+
+        public RadioButton(int group, string[] parts, string[] lines) : base(parts, lines)
+        {
+            GroupIndex = group;
         }
 
         public int GroupIndex { get; set; }
 
-        public override bool IsChecked
+        protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            get => base.IsChecked;
-            set
+            if (Parent != null)
             {
-                if (value)
-                {
-                    HandleClick();
-                }
-
-                base.IsChecked = value;
+                HandleClick();
             }
-        }
-
-
-        public override void OnMouseButton(MouseEventArgs e)
-        {
-            HandleClick();
-            base.OnMouseButton(e);
+            base.OnMouseClick(x, y, button);
         }
 
 

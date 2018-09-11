@@ -19,6 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 using Microsoft.Xna.Framework.Graphics;
@@ -27,7 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace ClassicUO.Game.Renderer
+namespace ClassicUO.Renderer
 {
     public class SpriteTexture : Texture2D
     {

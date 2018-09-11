@@ -19,10 +19,26 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-namespace ClassicUO.Game.GameObjects.Interfaces
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
+
+namespace ClassicUO.Renderer
 {
-    public interface IUpdateable
+    public interface IDrawable
     {
-        void Update(double frameMS);
+        bool AllowedToDraw { get; set; }
+        SpriteTexture Texture { get; set; }
+        Vector3 HueVector { get; set; }
+
+        bool Draw(SpriteBatch3D spriteBatch,  Vector3 position);
+    }
+
+    public interface IDrawableUI
+    {
+        bool AllowedToDraw { get; set; }
+        SpriteTexture Texture { get; set; }
+        Vector3 HueVector { get; set; }
+
+        bool Draw(SpriteBatchUI spriteBatch, Vector3 position);
     }
 }

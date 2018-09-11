@@ -19,34 +19,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.GameObjects;
-using Microsoft.Xna.Framework;
-
-namespace ClassicUO.Game.Renderer.Views
+namespace ClassicUO.Renderer
 {
-    public class TextOverheadView : View
+    public interface IUpdateable
     {
-        private RenderedText _text;
-
-        public TextOverheadView(TextOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent)
-        {
-            _text = new RenderedText(parent.Text)
-            {
-                MaxWidth = maxwidth, Hue = hue, Font = font, IsUnicode = isunicode, FontStyle = style
-            };
-
-            Texture = _text.Texture;
-        }
-
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position)
-        {
-            if (!AllowedToDraw || GameObject.IsDisposed)
-                return false;
-
-            Texture.Ticks = World.Ticks;
-   
-            return base.Draw(spriteBatch, position);
-        }
-
+        void Update(double totalMS, double frameMS);
     }
 }

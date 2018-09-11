@@ -23,7 +23,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Runtime.InteropServices;
 
-namespace ClassicUO.Game.Renderer
+namespace ClassicUO.Renderer
 {
     public struct SpriteVertex : IVertexType
     {

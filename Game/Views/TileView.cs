@@ -21,9 +21,10 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Renderer.Views
+namespace ClassicUO.Game.Views
 {
     public class TileView : View
     {
@@ -43,7 +44,10 @@ namespace ClassicUO.Game.Renderer.Views
 
         public TileView(Tile tile) : base(tile)
         {
+            tile.IsStretched = !(tile.TileData.TexID <= 0 && IO.Resources.TileData.IsWet((long)tile.TileData.Flags));
             AllowedToDraw = !tile.IsIgnored;
+            tile.AverageZ = SortZ;
+            tile.MinZ = tile.Position.Z;
         }
 
 
@@ -76,6 +80,7 @@ namespace ClassicUO.Game.Renderer.Views
                 UpdateStreched(World.Map);
                 _needUpdateStrechedTile = false;
             }
+
             return !tile.IsStretched ? base.Draw(spriteBatch, position) : Draw3DStretched(spriteBatch, position);
         }
 
@@ -118,9 +123,9 @@ namespace ClassicUO.Game.Renderer.Views
                 sbyte low = 0, high = 0;
                 sbyte sort = (sbyte)map.GetAverageZ(GameObject.Position.Z, leftZ, rightZ, bottomZ, ref low, ref high);
                 tile.MinZ = low;
+                tile.AverageZ = sort;
                 if (sort != SortZ)
                 {
-                    tile.AverageZ = sort;
                     SortZ = sort;
                     map.GetTile((short)GameObject.Position.X, (short)GameObject.Position.Y).ForceSort();
                 }

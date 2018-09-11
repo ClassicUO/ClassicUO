@@ -19,7 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.Renderer;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -48,7 +48,7 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public override void Update(double frameMS)
+        public override void Update(double totalMS, double frameMS)
         {
             if (_gumpTexture[0] == null)
             {
@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Gumps
                 }
             }
 
-            base.Update(frameMS);
+            base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)

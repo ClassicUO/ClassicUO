@@ -19,13 +19,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Game.Views;
 
 namespace ClassicUO.Game.GameObjects
 {
     public class AnimatedItemEffect : GameEffect
     {
-        public AnimatedItemEffect(Graphic graphic,  Hue hue,  int duration)
+        public AnimatedItemEffect(Graphic graphic, Hue hue, int duration)
         {
             Graphic = graphic;
             Hue = hue;
@@ -34,25 +34,25 @@ namespace ClassicUO.Game.GameObjects
             Load();
         }
 
-        public AnimatedItemEffect(GameObject source,  Graphic graphic,  Hue hue,  int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(GameObject source, Graphic graphic, Hue hue, int duration) : this(graphic, hue, duration)
         {
             SetSource(source);
         }
 
-        public AnimatedItemEffect(Serial source,  Graphic graphic,  Hue hue,  int duration) : this(source, 0, 0, 0, graphic, hue, duration)
+        public AnimatedItemEffect(Serial source, Graphic graphic, Hue hue, int duration) : this(source, 0, 0, 0, graphic, hue, duration)
         {
         }
 
-        public AnimatedItemEffect(int sourceX,  int sourceY,  int sourceZ,  Graphic graphic,  Hue hue,  int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(int sourceX,  int sourceY, int sourceZ, Graphic graphic, Hue hue, int duration) : this(graphic, hue, duration)
         {
             SetSource(sourceX, sourceY, sourceZ);
         }
 
-        public AnimatedItemEffect(Serial sourceSerial,  int sourceX,  int sourceY,  int sourceZ,  Graphic graphic,  Hue hue,  int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(Serial sourceSerial, int sourceX, int sourceY, int sourceZ, Graphic graphic, Hue hue, int duration) : this(graphic, hue, duration)
         {
             sbyte zSrc = (sbyte)sourceZ;
 
-            GameObject source = World.Get(sourceSerial);
+            Entity source = World.Get(sourceSerial);
             if (source != null)
             {
                 if (sourceSerial.IsMobile)
@@ -75,7 +75,11 @@ namespace ClassicUO.Game.GameObjects
 
                     SetSource(item);
                 }
+                else
+                    SetSource(sourceX, sourceY, sourceZ);
             }
+            else
+                SetSource(sourceX, sourceY, sourceZ);
         }
 
         public int Duration { get; set; }
@@ -98,14 +102,16 @@ namespace ClassicUO.Game.GameObjects
             else
             {
                 (int x, int y, int z) = GetSource();
-                Position = new Position((ushort)x, (ushort)y, (sbyte)z);
+
+                if (Position.X != x || Position.Y != y || Position.Z != z)
+                    Position = new Position((ushort)x, (ushort)y, (sbyte)z);
             }
         }
 
 
-        public override void Update(double frameMS)
+        public override void Update(double totalMS, double frameMS)
         {
-            base.Update(frameMS);
+            base.Update(totalMS, frameMS);
 
             if (!IsDisposed)
             {

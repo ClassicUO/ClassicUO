@@ -384,8 +384,8 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateAbilities()
         {
-            Item right = Equipment[(int)Layer.RightHand];
-            Item left = Equipment[(int)Layer.LeftHand];
+            Item right = Equipment[(int)Layer.OneHanded];
+            Item left = Equipment[(int)Layer.TwoHanded];
 
             _ability[0] = Ability.None;
             _ability[1] = Ability.None;

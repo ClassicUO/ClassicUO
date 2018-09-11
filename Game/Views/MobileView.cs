@@ -21,11 +21,12 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
-namespace ClassicUO.Game.Renderer.Views
+namespace ClassicUO.Game.Views
 {
     public class MobileView : View
     {
@@ -41,7 +42,7 @@ namespace ClassicUO.Game.Renderer.Views
         //public new Mobile GameObject => (Mobile)base.GameObject;
 
 
-        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position)
             => !PreDraw(position) && DrawInternal(spriteBatch, position);
 
 

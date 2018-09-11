@@ -19,7 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.Renderer.Views;
+using ClassicUO.Game.Views;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -272,9 +272,9 @@ namespace ClassicUO.Game.GameObjects
             _isSA_Poisoned = value;
         }
 
-        public override void Update(double frameMS)
+        public override void Update(double totalMS, double frameMS)
         {
-            base.Update(frameMS);
+            base.Update(totalMS, frameMS);
             ProcessAnimation();
         }
 
@@ -560,6 +560,11 @@ namespace ClassicUO.Game.GameObjects
 
                 Graphic id = GetGraphicForAnimation();
                 int animGroup = GetGroupForAnimation(this, id);
+                if (animGroup == 64 || animGroup == 65)
+                {
+                    animGroup = InWarMode ? 65 : 64;
+                    AnimationGroup = (byte)animGroup;
+                }
 
                 Item mount = Equipment[(int)Layer.Mount];
                 if (mount != null)

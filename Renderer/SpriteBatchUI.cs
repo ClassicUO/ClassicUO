@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ClassicUO.Game.Renderer
+namespace ClassicUO.Renderer
 {
     public class SpriteBatchUI : SpriteBatch3D
     {

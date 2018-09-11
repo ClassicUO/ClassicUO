@@ -20,14 +20,16 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.GameObjects.Interfaces;
+using ClassicUO.Renderer;
 using ClassicUO.Game.Map;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;
-using IDrawable = ClassicUO.Game.GameObjects.Interfaces.IDrawable;
+using IDrawable = ClassicUO.Renderer.IDrawable;
 
-namespace ClassicUO.Game.Renderer.Views
+namespace ClassicUO.Game.Views
 {
     public abstract class View : IDrawable
     {
@@ -53,6 +55,7 @@ namespace ClassicUO.Game.Renderer.Views
         protected float Rotation { get; set; }
         protected int TextureWidth { get; set; } = 1;
 
+        public bool IsSelected { get; set; }
 
 
         protected bool PreDraw(Vector3 position)
@@ -195,7 +198,6 @@ namespace ClassicUO.Game.Renderer.Views
                 vertex[3].Position.Y += Bounds.Height;
             }
 
-
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
@@ -224,7 +226,7 @@ namespace ClassicUO.Game.Renderer.Views
             {
                 var v = GameObject.OverHeads[i].GetView();
                 v.Bounds = new Rectangle(v.Texture.Width / 2 - 22, offY + v.Texture.Height, v.Texture.Width, v.Texture.Height);
-                GameTextRenderer.AddView(v, position);
+                GameTextManager.AddView(v, position);
                 offY += v.Texture.Height;
             }
         }

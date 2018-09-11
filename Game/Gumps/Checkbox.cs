@@ -19,7 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.Renderer;
+using ClassicUO.Renderer;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -44,30 +44,41 @@ namespace ClassicUO.Game.Gumps
             Height = t.Height;
 
             CanMove = false;
+            AcceptMouseInput = true;
         }
 
 
-        public virtual bool IsChecked { get; set; }
+        public Checkbox(string[] parts, string[] lines) : this(ushort.Parse(parts[3]), ushort.Parse(parts[4]))
+        {
+            X = int.Parse(parts[1]);
+            Y = int.Parse(parts[2]);
+
+            IsChecked = parts[5] == "1";
+            LocalSerial = Serial.Parse(parts[6]);
+        }
+
+
+        public bool IsChecked { get; set; }
+
 
         public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
             bool ok = base.Draw(spriteBatch,  position);
 
             for (int i = 0; i < _textures.Length; i++)
-                _textures[i].Ticks = World.Ticks;
-
+            {
+                if (_textures[i] != null)
+                    _textures[i].Ticks = World.Ticks;
+            }
             spriteBatch.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
 
             return ok;
         }
 
-
-        public override void OnMouseButton(MouseEventArgs e)
+        protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (e.ButtonState == ButtonState.Released && e.Button == Input.MouseButtons.Left)
-            {
-                IsChecked = !IsChecked;
-            }
+            IsChecked = !IsChecked;
         }
+
     }
 }
