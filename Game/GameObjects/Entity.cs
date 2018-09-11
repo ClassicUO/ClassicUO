@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,12 +19,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -48,41 +45,25 @@ namespace ClassicUO.Game.GameObjects
 
 
         private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
-
         protected Delta _delta;
         private Direction _direction;
         private Flags _flags;
-
         private Graphic _graphic;
         private Hue _hue;
-
-
         protected long _lastAnimationChangeTime;
         private string _name;
-
         private Position _position;
-       // private Dictionary<Serial, Item> _items;
 
         protected Entity(Serial serial) : base(World.Map)
         {
             Serial = serial;
-            //_items = new Dictionary<Serial, Item>();
             Items = new EntityCollection<Item>();
             _position = base.Position;
-            //PositionChanged += OnPositionChanged;
         }
 
         public EntityCollection<Item> Items { get; }
-        //public IReadOnlyDictionary<Serial, Item> Items => _items;
         public Serial Serial { get; }
         public IReadOnlyList<Property> Properties => (IReadOnlyList<Property>)_properties.Values;
-
-        //public void AddItem(Item item)
-        //{
-        //    _items[item.Serial] = item;
-        //}
-
-        //public void RemoveItem(Serial serial) => _items.Remove(serial);
 
         public override Graphic Graphic
         {
@@ -102,7 +83,7 @@ namespace ClassicUO.Game.GameObjects
             get => _hue;
             set
             {
-                ushort fixedColor = (ushort)(value & 0x3FFF);
+                ushort fixedColor = (ushort)( value & 0x3FFF );
 
                 if (fixedColor > 0)
                 {
@@ -111,11 +92,11 @@ namespace ClassicUO.Game.GameObjects
                         fixedColor = 1;
                     }
 
-                    fixedColor |= (ushort)(value & 0xC000);
+                    fixedColor |= (ushort)( value & 0xC000 );
                 }
                 else
                 {
-                    fixedColor = (ushort)(value & 0x8000);
+                    fixedColor = (ushort)( value & 0x8000 );
                 }
 
                 if (_hue != fixedColor)
@@ -244,10 +225,7 @@ namespace ClassicUO.Game.GameObjects
             base.Dispose();
         }
 
-        protected virtual void OnPositionChanged(object sender, EventArgs e)
-        {
-            Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
-        }
+        protected virtual void OnPositionChanged(object sender, EventArgs e) => Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
 
         public static implicit operator Serial(Entity entity)
         {
@@ -264,7 +242,7 @@ namespace ClassicUO.Game.GameObjects
             return Serial.GetHashCode();
         }
 
-       
+
 
         public virtual void ProcessAnimation()
         {

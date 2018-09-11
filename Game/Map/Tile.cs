@@ -20,12 +20,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Renderer;
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ClassicUO.Game.Map
 {
@@ -53,7 +51,7 @@ namespace ClassicUO.Game.Map
             {
                 if (_needSort)
                 {
-                    RemoveDuplicates(); 
+                    RemoveDuplicates();
                     TileSorter.Sort(_objectsOnTile);
                     _needSort = false;
                 }
@@ -106,7 +104,7 @@ namespace ClassicUO.Game.Map
             //        {
             //            if (tile.IsStretched)
             //            {
-            //                //tile.GetView();
+            //                //tile.View;
             //                priorityZ = (short)(tile.AverageZ - 1);
             //            }
             //            else
@@ -277,7 +275,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public List<GameObject> GetItemsBetweenZ(int z0,  int z1)
+        public List<GameObject> GetItemsBetweenZ(int z0, int z1)
         {
             var items = _itemsAtZ;
             _itemsAtZ.Clear();
@@ -322,7 +320,7 @@ namespace ClassicUO.Game.Map
                     }
                 }
 
-                else if (list[i] is Tile tile && tile.GetView().SortZ >= z + 12)
+                else if (list[i] is Tile tile && tile.View.SortZ >= z + 12)
                 {
                     ground = list[i];
                 }

@@ -109,7 +109,7 @@ namespace ClassicUO.Game.Views
             else
             {
                 if (!item.Effect.IsDisposed)
-                    item.Effect.GetView().Draw(spriteBatch, position);
+                    item.Effect.View.Draw(spriteBatch, position);
             }
 
             return true;

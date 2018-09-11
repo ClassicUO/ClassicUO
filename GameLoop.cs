@@ -686,7 +686,7 @@ namespace ClassicUO
                                     && !(obj is Tile))
                                     continue;
 
-                                var view = obj.GetView();
+                                var view = obj.View;
 
                                 //if (MouseOverList<SpriteBatch3D>.IsMouseInObjectIsometric(vertices, Service.Get<InputManager>().MousePosition))
                                 //    vertices[0].Hue = vertices[1].Hue = vertices[2].Hue = vertices[3].Hue = RenderExtentions.GetHueVector(33);
@@ -727,7 +727,7 @@ namespace ClassicUO
 
                 //    Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
 
-                //    obj.GetView().Draw(sb3D, isometricPosition);
+                //    obj.View.Draw(sb3D, isometricPosition);
 
                 //}
 

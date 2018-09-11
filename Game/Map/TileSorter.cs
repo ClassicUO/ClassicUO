@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        private static int Compare(GameObject x,  GameObject y)
+        private static int Compare(GameObject x, GameObject y)
         {
             (int xZ, int xType, int xThreshold, int xTierbreaker) = GetSortValues(x);
             (int yZ, int yType, int yThreshold, int yTierbreaker) = GetSortValues(y);
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Map
                 case Mobile mobile:
                     return (mobile.Position.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int)mobile.Serial.Value);
                 case Tile tile:
-                    return (tile.GetView().SortZ, 0, 0, 0);
+                    return (tile.View.SortZ, 0, 0, 0);
                 case Static staticitem:
                     return (staticitem.Position.Z, 1, (staticitem.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground((long)staticitem.ItemData.Flags) ? 0 : 1), staticitem.Index);
                 case Item item:
