@@ -186,52 +186,53 @@ namespace ClassicUO.Game.Map
             _needSort = true;
         }
 
-        public void Clear()
-        {
+        //public void Clear()
+        //{
 
-            for (int k = 0; k < _objectsOnTile.Count; k++)
-            {
-                var obj = _objectsOnTile[k];
-                if (obj is Tile || obj is Static)
-                {
-                    int count = _objectsOnTile.Count;
-                    obj.Dispose();
-                    if (count == _objectsOnTile.Count)
-                        _objectsOnTile.RemoveAt(k);
-                    k--;
-                }
-            }
+        //    for (int k = 0; k < _objectsOnTile.Count; k++)
+        //    {
+        //        var obj = _objectsOnTile[k];
+        //        if (obj is Tile || obj is Static)
+        //        {
+        //            int count = _objectsOnTile.Count;
+        //            obj.Dispose();
+        //            if (count == _objectsOnTile.Count)
+        //                _objectsOnTile.RemoveAt(k);
+        //            k--;
+        //        }
+        //    }
 
-            _statics.Clear();
+        //    _statics.Clear();
 
-            //for (int i = 0; i < _objectsOnTile.Count; i++)
-            //{
-            //    var obj = _objectsOnTile[i];
+        //    //for (int i = 0; i < _objectsOnTile.Count; i++)
+        //    //{
+        //    //    var obj = _objectsOnTile[i];
 
-            //    if (obj is Entity || obj is Tile)
-            //        continue;
+        //    //    if (obj is Entity || obj is Tile)
+        //    //        continue;
 
-            //    int count = _objectsOnTile.Count;
+        //    //    int count = _objectsOnTile.Count;
 
-            //    obj.Dispose();
+        //    //    obj.Dispose();
 
-            //    if (count == _objectsOnTile.Count)
-            //    {
-            //        _objectsOnTile.RemoveAt(i);
-            //    }
+        //    //    if (count == _objectsOnTile.Count)
+        //    //    {
+        //    //        _objectsOnTile.RemoveAt(i);
+        //    //    }
 
-            //    i--;           
-            //}
+        //    //    i--;           
+        //    //}
 
-            //_objectsOnTile.Clear();
+        //    //_objectsOnTile.Clear();
 
-            //DisposeView();
-            //Graphic = 0;
-            //Position = Position.Invalid;
-            //_tileData = null;
-            //_needSort = false;
-            //_statics.Clear();
-        }
+        //    //DisposeView();
+        //    //Graphic = 0;
+        //    //Position = Position.Invalid;
+        //    //_tileData = null;
+        //    //_needSort = false;
+        //    //_statics.Clear();
+        //}
+
 
         private void RemoveDuplicates()
         {

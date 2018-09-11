@@ -44,11 +44,11 @@ namespace ClassicUO.Game.Map
             //Chunks = new FacetChunk[MAX_CHUNKS * MAX_CHUNKS];
 
             MapBlockIndex = IO.Resources.Map.MapBlocksSize[Index][0] * IO.Resources.Map.MapBlocksSize[Index][1];
-            Chunks = new FacetChunk[MapBlockIndex];
+            Chunks = new MapChunk[MapBlockIndex];
         }
 
         public int Index { get; }
-        public FacetChunk[] Chunks { get; private set; }
+        public MapChunk[] Chunks { get; private set; }
         public int MapBlockIndex { get; set; }
         public Point Center
         {
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Map
             if (chuck == null)
             {
                 _usedIndices.Add(block);
-                chuck = new FacetChunk((ushort)cellX, (ushort)cellY);
+                chuck = new MapChunk((ushort)cellX, (ushort)cellY);
                 chuck.Load(Index);
             }
             chuck.LastAccessTime = World.Ticks;
@@ -221,7 +221,7 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < _usedIndices.Count; i++)
             {
                 ref var block = ref Chunks[_usedIndices[i]];
-                if (World.Ticks - block.LastAccessTime > 3000)
+                if (World.Ticks - block.LastAccessTime > 3000 && block.HasNoExternalData())
                 {
                     block.Unload();
                     block = null;
@@ -306,10 +306,11 @@ namespace ClassicUO.Game.Map
                     if (tile == null)
                     {
                         _usedIndices.Add(cellindex);
-                        tile = new FacetChunk((ushort)i, (ushort)j);
-
+                        tile = new MapChunk((ushort)i, (ushort)j);
                         tile.Load(Index);
                     }
+
+                    tile.LastAccessTime = World.Ticks;
                 }
             }
         }

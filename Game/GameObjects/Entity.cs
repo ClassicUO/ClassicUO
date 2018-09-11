@@ -179,7 +179,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public virtual bool Exists => World.Contains(Serial);
-        public int Distance => DistanceTo(World.Player);
 
         public DeferredEntity DeferredObject { get; set; }
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
@@ -265,10 +264,7 @@ namespace ClassicUO.Game.GameObjects
             return Serial.GetHashCode();
         }
 
-        public int DistanceTo(Entity entity)
-        {
-            return Position.DistanceTo(entity.Position);
-        }
+       
 
         public virtual void ProcessAnimation()
         {

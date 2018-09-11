@@ -82,6 +82,9 @@ namespace ClassicUO.Game.GameObjects
         public Facet Map { get; set; }
         public bool IsDisposed { get; private set; }
 
+        public int Distance => DistanceTo(World.Player);
+        public int DistanceTo(GameObject entity) => Position.DistanceTo(entity.Position);
+
 
         protected virtual View CreateView()
         {
