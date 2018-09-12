@@ -27,6 +27,8 @@ using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Gumps;
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -212,6 +214,8 @@ namespace ClassicUO
             //_texture.SetData(new Color[1] { Color.White });
 
             // END TEST
+
+            GumpManager.Add(new DevConsole());
 
             base.LoadContent();
         }

@@ -2203,6 +2203,275 @@ namespace ClassicUO.IO.Resources
 
             return textHeight;
         }
+
+        public static int GetHeightUnicode(byte font, string str, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        {
+            if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
+                return 0;
+
+            if (width <= 0)
+                width = GetWidthUnicode(font, str);
+
+            var info = GetInfoUnicode(font, str, str.Length, align, flags, width);
+
+            int textHeight = 0;
+
+            while (info != null)
+            {
+                if (IsUsingHTML)
+                    textHeight += MAX_HTML_TEXT_HEIGHT;
+                else
+                    textHeight += info.MaxHeight;
+
+                var ptr = info;
+                info = info.Next;
+                ptr.Data.Clear();
+                ptr = null;
+            }
+
+            return textHeight;
+        }
+
+        public static unsafe int CalculateCaretPosUnicode(byte font, string str, int x, int y, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        {
+            if (x < 0 || y < 0 || font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
+                return 0;
+
+            if (width <= 0)
+                width = GetWidthUnicode(font, str);
+
+            if (x >= width)
+                return str.Length;
+
+            var info = GetInfoUnicode(font, str, str.Length, align, flags, width);
+            if (info == null)
+                return 0;
+
+            int height = 0;
+
+            uint* table = (uint*)_unicodeFontAddress[font];
+            int pos = 0;
+            bool found = false;
+
+            while (info != null)
+            {
+                height += info.MaxHeight;
+                width = 0;
+
+                if (!found)
+                {
+                    if (y < height)
+                    {
+                        int len = info.CharCount;
+
+                        for (int i = 0; i < len; i++)
+                        {
+                            var ch = info.Data[i].Item;
+                            int offset = (int)table[ch];
+                            if (offset > 0 && offset != 0xFFFFFFFF)
+                            {
+                                byte* cptr = (byte*)( (IntPtr)table + offset );
+                                width += ( cptr[0] + cptr[2] + 1 );
+                            }
+                            else if (ch == ' ')
+                                width += UNICODE_SPACE_WIDTH;
+
+                            if (width > x)
+                                break;
+
+                            pos++;
+                        }
+
+                        found = true;
+                    }
+                    else
+                    {
+                        pos += info.CharCount;
+                        pos++;
+                    }
+                }
+
+                var ptr = info;
+                info = info.Next;
+                ptr.Data.Clear();
+                ptr = null;
+            }
+
+            if (pos > str.Length)
+                pos = str.Length;
+
+            return pos;
+        }
+
+        public static unsafe (int, int) GetCaretPosUnicode(byte font, string str, int pos, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        {
+            if (pos < 1 || font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
+                return (0, 0);
+
+            if (width <= 0)
+                width = GetWidthUnicode(font, str);
+
+            var info = GetInfoUnicode(font, str, str.Length, align, flags, width);
+            if (info == null)
+                return (0, 0);
+
+            uint* table = (uint*)_unicodeFontAddress[font];
+
+            int x = 0;
+            int y = 0;
+
+            while (info != null)
+            {
+                x = 0;
+                int len = info.CharCount;
+                if (info.CharStart == pos)
+                    return (x, y);
+
+                if (pos <= info.CharStart + len)
+                {
+                    for (int i = 0; i < len; i++)
+                    {
+                        var ch = info.Data[i].Item;
+                        int offset = (int)table[ch];
+
+                        if (offset > 0 && offset != 0xFFFFFFFF)
+                        {
+                            byte* cptr = (byte*)( (IntPtr)table + offset );
+                            x += cptr[0] + cptr[2] + 1;
+                        }
+                        else if (ch == ' ')
+                            x += UNICODE_SPACE_WIDTH;
+
+                        if (info.CharStart + i + 1 == pos)
+                            return (x, y);
+                    }
+                }
+
+
+                if (info.Next != null)
+                    y += info.MaxHeight;
+
+                var ptr = info;
+                info = info.Next;
+                ptr.Data.Clear();
+                ptr = null;
+            }
+            return (x, y);
+        }
+
+        public static unsafe int CalculateCaretPosASCII(byte font, string str, int x, int y, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        {
+            if (font >= FontCount || x < 0 || y < 0 || string.IsNullOrEmpty(str))
+                return 0;
+
+            FontData fd = _font[font];
+            if (width <= 0)
+                width = GetWidthASCII(font, str);
+
+            if (x >= width)
+                return str.Length;
+
+            var info = GetInfoASCII(font, str, str.Length, align, flags, width);
+            if (info == null)
+                return 0;
+
+            int height = GetHeightASCII(info);
+
+            var ptr = info;
+
+            height = 0;
+            int pos = 0;
+            bool found = false;
+
+            while (ptr != null)
+            {
+                info = ptr;
+
+                height += ptr.MaxHeight;
+                width = 0;
+
+                if (!found)
+                {
+                    if (y < height)
+                    {
+                        int len = ptr.CharCount;
+
+                        for (int i = 0; i < len; i++)
+                        {
+                            byte index = _fontIndex[ptr.Data[i].Item];
+
+                            width += fd.Chars[index].Width;
+
+                            if (width > x)
+                                break;
+                            pos++;
+                        }
+
+                        found = true;
+                    }
+                    else
+                    {
+                        pos += ptr.CharCount;
+                        pos++;
+                    }
+                }
+
+                ptr = ptr.Next;
+                info.Data.Clear();
+                info = null;
+            }
+
+            return pos;
+        }
+
+        public static (int, int) GetCaretPosASCII(byte font, string str, int pos, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        {
+            if (font >= FontCount || pos < 1 || string.IsNullOrEmpty(str))
+                return (0, 0);
+
+            FontData fd = _font[font];
+            if (width <= 0)
+                width = GetWidthASCII(font, str);
+
+            var info = GetInfoASCII(font, str, str.Length, align, flags, width);
+            if (info == null)
+                return (0, 0);
+
+            int height = 0;
+            var ptr = info;
+
+            int x = 0;
+            int y = 0;
+
+            while (info != null)
+            {
+                x = 0;
+                int len = info.CharCount;
+                if (info.CharStart == pos)
+                    return (x, y);
+
+                if (pos <= info.CharStart + len)
+                {
+                    for (int i = 0; i < len; i++)
+                    {
+                        byte index = _fontIndex[ptr.Data[i].Item];
+                        x += fd.Chars[index].Width;
+
+                        if (info.CharStart + i + 1 == pos)
+                            return (x, y);
+                    }
+                }
+
+                if (info.Next != null)
+                    y += info.MaxHeight;
+
+                var ptr1 = info;
+                info = info.Next;
+                ptr1.Data.Clear();
+                ptr1 = null;
+            }
+            return (x, y);
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]

@@ -43,7 +43,8 @@ namespace ClassicUO.Renderer
     {
         private Rectangle _bounds;
         private string _text;
-        private SpriteTexture _texture;
+        private Fonts.FontTexture _texture;
+        private readonly string[] _lines;
 
         public RenderedText(string text = "")
         {
@@ -71,17 +72,17 @@ namespace ClassicUO.Renderer
             get => _text;
             set
             {
-                if (!string.IsNullOrEmpty(value) && _text != value)
+                if (_text != value)
                 {
                     _text = value;
                     Texture = CreateTexture();
+                    Lines = _text.Split(new char[2] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
                 }
             }
         }
-
-
+        public int LinesCount => _texture == null || _texture.IsDisposed ? 0 : _texture.LinesCount;
+        public string[] Lines { get; private set; }
         public bool IsPartialHue { get; set; }
-
         public bool IsDisposed { get; private set; }
 
         public Rectangle Bounds
@@ -126,7 +127,7 @@ namespace ClassicUO.Renderer
             {
                 if (_texture != null && !_texture.IsDisposed)
                     _texture.Dispose();
-                _texture = value;
+                _texture = (Fonts.FontTexture)value;
             }
         }
         public bool AllowedToDraw { get; set; } = true;

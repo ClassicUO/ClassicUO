@@ -220,6 +220,9 @@ namespace ClassicUO.Game.Gumps
         }
 
 
+        public static void Add(Gump gump) => _gumps.Add(gump);
+
+
         private static void HandleKeyboardInput()
         {
             if (KeyboardFocusControl != null)

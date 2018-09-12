@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    class Gump : GumpControl
+    public class Gump : GumpControl
     {
         public Gump(Serial local, Serial server) : base()
         {

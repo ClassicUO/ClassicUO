@@ -3,14 +3,31 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    class DevConsole : GumpControl
+    class DevConsole : Gump
     {
-        const ushort BLACK = 0x62E;
-        const ushort GRAY = 0x640;
+        const ushort BLACK = 0x243A;
+        const ushort GRAY = 0x248A;
 
-        public DevConsole() : base()
+        public DevConsole() : base(0, 0)
         {
+            CanCloseWithRightClick = false;
+            CanCloseWithEsc = false;
+            CanMove = true;
 
+            AddChildren(new GumpPicTiled(BLACK)
+            {
+                Width = 400,
+                Height = 400,
+            });
+
+            AddChildren(new TextBox()
+            {
+                Width = 400,
+                Height = 400,
+                CanMove = true,
+                MultiLine = true,
+                AllowTAB = true
+            });
         }
 
         public override void Update(double totalMS, double frameMS)

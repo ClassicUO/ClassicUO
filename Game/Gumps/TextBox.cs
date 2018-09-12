@@ -1,9 +1,6 @@
-﻿using ClassicUO.Renderer;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using SDL2;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Gumps
 {
@@ -19,8 +16,16 @@ namespace ClassicUO.Game.Gumps
 
         public TextBox() : base()
         {
-            _text = new RenderedText();
-            _carat = new RenderedText("_");
+            _text = new RenderedText()
+            {
+                IsUnicode = true,
+                Font = 1,
+            };
+            _carat = new RenderedText("_")
+            {
+                IsUnicode = true,
+                Font = 1,
+            };
 
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
@@ -53,15 +58,20 @@ namespace ClassicUO.Game.Gumps
             set
             {
                 _plainText = value;
+                if (MultiLine)
+                    _text.MaxWidth = Parent.Width;
+
                 _text.Text = IsPassword ? new string('*', value.Length) : value;
             }
         }
 
+        public bool MultiLine { get; set; }
+        public bool AllowTAB { get; set; }
 
         public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 
-        
+
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -101,9 +111,9 @@ namespace ClassicUO.Game.Gumps
                 }
                 else
                 {
-                    int offset = _text.Width - (Width - _carat.Width);
-                    _text.Draw(spriteBatch, new Rectangle((int)position.X, (int) position.Y, _text.Width - offset, _text.Height), offset, 0);
-                    caratPosition.X += (Width - _text.Width);
+                    int offset = _text.Width - ( Width - _carat.Width );
+                    _text.Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, _text.Width - offset, _text.Height), offset, 0);
+                    caratPosition.X += ( Width - _carat.Width );
                 }
             }
             else
@@ -140,8 +150,13 @@ namespace ClassicUO.Game.Gumps
             switch (key)
             {
                 case SDL.SDL_Keycode.SDLK_TAB:
+                    // throw an error if text is empty :|
+                    //if (AllowTAB)
+                    //    Text += "\t";
                     break;
-                case SDL.SDL_Keycode.SDLK_KP_ENTER:
+                case SDL.SDL_Keycode.SDLK_RETURN:
+                    if (MultiLine)
+                        Text += "\r\n";
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     if (ReplaceDefaultTextOnFirstKeyPress)
@@ -155,6 +170,24 @@ namespace ClassicUO.Game.Gumps
                     }
                     break;
             }
+        }
+
+
+
+
+        private void SetCaretPosition(int value)
+        {
+
+        }
+
+        private void AddChar(bool fromleft = false)
+        {
+
+        }
+
+        private void RemoveChar(bool fromleft = false)
+        {
+
         }
     }
 }
