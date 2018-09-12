@@ -767,6 +767,8 @@ namespace ClassicUO
             sb.AppendLine(sb3D.Merged.ToString());
             sb.Append("Totals: ");
             sb.AppendLine(sb3D.TotalCalls.ToString());
+            sb.Append("Pos: ");
+            sb.AppendLine(World.Player == null ? "" : World.Player.Position.ToString());
 
             _gameTextTRY.Text = sb.ToString();
             _gameTextTRY.Draw(sbUI, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
