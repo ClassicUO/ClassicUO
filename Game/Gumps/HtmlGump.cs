@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,10 +19,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Renderer;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
@@ -33,7 +32,7 @@ namespace ClassicUO.Game.Gumps
         private RenderedText _gameText;
         private IScrollBar _scrollBar;
 
-        public HtmlGump(string[] parts,  string[] lines) : this()
+        public HtmlGump(string[] parts, string[] lines) : this()
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -44,47 +43,30 @@ namespace ClassicUO.Game.Gumps
             HasScrollbar = parts[7] != "0";
             UseFlagScrollbar = HasScrollbar && parts[7] == "2";
 
+            _gameText.IsHTML = true;
 
-            _gameText.MaxWidth = (Width - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0));
-            _gameText.Text = lines[textIndex];
+            InternalBuild(lines[textIndex], 0);
+        }
 
-            if (HasBackground)
-            {
-                AddChildren(new ResizePic(0x2486)
-                {
-                    Width = Width - (HasScrollbar ? 15 : 0),
-                    Height = Height,
-                    AcceptMouseInput = false
-                });
-            }
+        public HtmlGump(int x, int y, int w, int h, string text, int hasbackground, int hasscrollbar, int hue, bool ishtml) : this()
+        {
+            X = x;
+            Y = y;
+            Width = w;
+            Height = h;
+            HasBackground = hasbackground == 1;
+            HasScrollbar = hasscrollbar != 0;
+            UseFlagScrollbar = hasscrollbar != 0 && hasscrollbar == 2;
 
-            if (HasScrollbar)
-            {
-                if (UseFlagScrollbar)
-                {
-                    _scrollBar = new ScrollFlag(this);
-                    _scrollBar.Location = new Point(Width - 14, 0);
-                }
-                else
-                {
-                    _scrollBar = new ScrollBar(this, Width - 14, 0, Height);
-                }
+            _gameText.IsHTML = ishtml;
 
-                _scrollBar.Height = Height;
-                _scrollBar.MinValue = 0;
-                _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
-                ScrollY = _scrollBar.Value;
-            }
-
-            if (Width != _gameText.Width)
-                Width = _gameText.Width;
+            InternalBuild(text, hue);
         }
 
         public HtmlGump() : base()
         {
             _gameText = new RenderedText()
             {
-                IsHTML = true,
                 IsUnicode = true,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 Font = 1,
@@ -98,27 +80,95 @@ namespace ClassicUO.Game.Gumps
         public bool UseFlagScrollbar { get; }
         public int ScrollX { get; set; }
         public int ScrollY { get; set; }
+        public string Text { get => _gameText.Text; set => _gameText.Text = value; }
 
+        private void InternalBuild(string text, int hue)
+        {
+            if (text == "Felucca")
+            {
+
+            }
+
+            uint htmlColor = 0xFFFFFFFF;
+            ushort color = 0;
+
+            if (hue > 0)
+            {
+                if (hue == 0x00FFFFFF)
+                    htmlColor = 0xFFFFFFFE;
+                else
+                    htmlColor = ( Hues.Color16To32((ushort)hue) << 8 ) | 0xFF;
+            }
+            else if (!HasBackground)
+            {
+                color = 0xFFFF;
+                if (!HasScrollbar)
+                    htmlColor = 0x010101FF;
+            }
+            else
+            {
+                htmlColor = 0x010101FF;
+            }
+
+            _gameText.Hue = color;
+            _gameText.HTMLColor = htmlColor;
+            _gameText.ColorBackground = !HasBackground;
+            _gameText.MaxWidth = ( Width - ( HasScrollbar ? 15 : 0 ) - ( HasBackground ? 8 : 0 ) );
+            _gameText.Text = text;
+
+            if (HasBackground)
+            {
+                AddChildren(new ResizePic(0x2486)
+                {
+                    Width = Width - ( HasScrollbar ? 15 : 0 ),
+                    Height = Height,
+                    AcceptMouseInput = false
+                });
+            }
+
+            if (HasScrollbar)
+            {
+                if (UseFlagScrollbar)
+                {
+                    _scrollBar = new ScrollFlag(this)
+                    {
+                        Location = new Point(Width - 14, 0)
+                    };
+                }
+                else
+                {
+                    _scrollBar = new ScrollBar(this, Width - 14, 0, Height);
+                }
+
+                _scrollBar.Height = Height;
+                _scrollBar.MinValue = 0;
+                _scrollBar.MaxValue = _gameText.Height - Height + ( HasBackground ? 8 : 0 );
+                ScrollY = _scrollBar.Value;
+            }
+
+            if (Width != _gameText.Width)
+                Width = _gameText.Width;
+        }
 
         public override void Update(double totalMS, double frameMS)
         {
-            //if (HasScrollbar)
-            //{
-            //    _scrollBar.Height = Height;
-            //    _scrollBar.MinValue = 0;
-            //    _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
-            //    ScrollY = _scrollBar.Value;
-            //}
+            if (HasScrollbar)
+            {
+                _scrollBar.Height = Height;
+                _scrollBar.MinValue = 0;
+                _scrollBar.MaxValue = _gameText.Height - Height + ( HasBackground ? 8 : 0 );
+                ScrollY = _scrollBar.Value;
+            }
 
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
         {
             base.Draw(spriteBatch, position);
 
-            _gameText.Draw(spriteBatch, 
-                new Rectangle((int)position.X + (HasBackground ? 4 : 0), (int)position.Y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0)), ScrollX, ScrollY);
+            _gameText.Draw(spriteBatch,
+                new Rectangle((int)position.X + ( HasBackground ? 4 : 0 ), (int)position.Y + ( HasBackground ? 4 : 0 ), Width - ( HasBackground ? 8 : 0 ), Height - ( HasBackground ? 8 : 0 )), ScrollX, ScrollY);
 
             return true;
         }

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -21,22 +21,26 @@
 #endregion
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Gumps
 {
     public class ResizePic : GumpControl
     {
         private readonly SpriteTexture[] _gumpTexture = new SpriteTexture[9];
-        private Graphic _graphic;
+        private readonly Graphic _graphic;
 
         public ResizePic(Graphic graphic) : base()
         {
             _graphic = graphic;
             CanMove = true;
             CanCloseWithRightClick = true;
+
+
+            for (int i = 0; i < _gumpTexture.Length; i++)
+            {
+                if (_gumpTexture[i] == null)
+                    _gumpTexture[i] = IO.Resources.Gumps.GetGumpTexture((Graphic)( _graphic + i ));
+            }
         }
 
         public ResizePic(string[] parts) : this(Graphic.Parse(parts[3]))
@@ -49,17 +53,13 @@ namespace ClassicUO.Game.Gumps
 
 
         public override void Update(double totalMS, double frameMS)
-        {           
+        {
             for (int i = 0; i < _gumpTexture.Length; i++)
-            {
-                if (_gumpTexture[i] == null)
-                    _gumpTexture[i] = IO.Resources.Gumps.GetGumpTexture((Graphic)(_graphic + i));
                 _gumpTexture[i].Ticks = (long)totalMS;
-            }
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
         {
             int centerWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
             int centerHeight = Height - _gumpTexture[0].Height - _gumpTexture[6].Height;

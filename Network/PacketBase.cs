@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -65,16 +65,16 @@ namespace ClassicUO.Network
         public void WriteUShort(ushort v)
         {
             EnsureSize(2);
-            WriteByte((byte)(v >> 8));
+            WriteByte((byte)( v >> 8 ));
             WriteByte((byte)v);
         }
 
         public void WriteUInt(uint v)
         {
             EnsureSize(4);
-            WriteByte((byte)(v >> 24));
-            WriteByte((byte)(v >> 16));
-            WriteByte((byte)(v >> 8));
+            WriteByte((byte)( v >> 24 ));
+            WriteByte((byte)( v >> 16 ));
+            WriteByte((byte)( v >> 8 ));
             WriteByte((byte)v);
         }
 
@@ -89,7 +89,7 @@ namespace ClassicUO.Network
             WriteByte(0);
         }
 
-        public void WriteASCII(string value,  int length)
+        public void WriteASCII(string value, int length)
         {
             EnsureSize(length);
             if (value.Length > length)
@@ -111,17 +111,17 @@ namespace ClassicUO.Network
 
         public void WriteUnicode(string value)
         {
-            EnsureSize((value.Length + 1) * 2);
+            EnsureSize(( value.Length + 1 ) * 2);
             foreach (char c in value)
             {
-                WriteByte((byte)(c >> 8));
+                WriteByte((byte)( c >> 8 ));
                 WriteByte((byte)c);
             }
 
             WriteUShort(0);
         }
 
-        public void WriteUnicode(string value,  int length)
+        public void WriteUnicode(string value, int length)
         {
             EnsureSize(length);
             if (value.Length > length)
@@ -131,14 +131,14 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < value.Length; i++)
             {
-                WriteByte((byte)(value[i] >> 8));
+                WriteByte((byte)( value[i] >> 8 ));
                 WriteByte((byte)value[i]);
             }
 
             if (value.Length < length)
             {
                 WriteUShort(0);
-                Position += (length - value.Length - 1) * 2;
+                Position += ( length - value.Length - 1 ) * 2;
             }
         }
     }

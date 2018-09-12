@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -33,6 +33,7 @@ namespace ClassicUO.Game.Gumps
         {
             _graphic = graphic;
             CanMove = true;
+            Texture = IO.Resources.Gumps.GetGumpTexture(graphic);
         }
 
         public GumpPicTiled(string[] parts) : this(Graphic.Parse(parts[5]))
@@ -46,15 +47,11 @@ namespace ClassicUO.Game.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (Texture == null || Texture.IsDisposed)
-            {
-                Texture = IO.Resources.Gumps.GetGumpTexture(_graphic);
-            }
             Texture.Ticks = (long)totalMS;
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
         {
             spriteBatch.Draw2DTiled(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), Vector3.Zero);
             return base.Draw(spriteBatch, position);

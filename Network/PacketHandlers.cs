@@ -1,15 +1,14 @@
-﻿using ClassicUO.Game;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Map;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
-using ClassicUO.Network;
 using ClassicUO.Utility;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Network
@@ -345,11 +344,11 @@ namespace ClassicUO.Network
                 {
                     if (FileManager.ClientVersion >= ClientVersions.CV_500A)
                     {
-                        World.Player.WeightMax = (ushort)(7 * (World.Player.Strength / 2) + 40);
+                        World.Player.WeightMax = (ushort)( 7 * ( World.Player.Strength / 2 ) + 40 );
                     }
                     else
                     {
-                        World.Player.WeightMax = (ushort)(World.Player.Strength * 4 + 25);
+                        World.Player.WeightMax = (ushort)( World.Player.Strength * 4 + 25 );
                     }
                 }
 
@@ -480,7 +479,7 @@ namespace ClassicUO.Network
             ushort hue = 0;
             byte flags = 0;
 
-            if ((serial & 0x80000000) != 0)
+            if (( serial & 0x80000000 ) != 0)
             {
                 serial &= 0x7FFFFFFF;
                 count = 1;
@@ -489,7 +488,7 @@ namespace ClassicUO.Network
             Item item = World.GetOrCreateItem(serial);
             ushort graphic = p.ReadUShort();
 
-            if ((graphic & 0x8000) != 0)
+            if (( graphic & 0x8000 ) != 0)
             {
                 graphic &= 0x7FFF;
                 graphicInc = p.ReadByte();
@@ -505,20 +504,20 @@ namespace ClassicUO.Network
             }
 
             ushort x = p.ReadUShort();
-            if ((x & 0x8000) != 0)
+            if (( x & 0x8000 ) != 0)
             {
                 x &= 0x7FFF;
                 direction = 1;
             }
 
             ushort y = p.ReadUShort();
-            if ((y & 0x8000) != 0)
+            if (( y & 0x8000 ) != 0)
             {
                 y &= 0x7FFF;
                 hue = 1;
             }
 
-            if ((y & 0x4000) != 0)
+            if (( y & 0x4000 ) != 0)
             {
                 y &= 0x3FFF;
                 flags = 1;
@@ -668,7 +667,7 @@ namespace ClassicUO.Network
                 throw new Exception("OnMobileStatus");
             }
 
-            World.Player.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
+            World.Player.Graphic = (ushort)( p.ReadUShort() + p.ReadSByte() );
             World.Player.Hue = p.ReadUShort();
             World.Player.Flags = (Flags)p.ReadByte();
             ushort x = p.ReadUShort();
@@ -694,9 +693,9 @@ namespace ClassicUO.Network
                 World.Player.Position = new Position(x, y, z);
                 World.Player.Direction = direction;
             }
-            else if ((endDir & Direction.Up) != (direction & Direction.Up))
+            else if (( endDir & Direction.Up ) != ( direction & Direction.Up ))
             {
-                World.Player.EnqueueStep(x, y, z, direction, (direction & Direction.Running) != 0);
+                World.Player.EnqueueStep(x, y, z, direction, ( direction & Direction.Running ) != 0);
             }
             else if (World.Player.Tile == null)
             {
@@ -737,7 +736,7 @@ namespace ClassicUO.Network
         private static void ConfirmWalk(Packet p)
         {
             byte seq = p.ReadByte();
-            World.Player.Notoriety = (Notoriety)(p.ReadByte() & ~0x40);
+            World.Player.Notoriety = (Notoriety)( p.ReadByte() & ~0x40 );
 
             World.Player.ConfirmWalk(seq);
             World.Player.ProcessDelta();
@@ -856,7 +855,7 @@ namespace ClassicUO.Network
         private static void EquipItem(Packet p)
         {
             Item item = World.GetOrCreateItem(p.ReadUInt());
-            item.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
+            item.Graphic = (ushort)( p.ReadUShort() + p.ReadSByte() );
             item.Layer = (Layer)p.ReadByte();
             item.Container = p.ReadUInt();
             item.Hue = p.ReadUShort();
@@ -897,7 +896,7 @@ namespace ClassicUO.Network
             switch (p.ReadByte())
             {
                 case 0:
-                    while ((id = p.ReadUShort()) > 0)
+                    while (( id = p.ReadUShort() ) > 0)
                     {
                         World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (SkillLock)p.ReadByte(), 100);
                     }
@@ -905,7 +904,7 @@ namespace ClassicUO.Network
                     break;
 
                 case 2:
-                    while ((id = p.ReadUShort()) > 0)
+                    while (( id = p.ReadUShort() ) > 0)
                     {
                         World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (SkillLock)p.ReadByte(), p.ReadUShort());
                     }
@@ -1064,9 +1063,7 @@ namespace ClassicUO.Network
         private static void UpdateCharacter(Packet p)
         {
             if (World.Player == null)
-            {
                 return;
-            }
 
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
             mobile.Graphic = p.ReadUShort();
@@ -1075,8 +1072,6 @@ namespace ClassicUO.Network
             int y = p.ReadUShort();
             sbyte z = p.ReadSByte();
             Direction direction = (Direction)p.ReadByte();
-            //mobile.Position.Set(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
-            //mobile.Direction = (Direction)p.ReadByte();
             mobile.Hue = p.ReadUShort();
             mobile.Flags = (Flags)p.ReadByte();
             mobile.Notoriety = (Notoriety)p.ReadByte();
@@ -1097,17 +1092,12 @@ namespace ClassicUO.Network
                 mobile.Direction = direction;
             }
 
-            if (!mobile.EnqueueStep(x, y, z, direction, (direction & Direction.Running) != 0))
+            if (!mobile.EnqueueStep(x, y, z, direction, ( direction & Direction.Running ) != 0))
             {
                 mobile.Position = new Position((ushort)x, (ushort)y, z);
                 mobile.Direction = direction;
                 mobile.ClearSteps();
             }
-
-            //if (mobile.Position == Position.Invalid)
-            //    mobile.MoveOf(position, direction);
-            //else
-            //    mobile.EnqueueMovement(position, direction);
         }
 
         private static void UpdateObject(Packet p)
@@ -1133,28 +1123,11 @@ namespace ClassicUO.Network
             }
 
             uint itemSerial;
-            while ((itemSerial = p.ReadUInt()) != 0)
+            while (( itemSerial = p.ReadUInt() ) != 0)
             {
                 Item item = World.GetOrCreateItem(itemSerial);
-
-
                 Graphic graphic = p.ReadUShort();
                 item.Layer = (Layer)p.ReadByte();
-
-                //Hue color = 0;
-
-                //if (FileManager.ClientVersion >= ClientVersions.CV_70331)
-                //    color = p.ReadUShort();
-                //else if ((graphic & 0x8000) != 0 )
-                //{
-                //    graphic &= 0x7FFF;
-                //    color = p.ReadUShort();
-                //}
-
-                //item.Hue = color;
-
-                //if (FileManager.ClientVersion >= ClientVersions.CV_70331 || (graphic & 0x8000) != 0)
-                //    item.Hue = p.ReadUShort();
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_70331)
                 {
@@ -1163,12 +1136,12 @@ namespace ClassicUO.Network
                 }
                 else if (FileManager.ClientVersion >= ClientVersions.CV_7000)
                 {
-                    item.Graphic = (ushort)(graphic & 0x7FFF);
+                    item.Graphic = (ushort)( graphic & 0x7FFF );
                     item.Hue = p.ReadUShort();
                 }
                 else
                 {
-                    item.Graphic = (ushort)(graphic & 0x3FFF);
+                    item.Graphic = (ushort)( graphic & 0x3FFF );
                 }
 
                 item.Amount = 1;
@@ -1179,25 +1152,34 @@ namespace ClassicUO.Network
                 World.Items.Add(item);
             }
 
-            if (World.Get(mobile) == null)
-            {
-                mobile.Position = new Position(x, y, z);
-                mobile.Direction = direction;
-            }
 
-            if (!mobile.EnqueueStep(x, y, z, direction, (direction & Direction.Running) != 0))
+            if (mobile == World.Player) // resync ?
             {
-                mobile.Position = new Position(x, y, z);
-                mobile.Direction = direction;
-                mobile.ClearSteps();
+                //World.Player.ResetSteps();
+                //World.Player.Position = new Position(x, y, z);
+                //World.Player.Direction = direction;
+            }
+            else
+            {
+                direction &= Direction.Up;
+
+                if (World.Get(mobile) == null)
+                {
+                    mobile.Position = new Position(x, y, z);
+                    mobile.Direction = direction;
+                }
+
+                if (!mobile.EnqueueStep(x, y, z, direction, ( direction & Direction.Running ) != 0))
+                {
+                    mobile.Position = new Position(x, y, z);
+                    mobile.Direction = direction;
+                    mobile.ClearSteps();
+                }
             }
 
             mobile.ProcessDelta();
             if (World.Mobiles.Add(mobile))
-            {
                 World.Mobiles.ProcessDelta();
-            }
-
             World.Items.ProcessDelta();
 
             new PClickRequest(mobile).SendToServer();
@@ -1711,12 +1693,12 @@ namespace ClassicUO.Network
                         uint spells = 0;
                         for (int i = 0; i < 4; i++)
                         {
-                            spells |= (uint)(p.ReadByte() << (i * 8));
+                            spells |= (uint)( p.ReadByte() << ( i * 8 ) );
                         }
 
                         for (int i = 0; i < 32; i++)
                         {
-                            if ((spells & (1 << i)) > 0)
+                            if (( spells & ( 1 << i ) ) > 0)
                             {
                             }
                         }
@@ -1744,8 +1726,8 @@ namespace ClassicUO.Network
                     break;
                 case 0x21:
 
-                    World.Player.PrimaryAbility = (Ability)((byte)World.Player.PrimaryAbility & 0x7F);
-                    World.Player.SecondaryAbility = (Ability)((byte)World.Player.SecondaryAbility & 0x7F);
+                    World.Player.PrimaryAbility = (Ability)( (byte)World.Player.PrimaryAbility & 0x7F );
+                    World.Player.SecondaryAbility = (Ability)( (byte)World.Player.SecondaryAbility & 0x7F );
 
                     break;
                 case 0x22:
@@ -1870,10 +1852,10 @@ namespace ClassicUO.Network
             for (int plane = 0; plane < planes; plane++)
             {
                 uint header = p.ReadUInt();
-                ulong dlen = ((header & 0xFF0000) >> 16) | ((header & 0xF0) << 4);
-                int clen = (int)(((header & 0xFF00) >> 8) | ((header & 0x0F) << 8));
-                int planeZ = (int)((header & 0x0F000000) >> 24);
-                int planeMode = (int)((header & 0xF0000000) >> 28);
+                ulong dlen = ( ( header & 0xFF0000 ) >> 16 ) | ( ( header & 0xF0 ) << 4 );
+                int clen = (int)( ( ( header & 0xFF00 ) >> 8 ) | ( ( header & 0x0F ) << 8 ) );
+                int planeZ = (int)( ( header & 0x0F000000 ) >> 24 );
+                int planeMode = (int)( ( header & 0xF0000000 ) >> 28 );
                 if (clen <= 0)
                 {
                     continue;
@@ -1908,9 +1890,9 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    Tile tile = World.Map.GetTile((ushort)(minX + foundation.Position.X + x), (ushort)(minY + foundation.Position.Y + y));
+                                    Tile tile = World.Map.GetTile((ushort)( minX + foundation.Position.X + x ), (ushort)( minY + foundation.Position.Y + y ));
 
-                                    tile.AddGameObject(new Static(id, 0, 0) { Position = new Position(tile.Position.X, tile.Position.Y, (sbyte)(foundation.Position.Z + z)) });
+                                    tile.AddGameObject(new Static(id, 0, 0) { Position = new Position(tile.Position.X, tile.Position.Y, (sbyte)( foundation.Position.Z + z )) });
                                 }
                             }
 
@@ -1918,7 +1900,7 @@ namespace ClassicUO.Network
                         case 1:
                             if (planeZ > 0)
                             {
-                                z = (byte)((planeZ - 1) % 4 * 20 + 7);
+                                z = (byte)( ( planeZ - 1 ) % 4 * 20 + 7 );
                             }
                             else
                             {
@@ -1937,9 +1919,9 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    Tile tile = World.Map.GetTile((ushort)(minX + foundation.Position.X + x), (ushort)(minY + foundation.Position.Y + y));
+                                    Tile tile = World.Map.GetTile((ushort)( minX + foundation.Position.X + x ), (ushort)( minY + foundation.Position.Y + y ));
 
-                                    tile.AddGameObject(new Static(id, 0, 0) { Position = new Position(tile.Position.X, tile.Position.Y, (sbyte)(foundation.Position.Z + z)) });
+                                    tile.AddGameObject(new Static(id, 0, 0) { Position = new Position(tile.Position.X, tile.Position.Y, (sbyte)( foundation.Position.Z + z )) });
                                 }
                             }
 
@@ -1950,7 +1932,7 @@ namespace ClassicUO.Network
 
                             if (planeZ > 0)
                             {
-                                z = (byte)((planeZ - 1) % 4 * 20 + 7);
+                                z = (byte)( ( planeZ - 1 ) % 4 * 20 + 7 );
                             }
                             else
                             {
@@ -1961,19 +1943,19 @@ namespace ClassicUO.Network
                             {
                                 offX = minX;
                                 offY = minY;
-                                multiHeight = (short)(maxY - minY + 2);
+                                multiHeight = (short)( maxY - minY + 2 );
                             }
                             else if (planeZ <= 4)
                             {
-                                offX = (short)(minX + 1);
-                                offY = (short)(minY + 1);
-                                multiHeight = (short)(maxY - minY);
+                                offX = (short)( minX + 1 );
+                                offY = (short)( minY + 1 );
+                                multiHeight = (short)( maxY - minY );
                             }
                             else
                             {
                                 offX = minX;
                                 offY = minY;
-                                multiHeight = (short)(maxY - minY + 1);
+                                multiHeight = (short)( maxY - minY + 1 );
                             }
 
                             if (multiHeight == 0)
@@ -1985,22 +1967,22 @@ namespace ClassicUO.Network
                             for (uint i = 0; i < decompressedBytes.Length / 2; i++)
                             {
                                 id = stream.ReadUShort();
-                                x = (byte)(i / multiHeight + offX);
-                                y = (byte)(i % multiHeight + offY);
+                                x = (byte)( i / multiHeight + offX );
+                                y = (byte)( i % multiHeight + offY );
 
                                 x += (byte)-minX;
                                 y += (byte)-minY;
 
                                 if (id != 0)
                                 {
-                                    Tile tile = World.Map.GetTile((ushort)(minX + foundation.Position.X + x), (ushort)(minY + foundation.Position.Y + y));
+                                    Tile tile = World.Map.GetTile((ushort)( minX + foundation.Position.X + x ), (ushort)( minY + foundation.Position.Y + y ));
                                     if (tile == null)
                                     {
                                         //TODO: CHECK WHY
                                         break;
                                     }
 
-                                    tile.AddGameObject(new Static(id, 0, 0) { Position = new Position(tile.Position.X, tile.Position.Y, (sbyte)(foundation.Position.Z + z)) });
+                                    tile.AddGameObject(new Static(id, 0, 0) { Position = new Position(tile.Position.X, tile.Position.Y, (sbyte)( foundation.Position.Z + z )) });
                                 }
                             }
 
@@ -2062,7 +2044,7 @@ namespace ClassicUO.Network
 
                 for (int i = 0, index = 0; i < linesNum; i++)
                 {
-                    int length = ((decData[index++] << 8) | decData[index++]);
+                    int length = ( ( decData[index++] << 8 ) | decData[index++] );
                     byte[] text = new byte[length * 2];
                     Buffer.BlockCopy(decData, index, text, 0, text.Length);
                     index += text.Length;
@@ -2099,7 +2081,7 @@ namespace ClassicUO.Network
             mobile.AnimationRepeatMode = 1;
             mobile.AnimationDirection = true;
 
-            if ((type == 1 || type == 2) && mobile.Graphic == 0x015)
+            if (( type == 1 || type == 2 ) && mobile.Graphic == 0x015)
             {
                 mobile.AnimationRepeat = true;
             }
@@ -2174,7 +2156,7 @@ namespace ClassicUO.Network
         private static bool ReadContainerContent(Packet p)
         {
             Item item = World.GetOrCreateItem(p.ReadUInt());
-            item.Graphic = (ushort)(p.ReadUShort() + p.ReadSByte());
+            item.Graphic = (ushort)( p.ReadUShort() + p.ReadSByte() );
             item.Amount = Math.Max(p.ReadUShort(), (ushort)1);
             item.Position = new Position(p.ReadUShort(), p.ReadUShort());
             if (FileManager.ClientVersion >= ClientVersions.CV_6017)
@@ -2209,7 +2191,7 @@ namespace ClassicUO.Network
         private static IEnumerable<Property> ReadProperties(Packet p)
         {
             uint cliloc;
-            while ((cliloc = p.ReadUInt()) != 0)
+            while (( cliloc = p.ReadUInt() ) != 0)
             {
                 ushort len = p.ReadUShort();
                 string str = p.ReadUnicodeReversed(len);

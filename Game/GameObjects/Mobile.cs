@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,12 +19,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using System;
 using ClassicUO.Game.Views;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using System;
 using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
@@ -209,12 +209,12 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool Paralyzed => ((byte)Flags & 0x01) != 0;
-        public bool YellowBar => ((byte)Flags & 0x08) != 0;
+        public bool Paralyzed => ( (byte)Flags & 0x01 ) != 0;
+        public bool YellowBar => ( (byte)Flags & 0x08 ) != 0;
 
-        public bool Poisoned => FileManager.ClientVersion >= ClientVersions.CV_7000 ? _isSA_Poisoned : ((byte)Flags & 0x04) != 0;
+        public bool Poisoned => FileManager.ClientVersion >= ClientVersions.CV_7000 ? _isSA_Poisoned : ( (byte)Flags & 0x04 ) != 0;
 
-        public bool Hidden => ((byte)Flags & 0x80) != 0;
+        public bool Hidden => ( (byte)Flags & 0x80 ) != 0;
 
         public bool IsDead
         {
@@ -222,11 +222,11 @@ namespace ClassicUO.Game.GameObjects
             set => _isDead = value;
         }
 
-        public bool IsFlying => FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte)Flags.Flying & 0x04) != 0;
+        public bool IsFlying => FileManager.ClientVersion >= ClientVersions.CV_7000 && ( (byte)Flags.Flying & 0x04 ) != 0;
 
         public virtual bool InWarMode
         {
-            get => ((byte)Flags & 0x40) != 0;
+            get => ( (byte)Flags & 0x40 ) != 0;
             set => throw new Exception();
         }
 
@@ -239,7 +239,7 @@ namespace ClassicUO.Game.GameObjects
 
 
         public bool IsMounted => Equipment[(int)Layer.Mount] != null;
-        public bool IsRunning => (Direction & Direction.Running) == Direction.Running;
+        public bool IsRunning => ( Direction & Direction.Running ) == Direction.Running;
 
         public byte AnimationInterval { get; set; }
         public byte AnimationFrameCount { get; set; }
@@ -324,19 +324,10 @@ namespace ClassicUO.Game.GameObjects
             z = Position.Z;
         }
 
-        public bool EnqueueStep(int x,  int y,  sbyte z, Direction direction,  bool run)
+        public bool EnqueueStep(int x, int y, sbyte z, Direction direction, bool run)
         {
-            //if (Deferred != null)
-            //    Deferred.Tile = null;
-
-            if (Serial == 0x0002353F)
-            {
-            }
-
             if (Steps.Count >= MAX_STEP_COUNT)
-            {
                 return false;
-            }
 
             Direction dirRun = run ? Direction.Running : Direction.North;
 
@@ -371,7 +362,7 @@ namespace ClassicUO.Game.GameObjects
                     step.X = endX;
                     step.Y = endY;
                     step.Z = endZ;
-                    step.Direction = (byte)(moveDir | dirRun);
+                    step.Direction = (byte)( moveDir | dirRun );
                     step.Run = run;
 
                     Steps.AddToBack(step);
@@ -380,7 +371,7 @@ namespace ClassicUO.Game.GameObjects
                 step.X = x;
                 step.Y = y;
                 step.Z = z;
-                step.Direction = (byte)(moveDir | dirRun);
+                step.Direction = (byte)( moveDir | dirRun );
                 step.Run = run;
                 Steps.AddToBack(step);
             }
@@ -391,7 +382,7 @@ namespace ClassicUO.Game.GameObjects
                 step.X = x;
                 step.Y = y;
                 step.Z = z;
-                step.Direction = (byte)(direction | dirRun);
+                step.Direction = (byte)( direction | dirRun );
                 step.Run = run;
                 Steps.AddToBack(step);
             }
@@ -399,7 +390,7 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private static Direction CalculateDirection(int curX,  int curY,  int newX,  int newY)
+        private static Direction CalculateDirection(int curX, int curY, int newX, int newY)
         {
             int deltaX = newX - curX;
             int deltaY = newY - curY;
@@ -457,7 +448,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        public void SetAnimation(byte id,  byte interval = 0,  byte frameCount = 0,  byte repeatCount = 0,  bool repeat = false,  bool frameDirection = false)
+        public void SetAnimation(byte id, byte interval = 0, byte frameCount = 0, byte repeatCount = 0, bool repeat = false, bool frameDirection = false)
         {
             AnimationGroup = id;
             AnimIndex = 0;
@@ -473,7 +464,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual bool NoIterateAnimIndex()
         {
-            return LastStepTime > (uint)(World.Ticks - WALKING_DELAY) && Steps.Count <= 0;
+            return LastStepTime > (uint)( World.Ticks - WALKING_DELAY ) && Steps.Count <= 0;
         }
 
         public override void ProcessAnimation()
@@ -507,7 +498,7 @@ namespace ClassicUO.Game.GameObjects
 
                         GetPixelOffset((byte)Direction, ref x, ref y, framesPerTile);
 
-                        Offset = new Vector3((sbyte)x, (sbyte)y, (int)((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
+                        Offset = new Vector3((sbyte)x, (sbyte)y, (int)( ( step.Z - Position.Z ) * frameOffset * ( 4.0f / framesPerTile ) ));
 
                         turnOnly = false;
                     }
@@ -604,7 +595,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (AnimationFromServer)
                         {
-                            currentDelay += currentDelay * (AnimationInterval + 1);
+                            currentDelay += currentDelay * ( AnimationInterval + 1 );
                             if (AnimationFrameCount <= 0)
                             {
                                 AnimationFrameCount = (byte)fc;
@@ -649,7 +640,7 @@ namespace ClassicUO.Game.GameObjects
                                     }
                                     else
                                     {
-                                        frameIndex = (sbyte)(fc - 1);
+                                        frameIndex = (sbyte)( fc - 1 );
                                     }
 
                                     if (AnimationRepeat)
@@ -690,7 +681,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        private static void GetPixelOffset(byte dir, ref float x, ref float y,  float framesPerTile)
+        private static void GetPixelOffset(byte dir, ref float x, ref float y, float framesPerTile)
         {
             float step_NESW_D = 44.0f / framesPerTile;
             float step_NESW = 22.0f / framesPerTile;
@@ -795,7 +786,7 @@ namespace ClassicUO.Game.GameObjects
 
         public struct Step
         {
-            public Step(int x,  int y,  sbyte z,  byte dir,  bool anim,  bool run,  byte seq)
+            public Step(int x, int y, sbyte z, byte dir, bool anim, bool run, byte seq)
             {
                 X = x;
                 Y = y;
