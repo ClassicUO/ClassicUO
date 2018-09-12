@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,13 +19,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using System.Collections.Generic;
 using ClassicUO.Game;
-using ClassicUO.Renderer;
-using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 using Microsoft.Xna.Framework;
-using System.Collections.Generic;
-using IUpdateable = ClassicUO.Renderer.IUpdateable;
 
 namespace ClassicUO.Renderer
 {
@@ -66,6 +63,8 @@ namespace ClassicUO.Renderer
         public bool IsHTML { get; set; }
         public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
         public Hue Hue { get; set; }
+        public uint HTMLColor { get; set; } = 0xFFFFFFFF;
+        public bool ColorBackground { get; set; }
 
         public string Text
         {
@@ -119,7 +118,7 @@ namespace ClassicUO.Renderer
         {
             get
             {
-                if (!string.IsNullOrEmpty(_text) && (_texture == null || _texture.IsDisposed))
+                if (!string.IsNullOrEmpty(_text) && ( _texture == null || _texture.IsDisposed ))
                     _texture = CreateTexture();
                 return _texture;
             }
@@ -134,7 +133,7 @@ namespace ClassicUO.Renderer
         public Vector3 HueVector { get; set; }
 
         public bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
-            => Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0 ,0);
+            => Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
 
         public bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY)
         {
@@ -173,7 +172,7 @@ namespace ClassicUO.Renderer
         private Fonts.FontTexture CreateTexture()
         {
             if (IsHTML)
-                Fonts.SetUseHTML(true);
+                Fonts.SetUseHTML(true, HTMLColor, ColorBackground);
 
             Fonts.FontTexture ftexture;
 

@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Gumps
         private RenderedText _gameText;
         private IScrollBar _scrollBar;
 
-        public HtmlGump(string[] parts, string[] lines) : this(0xFFFF)
+        public HtmlGump(string[] parts, string[] lines) : this()
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -43,11 +43,12 @@ namespace ClassicUO.Game.Gumps
             HasScrollbar = parts[7] != "0";
             UseFlagScrollbar = HasScrollbar && parts[7] == "2";
 
+            _gameText.IsHTML = true;
 
-            InternalBuild(lines[textIndex]);
+            InternalBuild(lines[textIndex], 0);
         }
 
-        public HtmlGump(int x, int y, int w, int h, string text, int hasbackground, int hasscrollbar, Hue hue) : this(0)
+        public HtmlGump(int x, int y, int w, int h, string text, int hasbackground, int hasscrollbar, int hue, bool ishtml) : this()
         {
             X = x;
             Y = y;
@@ -57,18 +58,18 @@ namespace ClassicUO.Game.Gumps
             HasScrollbar = hasscrollbar != 0;
             UseFlagScrollbar = hasscrollbar != 0 && hasscrollbar == 2;
 
-            InternalBuild(text);
+            _gameText.IsHTML = ishtml;
+
+            InternalBuild(text, hue);
         }
 
-        public HtmlGump(Hue hue) : base()
+        public HtmlGump() : base()
         {
             _gameText = new RenderedText()
             {
-                IsHTML = true,
                 IsUnicode = true,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 Font = 1,
-                Hue = hue,
             };
             CanMove = true;
         }
@@ -81,8 +82,37 @@ namespace ClassicUO.Game.Gumps
         public int ScrollY { get; set; }
         public string Text { get => _gameText.Text; set => _gameText.Text = value; }
 
-        private void InternalBuild(string text)
+        private void InternalBuild(string text, int hue)
         {
+            if (text == "Felucca")
+            {
+
+            }
+
+            uint htmlColor = 0xFFFFFFFF;
+            ushort color = 0;
+
+            if (hue > 0)
+            {
+                if (hue == 0x00FFFFFF)
+                    htmlColor = 0xFFFFFFFE;
+                else
+                    htmlColor = ( Hues.Color16To32((ushort)hue) << 8 ) | 0xFF;
+            }
+            else if (!HasBackground)
+            {
+                color = 0xFFFF;
+                if (!HasScrollbar)
+                    htmlColor = 0x010101FF;
+            }
+            else
+            {
+                htmlColor = 0x010101FF;
+            }
+
+            _gameText.Hue = color;
+            _gameText.HTMLColor = htmlColor;
+            _gameText.ColorBackground = !HasBackground;
             _gameText.MaxWidth = ( Width - ( HasScrollbar ? 15 : 0 ) - ( HasBackground ? 8 : 0 ) );
             _gameText.Text = text;
 

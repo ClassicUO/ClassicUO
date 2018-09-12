@@ -123,22 +123,22 @@ namespace ClassicUO.Game.Gumps
                             break;
                         case "xmfhtmlgump":
                             gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]),
-                                IO.Resources.Cliloc.GetString(int.Parse(gparams[5])), int.Parse(gparams[6]), int.Parse(gparams[7]), 0));
+                                IO.Resources.Cliloc.GetString(int.Parse(gparams[5])), int.Parse(gparams[6]), int.Parse(gparams[7]), 0, true));
                             break;
                         case "xmfhtmlgumpcolor":
-                            Hue color = Hue.Parse(gparams[8]);
+                            int color = int.Parse(gparams[8]);
                             if (color == 0x7FFF)
-                                color = unchecked((ushort)0x00FFFFFF);
+                                color = 0x00FFFFFF;
                             gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]),
-                               IO.Resources.Cliloc.GetString(int.Parse(gparams[5])), int.Parse(gparams[6]), int.Parse(gparams[7]), color));
+                               IO.Resources.Cliloc.GetString(int.Parse(gparams[5])), int.Parse(gparams[6]), int.Parse(gparams[7]), color, true));
                             break;
                         case "xmfhtmltok":
-                            color = Hue.Parse(gparams[7]);
+                            color = int.Parse(gparams[7]);
                             if (color == 0x7FFF)
-                                color = unchecked((ushort)0x00FFFFFF);
+                                color = 0x00FFFFFF;
 
                             gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]),
-                              IO.Resources.Cliloc.GetString(int.Parse(gparams[8])), int.Parse(gparams[5]), int.Parse(gparams[6]), color));
+                              IO.Resources.Cliloc.GetString(int.Parse(gparams[8])), int.Parse(gparams[5]), int.Parse(gparams[6]), color, true));
                             break;
                         case "page":
                             break;
