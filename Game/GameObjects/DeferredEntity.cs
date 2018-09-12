@@ -40,11 +40,11 @@ namespace ClassicUO.Game.GameObjects
         private View GetBaseView(GameObject entity)
         {
             if (entity is Mobile)
-                return (MobileView)entity.GetView();
+                return (MobileView)entity.View;
             else if (entity is AnimatedItemEffect)
-                return (AnimatedEffectView)entity.GetView();
+                return (AnimatedEffectView)entity.View;
             else if (entity is Item item && item.IsCorpse)
-                return (ItemView)entity.GetView();
+                return (ItemView)entity.View;
             return null;
         }
 

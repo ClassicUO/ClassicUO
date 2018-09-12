@@ -26,9 +26,9 @@ using System.Runtime.InteropServices;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class FacetChunk
+    public sealed class MapChunk
     {
-        public FacetChunk(ushort x, ushort y)
+        public MapChunk(ushort x, ushort y)
         {
             X = x;
             Y = y;
@@ -119,30 +119,33 @@ namespace ClassicUO.Game.Map
             return IO.Resources.Map.BlockData[map][block];
         }
 
-        // we wants to avoid reallocation, so use a reset method
-        public void SetTo(ushort x, ushort y)
-        {
-            X = x;
-            Y = y;
-        }
-
         public void Unload()
         {
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
-
-                    
-                    Tiles[i][j].Clear();
-
-                    //Tiles[i][j].Dispose();
-                    //Tiles[i][j] = null;
+                    Tiles[i][j].Dispose();
+                    Tiles[i][j] = null;
                 }
             }
-
-            //Tiles = null;
         }
 
+        public bool HasNoExternalData()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    ref var tile = ref Tiles[i][j];
+                    foreach (var o in tile.ObjectsOnTiles)
+                    {
+                        if (!(o is Tile) && !(o is Static))
+                            return false;
+                    }
+                }
+            }
+            return true;
+        }
     }
 }

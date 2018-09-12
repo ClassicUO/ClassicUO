@@ -20,7 +20,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.IO;
+using ClassicUO.Renderer;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace ClassicUO.IO.Resources
@@ -29,6 +31,13 @@ namespace ClassicUO.IO.Resources
     {
         public const int TEXTMAP_COUNT = 0x4000;
         private static UOFile _file;
+        private static readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
+        private static readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
+
+
+        private static SpriteTexture[] _textmapCache;
+        private static readonly List<int> _usedIndex = new List<int>();
+
 
         public static void Load()
         {
@@ -38,6 +47,8 @@ namespace ClassicUO.IO.Resources
             if (!File.Exists(path) || !File.Exists(pathidx)) throw new FileNotFoundException();
 
             _file = new UOFileMul(path, pathidx, TEXTMAP_COUNT, 10);
+
+            _textmapCache = new SpriteTexture[TEXTMAP_COUNT];
 
             string pathdef = Path.Combine(FileManager.UoFolderPath, "texterr.def");
             if (File.Exists(pathdef))
@@ -62,10 +73,45 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private static readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
-        private static readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
 
-        public static Span<ushort> GetTextmapTexture(ushort index, out int size)
+        public static unsafe SpriteTexture GetTextmapTexture(ushort g)
+        {
+            ref var texture = ref _textmapCache[g];
+            if (texture == null || texture.IsDisposed)
+            {
+                var pixels = GetTextmapTexture(g, out int size);
+                texture = new SpriteTexture(size, size, false);
+                fixed (ushort* ptr = pixels)
+                    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
+
+                _usedIndex.Add(g);
+            }
+
+            return texture;
+        }
+
+        public static void ClearUnusedTextures()
+        {
+            int count = 0;
+            for (int i = 0; i < _usedIndex.Count; i++)
+            {
+                ref var texture = ref _textmapCache[_usedIndex[i]];
+                if (texture == null || texture.IsDisposed)
+                    _usedIndex.RemoveAt(i--);
+                else if(Game.World.Ticks - texture.Ticks >= 3000)
+                {
+                    texture.Dispose();
+                    texture = null;
+
+                    _usedIndex.RemoveAt(i);
+                    i--;
+                    if (++count >= 5)
+                        break;
+                }
+            }
+        }
+
+        private static Span<ushort> GetTextmapTexture(ushort index, out int size)
         {
             (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
 

@@ -20,23 +20,20 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.IO;
+using ClassicUO.Renderer;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace ClassicUO.IO.Resources
 {
-    /*
-     *      TODO: 
-     *          - use Span<T> (retarget to netcore2.1) to read pixels and other array stuffs to improve performances
-     */
-
     public static class Art
     {
         public const int ART_COUNT = 0x10000;
         private static UOFile _file;
 
-        //private static readonly Span<ushort> _landArray = new ushort[44 * 44];
-
+        private static SpriteTexture[] _artCache;
+        private static readonly List<int> _usedIndex = new List<int>();
 
         public static void Load()
         {
@@ -51,9 +48,66 @@ namespace ClassicUO.IO.Resources
                 if (File.Exists(filepath) && File.Exists(idxpath))
                     _file = new UOFileMul(filepath, idxpath, ART_COUNT);
             }
+
+            _artCache = new SpriteTexture[ART_COUNT];
         }
 
-        public static unsafe Span<ushort> ReadStaticArt(ushort graphic, out short width, out short height)
+        public unsafe static SpriteTexture GetStaticTexture(ushort g)
+        {
+            ref var texture = ref _artCache[g];
+            if (texture == null || texture.IsDisposed)
+            {
+                var pixels = ReadStaticArt(g, out short w, out short h);
+
+                texture = new SpriteTexture(w, h, false);
+
+                fixed (ushort* ptr = pixels)
+                    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
+
+                _usedIndex.Add(g);
+            }
+
+            return texture;
+        }
+
+        public unsafe static SpriteTexture GetLandTexture(ushort g)
+        {
+            ref var texture = ref _artCache[g];
+            if (texture == null || texture.IsDisposed)
+            {
+                var pixels = ReadLandArt(g);
+                texture = new SpriteTexture(44, 44, false);
+                fixed (ushort* ptr = pixels)
+                    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
+
+                _usedIndex.Add(g);
+            }
+
+            return texture;
+        }
+
+        public static void ClearUnusedTextures()
+        {
+            int count = 0;
+            for (int i = 0; i < _usedIndex.Count; i++)
+            {
+                ref var texture = ref _artCache[_usedIndex[i]];
+                if (texture == null || texture.IsDisposed)
+                    _usedIndex.RemoveAt(i--);
+                else if (Game.World.Ticks - texture.Ticks >= 3000)
+                {
+                    texture.Dispose();
+                    texture = null;
+
+                    _usedIndex.RemoveAt(i);
+                    i--;
+                    if (++count >= 5)
+                        break;
+                }
+            }
+        }
+
+        private static unsafe Span<ushort> ReadStaticArt(ushort graphic, out short width, out short height)
         {
             graphic &= FileManager.GraphicMask;
 
@@ -132,7 +186,7 @@ namespace ClassicUO.IO.Resources
             return pixels;
         }
 
-        public static Span<ushort> ReadLandArt(ushort graphic)
+        private static Span<ushort> ReadLandArt(ushort graphic)
         {
             graphic &= FileManager.GraphicMask;
 

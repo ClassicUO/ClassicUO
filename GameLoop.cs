@@ -91,10 +91,7 @@ namespace ClassicUO
         protected override void Initialize()
         {
             Window.AllowUserResizing = true;
-
-            
-            TextureManager.Device = GraphicsDevice;
-            TextureManager.Device.DepthStencilState = DepthStencilState.Default;
+         
             _graphics.ApplyChanges();
 
             base.Initialize();
@@ -213,8 +210,8 @@ namespace ClassicUO
             };
 
 
-            _texture = new Texture2D(TextureManager.Device, 1, 1);
-            _texture.SetData(new Color[1] { Color.White });
+            //_texture = new Texture2D(TextureManager.Device, 1, 1);
+            //_texture.SetData(new Color[1] { Color.White });
 
             // END TEST
 
@@ -312,6 +309,12 @@ namespace ClassicUO
 
                 if (!allowBigUpdate)
                     return;
+
+                IO.Resources.Art.ClearUnusedTextures();
+                IO.Resources.Gumps.ClearUnusedTextures();
+                IO.Resources.TextmapTextures.ClearUnusedTextures();
+                IO.Resources.Animations.ClearUnusedTextures();
+                World.Map.ClearUnusedBlocks();
 
                 //var ss = Service.Get<InputManager>();
                 //_tileSelected = GetTileCoordinates(CartesianToIsometric( new Vector2(ss.MousePosition.X, ss.MousePosition.Y)));
@@ -625,8 +628,6 @@ namespace ClassicUO
 
         protected override void Draw(GameTime gameTime)
         {
-            TextureManager.Update();
-
             var sb3D = Service.Get<SpriteBatch3D>();
 
             if (World.InGame)
@@ -685,7 +686,7 @@ namespace ClassicUO
                                     && !(obj is Tile))
                                     continue;
 
-                                var view = obj.GetView();
+                                var view = obj.View;
 
                                 //if (MouseOverList<SpriteBatch3D>.IsMouseInObjectIsometric(vertices, Service.Get<InputManager>().MousePosition))
                                 //    vertices[0].Hue = vertices[1].Hue = vertices[2].Hue = vertices[3].Hue = RenderExtentions.GetHueVector(33);
@@ -726,7 +727,7 @@ namespace ClassicUO
 
                 //    Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
 
-                //    obj.GetView().Draw(sb3D, isometricPosition);
+                //    obj.View.Draw(sb3D, isometricPosition);
 
                 //}
 

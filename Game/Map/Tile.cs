@@ -20,12 +20,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Renderer;
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace ClassicUO.Game.Map
 {
@@ -53,7 +51,7 @@ namespace ClassicUO.Game.Map
             {
                 if (_needSort)
                 {
-                    RemoveDuplicates(); 
+                    RemoveDuplicates();
                     TileSorter.Sort(_objectsOnTile);
                     _needSort = false;
                 }
@@ -106,7 +104,7 @@ namespace ClassicUO.Game.Map
             //        {
             //            if (tile.IsStretched)
             //            {
-            //                //tile.GetView();
+            //                //tile.View;
             //                priorityZ = (short)(tile.AverageZ - 1);
             //            }
             //            else
@@ -186,52 +184,53 @@ namespace ClassicUO.Game.Map
             _needSort = true;
         }
 
-        public void Clear()
-        {
+        //public void Clear()
+        //{
 
-            for (int k = 0; k < _objectsOnTile.Count; k++)
-            {
-                var obj = _objectsOnTile[k];
-                if (obj is Tile || obj is Static)
-                {
-                    int count = _objectsOnTile.Count;
-                    obj.Dispose();
-                    if (count == _objectsOnTile.Count)
-                        _objectsOnTile.RemoveAt(k);
-                    k--;
-                }
-            }
+        //    for (int k = 0; k < _objectsOnTile.Count; k++)
+        //    {
+        //        var obj = _objectsOnTile[k];
+        //        if (obj is Tile || obj is Static)
+        //        {
+        //            int count = _objectsOnTile.Count;
+        //            obj.Dispose();
+        //            if (count == _objectsOnTile.Count)
+        //                _objectsOnTile.RemoveAt(k);
+        //            k--;
+        //        }
+        //    }
 
-            _statics.Clear();
+        //    _statics.Clear();
 
-            //for (int i = 0; i < _objectsOnTile.Count; i++)
-            //{
-            //    var obj = _objectsOnTile[i];
+        //    //for (int i = 0; i < _objectsOnTile.Count; i++)
+        //    //{
+        //    //    var obj = _objectsOnTile[i];
 
-            //    if (obj is Entity || obj is Tile)
-            //        continue;
+        //    //    if (obj is Entity || obj is Tile)
+        //    //        continue;
 
-            //    int count = _objectsOnTile.Count;
+        //    //    int count = _objectsOnTile.Count;
 
-            //    obj.Dispose();
+        //    //    obj.Dispose();
 
-            //    if (count == _objectsOnTile.Count)
-            //    {
-            //        _objectsOnTile.RemoveAt(i);
-            //    }
+        //    //    if (count == _objectsOnTile.Count)
+        //    //    {
+        //    //        _objectsOnTile.RemoveAt(i);
+        //    //    }
 
-            //    i--;           
-            //}
+        //    //    i--;           
+        //    //}
 
-            //_objectsOnTile.Clear();
+        //    //_objectsOnTile.Clear();
 
-            //DisposeView();
-            //Graphic = 0;
-            //Position = Position.Invalid;
-            //_tileData = null;
-            //_needSort = false;
-            //_statics.Clear();
-        }
+        //    //DisposeView();
+        //    //Graphic = 0;
+        //    //Position = Position.Invalid;
+        //    //_tileData = null;
+        //    //_needSort = false;
+        //    //_statics.Clear();
+        //}
+
 
         private void RemoveDuplicates()
         {
@@ -276,7 +275,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public List<GameObject> GetItemsBetweenZ(int z0,  int z1)
+        public List<GameObject> GetItemsBetweenZ(int z0, int z1)
         {
             var items = _itemsAtZ;
             _itemsAtZ.Clear();
@@ -321,7 +320,7 @@ namespace ClassicUO.Game.Map
                     }
                 }
 
-                else if (list[i] is Tile tile && tile.GetView().SortZ >= z + 12)
+                else if (list[i] is Tile tile && tile.View.SortZ >= z + 12)
                 {
                     ground = list[i];
                 }

@@ -44,11 +44,11 @@ namespace ClassicUO.Game.Gumps
         public Button(int buttonID,  ushort normal,  ushort pressed,  ushort over = 0) : base()
         {
             ButtonID = buttonID;
-            _textures[NORMAL] = TextureManager.GetOrCreateGumpTexture(normal);
-            _textures[PRESSED] = TextureManager.GetOrCreateGumpTexture(pressed);
+            _textures[NORMAL] = IO.Resources.Gumps.GetGumpTexture(normal);
+            _textures[PRESSED] = IO.Resources.Gumps.GetGumpTexture(pressed);
             if (over > 0)
             {
-                _textures[OVER] = TextureManager.GetOrCreateGumpTexture(over);
+                _textures[OVER] = IO.Resources.Gumps.GetGumpTexture(over);
             }
 
             ref var t = ref _textures[NORMAL];
@@ -88,17 +88,17 @@ namespace ClassicUO.Game.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            base.Update(totalMS, frameMS);
-        }
-
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
-        {
             for (int i = 0; i < _textures.Length; i++)
             {
                 if (_textures[i] != null)
                     _textures[i].Ticks = World.Ticks;
             }
 
+            base.Update(totalMS, frameMS);
+        }
+
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+        {        
             var texture = _curentState == PRESSED ? _textures[PRESSED] :
                 _textures[OVER] != null && MouseIsOver ? _textures[OVER] : _textures[NORMAL];
 

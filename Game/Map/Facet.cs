@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,11 +19,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.IO.Resources;
-using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using ClassicUO.IO.Resources;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Map
 {
@@ -40,15 +40,12 @@ namespace ClassicUO.Game.Map
         public Facet(int index)
         {
             Index = index;
-
-            //Chunks = new FacetChunk[MAX_CHUNKS * MAX_CHUNKS];
-
             MapBlockIndex = IO.Resources.Map.MapBlocksSize[Index][0] * IO.Resources.Map.MapBlocksSize[Index][1];
-            Chunks = new FacetChunk[MapBlockIndex];
+            Chunks = new MapChunk[MapBlockIndex];
         }
 
         public int Index { get; }
-        public FacetChunk[] Chunks { get; private set; }
+        public MapChunk[] Chunks { get; private set; }
         public int MapBlockIndex { get; set; }
         public Point Center
         {
@@ -64,7 +61,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public Tile GetTile(short x,  short y)
+        public Tile GetTile(short x, short y)
         {
             if (x < 0 || y < 0)
                 return null;
@@ -74,20 +71,20 @@ namespace ClassicUO.Game.Map
 
             int block = GetBlock(cellX, cellY);
 
-            ref var chuck = ref Chunks[block];
+            ref MapChunk chuck = ref Chunks[block];
 
             if (chuck == null)
             {
                 _usedIndices.Add(block);
-                chuck = new FacetChunk((ushort)cellX, (ushort)cellY);
+                chuck = new MapChunk((ushort)cellX, (ushort)cellY);
                 chuck.Load(Index);
             }
             chuck.LastAccessTime = World.Ticks;
-            return chuck.Tiles[x % 8][y % 8]; 
+            return chuck.Tiles[x % 8][y % 8];
 
             //int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
             //// int cellindex = (cellX * AssetsLoader.Map.MapBlocksSize[Index][1]) + cellY;
-     
+
 
             //ref var tile = ref Chunks[cellindex];
 
@@ -103,7 +100,7 @@ namespace ClassicUO.Game.Map
             => GetTile((short)x, (short)y);
 
 
-        public unsafe sbyte GetTileZ(short x,  short y)
+        public unsafe sbyte GetTileZ(short x, short y)
         {
             Tile tile = GetTile(x, y);
             if (tile == null)
@@ -138,12 +135,12 @@ namespace ClassicUO.Game.Map
         }
 
 
-        private IndexMap GetIndex(int blockX,  int blockY) => IO.Resources.Map.BlockData[Index][GetBlock(blockX, blockY)];
+        private IndexMap GetIndex(int blockX, int blockY) => IO.Resources.Map.BlockData[Index][GetBlock(blockX, blockY)];
 
         private int GetBlock(int blockX, int blockY) => blockX * IO.Resources.Map.MapBlocksSize[Index][1] + blockY;
 
 
-        public int GetAverageZ(sbyte top,  sbyte left,  sbyte right,  sbyte bottom, ref sbyte low, ref sbyte high)
+        public int GetAverageZ(sbyte top, sbyte left, sbyte right, sbyte bottom, ref sbyte low, ref sbyte high)
         {
             high = top;
             if (left > high)
@@ -203,9 +200,9 @@ namespace ClassicUO.Game.Map
             return FloorAverage(top, bottom);
         }
 
-        public int GetAverageZ(short x, short y, ref sbyte low, ref sbyte top) => GetAverageZ(GetTileZ(x, y), GetTileZ(x, (short)(y + 1)), GetTileZ((short)(x + 1), y), GetTileZ((short)(x + 1), (short)(y + 1)), ref low, ref top);
+        public int GetAverageZ(short x, short y, ref sbyte low, ref sbyte top) => GetAverageZ(GetTileZ(x, y), GetTileZ(x, (short)( y + 1 )), GetTileZ((short)( x + 1 ), y), GetTileZ((short)( x + 1 ), (short)( y + 1 )), ref low, ref top);
 
-        private static int FloorAverage(int a,  int b)
+        private static int FloorAverage(int a, int b)
         {
             int v = a + b;
 
@@ -221,7 +218,7 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < _usedIndices.Count; i++)
             {
                 ref var block = ref Chunks[_usedIndices[i]];
-                if (World.Ticks - block.LastAccessTime > 3000)
+                if (World.Ticks - block.LastAccessTime > 3000 && block.HasNoExternalData())
                 {
                     block.Unload();
                     block = null;
@@ -234,7 +231,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        private void LoadChunks(ushort centerX,  ushort centerY)
+        private void LoadChunks(ushort centerX, ushort centerY)
         {
             //for (int y = -CHUNKS_NUM; y <= CHUNKS_NUM; y++)
             //{
@@ -274,15 +271,15 @@ namespace ClassicUO.Game.Map
             //    }
             //}
 
-           
+
 
 
             const int XY_OFFSET = 30;
 
-            int minBlockX = (centerX - XY_OFFSET) / 8 - 1;
-            int minBlockY = (centerY - XY_OFFSET) / 8 - 1;
-            int maxBlockX = (centerX + XY_OFFSET) / 8 + 2;
-            int maxBlockY = (centerY + XY_OFFSET) / 8 + 2;
+            int minBlockX = ( centerX - XY_OFFSET ) / 8 - 1;
+            int minBlockY = ( centerY - XY_OFFSET ) / 8 - 1;
+            int maxBlockX = ( centerX + XY_OFFSET ) / 8 + 2;
+            int maxBlockY = ( centerY + XY_OFFSET ) / 8 + 2;
 
             if (minBlockX < 0)
                 minBlockX = 0;
@@ -299,17 +296,18 @@ namespace ClassicUO.Game.Map
 
                 for (int j = minBlockY; j <= maxBlockY; j++)
                 {
-                    int cellindex = index + j; 
+                    int cellindex = index + j;
 
                     ref var tile = ref Chunks[cellindex];
 
                     if (tile == null)
                     {
                         _usedIndices.Add(cellindex);
-                        tile = new FacetChunk((ushort)i, (ushort)j);
-
+                        tile = new MapChunk((ushort)i, (ushort)j);
                         tile.Load(Index);
                     }
+
+                    tile.LastAccessTime = World.Ticks;
                 }
             }
         }

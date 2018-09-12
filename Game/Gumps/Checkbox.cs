@@ -36,8 +36,8 @@ namespace ClassicUO.Game.Gumps
 
         public Checkbox(ushort inactive,  ushort active) : base()
         {
-            _textures[INACTIVE] = TextureManager.GetOrCreateGumpTexture(inactive);
-            _textures[ACTIVE] = TextureManager.GetOrCreateGumpTexture(active);
+            _textures[INACTIVE] = IO.Resources.Gumps.GetGumpTexture(inactive);
+            _textures[ACTIVE] = IO.Resources.Gumps.GetGumpTexture(active);
 
             ref var t = ref _textures[INACTIVE];
             Width = t.Width;
@@ -60,16 +60,22 @@ namespace ClassicUO.Game.Gumps
 
         public bool IsChecked { get; set; }
 
-
-        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
+        public override void Update(double totalMS, double frameMS)
         {
-            bool ok = base.Draw(spriteBatch,  position);
-
             for (int i = 0; i < _textures.Length; i++)
             {
                 if (_textures[i] != null)
                     _textures[i].Ticks = World.Ticks;
             }
+
+            base.Update(totalMS, frameMS);
+        }
+
+
+        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
+        {
+            bool ok = base.Draw(spriteBatch,  position);
+
             spriteBatch.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
 
             return ok;

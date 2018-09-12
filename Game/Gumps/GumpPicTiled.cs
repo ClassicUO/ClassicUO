@@ -48,8 +48,9 @@ namespace ClassicUO.Game.Gumps
         {
             if (Texture == null || Texture.IsDisposed)
             {
-                Texture = TextureManager.GetOrCreateGumpTexture(_graphic);
+                Texture = IO.Resources.Gumps.GetGumpTexture(_graphic);
             }
+            Texture.Ticks = (long)totalMS;
             base.Update(totalMS, frameMS);
         }
 

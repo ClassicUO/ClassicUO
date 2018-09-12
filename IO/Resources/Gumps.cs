@@ -20,7 +20,9 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.IO;
+using ClassicUO.Renderer;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -30,6 +32,10 @@ namespace ClassicUO.IO.Resources
     {
         public const int GUMP_COUNT = 0x10000;
         private static UOFile _file;
+
+        private static SpriteTexture[] _gumpCache;
+        private static readonly List<int> _usedIndex = new List<int>();
+
 
         public static void Load()
         {
@@ -43,6 +49,8 @@ namespace ClassicUO.IO.Resources
 
                 if (File.Exists(path) && File.Exists(pathidx)) _file = new UOFileMul(path, pathidx, GUMP_COUNT, 12);
             }
+
+            _gumpCache = new SpriteTexture[GUMP_COUNT];
 
             string pathdef = Path.Combine(FileManager.UoFolderPath, "gump.def");
             if (!File.Exists(pathdef))
@@ -69,7 +77,45 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public static int PaddedRowWidth(int bitsPerPixel, int w, int padToNBytes)
+        public unsafe static SpriteTexture GetGumpTexture(ushort g)
+        {
+            ref var texture = ref _gumpCache[g];
+            if (texture == null || texture.IsDisposed)
+            {
+                var pixels = GetGump(g, out int w, out int h);
+                texture = new SpriteTexture(w, h, false);
+                fixed (ushort* ptr = pixels)
+                    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
+
+                _usedIndex.Add(g);
+            }
+
+            return texture;
+        }
+
+        public static void ClearUnusedTextures()
+        {
+            int count = 0;
+            for (int i = 0; i < _usedIndex.Count; i++)
+            {
+                ref var texture = ref _gumpCache[_usedIndex[i]];
+                if (texture == null || texture.IsDisposed)
+                    _usedIndex.RemoveAt(i--);
+                else if (Game.World.Ticks - texture.Ticks >= 3000)
+                {
+                    texture.Dispose();
+                    texture = null;
+
+                    _usedIndex.RemoveAt(i);
+                    i--;
+                    if (++count >= 5)
+                        break;
+                }
+            }
+        }
+
+
+        private static int PaddedRowWidth(int bitsPerPixel, int w, int padToNBytes)
         {
             if (padToNBytes == 0)
                 throw new ArgumentOutOfRangeException("padToNBytes", "pad value must be greater than 0.");
@@ -77,7 +123,7 @@ namespace ClassicUO.IO.Resources
             return ((w * bitsPerPixel + (padBits - 1)) / padBits) * padToNBytes;
         }
 
-        public static unsafe Span<ushort> GetGump(int index, out int width, out int height)
+        private static unsafe Span<ushort> GetGump(int index, out int width, out int height)
         {
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(index);
 

@@ -24,7 +24,6 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
 {
-
     public abstract class GumpPicBase : GumpControl
     {
         private Graphic _lastGump;
@@ -45,11 +44,12 @@ namespace ClassicUO.Game.Gumps
             {
                 _lastGump = Graphic;
 
-                Texture = TextureManager.GetOrCreateGumpTexture(Graphic);
+                Texture = IO.Resources.Gumps.GetGumpTexture(Graphic);
                 Width = Texture.Width;
                 Height = Texture.Height;
             }
 
+            Texture.Ticks = (long)totalMS;
             base.Update(totalMS, frameMS);
         }
     }

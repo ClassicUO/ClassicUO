@@ -49,25 +49,18 @@ namespace ClassicUO.Game.Gumps
 
 
         public override void Update(double totalMS, double frameMS)
-        {
-            if (_gumpTexture[0] == null)
+        {           
+            for (int i = 0; i < _gumpTexture.Length; i++)
             {
-                for (int i = 0; i < _gumpTexture.Length; i++)
-                {
-                    _gumpTexture[i] = TextureManager.GetOrCreateGumpTexture((Graphic)(_graphic + i));
-                }
+                if (_gumpTexture[i] == null)
+                    _gumpTexture[i] = IO.Resources.Gumps.GetGumpTexture((Graphic)(_graphic + i));
+                _gumpTexture[i].Ticks = (long)totalMS;
             }
-
             base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {
-            for (int i = 0; i < _gumpTexture.Length; i++)
-            {
-                _gumpTexture[i].Ticks = World.Ticks;
-            }
-
             int centerWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
             int centerHeight = Height - _gumpTexture[0].Height - _gumpTexture[6].Height;
             int line2Y = (int)position.Y + _gumpTexture[0].Height;

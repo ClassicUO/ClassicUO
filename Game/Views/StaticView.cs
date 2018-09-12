@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Views
 
             if (Texture == null || Texture.IsDisposed)
             {
-                Texture = TextureManager.GetOrCreateStaticTexture(GameObject.Graphic);
+                Texture = IO.Resources.Art.GetStaticTexture(GameObject.Graphic);
                 Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
             }
 
