@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void OnButtonClick(int buttonID)
         {
-            if (LocalSerial.IsValid)
+            if (LocalSerial != 0)
             {
                 if (buttonID == 0) // cancel
                 {
@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Gumps.Controls
             if (!CanCloseWithRightClick)
                 return;
 
-            if (ServerSerial.IsValid)
+            if (ServerSerial != 0)
                 OnButtonClick(0);
             base.CloseWithRightClick();
         }

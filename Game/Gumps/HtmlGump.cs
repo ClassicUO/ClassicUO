@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Gumps
         private RenderedText _gameText;
         private IScrollBar _scrollBar;
 
-        public HtmlGump(string[] parts, string[] lines) : this()
+        public HtmlGump(string[] parts, string[] lines) : this(0xFFFF)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -44,8 +44,47 @@ namespace ClassicUO.Game.Gumps
             UseFlagScrollbar = HasScrollbar && parts[7] == "2";
 
 
+            InternalBuild(lines[textIndex]);
+        }
+
+        public HtmlGump(int x, int y, int w, int h, string text, int hasbackground, int hasscrollbar, Hue hue) : this(0)
+        {
+            X = x;
+            Y = y;
+            Width = w;
+            Height = h;
+            HasBackground = hasbackground == 1;
+            HasScrollbar = hasscrollbar != 0;
+            UseFlagScrollbar = hasscrollbar != 0 && hasscrollbar == 2;
+
+            InternalBuild(text);
+        }
+
+        public HtmlGump(Hue hue) : base()
+        {
+            _gameText = new RenderedText()
+            {
+                IsHTML = true,
+                IsUnicode = true,
+                Align = TEXT_ALIGN_TYPE.TS_LEFT,
+                Font = 1,
+                Hue = hue,
+            };
+            CanMove = true;
+        }
+
+
+        public bool HasScrollbar { get; }
+        public bool HasBackground { get; }
+        public bool UseFlagScrollbar { get; }
+        public int ScrollX { get; set; }
+        public int ScrollY { get; set; }
+        public string Text { get => _gameText.Text; set => _gameText.Text = value; }
+
+        private void InternalBuild(string text)
+        {
             _gameText.MaxWidth = ( Width - ( HasScrollbar ? 15 : 0 ) - ( HasBackground ? 8 : 0 ) );
-            _gameText.Text = lines[textIndex];
+            _gameText.Text = text;
 
             if (HasBackground)
             {
@@ -80,26 +119,6 @@ namespace ClassicUO.Game.Gumps
             if (Width != _gameText.Width)
                 Width = _gameText.Width;
         }
-
-        public HtmlGump() : base()
-        {
-            _gameText = new RenderedText()
-            {
-                IsHTML = true,
-                IsUnicode = true,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                Font = 1,
-            };
-            CanMove = true;
-        }
-
-
-        public bool HasScrollbar { get; }
-        public bool HasBackground { get; }
-        public bool UseFlagScrollbar { get; }
-        public int ScrollX { get; set; }
-        public int ScrollY { get; set; }
-
 
         public override void Update(double totalMS, double frameMS)
         {

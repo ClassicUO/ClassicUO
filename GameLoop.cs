@@ -204,7 +204,7 @@ namespace ClassicUO
                 Text = "FPS: 0",
                 FontStyle = FontStyle.BlackBorder,
                 Font = 0,
-                IsHTML = false
+                IsHTML = false,
             };
 
 

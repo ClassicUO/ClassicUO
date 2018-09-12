@@ -119,10 +119,26 @@ namespace ClassicUO.Game.Gumps
                             gump.AddChildren(new GumpPicTiled(gparams));
                             break;
                         case "htmlgump":
-                        case "xmfhtmlgump":
-                        case "xmfhtmlgumpcolor":
-                        case "xmfhtmltok":
                             gump.AddChildren(new HtmlGump(gparams, lines));
+                            break;
+                        case "xmfhtmlgump":
+                            gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]),
+                                IO.Resources.Cliloc.GetString(int.Parse(gparams[5])), int.Parse(gparams[6]), int.Parse(gparams[7]), 0));
+                            break;
+                        case "xmfhtmlgumpcolor":
+                            Hue color = Hue.Parse(gparams[8]);
+                            if (color == 0x7FFF)
+                                color = unchecked((ushort)0x00FFFFFF);
+                            gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]),
+                               IO.Resources.Cliloc.GetString(int.Parse(gparams[5])), int.Parse(gparams[6]), int.Parse(gparams[7]), color));
+                            break;
+                        case "xmfhtmltok":
+                            color = Hue.Parse(gparams[7]);
+                            if (color == 0x7FFF)
+                                color = unchecked((ushort)0x00FFFFFF);
+
+                            gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]),
+                              IO.Resources.Cliloc.GetString(int.Parse(gparams[8])), int.Parse(gparams[5]), int.Parse(gparams[6]), color));
                             break;
                         case "page":
                             break;
