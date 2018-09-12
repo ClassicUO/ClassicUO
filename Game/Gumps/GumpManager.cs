@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,22 +19,22 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Renderer;
-using ClassicUO.Input;
-using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Input;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
 {
     public static class GumpManager
     {
-        private static readonly List<GumpControl> _gumps = new List<GumpControl>(); 
+        private static readonly List<Gump> _gumps = new List<Gump>();
         private static GumpControl _mouseOverControl, _keyboardFocusControl;
         private static readonly GumpControl[] _mouseDownControls = new GumpControl[5];
-       
+
 
         public static GumpControl KeyboardFocusControl
         {
@@ -55,27 +55,22 @@ namespace ClassicUO.Game.Gumps
 
                 return _keyboardFocusControl;
             }
-            set
-            {
-                _keyboardFocusControl = value;
-            }
+            set => _keyboardFocusControl = value;
         }
 
-        
 
-        public static GumpControl Create(Serial sender,  Serial gumpID,  int x,  int y,  string layout,  string[] lines)
+
+        public static GumpControl Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
         {
             List<string> pieces = new List<string>();
             int index = 0;
-            GumpControl gump = new GumpControl()
+            Gump gump = new Gump(sender, gumpID)
             {
-                LocalSerial = sender,
-                ServerSerial = gumpID,
                 X = x,
                 Y = y,
                 CanMove = true,
                 CanCloseWithRightClick = true,
-                CanCloseWithEsc = true,              
+                CanCloseWithEsc = true,
             };
 
             int group = 0;
@@ -232,7 +227,7 @@ namespace ClassicUO.Game.Gumps
                                 break;
                             case KeyboardEvent.TextInput:
                                 _keyboardFocusControl.InvokeTextInput(e.KeyChar);
-                                break;                        
+                                break;
                         }
                     }
                 }
@@ -260,9 +255,9 @@ namespace ClassicUO.Game.Gumps
             if (_mouseOverControl != null && gump != _mouseOverControl)
             {
                 _mouseOverControl.InvokeMouseLeft(position);
-                
-                if (_mouseOverControl.Parent != null && (gump == null || gump.RootParent != _mouseOverControl.RootParent))
-                    _mouseOverControl.InvokeMouseLeft(position);               
+
+                if (_mouseOverControl.Parent != null && ( gump == null || gump.RootParent != _mouseOverControl.RootParent ))
+                    _mouseOverControl.InvokeMouseLeft(position);
             }
 
 
@@ -278,7 +273,7 @@ namespace ClassicUO.Game.Gumps
 
             _mouseOverControl = gump;
 
-            for ( int i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
                 if (_mouseDownControls[i] != null && _mouseDownControls[i] != gump)
                     _mouseDownControls[i].InvokeMouseEnter(position);
@@ -289,7 +284,7 @@ namespace ClassicUO.Game.Gumps
 
             foreach (var e in events)
             {
-                switch(e.EventType)
+                switch (e.EventType)
                 {
                     case MouseEvent.Down:
                         if (gump != null)
@@ -392,7 +387,7 @@ namespace ClassicUO.Game.Gumps
             //}
         }
 
-        private static GumpControl HitTest(GumpControl parent,  Point position)
+        private static GumpControl HitTest(GumpControl parent, Point position)
         {
             var p = parent?.HitTest(position);
             if (p != null && p.Length > 0)
@@ -465,7 +460,7 @@ namespace ClassicUO.Game.Gumps
                         _mouseDownControls[i] = null;
                     }
                 }
-               
+
             }
         }
 

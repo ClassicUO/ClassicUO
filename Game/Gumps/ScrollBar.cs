@@ -1,9 +1,6 @@
-﻿using ClassicUO.Renderer;
 using ClassicUO.Input;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Gumps
 {
@@ -12,12 +9,12 @@ namespace ClassicUO.Game.Gumps
         private const float TIME_BETWEEN_CLICKS = 500f;
 
 
-        private SpriteTexture[] _textureUpButton, _textureDownButton, _textureBackground;
+        private readonly SpriteTexture[] _textureUpButton, _textureDownButton, _textureBackground;
         private SpriteTexture _textureSlider;
 
         private float _sliderPosition, _value;
-        private int _max, _min;
-
+        private int _max;
+        private int _min;
         private bool _btUpClicked, _btDownClicked, _btSliderClicked;
         private Point _clickPosition;
 
@@ -75,7 +72,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (value < 0)
                     value = 0;
-                _value = value;
+                _max = value;
                 if (_value > _max)
                     _value = _max;
             }
@@ -144,7 +141,7 @@ namespace ClassicUO.Game.Gumps
 
             // draw slider
             if (MaxValue > MinValue && middleHeight > 0)
-                spriteBatch.Draw2D(_textureSlider, new Vector3(position.X + (_textureBackground[0].Width - _textureSlider.Width) / 2, position.Y + _textureUpButton[0].Height + _sliderPosition, 0), Vector3.Zero);
+                spriteBatch.Draw2D(_textureSlider, new Vector3(position.X + ( _textureBackground[0].Width - _textureSlider.Width ) / 2, position.Y + _textureUpButton[0].Height + _sliderPosition, 0), Vector3.Zero);
 
 
             return base.Draw(spriteBatch, position);
@@ -154,7 +151,7 @@ namespace ClassicUO.Game.Gumps
         {
             if (MaxValue - MinValue == 0)
                 return 0f;
-            return GetScrollableArea() * ((_value - MinValue) / (MaxValue - MinValue));
+            return GetScrollableArea() * ( ( _value - MinValue ) / ( MaxValue - MinValue ) );
         }
 
         private float GetScrollableArea()
@@ -176,7 +173,7 @@ namespace ClassicUO.Game.Gumps
                 // clicked on the up button
                 _btUpClicked = true;
             }
-            else if (new Rectangle((_textureBackground[0].Width - _textureSlider.Width) / 2, _textureUpButton[0].Height + (int)_sliderPosition, _textureSlider.Width, _textureSlider.Height).Contains(new Point(x, y)))
+            else if (new Rectangle(( _textureBackground[0].Width - _textureSlider.Width ) / 2, _textureUpButton[0].Height + (int)_sliderPosition, _textureSlider.Width, _textureSlider.Height).Contains(new Point(x, y)))
             {
                 // clicked on the slider
                 _btSliderClicked = true;
@@ -202,7 +199,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (y != _clickPosition.Y)
                 {
-                    float sliderY = _sliderPosition + (y - _clickPosition.Y);
+                    float sliderY = _sliderPosition + ( y - _clickPosition.Y );
 
                     if (sliderY < 0)
                         sliderY = 0;
@@ -216,24 +213,18 @@ namespace ClassicUO.Game.Gumps
                     if (sliderY == 0 && _clickPosition.Y < _textureUpButton[0].Height + _textureSlider.Height / 2)
                         _clickPosition.Y = _textureUpButton[0].Height + _textureSlider.Height / 2;
 
-                    if (sliderY == (scrollableArea) && _clickPosition.Y > Height - _textureDownButton[0].Height - _textureSlider.Height / 2)
+                    if (sliderY == ( scrollableArea ) && _clickPosition.Y > Height - _textureDownButton[0].Height - _textureSlider.Height / 2)
                         _clickPosition.Y = Height - _textureDownButton[0].Height - _textureSlider.Height / 2;
 
-                    _value = ((sliderY / scrollableArea) * (float)((MaxValue - MinValue))) + MinValue;
+                    _value = ( ( sliderY / scrollableArea ) * ( MaxValue - MinValue ) ) + MinValue;
                     _sliderPosition = sliderY;
                 }
             }
         }
 
 
-        protected override bool Contains(int x, int y)
-        {
-            return new Rectangle(0, 0, Width, Height).Contains(x, y);
-        }
+        protected override bool Contains(int x, int y) => new Rectangle(0, 0, Width, Height).Contains(x, y);
 
-        bool IScrollBar.Contains(int x, int y)
-        {
-            return Contains(x, y);
-        }
+        bool IScrollBar.Contains(int x, int y) => Contains(x, y);
     }
 }

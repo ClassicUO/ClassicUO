@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,12 +19,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using System;
+using System.Collections.Generic;
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO;
-using ClassicUO.Network;
-using System;
-using System.Collections.Generic;
 
 namespace ClassicUO.Network
 {
@@ -45,7 +44,7 @@ namespace ClassicUO.Network
 
     public sealed class PFirstLogin : PacketWriter
     {
-        public PFirstLogin(string account,  string password) : base(0x80)
+        public PFirstLogin(string account, string password) : base(0x80)
         {
             WriteASCII(account, 30);
             WriteASCII(password, 30);
@@ -64,7 +63,7 @@ namespace ClassicUO.Network
 
     public sealed class PSecondLogin : PacketWriter
     {
-        public PSecondLogin(string account,  string password,  uint seed) : base(0x91)
+        public PSecondLogin(string account, string password, uint seed) : base(0x91)
         {
             WriteUInt(seed);
             WriteASCII(account, 30);
@@ -107,7 +106,7 @@ namespace ClassicUO.Network
 
     public sealed class PDeleteCharacter : PacketWriter
     {
-        public PDeleteCharacter(byte index,  uint ipclient) : base(0x83)
+        public PDeleteCharacter(byte index, uint ipclient) : base(0x83)
         {
             Skip(30);
             WriteUInt(index);
@@ -117,7 +116,7 @@ namespace ClassicUO.Network
 
     public sealed class PSelectCharacter : PacketWriter
     {
-        public PSelectCharacter(byte index,  string name,  uint ipclient) : base(0x5D)
+        public PSelectCharacter(byte index, string name, uint ipclient) : base(0x5D)
         {
             WriteUInt(0xEDEDEDED);
             WriteASCII(name, 30);
@@ -135,7 +134,7 @@ namespace ClassicUO.Network
 
     public sealed class PPickUpRequest : PacketWriter
     {
-        public PPickUpRequest(Serial serial,  ushort count) : base(0x07)
+        public PPickUpRequest(Serial serial, ushort count) : base(0x07)
         {
             WriteUInt(serial);
             WriteUShort(count);
@@ -144,7 +143,7 @@ namespace ClassicUO.Network
 
     public sealed class PDropRequestOld : PacketWriter
     {
-        public PDropRequestOld(Serial serial,  Position position,  Serial container) : base(0x08)
+        public PDropRequestOld(Serial serial, Position position, Serial container) : base(0x08)
         {
             WriteUInt(serial);
             WriteUShort(position.X);
@@ -156,7 +155,7 @@ namespace ClassicUO.Network
 
     public sealed class PDropRequestNew : PacketWriter
     {
-        public PDropRequestNew(Serial serial,  Position position,  byte slot,  Serial container) : base(0x08)
+        public PDropRequestNew(Serial serial, Position position, byte slot, Serial container) : base(0x08)
         {
             WriteUInt(serial);
             WriteUShort(position.X);
@@ -169,7 +168,7 @@ namespace ClassicUO.Network
 
     public sealed class PEquipRequest : PacketWriter
     {
-        public PEquipRequest(Serial serial,  Layer layer,  Serial container) : base(0x13)
+        public PEquipRequest(Serial serial, Layer layer, Serial container) : base(0x13)
         {
             WriteUInt(serial);
             WriteByte((byte)layer);
@@ -215,7 +214,7 @@ namespace ClassicUO.Network
 
     public sealed class PSkillsStatusChangeRequest : PacketWriter
     {
-        public PSkillsStatusChangeRequest(byte skill,  bool state) : base(0x3A)
+        public PSkillsStatusChangeRequest(byte skill, bool state) : base(0x3A)
         {
             WriteUShort(skill);
             WriteBool(state);
@@ -256,7 +255,7 @@ namespace ClassicUO.Network
 
     public sealed class PASCIISpeechRequest : PacketWriter
     {
-        public PASCIISpeechRequest(string text,  MessageType type,  MessageFont font,  Hue hue) : base(0x03)
+        public PASCIISpeechRequest(string text, MessageType type, MessageFont font, Hue hue) : base(0x03)
         {
             WriteByte((byte)type);
             WriteUShort(hue);
@@ -267,7 +266,7 @@ namespace ClassicUO.Network
 
     public sealed class PUnicodeSpeechRequest : PacketWriter
     {
-        public PUnicodeSpeechRequest(string text,  MessageType type,  MessageFont font,  Hue hue,  string lang) : base(0xAD)
+        public PUnicodeSpeechRequest(string text, MessageType type, MessageFont font, Hue hue, string lang) : base(0xAD)
         {
             WriteByte((byte)type);
             WriteUShort(hue);
@@ -300,7 +299,7 @@ namespace ClassicUO.Network
 
     public sealed class PCastSpellFromBook : PacketWriter
     {
-        public PCastSpellFromBook(int idx,  Serial serial) : base(0x12)
+        public PCastSpellFromBook(int idx, Serial serial) : base(0x12)
         {
             WriteByte(0x27);
             WriteASCII(string.Format("{0} {1}", idx, serial));
@@ -344,9 +343,35 @@ namespace ClassicUO.Network
 
     public sealed class PGumpResponse : PacketWriter
     {
-        public PGumpResponse() : base(0xB1)
+        public PGumpResponse(Serial local, Serial server, int buttonID, Serial[] switches, Tuple<ushort, string>[] entries) : base(0xB1)
         {
-            throw new NotImplementedException();
+            WriteUInt(local);
+            WriteUInt(server);
+            WriteUInt((uint)buttonID);
+
+            if (switches == null)
+                WriteUInt(0);
+            else
+            {
+                WriteUInt((uint)switches.Length);
+                for (int i = 0; i < switches.Length; i++)
+                    WriteUInt(switches[i]);
+            }
+
+            if (entries == null)
+                WriteUInt(0);
+            else
+            {
+                WriteUInt((uint)entries.Length);
+                for (int i = 0; i < entries.Length; i++)
+                {
+                    int length = entries[i].Item2.Length * 2;
+
+                    WriteUShort(entries[i].Item1);
+                    WriteUShort((ushort)length);
+                    WriteUnicode(entries[i].Item2, entries[i].Item2.Length);
+                }
+            }
         }
     }
 
@@ -392,7 +417,7 @@ namespace ClassicUO.Network
 
     public sealed class PRenameRequest : PacketWriter
     {
-        public PRenameRequest(Serial serial,  string name) : base(0x75)
+        public PRenameRequest(Serial serial, string name) : base(0x75)
         {
             WriteUInt(serial);
             WriteASCII(name);
@@ -401,7 +426,7 @@ namespace ClassicUO.Network
 
     public sealed class PTipRequest : PacketWriter
     {
-        public PTipRequest(ushort id,  byte flag) : base(0xA7)
+        public PTipRequest(ushort id, byte flag) : base(0xA7)
         {
             WriteUShort(id);
             WriteByte(flag);
@@ -420,7 +445,7 @@ namespace ClassicUO.Network
 
     public sealed class PDyeDataResponse : PacketWriter
     {
-        public PDyeDataResponse(Serial serial,  Graphic graphic,  Hue hue) : base(0x95)
+        public PDyeDataResponse(Serial serial, Graphic graphic, Hue hue) : base(0x95)
         {
             WriteUInt(serial);
             WriteUShort(graphic);
@@ -439,7 +464,7 @@ namespace ClassicUO.Network
 
     public sealed class PProfileUpdate : PacketWriter
     {
-        public PProfileUpdate(Serial serial,  string text,  int len) : base(0xB8)
+        public PProfileUpdate(Serial serial, string text, int len) : base(0xB8)
         {
             WriteByte(1);
             WriteUInt(serial);
@@ -510,7 +535,7 @@ namespace ClassicUO.Network
 
     public sealed class PPartyMessage : PacketWriter
     {
-        public PPartyMessage(string text,  Serial serial) : base(0xBF)
+        public PPartyMessage(string text, Serial serial) : base(0xBF)
         {
             WriteUShort(0x06);
             if (serial.IsValid)
@@ -529,7 +554,7 @@ namespace ClassicUO.Network
 
     public sealed class PGameWindowSize : PacketWriter
     {
-        public PGameWindowSize(uint w,  uint h) : base(0xBF)
+        public PGameWindowSize(uint w, uint h) : base(0xBF)
         {
             WriteUShort(0x05);
             WriteUInt(w);
@@ -539,7 +564,7 @@ namespace ClassicUO.Network
 
     public sealed class PBulletinBoardRequestMessage : PacketWriter
     {
-        public PBulletinBoardRequestMessage(Serial serial,  Serial msgserial) : base(0x71)
+        public PBulletinBoardRequestMessage(Serial serial, Serial msgserial) : base(0x71)
         {
             WriteByte(0x03);
             WriteUInt(serial);
@@ -549,7 +574,7 @@ namespace ClassicUO.Network
 
     public sealed class PBulletinBoardRequestMessageSummary : PacketWriter
     {
-        public PBulletinBoardRequestMessageSummary(Serial serial,  Serial msgserial) : base(0x71)
+        public PBulletinBoardRequestMessageSummary(Serial serial, Serial msgserial) : base(0x71)
         {
             WriteByte(0x04);
             WriteUInt(serial);
@@ -559,12 +584,12 @@ namespace ClassicUO.Network
 
     public sealed class PBulletinBoardPostMessage : PacketWriter
     {
-        public PBulletinBoardPostMessage(Serial serial,  Serial msgserial,  string subject,  string message) : base(0x71)
+        public PBulletinBoardPostMessage(Serial serial, Serial msgserial, string subject, string message) : base(0x71)
         {
             WriteByte(0x05);
             WriteUInt(serial);
             WriteUInt(msgserial);
-            WriteByte((byte)(subject.Length + 1));
+            WriteByte((byte)( subject.Length + 1 ));
             WriteASCII(subject);
 
             string[] lines = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
@@ -579,7 +604,7 @@ namespace ClassicUO.Network
 
     public sealed class PBulletinBoardRemoveMessage : PacketWriter
     {
-        public PBulletinBoardRemoveMessage(Serial serial,  Serial msgserial) : base(0x71)
+        public PBulletinBoardRemoveMessage(Serial serial, Serial msgserial) : base(0x71)
         {
             WriteByte(0x06);
             WriteUInt(serial);
@@ -589,7 +614,7 @@ namespace ClassicUO.Network
 
     public sealed class PAssistVersion : PacketWriter
     {
-        public PAssistVersion(byte[] clientversion,  uint version) : base(0xBE)
+        public PAssistVersion(byte[] clientversion, uint version) : base(0xBE)
         {
             WriteUInt(version);
             WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2], clientversion[3]));
@@ -639,7 +664,7 @@ namespace ClassicUO.Network
 
     public sealed class PPopupMenuSelection : PacketWriter
     {
-        public PPopupMenuSelection(Serial serial,  Graphic menuid) : base(0xBF)
+        public PPopupMenuSelection(Serial serial, Graphic menuid) : base(0xBF)
         {
             WriteUShort(0x15);
             WriteUInt(serial);
@@ -657,7 +682,7 @@ namespace ClassicUO.Network
 
     public sealed class PMapMessage : PacketWriter
     {
-        public PMapMessage(Serial serial,  byte action,  byte pin,  ushort x,  ushort y) : base(0x56)
+        public PMapMessage(Serial serial, byte action, byte pin, ushort x, ushort y) : base(0x56)
         {
             WriteUInt(serial);
             WriteByte(action);
@@ -741,7 +766,7 @@ namespace ClassicUO.Network
 
     public sealed class PChangeStatLockStateRequest : PacketWriter
     {
-        public PChangeStatLockStateRequest(byte stat,  SkillLock state) : base(0xBF)
+        public PChangeStatLockStateRequest(byte stat, SkillLock state) : base(0xBF)
         {
             WriteUShort(0x1A);
             WriteByte(stat);
@@ -759,7 +784,7 @@ namespace ClassicUO.Network
 
     public sealed class PBookPageDataRequest : PacketWriter
     {
-        public PBookPageDataRequest(Serial serial,  ushort page) : base(0x66)
+        public PBookPageDataRequest(Serial serial, ushort page) : base(0x66)
         {
             WriteUInt(serial);
             WriteUShort(1);
@@ -795,7 +820,7 @@ namespace ClassicUO.Network
 
     public sealed class PTargetSelectedObject : PacketWriter
     {
-        public PTargetSelectedObject(Serial useObjSerial,  Serial targObjSerial) : base(0xBF)
+        public PTargetSelectedObject(Serial useObjSerial, Serial targObjSerial) : base(0xBF)
         {
             WriteUShort(0x2C);
             WriteUInt(useObjSerial);
@@ -847,7 +872,7 @@ namespace ClassicUO.Network
 
     public sealed class PWalkRequest : PacketWriter
     {
-        public PWalkRequest(Direction direction,  byte seq) : base(0x02)
+        public PWalkRequest(Direction direction, byte seq) : base(0x02)
         {
             WriteByte((byte)direction);
             WriteByte(seq);
@@ -949,7 +974,7 @@ namespace ClassicUO.Network
 
     public sealed class PCustomHouseAddItem : PacketWriter
     {
-        public PCustomHouseAddItem(Graphic graphic,  uint x,  uint y) : base(0xD7)
+        public PCustomHouseAddItem(Graphic graphic, uint x, uint y) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x06);
@@ -965,7 +990,7 @@ namespace ClassicUO.Network
 
     public sealed class PCustomHouseDeleteItem : PacketWriter
     {
-        public PCustomHouseDeleteItem(Graphic graphic,  uint x,  uint y,  uint z) : base(0xD7)
+        public PCustomHouseDeleteItem(Graphic graphic, uint x, uint y, uint z) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x05);
@@ -983,7 +1008,7 @@ namespace ClassicUO.Network
 
     public sealed class PCustomHouseAddRoof : PacketWriter
     {
-        public PCustomHouseAddRoof(Graphic graphic,  uint x,  uint y,  uint z) : base(0xD7)
+        public PCustomHouseAddRoof(Graphic graphic, uint x, uint y, uint z) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x13);
@@ -1001,7 +1026,7 @@ namespace ClassicUO.Network
 
     public sealed class PCustomHouseDeleteRoof : PacketWriter
     {
-        public PCustomHouseDeleteRoof(Graphic graphic,  uint x,  uint y,  uint z) : base(0xD7)
+        public PCustomHouseDeleteRoof(Graphic graphic, uint x, uint y, uint z) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x14);
@@ -1019,7 +1044,7 @@ namespace ClassicUO.Network
 
     public sealed class PCustomHouseAddStair : PacketWriter
     {
-        public PCustomHouseAddStair(Graphic graphic,  uint x,  uint y) : base(0xD7)
+        public PCustomHouseAddStair(Graphic graphic, uint x, uint y) : base(0xD7)
         {
             WriteUInt(World.Player);
             WriteUShort(0x0D);

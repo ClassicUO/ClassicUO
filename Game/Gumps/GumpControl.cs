@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,19 +19,18 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Renderer;
-using ClassicUO.Renderer;
-using ClassicUO.Input;
-using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ClassicUO.Input;
+using ClassicUO.Renderer;
+using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 using IUpdateable = ClassicUO.Renderer.IUpdateable;
 
 namespace ClassicUO.Game.Gumps
 {
-    public class GumpControl : IDrawableUI, IUpdateable
+    public abstract class GumpControl : IDrawableUI, IUpdateable
     {
         private readonly List<GumpControl> _children;
         private GumpControl _parent;
@@ -41,7 +40,7 @@ namespace ClassicUO.Game.Gumps
         private bool _acceptKeyboardInput, _acceptMouseInput;
 
 
-        public GumpControl(GumpControl parent = null)
+        protected GumpControl(GumpControl parent = null)
         {
             Parent = parent;
             _children = new List<GumpControl>();
@@ -57,12 +56,12 @@ namespace ClassicUO.Game.Gumps
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
         public event EventHandler<KeyboardEventArgs> Keyboard;
 
-
+        public Serial ServerSerial { get; set; }
+        public Serial LocalSerial { get; set; }
         public bool AllowedToDraw { get; set; }
         public SpriteTexture Texture { get; set; }
         public Vector3 HueVector { get; set; }
-        public Serial ServerSerial { get; set; }
-        public Serial LocalSerial { get; set; }
+
         public Point Location
         {
             get => _bounds.Location;
@@ -80,8 +79,8 @@ namespace ClassicUO.Game.Gumps
         public bool IsEnabled { get; set; }
         public bool IsFocused { get; protected set; }
         public bool MouseIsOver { get; protected set; }
-        public bool CanMove { get; set; }
-        public bool CanCloseWithRightClick { get; set; }
+        public virtual bool CanMove { get; set; }
+        public bool CanCloseWithRightClick { get; set; } = true;
         public bool CanCloseWithEsc { get; set; }
         public bool IsEditable { get; set; }
         public IReadOnlyList<GumpControl> Children => _children;
@@ -102,7 +101,7 @@ namespace ClassicUO.Game.Gumps
 
                 return false;
             }
-            set => _acceptKeyboardInput = value;       
+            set => _acceptKeyboardInput = value;
         }
 
         public virtual bool AcceptMouseInput
@@ -126,13 +125,27 @@ namespace ClassicUO.Game.Gumps
         public int X
         {
             get => _bounds.X;
-            set => _bounds.X = value;
+            set
+            {
+                if (_bounds.X != value)
+                {
+                    _bounds.X = value;
+                    OnMove();
+                }
+            }
         }
 
         public int Y
         {
             get => _bounds.Y;
-            set => _bounds.Y = value;
+            set
+            {
+                if (_bounds.Y != value)
+                {
+                    _bounds.Y = value;
+                    OnMove();
+                }
+            }
         }
 
         public int ParentX => Parent != null ? Parent.X + Parent.ParentX : 0;
@@ -192,9 +205,9 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public virtual bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
+        public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
         {
-            if (IsDisposed || ((Texture == null || Texture.IsDisposed) && Children.Count <= 0))
+            if (IsDisposed || ( ( Texture == null || Texture.IsDisposed ) && Children.Count <= 0 ))
             {
                 return false;
             }
@@ -269,15 +282,9 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public void AddChildren(GumpControl c)
-        {
-            c.Parent = this;
-        }
+        public void AddChildren(GumpControl c) => c.Parent = this;
 
-        public void RemoveChildren(GumpControl c)
-        {
-            c.Parent = null;
-        }
+        public void RemoveChildren(GumpControl c) => c.Parent = null;
 
         public void Clear()
         {
@@ -348,9 +355,9 @@ namespace ClassicUO.Game.Gumps
             else
                 _maxTimeForDClick = ms + 200;
 
-            if (button == MouseButton.Right && RootParent.CanCloseWithRightClick)
+            if (button == MouseButton.Right && CanCloseWithRightClick)
             {
-                RootParent.Dispose();
+                CloseWithRightClick();
             }
             else
             {
@@ -416,9 +423,9 @@ namespace ClassicUO.Game.Gumps
 
         protected virtual void OnTextInput(char c)
         {
-            
+
         }
-     
+
         protected virtual void OnKeyDown(SDL2.SDL.SDL_Keycode key, SDL2.SDL.SDL_Keymod mod)
         {
 
@@ -432,6 +439,43 @@ namespace ClassicUO.Game.Gumps
         protected virtual bool Contains(int x, int y)
         {
             return true;
+        }
+
+        protected virtual void OnMove()
+        {
+
+        }
+
+        protected virtual void CloseWithRightClick()
+        {
+            if (!CanCloseWithRightClick)
+                return;
+
+            var parent = Parent;
+
+            while (parent != null)
+            {
+                if (!parent.CanCloseWithRightClick)
+                    return;
+                parent = parent.Parent;
+            }
+
+            if (Parent == null)
+                Dispose();
+            else
+                Parent.CloseWithRightClick();
+        }
+
+        public virtual void OnButtonClick(int buttonID)
+        {
+            if (Parent != null)
+                Parent.OnButtonClick(buttonID);
+        }
+
+        public virtual void OnKeybaordReturn(int textID, string text)
+        {
+            if (Parent != null)
+                Parent.OnKeybaordReturn(textID, text);
         }
 
         public virtual void Dispose()

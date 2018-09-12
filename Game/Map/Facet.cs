@@ -64,7 +64,9 @@ namespace ClassicUO.Game.Map
         public Tile GetTile(short x, short y)
         {
             if (x < 0 || y < 0)
+            {
                 return null;
+            }
 
             int cellX = x / 8;
             int cellY = y / 8;
@@ -217,7 +219,7 @@ namespace ClassicUO.Game.Map
             int count = 0;
             for (int i = 0; i < _usedIndices.Count; i++)
             {
-                ref var block = ref Chunks[_usedIndices[i]];
+                ref MapChunk block = ref Chunks[_usedIndices[i]];
                 if (World.Ticks - block.LastAccessTime > 3000 && block.HasNoExternalData())
                 {
                     block.Unload();
