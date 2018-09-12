@@ -2332,11 +2332,11 @@ namespace ClassicUO.IO.Resources
                     for (int i = 0; i < len; i++)
                     {
                         var ch = info.Data[i].Item;
-                        int offset = (int)table[ch];
+                        uint offset = table[ch];
 
                         if (offset > 0 && offset != 0xFFFFFFFF)
                         {
-                            byte* cptr = (byte*)( (IntPtr)table + offset );
+                            byte* cptr = (byte*)( (IntPtr)table + (int)offset );
                             x += cptr[0] + cptr[2] + 1;
                         }
                         else if (ch == ' ')

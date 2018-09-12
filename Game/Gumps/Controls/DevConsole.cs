@@ -14,6 +14,9 @@ namespace ClassicUO.Game.Gumps.Controls
             CanCloseWithEsc = false;
             CanMove = true;
 
+            X = 50;
+            Y = 50;
+
             AddChildren(new GumpPicTiled(BLACK)
             {
                 Width = 400,
@@ -25,7 +28,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 Width = 400,
                 Height = 400,
                 CanMove = true,
-                MultiLine = true,
+                MultiLine = false,
                 AllowTAB = true
             });
         }
