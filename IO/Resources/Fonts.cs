@@ -2346,24 +2346,7 @@ namespace ClassicUO.IO.Resources
                             x += UNICODE_SPACE_WIDTH;
 
                         if (info.CharStart + i + 1 == pos)
-                        {
-                            //byte* cptr = (byte*)( (IntPtr)table + (int)offset );
-
-                            //if (info.Next != null)
-                            //{
-                            //    x = cptr[0] + cptr[2] + 1;
-                            //    y += info.MaxHeight;
-                            //}
-                            //else
-                            //{
-                            //    if (x + cptr[0] + cptr[2] + 1 >= width)
-                            //    {
-                            //        x = 0;
-                            //        y += info.MaxHeight;
-                            //    }
-                            //}
                             return (x, y);
-                        }
                     }
                 }
 

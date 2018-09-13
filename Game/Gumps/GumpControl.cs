@@ -374,7 +374,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public void InvokeTextInput(char c)
+        public void InvokeTextInput(string c)
         {
             OnTextInput(c);
         }
@@ -421,7 +421,7 @@ namespace ClassicUO.Game.Gumps
 
         }
 
-        protected virtual void OnTextInput(char c)
+        protected virtual void OnTextInput(string c)
         {
 
         }
