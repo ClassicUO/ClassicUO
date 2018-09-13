@@ -45,6 +45,8 @@ namespace ClassicUO.Game.Gumps
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
             Hue = Hue.Parse(parts[3]);
+            if (Hue > 0)
+                Hue++;
             Text = lines[int.Parse(parts[4])];
         }
 
