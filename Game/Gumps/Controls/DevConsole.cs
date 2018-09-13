@@ -14,18 +14,18 @@ namespace ClassicUO.Game.Gumps.Controls
             CanCloseWithEsc = false;
             CanMove = true;
 
-            X = 50;
+            X = 150;
             Y = 50;
 
             AddChildren(new GumpPicTiled(BLACK)
             {
-                Width = 400,
+                Width = 50,
                 Height = 400,
             });
 
             AddChildren(new TextBox()
             {
-                Width = 400,
+                Width = 50,
                 Height = 400,
                 CanMove = true,
                 MultiLine = false,

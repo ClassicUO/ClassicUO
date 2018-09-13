@@ -35,6 +35,7 @@ namespace ClassicUO.Renderer
         Indention = 0x04,
         BlackBorder = 0x08,
         Underline = 0x10,
+        Fixed = 0x20,
         Cropped = 0x40,
         BQ = 0x80
     }
@@ -76,12 +77,10 @@ namespace ClassicUO.Renderer
                 {
                     _text = value;
                     Texture = CreateTexture();
-                    Lines = _text.Split(new char[2] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
                 }
             }
         }
         public int LinesCount => _texture == null || _texture.IsDisposed ? 0 : _texture.LinesCount;
-        public string[] Lines { get; private set; }
         public bool IsPartialHue { get; set; }
         public bool IsDisposed { get; private set; }
 
@@ -114,6 +113,7 @@ namespace ClassicUO.Renderer
             get => _bounds.Height;
             set => _bounds.Height = value;
         }
+
 
         public SpriteTexture Texture
         {

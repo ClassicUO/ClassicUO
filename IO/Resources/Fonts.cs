@@ -850,8 +850,7 @@ namespace ClassicUO.IO.Resources
                         ptr.IndentionOffset = 0;
                         continue;
                     }
-
-                    if (lastSpace + 1 == ptr.CharStart && !isFixed && !isCropped)
+                    else if (lastSpace + 1 == ptr.CharStart && !isFixed && !isCropped)
                     {
                         ptr.Width += readWidth;
                         ptr.CharCount += charCount;
@@ -898,7 +897,11 @@ namespace ClassicUO.IO.Resources
 
                         charcolor = lastspace_charcolor;
                         current_charcolor = lastspace_charcolor;
-                        si = str[i];
+
+                        if (i < str.Length)
+                            si = str[i];
+                        else
+                            si = '\0';
 
                         if (ptr.Width <= 0)
                             ptr.Width = 1;
@@ -912,6 +915,7 @@ namespace ClassicUO.IO.Resources
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
+                        ptr = newptr;
 
                         ptr.Align = current_align;
                         ptr.CharStart = i;
@@ -2267,10 +2271,10 @@ namespace ClassicUO.IO.Resources
                         for (int i = 0; i < len; i++)
                         {
                             var ch = info.Data[i].Item;
-                            int offset = (int)table[ch];
+                            uint offset = table[ch];
                             if (offset > 0 && offset != 0xFFFFFFFF)
                             {
-                                byte* cptr = (byte*)( (IntPtr)table + offset );
+                                byte* cptr = (byte*)( (IntPtr)table + (int)offset );
                                 width += ( cptr[0] + cptr[2] + 1 );
                             }
                             else if (ch == ' ')
@@ -2287,7 +2291,6 @@ namespace ClassicUO.IO.Resources
                     else
                     {
                         pos += info.CharCount;
-                        pos++;
                     }
                 }
 
@@ -2343,7 +2346,24 @@ namespace ClassicUO.IO.Resources
                             x += UNICODE_SPACE_WIDTH;
 
                         if (info.CharStart + i + 1 == pos)
+                        {
+                            //byte* cptr = (byte*)( (IntPtr)table + (int)offset );
+
+                            //if (info.Next != null)
+                            //{
+                            //    x = cptr[0] + cptr[2] + 1;
+                            //    y += info.MaxHeight;
+                            //}
+                            //else
+                            //{
+                            //    if (x + cptr[0] + cptr[2] + 1 >= width)
+                            //    {
+                            //        x = 0;
+                            //        y += info.MaxHeight;
+                            //    }
+                            //}
                             return (x, y);
+                        }
                     }
                 }
 
@@ -2412,7 +2432,6 @@ namespace ClassicUO.IO.Resources
                     else
                     {
                         pos += ptr.CharCount;
-                        pos++;
                     }
                 }
 

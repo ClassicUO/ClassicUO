@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,7 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Game.GameObjects;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -32,10 +32,15 @@ namespace ClassicUO.Game.Gumps
 
         public CroppedText() : base()
         {
-            _gameText = new RenderedText();
+            _gameText = new RenderedText()
+            {
+                IsUnicode = true,
+                Font = (byte)( FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0 ),
+                FontStyle = FontStyle.BlackBorder
+            };
         }
 
-        public CroppedText(string[] parts,  string[] lines) : this()
+        public CroppedText(string[] parts, string[] lines) : this()
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -45,6 +50,9 @@ namespace ClassicUO.Game.Gumps
             _index = int.Parse(parts[6]);
 
             _gameText.MaxWidth = Width;
+
+            if (_gameText.MaxWidth > 0)
+                _gameText.FontStyle |= FontStyle.Cropped;
 
             Text = lines[_index];
 
@@ -61,7 +69,7 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
         {
             _gameText.Draw(spriteBatch, position);
             return base.Draw(spriteBatch, position);
