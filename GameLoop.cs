@@ -778,8 +778,8 @@ namespace ClassicUO
             sb.Append("Pos: ");
             sb.AppendLine(World.Player == null ? "" : World.Player.Position.ToString());
 
-            //_gameTextTRY.Text = sb.ToString();
-            //_gameTextTRY.Draw(sbUI, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
+            _gameTextTRY.Text = sb.ToString();
+            _gameTextTRY.Draw(sbUI, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
 
             //_spriteBatch.Draw2D(_gump, new Rectangle(100, 100, _gump.Width, _gump.Height), Vector3.Zero);
 
