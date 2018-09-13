@@ -194,7 +194,7 @@ namespace ClassicUO
             NetClient.Disconnected += (sender, e) => { Service.Get<Log>().Message(LogTypes.Warning, "Disconnected!"); };
 
 
-            //NetClient.Socket.Connect(settings.IP, settings.Port);
+            NetClient.Socket.Connect(settings.IP, settings.Port);
 
 
             _gameCursor = new CursorRenderer();

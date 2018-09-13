@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,6 +19,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using System.IO;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
 
 namespace ClassicUO.Utility
@@ -29,16 +31,16 @@ namespace ClassicUO.Utility
 
         public static bool Decompress(byte[] source, int offset, byte[] dest, int length)
         {
-            /*using (MemoryStream ms = new MemoryStream(source, offset, source.Length - offset))
+            using (MemoryStream ms = new MemoryStream(source, offset, source.Length - offset))
             {
                 ms.Seek(2, SeekOrigin.Begin);
                 using (DeflateStream stream = new DeflateStream(ms, CompressionMode.Decompress))
                 {
                     stream.Read(dest, 0, length);
                 }
-            }*/
-
-            return Uncompress(dest, ref length, source, source.Length) == ZLibError.Z_OK;
+            }
+            return true;
+            //return Uncompress(dest, ref length, source, source.Length) == ZLibError.Z_OK;
         }
 
 
