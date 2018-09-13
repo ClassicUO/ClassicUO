@@ -1182,7 +1182,7 @@ namespace ClassicUO.Network
                 World.Mobiles.ProcessDelta();
             World.Items.ProcessDelta();
 
-            new PClickRequest(mobile).SendToServer();
+            NetClient.Socket.Send(new PClickRequest(mobile));
         }
 
         private static void OpenMenu(Packet p)
@@ -1709,7 +1709,7 @@ namespace ClassicUO.Network
                     serial = p.ReadUInt();
                     uint revision = p.ReadUInt();
 
-                    new PCustomHouseDataRequest(serial).SendToServer();
+                    NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
 
                     break;
                 case 0x20:
@@ -2052,7 +2052,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            GumpManager.Create(sender, gumpID, (int)x, (int)y, layout, lines);
+            UIManager.Create(sender, gumpID, (int)x, (int)y, layout, lines);
         }
 
         private static void UpdateMobileStatus(Packet p)
@@ -2098,7 +2098,7 @@ namespace ClassicUO.Network
             if (p.ReadByte() == 0xFE)
             {
                 Service.Get<Log>().Message(LogTypes.Info, "Razor ACK sended");
-                new PRazorAnswer().SendToServer();
+                NetClient.Socket.Send(new PRazorAnswer());
             }
         }
 

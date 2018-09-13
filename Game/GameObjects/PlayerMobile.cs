@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,11 +19,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using System;
+using System.Collections.Generic;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -1038,7 +1038,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-        done:;
+            done:
+            ;
         }
 
 
@@ -1167,7 +1168,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             _requestedSteps.AddToBack(step);
-            new PWalkRequest(direction, SequenceNumber).SendToServer();
+            NetClient.Socket.Send(new PWalkRequest(direction, SequenceNumber));
 
             if (SequenceNumber == 0xFF)
                 SequenceNumber = 1;
@@ -1215,7 +1216,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void DenyWalk(byte seq,  Direction dir,  Position position)
+        public void DenyWalk(byte seq, Direction dir, Position position)
         {
             foreach (Step step in _requestedSteps)
             {

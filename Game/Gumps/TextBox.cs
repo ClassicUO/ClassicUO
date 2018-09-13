@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (GumpManager.KeyboardFocusControl == this)
+            if (UIManager.KeyboardFocusControl == this)
             {
                 if (!IsFocused)
                 {

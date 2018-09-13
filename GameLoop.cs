@@ -149,7 +149,7 @@ namespace ClassicUO
             string password = settings.Password;
 
             var console = new DevConsole();
-            GumpManager.Add(console);
+            UIManager.Add(console);
 
             NetClient.PacketReceived += (sender, e) =>
             {
@@ -291,7 +291,7 @@ namespace ClassicUO
 
             _gameCursor.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.Milliseconds);
 
-            Game.Gumps.GumpManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.Milliseconds);
+            UIManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.Milliseconds);
 
             if (World.InGame)
             {
@@ -753,7 +753,7 @@ namespace ClassicUO
 
             sbUI.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
             GameTextManager.Render(sbUI);
-            Game.Gumps.GumpManager.Render(sbUI);
+            Game.Gumps.UIManager.Render(sbUI);
 
             //_spriteBatch.Draw2D(_crossTexture, new Bounds(_graphics.PreferredBackBufferWidth / 2  - 5, _graphics.PreferredBackBufferHeight / 2 - 5, 10, 10), Vector3.Zero);
 

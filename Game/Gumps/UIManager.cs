@@ -29,7 +29,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
 {
-    public static class GumpManager
+    public static class UIManager
     {
         private static readonly List<Gump> _gumps = new List<Gump>();
         private static GumpControl _mouseOverControl, _keyboardFocusControl;
