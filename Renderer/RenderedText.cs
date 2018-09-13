@@ -180,18 +180,14 @@ namespace ClassicUO.Renderer
             if (IsUnicode)
             {
                 Fonts.GenerateUnicode(out ftexture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle);
-                //RealWidth = Fonts.GetWidthUnicode(Font, Text);
             }
             else
             {
                 IsPartialHue = Fonts.GenerateASCII(out ftexture, Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle);
-                //RealWidth = Fonts.GetWidthASCII(Font, Text);
             }
 
             if (ftexture != null)
             {
-                //Width = Fonts.GetWidthUnicode(Font, Text);
-                //Width = Fonts.GetWidthExUnicode(Font, Text, MaxWidth, Align, (ushort)FontStyle);
                 Width = ftexture.Width;
                 Height = ftexture.Height;
                 Links = ftexture.Links;

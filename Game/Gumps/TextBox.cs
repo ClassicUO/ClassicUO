@@ -10,10 +10,12 @@ namespace ClassicUO.Game.Gumps
         const float CARAT_BLINK_TIME = 500f;
 
         private bool _caratBlink;
-        private float _lastCaratBlinkTime;
         private readonly RenderedText _text, _carat;
-
+        private Point _caretPosition;
+        private int _caretIndex;
+        private int _offset;
         private string _plainText;
+
 
         public TextBox() : base()
         {
@@ -47,6 +49,7 @@ namespace ClassicUO.Game.Gumps
                 MaxCharCount = int.Parse(parts[8]);
         }
 
+
         public Hue Hue { get; set; }
         public Graphic Graphic { get; set; }
         public int MaxCharCount { get; set; }
@@ -65,8 +68,6 @@ namespace ClassicUO.Game.Gumps
                 _text.Text = IsPassword ? new string('*', value.Length) : value;
 
                 UpdateCaretPosition(_text.Text);
-
-                _changed = false;
             }
         }
 
@@ -86,12 +87,8 @@ namespace ClassicUO.Game.Gumps
                 {
                     SetFocused();
                     _caratBlink = true;
-                    _lastCaratBlinkTime = 0f;
                 }
-
                 _caratBlink = true;
-
-
             }
             else
             {
@@ -104,66 +101,13 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
         {
-            Vector3 caratPosition = new Vector3(position.X, position.Y, 0);
+            _text.Draw(spriteBatch, new Vector3(position.X + _offset, position.Y, 0));
 
             if (IsEditable)
             {
-
-
-                //if (_caretPosition.X + _carat.Width >= Width)
-                //{
-                //    _caretPosition.X = 0;
-                //    _caretPosition.Y += _text.Height;
-                //}
-
-                //if (_text.Width + _carat.Width <= Width)
-                //{
-                //    _text.Draw(spriteBatch, position);
-                //    caratPosition.X += _caretPosition.X;
-                //    caratPosition.Y += _caretPosition.Y;
-                //}
-                //else
-                //{
-                //    int offset = _text.Width - ( Width - _carat.Width );
-                //    _text.Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, _text.Width - offset, _text.Height), offset, 0);
-                //    caratPosition.X += ( Width - _carat.Width );
-                //    caratPosition.Y += _caretPosition.Y;
-                //}
-                caratPosition.X += _caretPosition.X;
-                caratPosition.Y += _caretPosition.Y;
-                if (!MultiLine)
-                {
-                    if (_text.Width + _carat.Width <= Width)
-                    {
-                        _text.Draw(spriteBatch, position);
-                    }
-                    else
-                    {
-                        int offset = _text.Width - ( Width - _carat.Width );
-                        _text.Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, _text.Width - offset, _text.Height), offset, 0);
-
-                        if (_caretPosition.X >= ( Width - _carat.Width ))
-                        {
-                            caratPosition.X = position.X + ( Width - _carat.Width );
-                        }
-                        else
-                        {
-
-                        }
-                    }
-                }
-                else
-                {
-                    _text.Draw(spriteBatch, position);
-                }
+                if (_caratBlink)
+                    _carat.Draw(spriteBatch, new Vector3(position.X + _offset + _caretPosition.X, position.Y + _caretPosition.Y, 0));
             }
-            else
-            {
-                _text.Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
-            }
-
-            if (_caratBlink)
-                _carat.Draw(spriteBatch, new Vector3(caratPosition.X, caratPosition.Y, 0));
 
             return base.Draw(spriteBatch, position);
         }
@@ -194,7 +138,6 @@ namespace ClassicUO.Game.Gumps
 
                     break;
                 case SDL.SDL_Keycode.SDLK_TAB:
-                    // throw an error if text is empty :|
                     if (AllowTAB)
                         Insert("    ");
                     break;
@@ -208,9 +151,8 @@ namespace ClassicUO.Game.Gumps
                         Text = string.Empty;
                         ReplaceDefaultTextOnFirstKeyPress = false;
                     }
-                    else if (!string.IsNullOrEmpty(Text))
+                    else
                     {
-                        //Text = Text.Substring(0, Text.Length - 1);
                         RemoveChar(true);
                     }
                     break;
@@ -232,10 +174,6 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-
-        private Point _caretPosition;
-        private int _caretIndex;
-
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             if (button != MouseButton.Left)
@@ -250,16 +188,8 @@ namespace ClassicUO.Game.Gumps
 
 
             if (oldPos != _caretIndex)
-            {
-                _changed = true;
                 UpdateCaretPosition(Text);
-            }
-
         }
-
-
-        private bool _changed;
-
 
         private void AddCaretPosition(int value)
         {
@@ -270,8 +200,6 @@ namespace ClassicUO.Game.Gumps
 
             if (_caretIndex > Text.Length)
                 _caretIndex = Text.Length;
-
-            _changed = true;
 
             UpdateCaretPosition(Text);
         }
@@ -285,8 +213,6 @@ namespace ClassicUO.Game.Gumps
 
             if (_caretIndex > Text.Length)
                 _caretIndex = Text.Length;
-
-            _changed = true;
 
             UpdateCaretPosition(Text);
         }
@@ -315,7 +241,6 @@ namespace ClassicUO.Game.Gumps
 
             string text = Text.Insert(_caretIndex, c);
             _caretIndex += c.Length;
-            _changed = true;
 
             Text = text;
         }
@@ -338,31 +263,32 @@ namespace ClassicUO.Game.Gumps
                 Text = Text.Remove(_caretIndex, 1);
             else
                 Text = Text.Remove(Text.Length);
-
-            _changed = true;
         }
 
 
         private void UpdateCaretPosition(string text)
         {
-            (int x, int y) = IO.Resources.Fonts.GetCaretPosUnicode(_carat.Font, text, _caretIndex, _text.MaxWidth, _carat.Align, (ushort)_carat.FontStyle);
+            int x, y;
+
+            if (_text.IsUnicode)
+                (x, y) = IO.Resources.Fonts.GetCaretPosUnicode(_carat.Font, text, _caretIndex, _text.MaxWidth, _carat.Align, (ushort)_carat.FontStyle);
+            else
+                (x, y) = IO.Resources.Fonts.GetCaretPosASCII(_carat.Font, text, _caretIndex, _text.MaxWidth, _carat.Align, (ushort)_carat.FontStyle);
+
             _caretPosition = new Point(x, y);
-        }
 
-        private void FixMaxWidth()
-        {
-            if (_text.MaxWidth > 0)
+            if (_offset > 0)
             {
-                int width = IO.Resources.Fonts.GetWidthUnicode(_text.Font, Text);
-                int len = Text.Length;
-
-                while (_text.MaxWidth < width && len > 0)
-                {
-                    RemoveChar(_caretIndex > 0);
-                    len--;
-                    width = IO.Resources.Fonts.GetWidthUnicode(_text.Font, Text);
-                }
+                if (_caretPosition.X + _offset < 0)
+                    _offset = -_caretPosition.X;
+                else if (Width + -_offset < _caretPosition.X)
+                    _offset = Width - _caretPosition.X - _carat.Width;
             }
+            else if (Width + _offset < _caretPosition.X + _carat.Width)
+                _offset = Width - _caretPosition.X - _carat.Width;
+            else
+                _offset = 0;
         }
+
     }
 }

@@ -19,13 +19,13 @@ namespace ClassicUO.Game.Gumps.Controls
 
             AddChildren(new GumpPicTiled(BLACK)
             {
-                Width = 400,
+                Width = 50,
                 Height = 400,
             });
 
             AddChildren(new TextBox()
             {
-                Width = 400,
+                Width = 50,
                 Height = 400,
                 CanMove = true,
                 MultiLine = false,
