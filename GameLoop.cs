@@ -149,7 +149,7 @@ namespace ClassicUO
             string password = settings.Password;
 
             var console = new DevConsole();
-            UIManager.Add(console);
+            //UIManager.Add(console);
 
             NetClient.PacketReceived += (sender, e) =>
             {

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,11 +19,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.IO;
-using ClassicUO.Renderer;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
@@ -34,6 +33,7 @@ namespace ClassicUO.IO.Resources
 
         private static SpriteTexture[] _artCache;
         private static readonly List<int> _usedIndex = new List<int>();
+        private static readonly PixelPicking _picker = new PixelPicking();
 
         public static void Load()
         {
@@ -52,7 +52,12 @@ namespace ClassicUO.IO.Resources
             _artCache = new SpriteTexture[ART_COUNT];
         }
 
-        public unsafe static SpriteTexture GetStaticTexture(ushort g)
+        public static bool Contains(ushort g, int x, int y, int extra = 0)
+        {
+            return _picker.Get(g, x, y, extra);
+        }
+
+        public static unsafe SpriteTexture GetStaticTexture(ushort g)
         {
             ref var texture = ref _artCache[g];
             if (texture == null || texture.IsDisposed)
@@ -65,12 +70,13 @@ namespace ClassicUO.IO.Resources
                     texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
 
                 _usedIndex.Add(g);
-            }
 
+                _picker.Set(g, w, h, pixels);
+            }
             return texture;
         }
 
-        public unsafe static SpriteTexture GetLandTexture(ushort g)
+        public static unsafe SpriteTexture GetLandTexture(ushort g)
         {
             ref var texture = ref _artCache[g];
             if (texture == null || texture.IsDisposed)
@@ -81,8 +87,9 @@ namespace ClassicUO.IO.Resources
                     texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
 
                 _usedIndex.Add(g);
-            }
 
+                _picker.Set(g, 44, 44, pixels);
+            }
             return texture;
         }
 
@@ -107,7 +114,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private static unsafe Span<ushort> ReadStaticArt(ushort graphic, out short width, out short height)
+        private static unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height)
         {
             graphic &= FileManager.GraphicMask;
 
@@ -133,7 +140,7 @@ namespace ClassicUO.IO.Resources
             ushort xoffs = 0;
             ushort run = 0;
 
-            ptr = (ushort*)(datastart + lineoffsets[0] * 2);
+            ptr = (ushort*)( datastart + lineoffsets[0] * 2 );
 
             while (y < height)
             {
@@ -154,7 +161,7 @@ namespace ClassicUO.IO.Resources
                     {
                         ushort val = *ptr++;
                         if (val > 0)
-                            val = (ushort)(0x8000 | val);
+                            val = (ushort)( 0x8000 | val );
                         pixels[pos++] = val;
                     }
 
@@ -164,7 +171,7 @@ namespace ClassicUO.IO.Resources
                 {
                     x = 0;
                     y++;
-                    ptr = (ushort*)(datastart + lineoffsets[y] * 2);
+                    ptr = (ushort*)( datastart + lineoffsets[y] * 2 );
                 }
             }
 
@@ -173,7 +180,7 @@ namespace ClassicUO.IO.Resources
                 for (int i = 0; i < width; i++)
                 {
                     pixels[i] = 0;
-                    pixels[(height - 1) * width + i] = 0;
+                    pixels[( height - 1 ) * width + i] = 0;
                 }
 
                 for (int i = 0; i < height; i++)
@@ -186,25 +193,25 @@ namespace ClassicUO.IO.Resources
             return pixels;
         }
 
-        private static Span<ushort> ReadLandArt(ushort graphic)
+        private static ushort[] ReadLandArt(ushort graphic)
         {
             graphic &= FileManager.GraphicMask;
 
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
 
-            Span<ushort> pixels = new ushort[44 * 44];
+            ushort[] pixels = new ushort[44 * 44];
 
             for (int i = 0; i < 22; i++)
             {
-                int start = 22 - (i + 1);
+                int start = 22 - ( i + 1 );
                 int pos = i * 44 + start;
-                int end = start + (i + 1) * 2;
+                int end = start + ( i + 1 ) * 2;
 
                 for (int j = start; j < end; j++)
                 {
                     ushort val = _file.ReadUShort();
                     if (val > 0)
-                        val = (ushort)(0x8000 | val);
+                        val = (ushort)( 0x8000 | val );
 
                     pixels[pos++] = val;
                 }
@@ -212,14 +219,14 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < 22; i++)
             {
-                int pos = (i + 22) * 44 + i;
-                int end = i + (22 - i) * 2;
+                int pos = ( i + 22 ) * 44 + i;
+                int end = i + ( 22 - i ) * 2;
 
                 for (int j = i; j < end; j++)
                 {
                     ushort val = _file.ReadUShort();
                     if (val > 0)
-                        val = (ushort)(0x8000 | val);
+                        val = (ushort)( 0x8000 | val );
 
                     pixels[pos++] = val;
                 }

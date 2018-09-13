@@ -996,7 +996,7 @@ namespace ClassicUO.IO.Resources
 
                 int textureSize = imageWidth * imageHeight;
 
-                Span<ushort> pixels = new ushort[textureSize];
+                ushort[] pixels = new ushort[textureSize];
 
                 uint header = _reader.ReadUInt();
 
@@ -1098,7 +1098,7 @@ namespace ClassicUO.IO.Resources
 
                 int wantSize = imageWidth * imageHeight;
 
-                Span<ushort> pixels = new ushort[wantSize];
+                ushort[] pixels = new ushort[wantSize];
 
                 uint header = _reader.ReadUInt();
 

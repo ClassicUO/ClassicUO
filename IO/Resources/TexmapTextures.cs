@@ -111,7 +111,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private static Span<ushort> GetTextmapTexture(ushort index, out int size)
+        private static ushort[] GetTextmapTexture(ushort index, out int size)
         {
             (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
 
@@ -121,7 +121,7 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
-            Span<ushort> pixels;
+            ushort[] pixels;
 
             if (extra == 0)
             {

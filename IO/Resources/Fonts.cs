@@ -285,7 +285,7 @@ namespace ClassicUO.IO.Resources
 
         private static unsafe bool GeneratePixelsASCII(out FontTexture ftexture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
-            Span<uint> pData;
+            uint[] pData;
             ftexture = null;
 
             if (font >= FontCount)
@@ -1032,7 +1032,7 @@ namespace ClassicUO.IO.Resources
 
             height += _topMargin + _bottomMargin + 4;
             int blocksize = height * width;
-            Span<uint> pData = new uint[blocksize];
+            uint[] pData = new uint[blocksize];
 
             uint* table = (uint*)_unicodeFontAddress[font];
             int lineOffsY = 1 + _topMargin;

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,14 +19,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using System;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Renderer;
 using ClassicUO.Game.Map;
-using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using System;
 using IDrawable = ClassicUO.Renderer.IDrawable;
 
 namespace ClassicUO.Game.Views
@@ -69,12 +67,12 @@ namespace ClassicUO.Game.Views
                 {
                     Direction dir = mobile.Direction;
 
-                    if ((dir & Direction.Up) == Direction.Left || (dir & Direction.Up) == Direction.South || (dir & Direction.Up) == Direction.East)
+                    if (( dir & Direction.Up ) == Direction.Left || ( dir & Direction.Up ) == Direction.South || ( dir & Direction.Up ) == Direction.East)
                     {
                         tile = World.Map.GetTile(GameObject.Position.X, GameObject.Position.Y + 1);
                         check = dir & Direction.Up;
                     }
-                    else if ((dir & Direction.Up) == Direction.Down)
+                    else if (( dir & Direction.Up ) == Direction.Down)
                     {
                         tile = World.Map.GetTile(GameObject.Position.X + 1, GameObject.Position.Y + 1);
                         check = Direction.Down;
@@ -132,7 +130,7 @@ namespace ClassicUO.Game.Views
             return false;
         }
 
-        public virtual bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        public virtual bool Draw(SpriteBatch3D spriteBatch, Vector3 position)
         {
             if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed)
             {
@@ -198,8 +196,27 @@ namespace ClassicUO.Game.Views
                 vertex[3].Position.Y += Bounds.Height;
             }
 
+            /*var pos = Service.Get<InputManager>().MousePosition;
+
+            int x = pos.X - (int)vertex[0].Position.X;
+            int y = pos.Y - (int)vertex[0].Position.Y;
+
+
+            if (Art.Contains(GameObject.Graphic, x, y))
+            {
+                if (_selected != GameObject && _selected != null)
+                    _selected.View.HueVector = RenderExtentions.GetHueVector(_selected.Hue);
+                _selected = GameObject;
+                HueVector = RenderExtentions.GetHueVector(33);
+            }
+            else
+            {
+                HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
+            }*/
+
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
+
 
 
             if (!spriteBatch.DrawSprite(Texture, vertex))
@@ -210,7 +227,10 @@ namespace ClassicUO.Game.Views
             return true;
         }
 
-        public virtual bool DrawInternal(SpriteBatch3D spriteBatch,  Vector3 position)
+
+        private static readonly GameObject _selected;
+
+        public virtual bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position)
         {
             return false;
         }
@@ -220,7 +240,7 @@ namespace ClassicUO.Game.Views
         {
         }
 
-        protected virtual void MessageOverHead(SpriteBatch3D spriteBatch,  Vector3 position, int offY)
+        protected virtual void MessageOverHead(SpriteBatch3D spriteBatch, Vector3 position, int offY)
         {
             for (int i = 0; i < GameObject.OverHeads.Count; i++)
             {
