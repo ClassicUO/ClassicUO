@@ -148,9 +148,14 @@ namespace ClassicUO
             string username = settings.Username;
             string password = settings.Password;
 
+            var console = new DevConsole();
+            GumpManager.Add(console);
+
             NetClient.PacketReceived += (sender, e) =>
             {
                 //Service.Get<Log>().Message(LogTypes.Trace, string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
+
+                //console.AppendLine(string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
 
                 switch (e.ID)
                 {
@@ -194,7 +199,7 @@ namespace ClassicUO
             NetClient.Disconnected += (sender, e) => { Service.Get<Log>().Message(LogTypes.Warning, "Disconnected!"); };
 
 
-            //NetClient.Socket.Connect(settings.IP, settings.Port);
+            NetClient.Socket.Connect(settings.IP, settings.Port);
 
 
             _gameCursor = new CursorRenderer();
@@ -215,7 +220,6 @@ namespace ClassicUO
 
             // END TEST
 
-            GumpManager.Add(new DevConsole());
 
             base.LoadContent();
         }

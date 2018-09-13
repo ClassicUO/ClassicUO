@@ -7,19 +7,20 @@ namespace ClassicUO.Input.TextEntry
     {
         private string _plainText;
 
-        public TextEntry(byte font, int maxcharlength = -1, int maxlength = 0, bool unicode = true)
+        public TextEntry(byte font, int maxcharlength = -1, int maxlength = 0, bool unicode = true, FontStyle style = FontStyle.None)
         {
-            RenderText = new Renderer.RenderedText()
+            RenderText = new RenderedText()
             {
                 IsUnicode = unicode,
                 Font = font,
                 MaxWidth = maxlength,
+                FontStyle = style
             };
 
             RenderCaret = new RenderedText("_")
             {
                 IsUnicode = unicode,
-                Font = font
+                Font = font,
             };
 
             MaxCharCount = maxcharlength;
@@ -90,8 +91,10 @@ namespace ClassicUO.Input.TextEntry
             string text = Text.Insert(CaretIndex, c);
             CaretIndex += c.Length;
 
-            Text = text;
+            SetText(text);
         }
+
+        public void SetText(string text) => Text = text;
 
         public void RemoveChar(bool fromleft)
         {
@@ -140,14 +143,14 @@ namespace ClassicUO.Input.TextEntry
         }
 
 
-        public void UpdateCaretPosition(string text, int width)
+        public void UpdateCaretPosition()
         {
             int x, y;
 
             if (RenderText.IsUnicode)
-                (x, y) = IO.Resources.Fonts.GetCaretPosUnicode(RenderText.Font, text, CaretIndex, MaxLength, RenderText.Align, (ushort)RenderText.FontStyle);
+                (x, y) = IO.Resources.Fonts.GetCaretPosUnicode(RenderText.Font, Text, CaretIndex, MaxLength, RenderText.Align, (ushort)RenderText.FontStyle);
             else
-                (x, y) = IO.Resources.Fonts.GetCaretPosASCII(RenderText.Font, text, CaretIndex, MaxLength, RenderText.Align, (ushort)RenderText.FontStyle);
+                (x, y) = IO.Resources.Fonts.GetCaretPosASCII(RenderText.Font, Text, CaretIndex, MaxLength, RenderText.Align, (ushort)RenderText.FontStyle);
 
             CaretPosition = new Point(x, y);
 
@@ -191,7 +194,62 @@ namespace ClassicUO.Input.TextEntry
 
 
             if (oldPos != CaretIndex)
-                UpdateCaretPosition(Text, MaxLength);
+                UpdateCaretPosition();
+        }
+
+        public int GetLinesCount() => RenderText.IsUnicode ? IO.Resources.Fonts.GetLinesCountUnicode(RenderText.Font, Text, RenderText.Align, (ushort)RenderText.FontStyle, RenderText.MaxWidth) :
+                IO.Resources.Fonts.GetLinesCountASCII(RenderText.Font, Text, RenderText.Align, (ushort)RenderText.FontStyle, RenderText.MaxWidth);
+
+        //public int GetLinesCount()
+        //{
+        //    return Text.Split(new char[2] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries).Length;
+        //}
+
+        public void RemoveLineAt(int index)
+        {
+            //var lines = Text.Split(new char[2] { '\r', '\n' }, System.StringSplitOptions.RemoveEmptyEntries);
+
+            //if (lines == null || lines.Length <= 0)
+            //    return;
+
+            //StringBuilder sb = new StringBuilder();
+            //for (int i = 0; i < lines.Length; i++)
+            //{
+            //    if (i != index)
+            //        sb.Append(lines[i] + "\n");
+            //}
+
+            //Text = sb.ToString();
+
+            int count = GetLinesCount();
+            if (count <= index)
+                return;
+
+            int current = 0;
+            int foundedIndex = 0;
+            while (index != count)
+            {
+                int first = Text.IndexOf('\n', foundedIndex);
+                if (first == -1)
+                    break;
+
+                if (index == current)
+                {
+                    Text = Text.Remove(foundedIndex, first - foundedIndex + 1);
+                    break;
+                }
+                foundedIndex = first + 1;
+                current++;
+            }
+
+        }
+
+        public void Clear()
+        {
+            Text = string.Empty;
+            Offset = 0;
+            CaretPosition = Point.Zero;
+            CaretIndex = 0;
         }
     }
 }

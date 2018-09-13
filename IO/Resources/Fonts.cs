@@ -636,8 +636,10 @@ namespace ClassicUO.IO.Resources
             if (( flags & UOFONT_FIXED ) != 0 || ( flags & UOFONT_CROPPED ) != 0)
             {
                 if (width <= 0 || string.IsNullOrEmpty(str))
+                {
+                    Service.Get<Log>().Message(LogTypes.Error, "You must set a string or width");
                     return;
-
+                }
                 int realWidth = GetWidthUnicode(font, str);
 
                 if (realWidth > width)
@@ -2473,6 +2475,44 @@ namespace ClassicUO.IO.Resources
                 ptr1 = null;
             }
             return (x, y);
+        }
+
+        public static int GetLinesCountASCII(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width)
+        {
+            if (width <= 0)
+                width = GetWidthASCII(font, str);
+
+            var info = GetInfoASCII(font, str, str.Length, align, flags, width);
+            if (info == null)
+                return 0;
+
+            int count = 0;
+
+            while (info != null)
+            {
+                info = info.Next;
+                count++;
+            }
+            return count;
+        }
+
+        public static int GetLinesCountUnicode(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width)
+        {
+            if (width <= 0)
+                width = GetWidthUnicode(font, str);
+
+            var info = GetInfoUnicode(font, str, str.Length, align, flags, width);
+            if (info == null)
+                return 0;
+
+            int count = 0;
+
+            while (info != null)
+            {
+                info = info.Next;
+                count++;
+            }
+            return count;
         }
     }
 

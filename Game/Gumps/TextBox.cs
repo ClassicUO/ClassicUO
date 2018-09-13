@@ -14,9 +14,9 @@ namespace ClassicUO.Game.Gumps
         private readonly TextEntry _entry;
 
 
-        public TextBox(byte font, int maxcharlength = -1, int maxlength = 0, bool isunicode = true) : base()
+        public TextBox(byte font, int maxcharlength = -1, int maxlength = 0, bool isunicode = true, FontStyle style = FontStyle.None) : base()
         {
-            _entry = new TextEntry(font, maxcharlength, maxlength, isunicode);
+            _entry = new TextEntry(font, maxcharlength, maxlength, isunicode, style);
 
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
@@ -31,7 +31,7 @@ namespace ClassicUO.Game.Gumps
             Height = int.Parse(parts[4]);
             Hue = Hue.Parse(parts[5]);
             Graphic = Graphic.Parse(parts[6]);
-            Text = lines[int.Parse(parts[7])];
+            SetText(lines[int.Parse(parts[7])]);
         }
 
 
@@ -41,17 +41,20 @@ namespace ClassicUO.Game.Gumps
         public bool IsPassword { get; set; }
         public bool NumericOnly { get; set; }
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
-        public string Text
-        {
-            get => _entry.Text;
-            set => _entry.InsertString(value);
-        }
+        public string Text => _entry.Text;
 
+        public int LinesCount => _entry.GetLinesCount();
 
         public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 
-
+        public void SetText(string text, bool append = false)
+        {
+            if (append)
+                _entry.InsertString(text);
+            else
+                _entry.SetText(text);
+        }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -72,7 +75,7 @@ namespace ClassicUO.Game.Gumps
 
             if (_entry.IsChanged)
             {
-                _entry.UpdateCaretPosition(Text, _entry.MaxLength);
+                _entry.UpdateCaretPosition();
             }
 
             base.Update(totalMS, frameMS);
@@ -106,21 +109,10 @@ namespace ClassicUO.Game.Gumps
             return base.Draw(spriteBatch, position);
         }
 
+        public void RemoveLineAt(int index) => _entry.RemoveLineAt(index);
+
         protected override void OnTextInput(string c)
         {
-            if (MaxCharCount != 0 && Text.Length >= MaxCharCount)
-                return;
-
-            if (NumericOnly && !int.TryParse(c, out _))
-                return;
-
-            if (ReplaceDefaultTextOnFirstKeyPress)
-            {
-                Text = string.Empty;
-                ReplaceDefaultTextOnFirstKeyPress = false;
-            }
-
-            //Text += c;
             _entry.InsertString(c);
         }
 
@@ -128,21 +120,17 @@ namespace ClassicUO.Game.Gumps
         {
             switch (key)
             {
-                case SDL.SDL_Keycode.SDLK_PASTE:
-
-                    break;
                 /*case SDL.SDL_Keycode.SDLK_TAB:
                     if (AllowTAB)
                         _entry.InsertString("    ");
-                    break;
-                case SDL.SDL_Keycode.SDLK_RETURN:
-                    if (MultiLine)
-                        _entry.InsertString("\n");
                     break;*/
+                case SDL.SDL_Keycode.SDLK_RETURN:
+                    _entry.InsertString("\n");
+                    break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     if (ReplaceDefaultTextOnFirstKeyPress)
                     {
-                        Text = string.Empty;
+                        //Text = string.Empty;
                         ReplaceDefaultTextOnFirstKeyPress = false;
                     }
                     else
