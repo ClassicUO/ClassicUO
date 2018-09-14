@@ -21,6 +21,7 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -33,7 +34,6 @@ namespace ClassicUO.Game.Views
             AllowedToDraw = !IsNoDrawable(st.Graphic);
         }
 
-        //public new Static GameObject => (Static)base.GameObject;
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
@@ -48,8 +48,21 @@ namespace ClassicUO.Game.Views
                 Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
             }
 
+            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 
             return base.Draw(spriteBatch, position, objectList);
+        }
+
+
+        protected override void MousePick(MouseOverList<GameObject> list, SpriteVertex[] vertex)
+        {
+            int x = list.MousePosition.X - (int)vertex[0].Position.X;
+            int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
+
+            if (Art.Contains(GameObject.Graphic, x, y))
+            {
+                list.Add(GameObject, vertex[0].Position);
+            }
         }
     }
 }
