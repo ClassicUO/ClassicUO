@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,9 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.IO;
 using ClassicUO.Renderer;
-using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -34,6 +32,7 @@ namespace ClassicUO.IO.Resources
 
         private static SpriteTexture[] _artCache;
         private static readonly List<int> _usedIndex = new List<int>();
+        //private static readonly PixelPicking _picker = new PixelPicking();
 
         public static void Load()
         {
@@ -52,7 +51,17 @@ namespace ClassicUO.IO.Resources
             _artCache = new SpriteTexture[ART_COUNT];
         }
 
-        public unsafe static SpriteTexture GetStaticTexture(ushort g)
+        //public static bool Contains(ushort g, int x, int y, int extra = 0)
+        //{
+        //    return _picker.Get(g, x, y, extra);
+        //}
+
+        //public static void Clear(ushort g)
+        //{
+        //    _picker.Remove(g);
+        //}
+
+        public static unsafe SpriteTexture GetStaticTexture(ushort g)
         {
             ref var texture = ref _artCache[g];
             if (texture == null || texture.IsDisposed)
@@ -61,28 +70,34 @@ namespace ClassicUO.IO.Resources
 
                 texture = new SpriteTexture(w, h, false);
 
-                fixed (ushort* ptr = pixels)
-                    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
+                texture.SetDataForHitBox(pixels);
+
+                //fixed (ushort* ptr = pixels)
+                //    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
 
                 _usedIndex.Add(g);
-            }
 
+                //_picker.Set(g, w, h, pixels);
+            }
             return texture;
         }
 
-        public unsafe static SpriteTexture GetLandTexture(ushort g)
+        public static unsafe SpriteTexture GetLandTexture(ushort g)
         {
             ref var texture = ref _artCache[g];
             if (texture == null || texture.IsDisposed)
             {
                 var pixels = ReadLandArt(g);
                 texture = new SpriteTexture(44, 44, false);
-                fixed (ushort* ptr = pixels)
-                    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
+                texture.SetDataForHitBox(pixels);
+
+                //fixed (ushort* ptr = pixels)
+                //    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
 
                 _usedIndex.Add(g);
-            }
 
+                //_picker.Set(g, 44, 44, pixels);
+            }
             return texture;
         }
 
@@ -96,6 +111,7 @@ namespace ClassicUO.IO.Resources
                     _usedIndex.RemoveAt(i--);
                 else if (Game.World.Ticks - texture.Ticks >= 3000)
                 {
+                    //Clear((ushort)_usedIndex[i]);
                     texture.Dispose();
                     texture = null;
 
@@ -107,7 +123,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private static unsafe Span<ushort> ReadStaticArt(ushort graphic, out short width, out short height)
+        private static unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height)
         {
             graphic &= FileManager.GraphicMask;
 
@@ -186,13 +202,13 @@ namespace ClassicUO.IO.Resources
             return pixels;
         }
 
-        private static Span<ushort> ReadLandArt(ushort graphic)
+        private static ushort[] ReadLandArt(ushort graphic)
         {
             graphic &= FileManager.GraphicMask;
 
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
 
-            Span<ushort> pixels = new ushort[44 * 44];
+            ushort[] pixels = new ushort[44 * 44];
 
             for (int i = 0; i < 22; i++)
             {

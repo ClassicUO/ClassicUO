@@ -222,6 +222,20 @@ namespace ClassicUO.Game.Map
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
                 if (World.Ticks - block.LastAccessTime > 3000 && block.HasNoExternalData())
                 {
+
+                    //for (int x = 0; x < 8; x++)
+                    //{
+                    //    for (int y = 0; y < 8; y++)
+                    //    {
+                    //        var tile = block.Tiles[x][y];
+
+                    //        if (tile.IsStretched)
+                    //            TextmapTextures.Clear(tile.Graphic);
+                    //        else
+                    //            Art.Clear(tile.Graphic);
+                    //    }
+                    //}
+
                     block.Unload();
                     block = null;
                     _usedIndices.RemoveAt(i);

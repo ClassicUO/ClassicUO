@@ -26,6 +26,8 @@
 
   <ItemGroup>
     <Folder Include="Audio\" />
+    <Folder Include="Game\Gumps\Controls\Login\" />
+    <Folder Include="Game\Gumps\Controls\InGame\" />
     <Folder Include="Platforms\MacOS\" />
     <Folder Include="Platforms\Linux\" />
     <Folder Include="Properties\" />

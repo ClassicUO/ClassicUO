@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,18 +19,18 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.Renderer;
+using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
 {
-    public interface IDrawable
+    public interface IDrawable<T> where T : class
     {
         bool AllowedToDraw { get; set; }
         SpriteTexture Texture { get; set; }
         Vector3 HueVector { get; set; }
 
-        bool Draw(SpriteBatch3D spriteBatch,  Vector3 position);
+        bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<T> objectList);
     }
 
     public interface IDrawableUI

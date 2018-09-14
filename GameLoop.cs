@@ -148,9 +148,14 @@ namespace ClassicUO
             string username = settings.Username;
             string password = settings.Password;
 
+            var console = new DevConsole();
+            //UIManager.Add(console);
+
             NetClient.PacketReceived += (sender, e) =>
             {
                 //Service.Get<Log>().Message(LogTypes.Trace, string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
+
+                //console.AppendLine(string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
 
                 switch (e.ID)
                 {
@@ -215,7 +220,6 @@ namespace ClassicUO
 
             // END TEST
 
-            GumpManager.Add(new DevConsole());
 
             base.LoadContent();
         }
@@ -287,7 +291,11 @@ namespace ClassicUO
 
             _gameCursor.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.Milliseconds);
 
-            Game.Gumps.GumpManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.Milliseconds);
+            UIManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.Milliseconds);
+
+
+            _picker.Position = _gameCursor.ScreenPosition;
+            _picker.PickOnly = PickerType.PickEverything;
 
             if (World.InGame)
             {
@@ -626,12 +634,13 @@ namespace ClassicUO
             return (firstTile, renderOffset, renderDimensions);
         }
 
-        private readonly GameObject _selectedObject;
-
+        private MousePicker<GameObject> _picker = new MousePicker<GameObject>();
 
         protected override void Draw(GameTime gameTime)
         {
             var sb3D = Service.Get<SpriteBatch3D>();
+            MouseOverList<GameObject> overList = new MouseOverList<GameObject>(_picker);
+
 
             if (World.InGame)
             {
@@ -694,7 +703,7 @@ namespace ClassicUO
                                 //if (MouseOverList<SpriteBatch3D>.IsMouseInObjectIsometric(vertices, Service.Get<InputManager>().MousePosition))
                                 //    vertices[0].Hue = vertices[1].Hue = vertices[2].Hue = vertices[3].Hue = RenderExtentions.GetHueVector(33);
 
-                                if (draw && view.Draw(sb3D, dp))
+                                if (draw && view.Draw(sb3D, dp, overList))
                                     _renderListCount++;
                             }
 
@@ -748,8 +757,10 @@ namespace ClassicUO
             sbUI.Begin();
 
             sbUI.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
-            GameTextManager.Render(sbUI);
-            Game.Gumps.GumpManager.Render(sbUI);
+            GameTextManager.Render(sbUI, overList);
+            UIManager.Render(sbUI);
+
+            _picker.UpdateOverObjects(overList, overList.MousePosition);
 
             //_spriteBatch.Draw2D(_crossTexture, new Bounds(_graphics.PreferredBackBufferWidth / 2  - 5, _graphics.PreferredBackBufferHeight / 2 - 5, 10, 10), Vector3.Zero);
 
@@ -773,9 +784,11 @@ namespace ClassicUO
             sb.AppendLine(sb3D.TotalCalls.ToString());
             sb.Append("Pos: ");
             sb.AppendLine(World.Player == null ? "" : World.Player.Position.ToString());
+            sb.Append("Selected: ");
+            sb.AppendLine(SelectedObject == null ? "" : SelectedObject.ToString());
 
-            //_gameTextTRY.Text = sb.ToString();
-            //_gameTextTRY.Draw(sbUI, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
+            _gameTextTRY.Text = sb.ToString();
+            _gameTextTRY.Draw(sbUI, new Vector3(/*Window.ClientBounds.Width - 150*/ 20, 20, 0));
 
             //_spriteBatch.Draw2D(_gump, new Rectangle(100, 100, _gump.Width, _gump.Height), Vector3.Zero);
 
@@ -785,6 +798,39 @@ namespace ClassicUO
 
             _gameCursor.Draw(sbUI);
             sbUI.End();
+
+
+            SelectedObject = _picker.MouseOverObject;
+        }
+
+        private Hue _savedHue;
+        private GameObject _selectedObject;
+
+        private GameObject SelectedObject
+        {
+            get => _selectedObject;
+            set
+            {
+                if (_selectedObject == value)
+                    return;
+
+                if (_selectedObject != null)
+                {
+                    _selectedObject.Hue = _savedHue;
+                }
+
+                if (value == null)
+                {
+                    _selectedObject = null;
+                    _savedHue = 0;
+                }
+                else
+                {
+                    _selectedObject = value;
+                    _savedHue = _selectedObject.Hue;
+                    _selectedObject.Hue = 33;
+                }
+            }
         }
 
         private readonly int _renderIndex = 1;

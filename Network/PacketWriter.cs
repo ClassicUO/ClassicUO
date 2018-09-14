@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -59,7 +59,7 @@ namespace ClassicUO.Network
         {
             if (IsDynamic)
             {
-                this[1] = (byte)(Position >> 8);
+                this[1] = (byte)( Position >> 8 );
                 this[2] = (byte)Position;
             }
         }
@@ -82,19 +82,6 @@ namespace ClassicUO.Network
             {
                 throw new ArgumentOutOfRangeException("length");
             }
-        }
-
-        public void SendToClient()
-        {
-            WriteSize();
-            //WOrion.SendToClient(this.Data, ref len);
-        }
-
-        public void SendToServer()
-        {
-            WriteSize();
-            NetClient.Socket.Send(this);
-            //WOrion.SendToServer(this.Data, ref len);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,9 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.IO;
 using ClassicUO.Renderer;
-using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -38,13 +36,16 @@ namespace ClassicUO.IO.Resources
         private static SpriteTexture[] _textmapCache;
         private static readonly List<int> _usedIndex = new List<int>();
 
+        //private static readonly PixelPicking _picker = new PixelPicking();
+
 
         public static void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "texmaps.mul");
             string pathidx = Path.Combine(FileManager.UoFolderPath, "texidx.mul");
 
-            if (!File.Exists(path) || !File.Exists(pathidx)) throw new FileNotFoundException();
+            if (!File.Exists(path) || !File.Exists(pathidx))
+                throw new FileNotFoundException();
 
             _file = new UOFileMul(path, pathidx, TEXTMAP_COUNT, 10);
 
@@ -67,12 +68,16 @@ namespace ClassicUO.IO.Resources
 
                         int checkindex = int.Parse(defs[1].Replace("{", string.Empty).Replace("}", string.Empty));
 
-                        
+
                     }
                 }
             }
         }
 
+        //public static bool Contains(ushort g, int x, int y, int extra = 0)
+        //     => _picker.Get(g, x, y, extra);
+
+        //public static void Clear(ushort g) => _picker.Remove(g);
 
         public static unsafe SpriteTexture GetTextmapTexture(ushort g)
         {
@@ -81,10 +86,13 @@ namespace ClassicUO.IO.Resources
             {
                 var pixels = GetTextmapTexture(g, out int size);
                 texture = new SpriteTexture(size, size, false);
-                fixed (ushort* ptr = pixels)
-                    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
+                texture.SetDataForHitBox(pixels);
+                //fixed (ushort* ptr = pixels)
+                //    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
 
                 _usedIndex.Add(g);
+
+                //_picker.Set(g, size, size, pixels);
             }
 
             return texture;
@@ -98,8 +106,9 @@ namespace ClassicUO.IO.Resources
                 ref var texture = ref _textmapCache[_usedIndex[i]];
                 if (texture == null || texture.IsDisposed)
                     _usedIndex.RemoveAt(i--);
-                else if(Game.World.Ticks - texture.Ticks >= 3000)
+                else if (Game.World.Ticks - texture.Ticks >= 3000)
                 {
+                    //_picker.Remove(_usedIndex[i]);
                     texture.Dispose();
                     texture = null;
 
@@ -111,7 +120,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private static Span<ushort> GetTextmapTexture(ushort index, out int size)
+        private static ushort[] GetTextmapTexture(ushort index, out int size)
         {
             (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
 
@@ -121,7 +130,7 @@ namespace ClassicUO.IO.Resources
                 return null;
             }
 
-            Span<ushort> pixels;
+            ushort[] pixels;
 
             if (extra == 0)
             {
@@ -132,12 +141,13 @@ namespace ClassicUO.IO.Resources
             {
                 size = 128;
                 pixels = _textmapPixels128;
-            }            
+            }
 
             for (int i = 0; i < size; i++)
             {
                 int pos = i * size;
-                for (int j = 0; j < size; j++) pixels[pos + j] = (ushort)(0x8000 | _file.ReadUShort());
+                for (int j = 0; j < size; j++)
+                    pixels[pos + j] = (ushort)(0x8000 | _file.ReadUShort());
             }
 
             return pixels;

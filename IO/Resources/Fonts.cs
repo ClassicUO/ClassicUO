@@ -285,7 +285,7 @@ namespace ClassicUO.IO.Resources
 
         private static unsafe bool GeneratePixelsASCII(out FontTexture ftexture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
-            Span<uint> pData;
+            uint[] pData;
             ftexture = null;
 
             if (font >= FontCount)
@@ -636,8 +636,10 @@ namespace ClassicUO.IO.Resources
             if (( flags & UOFONT_FIXED ) != 0 || ( flags & UOFONT_CROPPED ) != 0)
             {
                 if (width <= 0 || string.IsNullOrEmpty(str))
+                {
+                    Service.Get<Log>().Message(LogTypes.Error, "You must set a string or width");
                     return;
-
+                }
                 int realWidth = GetWidthUnicode(font, str);
 
                 if (realWidth > width)
@@ -1030,7 +1032,7 @@ namespace ClassicUO.IO.Resources
 
             height += _topMargin + _bottomMargin + 4;
             int blocksize = height * width;
-            Span<uint> pData = new uint[blocksize];
+            uint[] pData = new uint[blocksize];
 
             uint* table = (uint*)_unicodeFontAddress[font];
             int lineOffsY = 1 + _topMargin;
@@ -2346,24 +2348,7 @@ namespace ClassicUO.IO.Resources
                             x += UNICODE_SPACE_WIDTH;
 
                         if (info.CharStart + i + 1 == pos)
-                        {
-                            //byte* cptr = (byte*)( (IntPtr)table + (int)offset );
-
-                            //if (info.Next != null)
-                            //{
-                            //    x = cptr[0] + cptr[2] + 1;
-                            //    y += info.MaxHeight;
-                            //}
-                            //else
-                            //{
-                            //    if (x + cptr[0] + cptr[2] + 1 >= width)
-                            //    {
-                            //        x = 0;
-                            //        y += info.MaxHeight;
-                            //    }
-                            //}
                             return (x, y);
-                        }
                     }
                 }
 
@@ -2490,6 +2475,44 @@ namespace ClassicUO.IO.Resources
                 ptr1 = null;
             }
             return (x, y);
+        }
+
+        public static int GetLinesCountASCII(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width)
+        {
+            if (width <= 0)
+                width = GetWidthASCII(font, str);
+
+            var info = GetInfoASCII(font, str, str.Length, align, flags, width);
+            if (info == null)
+                return 0;
+
+            int count = 0;
+
+            while (info != null)
+            {
+                info = info.Next;
+                count++;
+            }
+            return count;
+        }
+
+        public static int GetLinesCountUnicode(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width)
+        {
+            if (width <= 0)
+                width = GetWidthUnicode(font, str);
+
+            var info = GetInfoUnicode(font, str, str.Length, align, flags, width);
+            if (info == null)
+                return 0;
+
+            int count = 0;
+
+            while (info != null)
+            {
+                info = info.Next;
+                count++;
+            }
+            return count;
         }
     }
 

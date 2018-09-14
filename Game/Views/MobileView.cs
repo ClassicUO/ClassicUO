@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -20,10 +20,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.Views
@@ -42,11 +42,11 @@ namespace ClassicUO.Game.Views
         //public new Mobile GameObject => (Mobile)base.GameObject;
 
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position)
-            => !PreDraw(position) && DrawInternal(spriteBatch, position);
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
+            => !PreDraw(position) && DrawInternal(spriteBatch, position, objectList);
 
 
-        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position)
+        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
             if (GameObject.IsDisposed)
                 return false;
@@ -103,7 +103,9 @@ namespace ClassicUO.Game.Views
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                 HueVector = RenderExtentions.GetHueVector(vl.Hue);
 
-                base.Draw(spriteBatch, position);
+                base.Draw(spriteBatch, position, objectList);
+
+                Pick(frame.ID, Bounds, position, objectList);
             }
 
 
@@ -153,11 +155,35 @@ namespace ClassicUO.Game.Views
         }
 
 
+
+
+        private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList<GameObject> list)
+        {
+            int x;
+
+            if (IsFlipped)
+            {
+                x = (int)drawPosition.X + area.X + 44 - list.MousePosition.X;
+            }
+            else
+            {
+                x = list.MousePosition.X - (int)drawPosition.X + area.X;
+            }
+
+            int y = list.MousePosition.Y - ((int)drawPosition.Y - area.Y);
+
+            if (Texture.Contains(x, y)) // if (Animations.Contains(id, x, y))
+            {
+                list.Add(GameObject, drawPosition);
+            }
+        }
+
+
         private void SetupLayers(byte dir, ref Mobile mobile)
         {
             _layerCount = 0;
 
-            
+
 
             if (mobile.IsHuman)
             {
@@ -226,7 +252,7 @@ namespace ClassicUO.Game.Views
             }
         }
 
-        private void AddLayer(byte dir,  Graphic graphic, Hue hue, ref Mobile mobile,  bool mounted = false,  EquipConvData? convertedItem = null)
+        private void AddLayer(byte dir, Graphic graphic, Hue hue, ref Mobile mobile, bool mounted = false, EquipConvData? convertedItem = null)
         {
             sbyte animIndex = GameObject.AnimIndex;
             byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic);

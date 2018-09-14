@@ -1,10 +1,8 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
+using Microsoft.Xna.Framework;
 using static SDL2.SDL;
 
 namespace ClassicUO.Input
@@ -17,7 +15,7 @@ namespace ClassicUO.Input
         const int MOUSE_DOUBLE_CLICK_TIME = 200;
 
 
-        private SDL_EventFilter _hookDel;
+        private readonly SDL_EventFilter _hookDel;
         private Queue<InputEvent> _events = new Queue<InputEvent>();
         private Queue<InputEvent> _nextEvents = new Queue<InputEvent>();
         private SDL_Keycode _lastKey;
@@ -36,21 +34,11 @@ namespace ClassicUO.Input
         }
 
 
-        public void Dispose()
-        {
-            SDL_DelEventWatch(_hookDel, IntPtr.Zero);
-        }
+        public void Dispose() => SDL_DelEventWatch(_hookDel, IntPtr.Zero);
 
+        public IEnumerable<InputKeyboardEvent> GetKeyboardEvents() => _events.Where(s => s is InputKeyboardEvent e && !e.IsHandled).Cast<InputKeyboardEvent>();
 
-        public IEnumerable<InputKeyboardEvent> GetKeyboardEvents()
-        {
-            return _events.Where(s => s is InputKeyboardEvent e && !e.IsHandled).Cast<InputKeyboardEvent>();
-        }
-
-        public IEnumerable<InputMouseEvent> GetMouseEvents()
-        {
-            return _events.Where(s => s is InputMouseEvent e && !e.IsHandled).Cast<InputMouseEvent>();
-        }
+        public IEnumerable<InputMouseEvent> GetMouseEvents() => _events.Where(s => s is InputMouseEvent e && !e.IsHandled).Cast<InputMouseEvent>();
 
         public void Update(float totaltime)
         {
@@ -73,8 +61,15 @@ namespace ClassicUO.Input
             }
             else
             {
-                _lastKey = e.KeyCode;
-                AddEvent(e);
+                if (_lastKey == SDL_Keycode.SDLK_LCTRL && e.KeyCode == SDL_Keycode.SDLK_v)
+                {
+                    OnTextInput(new InputKeyboardEvent(KeyboardEvent.TextInput, SDL_Keycode.SDLK_UNKNOWN, 0, SDL_Keymod.KMOD_NONE) { KeyChar = SDL_GetClipboardText() });
+                }
+                else
+                {
+                    _lastKey = e.KeyCode;
+                    AddEvent(e);
+                }
             }
         }
 
@@ -84,10 +79,7 @@ namespace ClassicUO.Input
             AddEvent(e);
         }
 
-        private void OnTextInput(InputKeyboardEvent e)
-        {
-            AddEvent(e);
-        }
+        private void OnTextInput(InputKeyboardEvent e) => AddEvent(e);
 
         private void OnMouseDown(InputMouseEvent e)
         {
@@ -122,7 +114,7 @@ namespace ClassicUO.Input
                             _lastMouseClick = e;
                         }
                     }
-                   
+
                 }
             }
 
@@ -152,6 +144,7 @@ namespace ClassicUO.Input
             AddEvent(new InputMouseEvent(ConvertWheelDirection(e.X, e.Y), e));
         }
 
+
         private void AddEvent(InputEvent e) => _nextEvents.Enqueue(e);
 
         private bool DistanceBetweenPoints(Point initial, Point final, int distance)
@@ -174,7 +167,7 @@ namespace ClassicUO.Input
                 case SDL_EventType.SDL_TEXTINPUT:
                     string s = Marshal.PtrToStringUTF8((IntPtr)e->text.text);
                     if (!string.IsNullOrEmpty(s))
-                        OnTextInput(new InputKeyboardEvent(KeyboardEvent.TextInput, SDL_Keycode.SDLK_UNKNOWN, 0, SDL_Keymod.KMOD_NONE) { KeyChar = s[0] });
+                        OnTextInput(new InputKeyboardEvent(KeyboardEvent.TextInput, SDL_Keycode.SDLK_UNKNOWN, 0, SDL_Keymod.KMOD_NONE) { KeyChar = s });
                     break;
 
 
@@ -200,13 +193,19 @@ namespace ClassicUO.Input
         {
             switch (button)
             {
-                case 1: return MouseButton.Left;
-                case 2: return MouseButton.Middle;
-                case 3: return MouseButton.Right;
-                case 4: return MouseButton.XButton1;
-                case 5: return MouseButton.XButton2;
-                default: return MouseButton.None;
-            }   
+                case 1:
+                    return MouseButton.Left;
+                case 2:
+                    return MouseButton.Middle;
+                case 3:
+                    return MouseButton.Right;
+                case 4:
+                    return MouseButton.XButton1;
+                case 5:
+                    return MouseButton.XButton2;
+                default:
+                    return MouseButton.None;
+            }
         }
 
         private MouseEvent ConvertWheelDirection(int x, int y)

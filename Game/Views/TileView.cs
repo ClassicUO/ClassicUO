@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -21,6 +21,7 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -53,7 +54,7 @@ namespace ClassicUO.Game.Views
 
         //public new Tile GameObject => (Tile)base.GameObject;
 
-        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
             {
@@ -81,11 +82,11 @@ namespace ClassicUO.Game.Views
                 _needUpdateStrechedTile = false;
             }
 
-            return !tile.IsStretched ? base.Draw(spriteBatch, position) : Draw3DStretched(spriteBatch, position);
+            return !tile.IsStretched ? base.Draw(spriteBatch, position, objectList) : Draw3DStretched(spriteBatch, position, objectList);
         }
 
 
-        private bool Draw3DStretched(SpriteBatch3D spriteBatch,  Vector3 position)
+        private bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
             Texture.Ticks = World.Ticks;
 
@@ -94,15 +95,43 @@ namespace ClassicUO.Game.Views
             _vertex[2].Position = position + _vertex2_yOffset;
             _vertex[3].Position = position + _vertex3_yOffset;
 
+            _vertex[0].Hue =
+            _vertex[1].Hue =
+            _vertex[2].Hue =
+            _vertex[3].Hue = RenderExtentions.GetHueVector(GameObject.Hue);
+
+
             if (!spriteBatch.DrawSprite(Texture, _vertex))
             {
                 return false;
             }
 
-            MousePick(_vertex);
+            if (objectList.IsMouseInObjectIsometric(_vertex))
+                objectList.Add(GameObject, _vertex[0].Position);
+
+            //if (Texture.Contains(x, y))
+            //    objectList.Add(GameObject, _vertex[0].Position);
 
             return true;
         }
+
+
+        protected override void MousePick(MouseOverList<GameObject> list, SpriteVertex[] vertex)
+        {
+            int x = list.MousePosition.X - (int)vertex[0].Position.X;
+            int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
+
+            if (Texture.Contains(x, y))
+            {
+                list.Add(GameObject, vertex[0].Position);
+            }
+
+            //if (Art.Contains(GameObject.Graphic, x, y))
+            //{
+            //    list.Add(GameObject, vertex[0].Position);
+            //}
+        }
+
 
         private void UpdateStreched(Facet map)
         {
@@ -153,8 +182,8 @@ namespace ClassicUO.Game.Views
             }
         }
 
-        private static Vector3 CalculateNormal(float a,  float b,  float c,  float d)
-        {            
+        private static Vector3 CalculateNormal(float a, float b, float c, float d)
+        {
             return Vector3.Normalize(new Vector3(a - b, 1f, c - d));
         }
     }
