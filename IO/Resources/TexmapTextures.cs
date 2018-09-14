@@ -19,10 +19,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using System;
+using ClassicUO.Renderer;
 using System.Collections.Generic;
 using System.IO;
-using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
@@ -37,7 +36,7 @@ namespace ClassicUO.IO.Resources
         private static SpriteTexture[] _textmapCache;
         private static readonly List<int> _usedIndex = new List<int>();
 
-        private static readonly PixelPicking _picker = new PixelPicking();
+        //private static readonly PixelPicking _picker = new PixelPicking();
 
 
         public static void Load()
@@ -58,7 +57,7 @@ namespace ClassicUO.IO.Resources
                 using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
                 {
                     string line;
-                    while (( line = reader.ReadLine() ) != null)
+                    while ((line = reader.ReadLine()) != null)
                     {
                         line = line.Trim();
                         if (line.Length <= 0 || line[0] == '#')
@@ -75,9 +74,10 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public static bool Contains(ushort g, int x, int y, int extra = 0)
-             => _picker.Get(g, x, y, extra);
+        //public static bool Contains(ushort g, int x, int y, int extra = 0)
+        //     => _picker.Get(g, x, y, extra);
 
+        //public static void Clear(ushort g) => _picker.Remove(g);
 
         public static unsafe SpriteTexture GetTextmapTexture(ushort g)
         {
@@ -86,12 +86,13 @@ namespace ClassicUO.IO.Resources
             {
                 var pixels = GetTextmapTexture(g, out int size);
                 texture = new SpriteTexture(size, size, false);
-                fixed (ushort* ptr = pixels)
-                    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
+                texture.SetDataForHitBox(pixels);
+                //fixed (ushort* ptr = pixels)
+                //    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
 
                 _usedIndex.Add(g);
 
-                _picker.Set(g, size, size, pixels);
+                //_picker.Set(g, size, size, pixels);
             }
 
             return texture;
@@ -107,6 +108,7 @@ namespace ClassicUO.IO.Resources
                     _usedIndex.RemoveAt(i--);
                 else if (Game.World.Ticks - texture.Ticks >= 3000)
                 {
+                    //_picker.Remove(_usedIndex[i]);
                     texture.Dispose();
                     texture = null;
 
@@ -145,7 +147,7 @@ namespace ClassicUO.IO.Resources
             {
                 int pos = i * size;
                 for (int j = 0; j < size; j++)
-                    pixels[pos + j] = (ushort)( 0x8000 | _file.ReadUShort() );
+                    pixels[pos + j] = (ushort)(0x8000 | _file.ReadUShort());
             }
 
             return pixels;

@@ -54,5 +54,11 @@ namespace ClassicUO.Game.Views
             return base.Draw(spriteBatch, position, objectList);
         }
 
+
+        protected override void MousePick(MouseOverList<GameObject> list, SpriteVertex[] vertex)
+        {
+
+        }
+
     }
 }
