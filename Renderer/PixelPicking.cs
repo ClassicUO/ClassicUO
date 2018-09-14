@@ -1,10 +1,8 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Renderer
 {
-    internal class PixelPicking
+    public class PixelPicking
     {
         const int InitialDataCount = 0x40000; // 256kb
 
@@ -50,7 +48,7 @@ namespace ClassicUO.Renderer
                         int x0 = x1 - spanLength;
                         for (int range = -extraRange; range <= extraRange; range++)
                         {
-                            if (y + range == y0 && (x + extraRange >= x0) && (x - extraRange <= x1))
+                            if (y + range == y0 && ( x + extraRange >= x0 ) && ( x - extraRange <= x1 ))
                             {
                                 return true;
                             }
@@ -64,8 +62,7 @@ namespace ClassicUO.Renderer
 
         public void GetDimensions(int textureID, out int width, out int height)
         {
-            int index;
-            if (!m_IDs.TryGetValue(textureID, out index))
+            if (!m_IDs.TryGetValue(textureID, out int index))
             {
                 width = height = 0;
                 return;
@@ -105,7 +102,7 @@ namespace ClassicUO.Renderer
         {
             while (value > 0x7f)
             {
-                m_Data.Add((byte)((value & 0x7f) | 0x80));
+                m_Data.Add((byte)( ( value & 0x7f ) | 0x80 ));
                 value >>= 7;
             }
             m_Data.Add((byte)value);
@@ -118,8 +115,8 @@ namespace ClassicUO.Renderer
             while (true)
             {
                 byte data = m_Data[index++];
-                value += (data & 0x7f) << shift;
-                if ((data & 0x80) == 0x00)
+                value += ( data & 0x7f ) << shift;
+                if (( data & 0x80 ) == 0x00)
                 {
                     return value;
                 }

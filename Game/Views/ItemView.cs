@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,11 +19,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using System.Collections.Generic;
 
 namespace ClassicUO.Game.Views
 {
@@ -46,7 +47,7 @@ namespace ClassicUO.Game.Views
             else
             {
                 item.AnimIndex = 99;
-                if ((item.Direction & Direction.Running) != 0)
+                if (( item.Direction & Direction.Running ) != 0)
                 {
                     item.UsedLayer = true;
                     item.Direction &= (Direction)0x7F;
@@ -68,7 +69,7 @@ namespace ClassicUO.Game.Views
         //public new Item GameObject => (Item)base.GameObject;
 
 
-        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
@@ -76,7 +77,7 @@ namespace ClassicUO.Game.Views
             Item item = (Item)GameObject;
 
             if (item.IsCorpse)
-                return DrawInternal(spriteBatch, position);
+                return DrawInternal(spriteBatch, position, objectList);
 
             if (item.Effect == null)
             {
@@ -94,22 +95,22 @@ namespace ClassicUO.Game.Views
                 {
                     _hue = GameObject.Hue;
 
-                    HueVector = RenderExtentions.GetHueVector(_hue, TileData.IsPartialHue((long)item.ItemData.Flags), TileData.IsTransparent((long)item.ItemData.Flags), false);
+                    HueVector = RenderExtentions.GetHueVector(_hue, TileData.IsPartialHue((long)item.ItemData.Flags), false /*TileData.IsTransparent((long)item.ItemData.Flags)*/, false);
                 }
 
 
                 if (item.Amount > 1 && TileData.IsStackable((long)item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
                 {
                     Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
-                    base.Draw(spriteBatch, offsetDrawPosition);
+                    base.Draw(spriteBatch, offsetDrawPosition, objectList);
                 }
 
-                base.Draw(spriteBatch, position);
+                base.Draw(spriteBatch, position, objectList);
             }
             else
             {
                 if (!item.Effect.IsDisposed)
-                    item.Effect.View.Draw(spriteBatch, position);
+                    item.Effect.View.Draw(spriteBatch, position, objectList);
             }
 
             return true;
@@ -117,13 +118,13 @@ namespace ClassicUO.Game.Views
 
 
 
-        public override bool DrawInternal(SpriteBatch3D spriteBatch,  Vector3 position)
+        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
             Item item = (Item)GameObject;
 
             spriteBatch.GetZ();
 
-            byte dir = (byte)((byte)item.Layer & 0x7F & 7);
+            byte dir = (byte)( (byte)item.Layer & 0x7F & 7 );
             bool mirror = false;
 
             Animations.GetAnimDirection(ref dir, ref mirror);
@@ -186,7 +187,7 @@ namespace ClassicUO.Game.Views
 
                 if (fc > 0 && animIndex >= fc)
                 {
-                    animIndex = (byte)(fc - 1);
+                    animIndex = (byte)( fc - 1 );
                 }
 
                 if (animIndex < direction.FrameCount)
@@ -208,21 +209,27 @@ namespace ClassicUO.Game.Views
                     //    drawX = -22;
 
                     int x = drawX + frame.CenterX;
-                    int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
+                    int y = -drawY - ( frame.Height + frame.CenterY ) + drawCenterY;
 
                     Texture = frame; // TextureManager.GetOrCreateAnimTexture(frame);
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                     HueVector = RenderExtentions.GetHueVector(color);
-                    base.Draw(spriteBatch, position);
+                    base.Draw(spriteBatch, position, objectList);
                 }
             }
 
             return true;
         }
 
-        protected override void MousePick(SpriteVertex[] vertex)
+        protected override void MousePick(MouseOverList<GameObject> objectList, SpriteVertex[] vertex)
         {
-            base.MousePick(vertex);
+            int x = objectList.MousePosition.X - (int)vertex[0].Position.X;
+            int y = objectList.MousePosition.Y - (int)vertex[0].Position.Y;
+
+            if (Art.Contains(GameObject.Graphic, x, y))
+            {
+                objectList.Add(GameObject, vertex[0].Position);
+            }
         }
     }
 }

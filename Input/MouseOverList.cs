@@ -1,8 +1,6 @@
-﻿using ClassicUO.Renderer;
-using Microsoft.Xna.Framework;
-using System;
 using System.Collections.Generic;
-using System.Text;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Input
 {
@@ -19,20 +17,35 @@ namespace ClassicUO.Input
     }
 
 
-    public class MouseOverList<T> where T: class
+    public class MouseOverList<T> where T : class
     {
         private readonly List<MouseOverItem<T>> _items;
 
 
-        public MouseOverList()
+        public MouseOverList(MousePicker<T> picker)
         {
             _items = new List<MouseOverItem<T>>();
+            MousePosition = picker.Position;
+            Picker = picker.PickOnly;
         }
 
-        //public Point MousePosition { get; set; }
+        public Point MousePosition { get; set; }
 
+        public PickerType Picker { get; set; }
 
+        public MouseOverItem<T> GetItem(Point position)
+        {
+            if (_items.Count <= 0)
+                return default;
 
+            return _items[_items.Count - 1];
+        }
+
+        public void Add(T obj, Vector3 position)
+        {
+            Point p = new Point(MousePosition.X - (int)position.X, MousePosition.Y - (int)position.Y);
+            _items.Add(new MouseOverItem<T>(obj, p));
+        }
 
         public static bool IsMouseInObjectIsometric(SpriteVertex[] v, Point MousePosition)
         {
@@ -80,7 +93,7 @@ namespace ClassicUO.Input
                 p[1] = new Point((int)v[1].Position.X, (int)v[1].Position.Y);
                 p[2] = new Point((int)v[3].Position.X, (int)v[3].Position.Y);
                 p[3] = new Point((int)v[2].Position.X, (int)v[2].Position.Y);
-                if (PointInPolygon(new Point((int)MousePosition.X, (int)MousePosition.Y), p))
+                if (PointInPolygon(new Point(MousePosition.X, MousePosition.Y), p))
                 {
                     return true;
                 }
@@ -114,9 +127,9 @@ namespace ClassicUO.Input
                     p2 = oldPoint;
                 }
 
-                if ((newPoint.X < p.X) == (p.X <= oldPoint.X)
-                    && (p.Y - (long)p1.Y) * (p2.X - p1.X)
-                    < (p2.Y - (long)p1.Y) * (p.X - p1.X))
+                if (( newPoint.X < p.X ) == ( p.X <= oldPoint.X )
+                    && ( p.Y - (long)p1.Y ) * ( p2.X - p1.X )
+                    < ( p2.Y - (long)p1.Y ) * ( p.X - p1.X ))
                 {
                     inside = !inside;
                 }

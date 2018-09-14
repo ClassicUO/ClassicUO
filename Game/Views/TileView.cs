@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -21,6 +21,7 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -44,7 +45,7 @@ namespace ClassicUO.Game.Views
 
         public TileView(Tile tile) : base(tile)
         {
-            tile.IsStretched = !(tile.TileData.TexID <= 0 && IO.Resources.TileData.IsWet((long)tile.TileData.Flags));
+            tile.IsStretched = !( tile.TileData.TexID <= 0 && IO.Resources.TileData.IsWet((long)tile.TileData.Flags) );
             AllowedToDraw = !tile.IsIgnored;
             tile.AverageZ = SortZ;
             tile.MinZ = tile.Position.Z;
@@ -53,7 +54,7 @@ namespace ClassicUO.Game.Views
 
         //public new Tile GameObject => (Tile)base.GameObject;
 
-        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
             {
@@ -66,7 +67,7 @@ namespace ClassicUO.Game.Views
             {
                 if (tile.IsStretched)
                 {
-                    Texture = IO.Resources.TextmapTextures.GetTextmapTexture(((Tile)GameObject).TileData.TexID);
+                    Texture = IO.Resources.TextmapTextures.GetTextmapTexture(( (Tile)GameObject ).TileData.TexID);
                 }
                 else
                 {
@@ -81,11 +82,11 @@ namespace ClassicUO.Game.Views
                 _needUpdateStrechedTile = false;
             }
 
-            return !tile.IsStretched ? base.Draw(spriteBatch, position) : Draw3DStretched(spriteBatch, position);
+            return !tile.IsStretched ? base.Draw(spriteBatch, position, objectList) : Draw3DStretched(spriteBatch, position, objectList);
         }
 
 
-        private bool Draw3DStretched(SpriteBatch3D spriteBatch,  Vector3 position)
+        private bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
             Texture.Ticks = World.Ticks;
 
@@ -99,7 +100,7 @@ namespace ClassicUO.Game.Views
                 return false;
             }
 
-            MousePick(_vertex);
+            MousePick(objectList, _vertex);
 
             return true;
         }
@@ -109,7 +110,7 @@ namespace ClassicUO.Game.Views
             float[] surroundingTilesZ = new float[_surroundingIndexes.Length];
             for (int i = 0; i < _surroundingIndexes.Length; i++)
             {
-                surroundingTilesZ[i] = map.GetTileZ((short)(GameObject.Position.X + _surroundingIndexes[i].X), (short)(GameObject.Position.Y + _surroundingIndexes[i].Y));
+                surroundingTilesZ[i] = map.GetTileZ((short)( GameObject.Position.X + _surroundingIndexes[i].X ), (short)( GameObject.Position.Y + _surroundingIndexes[i].Y ));
             }
 
             sbyte currentZ = GameObject.Position.Z;
@@ -117,7 +118,7 @@ namespace ClassicUO.Game.Views
             sbyte rightZ = (sbyte)surroundingTilesZ[3];
             sbyte bottomZ = (sbyte)surroundingTilesZ[7];
 
-            if (!(currentZ == leftZ && currentZ == rightZ && currentZ == bottomZ))
+            if (!( currentZ == leftZ && currentZ == rightZ && currentZ == bottomZ ))
             {
                 Tile tile = (Tile)GameObject;
                 sbyte low = 0, high = 0;
@@ -136,7 +137,7 @@ namespace ClassicUO.Game.Views
             _normals[2] = CalculateNormal(surroundingTilesZ[5], surroundingTilesZ[7], GameObject.Position.Z, surroundingTilesZ[9]);
             _normals[3] = CalculateNormal(surroundingTilesZ[6], surroundingTilesZ[8], surroundingTilesZ[3], surroundingTilesZ[10]);
 
-            _vertex0_yOffset = new Vector3(22, -(currentZ * 4), 0);
+            _vertex0_yOffset = new Vector3(22, -( currentZ * 4 ), 0);
             _vertex1_yOffset = new Vector3(44f, 22 - rightZ * 4, 0);
             _vertex2_yOffset = new Vector3(0, 22 - leftZ * 4, 0);
             _vertex3_yOffset = new Vector3(22, 44f - bottomZ * 4, 0);
@@ -153,8 +154,8 @@ namespace ClassicUO.Game.Views
             }
         }
 
-        private static Vector3 CalculateNormal(float a,  float b,  float c,  float d)
-        {            
+        private static Vector3 CalculateNormal(float a, float b, float c, float d)
+        {
             return Vector3.Normalize(new Vector3(a - b, 1f, c - d));
         }
     }

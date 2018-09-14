@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -34,7 +35,7 @@ namespace ClassicUO.Game.Views
 
         //public new Static GameObject => (Static)base.GameObject;
 
-        public override bool Draw(SpriteBatch3D spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
             {
@@ -48,7 +49,7 @@ namespace ClassicUO.Game.Views
             }
 
 
-            return base.Draw(spriteBatch, position);
+            return base.Draw(spriteBatch, position, objectList);
         }
     }
 }

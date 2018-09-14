@@ -22,14 +22,14 @@
 using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using IDrawable = ClassicUO.Renderer.IDrawable;
 
 namespace ClassicUO.Game.Views
 {
-    public abstract class View : IDrawable
+    public abstract class View : IDrawable<GameObject>
     {
         protected static float PI = (float)Math.PI;
 
@@ -130,7 +130,7 @@ namespace ClassicUO.Game.Views
             return false;
         }
 
-        public virtual bool Draw(SpriteBatch3D spriteBatch, Vector3 position)
+        public virtual bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> list)
         {
             if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed)
             {
@@ -196,47 +196,27 @@ namespace ClassicUO.Game.Views
                 vertex[3].Position.Y += Bounds.Height;
             }
 
-            /*var pos = Service.Get<InputManager>().MousePosition;
-
-            int x = pos.X - (int)vertex[0].Position.X;
-            int y = pos.Y - (int)vertex[0].Position.Y;
-
-
-            if (Art.Contains(GameObject.Graphic, x, y))
-            {
-                if (_selected != GameObject && _selected != null)
-                    _selected.View.HueVector = RenderExtentions.GetHueVector(_selected.Hue);
-                _selected = GameObject;
-                HueVector = RenderExtentions.GetHueVector(33);
-            }
-            else
-            {
-                HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
-            }*/
 
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
-
-
             if (!spriteBatch.DrawSprite(Texture, vertex))
                 return false;
 
-            //MousePick(vertex);
+            MousePick(list, vertex);
 
             return true;
         }
 
 
-        private static readonly GameObject _selected;
 
-        public virtual bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position)
+        public virtual bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
             return false;
         }
 
 
-        protected virtual void MousePick(SpriteVertex[] vertex)
+        protected virtual void MousePick(MouseOverList<GameObject> list, SpriteVertex[] vertex)
         {
         }
 
