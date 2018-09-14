@@ -41,6 +41,164 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO
 {
+    class GameLoop1 : CoreGame
+    {
+        private CursorRenderer _cursor;
+        private Log _log;
+
+        public GameLoop1() : base()
+        {
+            
+        }
+
+        protected override void Initialize()
+        {
+            _log = Service.Get<Log>();
+
+            //uncomment it and fill it to save your first settings
+            /*Settings settings1 = new Settings()
+            {
+                Username = "",
+                Password = "",
+                LastCharacterName = "",
+                IP = "",
+                Port = 2599,
+                UltimaOnlineDirectory = "",
+                ClientVersion = "7.0.59.8"
+            };
+
+            ConfigurationResolver.Save(settings1, "settings.json");*/
+
+            Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine(Environment.CurrentDirectory, "settings.json"));
+           
+
+            _log.Message(LogTypes.Trace, "Checking for Ultima Online installation...", false);
+            try
+            {
+                FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
+            }
+            catch (FileNotFoundException)
+            {
+                _log.Message(LogTypes.None, string.Empty);
+                _log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
+                return;
+            }
+            _log.Message(LogTypes.Trace, "      Done!");
+            _log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
+
+
+            _log.Message(LogTypes.Trace, "Loading files...", false);
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            FileManager.LoadFiles();
+
+            Texture2D textureHue0 = new Texture2D(GraphicsDevice, 32, 3000);
+            textureHue0.SetData(Hues.CreateShaderColors());
+            GraphicsDevice.Textures[1] = textureHue0;
+
+            _cursor = new CursorRenderer();
+
+            _log.Message(LogTypes.Trace, $"     Done in: {stopwatch.ElapsedMilliseconds} ms!");
+            stopwatch.Stop();
+
+
+            _log.Message(LogTypes.Trace, "Network calibration...", false);
+            PacketHandlers.Load();
+            PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
+            _log.Message(LogTypes.Trace, "      Done!");
+
+
+
+
+            // ##### START TEST #####
+            TEST(settings);
+            // #####  END TEST  #####
+
+            base.Initialize();
+        }
+
+
+        private void TEST(Settings settings)
+        {
+            string[] parts = settings.ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            byte[] clientVersionBuffer = { byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3]) };
+
+            NetClient.Connected += (sender, e) =>
+            {
+                _log.Message(LogTypes.Info, "Connected!");
+                NetClient.Socket.Send(new PSeed(clientVersionBuffer));
+                NetClient.Socket.Send(new PFirstLogin(settings.Username, settings.Password));
+            };
+
+            NetClient.Disconnected += (sender, e) => _log.Message(LogTypes.Warning, "Disconnected!");
+
+            NetClient.PacketReceived += (sender, e) =>
+            {
+                switch (e.ID)
+                {
+                    case 0xA8:
+                        NetClient.Socket.Send(new PSelectServer(0));
+                        break;
+                    case 0x8C:
+                        NetClient.Socket.EnableCompression();
+                        e.Seek(0);
+                        e.MoveToData();
+                        e.Skip(6);
+                        NetClient.Socket.Send(new PSecondLogin(settings.Username, settings.Password, e.ReadUInt()));
+                        break;
+                    case 0xA9:
+                        NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName, NetClient.Socket.ClientAddress));
+                        break;
+                    case 0xBD:
+                        NetClient.Socket.Send(new PClientVersion(clientVersionBuffer));
+                        break;
+                    case 0xBE:
+                        NetClient.Socket.Send(new PAssistVersion(clientVersionBuffer, e.ReadUInt()));
+                        break;
+                    case 0x55:
+                        NetClient.Socket.Send(new PClientViewRange(24));
+                        break;
+                }
+            };
+
+
+
+
+            NetClient.Socket.Connect(settings.IP, settings.Port);
+        }
+
+
+
+        protected override void OnInputUpdate(double totalMS, double frameMS)
+        {
+            
+        }
+
+        protected override void OnNetworkUpdate(double totalMS, double frameMS)
+        {
+            NetClient.Socket.Slice();
+        }
+
+        protected override void OnUIUpdate(double totalMS, double frameMS)
+        {
+            UIManager.Update(totalMS, frameMS);
+        }
+
+        protected override void OnUpdate(double totalMS, double frameMS)
+        {
+        }
+
+        protected override void OnFixedUpdate(double totalMS, double frameMS)
+        {
+
+        }
+
+        protected override void OnDraw(double frameMS)
+        {
+        }
+    }
+
+
+
     public class GameLoop : Microsoft.Xna.Framework.Game
     {
         private readonly GraphicsDeviceManager _graphics;
@@ -117,13 +275,8 @@ namespace ClassicUO
             ConfigurationResolver.Save(settings1, "settings.json");*/
 
             Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine(Environment.CurrentDirectory, "settings.json"));
-
             string[] parts = settings.ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-
-
             byte[] clientVersionBuffer = { byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3]) };
-
-
             FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
 
 
@@ -135,7 +288,7 @@ namespace ClassicUO
             Service.Get<Log>().Message(LogTypes.Trace, "UO files loaded in " + _stopwatch.ElapsedMilliseconds + " ms");
 
 
-            PacketHandlers.LoadLoginHandlers();
+            PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
 
 
@@ -153,10 +306,6 @@ namespace ClassicUO
 
             NetClient.PacketReceived += (sender, e) =>
             {
-                //Service.Get<Log>().Message(LogTypes.Trace, string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
-
-                //console.AppendLine(string.Format(">> Received \t\tID:   0x{0:X2}\t\t Length:   {1}", e.ID, e.Length));
-
                 switch (e.ID)
                 {
                     case 0xA8:

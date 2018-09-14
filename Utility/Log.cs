@@ -40,7 +40,7 @@ namespace ClassicUO.Utility
         private static readonly Dictionary<LogTypes, ConsoleColor> _logMsgColor = new Dictionary<LogTypes, ConsoleColor> { { LogTypes.None, ConsoleColor.White }, { LogTypes.Trace, ConsoleColor.Green }, { LogTypes.Info, ConsoleColor.Cyan }, { LogTypes.Warning, ConsoleColor.Yellow }, { LogTypes.Error, ConsoleColor.Red } };
 
 
-        public void Message(LogTypes type,  string msg)
+        public void Message(LogTypes type,  string msg, bool newline = true)
         {
             Console.Write(DateTime.Now.ToString("HH:mm:ss") + " | ");
 
@@ -49,7 +49,10 @@ namespace ClassicUO.Utility
             Console.Write(_logMsgFormat[type]);
             Console.ForegroundColor = prev;
 
-            Console.WriteLine(" | " + msg);
+            if (newline)
+                Console.WriteLine(" |  {0}", msg);
+            else
+                Console.Write(" |  {0}", msg);
         }
     }
 }

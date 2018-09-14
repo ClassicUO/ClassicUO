@@ -109,9 +109,6 @@ namespace ClassicUO.Game.Views
             if (objectList.IsMouseInObjectIsometric(_vertex))
                 objectList.Add(GameObject, _vertex[0].Position);
 
-            //if (Texture.Contains(x, y))
-            //    objectList.Add(GameObject, _vertex[0].Position);
-
             return true;
         }
 
@@ -122,14 +119,7 @@ namespace ClassicUO.Game.Views
             int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
 
             if (Texture.Contains(x, y))
-            {
                 list.Add(GameObject, vertex[0].Position);
-            }
-
-            //if (Art.Contains(GameObject.Graphic, x, y))
-            //{
-            //    list.Add(GameObject, vertex[0].Position);
-            //}
         }
 
 
