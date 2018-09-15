@@ -29,14 +29,21 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
 {
-    public static class UIManager
+    public class UIManager
     {
-        private static readonly List<Gump> _gumps = new List<Gump>();
-        private static GumpControl _mouseOverControl, _keyboardFocusControl;
-        private static readonly GumpControl[] _mouseDownControls = new GumpControl[5];
+        private readonly List<Gump> _gumps = new List<Gump>();
+        private GumpControl _mouseOverControl, _keyboardFocusControl;
+        private readonly GumpControl[] _mouseDownControls = new GumpControl[5];
+        private readonly CursorRenderer _cursor;
+
+       
+        public UIManager()
+        {
+            _cursor = new CursorRenderer();
+        }
 
 
-        public static GumpControl KeyboardFocusControl
+        public GumpControl KeyboardFocusControl
         {
             get
             {
@@ -60,7 +67,7 @@ namespace ClassicUO.Game.Gumps
 
 
 
-        public static GumpControl Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
+        public GumpControl Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
         {
             List<string> pieces = new List<string>();
             int index = 0;
@@ -195,7 +202,7 @@ namespace ClassicUO.Game.Gumps
             return gump;
         }
 
-        public static void Update(double totalMS, double frameMS)
+        public void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _gumps.Count; i++)
             {
@@ -207,9 +214,11 @@ namespace ClassicUO.Game.Gumps
 
             HandleKeyboardInput();
             HandleMouseInput();
+
+            _cursor.Update(totalMS, frameMS);
         }
 
-        public static void Render(SpriteBatchUI spriteBatch)
+        public void Draw(SpriteBatchUI spriteBatch)
         {
             for (int i = _gumps.Count - 1; i >= 0; i--)
             {
@@ -217,13 +226,15 @@ namespace ClassicUO.Game.Gumps
                 g.Draw(spriteBatch,
                     new Vector3(g.X, g.Y, 0));
             }
+
+            _cursor.Draw(spriteBatch);
         }
 
 
-        public static void Add(Gump gump) => _gumps.Add(gump);
+        public void Add(Gump gump) => _gumps.Add(gump);
 
 
-        private static void HandleKeyboardInput()
+        private void HandleKeyboardInput()
         {
             if (KeyboardFocusControl != null)
             {
@@ -253,7 +264,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        private static void HandleMouseInput()
+        private void HandleMouseInput()
         {
             GumpControl gump = null;
             var inputManager = Service.Get<InputManager>();
@@ -339,74 +350,9 @@ namespace ClassicUO.Game.Gumps
                         break;
                 }
             }
-
-
-
-            //if (gump != null)
-            //{
-            //    bool isdown = false;
-
-            //    while (_typeQueue.Count > 0)
-            //    {
-            //        var t = _typeQueue.Dequeue();
-
-
-            //        switch (t)
-            //        {
-            //            case InputMouseType.MouseWheel:
-            //                var evw = _mouseEventsWheelTriggered.Dequeue();
-            //                gump.OnMouseWheel(evw);
-            //                break;
-            //            case InputMouseType.MouseDown:
-            //            case InputMouseType.MouseUp:
-            //            case InputMouseType.MousePressed:
-            //                var ev = _mouseEventsTriggered[(int)t].Dequeue();
-            //                gump.OnMouseButton(ev);
-
-            //                isdown = ev.Button == MouseButtons.Left && ev.ButtonState == Microsoft.Xna.Framework.Input.ButtonState.Pressed;
-
-            //                if (isdown)
-            //                {
-            //                    _lastClickedPosition = new Point(ev.X, ev.Y);
-            //                }
-
-            //                if (ev.Button == MouseButtons.Right && t == InputMouseType.MouseUp && gump.RootParent.CanCloseWithRightClick)
-            //                {
-            //                    gump.RootParent.Dispose();
-            //                    _gumps.Remove(gump.RootParent);
-            //                }
-
-            //                break;
-            //            case InputMouseType.MouseMove:
-            //                ev = _mouseEventsTriggered[(int)t].Dequeue();
-
-
-
-            //                if (isdown && gump.CanMove)
-            //                {
-            //                    // TODO: add check to viewport
-
-            //                    gump.RootParent.X += ev.X - _lastClickedPosition.X;
-            //                    gump.RootParent.Y += ev.Y - _lastClickedPosition.Y;
-
-            //                    _lastClickedPosition = new Point(ev.X, ev.Y);
-            //                }
-            //                else
-            //                {
-            //                    gump.OnMouseMove(ev);
-            //                }
-
-            //                break;
-            //            default:
-            //                Service.Get<Log>().Message(LogTypes.Error, "WRONG MOUSE INPUT");
-            //                break;
-            //        }
-            //    }
-
-            //}
         }
 
-        private static GumpControl HitTest(GumpControl parent, Point position)
+        private GumpControl HitTest(GumpControl parent, Point position)
         {
             var p = parent?.HitTest(position);
             if (p != null && p.Length > 0)
@@ -414,7 +360,7 @@ namespace ClassicUO.Game.Gumps
             return null;
         }
 
-        private static void MakeTopMostGump(GumpControl control)
+        private void MakeTopMostGump(GumpControl control)
         {
             var c = control.RootParent;
 
@@ -429,11 +375,11 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        private static GumpControl _draggingControl;
-        private static bool _isDraggingControl;
-        private static int _dragOriginX, _dragOriginY;
+        private GumpControl _draggingControl;
+        private bool _isDraggingControl;
+        private int _dragOriginX, _dragOriginY;
 
-        public static void AttemptDragControl(GumpControl control, Point mousePosition, bool attemptAlwaysSuccessful = false)
+        public void AttemptDragControl(GumpControl control, Point mousePosition, bool attemptAlwaysSuccessful = false)
         {
             if (_isDraggingControl)
                 return;
@@ -483,7 +429,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        private static void DoDragControl(Point mousePosition)
+        private void DoDragControl(Point mousePosition)
         {
             if (_draggingControl == null)
                 return;
@@ -496,7 +442,7 @@ namespace ClassicUO.Game.Gumps
             _dragOriginY = mousePosition.Y;
         }
 
-        private static void EndDragControl(Point mousePosition)
+        private void EndDragControl(Point mousePosition)
         {
             if (_isDraggingControl)
                 DoDragControl(mousePosition);

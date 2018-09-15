@@ -40,16 +40,20 @@ namespace ClassicUO.Utility
         private static readonly Dictionary<LogTypes, ConsoleColor> _logMsgColor = new Dictionary<LogTypes, ConsoleColor> { { LogTypes.None, ConsoleColor.White }, { LogTypes.Trace, ConsoleColor.Green }, { LogTypes.Info, ConsoleColor.Cyan }, { LogTypes.Warning, ConsoleColor.Yellow }, { LogTypes.Error, ConsoleColor.Red } };
 
 
-        public void Message(LogTypes type,  string msg)
+        public void Message(LogTypes type, string msg, bool newline = true)
         {
-            Console.Write(DateTime.Now.ToString("HH:mm:ss") + " | ");
+            if (type != LogTypes.None)
+                Console.Write(DateTime.Now.ToString("HH:mm:ss") + " | ");
 
             ConsoleColor prev = Console.ForegroundColor;
             Console.ForegroundColor = _logMsgColor[type];
             Console.Write(_logMsgFormat[type]);
             Console.ForegroundColor = prev;
 
-            Console.WriteLine(" | " + msg);
+            if (newline)
+                Console.WriteLine(type == LogTypes.None ? string.Empty + msg : " |  " + msg);
+            else
+                Console.Write(type == LogTypes.None ? string.Empty + msg : " |  " + msg);
         }
     }
 }

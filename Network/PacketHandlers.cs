@@ -76,7 +76,9 @@ namespace ClassicUO.Network
         }
 
 
-        public static void LoadLoginHandlers()
+
+
+        public static void Load()
         {
             ToClient.Add(0x1B, EnterWorld);
             ToClient.Add(0x55, LoginComplete);
@@ -86,12 +88,7 @@ namespace ClassicUO.Network
             ToClient.Add(0xA8, ServerList);
             ToClient.Add(0xA9, CharacterList);
             ToClient.Add(0xBD, ClientVersion);
-            Load();
-        }
 
-
-        public static void Load()
-        {
             /*ToServer.Add(0x00, CreateCharacter);
             ToServer.Add(0x01, Disconnect);
             ToServer.Add(0x02, MoveRequest);
@@ -2052,7 +2049,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            UIManager.Create(sender, gumpID, (int)x, (int)y, layout, lines);
+            Service.Get<UIManager>().Create(sender, gumpID, (int)x, (int)y, layout, lines);
         }
 
         private static void UpdateMobileStatus(Packet p)

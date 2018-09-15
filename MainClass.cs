@@ -19,14 +19,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using ClassicUO.Input;
+using ClassicUO.Renderer;
+using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime;
 using System.Runtime.InteropServices;
-using ClassicUO.Renderer;
-using ClassicUO.Input;
-using ClassicUO.Utility;
 
 namespace ClassicUO
 {
@@ -39,18 +40,19 @@ namespace ClassicUO
         private static void Main(string[] args)
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                SetDllDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory+"/Graphic/FNA/", Environment.Is64BitProcess ? "x64" : "x86"));
+                SetDllDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory + "/Graphic/FNA/", Environment.Is64BitProcess ? "x64" : "x86"));
 
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
 
-           
-            
+
+
             using (GameLoop game = new GameLoop())
             {
                 //========================================================
                 //SERVICE STACK
                 Service.Register(new Log());
+                Service.Register(game);
                 Service.Register(new SpriteBatch3D(game));
                 Service.Register(new SpriteBatchUI(game));
                 Service.Register(new InputManager());
@@ -59,10 +61,9 @@ namespace ClassicUO
                 bool isHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
                 if (isHighDPI)
                     Debug.WriteLine("HiDPI Enabled");
-                
 
                 game.Run();
             }
-        }
+        }        
     }
 }

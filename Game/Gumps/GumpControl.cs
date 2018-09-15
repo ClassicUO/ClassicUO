@@ -23,14 +23,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Input;
+using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using IUpdateable = ClassicUO.Renderer.IUpdateable;
+using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Gumps
 {
-    public abstract class GumpControl : IDrawableUI, IUpdateable
+    public abstract class GumpControl : IDrawableUI, IUpdateable, IColorable
     {
         private readonly List<GumpControl> _children;
         private GumpControl _parent;

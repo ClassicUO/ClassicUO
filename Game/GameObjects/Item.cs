@@ -24,6 +24,7 @@ using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using System;
+using ClassicUO.Interfaces;
 
 namespace ClassicUO.Game.GameObjects
 {

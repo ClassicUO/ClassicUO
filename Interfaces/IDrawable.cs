@@ -20,15 +20,15 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Input;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Renderer
+namespace ClassicUO.Interfaces
 {
     public interface IDrawable<T> where T : class
     {
         bool AllowedToDraw { get; set; }
         SpriteTexture Texture { get; set; }
-        Vector3 HueVector { get; set; }
 
         bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<T> objectList);
     }
@@ -37,7 +37,6 @@ namespace ClassicUO.Renderer
     {
         bool AllowedToDraw { get; set; }
         SpriteTexture Texture { get; set; }
-        Vector3 HueVector { get; set; }
 
         bool Draw(SpriteBatchUI spriteBatch, Vector3 position);
     }

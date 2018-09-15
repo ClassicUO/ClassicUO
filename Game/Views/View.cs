@@ -23,13 +23,14 @@ using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
+using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
 {
-    public abstract class View : IDrawable<GameObject>
+    public abstract class View : IDrawable<GameObject>, IColorable
     {
         protected static float PI = (float)Math.PI;
 
@@ -226,7 +227,7 @@ namespace ClassicUO.Game.Views
             {
                 var v = GameObject.OverHeads[i].View;
                 v.Bounds = new Rectangle(v.Texture.Width / 2 - 22, offY + v.Texture.Height, v.Texture.Width, v.Texture.Height);
-                GameTextManager.AddView(v, position);
+                OverheadManager.AddView(v, position);
                 offY += v.Texture.Height;
             }
         }

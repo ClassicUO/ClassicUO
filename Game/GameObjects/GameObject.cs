@@ -24,11 +24,11 @@ using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using IUpdateable = ClassicUO.Renderer.IUpdateable;
+using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameObject : /*IDisposable,*/ IUpdateable
+    public abstract class GameObject :  IUpdateable
     {
         private Tile _tile;
         private View _view;
