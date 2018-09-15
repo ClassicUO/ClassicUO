@@ -61,28 +61,12 @@ namespace ClassicUO
         protected override void Initialize()
         {
             _log = Service.Get<Log>();
-
-            //uncomment it and fill it to save your first settings
-            /*Settings settings1 = new Settings()
-            {
-                Username = "",
-                Password = "",
-                LastCharacterName = "",
-                IP = "",
-                Port = 2599,
-                UltimaOnlineDirectory = "",
-                ClientVersion = "7.0.59.8"
-            };
-
-            ConfigurationResolver.Save(settings1, "settings.json");*/
-
-            Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine(Environment.CurrentDirectory, "settings.json"));
-           
-
+            SettingsModel currentProfile = SettingsController.Load("Default");
+            
             _log.Message(LogTypes.Trace, "Checking for Ultima Online installation...", false);
             try
             {
-                FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
+                FileManager.UoFolderPath = currentProfile.UltimaOnlineDirectory;
             }
             catch (FileNotFoundException)
             {
@@ -123,7 +107,7 @@ namespace ClassicUO
 
 
             // ##### START TEST #####
-            TEST(settings);
+            TEST(currentProfile);
             // #####  END TEST  #####
 
            
@@ -132,7 +116,7 @@ namespace ClassicUO
         }
 
 
-        private void TEST(Settings settings)
+        private void TEST(SettingsModel settings)
         {
             _sceneManager.ChangeScene(ScenesType.Game);
 
