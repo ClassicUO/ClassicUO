@@ -19,30 +19,40 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using ClassicUO.Game.Gumps;
+using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.Scenes
 {
-    public abstract class Scene : IDrawableUI, Interfaces.IUpdateable
+    public abstract class Scene : Interfaces.IUpdateable, IDisposable
     {
         protected Scene()
         {
             ChainActions = new List<Func<bool>>();
+
+
+            Game = Service.Get<GameLoop>();
+            Device = Game.GraphicsDevice;
+            UIManager = Service.Get<UIManager>();
+            InputManager = Service.Get<InputManager>();
         }
 
-        public List<Func<bool>> ChainActions { get; }
-
-        public bool AllowedToDraw { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public SpriteTexture Texture { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-       
+        public IReadOnlyList<Func<bool>> ChainActions { get; }
+        protected GraphicsDevice Device { get;  }
+        public bool IsDisposed { get; private set; }
+        protected GameLoop Game { get; }
+        protected UIManager UIManager { get; }
+        protected InputManager InputManager { get; }
 
         public virtual void Load()
         {
-
+            
         }
 
         public virtual void Unload()
@@ -51,14 +61,32 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        public void Update(double totalMS, double frameMS)
+
+        public virtual void FixedUpdate(double totalMS, double frameMS)
+        {
+
+        }
+
+        public virtual void Update(double totalMS, double frameMS)
         {
             
         }
 
-        public bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+
+
+        public virtual bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
         {
             return true;
         }
+
+
+        public virtual void Dispose()
+        {
+            if (IsDisposed)
+                return;
+            IsDisposed = true;
+            Unload();
+        }
+        
     }
 }

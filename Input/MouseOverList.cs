@@ -47,6 +47,8 @@ namespace ClassicUO.Input
             _items.Add(new MouseOverItem<T>(obj, p));
         }
 
+        public void Clear() => _items.Clear();
+
         public bool IsMouseInObjectIsometric(SpriteVertex[] v)
         {
             if (v.Length != 4)

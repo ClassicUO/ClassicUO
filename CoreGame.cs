@@ -7,7 +7,7 @@ using System.Text;
 
 namespace ClassicUO
 {
-    abstract class CoreGame : Microsoft.Xna.Framework.Game
+    public abstract class CoreGame : Microsoft.Xna.Framework.Game
     {
         private float _time;
         private FpsCounter _fpsCounter;

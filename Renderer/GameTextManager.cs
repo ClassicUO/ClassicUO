@@ -27,7 +27,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
 {
-    public static class GameTextManager
+    public static class OverheadManager
     {
         private static readonly List<ViewWithDrawInfo> _views = new List<ViewWithDrawInfo>();
 

@@ -227,7 +227,7 @@ namespace ClassicUO.Game.Views
             {
                 var v = GameObject.OverHeads[i].View;
                 v.Bounds = new Rectangle(v.Texture.Width / 2 - 22, offY + v.Texture.Height, v.Texture.Width, v.Texture.Height);
-                GameTextManager.AddView(v, position);
+                OverheadManager.AddView(v, position);
                 offY += v.Texture.Height;
             }
         }
