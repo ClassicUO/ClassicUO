@@ -2049,7 +2049,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            UIManager.Create(sender, gumpID, (int)x, (int)y, layout, lines);
+            Service.Get<UIManager>().Create(sender, gumpID, (int)x, (int)y, layout, lines);
         }
 
         private static void UpdateMobileStatus(Packet p)

@@ -19,12 +19,14 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.Scenes
 {
-    public abstract class Scene
+    public abstract class Scene : IDrawableUI, Renderer.IUpdateable
     {
         protected Scene()
         {
@@ -33,17 +35,31 @@ namespace ClassicUO.Game.Scenes
 
         public List<Func<bool>> ChainActions { get; }
 
+        public bool AllowedToDraw { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public SpriteTexture Texture { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Vector3 HueVector { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+       
 
         public virtual void Load()
         {
+
         }
 
         public virtual void Unload()
         {
+
         }
 
-        public void Update()
+
+        public void Update(double totalMS, double frameMS)
         {
+            
+        }
+
+        public bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+        {
+            return true;
         }
     }
 }

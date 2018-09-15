@@ -43,8 +43,9 @@ namespace ClassicUO
 {
     class GameLoop1 : CoreGame
     {
-        private CursorRenderer _cursor;
         private Log _log;
+        private UIManager _uiManager;
+        private InputManager _inputManager;
 
         public GameLoop1() : base()
         {
@@ -95,11 +96,11 @@ namespace ClassicUO
             textureHue0.SetData(Hues.CreateShaderColors());
             GraphicsDevice.Textures[1] = textureHue0;
 
-            _cursor = new CursorRenderer();
-
             _log.Message(LogTypes.Trace, $"     Done in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
 
+            Service.Register(_uiManager = new UIManager());
+            Service.Register(_inputManager = new InputManager());
 
             _log.Message(LogTypes.Trace, "Network calibration...", false);
             PacketHandlers.Load();
@@ -112,6 +113,8 @@ namespace ClassicUO
             // ##### START TEST #####
             TEST(settings);
             // #####  END TEST  #####
+
+           
 
             base.Initialize();
         }
@@ -170,7 +173,7 @@ namespace ClassicUO
 
         protected override void OnInputUpdate(double totalMS, double frameMS)
         {
-            
+            _inputManager.Update(totalMS, frameMS);
         }
 
         protected override void OnNetworkUpdate(double totalMS, double frameMS)
@@ -180,7 +183,7 @@ namespace ClassicUO
 
         protected override void OnUIUpdate(double totalMS, double frameMS)
         {
-            UIManager.Update(totalMS, frameMS);
+            _uiManager.Update(totalMS, frameMS);
         }
 
         protected override void OnUpdate(double totalMS, double frameMS)
@@ -194,6 +197,7 @@ namespace ClassicUO
 
         protected override void OnDraw(double frameMS)
         {
+
         }
     }
 
@@ -401,7 +405,7 @@ namespace ClassicUO
             {
                 var inputManager = Service.Get<InputManager>();
 
-                inputManager.Update(World.Ticks);
+                //inputManager.Update(World.Ticks);
 
                 foreach (var e in inputManager.GetMouseEvents())
                 {
@@ -440,7 +444,7 @@ namespace ClassicUO
 
             _gameCursor.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.Milliseconds);
 
-            UIManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.Milliseconds);
+            //UIManager.Update(gameTime.TotalGameTime.TotalMilliseconds, gameTime.ElapsedGameTime.Milliseconds);
 
 
             _picker.Position = _gameCursor.ScreenPosition;
@@ -906,8 +910,8 @@ namespace ClassicUO
             sbUI.Begin();
 
             sbUI.Draw2D(_targetRender, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight), Vector3.Zero);
-            GameTextManager.Render(sbUI, overList);
-            UIManager.Render(sbUI);
+            GameTextManager.Draw(sbUI, overList);
+            //UIManager.Render(sbUI);
 
             _picker.UpdateOverObjects(overList, overList.MousePosition);
 
