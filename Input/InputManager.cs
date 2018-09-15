@@ -8,7 +8,7 @@ using static SDL2.SDL;
 namespace ClassicUO.Input
 {
 
-    public class InputManager : IDisposable, ClassicUO.Renderer.IUpdateable
+    public class InputManager : IDisposable, ClassicUO.Interfaces.IUpdateable
     {
         const int MOUSE_DRAG_BEGIN_DISTANCE = 2;
         const int MOUSE_CLICK_MAX_DELTA = 2;

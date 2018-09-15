@@ -22,6 +22,7 @@
 using ClassicUO.Renderer;
 using ClassicUO.IO.Resources;
 using System.Collections.Generic;
+using ClassicUO.Interfaces;
 
 namespace ClassicUO.Game.GameObjects
 {

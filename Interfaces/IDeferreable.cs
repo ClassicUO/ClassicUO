@@ -19,10 +19,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-namespace ClassicUO.Renderer
+using ClassicUO.Game.GameObjects;
+
+namespace ClassicUO.Interfaces
 {
-    public interface IUpdateable
+    public interface IDeferreable
     {
-        void Update(double totalMS, double frameMS);
+        DeferredEntity DeferredObject { get; set; }
     }
 }

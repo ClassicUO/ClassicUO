@@ -21,6 +21,7 @@
 #endregion
 using System.Collections.Generic;
 using ClassicUO.Game;
+using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using Microsoft.Xna.Framework;
 
@@ -131,7 +132,6 @@ namespace ClassicUO.Renderer
             }
         }
         public bool AllowedToDraw { get; set; } = true;
-        public Vector3 HueVector { get; set; }
 
         public bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
             => Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
@@ -167,7 +167,7 @@ namespace ClassicUO.Renderer
                 dst.Height = src.Height;
             }
 
-            return spriteBatch.Draw2D(Texture, dst, src, HueVector);
+            return spriteBatch.Draw2D(Texture, dst, src, Vector3.Zero);
         }
 
         private Fonts.FontTexture CreateTexture()

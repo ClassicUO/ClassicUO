@@ -21,6 +21,7 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Views;
+using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using System.Collections.Generic;
