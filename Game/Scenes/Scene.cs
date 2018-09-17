@@ -50,6 +50,8 @@ namespace ClassicUO.Game.Scenes
         protected UIManager UIManager { get; }
         protected InputManager InputManager { get; }
 
+        public int RenderedObjectsCount { get; protected set; }
+
         public virtual void Load()
         {
             

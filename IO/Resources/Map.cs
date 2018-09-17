@@ -77,8 +77,8 @@ namespace ClassicUO.IO.Resources
             int staticblocksize = Marshal.SizeOf<StaticsBlock>();
 
 
-            if (MapsDefaultSize[0][0] / 8 * (MapsDefaultSize[0][1] / 8) != _filesMap[0].Length / mapblocksize)
-                MapsDefaultSize[0][0] = MapsDefaultSize[1][0] = 6144;
+            //if (MapsDefaultSize[0][0] / 8 * (MapsDefaultSize[0][1] / 8) != _filesMap[0].Length / mapblocksize)
+            //    MapsDefaultSize[0][0] = MapsDefaultSize[1][0] = 6144;
 
             for (int i = 0; i < MAPS_COUNT; i++)
             {
@@ -167,6 +167,60 @@ namespace ClassicUO.IO.Resources
                 }
             }
         }
+
+
+        public static unsafe RadarMapBlock? GetRadarMapBlock(int map, int blockX, int blockY)
+        {
+            var indexMap = GetIndex(map, blockX, blockY);
+            if (indexMap == null || indexMap.MapAddress == 0)
+                return null;
+
+            MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr)indexMap.MapAddress);
+            RadarMapBlock mb = new RadarMapBlock();
+            mb.Cells = new RadarMapcells[8, 8];
+
+            for (int x = 0; x < 8; x++)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    ref var cell = ref block.Cells[(y * 8) + x];
+                    ref var outcell = ref mb.Cells[x, y];
+                    outcell.Graphic = cell.TileID;
+                    outcell.Z = cell.Z;
+                    outcell.IsLand = true;
+                }
+            }
+
+            StaticsBlock* sb = (StaticsBlock*)indexMap.StaticAddress;
+
+            if (sb != null)
+            {
+                int count = (int)indexMap.StaticCount;
+
+                for (int c = 0; c < count; c++)
+                {
+                    if (sb->Color > 0 && sb->Color != 0xFFFF && !Game.Views.View.IsNoDrawable(sb->Color))
+                    {
+                        ref var outcell = ref mb.Cells[sb->X, sb->Y];
+                        if (outcell.Z <= sb->Z)
+                        {
+                            outcell.Graphic = sb->Color;
+                            outcell.Z = sb->Z;
+                            outcell.IsLand = false;
+                        }
+                    }
+                    sb++;
+                }
+            }
+
+            return mb;
+        }
+
+        public static IndexMap GetIndex(int map,int x, int y)
+        {
+            int block = x * MapBlocksSize[map][1] + y;
+            return BlockData[map][block];
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -188,19 +242,34 @@ namespace ClassicUO.IO.Resources
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public readonly struct MapCells
+    public struct MapCells
     {
-        public readonly ushort TileID;
-        public readonly sbyte Z;
+        public ushort TileID;
+        public sbyte Z;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe readonly struct MapBlock
+    public struct MapBlock
     {
         public readonly uint Header;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
-        public readonly MapCells[] Cells;
+        public MapCells[] Cells;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct RadarMapcells
+    {
+        public ushort Graphic;
+        public sbyte Z;
+        public bool IsLand;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct RadarMapBlock
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+        public RadarMapcells[,] Cells;
     }
 
     public class IndexMap

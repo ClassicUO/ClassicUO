@@ -19,7 +19,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using ClassicUO.IO;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -90,9 +89,10 @@ namespace ClassicUO.IO.Resources
                 }
         }
 
+
         public static uint[] CreateShaderColors()
         {
-            uint[] hues = new uint[32 * 2 * 3000];
+            uint[] hues = new uint[32 * 2 * HuesCount];
             int len = HuesRange.Length;
 
             for (int r = 0; r < len; r++)

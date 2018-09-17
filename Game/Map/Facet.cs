@@ -101,7 +101,6 @@ namespace ClassicUO.Game.Map
         public Tile GetTile(int x, int y)
             => GetTile((short)x, (short)y);
 
-
         public unsafe sbyte GetTileZ(short x, short y)
         {
             Tile tile = GetTile(x, y);
@@ -137,7 +136,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        private IndexMap GetIndex(int blockX, int blockY) => IO.Resources.Map.BlockData[Index][GetBlock(blockX, blockY)];
+        public IndexMap GetIndex(int blockX, int blockY) => IO.Resources.Map.BlockData[Index][GetBlock(blockX, blockY)];
 
         private int GetBlock(int blockX, int blockY) => blockX * IO.Resources.Map.MapBlocksSize[Index][1] + blockY;
 

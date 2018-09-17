@@ -101,7 +101,7 @@ namespace ClassicUO.Game.Views
 
                 Texture = frame; // TextureManager.GetOrCreateAnimTexture(frame);
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-                HueVector = RenderExtentions.GetHueVector(vl.Hue);
+                HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, false, false);
 
                 base.Draw(spriteBatch, position, objectList);
 
@@ -239,7 +239,7 @@ namespace ClassicUO.Game.Views
                                         }
                                     }
 
-                                    AddLayer(dir, graphic, hue, ref mobile, false, convertedItem);
+                                    AddLayer(dir, graphic, hue, ref mobile, false, convertedItem, IO.Resources.TileData.IsPartialHue((long)item.ItemData.Flags));
                                 }
                             }
                         }
@@ -248,11 +248,11 @@ namespace ClassicUO.Game.Views
             }
             else
             {
-                AddLayer(dir, GameObject.Graphic, GameObject.Hue, ref mobile);
+                AddLayer(dir, GameObject.Graphic, mobile.IsDead ? (Hue)0x0386 : GameObject.Hue, ref mobile);
             }
         }
 
-        private void AddLayer(byte dir, Graphic graphic, Hue hue, ref Mobile mobile, bool mounted = false, EquipConvData? convertedItem = null)
+        private void AddLayer(byte dir, Graphic graphic, Hue hue, ref Mobile mobile, bool mounted = false, EquipConvData? convertedItem = null, bool ispartial = false)
         {
             sbyte animIndex = GameObject.AnimIndex;
             byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic);
@@ -309,7 +309,8 @@ namespace ClassicUO.Game.Views
                 {
                     Hue = hue,
                     Frame = frame,
-                    Graphic = graphic
+                    Graphic = graphic,
+                    IsParital = ispartial
                 };
 
                 TextureWidth = frame.Width;
@@ -321,6 +322,7 @@ namespace ClassicUO.Game.Views
             public Hue Hue;
             public TextureAnimationFrame Frame;
             public Graphic Graphic;
+            public bool IsParital;
         }
     }
 }

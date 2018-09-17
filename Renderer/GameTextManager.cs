@@ -33,7 +33,7 @@ namespace ClassicUO.Renderer
 
         public static void AddView(View view, Vector3 position) => _views.Add(new ViewWithDrawInfo() { View = view, DrawPosition = position });
 
-        public static void Draw(SpriteBatchUI spriteBatch, MouseOverList<GameObject> objectList)
+        public static void Draw(SpriteBatch3D spriteBatch, MouseOverList<GameObject> objectList)
         {
             if (_views.Count > 0)
             {

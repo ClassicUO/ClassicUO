@@ -19,6 +19,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using ClassicUO.Renderer;
+
 namespace ClassicUO.Game.Scenes
 {
     public sealed class LoadScene : Scene
@@ -37,6 +39,22 @@ namespace ClassicUO.Game.Scenes
         private bool OnGameLoaded()
         {
             return true;
+        }
+
+
+        public override void FixedUpdate(double totalMS, double frameMS)
+        {
+            base.FixedUpdate(totalMS, frameMS);
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+        }
+
+        public override bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
+        {
+            return base.Draw(sb3D, sbUI);
         }
     }
 }

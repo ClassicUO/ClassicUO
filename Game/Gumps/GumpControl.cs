@@ -178,6 +178,17 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        private GumpControlInfo _controlInfo;
+        public GumpControlInfo ControlInfo
+        {
+            get
+            {
+                if (_controlInfo == null)
+                    _controlInfo = new GumpControlInfo(this);
+                return _controlInfo;
+            }
+        }
+
         public virtual void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
@@ -289,13 +300,10 @@ namespace ClassicUO.Game.Gumps
 
         public void Clear()
         {
-            _children.ForEach(s => s.Parent = null);
-            _children.Clear();
+            _children.ForEach(s => s.Dispose());
         }
 
         public T[] GetControls<T>() where T : GumpControl => Children.OfType<T>().ToArray();
-
-
 
 
 

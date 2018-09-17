@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Gumps.Controls.InGame;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
@@ -38,18 +39,17 @@ namespace ClassicUO.Game.Scenes
     {
         private RenderTarget2D _renderTarget;
         private DateTime _timePing;
-        private int _renderListCount;
         private readonly List<DeferredEntity> _deferredToRemove = new List<DeferredEntity>();
         private MousePicker<GameObject> _mousePicker;
         private MouseOverList<GameObject> _mouseOverList;      
 
-        private StringBuilder _sb = new StringBuilder();
-        private RenderedText _infoText;
         private bool _rightMousePressed;
+        private WorldViewportGump _viewPortGump;
 
-        private Hue _savedHue;
-        private GameObject _selectedObject;
+        private static Hue _savedHue;
+        private static GameObject _selectedObject;
 
+        
 
 
         public GameScene()
@@ -60,8 +60,9 @@ namespace ClassicUO.Game.Scenes
         public int Width { get; set; } = 800;
         public int Height { get; set; } = 600;
         public int Scale { get; set; } = 1;
+        public Texture2D ViewportTexture => _renderTarget;
 
-        private GameObject SelectedObject
+        public static GameObject SelectedObject
         {
             get => _selectedObject;
             set
@@ -83,11 +84,12 @@ namespace ClassicUO.Game.Scenes
                 {
                     _selectedObject = value;
                     _savedHue = _selectedObject.Hue;
-                    _selectedObject.Hue = 33;
+                    _selectedObject.Hue = 24;
                 }
             }
         }
 
+        private bool _ADDED;
 
         public override void Load()
         {
@@ -96,19 +98,13 @@ namespace ClassicUO.Game.Scenes
             _mousePicker = new MousePicker<GameObject>();
             _mouseOverList = new MouseOverList<GameObject>(_mousePicker);
 
-            _infoText = new RenderedText()
-            {
-                IsUnicode = true,
-                Font = 1,
-                FontStyle = FontStyle.BlackBorder,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-            };
-
+            UIManager.Add(_viewPortGump = new WorldViewportGump(this));
         }
 
 
         public override void Unload()
         {
+            _viewPortGump.Dispose();
             CleaningResources();
             base.Unload();
         }
@@ -122,12 +118,22 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
+           
+            //if (World.Map != null)
+            //{
+            //    if (!_ADDED)
+            //    {
+            //        UIManager.Add(new Gumps.Controls.InGame.MapGump());
+            //        _ADDED = true;
+            //    }
+            //}
+
             World.Ticks = (long)totalMS;
 
             if (_renderTarget == null || _renderTarget.Width != Width / Scale || _renderTarget.Height != Height / Scale)
             {
                 _renderTarget?.Dispose();
-                _renderTarget = new RenderTarget2D(Device, Width / Scale, Height / Scale, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                _renderTarget = new RenderTarget2D(Device, Width / Scale, Height / Scale, false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
             MouseHandler();
@@ -152,7 +158,7 @@ namespace ClassicUO.Game.Scenes
         public override bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
         {
             DrawWorld(sb3D);
-            DrawInterfaces(sb3D, sbUI);
+            //DrawInterfaces(sb3D, sbUI);
 
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
             SelectedObject = _mousePicker.MouseOverObject;
@@ -278,7 +284,7 @@ namespace ClassicUO.Game.Scenes
             sb3D.SetLightIntensity(World.Light.IsometricLevel);
             sb3D.SetLightDirection(World.Light.IsometricDirection);
 
-            _renderListCount = 0;
+            RenderedObjectsCount = 0;
 
             ClearDeferredEntities();
 
@@ -326,7 +332,7 @@ namespace ClassicUO.Game.Scenes
 
 
                             if (draw && view.Draw(sb3D, dp, _mouseOverList))
-                                _renderListCount++;
+                                RenderedObjectsCount++;
                         }
 
                         ClearDeferredEntities();
@@ -334,6 +340,8 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
+            // Draw in game overhead text messages
+            OverheadManager.Draw(sb3D, _mouseOverList);
 
             sb3D.GraphicsDevice.SetRenderTarget(_renderTarget);
             sb3D.GraphicsDevice.Clear(Color.Black);
@@ -341,43 +349,25 @@ namespace ClassicUO.Game.Scenes
             sb3D.GraphicsDevice.SetRenderTarget(null);
         }
 
-        private void DrawInterfaces(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
-        {
-            sbUI.GraphicsDevice.Clear(Color.Transparent);
-            sbUI.Begin();
+        //private void DrawInterfaces(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
+        //{
+        //    sbUI.GraphicsDevice.Clear(Color.Transparent);
+        //    sbUI.Begin();
 
-            // Draw world
-            sbUI.Draw2D(_renderTarget, new Rectangle(0, 0, Width, Height), Vector3.Zero);
+        //    // Draw world
+        //    sbUI.Draw2D(_renderTarget, new Rectangle(0, 0, Width, Height), Vector3.Zero);
 
-            // Draw in game overhead text messages
-            OverheadManager.Draw(sbUI, _mouseOverList);
+            
 
-            // draw UI
-            UIManager.Draw(sbUI);
+        //    // draw UI
+        //    UIManager.Draw(sbUI);
 
 
-            _sb.Clear();
+           
 
-            _sb.Append("FPS: ");
-            _sb.AppendLine(Game.CurrentFPS.ToString());
-            _sb.Append("Objects: ");
-            _sb.AppendLine(_renderListCount.ToString());
-            _sb.Append("Calls: ");
-            _sb.AppendLine(sb3D.Calls.ToString());
-            _sb.Append("Merged: ");
-            _sb.AppendLine(sb3D.Merged.ToString());
-            _sb.Append("Totals: ");
-            _sb.AppendLine(sb3D.TotalCalls.ToString());
-            _sb.Append("Pos: ");
-            _sb.AppendLine(World.Player == null ? "" : World.Player.Position.ToString());
-            _sb.Append("Selected: ");
-            _sb.AppendLine(SelectedObject == null ? "" : SelectedObject.ToString());
-
-            _infoText.Text = _sb.ToString();
-            _infoText.Draw(sbUI, new Vector3(/*Window.ClientBounds.Width - 150*/ 20, 20, 0));
-
-            sbUI.End();
-        }
+          
+        //    sbUI.End();
+        //}
 
         private void CleaningResources()
         {

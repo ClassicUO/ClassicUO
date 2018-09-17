@@ -84,7 +84,7 @@ namespace ClassicUO.Game.GameObjects
             get => _hue;
             set
             {
-                ushort fixedColor = (ushort)( value & 0x3FFF );
+                ushort fixedColor = (ushort)(value & 0x3FFF);
 
                 if (fixedColor > 0)
                 {
@@ -93,11 +93,11 @@ namespace ClassicUO.Game.GameObjects
                         fixedColor = 1;
                     }
 
-                    fixedColor |= (ushort)( value & 0xC000 );
+                    fixedColor |= (ushort)(value & 0xC000);
                 }
                 else
                 {
-                    fixedColor = (ushort)( value & 0x8000 );
+                    fixedColor = (ushort)(value & 0x8000);
                 }
 
                 if (_hue != fixedColor)
@@ -105,6 +105,7 @@ namespace ClassicUO.Game.GameObjects
                     _hue = fixedColor;
                     _delta |= Delta.Appearance;
                 }
+
             }
         }
 

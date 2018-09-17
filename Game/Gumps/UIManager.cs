@@ -21,6 +21,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
@@ -65,6 +66,20 @@ namespace ClassicUO.Game.Gumps
             set => _keyboardFocusControl = value;
         }
 
+        public bool IsModalControlOpen
+        {
+            get
+            {
+                foreach (var c in _gumps)
+                {
+                    if (c.ControlInfo.IsModal)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
 
 
         public GumpControl Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
@@ -204,6 +219,8 @@ namespace ClassicUO.Game.Gumps
 
         public void Update(double totalMS, double frameMS)
         {
+            SortControlsByInfo();
+
             for (int i = 0; i < _gumps.Count; i++)
             {
                 _gumps[i].Update(totalMS, frameMS);
@@ -220,6 +237,8 @@ namespace ClassicUO.Game.Gumps
 
         public void Draw(SpriteBatchUI spriteBatch)
         {
+            SortControlsByInfo();
+
             for (int i = _gumps.Count - 1; i >= 0; i--)
             {
                 var g = _gumps[i];
@@ -324,6 +343,13 @@ namespace ClassicUO.Game.Gumps
 
                             _mouseDownControls[(int)e.Button] = gump;
                         }
+                        else
+                        {
+                            if (IsModalControlOpen)
+                            {
+                                _gumps.ForEach(s => { if (s.ControlInfo.IsModal && s.ControlInfo.ModalClickOutsideAreaClosesThisControl) s.Dispose(); });
+                            }
+                        }
                         break;
                     case MouseEvent.Up:
 
@@ -371,6 +397,37 @@ namespace ClassicUO.Game.Gumps
                     var cm = _gumps[i];
                     _gumps.RemoveAt(i);
                     _gumps.Insert(0, cm);
+                }
+            }
+        }
+
+        private void SortControlsByInfo()
+        {
+            List<Gump> gumps = _gumps.Where(s => s.ControlInfo.Layer != UILayer.Default).ToList();
+
+            foreach (var c in gumps)
+            {
+                if (c.ControlInfo.Layer == UILayer.Under)
+                {
+                    for (int i = 0; i < _gumps.Count; i++)
+                    {
+                        if (_gumps[i] == c)
+                        {
+                            _gumps.RemoveAt(i);
+                            _gumps.Insert(_gumps.Count, c);
+                        }
+                    }
+                }
+                else if (c.ControlInfo.Layer == UILayer.Over)
+                {
+                    for (int i = 0; i < _gumps.Count; i++)
+                    {
+                        if (_gumps[i] == c)
+                        {
+                            _gumps.RemoveAt(i);
+                            _gumps.Insert(0, c);
+                        }
+                    }
                 }
             }
         }

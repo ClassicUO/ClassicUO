@@ -77,6 +77,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
+
         protected override void CloseWithRightClick()
         {
             if (!CanCloseWithRightClick)

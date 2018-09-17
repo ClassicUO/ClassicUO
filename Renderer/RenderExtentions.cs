@@ -34,9 +34,6 @@ namespace ClassicUO.Renderer
             if ((hue & 0x4000) != 0)
             {
                 transparent = true;
-
-
-                //return new Vector3( 16843263 & 0x0FFF , (noLighting ? 4 : 0) + (partial ? 2 : 1), transparent ? ALPHA : 0); 
             }
 
             if ((hue & 0x8000) != 0)

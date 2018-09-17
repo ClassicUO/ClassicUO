@@ -50,7 +50,11 @@ namespace ClassicUO.Renderer
         private const int INITIAL_TEXTURE_COUNT = 0x800;
         private const float MAX_ACCURATE_SINGLE_FLOAT = 65536;
 
-        private readonly DepthStencilState _dss = new DepthStencilState { DepthBufferEnable = true, DepthBufferWriteEnable = true };
+        private readonly DepthStencilState _dss = new DepthStencilState
+        {
+            DepthBufferEnable = true,
+            DepthBufferWriteEnable = true,  
+        };
         private readonly Microsoft.Xna.Framework.Game _game;
         private readonly short[] _indices = new short[MAX_VERTICES_PER_DRAW * 6];
         private readonly short[] _sortedIndices = new short[MAX_VERTICES_PER_DRAW * 6];
@@ -229,9 +233,9 @@ namespace ClassicUO.Renderer
             _vertexBuffer.SetData(_vertices, 0, _vertexCount);
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
-            SortIndicesAndMerge();
+            //SortIndicesAndMerge();
 
-            _indexBuffer.SetData(_sortedIndices, 0, _indicesCount);
+            _indexBuffer.SetData(_indices, 0, _indicesCount);
             GraphicsDevice.Indices = _indexBuffer;
 
             _indicesCount = 0;
@@ -262,8 +266,7 @@ namespace ClassicUO.Renderer
 
                 sortedIndexCount += drawCallIndexCount;
                 if (currentDrawCall.TryMerge(ref _drawCalls[newDrawCallCount - 1]))
-                {
-                    
+                {                  
                     Merged++;
                     continue;
                 }
@@ -278,13 +281,15 @@ namespace ClassicUO.Renderer
         private void ApplyStates(bool light)
         {
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            //GraphicsDevice.BlendState.ColorBlendFunction = BlendFunction.Add;
+            //GraphicsDevice.BlendState.AlphaSourceBlend = Blend.SourceColor;
+
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
+            GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
-            //GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
             //GraphicsDevice.SamplerStates[3] = SamplerState.PointClamp;
-
             //GraphicsDevice.SamplerStates[4] = SamplerState.PointWrap;
 
             _drawLightingEffect.SetValue(light);

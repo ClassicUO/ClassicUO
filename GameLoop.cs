@@ -52,6 +52,9 @@ namespace ClassicUO
         private SpriteBatch3D _sb3D;
         private SpriteBatchUI _sbUI;
 
+        private StringBuilder _sb = new StringBuilder();
+        private RenderedText _infoText;
+
 
         public GameLoop() : base()
         {
@@ -98,9 +101,14 @@ namespace ClassicUO
             Stopwatch stopwatch = Stopwatch.StartNew();
             FileManager.LoadFiles();
 
-            Texture2D textureHue0 = new Texture2D(GraphicsDevice, 32, 3000);
-            textureHue0.SetData(Hues.CreateShaderColors());
-            GraphicsDevice.Textures[1] = textureHue0;
+            var hues = Hues.CreateShaderColors();
+            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, 3000);
+            texture0.SetData(hues, 0, 32 * 3000);
+            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, 3000);
+            texture1.SetData(hues, 32 * 3000, 32 * 3000);
+
+            GraphicsDevice.Textures[1] = texture0;
+            GraphicsDevice.Textures[2] = texture1;
 
             _log.Message(LogTypes.None, $"     Done in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
@@ -120,7 +128,13 @@ namespace ClassicUO
 
             _sceneManager.ChangeScene(ScenesType.Loading);
 
-
+            _infoText = new RenderedText()
+            {
+                IsUnicode = true,
+                Font = 1,
+                FontStyle = FontStyle.BlackBorder,
+                Align = TEXT_ALIGN_TYPE.TS_LEFT,
+            };
 
             // ##### START TEST #####
             TEST(settings);
@@ -217,7 +231,36 @@ namespace ClassicUO
         {
             if (World.InGame)
                 _sceneManager.CurrentScene.Draw(_sb3D, _sbUI);
+
+            _sbUI.GraphicsDevice.Clear(Color.Transparent);
+            _sbUI.Begin();
+
+            _uiManager.Draw(_sbUI);
+
+
+            _sb.Clear();
+
+            _sb.Append("FPS: ");
+            _sb.AppendLine(CurrentFPS.ToString());
+            _sb.Append("Objects: ");
+            _sb.AppendLine(_sceneManager.CurrentScene.RenderedObjectsCount.ToString());
+            _sb.Append("Calls: ");
+            _sb.AppendLine(_sb3D.Calls.ToString());
+            _sb.Append("Merged: ");
+            _sb.AppendLine(_sb3D.Merged.ToString());
+            _sb.Append("Totals: ");
+            _sb.AppendLine(_sb3D.TotalCalls.ToString());
+            _sb.Append("Pos: ");
+            _sb.AppendLine(World.Player == null ? "" : World.Player.Position.ToString());
+            _sb.Append("Selected: ");
+            _sb.AppendLine(GameScene.SelectedObject == null ? "" : GameScene.SelectedObject.ToString());
+
+            _infoText.Text = _sb.ToString();
+            _infoText.Draw(_sbUI, new Vector3(/*Window.ClientBounds.Width - 150*/ 20, 20, 0));
+
+            _sbUI.End();
         }
+    }
     }
 
 
@@ -1124,4 +1167,4 @@ namespace ClassicUO
     //    }
 
     //}
-}
+//}

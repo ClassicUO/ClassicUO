@@ -114,10 +114,8 @@ namespace ClassicUO.Game.Map
         private IndexMap GetIndex(int map) => GetIndex(map, X, Y);
 
         private IndexMap GetIndex(int map, int x, int y)
-        {
-            int block = x * IO.Resources.Map.MapBlocksSize[map][1] + y;
-            return IO.Resources.Map.BlockData[map][block];
-        }
+            => IO.Resources.Map.GetIndex(map, x, y);
+        
 
         public void Unload()
         {
