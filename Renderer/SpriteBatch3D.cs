@@ -201,11 +201,11 @@ namespace ClassicUO.Renderer
 
         private void Enqueue(ref DrawCallInfo call)
         {
-            if (_enqueuedDrawCalls > 0 && call.TryMerge(ref _drawCalls[_enqueuedDrawCalls - 1]))
-            {
-                Merged++;
-                return;
-            }
+            //if (_enqueuedDrawCalls > 0 && call.TryMerge(ref _drawCalls[_enqueuedDrawCalls - 1]))
+            //{
+            //    Merged++;
+            //    return;
+            //}
             _drawCalls[_enqueuedDrawCalls++] = call;
         }
 

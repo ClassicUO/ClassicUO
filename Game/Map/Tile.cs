@@ -96,57 +96,59 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            //short priorityZ = obj.Position.Z;
+#if ORIONSORT
+
+            short priorityZ = obj.Position.Z;
 
 
-            //switch (obj)
-            //{
-            //    case Tile tile:
-            //        {
-            //            if (tile.IsStretched)
-            //            {
-            //                //tile.View;
-            //                priorityZ = (short)(tile.AverageZ - 1);
-            //            }
-            //            else
-            //                priorityZ--;
-            //        }
-            //        break;
-            //    case Mobile mobile:
-            //        priorityZ++;
-            //        break;
-            //    case Item item:
-            //        if (item.IsCorpse)
-            //            priorityZ++;
-            //        else
-            //            goto default;
-            //        break;
-            //    case GameEffect effect:
-            //        priorityZ += 2;
-            //        break;
-            //    case DeferredEntity deferred:
-            //        if (deferred.Entity is Mobile)
-            //            priorityZ++;
-            //        else if (deferred.Entity is GameEffect)
-            //            priorityZ += 2;
-            //        break;
-            //    default:
-            //        {
-            //            IDynamicItem dyn = (IDynamicItem)obj;
+            switch (obj)
+            {
+                case Tile tile:
+                    {
+                        if (tile.IsStretched)
+                        {
+                            //tile.View;
+                            priorityZ = (short)(((TileView)tile.View).SortZ - 1);
+                        }
+                        else
+                            priorityZ--;
+                    }
+                    break;
+                case Mobile mobile:
+                    priorityZ++;
+                    break;
+                case Item item:
+                    if (item.IsCorpse)
+                        priorityZ++;
+                    else
+                        goto default;
+                    break;
+                case GameEffect effect:
+                    priorityZ += 2;
+                    break;
+                //case DeferredEntity deferred:
+                //    if (deferred.Entity is Mobile)
+                //        priorityZ++;
+                //    else if (deferred.Entity is GameEffect)
+                //        priorityZ += 2;
+                //    break;
+                default:
+                    {
+                        IDynamicItem dyn = (IDynamicItem)obj;
 
-            //            if (IO.Resources.TileData.IsBackground((long)dyn.ItemData.Flags))
-            //                priorityZ--;
+                        if (IO.Resources.TileData.IsBackground((long)dyn.ItemData.Flags))
+                            priorityZ--;
 
-            //            if (dyn.ItemData.Height > 0)
-            //                priorityZ++;
-            //        }
-            //        break;
-            //}
-
-
-            //obj.PriorityZ = priorityZ;
+                        if (dyn.ItemData.Height > 0)
+                            priorityZ++;
+                    }
+                    break;
+            }
 
 
+            obj.PriorityZ = priorityZ;
+
+#endif
 
             //GameObject found = null;
             //var objFirst = _objectsOnTile.Count > 0 ? _objectsOnTile[0] : null;

@@ -59,6 +59,7 @@ namespace ClassicUO.Game.Views
 
         protected bool PreDraw(Vector3 position)
         {
+#if !ORIONSORT
             if (GameObject is IDeferreable deferreable)
             {
                 Tile tile;
@@ -127,7 +128,7 @@ namespace ClassicUO.Game.Views
                     return true;
                 }
             }
-
+#endif
             return false;
         }
 
