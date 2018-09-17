@@ -77,7 +77,7 @@ namespace ClassicUO
                 ClientVersion = "7.0.59.8"
             };
 
-            ConfigurationResolver.Save(settings1, "settings.json");*/
+            ConfigurationResolver.Save(settings1, "settings.json");*/ 
 
             Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine(Environment.CurrentDirectory, "settings.json"));
            
