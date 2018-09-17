@@ -61,7 +61,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	float alpha = 1 - IN.Hue.z;
 
 	// ethereal mount fix
-	if (IN.Hue.x == 1)
+	if (IN.Hue.x == 1 && IN.Hue.z > 0.0f)
 		alpha = 1 - color.r * 1.5;
 
 
