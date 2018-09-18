@@ -17,6 +17,9 @@ namespace ClassicUO.Game
             => Socket.Send(new PClickRequest(serial));
 
         public static void Say(string message, ushort hue = 0x17, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal)
-            => Chat.Say(message, hue, type, font);
+            => Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
+
+        public static void SayParty(string message)
+            => Socket.Send(new PPartyMessage(message, World.Player));
     }
 }

@@ -73,8 +73,8 @@ namespace ClassicUO.Game
 
         //public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
         //public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PUnicodeSpeechRequest(entity.Serial, entity.Graphic, type, hue, font, _language, entity.Name ?? string.Empty, message).SendToClient();
-        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => NetClient.Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
-        public static void SayParty(string message) => NetClient.Socket.Send(new PPartyMessage(message, World.Player));
+        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
+        public static void SayParty(string message) => GameActions.SayParty(message);
 
 
         public static event EventHandler<UOMessageEventArgs> Message;
