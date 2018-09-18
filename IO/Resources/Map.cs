@@ -67,18 +67,14 @@ namespace ClassicUO.IO.Resources
             }
 
 
-            /*if (FileManager.ClientVersion < ClientVersions.CV_4011D)
-            {
-                _mapsDefaultSize[0][0] = _mapsDefaultSize[1][0] = 6144;
-            }*/
-
             int mapblocksize = Marshal.SizeOf<MapBlock>();
             int staticidxblocksize = Marshal.SizeOf<StaidxBlock>();
             int staticblocksize = Marshal.SizeOf<StaticsBlock>();
 
 
-            //if (MapsDefaultSize[0][0] / 8 * (MapsDefaultSize[0][1] / 8) != _filesMap[0].Length / mapblocksize)
-            //    MapsDefaultSize[0][0] = MapsDefaultSize[1][0] = 6144;
+            if (_filesMap[0].Length / mapblocksize == 393216 || FileManager.ClientVersion < ClientVersions.CV_4011D)
+                MapsDefaultSize[0][0] = MapsDefaultSize[1][0] = 6144;
+
 
             for (int i = 0; i < MAPS_COUNT; i++)
             {

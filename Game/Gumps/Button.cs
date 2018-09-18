@@ -60,7 +60,9 @@ namespace ClassicUO.Game.Gumps
 
             _gText = new RenderedText()
             {
-                MaxWidth = 100,
+                Font = 1,
+                FontStyle = FontStyle.BlackBorder,
+                IsUnicode = true
             };
 
             CanMove = false;
@@ -111,7 +113,7 @@ namespace ClassicUO.Game.Gumps
 
             if (Text != string.Empty)
             {
-                _gText.Draw(spriteBatch, position);
+                _gText.Draw(spriteBatch, new Vector3(position.X + (Width - _gText.Width) / 2, position.Y + (Height - _gText.Height) / 2, 0 ));
             }
 
             return base.Draw(spriteBatch, position);

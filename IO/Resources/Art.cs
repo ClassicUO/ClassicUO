@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Renderer;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -32,7 +33,6 @@ namespace ClassicUO.IO.Resources
 
         private static SpriteTexture[] _artCache;
         private static readonly List<int> _usedIndex = new List<int>();
-        //private static readonly PixelPicking _picker = new PixelPicking();
 
         public static void Load()
         {
@@ -48,18 +48,49 @@ namespace ClassicUO.IO.Resources
                     _file = new UOFileMul(filepath, idxpath, ART_COUNT);
             }
 
+
             _artCache = new SpriteTexture[ART_COUNT];
+
+            string pathdef = Path.Combine(FileManager.UoFolderPath, "art.def");
+            if (!File.Exists(pathdef))
+                return;
+
+            using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    line = line.Trim();
+                    if (line.Length <= 0 || line[0] == '#')
+                        continue;
+                    string[] defs = line.Split(new[] { '\t', ' ', '#' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (defs.Length < 2)
+                        continue;
+
+                    int index = int.Parse(defs[0]);
+
+                    if (index < 0 || index >= ART_COUNT)
+                        continue;
+
+                    int first = defs[1].IndexOf("{");
+                    int last = defs[1].IndexOf("}");
+
+                    string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (string s in newdef)
+                    {
+                        int checkindex = int.Parse(s);
+
+                        if (checkindex < 0 || checkindex >= ART_COUNT)
+                            continue;
+
+                        _file.Entries[index] = _file.Entries[checkindex];
+                    }                   
+                }
+            }
+
         }
 
-        //public static bool Contains(ushort g, int x, int y, int extra = 0)
-        //{
-        //    return _picker.Get(g, x, y, extra);
-        //}
-
-        //public static void Clear(ushort g)
-        //{
-        //    _picker.Remove(g);
-        //}
 
         public static unsafe SpriteTexture GetStaticTexture(ushort g)
         {
@@ -69,15 +100,9 @@ namespace ClassicUO.IO.Resources
                 var pixels = ReadStaticArt(g, out short w, out short h);
 
                 texture = new SpriteTexture(w, h, false);
-
                 texture.SetDataForHitBox(pixels);
-
-                //fixed (ushort* ptr = pixels)
-                //    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
-
                 _usedIndex.Add(g);
 
-                //_picker.Set(g, w, h, pixels);
             }
             return texture;
         }
@@ -90,13 +115,7 @@ namespace ClassicUO.IO.Resources
                 var pixels = ReadLandArt(g);
                 texture = new SpriteTexture(44, 44, false);
                 texture.SetDataForHitBox(pixels);
-
-                //fixed (ushort* ptr = pixels)
-                //    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
-
                 _usedIndex.Add(g);
-
-                //_picker.Set(g, 44, 44, pixels);
             }
             return texture;
         }
@@ -111,7 +130,6 @@ namespace ClassicUO.IO.Resources
                     _usedIndex.RemoveAt(i--);
                 else if (Game.World.Ticks - texture.Ticks >= 3000)
                 {
-                    //Clear((ushort)_usedIndex[i]);
                     texture.Dispose();
                     texture = null;
 
