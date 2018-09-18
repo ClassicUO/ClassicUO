@@ -81,7 +81,14 @@ namespace ClassicUO.Game
 
         public static void OnMessage(Entity entity, UOMessageEventArgs args)
         {
-            entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
+            if (entity != null)
+                entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
+            else
+            {
+                Service.Get<Log>().Message(LogTypes.Trace, "On System Message: " + args.Text);
+                // ADD TO SYSTEM MESSAGE
+            }
+
             Message.Raise(args, entity ?? _system);
         }
 

@@ -40,9 +40,11 @@ namespace ClassicUO.Game.Gumps
        
         public UIManager()
         {
-            _cursor = new CursorRenderer();
+            _cursor = new CursorRenderer(this);
         }
 
+
+        public GumpControl MouseOverControl => _mouseOverControl;
 
         public GumpControl KeyboardFocusControl
         {
