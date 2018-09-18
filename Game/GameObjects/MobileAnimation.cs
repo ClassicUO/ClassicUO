@@ -68,6 +68,11 @@ namespace ClassicUO.Game.GameObjects
 
         public static byte GetGroupForAnimation(Mobile mobile, ushort checkGraphic = 0)
         {
+            if (mobile != World.Player)
+            {
+
+            }
+
             Graphic graphic = checkGraphic;
             if (graphic == 0)
             {
@@ -644,8 +649,7 @@ namespace ClassicUO.Game.GameObjects
 
                 return 17;
             }
-
-            if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
+            else if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
             {
                 if (mobile.Equipment[(int)Layer.Mount] != null)
                 {
@@ -659,15 +663,16 @@ namespace ClassicUO.Game.GameObjects
 
                 return 5;
             }
-
-            switch (mode % 3)
+            else
             {
-                case 1:
-                    return 10;
-                case 2:
-                    return 3;
+                switch (mode % 3)
+                {
+                    case 1:
+                        return 10;
+                    case 2:
+                        return 3;
+                }
             }
-
             return 9;
         }
 

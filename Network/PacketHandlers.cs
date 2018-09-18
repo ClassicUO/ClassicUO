@@ -869,8 +869,13 @@ namespace ClassicUO.Network
             item.Amount = 1;
 
             Mobile mobile = World.Mobiles.Get(item.Container);
-            mobile.Equipment[(int)item.Layer] = item;
-            mobile?.Items.Add(item);
+
+            if (mobile != null) // could it render bad mobiles?
+            {
+                mobile.Equipment[(int)item.Layer] = item;
+                mobile.Items.Add(item);
+            }
+
             item.ProcessDelta();
             if (World.Items.Add(item))
             {
