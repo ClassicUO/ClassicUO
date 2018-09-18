@@ -239,7 +239,7 @@ namespace ClassicUO
 
 
             _sb.Clear();
-
+            _sb.AppendLine("");
             _sb.Append("FPS: ");
             _sb.AppendLine(CurrentFPS.ToString());
             _sb.Append("Objects: ");

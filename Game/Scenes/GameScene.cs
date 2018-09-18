@@ -32,6 +32,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using ClassicUO.Game.Gumps.UIGumps;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -45,6 +46,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool _rightMousePressed;
         private WorldViewportGump _viewPortGump;
+        private TopBarGump _topBarGump;
 
         private static Hue _savedHue;
         private static GameObject _selectedObject;
@@ -99,11 +101,13 @@ namespace ClassicUO.Game.Scenes
             _mouseOverList = new MouseOverList<GameObject>(_mousePicker);
 
             UIManager.Add(_viewPortGump = new WorldViewportGump(this));
+            UIManager.Add(_topBarGump = new TopBarGump(this));
         }
 
 
         public override void Unload()
         {
+            _topBarGump.Dispose();
             _viewPortGump.Dispose();
             CleaningResources();
             base.Unload();

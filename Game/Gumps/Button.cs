@@ -19,9 +19,14 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System.Runtime.InteropServices;
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Gumps
 {
@@ -37,10 +42,14 @@ namespace ClassicUO.Game.Gumps
         private const int NORMAL = 0;
         private const int PRESSED = 1;
         private const int OVER = 2;
+        
 
         private readonly SpriteTexture[] _textures = new SpriteTexture[3];
         private int _curentState = NORMAL;
         private RenderedText _gText;
+        private bool _centerFont;
+        private int _buttonParam;
+        
 
 
         public Button(int buttonID, ushort normal, ushort pressed, ushort over = 0) : base()
@@ -60,13 +69,17 @@ namespace ClassicUO.Game.Gumps
 
             _gText = new RenderedText()
             {
-                MaxWidth = 100,
+                IsUnicode = true,
+                
+
             };
 
             CanMove = false;
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
+
+            
         }
 
         public Button(string[] parts) :
@@ -79,6 +92,8 @@ namespace ClassicUO.Game.Gumps
             ushort param = ushort.Parse(parts[6]);
         }
 
+        
+
         public int ButtonID { get; }
         public ButtonAction ButtonAction { get; private set; }
 
@@ -87,6 +102,53 @@ namespace ClassicUO.Game.Gumps
         {
             get => _gText.Text;
             set => _gText.Text = value;
+        }
+
+        public int Font
+        {
+            get => _gText.Font;
+            set => _gText.Font = (byte)value;
+        }
+
+        public int FontHue
+        {
+            get => _gText.Hue;
+            set => _gText.Hue = (byte)value;
+        }
+
+        public bool IsUnicode
+        {
+            get => _gText.IsUnicode;
+            set => _gText.IsUnicode = (bool)value;
+        }
+
+
+
+        public bool FontCenter
+        {
+            get { return FontCenter; }
+            set
+            {
+                if (value == true)
+                {
+                    _centerFont = true;
+
+
+                }
+
+            }
+        }
+
+        public ButtonAction buttonAction
+        {
+            get => ButtonAction;
+            set => ButtonAction = (ButtonAction)value;
+        }
+
+        public int ButtonParameter
+        {
+            get => _buttonParam;
+            set => _buttonParam = (int)value;
         }
 
 
@@ -107,11 +169,31 @@ namespace ClassicUO.Game.Gumps
             var texture = _curentState == PRESSED ? _textures[PRESSED] :
                 _textures[OVER] != null && MouseIsOver ? _textures[OVER] : _textures[NORMAL];
 
-            spriteBatch.Draw2D(texture, new Rectangle((int)position.X, (int)position.Y + ( _curentState == PRESSED ? 1 : 0 ), Width, Height), Vector3.Zero);
+            spriteBatch.Draw2D(texture, new Rectangle((int)position.X, (int)position.Y + (_curentState == PRESSED ? 1 : 0), Width, Height), Vector3.Zero);
 
             if (Text != string.Empty)
             {
-                _gText.Draw(spriteBatch, position);
+                if (_centerFont)
+                {
+                    if (MouseIsOver)
+                    {
+                        //var _blackTexture = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
+                        //_blackTexture.SetData(new[] { Color.Black });
+                        //spriteBatch.Draw2D(_blackTexture, new Rectangle((int)position.X + (this.Width - _gText.Width) / 2, (int)position.Y + (this.Height - _gText.Height) / 2 , 100, 50), RenderExtentions.GetHueVector(0, false, true, false));
+
+                        
+                    }
+                    int yoffset = _curentState == PRESSED ? 1 : 0;
+                    _gText.Draw(spriteBatch, new Vector3(position.X + (this.Width - _gText.Width) / 2 , position.Y + yoffset + (this.Height - _gText.Height) / 2, position.Z));
+                   
+                }
+                else
+                {
+                    _gText.Draw(spriteBatch, position);
+                }
+
+
+
             }
 
             return base.Draw(spriteBatch, position);
@@ -124,6 +206,8 @@ namespace ClassicUO.Game.Gumps
                 _curentState = PRESSED;
         }
 
+        
+
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             if (button == Input.MouseButton.Left)
@@ -131,6 +215,7 @@ namespace ClassicUO.Game.Gumps
                 switch (ButtonAction)
                 {
                     case ButtonAction.SwitchPage:
+                        ChangePage(ButtonParameter);
                         break;
                     case ButtonAction.Activate:
                         OnButtonClick(ButtonID);
@@ -145,6 +230,7 @@ namespace ClassicUO.Game.Gumps
                 _curentState = NORMAL;
         }
 
+        
 
 
         public override void Dispose()

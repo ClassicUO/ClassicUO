@@ -21,9 +21,9 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             AcceptMouseInput = true;
 
             Width = 400;
-            Height = 250;
+            Height = 400;
 
-            Load2();
+            
 
 
             
@@ -126,7 +126,7 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             _mapTexture.SetData(buffer);
         }
 
-        private void Load2()
+        public Texture2D Load2()
         {
 
             int lastX = World.Player.Position.X;
@@ -220,6 +220,8 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 
             _mapTexture = new SpriteTexture(Width, Height, false);
             _mapTexture.SetData(data);
+
+            return _mapTexture;
         }
 
         private void CreatePixels(ushort[] data, int color, int x, int y, int w, int h, Point[] table, int count)
@@ -243,7 +245,8 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 
                 int block = (gy * w) + gx;
 
-                //if (data[block] == 0x8421)
+               // if (data[block] == 0x8421)
+                  //if (data[block] == (ushort)Hues.RgbaToArgb(0x8421))
                     data[block] = (ushort)color;
             }
         }

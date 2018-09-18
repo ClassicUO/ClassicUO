@@ -252,6 +252,11 @@ namespace ClassicUO.Game.Gumps
 
         public void Add(Gump gump) => _gumps.Add(gump);
 
+        public List<Gump> getControlls()
+        {
+            return _gumps;
+        }
+
 
         private void HandleKeyboardInput()
         {
