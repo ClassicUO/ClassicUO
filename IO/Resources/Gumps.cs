@@ -84,7 +84,8 @@ namespace ClassicUO.IO.Resources
             {
                 var pixels = GetGump(g, out int w, out int h);
                 texture = new SpriteTexture(w, h, false);
-                texture.SetDataForHitBox(pixels);
+                texture.SetData(pixels);
+                //texture.SetDataForHitBox(pixels);
                 //fixed (ushort* ptr = pixels)
                 //    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
 

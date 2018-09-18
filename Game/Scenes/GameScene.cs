@@ -104,6 +104,7 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            Service.Unregister<GameScene>();
             _viewPortGump.Dispose();
             CleaningResources();
             base.Unload();
@@ -461,8 +462,23 @@ namespace ClassicUO.Game.Scenes
         {      
             foreach (var e in InputManager.GetMouseEvents())
             {
-                if (e.Button == MouseButton.Right)
-                    _rightMousePressed = e.EventType == MouseEvent.Down;
+                switch (e.Button)
+                {
+                    case MouseButton.Right:
+                        _rightMousePressed = e.EventType == MouseEvent.Down;
+                        break;
+                    case MouseButton.Left:
+                        if (UIManager.IsOnWorld && _mousePicker.MouseOverObject is Entity entity)
+                        {
+                            if (e.EventType == MouseEvent.DoubleClick)
+                                GameActions.DoubleClick(entity);
+                            else if (e.EventType == MouseEvent.Click)
+                                GameActions.SingleClick(entity);
+                        }
+                       
+                        break;
+                }
+                    
             }
         }
 

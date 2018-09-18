@@ -188,7 +188,6 @@ namespace ClassicUO.Renderer
 
         public SpriteTexture Texture { get; private set; }
         public Point ScreenPosition => _inputManager.MousePosition;
-        public bool IsOverWorld => _uiManager.MouseOverControl != null && _uiManager.MouseOverControl is Game.Gumps.Controls.WorldViewport;
 
 
         public void Update(double totalMS, double frameMS)
@@ -244,7 +243,7 @@ namespace ClassicUO.Renderer
             int war = World.InGame && World.Player.InWarMode ? 1 : 0;
             ushort result = _cursorData[war, 9];
 
-            if (!IsOverWorld)
+            if (!_uiManager.IsOnWorld)
                 return result;
 
             int windowCenterX = 400;

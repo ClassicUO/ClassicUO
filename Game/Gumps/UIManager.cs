@@ -83,6 +83,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        public bool IsOnWorld => MouseOverControl != null && MouseOverControl is WorldViewport;
 
         public GumpControl Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
         {
