@@ -39,7 +39,9 @@ namespace ClassicUO.Game.Scenes
     {
         private RenderTarget2D _renderTarget;
         private DateTime _timePing;
+#if !ORIONSORT
         private readonly List<DeferredEntity> _deferredToRemove = new List<DeferredEntity>();
+#endif
         private MousePicker<GameObject> _mousePicker;
         private MouseOverList<GameObject> _mouseOverList;      
 
@@ -219,7 +221,6 @@ namespace ClassicUO.Game.Scenes
 
             base.Update(totalMS, frameMS);
         }
-
 
         public override bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
         {
@@ -458,8 +459,17 @@ namespace ClassicUO.Game.Scenes
             
         }
 
+
+
         private void MouseHandler()
-        {      
+        {
+            if (!UIManager.IsOnWorld)
+            {
+                if (_rightMousePressed)
+                    _rightMousePressed = false;
+                return;
+            }
+
             foreach (var e in InputManager.GetMouseEvents())
             {
                 switch (e.Button)
@@ -468,7 +478,7 @@ namespace ClassicUO.Game.Scenes
                         _rightMousePressed = e.EventType == MouseEvent.Down;
                         break;
                     case MouseButton.Left:
-                        if (UIManager.IsOnWorld && _mousePicker.MouseOverObject is Entity entity)
+                        if (SelectedObject is Entity entity)
                         {
                             if (e.EventType == MouseEvent.DoubleClick)
                                 GameActions.DoubleClick(entity);
@@ -493,6 +503,8 @@ namespace ClassicUO.Game.Scenes
                 World.Player.Walk(direction, true);
             }
         }
+
+
 
 
 #if ORIONSORT
