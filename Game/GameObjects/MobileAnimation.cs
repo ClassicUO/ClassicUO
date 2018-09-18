@@ -68,11 +68,6 @@ namespace ClassicUO.Game.GameObjects
 
         public static byte GetGroupForAnimation(Mobile mobile, ushort checkGraphic = 0)
         {
-            if (mobile != World.Player)
-            {
-
-            }
-
             Graphic graphic = checkGraphic;
             if (graphic == 0)
             {

@@ -23,6 +23,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
@@ -60,7 +61,8 @@ namespace ClassicUO.Game.Views
             Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
 
-            SetupLayers(dir, ref mobile);
+            int mountOffset = 0;
+            SetupLayers(dir, ref mobile, ref mountOffset);
 
             ref var bodyFrame = ref _frames[0].Frame;
             if (bodyFrame == null)
@@ -68,7 +70,7 @@ namespace ClassicUO.Game.Views
 
             int drawCenterY = bodyFrame.CenterY;
             int drawX;
-            int drawY = /*mountOffset +*/ drawCenterY + (int)(mobile.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 - (int)(mobile.Offset.Y - mobile.Offset.Z - 3);
+            int drawY = mountOffset + drawCenterY + (int)(mobile.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 - (int)(mobile.Offset.Y - mobile.Offset.Z - 3);
 
             if (IsFlipped)
             {
@@ -99,7 +101,7 @@ namespace ClassicUO.Game.Views
                     yOffset = y;
                 }
 
-                Texture = frame; // TextureManager.GetOrCreateAnimTexture(frame);
+                Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                 HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, false, false);
 
@@ -134,27 +136,79 @@ namespace ClassicUO.Game.Views
 
             //    RenderExtentions.GetHueVector(38));
 
+            yOffset = 0;
+
+            int height = 0;
+            int centerY = 0;
+
+            GetAnimationDimensions(mobile, 0, ref height, ref centerY);
+
             Vector3 overheadPosition = new Vector3
             {
                 X = position.X + mobile.Offset.X,
-                Y = position.Y - (int)(mobile.Offset.Z / 4 + GameObject.Position.Z * 4),
+                Y = (position.Y - (mobile.Position.Z * 4)) + (mobile.Offset.Y - mobile.Offset.Z) - ((height + centerY) + 8),
                 Z = position.Z
             };
 
-            if (!bodyFrame.IsDisposed)
-            {
-                yOffset = bodyFrame.Height + drawY - (int)(mobile.Offset.Z / 4 + GameObject.Position.Z * 4);
-            }
-            else
-            {
-                yOffset -= -(yOffset + 44);
-            }
+            //if (!bodyFrame.IsDisposed)
+            //{
+            //    Service.Get<Log>().Message(LogTypes.Trace, "BEFORE: " + yOffset.ToString());
 
-            MessageOverHead(spriteBatch, overheadPosition, mobile.IsMounted ? yOffset + 16 : yOffset);
+            //    yOffset = bodyFrame.Height + drawY - (int)(mobile.Offset.Z / 4 + GameObject.Position.Z * 4);
+
+            //    Service.Get<Log>().Message(LogTypes.Trace, "AFTER: " + yOffset.ToString());
+            //}
+            //else
+            //{
+            //    yOffset -= -(yOffset + 44);
+            //}
+
+            MessageOverHead(spriteBatch, overheadPosition, -22);
             return true;
         }
 
 
+        private void GetAnimationDimensions(Mobile mobile, byte frameIndex, ref int height, ref int centerY)
+        {
+            byte dir = 0 & 0x7F;
+            bool mirror = false;
+
+            Animations.GetAnimDirection(ref dir, ref mirror);
+            byte group = Mobile.GetGroupForAnimation(mobile);
+
+            if (mobile.Graphic <= Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            {
+                if (dir < 5)
+                {
+                    ref AnimationDirection direction = ref Animations.DataIndex[mobile.Graphic].Groups[group].Direction[dir];
+
+                    if (direction.FrameCount > 0 || Animations.LoadDirectionGroup(ref direction))
+                    {
+                        int fc = direction.FrameCount;
+                        if (fc > 0)
+                        {
+                            if (frameIndex >= fc)
+                            {
+                                frameIndex = 0;
+                            }
+                        }
+
+                        if (direction.Frames != null && direction.Frames.Length > 0)
+                        {
+                            height = direction.Frames[0].Height;
+                            centerY = direction.Frames[0].CenterY;
+                            return;
+                        }
+                    }
+                }
+            }
+
+            if (mobile.IsMounted)
+                height = 100;
+            else
+                height = 60;
+            centerY = 0;         
+        }
 
 
         private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList<GameObject> list)
@@ -179,7 +233,7 @@ namespace ClassicUO.Game.Views
         }
 
 
-        private void SetupLayers(byte dir, ref Mobile mobile)
+        private void SetupLayers(byte dir, ref Mobile mobile, ref int mountOffset)
         {
             _layerCount = 0;
 
@@ -211,8 +265,9 @@ namespace ClassicUO.Game.Views
                                 Item mount = mobile.Equipment[(int)Layer.Mount];
                                 if (mount != null)
                                 {
-                                    //if (graphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                                    //    mountOffset = Animations.DataIndex[graphic].MountedHeightOffset;
+                                    Graphic mountGraphic = item.GetMountAnimation();
+                                    if (mountGraphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                                        mountOffset = Animations.DataIndex[mountGraphic].MountedHeightOffset;
 
                                     AddLayer(dir, mount.GetMountAnimation(), mount.Hue, ref mobile, true);
                                 }
