@@ -1776,7 +1776,12 @@ namespace ClassicUO.Network
             uint cliloc = p.ReadUInt();
             byte flags = p.ID == 0xCC ? p.ReadByte() : (byte)0;
             string name = p.ReadASCII(30);
-            string text = Cliloc.GetString((int)cliloc);
+
+            string arguments = null;
+            if (p.Position < p.Length)
+                arguments = p.ReadUnicodeReversed(p.Length - p.Position);
+
+            string text = Cliloc.Translate(Cliloc.GetString((int)cliloc), arguments);
 
             if (!Fonts.UnicodeFontExists((byte)font))
                 font = MessageFont.Bold;

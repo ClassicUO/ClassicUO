@@ -260,7 +260,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected override View CreateView()
         {
-            return /*Graphic <= 0 ? null : */ new ItemView(this);
+            return new ItemView(this);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -269,8 +269,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 ProcessAnimation();
             }
-
-            if (Effect != null)
+            else if (Effect != null)
             {
                 if (Effect.IsDisposed)
                 {

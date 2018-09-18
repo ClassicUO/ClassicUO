@@ -47,6 +47,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool _rightMousePressed;
         private WorldViewportGump _viewPortGump;
+        private StaticManager _staticManager;
 
         private static Hue _savedHue;
         private static GameObject _selectedObject;
@@ -99,6 +100,7 @@ namespace ClassicUO.Game.Scenes
 
             _mousePicker = new MousePicker<GameObject>();
             _mouseOverList = new MouseOverList<GameObject>(_mousePicker);
+            _staticManager = new StaticManager();
 
             UIManager.Add(_viewPortGump = new WorldViewportGump(this));
         }
@@ -203,11 +205,12 @@ namespace ClassicUO.Game.Scenes
                 _renderTarget = new RenderTarget2D(Device, Width / Scale, Height / Scale, false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
-            MouseHandler();
+            MouseHandler(frameMS);
             if (_rightMousePressed)
                 MoveCharacterByInputs();
 
             World.Update(totalMS, frameMS);
+            _staticManager.Update(totalMS, frameMS);
 
             if (DateTime.Now > _timePing)
             {
@@ -461,7 +464,7 @@ namespace ClassicUO.Game.Scenes
 
 
 
-        private void MouseHandler()
+        private void MouseHandler(double frameMS)
         {
             if (!UIManager.IsOnWorld)
             {
@@ -476,20 +479,101 @@ namespace ClassicUO.Game.Scenes
                 {
                     case MouseButton.Right:
                         _rightMousePressed = e.EventType == MouseEvent.Down;
+                        e.IsHandled = true;
                         break;
                     case MouseButton.Left:
-                        if (SelectedObject is Entity entity)
+
+                        if (e.EventType == MouseEvent.Click)
                         {
-                            if (e.EventType == MouseEvent.DoubleClick)
-                                GameActions.DoubleClick(entity);
-                            else if (e.EventType == MouseEvent.Click)
-                                GameActions.SingleClick(entity);
+                            EnqueueSingleClick(e, _mousePicker.MouseOverObject, _mousePicker.MouseOverObjectPoint);
+                            continue;
                         }
-                       
+
+                        if (e.EventType == MouseEvent.DoubleClick)
+                            ClearQueuedClicks();
+
+                        DoMouseButton(e, _mousePicker.MouseOverObject, _mousePicker.MouseOverObjectPoint);                       
                         break;
                 }
                     
             }
+
+            CheckForQueuedClicks(frameMS);
+        }
+
+        private void DoMouseButton(InputMouseEvent e, GameObject obj, Point point)
+        {
+            switch (e.EventType)
+            {
+                case MouseEvent.Down:
+                    break;
+                case MouseEvent.Click:
+                    if (obj is Static st)
+                    {
+                        obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
+                        _staticManager.Add(st);
+                    }
+                    else if (obj is Entity entity)
+                    {
+                        GameActions.SingleClick(entity);
+                    }
+                    break;
+                case MouseEvent.DoubleClick:
+                    if (obj is Item item)
+                    {
+                        GameActions.DoubleClick(item);
+                    }
+                    else if (obj is Mobile mob)
+                    {
+                        //TODO: attack request also
+                        if (World.Player.InWarMode)
+                        {
+
+                        }
+                        else
+                            GameActions.DoubleClick(mob);
+                    }
+                    break;
+                case MouseEvent.DragBegin:
+                    break;
+            }
+
+            e.IsHandled = true;
+        }
+
+        private GameObject _queuedObject;
+        private Point _queuedPosition;
+        private InputMouseEvent _queuedEvent;
+        private double _dequeueAt;
+        private bool _inqueue;
+
+        private void EnqueueSingleClick(InputMouseEvent e, GameObject obj, Point point)
+        {
+            _inqueue = true;
+            _queuedObject = obj;
+            _queuedPosition = point;
+            _dequeueAt = 400f;
+            _queuedEvent = e;
+        }
+
+        private void CheckForQueuedClicks(double framMS)
+        {
+            if (_inqueue)
+            {
+                _dequeueAt -= framMS;
+                if (_dequeueAt <= 0d)
+                {
+                    DoMouseButton(_queuedEvent, _queuedObject, _queuedPosition);
+                    ClearQueuedClicks();
+                }
+            }
+        }
+
+        private void ClearQueuedClicks()
+        {
+            _inqueue = false;
+            _queuedEvent = null;
+            _queuedObject = null;
         }
 
         private void MoveCharacterByInputs()

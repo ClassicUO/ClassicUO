@@ -105,6 +105,7 @@ namespace ClassicUO.Game.Views
                     base.Draw(spriteBatch, offsetDrawPosition, objectList);
                 }
 
+                MessageOverHead(spriteBatch, position, Bounds.Y - 22);
                 base.Draw(spriteBatch, position, objectList);
             }
             else

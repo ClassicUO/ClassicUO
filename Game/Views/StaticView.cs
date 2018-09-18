@@ -48,7 +48,7 @@ namespace ClassicUO.Game.Views
             }
 
             HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
-
+            MessageOverHead(spriteBatch, position, Bounds.Y - 22);
             return base.Draw(spriteBatch, position, objectList);
         }
 
