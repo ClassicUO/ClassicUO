@@ -16,5 +16,7 @@ namespace ClassicUO.Game
         public static void SingleClick(Serial serial)
             => Socket.Send(new PClickRequest(serial));
 
+        public static void Say(string message, ushort hue = 0x17, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal)
+            => Chat.Say(message, hue, type, font);
     }
 }
