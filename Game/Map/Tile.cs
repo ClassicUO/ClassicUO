@@ -61,19 +61,14 @@ namespace ClassicUO.Game.Map
             }
         }
 
-
         public override Position Position { get; set; }
-        //public new TileView View => (TileView)base.View;
 
         public LandTiles TileData
         {
             get
             {
                 if (!_tileData.HasValue)
-                {
                     _tileData = IO.Resources.TileData.LandData[Graphic];
-                }
-
                 return _tileData.Value;
             }
         }
@@ -106,10 +101,7 @@ namespace ClassicUO.Game.Map
                 case Tile tile:
                     {
                         if (tile.IsStretched)
-                        {
-                            //tile.View;
                             priorityZ = (short)(((TileView)tile.View).SortZ - 1);
-                        }
                         else
                             priorityZ--;
                     }

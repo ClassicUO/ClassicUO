@@ -151,7 +151,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
                         }
-                        else if (mobile.Equipment[(int)Layer.TwoHanded] != null || mobile.Equipment[(int)Layer.OneHanded] != null)
+                        else if (mobile.Equipment[(int)Layer.OneHanded] != null || mobile.Equipment[(int)Layer.TwoHanded] != null)
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
                         }
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
                         }
-                        else if ((mobile.Equipment[(int)Layer.TwoHanded] != null || mobile.Equipment[(int)Layer.OneHanded] != null) && !mobile.IsDead)
+                        else if ((mobile.Equipment[(int)Layer.OneHanded] != null || mobile.Equipment[(int)Layer.TwoHanded] != null) && !mobile.IsDead)
                         {
                             if (inWar)
                             {
@@ -222,11 +222,11 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else if (inWar && !mobile.IsDead)
                     {
-                        if (mobile.Equipment[(int)Layer.TwoHanded] != null)
+                        if (mobile.Equipment[(int)Layer.OneHanded] != null)
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
                         }
-                        else if (mobile.Equipment[(int)Layer.OneHanded] != null)
+                        else if (mobile.Equipment[(int)Layer.TwoHanded] != null)
                         {
                             result = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK;
                         }
@@ -344,10 +344,17 @@ namespace ClassicUO.Game.GameObjects
                     case HIGHT_ANIMATION_GROUP.HAG_ATTACK_2:
                         animation = (byte)HIGHT_ANIMATION_GROUP.HAG_ATTACK_1;
                         break;
+                    case HIGHT_ANIMATION_GROUP.HAG_GET_HIT_3:
+                    case HIGHT_ANIMATION_GROUP.HAG_GET_HIT_2:
+                        animation = (byte)HIGHT_ANIMATION_GROUP.HAG_GET_HIT_1;
+                        break;
                     case HIGHT_ANIMATION_GROUP.HAG_MISC_4:
                     case HIGHT_ANIMATION_GROUP.HAG_MISC_3:
                     case HIGHT_ANIMATION_GROUP.HAG_MISC_2:
                         animation = (byte)HIGHT_ANIMATION_GROUP.HAG_MISC_1;
+                        break;
+                    case HIGHT_ANIMATION_GROUP.HAG_FLY:
+                        animation = (byte)HIGHT_ANIMATION_GROUP.HAG_WALK;
                         break;
                 }
 

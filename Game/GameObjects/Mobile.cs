@@ -538,6 +538,11 @@ namespace ClassicUO.Game.GameObjects
 
             if (_lastAnimationChangeTime < World.Ticks && !NoIterateAnimIndex())
             {
+                if (this == 0xcafa6)
+                {
+                    return;
+                }
+
                 sbyte frameIndex = AnimIndex;
 
                 if (AnimationFromServer && !AnimationDirection)

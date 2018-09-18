@@ -633,7 +633,17 @@ namespace ClassicUO.Network
 
         private static void DeleteObject(Packet p)
         {
+            if (World.Player == null)
+                return;
+
             Serial serial = p.ReadUInt();
+
+            if (World.Player == serial)
+                return;
+
+            if (World.Get(serial) == null)
+                return;
+
             if (serial.IsItem)
             {
                 if (World.RemoveItem(serial))
@@ -1019,7 +1029,7 @@ namespace ClassicUO.Network
 
         private static void ClientViewRange(Packet p)
         {
-            //World.ViewRange = p.ReadByte();
+            World.ViewRange = p.ReadByte();
         }
 
         private static void BulletinBoardData(Packet p)

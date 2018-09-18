@@ -177,8 +177,9 @@ namespace ClassicUO.Renderer
             if (!draw)
                 return false;
 
-            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();   
-
+#if !ORIONSORT
+            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
+#endif
             Build(texture, vertices);
 
             return true;
