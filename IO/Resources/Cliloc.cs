@@ -74,6 +74,45 @@ namespace ClassicUO.IO.Resources
             _entries.TryGetValue(number, out StringEntry res);
             return res;
         }
+
+        public static string Translate(string baseCliloc, string arg = null, bool capitalize = false)
+        {
+            if (string.IsNullOrEmpty(baseCliloc))
+                return string.Empty;
+
+            if (arg == null)
+            {
+                return capitalize ? Utility.StringHelper.CapitalizeFirstCharacter(baseCliloc) : baseCliloc;
+            }
+            else
+            {
+                string[] args = arg.Split('\t');
+
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (args[i].Length > 0 && args[i][0] == '#')
+                    {
+                        int clilocID = int.Parse(args[i].Substring(1));
+                        args[i] = GetString(clilocID);
+                    }
+                }
+
+                string construct = baseCliloc;
+
+                for (int i = 0; i < args.Length; i++)
+                {
+                    int begin = construct.IndexOf('~', 0);
+                    int end = construct.IndexOf('~', begin + 1);
+
+                    if (begin != -1 && end != -1)
+                        construct = construct.Substring(0, begin) + args[i] + construct.Substring(end + 1, construct.Length - end - 1);
+                    else
+                        construct = baseCliloc;
+                }
+
+                return capitalize ? Utility.StringHelper.CapitalizeFirstCharacter(construct) : construct;
+            }
+        }
     }
 
     public readonly struct StringEntry

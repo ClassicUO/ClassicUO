@@ -80,7 +80,23 @@ namespace ClassicUO.Game.GameObjects
         public bool IsDisposed { get; private set; }
 
         public int Distance => DistanceTo(World.Player);
-        public int DistanceTo(GameObject entity) => Position.DistanceTo(entity.Position);
+
+        public int DistanceTo(GameObject entity) 
+        {
+            if (entity is Mobile mob)
+            {
+                if (mob.Steps.Count > 0)
+                {
+                    var step = mob.Steps.Back();
+
+                    Position pos = new Position((ushort)step.X, (ushort)step.Y);
+
+                    return Position.DistanceTo(pos);
+                }           
+            }
+
+            return Position.DistanceTo(entity.Position);
+        }
 
 
         protected virtual View CreateView()

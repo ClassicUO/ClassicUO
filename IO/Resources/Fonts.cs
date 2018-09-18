@@ -185,6 +185,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
+        public static bool UnicodeFontExists(byte font) => font < 20 && _unicodeFontAddress[font] != IntPtr.Zero;
 
         public static int GetWidthASCII(byte font, string str)
         {

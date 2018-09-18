@@ -40,9 +40,11 @@ namespace ClassicUO.Game.Gumps
        
         public UIManager()
         {
-            _cursor = new CursorRenderer();
+            _cursor = new CursorRenderer(this);
         }
 
+
+        public GumpControl MouseOverControl => _mouseOverControl;
 
         public GumpControl KeyboardFocusControl
         {
@@ -81,6 +83,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        public bool IsOnWorld => MouseOverControl != null && MouseOverControl is WorldViewport;
 
         public GumpControl Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
         {

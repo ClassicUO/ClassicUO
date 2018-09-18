@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Network;
 using ClassicUO.Utility;
 using System;
 
@@ -70,10 +71,10 @@ namespace ClassicUO.Game
 
         private static readonly Mobile _system = new Mobile(Serial.Invalid) { Graphic = Graphic.Invariant, Name = "System" };
 
-        // public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
-        // public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PMessageUnicode(entity.Serial, entity.Graphic, type, hue, font, _language, entity.Name ?? string.Empty, message).SendToClient();
-        //public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PMessageUnicodeRequest(type, hue, font, _language, message).SendToServer();
-        //public static void SayParty(string message) => new PPartyMessage(message).SendToServer();
+        //public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
+        //public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PUnicodeSpeechRequest(entity.Serial, entity.Graphic, type, hue, font, _language, entity.Name ?? string.Empty, message).SendToClient();
+        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
+        public static void SayParty(string message) => GameActions.SayParty(message);
 
 
         public static event EventHandler<UOMessageEventArgs> Message;
@@ -81,7 +82,14 @@ namespace ClassicUO.Game
 
         public static void OnMessage(Entity entity, UOMessageEventArgs args)
         {
-            entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
+            if (entity != null)
+                entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
+            else
+            {
+                Service.Get<Log>().Message(LogTypes.Trace, "On System Message: " + args.Text);
+                // ADD TO SYSTEM MESSAGE
+            }
+
             Message.Raise(args, entity ?? _system);
         }
 

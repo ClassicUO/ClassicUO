@@ -674,9 +674,10 @@ namespace ClassicUO.Game.GameObjects
 
                         AnimIndex = frameIndex;
                     }
-
-                    _lastAnimationChangeTime = World.Ticks + currentDelay;
                 }
+
+                _lastAnimationChangeTime = World.Ticks + currentDelay;
+
             }
         }
 

@@ -49,13 +49,18 @@ namespace ClassicUO.Game.Map
 
         private static int Compare(GameObject x, GameObject y)
         {
+            int comparison;
+
+#if ORIONSORT
+            comparison = x.PriorityZ - y.PriorityZ;
+#else
             (int xZ, int xType, int xThreshold, int xTierbreaker) = GetSortValues(x);
             (int yZ, int yType, int yThreshold, int yTierbreaker) = GetSortValues(y);
 
             xZ += xThreshold;
             yZ += yThreshold;
 
-            int comparison = xZ - yZ;
+            comparison = xZ - yZ;
             if (comparison == 0)
                 comparison = xType - yType;
 
@@ -64,7 +69,7 @@ namespace ClassicUO.Game.Map
 
             if (comparison == 0)
                 comparison = xTierbreaker - yTierbreaker;
-
+#endif
             return comparison;
         }
 
