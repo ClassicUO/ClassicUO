@@ -89,6 +89,5 @@ namespace ClassicUO.Game.Gumps
             return base.Draw(spriteBatch, position);
         }
 
-        
     }
 }

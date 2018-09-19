@@ -148,7 +148,6 @@ namespace ClassicUO
 
         private void TEST(Settings settings)
         {
-            _sceneManager.ChangeScene(ScenesType.Game);
 
 
             string[] parts = settings.ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);

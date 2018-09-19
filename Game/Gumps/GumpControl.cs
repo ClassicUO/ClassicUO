@@ -80,16 +80,6 @@ namespace ClassicUO.Game.Gumps
             set => _bounds = value;
         }
 
-        public Point Size
-        {
-            get { return new Point(_bounds.Width, _bounds.Height); }
-            set
-            {
-                _bounds.Width = value.X;
-                _bounds.Height = value.Y;
-            }
-        }
-
         public bool IsDisposed { get; private set; }
         public bool IsVisible { get; set; }
         public bool IsEnabled { get; set; }

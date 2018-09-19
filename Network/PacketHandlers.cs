@@ -6,6 +6,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -610,6 +611,8 @@ namespace ClassicUO.Network
             World.Player.Direction = (Direction)p.ReadByte();
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
+
+            Service.Get<SceneManager>().ChangeScene(ScenesType.Game);
         }
 
         private static void Talk(Packet p)
