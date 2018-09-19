@@ -40,12 +40,8 @@ namespace ClassicUO.Game.Views
         }
 
 
-        //public new Mobile GameObject => (Mobile)base.GameObject;
-
-
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
             => !PreDraw(position) && DrawInternal(spriteBatch, position, objectList);
-
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
@@ -81,8 +77,6 @@ namespace ClassicUO.Game.Views
                 drawX = -22 - (int)(mobile.Offset.X);
             }
 
-            int yOffset = 0;
-
             for (int i = 0; i < _layerCount; i++)
             {
                 ref var vl = ref _frames[i];
@@ -95,11 +89,6 @@ namespace ClassicUO.Game.Views
 
                 int x = drawX + frame.CenterX;
                 int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
-
-                if (yOffset > y)
-                {
-                    yOffset = y;
-                }
 
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
@@ -136,7 +125,6 @@ namespace ClassicUO.Game.Views
 
             //    RenderExtentions.GetHueVector(38));
 
-            yOffset = 0;
 
             int height = 0;
             int centerY = 0;
@@ -226,7 +214,7 @@ namespace ClassicUO.Game.Views
 
             int y = list.MousePosition.Y - ((int)drawPosition.Y - area.Y);
 
-            if (Texture.Contains(x, y)) // if (Animations.Contains(id, x, y))
+            if (Animations.Contains(id, x, y))
             {
                 list.Add(GameObject, drawPosition);
             }
@@ -370,7 +358,6 @@ namespace ClassicUO.Game.Views
                     IsParital = ispartial
                 };
 
-                TextureWidth = frame.Width;
             }
         }
 

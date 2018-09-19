@@ -21,6 +21,7 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -58,7 +59,7 @@ namespace ClassicUO.Game.Views
             int x = list.MousePosition.X - (int)vertex[0].Position.X;
             int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
 
-            if (Texture.Contains(x, y)) //if (Art.Contains(GameObject.Graphic, x, y))
+            if (Art.Contains(GameObject.Graphic, x, y))
             {
                 list.Add(GameObject, vertex[0].Position);
             }

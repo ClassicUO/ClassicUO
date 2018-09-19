@@ -40,6 +40,7 @@ namespace ClassicUO.Game.Map
         public Facet(int index)
         {
             Index = index;
+            IO.Resources.Map.LoadMap(index);
             MapBlockIndex = IO.Resources.Map.MapBlocksSize[Index][0] * IO.Resources.Map.MapBlocksSize[Index][1];
             Chunks = new MapChunk[MapBlockIndex];
         }
@@ -219,26 +220,11 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < _usedIndices.Count; i++)
             {
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
-                if (World.Ticks - block.LastAccessTime > 3000 && block.HasNoExternalData())
+                if (World.Ticks - block.LastAccessTime >= 3000 && block.HasNoExternalData())
                 {
-
-                    //for (int x = 0; x < 8; x++)
-                    //{
-                    //    for (int y = 0; y < 8; y++)
-                    //    {
-                    //        var tile = block.Tiles[x][y];
-
-                    //        if (tile.IsStretched)
-                    //            TextmapTextures.Clear(tile.Graphic);
-                    //        else
-                    //            Art.Clear(tile.Graphic);
-                    //    }
-                    //}
-
                     block.Unload();
                     block = null;
-                    _usedIndices.RemoveAt(i);
-                    i--;
+                    _usedIndices.RemoveAt(i++);
                     if (++count >= 5)
                         break;
                 }

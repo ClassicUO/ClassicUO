@@ -19,6 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
@@ -43,7 +44,7 @@ namespace ClassicUO.IO.Resources
         private static byte _animGroupCount = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
         private static readonly DataReader _reader = new DataReader();
 
-        //private static readonly PixelPicking _picker = new PixelPicking();
+        private static readonly PixelPicking _picker = new PixelPicking();
 
         public static ushort Color { get; set; }
         public static byte AnimGroup { get; set; }
@@ -185,10 +186,6 @@ namespace ClassicUO.IO.Resources
                 DataIndex[i].Type = groupTye;
 
                 IntPtr address = _files[0].IdxFile.StartAddress + findID;
-
-                if (i == 46)
-                {
-                }
 
                 DataIndex[i].Groups = new AnimationGroup[100];
 
@@ -862,8 +859,6 @@ namespace ClassicUO.IO.Resources
 
             ReadFramesPixelData(ref animDir);
 
-            _usedTextures.Add(new ToRemoveInfo() { AnimID = AnimID, Group = AnimGroup, Direction = Direction });
-
             return true;
         }
 
@@ -1031,24 +1026,21 @@ namespace ClassicUO.IO.Resources
                     header = _reader.ReadUInt();
                 }
 
-                //animDirection.Frames[i].Pixels = pixels;
-                //animDirection.Frames[i].Width = imageWidth;
-                //animDirection.Frames[i].Height = imageHeight;
+
                 int uniqueAnimationIndex = ((AnimID & 0xfff) << 20) + ((AnimGroup & 0x3f) << 12) + ((Direction & 0x0f) << 8);
-                uniqueAnimationIndex += (i * 0xFF);
+                uniqueAnimationIndex += (i & 0xFF);
 
                 ref var f = ref animDirection.Frames[i];
                 if (f == null)
                     f = new TextureAnimationFrame(uniqueAnimationIndex, imageWidth, imageHeight);
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
+                f.SetData(pixels);
 
-                f.SetDataForHitBox(pixels);
-
-                //_picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
-
-                //f.SetData(pixels);
+                _picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
             }
+
+            _usedTextures.Add(new ToRemoveInfo() { AnimID = AnimID, Group = AnimGroup, Direction = Direction });
 
             return true;
         }
@@ -1071,12 +1063,6 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < frameCount; i++)
             {
-
-                //if (animDir.Frames[i] != null && animDir.Frames[i].Pixels == null)
-                //{
-
-                //}
-
                 if (animDir.Frames[i] != null /*&& !animDir.Frames[i].IsDisposed*/)
                     continue;
 
@@ -1141,27 +1127,22 @@ namespace ClassicUO.IO.Resources
                 }
 
                 int uniqueAnimationIndex = ((AnimID & 0xfff) << 20) + ((AnimGroup & 0x3f) << 12) + ((Direction & 0x0f) << 8);
-                uniqueAnimationIndex += (i * 0xFF);
+                uniqueAnimationIndex += (i & 0xFF);
 
                 ref var f = ref animDir.Frames[i];
                 if (f == null)
                     f = new TextureAnimationFrame(uniqueAnimationIndex, imageWidth, imageHeight);
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
+                f.SetData(pixels);
 
-                f.SetDataForHitBox(pixels);
-                //fixed (ushort* ptr = pixels)
-                //    f.SetDataPointerEXT(0, f.Bounds, (IntPtr)ptr, pixels.Length);
-
-                //_picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
-
-                //f.SetData(pixels);
-
-                //animDir.Frames[i].Pixels = pixels;
+                _picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
             }
+
+            _usedTextures.Add(new ToRemoveInfo() { AnimID = AnimID, Group = AnimGroup, Direction = Direction });
         }
 
-        //public static bool Contains(int g, int x, int y, int extra = 0) => _picker.Get(g, x, y, extra);
+        public static bool Contains(int g, int x, int y, int extra = 0) => _picker.Get(g, x, y, extra);
 
         public static void ClearUnusedTextures()
         {
@@ -1179,9 +1160,7 @@ namespace ClassicUO.IO.Resources
                     {
                         if (dir.Frames[j] != null)
                         {
-                            //_picker.Remove(dir.Frames[j].ID);
                             dir.Frames[j].Dispose();
-                            //dir.Frames[j] = null;
                         }
                     }
 
@@ -1189,12 +1168,9 @@ namespace ClassicUO.IO.Resources
                     dir.Frames = null;
                     dir.LastAccessTime = 0;
 
-                    _usedTextures.RemoveAt(i);
-                    i--;
+                    _usedTextures.RemoveAt(i--);
                     if (++count >= 5)
-                    {
                         break;
-                    }
                 }
             }
         }

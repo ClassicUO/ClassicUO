@@ -245,8 +245,7 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 
                 int block = (gy * w) + gx;
 
-               // if (data[block] == 0x8421)
-                  //if (data[block] == (ushort)Hues.RgbaToArgb(0x8421))
+                if (data[block] == 0x8421)
                     data[block] = (ushort)color;
             }
         }

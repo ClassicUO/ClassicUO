@@ -44,6 +44,8 @@ namespace ClassicUO.Game.Gumps
         }
 
 
+        public IReadOnlyList<Gump> Gumps => _gumps;
+
         public GumpControl MouseOverControl => _mouseOverControl;
 
         public GumpControl KeyboardFocusControl
@@ -220,6 +222,10 @@ namespace ClassicUO.Game.Gumps
             return gump;
         }
 
+        public T Get<T>() where T : Gump
+            => _gumps.OfType<T>().FirstOrDefault();
+
+
         public void Update(double totalMS, double frameMS)
         {
             SortControlsByInfo();
@@ -254,12 +260,6 @@ namespace ClassicUO.Game.Gumps
 
 
         public void Add(Gump gump) => _gumps.Add(gump);
-
-        public List<Gump> getControlls()
-        {
-            return _gumps;
-        }
-
 
         private void HandleKeyboardInput()
         {
