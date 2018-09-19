@@ -80,7 +80,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
             if (_gumpTexture != null)
-            _gumpTexture.Ticks = (long)totalMS;
+                _gumpTexture.Ticks = (long)totalMS;
 
             if (_mapTexture != null)
                 _mapTexture.Ticks = (long)totalMS;
@@ -170,6 +170,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             ushort[] data = IO.Resources.Gumps.GetGumpPixels((_useLargeMap ? (ushort)5011 : (ushort)5010), out _, out _);
 
+            Point[] table = new Point[2]
+                           {
+                                new Point(0, 0),
+                                new Point(0, 1)
+                           };
+
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
                 int blockIndexOffset = i * mapBlockHeight;
@@ -217,12 +223,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                             int tableSize = 2;
 
                             color = (uint)(0x8000 | IO.Resources.Hues.GetRadarColorData((int)color));
-
-                            Point[] table = new Point[2]
-                            {
-                                new Point(0, 0),
-                                new Point(0, 1)
-                            };
 
 
                             CreatePixels(data, (int)color, gx, gy, Width, Height, table, tableSize);
