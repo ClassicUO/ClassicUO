@@ -52,7 +52,6 @@ namespace ClassicUO.Game.Views
         protected bool HasShadow { get; set; }
         protected bool IsFlipped { get; set; }
         protected float Rotation { get; set; }
-        protected int TextureWidth { get; set; } = 1;
 
         public bool IsSelected { get; set; }
 

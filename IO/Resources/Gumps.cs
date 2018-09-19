@@ -108,8 +108,7 @@ namespace ClassicUO.IO.Resources
                     texture.Dispose();
                     texture = null;
 
-                    _usedIndex.RemoveAt(i);
-                    i--;
+                    _usedIndex.RemoveAt(i--);
                     if (++count >= 5)
                         break;
                 }

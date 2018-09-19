@@ -75,6 +75,9 @@ namespace ClassicUO.Renderer
 
         public void Set(int textureID, int width, int height, ushort[] pixels)
         {
+            if (Has(textureID))
+                return;
+
             int begin = _data.Count;
             WriteIntegerToData(width);
             WriteIntegerToData(height);
@@ -98,6 +101,9 @@ namespace ClassicUO.Renderer
 
         public void Set(int textureID, int width, int height, uint[] pixels)
         {
+            if (Has(textureID))
+                return;
+
             int begin = _data.Count;
             WriteIntegerToData(width);
             WriteIntegerToData(height);

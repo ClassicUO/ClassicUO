@@ -123,12 +123,10 @@ namespace ClassicUO.IO.Resources
                     _usedIndex.RemoveAt(i--);
                 else if (Game.World.Ticks - texture.Ticks >= 3000)
                 {
-                    //_picker.Remove(_usedIndex[i]);
                     texture.Dispose();
                     texture = null;
 
-                    _usedIndex.RemoveAt(i);
-                    i--;
+                    _usedIndex.RemoveAt(i--);
                     if (++count >= 5)
                         break;
                 }

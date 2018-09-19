@@ -68,102 +68,111 @@ namespace ClassicUO.IO.Resources
 
 
             int mapblocksize = Marshal.SizeOf<MapBlock>();
-            int staticidxblocksize = Marshal.SizeOf<StaidxBlock>();
-            int staticblocksize = Marshal.SizeOf<StaticsBlock>();
-
-
+         
             if (_filesMap[0].Length / mapblocksize == 393216 || FileManager.ClientVersion < ClientVersions.CV_4011D)
                 MapsDefaultSize[0][0] = MapsDefaultSize[1][0] = 6144;
 
 
             for (int i = 0; i < MAPS_COUNT; i++)
             {
-                MapBlocksSize[i] = new int[2] { MapsDefaultSize[i][0] / 8, MapsDefaultSize[i][1] / 8 };
-
-
-                int width = MapBlocksSize[i][0];
-                int height = MapBlocksSize[i][1];
-
-                int maxblockcount = width * height;
-
-                BlockData[i] = new IndexMap[maxblockcount];
-
-                UOFile file = _filesMap[i];
-                UOFile fileidx = _filesIdxStatics[i];
-                UOFile staticfile = _filesStatics[i];
-
-                ulong staticidxaddress = (ulong)fileidx.StartAddress;
-                ulong endstaticidxaddress = staticidxaddress + (ulong)fileidx.Length;
-
-                ulong staticaddress = (ulong)staticfile.StartAddress;
-                ulong endstaticaddress = staticaddress + (ulong)staticfile.Length;
-
-                ulong mapddress = (ulong)file.StartAddress;
-                ulong endmapaddress = mapddress + (ulong)file.Length;
-
-                ulong uopoffset = 0;
-                int fileNumber = -1;
-
-                bool isuop = file is UOFileUop;
-
-                for (int block = 0; block < maxblockcount; block++)
-                {
-                    ulong realmapaddress = 0, realstaticaddress = 0;
-                    uint realstaticcount = 0;
-
-                    int blocknum = block;
-
-                    if (isuop)
-                    {
-                        blocknum &= 4095;
-                        int shifted = block >> 12;
-
-                        if (fileNumber != shifted)
-                        {
-                            fileNumber = shifted;
-
-                            if (shifted < file.Entries.Length)
-                                uopoffset = (ulong)file.Entries[shifted].Offset;
-                        }
-                    }
-
-                    ulong address = mapddress + uopoffset + (ulong)(blocknum * mapblocksize);
-
-                    if (address < endmapaddress)
-                        realmapaddress = address;
-
-                    ulong stidxaddress = staticidxaddress + (ulong)(block * staticidxblocksize);
-                    StaidxBlock bb = fileidx.ReadStruct<StaidxBlock>(block * staticidxblocksize);
-
-                    if (stidxaddress < endstaticidxaddress && bb.Size > 0 && bb.Position != 0xFFFFFFFF)
-                    {
-                        ulong address1 = staticaddress + bb.Position;
-
-                        if (address1 < endstaticaddress)
-                        {
-                            StaticsBlock sss = staticfile.ReadStruct<StaticsBlock>(bb.Position);
-                            realstaticaddress = address1;
-                            realstaticcount = (uint)(bb.Size / staticblocksize);
-
-                            if (realstaticcount > 1024)
-                                realstaticcount = 1024;
-                        }
-                    }
-
-                    BlockData[i][block] = new IndexMap
-                    {
-                        OriginalMapAddress = realmapaddress,
-                        OriginalStaticAddress = realstaticaddress,
-                        OriginalStaticCount = realstaticcount,
-
-                        MapAddress = realmapaddress,
-                        StaticAddress = realstaticaddress,
-                        StaticCount = realstaticcount
-                    };
-                }
+                MapBlocksSize[i] = new int[2] { MapsDefaultSize[i][0] / 8, MapsDefaultSize[i][1] / 8 };               
             }
         }
 
+
+        public static void LoadMap(int i)
+        {
+            int mapblocksize = Marshal.SizeOf<MapBlock>();
+            int staticidxblocksize = Marshal.SizeOf<StaidxBlock>();
+            int staticblocksize = Marshal.SizeOf<StaticsBlock>();
+
+
+            int width = MapBlocksSize[i][0];
+            int height = MapBlocksSize[i][1];
+
+            int maxblockcount = width * height;
+
+            BlockData[i] = new IndexMap[maxblockcount];
+
+            UOFile file = _filesMap[i];
+            UOFile fileidx = _filesIdxStatics[i];
+            UOFile staticfile = _filesStatics[i];
+
+            ulong staticidxaddress = (ulong)fileidx.StartAddress;
+            ulong endstaticidxaddress = staticidxaddress + (ulong)fileidx.Length;
+
+            ulong staticaddress = (ulong)staticfile.StartAddress;
+            ulong endstaticaddress = staticaddress + (ulong)staticfile.Length;
+
+            ulong mapddress = (ulong)file.StartAddress;
+            ulong endmapaddress = mapddress + (ulong)file.Length;
+
+            ulong uopoffset = 0;
+            int fileNumber = -1;
+
+            bool isuop = file is UOFileUop;
+
+            for (int block = 0; block < maxblockcount; block++)
+            {
+                ulong realmapaddress = 0, realstaticaddress = 0;
+                uint realstaticcount = 0;
+
+                int blocknum = block;
+
+                if (isuop)
+                {
+                    blocknum &= 4095;
+                    int shifted = block >> 12;
+
+                    if (fileNumber != shifted)
+                    {
+                        fileNumber = shifted;
+
+                        if (shifted < file.Entries.Length)
+                            uopoffset = (ulong)file.Entries[shifted].Offset;
+                    }
+                }
+
+                ulong address = mapddress + uopoffset + (ulong)(blocknum * mapblocksize);
+
+                if (address < endmapaddress)
+                    realmapaddress = address;
+
+                ulong stidxaddress = staticidxaddress + (ulong)(block * staticidxblocksize);
+                StaidxBlock bb = fileidx.ReadStruct<StaidxBlock>(block * staticidxblocksize);
+
+                if (stidxaddress < endstaticidxaddress && bb.Size > 0 && bb.Position != 0xFFFFFFFF)
+                {
+                    ulong address1 = staticaddress + bb.Position;
+
+                    if (address1 < endstaticaddress)
+                    {
+                        StaticsBlock sss = staticfile.ReadStruct<StaticsBlock>(bb.Position);
+                        realstaticaddress = address1;
+                        realstaticcount = (uint)(bb.Size / staticblocksize);
+
+                        if (realstaticcount > 1024)
+                            realstaticcount = 1024;
+                    }
+                }
+
+                BlockData[i][block] = new IndexMap
+                {
+                    OriginalMapAddress = realmapaddress,
+                    OriginalStaticAddress = realstaticaddress,
+                    OriginalStaticCount = realstaticcount,
+
+                    MapAddress = realmapaddress,
+                    StaticAddress = realstaticaddress,
+                    StaticCount = realstaticcount
+                };
+            }
+        }
+
+        public static void UnloadMap(int i)
+        {
+            BlockData[i] = null;
+        }
 
         public static unsafe RadarMapBlock? GetRadarMapBlock(int map, int blockX, int blockY)
         {

@@ -859,8 +859,6 @@ namespace ClassicUO.IO.Resources
 
             ReadFramesPixelData(ref animDir);
 
-            _usedTextures.Add(new ToRemoveInfo() { AnimID = AnimID, Group = AnimGroup, Direction = Direction });
-
             return true;
         }
 
@@ -1028,11 +1026,9 @@ namespace ClassicUO.IO.Resources
                     header = _reader.ReadUInt();
                 }
 
-                //animDirection.Frames[i].Pixels = pixels;
-                //animDirection.Frames[i].Width = imageWidth;
-                //animDirection.Frames[i].Height = imageHeight;
+
                 int uniqueAnimationIndex = ((AnimID & 0xfff) << 20) + ((AnimGroup & 0x3f) << 12) + ((Direction & 0x0f) << 8);
-                uniqueAnimationIndex += (i * 0xFF);
+                uniqueAnimationIndex += (i & 0xFF);
 
                 ref var f = ref animDirection.Frames[i];
                 if (f == null)
@@ -1043,6 +1039,8 @@ namespace ClassicUO.IO.Resources
 
                 _picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
             }
+
+            _usedTextures.Add(new ToRemoveInfo() { AnimID = AnimID, Group = AnimGroup, Direction = Direction });
 
             return true;
         }
@@ -1065,12 +1063,6 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < frameCount; i++)
             {
-
-                //if (animDir.Frames[i] != null && animDir.Frames[i].Pixels == null)
-                //{
-
-                //}
-
                 if (animDir.Frames[i] != null /*&& !animDir.Frames[i].IsDisposed*/)
                     continue;
 
@@ -1135,7 +1127,7 @@ namespace ClassicUO.IO.Resources
                 }
 
                 int uniqueAnimationIndex = ((AnimID & 0xfff) << 20) + ((AnimGroup & 0x3f) << 12) + ((Direction & 0x0f) << 8);
-                uniqueAnimationIndex += (i * 0xFF);
+                uniqueAnimationIndex += (i & 0xFF);
 
                 ref var f = ref animDir.Frames[i];
                 if (f == null)
@@ -1146,6 +1138,8 @@ namespace ClassicUO.IO.Resources
 
                 _picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
             }
+
+            _usedTextures.Add(new ToRemoveInfo() { AnimID = AnimID, Group = AnimGroup, Direction = Direction });
         }
 
         public static bool Contains(int g, int x, int y, int extra = 0) => _picker.Get(g, x, y, extra);
@@ -1166,9 +1160,7 @@ namespace ClassicUO.IO.Resources
                     {
                         if (dir.Frames[j] != null)
                         {
-                            //_picker.Remove(dir.Frames[j].ID);
                             dir.Frames[j].Dispose();
-                            //dir.Frames[j] = null;
                         }
                     }
 
@@ -1176,12 +1168,9 @@ namespace ClassicUO.IO.Resources
                     dir.Frames = null;
                     dir.LastAccessTime = 0;
 
-                    _usedTextures.RemoveAt(i);
-                    i--;
+                    _usedTextures.RemoveAt(i--);
                     if (++count >= 5)
-                    {
                         break;
-                    }
                 }
             }
         }
