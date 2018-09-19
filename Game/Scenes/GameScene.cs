@@ -480,6 +480,8 @@ namespace ClassicUO.Game.Scenes
 
             foreach (var e in InputManager.GetMouseEvents())
             {
+                Console.WriteLine(e.EventType);
+
                 switch (e.Button)
                 {
                     case MouseButton.Right:

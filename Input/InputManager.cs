@@ -179,7 +179,7 @@ namespace ClassicUO.Input
                     OnMouseUp(new InputMouseEvent(MouseEvent.Up, CovertMouseButton(e->button.button), e->button.clicks, e->button.x, e->button.y, 0, SDL_Keymod.KMOD_NONE));
                     break;
                 case SDL_EventType.SDL_MOUSEMOTION:
-                    OnMouseMove(new InputMouseEvent(MouseEvent.Move, MouseButton.None, 0, e->motion.x, e->motion.y, 0, SDL_Keymod.KMOD_NONE));
+                    OnMouseMove(new InputMouseEvent(MouseEvent.Move, CovertMouseButton(e->button.button), 0, e->motion.x, e->motion.y, 0, SDL_Keymod.KMOD_NONE));
                     break;
                 case SDL_EventType.SDL_MOUSEWHEEL:
                     OnMouseWheel(new InputMouseEvent(MouseEvent.WheelScroll, MouseButton.Middle, 0, e->wheel.x, e->wheel.y, 0, SDL_Keymod.KMOD_NONE));
