@@ -48,7 +48,6 @@ namespace ClassicUO.Game.Gumps
         private int _curentState = NORMAL;
         private RenderedText _gText;
         private bool _centerFont;
-        private int _buttonParam;
         
 
 
@@ -86,14 +85,15 @@ namespace ClassicUO.Game.Gumps
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
 
-            ButtonAction = (ButtonAction)ushort.Parse(parts[5]);
-            ushort param = ushort.Parse(parts[6]);
+            ButtonAction = (ButtonAction)int.Parse(parts[5]);
+            ButtonParameter = int.Parse(parts[6]);        
         }
 
         
 
         public int ButtonID { get; }
-        public ButtonAction ButtonAction { get; private set; }
+        public ButtonAction ButtonAction { get;  set; }
+        public int ButtonParameter { get; set; }
 
 
         public string Text
@@ -136,18 +136,9 @@ namespace ClassicUO.Game.Gumps
 
             }
         }
-
-        public ButtonAction buttonAction
-        {
-            get => ButtonAction;
-            set => ButtonAction = (ButtonAction)value;
-        }
-
-        public int ButtonParameter
-        {
-            get => _buttonParam;
-            set => _buttonParam = (int)value;
-        }
+   
+        
+       
 
 
 
@@ -164,8 +155,14 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
         {
-            var texture = _curentState == PRESSED ? _textures[PRESSED] :
-                _textures[OVER] != null && MouseIsOver ? _textures[OVER] : _textures[NORMAL];
+            SpriteTexture texture;
+
+            if (_curentState == PRESSED)
+                texture = _textures[PRESSED];
+            else if (UIManager.MouseOverControl == this && _textures[OVER] != null)
+                texture = _textures[OVER];
+            else
+                texture = _textures[NORMAL];
 
             spriteBatch.Draw2D(texture, new Rectangle((int)position.X, (int)position.Y + (_curentState == PRESSED ? 1 : 0), Width, Height), Vector3.Zero);
 
@@ -178,8 +175,6 @@ namespace ClassicUO.Game.Gumps
                         //var _blackTexture = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
                         //_blackTexture.SetData(new[] { Color.Black });
                         //spriteBatch.Draw2D(_blackTexture, new Rectangle((int)position.X + (this.Width - _gText.Width) / 2, (int)position.Y + (this.Height - _gText.Height) / 2 , 100, 50), RenderExtentions.GetHueVector(0, false, true, false));
-
-                        
                     }
                     int yoffset = _curentState == PRESSED ? 1 : 0;
                     _gText.Draw(spriteBatch, new Vector3(position.X + (this.Width - _gText.Width) / 2 , position.Y + yoffset + (this.Height - _gText.Height) / 2, position.Z));
@@ -189,10 +184,6 @@ namespace ClassicUO.Game.Gumps
                 {
                     _gText.Draw(spriteBatch, position);
                 }
-
-
-
-
             }
 
             return base.Draw(spriteBatch, position);

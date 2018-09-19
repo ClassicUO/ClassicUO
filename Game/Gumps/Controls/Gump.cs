@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -25,6 +26,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (ActivePage == 0)
+                ActivePage = 1;
+
             base.Update(totalMS, frameMS);
         }
 

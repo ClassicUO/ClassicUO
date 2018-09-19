@@ -53,6 +53,9 @@ namespace ClassicUO.Game.Gumps
             AllowedToDraw = true;
 
             AcceptMouseInput = true;
+
+            Page = 0;
+            UIManager = Service.Get<UIManager>();
         }
 
 
@@ -92,7 +95,7 @@ namespace ClassicUO.Game.Gumps
         public bool IsEditable { get; set; }
         public IReadOnlyList<GumpControl> Children => _children;
 
-
+        public UIManager UIManager { get; private set; }
 
         public virtual bool AcceptKeyboardInput
         {
@@ -199,6 +202,7 @@ namespace ClassicUO.Game.Gumps
 
         public bool IsInitialize { get; private set; }
 
+
         public void Initialize()
         {
             IsDisposed = false;
@@ -230,7 +234,7 @@ namespace ClassicUO.Game.Gumps
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            if (IsDisposed)
+            if (IsDisposed || !IsInitialize)
             {
                 return;
             }
@@ -243,10 +247,13 @@ namespace ClassicUO.Game.Gumps
                 {
                     c.Update(totalMS, frameMS);
 
-                    if (w < c.Bounds.Right)
-                        w = c.Bounds.Right;
-                    if (h < c.Bounds.Bottom)
-                        h = c.Bounds.Bottom;
+                    if (c.Page == 0 || c.Page == ActivePage)
+                    {
+                        if (w < c.Bounds.Right)
+                            w = c.Bounds.Right;
+                        if (h < c.Bounds.Bottom)
+                            h = c.Bounds.Bottom;
+                    }
                 }
 
                 if (w != Width)
@@ -258,7 +265,7 @@ namespace ClassicUO.Game.Gumps
 
         public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
         {
-            if (IsDisposed /*|| ((Texture == null || Texture.IsDisposed) && Children.Count <= 0)*/)
+            if (IsDisposed)
             {
                 return false;
             }
@@ -269,10 +276,13 @@ namespace ClassicUO.Game.Gumps
 
             foreach (GumpControl c in Children)
             {
-                if (c.IsVisible)
+                if (c.Page == 0 || c.Page == ActivePage)
                 {
-                    Vector3 offset = new Vector3(c.X + position.X, c.Y + position.Y, position.Z);
-                    c.Draw(spriteBatch, offset);
+                    if (c.IsVisible && c.IsInitialize)
+                    {
+                        Vector3 offset = new Vector3(c.X + position.X, c.Y + position.Y, position.Z);
+                        c.Draw(spriteBatch, offset);
+                    }
                 }
             }
 
@@ -306,11 +316,14 @@ namespace ClassicUO.Game.Gumps
 
                 foreach (var c in Children)
                 {
-                    var cl = c.HitTest(position);
-                    if (cl != null)
+                    if (c.Page == 0 || c.Page == ActivePage)
                     {
-                        for (int i = cl.Length - 1; i >= 0; i--)
-                            results.Insert(0, cl[i]);
+                        var cl = c.HitTest(position);
+                        if (cl != null)
+                        {
+                            for (int i = cl.Length - 1; i >= 0; i--)
+                                results.Insert(0, cl[i]);
+                        }
                     }
                 }
             }
@@ -333,7 +346,11 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public void AddChildren(GumpControl c) => c.Parent = this;
+        public void AddChildren(GumpControl c, int page = 0)
+        {
+            c.Page = page;
+            c.Parent = this;
+        }
 
         public void RemoveChildren(GumpControl c) => c.Parent = null;
 
@@ -403,9 +420,13 @@ namespace ClassicUO.Game.Gumps
             else
                 _maxTimeForDClick = ms + 200;
 
-            if (button == MouseButton.Right && CanCloseWithRightClick)
+            if (button == MouseButton.Right)
             {
-                CloseWithRightClick();
+                OnMouseClick(x, y, button);
+                MouseClick.Raise(new MouseEventArgs(x, y, button, Microsoft.Xna.Framework.Input.ButtonState.Pressed));
+
+                if (CanCloseWithRightClick)
+                    CloseWithRightClick();
             }
             else
             {
@@ -441,12 +462,14 @@ namespace ClassicUO.Game.Gumps
 
         protected virtual void OnMouseDown(int x, int y, MouseButton button)
         {
-
+            if (Parent != null)
+                Parent.OnMouseDown(x, y, button);
         }
 
         protected virtual void OnMouseUp(int x, int y, MouseButton button)
         {
-
+            if (Parent != null)
+                Parent.OnMouseUp(x, y, button);
         }
 
         protected virtual void OnMouseEnter(int x, int y)
@@ -461,12 +484,14 @@ namespace ClassicUO.Game.Gumps
 
         protected virtual void OnMouseClick(int x, int y, MouseButton button)
         {
-
+            if (Parent != null)
+                Parent.OnMouseClick(x, y, button);
         }
 
         protected virtual void OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-
+            if (Parent != null)
+                Parent.OnMouseDoubleClick(x, y, button);
         }
 
         protected virtual void OnTextInput(string c)
@@ -495,6 +520,11 @@ namespace ClassicUO.Game.Gumps
         }
 
         protected virtual void OnInitialize()
+        {
+
+        }
+
+        protected virtual void OnClosing()
         {
 
         }
