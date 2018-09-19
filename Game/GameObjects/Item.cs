@@ -68,7 +68,7 @@ namespace ClassicUO.Game.GameObjects
         private Serial _container;
         private Graphic? _displayedGraphic;
         private bool _isMulti;
-        private StaticTiles? _itemData;
+        //private StaticTiles? _itemData;
         private Layer _layer;
 
         public Item(Serial serial) : base(serial)
@@ -89,6 +89,16 @@ namespace ClassicUO.Game.GameObjects
                     _amount = value;
                     _delta |= Delta.Attributes;
                 }
+            }
+        }
+
+        public override Graphic Graphic
+        {
+            get => base.Graphic;
+            set
+            {
+                Name = ItemData.Name;
+                base.Graphic = value;
             }
         }
 
@@ -204,6 +214,10 @@ namespace ClassicUO.Game.GameObjects
                             }
 
                             Multi = new Multi(this) { MinX = minX, MaxX = maxX, MinY = minY, MaxY = maxY, Components = components };
+
+                            var house = World.GetOrCreateHouse(Serial);
+                            house.GenerateOriginal(Multi);
+                            World.AddOrUpdateHouse(house);
                         }
                     }
                     else
@@ -240,13 +254,15 @@ namespace ClassicUO.Game.GameObjects
         {
             get
             {
-                if (!_itemData.HasValue)
-                {
-                    _itemData = TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic /*& 0xFFFF]*/];
-                    Name = _itemData.Value.Name;
-                }
+                //if (!_itemData.HasValue)
+                //{
+                //    _itemData = TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic /*& 0xFFFF]*/];
+                //    Name = _itemData.Value.Name;
+                //}
 
-                return _itemData.Value;
+                //return _itemData.Value;
+                
+                return TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
             }
         }
 

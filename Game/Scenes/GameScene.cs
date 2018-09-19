@@ -515,7 +515,11 @@ namespace ClassicUO.Game.Scenes
                 case MouseEvent.Click:
                     if (obj is Static st)
                     {
+                        if (string.IsNullOrEmpty(st.Name))
+                            TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
+
                         obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
+
                         _staticManager.Add(st);
                     }
                     else if (obj is Entity entity)
@@ -557,7 +561,7 @@ namespace ClassicUO.Game.Scenes
             _inqueue = true;
             _queuedObject = obj;
             _queuedPosition = point;
-            _dequeueAt = 400f;
+            _dequeueAt = 200f;
             _queuedEvent = e;
         }
 

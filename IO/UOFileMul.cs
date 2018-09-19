@@ -73,6 +73,12 @@ namespace ClassicUO.IO
             }
         }
 
+        public override void Unload()
+        {
+            _idxFile?.Unload();
+            base.Unload();
+        }
+
         private class UOFileIdxMul : UOFile
         {
             public UOFileIdxMul(string idxpath) : base(idxpath)

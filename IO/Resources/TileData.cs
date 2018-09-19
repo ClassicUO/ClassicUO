@@ -32,6 +32,9 @@ namespace ClassicUO.IO.Resources
         public static LandTiles[] LandData { get; private set; }
         public static StaticTiles[] StaticData { get; private set; }
 
+        const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
+        const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
+
         public static void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "tiledata.mul");
@@ -88,6 +91,69 @@ namespace ClassicUO.IO.Resources
                     StaticData[idx].Name = Encoding.UTF8.GetString(bufferString).TrimEnd('\0');
                 }
             }
+
+
+            tiledata.Unload();
+
+            //string pathdef = Path.Combine(FileManager.UoFolderPath, "art.def");
+            //if (!File.Exists(pathdef))
+            //    return;
+
+            //using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
+            //{
+            //    string line;
+            //    while ((line = reader.ReadLine()) != null)
+            //    {
+            //        line = line.Trim();
+            //        if (line.Length <= 0 || line[0] == '#')
+            //            continue;
+            //        string[] defs = line.Split(new[] { '\t', ' ', '#' }, StringSplitOptions.RemoveEmptyEntries);
+            //        if (defs.Length < 2)
+            //            continue;
+
+            //        int index = int.Parse(defs[0]);
+
+            //        if (index < 0 || index >= MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
+            //            continue;
+
+            //        int first = defs[1].IndexOf("{");
+            //        int last = defs[1].IndexOf("}");
+
+            //        string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            //        foreach (string s in newdef)
+            //        {
+            //            int checkindex = int.Parse(s);
+
+            //            if (checkindex < 0 || checkindex >= MAX_LAND_DATA_INDEX_COUNT + StaticData.Length)
+            //                continue;
+
+            //            //_file.Entries[index] = _file.Entries[checkindex];
+
+            //            if (index < MAX_LAND_DATA_INDEX_COUNT && checkindex < MAX_LAND_DATA_INDEX_COUNT && LandData.Length > checkindex && !LandData[checkindex].Equals(default) && (LandData.Length <= index  || LandData[index].Equals(default)))
+            //            {
+            //                LandData[index] = LandData[checkindex];
+            //            }
+            //            else if (index >= MAX_LAND_DATA_INDEX_COUNT && checkindex >= MAX_LAND_DATA_INDEX_COUNT)
+            //            {
+            //                checkindex -= MAX_LAND_DATA_INDEX_COUNT;
+            //                checkindex &= 0x3FFF;
+            //                index -= MAX_LAND_DATA_INDEX_COUNT;
+
+            //                if ( (StaticData.Length <= index || StaticData[index].Equals(default)) &&
+            //                    StaticData.Length > checkindex && !StaticData[checkindex].Equals(default))
+            //                {
+
+            //                    StaticData[index] = StaticData[checkindex];
+
+            //                    break;
+            //                }
+
+            //            }
+            //        }
+            //    }
+            //}
+
         }
 
 

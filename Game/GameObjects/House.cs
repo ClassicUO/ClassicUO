@@ -19,6 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using ClassicUO.Game.Map;
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.GameObjects
@@ -33,5 +34,35 @@ namespace ClassicUO.Game.GameObjects
         public uint Revision { get; set; }
 
         public new List<Static> Items { get; }
+
+        public void GenerateCustom()
+        {
+            foreach (var s in Items)
+            {
+                Tile tile = World.Map.GetTile(s.Position.X, s.Position.Y);
+                tile.AddGameObject(s);
+            }
+        }
+
+        public void GenerateOriginal(Multi multi)
+        {
+            foreach (var c in multi.Components)
+            {
+                Tile tile = World.Map.GetTile(c.Position.X, c.Position.Y);
+                tile.AddGameObject(new Static(c.Graphic, 0, 0) { Position = c.Position });
+            }
+        }
+
+        public override void Dispose()
+        {
+            Clear();
+            base.Dispose();
+        }
+
+        public void Clear()
+        {
+            //Items.ForEach(s => s.Dispose());
+            Items.Clear();
+        }
     }
 }

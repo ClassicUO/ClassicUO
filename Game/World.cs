@@ -103,11 +103,30 @@ namespace ClassicUO.Game
                     item.Update(totalMS, frameMS);
 
                     if (item.Distance > ViewRange && item.OnGround)
-                        RemoveItem(item);
-
+                    {
+                        if (_houses.ContainsKey(item))
+                        {
+                            if (item.Distance > ViewRange * 2 + 5)
+                            {
+                                RemoveItem(item);
+                                _houses.TryRemove(item, out _);
+                            }
+                        }
+                        else
+                            RemoveItem(item);
+                    }
                     if (item.IsDisposed)
                         Items.Remove(item);
                 }
+
+                //foreach (var k in _houses)
+                //{
+                //    if (k.Value.Distance > ViewRange * 2 + 5)
+                //        k.Value.Dispose();
+
+                //    if (k.Value.IsDisposed)
+                //        _houses.TryRemove(k.Key, out _);
+                //}
             }
         }
 

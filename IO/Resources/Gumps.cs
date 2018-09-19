@@ -85,9 +85,6 @@ namespace ClassicUO.IO.Resources
                 var pixels = GetGumpPixels(g, out int w, out int h);
                 texture = new SpriteTexture(w, h, false);
                 texture.SetData(pixels);
-                //texture.SetDataForHitBox(pixels);
-                //fixed (ushort* ptr = pixels)
-                //    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
 
                 _usedIndex.Add(g);
             }
@@ -142,7 +139,7 @@ namespace ClassicUO.IO.Resources
                 return null;
 
 
-            width = PaddedRowWidth(16, width, 4) / 2;
+            //width = PaddedRowWidth(16, width, 4) / 2;
 
             IntPtr dataStart = _file.PositionAddress;
 
