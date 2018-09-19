@@ -36,6 +36,17 @@ namespace ClassicUO.Game.Gumps
             Texture = IO.Resources.Gumps.GetGumpTexture(graphic);
         }
 
+        public GumpPicTiled(int x, int y, int width, int heigth, Graphic graphic) : base()
+        {
+            X = x;
+            Y = y;
+            Width = width;
+            Height = heigth;
+            _graphic = graphic;
+            CanMove = true;
+            Texture = IO.Resources.Gumps.GetGumpTexture(graphic);
+        }
+
         public GumpPicTiled(string[] parts) : this(Graphic.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);

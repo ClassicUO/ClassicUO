@@ -56,7 +56,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     MiniMapGump.Toggle(_scene);
                     break;
                 case Buttons.Paperdoll:
-                    Service.Get<Log>().Message(LogTypes.Warning, "Paperdoll button pushed! Not implemented yet!");
+                    PaperDollGump.Toggle(World.Player, World.Player.Name);
                     break;
                 case Buttons.Inventory:
                     Service.Get<Log>().Message(LogTypes.Warning, "Inventory button pushed! Not implemented yet!");
