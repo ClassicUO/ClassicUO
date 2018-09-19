@@ -87,5 +87,11 @@ namespace ClassicUO.Game.Gumps.Controls
                 OnButtonClick(0);
             base.CloseWithRightClick();
         }
+
+        public override void ChangePage(int pageIndex)
+        {
+            // For a gump, Page is the page that is drawing.
+            ActivePage = pageIndex;
+        }
     }
 }

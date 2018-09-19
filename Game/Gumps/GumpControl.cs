@@ -39,6 +39,8 @@ namespace ClassicUO.Game.Gumps
         private Point _lastClickPosition;
         private float _maxTimeForDClick;
         private bool _acceptKeyboardInput, _acceptMouseInput;
+        private int _activePage;
+        private bool _handlesKeyboardFocus;
 
 
         protected GumpControl(GumpControl parent = null)
@@ -46,6 +48,7 @@ namespace ClassicUO.Game.Gumps
             Parent = parent;
             _children = new List<GumpControl>();
             IsEnabled = true;
+            IsInitialized = true;
             IsVisible = true;
             AllowedToDraw = true;
 
@@ -62,6 +65,7 @@ namespace ClassicUO.Game.Gumps
         public bool AllowedToDraw { get; set; }
         public SpriteTexture Texture { get; set; }
         public Vector3 HueVector { get; set; }
+        public int Page { get; set; }
 
         public Point Location
         {
@@ -75,9 +79,20 @@ namespace ClassicUO.Game.Gumps
             set => _bounds = value;
         }
 
+        public Point Size
+        {
+            get { return new Point(_bounds.Width, _bounds.Height); }
+            set
+            {
+                _bounds.Width = value.X;
+                _bounds.Height = value.Y;
+            }
+        }
+
         public bool IsDisposed { get; private set; }
         public bool IsVisible { get; set; }
         public bool IsEnabled { get; set; }
+        public bool IsInitialized { get; set; }
         public bool IsFocused { get; protected set; }
         public bool MouseIsOver { get; protected set; }
         public virtual bool CanMove { get; set; }
@@ -85,6 +100,8 @@ namespace ClassicUO.Game.Gumps
         public bool CanCloseWithEsc { get; set; }
         public bool IsEditable { get; set; }
         public IReadOnlyList<GumpControl> Children => _children;
+
+        
 
         public virtual bool AcceptKeyboardInput
         {
@@ -485,6 +502,69 @@ namespace ClassicUO.Game.Gumps
         {
             if (Parent != null)
                 Parent.OnKeybaordReturn(textID, text);
+        }
+        public virtual void ChangePage(int pageIndex)
+        {
+            if (Parent != null)
+                Parent.ChangePage(pageIndex);
+        }
+
+        public virtual bool HandlesKeyboardFocus
+        {
+            get
+            {
+                if (!IsEnabled || !IsInitialized || IsDisposed || !IsVisible)
+                    return false;
+
+                if (_handlesKeyboardFocus)
+                    return true;
+
+                if (_children == null)
+                    return false;
+
+                foreach (GumpControl c in _children)
+                    if (c.HandlesKeyboardFocus)
+                        return true;
+
+                return false;
+            }
+            set
+            {
+                _handlesKeyboardFocus = value;
+            }
+        }
+
+        public int ActivePage
+        {
+            
+            get { return _activePage; }
+            set
+            {
+                var _uiManager = Service.Get<UIManager>();
+                _activePage = value;
+                
+                if (_uiManager.KeyboardFocusControl != null)
+                {
+                    if (Children.Contains(_uiManager.KeyboardFocusControl))
+                    {
+                        if (_uiManager.KeyboardFocusControl.Page != 0)
+                            _uiManager.KeyboardFocusControl = null;
+                    }
+                }
+                // When ActivePage changes, check to see if there are new text input boxes
+                // that we should redirect text input to.
+                if (_uiManager.KeyboardFocusControl == null)
+                {
+                    foreach (GumpControl c in Children)
+                    {
+                        if (c.HandlesKeyboardFocus && (c.Page == _activePage))
+                        {
+                            _uiManager.KeyboardFocusControl = c;
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         public virtual void Dispose()

@@ -32,6 +32,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using ClassicUO.Game.Gumps.UIGumps;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -47,6 +48,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool _rightMousePressed;
         private WorldViewportGump _viewPortGump;
+        private TopBarGump _topBarGump;
         private StaticManager _staticManager;
 
         private static Hue _savedHue;
@@ -103,12 +105,15 @@ namespace ClassicUO.Game.Scenes
             _staticManager = new StaticManager();
 
             UIManager.Add(_viewPortGump = new WorldViewportGump(this));
+            UIManager.Add(_topBarGump = new TopBarGump(this));
         }
 
 
         public override void Unload()
         {
+            _topBarGump.Dispose();
             Service.Unregister<GameScene>();
+
             _viewPortGump.Dispose();
             CleaningResources();
             base.Unload();

@@ -232,6 +232,7 @@ namespace ClassicUO.Renderer
                 sb.Draw2D(Texture, v, Vector3.Zero);
 
 
+
                 // tooltip testing, very nice!
                 //sb.Draw2D(_blackTexture, new Rectangle(ScreenPosition.X + _cursorOffset[0, id] - 100, ScreenPosition.Y + _cursorOffset[1, id] - 50, 100, 50), RenderExtentions.GetHueVector(0, false, true, false));
             }

@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public ResizePic(string[] parts) : this(Graphic.Parse(parts[3]))
+        public ResizePic( string[] parts) : this(Graphic.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
