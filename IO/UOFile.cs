@@ -67,6 +67,12 @@ namespace ClassicUO.IO
                 throw new UOFileException($"{Path} size must has > 0");
         }
 
+        public virtual void Unload()
+        {
+            _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
+            Entries = null;
+        }
+
      
         internal void Fill(byte[] buffer,  int count)
         {

@@ -32,7 +32,7 @@ namespace ClassicUO.IO
         private readonly bool _hasExtra;
         private int _count;
 
-        public UOFileUop(string path,  string extension,  int count = 0,  bool hasextra = false) : base(path)
+        public UOFileUop(string path, string extension, int count = 0, bool hasextra = false) : base(path)
         {
             _extension = extension;
             _count = count;
@@ -129,6 +129,7 @@ namespace ClassicUO.IO
                 Seek(nextBlock);
             } while (nextBlock != 0);
         }
+
 
         internal long GetOffsetFromUOP(long offset)
         {
