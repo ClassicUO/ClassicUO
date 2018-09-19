@@ -19,6 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -37,6 +38,7 @@ namespace ClassicUO.Game.Gumps
         public Hue Hue { get; set; }
         public bool IsPaperdoll { get; set; }
 
+       
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -62,6 +64,14 @@ namespace ClassicUO.Game.Gumps
             Graphic = graphic;
         }
 
+        public GumpPic(int x, int y, Graphic graphic, Hue hue) : base()
+        {
+            X = x;
+            Y = y;
+            Graphic = graphic;
+            Hue = hue;
+        }
+
         public GumpPic(string[] parts) : this(Graphic.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
@@ -71,6 +81,7 @@ namespace ClassicUO.Game.Gumps
                 Hue = Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1));
         }
 
+       
 
         public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
         {

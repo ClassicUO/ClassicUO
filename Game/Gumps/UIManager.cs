@@ -32,6 +32,7 @@ namespace ClassicUO.Game.Gumps
 {
     public class UIManager
     {
+        public IReadOnlyList<Gump> Gumps => _gumps;
         private readonly List<Gump> _gumps = new List<Gump>();
         private GumpControl _mouseOverControl, _keyboardFocusControl;
         private readonly GumpControl[] _mouseDownControls = new GumpControl[5];
