@@ -135,6 +135,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Item[] Equipment { get; } = new Item[(int)Layer.Bank + 1];
 
+        public bool IsPickable => ItemData.Weight < 255;
 
         public Graphic DisplayedGraphic
         {

@@ -21,5 +21,8 @@ namespace ClassicUO.Game
 
         public static void SayParty(string message)
             => Socket.Send(new PPartyMessage(message, World.Player));
+
+        public static void PickUp(Serial serial, ushort count)
+            => Socket.Send(new PPickUpRequest(serial, count));
     }
 }

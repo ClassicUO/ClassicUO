@@ -59,7 +59,6 @@ namespace ClassicUO.Game.Scenes
 
         public GameScene()
         {
-            
         }
 
         public int Width { get; set; } = 800;
@@ -513,44 +512,155 @@ namespace ClassicUO.Game.Scenes
             switch (e.EventType)
             {
                 case MouseEvent.Down:
+                    {
+                        _dragginObject = obj;
+                        _dragOffset = point;
+                    }
                     break;
                 case MouseEvent.Click:
-                    if (obj is Static st)
                     {
-                        if (string.IsNullOrEmpty(st.Name))
-                            TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
+                        if (obj is Static st)
+                        {
+                            if (string.IsNullOrEmpty(st.Name))
+                                TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
 
-                        obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
+                            obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
 
-                        _staticManager.Add(st);
-                    }
-                    else if (obj is Entity entity)
-                    {
-                        GameActions.SingleClick(entity);
+                            _staticManager.Add(st);
+                        }
+                        else if (obj is Entity entity)
+                        {
+                            GameActions.SingleClick(entity);
+                        }
                     }
                     break;
                 case MouseEvent.DoubleClick:
-                    if (obj is Item item)
                     {
-                        GameActions.DoubleClick(item);
-                    }
-                    else if (obj is Mobile mob)
-                    {
-                        //TODO: attack request also
-                        if (World.Player.InWarMode)
+                        if (obj is Item item)
                         {
-
+                            GameActions.DoubleClick(item);
                         }
-                        else
-                            GameActions.DoubleClick(mob);
+                        else if (obj is Mobile mob)
+                        {
+                            //TODO: attack request also
+                            if (World.Player.InWarMode)
+                            {
+
+                            }
+                            else
+                                GameActions.DoubleClick(mob);
+                        }
                     }
                     break;
                 case MouseEvent.DragBegin:
+                    {
+                        if (obj is Mobile mobile)
+                        {
+                            // get the lifebar
+                        }
+                        else if (obj is Item item)
+                        {
+                            PicupItemBegin(item, _dragOffset.X, _dragOffset.Y);
+                        }
+                    }
                     break;
             }
 
             e.IsHandled = true;
         }
+
+        private GameObject _dragginObject;
+        private Point _dragOffset, _heldOffset;
+        private Item _heldItem;
+
+        public Item HeldItem
+        {
+            get => _heldItem;
+            set
+            {
+                if (value == null && _heldItem != null)
+                {
+                    UIManager.RemoveInputBlocker(this);
+                }
+                else if (value != null && _heldItem == null)
+                {
+                    UIManager.RemoveInputBlocker(this);
+                }
+
+                _heldItem = value;
+            }
+        }
+        public bool IsHoldingItem => HeldItem != null;
+
+
+
+        private void PicupItemBegin(Item item, int x, int y, int? amount = null)
+        {
+            // TODO: AMOUNT CHECK
+
+            PickupItemDirectly(item, x, y, amount.HasValue ? amount.Value : item.Amount);
+        }
+
+        private void PickupItemDirectly(Item item, int x, int y, int amount)
+        {
+            if (!item.IsPickable)
+                return;
+
+            if (item.Container.IsValid)
+            {
+                var entity = World.Get(item.Container);
+                item.Position = entity.Position;
+                entity.Items.Remove(item);
+            }
+
+            item.Amount = (ushort)amount;
+            HeldItem = item;
+            _heldOffset = new Point(x, y);
+            GameActions.PickUp(item, (ushort)amount);
+        }
+
+        private void DropHelItemToWorld(ushort x, ushort y, sbyte z)
+        {
+            GameObject obj = SelectedObject;
+            Serial serial;
+            if (obj is Item item && IO.Resources.TileData.IsContainer((long)item.ItemData.Flags))
+            {
+                serial = item;
+                x = y = 0xFFFF;
+                z = 0;
+            }
+            else
+                serial = Serial.MinusOne;
+
+            NetClient.Socket.Send(new PDropRequestNew(HeldItem.Serial, x, y, z, 0, serial));
+            HeldItem = null;
+        }
+
+        private void DropHeldItemToContainer(Item container)
+        {
+
+        }
+
+        private void DropHeldItemToContainer(Item container, ushort x, ushort y)
+        {
+
+        }
+
+        private void WearHeldItem()
+        {
+            NetClient.Socket.Send(new PEquipRequest(HeldItem, Layer.Invalid, World.Player));
+            ClearHolding();
+        }
+
+        private void ClearHolding() => HeldItem = null;
+
+
+
+
+
+
+
+
 
         private GameObject _queuedObject;
         private Point _queuedPosition;
@@ -586,6 +696,14 @@ namespace ClassicUO.Game.Scenes
             _queuedEvent = null;
             _queuedObject = null;
         }
+
+
+
+
+
+
+
+
 
         private void MoveCharacterByInputs()
         {

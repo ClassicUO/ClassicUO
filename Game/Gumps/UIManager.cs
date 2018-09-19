@@ -36,6 +36,7 @@ namespace ClassicUO.Game.Gumps
         private GumpControl _mouseOverControl, _keyboardFocusControl;
         private readonly GumpControl[] _mouseDownControls = new GumpControl[5];
         private readonly CursorRenderer _cursor;
+        private readonly List<object> _inputBlockingObjects = new List<object>();
 
        
         public UIManager()
@@ -86,6 +87,32 @@ namespace ClassicUO.Game.Gumps
         }
 
         public bool IsOnWorld => MouseOverControl != null && MouseOverControl is WorldViewport;
+
+
+        private bool ObjectsBlockingInputExists => _inputBlockingObjects.Count > 0;
+
+        public void AddInputBlocker(object obj)
+        {
+            if (!_inputBlockingObjects.Contains(obj))
+                _inputBlockingObjects.Add(obj);
+        }
+
+        public void RemoveInputBlocker(object obj)
+        {
+            if (_inputBlockingObjects.Contains(obj))
+                _inputBlockingObjects.Remove(obj);
+        }
+
+
+
+
+
+
+
+
+
+
+
 
         public GumpControl Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
         {
