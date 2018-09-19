@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Renderer;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -51,24 +52,40 @@ namespace ClassicUO.IO.Resources
 
             _textmapCache = new SpriteTexture[TEXTMAP_COUNT];
 
-            string pathdef = Path.Combine(FileManager.UoFolderPath, "texterr.def");
-            if (File.Exists(pathdef))
+            string pathdef = Path.Combine(FileManager.UoFolderPath, "TexTerr.def");
+            if (!File.Exists(pathdef))
+                return;
+
+            using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
             {
-                using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
+                string line;
+                while ((line = reader.ReadLine()) != null)
                 {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
+                    line = line.Trim();
+                    if (line.Length <= 0 || line[0] == '#')
+                        continue;
+                    string[] defs = line.Split(new[] { '\t', ' ', '#' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (defs.Length < 2)
+                        continue;
+
+                    int index = int.Parse(defs[0]);
+
+                    if (index < 0 || index >= TEXTMAP_COUNT)
+                        continue;
+
+                    int first = defs[1].IndexOf("{");
+                    int last = defs[1].IndexOf("}");
+
+                    string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (string s in newdef)
                     {
-                        line = line.Trim();
-                        if (line.Length <= 0 || line[0] == '#')
-                            continue;
-                        string[] defs = line.Replace('\t', ' ').Split(' ');
-                        if (defs.Length != 3)
+                        int checkindex = int.Parse(s);
+
+                        if (checkindex < 0 || checkindex >= TEXTMAP_COUNT)
                             continue;
 
-                        int checkindex = int.Parse(defs[1].Replace("{", string.Empty).Replace("}", string.Empty));
-
-
+                        _file.Entries[index] = _file.Entries[checkindex];
                     }
                 }
             }

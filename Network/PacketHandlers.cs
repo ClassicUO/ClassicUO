@@ -633,7 +633,17 @@ namespace ClassicUO.Network
 
         private static void DeleteObject(Packet p)
         {
+            if (World.Player == null)
+                return;
+
             Serial serial = p.ReadUInt();
+
+            if (World.Player == serial)
+                return;
+
+            if (World.Get(serial) == null)
+                return;
+
             if (serial.IsItem)
             {
                 if (World.RemoveItem(serial))
@@ -798,6 +808,10 @@ namespace ClassicUO.Network
 
         private static void OpenContainer(Packet p)
         {
+            if (World.Player == null)
+                return;
+
+
         }
 
         private static void UpdateContainedItem(Packet p)
@@ -859,8 +873,13 @@ namespace ClassicUO.Network
             item.Amount = 1;
 
             Mobile mobile = World.Mobiles.Get(item.Container);
-            mobile.Equipment[(int)item.Layer] = item;
-            mobile?.Items.Add(item);
+
+            if (mobile != null) // could it render bad mobiles?
+            {
+                mobile.Equipment[(int)item.Layer] = item;
+                mobile.Items.Add(item);
+            }
+
             item.ProcessDelta();
             if (World.Items.Add(item))
             {
@@ -1019,7 +1038,7 @@ namespace ClassicUO.Network
 
         private static void ClientViewRange(Packet p)
         {
-            //World.ViewRange = p.ReadByte();
+            World.ViewRange = p.ReadByte();
         }
 
         private static void BulletinBoardData(Packet p)
@@ -1446,8 +1465,9 @@ namespace ClassicUO.Network
                 entity.Graphic = graphic;
                 entity.Name = name;
                 entity.ProcessDelta();
-                Chat.OnMessage(entity, new UOMessageEventArgs(text, hue, type, 0, true, lang));
             }
+
+            Chat.OnMessage(entity, new UOMessageEventArgs(text, hue, type, 0, true, lang));
         }
 
         private static void OpenGump(Packet p)
@@ -1744,6 +1764,9 @@ namespace ClassicUO.Network
 
         private static void DisplayClilocString(Packet p)
         {
+            if (World.Player == null)
+                return;
+
             Serial serial = p.ReadUInt();
             Entity entity = World.Mobiles.Get(serial);
             ushort graphic = p.ReadUShort();
@@ -1751,8 +1774,17 @@ namespace ClassicUO.Network
             Hue hue = p.ReadUShort();
             MessageFont font = (MessageFont)p.ReadUShort();
             uint cliloc = p.ReadUInt();
+            byte flags = p.ID == 0xCC ? p.ReadByte() : (byte)0;
             string name = p.ReadASCII(30);
-            string text = Cliloc.GetString((int)cliloc);
+
+            string arguments = null;
+            if (p.Position < p.Length)
+                arguments = p.ReadUnicodeReversed(p.Length - p.Position);
+
+            string text = Cliloc.Translate(Cliloc.GetString((int)cliloc), arguments);
+
+            if (!Fonts.UnicodeFontExists((byte)font))
+                font = MessageFont.Bold;
 
             if (entity != null)
             {
@@ -1760,6 +1792,8 @@ namespace ClassicUO.Network
                 entity.Name = name;
                 entity.ProcessDelta();
             }
+
+            Chat.OnMessage(entity, new UOMessageEventArgs(text, hue, type, font, true));
         }
 
         private static void UnicodePrompt(Packet p)

@@ -39,7 +39,6 @@ namespace ClassicUO.Game
         public static Facet Map { get; private set; }
         public static byte ViewRange { get; set; } = 24;
 
-        public static List<RenderedText> OverHeads { get; } = new List<RenderedText>();
 
         public static int MapIndex
         {
@@ -90,7 +89,7 @@ namespace ClassicUO.Game
                     mob.Update(totalMS, frameMS);
 
                     if (mob.Distance > ViewRange)
-                        mob.Dispose();
+                        RemoveMobile(mob);
 
                     if (mob.IsDisposed)
                         Mobiles.Remove(mob);
@@ -101,7 +100,7 @@ namespace ClassicUO.Game
                     item.Update(totalMS, frameMS);
 
                     if (item.Distance > ViewRange && item.OnGround)
-                        item.Dispose();
+                        RemoveItem(item);
 
                     if (item.IsDisposed)
                         Items.Remove(item);
@@ -169,12 +168,24 @@ namespace ClassicUO.Game
 
         public static Item GetOrCreateItem(Serial serial)
         {
-            return Items.Get(serial) ?? new Item(serial);
+            Item item = Items.Get(serial);
+            if (item == null || item.IsDisposed)
+            {
+                Items.Remove(serial);
+                item = new Item(serial);
+            }
+            return item;
         }
 
         public static Mobile GetOrCreateMobile(Serial serial)
         {
-            return Mobiles.Get(serial) ?? new Mobile(serial);
+            Mobile mob = Mobiles.Get(serial);
+            if (mob == null || mob.IsDisposed)
+            {
+                Mobiles.Remove(serial);
+                mob = new Mobile(serial);
+            }
+            return mob;
         }
 
         public static bool RemoveItem(Serial serial)
@@ -224,8 +235,6 @@ namespace ClassicUO.Game
 
         public static void Clear(bool noplayer = false)
         {
-            OverHeads.Clear();
-
             if (!noplayer)
             {
                 Map = null;

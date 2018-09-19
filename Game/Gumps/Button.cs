@@ -69,9 +69,7 @@ namespace ClassicUO.Game.Gumps
 
             _gText = new RenderedText()
             {
-                IsUnicode = true,
-                
-
+                IsUnicode = true,            
             };
 
             CanMove = false;
@@ -191,6 +189,7 @@ namespace ClassicUO.Game.Gumps
                 {
                     _gText.Draw(spriteBatch, position);
                 }
+
 
 
 

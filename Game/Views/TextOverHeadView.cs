@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Views
                 Hue = hue,
                 Font = font,
                 IsUnicode = isunicode,
-                FontStyle = style
+                FontStyle = style,              
             };
 
             Texture = _text.Texture;

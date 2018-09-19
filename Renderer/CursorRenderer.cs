@@ -20,9 +20,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Game;
+using ClassicUO.Game.Gumps;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace ClassicUO.Renderer
 {
@@ -34,14 +36,13 @@ namespace ClassicUO.Renderer
 
         private Texture2D _blackTexture;
         private Graphic _graphic = 0x2073;
-
         private bool _needGraphicUpdate;
-
         private InputManager _inputManager;
-
-        public CursorRenderer()
+        private UIManager _uiManager;
+        public CursorRenderer(UIManager ui)
         {
             _inputManager = Service.Get<InputManager>();
+            _uiManager = ui;
 
             for (int i = 0; i < 2; i++)
             {
@@ -188,13 +189,22 @@ namespace ClassicUO.Renderer
         public SpriteTexture Texture { get; private set; }
         public Point ScreenPosition => _inputManager.MousePosition;
 
+
         public void Update(double totalMS, double frameMS)
         {
+            Graphic = AssignGraphicByState();
+
             if (Texture == null || Texture.IsDisposed || _needGraphicUpdate)
             {
+                if (Texture != null && !Texture.IsDisposed)
+                    Texture.Dispose();
+
                 Texture = IO.Resources.Art.GetStaticTexture(Graphic);
-                _blackTexture = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
-                _blackTexture.SetData(new[] { Color.Black });
+                
+                //_blackTexture = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
+                //_blackTexture.SetData(new[] { Color.Black });
+
+
                 _needGraphicUpdate = false;
             }
             else
@@ -222,9 +232,99 @@ namespace ClassicUO.Renderer
                 sb.Draw2D(Texture, v, Vector3.Zero);
 
 
-                //        // tooltip testing, very nice!
+
+                // tooltip testing, very nice!
                 //sb.Draw2D(_blackTexture, new Rectangle(ScreenPosition.X + _cursorOffset[0, id] - 100, ScreenPosition.Y + _cursorOffset[1, id] - 50, 100, 50), RenderExtentions.GetHueVector(0, false, true, false));
             }
+        }
+
+
+        private ushort AssignGraphicByState()
+        {
+            int war = World.InGame && World.Player.InWarMode ? 1 : 0;
+            ushort result = _cursorData[war, 9];
+
+            if (!_uiManager.IsOnWorld)
+                return result;
+
+            int windowCenterX = 400;
+            int windowCenterY = 300;
+
+            return _cursorData[war, GetMouseDirection(windowCenterX, windowCenterY, ScreenPosition.X, ScreenPosition.Y, 1)];
+        }
+
+
+        private int GetMouseDirection(int x1, int y1, int to_x, int to_y, int current_facing)
+        {
+            int shiftX = to_x - x1;
+            int shiftY = to_y - y1;
+
+            int hashf = 100 * (Sgn(shiftX) + 2) + 10 * (Sgn(shiftY) + 2);
+
+            if ((shiftX != 0) && (shiftY != 0))
+            {
+                shiftX = Math.Abs(shiftX);
+                shiftY = Math.Abs(shiftY);
+
+                if ((shiftY * 5) <= (shiftX * 2))
+                    hashf = hashf + 1;
+                else if ((shiftY * 2) >= (shiftX * 5))
+                    hashf = hashf + 3;
+                else
+                    hashf = hashf + 2;
+            }
+            else if (shiftX <= 0)
+            {
+                if (shiftY <= 0)
+                    return current_facing;
+            }
+
+            switch (hashf)
+            {
+                case 111:
+                    return (int)Direction.West; // W
+                case 112:
+                    return (int)Direction.Up; // NW
+                case 113:
+                    return (int)Direction.North; // N
+                case 120:
+                    return (int)Direction.West; // W
+                case 131:
+                    return (int)Direction.West; // W
+                case 132:
+                    return (int)Direction.Left; // SW
+                case 133:
+                    return (int)Direction.South; // S
+                case 210:
+                    return (int)Direction.Right; // N
+                case 230:
+                    return (int)Direction.South; // S
+                case 311:
+                    return (int)Direction.East; // E
+                case 312:
+                    return (int)Direction.Right; // NE
+                case 313:
+                    return (int)Direction.North; // N
+                case 320:
+                    return (int)Direction.East; // E
+                case 331:
+                    return (int)Direction.East; // E
+                case 332:
+                    return (int)Direction.Down; // SE
+                case 333:
+                    return (int)Direction.South; // S
+                default:
+                    break;
+            }
+
+            return current_facing;
+        }
+
+        private int Sgn(int val)
+        {
+            int a = 0 < val ? 1 : 0;
+            int b = val < 0 ? 1 : 0;
+            return a - b;
         }
     }
 }

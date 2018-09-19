@@ -141,10 +141,11 @@ namespace ClassicUO.Game.Views
                 Tile tile = (Tile)GameObject;
                 sbyte low = 0, high = 0;
                 sbyte sort = (sbyte)map.GetAverageZ(GameObject.Position.Z, leftZ, rightZ, bottomZ, ref low, ref high);
-                tile.MinZ = low;
                 tile.AverageZ = sort;
                 if (sort != SortZ)
                 {
+                    tile.MinZ = low;
+
                     SortZ = sort;
                     map.GetTile((short)GameObject.Position.X, (short)GameObject.Position.Y).ForceSort();
                 }
