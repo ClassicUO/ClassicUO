@@ -506,7 +506,15 @@ namespace ClassicUO.Game.Scenes
                                     else
                                     {
                                         SelectedObject = item;
-                                        //TODO: target
+                                        
+                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && IO.Resources.TileData.IsStackable((long)dyn1.ItemData.Flags))
+                                        {
+                                            MergeHeldItem(item);
+                                        }
+                                        else
+                                        {
+                                            DropHelItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + dyn.ItemData.Height));
+                                        }
                                     }
                                 }
                                 else

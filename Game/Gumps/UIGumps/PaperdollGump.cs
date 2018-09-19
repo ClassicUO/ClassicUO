@@ -13,8 +13,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     class PaperDollGump : Gump
     {
-
-
         private bool _isWarMode;
         private Button _warModeBtn;
         private readonly ushort[] PeaceModeBtnGumps = { 0x07e5, 0x07e6, 0x07e7 };
@@ -40,7 +38,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 BuildGump();
             }
-
         }
 
         public Mobile Mobile
@@ -58,7 +55,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public static void Toggle(Serial serial, string mobileTitle)
         {
             var ui = Service.Get<UIManager>();
-            if (ui.Get<PaperDollGump>() == null)
+            var gump = ui.Get<PaperDollGump>();
+            if (gump == null || gump.IsDisposed)
             {
                 ui.Add(_self = new PaperDollGump(serial, mobileTitle));
             }
@@ -66,10 +64,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 _self.Dispose();
             }
-
-
         }
 
+        public override void Dispose()
+        {
+            if (Mobile == World.Player)
+            {
+                _virtueMenuPic.MouseDoubleClick -= VirtueMenu_MouseDoubleClickEvent;
+                _partyManifestPic.MouseDoubleClick -= PartyManifest_MouseDoubleClickEvent;
+            }
+            Clear();
+            base.Dispose();
+        }
 
         private void BuildGump()
         {

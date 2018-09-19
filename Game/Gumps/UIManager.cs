@@ -260,9 +260,14 @@ namespace ClassicUO.Game.Gumps
 
             for (int i = 0; i < _gumps.Count; i++)
             {
-                _gumps[i].Update(totalMS, frameMS);
+                var g = _gumps[i];
 
-                if (_gumps[i].IsDisposed)
+                if (!g.IsInitialize && !g.IsDisposed)
+                    g.Initialize();
+
+                g.Update(totalMS, frameMS);
+
+                if (g.IsDisposed)
                     _gumps.RemoveAt(i--);
             }
 
@@ -279,8 +284,8 @@ namespace ClassicUO.Game.Gumps
             for (int i = _gumps.Count - 1; i >= 0; i--)
             {
                 var g = _gumps[i];
-                g.Draw(spriteBatch,
-                    new Vector3(g.X, g.Y, 0));
+
+                g.Draw(spriteBatch, new Vector3(g.X, g.Y, 0));
             }
 
             _cursor.Draw(spriteBatch);

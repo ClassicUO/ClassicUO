@@ -236,14 +236,16 @@ namespace ClassicUO.Game.Gumps
         {
             base.Dispose();
 
-            _gText.Dispose();
-            _gText = null;
+            if (_gText != null)
+            {
+                _gText.Dispose();
+                _gText = null;
+            }
 
             for (int i = 0; i < _textures.Length; i++)
             {
                 if (_textures[i] != null)
                     _textures[i].Dispose();
-                //_textures[i] = null;
             }
         }
     }

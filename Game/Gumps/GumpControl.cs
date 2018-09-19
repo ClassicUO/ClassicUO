@@ -47,9 +47,9 @@ namespace ClassicUO.Game.Gumps
         {
             Parent = parent;
             _children = new List<GumpControl>();
-            IsEnabled = true;
-            IsInitialized = true;
-            IsVisible = true;
+            //IsEnabled = true;
+            //IsInitialized = true;
+            //IsVisible = true;
             AllowedToDraw = true;
 
             AcceptMouseInput = true;
@@ -197,6 +197,37 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        public bool IsInitialize { get; private set; }
+
+        public void Initialize()
+        {
+            IsDisposed = false;
+            IsEnabled = true;
+            IsInitialize = true;
+            IsVisible = true;
+            InitializeControls();
+            OnInitialize();
+        }
+
+        private void InitializeControls()
+        {
+            bool initializedKeyboardFocusedControl = false;
+
+            foreach (var c in _children)
+            {
+                if (!c.IsInitialized)
+                {
+                    c.Initialize();
+
+                    if (!initializedKeyboardFocusedControl && c.AcceptKeyboardInput)
+                    {
+                        Service.Get<UIManager>().KeyboardFocusControl = c;
+                        initializedKeyboardFocusedControl = true;
+                    }
+                }
+            }
+        }
+
         public virtual void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
@@ -227,12 +258,12 @@ namespace ClassicUO.Game.Gumps
 
         public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
         {
-            if (IsDisposed || ((Texture == null || Texture.IsDisposed) && Children.Count <= 0))
+            if (IsDisposed /*|| ((Texture == null || Texture.IsDisposed) && Children.Count <= 0)*/)
             {
                 return false;
             }
 
-            if (Texture != null)
+            if (Texture != null && !Texture.IsDisposed)
                 Texture.Ticks = World.Ticks;
 
 
@@ -459,6 +490,11 @@ namespace ClassicUO.Game.Gumps
         }
 
         protected virtual void OnMove()
+        {
+
+        }
+
+        protected virtual void OnInitialize()
         {
 
         }
