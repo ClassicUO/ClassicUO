@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Gumps
         {
             if (Texture == null || Texture.IsDisposed)
             {
-                Texture = IO.Resources.Gumps.GetGumpTexture(_graphic);
+                Texture = IO.Resources.Art.GetStaticTexture(_graphic);
                 Width = Texture.Width;
                 Height = Texture.Height;
             }

@@ -14,22 +14,23 @@ namespace ClassicUO.Game.Gumps
         private readonly TextEntry _entry;
 
 
-        public TextBox(byte font, int maxcharlength = -1, int maxlength = 0, bool isunicode = true, FontStyle style = FontStyle.None) : base()
+        public TextBox(byte font, int maxcharlength = -1, int maxlength = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0) : base()
         {
-            _entry = new TextEntry(font, maxcharlength, maxlength, isunicode, style);
+            _entry = new TextEntry(font, maxcharlength, maxlength, isunicode, style, hue);
+           
+            Hue = hue;
 
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
             IsEditable = true;
         }
 
-        public TextBox(string[] parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, int.Parse(parts[3]))
+        public TextBox(string[] parts, string[] lines) : this( font: 1, maxcharlength: parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, maxlength: int.Parse(parts[3]), style: FontStyle.BlackBorder, hue: Hue.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
             Width = int.Parse(parts[3]);
             Height = int.Parse(parts[4]);
-            Hue = Hue.Parse(parts[5]);
             Graphic = Graphic.Parse(parts[6]);
             SetText(lines[int.Parse(parts[7])]);
         }
