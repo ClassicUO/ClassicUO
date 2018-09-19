@@ -40,6 +40,32 @@ namespace ClassicUO.Input
 
         public IEnumerable<InputMouseEvent> GetMouseEvents() => _events.Where(s => s is InputMouseEvent e && !e.IsHandled).Cast<InputMouseEvent>();
 
+        public bool HandleMouseEvent(MouseEvent type, MouseButton button)
+        {
+            foreach (var e in _events)
+            {
+                if (!e.IsHandled && e is InputMouseEvent me && me.EventType == type && me.Button == button)
+                {
+                    e.IsHandled = true;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool HandleKeybaordEvent(KeyboardEvent type, SDL2.SDL.SDL_Keycode key, bool shift, bool alt, bool ctrl)
+        {
+            foreach (var e in _events)
+            {
+                if (!e.IsHandled && e is InputKeyboardEvent ke && ke.EventType == type && ke.KeyCode == key && ke.Shift == shift && ke.Alt == alt && ke.Control == ctrl)
+                {
+                    e.IsHandled = true;
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void Update(double totalMS, double frameMS)
         {
             _time = (float)totalMS;

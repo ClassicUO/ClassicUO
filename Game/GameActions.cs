@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
 
 using static ClassicUO.Network.NetClient;
@@ -24,5 +25,14 @@ namespace ClassicUO.Game
 
         public static void PickUp(Serial serial, ushort count)
             => Socket.Send(new PPickUpRequest(serial, count));
+
+        public static void DropDown(Serial serial, int x, int y, int z, Serial container)
+            => Socket.Send(new PDropRequestNew(serial, (ushort)x, (ushort)y, (sbyte)z, 0, container));
+
+        public static void DropDown(Serial serial, Position position, Serial container)
+            => DropDown(serial, position.X, position.Y, position.Z, container);
+
+        public static void Equip(Serial serial, Layer layer)
+            => Socket.Send(new PEquipRequest(serial, layer, World.Player));
     }
 }

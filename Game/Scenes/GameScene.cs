@@ -33,6 +33,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.Gumps.Controls;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -209,12 +210,18 @@ namespace ClassicUO.Game.Scenes
                 _renderTarget = new RenderTarget2D(Device, Width / Scale, Height / Scale, false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
+            HandleMouseActions();
             MouseHandler(frameMS);
+
             if (_rightMousePressed)
                 MoveCharacterByInputs();
 
             World.Update(totalMS, frameMS);
             _staticManager.Update(totalMS, frameMS);
+
+
+            
+
 
             if (DateTime.Now > _timePing)
             {
@@ -234,7 +241,6 @@ namespace ClassicUO.Game.Scenes
             DrawWorld(sb3D);
 
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
-            SelectedObject = _mousePicker.MouseOverObject;
 
             return base.Draw(sb3D, sbUI);
         }
@@ -462,11 +468,69 @@ namespace ClassicUO.Game.Scenes
                     def.AssociatedTile.RemoveGameObject(def);
                 }
                 _deferredToRemove.Clear();
-            }
-            
+            }         
         }
 
+        public bool IsMouseOverUI => UIManager.IsMouseOverUI && !(UIManager.MouseOverControl is WorldViewport);
+        public bool IsMouseOverWorld => UIManager.IsMouseOverUI && UIManager.MouseOverControl is WorldViewport;
 
+
+        private void HandleMouseActions()
+        {
+            SelectedObject = null;
+
+            if (IsHoldingItem && InputManager.HandleMouseEvent(MouseEvent.Up, MouseButton.Left))
+            {
+                if (IsMouseOverUI)
+                {
+                    var target = UIManager.MouseOverControl;
+
+                    // TODO: ITEMGUMPLING
+                }
+                else if (IsMouseOverWorld)
+                {
+                    GameObject obj = _mousePicker.MouseOverObject;
+
+                    if (obj != null)
+                    {
+                        switch (obj)
+                        {
+                            case Mobile mobile:
+                                MergeHeldItem(mobile);
+                                break;
+                            case IDynamicItem dyn:
+                                if (dyn is Item item)
+                                {
+                                    if (item.IsCorpse)
+                                        MergeHeldItem(item);
+                                    else
+                                    {
+                                        SelectedObject = item;
+                                        //TODO: target
+                                    }
+                                }
+                                else
+                                {
+                                    DropHelItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + dyn.ItemData.Height));
+                                }
+                                break;
+                            case Tile tile:
+                                DropHelItemToWorld(obj.Position);
+                                break;
+                            default:
+                                return;
+                        }
+                    }
+                }
+            }
+
+
+            if (SelectedObject == null)
+            {
+                SelectedObject = _mousePicker.MouseOverObject;
+            }
+
+        }
 
         private void MouseHandler(double frameMS)
         {
@@ -479,7 +543,6 @@ namespace ClassicUO.Game.Scenes
 
             foreach (var e in InputManager.GetMouseEvents())
             {
-                Console.WriteLine(e.EventType);
 
                 switch (e.Button)
                 {
@@ -592,7 +655,11 @@ namespace ClassicUO.Game.Scenes
         }
         public bool IsHoldingItem => HeldItem != null;
 
-
+        private void MergeHeldItem(Entity entity)
+        {
+            GameActions.DropDown(HeldItem, Position.Invalid, entity.Serial);
+            ClearHolding();
+        }
 
         private void PicupItemBegin(Item item, int x, int y, int? amount = null)
         {
@@ -619,6 +686,9 @@ namespace ClassicUO.Game.Scenes
             GameActions.PickUp(item, (ushort)amount);
         }
 
+        private void DropHelItemToWorld(Position position)
+            => DropHelItemToWorld(position.X, position.Y, position.Z);
+
         private void DropHelItemToWorld(ushort x, ushort y, sbyte z)
         {
             GameObject obj = SelectedObject;
@@ -632,23 +702,24 @@ namespace ClassicUO.Game.Scenes
             else
                 serial = Serial.MinusOne;
 
-            NetClient.Socket.Send(new PDropRequestNew(HeldItem.Serial, x, y, z, 0, serial));
-            HeldItem = null;
+            GameActions.DropDown(HeldItem.Serial, x, y, z, serial);
+            ClearHolding();
         }
 
         private void DropHeldItemToContainer(Item container)
         {
-
+            DropHeldItemToContainer(container, 0, 0);
         }
 
         private void DropHeldItemToContainer(Item container, ushort x, ushort y)
         {
-
+            GameActions.DropDown(HeldItem.Serial, x, y, 0, container);
+            ClearHolding();
         }
 
         private void WearHeldItem()
         {
-            NetClient.Socket.Send(new PEquipRequest(HeldItem, Layer.Invalid, World.Player));
+            GameActions.Equip(HeldItem, Layer.Invalid);
             ClearHolding();
         }
 

@@ -48,6 +48,7 @@ namespace ClassicUO.Game.Gumps
         public IReadOnlyList<Gump> Gumps => _gumps;
 
         public GumpControl MouseOverControl => _mouseOverControl;
+        public bool IsMouseOverUI => MouseOverControl != null;
 
         public GumpControl KeyboardFocusControl
         {
