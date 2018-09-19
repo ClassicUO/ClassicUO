@@ -52,45 +52,6 @@ namespace ClassicUO.IO.Resources
 
 
             _artCache = new SpriteTexture[ART_COUNT];
-
-            string pathdef = Path.Combine(FileManager.UoFolderPath, "art.def");
-            if (!File.Exists(pathdef))
-                return;
-
-            using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    line = line.Trim();
-                    if (line.Length <= 0 || line[0] == '#')
-                        continue;
-                    string[] defs = line.Split(new[] { '\t', ' ', '#' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (defs.Length < 2)
-                        continue;
-
-                    int index = int.Parse(defs[0]);
-
-                    if (index < 0 || index >= ART_COUNT)
-                        continue;
-
-                    int first = defs[1].IndexOf("{");
-                    int last = defs[1].IndexOf("}");
-
-                    string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    foreach (string s in newdef)
-                    {
-                        int checkindex = int.Parse(s);
-
-                        if (checkindex < 0 || checkindex >= ART_COUNT)
-                            continue;
-
-                        _file.Entries[index] = _file.Entries[checkindex];
-                    }                   
-                }
-            }
-
         }
 
         public static bool Contains(ushort g, int x, int y) => _picker.Get(g, x, y);

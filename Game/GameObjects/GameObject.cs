@@ -106,6 +106,9 @@ namespace ClassicUO.Game.GameObjects
 
         public TextOverhead AddGameText(MessageType type, string text, byte font, Hue hue, bool isunicode)
         {
+            if (string.IsNullOrEmpty(text))
+                return null;
+
             TextOverhead overhead;
 
             for (int i = 0; i < OverHeads.Count; i++)

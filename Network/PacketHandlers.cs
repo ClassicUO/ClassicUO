@@ -1729,7 +1729,17 @@ namespace ClassicUO.Network
                     serial = p.ReadUInt();
                     uint revision = p.ReadUInt();
 
-                    NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
+                    var house = World.GetHouse(serial);
+
+                    if (house != null && house.Revision == revision)
+                    {
+                        if (house.Items.Count > 0)
+                            house.GenerateCustom();
+                        else
+                            house.GenerateOriginal(World.Items.Get(house.Serial).Multi);
+                    }
+                    else
+                        NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
 
                     break;
                 case 0x20:
@@ -1855,7 +1865,6 @@ namespace ClassicUO.Network
 
         private static void CustomHouse(Packet p)
         {
-            return;
             //Log.Message(LogTypes.Info, "CUSTOM HOUSE RECV");
 
             bool compressed = p.ReadByte() == 0x03;
@@ -1872,10 +1881,10 @@ namespace ClassicUO.Network
             p.Skip(4);
 
             House house = World.GetOrCreateHouse(foundation);
+            house.Position = foundation.Position;
             house.Revision = revision;
+            house.Clear();
 
-            house.Items.ForEach(s => s.Dispose());
-            house.Items.Clear();
 
             short minX = multi.MinX;
             short minY = multi.MinY;
@@ -1924,9 +1933,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    Tile tile = World.Map.GetTile((ushort)( minX + foundation.Position.X + x ), (ushort)( minY + foundation.Position.Y + y ));
-
-                                    tile.AddGameObject(new Static(id, 0, 0) { Position = new Position(tile.Position.X, tile.Position.Y, (sbyte)( foundation.Position.Z + z )) });
+                                    house.Items.Add(new Static(id, 0, 0) { Position = new Position((ushort)(minX + foundation.Position.X + x), (ushort)(minY + foundation.Position.Y + y), (sbyte)(foundation.Position.Z + z)) });
                                 }
                             }
 
@@ -1953,9 +1960,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    Tile tile = World.Map.GetTile((ushort)( minX + foundation.Position.X + x ), (ushort)( minY + foundation.Position.Y + y ));
-
-                                    tile.AddGameObject(new Static(id, 0, 0) { Position = new Position(tile.Position.X, tile.Position.Y, (sbyte)( foundation.Position.Z + z )) });
+                                    house.Items.Add(new Static(id, 0, 0) { Position = new Position((ushort)(minX + foundation.Position.X + x), (ushort)(minY + foundation.Position.Y + y), (sbyte)(foundation.Position.Z + z)) });
                                 }
                             }
 
@@ -2009,14 +2014,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    Tile tile = World.Map.GetTile((ushort)( minX + foundation.Position.X + x ), (ushort)( minY + foundation.Position.Y + y ));
-                                    if (tile == null)
-                                    {
-                                        //TODO: CHECK WHY
-                                        break;
-                                    }
-
-                                    tile.AddGameObject(new Static(id, 0, 0) { Position = new Position(tile.Position.X, tile.Position.Y, (sbyte)( foundation.Position.Z + z )) });
+                                    house.Items.Add(new Static(id, 0, 0) { Position = new Position((ushort)(minX + foundation.Position.X + x), (ushort)(minY + foundation.Position.Y + y), (sbyte)(foundation.Position.Z + z)) });
                                 }
                             }
 
@@ -2024,6 +2022,9 @@ namespace ClassicUO.Network
                     }
                 }
             }
+
+
+            house.GenerateCustom();
 
             World.AddOrUpdateHouse(house);
         }

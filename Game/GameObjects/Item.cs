@@ -204,6 +204,10 @@ namespace ClassicUO.Game.GameObjects
                             }
 
                             Multi = new Multi(this) { MinX = minX, MaxX = maxX, MinY = minY, MaxY = maxY, Components = components };
+
+                            var house = World.GetOrCreateHouse(Serial);
+                            house.GenerateOriginal(Multi);
+                            World.AddOrUpdateHouse(house);
                         }
                     }
                     else

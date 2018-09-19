@@ -142,7 +142,7 @@ namespace ClassicUO.IO.Resources
                 return null;
 
 
-            width = PaddedRowWidth(16, width, 4) / 2;
+            //width = PaddedRowWidth(16, width, 4) / 2;
 
             IntPtr dataStart = _file.PositionAddress;
 
