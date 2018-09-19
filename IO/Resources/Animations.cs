@@ -19,6 +19,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
@@ -43,7 +44,7 @@ namespace ClassicUO.IO.Resources
         private static byte _animGroupCount = (int)PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
         private static readonly DataReader _reader = new DataReader();
 
-        //private static readonly PixelPicking _picker = new PixelPicking();
+        private static readonly PixelPicking _picker = new PixelPicking();
 
         public static ushort Color { get; set; }
         public static byte AnimGroup { get; set; }
@@ -185,10 +186,6 @@ namespace ClassicUO.IO.Resources
                 DataIndex[i].Type = groupTye;
 
                 IntPtr address = _files[0].IdxFile.StartAddress + findID;
-
-                if (i == 46)
-                {
-                }
 
                 DataIndex[i].Groups = new AnimationGroup[100];
 
@@ -1042,12 +1039,9 @@ namespace ClassicUO.IO.Resources
                     f = new TextureAnimationFrame(uniqueAnimationIndex, imageWidth, imageHeight);
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
+                f.SetData(pixels);
 
-                f.SetDataForHitBox(pixels);
-
-                //_picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
-
-                //f.SetData(pixels);
+                _picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
             }
 
             return true;
@@ -1148,20 +1142,13 @@ namespace ClassicUO.IO.Resources
                     f = new TextureAnimationFrame(uniqueAnimationIndex, imageWidth, imageHeight);
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
+                f.SetData(pixels);
 
-                f.SetDataForHitBox(pixels);
-                //fixed (ushort* ptr = pixels)
-                //    f.SetDataPointerEXT(0, f.Bounds, (IntPtr)ptr, pixels.Length);
-
-                //_picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
-
-                //f.SetData(pixels);
-
-                //animDir.Frames[i].Pixels = pixels;
+                _picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
             }
         }
 
-        //public static bool Contains(int g, int x, int y, int extra = 0) => _picker.Get(g, x, y, extra);
+        public static bool Contains(int g, int x, int y, int extra = 0) => _picker.Get(g, x, y, extra);
 
         public static void ClearUnusedTextures()
         {

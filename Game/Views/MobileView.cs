@@ -226,7 +226,7 @@ namespace ClassicUO.Game.Views
 
             int y = list.MousePosition.Y - ((int)drawPosition.Y - area.Y);
 
-            if (Texture.Contains(x, y)) // if (Animations.Contains(id, x, y))
+            if (Animations.Contains(id, x, y))
             {
                 list.Add(GameObject, drawPosition);
             }

@@ -77,5 +77,6 @@ namespace ClassicUO.Game.Gumps
             spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Hue));
             return base.Draw(spriteBatch, position);
         }
+
     }
 }

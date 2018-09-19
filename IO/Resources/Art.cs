@@ -34,6 +34,8 @@ namespace ClassicUO.IO.Resources
         private static SpriteTexture[] _artCache;
         private static readonly List<int> _usedIndex = new List<int>();
 
+        private static PixelPicking _picker = new PixelPicking();
+
         public static void Load()
         {
             string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
@@ -91,6 +93,7 @@ namespace ClassicUO.IO.Resources
 
         }
 
+        public static bool Contains(ushort g, int x, int y) => _picker.Get(g, x, y);
 
         public static unsafe SpriteTexture GetStaticTexture(ushort g)
         {
@@ -100,9 +103,10 @@ namespace ClassicUO.IO.Resources
                 var pixels = ReadStaticArt(g, out short w, out short h);
 
                 texture = new SpriteTexture(w, h, false);
-                texture.SetDataForHitBox(pixels);
+                texture.SetData(pixels);
                 _usedIndex.Add(g);
 
+                _picker.Set(g, w, h, pixels);
             }
             return texture;
         }
@@ -112,10 +116,14 @@ namespace ClassicUO.IO.Resources
             ref var texture = ref _artCache[g];
             if (texture == null || texture.IsDisposed)
             {
+                const int SIZE = 44;
+
                 var pixels = ReadLandArt(g);
-                texture = new SpriteTexture(44, 44, false);
-                texture.SetDataForHitBox(pixels);
+                texture = new SpriteTexture(SIZE, SIZE, false);
+                texture.SetData(pixels);
                 _usedIndex.Add(g);
+
+                _picker.Set(g, SIZE, SIZE, pixels);
             }
             return texture;
         }

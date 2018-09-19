@@ -227,14 +227,15 @@ namespace ClassicUO.Game.Views
             int x = objectList.MousePosition.X - (int)vertex[0].Position.X;
             int y = objectList.MousePosition.Y - (int)vertex[0].Position.Y;
 
-            if (Texture.Contains(x, y))
-            {
-                objectList.Add(GameObject, vertex[0].Position);
-            }
-            //if (Art.Contains(GameObject.Graphic, x, y))
+            //if (Texture.Contains(x, y))
             //{
             //    objectList.Add(GameObject, vertex[0].Position);
             //}
+
+            if (Art.Contains(GameObject.Graphic, x, y))
+            {
+                objectList.Add(GameObject, vertex[0].Position);
+            }
         }
     }
 }

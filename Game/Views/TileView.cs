@@ -52,8 +52,6 @@ namespace ClassicUO.Game.Views
         }
 
 
-        //public new Tile GameObject => (Tile)base.GameObject;
-
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
@@ -115,11 +113,11 @@ namespace ClassicUO.Game.Views
 
         protected override void MousePick(MouseOverList<GameObject> list, SpriteVertex[] vertex)
         {
-            int x = list.MousePosition.X - (int)vertex[0].Position.X;
-            int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
+            //int x = list.MousePosition.X - (int)vertex[0].Position.X;
+            //int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
 
-            if (Texture.Contains(x, y))
-                list.Add(GameObject, vertex[0].Position);
+            //if (IO.Resources.Art.Contains(GameObject.Graphic, x, y))
+            //    list.Add(GameObject, vertex[0].Position);
         }
 
 

@@ -103,9 +103,7 @@ namespace ClassicUO.IO.Resources
             {
                 var pixels = GetTextmapTexture(g, out int size);
                 texture = new SpriteTexture(size, size, false);
-                texture.SetDataForHitBox(pixels);
-                //fixed (ushort* ptr = pixels)
-                //    texture.SetDataPointerEXT(0, texture.Bounds, (IntPtr)ptr, pixels.Length);
+                texture.SetData(pixels);
 
                 _usedIndex.Add(g);
 
