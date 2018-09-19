@@ -56,6 +56,7 @@ namespace ClassicUO.Game.Gumps
         }
 
 
+        //internal event Action<GumpControl, int, int, MouseButton> MouseDoubleClickEvent;
         public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseEnter, MouseLeft, MouseClick, MouseDoubleClick;
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
         public event EventHandler<KeyboardEventArgs> Keyboard;
@@ -91,7 +92,7 @@ namespace ClassicUO.Game.Gumps
         public bool IsEditable { get; set; }
         public IReadOnlyList<GumpControl> Children => _children;
 
-        
+
 
         public virtual bool AcceptKeyboardInput
         {
@@ -226,7 +227,7 @@ namespace ClassicUO.Game.Gumps
 
         public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
         {
-            if (IsDisposed || ( ( Texture == null || Texture.IsDisposed ) && Children.Count <= 0 ))
+            if (IsDisposed || ((Texture == null || Texture.IsDisposed) && Children.Count <= 0))
             {
                 return false;
             }
@@ -526,13 +527,13 @@ namespace ClassicUO.Game.Gumps
 
         public int ActivePage
         {
-            
+
             get { return _activePage; }
             set
             {
                 var _uiManager = Service.Get<UIManager>();
                 _activePage = value;
-                
+
                 if (_uiManager.KeyboardFocusControl != null)
                 {
                     if (Children.Contains(_uiManager.KeyboardFocusControl))
