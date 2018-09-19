@@ -82,7 +82,7 @@ namespace ClassicUO.IO.Resources
             ref var texture = ref _gumpCache[g];
             if (texture == null || texture.IsDisposed)
             {
-                var pixels = GetGump(g, out int w, out int h);
+                var pixels = GetGumpPixels(g, out int w, out int h);
                 texture = new SpriteTexture(w, h, false);
                 texture.SetData(pixels);
                 //texture.SetDataForHitBox(pixels);
@@ -125,7 +125,7 @@ namespace ClassicUO.IO.Resources
             return ((w * bitsPerPixel + (padBits - 1)) / padBits) * padToNBytes;
         }
 
-        private static unsafe ushort[] GetGump(int index, out int width, out int height)
+        public static unsafe ushort[] GetGumpPixels(int index, out int width, out int height)
         {
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(index);
 
