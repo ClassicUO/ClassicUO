@@ -363,6 +363,8 @@ namespace ClassicUO.Game.Gumps
                     _mouseDownControls[i].InvokeMouseEnter(position);
             }
 
+            if (!!IsModalControlOpen && ObjectsBlockingInputExists)
+                return;
 
             var events = inputManager.GetMouseEvents();
 
