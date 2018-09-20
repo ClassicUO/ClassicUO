@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
         {
-            spriteBatch.Draw2DTiled(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), Vector3.Zero);
+            spriteBatch.Draw2DTiled(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, IsTransparent, false));
             return base.Draw(spriteBatch, position);
         }
 

@@ -93,9 +93,12 @@ namespace ClassicUO.Game.Gumps
         public bool CanCloseWithRightClick { get; set; } = true;
         public bool CanCloseWithEsc { get; set; }
         public bool IsEditable { get; set; }
+        public bool IsTransparent { get; set; }
         public IReadOnlyList<GumpControl> Children => _children;
 
         public UIManager UIManager { get; private set; }
+
+
 
         public virtual bool AcceptKeyboardInput
         {

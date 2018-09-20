@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 if (buttonID == 0) // cancel
                 {
-                    Network.NetClient.Socket.Send(new Network.PGumpResponse(LocalSerial, ServerSerial, buttonID, null, null));
+                    GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, null, null);
                 }
                 else
                 {

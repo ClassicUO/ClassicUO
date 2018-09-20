@@ -34,7 +34,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (_transparentTexture == null)
                 {
-                    _transparentTexture = new SpriteTexture(1, 1);
+                    _transparentTexture = new SpriteTexture(50, 50);
                     _transparentTexture.SetData(new Color[1] { Color.Black });
                 }
 
@@ -45,8 +45,7 @@ namespace ClassicUO.Game.Gumps
 
         public CheckerTrans() : base()
         {
-            CanMove = true;
-            CanCloseWithRightClick = true;
+
         }
 
         public CheckerTrans(string[] parts) : this()

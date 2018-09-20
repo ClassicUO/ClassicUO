@@ -161,7 +161,11 @@ namespace ClassicUO.Game.Gumps
                             });
                             break;
                         case "checkertrans":
-                            gump.AddChildren(new CheckerTrans(gparams));
+
+                            if (gump.Children.Count > 0)
+                                gump.Children[gump.Children.Count - 1].IsTransparent = true;
+
+                            //gump.AddChildren(new CheckerTrans(gparams));
                             break;
                         case "croppedtext":
                             gump.AddChildren(new CroppedText(gparams, lines));
