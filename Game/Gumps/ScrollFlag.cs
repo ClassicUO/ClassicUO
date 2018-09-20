@@ -9,7 +9,7 @@ namespace ClassicUO.Game.Gumps
 {
     public class ScrollFlag :  GumpControl, IScrollBar
     {
-        private readonly SpriteTexture _texture;
+        private SpriteTexture _texture;
         private int _sliderExtentTop, _sliderExtentHeight;
         private float _sliderPosition;
         private float _value;
@@ -20,10 +20,6 @@ namespace ClassicUO.Game.Gumps
 
         public ScrollFlag(GumpControl parent, int x, int y, int height) : this(parent)
         {
-            _texture = IO.Resources.Gumps.GetGumpTexture(0x0828);
-            Width = _texture.Width;
-            Height = _texture.Height;
-
             Location = new Point(x, y);
             _sliderExtentTop = y;
             _sliderExtentHeight = height;
@@ -69,6 +65,14 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        protected override void OnInitialize()
+        {
+            base.OnInitialize();
+
+            _texture = IO.Resources.Gumps.GetGumpTexture(0x0828);
+            Width = _texture.Width;
+            Height = _texture.Height;
+        }
 
         public override void Update(double totalMS, double frameMS)
         {

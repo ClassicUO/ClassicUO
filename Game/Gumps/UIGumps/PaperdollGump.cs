@@ -6,7 +6,9 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -20,7 +22,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private GumpPic _virtueMenuPic;
         private GumpPic _specialMovesBookPic;
         private GumpPic _partyManifestPic;
-        private static PaperDollGump _self;
+        //private static PaperDollGump _self;
 
         public PaperDollGump()
             : base(0, 0)
@@ -53,19 +55,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
             private set;
         }
 
-        public static void Toggle(Serial serial, string mobileTitle)
-        {
-            var ui = Service.Get<UIManager>();
-            var gump = ui.Get<PaperDollGump>();
-            if (gump == null || gump.IsDisposed)
-            {
-                ui.Add(_self = new PaperDollGump(serial, mobileTitle));
-            }
-            else
-            {
-                _self.Dispose();
-            }
-        }
+        //public static void Toggle(Serial serial, string mobileTitle)
+        //{
+        //    var ui = Service.Get<UIManager>();
+        //    var gump = ui.Get<PaperDollGump>();
+        //    if (gump == null || gump.IsDisposed)
+        //    {
+        //        ui.Add(_self = new PaperDollGump(serial, mobileTitle));
+        //    }
+        //    else
+        //    {
+        //        _self.Dispose();
+        //    }
+        //}
 
         public override void Dispose()
         {
@@ -88,7 +90,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             X = 100;
             Y = 100;
             //SaveOnWorldStop = true;
-            //GumpLocalID = Mobile.Serial;
+            LocalSerial = Mobile.Serial;
 
 
             if (Mobile == World.Player)
@@ -168,7 +170,29 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-       
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            if (Mobile != null && Mobile.IsDisposed)
+                Mobile = null;
+
+            if (Mobile == null)
+            {
+                Dispose();
+                return;
+            }
+
+
+
+            base.Update(totalMS, frameMS);
+        }
+
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        {
+            return base.Draw(spriteBatch, position, hue);
+        }
+
+
 
         private enum Buttons
         {

@@ -64,7 +64,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     MiniMapGump.Toggle(_scene);
                     break;
                 case Buttons.Paperdoll:
-                    PaperDollGump.Toggle(World.Player, World.Player.Name);
+                    if (UIManager.Get<PaperDollGump>(World.Player) == null)
+                        GameActions.DoubleClick((Serial)(World.Player.Serial | int.MinValue));
+                    else
+                        UIManager.Remove<PaperDollGump>(World.Player);
                     break;
                 case Buttons.Inventory:
                     Service.Get<Log>().Message(LogTypes.Warning, "Inventory button pushed! Not implemented yet!");

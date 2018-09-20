@@ -5,6 +5,7 @@ using System.Text;
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
+using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
@@ -1246,7 +1247,10 @@ namespace ClassicUO.Network
 
             string text = p.ReadASCII(60);
             byte flags = p.ReadByte();
-            // to finish
+
+            var ui = Service.Get<UIManager>();
+            if (ui.Get<PaperDollGump>(mobile) == null)
+                ui.Add(new PaperDollGump(mobile, text) { X = 100, Y = 100 });
         }
 
         private static void CorpseEquipment(Packet p)
