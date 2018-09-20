@@ -250,7 +250,7 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             }
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
 
             spriteBatch.Draw2D(_mapTexture, Bounds, position);
@@ -259,7 +259,7 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 
             //Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
 
-            return base.Draw(spriteBatch, position);
+            return base.Draw(spriteBatch, position, hue);
         }
 
         public static Vector2 RotateVector2(Vector2 point, float radians, Vector2 pivot)

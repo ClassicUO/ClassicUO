@@ -18,13 +18,13 @@ namespace ClassicUO.Game.Gumps
         private float _sClickTime;
 
 
-        public ItemGumpling(GumpControl parent, Item item) : base(parent)
+        public ItemGumpling(Item item) : base()
         {
             AcceptMouseInput = true;
-            Parent = parent;
+
             Item = item;
-            X = 0;
-            Y = 0;
+            X = item.Position.X;
+            Y = item.Position.Y;
             HighlightOnMouseOver = true;
             CanPickUp = true;
         }
@@ -67,29 +67,8 @@ namespace ClassicUO.Game.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        //public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
-        //{
-        //    Vector3 hue = RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver ? Game.Scenes.GameScene.MouseOverItemHue : Item.Hue);
-
-        //    if (Item.Amount > 1 && IO.Resources.TileData.IsStackable((long)Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
-        //    {
-        //        spriteBatch.Draw2D(Texture, new Vector3(position.X - 5, position.Y - 5, 0), hue);
-        //    }
-
-        //    spriteBatch.Draw2D(Texture, position, hue);
-
-        //    return base.Draw(spriteBatch, position);
-        //}
-
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            if (Texture == null)
-            {
-                Texture = IO.Resources.Art.GetStaticTexture(Item.DisplayedGraphic);
-                Width = Texture.Width;
-                Height = Texture.Height;
-            }
-
             Vector3 huev = RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver ? Game.Scenes.GameScene.MouseOverItemHue : Item.Hue);
 
             if (Item.Amount > 1 && IO.Resources.TileData.IsStackable((long)Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
@@ -99,7 +78,7 @@ namespace ClassicUO.Game.Gumps
 
             spriteBatch.Draw2D(Texture, position, huev);
 
-            return base.Draw(spriteBatch, position);
+            return base.Draw(spriteBatch, position, hue);
         }
 
         protected override bool Contains(int x, int y)

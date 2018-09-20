@@ -114,7 +114,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             if (Height <= 0)
                 return false;
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.Gumps
                 spriteBatch.Draw2D(_textureSlider, new Vector3(position.X + ( _textureBackground[0].Width - _textureSlider.Width ) / 2, position.Y + _textureUpButton[0].Height + _sliderPosition, 0), Vector3.Zero);
 
 
-            return base.Draw(spriteBatch, position);
+            return base.Draw(spriteBatch, position, hue);
         }
 
         private float GetSliderYPosition()

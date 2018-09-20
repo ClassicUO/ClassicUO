@@ -85,7 +85,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _mapTexture.Ticks = (long)totalMS;
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             if (_gumpTexture == null || _gumpTexture.IsDisposed)
                 return false;
@@ -110,7 +110,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (_timeMS >= ReticleBlinkMS * 2)
                 _timeMS -= ReticleBlinkMS * 2;
 
-            return base.Draw(spriteBatch, position);
+            return base.Draw(spriteBatch, position, hue);
         }
 
         
