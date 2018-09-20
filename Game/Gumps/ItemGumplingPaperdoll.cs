@@ -33,6 +33,8 @@ namespace ClassicUO.Game.Gumps
                 Width = Texture.Width;
                 Height = Texture.Height;
             }
+
+            base.OnInitialize();
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)

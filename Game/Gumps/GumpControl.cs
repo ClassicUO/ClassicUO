@@ -324,18 +324,21 @@ namespace ClassicUO.Game.Gumps
 
             if (inbouds)
             {
-                if (AcceptMouseInput)
-                    results.Insert(0, this);
-
-                foreach (var c in Children)
+                if (Contains(position.X - X - ParentX, position.Y - Y - ParentY))
                 {
-                    if (c.Page == 0 || c.Page == ActivePage)
+                    if (AcceptMouseInput)
+                        results.Insert(0, this);
+
+                    foreach (var c in Children)
                     {
-                        var cl = c.HitTest(position);
-                        if (cl != null)
+                        if (c.Page == 0 || c.Page == ActivePage)
                         {
-                            for (int i = cl.Length - 1; i >= 0; i--)
-                                results.Insert(0, cl[i]);
+                            var cl = c.HitTest(position);
+                            if (cl != null)
+                            {
+                                for (int i = cl.Length - 1; i >= 0; i--)
+                                    results.Insert(0, cl[i]);
+                            }
                         }
                     }
                 }

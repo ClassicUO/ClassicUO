@@ -54,6 +54,11 @@ namespace ClassicUO.Game.Gumps
             Texture.Ticks = (long)totalMS;
             base.Update(totalMS, frameMS);
         }
+
+        protected override bool Contains(int x, int y)
+        {
+            return Bounds.Contains(x, y);
+        }
     }
 
     public class GumpPic : GumpPicBase
