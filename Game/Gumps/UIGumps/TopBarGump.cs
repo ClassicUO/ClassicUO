@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new Button(0, 5537, 5539, 5538) { ButtonAction = ButtonAction.SwitchPage, ButtonParameter = 1, X = 5, Y = 3 }, 2);
 
             //layer
-            ControlInfo.Layer = UILayer.Over;
+            //ControlInfo.Layer = UILayer.Over;
             _scene = scene;
         }
 

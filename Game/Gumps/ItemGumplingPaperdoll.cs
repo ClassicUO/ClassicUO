@@ -15,7 +15,9 @@ namespace ClassicUO.Game.Gumps
         public ItemGumplingPaperdoll(int x, int y, Item item) : base(item)
         {
             X = x; Y = y;
+            AcceptMouseInput = false;
             HighlightOnMouseOver = false;
+            
         }
 
         public int SlotIndex { get; set; }
@@ -31,6 +33,8 @@ namespace ClassicUO.Game.Gumps
                 Width = Texture.Width;
                 Height = Texture.Height;
             }
+
+            base.OnInitialize();
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
