@@ -34,7 +34,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (_transparentTexture == null)
                 {
-                    _transparentTexture = new SpriteTexture(50, 50);
+                    _transparentTexture = new SpriteTexture(1, 1);
                     _transparentTexture.SetData(new Color[1] { Color.Black });
                 }
 
@@ -58,8 +58,7 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            spriteBatch.Draw2D(TransparentTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, true, false));
-            return base.Draw(spriteBatch, position, hue);
+            return spriteBatch.Draw2D(TransparentTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, true, false));
         }
     }
 }

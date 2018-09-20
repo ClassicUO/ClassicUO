@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
@@ -70,6 +71,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 
                 Mode = MessageType.Regular;
 
+                AddChildren(new CheckerTrans() { X = _textBox.X, Y = _textBox.Y, Width = Width, Height = Height });
                 AddChildren(_textBox);
             }
 
