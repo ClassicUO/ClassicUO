@@ -82,12 +82,12 @@ namespace ClassicUO.Game.Gumps
             _texture.Ticks = (long)totalMS;
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             if (MaxValue != MinValue)
                 spriteBatch.Draw2D(_texture, new Vector3(position.X - 5, position.Y + _sliderPosition, 0), Vector3.Zero);
 
-            return base.Draw(spriteBatch, position);
+            return base.Draw(spriteBatch, position, hue);
         }
 
         private float GetSliderYPosition()

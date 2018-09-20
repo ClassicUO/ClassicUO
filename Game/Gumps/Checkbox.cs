@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             bool ok = base.Draw(spriteBatch,  position);
 

@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position, Vector3? hue = null)
         {
             int centerWidth = Width - _frame[0].Width - _frame[2].Width;
             int centerHeight = Height - _frame[0].Height - _frame[6].Height;
@@ -67,7 +67,7 @@ namespace ClassicUO.Game.Gumps
             spriteBatch.Draw2D(_frame[8], new Vector3(position.X + Width - _frame[8].Width, line3Y, 0), Vector3.Zero);
 
 
-            return base.Draw(spriteBatch,  position);
+            return base.Draw(spriteBatch, position, hue);
         }
     }
 }

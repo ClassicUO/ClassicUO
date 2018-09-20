@@ -67,18 +67,18 @@ namespace ClassicUO.Game.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            Vector3 hue = RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver ? Game.Scenes.GameScene.MouseOverItemHue : Item.Hue);
+            Vector3 huev = RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver ? Game.Scenes.GameScene.MouseOverItemHue : Item.Hue);
 
             if (Item.Amount > 1 && IO.Resources.TileData.IsStackable((long)Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
             {
-                spriteBatch.Draw2D(Texture, new Vector3(position.X - 5, position.Y - 5, 0), hue);
+                spriteBatch.Draw2D(Texture, new Vector3(position.X - 5, position.Y - 5, 0), huev);
             }
 
-            spriteBatch.Draw2D(Texture, position, hue);
+            spriteBatch.Draw2D(Texture, position, huev);
 
-            return base.Draw(spriteBatch, position);
+            return base.Draw(spriteBatch, position, hue);
         }
 
         protected override bool Contains(int x, int y)

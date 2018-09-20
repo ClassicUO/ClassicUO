@@ -68,7 +68,7 @@ namespace ClassicUO.Game.Gumps
                 }
                 _caratBlink = true;
             }
-            else
+            else if (IsFocused)
             {
                 RemoveFocus();
                 _caratBlink = false;
@@ -82,24 +82,9 @@ namespace ClassicUO.Game.Gumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-
-            //if (_prevOffset < _offset)
-            //{
-            //    _text.Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, _text.Width + _offset, _text.Height), -_offset, 0);
-
-            //}
-            //else
-            //{
-            //    _text.Draw(spriteBatch, new Rectangle((int)position.X + _offset, (int)position.Y, _text.Width + _offset, _text.Height), _offset, 0);
-
-            //}
-
-            //_prevOffset = _offset;
-
             _entry.RenderText.Draw(spriteBatch, new Vector3(position.X + _entry.Offset, position.Y, 0));
-
 
             if (IsEditable)
             {
@@ -107,7 +92,7 @@ namespace ClassicUO.Game.Gumps
                     _entry.RenderCaret.Draw(spriteBatch, new Vector3(position.X + _entry.Offset + _entry.CaretPosition.X, position.Y + _entry.CaretPosition.Y, 0));
             }
 
-            return base.Draw(spriteBatch, position);
+            return base.Draw(spriteBatch, position, hue);
         }
 
         public void RemoveLineAt(int index) => _entry.RemoveLineAt(index);
@@ -126,7 +111,10 @@ namespace ClassicUO.Game.Gumps
                         _entry.InsertString("    ");
                     break;*/
                 case SDL.SDL_Keycode.SDLK_RETURN:
-                    _entry.InsertString("\n");
+                    if ((_entry.RenderText.FontStyle & FontStyle.Fixed) == 0)
+                        _entry.InsertString("\n");
+                    else
+                        Parent.OnKeybaordReturn(Graphic, Text);
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     if (ReplaceDefaultTextOnFirstKeyPress)
