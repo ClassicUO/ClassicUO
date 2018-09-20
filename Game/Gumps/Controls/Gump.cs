@@ -75,7 +75,7 @@ namespace ClassicUO.Game.Gumps.Controls
                             entries.Add(new Tuple<ushort, string>((ushort)LocalSerial, textBox.Text));
                     }
 
-                    Network.NetClient.Socket.Send(new Network.PGumpResponse(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray()));
+                    GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
                 }
                 Dispose();
             }

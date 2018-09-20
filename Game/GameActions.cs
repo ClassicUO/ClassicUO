@@ -52,7 +52,7 @@ namespace ClassicUO.Game
             => Socket.Send(new PEquipRequest(serial, layer, World.Player));
 
         public static void ReplyGump(Serial local, Serial server, int button, Serial[] switches = null, Tuple<ushort, string>[] entries = null)  
-            => Socket.Send(new Network.PGumpResponse(local, server, button, switches, entries));
+            => Socket.Send(new PGumpResponse(local, server, button, switches, entries));
 
         
     }
