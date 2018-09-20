@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Gumps
 {
     public class UIManager
     {
-        private readonly List<Gump> _gumps = new List<Gump>();
+        private readonly List<GumpControl> _gumps = new List<GumpControl>();
         private GumpControl _mouseOverControl, _keyboardFocusControl;
         private readonly GumpControl[] _mouseDownControls = new GumpControl[5];
         private readonly CursorRenderer _cursor;
@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public IReadOnlyList<Gump> Gumps => _gumps;
+        public IReadOnlyList<GumpControl> Gumps => _gumps;
 
         public GumpControl MouseOverControl => _mouseOverControl;
         public bool IsMouseOverUI => MouseOverControl != null;
@@ -291,7 +291,7 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public void Add(Gump gump) => _gumps.Add(gump);
+        public void Add(GumpControl gump) => _gumps.Add(gump);
 
         private void HandleKeyboardInput()
         {
@@ -445,7 +445,7 @@ namespace ClassicUO.Game.Gumps
 
         private void SortControlsByInfo()
         {
-            List<Gump> gumps = _gumps.Where(s => s.ControlInfo.Layer != UILayer.Default).ToList();
+            List<GumpControl> gumps = _gumps.Where(s => s.ControlInfo.Layer != UILayer.Default).ToList();
 
             foreach (var c in gumps)
             {

@@ -55,7 +55,8 @@ namespace ClassicUO.Game.Scenes
         private static Hue _savedHue;
         private static GameObject _selectedObject;
 
-        
+
+        public static Hue MouseOverItemHue => 0x038;
 
 
         public GameScene() : base(ScenesType.Game)
@@ -106,6 +107,8 @@ namespace ClassicUO.Game.Scenes
 
             UIManager.Add(_viewPortGump = new WorldViewportGump(this));
             UIManager.Add(_topBarGump = new TopBarGump(this));
+
+            GameActions.Initialize(PicupItemBegin);
         }
 
 
@@ -513,17 +516,17 @@ namespace ClassicUO.Game.Scenes
                                         }
                                         else
                                         {
-                                            DropHelItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + dyn.ItemData.Height));
+                                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + dyn.ItemData.Height));
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    DropHelItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + dyn.ItemData.Height));
+                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + dyn.ItemData.Height));
                                 }
                                 break;
                             case Tile tile:
-                                DropHelItemToWorld(obj.Position);
+                                DropHeldItemToWorld(obj.Position);
                                 break;
                             default:
                                 return;
@@ -691,13 +694,14 @@ namespace ClassicUO.Game.Scenes
             item.Amount = (ushort)amount;
             HeldItem = item;
             _heldOffset = new Point(x, y);
-            GameActions.PickUp(item, (ushort)amount);
+
+            NetClient.Socket.Send(new PPickUpRequest(item, (ushort)amount));
         }
 
-        private void DropHelItemToWorld(Position position)
-            => DropHelItemToWorld(position.X, position.Y, position.Z);
+        private void DropHeldItemToWorld(Position position)
+            => DropHeldItemToWorld(position.X, position.Y, position.Z);
 
-        private void DropHelItemToWorld(ushort x, ushort y, sbyte z)
+        private void DropHeldItemToWorld(ushort x, ushort y, sbyte z)
         {
             GameObject obj = SelectedObject;
             Serial serial;
