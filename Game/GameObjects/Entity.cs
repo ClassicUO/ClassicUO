@@ -23,6 +23,7 @@ using ClassicUO.Interfaces;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -65,6 +66,26 @@ namespace ClassicUO.Game.GameObjects
         public EntityCollection<Item> Items { get; }
         public Serial Serial { get; }
         public IReadOnlyList<Property> Properties => (IReadOnlyList<Property>)_properties.Values;
+
+        
+        protected Action<Entity> _OnUpdated;
+        protected Action<Entity> _OnDisposed;
+
+        public void SetCallbacks(Action<Entity> onUpdate, Action<Entity> onDispose)
+        {
+            if (onUpdate != null)
+                _OnUpdated += onUpdate;
+            if (onDispose != null)
+                _OnDisposed += onDispose;
+        }
+
+        public void ClearCallBacks(Action<Entity> onUpdate, Action<Entity> onDispose)
+        {
+            if (_OnUpdated.GetInvocationList().Contains(onUpdate))
+                _OnUpdated -= onUpdate;
+            if (_OnDisposed.GetInvocationList().Contains(onDispose))
+                _OnDisposed -= onDispose;
+        }
 
         public override Graphic Graphic
         {

@@ -12,10 +12,13 @@ namespace ClassicUO.Game.Gumps
         private Hue _hueOverride;
         private ushort _gumpIndex;
 
-        public ItemGumplingPaperdoll(int x, int y, Item item) : base(item)
+        public ItemGumplingPaperdoll(GumpControl parent, int x, int y, Item item) : base(parent, item)
         {
+            Parent = parent;
             X = x; Y = y;
+            AcceptMouseInput = false;
             HighlightOnMouseOver = false;
+            
         }
 
         public int SlotIndex { get; set; }

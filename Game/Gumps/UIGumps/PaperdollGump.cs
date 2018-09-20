@@ -127,26 +127,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 AddChildren(new EquipmentSlot(2, 76 + 22 * 2));//AddControl(new EquipmentSlot(this, 2, 76 + 22 * 2, Mobile, EquipLayer.Neck));
                 AddChildren(new EquipmentSlot(2, 76 + 22 * 3)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 3, Mobile, EquipLayer.Ring));
                 AddChildren(new EquipmentSlot(2, 76 + 22 * 4));//AddControl(new EquipmentSlot(this, 2, 76 + 22 * 4, Mobile, EquipLayer.Bracelet));
-                // Name and title
-                AddChildren(new HtmlGump(35, 260, 180, 42, string.Format("<span color=#222 style='font-family:uni0;'>{0}", Title), 0, 0, 0, true));
-                
-
-
-                //    // Paperdoll control!
-                //    AddControl(new PaperDollInteractable(this, 8, 21, Mobile));
-                //}
-                //else
-                //{
-                //    AddControl(new GumpPic(this, 0, 0, 0x07d1, 0));
-
-                //    // Paperdoll
-                //    AddControl(new PaperDollInteractable(this, 8, 21, Mobile));
-                //}
-
-
-
-                //layer
+                // Paperdoll control!
+                AddChildren(new PaperDollInteractable( this,8, 21, Mobile));
+                }
+            else
+            {
+                AddChildren(new GumpPic(0, 0, 0x07d1, 0));
+                // Paperdoll
+                AddChildren(new PaperDollInteractable(this, 8, 21, Mobile));
             }
+            
+            // Name and title
+            AddChildren(new HtmlGump(35, 260, 180, 42, string.Format("<span color=#222 style='font-family:uni0;'>{0}", Title), 0, 0, 0, true));
+
         }
 
 
@@ -173,6 +166,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 //    UserInterface.RemoveControl<PartyGump>();
             }
         }
+
+       
 
         private enum Buttons
         {
