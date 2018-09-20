@@ -33,12 +33,12 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             
             spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue));
 
-            return base.Draw(spriteBatch, position);
+            return base.Draw(spriteBatch, position, hue);
         }
 
         protected override bool Contains(int x, int y)

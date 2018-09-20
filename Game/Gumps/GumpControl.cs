@@ -47,11 +47,7 @@ namespace ClassicUO.Game.Gumps
         {
             Parent = parent;
             _children = new List<GumpControl>();
-            //IsEnabled = true;
-            //IsInitialized = true;
-            //IsVisible = true;
             AllowedToDraw = true;
-
             AcceptMouseInput = true;
 
             Page = 0;
@@ -242,18 +238,29 @@ namespace ClassicUO.Game.Gumps
 
             if (Children.Count > 0)
             {
+                InitializeControls();
+
                 int w = 0, h = 0;
+
+                List<GumpControl> toremove = new List<GumpControl>();
 
                 foreach (GumpControl c in Children)
                 {
                     c.Update(totalMS, frameMS);
 
-                    if (c.Page == 0 || c.Page == ActivePage)
+                    if (c.IsDisposed)
                     {
-                        if (w < c.Bounds.Right)
-                            w = c.Bounds.Right;
-                        if (h < c.Bounds.Bottom)
-                            h = c.Bounds.Bottom;
+                        toremove.Add(c);
+                    }
+                    else
+                    {
+                        if (c.Page == 0 || c.Page == ActivePage)
+                        {
+                            if (w < c.Bounds.Right)
+                                w = c.Bounds.Right;
+                            if (h < c.Bounds.Bottom)
+                                h = c.Bounds.Bottom;
+                        }
                     }
                 }
 
@@ -261,10 +268,13 @@ namespace ClassicUO.Game.Gumps
                     Width = w;
                 if (h != Height)
                     Height = h;
+
+                if (toremove.Count > 0)
+                    toremove.ForEach(s => _children.Remove(s));
             }
         }
 
-        public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+        public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             if (IsDisposed)
             {
@@ -282,7 +292,7 @@ namespace ClassicUO.Game.Gumps
                     if (c.IsVisible && c.IsInitialized)
                     {
                         Vector3 offset = new Vector3(c.X + position.X, c.Y + position.Y, position.Z);
-                        c.Draw(spriteBatch, offset);
+                        c.Draw(spriteBatch, offset, hue);
                     }
                 }
             }
@@ -295,11 +305,13 @@ namespace ClassicUO.Game.Gumps
         internal void SetFocused()
         {
             IsFocused = true;
+            OnFocusEnter();
         }
 
         internal void RemoveFocus()
         {
             IsFocused = false;
+            OnFocusLeft();
         }
 
 
@@ -526,6 +538,16 @@ namespace ClassicUO.Game.Gumps
         }
 
         protected virtual void OnClosing()
+        {
+
+        }
+
+        protected virtual void OnFocusEnter()
+        {
+
+        }
+
+        protected virtual void OnFocusLeft()
         {
 
         }

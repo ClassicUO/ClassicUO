@@ -38,6 +38,6 @@ namespace ClassicUO.Interfaces
         bool AllowedToDraw { get; set; }
         SpriteTexture Texture { get; set; }
 
-        bool Draw(SpriteBatchUI spriteBatch, Vector3 position);
+        bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null);
     }
 }

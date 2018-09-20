@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -18,7 +20,7 @@ namespace ClassicUO.Game.Gumps.Controls
             AcceptMouseInput = true;
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             _rect.X = (int)position.X;
             _rect.Y = (int)position.Y;
@@ -27,9 +29,14 @@ namespace ClassicUO.Game.Gumps.Controls
 
             spriteBatch.Draw2D(_scene.ViewportTexture, _rect, Vector3.Zero);
 
-            return base.Draw(spriteBatch, position);
+            return base.Draw(spriteBatch, position, hue);
         }
 
+
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            UIManager.KeyboardFocusControl = Service.Get<ChatControl>().GetFirstControlAcceptKeyboardInput();
+        }
 
     }
 }
