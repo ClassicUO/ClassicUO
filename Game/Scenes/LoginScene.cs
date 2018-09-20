@@ -23,7 +23,7 @@ namespace ClassicUO.Game.Scenes
 {
     public sealed class LoginScene : Scene
     {
-        public LoginScene()
+        public LoginScene() : base(ScenesType.Login)
         {
 
         }

@@ -32,10 +32,10 @@ namespace ClassicUO.Game.Scenes
 {
     public abstract class Scene : Interfaces.IUpdateable, IDisposable
     {
-        protected Scene()
+        protected Scene(ScenesType type)
         {
             ChainActions = new List<Func<bool>>();
-
+            SceneType = type;
 
             Game = Service.Get<GameLoop>();
             Device = Game.GraphicsDevice;
@@ -51,6 +51,7 @@ namespace ClassicUO.Game.Scenes
         protected InputManager InputManager { get; }
         public int RenderedObjectsCount { get; protected set; }
 
+        public ScenesType SceneType { get; }
 
 
         public virtual void Load()

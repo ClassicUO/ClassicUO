@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Scenes
         
 
 
-        public GameScene()
+        public GameScene() : base(ScenesType.Game)
         {
         }
 
@@ -542,7 +542,7 @@ namespace ClassicUO.Game.Scenes
 
         private void MouseHandler(double frameMS)
         {
-            if (!UIManager.IsOnWorld)
+            if (!IsMouseOverWorld)
             {
                 if (_rightMousePressed)
                     _rightMousePressed = false;

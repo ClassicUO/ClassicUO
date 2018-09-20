@@ -49,6 +49,7 @@ namespace ClassicUO.Game.Gumps
 
         public GumpControl MouseOverControl => _mouseOverControl;
         public bool IsMouseOverUI => MouseOverControl != null;
+        public bool IsMouseOverWorld => IsMouseOverUI && MouseOverControl is WorldViewport;
 
         public GumpControl KeyboardFocusControl
         {
@@ -86,8 +87,6 @@ namespace ClassicUO.Game.Gumps
                 return false;
             }
         }
-
-        public bool IsOnWorld => MouseOverControl != null && MouseOverControl is WorldViewport;
 
 
         private bool ObjectsBlockingInputExists => _inputBlockingObjects.Count > 0;

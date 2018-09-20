@@ -30,7 +30,6 @@ namespace ClassicUO.Game.Views
 {
     public class ItemView : View
     {
-        private Hue _hue;
         private Graphic _originalGraphic;
 
         public ItemView(Item item) : base(item)
@@ -61,12 +60,9 @@ namespace ClassicUO.Game.Views
 
                 AllowedToDraw = true;
                 item.DisplayedGraphic = item.Amount;
-
-                //item.Deferred = new DeferredEntity(item, item.Position.Z, item.Tile);
             }
         }
 
-        //public new Item GameObject => (Item)base.GameObject;
 
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
@@ -91,13 +87,7 @@ namespace ClassicUO.Game.Views
                     Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
                 }
 
-                if (_hue != GameObject.Hue)
-                {
-                    _hue = GameObject.Hue;
-
-                    HueVector = RenderExtentions.GetHueVector(_hue, TileData.IsPartialHue((long)item.ItemData.Flags), false /*TileData.IsTransparent((long)item.ItemData.Flags)*/, false);
-                }
-
+                HueVector = RenderExtentions.GetHueVector(GameObject.Hue, TileData.IsPartialHue((long)item.ItemData.Flags), TileData.IsTranslucent((long)item.ItemData.Flags), false);
 
                 if (item.Amount > 1 && TileData.IsStackable((long)item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
                 {
@@ -204,15 +194,10 @@ namespace ClassicUO.Game.Views
                     int drawX = -22;
                     int drawY = drawCenterY + GameObject.Position.Z * 4 - 22 - 3;
 
-                    //if (IsFlipped)
-                    //    drawX = -22;
-                    //else
-                    //    drawX = -22;
-
                     int x = drawX + frame.CenterX;
                     int y = -drawY - ( frame.Height + frame.CenterY ) + drawCenterY;
 
-                    Texture = frame; // TextureManager.GetOrCreateAnimTexture(frame);
+                    Texture = frame; 
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                     HueVector = RenderExtentions.GetHueVector(color);
                     base.Draw(spriteBatch, position, objectList);

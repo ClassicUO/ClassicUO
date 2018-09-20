@@ -21,6 +21,7 @@
 #endregion
 using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -39,6 +40,7 @@ namespace ClassicUO.Renderer
         private bool _needGraphicUpdate;
         private InputManager _inputManager;
         private UIManager _uiManager;
+
         public CursorRenderer(UIManager ui)
         {
             _inputManager = Service.Get<InputManager>();
@@ -244,7 +246,7 @@ namespace ClassicUO.Renderer
             int war = World.InGame && World.Player.InWarMode ? 1 : 0;
             ushort result = _cursorData[war, 9];
 
-            if (!_uiManager.IsOnWorld)
+            if (!_uiManager.IsMouseOverWorld)
                 return result;
 
             int windowCenterX = 400;
