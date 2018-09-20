@@ -124,7 +124,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new PaperDollInteractable(8, 21, Mobile));
 
             // Name and title
-            AddChildren(new HtmlGump(35, 260, 180, 42, string.Format("<span color=#222 style='font-family:uni0;'>{0}", Title), 0, 0, 0, true));
+            //AddChildren(new HtmlGump(35, 260, 180, 42, string.Format("<span color=#222 style='font-family:uni0;'>{0}", Title), 0, 0, 0, true));
+
+            AddChildren(new HtmlGump(39, 262, 185, 42, Title, 0, 0, 0x0386, false, 1, false));
         }
 
 

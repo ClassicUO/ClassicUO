@@ -160,7 +160,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (_htmlGump == null)
                 {
-                    _htmlGump = new HtmlGump(0, 0, 200, 32, Item.OverHeads[0].Text, 0, 0, 0, false, FontStyle.BlackBorder, IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER);
+                    _htmlGump = new HtmlGump(0, 0, 200, 32, Item.OverHeads[0].Text, 0, 0, 0, false, 1, true, FontStyle.BlackBorder, IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER);
                     _htmlGump.ControlInfo.Layer = UILayer.Over;
 
                     UIManager.Add(_htmlGump);
