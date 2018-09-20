@@ -33,14 +33,6 @@ namespace ClassicUO.Game.Gumps
         public bool HighlightOnMouseOver { get; set; }
         public bool CanPickUp { get; set; }
 
-        protected override void OnInitialize()
-        {
-            Texture = IO.Resources.Art.GetStaticTexture(Item.DisplayedGraphic);
-            Width = Texture.Width;
-            Height = Texture.Height;
-
-            base.OnInitialize();
-        }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -69,6 +61,13 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
+            if (Texture == null)
+            {
+                Texture = IO.Resources.Art.GetStaticTexture(Item.DisplayedGraphic);
+                Width = Texture.Width;
+                Height = Texture.Height;
+            }
+
             Vector3 huev = RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver ? Game.Scenes.GameScene.MouseOverItemHue : Item.Hue);
 
             if (Item.Amount > 1 && IO.Resources.TileData.IsStackable((long)Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
@@ -83,12 +82,12 @@ namespace ClassicUO.Game.Gumps
 
         protected override bool Contains(int x, int y)
         {
-            if (IO.Resources.Art.Contains(Item.Graphic, x, y))
+            if (IO.Resources.Art.Contains(Item.DisplayedGraphic, x, y))
                 return true;
 
             if (Item.Amount > 1 && IO.Resources.TileData.IsStackable((long)Item.ItemData.Flags))
             {
-                if (IO.Resources.Art.Contains(Item.Graphic, x - 5, y - 5))
+                if (IO.Resources.Art.Contains(Item.DisplayedGraphic, x - 5, y - 5))
                     return true;
             }
 
@@ -161,7 +160,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (_htmlGump == null)
                 {
-                    _htmlGump = new HtmlGump(0, 0, 200, 32, Item.OverHeads[0].Text, 0, 0, 0, false, FontStyle.BlackBorder, IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER);
+                    _htmlGump = new HtmlGump(0, 0, 200, 32, Item.OverHeads[0].Text, 0, 0, 0, false, 1, true, FontStyle.BlackBorder, IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER);
                     _htmlGump.ControlInfo.Layer = UILayer.Over;
 
                     UIManager.Add(_htmlGump);

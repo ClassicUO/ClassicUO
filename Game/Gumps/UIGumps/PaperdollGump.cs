@@ -6,7 +6,9 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -20,11 +22,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private GumpPic _virtueMenuPic;
         private GumpPic _specialMovesBookPic;
         private GumpPic _partyManifestPic;
-        private static PaperDollGump _self;
 
         public PaperDollGump()
             : base(0, 0)
         {
+            AcceptMouseInput = false;
         }
 
         public PaperDollGump(Serial serial, string mobileTitle)
@@ -52,19 +54,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             private set;
         }
 
-        public static void Toggle(Serial serial, string mobileTitle)
-        {
-            var ui = Service.Get<UIManager>();
-            var gump = ui.Get<PaperDollGump>();
-            if (gump == null || gump.IsDisposed)
-            {
-                ui.Add(_self = new PaperDollGump(serial, mobileTitle));
-            }
-            else
-            {
-                _self.Dispose();
-            }
-        }
 
         public override void Dispose()
         {
@@ -79,7 +68,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void BuildGump()
         {
-
             //m_World = Service.Get<WorldModel>();
             //m_Client = Service.Get<INetworkClient>();
 
@@ -87,12 +75,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             X = 100;
             Y = 100;
             //SaveOnWorldStop = true;
-            //GumpLocalID = Mobile.Serial;
+            LocalSerial = Mobile.Serial;
 
 
             if (Mobile == World.Player)
             {
-
                 AddChildren(new GumpPic(0, 0, 0x07d0, 0) { CanMove = true });
                 //HELP BUTTON
                 AddChildren(new Button((int)Buttons.Help, 0x07ef, 0x07f0, 0x07f1) { X = 185, Y = 44 + 27 * 0, ButtonAction = ButtonAction.Activate });
@@ -127,19 +114,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 AddChildren(new EquipmentSlot(2, 76 + 22 * 2));//AddControl(new EquipmentSlot(this, 2, 76 + 22 * 2, Mobile, EquipLayer.Neck));
                 AddChildren(new EquipmentSlot(2, 76 + 22 * 3)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 3, Mobile, EquipLayer.Ring));
                 AddChildren(new EquipmentSlot(2, 76 + 22 * 4));//AddControl(new EquipmentSlot(this, 2, 76 + 22 * 4, Mobile, EquipLayer.Bracelet));
-                // Paperdoll control!
-                AddChildren(new PaperDollInteractable( this,8, 21, Mobile));
-                }
+            }
             else
             {
                 AddChildren(new GumpPic(0, 0, 0x07d1, 0));
-                // Paperdoll
-                AddChildren(new PaperDollInteractable(this, 8, 21, Mobile));
             }
-            
-            // Name and title
-            AddChildren(new HtmlGump(35, 260, 180, 42, string.Format("<span color=#222 style='font-family:uni0;'>{0}", Title), 0, 0, 0, true));
 
+            // Paperdoll control!
+            AddChildren(new PaperDollInteractable(8, 21, Mobile));
+
+            // Name and title
+            //AddChildren(new HtmlGump(35, 260, 180, 42, string.Format("<span color=#222 style='font-family:uni0;'>{0}", Title), 0, 0, 0, true));
+
+            AddChildren(new HtmlGump(39, 262, 185, 42, Title, 0, 0, 0x0386, false, 1, false));
         }
 
 
@@ -167,7 +154,37 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-       
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            if (Mobile != null && Mobile.IsDisposed)
+                Mobile = null;
+
+            if (Mobile == null)
+            {
+                Dispose();
+                return;
+            }
+
+
+
+            base.Update(totalMS, frameMS);
+        }
+
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        {
+            return base.Draw(spriteBatch, position, hue);
+        }
+
+
+        public override void OnButtonClick(int buttonID)
+        {
+            switch ((Buttons)buttonID)
+            {
+
+            }
+        }
+
 
         private enum Buttons
         {

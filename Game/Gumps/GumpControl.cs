@@ -165,7 +165,7 @@ namespace ClassicUO.Game.Gumps
         public GumpControl Parent
         {
             get => _parent;
-            set
+            private set
             {
                 if (value == null)
                     _parent?._children.Remove(this);

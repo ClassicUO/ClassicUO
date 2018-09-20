@@ -14,11 +14,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     class TopBarGump : Gump
     {
-        private Scenes.GameScene _scene;
-        //private ResizePic _maximizedBar, _minimizedBar;
-        //private Button _maximize, _minimize, _map, _paperdoll, _inventory, _journal, _chat, _help, _debug;
+        private GameScene _scene;
         
-        public TopBarGump(Scenes.GameScene scene) : base(0, 0)
+        public TopBarGump(GameScene scene) : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -41,7 +39,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new Button(0, 5537, 5539, 5538) { ButtonAction = ButtonAction.SwitchPage, ButtonParameter = 1, X = 5, Y = 3 }, 2);
 
             //layer
-            //ControlInfo.Layer = UILayer.Over;
+            ControlInfo.Layer = UILayer.Over;
             _scene = scene;
         }
 
@@ -64,7 +62,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     MiniMapGump.Toggle(_scene);
                     break;
                 case Buttons.Paperdoll:
-                    PaperDollGump.Toggle(World.Player, World.Player.Name);
+                    if (UIManager.Get<PaperDollGump>(World.Player) == null)
+                        GameActions.DoubleClick((Serial)(World.Player.Serial | int.MinValue));
+                    else
+                        UIManager.Remove<PaperDollGump>(World.Player);
                     break;
                 case Buttons.Inventory:
                     Service.Get<Log>().Message(LogTypes.Warning, "Inventory button pushed! Not implemented yet!");
@@ -81,16 +82,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case Buttons.Debug:
                     Service.Get<Log>().Message(LogTypes.Warning, "Debug button pushed! Not implemented yet!");
                     break;
-                //case Buttons.Minimize:
-                //    _maximizedBar.IsEnabled = _minimize.IsEnabled = _map.IsEnabled = _paperdoll.IsEnabled = _inventory.IsEnabled = _journal.IsEnabled = _chat.IsEnabled = _help.IsEnabled = _debug.IsEnabled = false;
-                //    _maximizedBar.IsVisible = _minimize.IsVisible = _map.IsVisible = _paperdoll.IsVisible = _inventory.IsVisible = _journal.IsVisible = _chat.IsVisible = _help.IsVisible = _debug.IsVisible = false;
-                //    _minimizedBar.IsVisible = _minimizedBar.IsEnabled = _maximize.IsEnabled = _maximize.IsVisible = true;
-                //    break;
-                //case Buttons.Maximize:
-                //    _maximizedBar.IsEnabled = _minimize.IsEnabled = _map.IsEnabled = _paperdoll.IsEnabled = _inventory.IsEnabled = _journal.IsEnabled = _chat.IsEnabled = _help.IsEnabled = _debug.IsEnabled = true;
-                //    _maximizedBar.IsVisible = _minimize.IsVisible = _map.IsVisible = _paperdoll.IsVisible = _inventory.IsVisible = _journal.IsVisible = _chat.IsVisible = _help.IsVisible = _debug.IsVisible = true;
-                //    _minimizedBar.IsVisible = _minimizedBar.IsEnabled = _maximize.IsEnabled = _maximize.IsVisible = false;
-                //    break;
             }
         }
 
@@ -103,8 +94,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Chat,
             Help,
             Debug,
-            //Minimize,
-            //Maximize
         }
     }
 }

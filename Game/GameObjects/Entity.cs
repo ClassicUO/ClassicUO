@@ -81,6 +81,9 @@ namespace ClassicUO.Game.GameObjects
 
         public void ClearCallBacks(Action<Entity> onUpdate, Action<Entity> onDispose)
         {
+            if (_OnUpdated == null && _OnDisposed == null)
+                return;
+
             if (_OnUpdated.GetInvocationList().Contains(onUpdate))
                 _OnUpdated -= onUpdate;
             if (_OnDisposed.GetInvocationList().Contains(onDispose))

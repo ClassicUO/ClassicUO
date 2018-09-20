@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Input;
 
 namespace ClassicUO.Game.Gumps
 {
@@ -17,6 +18,12 @@ namespace ClassicUO.Game.Gumps
             : base(x, y, 0xC4F6, 0)
         {
             BackpackItem = backpack;
+            AcceptMouseInput = false;
+        }
+
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            base.OnMouseClick(x, y, button);
         }
     }
 }

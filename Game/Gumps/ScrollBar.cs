@@ -9,7 +9,7 @@ namespace ClassicUO.Game.Gumps
         private const float TIME_BETWEEN_CLICKS = 500f;
 
 
-        private readonly SpriteTexture[] _textureUpButton, _textureDownButton, _textureBackground;
+        private SpriteTexture[] _textureUpButton, _textureDownButton, _textureBackground;
         private SpriteTexture _textureSlider;
 
         private float _sliderPosition, _value;
@@ -22,23 +22,12 @@ namespace ClassicUO.Game.Gumps
 
 
         public ScrollBar(GumpControl parent, int x, int y, int height) : base(parent)
-        {
-            _textureUpButton = new SpriteTexture[2];
-            _textureUpButton[0] = IO.Resources.Gumps.GetGumpTexture(251);
-            _textureUpButton[1] = IO.Resources.Gumps.GetGumpTexture(250);
-            _textureDownButton = new SpriteTexture[2];
-            _textureDownButton[0] = IO.Resources.Gumps.GetGumpTexture(253);
-            _textureDownButton[1] = IO.Resources.Gumps.GetGumpTexture(252);
-            _textureBackground = new SpriteTexture[3];
-            _textureBackground[0] = IO.Resources.Gumps.GetGumpTexture(257);
-            _textureBackground[1] = IO.Resources.Gumps.GetGumpTexture(256);
-            _textureBackground[2] = IO.Resources.Gumps.GetGumpTexture(255);
-            _textureSlider = IO.Resources.Gumps.GetGumpTexture(254);
-            Width = _textureBackground[0].Width;
+        {      
             Height = height;
             Location = new Point(x, y);
             AcceptMouseInput = true;
         }
+
 
         public int Value
         {
@@ -76,6 +65,25 @@ namespace ClassicUO.Game.Gumps
                 if (_value > _max)
                     _value = _max;
             }
+        }
+
+
+        protected override void OnInitialize()
+        {
+            base.OnInitialize();
+
+            _textureUpButton = new SpriteTexture[2];
+            _textureUpButton[0] = IO.Resources.Gumps.GetGumpTexture(251);
+            _textureUpButton[1] = IO.Resources.Gumps.GetGumpTexture(250);
+            _textureDownButton = new SpriteTexture[2];
+            _textureDownButton[0] = IO.Resources.Gumps.GetGumpTexture(253);
+            _textureDownButton[1] = IO.Resources.Gumps.GetGumpTexture(252);
+            _textureBackground = new SpriteTexture[3];
+            _textureBackground[0] = IO.Resources.Gumps.GetGumpTexture(257);
+            _textureBackground[1] = IO.Resources.Gumps.GetGumpTexture(256);
+            _textureBackground[2] = IO.Resources.Gumps.GetGumpTexture(255);
+            _textureSlider = IO.Resources.Gumps.GetGumpTexture(254);
+            Width = _textureBackground[0].Width;
         }
 
 
