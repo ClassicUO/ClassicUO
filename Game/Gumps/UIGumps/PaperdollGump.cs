@@ -146,7 +146,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
 
                 //layer
-                ControlInfo.Layer = UILayer.Over;
             }
         }
 

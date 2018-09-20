@@ -20,10 +20,6 @@ namespace ClassicUO.Game.Gumps
             Y = y;
             AddChildren(new GumpPicTiled(0, 0, 19, 20, 0x243A));
             AddChildren(new GumpPic(0, 0, 0x2344, 0));
-            ControlInfo.Layer = UILayer.Over;
-
-
-
         }
 
 

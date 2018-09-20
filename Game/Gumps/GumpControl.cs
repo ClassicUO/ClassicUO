@@ -203,14 +203,12 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public bool IsInitialize { get; private set; }
-
 
         public void Initialize()
         {
             IsDisposed = false;
             IsEnabled = true;
-            IsInitialize = true;
+            IsInitialized = true;
             IsVisible = true;
             InitializeControls();
             OnInitialize();
@@ -237,7 +235,7 @@ namespace ClassicUO.Game.Gumps
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            if (IsDisposed || !IsInitialize)
+            if (IsDisposed || !IsInitialized)
             {
                 return;
             }
@@ -281,7 +279,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (c.Page == 0 || c.Page == ActivePage)
                 {
-                    if (c.IsVisible && c.IsInitialize)
+                    if (c.IsVisible && c.IsInitialized)
                     {
                         Vector3 offset = new Vector3(c.X + position.X, c.Y + position.Y, position.Z);
                         c.Draw(spriteBatch, offset);

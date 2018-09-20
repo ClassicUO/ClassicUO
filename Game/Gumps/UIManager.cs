@@ -128,6 +128,7 @@ namespace ClassicUO.Game.Gumps
             };
 
             int group = 0;
+            int page = 0;
 
             while (index < layout.Length)
             {
@@ -150,15 +151,15 @@ namespace ClassicUO.Game.Gumps
                     switch (gparams[0].ToLower())
                     {
                         case "button":
-                            gump.AddChildren(new Button(gparams));
+                            gump.AddChildren(new Button(gparams), page);
                             break;
                         case "buttontileart":
-                            gump.AddChildren(new Button(gparams));
+                            gump.AddChildren(new Button(gparams), page);
                             gump.AddChildren(new StaticPic(Graphic.Parse(gparams[8]), Hue.Parse(gparams[9]))
                             {
                                 X = int.Parse(gparams[1]) + int.Parse(gparams[10]),
                                 Y = int.Parse(gparams[2]) + int.Parse(gparams[11])
-                            });
+                            }, page);
                             break;
                         case "checkertrans":
 
@@ -168,27 +169,27 @@ namespace ClassicUO.Game.Gumps
                             //gump.AddChildren(new CheckerTrans(gparams));
                             break;
                         case "croppedtext":
-                            gump.AddChildren(new CroppedText(gparams, lines));
+                            gump.AddChildren(new CroppedText(gparams, lines), page);
                             break;
                         case "gumppic":
-                            gump.AddChildren(new GumpPic(gparams));
+                            gump.AddChildren(new GumpPic(gparams), page);
                             break;
                         case "gumppictiled":
-                            gump.AddChildren(new GumpPicTiled(gparams));
+                            gump.AddChildren(new GumpPicTiled(gparams), page);
                             break;
                         case "htmlgump":
-                            gump.AddChildren(new HtmlGump(gparams, lines));
+                            gump.AddChildren(new HtmlGump(gparams, lines), page);
                             break;
                         case "xmfhtmlgump":
                             gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]),
-                                IO.Resources.Cliloc.GetString(int.Parse(gparams[5])), int.Parse(gparams[6]), int.Parse(gparams[7]), 0, true));
+                                IO.Resources.Cliloc.GetString(int.Parse(gparams[5])), int.Parse(gparams[6]), int.Parse(gparams[7]), 0, true), page);
                             break;
                         case "xmfhtmlgumpcolor":
                             int color = int.Parse(gparams[8]);
                             if (color == 0x7FFF)
                                 color = 0x00FFFFFF;
                             gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]),
-                               IO.Resources.Cliloc.GetString(int.Parse(gparams[5])), int.Parse(gparams[6]), int.Parse(gparams[7]), color, true));
+                               IO.Resources.Cliloc.GetString(int.Parse(gparams[5])), int.Parse(gparams[6]), int.Parse(gparams[7]), color, true), page);
                             break;
                         case "xmfhtmltok":
                             color = int.Parse(gparams[7]);
@@ -196,23 +197,24 @@ namespace ClassicUO.Game.Gumps
                                 color = 0x00FFFFFF;
 
                             gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]),
-                              IO.Resources.Cliloc.GetString(int.Parse(gparams[8])), int.Parse(gparams[5]), int.Parse(gparams[6]), color, true));
+                              IO.Resources.Cliloc.GetString(int.Parse(gparams[8])), int.Parse(gparams[5]), int.Parse(gparams[6]), color, true), page);
                             break;
                         case "page":
+                            page = int.Parse(gparams[1]);
                             break;
                         case "resizepic":
-                            gump.AddChildren(new ResizePic(gparams));
+                            gump.AddChildren(new ResizePic(gparams), page);
                             break;
                         case "text":
-                            gump.AddChildren(new Label(gparams, lines));
+                            gump.AddChildren(new Label(gparams, lines), page);
                             break;
                         case "textentrylimited":
                         case "textentry":
-                            gump.AddChildren(new TextBox(gparams, lines));
+                            gump.AddChildren(new TextBox(gparams, lines), page);
                             break;
                         case "tilepichue":
                         case "tilepic":
-                            gump.AddChildren(new StaticPic(gparams));
+                            gump.AddChildren(new StaticPic(gparams), page);
                             break;
                         case "noclose":
                             gump.CanCloseWithRightClick = false;
@@ -228,10 +230,10 @@ namespace ClassicUO.Game.Gumps
                             group++;
                             break;
                         case "radio":
-                            gump.AddChildren(new RadioButton(group, gparams, lines));
+                            gump.AddChildren(new RadioButton(group, gparams, lines), page);
                             break;
                         case "checkbox":
-                            gump.AddChildren(new Checkbox(gparams, lines));
+                            gump.AddChildren(new Checkbox(gparams, lines), page);
                             break;
                         case "tooltip":
                             break;
@@ -265,19 +267,25 @@ namespace ClassicUO.Game.Gumps
             {
                 var g = _gumps[i];
 
-                if (!g.IsInitialize && !g.IsDisposed)
+                if (!g.IsInitialized && !g.IsDisposed)
                     g.Initialize();
 
-                g.Update(totalMS, frameMS);
-
-                if (g.IsDisposed)
-                    _gumps.RemoveAt(i--);
+                g.Update(totalMS, frameMS);               
             }
+
+            for (int i = 0; i < _gumps.Count; i++)
+            {
+                if (_gumps[i].IsDisposed)
+                {
+                    _gumps.RemoveAt(i--);
+                }
+            }
+
+            _cursor.Update(totalMS, frameMS);
+
 
             HandleKeyboardInput();
             HandleMouseInput();
-
-            _cursor.Update(totalMS, frameMS);
         }
 
         public void Draw(SpriteBatchUI spriteBatch)
@@ -286,16 +294,23 @@ namespace ClassicUO.Game.Gumps
 
             for (int i = _gumps.Count - 1; i >= 0; i--)
             {
-                var g = _gumps[i];
 
-                g.Draw(spriteBatch, new Vector3(g.X, g.Y, 0));
+                var g = _gumps[i];
+                if (g.IsInitialized)
+                    g.Draw(spriteBatch, new Vector3(g.X, g.Y, 0));
             }
 
             _cursor.Draw(spriteBatch);
         }
 
 
-        public void Add(GumpControl gump) => _gumps.Add(gump);
+        public void Add(GumpControl gump)
+        {
+            if (gump.IsDisposed)
+                return;
+
+            _gumps.Insert(0, gump);
+        }
 
         private void HandleKeyboardInput()
         {
@@ -329,21 +344,10 @@ namespace ClassicUO.Game.Gumps
 
         private void HandleMouseInput()
         {
-            GumpControl gump = null;
             var inputManager = Service.Get<InputManager>();
             var position = inputManager.MousePosition;
 
-            if (_isDraggingControl)
-                gump = _draggingControl;
-            else
-            {
-                for (int i = 0; i < _gumps.Count; i++)
-                {
-                    gump = HitTest(_gumps[i], position);
-                    if (gump != null)
-                        break;
-                }
-            }
+            GumpControl gump = GetMouseOverControl(position);
 
             if (_mouseOverControl != null && gump != _mouseOverControl)
             {
@@ -386,7 +390,8 @@ namespace ClassicUO.Game.Gumps
                         {
                             MakeTopMostGump(gump);
                             gump.InvokeMouseDown(e.Position, e.Button);
-
+                            if (gump.AcceptKeyboardInput)
+                                _keyboardFocusControl = gump;
                             _mouseDownControls[(int)e.Button] = gump;
                         }
                         else
@@ -424,11 +429,41 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        private GumpControl HitTest(GumpControl parent, Point position)
+        private GumpControl GetMouseOverControl(Point position)
         {
-            var p = parent?.HitTest(position);
-            if (p != null && p.Length > 0)
-                return p[0];
+            if (_isDraggingControl)
+                return _draggingControl;
+
+            List<GumpControl> controls;
+
+            if (IsModalControlOpen)
+            {
+                controls = new List<GumpControl>();
+                controls = _gumps.Where(s => s.ControlInfo.IsModal).ToList();
+            }
+            else
+                controls = _gumps;
+
+            GumpControl[] mouseoverControls = null;
+
+            foreach (var c in controls)
+            {
+                var ctrls = c.HitTest(position);
+                if (ctrls != null)
+                {
+                    mouseoverControls = ctrls;
+                    break;
+                }
+            }
+
+            if (mouseoverControls == null)
+                return null;
+
+            for (int i = 0; i < mouseoverControls.Length; i++)
+            {
+                if (mouseoverControls[i].AcceptMouseInput)
+                    return mouseoverControls[i];
+            }
             return null;
         }
 
