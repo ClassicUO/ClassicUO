@@ -15,7 +15,6 @@ namespace ClassicUO.Game.Gumps
         public ItemGumplingPaperdoll(int x, int y, Item item) : base(item)
         {
             X = x; Y = y;
-            AcceptMouseInput = false;
             HighlightOnMouseOver = false;
         }
 
@@ -23,7 +22,8 @@ namespace ClassicUO.Game.Gumps
         public bool IsFemale { get; set; }
 
 
-        protected override void OnInitialize()
+
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             if (Texture == null || Texture.IsDisposed)
             {
@@ -33,19 +33,13 @@ namespace ClassicUO.Game.Gumps
                 Height = Texture.Height;
             }
 
-            base.OnInitialize();
-        }
-
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
-        {
-        
             spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue));
 
             return base.Draw(spriteBatch, position, hue);
         }
 
         protected override bool Contains(int x, int y)
-            => IO.Resources.Gumps.Contains(Item.DisplayedGraphic, x, y);
+            => IO.Resources.Gumps.Contains(_gumpIndex, x, y);
         
 
     }
