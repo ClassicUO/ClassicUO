@@ -45,6 +45,7 @@ namespace ClassicUO.Game.Gumps
         
 
         private readonly SpriteTexture[] _textures = new SpriteTexture[3];
+        private readonly Graphic[] _gumpGraphics = new Graphic[3];
         private int _curentState = NORMAL;
         private RenderedText _gText;
         private bool _centerFont;
@@ -54,6 +55,11 @@ namespace ClassicUO.Game.Gumps
         public Button(int buttonID, ushort normal, ushort pressed, ushort over = 0) : base()
         {
             ButtonID = buttonID;
+
+            _gumpGraphics[NORMAL] = normal;
+            _gumpGraphics[PRESSED] = pressed;
+            _gumpGraphics[OVER] = over;
+
             _textures[NORMAL] = IO.Resources.Gumps.GetGumpTexture(normal);
             _textures[PRESSED] = IO.Resources.Gumps.GetGumpTexture(pressed);
             if (over > 0)
@@ -155,14 +161,7 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            SpriteTexture texture;
-
-            if (_curentState == PRESSED)
-                texture = _textures[PRESSED];
-            else if (UIManager.MouseOverControl == this && _textures[OVER] != null)
-                texture = _textures[OVER];
-            else
-                texture = _textures[NORMAL];
+            SpriteTexture texture = GetTextureByState();
 
             spriteBatch.Draw2D(texture, new Rectangle((int)position.X, (int)position.Y + (_curentState == PRESSED ? 1 : 0), Width, Height), Vector3.Zero);
 
@@ -196,7 +195,23 @@ namespace ClassicUO.Game.Gumps
                 _curentState = PRESSED;
         }
 
-        
+        private SpriteTexture GetTextureByState()
+        {
+            if (_curentState == PRESSED)
+                return _textures[PRESSED];
+            else if (UIManager.MouseOverControl == this && _textures[OVER] != null)
+                return _textures[OVER];
+             return _textures[NORMAL];
+        }
+
+        private Graphic GetGraphicByState()
+        {
+            if (_curentState == PRESSED)
+                return _gumpGraphics[PRESSED];
+            else if (UIManager.MouseOverControl == this && _textures[OVER] != null)
+                return _gumpGraphics[OVER];
+            return _gumpGraphics[NORMAL];
+        }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
@@ -220,6 +235,8 @@ namespace ClassicUO.Game.Gumps
                 _curentState = NORMAL;
         }
 
+        protected override bool Contains(int x, int y)
+            => IO.Resources.Gumps.Contains(GetGraphicByState(), x, y);
         
 
 

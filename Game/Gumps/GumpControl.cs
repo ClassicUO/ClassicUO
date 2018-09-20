@@ -165,7 +165,7 @@ namespace ClassicUO.Game.Gumps
         public GumpControl Parent
         {
             get => _parent;
-            set
+            private set
             {
                 if (value == null)
                     _parent?._children.Remove(this);
@@ -478,14 +478,14 @@ namespace ClassicUO.Game.Gumps
 
         protected virtual void OnMouseDown(int x, int y, MouseButton button)
         {
-            if (Parent != null)
-                Parent.OnMouseDown(x, y, button);
+            //if (Parent != null)
+            //    Parent.OnMouseDown(x, y, button);
         }
 
         protected virtual void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (Parent != null)
-                Parent.OnMouseUp(x, y, button);
+            //if (Parent != null)
+            //    Parent.OnMouseUp(x, y, button);
         }
 
         protected virtual void OnMouseEnter(int x, int y)
@@ -500,14 +500,14 @@ namespace ClassicUO.Game.Gumps
 
         protected virtual void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (Parent != null)
-                Parent.OnMouseClick(x, y, button);
+            //if (Parent != null)
+            //    Parent.OnMouseClick(x, y, button);
         }
 
         protected virtual void OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (Parent != null)
-                Parent.OnMouseDoubleClick(x, y, button);
+            //if (Parent != null)
+            //    Parent.OnMouseDoubleClick(x, y, button);
         }
 
         protected virtual void OnTextInput(string c)

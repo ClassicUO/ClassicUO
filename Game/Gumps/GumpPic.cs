@@ -32,6 +32,7 @@ namespace ClassicUO.Game.Gumps
         public GumpPicBase() : base()
         {
             CanMove = true;
+            AcceptMouseInput = true;
         }
 
         public Graphic Graphic { get; set; }
@@ -51,14 +52,12 @@ namespace ClassicUO.Game.Gumps
                 Height = Texture.Height;
             }
 
-            Texture.Ticks = (long)totalMS;
             base.Update(totalMS, frameMS);
         }
 
         protected override bool Contains(int x, int y)
-        {
-            return Bounds.Contains(x, y);
-        }
+            => IO.Resources.Gumps.Contains(Graphic, x, y);
+
     }
 
     public class GumpPic : GumpPicBase

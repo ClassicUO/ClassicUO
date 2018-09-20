@@ -25,6 +25,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public PaperDollGump()
             : base(0, 0)
         {
+            AcceptMouseInput = false;
         }
 
         public PaperDollGump(Serial serial, string mobileTitle)
@@ -128,13 +129,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 AddChildren(new EquipmentSlot(2, 76 + 22 * 3)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 3, Mobile, EquipLayer.Ring));
                 AddChildren(new EquipmentSlot(2, 76 + 22 * 4));//AddControl(new EquipmentSlot(this, 2, 76 + 22 * 4, Mobile, EquipLayer.Bracelet));
                 // Paperdoll control!
-                AddChildren(new PaperDollInteractable( this,8, 21, Mobile));
+                AddChildren(new PaperDollInteractable(8, 21, Mobile));
                 }
             else
             {
                 AddChildren(new GumpPic(0, 0, 0x07d1, 0));
                 // Paperdoll
-                AddChildren(new PaperDollInteractable(this, 8, 21, Mobile));
+                AddChildren(new PaperDollInteractable(8, 21, Mobile));
             }
             
             // Name and title

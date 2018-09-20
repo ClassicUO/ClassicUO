@@ -403,6 +403,8 @@ namespace ClassicUO.Game.Gumps
                     case MouseEvent.Down:
                         if (gump != null)
                         {
+                            Console.WriteLine(gump);
+
                             MakeTopMostGump(gump);
                             gump.InvokeMouseDown(e.Position, e.Button);
                             if (gump.AcceptKeyboardInput)

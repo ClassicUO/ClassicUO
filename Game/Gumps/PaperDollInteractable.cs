@@ -18,15 +18,14 @@ namespace ClassicUO.Game.Gumps
         
 
         
-        public PaperDollInteractable(GumpControl parent, int x, int y, Mobile sourceEntity)
+        public PaperDollInteractable(int x, int y, Mobile sourceEntity)
             : base(0, 0)
         {
-            Parent = parent;
             X = x;
             Y = y;
             _isFemale = ((sourceEntity.Flags & Flags.Female) != 0);
             SourceEntity = sourceEntity;
-           
+            AcceptMouseInput = false;
         }
 
         public override void Dispose()
@@ -84,7 +83,7 @@ namespace ClassicUO.Game.Gumps
                 itemGumplingPaperdoll.SlotIndex = i;
                 itemGumplingPaperdoll.IsFemale = _isFemale;
                 itemGumplingPaperdoll.CanPickUp = canPickUp;
-             
+
             }
             // If this object has a backpack, add it last.
             if (((Mobile)_sourceEntity).Equipment[(int)PaperDollEquipSlots.Backpack] != null)

@@ -17,7 +17,6 @@ namespace ClassicUO.Game.Gumps
             X = x; Y = y;
             AcceptMouseInput = false;
             HighlightOnMouseOver = false;
-            
         }
 
         public int SlotIndex { get; set; }
@@ -39,16 +38,15 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            
+        
             spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue));
 
             return base.Draw(spriteBatch, position, hue);
         }
 
         protected override bool Contains(int x, int y)
-        {
-            return Bounds.Contains(x, y);
-        }
+            => IO.Resources.Gumps.Contains(Item.DisplayedGraphic, x, y);
+        
 
     }
 }
