@@ -115,9 +115,7 @@ namespace ClassicUO.Game.Gumps
 
 
         public GumpControl Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
-        {
-            List<string> pieces = new List<string>();
-            int index = 0;
+        {            
             Gump gump = new Gump(sender, gumpID)
             {
                 X = x,
@@ -129,6 +127,7 @@ namespace ClassicUO.Game.Gumps
 
             int group = 0;
             int page = 0;
+            int index = 0;
 
             while (index < layout.Length)
             {
@@ -143,7 +142,6 @@ namespace ClassicUO.Game.Gumps
                 if (begin != -1 && end != -1)
                 {
                     string sub = layout.Substring(begin + 1, end - begin - 1).Trim();
-                    pieces.Add(sub);
                     index = end;
 
                     string[] gparams = Regex.Split(sub, @"\s+");
@@ -251,12 +249,15 @@ namespace ClassicUO.Game.Gumps
             }
 
 
-            _gumps.Add(gump);
+            Add(gump);
             return gump;
         }
 
-        public T Get<T>() where T : Gump
-            => _gumps.OfType<T>().FirstOrDefault();
+        public T Get<T>(Serial? serial = null) where T : GumpControl
+            => _gumps.OfType<T>().Where(s => !s.IsDisposed && (!serial.HasValue || s.LocalSerial == serial) ).FirstOrDefault();
+
+        public Gump Get(Serial serial)
+            => _gumps.OfType<Gump>().FirstOrDefault(s => !s.IsDisposed && s.ServerSerial == serial);
 
 
         public void Update(double totalMS, double frameMS)
@@ -294,7 +295,6 @@ namespace ClassicUO.Game.Gumps
 
             for (int i = _gumps.Count - 1; i >= 0; i--)
             {
-
                 var g = _gumps[i];
                 if (g.IsInitialized)
                     g.Draw(spriteBatch, new Vector3(g.X, g.Y, 0));
@@ -310,6 +310,21 @@ namespace ClassicUO.Game.Gumps
                 return;
 
             _gumps.Insert(0, gump);
+        }
+
+        public void Remove<T>(Serial? local = null) where T: GumpControl
+        {
+            foreach (var c in _gumps)
+            {
+                if (typeof(T).IsAssignableFrom(c.GetType()))
+                {
+                    if (!local.HasValue || c.LocalSerial == local)
+                    {
+                        if (!c.IsDisposed)
+                            c.Dispose();
+                    }
+                }
+            }
         }
 
         private void HandleKeyboardInput()

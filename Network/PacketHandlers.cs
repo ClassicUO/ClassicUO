@@ -1551,7 +1551,10 @@ namespace ClassicUO.Network
                     break;
                 case 4: // close generic gump
                     Serial serial = p.ReadUInt();
-                    uint button = p.ReadUInt();
+                    int button = (int)p.ReadUInt();
+                    var gump = Service.Get<UIManager>().Get(serial);
+                    gump?.OnButtonClick(button);
+
                     break;
                 case 6: //party
                     break;
