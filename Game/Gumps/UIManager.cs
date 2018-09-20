@@ -403,7 +403,7 @@ namespace ClassicUO.Game.Gumps
                     case MouseEvent.Down:
                         if (gump != null)
                         {
-                            Console.WriteLine(gump);
+                            Console.WriteLine("{0} - {1}", gump, gump.IsInitialized);
 
                             MakeTopMostGump(gump);
                             gump.InvokeMouseDown(e.Position, e.Button);

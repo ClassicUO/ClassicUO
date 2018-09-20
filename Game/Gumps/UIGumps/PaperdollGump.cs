@@ -22,7 +22,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private GumpPic _virtueMenuPic;
         private GumpPic _specialMovesBookPic;
         private GumpPic _partyManifestPic;
-        //private static PaperDollGump _self;
 
         public PaperDollGump()
             : base(0, 0)
@@ -55,19 +54,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             private set;
         }
 
-        //public static void Toggle(Serial serial, string mobileTitle)
-        //{
-        //    var ui = Service.Get<UIManager>();
-        //    var gump = ui.Get<PaperDollGump>();
-        //    if (gump == null || gump.IsDisposed)
-        //    {
-        //        ui.Add(_self = new PaperDollGump(serial, mobileTitle));
-        //    }
-        //    else
-        //    {
-        //        _self.Dispose();
-        //    }
-        //}
 
         public override void Dispose()
         {
@@ -82,7 +68,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void BuildGump()
         {
-
             //m_World = Service.Get<WorldModel>();
             //m_Client = Service.Get<INetworkClient>();
 
@@ -95,7 +80,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             if (Mobile == World.Player)
             {
-
                 AddChildren(new GumpPic(0, 0, 0x07d0, 0) { CanMove = true });
                 //HELP BUTTON
                 AddChildren(new Button((int)Buttons.Help, 0x07ef, 0x07f0, 0x07f1) { X = 185, Y = 44 + 27 * 0, ButtonAction = ButtonAction.Activate });
@@ -142,7 +126,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             
             // Name and title
             AddChildren(new HtmlGump(35, 260, 180, 42, string.Format("<span color=#222 style='font-family:uni0;'>{0}", Title), 0, 0, 0, true));
-
         }
 
 
@@ -192,6 +175,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return base.Draw(spriteBatch, position, hue);
         }
 
+
+        public override void OnButtonClick(int buttonID)
+        {
+            switch ((Buttons)buttonID)
+            {
+
+            }
+        }
 
 
         private enum Buttons

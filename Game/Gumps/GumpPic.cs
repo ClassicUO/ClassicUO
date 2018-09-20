@@ -27,7 +27,7 @@ namespace ClassicUO.Game.Gumps
 {
     public abstract class GumpPicBase : GumpControl
     {
-        private Graphic _lastGump;
+        private ushort _lastGump = 0xFFFF;
 
         public GumpPicBase() : base()
         {
@@ -62,12 +62,6 @@ namespace ClassicUO.Game.Gumps
 
     public class GumpPic : GumpPicBase
     {
-
-        public GumpPic(Graphic graphic) : base()
-        {
-            Graphic = graphic;
-        }
-
         public GumpPic(int x, int y, Graphic graphic, Hue hue) : base()
         {
             X = x;
@@ -76,16 +70,11 @@ namespace ClassicUO.Game.Gumps
             Hue = hue;
         }
 
-        public GumpPic(string[] parts) : this(Graphic.Parse(parts[3]))
+        public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) : (Hue)0)
         {
-            X = int.Parse(parts[1]);
-            Y = int.Parse(parts[2]);
-
-            if (parts.Length > 4)
-                Hue = Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1));
+               
         }
-
-       
+   
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
