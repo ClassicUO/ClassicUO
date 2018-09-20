@@ -54,7 +54,7 @@ namespace ClassicUO.IO.Resources
             _artCache = new SpriteTexture[ART_COUNT];
         }
 
-        public static bool Contains(ushort g, int x, int y) => _picker.Get(g, x, y);
+        public static bool Contains(ushort g, int x, int y, int extra = 0) => _picker.Get(g, x, y, extra);
 
         public static unsafe SpriteTexture GetStaticTexture(ushort g)
         {

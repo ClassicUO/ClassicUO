@@ -25,7 +25,7 @@ namespace ClassicUO.Game.Scenes
 {
     public sealed class LoadScene : Scene
     {
-        public LoadScene()
+        public LoadScene() : base(ScenesType.Loading)
         {
             //ChainActions.Add(OnGameLoading);
             //ChainActions.Add(OnGameLoaded);

@@ -64,8 +64,11 @@ namespace ClassicUO.Game
             {
                 direction = (Direction)( ( (byte)direction + 2 ) & 0x87 );
                 (nextX, nextY) = OffsetTile(current, direction);
-                moveIsOK = CheckMovement(m, current, direction, out nextZ);
+                moveIsOK = CheckMovement(m, current, direction, out nextZ); 
             }
+
+            if (!moveIsOK)
+                direction = initialDir;
 
             return moveIsOK;
         }

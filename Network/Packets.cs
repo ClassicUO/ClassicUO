@@ -155,14 +155,19 @@ namespace ClassicUO.Network
 
     public sealed class PDropRequestNew : PacketWriter
     {
-        public PDropRequestNew(Serial serial, Position position, byte slot, Serial container) : base(0x08)
+        public PDropRequestNew(Serial serial, ushort x, ushort y, sbyte z, byte slot, Serial container) : base(0x08)
         {
             WriteUInt(serial);
-            WriteUShort(position.X);
-            WriteUShort(position.Y);
-            WriteSByte(position.Z);
+            WriteUShort(x);
+            WriteUShort(y);
+            WriteSByte(z);
             WriteByte(slot);
             WriteUInt(container);
+        }
+
+        public PDropRequestNew(Serial serial, Position position, byte slot, Serial container) : this(serial, position.X, position.Y, position.Z, slot, container)
+        {
+
         }
     }
 

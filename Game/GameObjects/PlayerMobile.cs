@@ -1124,7 +1124,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection))
                 {
-                    return false;
+                    if (oldDirection == newDirection)
+                        return false;
                 }
 
                 if (oldDirection == newDirection)

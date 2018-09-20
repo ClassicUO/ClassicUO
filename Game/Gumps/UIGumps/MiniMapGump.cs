@@ -37,7 +37,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AcceptMouseInput = true;
             X = 600; Y = 50;
 
-            ControlInfo.Layer = UILayer.Over;
             _scene = scene;
             _useLargeMap = _miniMap_LargeFormat;
         }

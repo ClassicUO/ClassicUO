@@ -48,7 +48,7 @@ namespace ClassicUO.Game.Gumps
             InternalBuild(lines[textIndex], 0);
         }
 
-        public HtmlGump(int x, int y, int w, int h, string text, int hasbackground, int hasscrollbar, int hue, bool ishtml) : this()
+        public HtmlGump(int x, int y, int w, int h, string text, int hasbackground, int hasscrollbar, int hue, bool ishtml, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : this()
         {
             X = x;
             Y = y;
@@ -59,6 +59,8 @@ namespace ClassicUO.Game.Gumps
             UseFlagScrollbar = hasscrollbar != 0 && hasscrollbar == 2;
 
             _gameText.IsHTML = ishtml;
+            _gameText.FontStyle |= style;
+            _gameText.Align = align;
 
             InternalBuild(text, hue);
         }
@@ -84,11 +86,6 @@ namespace ClassicUO.Game.Gumps
 
         private void InternalBuild(string text, int hue)
         {
-            if (text == "Felucca")
-            {
-
-            }
-
             uint htmlColor = 0xFFFFFFFF;
             ushort color = 0;
 

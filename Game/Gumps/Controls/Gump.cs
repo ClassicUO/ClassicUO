@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -25,6 +26,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (ActivePage == 0)
+                ActivePage = 1;
+
             base.Update(totalMS, frameMS);
         }
 
@@ -54,7 +58,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 if (buttonID == 0) // cancel
                 {
-                    Network.NetClient.Socket.Send(new Network.PGumpResponse(LocalSerial, ServerSerial, buttonID, null, null));
+                    GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, null, null);
                 }
                 else
                 {
@@ -71,7 +75,7 @@ namespace ClassicUO.Game.Gumps.Controls
                             entries.Add(new Tuple<ushort, string>((ushort)LocalSerial, textBox.Text));
                     }
 
-                    Network.NetClient.Socket.Send(new Network.PGumpResponse(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray()));
+                    GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
                 }
                 Dispose();
             }
