@@ -80,7 +80,7 @@ namespace ClassicUO.Game.Gumps
                 }
 
                 ItemGumplingPaperdoll itemGumplingPaperdoll;
-                AddChildren(itemGumplingPaperdoll = new ItemGumplingPaperdoll(this , 0, 0, item));
+                AddChildren(itemGumplingPaperdoll = new ItemGumplingPaperdoll(0, 0, item));
                 itemGumplingPaperdoll.SlotIndex = i;
                 itemGumplingPaperdoll.IsFemale = _isFemale;
                 itemGumplingPaperdoll.CanPickUp = canPickUp;
