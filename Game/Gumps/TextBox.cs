@@ -78,7 +78,8 @@ namespace ClassicUO.Game.Gumps
                 _caratBlink = false;
             }
 
-            if (_entry.IsChanged) _entry.UpdateCaretPosition();
+            if (_entry.IsChanged)
+                _entry.UpdateCaretPosition();
 
             base.Update(totalMS, frameMS);
         }

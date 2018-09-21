@@ -127,6 +127,7 @@ namespace ClassicUO.Input.TextEntry
                 }
             }
 
+            CaretIndex = text.Length;
             Text = text;
         }
 

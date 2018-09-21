@@ -34,6 +34,7 @@ namespace ClassicUO.Game
         Regular = 0,
         System = 1,
         Emote = 2,
+
         Label = 6,
         Focus = 7,
         Whisper = 8,
