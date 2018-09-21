@@ -110,7 +110,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Service.Get<Log>().Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");
                     break;
                 case Buttons.Help:
-                    Service.Get<Log>().Message(LogTypes.Warning, "Help button pushed! Not implemented yet!");
+                    GameActions.RequestHelp();
+                    Service.Get<Log>().Message(LogTypes.Info, "Help request sent!");
                     break;
                 case Buttons.Debug:
                     Service.Get<Log>().Message(LogTypes.Warning, "Debug button pushed! Not implemented yet!");

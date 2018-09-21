@@ -196,6 +196,13 @@ namespace ClassicUO.Network
     {
         public PHelpRequest() : base(0x9B)
         {
+            byte[] empty = new byte[257];
+            foreach (var emptyByte in empty)
+            {
+                WriteByte(emptyByte);
+            }
+            
+
         }
     }
 
@@ -386,6 +393,7 @@ namespace ClassicUO.Network
     public sealed class PVirtueGumpReponse : PacketWriter
     {
         public PVirtueGumpReponse() : base(0xB1) => throw new NotImplementedException();
+
     }
 
     public sealed class PMenuResponse : PacketWriter
@@ -700,7 +708,8 @@ namespace ClassicUO.Network
         {
             WriteUInt(World.Player);
             WriteUShort(0x32);
-            WriteByte(0x0A);
+            //WriteByte(0x0A);
+            WriteByte(0x00);
         }
     }
 

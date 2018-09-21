@@ -130,8 +130,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (args.Button == MouseButton.Left)
             {
-                Service.Get<Log>().Message(LogTypes.Warning, "Virtue DoubleClick event!!");
-                //NetClient.Send(new GumpMenuSelectPacket(Mobile.Serial, 0x000001CD, 0x00000001, new int[1] { Mobile.Serial }, null));
+                GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new Serial[1] { Mobile.Serial });
+                Service.Get<Log>().Message(LogTypes.Info, "Virtue DoubleClick event!!");
             }
         }
 
@@ -183,7 +183,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.Help:
-                    //
+                    GameActions.RequestHelp();
+                    Service.Get<Log>().Message(LogTypes.Info,"Help request sent!");
                     break;
 
                 case Buttons.Options:
@@ -195,7 +196,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
 
                 case Buttons.Quests:
-                    //
+                    GameActions.RequestQuestMenu();
+                    Service.Get<Log>().Message(LogTypes.Info, "Quest menu request sent!");
                     break;
 
                 case Buttons.Skills:

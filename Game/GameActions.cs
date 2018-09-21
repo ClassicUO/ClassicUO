@@ -57,5 +57,11 @@ namespace ClassicUO.Game
         public static void ReplyGump(Serial local, Serial server, int button, Serial[] switches = null,
             Tuple<ushort, string>[] entries = null)
             => Socket.Send(new PGumpResponse(local, server, button, switches, entries));
+
+        public static void RequestHelp()
+            => Socket.Send(new PHelpRequest());
+
+        public static void RequestQuestMenu()
+            => Socket.Send(new PQuestMenuRequest());
     }
 }
