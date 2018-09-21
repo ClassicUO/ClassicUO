@@ -1052,6 +1052,9 @@ namespace ClassicUO.Network
         private static void Warmode(Packet p)
         {
             World.Player.InWarMode = p.ReadBool();
+            p.ReadByte(); // always 0x00
+            p.ReadByte(); // always 0x32
+            p.ReadByte(); // always 0x00
             World.Player.ProcessDelta();
         }
 

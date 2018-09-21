@@ -186,7 +186,9 @@ namespace ClassicUO.Network
         public PChangeWarMode(bool state) : base(0x72)
         {
             WriteBool(state);
-            WriteUShort(0x0032);
+            WriteByte(0x00); //always
+            WriteByte(0x32); //always
+            WriteByte(0x00); //always
         }
     }
 

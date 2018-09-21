@@ -17,7 +17,10 @@ namespace ClassicUO.Game
             _pickUpAction = onPickUpAction;
         }
 
-
+        public static void ToggleWarMode() 
+        {
+           Socket.Send(new PChangeWarMode((World.Player.Flags & Flags.WarMode) == 0));
+        }
 
 
         public static void DoubleClick(Serial serial)     

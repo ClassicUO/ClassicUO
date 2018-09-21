@@ -166,6 +166,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 return;
             }
 
+            // This is to update the state of the war mode button.
+            if (_isWarMode != Mobile.InWarMode)
+            {
+                _isWarMode = Mobile.InWarMode;
+                ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
+                _warModeBtn.ButtonGraphicNormal = btngumps[0];
+                _warModeBtn.ButtonGraphicPressed = btngumps[1];
+                _warModeBtn.ButtonGraphicOver = btngumps[2];
+                
+                
+            }
+
 
 
             base.Update(totalMS, frameMS);
@@ -181,6 +193,38 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             switch ((Buttons)buttonID)
             {
+                case Buttons.Help:
+                    //
+                    break;
+
+                case Buttons.Options:
+                    //
+                    break;
+
+                case Buttons.LogOut:
+                    //
+                    break;
+
+                case Buttons.Quests:
+                    //
+                    break;
+
+                case Buttons.Skills:
+                    //
+                    break;
+
+                case Buttons.Guild:
+                    //
+                    break;
+
+                case Buttons.PeaceWarToggle:
+                    GameActions.ToggleWarMode();
+                    Service.Get<Log>().Message(LogTypes.Info, $"War mode set {(!World.Player.InWarMode ? "ON" : "OFF")} !");
+                    break;
+
+                case Buttons.Status:
+                    //
+                    break;
 
             }
         }
