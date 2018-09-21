@@ -7,10 +7,7 @@ namespace ClassicUO.Input
         private MouseOverItem<T> _overObject;
         private MouseOverItem<T> _overTile;
 
-        public MousePicker()
-        {
-            PickOnly = PickerType.PickNothing;
-        }
+        public MousePicker() => PickOnly = PickerType.PickNothing;
 
         public PickerType PickOnly { get; set; }
         public Point Position { get; set; }

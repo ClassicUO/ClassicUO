@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,15 +19,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Input;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
@@ -34,7 +34,8 @@ namespace ClassicUO.Renderer
 
     public static class Ext
     {
-        public static void DrawIndexedPrimitives(this GraphicsDevice self, PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount)
+        public static void DrawIndexedPrimitives(this GraphicsDevice self, PrimitiveType primitiveType, int baseVertex,
+            int startIndex, int primitiveCount)
         {
             self.DrawIndexedPrimitives(primitiveType, baseVertex, 0, primitiveCount * 2, startIndex, primitiveCount);
         }
@@ -53,8 +54,9 @@ namespace ClassicUO.Renderer
         private readonly DepthStencilState _dss = new DepthStencilState
         {
             DepthBufferEnable = true,
-            DepthBufferWriteEnable = true,  
+            DepthBufferWriteEnable = true
         };
+
         private readonly Microsoft.Xna.Framework.Game _game;
         private readonly short[] _indices = new short[MAX_VERTICES_PER_DRAW * 6];
         private readonly short[] _sortedIndices = new short[MAX_VERTICES_PER_DRAW * 6];
@@ -76,20 +78,20 @@ namespace ClassicUO.Renderer
         private bool _isStarted;
 
 
-        private int _enqueuedDrawCalls = 0;
-        private int _vertexCount = 0;
-        private int _indicesCount = 0;
-        private VertexBuffer _vertexBuffer;
-        private IndexBuffer _indexBuffer;
+        private int _vertexCount;
+        private int _indicesCount;
+        private readonly VertexBuffer _vertexBuffer;
+        private readonly IndexBuffer _indexBuffer;
 
 
         public SpriteBatch3D(Microsoft.Xna.Framework.Game game)
         {
             _game = game;
 
-            _effect = new Effect(GraphicsDevice, File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, "Graphic/Shaders/IsometricWorld.fxc")));
+            _effect = new Effect(GraphicsDevice,
+                File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, "Graphic/Shaders/IsometricWorld.fxc")));
 
-            _effect.Parameters["HuesPerTexture"].SetValue(/*IO.Resources.Hues.HuesCount*/3000f);
+            _effect.Parameters["HuesPerTexture"].SetValue( /*IO.Resources.Hues.HuesCount*/3000f);
 
             _drawLightingEffect = _effect.Parameters["DrawLighting"];
             _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];
@@ -101,29 +103,34 @@ namespace ClassicUO.Renderer
 
             _drawCalls = new DrawCallInfo[MAX_VERTICES_PER_DRAW];
 
-            _vertexBuffer = new DynamicVertexBuffer(GraphicsDevice, SpriteVertex.VertexDeclaration, _vertices.Length, BufferUsage.WriteOnly);
-            _indexBuffer = new DynamicIndexBuffer(GraphicsDevice, IndexElementSize.SixteenBits, _indices.Length, BufferUsage.WriteOnly);
+            _vertexBuffer = new DynamicVertexBuffer(GraphicsDevice, SpriteVertex.VertexDeclaration, _vertices.Length,
+                BufferUsage.WriteOnly);
+            _indexBuffer = new DynamicIndexBuffer(GraphicsDevice, IndexElementSize.SixteenBits, _indices.Length,
+                BufferUsage.WriteOnly);
         }
 
 
         public GraphicsDevice GraphicsDevice => _game?.GraphicsDevice;
         public Matrix ProjectionMatrixWorld => Matrix.Identity;
-        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
+
+        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width,
+            GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
 
         public int Merged { get; private set; }
-        public int Calls => _enqueuedDrawCalls;
+        public int Calls { get; private set; }
+
         public int TotalCalls => Merged + Calls;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void AddQuadrilateralIndices(int indexOffset)
         {
-            _geometryIndices[0] = (short)(0 + indexOffset);
-            _geometryIndices[1] = (short)(1 + indexOffset);
-            _geometryIndices[2] = (short)(2 + indexOffset);
-            _geometryIndices[3] = (short)(1 + indexOffset);
-            _geometryIndices[4] = (short)(3 + indexOffset);
-            _geometryIndices[5] = (short)(2 + indexOffset);
+            _geometryIndices[0] = (short) (0 + indexOffset);
+            _geometryIndices[1] = (short) (1 + indexOffset);
+            _geometryIndices[2] = (short) (2 + indexOffset);
+            _geometryIndices[3] = (short) (1 + indexOffset);
+            _geometryIndices[4] = (short) (3 + indexOffset);
+            _geometryIndices[5] = (short) (2 + indexOffset);
         }
 
         public void SetLightDirection(Vector3 dir)
@@ -145,7 +152,7 @@ namespace ClassicUO.Renderer
 
             _isStarted = true;
 
-            _enqueuedDrawCalls = 0;
+            Calls = 0;
             Merged = 0;
 
             _z = 0;
@@ -158,10 +165,7 @@ namespace ClassicUO.Renderer
             if (!_isStarted)
                 throw new Exception();
 
-            if (texture == null || texture.IsDisposed)
-            {
-                return false;
-            }
+            if (texture == null || texture.IsDisposed) return false;
 
             bool draw = false;
 
@@ -190,7 +194,7 @@ namespace ClassicUO.Renderer
         {
             AddQuadrilateralIndices(_vertexCount);
 
-            var call = new DrawCallInfo(texture, _indicesCount, PRIMITIVES_COUNT);
+            DrawCallInfo call = new DrawCallInfo(texture, _indicesCount, PRIMITIVES_COUNT);
 
             Array.Copy(vertices, 0, _vertices, _vertexCount, VERTEX_COUNT);
             _vertexCount += VERTEX_COUNT;
@@ -207,21 +211,21 @@ namespace ClassicUO.Renderer
             //    Merged++;
             //    return;
             //}
-            _drawCalls[_enqueuedDrawCalls++] = call;
+            _drawCalls[Calls++] = call;
         }
 
         public void End(bool light = false)
         {
             if (!_isStarted)
                 throw new Exception();
-          
-            Flush(light);        
+
+            Flush(light);
             _isStarted = false;
         }
 
         private void Flush(bool light)
         {
-            if (_enqueuedDrawCalls == 0)
+            if (Calls == 0)
                 return;
 
             SetupBuffers();
@@ -245,21 +249,21 @@ namespace ClassicUO.Renderer
 
         private void SortIndicesAndMerge()
         {
-            Array.Sort(_drawCalls, 0, _enqueuedDrawCalls);
+            Array.Sort(_drawCalls, 0, Calls);
 
 
             int newDrawCallCount = 0;
             int start = _drawCalls[0].StartIndex;
 
             _drawCalls[0].StartIndex = 0;
-            var currentDrawCall = _drawCalls[0];
+            DrawCallInfo currentDrawCall = _drawCalls[0];
             _drawCalls[newDrawCallCount++] = _drawCalls[0];
 
             int drawCallIndexCount = currentDrawCall.PrimitiveCount * 3;
             Array.Copy(_indices, start, _sortedIndices, 0, drawCallIndexCount);
             int sortedIndexCount = drawCallIndexCount;
 
-            for (int i = 1; i < _enqueuedDrawCalls; i++)
+            for (int i = 1; i < Calls; i++)
             {
                 currentDrawCall = _drawCalls[i];
                 drawCallIndexCount = currentDrawCall.PrimitiveCount * 3;
@@ -267,7 +271,7 @@ namespace ClassicUO.Renderer
 
                 sortedIndexCount += drawCallIndexCount;
                 if (currentDrawCall.TryMerge(ref _drawCalls[newDrawCallCount - 1]))
-                {                  
+                {
                     Merged++;
                     continue;
                 }
@@ -276,7 +280,7 @@ namespace ClassicUO.Renderer
                 _drawCalls[newDrawCallCount++] = currentDrawCall;
             }
 
-            _enqueuedDrawCalls = newDrawCallCount;
+            Calls = newDrawCallCount;
         }
 
         private void ApplyStates(bool light)
@@ -308,26 +312,25 @@ namespace ClassicUO.Renderer
             _effect.CurrentTechnique = _huesTechnique;
             _effect.CurrentTechnique.Passes[0].Apply();
 
-            for (int i = 0; i < _enqueuedDrawCalls; i++)
+            for (int i = 0; i < Calls; i++)
             {
-                ref var call = ref _drawCalls[i];
+                ref DrawCallInfo call = ref _drawCalls[i];
 
                 GraphicsDevice.Textures[0] = call.Texture;
-                GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, call.StartIndex, call.PrimitiveCount);
+                GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, call.StartIndex,
+                    call.PrimitiveCount);
             }
 
-            Array.Clear(_drawCalls, 0, _enqueuedDrawCalls);
+            Array.Clear(_drawCalls, 0, Calls);
         }
 
-       
 
-
-        struct DrawCallInfo : IComparable<DrawCallInfo>
+        private struct DrawCallInfo : IComparable<DrawCallInfo>
         {
             public DrawCallInfo(Texture2D texture, int start, int count)
             {
                 Texture = texture;
-                TextureKey = (uint)texture.GetHashCode();
+                TextureKey = (uint) texture.GetHashCode();
                 StartIndex = start;
                 PrimitiveCount = count;
             }
@@ -345,12 +348,7 @@ namespace ClassicUO.Renderer
                 return true;
             }
 
-            public int CompareTo(DrawCallInfo other)
-            {
-                return TextureKey.CompareTo(other.TextureKey);
-            }
+            public int CompareTo(DrawCallInfo other) => TextureKey.CompareTo(other.TextureKey);
         }
-
     }
-
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Utility
 {
@@ -8,12 +7,12 @@ namespace ClassicUO.Utility
     {
         public const int ProfileTimeCount = 60;
 
-        static List<ContextAndTick> m_Context;
-        static HighPerformanceTimer m_Timer;
-        static List<Tuple<string[], double>> m_ThisFrameData;
-        static List<ProfileData> m_AllFrameData;
-        static ProfileData m_TotalTimeData;
-        static long m_BeginFrameTicks;
+        private static readonly List<ContextAndTick> m_Context;
+        private static readonly HighPerformanceTimer m_Timer;
+        private static readonly List<Tuple<string[], double>> m_ThisFrameData;
+        private static readonly List<ProfileData> m_AllFrameData;
+        private static readonly ProfileData m_TotalTimeData;
+        private static long m_BeginFrameTicks;
         public static double LastFrameTimeMS { get; private set; }
         public static double TrackedTime => m_TotalTimeData.TimeInContext;
 
@@ -43,11 +42,10 @@ namespace ClassicUO.Utility
                             break;
                         }
                     }
-                    if (!added)
-                    {
-                        m_AllFrameData.Add(new ProfileData(m_ThisFrameData[i].Item1, m_ThisFrameData[i].Item2));
-                    }
+
+                    if (!added) m_AllFrameData.Add(new ProfileData(m_ThisFrameData[i].Item1, m_ThisFrameData[i].Item2));
                 }
+
                 m_ThisFrameData.Clear();
             }
 
@@ -68,12 +66,17 @@ namespace ClassicUO.Utility
         public static void ExitContext(string context_name)
         {
             if (m_Context[m_Context.Count - 1].Name != context_name)
-                Service.Get<Log>().Message(LogTypes.Error, "Profiler.ExitProfiledContext: context_name does not match current context.");
+            {
+                Service.Get<Log>().Message(LogTypes.Error,
+                    "Profiler.ExitProfiledContext: context_name does not match current context.");
+            }
+
             string[] context = new string[m_Context.Count];
             for (int i = 0; i < m_Context.Count; i++)
                 context[i] = m_Context[i].Name;
 
-            double ms = HighPerformanceTimer.SecondsFromTicks(m_Timer.ElapsedTicks - m_Context[m_Context.Count - 1].Tick) * 1000d;
+            double ms = HighPerformanceTimer.SecondsFromTicks(
+                            m_Timer.ElapsedTicks - m_Context[m_Context.Count - 1].Tick) * 1000d;
             m_ThisFrameData.Add(new Tuple<string[], double>(context, ms));
             m_Context.RemoveAt(m_Context.Count - 1);
         }
@@ -82,22 +85,25 @@ namespace ClassicUO.Utility
         {
             if (m_Context.Count == 0)
                 return false;
-            return (m_Context[m_Context.Count - 1].Name == context_name);
+            return m_Context[m_Context.Count - 1].Name == context_name;
         }
 
         public static ProfileData GetContext(string context_name)
         {
             for (int i = 0; i < m_AllFrameData.Count; i++)
+            {
                 if (m_AllFrameData[i].Context[m_AllFrameData[i].Context.Length - 1] == context_name)
                     return m_AllFrameData[i];
+            }
+
             return ProfileData.Empty;
         }
 
         public class ProfileData
         {
             public string[] Context;
-            double[] m_LastTimes = new double[ProfileTimeCount];
-            uint m_LastIndex;
+            private readonly double[] m_LastTimes = new double[ProfileTimeCount];
+            private uint m_LastIndex;
 
             public double LastTime => m_LastTimes[m_LastIndex % ProfileTimeCount];
 
@@ -106,10 +112,7 @@ namespace ClassicUO.Utility
                 get
                 {
                     double time = 0;
-                    for (int i = 0; i < ProfileTimeCount; i++)
-                    {
-                        time += m_LastTimes[i];
-                    }
+                    for (int i = 0; i < ProfileTimeCount; i++) time += m_LastTimes[i];
                     return time;
                 }
             }
@@ -128,8 +131,11 @@ namespace ClassicUO.Utility
                 if (Context.Length != context.Length)
                     return false;
                 for (int i = 0; i < Context.Length; i++)
+                {
                     if (Context[i] != context[i])
                         return false;
+                }
+
                 return true;
             }
 
@@ -148,6 +154,7 @@ namespace ClassicUO.Utility
                         name += ":";
                     name += Context[i];
                 }
+
                 return $"{name} - {TimeInContext:0.0}ms";
             }
 
@@ -165,10 +172,7 @@ namespace ClassicUO.Utility
                 Tick = tick;
             }
 
-            public override string ToString()
-            {
-                return string.Format("{0} [{1}]", Name, Tick);
-            }
+            public override string ToString() => string.Format("{0} [{1}]", Name, Tick);
         }
     }
 }

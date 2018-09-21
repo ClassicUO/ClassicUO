@@ -3,14 +3,14 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    class DevConsole : Gump
+    internal class DevConsole : Gump
     {
-        const ushort BLACK = 0x243A;
-        const ushort GRAY = 0x248A;
+        private const ushort BLACK = 0x243A;
+        private const ushort GRAY = 0x248A;
 
-        const int MAX_LINES = 15;
+        private const int MAX_LINES = 15;
 
-        private TextBox _textbox;
+        private readonly TextBox _textbox;
 
         public DevConsole() : base(0, 0)
         {
@@ -24,14 +24,14 @@ namespace ClassicUO.Game.Gumps.Controls
             AddChildren(new GumpPicTiled(BLACK)
             {
                 Width = 400,
-                Height = 400,
+                Height = 400
             });
 
-            AddChildren(_textbox = new TextBox(2, maxcharlength: -1, maxlength: 350, style: FontStyle.BlackBorder)
+            AddChildren(_textbox = new TextBox(2, -1, 350, style: FontStyle.BlackBorder)
             {
                 Width = 400,
                 Height = 400,
-                CanMove = true,
+                CanMove = true
             });
         }
 
@@ -39,10 +39,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public void AppendLine(string line)
         {
-            if (_textbox.LinesCount + 1 > MAX_LINES)
-            {
-                _textbox.RemoveLineAt(0);
-            }
+            if (_textbox.LinesCount + 1 > MAX_LINES) _textbox.RemoveLineAt(0);
             _textbox.SetText(_textbox.Text + line + "\n");
         }
 
@@ -50,7 +47,6 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (_textbox.LinesCount > 0)
             {
-
             }
         }
 
@@ -59,9 +55,7 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
-        {
-            return base.Draw(spriteBatch, position, hue);
-        }
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>
+            base.Draw(spriteBatch, position, hue);
     }
 }

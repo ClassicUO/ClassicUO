@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,8 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.IO;
+
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -32,8 +34,8 @@ namespace ClassicUO.IO.Resources
         public static LandTiles[] LandData { get; private set; }
         public static StaticTiles[] StaticData { get; private set; }
 
-        const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
-        const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
+        private const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
+        private const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
 
         public static void Load()
         {
@@ -46,7 +48,9 @@ namespace ClassicUO.IO.Resources
 
             bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
 
-            int staticscount = !isold ? (int)(tiledata.Length - 512 * Marshal.SizeOf<LandGroupNew>()) / Marshal.SizeOf<StaticGroupNew>() : (int)(tiledata.Length - 512 * Marshal.SizeOf<LandGroupOld>()) / Marshal.SizeOf<StaticGroupOld>();
+            int staticscount = !isold
+                ? (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupNew>()) / Marshal.SizeOf<StaticGroupNew>()
+                : (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupOld>()) / Marshal.SizeOf<StaticGroupOld>();
 
             if (staticscount > 2048)
                 staticscount = 2048;
@@ -153,169 +157,72 @@ namespace ClassicUO.IO.Resources
             //        }
             //    }
             //}
-
         }
 
 
-        public static bool IsBackground(long flags)
-        {
-            return (flags & 0x00000001) != 0;
-        }
+        public static bool IsBackground(long flags) => (flags & 0x00000001) != 0;
 
-        public static bool IsWeapon(long flags)
-        {
-            return (flags & 0x00000002) != 0;
-        }
+        public static bool IsWeapon(long flags) => (flags & 0x00000002) != 0;
 
-        public static bool IsTransparent(long flags)
-        {
-            return (flags & 0x00000004) != 0;
-        }
+        public static bool IsTransparent(long flags) => (flags & 0x00000004) != 0;
 
-        public static bool IsTranslucent(long flags)
-        {
-            return (flags & 0x00000008) != 0;
-        }
+        public static bool IsTranslucent(long flags) => (flags & 0x00000008) != 0;
 
-        public static bool IsWall(long flags)
-        {
-            return (flags & 0x00000010) != 0;
-        }
+        public static bool IsWall(long flags) => (flags & 0x00000010) != 0;
 
-        public static bool IsDamaging(long flags)
-        {
-            return (flags & 0x00000020) != 0;
-        }
+        public static bool IsDamaging(long flags) => (flags & 0x00000020) != 0;
 
-        public static bool IsImpassable(long flags)
-        {
-            return (flags & 0x00000040) != 0;
-        }
+        public static bool IsImpassable(long flags) => (flags & 0x00000040) != 0;
 
-        public static bool IsWet(long flags)
-        {
-            return (flags & 0x00000080) != 0;
-        }
+        public static bool IsWet(long flags) => (flags & 0x00000080) != 0;
 
-        public static bool IsUnknown(long flags)
-        {
-            return (flags & 0x00000100) != 0;
-        }
+        public static bool IsUnknown(long flags) => (flags & 0x00000100) != 0;
 
-        public static bool IsSurface(long flags)
-        {
-            return (flags & 0x00000200) != 0;
-        }
+        public static bool IsSurface(long flags) => (flags & 0x00000200) != 0;
 
-        public static bool IsBridge(long flags)
-        {
-            return (flags & 0x00000400) != 0;
-        }
+        public static bool IsBridge(long flags) => (flags & 0x00000400) != 0;
 
-        public static bool IsStackable(long flags)
-        {
-            return (flags & 0x00000800) != 0;
-        }
+        public static bool IsStackable(long flags) => (flags & 0x00000800) != 0;
 
-        public static bool IsWindow(long flags)
-        {
-            return (flags & 0x00001000) != 0;
-        }
+        public static bool IsWindow(long flags) => (flags & 0x00001000) != 0;
 
-        public static bool IsNoShoot(long flags)
-        {
-            return (flags & 0x00002000) != 0;
-        }
+        public static bool IsNoShoot(long flags) => (flags & 0x00002000) != 0;
 
-        public static bool IsPrefixA(long flags)
-        {
-            return (flags & 0x00004000) != 0;
-        }
+        public static bool IsPrefixA(long flags) => (flags & 0x00004000) != 0;
 
-        public static bool IsPrefixAn(long flags)
-        {
-            return (flags & 0x00008000) != 0;
-        }
+        public static bool IsPrefixAn(long flags) => (flags & 0x00008000) != 0;
 
-        public static bool IsInternal(long flags)
-        {
-            return (flags & 0x00010000) != 0;
-        }
+        public static bool IsInternal(long flags) => (flags & 0x00010000) != 0;
 
-        public static bool IsFoliage(long flags)
-        {
-            return (flags & 0x00020000) != 0;
-        }
+        public static bool IsFoliage(long flags) => (flags & 0x00020000) != 0;
 
-        public static bool IsPartialHue(long flags)
-        {
-            return (flags & 0x00040000) != 0;
-        }
+        public static bool IsPartialHue(long flags) => (flags & 0x00040000) != 0;
 
-        public static bool IsUnknown1(long flags)
-        {
-            return (flags & 0x00080000) != 0;
-        }
+        public static bool IsUnknown1(long flags) => (flags & 0x00080000) != 0;
 
-        public static bool IsMap(long flags)
-        {
-            return (flags & 0x00100000) != 0;
-        }
+        public static bool IsMap(long flags) => (flags & 0x00100000) != 0;
 
-        public static bool IsContainer(long flags)
-        {
-            return (flags & 0x00200000) != 0;
-        }
+        public static bool IsContainer(long flags) => (flags & 0x00200000) != 0;
 
-        public static bool IsWearable(long flags)
-        {
-            return (flags & 0x00400000) != 0;
-        }
+        public static bool IsWearable(long flags) => (flags & 0x00400000) != 0;
 
-        public static bool IsLightSource(long flags)
-        {
-            return (flags & 0x00800000) != 0;
-        }
+        public static bool IsLightSource(long flags) => (flags & 0x00800000) != 0;
 
-        public static bool IsAnimated(long flags)
-        {
-            return (flags & 0x01000000) != 0;
-        }
+        public static bool IsAnimated(long flags) => (flags & 0x01000000) != 0;
 
-        public static bool IsNoDiagonal(long flags)
-        {
-            return (flags & 0x02000000) != 0;
-        }
+        public static bool IsNoDiagonal(long flags) => (flags & 0x02000000) != 0;
 
-        public static bool IsUnknown2(long flags)
-        {
-            return (flags & 0x04000000) != 0;
-        }
+        public static bool IsUnknown2(long flags) => (flags & 0x04000000) != 0;
 
-        public static bool IsArmor(long flags)
-        {
-            return (flags & 0x08000000) != 0;
-        }
+        public static bool IsArmor(long flags) => (flags & 0x08000000) != 0;
 
-        public static bool IsRoof(long flags)
-        {
-            return (flags & 0x10000000) != 0;
-        }
+        public static bool IsRoof(long flags) => (flags & 0x10000000) != 0;
 
-        public static bool IsDoor(long flags)
-        {
-            return (flags & 0x20000000) != 0;
-        }
+        public static bool IsDoor(long flags) => (flags & 0x20000000) != 0;
 
-        public static bool IsStairBack(long flags)
-        {
-            return (flags & 0x40000000) != 0;
-        }
+        public static bool IsStairBack(long flags) => (flags & 0x40000000) != 0;
 
-        public static bool IsStairRight(long flags)
-        {
-            return (flags & 0x80000000) != 0;
-        }
+        public static bool IsStairRight(long flags) => (flags & 0x80000000) != 0;
     }
 
 

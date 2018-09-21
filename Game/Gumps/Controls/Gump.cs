@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -8,14 +7,19 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class Gump : GumpControl
     {
-        public Gump(Serial local, Serial server) : base()
+        public Gump(Serial local, Serial server)
         {
             LocalSerial = local;
             ServerSerial = server;
         }
 
         public bool BlockMovement { get; set; }
-        public override bool CanMove { get => !BlockMovement && base.CanMove; set => base.CanMove = value; }
+
+        public override bool CanMove
+        {
+            get => !BlockMovement && base.CanMove;
+            set => base.CanMove = value;
+        }
 
 
         public override void Dispose()
@@ -57,26 +61,25 @@ namespace ClassicUO.Game.Gumps.Controls
             if (LocalSerial != 0)
             {
                 if (buttonID == 0) // cancel
-                {
                     GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, null, null);
-                }
                 else
                 {
                     List<Serial> switches = new List<Serial>();
                     List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();
 
-                    foreach (var control in Children)
+                    foreach (GumpControl control in Children)
                     {
                         if (control is Checkbox checkbox && checkbox.IsChecked)
                             switches.Add(control.LocalSerial);
                         else if (control is RadioButton radioButton && radioButton.IsChecked)
                             switches.Add(control.LocalSerial);
                         else if (control is TextBox textBox)
-                            entries.Add(new Tuple<ushort, string>((ushort)LocalSerial, textBox.Text));
+                            entries.Add(new Tuple<ushort, string>((ushort) LocalSerial, textBox.Text));
                     }
 
                     GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
                 }
+
                 Dispose();
             }
         }

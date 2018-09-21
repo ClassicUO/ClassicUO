@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -52,15 +55,9 @@ namespace ClassicUO.Utility
             }
         }
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
-            return new BagEnumerator(this);
-        }
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => new BagEnumerator(this);
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return new BagEnumerator(this);
-        }
+        IEnumerator IEnumerable.GetEnumerator() => new BagEnumerator(this);
 
         public void Add(T element)
         {
@@ -89,7 +86,7 @@ namespace ClassicUO.Utility
 
         public bool Contains(T element)
         {
-            for (var index = Count - 1; index >= 0; --index)
+            for (int index = Count - 1; index >= 0; --index)
             {
                 if (element.Equals(_items[index]))
                     return true;
@@ -100,7 +97,7 @@ namespace ClassicUO.Utility
 
         public T RemoveAt(int index)
         {
-            var result = _items[index];
+            T result = _items[index];
             --Count;
             _items[index] = _items[Count];
             _items[Count] = default;
@@ -109,7 +106,7 @@ namespace ClassicUO.Utility
 
         public bool Remove(T element)
         {
-            for (var index = Count - 1; index >= 0; --index)
+            for (int index = Count - 1; index >= 0; --index)
             {
                 if (element.Equals(_items[index]))
                 {
@@ -126,9 +123,9 @@ namespace ClassicUO.Utility
 
         public bool RemoveAll(Bag<T> bag)
         {
-            var isResult = false;
+            bool isResult = false;
 
-            for (var index = bag.Count - 1; index >= 0; --index)
+            for (int index = bag.Count - 1; index >= 0; --index)
             {
                 if (Remove(bag[index]))
                     isResult = true;
@@ -142,8 +139,8 @@ namespace ClassicUO.Utility
             if (capacity < _items.Length)
                 return;
 
-            var newCapacity = Math.Max((int)(_items.Length * 1.5), capacity);
-            var oldElements = _items;
+            int newCapacity = Math.Max((int) (_items.Length * 1.5), capacity);
+            T[] oldElements = _items;
             _items = new T[newCapacity];
             Array.Copy(oldElements, 0, _items, 0, oldElements.Length);
         }
@@ -162,10 +159,7 @@ namespace ClassicUO.Utility
             T IEnumerator<T>.Current => _bag[_index];
             object IEnumerator.Current => _bag[_index];
 
-            public bool MoveNext()
-            {
-                return ++_index < _bag.Count;
-            }
+            public bool MoveNext() => ++_index < _bag.Count;
 
             public void Dispose()
             {

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,71 +19,38 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 namespace ClassicUO.Game.Scenes
 {
     public sealed class LoginScene : Scene
     {
         public LoginScene() : base(ScenesType.Login)
         {
-
         }
 
 
-        private bool OnBeforeLogin()
-        {
+        private bool OnBeforeLogin() => true;
 
-            return true;
-        }
+        private bool OnLogin() => true;
 
-        private bool OnLogin()
-        {
-            return true;
-        }
+        private bool OnLoginFailed() => true;
 
-        private bool OnLoginFailed()
-        {
-            return true;
-        }
+        private bool OnLoginAccepted() => true;
 
-        private bool OnLoginAccepted()
-        {
-            return true;
-        }
+        private bool OnServerList() => true;
 
-        private bool OnServerList()
-        {
-            return true;
-        }
+        private bool OnServerListSelected() => true;
 
-        private bool OnServerListSelected()
-        {
-            return true;
-        }
+        private bool OnCharacterList() => true;
 
-        private bool OnCharacterList()
-        {
-            return true;
-        }
+        private bool OnCharacterListSelected() => true;
 
-        private bool OnCharacterListSelected()
-        {
-            return true;
-        }
+        private bool OnCharacterDeleted() => true;
 
-        private bool OnCharacterDeleted()
-        {
-            return true;
-        }
+        private bool OnCharacterCreated() => true;
 
-        private bool OnCharacterCreated()
-        {
-            return true;
-        }
-
-        private bool OnWorldEntered()
-        {
-            return true;
-        }
+        private bool OnWorldEntered() => true;
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace ClassicUO.Utility
 {
@@ -30,8 +28,9 @@ namespace ClassicUO.Utility
                     sb.Append(char.ToUpper(str[i]));
                 else
                     sb.Append(str[i]);
-                capitalizeNext = (" .,;!".Contains(str[i]));
+                capitalizeNext = " .,;!".Contains(str[i]);
             }
+
             return sb.ToString();
         }
     }

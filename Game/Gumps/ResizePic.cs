@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -29,7 +32,7 @@ namespace ClassicUO.Game.Gumps
         private readonly SpriteTexture[] _gumpTexture = new SpriteTexture[9];
         private readonly Graphic _graphic;
 
-        public ResizePic(Graphic graphic) : base()
+        public ResizePic(Graphic graphic)
         {
             _graphic = graphic;
             CanMove = true;
@@ -39,11 +42,11 @@ namespace ClassicUO.Game.Gumps
             for (int i = 0; i < _gumpTexture.Length; i++)
             {
                 if (_gumpTexture[i] == null)
-                    _gumpTexture[i] = IO.Resources.Gumps.GetGumpTexture((Graphic)( _graphic + i ));
+                    _gumpTexture[i] = IO.Resources.Gumps.GetGumpTexture((Graphic) (_graphic + i));
             }
         }
 
-        public ResizePic( string[] parts) : this(Graphic.Parse(parts[3]))
+        public ResizePic(string[] parts) : this(Graphic.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -55,7 +58,7 @@ namespace ClassicUO.Game.Gumps
         public override void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _gumpTexture.Length; i++)
-                _gumpTexture[i].Ticks = (long)totalMS;
+                _gumpTexture[i].Ticks = (long) totalMS;
             base.Update(totalMS, frameMS);
         }
 
@@ -63,20 +66,31 @@ namespace ClassicUO.Game.Gumps
         {
             int centerWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
             int centerHeight = Height - _gumpTexture[0].Height - _gumpTexture[6].Height;
-            int line2Y = (int)position.Y + _gumpTexture[0].Height;
-            int line3Y = (int)position.Y + Height - _gumpTexture[6].Height;
+            int line2Y = (int) position.Y + _gumpTexture[0].Height;
+            int line3Y = (int) position.Y + Height - _gumpTexture[6].Height;
             // top row
             spriteBatch.Draw2D(_gumpTexture[0], new Vector3(position.X, position.Y, 0), Vector3.Zero);
-            spriteBatch.Draw2DTiled(_gumpTexture[1], new Rectangle((int)position.X + _gumpTexture[0].Width, (int)position.Y, centerWidth, _gumpTexture[0].Height), Vector3.Zero);
-            spriteBatch.Draw2D(_gumpTexture[2], new Vector3(position.X + Width - _gumpTexture[2].Width, position.Y, 0), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_gumpTexture[1],
+                new Rectangle((int) position.X + _gumpTexture[0].Width, (int) position.Y, centerWidth,
+                    _gumpTexture[0].Height), Vector3.Zero);
+            spriteBatch.Draw2D(_gumpTexture[2], new Vector3(position.X + Width - _gumpTexture[2].Width, position.Y, 0),
+                Vector3.Zero);
             // middle
-            spriteBatch.Draw2DTiled(_gumpTexture[3], new Rectangle((int)position.X, line2Y, _gumpTexture[3].Width, centerHeight), Vector3.Zero);
-            spriteBatch.Draw2DTiled(_gumpTexture[4], new Rectangle((int)position.X + _gumpTexture[3].Width, line2Y, centerWidth, centerHeight), Vector3.Zero);
-            spriteBatch.Draw2DTiled(_gumpTexture[5], new Rectangle((int)position.X + Width - _gumpTexture[5].Width, line2Y, _gumpTexture[5].Width, centerHeight), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_gumpTexture[3],
+                new Rectangle((int) position.X, line2Y, _gumpTexture[3].Width, centerHeight), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_gumpTexture[4],
+                new Rectangle((int) position.X + _gumpTexture[3].Width, line2Y, centerWidth, centerHeight),
+                Vector3.Zero);
+            spriteBatch.Draw2DTiled(_gumpTexture[5],
+                new Rectangle((int) position.X + Width - _gumpTexture[5].Width, line2Y, _gumpTexture[5].Width,
+                    centerHeight), Vector3.Zero);
             // bottom
             spriteBatch.Draw2D(_gumpTexture[6], new Vector3(position.X, line3Y, 0), Vector3.Zero);
-            spriteBatch.Draw2DTiled(_gumpTexture[7], new Rectangle((int)position.X + _gumpTexture[6].Width, line3Y, centerWidth, _gumpTexture[6].Height), Vector3.Zero);
-            spriteBatch.Draw2D(_gumpTexture[8], new Vector3(position.X + Width - _gumpTexture[8].Width, line3Y, 0), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_gumpTexture[7],
+                new Rectangle((int) position.X + _gumpTexture[6].Width, line3Y, centerWidth, _gumpTexture[6].Height),
+                Vector3.Zero);
+            spriteBatch.Draw2D(_gumpTexture[8], new Vector3(position.X + Width - _gumpTexture[8].Width, line3Y, 0),
+                Vector3.Zero);
 
 
             return base.Draw(spriteBatch, position, hue);

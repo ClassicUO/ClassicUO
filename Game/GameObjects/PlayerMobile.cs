@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using ClassicUO.Network;
@@ -67,7 +70,7 @@ namespace ClassicUO.Game.GameObjects
 
     public class PlayerMobile : Mobile
     {
-        private readonly Ability[] _ability = new Ability[2] { Ability.None, Ability.None };
+        private readonly Ability[] _ability = new Ability[2] {Ability.None, Ability.None};
 
         private readonly Deque<Step> _requestedSteps = new Deque<Step>();
         private readonly List<Skill> _sklls;
@@ -95,10 +98,7 @@ namespace ClassicUO.Game.GameObjects
         private ushort _weightMax;
 
 
-        public PlayerMobile(Serial serial) : base(serial)
-        {
-            _sklls = new List<Skill>();
-        }
+        public PlayerMobile(Serial serial) : base(serial) => _sklls = new List<Skill>();
 
 
         public IReadOnlyList<Skill> Skills => _sklls;
@@ -384,27 +384,20 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateAbilities()
         {
-            Item right = Equipment[(int)Layer.OneHanded];
-            Item left = Equipment[(int)Layer.TwoHanded];
+            Item right = Equipment[(int) Layer.OneHanded];
+            Item left = Equipment[(int) Layer.TwoHanded];
 
             _ability[0] = Ability.None;
             _ability[1] = Ability.None;
 
-            if (right == null && left == null)
-            {
-                return;
-            }
+            if (right == null && left == null) return;
 
-            Graphic[] graphics = { 0x00, 0x00 };
+            Graphic[] graphics = {0x00, 0x00};
 
             if (right == null)
-            {
                 graphics[0] = left.Graphic;
-            }
             else if (left == null)
-            {
                 graphics[1] = right.Graphic;
-            }
             else
             {
                 graphics[0] = left.Graphic;
@@ -1033,61 +1026,47 @@ namespace ClassicUO.Game.GameObjects
                         _ability[0] = Ability.Feint;
                         _ability[1] = Ability.DoubleShot;
                         goto done;
-                    default:
-                        break;
                 }
             }
 
-            done:
-            ;
+            done: ;
         }
 
 
         protected override void OnProcessDelta(Delta d)
         {
             base.OnProcessDelta(d);
-            if (d.HasFlag(Delta.Stats))
-            {
-                StatsChanged.Raise(this);
-            }
+            if (d.HasFlag(Delta.Stats)) StatsChanged.Raise(this);
 
-            if (d.HasFlag(Delta.Skills))
-            {
-                SkillsChanged.Raise(this);
-            }
+            if (d.HasFlag(Delta.Skills)) SkillsChanged.Raise(this);
         }
 
         protected override void OnPositionChanged(object sender, EventArgs e)
         {
             if (World.Map != null && World.Map.Index >= 0)
             {
-                World.Map.Center = new Point((short)Position.X, (short)Position.Y);
+                World.Map.Center = new Point((short) Position.X, (short) Position.Y);
                 base.OnPositionChanged(sender, e);
             }
         }
 
         public bool Walk(Direction direction, bool run)
         {
-            if (_lastStepRequestedTime > World.Ticks || _requestedSteps.Count >= MAX_STEP_COUNT)
-            {
-                return false;
-            }
+            if (_lastStepRequestedTime > World.Ticks || _requestedSteps.Count >= MAX_STEP_COUNT) return false;
 
             int x = 0, y = 0;
             sbyte z = 0;
             Direction oldDirection = Direction.NONE;
 
             if (_requestedSteps.Count <= 0)
-            {
                 GetEndPosition(ref x, ref y, ref z, ref oldDirection);
-            }
             else
             {
                 Step step1 = _requestedSteps.Back();
                 x = step1.X;
                 y = step1.Y;
                 z = step1.Z;
-                oldDirection = (Direction)step1.Direction;
+                oldDirection = (Direction) step1.Direction;
             }
 
             oldDirection = oldDirection & Direction.Up;
@@ -1101,10 +1080,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (oldDirection == newDirection)
             {
-                if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection))
-                {
-                    return false;
-                }
+                if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection)) return false;
 
                 if (newDirection != direction)
                 {
@@ -1117,7 +1093,7 @@ namespace ClassicUO.Game.GameObjects
                     x = newX;
                     y = newY;
                     z = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
                 }
             }
             else
@@ -1134,7 +1110,7 @@ namespace ClassicUO.Game.GameObjects
                     x = newX;
                     y = newY;
                     z = newZ;
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
                 }
                 else
                 {
@@ -1143,12 +1119,9 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (run)
-            {
-                direction |= Direction.Running;
-            }
+            if (run) direction |= Direction.Running;
 
-            Step step = new Step { X = x, Y = y, Z = z, Direction = (byte)direction, Run = run, Seq = SequenceNumber };
+            Step step = new Step {X = x, Y = y, Z = z, Direction = (byte) direction, Run = run, Seq = SequenceNumber};
 
 
             if (_movementState == PlayerMovementState.ANIMATE_IMMEDIATELY)
@@ -1160,12 +1133,12 @@ namespace ClassicUO.Game.GameObjects
                     {
                         s.Anim = true;
                         _requestedSteps[i] = s;
-                        EnqueueStep(s.X, s.Y, s.Z, (Direction)s.Direction, s.Run);
+                        EnqueueStep(s.X, s.Y, s.Z, (Direction) s.Direction, s.Run);
                     }
                 }
 
                 step.Anim = true;
-                EnqueueStep(step.X, step.Y, step.Z, (Direction)step.Direction, step.Run);
+                EnqueueStep(step.X, step.Y, step.Z, (Direction) step.Direction, step.Run);
             }
 
             _requestedSteps.AddToBack(step);
@@ -1184,16 +1157,10 @@ namespace ClassicUO.Game.GameObjects
 
         public void ConfirmWalk(byte seq)
         {
-            if (_requestedSteps.Count <= 0)
-            {
-                return;
-            }
+            if (_requestedSteps.Count <= 0) return;
 
             Step step = _requestedSteps.Front();
-            if (step.Seq != seq)
-            {
-                return;
-            }
+            if (step.Seq != seq) return;
 
             _requestedSteps.RemoveFromFront();
 
@@ -1205,15 +1172,13 @@ namespace ClassicUO.Game.GameObjects
 
                 GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
 
-                if (step.Direction == (byte)endDir)
+                if (step.Direction == (byte) endDir)
                 {
                     if (_movementState == PlayerMovementState.ANIMATE_ON_CONFIRM)
-                    {
                         _movementState = PlayerMovementState.ANIMATE_ON_CONFIRM;
-                    }
                 }
 
-                EnqueueStep(step.X, step.Y, step.Z, (Direction)step.Direction, step.Run);
+                EnqueueStep(step.X, step.Y, step.Z, (Direction) step.Direction, step.Run);
             }
         }
 

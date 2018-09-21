@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.Gumps.UIGumps;
+﻿using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -10,20 +8,23 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class WorldViewport : GumpControl
     {
-        private Scenes.GameScene _scene;
+        private readonly GameScene _scene;
         private Rectangle _rect;
 
-        public WorldViewport(Scenes.GameScene scene, int x, int y, int width, int height) : base()
+        public WorldViewport(GameScene scene, int x, int y, int width, int height)
         {
-            X = x; Y = y; Width = width; Height = height;
+            X = x;
+            Y = y;
+            Width = width;
+            Height = height;
             _scene = scene;
             AcceptMouseInput = true;
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            _rect.X = (int)position.X;
-            _rect.Y = (int)position.Y;
+            _rect.X = (int) position.X;
+            _rect.Y = (int) position.Y;
             _rect.Width = Width;
             _rect.Height = Height;
 
@@ -37,6 +38,5 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             UIManager.KeyboardFocusControl = Service.Get<ChatControl>().GetFirstControlAcceptKeyboardInput();
         }
-
     }
 }

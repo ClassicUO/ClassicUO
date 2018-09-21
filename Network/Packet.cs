@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Text;
 
@@ -28,7 +31,7 @@ namespace ClassicUO.Network
     {
         private readonly byte[] _data;
 
-        public Packet(byte[] data,  int length)
+        public Packet(byte[] data, int length)
         {
             _data = data;
             Length = length;
@@ -40,19 +43,13 @@ namespace ClassicUO.Network
         {
             get
             {
-                if (index < 0 || index >= Length)
-                {
-                    throw new ArgumentOutOfRangeException("index");
-                }
+                if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException("index");
 
                 return _data[index];
             }
             set
             {
-                if (index < 0 || index >= Length)
-                {
-                    throw new ArgumentOutOfRangeException("index");
-                }
+                if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException("index");
 
                 _data[index] = value;
                 IsChanged = true;
@@ -64,10 +61,7 @@ namespace ClassicUO.Network
         public bool IsChanged { get; private set; }
         public bool Filter { get; set; }
 
-        public override byte[] ToArray()
-        {
-            return _data;
-        }
+        public override byte[] ToArray() => _data;
 
         public void MoveToData()
         {
@@ -76,10 +70,7 @@ namespace ClassicUO.Network
 
         protected override void EnsureSize(int length)
         {
-            if (length < 0 || Position + length > Length)
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
+            if (length < 0 || Position + length > Length) throw new ArgumentOutOfRangeException("length");
         }
 
         public byte ReadByte()
@@ -88,26 +79,20 @@ namespace ClassicUO.Network
             return this[Position++];
         }
 
-        public sbyte ReadSByte()
-        {
-            return (sbyte)ReadByte();
-        }
+        public sbyte ReadSByte() => (sbyte) ReadByte();
 
-        public bool ReadBool()
-        {
-            return ReadByte() != 0;
-        }
+        public bool ReadBool() => ReadByte() != 0;
 
         public ushort ReadUShort()
         {
             EnsureSize(2);
-            return (ushort)((ReadByte() << 8) | ReadByte());
+            return (ushort) ((ReadByte() << 8) | ReadByte());
         }
 
         public uint ReadUInt()
         {
             EnsureSize(4);
-            return (uint)((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
+            return (uint) ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
         }
 
         public string ReadASCII()
@@ -116,10 +101,7 @@ namespace ClassicUO.Network
             StringBuilder sb = new StringBuilder();
             char c;
 
-            while ((c = (char)ReadByte()) != '\0')
-            {
-                sb.Append(c);
-            }
+            while ((c = (char) ReadByte()) != '\0') sb.Append(c);
 
             return sb.ToString();
         }
@@ -132,11 +114,8 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < length; i++)
             {
-                c = (char)ReadByte();
-                if (c != '\0')
-                {
-                    sb.Append(c);
-                }
+                c = (char) ReadByte();
+                if (c != '\0') sb.Append(c);
             }
 
             return sb.ToString();
@@ -148,10 +127,7 @@ namespace ClassicUO.Network
             StringBuilder sb = new StringBuilder();
             char c;
 
-            while ((c = (char)ReadUShort()) != '\0')
-            {
-                sb.Append(c);
-            }
+            while ((c = (char) ReadUShort()) != '\0') sb.Append(c);
 
             return sb.ToString();
         }
@@ -163,11 +139,8 @@ namespace ClassicUO.Network
             char c;
             for (int i = 0; i < length; i++)
             {
-                c = (char)ReadUShort();
-                if (c != '\0')
-                {
-                    sb.Append(c);
-                }
+                c = (char) ReadUShort();
+                if (c != '\0') sb.Append(c);
             }
 
             return sb.ToString();
@@ -183,19 +156,13 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < length; i++)
             {
-                c = (char)ReadUShortReversed();
-                if (c != '\0')
-                {
-                    sb.Append(c);
-                }
+                c = (char) ReadUShortReversed();
+                if (c != '\0') sb.Append(c);
             }
 
             return sb.ToString();
         }
 
-        public ushort ReadUShortReversed()
-        {
-            return (ushort)(ReadByte() | (ReadByte() << 8));
-        }
+        public ushort ReadUShortReversed() => (ushort) (ReadByte() | (ReadByte() << 8));
     }
 }

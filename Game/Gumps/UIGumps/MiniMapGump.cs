@@ -1,26 +1,20 @@
-﻿
-using ClassicUO.Game.Gumps.Controls;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using ClassicUO.Game.Gumps.Controls.InGame;
+﻿using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
-using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    class MiniMapGump : Gump
+    internal class MiniMapGump : Gump
     {
-
         private GameScene _scene;
-        const float ReticleBlinkMS = 250f;
+        private const float ReticleBlinkMS = 250f;
         private bool _useLargeMap;
-        float _timeMS;
+        private float _timeMS;
         private double _frameMS;
         private SpriteTexture _gumpTexture, _mapTexture;
         private Texture2D _playerIndicator;
@@ -32,32 +26,25 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
 
         public MiniMapGump(GameScene scene) : base(0, 0)
-        {          
+        {
             CanMove = true;
             AcceptMouseInput = true;
-            X = 600; Y = 50;
+            X = 600;
+            Y = 50;
 
             _scene = scene;
             _useLargeMap = _miniMap_LargeFormat;
         }
 
-        public static bool MiniMap_LargeFormat
-        {
-            get;
-            set;
-        }
+        public static bool MiniMap_LargeFormat { get; set; }
 
         public static void Toggle(GameScene scene)
         {
-            var ui = Service.Get<UIManager>();
+            UIManager ui = Service.Get<UIManager>();
             if (ui.Get<MiniMapGump>() == null)
-            {
                 ui.Add(_self = new MiniMapGump(scene));
-            }
             else
-            {             
-                _self.Dispose();             
-            }
+                _self.Dispose();
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -71,18 +58,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if (_gumpTexture != null)
                     _gumpTexture.Dispose();
 
-                _gumpTexture = IO.Resources.Gumps.GetGumpTexture((_useLargeMap ? (ushort)5011 : (ushort)5010));
-                Width = _gumpTexture.Width; Height = _gumpTexture.Height; CreateMiniMapTexture();
+                _gumpTexture = IO.Resources.Gumps.GetGumpTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
+                Width = _gumpTexture.Width;
+                Height = _gumpTexture.Height;
+                CreateMiniMapTexture();
 
                 if (_forceUpdate)
                     _forceUpdate = false;
             }
 
             if (_gumpTexture != null)
-                _gumpTexture.Ticks = (long)totalMS;
+                _gumpTexture.Ticks = (long) totalMS;
 
             if (_mapTexture != null)
-                _mapTexture.Ticks = (long)totalMS;
+                _mapTexture.Ticks = (long) totalMS;
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
@@ -94,17 +83,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CreateMiniMapTexture();
             spriteBatch.Draw2D(_mapTexture, position, Vector3.Zero);
 
-            _timeMS += (float)_frameMS;
+            _timeMS += (float) _frameMS;
 
             if (_timeMS >= ReticleBlinkMS)
             {
                 if (_playerIndicator == null)
                 {
                     _playerIndicator = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-                    _playerIndicator.SetData(new uint[1] { 0xFFFFFFFF });
+                    _playerIndicator.SetData(new uint[1] {0xFFFFFFFF});
                 }
+
                 //DRAW DOT OF PLAYER
-                spriteBatch.Draw2D(_playerIndicator, new Vector3(position.X + Width / 2, position.Y + Height / 2, 0), Vector3.Zero);
+                spriteBatch.Draw2D(_playerIndicator, new Vector3(position.X + Width / 2, position.Y + Height / 2, 0),
+                    Vector3.Zero);
             }
 
             if (_timeMS >= ReticleBlinkMS * 2)
@@ -113,11 +104,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return base.Draw(spriteBatch, position, hue);
         }
 
-        
+
         protected override void OnMouseDoubleClick(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
-            {             
+            {
                 MiniMap_LargeFormat = !MiniMap_LargeFormat;
                 _miniMap_LargeFormat = MiniMap_LargeFormat;
 
@@ -136,7 +127,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             if (_x != lastX || _y != lastY)
             {
-                _x = lastX; _y = lastY;
+                _x = lastX;
+                _y = lastY;
             }
             else if (!_forceUpdate)
                 return;
@@ -155,8 +147,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             int minBlockX = (lastX - blockOffsetX) / 8 - 1;
             int minBlockY = (lastY - blockOffsetY) / 8 - 1;
-            int maxBlockX = ((lastX + blockOffsetX) / 8) + 1;
-            int maxBlockY = ((lastY + blockOffsetY) / 8) + 1;
+            int maxBlockX = (lastX + blockOffsetX) / 8 + 1;
+            int maxBlockY = (lastY + blockOffsetY) / 8 + 1;
 
             if (minBlockX < 0)
                 minBlockX = 0;
@@ -167,13 +159,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
             int maxBlockIndex = World.Map.MapBlockIndex;
             int mapBlockHeight = IO.Resources.Map.MapBlocksSize[World.MapIndex][1];
 
-            ushort[] data = IO.Resources.Gumps.GetGumpPixels((_useLargeMap ? (ushort)5011 : (ushort)5010), out _, out _);
+            ushort[] data = IO.Resources.Gumps.GetGumpPixels(_useLargeMap ? 5011 : 5010, out _, out _);
 
             Point[] table = new Point[2]
-                           {
-                                new Point(0, 0),
-                                new Point(0, 1)
-                           };
+            {
+                new Point(0, 0),
+                new Point(0, 1)
+            };
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
@@ -186,24 +178,24 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     if (blockIndex >= maxBlockIndex)
                         break;
 
-                    var mbbv = IO.Resources.Map.GetRadarMapBlock(World.MapIndex, i, j);
+                    RadarMapBlock? mbbv = IO.Resources.Map.GetRadarMapBlock(World.MapIndex, i, j);
                     if (!mbbv.HasValue)
                         break;
 
-                    var mb = mbbv.Value;
+                    RadarMapBlock mb = mbbv.Value;
 
-                    var mapBlock = World.Map.Chunks[blockIndex];
+                    MapChunk mapBlock = World.Map.Chunks[blockIndex];
 
                     int realBlockX = i * 8;
                     int realBlockY = j * 8;
 
                     for (int x = 0; x < 8; x++)
                     {
-                        int px = ((realBlockX + x) - lastX) + gumpCenterX;
+                        int px = realBlockX + x - lastX + gumpCenterX;
 
                         for (int y = 0; y < 8; y++)
                         {
-                            int py = (realBlockY + y) - lastY;
+                            int py = realBlockY + y - lastY;
 
                             int gx = px - py;
                             int gy = px + py;
@@ -221,10 +213,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                             int tableSize = 2;
 
-                            color = (uint)(0x8000 | IO.Resources.Hues.GetRadarColorData((int)color));
+                            color = (uint) (0x8000 | Hues.GetRadarColorData((int) color));
 
 
-                            CreatePixels(data, (int)color, gx, gy, Width, Height, table, tableSize);
+                            CreatePixels(data, (int) color, gx, gy, Width, Height, table, tableSize);
                         }
                     }
                 }
@@ -253,12 +245,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if (gy < 0 || gy >= h)
                     break;
 
-                int block = (gy * w) + gx;
+                int block = gy * w + gx;
 
                 if (data[block] == 0x8421)
-                    data[block] = (ushort)color;
+                    data[block] = (ushort) color;
             }
         }
-
     }
 }

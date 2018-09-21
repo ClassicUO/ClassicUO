@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,11 +19,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Renderer;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
+using ClassicUO.Game;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
@@ -64,7 +68,7 @@ namespace ClassicUO.IO.Resources
                     line = line.Trim();
                     if (line.Length <= 0 || line[0] == '#')
                         continue;
-                    string[] defs = line.Split(new[] { '\t', ' ', '#' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] defs = line.Split(new[] {'\t', ' ', '#'}, StringSplitOptions.RemoveEmptyEntries);
                     if (defs.Length < 2)
                         continue;
 
@@ -76,7 +80,8 @@ namespace ClassicUO.IO.Resources
                     int first = defs[1].IndexOf("{");
                     int last = defs[1].IndexOf("}");
 
-                    string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] newdef = defs[1].Substring(first + 1, last - 1)
+                        .Split(new[] {' ', ','}, StringSplitOptions.RemoveEmptyEntries);
 
                     foreach (string s in newdef)
                     {
@@ -96,12 +101,12 @@ namespace ClassicUO.IO.Resources
 
         //public static void Clear(ushort g) => _picker.Remove(g);
 
-        public static unsafe SpriteTexture GetTextmapTexture(ushort g)
+        public static SpriteTexture GetTextmapTexture(ushort g)
         {
-            ref var texture = ref _textmapCache[g];
+            ref SpriteTexture texture = ref _textmapCache[g];
             if (texture == null || texture.IsDisposed)
             {
-                var pixels = GetTextmapTexture(g, out int size);
+                ushort[] pixels = GetTextmapTexture(g, out int size);
                 texture = new SpriteTexture(size, size, false);
                 texture.SetData(pixels);
 
@@ -118,10 +123,10 @@ namespace ClassicUO.IO.Resources
             int count = 0;
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                ref var texture = ref _textmapCache[_usedIndex[i]];
+                ref SpriteTexture texture = ref _textmapCache[_usedIndex[i]];
                 if (texture == null || texture.IsDisposed)
                     _usedIndex.RemoveAt(i--);
-                else if (Game.World.Ticks - texture.Ticks >= 3000)
+                else if (World.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();
                     texture = null;
@@ -160,7 +165,7 @@ namespace ClassicUO.IO.Resources
             {
                 int pos = i * size;
                 for (int j = 0; j < size; j++)
-                    pixels[pos + j] = (ushort)(0x8000 | _file.ReadUShort());
+                    pixels[pos + j] = (ushort) (0x8000 | _file.ReadUShort());
             }
 
             return pixels;

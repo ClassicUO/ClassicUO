@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
+using ClassicUO.Platforms.Windows;
 
 namespace ClassicUO.Input
 {
@@ -14,12 +13,12 @@ namespace ClassicUO.Input
         {
             if (_encoding == null)
                 _encoding = GetSystemEncoding();
-            return _encoding.GetChars(new byte[] { (byte)input })[0];
+            return _encoding.GetChars(new[] {(byte) input})[0];
         }
 
         private static Encoding GetSystemEncoding()
         {
-            Encoding encoding = Encoding.GetEncoding((int)Platforms.Windows.NativeMethods.GetCurrentCodePage());
+            Encoding encoding = Encoding.GetEncoding((int) NativeMethods.GetCurrentCodePage());
 
             return encoding;
         }

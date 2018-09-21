@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 
 namespace ClassicUO.Network
@@ -46,10 +49,7 @@ namespace ClassicUO.Network
 
         public override byte[] ToArray()
         {
-            if (Length > Position)
-            {
-                Array.Resize(ref _data, Position);
-            }
+            if (Length > Position) Array.Resize(ref _data, Position);
 
             WriteSize();
             return _data;
@@ -59,29 +59,18 @@ namespace ClassicUO.Network
         {
             if (IsDynamic)
             {
-                this[1] = (byte)( Position >> 8 );
-                this[2] = (byte)Position;
+                this[1] = (byte) (Position >> 8);
+                this[2] = (byte) Position;
             }
         }
 
         protected override void EnsureSize(int length)
         {
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
+            if (length < 0) throw new ArgumentOutOfRangeException("length");
 
             if (IsDynamic)
-            {
-                while (Position + length > Length)
-                {
-                    Array.Resize(ref _data, Position + length);
-                }
-            }
-            else if (Position + length > Length)
-            {
-                throw new ArgumentOutOfRangeException("length");
-            }
+                while (Position + length > Length) Array.Resize(ref _data, Position + length);
+            else if (Position + length > Length) throw new ArgumentOutOfRangeException("length");
         }
     }
 }

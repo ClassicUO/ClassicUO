@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,18 +19,17 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Game.Map;
+
 using System.Collections.Generic;
+using ClassicUO.Game.Map;
 
 namespace ClassicUO.Game.GameObjects
 {
     public class House : Item
     {
-        public House(Serial serial) : base(serial)
-        {
-            Items = new List<Static>();
-        }
+        public House(Serial serial) : base(serial) => Items = new List<Static>();
 
         public uint Revision { get; set; }
 
@@ -37,7 +37,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void GenerateCustom()
         {
-            foreach (var s in Items)
+            foreach (Static s in Items)
             {
                 Tile tile = World.Map.GetTile(s.Position.X, s.Position.Y);
                 tile.AddGameObject(s);
@@ -46,10 +46,10 @@ namespace ClassicUO.Game.GameObjects
 
         public void GenerateOriginal(Multi multi)
         {
-            foreach (var c in multi.Components)
+            foreach (MultiComponent c in multi.Components)
             {
                 Tile tile = World.Map.GetTile(c.Position.X, c.Position.Y);
-                tile.AddGameObject(new Static(c.Graphic, 0, 0) { Position = c.Position });
+                tile.AddGameObject(new Static(c.Graphic, 0, 0) {Position = c.Position});
             }
         }
 

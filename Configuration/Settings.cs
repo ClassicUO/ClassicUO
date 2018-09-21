@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
@@ -36,11 +39,9 @@ namespace ClassicUO.Configuration
         [JsonProperty(PropertyName = "password")]
         public string Password { get; set; }
 
-        [JsonProperty(PropertyName = "ip")]
-        public string IP { get; set; }
+        [JsonProperty(PropertyName = "ip")] public string IP { get; set; }
 
-        [JsonProperty(PropertyName = "port")]
-        public ushort Port { get; set; }
+        [JsonProperty(PropertyName = "port")] public ushort Port { get; set; }
 
         [JsonProperty(PropertyName = "lastcharactername")]
         public string LastCharacterName { get; set; }

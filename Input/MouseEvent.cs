@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.Input
+﻿namespace ClassicUO.Input
 {
     public enum MouseEvent
     {
@@ -17,6 +13,6 @@ namespace ClassicUO.Input
         Click,
         DoubleClick,
         Left,
-        Right,
+        Right
     }
 }

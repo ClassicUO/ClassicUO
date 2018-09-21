@@ -43,7 +43,7 @@ namespace ClassicUO.Input
 
         public void Add(T obj, Vector3 position)
         {
-            Point p = new Point(MousePosition.X - (int)position.X, MousePosition.Y - (int)position.Y);
+            Point p = new Point(MousePosition.X - (int) position.X, MousePosition.Y - (int) position.Y);
             _items.Add(new MouseOverItem<T>(obj, p));
         }
 
@@ -51,10 +51,7 @@ namespace ClassicUO.Input
 
         public bool IsMouseInObjectIsometric(SpriteVertex[] v)
         {
-            if (v.Length != 4)
-            {
-                return false;
-            }
+            if (v.Length != 4) return false;
             float high = -50000, low = 50000;
             for (int i = 0; i < 4; i++)
             {
@@ -63,6 +60,7 @@ namespace ClassicUO.Input
                 if (v[i].Position.Y < low)
                     low = v[i].Position.Y;
             }
+
             if (high < MousePosition.Y)
                 return false;
             if (low > MousePosition.Y)
@@ -91,15 +89,13 @@ namespace ClassicUO.Input
             if (iBoundingBox.Contains(new Vector3(MousePosition.X, MousePosition.Y, 1)) == ContainmentType.Contains)
             {
                 Point[] p = new Point[4];
-                p[0] = new Point((int)v[0].Position.X, (int)v[0].Position.Y);
-                p[1] = new Point((int)v[1].Position.X, (int)v[1].Position.Y);
-                p[2] = new Point((int)v[3].Position.X, (int)v[3].Position.Y);
-                p[3] = new Point((int)v[2].Position.X, (int)v[2].Position.Y);
-                if (PointInPolygon(new Point(MousePosition.X, MousePosition.Y), p))
-                {
-                    return true;
-                }
+                p[0] = new Point((int) v[0].Position.X, (int) v[0].Position.Y);
+                p[1] = new Point((int) v[1].Position.X, (int) v[1].Position.Y);
+                p[2] = new Point((int) v[3].Position.X, (int) v[3].Position.Y);
+                p[3] = new Point((int) v[2].Position.X, (int) v[2].Position.Y);
+                if (PointInPolygon(new Point(MousePosition.X, MousePosition.Y), p)) return true;
             }
+
             return false;
         }
 
@@ -108,10 +104,7 @@ namespace ClassicUO.Input
             // Taken from http://social.msdn.microsoft.com/forums/en-US/winforms/thread/95055cdc-60f8-4c22-8270-ab5f9870270a/
             Point p1, p2;
             bool inside = false;
-            if (poly.Length < 3)
-            {
-                return inside;
-            }
+            if (poly.Length < 3) return inside;
             Point oldPoint = new Point(
                 poly[poly.Length - 1].X, poly[poly.Length - 1].Y);
 
@@ -129,14 +122,13 @@ namespace ClassicUO.Input
                     p2 = oldPoint;
                 }
 
-                if (( newPoint.X < p.X ) == ( p.X <= oldPoint.X )
-                    && ( p.Y - (long)p1.Y ) * ( p2.X - p1.X )
-                    < ( p2.Y - (long)p1.Y ) * ( p.X - p1.X ))
-                {
+                if (newPoint.X < p.X == p.X <= oldPoint.X
+                    && (p.Y - (long) p1.Y) * (p2.X - p1.X)
+                    < (p2.Y - (long) p1.Y) * (p.X - p1.X))
                     inside = !inside;
-                }
                 oldPoint = newPoint;
             }
+
             return inside;
         }
     }

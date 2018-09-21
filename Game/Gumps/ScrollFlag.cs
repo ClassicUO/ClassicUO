@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ClassicUO.Input;
 using ClassicUO.Renderer;
-using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
 {
-    public class ScrollFlag :  GumpControl, IScrollBar
+    public class ScrollFlag : GumpControl, IScrollBar
     {
         private SpriteTexture _texture;
         private int _sliderExtentTop, _sliderExtentHeight;
@@ -25,15 +22,12 @@ namespace ClassicUO.Game.Gumps
             _sliderExtentHeight = height;
         }
 
-        public ScrollFlag(GumpControl parent) : base(parent)
-        {
-            AcceptMouseInput = true;
-        }
+        public ScrollFlag(GumpControl parent) : base(parent) => AcceptMouseInput = true;
 
 
         public int Value
         {
-            get => (int)_value;
+            get => (int) _value;
             set
             {
                 _value = value;
@@ -43,6 +37,7 @@ namespace ClassicUO.Game.Gumps
                     _value = MaxValue;
             }
         }
+
         public int MinValue
         {
             get => _min;
@@ -83,13 +78,16 @@ namespace ClassicUO.Game.Gumps
 
             _sliderPosition = GetSliderYPosition();
 
-            _texture.Ticks = (long)totalMS;
+            _texture.Ticks = (long) totalMS;
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             if (MaxValue != MinValue)
-                spriteBatch.Draw2D(_texture, new Vector3(position.X - 5, position.Y + _sliderPosition, 0), Vector3.Zero);
+            {
+                spriteBatch.Draw2D(_texture, new Vector3(position.X - 5, position.Y + _sliderPosition, 0),
+                    Vector3.Zero);
+            }
 
             return base.Draw(spriteBatch, position, hue);
         }
@@ -101,10 +99,7 @@ namespace ClassicUO.Game.Gumps
             return GetScrollableArea() * ((_value - MinValue) / (MaxValue - MinValue));
         }
 
-        private float GetScrollableArea()
-        {
-            return Height - _texture.Height;
-        }
+        private float GetScrollableArea() => Height - _texture.Height;
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
@@ -137,7 +132,7 @@ namespace ClassicUO.Game.Gumps
 
                     _clickPosition = new Point(x, y);
 
-                    _value = ((sliderY / scrollableArea) * (MaxValue - MinValue)) + MinValue;
+                    _value = sliderY / scrollableArea * (MaxValue - MinValue) + MinValue;
                     _sliderPosition = sliderY;
                 }
             }
@@ -146,7 +141,7 @@ namespace ClassicUO.Game.Gumps
         protected override bool Contains(int x, int y)
         {
             x -= 5;
-            return new Rectangle(0, (int)_sliderPosition, _texture.Width, _texture.Height).Contains(x, y);
+            return new Rectangle(0, (int) _sliderPosition, _texture.Width, _texture.Height).Contains(x, y);
         }
 
         bool IScrollBar.Contains(int x, int y)

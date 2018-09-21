@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using Microsoft.Xna.Framework;
@@ -40,11 +43,11 @@ namespace ClassicUO.Game.GameObjects
         private View GetBaseView(GameObject entity)
         {
             if (entity is Mobile)
-                return (MobileView)entity.View;
-            else if (entity is AnimatedItemEffect)
-                return (AnimatedEffectView)entity.View;
-            else if (entity is Item item && item.IsCorpse)
-                return (ItemView)entity.View;
+                return (MobileView) entity.View;
+            if (entity is AnimatedItemEffect)
+                return (AnimatedEffectView) entity.View;
+            if (entity is Item item && item.IsCorpse)
+                return (ItemView) entity.View;
             return null;
         }
 
@@ -59,10 +62,7 @@ namespace ClassicUO.Game.GameObjects
             Z = sbyte.MinValue;
         }
 
-        protected override View CreateView()
-        {
-            return /*Entity == null ? null :*/ new DeferredView(this, GetBaseView(Entity), AtPosition);
-        }
+        protected override View CreateView() => new DeferredView(this, GetBaseView(Entity), AtPosition);
 
         public override void Dispose()
         {

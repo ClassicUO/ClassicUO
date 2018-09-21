@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,8 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.IO;
+
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -69,7 +71,11 @@ namespace ClassicUO.IO.Resources
                 //SkillEntryI entry = _file.ReadStruct<SkillEntryI>(_file.Position );
 
 
-                value = new SkillEntry { HasButton = _file.ReadBool(), Name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)), Index = index };
+                value = new SkillEntry
+                {
+                    HasButton = _file.ReadBool(), Name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)),
+                    Index = index
+                };
 
                 _skills[index] = value;
             }

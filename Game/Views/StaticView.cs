@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -29,23 +32,18 @@ namespace ClassicUO.Game.Views
 {
     public class StaticView : View
     {
-        public StaticView(Static st) : base(st)
-        {
-            AllowedToDraw = !IsNoDrawable(st.Graphic);
-        }
+        public StaticView(Static st) : base(st) => AllowedToDraw = !IsNoDrawable(st.Graphic);
 
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
         {
-            if (!AllowedToDraw || GameObject.IsDisposed)
-            {
-                return false;
-            }
+            if (!AllowedToDraw || GameObject.IsDisposed) return false;
 
             if (Texture == null || Texture.IsDisposed)
             {
-                Texture = IO.Resources.Art.GetStaticTexture(GameObject.Graphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
+                Texture = Art.GetStaticTexture(GameObject.Graphic);
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4,
+                    Texture.Width, Texture.Height);
             }
 
             HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
@@ -56,13 +54,10 @@ namespace ClassicUO.Game.Views
 
         protected override void MousePick(MouseOverList<GameObject> list, SpriteVertex[] vertex)
         {
-            int x = list.MousePosition.X - (int)vertex[0].Position.X;
-            int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
+            int x = list.MousePosition.X - (int) vertex[0].Position.X;
+            int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
 
-            if (Art.Contains(GameObject.Graphic, x, y))
-            {
-                list.Add(GameObject, vertex[0].Position);
-            }
+            if (Art.Contains(GameObject.Graphic, x, y)) list.Add(GameObject, vertex[0].Position);
         }
     }
 }

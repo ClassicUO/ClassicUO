@@ -1,14 +1,14 @@
-﻿using ClassicUO.Game.GameObjects;
+﻿using System;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Gumps
 {
-    class ItemGumpling : GumpControl
+    internal class ItemGumpling : GumpControl
     {
         private HtmlGump _htmlGump;
         private bool _clickedCanDrag;
@@ -18,7 +18,7 @@ namespace ClassicUO.Game.Gumps
         private float _sClickTime;
 
 
-        public ItemGumpling(Item item) : base()
+        public ItemGumpling(Item item)
         {
             AcceptMouseInput = true;
 
@@ -63,17 +63,19 @@ namespace ClassicUO.Game.Gumps
         {
             if (Texture == null)
             {
-                Texture = IO.Resources.Art.GetStaticTexture(Item.DisplayedGraphic);
+                Texture = Art.GetStaticTexture(Item.DisplayedGraphic);
                 Width = Texture.Width;
                 Height = Texture.Height;
             }
 
-            Vector3 huev = RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver ? Game.Scenes.GameScene.MouseOverItemHue : Item.Hue);
+            Vector3 huev =
+                RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver
+                    ? GameScene.MouseOverItemHue
+                    : Item.Hue);
 
-            if (Item.Amount > 1 && IO.Resources.TileData.IsStackable((long)Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
-            {
+            if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags) &&
+                Item.DisplayedGraphic == Item.Graphic)
                 spriteBatch.Draw2D(Texture, new Vector3(position.X - 5, position.Y - 5, 0), huev);
-            }
 
             spriteBatch.Draw2D(Texture, position, huev);
 
@@ -82,12 +84,12 @@ namespace ClassicUO.Game.Gumps
 
         protected override bool Contains(int x, int y)
         {
-            if (IO.Resources.Art.Contains(Item.DisplayedGraphic, x, y))
+            if (Art.Contains(Item.DisplayedGraphic, x, y))
                 return true;
 
-            if (Item.Amount > 1 && IO.Resources.TileData.IsStackable((long)Item.ItemData.Flags))
+            if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags))
             {
-                if (IO.Resources.Art.Contains(Item.DisplayedGraphic, x - 5, y - 5))
+                if (Art.Contains(Item.DisplayedGraphic, x - 5, y - 5))
                     return true;
             }
 
@@ -145,7 +147,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (this is ItemGumplingPaperdoll)
                 {
-                    var bounds = IO.Resources.Art.GetStaticTexture(Item.DisplayedGraphic).Bounds;
+                    Rectangle bounds = Art.GetStaticTexture(Item.DisplayedGraphic).Bounds;
 
                     GameActions.PickUp(Item, bounds.Width / 2, bounds.Height / 2);
                 }
@@ -160,7 +162,8 @@ namespace ClassicUO.Game.Gumps
             {
                 if (_htmlGump == null)
                 {
-                    _htmlGump = new HtmlGump(0, 0, 200, 32, Item.OverHeads[0].Text, 0, 0, 0, false, 1, true, FontStyle.BlackBorder, IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER);
+                    _htmlGump = new HtmlGump(0, 0, 200, 32, Item.OverHeads[0].Text, 0, 0, 0, false, 1, true,
+                        FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER);
                     _htmlGump.ControlInfo.Layer = UILayer.Over;
 
                     UIManager.Add(_htmlGump);

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,12 +19,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.IO.Resources;
+
 using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.IO
 {
@@ -31,10 +34,7 @@ namespace ClassicUO.IO
     {
         private MemoryMappedViewAccessor _accessor;
 
-        public UOFile(string filepath)
-        {
-            Path = filepath;
-        }
+        public UOFile(string filepath) => Path = filepath;
 
         public string Path { get; }
         public UOFileIndex3D[] Entries { get; protected set; }
@@ -55,7 +55,7 @@ namespace ClassicUO.IO
                 {
                     _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
 
-                    SetData(ptr, (long)_accessor.SafeMemoryMappedViewHandle.ByteLength);
+                    SetData(ptr, (long) _accessor.SafeMemoryMappedViewHandle.ByteLength);
                 }
                 catch
                 {
@@ -73,8 +73,8 @@ namespace ClassicUO.IO
             Entries = null;
         }
 
-     
-        internal void Fill(byte[] buffer,  int count)
+
+        internal void Fill(byte[] buffer, int count)
         {
             for (int i = 0; i < count; i++) buffer[i] = ReadByte();
         }
@@ -86,7 +86,7 @@ namespace ClassicUO.IO
             return t;
         }
 
-        internal T[] ReadArray<T>(long position,  int count) where T : struct
+        internal T[] ReadArray<T>(long position, int count) where T : struct
         {
             T[] array = new T[count];
             _accessor.ReadArray(position, array, 0, count);

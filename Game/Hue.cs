@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Globalization;
 
@@ -34,84 +37,42 @@ namespace ClassicUO.Game
 
         private readonly ushort _value;
 
-        public Hue(ushort hue)
-        {
-            _value = hue;
-        }
+        public Hue(ushort hue) => _value = hue;
 
         public bool IsInvariant => _value == Invariant;
 
-        public static implicit operator Hue(ushort value)
-        {
-            return new Hue(value);
-        }
+        public static implicit operator Hue(ushort value) => new Hue(value);
 
-        public static implicit operator ushort(Hue color)
-        {
-            return color._value;
-        }
+        public static implicit operator ushort(Hue color) => color._value;
 
-        public static bool operator ==(Hue h1,  Hue h2)
-        {
-            return h1.IsInvariant || h2.IsInvariant || h1._value == h2._value;
-        }
+        public static bool operator ==(Hue h1, Hue h2) => h1.IsInvariant || h2.IsInvariant || h1._value == h2._value;
 
-        public static bool operator !=(Hue h1,  Hue h2)
-        {
-            return !h1.IsInvariant && !h2.IsInvariant && h1._value != h2._value;
-        }
+        public static bool operator !=(Hue h1, Hue h2) => !h1.IsInvariant && !h2.IsInvariant && h1._value != h2._value;
 
-        public static bool operator <(Hue h1,  Hue h2)
-        {
-            return h1._value < h2._value;
-        }
+        public static bool operator <(Hue h1, Hue h2) => h1._value < h2._value;
 
-        public static bool operator >(Hue h1,  Hue h2)
-        {
-            return h1._value > h2._value;
-        }
+        public static bool operator >(Hue h1, Hue h2) => h1._value > h2._value;
 
-        public int CompareTo(object obj)
-        {
-            return _value.CompareTo(obj);
-        }
+        public int CompareTo(object obj) => _value.CompareTo(obj);
 
-        public int CompareTo(ushort other)
-        {
-            return _value.CompareTo(other);
-        }
+        public int CompareTo(ushort other) => _value.CompareTo(other);
 
-        public override string ToString()
-        {
-            return $"0x{_value:X4}";
-        }
+        public override string ToString() => $"0x{_value:X4}";
 
-        public override int GetHashCode()
-        {
-            return _value.GetHashCode();
-        }
+        public override int GetHashCode() => _value.GetHashCode();
 
         public override bool Equals(object obj)
         {
-            if (obj is Hue)
-            {
-                return this == (Hue)obj;
-            }
+            if (obj is Hue) return this == (Hue) obj;
 
-            if (obj is ushort)
-            {
-                return _value == (ushort)obj;
-            }
+            if (obj is ushort) return _value == (ushort) obj;
 
             return false;
         }
 
         public static Hue Parse(string str)
         {
-            if (str.StartsWith("0x"))
-            {
-                return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
-            }
+            if (str.StartsWith("0x")) return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
 
             return ushort.Parse(str);
         }

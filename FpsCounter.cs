@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,28 +19,29 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO
 {
     public class FpsCounter
     {
-        private double _currentFpsTime;
         private int _totalFrames;
 
         public int FPS { get; private set; }
-        public double CurrentFpsTime => _currentFpsTime;
+        public double CurrentFpsTime { get; private set; }
 
         public void Update(GameTime gameTime)
         {
-            _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
+            CurrentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (_currentFpsTime >= 1.0)
+            if (CurrentFpsTime >= 1.0)
             {
                 FPS = _totalFrames;
                 _totalFrames = 0;
-                _currentFpsTime = 0;
+                CurrentFpsTime = 0;
             }
         }
 

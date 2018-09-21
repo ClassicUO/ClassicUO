@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 using ClassicUO.Game;
 using ClassicUO.Interfaces;
@@ -27,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
 {
-    public enum FontStyle : int
+    public enum FontStyle
     {
         None = 0x00,
 
@@ -60,7 +63,9 @@ namespace ClassicUO.Renderer
         public int MaxWidth { get; set; }
         public FontStyle FontStyle { get; set; }
         public byte Cell { get; set; } = 30;
+
         public MessageType MessageType { get; set; }
+
         //public long Timeout { get; set; }
         //public bool IsPersistent { get; set; }
         public bool IsHTML { get; set; }
@@ -81,6 +86,7 @@ namespace ClassicUO.Renderer
                 }
             }
         }
+
         public int LinesCount => _texture == null || _texture.IsDisposed ? 0 : _texture.LinesCount;
         public bool IsPartialHue { get; set; }
         public bool IsDisposed { get; private set; }
@@ -120,7 +126,7 @@ namespace ClassicUO.Renderer
         {
             get
             {
-                if (!string.IsNullOrEmpty(_text) && ( _texture == null || _texture.IsDisposed ))
+                if (!string.IsNullOrEmpty(_text) && (_texture == null || _texture.IsDisposed))
                     _texture = CreateTexture();
                 return _texture;
             }
@@ -128,13 +134,14 @@ namespace ClassicUO.Renderer
             {
                 if (_texture != null && !_texture.IsDisposed)
                     _texture.Dispose();
-                _texture = (Fonts.FontTexture)value;
+                _texture = (Fonts.FontTexture) value;
             }
         }
+
         public bool AllowedToDraw { get; set; } = true;
 
         public bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
-            => Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
+            => Draw(spriteBatch, new Rectangle((int) position.X, (int) position.Y, Width, Height), 0, 0);
 
         public bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
         {
@@ -178,13 +185,9 @@ namespace ClassicUO.Renderer
             Fonts.FontTexture ftexture;
 
             if (IsUnicode)
-            {
-                Fonts.GenerateUnicode(out ftexture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle);
-            }
+                Fonts.GenerateUnicode(out ftexture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle);
             else
-            {
-                IsPartialHue = Fonts.GenerateASCII(out ftexture, Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle);
-            }
+                IsPartialHue = Fonts.GenerateASCII(out ftexture, Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle);
 
             if (ftexture != null)
             {

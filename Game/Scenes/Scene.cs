@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,19 +19,20 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using System;
+using System.Collections.Generic;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
 
 namespace ClassicUO.Game.Scenes
 {
-    public abstract class Scene : Interfaces.IUpdateable, IDisposable
+    public abstract class Scene : IUpdateable, IDisposable
     {
         protected Scene(ScenesType type)
         {
@@ -44,7 +46,7 @@ namespace ClassicUO.Game.Scenes
         }
 
         public IReadOnlyList<Func<bool>> ChainActions { get; }
-        protected GraphicsDevice Device { get;  }
+        protected GraphicsDevice Device { get; }
         public bool IsDisposed { get; private set; }
         protected GameLoop Game { get; }
         protected UIManager UIManager { get; }
@@ -56,32 +58,23 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Load()
         {
-            
         }
 
         public virtual void Unload()
         {
-
         }
-
 
 
         public virtual void FixedUpdate(double totalMS, double frameMS)
         {
-
         }
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            
         }
 
 
-
-        public virtual bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
-        {
-            return true;
-        }
+        public virtual bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI) => true;
 
 
         public virtual void Dispose()
@@ -91,6 +84,5 @@ namespace ClassicUO.Game.Scenes
             IsDisposed = true;
             Unload();
         }
-        
     }
 }

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using ClassicUO.Game;
@@ -35,10 +38,7 @@ namespace ClassicUO.Network
 
             WriteUInt(SEED);
 
-            for (int i = 0; i < 4; i++)
-            {
-                WriteUInt(version[i]);
-            }
+            for (int i = 0; i < 4; i++) WriteUInt(version[i]);
         }
     }
 
@@ -165,9 +165,9 @@ namespace ClassicUO.Network
             WriteUInt(container);
         }
 
-        public PDropRequestNew(Serial serial, Position position, byte slot, Serial container) : this(serial, position.X, position.Y, position.Z, slot, container)
+        public PDropRequestNew(Serial serial, Position position, byte slot, Serial container) : this(serial, position.X,
+            position.Y, position.Z, slot, container)
         {
-
         }
     }
 
@@ -176,7 +176,7 @@ namespace ClassicUO.Network
         public PEquipRequest(Serial serial, Layer layer, Serial container) : base(0x13)
         {
             WriteUInt(serial);
-            WriteByte((byte)layer);
+            WriteByte((byte) layer);
             WriteUInt(container);
         }
     }
@@ -264,9 +264,9 @@ namespace ClassicUO.Network
     {
         public PASCIISpeechRequest(string text, MessageType type, MessageFont font, Hue hue) : base(0x03)
         {
-            WriteByte((byte)type);
+            WriteByte((byte) type);
             WriteUShort(hue);
-            WriteUShort((ushort)font);
+            WriteUShort((ushort) font);
             WriteASCII(text);
         }
     }
@@ -275,9 +275,9 @@ namespace ClassicUO.Network
     {
         public PUnicodeSpeechRequest(string text, MessageType type, MessageFont font, Hue hue, string lang) : base(0xAD)
         {
-            WriteByte((byte)type);
+            WriteByte((byte) type);
             WriteUShort(hue);
-            WriteUShort((ushort)font);
+            WriteUShort((ushort) font);
             WriteASCII(lang, 4);
             WriteUnicode(text);
         }
@@ -291,7 +291,7 @@ namespace ClassicUO.Network
             {
                 WriteUShort(0x1C);
                 WriteUShort(0x02);
-                WriteUShort((ushort)idx);
+                WriteUShort((ushort) idx);
             }
             else
             {
@@ -350,17 +350,18 @@ namespace ClassicUO.Network
 
     public sealed class PGumpResponse : PacketWriter
     {
-        public PGumpResponse(Serial local, Serial server, int buttonID, Serial[] switches, Tuple<ushort, string>[] entries) : base(0xB1)
+        public PGumpResponse(Serial local, Serial server, int buttonID, Serial[] switches,
+            Tuple<ushort, string>[] entries) : base(0xB1)
         {
             WriteUInt(local);
             WriteUInt(server);
-            WriteUInt((uint)buttonID);
+            WriteUInt((uint) buttonID);
 
             if (switches == null)
                 WriteUInt(0);
             else
             {
-                WriteUInt((uint)switches.Length);
+                WriteUInt((uint) switches.Length);
                 for (int i = 0; i < switches.Length; i++)
                     WriteUInt(switches[i]);
             }
@@ -369,13 +370,13 @@ namespace ClassicUO.Network
                 WriteUInt(0);
             else
             {
-                WriteUInt((uint)entries.Length);
+                WriteUInt((uint) entries.Length);
                 for (int i = 0; i < entries.Length; i++)
                 {
                     int length = entries[i].Item2.Length * 2;
 
                     WriteUShort(entries[i].Item1);
-                    WriteUShort((ushort)length);
+                    WriteUShort((ushort) length);
                     WriteUnicode(entries[i].Item2, entries[i].Item2.Length);
                 }
             }
@@ -384,42 +385,27 @@ namespace ClassicUO.Network
 
     public sealed class PVirtueGumpReponse : PacketWriter
     {
-        public PVirtueGumpReponse() : base(0xB1)
-        {
-            throw new NotImplementedException();
-        }
+        public PVirtueGumpReponse() : base(0xB1) => throw new NotImplementedException();
     }
 
     public sealed class PMenuResponse : PacketWriter
     {
-        public PMenuResponse() : base(0x7D)
-        {
-            throw new NotImplementedException();
-        }
+        public PMenuResponse() : base(0x7D) => throw new NotImplementedException();
     }
 
     public sealed class PGrayMenuResponse : PacketWriter
     {
-        public PGrayMenuResponse() : base(0x7D)
-        {
-            throw new NotImplementedException();
-        }
+        public PGrayMenuResponse() : base(0x7D) => throw new NotImplementedException();
     }
 
     public sealed class PTradeResponse : PacketWriter
     {
-        public PTradeResponse() : base(0x6F)
-        {
-            throw new NotImplementedException();
-        }
+        public PTradeResponse() : base(0x6F) => throw new NotImplementedException();
     }
 
     public sealed class PTextEntryDialogResponse : PacketWriter
     {
-        public PTextEntryDialogResponse() : base(0xAC)
-        {
-            throw new NotImplementedException();
-        }
+        public PTextEntryDialogResponse() : base(0xAC) => throw new NotImplementedException();
     }
 
     public sealed class PRenameRequest : PacketWriter
@@ -476,7 +462,7 @@ namespace ClassicUO.Network
             WriteByte(1);
             WriteUInt(serial);
             WriteUShort(0x01);
-            WriteUShort((ushort)len);
+            WriteUShort((ushort) len);
             WriteUnicode(text, len);
         }
     }
@@ -551,9 +537,7 @@ namespace ClassicUO.Network
                 WriteUInt(serial);
             }
             else
-            {
                 WriteByte(0x04);
-            }
 
             WriteUnicode(text);
         }
@@ -596,14 +580,14 @@ namespace ClassicUO.Network
             WriteByte(0x05);
             WriteUInt(serial);
             WriteUInt(msgserial);
-            WriteByte((byte)( subject.Length + 1 ));
+            WriteByte((byte) (subject.Length + 1));
             WriteASCII(subject);
 
-            string[] lines = message.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] lines = message.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < lines.Length; i++)
             {
-                WriteByte((byte)lines[i].Length);
+                WriteByte((byte) lines[i].Length);
                 WriteASCII(lines[i]);
             }
         }
@@ -624,7 +608,8 @@ namespace ClassicUO.Network
         public PAssistVersion(byte[] clientversion, uint version) : base(0xBE)
         {
             WriteUInt(version);
-            WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2], clientversion[3]));
+            WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2],
+                clientversion[3]));
         }
     }
 
@@ -764,10 +749,7 @@ namespace ClassicUO.Network
     {
         public PMegaClilocRequest(List<Serial> list) : base(0xD6)
         {
-            for (int i = 0; i < list.Count && i < 50; i++)
-            {
-                WriteUInt(list[i]);
-            }
+            for (int i = 0; i < list.Count && i < 50; i++) WriteUInt(list[i]);
         }
     }
 
@@ -777,7 +759,7 @@ namespace ClassicUO.Network
         {
             WriteUShort(0x1A);
             WriteByte(stat);
-            WriteByte((byte)state);
+            WriteByte((byte) state);
         }
     }
 
@@ -881,7 +863,7 @@ namespace ClassicUO.Network
     {
         public PWalkRequest(Direction direction, byte seq) : base(0x02)
         {
-            WriteByte((byte)direction);
+            WriteByte((byte) direction);
             WriteByte(seq);
             WriteUInt(0);
         }
@@ -1078,13 +1060,8 @@ namespace ClassicUO.Network
         public PClientViewRange(byte range) : base(0xC8)
         {
             if (range < 5)
-            {
                 range = 5;
-            }
-            else if (range > 24)
-            {
-                range = 24;
-            }
+            else if (range > 24) range = 24;
 
             WriteByte(range);
         }

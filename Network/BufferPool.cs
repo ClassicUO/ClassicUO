@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 
 namespace ClassicUO.Network
@@ -29,30 +32,21 @@ namespace ClassicUO.Network
         private readonly int _capacity;
         private readonly Queue<byte[]> _freeSegment;
 
-        public BufferPool(int capacity,  int arraysize)
+        public BufferPool(int capacity, int arraysize)
         {
             _capacity = capacity;
             _arraySize = arraysize;
             _freeSegment = new Queue<byte[]>(capacity);
-            for (int i = 0; i < capacity; i++)
-            {
-                _freeSegment.Enqueue(new byte[arraysize]);
-            }
+            for (int i = 0; i < capacity; i++) _freeSegment.Enqueue(new byte[arraysize]);
         }
 
         public byte[] GetFreeSegment()
         {
             lock (this)
             {
-                if (_freeSegment.Count > 0)
-                {
-                    return _freeSegment.Dequeue();
-                }
+                if (_freeSegment.Count > 0) return _freeSegment.Dequeue();
 
-                for (int i = 0; i < _capacity; i++)
-                {
-                    _freeSegment.Enqueue(new byte[_arraySize]);
-                }
+                for (int i = 0; i < _capacity; i++) _freeSegment.Enqueue(new byte[_arraySize]);
 
                 return _freeSegment.Dequeue();
             }
@@ -60,15 +54,9 @@ namespace ClassicUO.Network
 
         public void AddFreeSegment(byte[] segment)
         {
-            if (segment == null)
-            {
-                return;
-            }
+            if (segment == null) return;
 
-            lock (this)
-            {
-                _freeSegment.Enqueue(segment);
-            }
+            lock (this) _freeSegment.Enqueue(segment);
         }
     }
 }

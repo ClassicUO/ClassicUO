@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,21 +19,18 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
-using ClassicUO.Game.Gumps.Controls;
-using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
-using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -52,14 +50,9 @@ namespace ClassicUO
         private SpriteBatch3D _sb3D;
         private SpriteBatchUI _sbUI;
 
-        private StringBuilder _sb = new StringBuilder();
+        private readonly StringBuilder _sb = new StringBuilder();
         private RenderedText _infoText;
 
-
-        public GameLoop() : base()
-        {
-
-        }
 
         protected override void Initialize()
         {
@@ -79,7 +72,8 @@ namespace ClassicUO
 
             ConfigurationResolver.Save(settings1, "settings.json");*/
 
-            Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine(Environment.CurrentDirectory, "settings.json"));
+            Settings settings =
+                ConfigurationResolver.Load<Settings>(Path.Combine(Environment.CurrentDirectory, "settings.json"));
 
 
             _log.Message(LogTypes.Trace, "Checking for Ultima Online installation...", false);
@@ -93,6 +87,7 @@ namespace ClassicUO
                 _log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
                 return;
             }
+
             _log.Message(LogTypes.None, "      Done!");
             _log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
 
@@ -101,7 +96,7 @@ namespace ClassicUO
             Stopwatch stopwatch = Stopwatch.StartNew();
             FileManager.LoadFiles();
 
-            var hues = Hues.CreateShaderColors();
+            uint[] hues = Hues.CreateShaderColors();
             Texture2D texture0 = new Texture2D(GraphicsDevice, 32, 3000);
             texture0.SetData(hues, 0, 32 * 3000);
             Texture2D texture1 = new Texture2D(GraphicsDevice, 32, 3000);
@@ -128,18 +123,17 @@ namespace ClassicUO
 
             _sceneManager.ChangeScene(ScenesType.Loading);
 
-            _infoText = new RenderedText()
+            _infoText = new RenderedText
             {
                 IsUnicode = true,
                 Font = 1,
                 FontStyle = FontStyle.BlackBorder,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
+                Align = TEXT_ALIGN_TYPE.TS_LEFT
             };
 
             // ##### START TEST #####
             TEST(settings);
             // #####  END TEST  #####
-
 
 
             base.Initialize();
@@ -148,10 +142,9 @@ namespace ClassicUO
 
         private void TEST(Settings settings)
         {
-
-
-            string[] parts = settings.ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-            byte[] clientVersionBuffer = { byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3]) };
+            string[] parts = settings.ClientVersion.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
+            byte[] clientVersionBuffer =
+                {byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])};
 
             NetClient.Connected += (sender, e) =>
             {
@@ -177,7 +170,8 @@ namespace ClassicUO
                         NetClient.Socket.Send(new PSecondLogin(settings.Username, settings.Password, e.ReadUInt()));
                         break;
                     case 0xA9:
-                        NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName, NetClient.Socket.ClientAddress));
+                        NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName,
+                            NetClient.Socket.ClientAddress));
                         break;
                     case 0xBD:
                         NetClient.Socket.Send(new PClientVersion(clientVersionBuffer));
@@ -192,11 +186,8 @@ namespace ClassicUO
             };
 
 
-
-
             NetClient.Socket.Connect(settings.IP, settings.Port);
         }
-
 
 
         protected override void OnInputUpdate(double totalMS, double frameMS)
@@ -255,7 +246,7 @@ namespace ClassicUO
             _sb.AppendLine(GameScene.SelectedObject == null ? "" : GameScene.SelectedObject.ToString());
 
             _infoText.Text = _sb.ToString();
-            _infoText.Draw(_sbUI, new Vector3(/*Window.ClientBounds.Width - 150*/ 20, 20, 0));
+            _infoText.Draw(_sbUI, new Vector3( /*Window.ClientBounds.Width - 150*/ 20, 20, 0));
 
             _sbUI.End();
         }

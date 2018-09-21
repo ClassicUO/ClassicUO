@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using ClassicUO.Game.Views;
 using ClassicUO.IO;
@@ -70,10 +73,7 @@ namespace ClassicUO.Game.GameObjects
         private ushort _stamina;
         private ushort _staminaMax;
 
-        public Mobile(Serial serial) : base(serial)
-        {
-            _lastAnimationChangeTime = World.Ticks;
-        }
+        public Mobile(Serial serial) : base(serial) => _lastAnimationChangeTime = World.Ticks;
 
         //public new MobileView View => (MobileView)base.View;
 
@@ -209,37 +209,46 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool Paralyzed => ( (byte)Flags & 0x01 ) != 0;
-        public bool YellowBar => ( (byte)Flags & 0x08 ) != 0;
+        public bool Paralyzed => ((byte) Flags & 0x01) != 0;
+        public bool YellowBar => ((byte) Flags & 0x08) != 0;
 
-        public bool Poisoned => FileManager.ClientVersion >= ClientVersions.CV_7000 ? _isSA_Poisoned : ( (byte)Flags & 0x04 ) != 0;
+        public bool Poisoned => FileManager.ClientVersion >= ClientVersions.CV_7000
+            ? _isSA_Poisoned
+            : ((byte) Flags & 0x04) != 0;
 
-        public bool Hidden => ( (byte)Flags & 0x80 ) != 0;
+        public bool Hidden => ((byte) Flags & 0x80) != 0;
 
         public bool IsDead
         {
-            get => MathHelper.InRange(Graphic, 0x0192, 0x0193) || MathHelper.InRange(Graphic, 0x025F, 0x0260) || MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || _isDead;
+            get => MathHelper.InRange(Graphic, 0x0192, 0x0193) || MathHelper.InRange(Graphic, 0x025F, 0x0260) ||
+                   MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || _isDead;
             set => _isDead = value;
         }
 
-        public bool IsFlying => FileManager.ClientVersion >= ClientVersions.CV_7000 && ( (byte)Flags.Flying & 0x04 ) != 0;
+        public bool IsFlying =>
+            FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte) Flags.Flying & 0x04) != 0;
 
         public virtual bool InWarMode
         {
-            get => ( (byte)Flags & 0x40 ) != 0;
+            get => ((byte) Flags & 0x40) != 0;
             set => throw new Exception();
         }
 
-        public bool IsHuman => MathHelper.InRange(Graphic, 0x0190, 0x0193) || MathHelper.InRange(Graphic, 0x00B7, 0x00BA) || MathHelper.InRange(Graphic, 0x025D, 0x0260) || MathHelper.InRange(Graphic, 0x029A, 0x029B) || MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2;
+        public bool IsHuman => MathHelper.InRange(Graphic, 0x0190, 0x0193) ||
+                               MathHelper.InRange(Graphic, 0x00B7, 0x00BA) ||
+                               MathHelper.InRange(Graphic, 0x025D, 0x0260) ||
+                               MathHelper.InRange(Graphic, 0x029A, 0x029B) ||
+                               MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || Graphic == 0x03DB || Graphic == 0x03DF ||
+                               Graphic == 0x03E2;
 
         public override bool Exists => World.Contains(Serial);
 
 
-        public Item[] Equipment { get; } = new Item[(int)Layer.Bank + 1];
+        public Item[] Equipment { get; } = new Item[(int) Layer.Bank + 1];
 
 
-        public bool IsMounted => Equipment[(int)Layer.Mount] != null;
-        public bool IsRunning => ( Direction & Direction.Running ) == Direction.Running;
+        public bool IsMounted => Equipment[(int) Layer.Mount] != null;
+        public bool IsRunning => (Direction & Direction.Running) == Direction.Running;
 
         public byte AnimationInterval { get; set; }
         public byte AnimationFrameCount { get; set; }
@@ -261,10 +270,7 @@ namespace ClassicUO.Game.GameObjects
         public event EventHandler StaminaChanged;
 
 
-        protected override View CreateView()
-        {
-            return new MobileView(this);
-        }
+        protected override View CreateView() => new MobileView(this);
 
 
         public void SetSAPoison(bool value)
@@ -310,8 +316,8 @@ namespace ClassicUO.Game.GameObjects
         {
             if (Steps.Count > 0)
             {
-                var step = Steps.Back();
-                dir = (Direction)step.Direction;
+                Step step = Steps.Back();
+                dir = (Direction) step.Direction;
                 x = step.X;
                 y = step.Y;
                 z = step.Z;
@@ -341,15 +347,9 @@ namespace ClassicUO.Game.GameObjects
 
             endDir = endDir & Direction.Up;
 
-            if (endX == x && endY == y && endZ == z && endDir == direction)
-            {
-                return true;
-            }
+            if (endX == x && endY == y && endZ == z && endDir == direction) return true;
 
-            if (!IsMoving)
-            {
-                LastStepTime = World.Ticks;
-            }
+            if (!IsMoving) LastStepTime = World.Ticks;
 
             Direction moveDir = CalculateDirection(endX, endY, x, y);
 
@@ -362,7 +362,7 @@ namespace ClassicUO.Game.GameObjects
                     step.X = endX;
                     step.Y = endY;
                     step.Z = endZ;
-                    step.Direction = (byte)( moveDir | dirRun );
+                    step.Direction = (byte) (moveDir | dirRun);
                     step.Run = run;
 
                     Steps.AddToBack(step);
@@ -371,7 +371,7 @@ namespace ClassicUO.Game.GameObjects
                 step.X = x;
                 step.Y = y;
                 step.Z = z;
-                step.Direction = (byte)( moveDir | dirRun );
+                step.Direction = (byte) (moveDir | dirRun);
                 step.Run = run;
                 Steps.AddToBack(step);
             }
@@ -382,7 +382,7 @@ namespace ClassicUO.Game.GameObjects
                 step.X = x;
                 step.Y = y;
                 step.Z = z;
-                step.Direction = (byte)( direction | dirRun );
+                step.Direction = (byte) (direction | dirRun);
                 step.Run = run;
                 Steps.AddToBack(step);
             }
@@ -397,33 +397,21 @@ namespace ClassicUO.Game.GameObjects
 
             if (deltaX > 0)
             {
-                if (deltaY > 0)
-                {
-                    return Direction.Down;
-                }
+                if (deltaY > 0) return Direction.Down;
 
-                if (deltaY == 0)
-                {
-                    return Direction.East;
-                }
+                if (deltaY == 0) return Direction.East;
 
                 return Direction.Right;
             }
 
             if (deltaX == 0)
             {
-                if (deltaY > 0)
-                {
-                    return Direction.South;
-                }
+                if (deltaY > 0) return Direction.South;
 
                 return deltaY == 0 ? Direction.NONE : Direction.North;
             }
 
-            if (deltaY > 0)
-            {
-                return Direction.Left;
-            }
+            if (deltaY > 0) return Direction.Left;
 
             return deltaY == 0 ? Direction.West : Direction.Up;
         }
@@ -443,12 +431,13 @@ namespace ClassicUO.Game.GameObjects
                 x = step.X;
                 y = step.Y;
                 z = step.Z;
-                dir = (Direction)step.Direction;
+                dir = (Direction) step.Direction;
             }
         }
 
 
-        public void SetAnimation(byte id, byte interval = 0, byte frameCount = 0, byte repeatCount = 0, bool repeat = false, bool frameDirection = false)
+        public void SetAnimation(byte id, byte interval = 0, byte frameCount = 0, byte repeatCount = 0,
+            bool repeat = false, bool frameDirection = false)
         {
             AnimationGroup = id;
             AnimIndex = 0;
@@ -462,14 +451,12 @@ namespace ClassicUO.Game.GameObjects
             _lastAnimationChangeTime = World.Ticks;
         }
 
-        protected virtual bool NoIterateAnimIndex()
-        {
-            return LastStepTime > (uint)( World.Ticks - WALKING_DELAY ) && Steps.Count <= 0;
-        }
+        protected virtual bool NoIterateAnimIndex() =>
+            LastStepTime > (uint) (World.Ticks - WALKING_DELAY) && Steps.Count <= 0;
 
         public override void ProcessAnimation()
         {
-            byte dir = (byte)GetDirectionForAnimation();
+            byte dir = (byte) GetDirectionForAnimation();
 
             if (Steps.Count > 0)
             {
@@ -479,13 +466,10 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Step step = Steps.Front();
 
-                    if (AnimationFromServer)
-                    {
-                        SetAnimation(0xFF);
-                    }
+                    if (AnimationFromServer) SetAnimation(0xFF);
 
                     int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - 15;
-                    int delay = (int)World.Ticks - (int)LastStepTime;
+                    int delay = (int) World.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
 
                     if (Position.X != step.X || Position.Y != step.Y)
@@ -496,9 +480,10 @@ namespace ClassicUO.Game.GameObjects
                         float x = frameOffset;
                         float y = frameOffset;
 
-                        GetPixelOffset((byte)Direction, ref x, ref y, framesPerTile);
+                        GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
 
-                        Offset = new Vector3((sbyte)x, (sbyte)y, (int)( ( step.Z - Position.Z ) * frameOffset * ( 4.0f / framesPerTile ) ));
+                        Offset = new Vector3((sbyte) x, (sbyte) y,
+                            (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
 
                         turnOnly = false;
                     }
@@ -522,8 +507,8 @@ namespace ClassicUO.Game.GameObjects
                             }
                         }
 
-                        Position = new Position((ushort)step.X, (ushort)step.Y, step.Z);
-                        Direction = (Direction)step.Direction;
+                        Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
+                        Direction = (Direction) step.Direction;
 
                         Offset = Vector3.Zero;
                         Steps.RemoveFromFront();
@@ -541,30 +526,26 @@ namespace ClassicUO.Game.GameObjects
                 sbyte frameIndex = AnimIndex;
 
                 if (AnimationFromServer && !AnimationDirection)
-                {
                     frameIndex--;
-                }
                 else
-                {
                     frameIndex++;
-                }
 
                 Graphic id = GetGraphicForAnimation();
                 int animGroup = GetGroupForAnimation(this, id);
                 if (animGroup == 64 || animGroup == 65)
                 {
                     animGroup = InWarMode ? 65 : 64;
-                    AnimationGroup = (byte)animGroup;
+                    AnimationGroup = (byte) animGroup;
                 }
 
-                Item mount = Equipment[(int)Layer.Mount];
+                Item mount = Equipment[(int) Layer.Mount];
                 if (mount != null)
                 {
                     switch (animGroup)
                     {
-                        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
-                        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
-                        case (byte)PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
+                        case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
+                        case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
+                        case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
                             id = mount.GetMountAnimation();
                             animGroup = GetGroupForAnimation(this, id);
                             break;
@@ -574,19 +555,16 @@ namespace ClassicUO.Game.GameObjects
                 bool mirror = false;
                 Animations.GetAnimDirection(ref dir, ref mirror);
 
-                int currentDelay = (int)CHARACTER_ANIMATION_DELAY;
+                int currentDelay = (int) CHARACTER_ANIMATION_DELAY;
 
                 if (id < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
                     ref AnimationDirection direction = ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
                     Animations.AnimID = id;
-                    Animations.AnimGroup = (byte)animGroup;
+                    Animations.AnimGroup = (byte) animGroup;
                     Animations.Direction = dir;
 
-                    if (direction.FrameCount == 0)
-                    {
-                        Animations.LoadDirectionGroup(ref direction);
-                    }
+                    if (direction.FrameCount == 0) Animations.LoadDirectionGroup(ref direction);
 
                     if (direction.Address != 0 || direction.IsUOP)
                     {
@@ -595,15 +573,11 @@ namespace ClassicUO.Game.GameObjects
 
                         if (AnimationFromServer)
                         {
-                            currentDelay += currentDelay * ( AnimationInterval + 1 );
+                            currentDelay += currentDelay * (AnimationInterval + 1);
                             if (AnimationFrameCount <= 0)
-                            {
-                                AnimationFrameCount = (byte)fc;
-                            }
+                                AnimationFrameCount = (byte) fc;
                             else
-                            {
                                 fc = AnimationFrameCount;
-                            }
 
                             if (AnimationDirection)
                             {
@@ -619,15 +593,10 @@ namespace ClassicUO.Game.GameObjects
                                             repCount--;
                                             AnimationRepeatMode = repCount;
                                         }
-                                        else if (repCount == 1)
-                                        {
-                                            SetAnimation(0xFF);
-                                        }
+                                        else if (repCount == 1) SetAnimation(0xFF);
                                     }
                                     else
-                                    {
                                         SetAnimation(0xFF);
-                                    }
                                 }
                             }
                             else
@@ -635,13 +604,9 @@ namespace ClassicUO.Game.GameObjects
                                 if (frameIndex < 0)
                                 {
                                     if (fc <= 0)
-                                    {
                                         frameIndex = 0;
-                                    }
                                     else
-                                    {
-                                        frameIndex = (sbyte)( fc - 1 );
-                                    }
+                                        frameIndex = (sbyte) (fc - 1);
 
                                     if (AnimationRepeat)
                                     {
@@ -651,24 +616,16 @@ namespace ClassicUO.Game.GameObjects
                                             repCount--;
                                             AnimationRepeatMode = repCount;
                                         }
-                                        else if (repCount == 1)
-                                        {
-                                            SetAnimation(0xFF);
-                                        }
+                                        else if (repCount == 1) SetAnimation(0xFF);
                                     }
                                     else
-                                    {
                                         SetAnimation(0xFF);
-                                    }
                                 }
                             }
                         }
                         else
                         {
-                            if (frameIndex >= fc)
-                            {
-                                frameIndex = 0;
-                            }
+                            if (frameIndex >= fc) frameIndex = 0;
                         }
 
 
@@ -677,7 +634,6 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 _lastAnimationChangeTime = World.Ticks + currentDelay;
-
             }
         }
 
@@ -693,86 +649,78 @@ namespace ClassicUO.Game.GameObjects
             switch (dir & 7)
             {
                 case 0:
-                    {
-                        x *= step_NESW;
-                        y *= -step_NESW;
-                        break;
-                    }
+                {
+                    x *= step_NESW;
+                    y *= -step_NESW;
+                    break;
+                }
                 case 1:
-                    {
-                        x *= step_NESW_D;
-                        checkX = 44;
-                        y = 0.0f;
-                        break;
-                    }
+                {
+                    x *= step_NESW_D;
+                    checkX = 44;
+                    y = 0.0f;
+                    break;
+                }
                 case 2:
-                    {
-                        x *= step_NESW;
-                        y *= step_NESW;
-                        break;
-                    }
+                {
+                    x *= step_NESW;
+                    y *= step_NESW;
+                    break;
+                }
                 case 3:
-                    {
-                        x = 0.0f;
-                        y *= step_NESW_D;
-                        checkY = 44;
-                        break;
-                    }
+                {
+                    x = 0.0f;
+                    y *= step_NESW_D;
+                    checkY = 44;
+                    break;
+                }
                 case 4:
-                    {
-                        x *= -step_NESW;
-                        y *= step_NESW;
-                        break;
-                    }
+                {
+                    x *= -step_NESW;
+                    y *= step_NESW;
+                    break;
+                }
                 case 5:
-                    {
-                        x *= -step_NESW_D;
-                        checkX = 44;
-                        y = 0.0f;
-                        break;
-                    }
+                {
+                    x *= -step_NESW_D;
+                    checkX = 44;
+                    y = 0.0f;
+                    break;
+                }
                 case 6:
-                    {
-                        x *= -step_NESW;
-                        y *= -step_NESW;
-                        break;
-                    }
+                {
+                    x *= -step_NESW;
+                    y *= -step_NESW;
+                    break;
+                }
                 case 7:
-                    {
-                        x = 0.0f;
-                        y *= -step_NESW_D;
-                        checkY = 44;
-                        break;
-                    }
+                {
+                    x = 0.0f;
+                    y *= -step_NESW_D;
+                    checkY = 44;
+                    break;
+                }
             }
 
-            int valueX = (int)x;
+            int valueX = (int) x;
 
 
             if (Math.Abs(valueX) > checkX)
             {
                 if (valueX < 0)
-                {
                     x = -checkX;
-                }
                 else
-                {
                     x = checkX;
-                }
             }
 
-            int valueY = (int)y;
+            int valueY = (int) y;
 
             if (Math.Abs(valueY) > checkY)
             {
                 if (valueY < 0)
-                {
                     y = -checkY;
-                }
                 else
-                {
                     y = checkY;
-                }
             }
         }
 
@@ -782,7 +730,6 @@ namespace ClassicUO.Game.GameObjects
 
             for (int i = 0; i < Equipment.Length; i++)
                 Equipment[i] = null;
-
         }
 
         public struct Step

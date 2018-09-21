@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,8 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.IO;
+
 using System.IO;
 
 namespace ClassicUO.IO.Resources
@@ -55,8 +57,8 @@ namespace ClassicUO.IO.Resources
                 for (int j = 0; j < width; j++)
                 {
                     ushort val = _file.ReadUShort();
-                    val = (ushort)((val << 10) | (val << 5) | val);
-                    pixels[pos + j] = (ushort)((val > 0 ? 0x8000 : 0) | val);
+                    val = (ushort) ((val << 10) | (val << 5) | val);
+                    pixels[pos + j] = (ushort) ((val > 0 ? 0x8000 : 0) | val);
                 }
             }
 

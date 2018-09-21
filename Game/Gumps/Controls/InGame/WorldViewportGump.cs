@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.Gumps.UIGumps;
+﻿using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -9,12 +7,13 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 {
     public class WorldViewportGump : Gump
     {
-        private int _worldWidth = 800, _worldHeight = 600;
+        private readonly int _worldWidth = 800;
+        private readonly int _worldHeight = 600;
         private WorldViewport _viewport;
         private ChatControl _chatControl;
-        private Scenes.GameScene _scene;
+        private readonly GameScene _scene;
 
-        public WorldViewportGump(Scenes.GameScene scene) : base(0, 0)
+        public WorldViewportGump(GameScene scene) : base(0, 0)
         {
             AcceptMouseInput = false;
             CanMove = true;
@@ -22,7 +21,8 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             CanCloseWithRightClick = false;
             ControlInfo.Layer = UILayer.Under;
 
-            X = 0; Y = 0;
+            X = 0;
+            Y = 0;
 
             _scene = scene;
 
@@ -36,10 +36,8 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
         }
 
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
-        {
-            return base.Draw(spriteBatch, position, hue);
-        }
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>
+            base.Draw(spriteBatch, position, hue);
 
         protected override void OnMove()
         {

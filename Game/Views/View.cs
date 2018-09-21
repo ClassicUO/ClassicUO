@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
@@ -32,7 +35,7 @@ namespace ClassicUO.Game.Views
 {
     public abstract class View : IDrawable<GameObject>, IColorable
     {
-        protected static float PI = (float)Math.PI;
+        protected static float PI = (float) Math.PI;
 
 
         protected View(GameObject parent)
@@ -68,12 +71,13 @@ namespace ClassicUO.Game.Views
                 {
                     Direction dir = mobile.Direction;
 
-                    if (( dir & Direction.Up ) == Direction.Left || ( dir & Direction.Up ) == Direction.South || ( dir & Direction.Up ) == Direction.East)
+                    if ((dir & Direction.Up) == Direction.Left || (dir & Direction.Up) == Direction.South ||
+                        (dir & Direction.Up) == Direction.East)
                     {
                         tile = World.Map.GetTile(GameObject.Position.X, GameObject.Position.Y + 1);
                         check = dir & Direction.Up;
                     }
-                    else if (( dir & Direction.Up ) == Direction.Down)
+                    else if ((dir & Direction.Up) == Direction.Down)
                     {
                         tile = World.Map.GetTile(GameObject.Position.X + 1, GameObject.Position.Y + 1);
                         check = Direction.Down;
@@ -93,13 +97,9 @@ namespace ClassicUO.Game.Views
                 if (tile != null)
                 {
                     if (deferreable.DeferredObject == null)
-                    {
                         deferreable.DeferredObject = new DeferredEntity();
-                    }
                     else
-                    {
                         deferreable.DeferredObject.Reset();
-                    }
 
                     deferreable.DeferredObject.AtPosition = position;
                     deferreable.DeferredObject.Entity = GameObject;
@@ -108,10 +108,7 @@ namespace ClassicUO.Game.Views
 
                     if (GameObject is Mobile mob)
                     {
-                        if (!Pathfinder.TryGetNextZ(mob, mob.Position, check, out sbyte z))
-                        {
-                            return false;
-                        }
+                        if (!Pathfinder.TryGetNextZ(mob, mob.Position, check, out sbyte z)) return false;
 
                         deferreable.DeferredObject.Z = z;
                         deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, z);
@@ -133,10 +130,7 @@ namespace ClassicUO.Game.Views
 
         public virtual bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> list)
         {
-            if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed)
-            {
-                return false;
-            }
+            if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed) return false;
 
             Texture.Ticks = World.Ticks;
 
@@ -147,10 +141,10 @@ namespace ClassicUO.Game.Views
                 float w = Bounds.Width / 2f;
                 float h = Bounds.Height / 2f;
                 Vector3 center = position - new Vector3(Bounds.X - 44 + w, Bounds.Y + h, 0);
-                float sinx = (float)Math.Sin(Rotation) * w;
-                float cosx = (float)Math.Cos(Rotation) * w;
-                float siny = (float)Math.Sin(Rotation) * h;
-                float cosy = (float)Math.Cos(Rotation) * h;
+                float sinx = (float) Math.Sin(Rotation) * w;
+                float cosx = (float) Math.Cos(Rotation) * w;
+                float siny = (float) Math.Sin(Rotation) * h;
+                float cosy = (float) Math.Cos(Rotation) * h;
 
                 vertex = SpriteVertex.PolyBufferFlipped;
                 vertex[0].Position = center;
@@ -210,11 +204,8 @@ namespace ClassicUO.Game.Views
         }
 
 
-
-        public virtual bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
-        {
-            return false;
-        }
+        public virtual bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
+            MouseOverList<GameObject> objectList) => false;
 
 
         protected virtual void MousePick(MouseOverList<GameObject> list, SpriteVertex[] vertex)
@@ -225,8 +216,9 @@ namespace ClassicUO.Game.Views
         {
             for (int i = 0; i < GameObject.OverHeads.Count; i++)
             {
-                var v = GameObject.OverHeads[i].View;
-                v.Bounds = new Rectangle(v.Texture.Width / 2 - 22, offY + v.Texture.Height, v.Texture.Width, v.Texture.Height);
+                View v = GameObject.OverHeads[i].View;
+                v.Bounds = new Rectangle(v.Texture.Width / 2 - 22, offY + v.Texture.Height, v.Texture.Width,
+                    v.Texture.Height);
                 OverheadManager.AddView(v, position);
                 offY += v.Texture.Height;
             }
@@ -247,17 +239,12 @@ namespace ClassicUO.Game.Views
 
             if (g != 0x63D3)
             {
-                if (g >= 0x2198 && g <= 0x21A4)
-                {
-                    return true;
-                }
+                if (g >= 0x2198 && g <= 0x21A4) return true;
 
-                long flags = (long)TileData.StaticData[g].Flags;
+                long flags = (long) TileData.StaticData[g].Flags;
 
-                if (!TileData.IsNoDiagonal(flags) || TileData.IsAnimated(flags) && World.Player != null && World.Player.Race == RaceType.GARGOYLE)
-                {
-                    return false;
-                }
+                if (!TileData.IsNoDiagonal(flags) || TileData.IsAnimated(flags) && World.Player != null &&
+                    World.Player.Race == RaceType.GARGOYLE) return false;
             }
 
             return true;

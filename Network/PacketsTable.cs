@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.IO;
 
 namespace ClassicUO.Network
@@ -284,10 +287,7 @@ namespace ClassicUO.Network
             -1 // ff
         };
 
-        public static short GetPacketLength(int id)
-        {
-            return _packetsTable[id];
-        }
+        public static short GetPacketLength(int id) => _packetsTable[id];
 
         public static void AdjustPacketSizeByVersion(ClientVersions version)
         {
@@ -305,13 +305,9 @@ namespace ClassicUO.Network
             }
 
             if (version >= ClientVersions.CV_5090)
-            {
                 _packetsTable[0xE1] = -1;
-            }
             else
-            {
                 _packetsTable[0xE1] = 0x09;
-            }
 
             if (version >= ClientVersions.CV_6013)
             {
@@ -357,13 +353,9 @@ namespace ClassicUO.Network
             }
 
             if (version >= ClientVersions.CV_60142)
-            {
                 _packetsTable[0xB9] = 0x05;
-            }
             else
-            {
                 _packetsTable[0xB9] = 0x03;
-            }
 
             if (version >= ClientVersions.CV_7000)
             {
@@ -396,13 +388,9 @@ namespace ClassicUO.Network
             }
 
             if (version >= ClientVersions.CV_70180)
-            {
                 _packetsTable[0x00] = 0x6A;
-            }
             else
-            {
                 _packetsTable[0x00] = 0x68;
-            }
         }
     }
 }

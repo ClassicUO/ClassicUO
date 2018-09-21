@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Game;
 using ClassicUO.IO.Resources;
 
@@ -31,6 +34,6 @@ namespace ClassicUO.Interfaces
         Graphic Graphic { get; set; }
         Position Position { get; set; }
 
-        bool IsAtWorld(int x,  int y);
+        bool IsAtWorld(int x, int y);
     }
 }
