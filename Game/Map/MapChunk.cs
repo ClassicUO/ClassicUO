@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,11 +19,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Game.GameObjects;
-using ClassicUO.IO.Resources;
+
 using System;
 using System.Runtime.InteropServices;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
@@ -37,18 +40,15 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < 8; i++)
             {
                 Tiles[i] = new Tile[8];
-                for (int j = 0; j < 8; j++)
-                {
-                    Tiles[i][j] = new Tile();
-                }
+                for (int j = 0; j < 8; j++) Tiles[i][j] = new Tile();
             }
 
             LastAccessTime = World.Ticks;
         }
 
-        public ushort X { get; private set; }
-        public ushort Y { get; private set; }
-        public Tile[][] Tiles { get; private set; }
+        public ushort X { get; }
+        public ushort Y { get; }
+        public Tile[][] Tiles { get; }
         public long LastAccessTime { get; set; }
 
 
@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Map
             IndexMap im = GetIndex(map);
             if (im.MapAddress != 0)
             {
-                MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr)im.MapAddress);
+                MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr) im.MapAddress);
 
 
                 int bx = X * 8;
@@ -69,12 +69,12 @@ namespace ClassicUO.Game.Map
                     {
                         int pos = y * 8 + x;
 
-                        ushort tileID = (ushort)(block.Cells[pos].TileID & 0x3FFF);
+                        ushort tileID = (ushort) (block.Cells[pos].TileID & 0x3FFF);
                         sbyte z = block.Cells[pos].Z;
 
 
                         Tiles[x][y].Graphic = tileID;
-                        Tiles[x][y].Position = new Position((ushort)(bx + x), (ushort)(by + y), z);
+                        Tiles[x][y].Position = new Position((ushort) (bx + x), (ushort) (by + y), z);
 
                         Tiles[x][y].AddGameObject(Tiles[x][y]);
                     }
@@ -82,11 +82,11 @@ namespace ClassicUO.Game.Map
 
                 if (im.StaticAddress != 0)
                 {
-                    StaticsBlock* sb = (StaticsBlock*)im.StaticAddress;
+                    StaticsBlock* sb = (StaticsBlock*) im.StaticAddress;
 
                     if (sb != null)
                     {
-                        int count = (int)im.StaticCount;
+                        int count = (int) im.StaticCount;
 
                         for (int i = 0; i < count; i++, sb++)
                         {
@@ -100,12 +100,12 @@ namespace ClassicUO.Game.Map
                                     continue;
 
                                 sbyte z = sb->Z;
-                                Static staticObject = new Static(sb->Color, sb->Hue, pos) { Position = new Position((ushort)(bx + x), (ushort)(by + y), z) };
+                                Static staticObject = new Static(sb->Color, sb->Hue, pos)
+                                    {Position = new Position((ushort) (bx + x), (ushort) (by + y), z)};
 
                                 Tiles[x][y].AddGameObject(staticObject);
                             }
                         }
-
                     }
                 }
             }
@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Map
 
         private IndexMap GetIndex(int map, int x, int y)
             => IO.Resources.Map.GetIndex(map, x, y);
-        
+
 
         public void Unload()
         {
@@ -135,14 +135,15 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    ref var tile = ref Tiles[i][j];
-                    foreach (var o in tile.ObjectsOnTiles)
+                    ref Tile tile = ref Tiles[i][j];
+                    foreach (GameObject o in tile.ObjectsOnTiles)
                     {
                         if (!(o is Tile) && !(o is Static))
                             return false;
                     }
                 }
             }
+
             return true;
         }
     }

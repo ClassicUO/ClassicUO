@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,11 +19,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Renderer;
+
 using ClassicUO.Game.Views;
-using ClassicUO.IO.Resources;
 using ClassicUO.Interfaces;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -30,7 +32,7 @@ namespace ClassicUO.Game.GameObjects
     {
         //private StaticTiles? _itemData;
 
-        public Static(Graphic tileID,  Hue hue,  int index) : base(World.Map)
+        public Static(Graphic tileID, Hue hue, int index) : base(World.Map)
         {
             Graphic = tileID;
             Hue = hue;
@@ -38,33 +40,15 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public int Index { get; }
+
         //public new StaticView View => (StaticView)base.View;
         public string Name => ItemData.Name;
         public override Position Position { get; set; }
 
-        public StaticTiles ItemData
-        {
-            get
-            {
-                //if (!_itemData.HasValue)
-                //{
-                //    _itemData = 
-                //    Name = _itemData.Value.Name;
-                //}
+        public StaticTiles ItemData => TileData.StaticData[Graphic];
 
-                //return _itemData.Value;
-                return TileData.StaticData[Graphic];
-            }
-        }
+        public bool IsAtWorld(int x, int y) => Position.X == x && Position.Y == y;
 
-        public bool IsAtWorld(int x,  int y)
-        {
-            return Position.X == x && Position.Y == y;
-        }
-
-        protected override View CreateView()
-        {
-            return new StaticView(this);
-        }
+        protected override View CreateView() => new StaticView(this);
     }
 }

@@ -1,31 +1,31 @@
-﻿using ClassicUO.Utility;
+﻿using System;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO
 {
     public abstract class CoreGame : Microsoft.Xna.Framework.Game
     {
         private float _time;
-        private FpsCounter _fpsCounter;
+        private readonly FpsCounter _fpsCounter;
 
         protected CoreGame()
         {
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / 300.0f);
             GraphicsDeviceManager = new GraphicsDeviceManager(this);
 
-            GraphicsDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = Microsoft.Xna.Framework.Graphics.RenderTargetUsage.PreserveContents;
+            GraphicsDeviceManager.PreparingDeviceSettings += (sender, e) =>
+                e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage =
+                    RenderTargetUsage.PreserveContents;
 
             if (GraphicsDeviceManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
                 GraphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
 
             GraphicsDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             GraphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
-            GraphicsDeviceManager.PreferredBackBufferWidth = 800;   // should be changed by settings file
-            GraphicsDeviceManager.PreferredBackBufferHeight = 600;  // should be changed by settings file
+            GraphicsDeviceManager.PreferredBackBufferWidth = 800; // should be changed by settings file
+            GraphicsDeviceManager.PreferredBackBufferHeight = 600; // should be changed by settings file
             GraphicsDeviceManager.ApplyChanges();
 
 
@@ -58,8 +58,8 @@ namespace ClassicUO
                 Profiler.ExitContext("OutOfContext");
             Profiler.EnterContext("Update");
 
-            var totalms = gameTime.TotalGameTime.TotalMilliseconds;
-            var framems = gameTime.ElapsedGameTime.TotalMilliseconds;
+            double totalms = gameTime.TotalGameTime.TotalMilliseconds;
+            double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
 
             _fpsCounter.Update(gameTime);
 
@@ -75,7 +75,7 @@ namespace ClassicUO
 
             Profiler.ExitContext("Update");
 
-            _time += (float)framems;
+            _time += (float) framems;
 
             if (_time > IntervalFixedUpdate)
             {
@@ -85,9 +85,7 @@ namespace ClassicUO
                 Profiler.ExitContext("FixedUpdate");
             }
             else
-            {
                 SuppressDraw();
-            }
 
             Profiler.EnterContext("OutOfContext");
         }
@@ -117,7 +115,8 @@ namespace ClassicUO
             double timeTotal = Profiler.TrackedTime;
             double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
 
-            Window.Title = string.Format("ClassicUO - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}",
+            Window.Title = string.Format(
+                "ClassicUO - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}",
                 100d * (timeDraw / timeTotal),
                 100d * (timeUpdate / timeTotal),
                 100d * (timeFixedUpdate / timeTotal),
@@ -132,7 +131,5 @@ namespace ClassicUO
         protected abstract void OnNetworkUpdate(double totalMS, double frameMS);
         protected abstract void OnInputUpdate(double totalMS, double frameMS);
         protected abstract void OnUIUpdate(double totalMS, double frameMS);
-
-
     }
 }

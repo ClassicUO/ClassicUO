@@ -2,7 +2,7 @@
 
 namespace ClassicUO.Game.Gumps
 {
-    interface IScrollBar
+    internal interface IScrollBar
     {
         int Value { get; set; }
         int MinValue { get; set; }

@@ -7,7 +7,7 @@ namespace ClassicUO.Platforms.Windows
     [StructLayout(LayoutKind.Sequential)]
     public struct Message
     {
-        public UInt32 Id;
+        public uint Id;
         public IntPtr WParam;
         public IntPtr LParam;
         public Point Point;
@@ -22,79 +22,37 @@ namespace ClassicUO.Platforms.Windows
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Message))
-            {
-                return false;
-            }
+            if (!(obj is Message)) return false;
 
-            Message msg = (Message)obj;
+            Message msg = (Message) obj;
 
             return msg.Id == Id && msg.LParam == LParam && msg.Point == Point && msg.WParam == WParam;
         }
 
-        public override int GetHashCode()
-        {
-            return (int)Id;
-        }
+        public override int GetHashCode() => (int) Id;
 
-        public static bool operator ==(Message m1, Message m2)
-        {
-            return m1.Equals(m2);
-        }
+        public static bool operator ==(Message m1, Message m2) => m1.Equals(m2);
 
-        public static bool operator !=(Message m1, Message m2)
-        {
-            return !m1.Equals(m2);
-        }
+        public static bool operator !=(Message m1, Message m2) => !m1.Equals(m2);
 
-        public static int HighWord(int n)
-        {
-            return ((n >> 0x10) & 0xffff);
-        }
+        public static int HighWord(int n) => (n >> 0x10) & 0xffff;
 
-        public static int HighWord(IntPtr n)
-        {
-            return HighWord((int)((long)n));
-        }
+        public static int HighWord(IntPtr n) => HighWord((int) (long) n);
 
-        public static int LowWord(int n)
-        {
-            return (n & 0xffff);
-        }
+        public static int LowWord(int n) => n & 0xffff;
 
-        public static int LowWord(IntPtr n)
-        {
-            return LowWord((int)((long)n));
-        }
+        public static int LowWord(IntPtr n) => LowWord((int) (long) n);
 
-        public static int MakeLong(int low, int high)
-        {
-            return ((high << 0x10) | (low & 0xffff));
-        }
+        public static int MakeLong(int low, int high) => (high << 0x10) | (low & 0xffff);
 
-        public static IntPtr MakeLParam(int low, int high)
-        {
-            return (IntPtr)((high << 0x10) | (low & 0xffff));
-        }
+        public static IntPtr MakeLParam(int low, int high) => (IntPtr) ((high << 0x10) | (low & 0xffff));
 
-        public static int SignedHighWord(int n)
-        {
-            return (short)((n >> 0x10) & 0xffff);
-        }
+        public static int SignedHighWord(int n) => (short) ((n >> 0x10) & 0xffff);
 
-        public static int SignedHighWord(IntPtr n)
-        {
-            return SignedHighWord((int)((long)n));
-        }
+        public static int SignedHighWord(IntPtr n) => SignedHighWord((int) (long) n);
 
-        public static int SignedLowWord(int n)
-        {
-            return (short)(n & 0xffff);
-        }
+        public static int SignedLowWord(int n) => (short) (n & 0xffff);
 
-        public static int SignedLowWord(IntPtr n)
-        {
-            return SignedLowWord((int)((long)n));
-        }
+        public static int SignedLowWord(IntPtr n) => SignedLowWord((int) (long) n);
     }
 }

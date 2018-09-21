@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
@@ -35,9 +38,18 @@ namespace ClassicUO.Utility
 
     public class Log
     {
-        private static readonly Dictionary<LogTypes, string> _logMsgFormat = new Dictionary<LogTypes, string> { { LogTypes.None, string.Empty }, { LogTypes.Trace, "  Trace   " }, { LogTypes.Info, "  Info    " }, { LogTypes.Warning, "  Warning " }, { LogTypes.Error, "  Error   " } };
+        private static readonly Dictionary<LogTypes, string> _logMsgFormat = new Dictionary<LogTypes, string>
+        {
+            {LogTypes.None, string.Empty}, {LogTypes.Trace, "  Trace   "}, {LogTypes.Info, "  Info    "},
+            {LogTypes.Warning, "  Warning "}, {LogTypes.Error, "  Error   "}
+        };
 
-        private static readonly Dictionary<LogTypes, ConsoleColor> _logMsgColor = new Dictionary<LogTypes, ConsoleColor> { { LogTypes.None, ConsoleColor.White }, { LogTypes.Trace, ConsoleColor.Green }, { LogTypes.Info, ConsoleColor.Cyan }, { LogTypes.Warning, ConsoleColor.Yellow }, { LogTypes.Error, ConsoleColor.Red } };
+        private static readonly Dictionary<LogTypes, ConsoleColor> _logMsgColor = new Dictionary<LogTypes, ConsoleColor>
+        {
+            {LogTypes.None, ConsoleColor.White}, {LogTypes.Trace, ConsoleColor.Green},
+            {LogTypes.Info, ConsoleColor.Cyan}, {LogTypes.Warning, ConsoleColor.Yellow},
+            {LogTypes.Error, ConsoleColor.Red}
+        };
 
 
         public void Message(LogTypes type, string msg, bool newline = true)

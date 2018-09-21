@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,10 +19,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
-using System.Collections.Generic;
 
 namespace ClassicUO.Game.Map
 {
@@ -82,13 +85,18 @@ namespace ClassicUO.Game.Map
                 case DeferredEntity def:
                     return (def.Position.Z, 2, 1, 0);
                 case Mobile mobile:
-                    return (mobile.Position.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int)mobile.Serial.Value);
+                    return (mobile.Position.Z, 3 /* is sitting */, 2,
+                        mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);
                 case Tile tile:
                     return (tile.View.SortZ, 0, 0, 0);
                 case Static staticitem:
-                    return (staticitem.Position.Z, 1, (staticitem.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground((long)staticitem.ItemData.Flags) ? 0 : 1), staticitem.Index);
+                    return (staticitem.Position.Z, 1,
+                        (staticitem.ItemData.Height > 0 ? 1 : 0) +
+                        (TileData.IsBackground((long) staticitem.ItemData.Flags) ? 0 : 1), staticitem.Index);
                 case Item item:
-                    return (item.Position.Z, item.IsCorpse ? 4 : 2, (item.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground((long)item.ItemData.Flags) ? 0 : 1), (int)item.Serial.Value);
+                    return (item.Position.Z, item.IsCorpse ? 4 : 2,
+                        (item.ItemData.Height > 0 ? 1 : 0) +
+                        (TileData.IsBackground((long) item.ItemData.Flags) ? 0 : 1), (int) item.Serial.Value);
                 default:
                     return (0, 0, 0, 0);
             }

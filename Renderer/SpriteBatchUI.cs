@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,12 +19,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Renderer
 {
@@ -33,7 +33,6 @@ namespace ClassicUO.Renderer
 
         public SpriteBatchUI(Microsoft.Xna.Framework.Game game) : base(game)
         {
-
         }
 
         public bool Draw2D(Texture2D texture, Vector3 position, Vector3 hue)
@@ -82,10 +81,10 @@ namespace ClassicUO.Renderer
 
         public bool Draw2D(Texture2D texture, Vector3 position, Rectangle sourceRect, Vector3 hue)
         {
-            float minX = sourceRect.X / (float)texture.Width;
-            float maxX = (sourceRect.X + sourceRect.Width) / (float)texture.Width;
-            float minY = sourceRect.Y / (float)texture.Height;
-            float maxY = (sourceRect.Y + sourceRect.Height) / (float)texture.Height;
+            float minX = sourceRect.X / (float) texture.Width;
+            float maxX = (sourceRect.X + sourceRect.Width) / (float) texture.Width;
+            float minY = sourceRect.Y / (float) texture.Height;
+            float maxY = (sourceRect.Y + sourceRect.Height) / (float) texture.Height;
 
             _vertexBufferUI[0].Position.X = position.X;
             _vertexBufferUI[0].Position.Y = position.Y;
@@ -134,8 +133,10 @@ namespace ClassicUO.Renderer
 
         public bool Draw2D(Texture2D texture, Rectangle destRect, Rectangle sourceRect, Vector3 hue)
         {
-            float minX = sourceRect.X / (float)texture.Width, maxX = (sourceRect.X + sourceRect.Width) / (float)texture.Width;
-            float minY = sourceRect.Y / (float)texture.Height, maxY = (sourceRect.Y + sourceRect.Height) / (float)texture.Height;
+            float minX = sourceRect.X / (float) texture.Width,
+                maxX = (sourceRect.X + sourceRect.Width) / (float) texture.Width;
+            float minY = sourceRect.Y / (float) texture.Height,
+                maxY = (sourceRect.Y + sourceRect.Height) / (float) texture.Height;
 
             _vertexBufferUI[0].Position.X = destRect.X;
             _vertexBufferUI[0].Position.Y = destRect.Y;
@@ -237,20 +238,13 @@ namespace ClassicUO.Renderer
                 int x = destRect.X;
                 int w = destRect.Width;
                 if (h < texture.Height)
-                {
                     sRect = new Rectangle(0, 0, texture.Width, h);
-                }
                 else
-                {
                     sRect = new Rectangle(0, 0, texture.Width, texture.Height);
-                }
 
                 while (w > 0)
                 {
-                    if (w < texture.Width)
-                    {
-                        sRect.Width = w;
-                    }
+                    if (w < texture.Width) sRect.Width = w;
 
                     Draw2D(texture, new Vector3(x, y, 0), sRect, hue);
                     w -= texture.Width;
@@ -267,8 +261,10 @@ namespace ClassicUO.Renderer
         public bool DrawRectangle(Texture2D texture, Rectangle rectangle, Vector3 hue)
         {
             DrawLine(texture, new Vector2(rectangle.X, rectangle.Y), new Vector2(rectangle.Right, rectangle.Y), hue);
-            DrawLine(texture, new Vector2(rectangle.Right, rectangle.Y), new Vector2(rectangle.Right, rectangle.Bottom), hue);
-            DrawLine(texture, new Vector2(rectangle.Right, rectangle.Bottom), new Vector2(rectangle.X, rectangle.Bottom), hue);
+            DrawLine(texture, new Vector2(rectangle.Right, rectangle.Y), new Vector2(rectangle.Right, rectangle.Bottom),
+                hue);
+            DrawLine(texture, new Vector2(rectangle.Right, rectangle.Bottom),
+                new Vector2(rectangle.X, rectangle.Bottom), hue);
             DrawLine(texture, new Vector2(rectangle.X, rectangle.Bottom), new Vector2(rectangle.X, rectangle.Y), hue);
 
             return true;

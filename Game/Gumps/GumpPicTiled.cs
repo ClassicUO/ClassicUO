@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -29,14 +32,14 @@ namespace ClassicUO.Game.Gumps
         private readonly Graphic _graphic;
 
 
-        public GumpPicTiled(Graphic graphic) : base()
+        public GumpPicTiled(Graphic graphic)
         {
             _graphic = graphic;
             CanMove = true;
             Texture = IO.Resources.Gumps.GetGumpTexture(graphic);
         }
 
-        public GumpPicTiled(int x, int y, int width, int heigth, Graphic graphic) : base()
+        public GumpPicTiled(int x, int y, int width, int heigth, Graphic graphic)
         {
             X = x;
             Y = y;
@@ -58,15 +61,15 @@ namespace ClassicUO.Game.Gumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            Texture.Ticks = (long)totalMS;
+            Texture.Ticks = (long) totalMS;
             base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            spriteBatch.Draw2DTiled(Texture, new Rectangle((int)position.X, (int)position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, IsTransparent, false));
+            spriteBatch.Draw2DTiled(Texture, new Rectangle((int) position.X, (int) position.Y, Width, Height),
+                RenderExtentions.GetHueVector(0, false, IsTransparent, false));
             return base.Draw(spriteBatch, position, hue);
         }
-
     }
 }

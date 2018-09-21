@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.Platforms.Windows
+﻿namespace ClassicUO.Platforms.Windows
 {
-    static class NativeConstants
+    internal static class NativeConstants
     {
         public const int WM_NULL = 0x00;
         public const int WM_CREATE = 0x01;

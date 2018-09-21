@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,15 +19,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 namespace ClassicUO.Game.GameObjects
 {
     public sealed class Multi
     {
-        public Multi(Item parent)
-        {
-            Parent = parent;
-        }
+        public Multi(Item parent) => Parent = parent;
 
         public Item Parent { get; }
 
@@ -40,7 +40,7 @@ namespace ClassicUO.Game.GameObjects
 
     public struct MultiComponent
     {
-        public MultiComponent(Graphic graphic,  ushort x,  ushort y,  sbyte z,  uint flags)
+        public MultiComponent(Graphic graphic, ushort x, ushort y, sbyte z, uint flags)
         {
             Graphic = graphic;
             Position = new Position(x, y, z);

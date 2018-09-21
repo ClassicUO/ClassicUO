@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,11 +19,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.IO;
+
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace ClassicUO.IO.Resources
@@ -48,13 +49,14 @@ namespace ClassicUO.IO.Resources
 
             while (_file.Position < _file.Length)
             {
-                ushort id = (ushort)((_file.ReadByte() << 8) | _file.ReadByte());
-                ushort length = (ushort)((_file.ReadByte() << 8) | _file.ReadByte());
+                ushort id = (ushort) ((_file.ReadByte() << 8) | _file.ReadByte());
+                ushort length = (ushort) ((_file.ReadByte() << 8) | _file.ReadByte());
 
                 if (length > 128)
                     length = 128;
 
-                _keywords.Add(new KeywordEntry { Code = id, Text = Encoding.UTF8.GetString(_file.ReadArray<byte>(length)) });
+                _keywords.Add(new KeywordEntry
+                    {Code = id, Text = Encoding.UTF8.GetString(_file.ReadArray<byte>(length))});
             }
         }
     }

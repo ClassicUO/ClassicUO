@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,10 +19,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using Newtonsoft.Json;
+
 using System.IO;
 using ClassicUO.Utility;
+using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
 {
@@ -31,15 +34,16 @@ namespace ClassicUO.Configuration
         {
             if (!File.Exists(file))
             {
-                Service.Get<Log>().Message(Utility.LogTypes.Warning, file + " not found.");
-                
+                Service.Get<Log>().Message(LogTypes.Warning, file + " not found.");
+
                 return null;
             }
+
             T settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
             return settings;
         }
 
-        public static void Save<T>(T obj,  string file) where T : class
+        public static void Save<T>(T obj, string file) where T : class
         {
             string t = JsonConvert.SerializeObject(obj, Formatting.Indented);
             File.WriteAllText(file, t);

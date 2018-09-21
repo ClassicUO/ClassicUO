@@ -1,20 +1,18 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using SDL2;
 
 namespace ClassicUO.Input
 {
     public class InputMouseEvent : InputEvent
     {
-        private readonly MouseButton _button;
         private readonly int _clicks;
         private readonly int _data;
-        
-        public InputMouseEvent(MouseEvent type, MouseButton button, int clicks, int x, int y, int data, SDL2.SDL.SDL_Keymod mod) : base(mod)
+
+        public InputMouseEvent(MouseEvent type, MouseButton button, int clicks, int x, int y, int data,
+            SDL.SDL_Keymod mod) : base(mod)
         {
             EventType = type;
-            _button = button;
+            Button = button;
             _clicks = clicks;
             X = x;
             Y = y;
@@ -24,7 +22,7 @@ namespace ClassicUO.Input
         public InputMouseEvent(MouseEvent type, InputMouseEvent parent) : base(parent)
         {
             EventType = type;
-            _button = parent._button;
+            Button = parent.Button;
             _clicks = parent._clicks;
             X = parent.X;
             Y = parent.Y;
@@ -36,7 +34,8 @@ namespace ClassicUO.Input
         public int Y { get; }
         public MouseEvent EventType { get; }
         public Point Position => new Point(X, Y);
-        public MouseButton Button => _button;
+        public MouseButton Button { get; }
+
         //{
         //    get
         //    {

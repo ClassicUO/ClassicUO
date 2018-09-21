@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,11 +19,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Renderer;
-using ClassicUO.IO.Resources;
+
 using System.Collections.Generic;
 using ClassicUO.Interfaces;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -30,10 +32,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly List<GameEffect> _children;
 
-        protected GameEffect() : base(World.Map)
-        {
-            _children = new List<GameEffect>();
-        }
+        protected GameEffect() : base(World.Map) => _children = new List<GameEffect>();
 
         public IReadOnlyList<GameEffect> Children => _children;
 
@@ -55,7 +54,7 @@ namespace ClassicUO.Game.GameObjects
         public long LastChangeFrameTime { get; set; }
         public bool IsEnabled { get; set; }
         public Graphic AnimationGraphic { get; set; }
-        public bool IsMoving => Target != null || (TargetX != 0 && TargetY != 0);
+        public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
         public DeferredEntity DeferredObject { get; set; }
 
 
@@ -63,7 +62,7 @@ namespace ClassicUO.Game.GameObjects
         {
             AnimDataFrame = AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
-            AnimIndex = (sbyte)AnimDataFrame.FrameStart;
+            AnimIndex = (sbyte) AnimDataFrame.FrameStart;
             Speed = AnimDataFrame.FrameInterval * 45;
         }
 
@@ -73,21 +72,15 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (LastChangeFrameTime < World.Ticks)
                 {
-                    AnimationGraphic = (Graphic)(Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                    AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                     AnimIndex++;
 
-                    if (AnimIndex >= AnimDataFrame.FrameCount)
-                    {
-                        AnimIndex = (sbyte)AnimDataFrame.FrameStart;
-                    }
+                    if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte) AnimDataFrame.FrameStart;
 
                     LastChangeFrameTime = World.Ticks + Speed;
                 }
             }
-            else if (Graphic != AnimationGraphic)
-            {
-                AnimationGraphic = Graphic;
-            }
+            else if (Graphic != AnimationGraphic) AnimationGraphic = Graphic;
         }
 
 
@@ -98,10 +91,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected (int x, int y, int z) GetSource()
         {
-            if (Source == null)
-            {
-                return (SourceX, SourceY, SourceZ);
-            }
+            if (Source == null) return (SourceX, SourceY, SourceZ);
 
             return (Source.Position.X, Source.Position.Y, Source.Position.Z);
         }
@@ -111,7 +101,7 @@ namespace ClassicUO.Game.GameObjects
             Source = source;
         }
 
-        public void SetSource(int x,  int y,  int z)
+        public void SetSource(int x, int y, int z)
         {
             Source = null;
             SourceX = x;
@@ -121,10 +111,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected (int x, int y, int z) GetTarget()
         {
-            if (Target == null)
-            {
-                return (TargetX, TargetY, TargetZ);
-            }
+            if (Target == null) return (TargetX, TargetY, TargetZ);
 
             return (Target.Position.X, Target.Position.Y, Target.Position.Z);
         }
@@ -134,7 +121,7 @@ namespace ClassicUO.Game.GameObjects
             Target = target;
         }
 
-        public void SetTarget(int x,  int y,  int z)
+        public void SetTarget(int x, int y, int z)
         {
             Target = null;
             TargetX = x;

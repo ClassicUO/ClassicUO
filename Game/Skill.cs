@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 namespace ClassicUO.Game
 {
     public enum SkillLock : byte
@@ -30,7 +33,7 @@ namespace ClassicUO.Game
 
     public sealed class Skill
     {
-        public Skill(string name,  int index,  bool click)
+        public Skill(string name, int index, bool click)
         {
             Name = name;
             Index = index;
@@ -50,9 +53,6 @@ namespace ClassicUO.Game
         public string Name { get; }
         public int Index { get; }
 
-        public override string ToString()
-        {
-            return Name;
-        }
+        public override string ToString() => Name;
     }
 }

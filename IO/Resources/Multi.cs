@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,8 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.IO;
+
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -40,13 +42,13 @@ namespace ClassicUO.IO.Resources
             else
                 throw new FileNotFoundException();
 
-            _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? Marshal.SizeOf<MultiBlockNew>() : Marshal.SizeOf<MultiBlock>();
+            _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090
+                ? Marshal.SizeOf<MultiBlockNew>()
+                : Marshal.SizeOf<MultiBlock>();
         }
 
-        public static unsafe MultiBlock GetMulti(int index)
-        {
-            return *((MultiBlock*)(_file.PositionAddress + index * _itemOffset));
-        }
+        public static unsafe MultiBlock GetMulti(int index) =>
+            *(MultiBlock*) (_file.PositionAddress + index * _itemOffset);
 
 
         public static int GetCount(int graphic)

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,14 +19,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 
 namespace ClassicUO.Game
 {
@@ -115,6 +117,7 @@ namespace ClassicUO.Game
                         else
                             RemoveItem(item);
                     }
+
                     if (item.IsDisposed)
                         Items.Remove(item);
                 }
@@ -139,10 +142,7 @@ namespace ClassicUO.Game
 
         public static House GetOrCreateHouse(Serial serial)
         {
-            if (_houses.TryGetValue(serial, out House house))
-            {
-                return house;
-            }
+            if (_houses.TryGetValue(serial, out House house)) return house;
 
             return new House(serial);
         }
@@ -160,30 +160,18 @@ namespace ClassicUO.Game
 
         public static bool Contains(Serial serial)
         {
-            if (serial.IsItem)
-            {
-                return Items.Contains(serial);
-            }
+            if (serial.IsItem) return Items.Contains(serial);
 
-            if (serial.IsMobile)
-            {
-                return Mobiles.Contains(serial);
-            }
+            if (serial.IsMobile) return Mobiles.Contains(serial);
 
             return false;
         }
 
         public static Entity Get(Serial serial)
         {
-            if (serial.IsItem)
-            {
-                return Items.Get(serial);
-            }
+            if (serial.IsItem) return Items.Get(serial);
 
-            if (serial.IsMobile)
-            {
-                return Mobiles.Get(serial);
-            }
+            if (serial.IsMobile) return Mobiles.Get(serial);
 
             return null;
         }
@@ -196,6 +184,7 @@ namespace ClassicUO.Game
                 Items.Remove(serial);
                 item = new Item(serial);
             }
+
             return item;
         }
 
@@ -207,6 +196,7 @@ namespace ClassicUO.Game
                 Mobiles.Remove(serial);
                 mob = new Mobile(serial);
             }
+
             return mob;
         }
 
@@ -221,17 +211,11 @@ namespace ClassicUO.Game
 
             if (item.Layer != Layer.Invalid && item.RootContainer.IsMobile)
             {
-                var mobile = Mobiles.Get(item.RootContainer);
-                if (mobile != null)
-                {
-                    mobile.Equipment[(int)item.Layer] = null;
-                }
+                Mobile mobile = Mobiles.Get(item.RootContainer);
+                if (mobile != null) mobile.Equipment[(int) item.Layer] = null;
             }
 
-            foreach (Item i in item.Items)
-            {
-                RemoveItem(i);
-            }
+            foreach (Item i in item.Items) RemoveItem(i);
 
             item.Dispose();
             return true;
@@ -240,17 +224,11 @@ namespace ClassicUO.Game
         public static bool RemoveMobile(Serial serial)
         {
             Mobile mobile = Mobiles.Get(serial);
-            if (mobile == null)
-            {
-                return false;
-            }
+            if (mobile == null) return false;
 
-            foreach (Item i in mobile.Items)
-            {
-                RemoveItem(i);
-            }
+            foreach (Item i in mobile.Items) RemoveItem(i);
 
-       
+
             mobile.Dispose();
             return true;
         }
@@ -268,9 +246,7 @@ namespace ClassicUO.Game
                 if (noplayer)
                 {
                     if (item.RootContainer == Player)
-                    {
                         continue;
-                    }
                 }
 
                 RemoveItem(item);
@@ -281,9 +257,7 @@ namespace ClassicUO.Game
                 if (noplayer)
                 {
                     if (mob == Player)
-                    {
                         continue;
-                    }
                 }
 
                 RemoveMobile(mob);

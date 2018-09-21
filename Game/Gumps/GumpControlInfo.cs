@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.Game.Gumps
+﻿namespace ClassicUO.Game.Gumps
 {
     public enum UILayer
     {

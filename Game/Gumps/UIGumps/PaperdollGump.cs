@@ -1,33 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ClassicUO.Game.GameObjects;
+﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
-using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    class PaperDollGump : Gump
+    internal class PaperDollGump : Gump
     {
         private bool _isWarMode;
         private Button _warModeBtn;
-        private readonly ushort[] PeaceModeBtnGumps = { 0x07e5, 0x07e6, 0x07e7 };
-        private readonly ushort[] WarModeBtnGumps = { 0x07e8, 0x07e9, 0x07ea };
+        private readonly ushort[] PeaceModeBtnGumps = {0x07e5, 0x07e6, 0x07e7};
+        private readonly ushort[] WarModeBtnGumps = {0x07e8, 0x07e9, 0x07ea};
         private GumpPic _virtueMenuPic;
         private GumpPic _specialMovesBookPic;
         private GumpPic _partyManifestPic;
 
         public PaperDollGump()
-            : base(0, 0)
-        {
-            AcceptMouseInput = false;
-        }
+            : base(0, 0) => AcceptMouseInput = false;
 
         public PaperDollGump(Serial serial, string mobileTitle)
             : this()
@@ -42,17 +33,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        public Mobile Mobile
-        {
-            get;
-            private set;
-        }
+        public Mobile Mobile { get; private set; }
 
-        public string Title
-        {
-            get;
-            private set;
-        }
+        public string Title { get; }
 
 
         public override void Dispose()
@@ -62,6 +45,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _virtueMenuPic.MouseDoubleClick -= VirtueMenu_MouseDoubleClickEvent;
                 _partyManifestPic.MouseDoubleClick -= PartyManifest_MouseDoubleClickEvent;
             }
+
             Clear();
             base.Dispose();
         }
@@ -80,25 +64,34 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             if (Mobile == World.Player)
             {
-                AddChildren(new GumpPic(0, 0, 0x07d0, 0) { CanMove = true });
+                AddChildren(new GumpPic(0, 0, 0x07d0, 0) {CanMove = true});
                 //HELP BUTTON
-                AddChildren(new Button((int)Buttons.Help, 0x07ef, 0x07f0, 0x07f1) { X = 185, Y = 44 + 27 * 0, ButtonAction = ButtonAction.Activate });
+                AddChildren(new Button((int) Buttons.Help, 0x07ef, 0x07f0, 0x07f1)
+                    {X = 185, Y = 44 + 27 * 0, ButtonAction = ButtonAction.Activate});
                 //OPTIONS BUTTON
-                AddChildren(new Button((int)Buttons.Options, 0x07d6, 0x07d7, 0x07d8) { X = 185, Y = 44 + 27 * 1, ButtonAction = ButtonAction.Activate });
+                AddChildren(new Button((int) Buttons.Options, 0x07d6, 0x07d7, 0x07d8)
+                    {X = 185, Y = 44 + 27 * 1, ButtonAction = ButtonAction.Activate});
                 // LOG OUT BUTTON
-                AddChildren(new Button((int)Buttons.LogOut, 0x07d9, 0x07da, 0x07db) { X = 185, Y = 44 + 27 * 2, ButtonAction = ButtonAction.Activate });
+                AddChildren(new Button((int) Buttons.LogOut, 0x07d9, 0x07da, 0x07db)
+                    {X = 185, Y = 44 + 27 * 2, ButtonAction = ButtonAction.Activate});
                 // QUESTS BUTTON
-                AddChildren(new Button((int)Buttons.Quests, 0x57b5, 0x57b7, 0x57b6) { X = 185, Y = 44 + 27 * 3, ButtonAction = ButtonAction.Activate });
+                AddChildren(new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
+                    {X = 185, Y = 44 + 27 * 3, ButtonAction = ButtonAction.Activate});
                 // SKILLS BUTTON
-                AddChildren(new Button((int)Buttons.Skills, 0x07df, 0x07e0, 0x07e1) { X = 185, Y = 44 + 27 * 4, ButtonAction = ButtonAction.Activate });
+                AddChildren(new Button((int) Buttons.Skills, 0x07df, 0x07e0, 0x07e1)
+                    {X = 185, Y = 44 + 27 * 4, ButtonAction = ButtonAction.Activate});
                 // GUILD BUTTON
-                AddChildren(new Button((int)Buttons.Guild, 0x57b2, 0x57b4, 0x57b3) { X = 185, Y = 44 + 27 * 5, ButtonAction = ButtonAction.Activate });
+                AddChildren(new Button((int) Buttons.Guild, 0x57b2, 0x57b4, 0x57b3)
+                    {X = 185, Y = 44 + 27 * 5, ButtonAction = ButtonAction.Activate});
                 // TOGGLE PEACE/WAR BUTTON
                 _isWarMode = Mobile.InWarMode;
                 ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
-                AddChildren(_warModeBtn = new Button((int)Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2]) { X = 185, Y = 44 + 27 * 6, ButtonAction = ButtonAction.Activate });
+                AddChildren(_warModeBtn =
+                    new Button((int) Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2])
+                        {X = 185, Y = 44 + 27 * 6, ButtonAction = ButtonAction.Activate});
                 // STATUS BUTTON
-                AddChildren(new Button((int)Buttons.Status, 0x07eb, 0x07ec, 0x07ed) { X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate });
+                AddChildren(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
+                    {X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate});
                 // Virtue menu
                 AddChildren(_virtueMenuPic = new GumpPic(80, 8, 0x0071, 0));
                 _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
@@ -109,16 +102,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 AddChildren(_partyManifestPic = new GumpPic(44, 195, 2002, 0));
                 _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;
                 // Equipment slots for hat/earrings/neck/ring/bracelet
-                AddChildren(new EquipmentSlot(2, 76)); //AddControl(new EquipmentSlot(this, 2, 76, Mobile, EquipLayer.Helm));
-                AddChildren(new EquipmentSlot(2, 76 + 22 * 1)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 1, Mobile, EquipLayer.Earrings));
-                AddChildren(new EquipmentSlot(2, 76 + 22 * 2));//AddControl(new EquipmentSlot(this, 2, 76 + 22 * 2, Mobile, EquipLayer.Neck));
-                AddChildren(new EquipmentSlot(2, 76 + 22 * 3)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 3, Mobile, EquipLayer.Ring));
-                AddChildren(new EquipmentSlot(2, 76 + 22 * 4));//AddControl(new EquipmentSlot(this, 2, 76 + 22 * 4, Mobile, EquipLayer.Bracelet));
+                AddChildren(new EquipmentSlot(2,
+                    76)); //AddControl(new EquipmentSlot(this, 2, 76, Mobile, EquipLayer.Helm));
+                AddChildren(new EquipmentSlot(2,
+                    76 + 22 * 1)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 1, Mobile, EquipLayer.Earrings));
+                AddChildren(new EquipmentSlot(2,
+                    76 + 22 * 2)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 2, Mobile, EquipLayer.Neck));
+                AddChildren(new EquipmentSlot(2,
+                    76 + 22 * 3)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 3, Mobile, EquipLayer.Ring));
+                AddChildren(new EquipmentSlot(2,
+                    76 + 22 * 4)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 4, Mobile, EquipLayer.Bracelet));
             }
             else
-            {
                 AddChildren(new GumpPic(0, 0, 0x07d1, 0));
-            }
 
             // Paperdoll control!
             AddChildren(new PaperDollInteractable(8, 21, Mobile));
@@ -132,13 +128,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void VirtueMenu_MouseDoubleClickEvent(object sender, MouseEventArgs args)
         {
-
             if (args.Button == MouseButton.Left)
             {
                 Service.Get<Log>().Message(LogTypes.Warning, "Virtue DoubleClick event!!");
                 //NetClient.Send(new GumpMenuSelectPacket(Mobile.Serial, 0x000001CD, 0x00000001, new int[1] { Mobile.Serial }, null));
             }
-
         }
 
         private void PartyManifest_MouseDoubleClickEvent(object sender, MouseEventArgs args)
@@ -174,24 +168,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _warModeBtn.ButtonGraphicNormal = btngumps[0];
                 _warModeBtn.ButtonGraphicPressed = btngumps[1];
                 _warModeBtn.ButtonGraphicOver = btngumps[2];
-                
-                
             }
-
 
 
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
-        {
-            return base.Draw(spriteBatch, position, hue);
-        }
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>
+            base.Draw(spriteBatch, position, hue);
 
 
         public override void OnButtonClick(int buttonID)
         {
-            switch ((Buttons)buttonID)
+            switch ((Buttons) buttonID)
             {
                 case Buttons.Help:
                     //
@@ -219,13 +208,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 case Buttons.PeaceWarToggle:
                     GameActions.ToggleWarMode();
-                    Service.Get<Log>().Message(LogTypes.Info, $"War mode set {(!World.Player.InWarMode ? "ON" : "OFF")} !");
+                    Service.Get<Log>().Message(LogTypes.Info,
+                        $"War mode set {(!World.Player.InWarMode ? "ON" : "OFF")} !");
                     break;
 
                 case Buttons.Status:
                     //
                     break;
-
             }
         }
 
@@ -242,5 +231,4 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Status
         }
     }
-
 }

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 
 namespace ClassicUO.Network
@@ -54,37 +57,34 @@ namespace ClassicUO.Network
 
         public void WriteSByte(sbyte v)
         {
-            WriteByte((byte)v);
+            WriteByte((byte) v);
         }
 
         public void WriteBool(bool v)
         {
-            WriteByte(v ? (byte)0x01 : (byte)0x00);
+            WriteByte(v ? (byte) 0x01 : (byte) 0x00);
         }
 
         public void WriteUShort(ushort v)
         {
             EnsureSize(2);
-            WriteByte((byte)( v >> 8 ));
-            WriteByte((byte)v);
+            WriteByte((byte) (v >> 8));
+            WriteByte((byte) v);
         }
 
         public void WriteUInt(uint v)
         {
             EnsureSize(4);
-            WriteByte((byte)( v >> 24 ));
-            WriteByte((byte)( v >> 16 ));
-            WriteByte((byte)( v >> 8 ));
-            WriteByte((byte)v);
+            WriteByte((byte) (v >> 24));
+            WriteByte((byte) (v >> 16));
+            WriteByte((byte) (v >> 8));
+            WriteByte((byte) v);
         }
 
         public void WriteASCII(string value)
         {
             EnsureSize(value.Length + 1);
-            foreach (char c in value)
-            {
-                WriteByte((byte)c);
-            }
+            foreach (char c in value) WriteByte((byte) c);
 
             WriteByte(0);
         }
@@ -92,15 +92,9 @@ namespace ClassicUO.Network
         public void WriteASCII(string value, int length)
         {
             EnsureSize(length);
-            if (value.Length > length)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
+            if (value.Length > length) throw new ArgumentOutOfRangeException();
 
-            for (int i = 0; i < value.Length; i++)
-            {
-                WriteByte((byte)value[i]);
-            }
+            for (int i = 0; i < value.Length; i++) WriteByte((byte) value[i]);
 
             if (value.Length < length)
             {
@@ -111,11 +105,11 @@ namespace ClassicUO.Network
 
         public void WriteUnicode(string value)
         {
-            EnsureSize(( value.Length + 1 ) * 2);
+            EnsureSize((value.Length + 1) * 2);
             foreach (char c in value)
             {
-                WriteByte((byte)( c >> 8 ));
-                WriteByte((byte)c);
+                WriteByte((byte) (c >> 8));
+                WriteByte((byte) c);
             }
 
             WriteUShort(0);
@@ -124,21 +118,18 @@ namespace ClassicUO.Network
         public void WriteUnicode(string value, int length)
         {
             EnsureSize(length);
-            if (value.Length > length)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
+            if (value.Length > length) throw new ArgumentOutOfRangeException();
 
             for (int i = 0; i < value.Length; i++)
             {
-                WriteByte((byte)( value[i] >> 8 ));
-                WriteByte((byte)value[i]);
+                WriteByte((byte) (value[i] >> 8));
+                WriteByte((byte) value[i]);
             }
 
             if (value.Length < length)
             {
                 WriteUShort(0);
-                Position += ( length - value.Length - 1 ) * 2;
+                Position += (length - value.Length - 1) * 2;
             }
         }
     }

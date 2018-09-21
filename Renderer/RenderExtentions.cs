@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
@@ -31,17 +34,13 @@ namespace ClassicUO.Renderer
 
         public static Vector3 GetHueVector(int hue, bool partial, bool transparent, bool noLighting)
         {
-            if ((hue & 0x4000) != 0)
-            {
-                transparent = true;
-            }
+            if ((hue & 0x4000) != 0) transparent = true;
 
-            if ((hue & 0x8000) != 0)
-            {
-                partial = true;
-            }
+            if ((hue & 0x8000) != 0) partial = true;
 
-            return hue == 0 ? new Vector3(0, 0, transparent ? ALPHA : 0) : new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), transparent ? ALPHA : 0);
+            return hue == 0
+                ? new Vector3(0, 0, transparent ? ALPHA : 0)
+                : new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), transparent ? ALPHA : 0);
         }
     }
 }

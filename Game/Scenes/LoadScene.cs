@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.Scenes
@@ -31,15 +34,9 @@ namespace ClassicUO.Game.Scenes
             //ChainActions.Add(OnGameLoaded);
         }
 
-        private bool OnGameLoading()
-        {
-            return true;
-        }
+        private bool OnGameLoading() => true;
 
-        private bool OnGameLoaded()
-        {
-            return true;
-        }
+        private bool OnGameLoaded() => true;
 
 
         public override void FixedUpdate(double totalMS, double frameMS)
@@ -52,9 +49,6 @@ namespace ClassicUO.Game.Scenes
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
-        {
-            return base.Draw(sb3D, sbUI);
-        }
+        public override bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI) => base.Draw(sb3D, sbUI);
     }
 }

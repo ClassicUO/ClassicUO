@@ -4,29 +4,20 @@ namespace ClassicUO.Renderer
 {
     public class PixelPicking
     {
-        const int InitialDataCount = 0x40000; // 256kb
+        private const int InitialDataCount = 0x40000; // 256kb
 
-        Dictionary<int, int> _ids = new Dictionary<int, int>();
-        readonly Dictionary<int, int> _ends = new Dictionary<int, int>();
+        private readonly Dictionary<int, int> _ids = new Dictionary<int, int>();
+        private readonly Dictionary<int, int> _ends = new Dictionary<int, int>();
 
-        readonly List<byte> _data = new List<byte>(InitialDataCount); // list<t> access is 10% slower than t[].
+        private readonly List<byte> _data = new List<byte>(InitialDataCount); // list<t> access is 10% slower than t[].
 
         public bool Get(int textureID, int x, int y, int extraRange = 0)
         {
-            if (!_ids.TryGetValue(textureID, out int index))
-            {
-                return false;
-            }
+            if (!_ids.TryGetValue(textureID, out int index)) return false;
             int width = ReadIntegerFromData(ref index);
-            if (x < 0 || x >= width)
-            {
-                return false;
-            }
+            if (x < 0 || x >= width) return false;
             int height = ReadIntegerFromData(ref index);
-            if (y < 0 || y >= height)
-            {
-                return false;
-            }
+            if (y < 0 || y >= height) return false;
             int current = 0;
             int target = x + y * width;
             bool inTransparentSpan = true;
@@ -36,10 +27,7 @@ namespace ClassicUO.Renderer
                 current += spanLength;
                 if (extraRange == 0)
                 {
-                    if (target < current)
-                    {
-                        return !inTransparentSpan;
-                    }
+                    if (target < current) return !inTransparentSpan;
                 }
                 else
                 {
@@ -50,15 +38,15 @@ namespace ClassicUO.Renderer
                         int x0 = x1 - spanLength;
                         for (int range = -extraRange; range <= extraRange; range++)
                         {
-                            if (y + range == y0 && (x + extraRange >= x0) && (x - extraRange <= x1))
-                            {
+                            if (y + range == y0 && x + extraRange >= x0 && x - extraRange <= x1)
                                 return true;
-                            }
                         }
                     }
                 }
+
                 inTransparentSpan = !inTransparentSpan;
             }
+
             return false;
         }
 
@@ -69,6 +57,7 @@ namespace ClassicUO.Renderer
                 width = height = 0;
                 return;
             }
+
             width = ReadIntegerFromData(ref index);
             height = ReadIntegerFromData(ref index);
         }
@@ -92,8 +81,10 @@ namespace ClassicUO.Renderer
                     countingTransparent = !countingTransparent;
                     count = 0;
                 }
+
                 count += 1;
             }
+
             WriteIntegerToData(count);
             _ids[textureID] = begin;
             _ends[textureID] = _data.Count - begin;
@@ -118,8 +109,10 @@ namespace ClassicUO.Renderer
                     countingTransparent = !countingTransparent;
                     count = 0;
                 }
+
                 count += 1;
             }
+
             WriteIntegerToData(count);
             _ids[textureID] = begin;
             _ends[textureID] = _data.Count - begin;
@@ -141,19 +134,20 @@ namespace ClassicUO.Renderer
             //}
         }
 
-        bool Has(int textureID) => _ids.ContainsKey(textureID);
+        private bool Has(int textureID) => _ids.ContainsKey(textureID);
 
-        void WriteIntegerToData(int value)
+        private void WriteIntegerToData(int value)
         {
             while (value > 0x7f)
             {
-                _data.Add((byte)((value & 0x7f) | 0x80));
+                _data.Add((byte) ((value & 0x7f) | 0x80));
                 value >>= 7;
             }
-            _data.Add((byte)value);
+
+            _data.Add((byte) value);
         }
 
-        int ReadIntegerFromData(ref int index)
+        private int ReadIntegerFromData(ref int index)
         {
             int value = 0;
             int shift = 0;
@@ -161,10 +155,7 @@ namespace ClassicUO.Renderer
             {
                 byte data = _data[index++];
                 value += (data & 0x7f) << shift;
-                if ((data & 0x80) == 0x00)
-                {
-                    return value;
-                }
+                if ((data & 0x80) == 0x00) return value;
                 shift += 7;
             }
         }

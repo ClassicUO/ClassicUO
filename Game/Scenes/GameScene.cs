@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,10 +19,18 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using System;
+using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Gumps;
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.Controls.InGame;
+using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.Views;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
@@ -29,11 +38,6 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.Gumps.UIGumps;
-using ClassicUO.Game.Gumps.Controls;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -45,7 +49,7 @@ namespace ClassicUO.Game.Scenes
         private readonly List<DeferredEntity> _deferredToRemove = new List<DeferredEntity>();
 #endif
         private MousePicker<GameObject> _mousePicker;
-        private MouseOverList<GameObject> _mouseOverList;      
+        private MouseOverList<GameObject> _mouseOverList;
 
         private bool _rightMousePressed;
         private WorldViewportGump _viewPortGump;
@@ -76,10 +80,7 @@ namespace ClassicUO.Game.Scenes
                 if (_selectedObject == value)
                     return;
 
-                if (_selectedObject != null)
-                {
-                    _selectedObject.Hue = _savedHue;
-                }
+                if (_selectedObject != null) _selectedObject.Hue = _savedHue;
 
                 if (value == null)
                 {
@@ -126,7 +127,8 @@ namespace ClassicUO.Game.Scenes
         public override void FixedUpdate(double totalMS, double frameMS)
         {
 #if ORIONSORT
-            (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort2();
+            (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions)
+ = GetViewPort2();
             _renderListCount = 0;
 
             //if (_renderList.Count > 0)
@@ -195,7 +197,7 @@ namespace ClassicUO.Game.Scenes
         }
 
         public override void Update(double totalMS, double frameMS)
-        {         
+        {
             //if (World.Map != null)
             //{
             //    if (!_ADDED)
@@ -205,12 +207,13 @@ namespace ClassicUO.Game.Scenes
             //    }
             //}
 
-            World.Ticks = (long)totalMS;
+            World.Ticks = (long) totalMS;
 
             if (_renderTarget == null || _renderTarget.Width != Width / Scale || _renderTarget.Height != Height / Scale)
             {
                 _renderTarget?.Dispose();
-                _renderTarget = new RenderTarget2D(Device, Width / Scale, Height / Scale, false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                _renderTarget = new RenderTarget2D(Device, Width / Scale, Height / Scale, false, SurfaceFormat.Bgra5551,
+                    DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
             HandleMouseActions();
@@ -221,9 +224,6 @@ namespace ClassicUO.Game.Scenes
 
             World.Update(totalMS, frameMS);
             _staticManager.Update(totalMS, frameMS);
-
-
-            
 
 
             if (DateTime.Now > _timePing)
@@ -249,7 +249,6 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-
         private void CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface)
         {
             maxItemZ = 255;
@@ -257,16 +256,19 @@ namespace ClassicUO.Game.Scenes
             underSurface = false;
 
             Tile tile = World.Map.GetTile(World.Map.Center.X, World.Map.Center.Y);
-            if (tile != null && tile.IsZUnderObjectOrGround(World.Player.Position.Z, out GameObject underObject, out GameObject underGround))
+            if (tile != null && tile.IsZUnderObjectOrGround(World.Player.Position.Z, out GameObject underObject,
+                    out GameObject underGround))
             {
                 drawTerrain = underGround == null;
                 if (underObject != null)
                 {
                     if (underObject is Item item)
                     {
-                        if (TileData.IsRoof((long)item.ItemData.Flags))
+                        if (TileData.IsRoof((long) item.ItemData.Flags))
                             maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
-                        else if (TileData.IsSurface((long)item.ItemData.Flags) || TileData.IsWall((long)item.ItemData.Flags) && TileData.IsDoor((long)item.ItemData.Flags))
+                        else if (TileData.IsSurface((long) item.ItemData.Flags) ||
+                                 TileData.IsWall((long) item.ItemData.Flags) &&
+                                 TileData.IsDoor((long) item.ItemData.Flags))
                             maxItemZ = item.Position.Z;
                         else
                         {
@@ -276,9 +278,11 @@ namespace ClassicUO.Game.Scenes
                     }
                     else if (underObject is Static sta)
                     {
-                        if (TileData.IsRoof((long)sta.ItemData.Flags))
+                        if (TileData.IsRoof((long) sta.ItemData.Flags))
                             maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
-                        else if (TileData.IsSurface((long)sta.ItemData.Flags) || TileData.IsWall((long)sta.ItemData.Flags) && TileData.IsDoor((long)sta.ItemData.Flags))
+                        else if (TileData.IsSurface((long) sta.ItemData.Flags) ||
+                                 TileData.IsWall((long) sta.ItemData.Flags) &&
+                                 TileData.IsDoor((long) sta.ItemData.Flags))
                             maxItemZ = sta.Position.Z;
                         else
                         {
@@ -287,7 +291,8 @@ namespace ClassicUO.Game.Scenes
                         }
                     }
 
-                    if (underObject is Item i && TileData.IsRoof((long)i.ItemData.Flags) || underObject is Static s && TileData.IsRoof((long)s.ItemData.Flags))
+                    if (underObject is Item i && TileData.IsRoof((long) i.ItemData.Flags) ||
+                        underObject is Static s && TileData.IsRoof((long) s.ItemData.Flags))
                     {
                         bool isSE = true;
                         if ((tile = World.Map.GetTile(World.Map.Center.X + 1, World.Map.Center.Y)) != null)
@@ -305,7 +310,8 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private (Point firstTile, Vector2 renderOffset, Point renderDimensions) GetViewPort(int width, int height, int scale = 1)
+        private (Point firstTile, Vector2 renderOffset, Point renderDimensions) GetViewPort(int width, int height,
+            int scale = 1)
         {
             Point renderDimensions = new Point
             {
@@ -316,7 +322,9 @@ namespace ClassicUO.Game.Scenes
             int renderDimensionDiff = Math.Abs(renderDimensions.X - renderDimensions.Y);
             renderDimensionDiff -= renderDimensionDiff % 2;
 
-            int firstZOffset = World.Player.Position.Z > 0 ? (int)Math.Abs((World.Player.Position.Z + World.Player.Offset.Z / 4) / 11) : 0;
+            int firstZOffset = World.Player.Position.Z > 0
+                ? (int) Math.Abs((World.Player.Position.Z + World.Player.Offset.Z / 4) / 11)
+                : 0;
 
             Point firstTile = new Point
             {
@@ -342,14 +350,14 @@ namespace ClassicUO.Game.Scenes
 
             Vector2 renderOffset = new Vector2();
 
-            renderOffset.X = (((width / scale) + (renderDimensions.Y * 44)) / 2) - 22f;
-            renderOffset.X -= (int)World.Player.Offset.X;
+            renderOffset.X = (width / scale + renderDimensions.Y * 44) / 2 - 22f;
+            renderOffset.X -= (int) World.Player.Offset.X;
             renderOffset.X -= (firstTile.X - firstTile.Y) * 22f;
             renderOffset.X += renderDimensionDiff * 22f;
 
-            renderOffset.Y = (height / scale) / 2 - (renderDimensions.Y * 44 / 2);
+            renderOffset.Y = height / scale / 2 - renderDimensions.Y * 44 / 2;
             renderOffset.Y += (World.Player.Position.Z + World.Player.Offset.Z / 4) * 4;
-            renderOffset.Y -= (int)World.Player.Offset.Y;
+            renderOffset.Y -= (int) World.Player.Offset.Y;
             renderOffset.Y -= (firstTile.X + firstTile.Y) * 22f;
             renderOffset.Y -= 22f;
             renderOffset.Y -= firstZOffset * 44f;
@@ -367,7 +375,6 @@ namespace ClassicUO.Game.Scenes
 
 
 #if ORIONSORT
-
             for (int i = 0; i < _renderListCount; i++)
             {
                 var obj = _renderList[i];
@@ -377,7 +384,8 @@ namespace ClassicUO.Game.Scenes
                 int x = obj.Position.X;
                 int y = obj.Position.Y;
 
-                Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
+                Vector3 isometricPosition =
+ new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
 
                 obj.View.Draw(sb3D, isometricPosition, _mouseOverList);
 
@@ -392,15 +400,14 @@ namespace ClassicUO.Game.Scenes
 
             for (int y = 0; y < renderDimensions.Y * 2 + 11; y++)
             {
-
                 Vector3 dp = new Vector3
                 {
-                    X = (firstTile.X - firstTile.Y + (y % 2)) * 22f + renderOffset.X,
+                    X = (firstTile.X - firstTile.Y + y % 2) * 22f + renderOffset.X,
                     Y = (firstTile.X + firstTile.Y + y) * 22f + renderOffset.Y
                 };
 
 
-                Point firstTileInRow = new Point(firstTile.X + ((y + 1) / 2), firstTile.Y + (y / 2));
+                Point firstTileInRow = new Point(firstTile.X + (y + 1) / 2, firstTile.Y + y / 2);
 
                 for (int x = 0; x < renderDimensions.X + 1; x++, dp.X -= 44f)
                 {
@@ -410,11 +417,11 @@ namespace ClassicUO.Game.Scenes
                     Tile tile = World.Map.GetTile(tileX, tileY);
                     if (tile != null)
                     {
-                        var objects = tile.ObjectsOnTiles;
+                        IReadOnlyList<GameObject> objects = tile.ObjectsOnTiles;
                         bool draw = true;
                         for (int k = 0; k < objects.Count; k++)
                         {
-                            var obj = objects[k];
+                            GameObject obj = objects[k];
 
                             if (obj is DeferredEntity d)
                                 _deferredToRemove.Add(d);
@@ -426,11 +433,12 @@ namespace ClassicUO.Game.Scenes
                             }
 
                             if ((obj.Position.Z >= maxItemZ
-                                || maxItemZ != 255 && obj is IDynamicItem dyn && TileData.IsRoof((long)dyn.ItemData.Flags))
+                                 || maxItemZ != 255 && obj is IDynamicItem dyn &&
+                                 TileData.IsRoof((long) dyn.ItemData.Flags))
                                 && !(obj is Tile))
                                 continue;
 
-                            var view = obj.View;
+                            View view = obj.View;
 
 
                             if (draw && view.Draw(sb3D, dp, _mouseOverList))
@@ -440,7 +448,7 @@ namespace ClassicUO.Game.Scenes
                         ClearDeferredEntities();
                     }
                 }
-            }            
+            }
 #endif
             // Draw in game overhead text messages
             OverheadManager.Draw(sb3D, _mouseOverList);
@@ -454,10 +462,10 @@ namespace ClassicUO.Game.Scenes
 
         private void CleaningResources()
         {
-            IO.Resources.Art.ClearUnusedTextures();
+            Art.ClearUnusedTextures();
             IO.Resources.Gumps.ClearUnusedTextures();
-            IO.Resources.TextmapTextures.ClearUnusedTextures();
-            IO.Resources.Animations.ClearUnusedTextures();
+            TextmapTextures.ClearUnusedTextures();
+            Animations.ClearUnusedTextures();
             World.Map.ClearUnusedBlocks();
         }
 
@@ -465,13 +473,14 @@ namespace ClassicUO.Game.Scenes
         {
             if (_deferredToRemove.Count > 0)
             {
-                foreach (var def in _deferredToRemove)
+                foreach (DeferredEntity def in _deferredToRemove)
                 {
                     def.Reset();
                     def.AssociatedTile.RemoveGameObject(def);
                 }
+
                 _deferredToRemove.Clear();
-            }         
+            }
         }
 
         public bool IsMouseOverUI => UIManager.IsMouseOverUI && !(UIManager.MouseOverControl is WorldViewport);
@@ -486,7 +495,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (IsMouseOverUI)
                 {
-                    var target = UIManager.MouseOverControl;
+                    GumpControl target = UIManager.MouseOverControl;
 
                     // TODO: ITEMGUMPLING
                 }
@@ -509,21 +518,23 @@ namespace ClassicUO.Game.Scenes
                                     else
                                     {
                                         SelectedObject = item;
-                                        
-                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && IO.Resources.TileData.IsStackable((long)dyn1.ItemData.Flags))
-                                        {
+
+                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 &&
+                                            TileData.IsStackable((long) dyn1.ItemData.Flags))
                                             MergeHeldItem(item);
-                                        }
                                         else
                                         {
-                                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + dyn.ItemData.Height));
+                                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y,
+                                                (sbyte) (obj.Position.Z + dyn.ItemData.Height));
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + dyn.ItemData.Height));
+                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y,
+                                        (sbyte) (obj.Position.Z + dyn.ItemData.Height));
                                 }
+
                                 break;
                             case Tile tile:
                                 DropHeldItemToWorld(obj.Position);
@@ -536,11 +547,7 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            if (SelectedObject == null)
-            {
-                SelectedObject = _mousePicker.MouseOverObject;
-            }
-
+            if (SelectedObject == null) SelectedObject = _mousePicker.MouseOverObject;
         }
 
         private void MouseHandler(double frameMS)
@@ -552,9 +559,8 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            foreach (var e in InputManager.GetMouseEvents())
+            foreach (InputMouseEvent e in InputManager.GetMouseEvents())
             {
-
                 switch (e.Button)
                 {
                     case MouseButton.Right:
@@ -572,10 +578,9 @@ namespace ClassicUO.Game.Scenes
                         if (e.EventType == MouseEvent.DoubleClick)
                             ClearQueuedClicks();
 
-                        DoMouseButton(e, _mousePicker.MouseOverObject, _mousePicker.MouseOverObjectPoint);                       
+                        DoMouseButton(e, _mousePicker.MouseOverObject, _mousePicker.MouseOverObjectPoint);
                         break;
                 }
-                    
             }
 
             CheckForQueuedClicks(frameMS);
@@ -586,57 +591,48 @@ namespace ClassicUO.Game.Scenes
             switch (e.EventType)
             {
                 case MouseEvent.Down:
-                    {
-                        _dragginObject = obj;
-                        _dragOffset = point;
-                    }
+                {
+                    _dragginObject = obj;
+                    _dragOffset = point;
+                }
                     break;
                 case MouseEvent.Click:
+                {
+                    if (obj is Static st)
                     {
-                        if (obj is Static st)
-                        {
-                            if (string.IsNullOrEmpty(st.Name))
-                                TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
+                        if (string.IsNullOrEmpty(st.Name))
+                            TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
 
-                            obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
+                        obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
 
-                            _staticManager.Add(st);
-                        }
-                        else if (obj is Entity entity)
-                        {
-                            GameActions.SingleClick(entity);
-                        }
+                        _staticManager.Add(st);
                     }
+                    else if (obj is Entity entity) GameActions.SingleClick(entity);
+                }
                     break;
                 case MouseEvent.DoubleClick:
+                {
+                    if (obj is Item item)
+                        GameActions.DoubleClick(item);
+                    else if (obj is Mobile mob)
                     {
-                        if (obj is Item item)
+                        //TODO: attack request also
+                        if (World.Player.InWarMode)
                         {
-                            GameActions.DoubleClick(item);
                         }
-                        else if (obj is Mobile mob)
-                        {
-                            //TODO: attack request also
-                            if (World.Player.InWarMode)
-                            {
-
-                            }
-                            else
-                                GameActions.DoubleClick(mob);
-                        }
+                        else
+                            GameActions.DoubleClick(mob);
                     }
+                }
                     break;
                 case MouseEvent.DragBegin:
+                {
+                    if (obj is Mobile mobile)
                     {
-                        if (obj is Mobile mobile)
-                        {
-                            // get the lifebar
-                        }
-                        else if (obj is Item item)
-                        {
-                            PicupItemBegin(item, _dragOffset.X, _dragOffset.Y);
-                        }
+                        // get the lifebar
                     }
+                    else if (obj is Item item) PicupItemBegin(item, _dragOffset.X, _dragOffset.Y);
+                }
                     break;
             }
 
@@ -653,17 +649,13 @@ namespace ClassicUO.Game.Scenes
             set
             {
                 if (value == null && _heldItem != null)
-                {
                     UIManager.RemoveInputBlocker(this);
-                }
-                else if (value != null && _heldItem == null)
-                {
-                    UIManager.RemoveInputBlocker(this);
-                }
+                else if (value != null && _heldItem == null) UIManager.RemoveInputBlocker(this);
 
                 _heldItem = value;
             }
         }
+
         public bool IsHoldingItem => HeldItem != null;
 
         private void MergeHeldItem(Entity entity)
@@ -686,16 +678,16 @@ namespace ClassicUO.Game.Scenes
 
             if (item.Container.IsValid)
             {
-                var entity = World.Get(item.Container);
+                Entity entity = World.Get(item.Container);
                 item.Position = entity.Position;
                 entity.Items.Remove(item);
             }
 
-            item.Amount = (ushort)amount;
+            item.Amount = (ushort) amount;
             HeldItem = item;
             _heldOffset = new Point(x, y);
 
-            NetClient.Socket.Send(new PPickUpRequest(item, (ushort)amount));
+            NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
         }
 
         private void DropHeldItemToWorld(Position position)
@@ -705,7 +697,7 @@ namespace ClassicUO.Game.Scenes
         {
             GameObject obj = SelectedObject;
             Serial serial;
-            if (obj is Item item && IO.Resources.TileData.IsContainer((long)item.ItemData.Flags))
+            if (obj is Item item && TileData.IsContainer((long) item.ItemData.Flags))
             {
                 serial = item;
                 x = y = 0xFFFF;
@@ -736,13 +728,6 @@ namespace ClassicUO.Game.Scenes
         }
 
         private void ClearHolding() => HeldItem = null;
-
-
-
-
-
-
-
 
 
         private GameObject _queuedObject;
@@ -781,13 +766,6 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-
-
-
-
-
-
-
         private void MoveCharacterByInputs()
         {
             if (World.InGame)
@@ -801,10 +779,7 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-
-
 #if ORIONSORT
-
         private int _renderIndex = 1;
         private int _renderListCount = 0;
         private GameObject[] _renderList = new GameObject[2000];

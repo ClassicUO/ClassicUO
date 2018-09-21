@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Views
@@ -27,16 +30,56 @@ namespace ClassicUO.Game.Views
     {
         public const int USED_LAYER_COUNT = 25;
 
-        public static Layer[,] UsedLayers { get; } = new Layer[8, USED_LAYER_COUNT] 
-        { 
-            { Layer.Mount, Layer.Invalid, Layer.Cloak, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair, Layer.Earrings, Layer.OneHanded, Layer.Helm, Layer.TwoHanded },
-            { Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair, Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded },
-            { Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair, Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded }, 
-            { Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair, Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded }, 
-            { Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair, Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded },
-            { Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair, Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded }, 
-            { Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair, Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded },
-            { Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair, Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded }
+        public static Layer[,] UsedLayers { get; } = new Layer[8, USED_LAYER_COUNT]
+        {
+            {
+                Layer.Mount, Layer.Invalid, Layer.Cloak, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs,
+                Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves,
+                Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist,
+                Layer.FacialHair, Layer.Earrings, Layer.OneHanded, Layer.Helm, Layer.TwoHanded
+            },
+            {
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
+                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
+                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+            },
+            {
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
+                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
+                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+            },
+            {
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
+                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
+                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+            },
+            {
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
+                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
+                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+            },
+            {
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
+                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
+                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+            },
+            {
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
+                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
+                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+            },
+            {
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
+                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
+                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
+                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+            }
         };
     }
 }

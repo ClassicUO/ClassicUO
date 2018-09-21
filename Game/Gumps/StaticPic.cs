@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -28,7 +32,7 @@ namespace ClassicUO.Game.Gumps
     {
         private readonly Graphic _graphic;
 
-        public StaticPic(Graphic graphic, Hue hue) : base()
+        public StaticPic(Graphic graphic, Hue hue)
         {
             _graphic = graphic;
             Hue = hue;
@@ -36,7 +40,8 @@ namespace ClassicUO.Game.Gumps
             CanMove = true;
         }
 
-        public StaticPic(string[] parts) : this(Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue)0)
+        public StaticPic(string[] parts) : this(Graphic.Parse(parts[3]),
+            parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue) 0)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -49,19 +54,19 @@ namespace ClassicUO.Game.Gumps
         {
             if (Texture == null || Texture.IsDisposed)
             {
-                Texture = IO.Resources.Art.GetStaticTexture(_graphic);
+                Texture = Art.GetStaticTexture(_graphic);
                 Width = Texture.Width;
                 Height = Texture.Height;
             }
-            Texture.Ticks = (long)totalMS;
+
+            Texture.Ticks = (long) totalMS;
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch,  Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Hue, false, false, true));
             return base.Draw(spriteBatch, position, hue);
         }
-
     }
 }

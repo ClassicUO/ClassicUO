@@ -1,40 +1,35 @@
-﻿using ClassicUO.IO.Resources;
+﻿using System;
+using System.Runtime.InteropServices;
+using ClassicUO.Game.Map;
+using ClassicUO.Game.Views;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace ClassicUO.Game.Gumps.Controls.InGame
 {
-    class MapGump : Gump
+    internal class MapGump : Gump
     {
         private Texture2D _mapTexture;
 
         public MapGump() : base(0, 0)
         {
-
             CanMove = true;
             AcceptMouseInput = true;
 
             Width = 400;
             Height = 400;
 
-            
 
-
-            
             //using (FileStream stream = File.OpenRead(@"D:\Progetti\UO\map\Maps\2Dmap0.png"))
             //    _mapTexture = Texture2D.FromStream(Service.Get<SpriteBatch3D>().GraphicsDevice, stream);
-
         }
 
         private unsafe void Load()
         {
-            int size = IO.Resources.Map.MapsDefaultSize[World.MapIndex][0] * IO.Resources.Map.MapsDefaultSize[World.MapIndex][1];
+            int size = IO.Resources.Map.MapsDefaultSize[World.MapIndex][0] *
+                       IO.Resources.Map.MapsDefaultSize[World.MapIndex][1];
 
             ushort[] buffer = new ushort[size];
 
@@ -46,7 +41,7 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
                 int mapX = bx * 8;
                 for (int by = 0; by < IO.Resources.Map.MapBlocksSize[World.MapIndex][1]; by++)
                 {
-                    var indexMap = World.Map.GetIndex(bx, by);
+                    IndexMap indexMap = World.Map.GetIndex(bx, by);
 
                     if (indexMap == null || indexMap.MapAddress == 0)
                         continue;
@@ -58,41 +53,41 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
                         Cells = new MapCells[64]
                     };
 
-                    MapBlock mapBlock = Marshal.PtrToStructure<MapBlock>((IntPtr)indexMap.MapAddress);
+                    MapBlock mapBlock = Marshal.PtrToStructure<MapBlock>((IntPtr) indexMap.MapAddress);
                     int pos = 0;
 
                     for (int y = 0; y < 8; y++)
                     {
                         for (int x = 0; x < 8; x++)
                         {
-                            ref var cell = ref mapBlock.Cells[pos];
-                            ref var infoCell = ref info.Cells[pos];
+                            ref MapCells cell = ref mapBlock.Cells[pos];
+                            ref MapCells infoCell = ref info.Cells[pos];
                             infoCell.TileID = cell.TileID;
                             infoCell.Z = cell.Z;
                             pos++;
                         }
                     }
 
-                    StaticsBlock* sb = (StaticsBlock*)indexMap.StaticAddress;
+                    StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
 
                     if (sb != null)
                     {
-                        int count = (int)indexMap.StaticCount;
+                        int count = (int) indexMap.StaticCount;
 
                         for (int c = 0; c < count; c++)
                         {
-                            var staticBlock = sb[c];
+                            StaticsBlock staticBlock = sb[c];
 
-                            if (staticBlock.Color > 0 && staticBlock.Color != 0xFFFF && 
-                                !Views.View.IsNoDrawable(staticBlock.Color))
+                            if (staticBlock.Color > 0 && staticBlock.Color != 0xFFFF &&
+                                !View.IsNoDrawable(staticBlock.Color))
                             {
-                                pos = (staticBlock.Y * 8) + staticBlock.X;
+                                pos = staticBlock.Y * 8 + staticBlock.X;
 
-                                ref var cell = ref info.Cells[pos];
+                                ref MapCells cell = ref info.Cells[pos];
 
                                 if (cell.Z <= staticBlock.Z)
                                 {
-                                    cell.TileID = (ushort)(staticBlock.Color + 0x4000);
+                                    cell.TileID = (ushort) (staticBlock.Color + 0x4000);
                                     cell.Z = staticBlock.Z;
                                 }
                             }
@@ -103,11 +98,11 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 
                     for (int y = 0; y < 8; y++)
                     {
-                        int block = ((mapY + y) * IO.Resources.Map.MapsDefaultSize[World.MapIndex][0]) + mapX;
+                        int block = (mapY + y) * IO.Resources.Map.MapsDefaultSize[World.MapIndex][0] + mapX;
 
                         for (int x = 0; x < 8; x++)
                         {
-                            ushort color = (ushort)(0x8000 | Hues.GetRadarColorData(info.Cells[pos].TileID));
+                            ushort color = (ushort) (0x8000 | Hues.GetRadarColorData(info.Cells[pos].TileID));
 
                             buffer[block] = color;
 
@@ -118,17 +113,16 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
                             pos++;
                         }
                     }
-
                 }
             }
 
-            _mapTexture = new SpriteTexture(IO.Resources.Map.MapsDefaultSize[World.MapIndex][0], IO.Resources.Map.MapsDefaultSize[World.MapIndex][1], false);
+            _mapTexture = new SpriteTexture(IO.Resources.Map.MapsDefaultSize[World.MapIndex][0],
+                IO.Resources.Map.MapsDefaultSize[World.MapIndex][1], false);
             _mapTexture.SetData(buffer);
         }
 
         public Texture2D Load2()
         {
-
             int lastX = World.Player.Position.X;
             int lastY = World.Player.Position.Y;
 
@@ -143,8 +137,8 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 
             int minBlockX = (lastX - blockOffsetX) / 8 - 1;
             int minBlockY = (lastY - blockOffsetY) / 8 - 1;
-            int maxBlockX = ((lastX + blockOffsetX) / 8) + 1;
-            int maxBlockY = ((lastY + blockOffsetY) / 8) + 1;
+            int maxBlockX = (lastX + blockOffsetX) / 8 + 1;
+            int maxBlockY = (lastY + blockOffsetY) / 8 + 1;
 
             if (minBlockX < 0)
                 minBlockX = 0;
@@ -168,29 +162,29 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
                     if (blockIndex >= maxBlockIndex)
                         break;
 
-                    var mbbv = IO.Resources.Map.GetRadarMapBlock(World.MapIndex, i, j);
+                    RadarMapBlock? mbbv = IO.Resources.Map.GetRadarMapBlock(World.MapIndex, i, j);
                     if (!mbbv.HasValue)
                         break;
 
-                    var mb = mbbv.Value;
+                    RadarMapBlock mb = mbbv.Value;
 
-                    var mapBlock = World.Map.Chunks[blockIndex];
+                    MapChunk mapBlock = World.Map.Chunks[blockIndex];
 
                     int realBlockX = i * 8;
                     int realBlockY = j * 8;
 
                     for (int x = 0; x < 8; x++)
                     {
-                        int px = ((realBlockX + x) - lastX) + gumpCenterX;
+                        int px = realBlockX + x - lastX + gumpCenterX;
 
                         for (int y = 0; y < 8; y++)
                         {
-                            int py = (realBlockY + y) - lastY;
+                            int py = realBlockY + y - lastY;
 
                             int gx = px - py;
                             int gy = px + py;
 
-                            uint color = mb.Cells[x,y].Graphic;
+                            uint color = mb.Cells[x, y].Graphic;
                             bool island = mb.Cells[x, y].IsLand;
 
                             //if (mapBlock != null)
@@ -203,7 +197,7 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 
                             int tableSize = 2;
 
-                            color = (uint)(0x8000 | IO.Resources.Hues.GetRadarColorData((int)color));
+                            color = (uint) (0x8000 | Hues.GetRadarColorData((int) color));
 
                             Point[] table = new Point[2]
                             {
@@ -212,7 +206,7 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
                             };
 
 
-                            CreatePixels(data, (int)color, gx, gy, Width, Height, table, tableSize);
+                            CreatePixels(data, (int) color, gx, gy, Width, Height, table, tableSize);
                         }
                     }
                 }
@@ -243,16 +237,15 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
                 if (gy < 0 || gy >= h)
                     break;
 
-                int block = (gy * w) + gx;
+                int block = gy * w + gx;
 
                 if (data[block] == 0x8421)
-                    data[block] = (ushort)color;
+                    data[block] = (ushort) color;
             }
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-
             spriteBatch.Draw2D(_mapTexture, Bounds, position);
 
             //spriteBatch.Draw2D(_mapTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), _mapTexture.Bounds, Vector3.Zero);
@@ -264,8 +257,8 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 
         public static Vector2 RotateVector2(Vector2 point, float radians, Vector2 pivot)
         {
-            float cosRadians = (float)Math.Cos(radians);
-            float sinRadians = (float)Math.Sin(radians);
+            float cosRadians = (float) Math.Cos(radians);
+            float sinRadians = (float) Math.Sin(radians);
 
             Vector2 translatedPoint = new Vector2();
             translatedPoint.X = point.X - pivot.X;

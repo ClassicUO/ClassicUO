@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -35,7 +38,7 @@ namespace ClassicUO.Game.Gumps
                 if (_transparentTexture == null)
                 {
                     _transparentTexture = new SpriteTexture(1, 1);
-                    _transparentTexture.SetData(new Color[1] { Color.Black });
+                    _transparentTexture.SetData(new Color[1] {Color.Black});
                 }
 
                 _transparentTexture.Ticks = World.Ticks;
@@ -43,9 +46,8 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public CheckerTrans() : base()
+        public CheckerTrans()
         {
-
         }
 
         public CheckerTrans(string[] parts) : this()
@@ -56,9 +58,8 @@ namespace ClassicUO.Game.Gumps
             Height = int.Parse(parts[4]);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
-        {
-            return spriteBatch.Draw2D(TransparentTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, true, false));
-        }
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>
+            spriteBatch.Draw2D(TransparentTexture, new Rectangle((int) position.X, (int) position.Y, Width, Height),
+                RenderExtentions.GetHueVector(0, false, true, false));
     }
 }

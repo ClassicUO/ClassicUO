@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,13 +19,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.IO;
-using ClassicUO.Renderer;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using ClassicUO.Game;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
@@ -78,18 +81,17 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public unsafe static SpriteTexture GetGumpTexture(ushort g)
+        public static SpriteTexture GetGumpTexture(ushort g)
         {
-            ref var texture = ref _gumpCache[g];
+            ref SpriteTexture texture = ref _gumpCache[g];
             if (texture == null || texture.IsDisposed)
             {
-                var pixels = GetGumpPixels(g, out int w, out int h);
+                ushort[] pixels = GetGumpPixels(g, out int w, out int h);
                 texture = new SpriteTexture(w, h, false);
                 texture.SetData(pixels);
 
                 _usedIndex.Add(g);
                 _picker.Set(g, w, h, pixels);
-
             }
 
             return texture;
@@ -100,10 +102,10 @@ namespace ClassicUO.IO.Resources
             int count = 0;
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                ref var texture = ref _gumpCache[_usedIndex[i]];
+                ref SpriteTexture texture = ref _gumpCache[_usedIndex[i]];
                 if (texture == null || texture.IsDisposed)
                     _usedIndex.RemoveAt(i--);
-                else if (Game.World.Ticks - texture.Ticks >= 3000)
+                else if (World.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();
                     texture = null;
@@ -123,7 +125,7 @@ namespace ClassicUO.IO.Resources
             if (padToNBytes == 0)
                 throw new ArgumentOutOfRangeException("padToNBytes", "pad value must be greater than 0.");
             int padBits = 8 * padToNBytes;
-            return ((w * bitsPerPixel + (padBits - 1)) / padBits) * padToNBytes;
+            return (w * bitsPerPixel + (padBits - 1)) / padBits * padToNBytes;
         }
 
         public static unsafe ushort[] GetGumpPixels(int index, out int width, out int height)
@@ -149,7 +151,7 @@ namespace ClassicUO.IO.Resources
             IntPtr dataStart = _file.PositionAddress;
 
             ushort[] pixels = new ushort[width * height];
-            int* lookuplist = (int*)dataStart;
+            int* lookuplist = (int*) dataStart;
 
             for (int y = 0; y < height; y++)
             {
@@ -159,7 +161,7 @@ namespace ClassicUO.IO.Resources
                 else
                     gsize = length / 4 - lookuplist[y];
 
-                GumpBlock* gmul = (GumpBlock*)(dataStart + lookuplist[y] * 4);
+                GumpBlock* gmul = (GumpBlock*) (dataStart + lookuplist[y] * 4);
 
                 int pos = y * width;
                 int x = 0;
@@ -172,14 +174,10 @@ namespace ClassicUO.IO.Resources
                     if (val > 0)
                     {
                         for (int j = 0; j < count; j++)
-                        {
-                            pixels[pos + x++] = (ushort)(0x8000 | val);
-                        }
+                            pixels[pos + x++] = (ushort) (0x8000 | val);
                     }
                     else
-                    {
                         x += count;
-                    }
 
                     //ushort a = (ushort) ((val > 0 ? 0x8000 : 0) | val);
                     //int count = gmul[i].Run;

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,12 +19,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.IO;
+
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
@@ -81,37 +84,35 @@ namespace ClassicUO.IO.Resources
                 return string.Empty;
 
             if (arg == null)
+                return capitalize ? StringHelper.CapitalizeFirstCharacter(baseCliloc) : baseCliloc;
+            string[] args = arg.Split('\t');
+
+            for (int i = 0; i < args.Length; i++)
             {
-                return capitalize ? Utility.StringHelper.CapitalizeFirstCharacter(baseCliloc) : baseCliloc;
+                if (args[i].Length > 0 && args[i][0] == '#')
+                {
+                    int clilocID = int.Parse(args[i].Substring(1));
+                    args[i] = GetString(clilocID);
+                }
             }
-            else
+
+            string construct = baseCliloc;
+
+            for (int i = 0; i < args.Length; i++)
             {
-                string[] args = arg.Split('\t');
+                int begin = construct.IndexOf('~', 0);
+                int end = construct.IndexOf('~', begin + 1);
 
-                for (int i = 0; i < args.Length; i++)
+                if (begin != -1 && end != -1)
                 {
-                    if (args[i].Length > 0 && args[i][0] == '#')
-                    {
-                        int clilocID = int.Parse(args[i].Substring(1));
-                        args[i] = GetString(clilocID);
-                    }
+                    construct = construct.Substring(0, begin) + args[i] +
+                                construct.Substring(end + 1, construct.Length - end - 1);
                 }
-
-                string construct = baseCliloc;
-
-                for (int i = 0; i < args.Length; i++)
-                {
-                    int begin = construct.IndexOf('~', 0);
-                    int end = construct.IndexOf('~', begin + 1);
-
-                    if (begin != -1 && end != -1)
-                        construct = construct.Substring(0, begin) + args[i] + construct.Substring(end + 1, construct.Length - end - 1);
-                    else
-                        construct = baseCliloc;
-                }
-
-                return capitalize ? Utility.StringHelper.CapitalizeFirstCharacter(construct) : construct;
+                else
+                    construct = baseCliloc;
             }
+
+            return capitalize ? StringHelper.CapitalizeFirstCharacter(construct) : construct;
         }
     }
 

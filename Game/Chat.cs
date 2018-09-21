@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,11 +19,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Network;
-using ClassicUO.Utility;
+
 using System;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game
 {
@@ -69,11 +71,14 @@ namespace ClassicUO.Game
     {
         private const ushort defaultHue = 0x0017;
 
-        private static readonly Mobile _system = new Mobile(Serial.Invalid) { Graphic = Graphic.Invariant, Name = "System" };
+        private static readonly Mobile _system = new Mobile(Serial.Invalid)
+            {Graphic = Graphic.Invariant, Name = "System"};
 
         //public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
         //public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PUnicodeSpeechRequest(entity.Serial, entity.Graphic, type, hue, font, _language, entity.Name ?? string.Empty, message).SendToClient();
-        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
+        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular,
+            MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
+
         public static void SayParty(string message) => GameActions.SayParty(message);
 
 
@@ -83,7 +88,7 @@ namespace ClassicUO.Game
         public static void OnMessage(Entity entity, UOMessageEventArgs args)
         {
             if (entity != null)
-                entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
+                entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
             else
             {
                 Service.Get<Log>().Message(LogTypes.Trace, "On System Message: " + args.Text);
@@ -101,7 +106,8 @@ namespace ClassicUO.Game
 
     public class UOMessageEventArgs : EventArgs
     {
-        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font,  bool unicode = false, string lang = null)
+        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, bool unicode = false,
+            string lang = null)
         {
             Text = text;
             Hue = hue;
@@ -112,7 +118,8 @@ namespace ClassicUO.Game
             IsUnicode = unicode;
         }
 
-        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, uint cliloc,  bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
+        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, uint cliloc,
+            bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
         {
             Text = text;
             Hue = hue;

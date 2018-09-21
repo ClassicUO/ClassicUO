@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -33,7 +36,7 @@ namespace ClassicUO.Game.Map
         //private const int MAX_CHUNKS = CHUNKS_NUM * 2 + 1;
 
 
-        private List<int> _usedIndices = new List<int>();
+        private readonly List<int> _usedIndices = new List<int>();
 
         private Point _center;
 
@@ -46,8 +49,9 @@ namespace ClassicUO.Game.Map
         }
 
         public int Index { get; }
-        public MapChunk[] Chunks { get; private set; }
+        public MapChunk[] Chunks { get; }
         public int MapBlockIndex { get; set; }
+
         public Point Center
         {
             get => _center;
@@ -56,7 +60,7 @@ namespace ClassicUO.Game.Map
                 if (_center != value)
                 {
                     _center = value;
-                    LoadChunks((ushort)_center.X, (ushort)_center.Y);
+                    LoadChunks((ushort) _center.X, (ushort) _center.Y);
                 }
             }
         }
@@ -64,10 +68,7 @@ namespace ClassicUO.Game.Map
 
         public Tile GetTile(short x, short y)
         {
-            if (x < 0 || y < 0)
-            {
-                return null;
-            }
+            if (x < 0 || y < 0) return null;
 
             int cellX = x / 8;
             int cellY = y / 8;
@@ -79,9 +80,10 @@ namespace ClassicUO.Game.Map
             if (chuck == null)
             {
                 _usedIndices.Add(block);
-                chuck = new MapChunk((ushort)cellX, (ushort)cellY);
+                chuck = new MapChunk((ushort) cellX, (ushort) cellY);
                 chuck.Load(Index);
             }
+
             chuck.LastAccessTime = World.Ticks;
             return chuck.Tiles[x % 8][y % 8];
 
@@ -100,9 +102,9 @@ namespace ClassicUO.Game.Map
         }
 
         public Tile GetTile(int x, int y)
-            => GetTile((short)x, (short)y);
+            => GetTile((short) x, (short) y);
 
-        public unsafe sbyte GetTileZ(short x, short y)
+        public sbyte GetTileZ(short x, short y)
         {
             Tile tile = GetTile(x, y);
             if (tile == null)
@@ -116,21 +118,15 @@ namespace ClassicUO.Game.Map
                 //Chunks[index].Load(Index);
                 //return Chunks[index].Tiles[x % 8][y % 8].Position.Z;
 
-                if (x < 0 || y < 0)
-                {
-                    return -125;
-                }
+                if (x < 0 || y < 0) return -125;
 
                 IndexMap blockIndex = GetIndex(x / 8, y / 8);
-                if (blockIndex.MapAddress == 0)
-                {
-                    return -125;
-                }
+                if (blockIndex.MapAddress == 0) return -125;
 
                 int mx = x % 8;
                 int my = y % 8;
 
-                return Marshal.PtrToStructure<MapBlock>((IntPtr)blockIndex.MapAddress).Cells[my * 8 + mx].Z;
+                return Marshal.PtrToStructure<MapBlock>((IntPtr) blockIndex.MapAddress).Cells[my * 8 + mx].Z;
             }
 
             return tile.Position.Z;
@@ -145,36 +141,18 @@ namespace ClassicUO.Game.Map
         public int GetAverageZ(sbyte top, sbyte left, sbyte right, sbyte bottom, ref sbyte low, ref sbyte high)
         {
             high = top;
-            if (left > high)
-            {
-                high = left;
-            }
+            if (left > high) high = left;
 
-            if (right > high)
-            {
-                high = right;
-            }
+            if (right > high) high = right;
 
-            if (bottom > high)
-            {
-                high = bottom;
-            }
+            if (bottom > high) high = bottom;
 
             low = high;
-            if (left < low)
-            {
-                low = left;
-            }
+            if (left < low) low = left;
 
-            if (right < low)
-            {
-                low = right;
-            }
+            if (right < low) low = right;
 
-            if (bottom < low)
-            {
-                low = bottom;
-            }
+            if (bottom < low) low = bottom;
 
             //if (top < low)
             //    low = top;
@@ -194,15 +172,14 @@ namespace ClassicUO.Game.Map
             //else
             //    return (bottom + top) >> 1;
 
-            if (Math.Abs(top - bottom) > Math.Abs(left - right))
-            {
-                return FloorAverage(left, right);
-            }
+            if (Math.Abs(top - bottom) > Math.Abs(left - right)) return FloorAverage(left, right);
 
             return FloorAverage(top, bottom);
         }
 
-        public int GetAverageZ(short x, short y, ref sbyte low, ref sbyte top) => GetAverageZ(GetTileZ(x, y), GetTileZ(x, (short)( y + 1 )), GetTileZ((short)( x + 1 ), y), GetTileZ((short)( x + 1 ), (short)( y + 1 )), ref low, ref top);
+        public int GetAverageZ(short x, short y, ref sbyte low, ref sbyte top) => GetAverageZ(GetTileZ(x, y),
+            GetTileZ(x, (short) (y + 1)), GetTileZ((short) (x + 1), y), GetTileZ((short) (x + 1), (short) (y + 1)),
+            ref low, ref top);
 
         private static int FloorAverage(int a, int b)
         {
@@ -273,14 +250,12 @@ namespace ClassicUO.Game.Map
             //}
 
 
-
-
             const int XY_OFFSET = 30;
 
-            int minBlockX = ( centerX - XY_OFFSET ) / 8 - 1;
-            int minBlockY = ( centerY - XY_OFFSET ) / 8 - 1;
-            int maxBlockX = ( centerX + XY_OFFSET ) / 8 + 2;
-            int maxBlockY = ( centerY + XY_OFFSET ) / 8 + 2;
+            int minBlockX = (centerX - XY_OFFSET) / 8 - 1;
+            int minBlockY = (centerY - XY_OFFSET) / 8 - 1;
+            int maxBlockX = (centerX + XY_OFFSET) / 8 + 2;
+            int maxBlockY = (centerY + XY_OFFSET) / 8 + 2;
 
             if (minBlockX < 0)
                 minBlockX = 0;
@@ -299,12 +274,12 @@ namespace ClassicUO.Game.Map
                 {
                     int cellindex = index + j;
 
-                    ref var tile = ref Chunks[cellindex];
+                    ref MapChunk tile = ref Chunks[cellindex];
 
                     if (tile == null)
                     {
                         _usedIndices.Add(cellindex);
-                        tile = new MapChunk((ushort)i, (ushort)j);
+                        tile = new MapChunk((ushort) i, (ushort) j);
                         tile.Load(Index);
                     }
 

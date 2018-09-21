@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,13 +19,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Renderer;
-using ClassicUO.Game.Views;
-using ClassicUO.IO.Resources;
-using ClassicUO.Utility;
+
 using System;
+using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -67,7 +68,9 @@ namespace ClassicUO.Game.GameObjects
         private ushort _amount;
         private Serial _container;
         private Graphic? _displayedGraphic;
+
         private bool _isMulti;
+
         //private StaticTiles? _itemData;
         private Layer _layer;
 
@@ -133,7 +136,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCoin => Graphic >= 0x0EEA && Graphic <= 0x0EF2;
 
-        public Item[] Equipment { get; } = new Item[(int)Layer.Bank + 1];
+        public Item[] Equipment { get; } = new Item[(int) Layer.Bank + 1];
 
         public bool IsPickable => ItemData.Weight < 255;
 
@@ -141,22 +144,13 @@ namespace ClassicUO.Game.GameObjects
         {
             get
             {
-                if (_displayedGraphic.HasValue)
-                {
-                    return _displayedGraphic.Value;
-                }
+                if (_displayedGraphic.HasValue) return _displayedGraphic.Value;
 
                 if (IsCoin)
                 {
-                    if (Amount > 5)
-                    {
-                        return (Graphic)(Graphic + 2);
-                    }
+                    if (Amount > 5) return (Graphic) (Graphic + 2);
 
-                    if (Amount > 1)
-                    {
-                        return (Graphic)(Graphic + 1);
-                    }
+                    if (Amount > 1) return (Graphic) (Graphic + 1);
                 }
 
                 return Graphic;
@@ -189,42 +183,30 @@ namespace ClassicUO.Game.GameObjects
                             {
                                 MultiBlock pbm = IO.Resources.Multi.GetMulti(i);
 
-                                MultiComponent component = new MultiComponent(pbm.ID, (ushort)(Position.X + pbm.X), (ushort)(Position.Y + pbm.Y), (sbyte)(Position.Z + pbm.Z), pbm.Flags);
+                                MultiComponent component = new MultiComponent(pbm.ID, (ushort) (Position.X + pbm.X),
+                                    (ushort) (Position.Y + pbm.Y), (sbyte) (Position.Z + pbm.Z), pbm.Flags);
 
-                                if (pbm.X < minX)
-                                {
-                                    minX = pbm.X;
-                                }
+                                if (pbm.X < minX) minX = pbm.X;
 
-                                if (pbm.X > maxX)
-                                {
-                                    maxX = pbm.X;
-                                }
+                                if (pbm.X > maxX) maxX = pbm.X;
 
-                                if (pbm.Y < minY)
-                                {
-                                    minY = pbm.Y;
-                                }
+                                if (pbm.Y < minY) minY = pbm.Y;
 
-                                if (pbm.Y > maxY)
-                                {
-                                    maxY = pbm.Y;
-                                }
+                                if (pbm.Y > maxY) maxY = pbm.Y;
 
                                 components[i] = component;
                             }
 
-                            Multi = new Multi(this) { MinX = minX, MaxX = maxX, MinY = minY, MaxY = maxY, Components = components };
+                            Multi = new Multi(this)
+                                {MinX = minX, MaxX = maxX, MinY = minY, MaxY = maxY, Components = components};
 
-                            var house = World.GetOrCreateHouse(Serial);
+                            House house = World.GetOrCreateHouse(Serial);
                             house.GenerateOriginal(Multi);
                             World.AddOrUpdateHouse(house);
                         }
                     }
                     else
-                    {
                         Multi = null;
-                    }
                 }
             }
         }
@@ -242,60 +224,31 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 Item item = this;
-                while (item.Container.IsItem)
-                {
-                    item = World.Items.Get(item.Container);
-                }
+                while (item.Container.IsItem) item = World.Items.Get(item.Container);
 
                 return item.Container.IsMobile ? item.Container : item;
             }
         }
 
-        public StaticTiles ItemData
-        {
-            get
-            {
-                //if (!_itemData.HasValue)
-                //{
-                //    _itemData = TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic /*& 0xFFFF]*/];
-                //    Name = _itemData.Value.Name;
-                //}
+        public StaticTiles ItemData => TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
 
-                //return _itemData.Value;
-                
-                return TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
-            }
-        }
-
-        public bool IsAtWorld(int x,  int y)
-        {
-            return Position.X == x && Position.Y == y;
-        }
+        public bool IsAtWorld(int x, int y) => Position.X == x && Position.Y == y;
 
 
         public event EventHandler OwnerChanged;
 
-        protected override View CreateView()
-        {
-            return new ItemView(this);
-        }
+        protected override View CreateView() => new ItemView(this);
 
         public override void Update(double totalMS, double frameMS)
         {
             if (IsCorpse)
-            {
                 ProcessAnimation();
-            }
             else if (Effect != null)
             {
                 if (Effect.IsDisposed)
-                {
                     Effect = null;
-                }
                 else
-                {
                     Effect.UpdateAnimation(frameMS);
-                }
             }
         }
 
@@ -318,254 +271,248 @@ namespace ClassicUO.Game.GameObjects
                 switch (graphic)
                 {
                     case 0x3E90:
-                        {
-                            graphic = 0x0114;
-                            break;
-                        }
+                    {
+                        graphic = 0x0114;
+                        break;
+                    }
                     case 0x3E91:
-                        {
-                            graphic = 0x0115;
-                            break;
-                        }
+                    {
+                        graphic = 0x0115;
+                        break;
+                    }
                     case 0x3E92:
-                        {
-                            graphic = 0x011C;
-                            break;
-                        }
+                    {
+                        graphic = 0x011C;
+                        break;
+                    }
                     case 0x3E94:
-                        {
-                            graphic = 0x00F3;
-                            break;
-                        }
+                    {
+                        graphic = 0x00F3;
+                        break;
+                    }
                     case 0x3E95:
-                        {
-                            graphic = 0x00A9;
-                            break;
-                        }
+                    {
+                        graphic = 0x00A9;
+                        break;
+                    }
                     case 0x3E97:
-                        {
-                            graphic = 0x00C3;
-                            break;
-                        }
+                    {
+                        graphic = 0x00C3;
+                        break;
+                    }
                     case 0x3E98:
-                        {
-                            graphic = 0x00C2;
-                            break;
-                        }
+                    {
+                        graphic = 0x00C2;
+                        break;
+                    }
                     case 0x3E9A:
-                        {
-                            graphic = 0x00C1;
-                            break;
-                        }
+                    {
+                        graphic = 0x00C1;
+                        break;
+                    }
                     case 0x3E9B:
                     case 0x3E9D:
-                        {
-                            graphic = 0x00C0;
-                            break;
-                        }
+                    {
+                        graphic = 0x00C0;
+                        break;
+                    }
                     case 0x3E9C:
-                        {
-                            graphic = 0x00BF;
-                            break;
-                        }
+                    {
+                        graphic = 0x00BF;
+                        break;
+                    }
                     case 0x3E9E:
-                        {
-                            graphic = 0x00BE;
-                            break;
-                        }
+                    {
+                        graphic = 0x00BE;
+                        break;
+                    }
                     case 0x3EA0:
-                        {
-                            graphic = 0x00E2;
-                            break;
-                        }
+                    {
+                        graphic = 0x00E2;
+                        break;
+                    }
                     case 0x3EA1:
-                        {
-                            graphic = 0x00E4;
-                            break;
-                        }
+                    {
+                        graphic = 0x00E4;
+                        break;
+                    }
                     case 0x3EA2:
-                        {
-                            graphic = 0x00CC;
-                            break;
-                        }
+                    {
+                        graphic = 0x00CC;
+                        break;
+                    }
                     case 0x3EA3:
-                        {
-                            graphic = 0x00D2;
-                            break;
-                        }
+                    {
+                        graphic = 0x00D2;
+                        break;
+                    }
                     case 0x3EA4:
-                        {
-                            graphic = 0x00DA;
-                            break;
-                        }
+                    {
+                        graphic = 0x00DA;
+                        break;
+                    }
                     case 0x3EA5:
-                        {
-                            graphic = 0x00DB;
-                            break;
-                        }
+                    {
+                        graphic = 0x00DB;
+                        break;
+                    }
                     case 0x3EA6:
-                        {
-                            graphic = 0x00DC;
-                            break;
-                        }
+                    {
+                        graphic = 0x00DC;
+                        break;
+                    }
                     case 0x3EA7:
-                        {
-                            graphic = 0x0074;
-                            break;
-                        }
+                    {
+                        graphic = 0x0074;
+                        break;
+                    }
                     case 0x3EA8:
-                        {
-                            graphic = 0x0075;
-                            break;
-                        }
+                    {
+                        graphic = 0x0075;
+                        break;
+                    }
                     case 0x3EA9:
-                        {
-                            graphic = 0x0072;
-                            break;
-                        }
+                    {
+                        graphic = 0x0072;
+                        break;
+                    }
                     case 0x3EAA:
-                        {
-                            graphic = 0x0073;
-                            break;
-                        }
+                    {
+                        graphic = 0x0073;
+                        break;
+                    }
                     case 0x3EAB:
-                        {
-                            graphic = 0x00AA;
-                            break;
-                        }
+                    {
+                        graphic = 0x00AA;
+                        break;
+                    }
                     case 0x3EAC:
-                        {
-                            graphic = 0x00AB;
-                            break;
-                        }
+                    {
+                        graphic = 0x00AB;
+                        break;
+                    }
                     case 0x3EAD:
-                        {
-                            graphic = 0x0084;
-                            break;
-                        }
+                    {
+                        graphic = 0x0084;
+                        break;
+                    }
                     case 0x3EAF:
-                        {
-                            graphic = 0x0078;
-                            break;
-                        }
+                    {
+                        graphic = 0x0078;
+                        break;
+                    }
                     case 0x3EB0:
-                        {
-                            graphic = 0x0079;
-                            break;
-                        }
+                    {
+                        graphic = 0x0079;
+                        break;
+                    }
                     case 0x3EB1:
-                        {
-                            graphic = 0x0077;
-                            break;
-                        }
+                    {
+                        graphic = 0x0077;
+                        break;
+                    }
                     case 0x3EB2:
-                        {
-                            graphic = 0x0076;
-                            break;
-                        }
+                    {
+                        graphic = 0x0076;
+                        break;
+                    }
                     case 0x3EB3:
-                        {
-                            graphic = 0x0090;
-                            break;
-                        }
+                    {
+                        graphic = 0x0090;
+                        break;
+                    }
                     case 0x3EB4:
-                        {
-                            graphic = 0x007A;
-                            break;
-                        }
+                    {
+                        graphic = 0x007A;
+                        break;
+                    }
                     case 0x3EB5:
-                        {
-                            graphic = 0x00B1;
-                            break;
-                        }
+                    {
+                        graphic = 0x00B1;
+                        break;
+                    }
                     case 0x3EB6:
-                        {
-                            graphic = 0x00B2;
-                            break;
-                        }
+                    {
+                        graphic = 0x00B2;
+                        break;
+                    }
                     case 0x3EB7:
-                        {
-                            graphic = 0x00B3;
-                            break;
-                        }
+                    {
+                        graphic = 0x00B3;
+                        break;
+                    }
                     case 0x3EB8:
-                        {
-                            graphic = 0x00BC;
-                            break;
-                        }
+                    {
+                        graphic = 0x00BC;
+                        break;
+                    }
                     case 0x3EBA:
-                        {
-                            graphic = 0x00BB;
-                            break;
-                        }
+                    {
+                        graphic = 0x00BB;
+                        break;
+                    }
                     case 0x3EBB:
-                        {
-                            graphic = 0x0319;
-                            break;
-                        }
+                    {
+                        graphic = 0x0319;
+                        break;
+                    }
                     case 0x3EBC:
-                        {
-                            graphic = 0x0317;
-                            break;
-                        }
+                    {
+                        graphic = 0x0317;
+                        break;
+                    }
                     case 0x3EBD:
-                        {
-                            graphic = 0x031A;
-                            break;
-                        }
+                    {
+                        graphic = 0x031A;
+                        break;
+                    }
                     case 0x3EBE:
-                        {
-                            graphic = 0x031F;
-                            break;
-                        }
+                    {
+                        graphic = 0x031F;
+                        break;
+                    }
                     case 0x3EC3:
-                        {
-                            graphic = 0x02D4;
-                            break;
-                        }
+                    {
+                        graphic = 0x02D4;
+                        break;
+                    }
                     case 0x3EC5:
                     case 0x3F3A:
-                        {
-                            graphic = 0x00D5;
-                            break;
-                        }
+                    {
+                        graphic = 0x00D5;
+                        break;
+                    }
                     case 0x3EC6:
-                        {
-                            graphic = 0x01B0;
-                            break;
-                        }
+                    {
+                        graphic = 0x01B0;
+                        break;
+                    }
                     case 0x3EC7:
-                        {
-                            graphic = 0x04E6;
-                            break;
-                        }
+                    {
+                        graphic = 0x04E6;
+                        break;
+                    }
                     case 0x3EC8:
-                        {
-                            graphic = 0x04E7;
-                            break;
-                        }
+                    {
+                        graphic = 0x04E7;
+                        break;
+                    }
                     case 0x3EC9:
-                        {
-                            graphic = 0x042D;
-                            break;
-                        }
+                    {
+                        graphic = 0x042D;
+                        break;
+                    }
                     default:
-                        {
-                            graphic = 0x00C8;
+                    {
+                        graphic = 0x00C8;
 
-                            break;
-                        }
+                        break;
+                    }
                 }
 
-                if (ItemData.AnimID != 0)
-                {
-                    graphic = ItemData.AnimID;
-                }
+                if (ItemData.AnimID != 0) graphic = ItemData.AnimID;
             }
-            else if (IsCorpse)
-            {
-                return Amount;
-            }
+            else if (IsCorpse) return Amount;
 
             return graphic;
         }
@@ -578,7 +525,7 @@ namespace ClassicUO.Game.GameObjects
                 Array.Clear(Multi.Components, 0, 0);
                 Multi = null;
             }
-            
+
             Effect?.Dispose();
             Effect = null;
             base.Dispose();
@@ -588,11 +535,11 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsCorpse)
             {
-                byte dir = (byte)Layer;
+                byte dir = (byte) Layer;
 
                 if (_lastAnimationChangeTime < World.Ticks)
                 {
-                    sbyte frameIndex = (sbyte)(AnimIndex + 1);
+                    sbyte frameIndex = (sbyte) (AnimIndex + 1);
 
                     Graphic id = GetMountAnimation();
 
@@ -604,32 +551,27 @@ namespace ClassicUO.Game.GameObjects
                     {
                         int animGroup = Animations.GetDieGroupIndex(id, UsedLayer);
 
-                        ref AnimationDirection direction = ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+                        ref AnimationDirection direction =
+                            ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
 
                         Animations.AnimID = id;
-                        Animations.AnimGroup = (byte)animGroup;
+                        Animations.AnimGroup = (byte) animGroup;
                         Animations.Direction = dir;
 
-                        if (direction.FrameCount == 0)
-                        {
-                            Animations.LoadDirectionGroup(ref direction);
-                        }
+                        if (direction.FrameCount == 0) Animations.LoadDirectionGroup(ref direction);
 
                         if (direction.Address != 0 || direction.IsUOP)
                         {
                             direction.LastAccessTime = World.Ticks;
                             int fc = direction.FrameCount;
 
-                            if (frameIndex >= fc)
-                            {
-                                frameIndex = (sbyte)(fc - 1);
-                            }
+                            if (frameIndex >= fc) frameIndex = (sbyte) (fc - 1);
 
                             AnimIndex = frameIndex;
                         }
                     }
 
-                    _lastAnimationChangeTime = World.Ticks + (int)CHARACTER_ANIMATION_DELAY;
+                    _lastAnimationChangeTime = World.Ticks + (int) CHARACTER_ANIMATION_DELAY;
                 }
             }
         }

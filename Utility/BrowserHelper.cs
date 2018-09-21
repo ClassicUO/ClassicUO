@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,12 +19,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using System;
-using System.Collections.Generic;
+
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
+
 namespace ClassicUO.Utility
 {
     public static class BrowserHelper
@@ -40,20 +41,14 @@ namespace ClassicUO.Utility
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     url = url.Replace("&", "^&");
-                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") {CreateNoWindow = true});
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
                     Process.Start("xdg-open", url);
-                }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
                     Process.Start("open", url);
-                }
                 else
-                {
                     throw;
-                }
             }
         }
     }

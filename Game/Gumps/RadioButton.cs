@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,27 +19,23 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Input;
+
 using System.Linq;
+using ClassicUO.Input;
 
 namespace ClassicUO.Game.Gumps
 {
     public class RadioButton : Checkbox
     {
-        public RadioButton(int group, string[] parts, string[] lines) : base(parts, lines)
-        {
-            GroupIndex = group;
-        }
+        public RadioButton(int group, string[] parts, string[] lines) : base(parts, lines) => GroupIndex = group;
 
         public int GroupIndex { get; set; }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (Parent != null)
-            {
-                HandleClick();
-            }
+            if (Parent != null) HandleClick();
             base.OnMouseClick(x, y, button);
         }
 

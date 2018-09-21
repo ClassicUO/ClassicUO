@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 
 namespace ClassicUO.Network
@@ -291,32 +294,30 @@ namespace ClassicUO.Network
         #endregion
 
 
-        private static int GetBit(int buf,  int bit)
-        {
-            return (buf >> (bit - 1)) & 1;
-        }
+        private static int GetBit(int buf, int bit) => (buf >> (bit - 1)) & 1;
 
-        private int PutBit(ref byte b,  int bit)
+        private int PutBit(ref byte b, int bit)
         {
             int bit_num = 1 << (bit - 1);
-            b |= (byte)bit_num;
+            b |= (byte) bit_num;
             return 1;
         }
 
-        private static int RemoveBit(ref byte b,  int bit)
+        private static int RemoveBit(ref byte b, int bit)
         {
             int bit_num = 0;
 
             if (GetBit(b, bit) != -1)
             {
                 bit_num = 1 << (bit - 1);
-                b ^= (byte)bit_num;
+                b ^= (byte) bit_num;
             }
 
             return 1;
         }
 
-        public static bool DecompressChunk(ref byte[] src, ref int srcOffset,  int srcLength, ref byte[] dest,  int destOffset, out int destLength)
+        public static bool DecompressChunk(ref byte[] src, ref int srcOffset, int srcLength, ref byte[] dest,
+            int destOffset, out int destLength)
         {
             Array.Clear(dest, destOffset, dest.Length - destOffset);
 
@@ -344,7 +345,7 @@ namespace ClassicUO.Network
 
                 if (leafValue < 1)
                 {
-                    dest[destPos] = (byte)-leafValue;
+                    dest[destPos] = (byte) -leafValue;
                     leafValue = 0;
                     destPos++;
                 }
@@ -361,10 +362,7 @@ namespace ClassicUO.Network
 
                 // check to see if the current codeword has no end
                 // if not, make it an incomplete byte
-                if (srcOffset == srcLength)
-                {
-                    return false;
-                }
+                if (srcOffset == srcLength) return false;
             }
 
             destLength = destPos - destOffset;

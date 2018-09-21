@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.IO;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -29,16 +32,12 @@ namespace ClassicUO.Game.Gumps
     {
         private readonly RenderedText _gText;
 
-        public Label() : base()
+        public Label() => _gText = new RenderedText
         {
-            _gText = new RenderedText()
-            {
-                IsUnicode = true,
-                Font = (byte)( FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0 ),
-                FontStyle = FontStyle.BlackBorder
-            };
-
-        }
+            IsUnicode = true,
+            Font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0),
+            FontStyle = FontStyle.BlackBorder
+        };
 
         public Label(string[] parts, string[] lines) : this()
         {

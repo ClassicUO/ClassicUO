@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +19,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using Microsoft.Xna.Framework;
+
 using System;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
 {
@@ -81,7 +84,8 @@ namespace ClassicUO.Renderer
             IsometricLevel = light / 30;
 
             _direction = 1.2f;
-            IsometricDirection = Vector3.Normalize(new Vector3((float)Math.Cos(_direction), (float)Math.Sin(_direction), 1f));
+            IsometricDirection =
+                Vector3.Normalize(new Vector3((float) Math.Cos(_direction), (float) Math.Sin(_direction), 1f));
         }
     }
 }

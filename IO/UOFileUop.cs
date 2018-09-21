@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 
@@ -98,7 +101,11 @@ namespace ClassicUO.IO
                     if (hashes.TryGetValue(hash, out int idx))
                     {
                         if (idx < 0 || idx > Entries.Length)
-                            throw new IndexOutOfRangeException("hashes dictionary and files collection have different count of entries!");
+                        {
+                            throw new IndexOutOfRangeException(
+                                "hashes dictionary and files collection have different count of entries!");
+                        }
+
                         Entries[idx] = new UOFileIndex3D(offset + headerLength, length);
 
                         // extra?
@@ -116,14 +123,18 @@ namespace ClassicUO.IO
                             int extra2 = ReadInt();
 
                             Entries[idx].Offset += 8;
-                            Entries[idx].Extra = extra1 << 16 | extra2;
+                            Entries[idx].Extra = (extra1 << 16) | extra2;
                             Entries[idx].Length -= 8;
 
                             Seek(curpos);
                         }
                     }
                     else
-                        throw new ArgumentException(string.Format("File with hash 0x{0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!", hash));
+                    {
+                        throw new ArgumentException(string.Format(
+                            "File with hash 0x{0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!",
+                            hash));
+                    }
                 }
 
                 Seek(nextBlock);
@@ -151,15 +162,15 @@ namespace ClassicUO.IO
             uint eax, ecx, edx, ebx, esi, edi;
 
             eax = ecx = edx = ebx = esi = edi = 0;
-            ebx = edi = esi = (uint)s.Length + 0xDEADBEEF;
+            ebx = edi = esi = (uint) s.Length + 0xDEADBEEF;
 
             int i = 0;
 
             for (i = 0; i + 12 < s.Length; i += 12)
             {
-                edi = (uint)((s[i + 7] << 24) | (s[i + 6] << 16) | (s[i + 5] << 8) | s[i + 4]) + edi;
-                esi = (uint)((s[i + 11] << 24) | (s[i + 10] << 16) | (s[i + 9] << 8) | s[i + 8]) + esi;
-                edx = (uint)((s[i + 3] << 24) | (s[i + 2] << 16) | (s[i + 1] << 8) | s[i]) - esi;
+                edi = (uint) ((s[i + 7] << 24) | (s[i + 6] << 16) | (s[i + 5] << 8) | s[i + 4]) + edi;
+                esi = (uint) ((s[i + 11] << 24) | (s[i + 10] << 16) | (s[i + 9] << 8) | s[i + 8]) + esi;
+                edx = (uint) ((s[i + 3] << 24) | (s[i + 2] << 16) | (s[i + 1] << 8) | s[i]) - esi;
 
                 edx = (edx + ebx) ^ (esi >> 28) ^ (esi << 4);
                 esi += edi;
@@ -180,37 +191,37 @@ namespace ClassicUO.IO
                 switch (s.Length - i)
                 {
                     case 12:
-                        esi += (uint)s[i + 11] << 24;
+                        esi += (uint) s[i + 11] << 24;
                         goto case 11;
                     case 11:
-                        esi += (uint)s[i + 10] << 16;
+                        esi += (uint) s[i + 10] << 16;
                         goto case 10;
                     case 10:
-                        esi += (uint)s[i + 9] << 8;
+                        esi += (uint) s[i + 9] << 8;
                         goto case 9;
                     case 9:
                         esi += s[i + 8];
                         goto case 8;
                     case 8:
-                        edi += (uint)s[i + 7] << 24;
+                        edi += (uint) s[i + 7] << 24;
                         goto case 7;
                     case 7:
-                        edi += (uint)s[i + 6] << 16;
+                        edi += (uint) s[i + 6] << 16;
                         goto case 6;
                     case 6:
-                        edi += (uint)s[i + 5] << 8;
+                        edi += (uint) s[i + 5] << 8;
                         goto case 5;
                     case 5:
                         edi += s[i + 4];
                         goto case 4;
                     case 4:
-                        ebx += (uint)s[i + 3] << 24;
+                        ebx += (uint) s[i + 3] << 24;
                         goto case 3;
                     case 3:
-                        ebx += (uint)s[i + 2] << 16;
+                        ebx += (uint) s[i + 2] << 16;
                         goto case 2;
                     case 2:
-                        ebx += (uint)s[i + 1] << 8;
+                        ebx += (uint) s[i + 1] << 8;
                         goto case 1;
                     case 1:
                         ebx += s[i];
@@ -225,10 +236,10 @@ namespace ClassicUO.IO
                 edi = (edi ^ edx) - ((edx >> 18) ^ (edx << 14));
                 eax = (esi ^ edi) - ((edi >> 8) ^ (edi << 24));
 
-                return ((ulong)edi << 32) | eax;
+                return ((ulong) edi << 32) | eax;
             }
 
-            return ((ulong)esi << 32) | eax;
+            return ((ulong) esi << 32) | eax;
         }
     }
 }

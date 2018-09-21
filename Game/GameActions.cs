@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework;
@@ -17,13 +15,13 @@ namespace ClassicUO.Game
             _pickUpAction = onPickUpAction;
         }
 
-        public static void ToggleWarMode() 
+        public static void ToggleWarMode()
         {
-           Socket.Send(new PChangeWarMode((World.Player.Flags & Flags.WarMode) == 0));
+            Socket.Send(new PChangeWarMode((World.Player.Flags & Flags.WarMode) == 0));
         }
 
 
-        public static void DoubleClick(Serial serial)     
+        public static void DoubleClick(Serial serial)
             => Socket.Send(new PDoubleClickRequest(serial));
 
 
@@ -33,22 +31,22 @@ namespace ClassicUO.Game
             Socket.Send(new PClickRequest(serial));
         }
 
-        public static void Say(string message, ushort hue = 0x17, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal)
+        public static void Say(string message, ushort hue = 0x17, MessageType type = MessageType.Regular,
+            MessageFont font = MessageFont.Normal)
             => Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
-
 
 
         public static void SayParty(string message)
             => Socket.Send(new PPartyMessage(message, World.Player));
 
-        public static void PickUp(Item item, Point point, int? amount = null)     
+        public static void PickUp(Item item, Point point, int? amount = null)
             => PickUp(item, point.X, point.Y, amount);
-     
+
         public static void PickUp(Item item, int x, int y, int? amount = null)
             => _pickUpAction(item, x, y, amount);
 
         public static void DropDown(Serial serial, int x, int y, int z, Serial container)
-            => Socket.Send(new PDropRequestNew(serial, (ushort)x, (ushort)y, (sbyte)z, 0, container));
+            => Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
 
         public static void DropDown(Serial serial, Position position, Serial container)
             => DropDown(serial, position.X, position.Y, position.Z, container);
@@ -56,9 +54,8 @@ namespace ClassicUO.Game
         public static void Equip(Serial serial, Layer layer)
             => Socket.Send(new PEquipRequest(serial, layer, World.Player));
 
-        public static void ReplyGump(Serial local, Serial server, int button, Serial[] switches = null, Tuple<ushort, string>[] entries = null)  
+        public static void ReplyGump(Serial local, Serial server, int button, Serial[] switches = null,
+            Tuple<ushort, string>[] entries = null)
             => Socket.Send(new PGumpResponse(local, server, button, switches, entries));
-
-
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.Input
+﻿namespace ClassicUO.Input
 {
     public enum MouseButton
     {

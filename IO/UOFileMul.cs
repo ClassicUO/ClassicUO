@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.IO
@@ -28,7 +31,7 @@ namespace ClassicUO.IO
         private readonly int _count, _patch;
         private readonly UOFileIdxMul _idxFile;
 
-        public UOFileMul(string file,  string idxfile,  int count,  int patch = -1) : base(file)
+        public UOFileMul(string file, string idxfile, int count, int patch = -1) : base(file)
         {
             _idxFile = new UOFileIdxMul(idxfile);
             _count = count;
@@ -49,7 +52,7 @@ namespace ClassicUO.IO
 
             if (_idxFile != null)
             {
-                int count = (int)_idxFile.Length / 12;
+                int count = (int) _idxFile.Length / 12;
 
                 Entries = new UOFileIndex3D[count];
 

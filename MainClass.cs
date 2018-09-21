@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,20 +19,20 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Input;
-using ClassicUO.Renderer;
-using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using ClassicUO.Input;
+using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 namespace ClassicUO
 {
-    class MainClass
+    internal class MainClass
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -40,11 +41,13 @@ namespace ClassicUO
         private static void Main(string[] args)
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                SetDllDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory + "/Graphic/FNA/", Environment.Is64BitProcess ? "x64" : "x86"));
+            {
+                SetDllDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory + "/Graphic/FNA/",
+                    Environment.Is64BitProcess ? "x64" : "x86"));
+            }
 
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
-
 
 
             using (GameLoop game = new GameLoop())
@@ -64,6 +67,6 @@ namespace ClassicUO
 
                 game.Run();
             }
-        }        
+        }
     }
 }

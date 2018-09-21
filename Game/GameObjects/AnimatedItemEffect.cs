@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Game.Views;
 
 namespace ClassicUO.Game.GameObjects
@@ -34,44 +37,44 @@ namespace ClassicUO.Game.GameObjects
             Load();
         }
 
-        public AnimatedItemEffect(GameObject source, Graphic graphic, Hue hue, int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(GameObject source, Graphic graphic, Hue hue, int duration) : this(graphic, hue,
+            duration)
         {
             SetSource(source);
         }
 
-        public AnimatedItemEffect(Serial source, Graphic graphic, Hue hue, int duration) : this(source, 0, 0, 0, graphic, hue, duration)
+        public AnimatedItemEffect(Serial source, Graphic graphic, Hue hue, int duration) : this(source, 0, 0, 0,
+            graphic, hue, duration)
         {
         }
 
-        public AnimatedItemEffect(int sourceX,  int sourceY, int sourceZ, Graphic graphic, Hue hue, int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(int sourceX, int sourceY, int sourceZ, Graphic graphic, Hue hue, int duration) : this(
+            graphic, hue, duration)
         {
             SetSource(sourceX, sourceY, sourceZ);
         }
 
-        public AnimatedItemEffect(Serial sourceSerial, int sourceX, int sourceY, int sourceZ, Graphic graphic, Hue hue, int duration) : this(graphic, hue, duration)
+        public AnimatedItemEffect(Serial sourceSerial, int sourceX, int sourceY, int sourceZ, Graphic graphic, Hue hue,
+            int duration) : this(graphic, hue, duration)
         {
-            sbyte zSrc = (sbyte)sourceZ;
+            sbyte zSrc = (sbyte) sourceZ;
 
             Entity source = World.Get(sourceSerial);
             if (source != null)
             {
                 if (sourceSerial.IsMobile)
                 {
-                    Mobile mob = (Mobile)source;
+                    Mobile mob = (Mobile) source;
                     if (mob != World.Player && !mob.IsMoving && (sourceX != 0 || sourceY != 0 || sourceZ != 0))
-                    {
-                        mob.Position = new Position((ushort)sourceX, (ushort)sourceY, zSrc);
-                    }
+                        mob.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
 
                     SetSource(mob);
                 }
                 else if (sourceSerial.IsItem)
                 {
-                    Item item = (Item)source;
+                    Item item = (Item) source;
                     if (sourceX != 0 || sourceY != 0 || sourceZ != 0)
-                    {
-                        item.Position = new Position((ushort)sourceX, (ushort)sourceY, zSrc);
-                    }
+                        item.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
 
                     SetSource(item);
                 }
@@ -86,25 +89,20 @@ namespace ClassicUO.Game.GameObjects
         //public new AnimatedEffectView View => (AnimatedEffectView)base.View;
 
 
-        protected override View CreateView()
-        {
-            return new AnimatedEffectView(this);
-        }
+        protected override View CreateView() => new AnimatedEffectView(this);
 
         public override void UpdateAnimation(double ms)
         {
             base.UpdateAnimation(ms);
 
             if (LastChangeFrameTime >= Duration && Duration >= 0)
-            {
                 Dispose();
-            }
             else
             {
                 (int x, int y, int z) = GetSource();
 
                 if (Position.X != x || Position.Y != y || Position.Z != z)
-                    Position = new Position((ushort)x, (ushort)y, (sbyte)z);
+                    Position = new Position((ushort) x, (ushort) y, (sbyte) z);
             }
         }
 
@@ -113,10 +111,7 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Update(totalMS, frameMS);
 
-            if (!IsDisposed)
-            {
-                UpdateAnimation(frameMS);
-            }
+            if (!IsDisposed) UpdateAnimation(frameMS);
         }
     }
 }

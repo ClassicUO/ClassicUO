@@ -52,10 +52,7 @@ namespace ClassicUO.Utility
 
     public class Coroutine : YieldInstruction
     {
-        public Coroutine(in IEnumerator routine)
-        {
-            this.routine = routine;
-        }
+        public Coroutine(in IEnumerator routine) => this.routine = routine;
     }
 
     public class WaitForSeconds : YieldInstruction
@@ -75,10 +72,7 @@ namespace ClassicUO.Utility
 
     public class WaitUntil : YieldInstruction
     {
-        public WaitUntil(in Func<bool> func)
-        {
-            routine = Until(func);
-        }
+        public WaitUntil(in Func<bool> func) => routine = Until(func);
 
         public WaitUntil(Func<bool> func, float seconds)
         {

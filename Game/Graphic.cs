@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Globalization;
 
@@ -31,89 +34,45 @@ namespace ClassicUO.Game
 
         private readonly ushort _value;
 
-        public Graphic(ushort graphic)
-        {
-            _value = graphic;
-        }
+        public Graphic(ushort graphic) => _value = graphic;
 
-        public Graphic(int graphic)
-        {
-            _value = (ushort)graphic;
-        }
+        public Graphic(int graphic) => _value = (ushort) graphic;
 
         public bool IsInvariant => _value == Invariant;
 
-        public static implicit operator Graphic(ushort value)
-        {
-            return new Graphic(value);
-        }
+        public static implicit operator Graphic(ushort value) => new Graphic(value);
 
-        public static implicit operator ushort(Graphic color)
-        {
-            return color._value;
-        }
+        public static implicit operator ushort(Graphic color) => color._value;
 
-        public static bool operator ==(Graphic g1,  Graphic g2)
-        {
-            return g1.IsInvariant || g2.IsInvariant || g1._value == g2._value;
-        }
+        public static bool operator ==(Graphic g1, Graphic g2) =>
+            g1.IsInvariant || g2.IsInvariant || g1._value == g2._value;
 
-        public static bool operator !=(Graphic g1,  Graphic g2)
-        {
-            return /*!g1.IsInvariant && !g2.IsInvariant && */g1._value != g2._value;
-        }
+        public static bool operator !=(Graphic g1, Graphic g2) => g1._value != g2._value;
 
-        public static bool operator <(Graphic g1,  Graphic g2)
-        {
-            return g1._value < g2._value;
-        }
+        public static bool operator <(Graphic g1, Graphic g2) => g1._value < g2._value;
 
-        public static bool operator >(Graphic g1,  Graphic g2)
-        {
-            return g1._value > g2._value;
-        }
+        public static bool operator >(Graphic g1, Graphic g2) => g1._value > g2._value;
 
-        public int CompareTo(object obj)
-        {
-            return _value.CompareTo(obj);
-        }
+        public int CompareTo(object obj) => _value.CompareTo(obj);
 
-        public int CompareTo(ushort other)
-        {
-            return _value.CompareTo(other);
-        }
+        public int CompareTo(ushort other) => _value.CompareTo(other);
 
-        public override string ToString()
-        {
-            return string.Format("0x{0:X4}", _value);
-        }
+        public override string ToString() => string.Format("0x{0:X4}", _value);
 
-        public override int GetHashCode()
-        {
-            return _value.GetHashCode();
-        }
+        public override int GetHashCode() => _value.GetHashCode();
 
         public override bool Equals(object obj)
         {
-            if (obj is Graphic)
-            {
-                return this == (Graphic)obj;
-            }
+            if (obj is Graphic) return this == (Graphic) obj;
 
-            if (obj is ushort)
-            {
-                return _value == (ushort)obj;
-            }
+            if (obj is ushort) return _value == (ushort) obj;
 
             return false;
         }
 
         public static Graphic Parse(string str)
         {
-            if (str.StartsWith("0x"))
-            {
-                return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
-            }
+            if (str.StartsWith("0x")) return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
 
             return ushort.Parse(str);
         }

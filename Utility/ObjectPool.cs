@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -42,7 +45,8 @@ namespace ClassicUO.Utility
         private T _headNode; // linked list for iteration
         private T _tailNode;
 
-        public ObjectPool(Func<T> instantiationFunc, int capacity = 16, ObjectPoolIsFullPolicy isFullPolicy = ObjectPoolIsFullPolicy.ReturnNull)
+        public ObjectPool(Func<T> instantiationFunc, int capacity = 16,
+            ObjectPoolIsFullPolicy isFullPolicy = ObjectPoolIsFullPolicy.ReturnNull)
         {
             if (instantiationFunc == null)
                 throw new ArgumentNullException(nameof(instantiationFunc));
@@ -68,25 +72,22 @@ namespace ClassicUO.Utility
 
         public IEnumerator<T> GetEnumerator()
         {
-            var node = _headNode;
+            T node = _headNode;
             while (node != null)
             {
                 yield return node;
-                node = (T)node.NextNode;
+                node = (T) node.NextNode;
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public event Action<T> ItemUsed;
         public event Action<T> ItemReturned;
 
         public T New()
         {
-            if (!_freeItems.RemoveFromFront(out var poolable))
+            if (!_freeItems.RemoveFromFront(out T poolable))
             {
                 if (TotalCount <= Capacity)
                     poolable = CreateObject();
@@ -103,7 +104,7 @@ namespace ClassicUO.Utility
                         case ObjectPoolIsFullPolicy.KillExisting:
                             if (_headNode == null)
                                 return null;
-                            var newHeadNode = (T)_headNode.NextNode;
+                            T newHeadNode = (T) _headNode.NextNode;
                             _headNode.Return();
                             _freeItems.RemoveFromBack(out poolable);
                             _headNode = newHeadNode;
@@ -121,7 +122,7 @@ namespace ClassicUO.Utility
         private T CreateObject()
         {
             TotalCount++;
-            var item = _instantiationFunction();
+            T item = _instantiationFunction();
             if (item == null)
                 throw new NullReferenceException($"The created pooled object of type '{typeof(T).Name}' is null.");
             item.PreviousNode = _tailNode;
@@ -138,10 +139,10 @@ namespace ClassicUO.Utility
         {
             Debug.Assert(item != null);
 
-            var poolable1 = (T)item;
+            T poolable1 = (T) item;
 
-            var previousNode = (T)item.PreviousNode;
-            var nextNode = (T)item.NextNode;
+            T previousNode = (T) item.PreviousNode;
+            T nextNode = (T) item.NextNode;
 
             if (previousNode != null)
                 previousNode.NextNode = nextNode;
@@ -158,7 +159,7 @@ namespace ClassicUO.Utility
 
             _freeItems.AddToBack(poolable1);
 
-            ItemReturned?.Invoke((T)item);
+            ItemReturned?.Invoke((T) item);
         }
 
         private void Use(T item)

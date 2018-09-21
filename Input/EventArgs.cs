@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,17 +19,20 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using System;
 using static SDL2.SDL;
 
 namespace ClassicUO.Input
 {
     public sealed class MouseEventArgs : EventArgs
     {
-        public MouseEventArgs(int x, int y, MouseButton button = MouseButton.None, ButtonState state = ButtonState.Released)
+        public MouseEventArgs(int x, int y, MouseButton button = MouseButton.None,
+            ButtonState state = ButtonState.Released)
         {
             Location = new Point(x, y);
             Button = button;
@@ -46,7 +50,8 @@ namespace ClassicUO.Input
     {
         public MouseWheelEventArgs(MouseEvent direction)
         {
-            if (direction != MouseEvent.WheelScroll || direction != MouseEvent.WheelScrollDown || direction != MouseEvent.WheelScrollUp)
+            if (direction != MouseEvent.WheelScroll || direction != MouseEvent.WheelScrollDown ||
+                direction != MouseEvent.WheelScrollUp)
                 throw new Exception("Wrong scroll direction: " + direction);
 
             Direction = direction;
@@ -68,5 +73,4 @@ namespace ClassicUO.Input
         public SDL_Keymod Mod { get; }
         public KeyboardEvent KeyboardEvent { get; }
     }
-
 }

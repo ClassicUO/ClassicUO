@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.Game.Scenes
+﻿namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType
     {
@@ -22,7 +18,7 @@ namespace ClassicUO.Game.Scenes
 
             switch (type)
             {
-                case ScenesType.Loading:                  
+                case ScenesType.Loading:
                     CurrentScene = new LoadScene();
                     break;
                 case ScenesType.Login:
@@ -35,7 +31,5 @@ namespace ClassicUO.Game.Scenes
 
             CurrentScene.Load();
         }
-
-
     }
 }

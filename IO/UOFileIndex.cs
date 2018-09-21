@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,12 +19,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 namespace ClassicUO.IO
 {
     public struct UOFileIndex3D
     {
-        public UOFileIndex3D(long offset,  int length,  int extra = 0)
+        public UOFileIndex3D(long offset, int length, int extra = 0)
         {
             Offset = offset;
             Length = length;
@@ -37,7 +40,7 @@ namespace ClassicUO.IO
 
     public struct UOFileIndex5D
     {
-        public UOFileIndex5D(int file,  int index,  int offset,  int length,  int extra = 0)
+        public UOFileIndex5D(int file, int index, int offset, int length, int extra = 0)
         {
             File = file;
             Index = index;

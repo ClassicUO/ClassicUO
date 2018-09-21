@@ -8,16 +8,17 @@ namespace ClassicUO.Game.Gumps
 {
     public class TextBox : GumpControl
     {
-        const float CARAT_BLINK_TIME = 500f;
+        private const float CARAT_BLINK_TIME = 500f;
 
         private bool _caratBlink;
         private readonly TextEntry _entry;
 
 
-        public TextBox(byte font, int maxcharlength = -1, int maxlength = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0) : base()
+        public TextBox(byte font, int maxcharlength = -1, int maxlength = 0, bool isunicode = true,
+            FontStyle style = FontStyle.None, ushort hue = 0)
         {
             _entry = new TextEntry(font, maxcharlength, maxlength, isunicode, style, hue);
-           
+
             Hue = hue;
 
             base.AcceptKeyboardInput = true;
@@ -25,7 +26,9 @@ namespace ClassicUO.Game.Gumps
             IsEditable = true;
         }
 
-        public TextBox(string[] parts, string[] lines) : this( font: 1, maxcharlength: parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, maxlength: int.Parse(parts[3]), style: FontStyle.BlackBorder, hue: Hue.Parse(parts[5]))
+        public TextBox(string[] parts, string[] lines) : this(1,
+            parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, int.Parse(parts[3]),
+            style: FontStyle.BlackBorder, hue: Hue.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -66,6 +69,7 @@ namespace ClassicUO.Game.Gumps
                     SetFocused();
                     _caratBlink = true;
                 }
+
                 _caratBlink = true;
             }
             else if (IsFocused)
@@ -74,10 +78,7 @@ namespace ClassicUO.Game.Gumps
                 _caratBlink = false;
             }
 
-            if (_entry.IsChanged)
-            {
-                _entry.UpdateCaretPosition();
-            }
+            if (_entry.IsChanged) _entry.UpdateCaretPosition();
 
             base.Update(totalMS, frameMS);
         }
@@ -89,7 +90,11 @@ namespace ClassicUO.Game.Gumps
             if (IsEditable)
             {
                 if (_caratBlink)
-                    _entry.RenderCaret.Draw(spriteBatch, new Vector3(position.X + _entry.Offset + _entry.CaretPosition.X, position.Y + _entry.CaretPosition.Y, 0));
+                {
+                    _entry.RenderCaret.Draw(spriteBatch,
+                        new Vector3(position.X + _entry.Offset + _entry.CaretPosition.X,
+                            position.Y + _entry.CaretPosition.Y, 0));
+                }
             }
 
             return base.Draw(spriteBatch, position, hue);
@@ -123,9 +128,8 @@ namespace ClassicUO.Game.Gumps
                         ReplaceDefaultTextOnFirstKeyPress = false;
                     }
                     else
-                    {
                         _entry.RemoveChar(true);
-                    }
+
                     break;
                 case SDL.SDL_Keycode.SDLK_LEFT:
                     _entry.SeekCaretPosition(-1);
@@ -150,6 +154,5 @@ namespace ClassicUO.Game.Gumps
             if (button == MouseButton.Left)
                 _entry.OnMouseClick(x, y);
         }
-
     }
 }

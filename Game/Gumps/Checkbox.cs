@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,11 +19,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Renderer;
+
 using ClassicUO.Input;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Game.Gumps
 {
@@ -34,12 +36,12 @@ namespace ClassicUO.Game.Gumps
         private readonly SpriteTexture[] _textures = new SpriteTexture[2];
 
 
-        public Checkbox(ushort inactive,  ushort active) : base()
+        public Checkbox(ushort inactive, ushort active)
         {
             _textures[INACTIVE] = IO.Resources.Gumps.GetGumpTexture(inactive);
             _textures[ACTIVE] = IO.Resources.Gumps.GetGumpTexture(active);
 
-            ref var t = ref _textures[INACTIVE];
+            ref SpriteTexture t = ref _textures[INACTIVE];
             Width = t.Width;
             Height = t.Height;
 
@@ -74,7 +76,7 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            bool ok = base.Draw(spriteBatch,  position);
+            bool ok = base.Draw(spriteBatch, position);
 
             spriteBatch.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
 
@@ -85,6 +87,5 @@ namespace ClassicUO.Game.Gumps
         {
             IsChecked = !IsChecked;
         }
-
     }
 }

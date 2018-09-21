@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,7 +19,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -29,7 +32,7 @@ namespace ClassicUO.Game.Gumps
 {
     public class HtmlGump : GumpControl
     {
-        private RenderedText _gameText;
+        private readonly RenderedText _gameText;
         private IScrollBar _scrollBar;
 
         public HtmlGump(string[] parts, string[] lines) : this()
@@ -48,7 +51,9 @@ namespace ClassicUO.Game.Gumps
             InternalBuild(lines[textIndex], 0);
         }
 
-        public HtmlGump(int x, int y, int w, int h, string text, int hasbackground, int hasscrollbar, int hue, bool ishtml, byte font = 1, bool isunicode = true, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : this()
+        public HtmlGump(int x, int y, int w, int h, string text, int hasbackground, int hasscrollbar, int hue,
+            bool ishtml, byte font = 1, bool isunicode = true, FontStyle style = FontStyle.None,
+            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : this()
         {
             X = x;
             Y = y;
@@ -67,13 +72,13 @@ namespace ClassicUO.Game.Gumps
             InternalBuild(text, hue);
         }
 
-        public HtmlGump() : base()
+        public HtmlGump()
         {
-            _gameText = new RenderedText()
+            _gameText = new RenderedText
             {
                 IsUnicode = true,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                Font = 1,
+                Font = 1
             };
             CanMove = true;
         }
@@ -84,7 +89,12 @@ namespace ClassicUO.Game.Gumps
         public bool UseFlagScrollbar { get; }
         public int ScrollX { get; set; }
         public int ScrollY { get; set; }
-        public string Text { get => _gameText.Text; set => _gameText.Text = value; }
+
+        public string Text
+        {
+            get => _gameText.Text;
+            set => _gameText.Text = value;
+        }
 
         private void InternalBuild(string text, int hue)
         {
@@ -98,7 +108,7 @@ namespace ClassicUO.Game.Gumps
                     if (hue == 0x00FFFFFF)
                         htmlColor = 0xFFFFFFFE;
                     else
-                        htmlColor = (Hues.Color16To32((ushort)hue) << 8) | 0xFF;
+                        htmlColor = (Hues.Color16To32((ushort) hue) << 8) | 0xFF;
                 }
                 else if (!HasBackground)
                 {
@@ -107,25 +117,23 @@ namespace ClassicUO.Game.Gumps
                         htmlColor = 0x010101FF;
                 }
                 else
-                {
                     htmlColor = 0x010101FF;
-                }
-       
+
                 _gameText.HTMLColor = htmlColor;
                 _gameText.Hue = color;
             }
             else
-                _gameText.Hue = (ushort)hue;
+                _gameText.Hue = (ushort) hue;
 
             _gameText.ColorBackground = !HasBackground;
-            _gameText.MaxWidth = ( Width - ( HasScrollbar ? 15 : 0 ) - ( HasBackground ? 8 : 0 ) );
+            _gameText.MaxWidth = Width - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0);
             _gameText.Text = text;
 
             if (HasBackground)
             {
                 AddChildren(new ResizePic(0x2486)
                 {
-                    Width = Width - ( HasScrollbar ? 15 : 0 ),
+                    Width = Width - (HasScrollbar ? 15 : 0),
                     Height = Height,
                     AcceptMouseInput = false
                 });
@@ -141,13 +149,11 @@ namespace ClassicUO.Game.Gumps
                     };
                 }
                 else
-                {
                     _scrollBar = new ScrollBar(this, Width - 14, 0, Height);
-                }
 
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
-                _scrollBar.MaxValue = _gameText.Height - Height + ( HasBackground ? 8 : 0 );
+                _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
                 ScrollY = _scrollBar.Value;
             }
 
@@ -161,7 +167,7 @@ namespace ClassicUO.Game.Gumps
             {
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
-                _scrollBar.MaxValue = _gameText.Height - Height + ( HasBackground ? 8 : 0 );
+                _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
                 ScrollY = _scrollBar.Value;
             }
 
@@ -173,7 +179,8 @@ namespace ClassicUO.Game.Gumps
             base.Draw(spriteBatch, position);
 
             _gameText.Draw(spriteBatch,
-                new Rectangle((int)position.X + ( HasBackground ? 4 : 0 ), (int)position.Y + ( HasBackground ? 4 : 0 ), Width - ( HasBackground ? 8 : 0 ), Height - ( HasBackground ? 8 : 0 )), ScrollX, ScrollY);
+                new Rectangle((int) position.X + (HasBackground ? 4 : 0), (int) position.Y + (HasBackground ? 4 : 0),
+                    Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0)), ScrollX, ScrollY);
 
             return true;
         }
@@ -184,19 +191,17 @@ namespace ClassicUO.Game.Gumps
             {
                 for (int i = 0; i < _gameText.Links.Count; i++)
                 {
-                    var link = _gameText.Links[i];
+                    WebLinkRect link = _gameText.Links[i];
                     Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
                     bool inbounds = rect.Contains(x, y);
-                    if (inbounds && Fonts.GetWebLink(link.LinkID, out var result))
+                    if (inbounds && Fonts.GetWebLink(link.LinkID, out WebLink result))
                     {
-                        Service.Get<Log>().Message(Utility.LogTypes.Info, "LINK CLICKED: " + result.Link);
-                        Utility.BrowserHelper.OpenBrowser(result.Link);
+                        Service.Get<Log>().Message(LogTypes.Info, "LINK CLICKED: " + result.Link);
+                        BrowserHelper.OpenBrowser(result.Link);
                         break;
                     }
                 }
             }
         }
-
-
     }
 }
