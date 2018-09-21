@@ -42,14 +42,14 @@ namespace ClassicUO.Game.Gumps
         private const int NORMAL = 0;
         private const int PRESSED = 1;
         private const int OVER = 2;
-        
+
 
         private readonly SpriteTexture[] _textures = new SpriteTexture[3];
         private readonly Graphic[] _gumpGraphics = new Graphic[3];
         private int _curentState = NORMAL;
         private RenderedText _gText;
         private bool _centerFont;
-        
+
 
 
         public Button(int buttonID, ushort normal, ushort pressed, ushort over = 0) : base()
@@ -74,7 +74,7 @@ namespace ClassicUO.Game.Gumps
 
             _gText = new RenderedText()
             {
-                IsUnicode = true,            
+                IsUnicode = true,
             };
 
             CanMove = false;
@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Gumps
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
 
-            
+
         }
 
         public Button(string[] parts) :
@@ -92,15 +92,44 @@ namespace ClassicUO.Game.Gumps
             Y = int.Parse(parts[2]);
 
             ButtonAction = (ButtonAction)int.Parse(parts[5]);
-            ButtonParameter = int.Parse(parts[6]);        
+            ButtonParameter = int.Parse(parts[6]);
         }
 
-        
+
 
         public int ButtonID { get; }
-        public ButtonAction ButtonAction { get;  set; }
+        public ButtonAction ButtonAction { get; set; }
         public int ButtonParameter { get; set; }
 
+        public int ButtonGraphicNormal
+        {
+            get => _gumpGraphics[NORMAL];
+            set
+            {
+                _textures[NORMAL] = IO.Resources.Gumps.GetGumpTexture((ushort)value);
+                
+            }
+        }
+
+        public int ButtonGraphicPressed
+        {
+            get => _gumpGraphics[PRESSED];
+            set
+            {
+                _textures[PRESSED] = IO.Resources.Gumps.GetGumpTexture((ushort)value);
+
+            }
+        }
+
+        public int ButtonGraphicOver
+        {
+            get => _gumpGraphics[OVER];
+            set
+            {
+                _textures[OVER] = IO.Resources.Gumps.GetGumpTexture((ushort)value);
+
+            }
+        }
 
         public string Text
         {
@@ -142,9 +171,9 @@ namespace ClassicUO.Game.Gumps
 
             }
         }
-   
-        
-       
+
+
+
 
 
 
@@ -176,8 +205,8 @@ namespace ClassicUO.Game.Gumps
                         //spriteBatch.Draw2D(_blackTexture, new Rectangle((int)position.X + (this.Width - _gText.Width) / 2, (int)position.Y + (this.Height - _gText.Height) / 2 , 100, 50), RenderExtentions.GetHueVector(0, false, true, false));
                     }
                     int yoffset = _curentState == PRESSED ? 1 : 0;
-                    _gText.Draw(spriteBatch, new Vector3(position.X + (this.Width - _gText.Width) / 2 , position.Y + yoffset + (this.Height - _gText.Height) / 2, position.Z));
-                   
+                    _gText.Draw(spriteBatch, new Vector3(position.X + (this.Width - _gText.Width) / 2, position.Y + yoffset + (this.Height - _gText.Height) / 2, position.Z));
+
                 }
                 else
                 {
@@ -201,7 +230,7 @@ namespace ClassicUO.Game.Gumps
                 return _textures[PRESSED];
             else if (UIManager.MouseOverControl == this && _textures[OVER] != null)
                 return _textures[OVER];
-             return _textures[NORMAL];
+            return _textures[NORMAL];
         }
 
         private Graphic GetGraphicByState()
@@ -237,7 +266,7 @@ namespace ClassicUO.Game.Gumps
 
         protected override bool Contains(int x, int y)
             => IO.Resources.Gumps.Contains(GetGraphicByState(), x, y);
-        
+
 
 
         public override void Dispose()
