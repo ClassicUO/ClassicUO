@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
@@ -16,7 +17,7 @@ namespace ClassicUO.Game.Gumps
     class HSliderBar : GumpControl
     {
         private int _value;
-        private int _newValue;
+        //private int _newValue;
         private int _sliderX;
         private SpriteTexture _gumpWidget;
         private SpriteTexture[] _gumpSpliderBackground;
@@ -36,7 +37,12 @@ namespace ClassicUO.Game.Gumps
             BarWidth = w;
             Value = value;
             _style = style;
+
+            AcceptMouseInput = true;
         }
+
+
+        public EventHandler ValueChanged;
 
 
         public int MinValue { get; set; }
@@ -48,12 +54,23 @@ namespace ClassicUO.Game.Gumps
             get => _value;
             set
             {
-                _value = _newValue = value;
-                if (IsInitialized)
-                    RecalculateSliderX();
+                if (_value != value)
+                {
+                    _value = /*_newValue =*/ value;
+                    //if (IsInitialized)
+                    //    RecalculateSliderX();
+
+                    if (_value < MinValue)
+                        _value = MinValue;
+                    else if (_value > MaxValue)
+                        _value = MaxValue;
+
+                    ValueChanged.Raise();
+                }
             }
         }
 
+        public float Percents { get; private set; }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -77,13 +94,14 @@ namespace ClassicUO.Game.Gumps
 
                 Width = BarWidth;
                 Height = _gumpWidget.Height;
-                RecalculateSliderX();
+                //RecalculateSliderX();
             }
 
-            ModifyPairedValues(_newValue - Value);
+            //ModifyPairedValues(_newValue - Value);
             _gumpWidget.Ticks = (long)totalMS;
 
-            _value = _newValue;
+           // if (_value != _newValue)
+                //_value = _newValue;
 
             base.Update(totalMS, frameMS);
         }
@@ -113,31 +131,86 @@ namespace ClassicUO.Game.Gumps
             _clicked = false;
         }
 
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
+            {
+                CalculateNew(x);
+            }
+        }
+
         protected override void OnMouseEnter(int x, int y)
         {
             if (_clicked)
             {
-                _sliderX = _sliderX + (x - _clickPosition.X);
-                if (_sliderX < 0)
-                    _sliderX = 0;
-                if (_sliderX > BarWidth - _gumpWidget.Width)
-                    _sliderX = BarWidth - _gumpWidget.Width;
-                _clickPosition.X = x;
-                _clickPosition.Y = y;
-                if (_clickPosition.X < _gumpWidget.Width / 2)
-                    _clickPosition.X = _gumpWidget.Width / 2;
-                if (_clickPosition.X > BarWidth - _gumpWidget.Width / 2)
-                    _clickPosition.X = BarWidth - _gumpWidget.Width / 2;
-                _newValue = (int)(_sliderX / (float)(BarWidth - _gumpWidget.Width) * (MaxValue - MinValue)) + MinValue;
+
+                CalculateNew(x);
+
+                //_sliderX = _sliderX + (x - _clickPosition.X);
+                //if (_sliderX < 0)
+                //    _sliderX = 0;
+                //if (_sliderX > BarWidth - _gumpWidget.Width)
+                //    _sliderX = BarWidth - _gumpWidget.Width;
+
+
+
+                //_clickPosition.X = x;
+                //_clickPosition.Y = y;
+                //if (_clickPosition.X < _gumpWidget.Width / 2)
+                //    _clickPosition.X = _gumpWidget.Width / 2;
+                //if (_clickPosition.X > BarWidth - _gumpWidget.Width / 2)
+                //    _clickPosition.X = BarWidth - _gumpWidget.Width / 2;
+
+                //_newValue = (int)(_sliderX / (float)(BarWidth - _gumpWidget.Width) * (MaxValue - MinValue)) + MinValue;
             }
+        }
+
+        private void CalculateNew(int x)
+        {
+            int len = BarWidth;
+            int maxValue = MaxValue - MinValue;
+
+            len -= _gumpWidget.Width;
+
+            float perc = (x / (float)len) * 100.0f;
+
+            Value = (int)((maxValue * perc) / 100.0f) + MinValue;
+
+
+            CalculateOffset();
+        }
+
+        private void CalculateOffset()
+        {
+            if (Value < MinValue)
+                Value = MinValue;
+            else if (Value > MaxValue)
+                Value = MaxValue;
+
+            int value = Value - MinValue;
+            int maxValue = MaxValue - MinValue;
+            int length = BarWidth;
+
+            length -= _gumpWidget.Width;
+
+            if (maxValue > 0)
+                Percents = ((value / (float) maxValue) * 100.0f);
+            else
+            {
+                Percents = 0;
+            }
+
+            _sliderX = (int) ((length * Percents) / 100.0f);
+            if (_sliderX < 0)
+                _sliderX = 0;
         }
 
 
         protected override bool Contains(int x, int y)
         {
-            _rect.X = _sliderX;
+            _rect.X = 0;
             _rect.Y = 0;
-            _rect.Width = _gumpWidget.Width;
+            _rect.Width = BarWidth;
             _rect.Height = _gumpWidget.Height;
 
             return _rect.Contains(x, y);

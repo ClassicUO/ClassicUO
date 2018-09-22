@@ -373,7 +373,7 @@ namespace ClassicUO.Game.Gumps
                     _mouseDownControls[i].InvokeMouseEnter(position);
             }
 
-            if (!!IsModalControlOpen && ObjectsBlockingInputExists)
+            if (!IsModalControlOpen && ObjectsBlockingInputExists)
                 return;
 
             IEnumerable<InputMouseEvent> events = inputManager.GetMouseEvents();

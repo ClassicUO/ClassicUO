@@ -122,7 +122,7 @@ namespace ClassicUO
             _infoText = new RenderedText
             {
                 IsUnicode = true,
-                Font = 1,
+                Font = 3,
                 FontStyle = FontStyle.BlackBorder,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT
             };
