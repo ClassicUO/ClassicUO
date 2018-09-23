@@ -150,7 +150,7 @@ namespace ClassicUO.IO.Resources
         public static uint Color16To32(ushort c) =>
             (uint) (_table[(c >> 10) & 0x1F] | (_table[(c >> 5) & 0x1F] << 8) | (_table[c & 0x1F] << 16));
 
-        public static ushort Color32To16(int c) => (ushort) (((c & 0xFF) * 32 / 256) |
+        public static ushort Color32To16(uint c) => (ushort) (((c & 0xFF) * 32 / 256) |
                                                              ((((c >> 16) & 0xff) * 32 / 256) << 10) |
                                                              ((((c >> 8) & 0xff) * 32 / 256) << 5));
 

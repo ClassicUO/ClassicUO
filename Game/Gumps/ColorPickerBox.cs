@@ -6,6 +6,7 @@ using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -22,14 +23,11 @@ namespace ClassicUO.Game.Gumps
         private const int WIDTH = COLUMNS * CELL_WIDTH;
         private const int HEIGHT = ROWS * CELL_HEIGHT;
 
-        private const int SLIDER_MIN = 0;
-        private const int SLIDER_MAX = 4;
 
-
-        private int _graduation;
+        private int _graduation, _selectedIndex;
         private SpriteTexture _colorTable;
         private Texture2D _pointer;
-        private uint[] _hueData;
+        private ushort[] _hues;
 
 
         public ColorPickerBox(int x, int y) : base()
@@ -43,6 +41,8 @@ namespace ClassicUO.Game.Gumps
             AcceptMouseInput = true;
         }
 
+        public EventHandler ColorSelectedIndex;
+
         public int Graduation
         {
             get => _graduation;
@@ -51,19 +51,26 @@ namespace ClassicUO.Game.Gumps
                 if (_graduation != value)
                 {
                     _graduation = value;
-                    if (_graduation < SLIDER_MIN)
-                        _graduation = SLIDER_MIN;
-                    if (_graduation > SLIDER_MAX)
-                        _graduation = SLIDER_MAX;
-
+                 
                     if (_colorTable != null && !_colorTable.IsDisposed)
                         _colorTable.Dispose();
+
+                    ColorSelectedIndex.Raise();
                 }
             }
         }
 
-        public int SelectedIndex { get; private set; } 
-        public uint SelectedHue => SelectedIndex < 0 || SelectedIndex >= _hueData.Length ? 0 : _hueData[SelectedIndex];
+        public int SelectedIndex
+        {
+            get => _selectedIndex;
+            private set
+            {               
+                _selectedIndex = value;
+                ColorSelectedIndex.Raise();             
+            }
+        }
+
+        public ushort SelectedHue => SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort)0 : _hues[SelectedIndex];
 
 
         public override void Update(double totalMS, double frameMS)
@@ -84,23 +91,25 @@ namespace ClassicUO.Game.Gumps
             {
                 _pointer = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
                 _pointer.SetData(new Color[1] { Color.White });
+                SelectedIndex = 0;
             }
 
             spriteBatch.Draw2D(_colorTable, new Rectangle((int)position.X, (int)position.Y, Width, Height), Vector3.Zero);
 
             spriteBatch.Draw2D(_pointer, new Rectangle((int)(
-                position.X + (WIDTH / COLUMNS) * ((SelectedIndex / ROWS) + .5f) - _pointer.Width / 2),
-                (int)(position.Y + (HEIGHT / ROWS) * ((SelectedIndex % ROWS) + .5f) - _pointer.Height / 2), 2, 2), Vector3.Zero);
+                position.X + (WIDTH / COLUMNS) * ((SelectedIndex % COLUMNS) + .5f) - 1),
+                (int)(position.Y + (HEIGHT / ROWS) * ((SelectedIndex / COLUMNS) + .5f) - 1), 2, 2), Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);          
         }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
-        {           
-            int column = x / (WIDTH / COLUMNS);
-            int row = y / (HEIGHT / ROWS);
+        {
+            int row = x / (WIDTH / COLUMNS);
 
-            SelectedIndex = row + column * ROWS;       
+            int column = y / (HEIGHT / ROWS);
+
+            SelectedIndex = row + column * COLUMNS;
         }
 
 
@@ -112,10 +121,10 @@ namespace ClassicUO.Game.Gumps
 
             int offset = Marshal.SizeOf<HuesGroup>() - 4;
 
-            int startColor = Graduation + 1;
+            ushort startColor = (ushort)(Graduation + 1);
 
-            _hueData = new uint[20 * 10];
-
+            _hues = new ushort[20 * 10];
+            var pixels = new Color[20 * 10];
 
             int size = Marshal.SizeOf<HuesGroup>();
 
@@ -137,12 +146,11 @@ namespace ClassicUO.Game.Gumps
                     colorIndex += (colorIndex / offset) << 2;
 
                     ushort color = *(ushort*)((IntPtr)huesData + colorIndex);
+                    (byte b, byte g, byte r, byte _) = Hues.GetBGRA(Hues.Color16To32(color));
 
-                    (byte b, byte g, byte r, byte a) = Hues.GetBGRA(Hues.Color16To32(color));
-
-                    Color cc = new Color(r, g, b);
-                    _hueData[y * 20 + x] = cc.PackedValue;
-
+                    Color cc = new Color(b, g, r);
+                    pixels[y * 20 + x] = cc;
+                    _hues[y * 20 + x] = startColor;
                     startColor += 5;
                 }
             }
@@ -150,7 +158,7 @@ namespace ClassicUO.Game.Gumps
             Marshal.FreeHGlobal(ptr);
 
             _colorTable = new SpriteTexture(20, 10);
-            _colorTable.SetData(_hueData);
+            _colorTable.SetData(pixels);
         }
 
     }
