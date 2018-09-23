@@ -481,6 +481,12 @@ namespace ClassicUO.Game.Gumps
             OnKeyUp(key, mod);
         }
 
+        public void InvokeMouseWheel(MouseEvent delta)
+        {
+            OnMouseWheel(delta);
+            MouseWheel.Raise(new MouseWheelEventArgs(delta));
+        }
+
 
         protected virtual void OnMouseDown(int x, int y, MouseButton button)
         {
@@ -492,6 +498,11 @@ namespace ClassicUO.Game.Gumps
         {
             if (Parent != null)
                 Parent.OnMouseUp(x, y, button);
+        }
+
+        protected virtual void OnMouseWheel(MouseEvent delta)
+        {
+            
         }
 
         protected virtual void OnMouseEnter(int x, int y)

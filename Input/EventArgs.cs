@@ -50,7 +50,7 @@ namespace ClassicUO.Input
     {
         public MouseWheelEventArgs(MouseEvent direction)
         {
-            if (direction != MouseEvent.WheelScroll || direction != MouseEvent.WheelScrollDown ||
+            if (direction != MouseEvent.WheelScroll && direction != MouseEvent.WheelScrollDown &&
                 direction != MouseEvent.WheelScrollUp)
                 throw new Exception("Wrong scroll direction: " + direction);
 

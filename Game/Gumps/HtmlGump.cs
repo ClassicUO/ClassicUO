@@ -155,6 +155,19 @@ namespace ClassicUO.Game.Gumps
                 _scrollBar.MinValue = 0;
                 _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
                 ScrollY = _scrollBar.Value;
+
+                MouseWheel += (sender, e) =>
+                {
+                    switch (e.Direction)
+                    {
+                        case MouseEvent.WheelScrollUp:
+                            _scrollBar.Value--;
+                            break;
+                        case MouseEvent.WheelScrollDown:
+                            _scrollBar.Value++;
+                            break;
+                    }
+                };
             }
 
             if (Width != _gameText.Width)

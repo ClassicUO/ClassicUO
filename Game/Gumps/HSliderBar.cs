@@ -139,6 +139,22 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        protected override void OnMouseWheel(MouseEvent delta)
+        {
+            switch (delta)
+            {
+                case MouseEvent.WheelScrollUp:
+                    Value--;
+                    break;
+                case MouseEvent.WheelScrollDown:
+                    Value++;
+                    break;
+                    
+            }
+
+            CalculateOffset();
+        }
+
         protected override void OnMouseEnter(int x, int y)
         {
             if (_clicked)

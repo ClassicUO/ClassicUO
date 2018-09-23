@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
 {
@@ -14,5 +15,7 @@ namespace ClassicUO.Game.Gumps
         bool Contains(int x, int y);
 
         bool IsVisible { get; set; } // from AControl
+
+        event EventHandler ValueChanged;
     }
 }
