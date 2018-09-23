@@ -22,46 +22,44 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 new Button(0, 5540, 5542, 5541)
                     {ButtonAction = ButtonAction.SwitchPage, ButtonParameter = 2, X = 5, Y = 3}, 1);
             AddChildren(
-                new Button((int) Buttons.Map, 2443, 2443, 0)
+                new Button((int) Buttons.Map, 2443, 2443, 0, "Map", 1, true, 0, 0x36)
                 {
-                    ButtonAction = ButtonAction.Activate, X = 30, Y = 3, Font = 1, FontHue = 1, FontCenter = true,
-                    Text = "Map"
+                    ButtonAction = ButtonAction.Activate, X = 30, Y = 3, FontCenter = true,
                 }, 1);
             AddChildren(
-                new Button((int) Buttons.Paperdoll, 2445, 2445, 0)
+                new Button((int) Buttons.Paperdoll, 2445, 2445, 0, "Paperdoll", 1, true, 0, 0x36)
                 {
-                    ButtonAction = ButtonAction.Activate, X = 93, Y = 3, Font = 1, FontHue = 1, FontCenter = true,
-                    Text = "Paperdoll"
+                    ButtonAction = ButtonAction.Activate, X = 93, Y = 3, 
+                    FontCenter = true,
                 }, 1);
             AddChildren(
-                new Button((int) Buttons.Inventory, 2445, 2445, 0)
+                new Button((int) Buttons.Inventory, 2445, 2445, 0, "Inventory", 1, true, 0, 0x36)
                 {
-                    ButtonAction = ButtonAction.Activate, X = 201, Y = 3, Font = 1, FontHue = 1, FontCenter = true,
-                    Text = "Inventory"
+                    ButtonAction = ButtonAction.Activate, X = 201, Y = 3, 
+                    FontCenter = true,
                 }, 1);
             AddChildren(
-                new Button((int) Buttons.Journal, 2445, 2445, 0)
+                new Button((int) Buttons.Journal, 2445, 2445, 0, "Journal", 1, true, 0, 0x36)
                 {
-                    ButtonAction = ButtonAction.Activate, X = 309, Y = 3, Font = 1, FontHue = 1, FontCenter = true,
-                    Text = "Journal"
+                    ButtonAction = ButtonAction.Activate, X = 309, Y = 3, FontCenter = true,
                 }, 1);
             AddChildren(
-                new Button((int) Buttons.Chat, 2443, 2443, 0)
+                new Button((int) Buttons.Chat, 2443, 2443, 0, "Chat", 1, true, 0, 0x36)
                 {
-                    ButtonAction = ButtonAction.Activate, X = 417, Y = 3, Font = 1, FontHue = 1, FontCenter = true,
-                    Text = "Chat"
+                    ButtonAction = ButtonAction.Activate, X = 417, Y = 3, 
+                    FontCenter = true,
                 }, 1);
             AddChildren(
-                new Button((int) Buttons.Help, 2443, 2443, 0)
+                new Button((int) Buttons.Help, 2443, 2443, 0, "Help", 1, true, 0, 0x36)
                 {
-                    ButtonAction = ButtonAction.Activate, X = 480, Y = 3, Font = 1, FontHue = 1, FontCenter = true,
-                    Text = "Help"
+                    ButtonAction = ButtonAction.Activate, X = 480, Y = 3,
+                    FontCenter = true,
                 }, 1);
             AddChildren(
-                new Button((int) Buttons.Debug, 2443, 2443, 0)
+                new Button((int) Buttons.Debug, 2443, 2443, 0, "Debug", 1, true, 0, 0x36)
                 {
-                    ButtonAction = ButtonAction.Activate, X = 543, Y = 3, Font = 1, FontHue = 1, FontCenter = true,
-                    Text = "Debug"
+                    ButtonAction = ButtonAction.Activate, X = 543, Y = 3,
+                    FontCenter = true,
                 }, 1);
 
             //minimized view

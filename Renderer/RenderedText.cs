@@ -83,9 +83,6 @@ namespace ClassicUO.Renderer
                 {
                     _text = value;
 
-                    if (Texture != null && !Texture.IsDisposed)
-                        Texture.Dispose();
-
                     if (string.IsNullOrEmpty(value))
                     {
                         Width = 0;
@@ -193,6 +190,8 @@ namespace ClassicUO.Renderer
 
             return spriteBatch.Draw2D(Texture, dst, src, hue.HasValue ? hue.Value : Vector3.Zero);
         }
+
+        public void ReDraw() => Texture = CreateTexture();
 
         private Fonts.FontTexture CreateTexture()
         {
