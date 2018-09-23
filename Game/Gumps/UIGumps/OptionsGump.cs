@@ -21,7 +21,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Misc,
             FilterOptions,
 
-
+            Cancel,
+            Apply,
+            Default,
+            Ok
 
         }
 
@@ -48,6 +51,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new Button((int)Buttons.Misc, 0x00E8, 0x00E8) { X = 576, Y = 243, ButtonAction = ButtonAction.SwitchPage, ButtonParameter = 9, AnimationPressed = false });
             AddChildren(new Button((int)Buttons.FilterOptions, 0x00EB, 0x00EB) { X = 576, Y = 309, ButtonAction = ButtonAction.SwitchPage, ButtonParameter = 10, AnimationPressed = false });
 
+            // bottom
+            AddChildren(new Button((int)Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2) { X = 154, Y = 405, ButtonAction = ButtonAction.Activate, ButtonParameter = 0});
+            AddChildren(new Button((int)Buttons.Apply, 0x00EF, 0x00F0, 0x00EE) { X = 248, Y = 405, ButtonAction = ButtonAction.Activate, ButtonParameter = 0 });
+            AddChildren(new Button((int)Buttons.Default, 0x00F6, 0x00F4, 0x00F5) { X = 346, Y = 405, ButtonAction = ButtonAction.Activate, ButtonParameter = 0 });
+            AddChildren(new Button((int)Buttons.Ok, 0x00F9, 0x00F8, 0x00F7) { X = 443, Y = 405, ButtonAction = ButtonAction.Activate, ButtonParameter = 0 });
 
             BuildPage1();
             BuildPage2();
