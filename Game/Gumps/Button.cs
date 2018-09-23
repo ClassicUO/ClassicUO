@@ -75,6 +75,8 @@ namespace ClassicUO.Game.Gumps
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
+
+            AnimationPressed = true;
         }
 
         public Button(string[] parts) :
@@ -144,6 +146,8 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        public bool AnimationPressed { get; set; }
+
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -161,7 +165,7 @@ namespace ClassicUO.Game.Gumps
             SpriteTexture texture = GetTextureByState();
 
             spriteBatch.Draw2D(texture,
-                new Rectangle((int) position.X, (int) position.Y + (_curentState == PRESSED ? 1 : 0), Width, Height),
+                new Rectangle((int) position.X, (int) position.Y + (_curentState == PRESSED && AnimationPressed ? 1 : 0), Width, Height),
                 Vector3.Zero);
 
             if (Text != string.Empty)
@@ -175,7 +179,7 @@ namespace ClassicUO.Game.Gumps
                         //spriteBatch.Draw2D(_blackTexture, new Rectangle((int)position.X + (this.Width - _gText.Width) / 2, (int)position.Y + (this.Height - _gText.Height) / 2 , 100, 50), RenderExtentions.GetHueVector(0, false, true, false));
                     }
 
-                    int yoffset = _curentState == PRESSED ? 1 : 0;
+                    int yoffset = _curentState == PRESSED && AnimationPressed ? 1 : 0;
                     _gText.Draw(spriteBatch,
                         new Vector3(position.X + (Width - _gText.Width) / 2,
                             position.Y + yoffset + (Height - _gText.Height) / 2, position.Z));
@@ -246,12 +250,6 @@ namespace ClassicUO.Game.Gumps
             {
                 _gText.Dispose();
                 _gText = null;
-            }
-
-            for (int i = 0; i < _textures.Length; i++)
-            {
-                if (_textures[i] != null)
-                    _textures[i].Dispose();
             }
         }
     }

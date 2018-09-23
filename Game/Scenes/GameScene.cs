@@ -109,8 +109,6 @@ namespace ClassicUO.Game.Scenes
             UIManager.Add(_viewPortGump = new WorldViewportGump(this));
             UIManager.Add(_topBarGump = new TopBarGump(this));
 
-            UIManager.Add(new ColorPickerGump(100, 100));
-
             GameActions.Initialize(PicupItemBegin);
         }
 
