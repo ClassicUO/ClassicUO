@@ -34,9 +34,9 @@ namespace ClassicUO.Game.Gumps
         private const int ACTIVE = 1;
 
         private readonly SpriteTexture[] _textures = new SpriteTexture[2];
+        private RenderedText _text;
 
-
-        public Checkbox(ushort inactive, ushort active)
+        public Checkbox(ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0)
         {
             _textures[INACTIVE] = IO.Resources.Gumps.GetGumpTexture(inactive);
             _textures[ACTIVE] = IO.Resources.Gumps.GetGumpTexture(active);
@@ -44,6 +44,14 @@ namespace ClassicUO.Game.Gumps
             ref SpriteTexture t = ref _textures[INACTIVE];
             Width = t.Width;
             Height = t.Height;
+
+            _text = new RenderedText()
+            {
+                Font = font,
+                Hue = color,
+                IsUnicode = true,
+                Text = text
+            };
 
             CanMove = false;
             AcceptMouseInput = true;
@@ -79,6 +87,11 @@ namespace ClassicUO.Game.Gumps
             bool ok = base.Draw(spriteBatch, position);
 
             spriteBatch.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
+
+            if (_text.Text != string.Empty)
+            {
+                _text.Draw(spriteBatch, new Vector3(position.X + _textures[ACTIVE].Width + 2, position.Y, 0));
+            }
 
             return ok;
         }

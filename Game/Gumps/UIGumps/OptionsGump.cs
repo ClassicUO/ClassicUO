@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
@@ -28,11 +31,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         }
 
+        private Settings _settings;
+        private HSliderBar _sliderSound, _sliderMusic;
 
         public OptionsGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = false;
+
+            _settings = Service.Get<Settings>();
 
             // base
             AddChildren(new ResizePic(0x0A28){ X = 40, Y = 0, Width = 550, Height = 450});
@@ -67,74 +74,126 @@ namespace ClassicUO.Game.Gumps.UIGumps
             BuildPage8();
             BuildPage9();
             BuildPage10();
+
+            ChangePage(2);
         }
 
 
         private void BuildPage1()
         {
-            AddChildren(new GumpPic(0, 45, 0x00D9, 0), 1);
+            AddChildren(new GumpPic(0, 45, 0x00D9, 0) { CanMove = false }, 1);
 
-            Label label = new Label()
+            Label label = new Label("Sound and Music", true, 0, 460, align: TEXT_ALIGN_TYPE.TS_CENTER)
             {
-                Hue = 0,
                 X = 84,
                 Y = 22
             };
-            label.Text = "Sound and Music";
+            AddChildren(label, 1);
 
-            AddChildren(label);
+            label = new Label("These settings affect the sound and music you will hear while playing Ultima Online.",
+                true, 0, maxwidth: 500)
+            {
+                X = 64,
+                Y = 44
+            };
+            AddChildren(label, 1);
+
+            Checkbox checkbox = new Checkbox(0x00D2, 0x00D3, "Sound On/Off")
+            {
+                X = 64, Y = 90,
+                IsChecked = _settings.Sound,                
+            };
+            AddChildren(checkbox, 1);
+
+            label = new Label("Sound Volume", true, 0) { X= 64, Y = 112 };
+            AddChildren(label, 1);
+
+            _sliderSound = new HSliderBar(64, 133, 90, 0, 255, _settings.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true);
+            AddChildren(_sliderSound, 1);
+
+            checkbox = new Checkbox(0x00D2, 0x00D3, "Music On/Off")
+            {
+                X = 64, Y = 151, IsChecked = _settings.Music
+            };
+            AddChildren(checkbox, 1);
+
+            label = new Label("Music volume", true, 0) { X= 64, Y = 173};
+            AddChildren(label, 1);
+
+            _sliderMusic = new HSliderBar(64, 194, 90, 0, 255, _settings.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true);
+            AddChildren(_sliderMusic, 1);
+
+            checkbox = new Checkbox(0x00D2, 0x00D3, "Play footsteps sound")
+            {
+                X = 64, Y = 212
+            };
+            AddChildren(checkbox, 1);
+
+            checkbox = new Checkbox(0x00D2, 0x00D3, "Play combat music")
+            {
+                X = 64,
+                Y = 232
+            };
+            AddChildren(checkbox, 1);
+
+            checkbox = new Checkbox(0x00D2, 0x00D3, "Play sounds in background")
+            {
+                X = 64,
+                Y = 252
+            };
+            AddChildren(checkbox, 1);
         }
 
         private void BuildPage2()
         {
-            AddChildren(new GumpPic(0, 111, 0x00DB, 0), 2);
+            AddChildren(new GumpPic(0, 111, 0x00DB, 0) { CanMove = false }, 2);
         }
 
         private void BuildPage3()
         {
-            AddChildren(new GumpPic(0, 177, 0x00DD, 0), 3);
+            AddChildren(new GumpPic(0, 177, 0x00DD, 0) { CanMove = false }, 3);
 
         }
 
         private void BuildPage4()
         {
-            AddChildren(new GumpPic(0, 243, 0x00DF, 0), 4);
+            AddChildren(new GumpPic(0, 243, 0x00DF, 0) { CanMove = false }, 4);
 
         }
 
         private void BuildPage5()
         {
-            AddChildren(new GumpPic(0, 309, 0x00EC, 0), 5);
+            AddChildren(new GumpPic(0, 309, 0x00EC, 0) { CanMove = false }, 5);
 
         }
 
         private void BuildPage6()
         {
-            AddChildren(new GumpPic(576, 45, 0x00E1, 0), 6);
+            AddChildren(new GumpPic(576, 45, 0x00E1, 0) { CanMove = false }, 6);
 
         }
 
         private void BuildPage7()
         {
-            AddChildren(new GumpPic(576, 111, 0x00E3, 0), 7);
+            AddChildren(new GumpPic(576, 111, 0x00E3, 0) { CanMove = false }, 7);
 
         }
 
         private void BuildPage8()
         {
-            AddChildren(new GumpPic(576, 177, 0x00E5, 0), 8);
+            AddChildren(new GumpPic(576, 177, 0x00E5, 0) { CanMove = false }, 8);
 
         }
 
         private void BuildPage9()
         {
-            AddChildren(new GumpPic(576, 243, 0x00E7, 0), 9);
+            AddChildren(new GumpPic(576, 243, 0x00E7, 0) { CanMove = false }, 9);
 
         }
 
         private void BuildPage10()
         {
-            AddChildren(new GumpPic(576, 309, 0x00EA, 0), 10);
+            AddChildren(new GumpPic(576, 309, 0x00EA, 0) { CanMove = false }, 10);
 
         }
 

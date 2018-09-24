@@ -16,7 +16,7 @@ namespace ClassicUO.Game.Gumps
 
     class HSliderBar : GumpControl
     {
-        private int _value;
+        private int _value = -1;
         //private int _newValue;
         private int _sliderX;
         private SpriteTexture _gumpWidget;
@@ -26,18 +26,31 @@ namespace ClassicUO.Game.Gumps
         private Rectangle _rect;
         private bool _clicked;
         private Point _clickPosition;
+        private RenderedText _text;
 
 
-        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style) : base()
+        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true) : base()
         {
             X = x;
             Y = y;
+
+            if (hasText)
+            {
+                _text = new RenderedText()
+                {
+                    Font = font,
+                    Hue = color,
+                    IsUnicode = unicode,
+                };
+            }
+
             MinValue = min;
             MaxValue = max;
             BarWidth = w;
             Value = value;
             _style = style;
 
+           
             AcceptMouseInput = true;
         }
 
@@ -65,6 +78,8 @@ namespace ClassicUO.Game.Gumps
                     else if (_value > MaxValue)
                         _value = MaxValue;
 
+                    if (_text != null)
+                        _text.Text = Value.ToString();
                     ValueChanged.Raise();
                 }
             }
@@ -97,6 +112,14 @@ namespace ClassicUO.Game.Gumps
                 //RecalculateSliderX();
             }
 
+            if (_gumpSpliderBackground != null)
+            {
+                for (int i = 0; i < _gumpSpliderBackground.Length; i++)
+                {
+                    _gumpSpliderBackground[i].Ticks = (long)totalMS;
+                }
+            }
+
             //ModifyPairedValues(_newValue - Value);
             _gumpWidget.Ticks = (long)totalMS;
 
@@ -115,6 +138,8 @@ namespace ClassicUO.Game.Gumps
                 spriteBatch.Draw2D(_gumpSpliderBackground[2], new Vector3(position.X + BarWidth - _gumpSpliderBackground[2].Width, position.Y, 0), Vector3.Zero);
             }
             spriteBatch.Draw2D(_gumpWidget, new Vector3(position.X + _sliderX, position.Y, 0), Vector3.Zero);
+
+            _text?.Draw(spriteBatch, new Vector3(position.X + BarWidth + 2, position.Y + Height / 2 - _text.Height / 2, 0));
 
             return base.Draw(spriteBatch, position, hue);
         }

@@ -69,6 +69,7 @@ namespace ClassicUO
             Settings settings =
                 ConfigurationResolver.Load<Settings>(Path.Combine(Environment.CurrentDirectory, "settings.json"));
 
+            Service.Register(settings);
 
             _log.Message(LogTypes.Trace, "Checking for Ultima Online installation...", false);
             try

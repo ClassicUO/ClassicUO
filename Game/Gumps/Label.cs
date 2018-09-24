@@ -23,6 +23,7 @@
 #endregion
 
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -32,34 +33,26 @@ namespace ClassicUO.Game.Gumps
     {
         private readonly RenderedText _gText;
 
-        public Label() => _gText = new RenderedText
+        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT)
         {
-            IsUnicode = true,
-            Font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0),
-            FontStyle = FontStyle.BlackBorder
-        };
+            _gText = new RenderedText
+            {
+                IsUnicode = isunicode,
+                Font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0),
+                FontStyle = style,
+                Hue = hue++,
+                Align = align,
+                MaxWidth = maxwidth,
+                Text = text
+            };
+        }
 
-        public Label(string[] parts, string[] lines) : this()
+        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, Hue.Parse(parts[3]), 0, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
-            Hue = Hue.Parse(parts[3]);
-            if (Hue > 0)
-                Hue++;
-            Text = lines[int.Parse(parts[4])];
         }
 
-        public string Text
-        {
-            get => _gText.Text;
-            set => _gText.Text = value;
-        }
-
-        public Hue Hue
-        {
-            get => _gText.Hue;
-            set => _gText.Hue = value;
-        }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {

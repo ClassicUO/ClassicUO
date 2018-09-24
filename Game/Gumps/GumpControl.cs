@@ -25,6 +25,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ClassicUO.Configuration;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
@@ -46,6 +47,7 @@ namespace ClassicUO.Game.Gumps
         private bool _acceptKeyboardInput, _acceptMouseInput;
         private int _activePage;
         private bool _handlesKeyboardFocus;
+
 
 
         protected GumpControl(GumpControl parent = null)
