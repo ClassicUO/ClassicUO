@@ -153,12 +153,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 84, Y = 22
             };
             AddChildren(label, 2);
-            
+
+
+            label = new Label("FPS:", true, 0)
+            {
+                X = 64,
+                Y = 44
+            };
+            AddChildren(label, 2);
         }
 
         private void BuildPage3()
         {
             AddChildren(new GumpPic(0, 177, 0x00DD, 0) { CanMove = false }, 3);
+
 
         }
 
