@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,11 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game
@@ -93,6 +91,7 @@ namespace ClassicUO.Game
             else
             {
                 Service.Get<Log>().Message(LogTypes.Trace, "On System Message: " + args.Text);
+                Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "System");
                 // ADD TO SYSTEM MESSAGE
             }
 

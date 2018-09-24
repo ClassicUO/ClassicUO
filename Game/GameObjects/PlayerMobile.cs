@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,11 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
+using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -98,7 +96,11 @@ namespace ClassicUO.Game.GameObjects
         private ushort _weightMax;
 
 
-        public PlayerMobile(Serial serial) : base(serial) => _sklls = new List<Skill>();
+        public PlayerMobile(Serial serial) : base(serial)
+        {
+            _sklls = new List<Skill>();
+           
+        } 
 
 
         public IReadOnlyList<Skill> Skills => _sklls;

@@ -1,4 +1,25 @@
-﻿using ClassicUO.Game.GameObjects;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//  (Copyright (c) 2018 ClassicUO Development Team)
+//    
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -130,8 +151,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (args.Button == MouseButton.Left)
             {
-                Service.Get<Log>().Message(LogTypes.Warning, "Virtue DoubleClick event!!");
-                //NetClient.Send(new GumpMenuSelectPacket(Mobile.Serial, 0x000001CD, 0x00000001, new int[1] { Mobile.Serial }, null));
+                GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new Serial[1] { Mobile.Serial });
+                Service.Get<Log>().Message(LogTypes.Info, "Virtue DoubleClick event!!");
             }
         }
 
@@ -183,7 +204,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.Help:
-                    //
+                    GameActions.RequestHelp();
+                    Service.Get<Log>().Message(LogTypes.Info,"Help request sent!");
                     break;
 
                 case Buttons.Options:
@@ -198,7 +220,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
 
                 case Buttons.Quests:
-                    //
+                    GameActions.RequestQuestMenu();
+                    Service.Get<Log>().Message(LogTypes.Info, "Quest menu request sent!");
                     break;
 
                 case Buttons.Skills:
