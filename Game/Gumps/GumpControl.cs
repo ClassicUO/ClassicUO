@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ClassicUO.Configuration;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
@@ -43,6 +44,7 @@ namespace ClassicUO.Game.Gumps
         private bool _acceptKeyboardInput, _acceptMouseInput;
         private int _activePage;
         private bool _handlesKeyboardFocus;
+
 
 
         protected GumpControl(GumpControl parent = null)
@@ -494,6 +496,12 @@ namespace ClassicUO.Game.Gumps
             OnKeyUp(key, mod);
         }
 
+        public void InvokeMouseWheel(MouseEvent delta)
+        {
+            OnMouseWheel(delta);
+            MouseWheel.Raise(new MouseWheelEventArgs(delta));
+        }
+
 
         protected virtual void OnMouseDown(int x, int y, MouseButton button)
         {
@@ -505,6 +513,11 @@ namespace ClassicUO.Game.Gumps
         {
             if (Parent != null)
                 Parent.OnMouseUp(x, y, button);
+        }
+
+        protected virtual void OnMouseWheel(MouseEvent delta)
+        {
+            
         }
 
         protected virtual void OnMouseEnter(int x, int y)

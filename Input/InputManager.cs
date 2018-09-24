@@ -106,23 +106,23 @@ namespace ClassicUO.Input
         }
 
         private void OnKeyDown(InputKeyboardEvent e)
-        {
-            if (_lastKey == e.KeyCode && _lastKey != SDL_Keycode.SDLK_UNKNOWN)
-                AddEvent(new InputKeyboardEvent(KeyboardEvent.Press, e));
+        {          
+            if (_lastKey == SDL_Keycode.SDLK_LCTRL && e.KeyCode == SDL_Keycode.SDLK_v)
+            {
+                OnTextInput(
+                    new InputKeyboardEvent(KeyboardEvent.TextInput, SDL_Keycode.SDLK_UNKNOWN, 0,
+                        SDL_Keymod.KMOD_NONE) {KeyChar = SDL_GetClipboardText()});
+            }
             else
             {
-                if (_lastKey == SDL_Keycode.SDLK_LCTRL && e.KeyCode == SDL_Keycode.SDLK_v)
+                if (_lastKey == e.KeyCode && _lastKey != SDL_Keycode.SDLK_UNKNOWN || e.EventType == KeyboardEvent.Down)
                 {
-                    OnTextInput(
-                        new InputKeyboardEvent(KeyboardEvent.TextInput, SDL_Keycode.SDLK_UNKNOWN, 0,
-                            SDL_Keymod.KMOD_NONE) {KeyChar = SDL_GetClipboardText()});
+                    AddEvent(new InputKeyboardEvent(KeyboardEvent.Press, e));
                 }
-                else
-                {
-                    _lastKey = e.KeyCode;
-                    AddEvent(e);
-                }
-            }
+
+                _lastKey = e.KeyCode;
+                AddEvent(e);
+            }       
         }
 
         private void OnKeyUp(InputKeyboardEvent e)

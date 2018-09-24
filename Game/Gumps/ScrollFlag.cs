@@ -19,8 +19,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
@@ -35,6 +37,8 @@ namespace ClassicUO.Game.Gumps
 
         private bool _btnSliderClicked;
         private Point _clickPosition;
+        private Rectangle _rect;
+
 
         public ScrollFlag(GumpControl parent, int x, int y, int height) : this(parent)
         {
@@ -46,6 +50,8 @@ namespace ClassicUO.Game.Gumps
         public ScrollFlag(GumpControl parent) : base(parent) => AcceptMouseInput = true;
 
 
+        public event EventHandler ValueChanged; 
+
         public int Value
         {
             get => (int) _value;
@@ -56,6 +62,8 @@ namespace ClassicUO.Game.Gumps
                     _value = MinValue;
                 if (_value > MaxValue)
                     _value = MaxValue;
+
+                ValueChanged.Raise();
             }
         }
 
@@ -159,10 +167,27 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        protected override void OnMouseWheel(MouseEvent delta)
+        {
+            switch (delta)
+            {
+                case MouseEvent.WheelScrollUp:
+                    Value--;
+                    break;
+                case MouseEvent.WheelScrollDown:
+                    Value++;
+                    break;
+            }
+        }
+
         protected override bool Contains(int x, int y)
         {
             x -= 5;
-            return new Rectangle(0, (int) _sliderPosition, _texture.Width, _texture.Height).Contains(x, y);
+            _rect.Y = (int)_sliderPosition;
+            _rect.Width = _texture.Width;
+            _rect.Height = _texture.Height;
+
+            return _rect.Contains(x, y);
         }
 
         bool IScrollBar.Contains(int x, int y)

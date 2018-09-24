@@ -29,10 +29,14 @@ namespace ClassicUO.Game.Gumps
     {
         private readonly Graphic _graphic;
 
+        private bool _isPartial;
+
         public StaticPic(Graphic graphic, Hue hue)
         {
             _graphic = graphic;
             Hue = hue;
+
+            _isPartial = IO.Resources.TileData.IsPartialHue((long) IO.Resources.TileData.StaticData[_graphic].Flags);
 
             CanMove = true;
         }
@@ -62,7 +66,7 @@ namespace ClassicUO.Game.Gumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Hue, false, false, true));
+            spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Hue, _isPartial, false, true));
             return base.Draw(spriteBatch, position, hue);
         }
     }

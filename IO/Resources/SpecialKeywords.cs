@@ -22,39 +22,95 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ClassicUO.IO.Resources
 {
     public static class SpecialKeywords
     {
-        private static UOFile _file;
-        private static readonly List<KeywordEntry> _keywords = new List<KeywordEntry>();
+        //private static UOFile _file;
+        //private static readonly List<KeywordEntry> _keywords = new List<KeywordEntry>();
 
 
-        public static IReadOnlyList<KeywordEntry> Keywords => _keywords;
+        //public static IReadOnlyList<KeywordEntry> Keywords => _keywords;
+
+
+        private static readonly List<Dictionary<int, List<Regex>>> _speeches = new List<Dictionary<int, List<Regex>>>();
+
 
         public static void Load()
         {
-            if (_keywords.Count > 0)
+            if (_speeches.Count > 0)
                 return;
 
             string path = Path.Combine(FileManager.UoFolderPath, "speech.mul");
             if (!File.Exists(path))
                 throw new FileNotFoundException();
 
-            _file = new UOFileMul(path);
+            UOFileMul file = new UOFileMul(path);
 
-            while (_file.Position < _file.Length)
+            Dictionary<int, List<Regex>> table = null;
+            int lastIndex = -1;
+
+            while (file.Position < file.Length)
             {
-                ushort id = (ushort) ((_file.ReadByte() << 8) | _file.ReadByte());
-                ushort length = (ushort) ((_file.ReadByte() << 8) | _file.ReadByte());
+                ushort id = (ushort) ((file.ReadByte() << 8) | file.ReadByte());
+                ushort length = (ushort) ((file.ReadByte() << 8) | file.ReadByte());
 
                 if (length > 128)
                     length = 128;
 
-                _keywords.Add(new KeywordEntry
-                    {Code = id, Text = Encoding.UTF8.GetString(_file.ReadArray<byte>(length))});
+                string text = Encoding.UTF8.GetString(file.ReadArray<byte>(length)).Trim();
+
+                if (text.Length == 0)
+                    continue;
+
+                if (table == null || lastIndex > id)
+                {
+                    if (id == 0 && text == "*withdraw*")
+                        _speeches.Insert(0, table = new Dictionary<int, List<Regex>>());
+                    else
+                    {
+                        _speeches.Add(table = new Dictionary<int, List<Regex>>());
+                    }
+                }
+
+                lastIndex = id;
+
+                table.TryGetValue(id, out List<Regex> regex);
+
+                if (regex == null)
+                    table[id] = regex = new List<Regex>();
+
+                regex.Add(new Regex(text.Replace("*", @".*"), RegexOptions.IgnoreCase));
+
+
+                //_keywords.Add(new KeywordEntry
+                //    {Code = id, Text = Encoding.UTF8.GetString(_file.ReadArray<byte>(length)).Trim()});
             }
+
+            file.Unload();
+        }
+
+        public static void GetSpeechTriggers(string text, string lang, out int count, out int[] triggers)
+        {
+            List<int> t = new List<int>();
+            int speechTable = 0;
+
+
+            foreach (KeyValuePair<int, List<Regex>> e in _speeches[speechTable])
+            {
+                for (int i = 0; i < e.Value.Count; i++)
+                {
+                    if (e.Value[i].IsMatch(text) && !t.Contains(e.Key))
+                    {
+                        t.Add(e.Key);
+                    }
+                }
+            }
+
+            count = t.Count;
+            triggers = t.ToArray();
         }
     }
 

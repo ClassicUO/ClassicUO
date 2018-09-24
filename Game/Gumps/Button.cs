@@ -41,12 +41,11 @@ namespace ClassicUO.Game.Gumps
 
         private readonly SpriteTexture[] _textures = new SpriteTexture[3];
         private readonly Graphic[] _gumpGraphics = new Graphic[3];
-        private int _curentState = NORMAL;
         private RenderedText _gText;
-        private bool _centerFont;
+        private bool _clicked;
 
 
-        public Button(int buttonID, ushort normal, ushort pressed, ushort over = 0)
+        public Button(int buttonID, ushort normal, ushort pressed, ushort over = 0, string caption = "", byte font = 0, bool isunicode = true, ushort normalHue = ushort.MaxValue, ushort hoverHue = ushort.MaxValue)
         {
             ButtonID = buttonID;
 
@@ -63,9 +62,16 @@ namespace ClassicUO.Game.Gumps
             Width = t.Width;
             Height = t.Height;
 
+            FontHue = normalHue == ushort.MaxValue ? (ushort)0 : normalHue;
+            
+            HueHover = hoverHue == ushort.MaxValue ? normalHue : hoverHue;
+
             _gText = new RenderedText
             {
-                IsUnicode = true
+                IsUnicode = isunicode,
+                Hue = FontHue,
+                Font = font,
+                Text = caption
             };
 
             CanMove = false;
@@ -107,39 +113,9 @@ namespace ClassicUO.Game.Gumps
             set => _textures[OVER] = IO.Resources.Gumps.GetGumpTexture((ushort) value);
         }
 
-        public string Text
-        {
-            get => _gText.Text;
-            set => _gText.Text = value;
-        }
-
-        public int Font
-        {
-            get => _gText.Font;
-            set => _gText.Font = (byte) value;
-        }
-
-        public int FontHue
-        {
-            get => _gText.Hue;
-            set => _gText.Hue = (byte) value;
-        }
-
-        public bool IsUnicode
-        {
-            get => _gText.IsUnicode;
-            set => _gText.IsUnicode = value;
-        }
-
-
-        public bool FontCenter
-        {
-            get => FontCenter;
-            set
-            {
-                if (value) _centerFont = true;
-            }
-        }
+        public Hue FontHue { get; }
+        public Hue HueHover { get; }
+        public bool FontCenter { get; set; }
 
 
         public override void Update(double totalMS, double frameMS)
@@ -158,21 +134,14 @@ namespace ClassicUO.Game.Gumps
             SpriteTexture texture = GetTextureByState();
 
             spriteBatch.Draw2D(texture,
-                new Rectangle((int) position.X, (int) position.Y + (_curentState == PRESSED ? 1 : 0), Width, Height),
+                new Rectangle((int) position.X, (int) position.Y, Width, Height),
                 Vector3.Zero);
 
-            if (Text != string.Empty)
+            if (_gText.Text != string.Empty)
             {
-                if (_centerFont)
+                if (FontCenter)
                 {
-                    if (MouseIsOver)
-                    {
-                        //var _blackTexture = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
-                        //_blackTexture.SetData(new[] { Color.Black });
-                        //spriteBatch.Draw2D(_blackTexture, new Rectangle((int)position.X + (this.Width - _gText.Width) / 2, (int)position.Y + (this.Height - _gText.Height) / 2 , 100, 50), RenderExtentions.GetHueVector(0, false, true, false));
-                    }
-
-                    int yoffset = _curentState == PRESSED ? 1 : 0;
+                    int yoffset = _clicked ? 1 : 0;
                     _gText.Draw(spriteBatch,
                         new Vector3(position.X + (Width - _gText.Width) / 2,
                             position.Y + yoffset + (Height - _gText.Height) / 2, position.Z));
@@ -184,16 +153,52 @@ namespace ClassicUO.Game.Gumps
             return base.Draw(spriteBatch, position, hue);
         }
 
+        private bool _isHovered;
+
+        protected override void OnMouseEnter(int x, int y)
+        {
+            if (!_isHovered)
+            {
+                _isHovered = true;
+
+                if (HueHover != FontHue && _gText.Hue != HueHover)
+                {
+                    _gText.Hue = HueHover;
+                    _gText.ReDraw();
+                }
+            }
+        }
+
+        protected override void OnMouseLeft(int x, int y)
+        {
+            if (_isHovered)
+            {
+                _isHovered = false;
+
+                if (_gText.Hue != FontHue)
+                {
+                    _gText.Hue = FontHue;
+                    _gText.ReDraw();
+                }
+
+            }
+        }
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
-                _curentState = PRESSED;
+                _clicked = true;
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
+                _clicked = false;
         }
 
         private SpriteTexture GetTextureByState()
         {
-            if (_curentState == PRESSED)
+            if (_clicked && _textures[PRESSED] != null)
                 return _textures[PRESSED];
             if (UIManager.MouseOverControl == this && _textures[OVER] != null)
                 return _textures[OVER];
@@ -202,7 +207,7 @@ namespace ClassicUO.Game.Gumps
 
         private Graphic GetGraphicByState()
         {
-            if (_curentState == PRESSED)
+            if (_clicked && _textures[PRESSED] != null)
                 return _gumpGraphics[PRESSED];
             if (UIManager.MouseOverControl == this && _textures[OVER] != null)
                 return _gumpGraphics[OVER];
@@ -225,11 +230,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        protected override void OnMouseUp(int x, int y, MouseButton button)
-        {
-            if (button == MouseButton.Left)
-                _curentState = NORMAL;
-        }
+       
 
         protected override bool Contains(int x, int y)
             => IO.Resources.Gumps.Contains(GetGraphicByState(), x, y);
@@ -243,12 +244,6 @@ namespace ClassicUO.Game.Gumps
             {
                 _gText.Dispose();
                 _gText = null;
-            }
-
-            for (int i = 0; i < _textures.Length; i++)
-            {
-                if (_textures[i] != null)
-                    _textures[i].Dispose();
             }
         }
     }

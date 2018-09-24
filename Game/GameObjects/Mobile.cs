@@ -432,6 +432,15 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
+        {
+            Steps.Clear();
+
+            Position = new Position(x, y, z);
+            Direction = dir;
+
+            Offset = Vector3.Zero;
+        }
 
         public void SetAnimation(byte id, byte interval = 0, byte frameCount = 0, byte repeatCount = 0,
             bool repeat = false, bool frameDirection = false)
@@ -731,7 +740,7 @@ namespace ClassicUO.Game.GameObjects
 
         public struct Step
         {
-            public Step(int x, int y, sbyte z, byte dir, bool anim, bool run, byte seq)
+            public Step(int x, int y, sbyte z, byte dir, bool anim, bool run, byte rej, byte seq)
             {
                 X = x;
                 Y = y;
@@ -739,6 +748,7 @@ namespace ClassicUO.Game.GameObjects
                 Direction = dir;
                 Anim = anim;
                 Run = run;
+                Rej = rej;
                 Seq = seq;
             }
 
@@ -748,6 +758,7 @@ namespace ClassicUO.Game.GameObjects
             public byte Direction;
             public bool Anim;
             public bool Run;
+            public byte Rej;
             public byte Seq;
         }
     }

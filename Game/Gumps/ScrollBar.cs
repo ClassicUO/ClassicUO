@@ -19,8 +19,10 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
@@ -50,6 +52,9 @@ namespace ClassicUO.Game.Gumps
         }
 
 
+        public event EventHandler ValueChanged;
+
+
         public int Value
         {
             get => (int) _value;
@@ -60,6 +65,8 @@ namespace ClassicUO.Game.Gumps
                     _value = MinValue;
                 if (_value > MaxValue)
                     _value = MaxValue;
+
+                ValueChanged.Raise();
             }
         }
 
@@ -264,6 +271,19 @@ namespace ClassicUO.Game.Gumps
                     _value = sliderY / scrollableArea * (MaxValue - MinValue) + MinValue;
                     _sliderPosition = sliderY;
                 }
+            }
+        }
+
+        protected override void OnMouseWheel(MouseEvent delta)
+        {
+            switch (delta)
+            {
+                case MouseEvent.WheelScrollUp:
+                    Value--;
+                    break;
+                case MouseEvent.WheelScrollDown:
+                    Value++;
+                    break;
             }
         }
 

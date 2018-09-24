@@ -79,7 +79,21 @@ namespace ClassicUO.Renderer
                 if (_text != value)
                 {
                     _text = value;
-                    Texture = CreateTexture();
+
+                    if (string.IsNullOrEmpty(value))
+                    {
+                        Width = 0;
+                        Height = 0;
+                        IsPartialHue = false;
+                        if (IsHTML)
+                            Fonts.SetUseHTML(false);
+                        Links = null;
+                        Texture = null;
+                    }
+                    else
+                    {
+                        Texture = CreateTexture();
+                    }
                 }
             }
         }
@@ -173,6 +187,8 @@ namespace ClassicUO.Renderer
 
             return spriteBatch.Draw2D(Texture, dst, src, hue.HasValue ? hue.Value : Vector3.Zero);
         }
+
+        public void ReDraw() => Texture = CreateTexture();
 
         private Fonts.FontTexture CreateTexture()
         {

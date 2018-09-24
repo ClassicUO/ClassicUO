@@ -32,8 +32,8 @@ namespace ClassicUO.Input
         public SDL_Keymod Mod { get; }
 
         public bool IsHandled { get; set; }
-        public bool Alt => (Mod & SDL_Keymod.KMOD_ALT) == SDL_Keymod.KMOD_ALT;
-        public bool Control => (Mod & SDL_Keymod.KMOD_CTRL) == SDL_Keymod.KMOD_CTRL;
-        public bool Shift => (Mod & SDL_Keymod.KMOD_SHIFT) == SDL_Keymod.KMOD_SHIFT;
+        public bool Alt => (Mod & SDL_Keymod.KMOD_LALT) == SDL_Keymod.KMOD_LALT;
+        public bool Control => (Mod & SDL_Keymod.KMOD_LCTRL) == SDL_Keymod.KMOD_LCTRL;
+        public bool Shift => (Mod & SDL_Keymod.KMOD_LSHIFT) == SDL_Keymod.KMOD_LSHIFT;
     }
 }

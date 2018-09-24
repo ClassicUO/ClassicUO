@@ -118,8 +118,8 @@ namespace ClassicUO.Game.Gumps
             {
                 if (layout.Substring(index) == "\0") break;
 
-                int begin = layout.IndexOf("{", index);
-                int end = layout.IndexOf("}", index + 1);
+                int begin = layout.IndexOf("{", index, StringComparison.Ordinal);
+                int end = layout.IndexOf("}", index + 1, StringComparison.Ordinal);
 
                 if (begin != -1 && end != -1)
                 {
@@ -237,8 +237,8 @@ namespace ClassicUO.Game.Gumps
         }
 
         public T Get<T>(Serial? serial = null) where T : GumpControl
-            => _gumps.OfType<T>().Where(s => !s.IsDisposed && (!serial.HasValue || s.LocalSerial == serial))
-                .FirstOrDefault();
+            => _gumps.OfType<T>()
+                .FirstOrDefault(s => !s.IsDisposed && (!serial.HasValue || s.LocalSerial == serial));
 
         public Gump Get(Serial serial)
             => _gumps.OfType<Gump>().FirstOrDefault(s => !s.IsDisposed && s.ServerSerial == serial);
@@ -370,7 +370,7 @@ namespace ClassicUO.Game.Gumps
                     _mouseDownControls[i].InvokeMouseEnter(position);
             }
 
-            if (!!IsModalControlOpen && ObjectsBlockingInputExists)
+            if (!IsModalControlOpen && ObjectsBlockingInputExists)
                 return;
 
             IEnumerable<InputMouseEvent> events = inputManager.GetMouseEvents();
@@ -379,6 +379,14 @@ namespace ClassicUO.Game.Gumps
             {
                 switch (e.EventType)
                 {
+                    case MouseEvent.WheelScrollDown:
+                    case MouseEvent.WheelScrollUp:
+                        if (gump != null)
+                        {
+                            if (gump.AcceptMouseInput)
+                                gump.InvokeMouseWheel(e.EventType);
+                        }
+                        break;
                     case MouseEvent.Down:
                         if (gump != null)
                         {

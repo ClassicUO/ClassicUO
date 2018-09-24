@@ -209,7 +209,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
 
                 case Buttons.Options:
-                    //
+                    if (UIManager.Get<OptionsGump>() == null)
+                        UIManager.Add(new OptionsGump() { X = 80, Y = 80 });
+                    else
+                        UIManager.Remove<OptionsGump>();
                     break;
 
                 case Buttons.LogOut:

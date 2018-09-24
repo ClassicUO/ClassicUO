@@ -59,8 +59,6 @@ namespace ClassicUO
 
             Window.AllowUserResizing = true;
 
-
-            MaxFPS = 144;
             _fpsCounter = new FpsCounter();
         }
 
@@ -69,7 +67,7 @@ namespace ClassicUO
         protected float IntervalFixedUpdate => 1000.0f / MaxFPS;
 
 
-        public int MaxFPS { get; set; }
+        public int MaxFPS { get; protected set; }
         public int CurrentFPS => _fpsCounter.FPS;
 
 

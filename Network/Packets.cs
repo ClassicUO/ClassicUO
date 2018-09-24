@@ -279,11 +279,46 @@ namespace ClassicUO.Network
     {
         public PUnicodeSpeechRequest(string text, MessageType type, MessageFont font, Hue hue, string lang) : base(0xAD)
         {
+            IO.Resources.SpecialKeywords.GetSpeechTriggers(text, lang, out int triggerCount, out int[] triggers);
+            if (triggerCount > 0)
+                type |= MessageType.Encoded;
+
+
             WriteByte((byte) type);
             WriteUShort(hue);
             WriteUShort((ushort) font);
             WriteASCII(lang, 4);
-            WriteUnicode(text);
+
+            if (triggerCount > 0)
+            {
+                byte[] t = new byte[(int)Math.Ceiling((triggerCount + 1) * 1.5f)];
+                // write 12 bits at a time. first write count: byte then half byte.
+                t[0] = (byte)((triggerCount & 0x0FF0) >> 4);
+                t[1] = (byte)((triggerCount & 0x000F) << 4);
+                for (int i = 0; i < triggerCount; i++)
+                {
+                    int index = (int)((i + 1) * 1.5f);
+                    if (i % 2 == 0) // write half byte and then byte
+                    {
+                        t[index + 0] |= (byte)((triggers[i] & 0x0F00) >> 8);
+                        t[index + 1] = (byte)(triggers[i] & 0x00FF);
+                    }
+                    else // write byte and then half byte
+                    {
+                        t[index] = (byte)((triggers[i] & 0x0FF0) >> 4);
+                        t[index + 1] = (byte)((triggers[i] & 0x000F) << 4);
+                    }
+                }
+
+                for (int i = 0; i < t.Length; i++)
+                    WriteByte(t[i]);
+
+                WriteASCII(text);
+            }
+            else
+            {
+                WriteUnicode(text);
+            }
         }
     }
 

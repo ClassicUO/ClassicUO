@@ -27,25 +27,38 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using SDL2;
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
+    public enum ChatMode
+    {
+        Default,
+        Whisper,
+        Emote,
+        Party,
+        PartyPrivate,
+        Guild,
+        Alliance
+    }
+
     internal class ChatControl : GumpControl
     {
         private const int MAX_MESSAGE_LENGHT = 100;
 
         private TextBox _textBox;
         private readonly List<ChatLineTime> _textEntries;
-        private readonly List<Tuple<MessageType, string>> _messageHistory;
+        private readonly List<Tuple<ChatMode, string>> _messageHistory;
         private InputManager _uiManager;
+        private InputManager _inputManager;
         private int _messageHistoryIndex = -1;
         private Serial _privateMsgSerial = 0;
         private string _privateMsgName;
 
-        private MessageType _mode = MessageType.Regular;
+        private ChatMode _mode = ChatMode.Default;
 
-        private MessageType Mode
+        private ChatMode Mode
         {
             get => _mode;
             set
@@ -53,10 +66,24 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _mode = value;
                 switch (value)
                 {
-                    case MessageType.Regular:
-                        _textBox.SetText(string.Empty);
+                    case ChatMode.Default:
+                        _textBox.Hue = 33;                       
+                        break;
+                    case ChatMode.Whisper:
+                        break;
+                    case ChatMode.Emote:
+                        break;
+                    case ChatMode.Party:
+                        break;
+                    case ChatMode.PartyPrivate:
+                        break;
+                    case ChatMode.Guild:
+                        break;
+                    case ChatMode.Alliance:
                         break;
                 }
+
+                _textBox.SetText(string.Empty);
             }
         }
 
@@ -68,15 +95,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Height = h;
 
             _textEntries = new List<ChatLineTime>();
-            _messageHistory = new List<Tuple<MessageType, string>>();
+            _messageHistory = new List<Tuple<ChatMode, string>>();
+
+            _inputManager = Service.Get<InputManager>();
 
             CanCloseWithRightClick = false;
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
         }
 
-        public void AddLine()
-        {
+        public void AddLine(string text, byte font, Hue hue, bool isunicode)
+        { 
+            _textEntries.Add(new ChatLineTime(text, Width, font, isunicode, hue));
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -95,7 +125,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 };
 
 
-                Mode = MessageType.Regular;
+                Mode = ChatMode.Default;
 
                 AddChildren(new CheckerTrans {X = _textBox.X, Y = _textBox.Y, Width = Width, Height = Height});
                 AddChildren(_textBox);
@@ -108,6 +138,56 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
                     _textEntries[i].Dispose();
                     _textEntries.RemoveAt(i--);
+                }
+            }
+
+            if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_q, false, false, true) &&
+                _messageHistoryIndex > -1)
+            {
+                if (_messageHistoryIndex > 0)
+                    _messageHistoryIndex--;
+                Mode = _messageHistory[_messageHistoryIndex].Item1;
+                _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
+            }
+            else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_w, false, false, true))
+            {
+                if (_messageHistoryIndex < _messageHistory.Count - 1)
+                {
+                    _messageHistoryIndex++;
+                    Mode = _messageHistory[_messageHistoryIndex].Item1;
+                    _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
+                }
+                else
+                {
+                    _textBox.SetText(string.Empty);
+                }
+            }
+            else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_BACKSPACE, false, false, false) && _textBox.Text == string.Empty)
+            {
+                Mode = ChatMode.Default;
+            }
+
+
+            if ((Mode == ChatMode.Default && _textBox.Text.Length == 1) ||
+                (Mode != ChatMode.Default && _textBox.Text.Length == 1))
+            {
+                switch (_textBox.Text[0])
+                {
+                    case ':':
+                        Mode = ChatMode.Emote;
+                        break;
+                    case ';':
+                        Mode = ChatMode.Whisper;
+                        break;
+                    case '/':
+                        Mode = ChatMode.Party;
+                        break;
+                    case '\\':
+                        Mode = ChatMode.Guild;
+                        break;
+                    case '|':
+                        Mode = ChatMode.Alliance;
+                        break;
                 }
             }
 
@@ -129,25 +209,40 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void OnKeybaordReturn(int textID, string text)
         {
-            MessageType sentMode = Mode;
+            if (string.IsNullOrEmpty((text)))
+                return;
+
+            ChatMode sentMode = Mode;
             MessageType speechType = MessageType.Regular;
 
             ushort hue = 0;
             _textBox.SetText(string.Empty);
-            _messageHistory.Add(new Tuple<MessageType, string>(Mode, text));
+            _messageHistory.Add(new Tuple<ChatMode, string>(Mode, text));
             _messageHistoryIndex = _messageHistory.Count;
-            Mode = MessageType.Regular;
+            Mode = ChatMode.Default;
 
             switch (sentMode)
             {
-                case MessageType.Regular:
+                case ChatMode.Default:
                     speechType = MessageType.Regular;
                     hue = 33;
+                    break;
+                case ChatMode.Whisper:
+                    break;
+                case ChatMode.Emote:
+                    break;
+                case ChatMode.Party:
+                    break;
+                case ChatMode.PartyPrivate:
+                    break;
+                case ChatMode.Guild:
+                    break;
+                case ChatMode.Alliance:
                     break;
             }
 
             //GameActions.Say(text, hue, speechType, 0);
-            NetClient.Socket.Send(new PASCIISpeechRequest(text, speechType, MessageFont.Normal, hue));
+            NetClient.Socket.Send(new PUnicodeSpeechRequest(text, speechType, MessageFont.Normal, hue, "ENU"));
         }
 
 
@@ -160,14 +255,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
             private const float TIME_DISPLAY = 10000.0f;
             private const float TIME_FADEOUT = 4000.0f;
 
-            public ChatLineTime(string text, int width)
+            public ChatLineTime(string text, int width, byte font, bool isunicode, Hue hue)
             {
                 _renderedText = new RenderedText
                 {
-                    IsUnicode = true,
-                    Font = 1,
+                    IsUnicode = isunicode,
+                    Font = font,
                     MaxWidth = width,
-                    FontStyle = FontStyle.BlackBorder
+                    FontStyle = FontStyle.BlackBorder,
+                    Hue = hue
                 };
 
                 _renderedText.Text = text;

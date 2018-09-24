@@ -1,3 +1,5 @@
+
+=======
 ﻿#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
@@ -19,6 +21,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
@@ -35,5 +38,7 @@ namespace ClassicUO.Game.Gumps
         bool Contains(int x, int y);
 
         bool IsVisible { get; set; } // from AControl
+
+        event EventHandler ValueChanged;
     }
 }

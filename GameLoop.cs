@@ -58,22 +58,17 @@ namespace ClassicUO
             _log = Service.Get<Log>();
 
             //uncomment it and fill it to save your first settings
-            /*Settings settings1 = new Settings()
-            {
-                Username = "",
-                Password = "",
-                LastCharacterName = "",
-                IP = "",
-                Port = 2599,
-                UltimaOnlineDirectory = "",
-                ClientVersion = "7.0.59.8"
-            };
+            //Settings settings1 = new Settings()
+            //{
 
-            ConfigurationResolver.Save(settings1, "settings.json");*/
+            //};
+
+            //ConfigurationResolver.Save(settings1, "settings.json");
 
             Settings settings =
                 ConfigurationResolver.Load<Settings>(Path.Combine(Environment.CurrentDirectory, "settings.json"));
 
+            Service.Register(settings);
 
             _log.Message(LogTypes.Trace, "Checking for Ultima Online installation...", false);
             try
@@ -121,12 +116,14 @@ namespace ClassicUO
             _log.Message(LogTypes.None, "      Done!");
 
 
+            MaxFPS = settings.MaxFPS;
+
             _sceneManager.ChangeScene(ScenesType.Loading);
 
             _infoText = new RenderedText
             {
                 IsUnicode = true,
-                Font = 1,
+                Font = 3,
                 FontStyle = FontStyle.BlackBorder,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT
             };
@@ -150,7 +147,7 @@ namespace ClassicUO
             {
                 _log.Message(LogTypes.Info, "Connected!");
                 NetClient.Socket.Send(new PSeed(clientVersionBuffer));
-                NetClient.Socket.Send(new PFirstLogin(settings.Username, settings.Password));
+                NetClient.Socket.Send(new PFirstLogin(settings.Username, settings.Password.ToString()));
             };
 
             NetClient.Disconnected += (sender, e) => _log.Message(LogTypes.Warning, "Disconnected!");
@@ -167,7 +164,7 @@ namespace ClassicUO
                         e.Seek(0);
                         e.MoveToData();
                         e.Skip(6);
-                        NetClient.Socket.Send(new PSecondLogin(settings.Username, settings.Password, e.ReadUInt()));
+                        NetClient.Socket.Send(new PSecondLogin(settings.Username, settings.Password.ToString(), e.ReadUInt()));
                         break;
                     case 0xA9:
                         NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName,

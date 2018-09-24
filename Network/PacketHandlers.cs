@@ -639,17 +639,19 @@ namespace ClassicUO.Network
 
             World.Player.GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
 
-            World.Player.SequenceNumber = 0;
+            //World.Player.SequenceNumber = 0;
 
-            if (endX != x || endY != y || endZ != z)
+            if (endX != x || endY != y)
             {
-                World.Player.ResetSteps();
-                World.Player.Position = new Position(x, y, z);
-                World.Player.Direction = direction;
+                World.Player.ForcePosition(x, y, z, direction);
+                //World.Player.ResetSteps();
+                //World.Player.Position = new Position(x, y, z);
+                //World.Player.Direction = direction;
             }
             else if ((endDir & Direction.Up) != (direction & Direction.Up))
                 World.Player.EnqueueStep(x, y, z, direction, (direction & Direction.Running) != 0);
-            else if (World.Player.Tile == null) World.Player.Tile = World.Map.GetTile(x, y);
+            else if (World.Player.Tile == null)
+                World.Player.Tile = World.Map.GetTile(x, y);
 
             //if (endX == x && endY == y)
             //{
