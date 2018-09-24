@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;

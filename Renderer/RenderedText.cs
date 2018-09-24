@@ -43,15 +43,14 @@ namespace ClassicUO.Renderer
 
     public class RenderedText : IDrawableUI
     {
-        private Rectangle _bounds;
         private string _text;
         private Fonts.FontTexture _texture;
         private readonly string[] _lines;
 
-        public RenderedText(string text = "")
+        public RenderedText()
         {
-            _text = text;
             Hue = 0xFFFF;
+            Cell = 30;
         }
 
         public bool IsUnicode { get; set; }
@@ -59,12 +58,7 @@ namespace ClassicUO.Renderer
         public TEXT_ALIGN_TYPE Align { get; set; }
         public int MaxWidth { get; set; }
         public FontStyle FontStyle { get; set; }
-        public byte Cell { get; set; } = 30;
-
-        public MessageType MessageType { get; set; }
-
-        //public long Timeout { get; set; }
-        //public bool IsPersistent { get; set; }
+        public byte Cell { get; set; }
         public bool IsHTML { get; set; }
         public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
         public Hue Hue { get; set; }
@@ -92,7 +86,7 @@ namespace ClassicUO.Renderer
                     }
                     else
                     {
-                        Texture = CreateTexture();
+                        Texture = InternalCreateTexture();
                     }
                 }
             }
@@ -102,35 +96,8 @@ namespace ClassicUO.Renderer
         public bool IsPartialHue { get; set; }
         public bool IsDisposed { get; private set; }
 
-        public Rectangle Bounds
-        {
-            get => _bounds;
-            set => _bounds = value;
-        }
-
-        public int X
-        {
-            get => _bounds.X;
-            set => _bounds.X = value;
-        }
-
-        public int Y
-        {
-            get => _bounds.Y;
-            set => _bounds.Y = value;
-        }
-
-        public int Width
-        {
-            get => _bounds.Width;
-            set => _bounds.Width = value;
-        }
-
-        public int Height
-        {
-            get => _bounds.Height;
-            set => _bounds.Height = value;
-        }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
 
 
         public SpriteTexture Texture
@@ -138,7 +105,7 @@ namespace ClassicUO.Renderer
             get
             {
                 if (!string.IsNullOrEmpty(_text) && (_texture == null || _texture.IsDisposed))
-                    _texture = CreateTexture();
+                    _texture = InternalCreateTexture();
                 return _texture;
             }
             set
@@ -185,12 +152,12 @@ namespace ClassicUO.Renderer
                 dst.Height = src.Height;
             }
 
-            return spriteBatch.Draw2D(Texture, dst, src, hue.HasValue ? hue.Value : Vector3.Zero);
+            return spriteBatch.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);
         }
 
-        public void ReDraw() => Texture = CreateTexture();
+        public void CreateTexture() => Texture = InternalCreateTexture();
 
-        private Fonts.FontTexture CreateTexture()
+        private Fonts.FontTexture InternalCreateTexture()
         {
             if (IsHTML)
                 Fonts.SetUseHTML(true, HTMLColor, ColorBackground);

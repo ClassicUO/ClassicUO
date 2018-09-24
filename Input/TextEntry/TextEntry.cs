@@ -41,11 +41,12 @@ namespace ClassicUO.Input.TextEntry
                 Hue = hue
             };
 
-            RenderCaret = new RenderedText("_")
+            RenderCaret = new RenderedText()
             {
                 IsUnicode = unicode,
                 Font = font,
-                Hue = hue
+                Hue = hue,
+                Text = "_"
             };
 
             MaxCharCount = maxcharlength;

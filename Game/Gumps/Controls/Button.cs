@@ -164,7 +164,7 @@ namespace ClassicUO.Game.Gumps
                 if (HueHover != FontHue && _gText.Hue != HueHover)
                 {
                     _gText.Hue = HueHover;
-                    _gText.ReDraw();
+                    _gText.CreateTexture();
                 }
             }
         }
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.Gumps
                 if (_gText.Hue != FontHue)
                 {
                     _gText.Hue = FontHue;
-                    _gText.ReDraw();
+                    _gText.CreateTexture();
                 }
 
             }
