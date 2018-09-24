@@ -1112,7 +1112,7 @@ namespace ClassicUO.IO.Resources
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {
-                    Service.Get<Log>().Message(LogTypes.Warning, "mul frame size is null");
+                    //Service.Get<Log>().Message(LogTypes.Warning, "mul frame size is null");
                     continue;
                 }
 

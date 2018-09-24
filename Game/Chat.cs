@@ -90,8 +90,12 @@ namespace ClassicUO.Game
                 entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
             else
             {
-                Service.Get<Log>().Message(LogTypes.Trace, "On System Message: " + args.Text);
-                Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "System");
+                if (args.Text != "No militia members present, progress halted.")
+                {
+                    Service.Get<Log>().Message(LogTypes.Trace, "On System Message: [" + args.Type + "] "+  args.Text);
+                    Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "System");
+                }
+
                 // ADD TO SYSTEM MESSAGE
             }
 
