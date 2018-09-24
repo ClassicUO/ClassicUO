@@ -175,7 +175,7 @@ namespace ClassicUO.Game.Gumps
             {
                 _isHovered = false;
 
-                if (_gText.Hue != FontHue)
+                if (_gText != null && _gText.Hue != FontHue)
                 {
                     _gText.Hue = FontHue;
                     _gText.CreateTexture();
