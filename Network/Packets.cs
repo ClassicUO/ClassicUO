@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,9 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using ClassicUO.Game;
@@ -196,6 +193,13 @@ namespace ClassicUO.Network
     {
         public PHelpRequest() : base(0x9B)
         {
+            byte[] empty = new byte[257];
+            foreach (var emptyByte in empty)
+            {
+                WriteByte(emptyByte);
+            }
+            
+
         }
     }
 
@@ -421,6 +425,7 @@ namespace ClassicUO.Network
     public sealed class PVirtueGumpReponse : PacketWriter
     {
         public PVirtueGumpReponse() : base(0xB1) => throw new NotImplementedException();
+
     }
 
     public sealed class PMenuResponse : PacketWriter
@@ -735,7 +740,8 @@ namespace ClassicUO.Network
         {
             WriteUInt(World.Player);
             WriteUShort(0x32);
-            WriteByte(0x0A);
+            //WriteByte(0x0A);
+            WriteByte(0x00);
         }
     }
 

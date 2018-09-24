@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -19,9 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -29,6 +26,7 @@ using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
+using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -47,6 +45,7 @@ namespace ClassicUO
         private UIManager _uiManager;
         private InputManager _inputManager;
         private SceneManager _sceneManager;
+        private JournalData _journalManager;
         private SpriteBatch3D _sb3D;
         private SpriteBatchUI _sbUI;
 
@@ -105,6 +104,7 @@ namespace ClassicUO
 
             Service.Register(_uiManager = new UIManager());
             Service.Register(_sceneManager = new SceneManager());
+            Service.Register(_journalManager = new JournalData());
 
             _inputManager = Service.Get<InputManager>();
             _sb3D = Service.Get<SpriteBatch3D>();
