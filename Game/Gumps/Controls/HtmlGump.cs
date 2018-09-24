@@ -65,6 +65,7 @@ namespace ClassicUO.Game.Gumps
             _gameText.Align = align;
             _gameText.Font = font;
             _gameText.IsUnicode = isunicode;
+            _gameText.MaxWidth = w;
 
             InternalBuild(text, hue);
         }
