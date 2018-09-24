@@ -147,6 +147,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private void BuildPage2()
         {
             AddChildren(new GumpPic(0, 111, 0x00DB, 0) { CanMove = false }, 2);
+
+            Label label = new Label("ClassicUO configuration", true, 0, 460, align: TEXT_ALIGN_TYPE.TS_CENTER)
+            {
+                X = 84, Y = 22
+            };
+            AddChildren(label, 2);
+            
         }
 
         private void BuildPage3()

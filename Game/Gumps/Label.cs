@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Gumps
             _gText = new RenderedText
             {
                 IsUnicode = isunicode,
-                Font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0),
+                Font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 0 : 0),
                 FontStyle = style,
                 Hue = hue++,
                 Align = align,

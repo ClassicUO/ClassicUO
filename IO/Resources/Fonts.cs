@@ -703,7 +703,7 @@ namespace ClassicUO.IO.Resources
                 if (offset > 0 && offset != 0xFFFFFFFF)
                 {
                     byte* ptr = (byte*) ((IntPtr) table + (int) offset);
-                    charWidth = (sbyte) (ptr[0] + ptr[2] + 1);
+                    charWidth = (sbyte) ((sbyte)ptr[0] + (sbyte)ptr[2] + 1);
                 }
                 else if (c == ' ')
                     charWidth = UNICODE_SPACE_WIDTH;
@@ -737,7 +737,7 @@ namespace ClassicUO.IO.Resources
                 if (offset > 0 && offset != 0xFFFFFFFF)
                 {
                     byte* ptr = (byte*) ((IntPtr) table + (int) offset);
-                    textLength += ptr[0] + ptr[2] + 1;
+                    textLength += (sbyte)ptr[0] + (sbyte)ptr[2] + 1;
                 }
                 else if (c == ' ')
                     textLength += UNICODE_SPACE_WIDTH;
@@ -845,7 +845,7 @@ namespace ClassicUO.IO.Resources
                     lastaspace_current_charcolor = current_charcolor;
                 }
 
-                if (ptr.Width + readWidth + data[0] + data[2] > width || si == '\n')
+                if (ptr.Width + readWidth + ((sbyte)data[0] + (sbyte)data[2]) > width || si == '\n')
                 {
                     if (lastSpace == ptr.CharStart && lastSpace <= 0 && si != '\n')
                         ptr.CharStart = 1;
@@ -878,8 +878,7 @@ namespace ClassicUO.IO.Resources
                         ptr.IndentionOffset = 0;
                         continue;
                     }
-
-                    if (lastSpace + 1 == ptr.CharStart && !isFixed && !isCropped)
+                    else if (lastSpace + 1 == ptr.CharStart && !isFixed && !isCropped)
                     {
                         ptr.Width += readWidth;
                         ptr.CharCount += charCount;
@@ -915,10 +914,10 @@ namespace ClassicUO.IO.Resources
                             };
 
                             ptr.Data.Add(mfd1);
-                            readWidth += data[0] + data[2] + 1;
+                            readWidth += (sbyte)data[0] + (sbyte)data[2] + 1;
 
-                            if (data[1] + data[3] > ptr.MaxHeight)
-                                ptr.MaxHeight = data[1] + data[3];
+                            if ((sbyte)data[1] + (sbyte)data[3] > ptr.MaxHeight)
+                                ptr.MaxHeight = (sbyte)data[1] + (sbyte)data[3];
 
                             charCount++;
 
@@ -931,10 +930,7 @@ namespace ClassicUO.IO.Resources
                         charcolor = lastspace_charcolor;
                         current_charcolor = lastspace_charcolor;
 
-                        if (i < str.Length)
-                            si = str[i];
-                        else
-                            si = '\0';
+                        si = i < str.Length ? str[i] : '\0';
 
                         if (ptr.Width <= 0)
                             ptr.Width = 1;
@@ -973,9 +969,9 @@ namespace ClassicUO.IO.Resources
                 }
                 else
                 {
-                    readWidth += data[0] + data[2] + 1;
-                    if (data[1] + data[3] > ptr.MaxHeight)
-                        ptr.MaxHeight = data[1] + data[3];
+                    readWidth += (sbyte)data[0] + (sbyte)data[2] + 1;
+                    if ((sbyte)data[1] + (sbyte)data[3] > ptr.MaxHeight)
+                        ptr.MaxHeight = (sbyte)data[1] + (sbyte)data[3];
                 }
 
                 charCount++;
@@ -1123,14 +1119,14 @@ namespace ClassicUO.IO.Resources
 
                 for (int i = 0; i < dataSize; i++)
                 {
-                    MultilinesFontData data = ptr.Data[i];
-                    char si = data.Item;
+                    MultilinesFontData dataPtr = ptr.Data[i];
+                    char si = dataPtr.Item;
 
-                    table = (uint*) _unicodeFontAddress[data.Font];
+                    table = (uint*) _unicodeFontAddress[dataPtr.Font];
 
                     if (!isLink)
                     {
-                        oldLink = data.LinkID;
+                        oldLink = dataPtr.LinkID;
                         if (oldLink > 0)
                         {
                             isLink = true;
@@ -1138,7 +1134,7 @@ namespace ClassicUO.IO.Resources
                             linkStartY = lineOffsY + 3;
                         }
                     }
-                    else if (data.LinkID <= 0 || i + 1 == dataSize)
+                    else if (dataPtr.LinkID <= 0 || i + 1 == dataSize)
                     {
                         isLink = false;
                         int linkHeight = lineOffsY - linkStartY;
@@ -1171,7 +1167,7 @@ namespace ClassicUO.IO.Resources
                     if ((table[si] <= 0 || table[si] == 0xFFFFFFFF) && si != ' ')
                         continue;
 
-                    byte* ddata = (byte*) ((IntPtr) table + (int) table[si]);
+                    byte* data = (byte*) ((IntPtr) table + (int) table[si]);
                     int offsX = 0;
                     int offsY = 0;
                     int dw = 0;
@@ -1184,12 +1180,12 @@ namespace ClassicUO.IO.Resources
                     }
                     else
                     {
-                        offsX = ddata[0] + 1;
-                        offsY = ddata[1];
-                        dw = ddata[2];
-                        dh = ddata[3];
+                        offsX = (sbyte)data[0] + 1;
+                        offsY = (sbyte)data[1];
+                        dw = (sbyte)data[2];
+                        dh = (sbyte)data[3];
 
-                        ddata = (byte*) ((IntPtr) ddata + 4);
+                        data += 4;
                     }
 
                     int tmpW = w;
@@ -1203,14 +1199,14 @@ namespace ClassicUO.IO.Resources
                     {
                         if (IsUsingHTML && i < ptr.Data.Count)
                         {
-                            isItalic = (data.Flags & UOFONT_ITALIC) != 0;
-                            isSolid = (data.Flags & UOFONT_SOLID) != 0;
-                            isBlackBorder = (data.Flags & UOFONT_BLACK_BORDER) != 0;
-                            isUnderline = (data.Flags & UOFONT_UNDERLINE) != 0;
+                            isItalic = (dataPtr.Flags & UOFONT_ITALIC) != 0;
+                            isSolid = (dataPtr.Flags & UOFONT_SOLID) != 0;
+                            isBlackBorder = (dataPtr.Flags & UOFONT_BLACK_BORDER) != 0;
+                            isUnderline = (dataPtr.Flags & UOFONT_UNDERLINE) != 0;
 
-                            if (data.Color != 0xFFFFFFFF)
+                            if (dataPtr.Color != 0xFFFFFFFF)
                             {
-                                charcolor = Hues.RgbaToArgb(data.Color);
+                                charcolor = Hues.RgbaToArgb(dataPtr.Color);
                                 //isBlackPixel = ((charcolor >> 24) & 0xFF) <= 8 && ((charcolor >> 16) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8;
                                 isBlackPixel = ((charcolor >> 0) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8 &&
                                                ((charcolor >> 16) & 0xFF) <= 8;
@@ -1224,10 +1220,10 @@ namespace ClassicUO.IO.Resources
                             if (testY >= height)
                                 break;
 
-                            byte* scanlines = ddata;
-                            //ddata += scanlineCount;
+                            byte* scanlines = data;
+                            data += scanlineCount;
 
-                            ddata = (byte*) ((IntPtr) ddata + scanlineCount);
+                            //data = (byte*) ((IntPtr) data + scanlineCount);
 
                             int italicOffset = 0;
                             if (isItalic)
@@ -1410,10 +1406,10 @@ namespace ClassicUO.IO.Resources
 
                         if (IsUsingHTML)
                         {
-                            isUnderline = (data.Flags & UOFONT_UNDERLINE) != 0;
-                            if (data.Color != 0xFFFFFFFF)
+                            isUnderline = (dataPtr.Flags & UOFONT_UNDERLINE) != 0;
+                            if (dataPtr.Color != 0xFFFFFFFF)
                             {
-                                charcolor = Hues.RgbaToArgb(data.Color);
+                                charcolor = Hues.RgbaToArgb(dataPtr.Color);
                                 isBlackPixel = ((charcolor >> 0) & 0xFF) <= 8 && ((charcolor >> 8) & 0xFF) <= 8 &&
                                                ((charcolor >> 16) & 0xFF) <= 8;
                             }
@@ -1427,7 +1423,7 @@ namespace ClassicUO.IO.Resources
 
                         byte* aData = (byte*) ((IntPtr) table + (int) table[(byte) 'a']);
 
-                        int testY = lineOffsY + aData[1] + aData[3];
+                        int testY = lineOffsY + (sbyte)aData[1] + (sbyte)aData[3];
 
                         if (testY >= height)
                             break;
@@ -1527,7 +1523,7 @@ namespace ClassicUO.IO.Resources
                 }
 
                 int solidWidth = htmlData[i].Flags & UOFONT_SOLID;
-                if (ptr.Width + readWidth + data[0] + data[2] + solidWidth > width || si == '\n')
+                if (ptr.Width + readWidth + (sbyte)data[0] + (sbyte)data[2] + solidWidth > width || si == '\n')
                 {
                     if (lastSpace == ptr.CharStart && lastSpace <= 0 && si != '\n')
                         ptr.CharStart = 1;
@@ -1599,7 +1595,7 @@ namespace ClassicUO.IO.Resources
 
                             ptr.Data.Add(mfd1);
 
-                            readWidth += data[0] + data[2] + 1;
+                            readWidth += (sbyte)data[0] + (sbyte)data[2] + 1;
                             ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
 
                             charCount++;
@@ -1649,7 +1645,7 @@ namespace ClassicUO.IO.Resources
                 if (si == ' ')
                     readWidth += UNICODE_SPACE_WIDTH;
                 else
-                    readWidth += data[0] + data[2] + 1 + solidWidth;
+                    readWidth += (sbyte)data[0] + (sbyte)data[2] + 1 + solidWidth;
 
                 charCount++;
             }
@@ -2342,7 +2338,7 @@ namespace ClassicUO.IO.Resources
                             if (offset > 0 && offset != 0xFFFFFFFF)
                             {
                                 byte* cptr = (byte*) ((IntPtr) table + (int) offset);
-                                width += cptr[0] + cptr[2] + 1;
+                                width += (sbyte)cptr[0] + (sbyte)cptr[2] + 1;
                             }
                             else if (ch == ' ')
                                 width += UNICODE_SPACE_WIDTH;
@@ -2406,7 +2402,7 @@ namespace ClassicUO.IO.Resources
                         if (offset > 0 && offset != 0xFFFFFFFF)
                         {
                             byte* cptr = (byte*) ((IntPtr) table + (int) offset);
-                            x += cptr[0] + cptr[2] + 1;
+                            x += (sbyte)cptr[0] + (sbyte)cptr[2] + 1;
                         }
                         else if (ch == ' ')
                             x += UNICODE_SPACE_WIDTH;
