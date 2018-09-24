@@ -44,13 +44,14 @@ namespace ClassicUO.Game.Gumps
             UseFlagScrollbar = HasScrollbar && parts[7] == "2";
 
             _gameText.IsHTML = true;
+            _gameText.MaxWidth = Width - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0);
 
             InternalBuild(lines[textIndex], 0);
         }
 
         public HtmlGump(int x, int y, int w, int h, string text, int hasbackground, int hasscrollbar, int hue,
             bool ishtml, byte font = 1, bool isunicode = true, FontStyle style = FontStyle.None,
-            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : this()
+            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, int maxWidth = 0) : this()
         {
             X = x;
             Y = y;
@@ -65,12 +66,12 @@ namespace ClassicUO.Game.Gumps
             _gameText.Align = align;
             _gameText.Font = font;
             _gameText.IsUnicode = isunicode;
-            _gameText.MaxWidth = w;
+            _gameText.MaxWidth = maxWidth;
 
             InternalBuild(text, hue);
         }
 
-        public HtmlGump()
+        public HtmlGump() : base()
         {
             _gameText = new RenderedText
             {
@@ -124,7 +125,6 @@ namespace ClassicUO.Game.Gumps
                 _gameText.Hue = (ushort) hue;
 
             _gameText.ColorBackground = !HasBackground;
-            _gameText.MaxWidth = Width - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0);
             _gameText.Text = text;
 
             if (HasBackground)
