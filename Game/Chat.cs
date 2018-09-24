@@ -21,6 +21,7 @@
 #endregion
 using System;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game
@@ -89,6 +90,7 @@ namespace ClassicUO.Game
             else
             {
                 Service.Get<Log>().Message(LogTypes.Trace, "On System Message: " + args.Text);
+                Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "System");
                 // ADD TO SYSTEM MESSAGE
             }
 
