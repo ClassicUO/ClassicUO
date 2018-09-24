@@ -176,6 +176,22 @@ namespace ClassicUO.Game.Gumps
         public int ParentX => Parent != null ? Parent.X + Parent.ParentX : 0;
         public int ParentY => Parent != null ? Parent.Y + Parent.ParentY : 0;
 
+        public int ScreenCoordinateX
+        {
+            get
+            {
+                return ParentX + X;
+            }
+        }
+
+        public int ScreenCoordinateY
+        {
+            get
+            {
+                return ParentY + Y;
+            }
+        }
+
         public GumpControl Parent
         {
             get => _parent;
