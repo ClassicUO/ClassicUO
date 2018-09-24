@@ -33,13 +33,14 @@ namespace ClassicUO.Game.Views
         public TextOverheadView(TextOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0,
             bool isunicode = false, FontStyle style = FontStyle.None) : base(parent)
         {
-            _text = new RenderedText(parent.Text)
+            _text = new RenderedText()
             {
                 MaxWidth = maxwidth,
                 Hue = hue,
                 Font = font,
                 IsUnicode = isunicode,
-                FontStyle = style
+                FontStyle = style,
+                Text = parent.Text
             };
 
             Texture = _text.Texture;
