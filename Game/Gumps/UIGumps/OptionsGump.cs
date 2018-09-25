@@ -41,6 +41,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private ColorPickerGump _colorPickerGump;
 
+        private Dictionary<string, object>[] _settingsToValidate = new Dictionary<string, object>[10]
+        {
+            new Dictionary<string, object>(), new Dictionary<string, object>(), new Dictionary<string, object>(),
+            new Dictionary<string, object>(), new Dictionary<string, object>(),new Dictionary<string, object>(),
+            new Dictionary<string, object>(),new Dictionary<string, object>(),new Dictionary<string, object>(),
+            new Dictionary<string, object>()
+        };
+
         public OptionsGump() : base(0, 0)
         {
             CanMove = true;
@@ -98,7 +106,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(label, 1);
 
             label = new Label("These settings affect the sound and music you will hear while playing Ultima Online.",
-                true, 0, maxwidth: 500)
+                true, 0, 500)
             {
                 X = 64,
                 Y = 44
@@ -174,8 +182,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             scrollArea.AddChildren(label);
 
             _sliderFPS = new HSliderBar(0, 21, 90, 15, 250, _settings.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true);
+            _sliderFPS.ValueChanged += (sender, args) => _settingsToValidate[1]["maxfps"] = _sliderFPS.Value;
             scrollArea.AddChildren(_sliderFPS);
-
 
         }
 
@@ -263,6 +271,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             AddChildren(new GumpPic(0, 243, 0x00DF, 0) { CanMove = false }, 4);
 
+            Label label = new Label("Chat", true, 0, 460, align: TEXT_ALIGN_TYPE.TS_CENTER)
+            {
+                X = 84, Y = 22
+            };
+            AddChildren(label, 4);
+
+            label = new Label("These settings affect the interface display for the chat system.", true, 0)
+            {
+                X = 64, Y = 44
+            };
+            AddChildren(label, 4);
+
+
+            
         }
 
         private void BuildPage5()
@@ -301,9 +323,106 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         }
 
-        public override void OnButtonClick(int buttonID)
+
+        private void ApplySettings()
+        {
+            int index = ActivePage - 1;
+
+            switch (index)
+            {
+                case 0:
+                    break;
+                case 1:
+
+
+                    if (_settingsToValidate[index].TryGetValue("maxfps", out var result))
+                    {                     
+                        Service.Get<GameLoop>().MaxFPS = _settings.MaxFPS = (int)result;
+                    }
+
+
+
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+                case 8:
+                    break;
+                case 9:
+                    break;
+            }
+
+        }
+
+
+        private void Validate(int index, string key, dynamic obj)
+        {
+            if (_settingsToValidate[index].TryGetValue(key, out var value))
+            {
+                obj = value;
+            }
+        }
+    
+
+        private void RestoreDefaultSettings()
         {
 
+        }
+
+
+
+        public override void OnButtonClick(int buttonID)
+        {
+            switch ((Buttons)buttonID)
+            {
+                case Buttons.SoundAndMusic:
+                    break;
+                case Buttons.Configuration:
+                    break;
+                case Buttons.Language:
+                    break;
+                case Buttons.Chat:
+                    break;
+                case Buttons.Macro:
+                    break;
+                case Buttons.Interface:
+                    break;
+                case Buttons.Display:
+                    break;
+                case Buttons.Reputation:
+                    break;
+                case Buttons.Misc:
+                    break;
+                case Buttons.FilterOptions:
+                    break;
+                case Buttons.TextColor:
+                    break;
+                case Buttons.TextFont:
+                    break;
+                case Buttons.Cancel:
+                    Dispose();
+                    break;
+                case Buttons.Apply:
+                    ApplySettings();
+                    break;
+                case Buttons.Default:
+                    break;
+                case Buttons.Ok:
+                    ApplySettings();
+                    Dispose();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(buttonID), buttonID, null);
+            }
         }
     }
 }

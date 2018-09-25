@@ -132,10 +132,15 @@ namespace ClassicUO
             TEST(settings);
             // #####  END TEST  #####
 
-
             base.Initialize();
         }
 
+        protected override void UnloadContent()
+        {
+            ConfigurationResolver.Save(Service.Get<Settings>(), "settings.json");
+
+            base.UnloadContent();
+        }
 
         private void TEST(Settings settings)
         {
