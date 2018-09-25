@@ -224,7 +224,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             if (_settings.TooltipsTextColor != 0xFFFF)
             {
-                color = Hues.GetPolygoneColor(12, (ushort)_settings.TooltipsTextColor);
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, (ushort) _settings.TooltipsTextColor) << 8) | 0xFF);
             }
 
             _colorPickerTooltipText = new ColorPickerBox(67, 154, 1, 1, 13, 14, (int)color);
@@ -234,6 +234,29 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 UIManager.Add(pickerGump);
             };
             AddChildren(_colorPickerTooltipText, 3);
+
+            label = new Label("Color of tooltips text", true, 0)
+            {
+                X = 88, Y = 151
+            };
+
+            AddChildren(label, 3);
+
+
+            AddChildren(new Button((int)Buttons.TextFont, 0x00D0, 0x00D0)
+            {
+                X = 64,
+                Y = 173,
+                ButtonAction = ButtonAction.Activate,
+                ButtonParameter = 3
+            }, 3);
+
+            label = new Label("Font for tooltips", true, 0)
+            {
+                X = 88, Y = 173
+            };
+
+            AddChildren(label, 3);
         }
 
         private void BuildPage4()

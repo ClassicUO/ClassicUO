@@ -92,7 +92,7 @@ namespace ClassicUO.Configuration
 
         private bool _useTooltips;
         private int _delayAppearTooltips;
-        private int _tooltipsTextColor;
+        private ushort _tooltipsTextColor;
 
         [JsonConstructor]
         public Settings()
@@ -437,7 +437,7 @@ namespace ClassicUO.Configuration
         }
 
         [JsonProperty(PropertyName = "tooltips_text_color")]
-        public int TooltipsTextColor
+        public ushort TooltipsTextColor
         {
             get => _tooltipsTextColor;
             set => SetProperty(ref _tooltipsTextColor, value);
