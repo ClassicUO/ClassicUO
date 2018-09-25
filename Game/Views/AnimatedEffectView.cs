@@ -55,9 +55,6 @@ namespace ClassicUO.Game.Views
             AnimatedItemEffect effect = (AnimatedItemEffect) GameObject;
             if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
-                if (Texture != null && !Texture.IsDisposed)
-                    Texture.Dispose();
-
                 _displayedGraphic = effect.AnimationGraphic;
                 Texture = Art.GetStaticTexture(effect.AnimationGraphic);
                 Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4,

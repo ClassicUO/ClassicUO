@@ -96,6 +96,8 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        public int ScrollStep { get; set; } = 5;
+
 
         protected override void OnInitialize()
         {
@@ -131,9 +133,9 @@ namespace ClassicUO.Game.Gumps
                 {
                     _timeUntilNextClick += TIME_BETWEEN_CLICKS;
                     if (_btUpClicked)
-                        Value -= 1;
+                        Value -= ScrollStep;
                     if (_btDownClicked)
-                        Value += 1;
+                        Value += ScrollStep;
                 }
 
                 _timeUntilNextClick -= (float) totalMS;
@@ -275,15 +277,16 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+
         protected override void OnMouseWheel(MouseEvent delta)
         {
             switch (delta)
             {
                 case MouseEvent.WheelScrollUp:
-                    Value--;
+                    Value -= ScrollStep;
                     break;
                 case MouseEvent.WheelScrollDown:
-                    Value++;
+                    Value += ScrollStep;
                     break;
             }
         }

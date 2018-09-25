@@ -61,6 +61,7 @@ namespace ClassicUO.Game.Gumps
         public int MinValue { get; set; }
         public int MaxValue { get; set; }
         public int BarWidth { get; set; }
+        public float Percents { get; private set; }
 
         public int Value
         {
@@ -85,7 +86,6 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public float Percents { get; private set; }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -110,6 +110,8 @@ namespace ClassicUO.Game.Gumps
                 Width = BarWidth;
                 Height = _gumpWidget.Height;
                 //RecalculateSliderX();
+
+                CalculateOffset();
             }
 
             if (_gumpSpliderBackground != null)

@@ -88,7 +88,11 @@ namespace ClassicUO.Configuration
         private bool _skillReport;
 
 
+        private bool _useOldStatus;
 
+        private bool _useTooltips;
+        private int _delayAppearTooltips;
+        private ushort _tooltipsTextColor;
 
         [JsonConstructor]
         public Settings()
@@ -404,6 +408,39 @@ namespace ClassicUO.Configuration
         {
             get => _skillReport;
             set => SetProperty(ref _skillReport, value);
+        }
+
+
+
+        [JsonProperty(PropertyName = "use_old_status")]
+        public bool UseOldStatus
+        {
+            get => _useOldStatus;
+            set => SetProperty(ref _useOldStatus, value);
+        }
+
+
+
+
+        [JsonProperty(PropertyName = "use_tooltips")]
+        public bool UseTooltips
+        {
+            get => _useTooltips;
+            set => SetProperty(ref _useTooltips, value);
+        }
+
+        [JsonProperty(PropertyName = "delay_appear_tooltips")]
+        public int DelayAppearTooltips
+        {
+            get => _delayAppearTooltips;
+            set => SetProperty(ref _delayAppearTooltips, value);
+        }
+
+        [JsonProperty(PropertyName = "tooltips_text_color")]
+        public ushort TooltipsTextColor
+        {
+            get => _tooltipsTextColor;
+            set => SetProperty(ref _tooltipsTextColor, value);
         }
     }
 

@@ -163,7 +163,8 @@ namespace ClassicUO.Game.Gumps
                         case "xmfhtmlgump":
                             gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]),
                                 int.Parse(gparams[3]), int.Parse(gparams[4]),
-                                Cliloc.GetString(int.Parse(gparams[5])), int.Parse(gparams[6]), int.Parse(gparams[7]),
+                                int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2",
+                                Cliloc.GetString(int.Parse(gparams[5])),
                                 0, true), page);
                             break;
                         case "xmfhtmlgumpcolor":
@@ -172,7 +173,8 @@ namespace ClassicUO.Game.Gumps
                                 color = 0x00FFFFFF;
                             gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]),
                                 int.Parse(gparams[3]), int.Parse(gparams[4]),
-                                Cliloc.GetString(int.Parse(gparams[5])), int.Parse(gparams[6]), int.Parse(gparams[7]),
+                                int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2",
+                                Cliloc.GetString(int.Parse(gparams[5])),
                                 color, true), page);
                             break;
                         case "xmfhtmltok":
@@ -182,7 +184,8 @@ namespace ClassicUO.Game.Gumps
 
                             gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]),
                                 int.Parse(gparams[3]), int.Parse(gparams[4]),
-                                Cliloc.GetString(int.Parse(gparams[8])), int.Parse(gparams[5]), int.Parse(gparams[6]),
+                                int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2",
+                                Cliloc.GetString(int.Parse(gparams[8])),
                                 color, true), page);
                             break;
                         case "page":

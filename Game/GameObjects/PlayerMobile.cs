@@ -21,6 +21,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -71,7 +72,7 @@ namespace ClassicUO.Game.GameObjects
         private readonly Ability[] _ability = new Ability[2] {Ability.None, Ability.None};
 
         private readonly Deque<Step> _requestedSteps = new Deque<Step>();
-        private readonly List<Skill> _sklls;
+        private readonly Skill[] _sklls;
         private ushort _damageMax;
         private ushort _damageMin;
         private ushort _dexterity;
@@ -122,8 +123,14 @@ namespace ClassicUO.Game.GameObjects
 
         public PlayerMobile(Serial serial) : base(serial)
         {
-            _sklls = new List<Skill>();
-           
+            _sklls = new Skill[IO.Resources.Skills.SkillsCount];
+            for (int i = 0; i < _sklls.Length; i++)
+            {
+                var skill = IO.Resources.Skills.GetSkill(i);
+                _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasButton);
+            }
+
+            NetClient.Socket.Send((new PSkillsRequest(this)));
         } 
 
 
@@ -699,7 +706,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateSkill(int id, ushort realValue, ushort baseValue, SkillLock skillLock, ushort cap)
         {
-            if (id < _sklls.Count)
+            if (id < _sklls.Length)
             {
                 Skill skill = _sklls[id];
                 skill.ValueFixed = realValue;
@@ -712,7 +719,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateSkillLock(int id, SkillLock skillLock)
         {
-            if (id < _sklls.Count)
+            if (id < _sklls.Length)
             {
                 Skill skill = _sklls[id];
                 skill.Lock = skillLock;
