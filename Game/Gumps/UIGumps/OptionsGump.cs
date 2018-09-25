@@ -41,13 +41,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private ColorPickerGump _colorPickerGump;
 
-        private Dictionary<string, object>[] _settingsToValidate = new Dictionary<string, object>[10]
-        {
-            new Dictionary<string, object>(), new Dictionary<string, object>(), new Dictionary<string, object>(),
-            new Dictionary<string, object>(), new Dictionary<string, object>(),new Dictionary<string, object>(),
-            new Dictionary<string, object>(),new Dictionary<string, object>(),new Dictionary<string, object>(),
-            new Dictionary<string, object>()
-        };
+        private Checkbox _checkboxHighlightGameObjects;
+
 
         public OptionsGump() : base(0, 0)
         {
@@ -182,24 +177,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
             scrollArea.AddChildren(label);
 
             _sliderFPS = new HSliderBar(0, 21, 90, 15, 250, _settings.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true);
-            _sliderFPS.ValueChanged += (sender, args) => _settingsToValidate[1]["maxfps"] = _sliderFPS.Value;
             scrollArea.AddChildren(_sliderFPS);
 
 
-            Checkbox checkbox = new Checkbox(0x00D2, 0x00D3, "Highlight game objects")
+            _checkboxHighlightGameObjects = new Checkbox(0x00D2, 0x00D3, "Highlight game objects")
             {
                 X = 0, Y = 41, IsChecked =  _settings.HighlightGameObjects
             };
-            checkbox.ValueChanged += (sender, e) => _settingsToValidate[1]["highlightgameobjects"] = checkbox.IsChecked;
-            scrollArea.AddChildren(checkbox);
+            scrollArea.AddChildren(_checkboxHighlightGameObjects);
 
-            checkbox = new Checkbox(0x00D2, 0x00D3, "STUFF")
-            {
-                X = 0,
-                Y = 61,
-            };
-            checkbox.ValueChanged += (sender, e) => _settingsToValidate[1]["stuff"] = checkbox.IsChecked;
-            scrollArea.AddChildren(checkbox);
+           
         }
 
         private void BuildPage3()
@@ -341,54 +328,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void ApplySettings()
         {
-            int index = ActivePage - 1;
-
-            switch (index)
-            {
-                case 0:
-                    break;
-                case 1:
-
-
-                    if (_settingsToValidate[index].TryGetValue("maxfps", out var result))
-                    {                     
-                        Service.Get<GameLoop>().MaxFPS = _settings.MaxFPS = (int)result;
-
-                        _settingsToValidate[index].Remove("maxfps");
-                    }
-
-                    if (_settingsToValidate[index].TryGetValue("highlightgameobjects", out result))
-                    {
-                        _settings.HighlightGameObjects = (bool) result;
-
-                        _settingsToValidate[index].Remove("highlightgameobjects");
-                    }
-
-                    if (_settingsToValidate[index].TryGetValue("stuff", out result))
-                    {
-                        //_settings.HighlightGameObjects = (bool)result;ù
-
-                        _settingsToValidate[index].Remove("stuff");
-                    }
-
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
-                    break;
-                case 5:
-                    break;
-                case 6:
-                    break;
-                case 7:
-                    break;
-                case 8:
-                    break;
-                case 9:
-                    break;
-            }
+            Service.Get<GameLoop>().MaxFPS = _settings.MaxFPS = _sliderFPS.Value;
+            _settings.HighlightGameObjects = _checkboxHighlightGameObjects.IsChecked;
 
         }
 
