@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             scrollArea.AddChildren(label);
 
-            _sliderFPS = new HSliderBar(0, 21, 90, 15, 250, 144, HSliderBarStyle.MetalWidgetRecessedBar, true);
+            _sliderFPS = new HSliderBar(0, 21, 90, 15, 250, _settings.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true);
             scrollArea. AddChildren(_sliderFPS);
         }
 
