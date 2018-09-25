@@ -94,6 +94,30 @@ namespace ClassicUO.Game.GameObjects
         private uint _tithingPoints;
         private ushort _weight;
         private ushort _weightMax;
+        private ushort _statscap;
+        private ushort _hitChanceInc;
+        private ushort _swingSpeedInc;
+        private ushort _damageChanceInc;
+        private ushort _lowerReagentCost;
+        private ushort _hitPointsRegen;
+        private ushort _staminaRegen;
+        private ushort _manaRegen;
+        private ushort _reflectPhysicalDamage;
+        private ushort _enhancePotions;
+        private ushort _defenseChanceInc;
+        private ushort _spellDamageInc;
+        private ushort _fasterCastRecovery;
+        private ushort _fasterCasting;
+        private ushort _lowerManaCost;
+        private ushort _strengthInc;
+        private ushort _dexterityInc;
+        private ushort _intelligenceInc;
+        private ushort _hitPointsInc;
+        private ushort _staminaInc;
+        private ushort _manaInc;
+        private ushort _maximumHitPointsInc;
+        private ushort _maximumStaminaInc;
+        private ushort _maximumManaInc;
 
 
         public PlayerMobile(Serial serial) : base(serial)
@@ -341,6 +365,318 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public ushort StatsCap
+        {
+            get => _statscap;
+            set
+            {
+                if (_statscap != value)
+                {
+                    _statscap = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort HitChanceInc
+        {
+            get => _hitChanceInc;
+            set
+            {
+                if (_hitChanceInc != value)
+                {
+                    _hitChanceInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort SwingSpeedInc
+        {
+            get => _swingSpeedInc;
+            set
+            {
+                if (_swingSpeedInc != value)
+                {
+                    _swingSpeedInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort DamageChanceInc
+        {
+            get => _damageChanceInc;
+            set
+            {
+                if (_damageChanceInc != value)
+                {
+                    _damageChanceInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort LowerReagentCost
+        {
+            get => _lowerReagentCost;
+            set
+            {
+                if (_lowerReagentCost != value)
+                {
+                    _lowerReagentCost = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort HitPointsRegen
+        {
+            get => _hitPointsRegen;
+            set
+            {
+                if (_hitPointsRegen != value)
+                {
+                    _hitPointsRegen = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort StaminaRegen
+        {
+            get => _staminaRegen;
+            set
+            {
+                if (_staminaRegen != value)
+                {
+                    _staminaRegen = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort ManaRegen
+        {
+            get => _manaRegen;
+            set
+            {
+                if (_manaRegen != value)
+                {
+                    _manaRegen = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+//====================================================
+        public ushort ReflectPhysicalDamage
+        {
+            get => _reflectPhysicalDamage;
+            set
+            {
+                if (_reflectPhysicalDamage != value)
+                {
+                    _reflectPhysicalDamage = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort EnhancePotions
+        {
+            get => _enhancePotions;
+            set
+            {
+                if (_enhancePotions != value)
+                {
+                    _enhancePotions = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort DefenseChanceInc
+        {
+            get => _defenseChanceInc;
+            set
+            {
+                if (_defenseChanceInc != value)
+                {
+                    _defenseChanceInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort SpellDamageInc
+        {
+            get => _spellDamageInc;
+            set
+            {
+                if (_spellDamageInc != value)
+                {
+                    _spellDamageInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort FasterCastRecovery
+        {
+            get => _fasterCastRecovery;
+            set
+            {
+                if (_fasterCastRecovery != value)
+                {
+                    _fasterCastRecovery = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort FasterCasting
+        {
+            get => _fasterCasting;
+            set
+            {
+                if (_fasterCasting != value)
+                {
+                    _fasterCasting = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort LowerManaCost
+        {
+            get => _lowerManaCost;
+            set
+            {
+                if (_lowerManaCost != value)
+                {
+                    _lowerManaCost = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort StrengthInc
+        {
+            get => _strengthInc;
+            set
+            {
+                if (_strengthInc != value)
+                {
+                    _strengthInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort DexterityInc
+        {
+            get => _dexterityInc;
+            set
+            {
+                if (_dexterityInc != value)
+                {
+                    _dexterityInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort IntelligenceInc
+        {
+            get => _intelligenceInc;
+            set
+            {
+                if (_intelligenceInc != value)
+                {
+                    _intelligenceInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort HitPointsInc
+        {
+            get => _hitPointsInc;
+            set
+            {
+                if (_hitPointsInc != value)
+                {
+                    _hitPointsInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort StaminaInc
+        {
+            get => _staminaInc;
+            set
+            {
+                if (_staminaInc != value)
+                {
+                    _staminaInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort ManaInc
+        {
+            get => _manaInc;
+            set
+            {
+                if (_manaInc != value)
+                {
+                    _manaInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort MaximumHitPointsInc
+        {
+            get => _maximumHitPointsInc;
+            set
+            {
+                if (_maximumHitPointsInc != value)
+                {
+                    _maximumHitPointsInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort MaximumStaminaInc
+        {
+            get => _maximumStaminaInc;
+            set
+            {
+                if (_maximumStaminaInc != value)
+                {
+                    _maximumStaminaInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort MaximumManaInc
+        {
+            get => _maximumManaInc;
+            set
+            {
+                if (_maximumManaInc != value)
+                {
+                    _maximumManaInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
         public Ability PrimaryAbility
         {
             get => _ability[0];
@@ -357,7 +693,7 @@ namespace ClassicUO.Game.GameObjects
         //protected override bool NoIterateAnimIndex() => false;
         protected override bool IsWalking => LastStepTime > World.Ticks - PLAYER_WALKING_DELAY;
         public byte SequenceNumber { get; set; }
-
+        
 
         public event EventHandler StatsChanged, SkillsChanged;
 
