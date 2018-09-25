@@ -31,8 +31,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         }
 
-        private Settings _settings;
-        private HSliderBar _sliderSound, _sliderMusic;
+        private readonly Settings _settings;
+        private HSliderBar _sliderSound, _sliderMusic, _sliderFPS;
 
         public OptionsGump() : base(0, 0)
         {
@@ -155,12 +155,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(label, 2);
 
 
+            HtmlGump scrollArea = new HtmlGump(64, 90, 500, 300, false, true);
+            AddChildren(scrollArea, 2);
+
+
             label = new Label("FPS:", true, 0)
             {
-                X = 64,
-                Y = 44
+                X = 0,
+                Y = 0
             };
-            AddChildren(label, 2);
+            scrollArea.AddChildren(label);
+
+            _sliderFPS = new HSliderBar(0, 21, 90, 15, 250, 144, HSliderBarStyle.MetalWidgetRecessedBar, true);
+            scrollArea. AddChildren(_sliderFPS);
         }
 
         private void BuildPage3()

@@ -88,6 +88,7 @@ namespace ClassicUO.Configuration
         private bool _skillReport;
 
 
+        private bool _useOldStatus;
 
 
         [JsonConstructor]
@@ -404,6 +405,15 @@ namespace ClassicUO.Configuration
         {
             get => _skillReport;
             set => SetProperty(ref _skillReport, value);
+        }
+
+
+
+        [JsonProperty(PropertyName = "use_old_status")]
+        public bool UseOldStatus
+        {
+            get => _useOldStatus;
+            set => SetProperty(ref _useOldStatus, value);
         }
     }
 
