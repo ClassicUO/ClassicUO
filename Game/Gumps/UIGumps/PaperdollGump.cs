@@ -205,7 +205,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 case Buttons.Help:
                     GameActions.RequestHelp();
-                    Service.Get<Log>().Message(LogTypes.Info,"Help request sent!");
                     break;
 
                 case Buttons.Options:
@@ -221,7 +220,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 case Buttons.Quests:
                     GameActions.RequestQuestMenu();
-                    Service.Get<Log>().Message(LogTypes.Info, "Quest menu request sent!");
                     break;
 
                 case Buttons.Skills:
@@ -234,12 +232,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 case Buttons.PeaceWarToggle:
                     GameActions.ToggleWarMode();
-                    Service.Get<Log>().Message(LogTypes.Info,
-                        $"War mode set {(!World.Player.InWarMode ? "ON" : "OFF")} !");
                     break;
 
                 case Buttons.Status:
-                    //
+                    if (UIManager.Get<StatusGump>() == null)
+                    {
+                        UIManager.Add(new StatusGump());
+                    }
+                    else
+                        UIManager.Remove<StatusGump>();
                     break;
             }
         }

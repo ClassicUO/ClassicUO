@@ -11,9 +11,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     class JournalGump : Gump
     {
-        private ExpandableScroll m_Background;
-        private RenderedTextList m_JournalEntries;
-        private readonly ScrollFlag m_ScrollBar;
+        private ExpandableScroll _background;
+        private RenderedTextList _journalEntries;
+        private readonly ScrollFlag _scrollBar;
 
         public JournalGump()
             : base(0, 0)
@@ -23,11 +23,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanMove = true;
             AcceptMouseInput = true;
 
-            AddChildren(m_Background = new ExpandableScroll( 0, 0, 300));
-            m_Background.TitleGumpID = 0x82A;
+            AddChildren(_background = new ExpandableScroll( 0, 0, 300));
+            _background.TitleGumpID = 0x82A;
 
-            AddChildren(m_ScrollBar = new ScrollFlag(this, 0, 0 , Height));
-            AddChildren(m_JournalEntries = new RenderedTextList( 30, 36, 242, 200, m_ScrollBar));
+            AddChildren(_scrollBar = new ScrollFlag(this, 0, 0 , Height));
+            AddChildren(_journalEntries = new RenderedTextList( 30, 36, 242, 200, _scrollBar));
         }
 
         protected override void OnInitialize()
@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            m_JournalEntries.Height = Height - 98;
+            _journalEntries.Height = Height - 98;
             base.Update(totalMS, frameMS);
         }
 
@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             bool asUnicode = entry.AsUnicode;
             TransformFont(ref font, ref asUnicode);
 
-            m_JournalEntries.AddEntry(text, font, entry.Hue);
+            _journalEntries.AddEntry(text, font, entry.Hue);
         }
 
         private void TransformFont(ref int font, ref bool asUnicode)
@@ -89,26 +89,26 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 AddJournalEntry(Service.Get<JournalData>().JournalEntries[i]);
             }
 
-            m_ScrollBar.MinValue = 0;
+            _scrollBar.MinValue = 0;
         }
     }
 
     public class JournalData
     {
-        private readonly List<JournalEntry> m_JournalEntries = new List<JournalEntry>();
+        private readonly List<JournalEntry> _journalEntries = new List<JournalEntry>();
         public List<JournalEntry> JournalEntries
         {
-            get { return m_JournalEntries; }
+            get { return _journalEntries; }
         }
 
         public event Action<JournalEntry> OnJournalEntryAdded;
 
         public void AddEntry(string text, int font, ushort hue, string speakerName)
         {
-            while (m_JournalEntries.Count > 99)
-                m_JournalEntries.RemoveAt(0);
-            m_JournalEntries.Add(new JournalEntry(text, font, hue, speakerName));
-            OnJournalEntryAdded?.Invoke(m_JournalEntries[m_JournalEntries.Count - 1]);
+            while (_journalEntries.Count > 99)
+                _journalEntries.RemoveAt(0);
+            _journalEntries.Add(new JournalEntry(text, font, hue, speakerName));
+            OnJournalEntryAdded?.Invoke(_journalEntries[_journalEntries.Count - 1]);
         }
     }
 

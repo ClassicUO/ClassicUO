@@ -44,10 +44,35 @@ namespace ClassicUO.Game.Gumps
             };
         }
 
+        public Label(int font, int hue, string text, int width = 400)
+        {
+            _gText = new RenderedText
+            {
+                IsUnicode = false,
+                Font = (byte)font,
+                Hue = (Hue)hue,
+                //Align = align,
+                MaxWidth = width,
+                Text = text
+            };
+        }
+
         public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, Hue.Parse(parts[3]), 0, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
+        }
+
+        public byte Font
+        {
+            get => _gText.Font;
+            set => _gText.Font = value;
+        }
+
+        public string Text
+        {
+            get => _gText.Text;
+            set => _gText.Text = value;
         }
 
 
