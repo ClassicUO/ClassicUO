@@ -126,11 +126,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     if (UIManager.Get<JournalGump>() == null)
                     {
                         UIManager.Add(new JournalGump());
-                        Service.Get<Log>().Message(LogTypes.Warning, "Journal opened!");
                     }
                     else
                         UIManager.Remove<JournalGump>();
-                        Service.Get<Log>().Message(LogTypes.Warning, "Journal closed!");
                     break;
                 case Buttons.Chat:
                     Service.Get<Log>().Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");
