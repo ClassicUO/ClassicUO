@@ -81,7 +81,7 @@ namespace ClassicUO.Renderer
                         IsPartialHue = false;
                         if (IsHTML)
                             Fonts.SetUseHTML(false);
-                        Links = null;
+                        Links.Clear();
                         Texture = null;
                     }
                     else
