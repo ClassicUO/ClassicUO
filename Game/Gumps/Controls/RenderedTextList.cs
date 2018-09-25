@@ -21,7 +21,7 @@ namespace ClassicUO.Game.Gumps
             _scrollBar = scrollBarControl;
             _scrollBar.IsVisible = false;
 
-            AcceptMouseInput = true;
+            AcceptMouseInput = false;
 
             X = x;
             Y = y;

@@ -517,7 +517,8 @@ namespace ClassicUO.Game.Gumps
 
         protected virtual void OnMouseWheel(MouseEvent delta)
         {
-            
+            if (Parent != null)
+                Parent.OnMouseWheel(delta);
         }
 
         protected virtual void OnMouseEnter(int x, int y)
