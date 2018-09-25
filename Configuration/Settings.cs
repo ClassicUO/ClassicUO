@@ -94,6 +94,9 @@ namespace ClassicUO.Configuration
         private int _delayAppearTooltips;
         private ushort _tooltipsTextColor;
 
+        private bool _highlightGameObjects;
+
+
         [JsonConstructor]
         public Settings()
         {
@@ -441,6 +444,14 @@ namespace ClassicUO.Configuration
         {
             get => _tooltipsTextColor;
             set => SetProperty(ref _tooltipsTextColor, value);
+        }
+
+
+        [JsonProperty(PropertyName = "highlight_gameobjects")]
+        public bool HighlightGameObjects
+        {
+            get => _highlightGameObjects;
+            set => SetProperty(ref _highlightGameObjects, value);
         }
     }
 

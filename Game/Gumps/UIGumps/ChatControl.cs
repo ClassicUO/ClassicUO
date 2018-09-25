@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public void AddLine(string text, byte font, Hue hue, bool isunicode)
         { 
-            _textEntries.Add(new ChatLineTime(text, Width, font, isunicode, hue));
+            _textEntries.Add(new ChatLineTime(text, 320, font, isunicode, hue));
         }
 
         public override void Update(double totalMS, double frameMS)

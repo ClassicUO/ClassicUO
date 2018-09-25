@@ -19,8 +19,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
@@ -32,6 +35,8 @@ namespace ClassicUO.Game.Gumps
 
         private readonly SpriteTexture[] _textures = new SpriteTexture[2];
         private RenderedText _text;
+        private bool _isChecked;
+
 
         public Checkbox(ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0)
         {
@@ -64,8 +69,20 @@ namespace ClassicUO.Game.Gumps
             LocalSerial = Serial.Parse(parts[6]);
         }
 
+        public event EventHandler ValueChanged;
 
-        public bool IsChecked { get; set; }
+        public bool IsChecked
+        {
+            get => _isChecked;
+            set
+            {
+                if (_isChecked != value)
+                {
+                    _isChecked = value;
+                    ValueChanged.Raise();
+                }
+            }
+        }
 
         public override void Update(double totalMS, double frameMS)
         {

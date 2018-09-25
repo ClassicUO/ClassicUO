@@ -21,6 +21,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.Controls;
@@ -77,7 +78,8 @@ namespace ClassicUO.Game.Scenes
                 if (_selectedObject == value)
                     return;
 
-                if (_selectedObject != null) _selectedObject.Hue = _savedHue;
+                if (_selectedObject != null)
+                    _selectedObject.Hue = _savedHue;
 
                 if (value == null)
                 {
@@ -88,7 +90,9 @@ namespace ClassicUO.Game.Scenes
                 {
                     _selectedObject = value;
                     _savedHue = _selectedObject.Hue;
-                    _selectedObject.Hue = 24;
+
+                    if (Service.Get<Settings>().HighlightGameObjects)
+                        _selectedObject.Hue = 24;
                 }
             }
         }

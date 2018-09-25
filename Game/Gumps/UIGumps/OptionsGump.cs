@@ -185,6 +185,21 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _sliderFPS.ValueChanged += (sender, args) => _settingsToValidate[1]["maxfps"] = _sliderFPS.Value;
             scrollArea.AddChildren(_sliderFPS);
 
+
+            Checkbox checkbox = new Checkbox(0x00D2, 0x00D3, "Highlight game objects")
+            {
+                X = 0, Y = 41, IsChecked =  _settings.HighlightGameObjects
+            };
+            checkbox.ValueChanged += (sender, e) => _settingsToValidate[1]["highlightgameobjects"] = checkbox.IsChecked;
+            scrollArea.AddChildren(checkbox);
+
+            checkbox = new Checkbox(0x00D2, 0x00D3, "STUFF")
+            {
+                X = 0,
+                Y = 61,
+            };
+            checkbox.ValueChanged += (sender, e) => _settingsToValidate[1]["stuff"] = checkbox.IsChecked;
+            scrollArea.AddChildren(checkbox);
         }
 
         private void BuildPage3()
@@ -338,9 +353,23 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     if (_settingsToValidate[index].TryGetValue("maxfps", out var result))
                     {                     
                         Service.Get<GameLoop>().MaxFPS = _settings.MaxFPS = (int)result;
+
+                        _settingsToValidate[index].Remove("maxfps");
                     }
 
+                    if (_settingsToValidate[index].TryGetValue("highlightgameobjects", out result))
+                    {
+                        _settings.HighlightGameObjects = (bool) result;
 
+                        _settingsToValidate[index].Remove("highlightgameobjects");
+                    }
+
+                    if (_settingsToValidate[index].TryGetValue("stuff", out result))
+                    {
+                        //_settings.HighlightGameObjects = (bool)result;ù
+
+                        _settingsToValidate[index].Remove("stuff");
+                    }
 
                     break;
                 case 2:
@@ -363,14 +392,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         }
 
-
-        private void Validate(int index, string key, dynamic obj)
-        {
-            if (_settingsToValidate[index].TryGetValue(key, out var value))
-            {
-                obj = value;
-            }
-        }
     
 
         private void RestoreDefaultSettings()
@@ -415,6 +436,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     ApplySettings();
                     break;
                 case Buttons.Default:
+                    RestoreDefaultSettings();
                     break;
                 case Buttons.Ok:
                     ApplySettings();
