@@ -61,8 +61,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 _dyeTybeImage.Hue = (ushort)(_box.SelectedHue + 1);
 
-                var polcolor = Hues.GetPolygoneColor(12, _dyeTybeImage.Hue);
-
             };
 
 
