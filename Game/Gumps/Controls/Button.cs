@@ -19,6 +19,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -232,8 +234,7 @@ namespace ClassicUO.Game.Gumps
 
        
 
-        protected override bool Contains(int x, int y)
-            => IO.Resources.Gumps.Contains(GetGraphicByState(), x, y);
+        protected override bool Contains(int x, int y) => IO.Resources.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
 
 
         public override void Dispose()
