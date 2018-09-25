@@ -20,8 +20,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private ColorPickerBox _box;
         private StaticPic _dyeTybeImage;
 
+        private Action<ushort> _okClicked;
 
-        public ColorPickerGump(int x, int y) : base(0, 0)
+        public ColorPickerGump(int x, int y, Action<ushort> okClicked) : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = false;
@@ -45,7 +46,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             HSliderBar slider;
 
             AddChildren(
-            slider = new HSliderBar(39, 142, 145, SLIDER_MIN, SLIDER_MAX, 0, HSliderBarStyle.BlueWidgetNoBar ));
+            slider = new HSliderBar(39, 142, 145, SLIDER_MIN, SLIDER_MAX, 1, HSliderBarStyle.BlueWidgetNoBar ));
 
             slider.ValueChanged += (sender, e) => 
             {
@@ -59,6 +60,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _box.ColorSelectedIndex += (sender, e) =>
             {
                 _dyeTybeImage.Hue = (ushort)(_box.SelectedHue + 1);
+
+                var polcolor = Hues.GetPolygoneColor(12, _dyeTybeImage.Hue);
+
             };
 
 
@@ -67,6 +71,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 208 - 10,
                 Y = _box.Y + _box.Height / 2 - 10
             });
+
+
+            _okClicked = okClicked;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -74,6 +81,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch (buttonID)
             {
                 case 0:
+                    _okClicked((ushort)(_box.SelectedHue + 1));
                     Dispose();
                     break;
             }

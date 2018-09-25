@@ -24,6 +24,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Misc,
             FilterOptions,
 
+            TextColor,
+            TextFont,
+
+
             Cancel,
             Apply,
             Default,
@@ -32,7 +36,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
 
         private readonly Settings _settings;
-        private HSliderBar _sliderSound, _sliderMusic, _sliderFPS;
+        private HSliderBar _sliderSound, _sliderMusic, _sliderFPS, _sliderTooltips;
+        private ColorPickerBox _colorPickerTooltipText;
+
+        private ColorPickerGump _colorPickerGump;
 
         public OptionsGump() : base(0, 0)
         {
@@ -167,14 +174,66 @@ namespace ClassicUO.Game.Gumps.UIGumps
             scrollArea.AddChildren(label);
 
             _sliderFPS = new HSliderBar(0, 21, 90, 15, 250, _settings.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true);
-            scrollArea. AddChildren(_sliderFPS);
+            scrollArea.AddChildren(_sliderFPS);
+
+
         }
 
         private void BuildPage3()
         {
             AddChildren(new GumpPic(0, 177, 0x00DD, 0) { CanMove = false }, 3);
 
+            Label label = new Label("Language", true, 0, 460, align: TEXT_ALIGN_TYPE.TS_CENTER)
+            {
+                X = 84, Y = 22
+            };
+            AddChildren(label, 3);
 
+            label = new Label("The language you use when playing UO is obtained from your OS.", true, 0, 480)
+            {
+                X = 64, Y  = 44
+            };
+            AddChildren(label, 3);
+
+            Checkbox checkbox = new Checkbox(0x00D2, 0x00D3, "Use tooltips")
+            {
+                X = 64, Y = 90,
+                IsChecked = _settings.UseTooltips
+            };
+            AddChildren(checkbox, 3);
+
+            label = new Label("Delay before tooltip appears", true, 0)
+            {
+                X = 64, Y = 112
+            };
+            AddChildren(label, 3);
+
+            _sliderTooltips = new HSliderBar(64, 133, 90, 0, 5000, _settings.DelayAppearTooltips , HSliderBarStyle.MetalWidgetRecessedBar, true);
+            AddChildren(_sliderTooltips, 3);
+
+
+            AddChildren(new Button((int)Buttons.TextColor, 0x00D4, 0x00D4)
+            {
+                X = 64,
+                Y = 151,
+                ButtonAction = ButtonAction.Activate,
+                ButtonParameter = 3
+            }, 3);
+
+            uint color = 0xFF7F7F7F;
+
+            if (_settings.TooltipsTextColor != 0xFFFF)
+            {
+                color = Hues.GetPolygoneColor(12, (ushort)_settings.TooltipsTextColor);
+            }
+
+            _colorPickerTooltipText = new ColorPickerBox(67, 154, 1, 1, 13, 14, (int)color);
+            _colorPickerTooltipText.MouseClick += (sender, e) =>
+            {
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => _colorPickerTooltipText.SetHue(s));
+                UIManager.Add(pickerGump);
+            };
+            AddChildren(_colorPickerTooltipText, 3);
         }
 
         private void BuildPage4()
