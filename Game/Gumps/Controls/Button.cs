@@ -175,7 +175,7 @@ namespace ClassicUO.Game.Gumps
             {
                 _isHovered = false;
 
-                if (_gText.Hue != FontHue)
+                if (_gText != null && _gText.Hue != FontHue)
                 {
                     _gText.Hue = FontHue;
                     _gText.CreateTexture();
@@ -232,8 +232,7 @@ namespace ClassicUO.Game.Gumps
 
        
 
-        protected override bool Contains(int x, int y)
-            => IO.Resources.Gumps.Contains(GetGraphicByState(), x, y);
+        protected override bool Contains(int x, int y) => IO.Resources.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
 
 
         public override void Dispose()

@@ -216,7 +216,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
 
                 case Buttons.LogOut:
-                    //
+                    UIManager.Add(new LogoutGump());
+                    Service.Get<Log>().Message(LogTypes.Info, "Logout request sent!");
                     break;
 
                 case Buttons.Quests:
