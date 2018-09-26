@@ -120,10 +120,6 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             base.Update(totalMS, frameMS);
         }
 
-
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>
-            base.Draw(spriteBatch, position, hue);
-
         protected override void OnMove()
         {
             Point position = Location;

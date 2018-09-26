@@ -120,7 +120,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _textBox.Width = Width;
                 _textBox.Height = height - 3;
 
-                var trans = GetControls<CheckerTrans>()[0];
+                CheckerTrans trans = GetControls<CheckerTrans>()[0];
                 trans.Location = new Point(_textBox.X, _textBox.Y);
                 trans.Width = Width;
                 trans.Height = height + 5;

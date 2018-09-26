@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Scenes
         public Texture2D ViewportTexture => _renderTarget;
         public Point MouseOverWorldPosition => InputManager.MousePosition - _viewPortGump.Location;
 
-        public static GameObject SelectedObject
+        public GameObject SelectedObject
         {
             get => _selectedObject;
             set
@@ -96,8 +96,6 @@ namespace ClassicUO.Game.Scenes
                 }
             }
         }
-
-        private bool _ADDED;
 
         public override void Load()
         {
@@ -253,7 +251,7 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        private void CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface)
+        private static void CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface)
         {
             maxItemZ = 255;
             drawTerrain = true;
@@ -314,9 +312,12 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private (Point firstTile, Vector2 renderOffset, Point renderDimensions) GetViewPort(int width, int height,
-            int scale = 1)
+        private static (Point firstTile, Vector2 renderOffset, Point renderDimensions) GetViewPort(int width, int height, int scale)
         {
+            int off = Math.Abs(width / 44 - height / 44) % 3;
+
+            Console.WriteLine(off);
+
             Point renderDimensions = new Point
             {
                 X = width / scale / 44 + 3,
@@ -388,8 +389,7 @@ namespace ClassicUO.Game.Scenes
                 int x = obj.Position.X;
                 int y = obj.Position.Y;
 
-                Vector3 isometricPosition =
- new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
+                Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
 
                 obj.View.Draw(sb3D, isometricPosition, _mouseOverList);
 
@@ -423,6 +423,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         IReadOnlyList<GameObject> objects = tile.ObjectsOnTiles;
                         bool draw = true;
+
                         for (int k = 0; k < objects.Count; k++)
                         {
                             GameObject obj = objects[k];
@@ -442,10 +443,7 @@ namespace ClassicUO.Game.Scenes
                                 && !(obj is Tile))
                                 continue;
 
-                            View view = obj.View;
-
-
-                            if (draw && view.Draw(sb3D, dp, _mouseOverList))
+                            if (draw && obj.View.Draw(sb3D, dp, _mouseOverList))
                                 RenderedObjectsCount++;
                         }
 
@@ -473,6 +471,7 @@ namespace ClassicUO.Game.Scenes
             World.Map.ClearUnusedBlocks();
         }
 
+#if !ORIONSORT
         private void ClearDeferredEntities()
         {
             if (_deferredToRemove.Count > 0)
@@ -486,6 +485,7 @@ namespace ClassicUO.Game.Scenes
                 _deferredToRemove.Clear();
             }
         }
+#endif
 
         public bool IsMouseOverUI => UIManager.IsMouseOverUI && !(UIManager.MouseOverControl is WorldViewport);
         public bool IsMouseOverWorld => UIManager.IsMouseOverUI && UIManager.MouseOverControl is WorldViewport;
@@ -672,7 +672,7 @@ namespace ClassicUO.Game.Scenes
         {
             // TODO: AMOUNT CHECK
 
-            PickupItemDirectly(item, x, y, amount.HasValue ? amount.Value : item.Amount);
+            PickupItemDirectly(item, x, y, amount ?? item.Amount);
         }
 
         private void PickupItemDirectly(Item item, int x, int y, int amount)
@@ -922,8 +922,8 @@ namespace ClassicUO.Game.Scenes
             int winGamePosX = 0;
             int winGamePosY = 0;
 
-            int winGameWidth = Width;
-            int winGameHeight = Height;
+            int winGameWidth = _settings.GameWindowWidth;
+            int winGameHeight = _settings.GameWindowHeight;
 
             int winGameCenterX = winGamePosX + (winGameWidth / 2);
             int winGameCenterY = winGamePosY + winGameHeight / 2 + World.Player.Position.Z * 4;
