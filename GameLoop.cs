@@ -245,7 +245,9 @@ namespace ClassicUO
             _sb.Append("Pos: ");
             _sb.AppendLine(World.Player == null ? "" : World.Player.Position.ToString());
             _sb.Append("Selected: ");
-            _sb.AppendLine(GameScene.SelectedObject == null ? "" : GameScene.SelectedObject.ToString());
+
+            if (_sceneManager.CurrentScene is GameScene gameScene)
+                _sb.AppendLine(gameScene.SelectedObject == null ? "" : gameScene.SelectedObject.ToString());
 
             _infoText.Text = _sb.ToString();
             _infoText.Draw(_sbUI, new Vector3( /*Window.ClientBounds.Width - 150*/ 20, 20, 0));

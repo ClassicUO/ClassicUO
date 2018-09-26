@@ -475,7 +475,92 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
-//====================================================
+
+        private ushort _maxPhysicRes;
+        public ushort MaxPhysicRes
+        {
+            get => _maxPhysicRes;
+            set
+            {
+                if (_maxPhysicRes != value)
+                {
+                    _maxPhysicRes = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        private ushort _maxFireRes;
+        public ushort MaxFireRes
+        {
+            get => _maxFireRes;
+            set
+            {
+                if (_maxFireRes != value)
+                {
+                    _maxFireRes = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        private ushort _maxColdcRes;
+        public ushort MaxColdRes
+        {
+            get => _maxColdcRes;
+            set
+            {
+                if (_maxColdcRes != value)
+                {
+                    _maxColdcRes = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        private ushort _maxPoisResUshort;
+        public ushort MaxPoisonRes
+        {
+            get => _maxPoisResUshort;
+            set
+            {
+                if (_maxPoisResUshort != value)
+                {
+                    _maxPoisResUshort = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        private ushort _maxEnergRes;
+        public ushort MaxEnergyRes
+        {
+            get => _maxEnergRes;
+            set
+            {
+                if (_maxEnergRes != value)
+                {
+                    _maxEnergRes = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        private ushort _maxDefChance;
+        public ushort MaxDefChance
+        {
+            get => _maxDefChance;
+            set
+            {
+                if (_maxDefChance != value)
+                {
+                    _maxDefChance = value;
+                    _delta |= Delta.Attributes;
+                }
+            }
+        }
+
+        //====================================================
         public ushort ReflectPhysicalDamage
         {
             get => _reflectPhysicalDamage;
