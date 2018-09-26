@@ -106,7 +106,25 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public void AddLine(string text, byte font, Hue hue, bool isunicode)
         { 
-            _textEntries.Add(new ChatLineTime(text, Width, font, isunicode, hue));
+            _textEntries.Add(new ChatLineTime(text, 320, font, isunicode, hue));
+        }
+
+        protected override void OnResize()
+        {
+            if (_textBox != null)
+            {
+                int height = Fonts.GetHeightUnicode(1, "ABC", Width, 0,
+                    (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
+
+                _textBox.Y = Height - height - 3;
+                _textBox.Width = Width;
+                _textBox.Height = height - 3;
+
+                var trans = GetControls<CheckerTrans>()[0];
+                trans.Location = new Point(_textBox.X, _textBox.Y);
+                trans.Width = Width;
+                trans.Height = height + 5;
+            }
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -127,9 +145,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 Mode = ChatMode.Default;
 
-                AddChildren(new CheckerTrans {X = _textBox.X, Y = _textBox.Y, Width = Width, Height = Height});
+                AddChildren(new CheckerTrans {X = _textBox.X, Y = _textBox.Y, Width = Width, Height = height + 5 });
                 AddChildren(_textBox);
             }
+
+
 
             for (int i = 0; i < _textEntries.Count; i++)
             {
@@ -140,6 +160,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     _textEntries.RemoveAt(i--);
                 }
             }
+
 
             if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_q, false, false, true) &&
                 _messageHistoryIndex > -1)
@@ -168,40 +189,47 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
 
-            if ((Mode == ChatMode.Default && _textBox.Text.Length == 1) ||
-                (Mode != ChatMode.Default && _textBox.Text.Length == 1))
+            if (Mode == ChatMode.Default)
             {
-                switch (_textBox.Text[0])
+                if (_textBox.Text.Length == 1)
                 {
-                    case ':':
-                        Mode = ChatMode.Emote;
-                        break;
-                    case ';':
-                        Mode = ChatMode.Whisper;
-                        break;
-                    case '/':
-                        Mode = ChatMode.Party;
-                        break;
-                    case '\\':
-                        Mode = ChatMode.Guild;
-                        break;
-                    case '|':
-                        Mode = ChatMode.Alliance;
-                        break;
+                    switch (_textBox.Text[0])
+                    {
+                        case ';':
+                            Mode = ChatMode.Whisper;
+                            break;
+                        case '/':
+                            Mode = ChatMode.Party;
+                            break;
+                        case '\\':
+                            Mode = ChatMode.Guild;
+                            break;
+                        case '|':
+                            Mode = ChatMode.Alliance;
+                            break;
+                    }
+                }
+                else if (_textBox.Text.Length == 2 && _textBox.Text[0] == ':' && _textBox.Text[1] == ' ')
+                {
+                    Mode = ChatMode.Emote;
                 }
             }
+
+           
 
             base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            int y = _textBox.Y - (int) position.Y - 6;
+            int y = _textBox.Y + (int) position.Y - 6;
 
             for (int i = _textEntries.Count - 1; i >= 0; i--)
             {
                 y -= _textEntries[i].TextHeight;
-                _textEntries[i].Draw(spriteBatch, new Vector3(position.X + 2, y, 0));
+
+                if (y >= (int)position.Y)
+                    _textEntries[i].Draw(spriteBatch, new Vector3(position.X + 2, y, 0));
             }
 
             return base.Draw(spriteBatch, position, hue);

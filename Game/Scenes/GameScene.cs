@@ -21,6 +21,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.Controls;
@@ -52,6 +53,7 @@ namespace ClassicUO.Game.Scenes
         private WorldViewportGump _viewPortGump;
         private TopBarGump _topBarGump;
         private StaticManager _staticManager;
+        private Settings _settings;
 
         private static Hue _savedHue;
         private static GameObject _selectedObject;
@@ -64,10 +66,9 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-        public int Width { get; set; } = 800;
-        public int Height { get; set; } = 600;
         public int Scale { get; set; } = 1;
         public Texture2D ViewportTexture => _renderTarget;
+        public Point MouseOverWorldPosition => InputManager.MousePosition - _viewPortGump.Location;
 
         public static GameObject SelectedObject
         {
@@ -77,7 +78,8 @@ namespace ClassicUO.Game.Scenes
                 if (_selectedObject == value)
                     return;
 
-                if (_selectedObject != null) _selectedObject.Hue = _savedHue;
+                if (_selectedObject != null)
+                    _selectedObject.Hue = _savedHue;
 
                 if (value == null)
                 {
@@ -88,7 +90,9 @@ namespace ClassicUO.Game.Scenes
                 {
                     _selectedObject = value;
                     _savedHue = _selectedObject.Hue;
-                    _selectedObject.Hue = 24;
+
+                    if (Service.Get<Settings>().HighlightGameObjects)
+                        _selectedObject.Hue = 24;
                 }
             }
         }
@@ -105,6 +109,8 @@ namespace ClassicUO.Game.Scenes
 
             UIManager.Add(_viewPortGump = new WorldViewportGump(this));
             UIManager.Add(_topBarGump = new TopBarGump(this));
+
+            _settings = Service.Get<Settings>();
 
             GameActions.Initialize(PicupItemBegin);
         }
@@ -206,10 +212,10 @@ namespace ClassicUO.Game.Scenes
 
             World.Ticks = (long) totalMS;
 
-            if (_renderTarget == null || _renderTarget.Width != Width / Scale || _renderTarget.Height != Height / Scale)
+            if (_renderTarget == null || _renderTarget.Width != _settings.GameWindowWidth / Scale || _renderTarget.Height != _settings.GameWindowHeight / Scale)
             {
                 _renderTarget?.Dispose();
-                _renderTarget = new RenderTarget2D(Device, Width / Scale, Height / Scale, false, SurfaceFormat.Bgra5551,
+                _renderTarget = new RenderTarget2D(Device, _settings.GameWindowWidth / Scale, _settings.GameWindowHeight / Scale, false, SurfaceFormat.Bgra5551,
                     DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
@@ -229,12 +235,13 @@ namespace ClassicUO.Game.Scenes
                 _timePing = DateTime.Now.AddSeconds(10);
             }
 
-            _mouseOverList.MousePosition = _mousePicker.Position = InputManager.MousePosition;
+            _mouseOverList.MousePosition = _mousePicker.Position = MouseOverWorldPosition;
             _mousePicker.PickOnly = PickerType.PickEverything;
             _mouseOverList.Clear();
 
             base.Update(totalMS, frameMS);
         }
+
 
         public override bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
         {
@@ -391,7 +398,7 @@ namespace ClassicUO.Game.Scenes
             //_renderList.Clear();
 #else
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
-            (Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort(Width, Height, Scale);
+            (Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort(_settings.GameWindowWidth, _settings.GameWindowHeight, Scale);
 
             ClearDeferredEntities();
 
@@ -767,7 +774,8 @@ namespace ClassicUO.Game.Scenes
         {
             if (World.InGame)
             {
-                Point center = new Point(Width / 2, Height / 2);
+                Point center = new Point(_settings.GameWindowX + _settings.GameWindowWidth / 2,
+                    _settings.GameWindowY + _settings.GameWindowHeight / 2);
 
                 Direction direction = DirectionHelper.DirectionFromPoints(center, InputManager.MousePosition);
 

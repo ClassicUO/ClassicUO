@@ -19,6 +19,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using System.Collections.Generic;
 using ClassicUO.Game;
 using ClassicUO.Interfaces;
@@ -27,6 +29,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
 {
+    [Flags]
     public enum FontStyle
     {
         None = 0x00,

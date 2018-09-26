@@ -63,10 +63,10 @@ namespace ClassicUO.Configuration
         private int _containerDefaultX;
         private int _containerDefaultY;
         private int _backpackStyle;
-        private int _gameWindowX;
-        private int _gameWindowY;
-        private int _gameWindowWidth;
-        private int _gameWindowHeight;
+        private int _gameWindowX = 4;
+        private int _gameWindowY = 5;
+        private int _gameWindowWidth = 800;
+        private int _gameWindowHeight = 600;
 
         private int _speechDelay;
         private bool _scaleSpeechDelay;
@@ -93,6 +93,9 @@ namespace ClassicUO.Configuration
         private bool _useTooltips;
         private int _delayAppearTooltips;
         private ushort _tooltipsTextColor;
+
+        private bool _highlightGameObjects;
+
 
         [JsonConstructor]
         public Settings()
@@ -441,6 +444,14 @@ namespace ClassicUO.Configuration
         {
             get => _tooltipsTextColor;
             set => SetProperty(ref _tooltipsTextColor, value);
+        }
+
+
+        [JsonProperty(PropertyName = "highlight_gameobjects")]
+        public bool HighlightGameObjects
+        {
+            get => _highlightGameObjects;
+            set => SetProperty(ref _highlightGameObjects, value);
         }
     }
 

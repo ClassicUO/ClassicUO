@@ -30,6 +30,10 @@ namespace ClassicUO
     {
         private float _time;
         private readonly FpsCounter _fpsCounter;
+        private int _maxFPS = MIN_FPS;
+
+        private const int MIN_FPS = 15;
+        private const int MAX_FPS = 250;
 
         protected CoreGame()
         {
@@ -45,8 +49,8 @@ namespace ClassicUO
 
             GraphicsDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             GraphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
-            GraphicsDeviceManager.PreferredBackBufferWidth = 800; // should be changed by settings file
-            GraphicsDeviceManager.PreferredBackBufferHeight = 600; // should be changed by settings file
+            GraphicsDeviceManager.PreferredBackBufferWidth = 1000; // should be changed by settings file
+            GraphicsDeviceManager.PreferredBackBufferHeight = 800; // should be changed by settings file
             GraphicsDeviceManager.ApplyChanges();
 
 
@@ -67,7 +71,21 @@ namespace ClassicUO
         protected float IntervalFixedUpdate => 1000.0f / MaxFPS;
 
 
-        public int MaxFPS { get; protected set; }
+        public int MaxFPS
+        {
+            get => _maxFPS;
+            set
+            {
+                if (_maxFPS != value)
+                {
+                    _maxFPS = value;
+                    if (_maxFPS < MIN_FPS)
+                        _maxFPS = MaxFPS;
+                    else if (_maxFPS > MAX_FPS)
+                        _maxFPS = MAX_FPS;
+                }
+            }
+        }
         public int CurrentFPS => _fpsCounter.FPS;
 
 

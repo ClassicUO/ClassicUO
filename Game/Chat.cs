@@ -86,16 +86,61 @@ namespace ClassicUO.Game
 
         public static void OnMessage(Entity entity, UOMessageEventArgs args)
         {
-            if (entity != null)
+            switch (args.Type)
             {
-                //CHAT MESSAGE
-                entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
-                Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, entity.Name);
-            }
-            else
-            {
-                //SYSTEM MESSAGE
-                Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "System");
+                case MessageType.Regular:
+                    if (entity != null && entity.Serial.IsValid)
+                    {
+                        entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
+                        Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, entity.Name);
+                    }
+                    else
+                    {
+                        Service.Get<ChatControl>().AddLine(args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
+                        Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "System");
+                    }
+                    break;
+                case MessageType.System:
+                    Service.Get<ChatControl>().AddLine(args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
+                    Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "System");
+                    break;
+                case MessageType.Emote:
+                    if (entity != null && entity.Serial.IsValid)
+                    {
+                        entity.AddGameText(args.Type, $"*{args.Text}*", (byte)args.Font, args.Hue, args.IsUnicode);
+                        Service.Get<JournalData>().AddEntry($"*{args.Text}*", (byte)args.Font, args.Hue, entity.Name);
+                    }
+                    else
+                    {
+                        Service.Get<JournalData>().AddEntry($"*{args.Text}*", (byte)args.Font, args.Hue, "System");
+                    }
+                    break;
+                case MessageType.Label:
+                    Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "You see");
+                    break;
+                case MessageType.Focus:
+                    break;
+                case MessageType.Whisper:
+                    break;
+                case MessageType.Yell:
+                    break;
+                case MessageType.Spell:
+                    if (entity != null && entity.Serial.IsValid)
+                    {
+                        entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
+                        Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, entity.Name);
+                    }
+                    break;
+                case MessageType.Guild:
+                    break;
+                case MessageType.Alliance:
+                    break;
+                case MessageType.Command:
+                    break;
+                case MessageType.Encoded:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             Message.Raise(args, entity ?? _system);

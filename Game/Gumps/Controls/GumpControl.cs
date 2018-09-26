@@ -140,13 +140,29 @@ namespace ClassicUO.Game.Gumps
         public int Width
         {
             get => _bounds.Width;
-            set => _bounds.Width = value;
+            set
+            {
+                if (_bounds.Width != value)
+                {
+                    _bounds.Width = value;
+                    if (IsInitialized)
+                        OnResize();
+                }
+            }
         }
 
         public int Height
         {
             get => _bounds.Height;
-            set => _bounds.Height = value;
+            set
+            {
+                if (_bounds.Height != value)
+                {
+                    _bounds.Height = value;
+                    if (IsInitialized)
+                        OnResize();
+                }
+            } 
         }
 
         public int X
@@ -157,7 +173,8 @@ namespace ClassicUO.Game.Gumps
                 if (_bounds.X != value)
                 {
                     _bounds.X = value;
-                    OnMove();
+                    if (IsInitialized)
+                        OnMove();
                 }
             }
         }
@@ -170,7 +187,8 @@ namespace ClassicUO.Game.Gumps
                 if (_bounds.Y != value)
                 {
                     _bounds.Y = value;
-                    OnMove();
+                    if (IsInitialized)
+                        OnMove();
                 }
             }
         }
@@ -505,20 +523,17 @@ namespace ClassicUO.Game.Gumps
 
         protected virtual void OnMouseDown(int x, int y, MouseButton button)
         {
-            if (Parent != null)
-                Parent.OnMouseDown(x, y, button);
+            Parent?.OnMouseDown(x, y, button);
         }
 
         protected virtual void OnMouseUp(int x, int y, MouseButton button)
         {
-            if (Parent != null)
-                Parent.OnMouseUp(x, y, button);
+            Parent?.OnMouseUp(x, y, button);
         }
 
         protected virtual void OnMouseWheel(MouseEvent delta)
         {
-            if (Parent != null)
-                Parent.OnMouseWheel(delta);
+            Parent?.OnMouseWheel(delta);
         }
 
         protected virtual void OnMouseEnter(int x, int y)
@@ -531,14 +546,12 @@ namespace ClassicUO.Game.Gumps
 
         protected virtual void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (Parent != null)
-                Parent.OnMouseClick(x, y, button);
+            Parent?.OnMouseClick(x, y, button);
         }
 
         protected virtual void OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (Parent != null)
-                Parent.OnMouseDoubleClick(x, y, button);
+            Parent?.OnMouseDoubleClick(x, y, button);
         }
 
         protected virtual void OnTextInput(string c)
@@ -555,24 +568,35 @@ namespace ClassicUO.Game.Gumps
 
         protected virtual bool Contains(int x, int y) => true;
 
+
         protected virtual void OnMove()
         {
+
+        }
+
+        protected virtual void OnResize()
+        {
+            
         }
 
         protected virtual void OnInitialize()
         {
+
         }
 
         protected virtual void OnClosing()
         {
+
         }
 
         protected virtual void OnFocusEnter()
         {
+
         }
 
         protected virtual void OnFocusLeft()
         {
+
         }
 
         protected virtual void CloseWithRightClick()
