@@ -90,8 +90,6 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             Service.Register(_chatControl);
 
             _scene = scene;
-
-            OnResize();
         }
 
 

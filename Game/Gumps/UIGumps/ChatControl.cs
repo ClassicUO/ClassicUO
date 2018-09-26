@@ -149,6 +149,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 AddChildren(_textBox);
             }
 
+
+
             for (int i = 0; i < _textEntries.Count; i++)
             {
                 _textEntries[i].Update(totalMS, frameMS);
@@ -158,6 +160,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     _textEntries.RemoveAt(i--);
                 }
             }
+
 
             if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_q, false, false, true) &&
                 _messageHistoryIndex > -1)
@@ -186,28 +189,33 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
 
-            if ((Mode == ChatMode.Default && _textBox.Text.Length == 1) ||
-                (Mode != ChatMode.Default && _textBox.Text.Length == 1))
+            if (Mode == ChatMode.Default)
             {
-                switch (_textBox.Text[0])
+                if (_textBox.Text.Length == 1)
                 {
-                    case ':':
-                        Mode = ChatMode.Emote;
-                        break;
-                    case ';':
-                        Mode = ChatMode.Whisper;
-                        break;
-                    case '/':
-                        Mode = ChatMode.Party;
-                        break;
-                    case '\\':
-                        Mode = ChatMode.Guild;
-                        break;
-                    case '|':
-                        Mode = ChatMode.Alliance;
-                        break;
+                    switch (_textBox.Text[0])
+                    {
+                        case ';':
+                            Mode = ChatMode.Whisper;
+                            break;
+                        case '/':
+                            Mode = ChatMode.Party;
+                            break;
+                        case '\\':
+                            Mode = ChatMode.Guild;
+                            break;
+                        case '|':
+                            Mode = ChatMode.Alliance;
+                            break;
+                    }
+                }
+                else if (_textBox.Text.Length == 2 && _textBox.Text[0] == ':' && _textBox.Text[1] == ' ')
+                {
+                    Mode = ChatMode.Emote;
                 }
             }
+
+           
 
             base.Update(totalMS, frameMS);
         }
@@ -219,7 +227,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             for (int i = _textEntries.Count - 1; i >= 0; i--)
             {
                 y -= _textEntries[i].TextHeight;
-                _textEntries[i].Draw(spriteBatch, new Vector3(position.X + 2, y, 0));
+
+                if (y >= (int)position.Y)
+                    _textEntries[i].Draw(spriteBatch, new Vector3(position.X + 2, y, 0));
             }
 
             return base.Draw(spriteBatch, position, hue);
