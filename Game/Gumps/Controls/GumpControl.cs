@@ -157,7 +157,8 @@ namespace ClassicUO.Game.Gumps
                 if (_bounds.X != value)
                 {
                     _bounds.X = value;
-                    OnMove();
+                    if (IsInitialized)
+                        OnMove();
                 }
             }
         }
@@ -170,7 +171,8 @@ namespace ClassicUO.Game.Gumps
                 if (_bounds.Y != value)
                 {
                     _bounds.Y = value;
-                    OnMove();
+                    if (IsInitialized)
+                        OnMove();
                 }
             }
         }

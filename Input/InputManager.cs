@@ -45,8 +45,13 @@ namespace ClassicUO.Input
         private float _time = -1f;
         private float _lastMouseDownTime, _lastMouseClickTime;
 
+        private bool _leftButtonPressed;
 
         public Point MousePosition { get; private set; }
+
+        public Point LeftDragPosition { get; private set; }
+
+        public Point Offset => _leftButtonPressed ? MousePosition - LeftDragPosition : Point.Zero;
 
         public InputManager()
         {
@@ -135,6 +140,13 @@ namespace ClassicUO.Input
 
         private void OnMouseDown(InputMouseEvent e)
         {
+            if (e.Button == MouseButton.Left)
+            {
+                _leftButtonPressed = true;
+                LeftDragPosition = MousePosition;
+            }
+            
+
             _lastMouseDown = e;
             _lastMouseDownTime = _time;
             AddEvent(e);
@@ -143,7 +155,7 @@ namespace ClassicUO.Input
         private void OnMouseUp(InputMouseEvent e)
         {
             if (_mouseIsDragging)
-            {
+            {              
                 AddEvent(new InputMouseEvent(MouseEvent.DragEnd, e));
                 _mouseIsDragging = false;
             }
@@ -169,6 +181,9 @@ namespace ClassicUO.Input
                     }
                 }
             }
+
+            if (e.Button == MouseButton.Left)
+                _leftButtonPressed = false;
 
             AddEvent(new InputMouseEvent(MouseEvent.Up, e));
             _lastMouseDown = null;

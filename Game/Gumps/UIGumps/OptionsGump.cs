@@ -36,12 +36,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
 
         private readonly Settings _settings;
-        private HSliderBar _sliderSound, _sliderMusic, _sliderFPS, _sliderTooltips;
+        private HSliderBar _sliderSound, _sliderMusic, _sliderFPS, _sliderDelayAppearTooltips;
         private ColorPickerBox _colorPickerTooltipText;
 
         private ColorPickerGump _colorPickerGump;
 
-        private Checkbox _checkboxHighlightGameObjects;
+        private Checkbox _checkboxSound, _checkboxMusic, _checboxFootstepsSound, _checkboxPlayCombatMusic, _checkboxPlaySoundsInBackground, _checkboxHighlightGameObjects,
+            _checkboxUseTooltips;
 
 
         public OptionsGump() : base(0, 0)
@@ -60,7 +61,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new Button((int)Buttons.Language, 0x00DE, 0x00DE) { X = 0, Y = 177, ButtonAction = ButtonAction.SwitchPage, ButtonParameter = 3 });
             AddChildren(new Button((int)Buttons.Chat, 0x00E0, 0x00E0) { X = 0, Y = 243, ButtonAction = ButtonAction.SwitchPage, ButtonParameter = 4});
             AddChildren(new Button((int)Buttons.Macro, 0x00ED, 0x00ED) { X = 0, Y = 309, ButtonAction = ButtonAction.SwitchPage, ButtonParameter = 5});
-
+            
             // right
             AddChildren(new Button((int)Buttons.Interface, 0x00E2, 0x00E2) { X = 576, Y = 45,  ButtonAction = ButtonAction.SwitchPage, ButtonParameter = 6 });
             AddChildren(new Button((int)Buttons.Display, 0x00E4, 0x00E4) { X = 576, Y = 111, ButtonAction = ButtonAction.SwitchPage, ButtonParameter = 7});
@@ -108,12 +109,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             AddChildren(label, 1);
 
-            Checkbox checkbox = new Checkbox(0x00D2, 0x00D3, "Sound On/Off")
+            _checkboxSound = new Checkbox(0x00D2, 0x00D3, "Sound On/Off")
             {
                 X = 64, Y = 90,
                 IsChecked = _settings.Sound,                
             };
-            AddChildren(checkbox, 1);
+            AddChildren(_checkboxSound, 1);
 
             label = new Label("Sound Volume", true, 0) { X= 64, Y = 112 };
             AddChildren(label, 1);
@@ -121,11 +122,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _sliderSound = new HSliderBar(64, 133, 90, 0, 255, _settings.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true);
             AddChildren(_sliderSound, 1);
 
-            checkbox = new Checkbox(0x00D2, 0x00D3, "Music On/Off")
+            _checkboxMusic = new Checkbox(0x00D2, 0x00D3, "Music On/Off")
             {
                 X = 64, Y = 151, IsChecked = _settings.Music
             };
-            AddChildren(checkbox, 1);
+            AddChildren(_checkboxMusic, 1);
 
             label = new Label("Music volume", true, 0) { X= 64, Y = 173};
             AddChildren(label, 1);
@@ -133,25 +134,25 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _sliderMusic = new HSliderBar(64, 194, 90, 0, 255, _settings.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true);
             AddChildren(_sliderMusic, 1);
 
-            checkbox = new Checkbox(0x00D2, 0x00D3, "Play footsteps sound")
+            _checboxFootstepsSound = new Checkbox(0x00D2, 0x00D3, "Play footsteps sound")
             {
                 X = 64, Y = 212
             };
-            AddChildren(checkbox, 1);
+            AddChildren(_checboxFootstepsSound, 1);
 
-            checkbox = new Checkbox(0x00D2, 0x00D3, "Play combat music")
+            _checkboxPlayCombatMusic = new Checkbox(0x00D2, 0x00D3, "Play combat music")
             {
                 X = 64,
                 Y = 232
             };
-            AddChildren(checkbox, 1);
+            AddChildren(_checkboxPlayCombatMusic, 1);
 
-            checkbox = new Checkbox(0x00D2, 0x00D3, "Play sounds in background")
+            _checkboxPlaySoundsInBackground = new Checkbox(0x00D2, 0x00D3, "Play sounds in background")
             {
                 X = 64,
                 Y = 252
             };
-            AddChildren(checkbox, 1);
+            AddChildren(_checkboxPlaySoundsInBackground, 1);
         }
 
         private void BuildPage2()
@@ -205,12 +206,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             AddChildren(label, 3);
 
-            Checkbox checkbox = new Checkbox(0x00D2, 0x00D3, "Use tooltips")
+            _checkboxUseTooltips = new Checkbox(0x00D2, 0x00D3, "Use tooltips")
             {
                 X = 64, Y = 90,
                 IsChecked = _settings.UseTooltips
             };
-            AddChildren(checkbox, 3);
+            AddChildren(_checkboxUseTooltips, 3);
 
             label = new Label("Delay before tooltip appears", true, 0)
             {
@@ -218,8 +219,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             AddChildren(label, 3);
 
-            _sliderTooltips = new HSliderBar(64, 133, 90, 0, 5000, _settings.DelayAppearTooltips , HSliderBarStyle.MetalWidgetRecessedBar, true);
-            AddChildren(_sliderTooltips, 3);
+            _sliderDelayAppearTooltips = new HSliderBar(64, 133, 90, 0, 5000, _settings.DelayAppearTooltips , HSliderBarStyle.MetalWidgetRecessedBar, true);
+            AddChildren(_sliderDelayAppearTooltips, 3);
 
 
             AddChildren(new Button((int)Buttons.TextColor, 0x00D4, 0x00D4)
@@ -328,7 +329,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void ApplySettings()
         {
-            Service.Get<GameLoop>().MaxFPS = _settings.MaxFPS = _sliderFPS.Value;
+            _settings.Sound = _checkboxSound.IsChecked;
+            _settings.SoundVolume = _sliderSound.Value;
+            _settings.Music = _checkboxMusic.IsChecked;
+            _settings.MusicVolume = _sliderMusic.Value;
+            _settings.UseTooltips = _checkboxUseTooltips.IsChecked;
+            _settings.DelayAppearTooltips = _sliderDelayAppearTooltips.Value;
+
+            _settings.MaxFPS = Service.Get<GameLoop>().MaxFPS = _sliderFPS.Value;
             _settings.HighlightGameObjects = _checkboxHighlightGameObjects.IsChecked;
 
         }

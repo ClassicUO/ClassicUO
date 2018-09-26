@@ -49,8 +49,8 @@ namespace ClassicUO
 
             GraphicsDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             GraphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
-            GraphicsDeviceManager.PreferredBackBufferWidth = 800; // should be changed by settings file
-            GraphicsDeviceManager.PreferredBackBufferHeight = 600; // should be changed by settings file
+            GraphicsDeviceManager.PreferredBackBufferWidth = 1000; // should be changed by settings file
+            GraphicsDeviceManager.PreferredBackBufferHeight = 800; // should be changed by settings file
             GraphicsDeviceManager.ApplyChanges();
 
 

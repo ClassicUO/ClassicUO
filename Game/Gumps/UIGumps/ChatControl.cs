@@ -127,7 +127,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 Mode = ChatMode.Default;
 
-                AddChildren(new CheckerTrans {X = _textBox.X, Y = _textBox.Y, Width = Width, Height = Height});
+                AddChildren(new CheckerTrans {X = _textBox.X, Y = _textBox.Y, Width = Width, Height = height + 5 });
                 AddChildren(_textBox);
             }
 
@@ -196,7 +196,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            int y = _textBox.Y - (int) position.Y - 6;
+            int y = _textBox.Y + (int) position.Y - 6;
 
             for (int i = _textEntries.Count - 1; i >= 0; i--)
             {

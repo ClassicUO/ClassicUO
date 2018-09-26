@@ -29,7 +29,7 @@ namespace ClassicUO.Game.Gumps
         private readonly SpriteTexture[] _gumpTexture = new SpriteTexture[9];
         private readonly Graphic _graphic;
 
-        public ResizePic(Graphic graphic)
+        public ResizePic(Graphic graphic): base()
         {
             _graphic = graphic;
             CanMove = true;
