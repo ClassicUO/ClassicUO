@@ -109,6 +109,24 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _textEntries.Add(new ChatLineTime(text, 320, font, isunicode, hue));
         }
 
+        protected override void OnResize()
+        {
+            if (_textBox != null)
+            {
+                int height = Fonts.GetHeightUnicode(1, "ABC", Width, 0,
+                    (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
+
+                _textBox.Y = Height - height - 3;
+                _textBox.Width = Width;
+                _textBox.Height = height - 3;
+
+                var trans = GetControls<CheckerTrans>()[0];
+                trans.Location = new Point(_textBox.X, _textBox.Y);
+                trans.Width = Width;
+                trans.Height = height + 5;
+            }
+        }
+
         public override void Update(double totalMS, double frameMS)
         {
             if (_textBox == null)

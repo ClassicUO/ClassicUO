@@ -62,6 +62,8 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             _worldWidth = _settings.GameWindowWidth;
             _worldHeight = _settings.GameWindowHeight;
 
+
+
             _button = new Button(0, 0x837, 0x838, 0x838);
             
             _button.MouseDown += (sender, e) =>
@@ -73,6 +75,19 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
                 _clicked = false;
                 _lastPosition = Point.Zero;
             };
+
+
+            _border = new GameBorder(0,0, _worldWidth + 8, _worldHeight + 12);
+
+            _viewport = new WorldViewport(scene, 4, 6, _worldWidth, _worldHeight);
+            _chatControl = new ChatControl(4, 6, _worldWidth, _worldHeight);
+
+            AddChildren(_border);
+            AddChildren(_button);
+            AddChildren(_viewport);
+            AddChildren(_chatControl);
+
+            Service.Register(_chatControl);
 
             _scene = scene;
 
@@ -133,32 +148,27 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             _settings.GameWindowY = position.Y;        
         }
 
-        private void OnResize()
+        protected override void OnResize()
         {
-            if (Service.Has<ChatControl>())
-                Service.Unregister<ChatControl>();
-
-            if (_border != null)
-                RemoveChildren(_border);
-            if (_viewport != null)
-                RemoveChildren(_viewport);
-            if (_chatControl != null)
-                RemoveChildren(_chatControl);
-
             Width = _worldWidth + 8;
             Height = _worldHeight + 12;
 
-            AddChildren(_border = new GameBorder(0,0, Width, Height));
+            _border.Width = Width;
+            _border.Height = Height;
+
 
             _button.X = Width - 6;
             _button.Y = Height - 8;
 
-            AddChildren(_button);
 
-            AddChildren(_viewport = new WorldViewport(_scene, 4, 6, _worldWidth, _worldHeight));
-            AddChildren(_chatControl = new ChatControl(4, 6, _worldWidth, _worldHeight - 3));
+            _viewport.Width = _worldWidth;
+            _viewport.Height = _worldHeight;
 
-            Service.Register(_chatControl);
+
+            _chatControl.X = 4;
+            _chatControl.Y = 6;
+            _chatControl.Width = _worldWidth;
+            _chatControl.Height = _worldHeight - 2;
         }
 
 
