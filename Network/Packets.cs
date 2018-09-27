@@ -218,7 +218,7 @@ namespace ClassicUO.Network
         public PSkillsRequest(Serial serial) : base(0x34)
         {
             WriteUInt(0xEDEDEDED);
-            WriteByte(5);
+            WriteByte(0x05);
             WriteUInt(serial);
         }
     }

@@ -44,6 +44,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public PaperDollGump(Serial serial, string mobileTitle)
             : this()
         {
+            
             Mobile mobile = World.Mobiles.Get(serial);
             if (mobile != null)
             {
@@ -223,7 +224,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
 
                 case Buttons.Skills:
-                    //
+                    GameActions.RequestSkills();
+                    if (UIManager.Get<SkillGump>() == null)
+                    {
+                        UIManager.Add(new SkillGump());
+                    }
+                    else
+                        UIManager.Remove<SkillGump>();
                     break;
 
                 case Buttons.Guild:

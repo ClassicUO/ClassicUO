@@ -67,7 +67,7 @@ namespace ClassicUO.Game
             => _pickUpAction(item, x, y, amount);
 
         public static void DropDown(Serial serial, int x, int y, int z, Serial container)
-            => Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
+            => Socket.Send(new PDropRequestNew(serial, (ushort)x, (ushort)y, (sbyte)z, 0, container));
 
         public static void DropDown(Serial serial, Position position, Serial container)
             => DropDown(serial, position.X, position.Y, position.Z, container);
@@ -84,5 +84,8 @@ namespace ClassicUO.Game
 
         public static void RequestQuestMenu()
             => Socket.Send(new PQuestMenuRequest());
+
+        public static void RequestSkills()
+            => Socket.Send((new PSkillsRequest(World.Player)));
     }
 }

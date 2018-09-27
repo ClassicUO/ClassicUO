@@ -150,5 +150,7 @@ namespace ClassicUO.Game.Gumps
             _entries[index].Text = text;
             CalculateScrollBarMaxValue();
         }
+
+        
     }
 }
