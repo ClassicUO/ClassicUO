@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
@@ -289,6 +290,7 @@ namespace ClassicUO.Network
             ToClient.Add(0xF3, UpdateItemSA);
             ToClient.Add(0xF5, DisplayMap);
             //ToServer.Add(0xF8, CharacterCreation_7_0_16_0);
+            ToClient.Add(0xF7, PacketList);
         }
 
         private static void Damage(Packet p)
@@ -1444,6 +1446,13 @@ namespace ClassicUO.Network
         private static void AssistVersion(Packet p)
         {
             //uint version = p.ReadUInt();
+
+            //string[] parts = Service.Get<Settings>().ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            //byte[] clientVersionBuffer =
+            //    {byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])};
+
+
+            //NetClient.Socket.Send(new PAssistVersion(clientVersionBuffer, version));
         }
 
         private static void ExtendedCommand(Packet p)
@@ -1998,7 +2007,8 @@ namespace ClassicUO.Network
 
         private static void KrriosClientSpecial(Packet p)
         {
-            if (p.ReadByte() == 0xFE)
+            byte type = p.ReadByte();
+            if (type == 0xFE)
             {
                 Service.Get<Log>().Message(LogTypes.Info, "Razor ACK sended");
                 NetClient.Socket.Send(new PRazorAnswer());
@@ -2011,7 +2021,10 @@ namespace ClassicUO.Network
 
         private static void UpdateItemSA(Packet p)
         {
-            p.Skip(2); //unknown
+            if (World.Player == null)
+                return;
+
+            p.Skip(2);
 
             byte type = p.ReadByte();
             Item item = World.GetOrCreateItem(p.ReadUInt());
@@ -2040,6 +2053,13 @@ namespace ClassicUO.Network
 
             if (TileData.IsAnimated((long) item.ItemData.Flags))
                 item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
+        }
+
+        private static void PacketList(Packet p)
+        {
+            if (World.Player == null)
+                return;
+
         }
 
         private static bool ReadContainerContent(Packet p)

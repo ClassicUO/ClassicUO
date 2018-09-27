@@ -296,14 +296,19 @@ namespace ClassicUO.Network
         {
             bool ok = false;
 
-            do
+            try
             {
-                //if (!_socket.ReceiveAsync(_recvEventArgs))
-                //    IO_Socket(null, _recvEventArgs);
-
-                ok = !_socket.ReceiveAsync(_recvEventArgs);
-                if (ok) ProcessRecv(_recvEventArgs);
-            } while (ok);
+                do
+                {
+                    ok = !_socket.ReceiveAsync(_recvEventArgs);
+                    if (ok)
+                        ProcessRecv(_recvEventArgs);
+                } while (ok);
+            }
+            catch (Exception e)
+            {
+                Disconnect();
+            }
         }
 
         private void ProcessRecv(SocketAsyncEventArgs e)
