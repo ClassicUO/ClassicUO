@@ -99,6 +99,8 @@ namespace ClassicUO.Network
             ToClient.Add(0xA9, CharacterList);
             ToClient.Add(0xBD, ClientVersion);
 
+            ToClient.Add(0x03, ClientTalk);
+
             /*ToServer.Add(0x00, CreateCharacter);
             ToServer.Add(0x01, Disconnect);
             ToServer.Add(0x02, MoveRequest);
@@ -291,6 +293,24 @@ namespace ClassicUO.Network
             ToClient.Add(0xF5, DisplayMap);
             //ToServer.Add(0xF8, CharacterCreation_7_0_16_0);
             ToClient.Add(0xF7, PacketList);
+        }
+
+
+        private static void ClientTalk(Packet p)
+        {
+            switch (p.ReadByte())
+            {
+                case 0x78:
+                    break;
+                case 0x3C:
+                    break;
+                case 0x25:
+                    break;
+                case 0x2E:
+                    break;
+                default:
+                    break;
+            }
         }
 
         private static void Damage(Packet p)
@@ -611,6 +631,10 @@ namespace ClassicUO.Network
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
 
+            NetClient.Socket.Send(new PClientVersion(Service.Get<Settings>().ClientVersion));
+            GameActions.SingleClick(World.Player);
+            NetClient.Socket.Send(new PStatusRequest(World.Player));
+
             Service.Get<SceneManager>().ChangeScene(ScenesType.Game);
         }
 
@@ -622,8 +646,15 @@ namespace ClassicUO.Network
             MessageType type = (MessageType) p.ReadByte();
             Hue hue = p.ReadUShort();
             MessageFont font = (MessageFont) p.ReadUShort();
-            string name = p.ReadASCII(30);
+            string name = p.ReadASCII();
             string text = p.ReadASCII();
+
+            if (serial <= 0 && graphic <= 0 && type == MessageType.Regular && font == MessageFont.INVALID &&
+                hue == 0xFFFF && name.ToLower() == "system")
+            {
+                NetClient.Socket.Send(new PACKTalk());
+                return;
+            }
 
             if (entity != null)
             {

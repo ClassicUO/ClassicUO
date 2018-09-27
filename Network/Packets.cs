@@ -27,6 +27,26 @@ using ClassicUO.IO;
 
 namespace ClassicUO.Network
 {
+    public sealed class PACKTalk : PacketWriter
+    {
+        public PACKTalk() : base(0x03)
+        {
+            WriteByte(0x20); WriteByte(0x00); WriteByte(0x34);
+            WriteByte(0x00); WriteByte(0x03); WriteByte(0xdb);
+            WriteByte(0x13); WriteByte(0x14); WriteByte(0x3f);
+            WriteByte(0x45); WriteByte(0x2c); WriteByte(0x58);
+            WriteByte(0x0f); WriteByte(0x5d); WriteByte(0x44);
+            WriteByte(0x2e); WriteByte(0x50); WriteByte(0x11);
+            WriteByte(0xdf); WriteByte(0x75); WriteByte(0x5c);
+            WriteByte(0xe0); WriteByte(0x3e); WriteByte(0x71);
+            WriteByte(0x4f); WriteByte(0x31); WriteByte(0x34);
+            WriteByte(0x05); WriteByte(0x4e); WriteByte(0x18);
+            WriteByte(0x1e); WriteByte(0x72); WriteByte(0x0f);
+            WriteByte(0x59); WriteByte(0xad); WriteByte(0xf5);
+            WriteByte(0x00);
+        }
+    }
+
     public sealed class PSeed : PacketWriter
     {
         public PSeed(byte[] version) : base(0xEF)
@@ -35,6 +55,12 @@ namespace ClassicUO.Network
 
             WriteUInt(SEED);
 
+            for (int i = 0; i < 4; i++) WriteUInt(version[i]);
+        }
+
+        public PSeed(uint v, byte[] version) : base(0xEF)
+        {
+            WriteUInt(v);
             for (int i = 0; i < 4; i++) WriteUInt(version[i]);
         }
     }
@@ -258,8 +284,15 @@ namespace ClassicUO.Network
 
     public sealed class PClientVersion : PacketWriter
     {
-        public PClientVersion(byte[] version) : base(0xBD)
+        //public PClientVersion(byte[] version) : base(0xBD)
+        //{
+        //    WriteASCII(string.Format("{0}.{1}.{2}.{3}", version[0], version[1], version[2], version[3]));
+        //}
+
+        public PClientVersion(string v) : base(0xBD)
         {
+            string[] version = v.Split('.', StringSplitOptions.RemoveEmptyEntries);
+
             WriteASCII(string.Format("{0}.{1}.{2}.{3}", version[0], version[1], version[2], version[3]));
         }
     }
@@ -648,6 +681,16 @@ namespace ClassicUO.Network
         public PAssistVersion(byte[] clientversion, uint version) : base(0xBE)
         {
             WriteUInt(version);
+            WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2],
+                clientversion[3]));
+        }
+
+        public PAssistVersion(string v, uint version) : base(0xBE)
+        {
+            WriteUInt(version);
+
+            string[] clientversion = v.Split('.', StringSplitOptions.RemoveEmptyEntries);
+
             WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2],
                 clientversion[3]));
         }

@@ -46,6 +46,7 @@ namespace ClassicUO.Game
 
     public enum MessageFont : ushort
     {
+        INVALID = 0xFFFF,
         Bold = 0,
         Shadow = 1,
         BoldShadow = 2,
