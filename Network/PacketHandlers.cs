@@ -716,7 +716,7 @@ namespace ClassicUO.Network
 
             World.Player.GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
 
-            //World.Player.SequenceNumber = 0;
+            World.Player.SequenceNumber = 0;
 
             if (endX != x || endY != y)
             {

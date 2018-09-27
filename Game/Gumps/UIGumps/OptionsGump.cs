@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private ColorPickerGump _colorPickerGump;
 
         private Checkbox _checkboxSound, _checkboxMusic, _checboxFootstepsSound, _checkboxPlayCombatMusic, _checkboxPlaySoundsInBackground, _checkboxHighlightGameObjects,
-            _checkboxUseTooltips;
+            _checkboxUseTooltips, _checkboxSmoothMovement;
 
 
         public OptionsGump() : base(0, 0)
@@ -187,7 +187,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             scrollArea.AddChildren(_checkboxHighlightGameObjects);
 
-           
+
+            _checkboxSmoothMovement = new Checkbox(0x00D2, 0x00D3, "Smooth movement")
+            {
+                X = 0, Y = 61, IsChecked =  _settings.SmoothMovement
+            };
+            scrollArea.AddChildren(_checkboxSmoothMovement);
         }
 
         private void BuildPage3()
@@ -338,7 +343,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             _settings.MaxFPS = Service.Get<GameLoop>().MaxFPS = _sliderFPS.Value;
             _settings.HighlightGameObjects = _checkboxHighlightGameObjects.IsChecked;
-
+            _settings.SmoothMovement = _checkboxSmoothMovement.IsChecked;
         }
 
     
