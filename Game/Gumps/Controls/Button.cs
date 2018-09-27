@@ -83,19 +83,19 @@ namespace ClassicUO.Game.Gumps
         }
 
         public Button(string[] parts) :
-            this(parts.Length > 7 ? int.Parse(parts[7]) : 0, ushort.Parse(parts[3]), ushort.Parse(parts[4]))
+            this(parts.Length >= 8 ? int.Parse(parts[7]) : 0, ushort.Parse(parts[3]), ushort.Parse(parts[4]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
 
             ButtonAction = (ButtonAction) int.Parse(parts[5]);
-            ButtonParameter = int.Parse(parts[6]);
+            ToPage = int.Parse(parts[6]);
         }
 
 
         public int ButtonID { get; }
         public ButtonAction ButtonAction { get; set; }
-        public int ButtonParameter { get; set; }
+        public int ToPage { get; set; }
 
         public int ButtonGraphicNormal
         {
@@ -223,7 +223,7 @@ namespace ClassicUO.Game.Gumps
                 switch (ButtonAction)
                 {
                     case ButtonAction.SwitchPage:
-                        ChangePage(ButtonParameter);
+                        ChangePage(ToPage);
                         break;
                     case ButtonAction.Activate:
                         OnButtonClick(ButtonID);

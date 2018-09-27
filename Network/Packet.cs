@@ -143,6 +143,17 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
+        public byte[] ReadArray(int count)
+        {
+            EnsureSize(count);
+
+            byte[] array = new byte[count];            
+            Buffer.BlockCopy(_data, Position, array, 0, count);
+
+            Position += count;
+            return array;
+        }
+
         public string ReadUnicodeReversed(int length)
         {
             EnsureSize(length);

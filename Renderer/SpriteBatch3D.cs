@@ -44,7 +44,7 @@ namespace ClassicUO.Renderer
         private const int INDEX_COUNT = 6;
         private const int PRIMITIVES_COUNT = 2;
 
-        private const int MAX_VERTICES_PER_DRAW = 0x8000;
+        private const int MAX_VERTICES_PER_DRAW = 0x8000 * 4;
         private const int INITIAL_TEXTURE_COUNT = 0x800;
         private const float MAX_ACCURATE_SINGLE_FLOAT = 65536;
 

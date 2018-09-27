@@ -631,7 +631,19 @@ namespace ClassicUO.Network
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
 
-            NetClient.Socket.Send(new PClientVersion(Service.Get<Settings>().ClientVersion));
+
+            var settings = Service.Get<Settings>();
+
+            NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
+
+            if (FileManager.ClientVersion >= ClientVersions.CV_200)
+            {
+                NetClient.Socket.Send(new PGameWindowSize((uint)settings.GameWindowWidth, (uint)settings.GameWindowHeight));
+                NetClient.Socket.Send(new PLanguage("ENU"));
+            }
+
+
+
             GameActions.SingleClick(World.Player);
             NetClient.Socket.Send(new PStatusRequest(World.Player));
 
@@ -1963,8 +1975,7 @@ namespace ClassicUO.Network
             uint clen = p.ReadUInt() - 4;
             uint dlen = p.ReadUInt();
 
-            byte[] data = new byte[clen];
-            for (int i = 0; i < data.Length; i++) data[i] = p.ReadByte();
+            byte[] data = p.ReadArray((int)clen);
 
             byte[] decData = new byte[dlen];
 

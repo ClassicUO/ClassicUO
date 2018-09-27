@@ -145,7 +145,7 @@ namespace ClassicUO.Network
             WriteASCII(name, 30);
             Skip(2);
 
-            uint clientflag = 0;
+            uint clientflag = 0x1f;
             /* IFOR (i, 0, g_CharacterList.ClientFlag)
             clientFlag |= (1 << i);*/
             WriteUInt(clientflag);
