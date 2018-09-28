@@ -228,6 +228,9 @@ namespace ClassicUO.Game.Gumps
                             break;
                         case "noresize":
                             break;
+
+                        default:
+                            break;
                     }
                 }
                 else

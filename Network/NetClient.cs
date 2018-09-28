@@ -23,6 +23,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Network
 {
@@ -82,7 +83,18 @@ namespace ClassicUO.Network
 
             IPAddress address = ResolveIP(ip);
             IPEndPoint endpoint = new IPEndPoint(address, port);
+            Connect(endpoint);
+        }
 
+        public void Connect(IPAddress address, ushort port)
+        {
+            _isDisposing = _sending = false;
+            IPEndPoint endpoint = new IPEndPoint(address, port);
+            Connect(endpoint);
+        }
+
+        private void Connect(IPEndPoint endpoint)
+        {
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             //_socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.Debug, 1);
 
@@ -106,6 +118,10 @@ namespace ClassicUO.Network
                 {
                     Connected?.Invoke(null, EventArgs.Empty);
                     StartRecv();
+                }
+                else
+                {
+                    Service.Get<Log>().Message( LogTypes.Error, e.SocketError.ToString());
                 }
             };
             connectEventArgs.RemoteEndPoint = endpoint;
@@ -296,14 +312,19 @@ namespace ClassicUO.Network
         {
             bool ok = false;
 
-            do
+            try
             {
-                //if (!_socket.ReceiveAsync(_recvEventArgs))
-                //    IO_Socket(null, _recvEventArgs);
-
-                ok = !_socket.ReceiveAsync(_recvEventArgs);
-                if (ok) ProcessRecv(_recvEventArgs);
-            } while (ok);
+                do
+                {
+                    ok = !_socket.ReceiveAsync(_recvEventArgs);
+                    if (ok)
+                        ProcessRecv(_recvEventArgs);
+                } while (ok);
+            }
+            catch (Exception e)
+            {
+                Disconnect();
+            }
         }
 
         private void ProcessRecv(SocketAsyncEventArgs e)

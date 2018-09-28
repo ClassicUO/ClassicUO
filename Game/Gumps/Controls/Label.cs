@@ -76,6 +76,17 @@ namespace ClassicUO.Game.Gumps
         }
 
 
+        public override void Update(double totalMS, double frameMS)
+        {
+            if (!string.IsNullOrEmpty(Text) && (Width != _gText.Width || Height != _gText.Height))
+            {
+                Width = _gText.Width;
+                Height = _gText.Height;
+            }
+
+            base.Update(totalMS, frameMS);
+        }
+
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             _gText.Draw(spriteBatch, position);

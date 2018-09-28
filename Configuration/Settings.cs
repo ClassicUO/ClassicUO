@@ -63,8 +63,8 @@ namespace ClassicUO.Configuration
         private int _containerDefaultX;
         private int _containerDefaultY;
         private int _backpackStyle;
-        private int _gameWindowX = 4;
-        private int _gameWindowY = 5;
+        private int _gameWindowX = 32;
+        private int _gameWindowY = 32;
         private int _gameWindowWidth = 800;
         private int _gameWindowHeight = 600;
 
@@ -94,8 +94,8 @@ namespace ClassicUO.Configuration
         private int _delayAppearTooltips;
         private ushort _tooltipsTextColor;
 
-        private bool _highlightGameObjects;
-
+        private bool _highlightGameObjects = true;
+        private bool _smoothMovement = true;
 
         [JsonConstructor]
         public Settings()
@@ -452,6 +452,13 @@ namespace ClassicUO.Configuration
         {
             get => _highlightGameObjects;
             set => SetProperty(ref _highlightGameObjects, value);
+        }
+
+        [JsonProperty(PropertyName = "smooth_movement")]
+        public bool SmoothMovement
+        {
+            get => _smoothMovement;
+            set => SetProperty(ref _smoothMovement, value);
         }
     }
 

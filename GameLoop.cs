@@ -151,7 +151,8 @@ namespace ClassicUO
             NetClient.Connected += (sender, e) =>
             {
                 _log.Message(LogTypes.Info, "Connected!");
-                NetClient.Socket.Send(new PSeed(clientVersionBuffer));
+
+                NetClient.Socket.Send(new PSeed(NetClient.Socket.ClientAddress, clientVersionBuffer));
                 NetClient.Socket.Send(new PFirstLogin(settings.Username, settings.Password.ToString()));
             };
 
@@ -176,10 +177,10 @@ namespace ClassicUO
                             NetClient.Socket.ClientAddress));
                         break;
                     case 0xBD:
-                        NetClient.Socket.Send(new PClientVersion(clientVersionBuffer));
+                        NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
                         break;
                     case 0xBE:
-                        NetClient.Socket.Send(new PAssistVersion(clientVersionBuffer, e.ReadUInt()));
+                        NetClient.Socket.Send(new PAssistVersion(settings.ClientVersion, e.ReadUInt()));
                         break;
                     case 0x55:
                         NetClient.Socket.Send(new PClientViewRange(24));

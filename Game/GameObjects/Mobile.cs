@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Views;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -474,22 +475,26 @@ namespace ClassicUO.Game.GameObjects
 
                     if (AnimationFromServer) SetAnimation(0xFF);
 
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - 15;
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - 1; // default 15 = less smooth
                     int delay = (int) World.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
 
                     if (Position.X != step.X || Position.Y != step.Y)
                     {
-                        float framesPerTile = maxDelay / CHARACTER_ANIMATION_DELAY;
-                        float frameOffset = delay / CHARACTER_ANIMATION_DELAY;
+                      
+                        if (Service.Get<Settings>().SmoothMovement)
+                        {
+                            float framesPerTile = maxDelay / CHARACTER_ANIMATION_DELAY;
+                            float frameOffset = delay / CHARACTER_ANIMATION_DELAY;
 
-                        float x = frameOffset;
-                        float y = frameOffset;
+                            float x = frameOffset;
+                            float y = frameOffset;
 
-                        GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
+                            GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
 
-                        Offset = new Vector3((sbyte) x, (sbyte) y,
-                            (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
+                            Offset = new Vector3((sbyte) x, (sbyte) y,
+                                (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
+                        }
 
                         turnOnly = false;
                     }

@@ -316,7 +316,6 @@ namespace ClassicUO.Game.Scenes
         {
             int off = Math.Abs(width / 44 - height / 44) % 3;
 
-            Console.WriteLine(off);
 
             Point renderDimensions = new Point
             {

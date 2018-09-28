@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
@@ -97,6 +98,8 @@ namespace ClassicUO.Network
             ToClient.Add(0xA8, ServerList);
             ToClient.Add(0xA9, CharacterList);
             ToClient.Add(0xBD, ClientVersion);
+
+            ToClient.Add(0x03, ClientTalk);
 
             /*ToServer.Add(0x00, CreateCharacter);
             ToServer.Add(0x01, Disconnect);
@@ -289,6 +292,25 @@ namespace ClassicUO.Network
             ToClient.Add(0xF3, UpdateItemSA);
             ToClient.Add(0xF5, DisplayMap);
             //ToServer.Add(0xF8, CharacterCreation_7_0_16_0);
+            ToClient.Add(0xF7, PacketList);
+        }
+
+
+        private static void ClientTalk(Packet p)
+        {
+            switch (p.ReadByte())
+            {
+                case 0x78:
+                    break;
+                case 0x3C:
+                    break;
+                case 0x25:
+                    break;
+                case 0x2E:
+                    break;
+                default:
+                    break;
+            }
         }
 
         private static void Damage(Packet p)
@@ -609,6 +631,22 @@ namespace ClassicUO.Network
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
 
+
+            var settings = Service.Get<Settings>();
+
+            NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
+
+            if (FileManager.ClientVersion >= ClientVersions.CV_200)
+            {
+                NetClient.Socket.Send(new PGameWindowSize((uint)settings.GameWindowWidth, (uint)settings.GameWindowHeight));
+                NetClient.Socket.Send(new PLanguage("ENU"));
+            }
+
+
+
+            GameActions.SingleClick(World.Player);
+            NetClient.Socket.Send(new PStatusRequest(World.Player));
+
             Service.Get<SceneManager>().ChangeScene(ScenesType.Game);
         }
 
@@ -620,8 +658,15 @@ namespace ClassicUO.Network
             MessageType type = (MessageType) p.ReadByte();
             Hue hue = p.ReadUShort();
             MessageFont font = (MessageFont) p.ReadUShort();
-            string name = p.ReadASCII(30);
+            string name = p.ReadASCII();
             string text = p.ReadASCII();
+
+            if (serial <= 0 && graphic <= 0 && type == MessageType.Regular && font == MessageFont.INVALID &&
+                hue == 0xFFFF && name.ToLower() == "system")
+            {
+                NetClient.Socket.Send(new PACKTalk());
+                return;
+            }
 
             if (entity != null)
             {
@@ -683,7 +728,7 @@ namespace ClassicUO.Network
 
             World.Player.GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
 
-            //World.Player.SequenceNumber = 0;
+            World.Player.SequenceNumber = 0;
 
             if (endX != x || endY != y)
             {
@@ -1444,6 +1489,13 @@ namespace ClassicUO.Network
         private static void AssistVersion(Packet p)
         {
             //uint version = p.ReadUInt();
+
+            //string[] parts = Service.Get<Settings>().ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            //byte[] clientVersionBuffer =
+            //    {byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])};
+
+
+            //NetClient.Socket.Send(new PAssistVersion(clientVersionBuffer, version));
         }
 
         private static void ExtendedCommand(Packet p)
@@ -1923,8 +1975,7 @@ namespace ClassicUO.Network
             uint clen = p.ReadUInt() - 4;
             uint dlen = p.ReadUInt();
 
-            byte[] data = new byte[clen];
-            for (int i = 0; i < data.Length; i++) data[i] = p.ReadByte();
+            byte[] data = p.ReadArray((int)clen);
 
             byte[] decData = new byte[dlen];
 
@@ -1998,7 +2049,8 @@ namespace ClassicUO.Network
 
         private static void KrriosClientSpecial(Packet p)
         {
-            if (p.ReadByte() == 0xFE)
+            byte type = p.ReadByte();
+            if (type == 0xFE)
             {
                 Service.Get<Log>().Message(LogTypes.Info, "Razor ACK sended");
                 NetClient.Socket.Send(new PRazorAnswer());
@@ -2011,7 +2063,10 @@ namespace ClassicUO.Network
 
         private static void UpdateItemSA(Packet p)
         {
-            p.Skip(2); //unknown
+            if (World.Player == null)
+                return;
+
+            p.Skip(2);
 
             byte type = p.ReadByte();
             Item item = World.GetOrCreateItem(p.ReadUInt());
@@ -2040,6 +2095,13 @@ namespace ClassicUO.Network
 
             if (TileData.IsAnimated((long) item.ItemData.Flags))
                 item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
+        }
+
+        private static void PacketList(Packet p)
+        {
+            if (World.Player == null)
+                return;
+
         }
 
         private static bool ReadContainerContent(Packet p)

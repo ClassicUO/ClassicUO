@@ -84,6 +84,8 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        public string Text => _text.Text;
+
         public override void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _textures.Length; i++)
