@@ -11,6 +11,8 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private readonly IScrollBar _scrollBar;
 
+        private bool _needUpdate = true;
+
         public ScrollArea(int x, int y, int w, int h, bool normalScrollbar) : base()
         {
             X = x;
@@ -40,12 +42,23 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            _scrollBar.Height = Height;
-            CalculateScrollBarMaxValue();
-            _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
+            if (_needUpdate)
+            {
+                CalculateScrollBarMaxValue();
+                _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
+                _needUpdate = false;
+            }
 
             base.Update(totalMS, frameMS);
         }
+
+
+        protected override void OnInitialize()
+        {
+            _needUpdate = true;
+            base.OnInitialize();
+        }
+
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
@@ -66,12 +79,11 @@ namespace ClassicUO.Game.Gumps.Controls
 
                     if (height + child.Height <= _scrollBar.Value)
                     {
-                        
+
                     }
                     else if(height + child.Height <= maxheight)
                     {
                         child.Draw(spriteBatch, new Vector3(position.X + child.X, position.Y + child.Y, 0));
-
                     }
 
                     height += child.Height;
@@ -96,15 +108,27 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
+        protected override void OnChildAdded()
+        {
+            _needUpdate = true;
+        }
+
+        protected override void OnChildRemoved()
+        {
+            _needUpdate = true;
+        }
 
         private void CalculateScrollBarMaxValue()
         {
+            _scrollBar.Height = Height;
+
             bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
 
             int height = 0;
             for (int i = 0; i < Children.Count; i++)
             {
-                height += Children[i].Height;
+                if (!(Children[i] is IScrollBar))
+                    height += Children[i].Height;
             }
 
             height -= _scrollBar.Height;
