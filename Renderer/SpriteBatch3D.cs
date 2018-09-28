@@ -40,7 +40,7 @@ namespace ClassicUO.Renderer
 
     public class SpriteBatch3D
     {
-        private const int VERTEX_COUNT = 4;
+        private const int VERTEX_COUNT = 4;                 
         private const int INDEX_COUNT = 6;
         private const int PRIMITIVES_COUNT = 2;
 

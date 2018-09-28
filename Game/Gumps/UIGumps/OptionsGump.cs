@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(label, 2);
 
 
-            HtmlGump scrollArea = new HtmlGump(64, 90, 500, 300, false, true);
+            ScrollArea scrollArea = new ScrollArea(64, 90, 500, 300, true);
             AddChildren(scrollArea, 2);
 
 
@@ -193,6 +193,32 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 0, Y = 61, IsChecked =  _settings.SmoothMovement
             };
             scrollArea.AddChildren(_checkboxSmoothMovement);
+
+            int y = 81;
+            for (int i = 0; i < 400; i++)
+            {
+                Checkbox ck = new Checkbox(0x00D2, 0x00D3, "TRY " + i)
+                {
+                    Y = y
+                };
+                ck.ValueChanged += (sender, e) => Console.WriteLine("PRESSED: " + ck.Text);
+                scrollArea.AddChildren(ck);
+                y += 20;
+            }
+
+            y += 20;
+
+            for (int i = 0; i < 40; i++)
+            {
+                Button ck = new Button((int)Buttons.Ok + i + 1, 0x00F9, 0x00F8, 0x00F7)
+                {
+                    Y = y,
+                    ButtonAction = ButtonAction.Activate
+                };
+                ck.MouseClick += (sender, e) => Console.WriteLine("PRESSED: " + ck.ButtonID);
+                scrollArea.AddChildren(ck);
+                y += ck.Height;
+            }
         }
 
         private void BuildPage3()
@@ -357,6 +383,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void OnButtonClick(int buttonID)
         {
+            if (buttonID > (int)Buttons.Ok)
+                return;
+
             switch ((Buttons)buttonID)
             {
                 case Buttons.SoundAndMusic:

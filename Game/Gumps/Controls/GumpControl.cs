@@ -309,15 +309,21 @@ namespace ClassicUO.Game.Gumps
                     }
                 }
 
-                if (w != Width)
-                    Width = w;
-                if (h != Height)
-                    Height = h;
+                if (!IgnoreParentFill)
+                {
+                    if (w != Width)
+                        Width = w;
+                    if (h != Height)
+                        Height = h;
+                }
+
 
                 if (toremove.Count > 0)
                     toremove.ForEach(s => _children.Remove(s));
             }
         }
+
+        public bool IgnoreParentFill { get; set; }
 
         public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
