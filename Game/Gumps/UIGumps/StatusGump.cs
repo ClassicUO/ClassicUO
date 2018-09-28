@@ -30,60 +30,60 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case var expression when FileManager.ClientVersion >= ClientVersions.CV_308D && !_useOldGump: //ORIGINAL LARGE GUMP
                     _offset = 82;
                     AddChildren(new GumpPic(0, 0, 0x2A6C, 0));
-                    AddChildren(_labels[(int)MobileStats.Name] = new Label(1, 997, _mobile.Name) { X = 260 - Width / 2, Y = 48 });
+                    AddChildren(_labels[(int)MobileStats.Name] = new Label(_mobile.Name, false, 997, 400) { X = 260 - Width / 2, Y = 48 });
                     //============================================================================================================================
-                    AddChildren(_labels[(int)MobileStats.Strength] = new Label(1, 997, _mobile.Strength.ToString()) { X = _offset - 4, Y = 76 });
-                    AddChildren(_labels[(int)MobileStats.Dexterity] = new Label(1, 997, _mobile.Dexterity.ToString()) { X = _offset - 4, Y = 104 });
-                    AddChildren(_labels[(int)MobileStats.Intelligence] = new Label(1, 997, _mobile.Intelligence.ToString()) { X = _offset - 4, Y = 132 });
-                    AddChildren(_labels[(int)MobileStats.HitChanceInc] = new Label(1, 997, _mobile.HitChanceInc.ToString()) { X = _offset - 4, Y = 160 });
+                    AddChildren(_labels[(int)MobileStats.Strength] = new Label(_mobile.Name, false, 997, 400) { X = _offset - 4, Y = 76 });
+                    AddChildren(_labels[(int)MobileStats.Dexterity] = new Label(_mobile.Dexterity.ToString(), false, 997, 400) { X = _offset - 4, Y = 104 });
+                    AddChildren(_labels[(int)MobileStats.Intelligence] = new Label(_mobile.Intelligence.ToString(), false, 997, 400) { X = _offset - 4, Y = 132 });
+                    AddChildren(_labels[(int)MobileStats.HitChanceInc] = new Label(_mobile.HitChanceInc.ToString(), false, 997, 400) { X = _offset - 4, Y = 160 });
                     //============================================================================================================================
-                    AddChildren(_labels[(int)MobileStats.HealthCurrent] = new Label(1, 997, _mobile.Hits.ToString()) { X = 2 * _offset - 4, Y = 69 });
-                    AddChildren(_labels[(int)MobileStats.HealthMax] = new Label(1, 997, _mobile.HitsMax.ToString()) { X = 2 * _offset - 4, Y = 82 });
-                    AddChildren(_labels[(int)MobileStats.StaminaCurrent] = new Label(1, 997, _mobile.Stamina.ToString()) { X = 2 * _offset - 4, Y = 97 });
-                    AddChildren(_labels[(int)MobileStats.StaminaMax] = new Label(1, 997, _mobile.StaminaMax.ToString()) { X = 2 * _offset - 4, Y = 110 });
-                    AddChildren(_labels[(int)MobileStats.ManaCurrent] = new Label(1, 997, _mobile.Mana.ToString()) { X = 2 * _offset - 4, Y = 125 });
-                    AddChildren(_labels[(int)MobileStats.ManaMax] = new Label(1, 997, _mobile.ManaMax.ToString()) { X = 2 * _offset - 4, Y = 138 });
-                    AddChildren(_labels[(int)MobileStats.DefenseChanceInc] = new Label(1, 997, _mobile.DefenseChanceInc.ToString()) { X = 2 * _offset - 4, Y = 160 });
+                    AddChildren(_labels[(int)MobileStats.HealthCurrent] = new Label(_mobile.Hits.ToString(), false, 997, 400) { X = 2 * _offset - 4, Y = 69 });
+                    AddChildren(_labels[(int)MobileStats.HealthMax] = new Label(_mobile.HitsMax.ToString(), false, 997, 400) { X = 2 * _offset - 4, Y = 82 });
+                    AddChildren(_labels[(int)MobileStats.StaminaCurrent] = new Label(_mobile.Stamina.ToString(), false, 997, 400) { X = 2 * _offset - 4, Y = 97 });
+                    AddChildren(_labels[(int)MobileStats.StaminaMax] = new Label(_mobile.StaminaMax.ToString(), false, 997, 400) { X = 2 * _offset - 4, Y = 110 });
+                    AddChildren(_labels[(int)MobileStats.ManaCurrent] = new Label(_mobile.Mana.ToString(), false, 997, 400) { X = 2 * _offset - 4, Y = 125 });
+                    AddChildren(_labels[(int)MobileStats.ManaMax] = new Label(_mobile.ManaMax.ToString(), false, 997, 400) { X = 2 * _offset - 4, Y = 138 });
+                    AddChildren(_labels[(int)MobileStats.DefenseChanceInc] = new Label(_mobile.DefenseChanceInc.ToString(), false, 997, 400) { X = 2 * _offset - 4, Y = 160 });
                     //============================================================================================================================
-                    AddChildren(_labels[(int)MobileStats.StatCap] = new Label(1, 997, _mobile.StatsCap.ToString()) { X = 3 * _offset - 4, Y = 76 });
-                    AddChildren(_labels[(int)MobileStats.Luck] = new Label(1, 997, _mobile.Luck.ToString()) { X = 3 * _offset - 4, Y = 102 });
-                    AddChildren(_labels[(int)MobileStats.WeightCurrent] = new Label(1, 997, _mobile.Weight.ToString()) { X = 3 * _offset - 4, Y = 125 });
-                    AddChildren(_labels[(int)MobileStats.WeightMax] = new Label(1, 997, _mobile.WeightMax.ToString()) { X = 3 * _offset - 4, Y = 138 });
-                    AddChildren(_labels[(int)MobileStats.LowerManaCost] = new Label(1, 997, _mobile.LowerManaCost.ToString()) { X = 3 * _offset - 4, Y = 160 });
+                    AddChildren(_labels[(int)MobileStats.StatCap] = new Label(_mobile.StatsCap.ToString(), false, 997, 400) { X = 3 * _offset - 4, Y = 76 });
+                    AddChildren(_labels[(int)MobileStats.Luck] = new Label(_mobile.Luck.ToString(), false, 997, 400) { X = 3 * _offset - 4, Y = 102 });
+                    AddChildren(_labels[(int)MobileStats.WeightCurrent] = new Label(_mobile.Weight.ToString(), false, 997, 400) { X = 3 * _offset - 4, Y = 125 });
+                    AddChildren(_labels[(int)MobileStats.WeightMax] = new Label(_mobile.WeightMax.ToString(), false, 997, 400) { X = 3 * _offset - 4, Y = 138 });
+                    AddChildren(_labels[(int)MobileStats.LowerManaCost] = new Label(_mobile.LowerManaCost.ToString(), false, 997, 400) { X = 3 * _offset - 4, Y = 160 });
                     //============================================================================================================================
-                    AddChildren(_labels[(int)MobileStats.Damage] = new Label(1, 997, ConcatCurrentMax(_mobile.DamageMin, _mobile.DamageMax)) { X = 4 * _offset - 4, Y = 75 });
-                    AddChildren(_labels[(int)MobileStats.DamageChanceInc] = new Label(1, 997, _mobile.DamageChanceInc.ToString()) { X = 4 * _offset - 4, Y = 102 });
-                    AddChildren(_labels[(int)MobileStats.Followers] = new Label(1, 997, ConcatCurrentMax(_mobile.Followers, _mobile.FollowersMax)) { X = 4 * _offset - 4, Y = 132 });
-                    AddChildren(_labels[(int)MobileStats.SwingSpeedInc] = new Label(1, 997, _mobile.SwingSpeedInc.ToString()) { X = 4 * _offset - 4, Y = 160 });
+                    AddChildren(_labels[(int)MobileStats.Damage] = new Label(ConcatCurrentMax(_mobile.DamageMin, _mobile.DamageMax), false, 997, 400) { X = 4 * _offset - 4, Y = 75 });
+                    AddChildren(_labels[(int)MobileStats.DamageChanceInc] = new Label(_mobile.DamageChanceInc.ToString(), false, 997, 400) { X = 4 * _offset - 4, Y = 102 });
+                    AddChildren(_labels[(int)MobileStats.Followers] = new Label(ConcatCurrentMax(_mobile.Followers, _mobile.FollowersMax), false, 997, 400) { X = 4 * _offset - 4, Y = 132 });
+                    AddChildren(_labels[(int)MobileStats.SwingSpeedInc] = new Label(_mobile.SwingSpeedInc.ToString(), false, 997, 400) { X = 4 * _offset - 4, Y = 160 });
                     //============================================================================================================================
-                    AddChildren(_labels[(int)MobileStats.LowerReagentCost] = new Label(1, 997, _mobile.LowerReagentCost.ToString()) { X = 5 * _offset - 4, Y = 76 });
-                    AddChildren(_labels[(int)MobileStats.SpellDamageInc] = new Label(1, 997, _mobile.SpellDamageInc.ToString()) { X = 5 * _offset - 4, Y = 102 });
-                    AddChildren(_labels[(int)MobileStats.FasterCasting] = new Label(1, 997, _mobile.FasterCasting.ToString()) { X = 5 * _offset - 4, Y = 132 });
-                    AddChildren(_labels[(int)MobileStats.FasterCastRecovery] = new Label(1, 997, _mobile.FasterCastRecovery.ToString()) { X = 5 * _offset - 4, Y = 160 });
+                    AddChildren(_labels[(int)MobileStats.LowerReagentCost] = new Label(_mobile.LowerReagentCost.ToString(), false, 997, 400) { X = 5 * _offset - 4, Y = 76 });
+                    AddChildren(_labels[(int)MobileStats.SpellDamageInc] = new Label(_mobile.SpellDamageInc.ToString(), false, 997, 400) { X = 5 * _offset - 4, Y = 102 });
+                    AddChildren(_labels[(int)MobileStats.FasterCasting] = new Label(_mobile.FasterCasting.ToString(), false, 997, 400) { X = 5 * _offset - 4, Y = 132 });
+                    AddChildren(_labels[(int)MobileStats.FasterCastRecovery] = new Label(_mobile.FasterCastRecovery.ToString(), false, 997, 400) { X = 5 * _offset - 4, Y = 160 });
                     //============================================================================================================================
-                    AddChildren(_labels[(int)MobileStats.AR] = new Label(1, 997, _mobile.ResistPhysical.ToString()) { X = 6 * _offset - 4, Y = 73 });
-                    AddChildren(_labels[(int)MobileStats.RF] = new Label(1, 997, _mobile.ResistFire.ToString()) { X = 6 * _offset - 4, Y = 90 });
-                    AddChildren(_labels[(int)MobileStats.RC] = new Label(1, 997, _mobile.ResistCold.ToString()) { X = 6 * _offset - 4, Y = 105 });
-                    AddChildren(_labels[(int)MobileStats.RP] = new Label(1, 997, _mobile.ResistPoison.ToString()) { X = 6 * _offset - 4, Y = 119 });
-                    AddChildren(_labels[(int)MobileStats.RE] = new Label(1, 997, _mobile.ResistEnergy.ToString()) { X = 6 * _offset - 4, Y = 135 });
-                    AddChildren(_labels[(int)MobileStats.Gold] = new Label(1, 997, _mobile.Gold.ToString()) { X = 6 * _offset - 4, Y = 160 });
+                    AddChildren(_labels[(int)MobileStats.AR] = new Label(ConcatCurrentMax(_mobile.ResistPhysical, _mobile.MaxPhysicRes), false, 997, 400) { X = 6 * _offset - 4, Y = 73 });
+                    AddChildren(_labels[(int)MobileStats.RF] = new Label(ConcatCurrentMax(_mobile.ResistFire, _mobile.MaxFireRes), false, 997, 400) { X = 6 * _offset - 4, Y = 90 });
+                    AddChildren(_labels[(int)MobileStats.RC] = new Label(ConcatCurrentMax(_mobile.ResistCold, _mobile.MaxColdRes), false, 997, 400) { X = 6 * _offset - 4, Y = 105 });
+                    AddChildren(_labels[(int)MobileStats.RP] = new Label(ConcatCurrentMax(_mobile.ResistPoison, _mobile.MaxPoisonRes), false, 997, 400) { X = 6 * _offset - 4, Y = 119 });
+                    AddChildren(_labels[(int)MobileStats.RE] = new Label(ConcatCurrentMax(_mobile.ResistEnergy, _mobile.MaxEnergyRes), false, 997, 400) { X = 6 * _offset - 4, Y = 135 });
+                    AddChildren(_labels[(int)MobileStats.Gold] = new Label(_mobile.Gold.ToString(), false, 997, 400) { X = 6 * _offset - 4, Y = 160 });
                     break;
                 case var expression when FileManager.ClientVersion < ClientVersions.CV_308D | _useOldGump: //OLD GUMP
                     _offset = 84;
                     AddChildren(new GumpPic(0, 0, 0x802, 0));
                     //============================================================================================================================
-                    AddChildren(_labels[(int)MobileStats.Name] = new Label(1, 997, _mobile.Name.ToString()) { X = _offset, Y = 42 });
-                    AddChildren(_labels[(int)MobileStats.Strength] = new Label(1, 997, _mobile.Strength.ToString()) { X = _offset, Y = 62 });
-                    AddChildren(_labels[(int)MobileStats.Dexterity] = new Label(1, 997, _mobile.Dexterity.ToString()) { X = _offset, Y = 74 });
-                    AddChildren(_labels[(int)MobileStats.Intelligence] = new Label(1, 997, _mobile.Intelligence.ToString()) { X = _offset, Y = 85 });
-                    AddChildren(_labels[(int)MobileStats.Sex] = new Label(1, 997, ((_mobile.Flags & Flags.Female) != 0) ? "F" : "M") { X = _offset, Y = 98 });
-                    AddChildren(_labels[(int)MobileStats.AR] = new Label(1, 997, _mobile.ResistPhysical.ToString()) { X = _offset, Y = 110 });
+                    AddChildren(_labels[(int)MobileStats.Name] = new Label(_mobile.Name, false, 997, 400) { X = _offset, Y = 42 });
+                    AddChildren(_labels[(int)MobileStats.Strength] = new Label(_mobile.Strength.ToString(), false, 997, 400) { X = _offset, Y = 62 });
+                    AddChildren(_labels[(int)MobileStats.Dexterity] = new Label(_mobile.Dexterity.ToString(), false, 997, 400) { X = _offset, Y = 74 });
+                    AddChildren(_labels[(int)MobileStats.Intelligence] = new Label(_mobile.Intelligence.ToString(), false, 997, 400) { X = _offset, Y = 85 });
+                    AddChildren(_labels[(int)MobileStats.Sex] = new Label( ((_mobile.Flags & Flags.Female) != 0 ? "F" : "M"), false, 997, 400) { X = _offset, Y = 98 });
+                    AddChildren(_labels[(int)MobileStats.AR] = new Label(ConcatCurrentMax(_mobile.ResistPhysical, _mobile.MaxPhysicRes), false, 997, 400) { X = _offset, Y = 110 });
                     //============================================================================================================================
-                    AddChildren(_labels[(int)MobileStats.HealthCurrent] = new Label(1, 997, _mobile.Hits.ToString()) { X = 2 * _offset+3, Y = 62 });
-                    AddChildren(_labels[(int)MobileStats.ManaCurrent] = new Label(1, 997, _mobile.Mana.ToString()) { X = 2 * _offset+3, Y = 74 });
-                    AddChildren(_labels[(int)MobileStats.StaminaCurrent] = new Label(1, 997, _mobile.Stamina.ToString()) { X = 2 * _offset+3, Y = 85 });
-                    AddChildren(_labels[(int)MobileStats.Gold] = new Label(1, 997, _mobile.Gold.ToString()) { X = 2 * _offset+3, Y = 98 });
-                    AddChildren(_labels[(int)MobileStats.WeightCurrent] = new Label(1, 997, _mobile.Weight.ToString()) { X = 2 * _offset+3, Y = 110 });
+                    AddChildren(_labels[(int)MobileStats.HealthCurrent] = new Label(_mobile.Hits.ToString(), false, 997, 400) { X = 2 * _offset+3, Y = 62 });
+                    AddChildren(_labels[(int)MobileStats.ManaCurrent] = new Label(_mobile.Mana.ToString(), false, 997, 400) { X = 2 * _offset+3, Y = 74 });
+                    AddChildren(_labels[(int)MobileStats.StaminaCurrent] = new Label(_mobile.Stamina.ToString(), false, 997, 400) { X = 2 * _offset+3, Y = 85 });
+                    AddChildren(_labels[(int)MobileStats.Gold] = new Label(_mobile.Gold.ToString(), false, 997, 400) { X = 2 * _offset+3, Y = 98 });
+                    AddChildren(_labels[(int)MobileStats.WeightCurrent] = new Label(_mobile.Weight.ToString(), false, 997, 400) { X = 2 * _offset+3, Y = 110 });
                     break;
             }
 

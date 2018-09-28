@@ -413,9 +413,14 @@ namespace ClassicUO.Game.Gumps
         {
             c.Page = page;
             c.Parent = this;
+            OnChildAdded();
         }
 
-        public void RemoveChildren(GumpControl c) => c.Parent = null;
+        public void RemoveChildren(GumpControl c)
+        {
+            c.Parent = null;
+            OnChildRemoved();
+        }
 
         public void Clear()
         {
@@ -601,6 +606,16 @@ namespace ClassicUO.Game.Gumps
         }
 
         protected virtual void OnFocusLeft()
+        {
+
+        }
+
+        protected virtual void OnChildAdded()
+        {
+
+        }
+
+        protected virtual void OnChildRemoved()
         {
 
         }

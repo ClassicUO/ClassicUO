@@ -212,6 +212,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 Button ck = new Button((int)Buttons.Ok + i + 1, 0x00F9, 0x00F8, 0x00F7)
                 {
+                    X = 34,
                     Y = y,
                     ButtonAction = ButtonAction.Activate
                 };
