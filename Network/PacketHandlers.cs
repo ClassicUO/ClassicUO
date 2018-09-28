@@ -658,7 +658,7 @@ namespace ClassicUO.Network
             MessageType type = (MessageType) p.ReadByte();
             Hue hue = p.ReadUShort();
             MessageFont font = (MessageFont) p.ReadUShort();
-            string name = p.ReadASCII();
+            string name = p.ReadASCII(30, true);
             string text = p.ReadASCII();
 
             if (serial <= 0 && graphic <= 0 && type == MessageType.Regular && font == MessageFont.INVALID &&

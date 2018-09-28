@@ -475,7 +475,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (AnimationFromServer) SetAnimation(0xFF);
 
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - 1; // default 15 = less smooth
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (IsMounted ? 1 : 15) ; // default 15 = less smooth
                     int delay = (int) World.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
 

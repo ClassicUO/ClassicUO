@@ -103,7 +103,7 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
-        public string ReadASCII(int length)
+        public string ReadASCII(int length, bool exitIfNull = false)
         {
             EnsureSize(length);
             StringBuilder sb = new StringBuilder(length);
@@ -112,7 +112,10 @@ namespace ClassicUO.Network
             for (int i = 0; i < length; i++)
             {
                 c = (char) ReadByte();
-                if (c != '\0') sb.Append(c);
+                if (c != '\0')
+                    sb.Append(c);
+                else if (exitIfNull)
+                    break;
             }
 
             return sb.ToString();
