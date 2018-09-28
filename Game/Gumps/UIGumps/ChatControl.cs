@@ -134,7 +134,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 int height = Fonts.GetHeightUnicode(1, "ABC", Width, 0,
                     (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
 
-                _textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
+                _textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
                 {
                     X = 0,
                     Y = Height - height - 3,

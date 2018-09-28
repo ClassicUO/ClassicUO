@@ -42,25 +42,43 @@ namespace ClassicUO.Game.Gumps
                 MaxWidth = maxwidth,
                 Text = text
             };
+            AcceptMouseInput = false;
+
+            Width = _gText.Width;
+            Height = _gText.Height;
         }
 
-        public Label(int font, int hue, string text, int width = 400)
-        {
-            _gText = new RenderedText
-            {
-                IsUnicode = false,
-                Font = (byte)font,
-                Hue = (Hue)hue,
-                //Align = align,
-                MaxWidth = width,
-                Text = text
-            };
-        }
+        //public Label(int font, int hue, string text, int width = 400)
+        //{
+        //    _gText = new RenderedText
+        //    {
+        //        IsUnicode = false,
+        //        Font = (byte)font,
+        //        Hue = (Hue)hue,
+        //        //Align = align,
+        //        MaxWidth = width,
+        //        Text = text
+        //    };
+        //    AcceptMouseInput = false;
 
-        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, Hue.Parse(parts[3]), 0, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT)
+        //    Width = _gText.Width;
+        //    Height = _gText.Height;
+        //}
+
+        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, TransformHue(Hue.Parse(parts[3])), 0, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
+        }
+
+
+        private static Hue TransformHue(Hue hue)
+        {
+            if (hue > 1)
+                hue -= 2;
+            if (hue < 2)
+                hue = 1;
+            return hue;
         }
 
         public byte Font
@@ -75,17 +93,6 @@ namespace ClassicUO.Game.Gumps
             set => _gText.Text = value;
         }
 
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            if (!string.IsNullOrEmpty(Text) && (Width != _gText.Width || Height != _gText.Height))
-            {
-                Width = _gText.Width;
-                Height = _gText.Height;
-            }
-
-            base.Update(totalMS, frameMS);
-        }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {

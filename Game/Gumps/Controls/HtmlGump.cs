@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Gumps
 
         public HtmlGump(int x, int y, int w, int h, bool hasbackground, bool hasscrollbar, bool useflagscrollbar = false, string text = "", int hue = 0,
             bool ishtml = false, byte font = 1, bool isunicode = true, FontStyle style = FontStyle.None,
-            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, int maxWidth = 0) : this()
+            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : this()
         {
             X = x;
             Y = y;
@@ -68,7 +68,7 @@ namespace ClassicUO.Game.Gumps
                 _gameText.Align = align;
                 _gameText.Font = font;
                 _gameText.IsUnicode = isunicode;
-                _gameText.MaxWidth = maxWidth;
+                _gameText.MaxWidth = w;
             }
 
             InternalBuild(text, hue);

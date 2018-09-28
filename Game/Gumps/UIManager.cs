@@ -144,7 +144,10 @@ namespace ClassicUO.Game.Gumps
                         case "checkertrans":
 
                             if (gump.Children.Count > 0)
-                                gump.Children[gump.Children.Count - 1].IsTransparent = true;
+                            {
+                                var g = gump.Children[gump.Children.Count - 1];
+                                g.IsTransparent = true;
+                            }
 
                             //gump.AddChildren(new CheckerTrans(gparams));
                             break;

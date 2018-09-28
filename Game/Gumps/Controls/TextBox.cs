@@ -35,10 +35,10 @@ namespace ClassicUO.Game.Gumps
         private readonly TextEntry _entry;
 
 
-        public TextBox(byte font, int maxcharlength = -1, int maxlength = 0, bool isunicode = true,
+        public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true,
             FontStyle style = FontStyle.None, ushort hue = 0)
         {
-            _entry = new TextEntry(font, maxcharlength, maxlength, isunicode, style, hue);
+            _entry = new TextEntry(font, maxcharlength, maxWidth, width, isunicode, style, hue);
 
             Hue = hue;
 
@@ -47,9 +47,13 @@ namespace ClassicUO.Game.Gumps
             IsEditable = true;
         }
 
-        public TextBox(string[] parts, string[] lines) : this(1,
-            parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, int.Parse(parts[3]),
-            style: FontStyle.BlackBorder, hue: Hue.Parse(parts[5]))
+        public TextBox(string[] parts, string[] lines) : this
+        (   1,
+            parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, 
+            parts[0] == "textentrylimited" ? int.Parse(parts[3]) : 0, 
+            width: int.Parse(parts[3]),
+            style: FontStyle.BlackBorder, 
+            hue: Hue.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -138,9 +142,9 @@ namespace ClassicUO.Game.Gumps
                         _entry.InsertString("    ");
                     break;*/
                 case SDL.SDL_Keycode.SDLK_RETURN:
-                    if ((_entry.RenderText.FontStyle & FontStyle.Fixed) == 0)
-                        _entry.InsertString("\n");
-                    else
+                    //if ((_entry.RenderText.FontStyle & FontStyle.Fixed) == 0)
+                    //    _entry.InsertString("\n");
+                    //else
                         Parent.OnKeybaordReturn(Graphic, Text);
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
