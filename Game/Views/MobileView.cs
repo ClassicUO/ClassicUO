@@ -129,19 +129,6 @@ namespace ClassicUO.Game.Views
                 Z = position.Z
             };
 
-            //if (!bodyFrame.IsDisposed)
-            //{
-            //    Service.Get<Log>().Message(LogTypes.Trace, "BEFORE: " + yOffset.ToString());
-
-            //    yOffset = bodyFrame.Height + drawY - (int)(mobile.Offset.Z / 4 + GameObject.Position.Z * 4);
-
-            //    Service.Get<Log>().Message(LogTypes.Trace, "AFTER: " + yOffset.ToString());
-            //}
-            //else
-            //{
-            //    yOffset -= -(yOffset + 44);
-            //}
-
             MessageOverHead(spriteBatch, overheadPosition, -22);
             return true;
         }
@@ -173,18 +160,15 @@ namespace ClassicUO.Game.Views
 
                         if (direction.Frames != null && direction.Frames.Length > 0)
                         {
-                            height = direction.Frames[0].Height;
-                            centerY = direction.Frames[0].CenterY;
+                            height = direction.Frames[frameIndex].Height;
+                            centerY = direction.Frames[frameIndex].CenterY;
                             return;
                         }
                     }
                 }
             }
 
-            if (mobile.IsMounted)
-                height = 100;
-            else
-                height = 60;
+            height = mobile.IsMounted ? 100 : 60;
             centerY = 0;
         }
 
