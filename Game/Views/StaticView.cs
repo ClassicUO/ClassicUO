@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Views
         public StaticView(Static st) : base(st) => AllowedToDraw = !IsNoDrawable(st.Graphic);
 
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed) return false;
 
@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Views
         }
 
 
-        protected override void MousePick(MouseOverList<GameObject> list, SpriteVertex[] vertex)
+        protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
             int x = list.MousePosition.X - (int) vertex[0].Position.X;
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;

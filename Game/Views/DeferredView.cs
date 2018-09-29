@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Views
             _position = position;
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList) =>
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList) =>
             _baseView.DrawInternal(spriteBatch, _position, objectList);
     }
 }

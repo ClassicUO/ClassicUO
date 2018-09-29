@@ -195,22 +195,8 @@ namespace ClassicUO.Game.Gumps
 
         public int ParentX => Parent != null ? Parent.X + Parent.ParentX : 0;
         public int ParentY => Parent != null ? Parent.Y + Parent.ParentY : 0;
-
-        public int ScreenCoordinateX
-        {
-            get
-            {
-                return ParentX + X;
-            }
-        }
-
-        public int ScreenCoordinateY
-        {
-            get
-            {
-                return ParentY + Y;
-            }
-        }
+        public int ScreenCoordinateX => ParentX + X;
+        public int ScreenCoordinateY => ParentY + Y;
 
         public GumpControl Parent
         {
@@ -325,6 +311,7 @@ namespace ClassicUO.Game.Gumps
 
         public bool IgnoreParentFill { get; set; }
 
+
         public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             if (IsDisposed) return false;
@@ -347,6 +334,40 @@ namespace ClassicUO.Game.Gumps
 
             return true;
         }
+
+        //TODO: Future implementation
+
+        //public virtual bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
+        //{
+        //    Rectangle src = new Rectangle();
+
+        //    if (offsetX > Width || offsetX < -Width || offsetY > Height || offsetY < -Height)
+        //        return false;
+
+        //    src.X = offsetX;
+        //    src.Y = offsetY;
+
+        //    int maxX = src.X + dst.Width;
+        //    if (maxX <= Width)
+        //        src.Width = dst.Width;
+        //    else
+        //    {
+        //        src.Width = Width - src.X;
+        //        dst.Width = src.Width;
+        //    }
+
+        //    int maxY = src.Y + dst.Height;
+        //    if (maxY <= Height)
+        //        src.Height = dst.Height;
+        //    else
+        //    {
+        //        src.Height = Height - src.Y;
+        //        dst.Height = src.Height;
+        //    }
+
+        //    return true; /*spriteBatch.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);*/
+        //}
+
 
 
         internal void SetFocused()

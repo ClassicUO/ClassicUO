@@ -46,11 +46,11 @@ namespace ClassicUO.Game.Scenes
 #if !ORIONSORT
         private readonly List<DeferredEntity> _deferredToRemove = new List<DeferredEntity>();
 #endif
-        private MousePicker<GameObject> _mousePicker;
-        private MouseOverList<GameObject> _mouseOverList;
+        private MousePicker _mousePicker;
+        private MouseOverList _mouseOverList;
 
         private bool _rightMousePressed;
-        private WorldViewportGump _viewPortGump;
+        private WorldViewport _viewPortGump;
         private TopBarGump _topBarGump;
         private StaticManager _staticManager;
         private Settings _settings;
@@ -68,7 +68,7 @@ namespace ClassicUO.Game.Scenes
 
         public int Scale { get; set; } = 1;
         public Texture2D ViewportTexture => _renderTarget;
-        public Point MouseOverWorldPosition => InputManager.MousePosition - _viewPortGump.Location;
+        public Point MouseOverWorldPosition => new Point(InputManager.MousePosition.X - _viewPortGump.ScreenCoordinateX, InputManager.MousePosition.Y - _viewPortGump.ScreenCoordinateY);
 
         public GameObject SelectedObject
         {
@@ -101,12 +101,14 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
-            _mousePicker = new MousePicker<GameObject>();
-            _mouseOverList = new MouseOverList<GameObject>(_mousePicker);
+            _mousePicker = new MousePicker();
+            _mouseOverList = new MouseOverList(_mousePicker);
             _staticManager = new StaticManager();
 
-            UIManager.Add(_viewPortGump = new WorldViewportGump(this));
+            UIManager.Add(new WorldViewportGump(this));
             UIManager.Add(_topBarGump = new TopBarGump(this));
+
+            _viewPortGump = Service.Get<WorldViewport>();
 
             _settings = Service.Get<Settings>();
 
@@ -199,15 +201,6 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
-            //if (World.Map != null)
-            //{
-            //    if (!_ADDED)
-            //    {
-            //        UIManager.Add(new Gumps.Controls.InGame.MapGump());
-            //        _ADDED = true;
-            //    }
-            //}
-
             World.Ticks = (long) totalMS;
 
             if (_renderTarget == null || _renderTarget.Width != _settings.GameWindowWidth / Scale || _renderTarget.Height != _settings.GameWindowHeight / Scale)
@@ -217,11 +210,27 @@ namespace ClassicUO.Game.Scenes
                     DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
+
+            // ============== INPUT ==============          
             HandleMouseActions();
             MouseHandler(frameMS);
 
+
+            if (IsMouseOverWorld)
+            {
+                _mouseOverList.MousePosition = _mousePicker.Position = MouseOverWorldPosition;
+                _mousePicker.PickOnly = PickerType.PickEverything;
+            }
+            else if (SelectedObject != null)
+                SelectedObject = null;
+
+            _mouseOverList.Clear();
+
+
             if (_rightMousePressed)
                 MoveCharacterByInputs();
+            // ===================================
+
 
             World.Update(totalMS, frameMS);
             _staticManager.Update(totalMS, frameMS);
@@ -233,9 +242,7 @@ namespace ClassicUO.Game.Scenes
                 _timePing = DateTime.Now.AddSeconds(10);
             }
 
-            _mouseOverList.MousePosition = _mousePicker.Position = MouseOverWorldPosition;
-            _mousePicker.PickOnly = PickerType.PickEverything;
-            _mouseOverList.Clear();
+            Console.WriteLine("Normal: {0},   Game: {1}", InputManager.MousePosition, MouseOverWorldPosition);
 
             base.Update(totalMS, frameMS);
         }

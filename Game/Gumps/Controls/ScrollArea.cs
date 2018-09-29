@@ -37,6 +37,7 @@ namespace ClassicUO.Game.Gumps.Controls
             _scrollBar.MaxValue = Height;
 
             IgnoreParentFill = true;
+            AcceptMouseInput = false;
         }
 
 
@@ -79,11 +80,22 @@ namespace ClassicUO.Game.Gumps.Controls
 
                     if (height + child.Height <= _scrollBar.Value)
                     {
-
+                        // do nothing
                     }
                     else if(height + child.Height <= maxheight)
                     {
-                        child.Draw(spriteBatch, new Vector3(position.X + child.X, position.Y + child.Y, 0));
+                        if (child.Y < 0)
+                        {
+                            // TODO: Future implementation
+                        }
+                        else
+                        {
+                            child.Draw(spriteBatch, new Vector3(position.X + child.X, position.Y + child.Y, 0));
+                        }
+                    }
+                    else
+                    {
+                        // TODO: Future implementation
                     }
 
                     height += child.Height;
@@ -146,5 +158,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
+
+        
     }
 }

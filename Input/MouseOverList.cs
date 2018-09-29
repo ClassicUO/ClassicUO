@@ -20,32 +20,33 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System.Collections.Generic;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Input
 {
-    public struct MouseOverItem<T> where T : class
+    public class MouseOverItem
     {
-        public MouseOverItem(T obj, Point pos)
+        public MouseOverItem(GameObject obj, Point pos)
         {
             Object = obj;
             InTexturePoint = pos;
         }
 
-        public Point InTexturePoint;
-        public T Object;
+        public Point InTexturePoint { get; }
+        public GameObject Object { get; }
     }
 
 
-    public class MouseOverList<T> where T : class
+    public class MouseOverList
     {
-        private readonly List<MouseOverItem<T>> _items;
+        private readonly List<MouseOverItem> _items;
 
 
-        public MouseOverList(MousePicker<T> picker)
+        public MouseOverList(MousePicker picker)
         {
-            _items = new List<MouseOverItem<T>>();
+            _items = new List<MouseOverItem>();
             MousePosition = picker.Position;
             Picker = picker.PickOnly;
         }
@@ -54,21 +55,53 @@ namespace ClassicUO.Input
 
         public PickerType Picker { get; set; }
 
-        public MouseOverItem<T> GetItem(Point position)
-        {
-            if (_items.Count <= 0)
-                return default;
+        //public MouseOverItem GetItem(Point position)
+        //{
+        //    if (_items.Count <= 0)
+        //        return default;
 
-            return _items[_items.Count - 1];
-        }
+        //    return _items[_items.Count - 1];
+        //}
 
-        public void Add(T obj, Vector3 position)
+        public void Add(GameObject obj, Vector3 position)
         {
             Point p = new Point(MousePosition.X - (int) position.X, MousePosition.Y - (int) position.Y);
-            _items.Add(new MouseOverItem<T>(obj, p));
+            _items.Add(new MouseOverItem(obj, p));
         }
 
         public void Clear() => _items.Clear();
+
+        public MouseOverItem GetForemostMouseOverItem(Point mousePosition)
+        {
+            // Parse list backwards to find topmost mouse over object.
+            foreach (MouseOverItem item in CreateReverseIterator(_items))
+            {
+                return item;
+            }
+            return null;
+        }
+
+        public MouseOverItem GetForemostMouseOverItem<T>(Point mousePosition) where T : GameObject
+        {
+            // Parse list backwards to find topmost mouse over object.
+            foreach (MouseOverItem item in CreateReverseIterator(_items))
+            {
+                if (item.Object.GetType() == typeof(T))
+                {
+                    return item;
+                }
+            }
+            return null;
+        }
+
+        static IEnumerable<MouseOverItem> CreateReverseIterator<MouseOverItem>(IList<MouseOverItem> list)
+        {
+            int count = list.Count;
+            for (int i = count - 1; i >= 0; --i)
+            {
+                yield return list[i];
+            }
+        }
 
         public bool IsMouseInObjectIsometric(SpriteVertex[] v)
         {

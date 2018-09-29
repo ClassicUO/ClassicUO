@@ -104,13 +104,12 @@ namespace ClassicUO.Game.Gumps
 
             spriteBatch.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
 
-            if (_text.Text != string.Empty)
-            {
-                _text.Draw(spriteBatch, new Vector3(position.X + _textures[ACTIVE].Width + 2, position.Y, 0));
-            }
-
+            _text.Draw(spriteBatch, new Vector3(position.X + _textures[ACTIVE].Width + 2, position.Y, 0));
+           
             return ok;
         }
+
+    
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {

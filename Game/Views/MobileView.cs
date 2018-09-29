@@ -36,11 +36,11 @@ namespace ClassicUO.Game.Views
         public MobileView(Mobile mobile) : base(mobile) => _frames = new ViewLayer[(int) Layer.InnerLegs];
 
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
             => !PreDraw(position) && DrawInternal(spriteBatch, position, objectList);
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
-            MouseOverList<GameObject> objectList)
+            MouseOverList objectList)
         {
             if (GameObject.IsDisposed)
                 return false;
@@ -189,7 +189,7 @@ namespace ClassicUO.Game.Views
         }
 
 
-        private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList<GameObject> list)
+        private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
         {
             int x;
 

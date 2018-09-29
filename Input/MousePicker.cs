@@ -19,28 +19,32 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Map;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Input
 {
-    public class MousePicker<T> where T : class
+    public class MousePicker
     {
-        private MouseOverItem<T> _overObject;
-        private MouseOverItem<T> _overTile;
+        private MouseOverItem _overObject;
+        private MouseOverItem _overTile;
 
         public MousePicker() => PickOnly = PickerType.PickNothing;
 
         public PickerType PickOnly { get; set; }
         public Point Position { get; set; }
+        public GameObject MouseOverObject => _overObject?.Object;
+        public GameObject MouseOverTile => _overTile?.Object;
 
-        public T MouseOverObject => _overObject.Equals(default) ? null : _overObject.Object;
-
-        public Point MouseOverObjectPoint => _overObject.Equals(default) ? Point.Zero : _overObject.InTexturePoint;
+        public Point MouseOverObjectPoint => _overObject?.InTexturePoint ?? Point.Zero;
 
 
-        public void UpdateOverObjects(MouseOverList<T> list, Point position)
+        public void UpdateOverObjects(MouseOverList list, Point position)
         {
-            _overObject = list.GetItem(position);
+            _overObject = list.GetForemostMouseOverItem(position);
+            _overTile = list.GetForemostMouseOverItem<Tile>(position);
         }
     }
 }
