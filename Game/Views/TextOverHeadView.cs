@@ -19,6 +19,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -28,12 +30,10 @@ namespace ClassicUO.Game.Views
 {
     public class TextOverheadView : View
     {
-        private readonly RenderedText _text;
-
         public TextOverheadView(TextOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0,
             bool isunicode = false, FontStyle style = FontStyle.None) : base(parent)
         {
-            _text = new RenderedText()
+            RenderedText text = new RenderedText()
             {
                 MaxWidth = maxwidth,
                 Hue = hue,
@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Views
                 Text = parent.Text
             };
 
-            Texture = _text.Texture;
+            Texture = text.Texture;
         }
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
@@ -53,8 +53,20 @@ namespace ClassicUO.Game.Views
 
             Texture.Ticks = World.Ticks;
 
+            TextOverhead overhead = (TextOverhead) GameObject;
+
+
+
+
+            if (!overhead.IsPersistent && overhead.Alpha < 1.0f)
+            {
+                HueVector = RenderExtentions.GetHueVector(0, false, overhead.Alpha, true);
+            }
+
             return base.Draw(spriteBatch, position, objectList);
         }
+
+
 
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)

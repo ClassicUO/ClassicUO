@@ -280,7 +280,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             private int _width;
 
             private const float TIME_DISPLAY = 10000.0f;
-            private const float TIME_FADEOUT = 4000.0f;
+            private const float TIME_FADEOUT = 2000.0f;
 
             public ChatLineTime(string text, int width, byte font, bool isunicode, Hue hue)
             {
