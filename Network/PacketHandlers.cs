@@ -336,7 +336,7 @@ namespace ClassicUO.Network
             mobile.Name = p.ReadASCII(30);
             mobile.Hits = p.ReadUShort();
             mobile.HitsMax = p.ReadUShort();
-            mobile.Renamable = p.ReadBool();
+            mobile.IsRenamable = p.ReadBool();
 
             byte type = p.ReadByte();
             if (type > 0)
@@ -2482,7 +2482,7 @@ namespace ClassicUO.Network
 //            mobile.Name = p.ReadASCII(30);
 //            mobile.Hits = p.ReadUShort();
 //            mobile.HitsMax = p.ReadUShort();
-//            mobile.Renamable = p.ReadBool();
+//            mobile.IsRenamable = p.ReadBool();
 
 //            byte type = p.ReadByte();
 //            if (type > 0)
