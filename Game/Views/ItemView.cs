@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Views
 
                 HueVector = RenderExtentions.GetHueVector(GameObject.Hue,
                     TileData.IsPartialHue((long) item.ItemData.Flags),
-                    TileData.IsTranslucent((long) item.ItemData.Flags), false);
+                    TileData.IsTranslucent((long) item.ItemData.Flags) ? .5f : 0, false);
 
                 if (item.Amount > 1 && TileData.IsStackable((long) item.ItemData.Flags) &&
                     item.DisplayedGraphic == GameObject.Graphic)

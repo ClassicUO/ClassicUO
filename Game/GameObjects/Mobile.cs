@@ -73,8 +73,6 @@ namespace ClassicUO.Game.GameObjects
 
         public Mobile(Serial serial) : base(serial) => _lastAnimationChangeTime = World.Ticks;
 
-        //public new MobileView View => (MobileView)base.View;
-
         public Deque<Step> Steps { get; } = new Deque<Step>();
 
         public RaceType Race

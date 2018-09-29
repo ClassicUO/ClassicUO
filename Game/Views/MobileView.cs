@@ -83,7 +83,7 @@ namespace ClassicUO.Game.Views
 
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-                HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, false, false);
+                HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, 0, false);
 
                 base.Draw(spriteBatch, position, objectList);
 
