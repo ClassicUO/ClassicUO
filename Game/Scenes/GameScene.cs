@@ -242,8 +242,6 @@ namespace ClassicUO.Game.Scenes
                 _timePing = DateTime.Now.AddSeconds(10);
             }
 
-            Console.WriteLine("Normal: {0},   Game: {1}", InputManager.MousePosition, MouseOverWorldPosition);
-
             base.Update(totalMS, frameMS);
         }
 
