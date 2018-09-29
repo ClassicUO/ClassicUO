@@ -55,7 +55,7 @@ namespace ClassicUO.Game.Scenes
         private StaticManager _staticManager;
         private Settings _settings;
 
-        private static Hue _savedHue;
+        //private static Hue _savedHue;
         private static GameObject _selectedObject;
 
 
@@ -78,21 +78,22 @@ namespace ClassicUO.Game.Scenes
                 if (_selectedObject == value)
                     return;
 
-                if (_selectedObject != null)
-                    _selectedObject.Hue = _savedHue;
+                //if (_selectedObject != null)
+                //    _selectedObject.Hue = _savedHue;
 
                 if (value == null)
                 {
+                    _selectedObject.View.IsSelected = false;
                     _selectedObject = null;
-                    _savedHue = 0;
+                    //_savedHue = 0;
                 }
                 else
                 {
                     _selectedObject = value;
-                    _savedHue = _selectedObject.Hue;
+                    //_savedHue = _selectedObject.Hue;
 
                     if (Service.Get<Settings>().HighlightGameObjects)
-                        _selectedObject.Hue = 24;
+                        _selectedObject.View.IsSelected = true;
                 }
             }
         }

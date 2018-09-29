@@ -34,6 +34,8 @@ namespace ClassicUO.Game.Views
     {
         protected static float PI = (float) Math.PI;
 
+        private Vector3 _storedHue;
+
 
         protected View(GameObject parent)
         {
@@ -188,6 +190,18 @@ namespace ClassicUO.Game.Views
                 vertex[3].Position.Y += Bounds.Height;
             }
 
+
+            if (IsSelected)
+            {
+                if (_storedHue == Vector3.Zero)
+                    _storedHue = HueVector;
+                HueVector = RenderExtentions.SelectedHue;
+            }
+            else if (_storedHue != Vector3.Zero)
+            {
+                HueVector = _storedHue;
+                _storedHue = Vector3.Zero;               
+            }
 
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;

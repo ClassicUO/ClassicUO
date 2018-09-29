@@ -48,6 +48,7 @@ namespace ClassicUO.Game.Views
 
         private bool _needUpdateStrechedTile = true;
         private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
+        private Vector3 _storedHue;
 
 
         public TileView(Tile tile) : base(tile)
@@ -88,6 +89,7 @@ namespace ClassicUO.Game.Views
         }
 
 
+
         private bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             Texture.Ticks = World.Ticks;
@@ -97,10 +99,26 @@ namespace ClassicUO.Game.Views
             _vertex[2].Position = position + _vertex2_yOffset;
             _vertex[3].Position = position + _vertex3_yOffset;
 
+
+            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
+
+            if (IsSelected)
+            {
+                if (_storedHue == Vector3.Zero)
+                    _storedHue = HueVector;
+                HueVector = RenderExtentions.SelectedHue;
+            }
+            else if (_storedHue != Vector3.Zero)
+            {
+                HueVector = _storedHue;
+                _storedHue = Vector3.Zero;
+            }
+
+            if (HueVector != _vertex[0].Hue)
             _vertex[0].Hue =
                 _vertex[1].Hue =
                     _vertex[2].Hue =
-                        _vertex[3].Hue = RenderExtentions.GetHueVector(GameObject.Hue);
+                        _vertex[3].Hue = HueVector;
 
 
             if (!spriteBatch.DrawSprite(Texture, _vertex)) return false;

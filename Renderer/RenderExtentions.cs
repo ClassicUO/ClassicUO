@@ -39,5 +39,8 @@ namespace ClassicUO.Renderer
                 ? new Vector3(0, 0, alpha)
                 : new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), alpha);
         }
+
+
+        public static Vector3 SelectedHue { get; } = new Vector3(27, 1, 0);
     }
 }
