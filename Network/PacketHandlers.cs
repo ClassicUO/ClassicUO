@@ -658,11 +658,11 @@ namespace ClassicUO.Network
             MessageType type = (MessageType) p.ReadByte();
             Hue hue = p.ReadUShort();
             MessageFont font = (MessageFont) p.ReadUShort();
-            string name = p.ReadASCII(30, true);
+            string name = p.ReadASCII(30);
             string text = p.ReadASCII();
 
             if (serial <= 0 && graphic <= 0 && type == MessageType.Regular && font == MessageFont.INVALID &&
-                hue == 0xFFFF && name.ToLower() == "system")
+                hue == 0xFFFF && name.StartsWith("SYSTEM"))
             {
                 NetClient.Socket.Send(new PACKTalk());
                 return;
@@ -674,6 +674,8 @@ namespace ClassicUO.Network
                 entity.Name = name;
                 entity.ProcessDelta();
             }
+
+            Chat.OnMessage(entity, new UOMessageEventArgs(text, hue, type, font, false));
         }
 
         private static void DeleteObject(Packet p)
@@ -732,36 +734,26 @@ namespace ClassicUO.Network
 
             if (endX != x || endY != y)
             {
-                World.Player.ForcePosition(x, y, z, direction);
-                //World.Player.ResetSteps();
-                //World.Player.Position = new Position(x, y, z);
-                //World.Player.Direction = direction;
+                //World.Player.ForcePosition(x, y, z, direction);
+
+                World.Player.ResetSteps();
+                World.Player.Position = new Position(x, y, z);
+                World.Player.Direction = direction;
             }
             else if ((endDir & Direction.Up) != (direction & Direction.Up))
                 World.Player.EnqueueStep(x, y, z, direction, (direction & Direction.Running) != 0);
             else if (World.Player.Tile == null)
                 World.Player.Tile = World.Map.GetTile(x, y);
 
-            //if (endX == x && endY == y)
-            //{
-            //    if (endDir != dir)
-            //    {
-            //        World.Player.ResetRequestedSteps();
-            //        World.Player.EnqueueStep(x, y, z, dir, (direction & Direction.Running) != 0);
-            //    }
-            //}
-            //else
-            //{
-            //    World.Player.ResetSteps();
-            //    World.Player.Position = new Position(x, y, z);
-            //    World.Player.Direction = direction;
-            //}
 
             World.Player.ProcessDelta();
         }
 
         private static void DenyWalk(Packet p)
         {
+            if (World.Player == null)
+                return;
+
             byte seq = p.ReadByte();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
@@ -775,9 +767,15 @@ namespace ClassicUO.Network
 
         private static void ConfirmWalk(Packet p)
         {
+            if (World.Player == null)
+                return;
+            
             byte seq = p.ReadByte();
-            World.Player.Notoriety = (Notoriety) (p.ReadByte() & ~0x40);
+            byte noto = (byte)(p.ReadByte() & ~0x40);
+            if (noto <= 0 || noto >= 7)
+                noto = 0x01;
 
+            World.Player.Notoriety = (Notoriety)noto;
             World.Player.ConfirmWalk(seq);
             World.Player.ProcessDelta();
         }
@@ -1435,7 +1433,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, new UOMessageEventArgs(text, hue, type, 0, true, lang));
+            Chat.OnMessage(entity, new UOMessageEventArgs(text, hue, type, font, true, lang));
         }
 
         private static void OpenGump(Packet p)
