@@ -91,7 +91,7 @@ namespace ClassicUO.Game.Gumps
             for (int i = 0; i < _textures.Length; i++)
             {
                 if (_textures[i] != null)
-                    _textures[i].Ticks = World.Ticks;
+                    _textures[i].Ticks = (long)totalMS;
             }
 
             base.Update(totalMS, frameMS);
