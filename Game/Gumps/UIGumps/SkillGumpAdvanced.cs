@@ -99,8 +99,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            spriteBatch.Draw2D(_blackTexture, new Rectangle((int)position.X + 4, (int)position.Y + 4, 312, 322), RenderExtentions.GetHueVector(0, false, true, false));
-            spriteBatch.Draw2D(_line, new Rectangle((int)position.X + 30, (int)position.Y + 50, 260, 1), RenderExtentions.GetHueVector(0, false, false, false));
+            spriteBatch.Draw2D(_blackTexture, new Rectangle((int)position.X + 4, (int)position.Y + 4, 312, 322), RenderExtentions.GetHueVector(0, false, .5f, false));
+            spriteBatch.Draw2D(_line, new Rectangle((int)position.X + 30, (int)position.Y + 50, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));
             //spriteBatch.Draw2D(_line, new Rectangle((int)position.X + 30, (int)position.Y + 50, 260, 1), RenderExtentions.GetHueVector(0, false, false, false));
             return base.Draw(spriteBatch, position, hue);
 
