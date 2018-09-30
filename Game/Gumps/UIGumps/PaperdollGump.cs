@@ -230,7 +230,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
 
                 case Buttons.Skills:
-                    //
+                    if (UIManager.Get<SkillGumpAdvanced>() == null)
+                    {
+                        UIManager.Add(new SkillGumpAdvanced());
+                    }
+                    else
+                        UIManager.Remove<SkillGumpAdvanced>();
                     break;
 
                 case Buttons.Guild:
