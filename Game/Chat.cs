@@ -117,6 +117,8 @@ namespace ClassicUO.Game
                     }
                     break;
                 case MessageType.Label:
+                    if (entity != null && entity.Serial.IsValid)
+                        entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
                     Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "You see");
                     break;
                 case MessageType.Focus:

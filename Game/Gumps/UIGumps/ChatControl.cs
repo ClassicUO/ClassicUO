@@ -50,8 +50,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private TextBox _textBox;
         private readonly List<ChatLineTime> _textEntries;
         private readonly List<Tuple<ChatMode, string>> _messageHistory;
-        private InputManager _uiManager;
-        private InputManager _inputManager;
+        private readonly InputManager _inputManager;
         private int _messageHistoryIndex = -1;
         private Serial _privateMsgSerial = 0;
         private string _privateMsgName;
@@ -277,11 +276,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private class ChatLineTime : IUpdateable, IDrawableUI, IDisposable
         {
             private readonly RenderedText _renderedText;
-            private float _createdTime = float.MinValue;
+            private readonly float _createdTime;
             private int _width;
 
             private const float TIME_DISPLAY = 10000.0f;
-            private const float TIME_FADEOUT = 4000.0f;
+            private const float TIME_FADEOUT = 2000.0f;
 
             public ChatLineTime(string text, int width, byte font, bool isunicode, Hue hue)
             {
@@ -291,33 +290,35 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Font = font,
                     MaxWidth = width,
                     FontStyle = FontStyle.BlackBorder,
-                    Hue = hue
+                    Hue = hue,
+                    Text = text
                 };
 
-                _renderedText.Text = text;
                 _width = width;
+
+                _createdTime = World.Ticks;
             }
 
             public string Text => _renderedText.Text;
             public bool IsExpired { get; private set; }
-            public float Alpha { get; private set; } = 1.0f;
+            public float Alpha { get; private set; }
             public bool AllowedToDraw { get; set; } = true;
             public int TextHeight => _renderedText.Height;
             public SpriteTexture Texture { get; set; }
 
 
             public bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>
-                _renderedText.Draw(spriteBatch, position, RenderExtentions.GetHueVector(0, false, Alpha < 1, true));
+                _renderedText.Draw(spriteBatch, position, RenderExtentions.GetHueVector(0, false, Alpha < 1.0f ? Alpha : 0 , true));
 
             public void Update(double totalMS, double frameMS)
-            {
-                if (_createdTime == float.MinValue)
-                    _createdTime = (float) totalMS;
+            {                    
                 float time = (float) totalMS - _createdTime;
                 if (time > TIME_DISPLAY)
                     IsExpired = true;
                 else if (time > TIME_DISPLAY - TIME_FADEOUT)
-                    Alpha = 1.0f - (time - (TIME_DISPLAY - TIME_FADEOUT)) / TIME_FADEOUT;
+                {
+                    Alpha = (time - (TIME_DISPLAY - TIME_FADEOUT)) / TIME_FADEOUT;
+                }
             }
 
             public void Dispose()

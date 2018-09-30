@@ -68,7 +68,7 @@ namespace ClassicUO.Game.Gumps
                 _gameText.Align = align;
                 _gameText.Font = font;
                 _gameText.IsUnicode = isunicode;
-                _gameText.MaxWidth = w;
+                _gameText.MaxWidth = w - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0);
             }
 
             InternalBuild(text, hue);
@@ -189,6 +189,7 @@ namespace ClassicUO.Game.Gumps
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
                 _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
+                //_scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
                 ScrollY = _scrollBar.Value;
             }
 

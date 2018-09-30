@@ -122,7 +122,7 @@ namespace ClassicUO.Renderer
         public bool AllowedToDraw { get; set; } = true;
 
         public bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
-            => Draw(spriteBatch, new Rectangle((int) position.X, (int) position.Y, Width, Height), 0, 0);
+            => Draw(spriteBatch, new Rectangle((int) position.X, (int) position.Y, Width, Height), 0, 0, hue);
 
         public bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
         {

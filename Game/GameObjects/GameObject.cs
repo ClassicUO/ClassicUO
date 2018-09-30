@@ -130,10 +130,20 @@ namespace ClassicUO.Game.GameObjects
 
             overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder);
             InsertGameText(overhead);
+
+            if (_overHeads.Count > 5 )
+            {
+                TextOverhead over = _overHeads[_overHeads.Count - 1];
+                if (!over.IsPersistent && over.MessageType != MessageType.Spell)
+                {
+                    over.Dispose();
+                    _overHeads.RemoveAt(_overHeads.Count - 1);
+                }
+            }
+
             return overhead;
         }
 
-        public void RemoveGameTextAt(int idx) => _overHeads.RemoveAt(idx);
 
         private void InsertGameText(TextOverhead gameText) =>
             _overHeads.Insert(OverHeads.Count == 0 || OverHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
@@ -150,7 +160,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (gt.IsDisposed)
                 {
-                    RemoveGameTextAt(i);
+                    _overHeads.RemoveAt(i);
                     i--;
                 }
             }

@@ -44,8 +44,8 @@ namespace ClassicUO.Game.Gumps
             AcceptMouseInput = true;
 
             Item = item;
-            X = 0;
-            Y = 0;
+            X = item.Position.X;
+            Y = item.Position.Y;
             HighlightOnMouseOver = true;
             CanPickUp = true;
         }

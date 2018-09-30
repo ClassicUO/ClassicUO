@@ -99,10 +99,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case var expression when FileManager.ClientVersion >= ClientVersions.CV_308D && !_useOldGump:
                     Texture2D line = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
                     line.SetData(new[] { Color.Black });
-                    spriteBatch.Draw2D(line, new Rectangle((int)position.X + 2 * 82 - 4, (int)position.Y + 81, 20, 1), RenderExtentions.GetHueVector(0, false, false, false));
-                    spriteBatch.Draw2D(line, new Rectangle((int)position.X + 2 * 82 - 4, (int)position.Y + 109, 20, 1), RenderExtentions.GetHueVector(0, false, false, false));
-                    spriteBatch.Draw2D(line, new Rectangle((int)position.X + 2 * 82 - 4, (int)position.Y + 137, 20, 1), RenderExtentions.GetHueVector(0, false, false, false));
-                    spriteBatch.Draw2D(line, new Rectangle((int)position.X + 3 * 82 - 4, (int)position.Y + 137, 20, 1), RenderExtentions.GetHueVector(0, false, false, false));
+                    spriteBatch.Draw2D(line, new Rectangle((int)position.X + 2 * 82 - 4, (int)position.Y + 81, 20, 1), Vector3.Zero);
+                    spriteBatch.Draw2D(line, new Rectangle((int)position.X + 2 * 82 - 4, (int)position.Y + 109, 20, 1), Vector3.Zero);
+                    spriteBatch.Draw2D(line, new Rectangle((int)position.X + 2 * 82 - 4, (int)position.Y + 137, 20, 1), Vector3.Zero);
+                    spriteBatch.Draw2D(line, new Rectangle((int)position.X + 3 * 82 - 4, (int)position.Y + 137, 20, 1), Vector3.Zero);
                     break;
                 default:
                     break;

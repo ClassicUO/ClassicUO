@@ -27,17 +27,20 @@ namespace ClassicUO.Renderer
     {
         private const float ALPHA = .5f;
 
-        public static Vector3 GetHueVector(int hue) => GetHueVector(hue, false, false, false);
+        public static Vector3 GetHueVector(int hue) => GetHueVector(hue, false, 0, false);
 
-        public static Vector3 GetHueVector(int hue, bool partial, bool transparent, bool noLighting)
+        public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool noLighting)
         {
-            if ((hue & 0x4000) != 0) transparent = true;
+            if ((hue & 0x4000) != 0) alpha = ALPHA;
 
             if ((hue & 0x8000) != 0) partial = true;
 
             return hue == 0
-                ? new Vector3(0, 0, transparent ? ALPHA : 0)
-                : new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), transparent ? ALPHA : 0);
+                ? new Vector3(0, 0, alpha)
+                : new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), alpha);
         }
+
+
+        public static Vector3 SelectedHue { get; } = new Vector3(27, 1, 0);
     }
 }

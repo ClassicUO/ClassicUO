@@ -23,6 +23,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
@@ -32,7 +33,7 @@ namespace ClassicUO.Game.Views
         public StaticView(Static st) : base(st) => AllowedToDraw = !IsNoDrawable(st.Graphic);
 
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed) return false;
 
@@ -43,13 +44,39 @@ namespace ClassicUO.Game.Views
                     Texture.Width, Texture.Height);
             }
 
-            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
+            Static st = (Static) GameObject;
+
+            float alpha = 0;
+
+            if (TileData.IsFoliage((long) st.ItemData.Flags))
+            {
+                bool check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y;
+
+                if (!check)
+                {
+                    check = World.Player.Position.Y <= st.Position.Y && World.Player.Position.X <= st.Position.X + 1;
+
+                    if (!check)
+                        check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y + 1;
+                }
+
+                if (check)
+                {
+                    //Rectangle pos = new Rectangle((int)position.X + Bounds.X, (int)position.Y + Bounds.Y, Bounds.Width, Bounds.Height);
+                    ////Rectangle pos1 = new Rectangle((int)position.X - World.Player.View.Bounds.X, (int)position.Y - World.Player.View.Bounds.Y, World.Player.View.Bounds.Width, World.Player.View.Bounds.Height);
+
+                    //if (pos.InRect(((MobileView)World.Player.View).BoudsStrange))
+                    //    alpha = .6f;
+                }
+            }
+
+            HueVector = RenderExtentions.GetHueVector(GameObject.Hue, false, alpha, false );
             MessageOverHead(spriteBatch, position, Bounds.Y - 22);
             return base.Draw(spriteBatch, position, objectList);
         }
 
 
-        protected override void MousePick(MouseOverList<GameObject> list, SpriteVertex[] vertex)
+        protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
             int x = list.MousePosition.X - (int) vertex[0].Position.X;
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;

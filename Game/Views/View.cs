@@ -30,9 +30,11 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
 {
-    public abstract class View : IDrawable<GameObject>, IColorable
+    public abstract class View : Interfaces.IDrawable, IColorable
     {
         protected static float PI = (float) Math.PI;
+
+        private Vector3 _storedHue;
 
 
         protected View(GameObject parent)
@@ -47,7 +49,7 @@ namespace ClassicUO.Game.Views
         public sbyte SortZ { get; protected set; }
 
         public SpriteTexture Texture { get; set; }
-        protected Rectangle Bounds { get; set; }
+        public Rectangle Bounds;
         public Vector3 HueVector { get; set; }
         protected bool HasShadow { get; set; }
         protected bool IsFlipped { get; set; }
@@ -125,7 +127,7 @@ namespace ClassicUO.Game.Views
             return false;
         }
 
-        public virtual bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> list)
+        public virtual bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
         {
             if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed) return false;
 
@@ -189,6 +191,18 @@ namespace ClassicUO.Game.Views
             }
 
 
+            if (IsSelected)
+            {
+                if (_storedHue == Vector3.Zero)
+                    _storedHue = HueVector;
+                HueVector = RenderExtentions.SelectedHue;
+            }
+            else if (_storedHue != Vector3.Zero)
+            {
+                HueVector = _storedHue;
+                _storedHue = Vector3.Zero;               
+            }
+
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
@@ -202,10 +216,10 @@ namespace ClassicUO.Game.Views
 
 
         public virtual bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
-            MouseOverList<GameObject> objectList) => false;
+            MouseOverList objectList) => false;
 
 
-        protected virtual void MousePick(MouseOverList<GameObject> list, SpriteVertex[] vertex)
+        protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
         }
 

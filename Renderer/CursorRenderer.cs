@@ -204,7 +204,7 @@ namespace ClassicUO.Renderer
                 _needGraphicUpdate = false;
             }
             else
-                Texture.Ticks = World.Ticks;
+                Texture.Ticks = (long)totalMS;
         }
 
         public void Draw(SpriteBatchUI sb)

@@ -55,6 +55,12 @@ namespace ClassicUO.Game
         public static Position operator /(Position p1, Position p2) => new Position((ushort) (p1.X / p2.X),
             (ushort) (p1.Y / p2.Y), (sbyte) (p1.Z / p2.Z));
 
+        public static bool operator <(Position p1, Position p2) => p1.X < p2.X && p1.Y < p2.Y;
+        public static bool operator >(Position p1, Position p2) => p1.X > p2.X && p1.Y > p2.Y;
+        public static bool operator <=(Position p1, Position p2) => p1.X <= p2.X && p1.Y <= p2.Y;
+        public static bool operator >=(Position p1, Position p2) => p1.X >= p2.X && p1.Y >= p2.Y;
+
+
         public int DistanceTo(Position position) => Math.Max(Math.Abs(position.X - X), Math.Abs(position.Y - Y));
 
         public double DistanceToSqrt(Position position)

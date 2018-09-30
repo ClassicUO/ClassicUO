@@ -26,6 +26,8 @@ namespace ClassicUO.Game.GameObjects
 {
     public class TextOverhead : GameObject
     {
+        private const float TIME_FADEOUT = 2000.0f;
+
         private readonly int _maxWidth;
         private readonly ushort _hue;
         private readonly byte _font;
@@ -45,14 +47,18 @@ namespace ClassicUO.Game.GameObjects
 
 
             TimeToLive = 2500 + text.Substring(text.IndexOf('>') + 1).Length * 100;
-            if (TimeToLive > 10000) TimeToLive = 10000;
+            if (TimeToLive > 10000.0f) TimeToLive = 10000.0f;
+
+            TimeCreated = World.Ticks;
         }
 
         public string Text { get; }
         public GameObject Parent { get; }
         public bool IsPersistent { get; set; }
-        public int TimeToLive { get; set; }
+        public float TimeToLive { get; }
         public MessageType MessageType { get; set; }
+        public float TimeCreated { get; }
+        public float Alpha { get; private set; }
 
         protected override View CreateView() => new TextOverheadView(this, _maxWidth, _hue, _font, _isUnicode, _style);
 
@@ -63,10 +69,14 @@ namespace ClassicUO.Game.GameObjects
             if (IsPersistent || IsDisposed)
                 return;
 
-            TimeToLive -= (int) frameMS;
+            float time = (float) totalMS - TimeCreated;
 
-            if (TimeToLive <= 0)
+            if (time > TimeToLive)
                 Dispose();
+            else if (time > TimeToLive - TIME_FADEOUT)
+            {
+                Alpha = (time - (TimeToLive - TIME_FADEOUT)) / TIME_FADEOUT;
+            }
         }
     }
 }

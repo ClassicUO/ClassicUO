@@ -34,12 +34,17 @@ namespace ClassicUO.Renderer
         public static void AddView(View view, Vector3 position) =>
             _views.Add(new ViewWithDrawInfo {View = view, DrawPosition = position});
 
-        public static void Draw(SpriteBatch3D spriteBatch, MouseOverList<GameObject> objectList)
+        public static void Draw(SpriteBatch3D spriteBatch, MouseOverList objectList)
         {
             if (_views.Count > 0)
             {
                 for (int i = 0; i < _views.Count; i++)
-                    _views[i].View.Draw(spriteBatch, _views[i].DrawPosition, objectList);
+                {
+                    var v = _views[i];
+
+
+                    v.View.Draw(spriteBatch, v.DrawPosition, objectList);
+                }
 
                 _views.Clear();
             }

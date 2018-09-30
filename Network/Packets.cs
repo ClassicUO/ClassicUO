@@ -940,6 +940,8 @@ namespace ClassicUO.Network
     {
         public PResend() : base(0x22)
         {
+            WriteByte(World.Player.SequenceNumber);
+            WriteByte((byte)World.Player.Notoriety);
         }
     }
 

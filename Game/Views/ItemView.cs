@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Views
         }
 
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Views
 
                 HueVector = RenderExtentions.GetHueVector(GameObject.Hue,
                     TileData.IsPartialHue((long) item.ItemData.Flags),
-                    TileData.IsTranslucent((long) item.ItemData.Flags), false);
+                    TileData.IsTranslucent((long) item.ItemData.Flags) ? .5f : 0, false);
 
                 if (item.Amount > 1 && TileData.IsStackable((long) item.ItemData.Flags) &&
                     item.DisplayedGraphic == GameObject.Graphic)
@@ -87,22 +87,20 @@ namespace ClassicUO.Game.Views
                     Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
                     base.Draw(spriteBatch, offsetDrawPosition, objectList);
                 }
-
+                bool ok = base.Draw(spriteBatch, position, objectList);
                 MessageOverHead(spriteBatch, position, Bounds.Y - 22);
-                base.Draw(spriteBatch, position, objectList);
-            }
-            else
-            {
-                if (!item.Effect.IsDisposed)
-                    item.Effect.View.Draw(spriteBatch, position, objectList);
+                return ok;
             }
 
-            return true;
+            if (!item.Effect.IsDisposed)
+                return item.Effect.View.Draw(spriteBatch, position, objectList);
+
+            return false;
         }
 
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
-            MouseOverList<GameObject> objectList)
+            MouseOverList objectList)
         {
             Item item = (Item) GameObject;
 
@@ -190,7 +188,7 @@ namespace ClassicUO.Game.Views
             return true;
         }
 
-        protected override void MousePick(MouseOverList<GameObject> objectList, SpriteVertex[] vertex)
+        protected override void MousePick(MouseOverList objectList, SpriteVertex[] vertex)
         {
             int x = objectList.MousePosition.X - (int) vertex[0].Position.X;
             int y = objectList.MousePosition.Y - (int) vertex[0].Position.Y;
@@ -200,7 +198,8 @@ namespace ClassicUO.Game.Views
             //    objectList.Add(GameObject, vertex[0].Position);
             //}
 
-            if (Art.Contains(GameObject.Graphic, x, y)) objectList.Add(GameObject, vertex[0].Position);
+            if (Art.Contains(GameObject.Graphic, x, y, 0))
+                objectList.Add(GameObject, vertex[0].Position);
         }
     }
 }
