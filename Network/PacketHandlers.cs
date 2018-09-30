@@ -830,6 +830,33 @@ namespace ClassicUO.Network
         {
             if (World.Player == null)
                 return;
+
+            Item item = World.Items.Get(p.ReadUInt());           
+            Graphic graphic = p.ReadUShort();
+
+            if (graphic == 0x30) // vendor
+            {
+
+            }
+            else
+            {
+                if (item.IsCorpse)
+                {
+
+                }
+                else if (item.IsSpellBook)
+                {
+
+                }
+                else
+                {
+                    ContainerGump container = new ContainerGump(item, graphic)
+                    {
+                        X = 64, Y = 64
+                    };
+                    Service.Get<UIManager>().Add(container);
+                }
+            }
         }
 
         private static void UpdateContainedItem(Packet p)

@@ -39,7 +39,12 @@ namespace ClassicUO.Renderer
             if (_views.Count > 0)
             {
                 for (int i = 0; i < _views.Count; i++)
-                    _views[i].View.Draw(spriteBatch, _views[i].DrawPosition, objectList);
+                {
+                    var v = _views[i];
+
+
+                    v.View.Draw(spriteBatch, v.DrawPosition, objectList);
+                }
 
                 _views.Clear();
             }

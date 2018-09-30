@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Utility
 {
@@ -96,6 +97,36 @@ namespace ClassicUO.Utility
         public static void ForEach<T>(this T[] array, Action<T> func)
         {
             foreach (T c in array) func(c);
+        }
+
+        public static bool InRect(this Rectangle rect, Rectangle r)
+        {
+            bool inrect = false;
+
+            if (rect.X < r.X)
+            {
+                if (r.X < rect.Right)
+                    inrect = true;
+            }
+            else
+            {
+                if (rect.X < r.Right)
+                    inrect = true;
+            }
+
+            if (inrect)
+            {
+                if (rect.Y < r.Y)
+                {
+                    inrect = r.Y < rect.Bottom;
+                }
+            }
+            else
+            {
+                inrect = rect.Y < r.Bottom;
+            }
+
+            return inrect;
         }
     }
 }

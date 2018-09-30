@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Views
         public sbyte SortZ { get; protected set; }
 
         public SpriteTexture Texture { get; set; }
-        protected Rectangle Bounds;
+        public Rectangle Bounds;
         public Vector3 HueVector { get; set; }
         protected bool HasShadow { get; set; }
         protected bool IsFlipped { get; set; }

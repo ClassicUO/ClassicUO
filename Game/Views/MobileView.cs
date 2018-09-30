@@ -35,7 +35,6 @@ namespace ClassicUO.Game.Views
 
         public MobileView(Mobile mobile) : base(mobile) => _frames = new ViewLayer[(int) Layer.InnerLegs];
 
-
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
             => !PreDraw(position) && DrawInternal(spriteBatch, position, objectList);
 
@@ -71,6 +70,8 @@ namespace ClassicUO.Game.Views
             else
                 drawX = -22 - (int) mobile.Offset.X;
 
+            Rectangle rect = new Rectangle();
+
             for (int i = 0; i < _layerCount; i++)
             {
                 ref ViewLayer vl = ref _frames[i];
@@ -83,6 +84,19 @@ namespace ClassicUO.Game.Views
 
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
+
+                if (Bounds.X < rect.X)
+                    rect.X = Bounds.X;
+                if (Bounds.Y < rect.Y)
+                    rect.Y = Bounds.Y;
+                if (Bounds.Width > rect.Width)
+                    rect.Width = Bounds.Width;
+                if (Bounds.Height > rect.Height)
+                    rect.Height = Bounds.Height;
+
+                //if (i == 0)
+                //    rect = Bounds;
+
                 HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, 0, false);
 
                 base.Draw(spriteBatch, position, objectList);
@@ -90,6 +104,11 @@ namespace ClassicUO.Game.Views
                 Pick(frame.ID, Bounds, position, objectList);
             }
 
+            //Bounds = bodyFrame.Bounds;
+
+            //int xx = IsFlipped ? (int)position.X + rect.X + 44 : -(int)position.X + rect.X;
+
+            BoudsStrange = new Rectangle((int)position.X + rect.X, (int)position.Y + rect.Y, rect.Width, rect.Height);
 
             //spriteBatch.DrawRectangle(_texture, 
             //    new Rectangle
@@ -133,8 +152,10 @@ namespace ClassicUO.Game.Views
             return true;
         }
 
+        
+        public Rectangle BoudsStrange { get; set; }
 
-        private void GetAnimationDimensions(Mobile mobile, byte frameIndex, ref int height, ref int centerY)
+        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, ref int height, ref int centerY)
         {
             byte dir = 0 & 0x7F;
             bool mirror = false;
