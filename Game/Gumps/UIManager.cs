@@ -145,8 +145,13 @@ namespace ClassicUO.Game.Gumps
 
                             if (gump.Children.Count > 0)
                             {
-                                var g = gump.Children[gump.Children.Count - 1];
-                                g.IsTransparent = true;
+
+                                for (int i = 1; i <= gump.Children.Count; i++)
+                                {
+                                    GumpControl g = gump.Children[gump.Children.Count - i];
+                                    g.IsTransparent = true;
+                                }
+                              
                             }
 
                             //gump.AddChildren(new CheckerTrans(gparams));
@@ -250,7 +255,7 @@ namespace ClassicUO.Game.Gumps
                 .FirstOrDefault(s => !s.IsDisposed && (!serial.HasValue || s.LocalSerial == serial));
 
         public Gump Get(Serial serial)
-            => _gumps.OfType<Gump>().FirstOrDefault(s => !s.IsDisposed && s.ServerSerial == serial);
+            => _gumps.OfType<Gump>().FirstOrDefault(s => !s.IsDisposed && s.LocalSerial == serial);
 
 
         public void Update(double totalMS, double frameMS)

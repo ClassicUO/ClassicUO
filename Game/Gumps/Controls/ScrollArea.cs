@@ -130,6 +130,16 @@ namespace ClassicUO.Game.Gumps.Controls
             _needUpdate = true;
         }
 
+        public override void Clear()
+        {
+            foreach (GumpControl child in Children)
+            {
+                if (child is IScrollBar)
+                    continue;
+                child.Dispose();
+            }
+        }
+
         private void CalculateScrollBarMaxValue()
         {
             _scrollBar.Height = Height;
