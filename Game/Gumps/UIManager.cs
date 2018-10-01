@@ -361,8 +361,11 @@ namespace ClassicUO.Game.Gumps
             {
                 MouseOverControl.InvokeMouseLeft(position);
 
-                if (MouseOverControl.Parent != null && (gump == null || gump.RootParent != MouseOverControl.RootParent))
-                    MouseOverControl.InvokeMouseLeft(position);
+                if (MouseOverControl.RootParent != null)
+                {
+                    if (gump == null || gump.RootParent != MouseOverControl.RootParent)
+                        MouseOverControl.RootParent.InvokeMouseLeft(position);
+                }
             }
 
 

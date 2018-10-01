@@ -99,7 +99,7 @@ namespace ClassicUO.Game.Gumps
         public bool IsEnabled { get; set; }
         public bool IsInitialized { get; set; }
         public bool IsFocused { get; protected set; }
-        public bool MouseIsOver { get; protected set; }
+        public bool MouseIsOver => UIManager?.MouseOverControl == this;
         public virtual bool CanMove { get; set; }
         public bool CanCloseWithRightClick { get; set; } = true;
         public bool CanCloseWithEsc { get; set; }
@@ -471,7 +471,6 @@ namespace ClassicUO.Game.Gumps
 
         public void InvokeMouseEnter(Point position)
         {
-            MouseIsOver = true;
             if (Math.Abs(_lastClickPosition.X - position.X) + Math.Abs(_lastClickPosition.Y - position.Y) > 3)
                 _maxTimeForDClick = 0.0f;
             int x = position.X - X - ParentX;
@@ -482,11 +481,12 @@ namespace ClassicUO.Game.Gumps
 
         public void InvokeMouseLeft(Point position)
         {
-            MouseIsOver = false;
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseLeft(x, y);
             MouseLeft.Raise(new MouseEventArgs(x, y));
+
+            Console.WriteLine(this);
         }
 
         public void InvokeMouseClick(Point position, MouseButton button)
