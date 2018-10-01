@@ -443,7 +443,7 @@ namespace ClassicUO.Game.Gumps
             OnChildRemoved();
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             _children.ForEach(s => s.Dispose());
         }

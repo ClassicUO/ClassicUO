@@ -28,41 +28,23 @@ namespace ClassicUO.Game.Gumps
     public class CroppedText : GumpControl
     {
         private readonly RenderedText _gameText;
-        private readonly int _index;
 
-        public CroppedText() => _gameText = new RenderedText
+        public CroppedText(string text, Hue hue, int maxWidth = 0) => _gameText = new RenderedText
         {
             IsUnicode = true,
             Font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0),
-            FontStyle = FontStyle.BlackBorder
+            FontStyle = maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
+            Hue = hue,
+            MaxWidth = maxWidth,
+            Text = text
         };
 
-        public CroppedText(string[] parts, string[] lines) : this()
+        public CroppedText(string[] parts, string[] lines) : this(lines[int.Parse(parts[6])], Hue.Parse(parts[5]), int.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
             Width = int.Parse(parts[3]);
-            Height = int.Parse(parts[4]);
-            Hue = Hue.Parse(parts[5]);
-            _index = int.Parse(parts[6]);
-
-            _gameText.MaxWidth = Width;
-
-            if (_gameText.MaxWidth > 0)
-                _gameText.FontStyle |= FontStyle.Cropped;
-
-            Text = lines[_index];
-
-            CanMove = true;
-        }
-
-
-        public Hue Hue { get; set; }
-
-        public string Text
-        {
-            get => _gameText.Text;
-            set => _gameText.Text = value;
+            Height = int.Parse(parts[4]);         
         }
 
 

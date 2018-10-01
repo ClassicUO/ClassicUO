@@ -15,13 +15,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             _item = item;
             _data = ContainerManager.Get(gumpid);
-            _item.SetCallbacks(OnItemUpdated, OnItemDisposed);
+            //_item.SetCallbacks(OnItemUpdated, OnItemDisposed);
 
             CanMove = true;
 
-            AddChildren(new GumpPicContainer(0,0, _data.Graphic, 0, item));
-
-          
+            AddChildren(new GumpPicContainer(0, 0, _data.Graphic, 0, item));
         }
 
 
@@ -36,17 +34,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Dispose()
         {
-            _item.ClearCallBacks(OnItemUpdated, OnItemDisposed);
+            //_item.ClearCallBacks(OnItemUpdated, OnItemDisposed);
 
             base.Dispose();
         }
 
         private void OnItemUpdated(GameObject obj)
         {
-            foreach (Item item in _item.Items)
-            {
-                AddChildren(new ItemGumpling(item));
-            }
+            //foreach (Item item in _item.Items)
+            //{
+            //    AddChildren(new ItemGumpling(item));
+            //}
         }
 
         private void OnItemDisposed(GameObject obj)

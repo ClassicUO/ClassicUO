@@ -834,6 +834,10 @@ namespace ClassicUO.Network
             Item item = World.Items.Get(p.ReadUInt());           
             Graphic graphic = p.ReadUShort();
 
+            UIManager ui = Service.Get<UIManager>();
+            if (ui.Get(item.Serial) != null)
+                return;
+
             if (graphic == 0x30) // vendor
             {
 
@@ -854,7 +858,7 @@ namespace ClassicUO.Network
                     {
                         X = 64, Y = 64
                     };
-                    Service.Get<UIManager>().Add(container);
+                    ui.Add(container);
                 }
             }
         }
