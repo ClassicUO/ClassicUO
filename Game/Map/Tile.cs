@@ -276,7 +276,7 @@ namespace ClassicUO.Game.Map
 
         public bool IsZUnderObjectOrGround(sbyte z, out GameObject entity, out GameObject ground)
         {
-            List<GameObject> list = _objectsOnTile;
+            List<GameObject> list = (List < GameObject > )ObjectsOnTiles;
 
             entity = null;
             ground = null;
@@ -290,8 +290,8 @@ namespace ClassicUO.Game.Map
                     StaticTiles itemdata = dyn.ItemData;
                     if (IO.Resources.TileData.IsRoof((long) itemdata.Flags) ||
                         IO.Resources.TileData.IsSurface((long) itemdata.Flags) ||
-                        IO.Resources.TileData.IsWall((long) itemdata.Flags) &&
-                        IO.Resources.TileData.IsImpassable((long) itemdata.Flags))
+                        (IO.Resources.TileData.IsWall((long) itemdata.Flags) &&
+                        IO.Resources.TileData.IsImpassable((long) itemdata.Flags)))
                         if (entity == null || list[i].Position.Z < entity.Position.Z) entity = list[i];
                 }
 

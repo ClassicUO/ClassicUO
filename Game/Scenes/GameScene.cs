@@ -270,13 +270,13 @@ namespace ClassicUO.Game.Scenes
                 drawTerrain = underGround == null;
                 if (underObject != null)
                 {
-                    if (underObject is Item item)
+                    if (underObject is IDynamicItem item)
                     {
                         if (TileData.IsRoof((long) item.ItemData.Flags))
                             maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
                         else if (TileData.IsSurface((long) item.ItemData.Flags) ||
                                  TileData.IsWall((long) item.ItemData.Flags) &&
-                                 TileData.IsDoor((long) item.ItemData.Flags))
+                                 !TileData.IsDoor((long) item.ItemData.Flags))
                             maxItemZ = item.Position.Z;
                         else
                         {
@@ -284,33 +284,20 @@ namespace ClassicUO.Game.Scenes
                             maxItemZ = z;
                         }
                     }
-                    else if (underObject is Static sta)
-                    {
-                        if (TileData.IsRoof((long) sta.ItemData.Flags))
-                            maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
-                        else if (TileData.IsSurface((long) sta.ItemData.Flags) ||
-                                 TileData.IsWall((long) sta.ItemData.Flags) &&
-                                 TileData.IsDoor((long) sta.ItemData.Flags))
-                            maxItemZ = sta.Position.Z;
-                        else
-                        {
-                            int z = World.Player.Position.Z + (sta.ItemData.Height > 20 ? sta.ItemData.Height : 20);
-                            maxItemZ = z;
-                        }
-                    }
 
-                    if (underObject is Item i && TileData.IsRoof((long) i.ItemData.Flags) ||
-                        underObject is Static s && TileData.IsRoof((long) s.ItemData.Flags))
+                    if (underObject is IDynamicItem sta && TileData.IsRoof((long)sta.ItemData.Flags))
                     {
-                        bool isSE = true;
+                        bool isRoofSouthEast = true;
+
                         if ((tile = World.Map.GetTile(World.Map.Center.X + 1, World.Map.Center.Y)) != null)
                         {
                             tile.IsZUnderObjectOrGround(World.Player.Position.Z, out underObject, out underGround);
-                            isSE = underObject != null;
+                            isRoofSouthEast = underObject != null;
                         }
 
-                        if (!isSE)
+                        if (!isRoofSouthEast)
                             maxItemZ = 255;
+
                     }
 
                     underSurface = maxItemZ != 255;
@@ -418,7 +405,7 @@ namespace ClassicUO.Game.Scenes
 
                 Point firstTileInRow = new Point(firstTile.X + (y + 1) / 2, firstTile.Y + y / 2);
 
-                for (int x = 0; x < renderDimensions.X + 1; x++, dp.X -= 44f)
+                for (int x = 0; x < renderDimensions.X + 1; x++)
                 {
                     int tileX = firstTileInRow.X - x;
                     int tileY = firstTileInRow.Y + x;
@@ -427,6 +414,7 @@ namespace ClassicUO.Game.Scenes
                     if (tile != null)
                     {
                         IReadOnlyList<GameObject> objects = tile.ObjectsOnTiles;
+
                         bool draw = true;
 
                         for (int k = 0; k < objects.Count; k++)
@@ -446,14 +434,27 @@ namespace ClassicUO.Game.Scenes
                                  || maxItemZ != 255 && obj is IDynamicItem dyn &&
                                  TileData.IsRoof((long) dyn.ItemData.Flags))
                                 && !(obj is Tile))
+                            {
+                                if (tile == World.Player.Tile)
+                                {
+
+                                }
+
                                 continue;
+                            }
+
+                            if (obj == World.Player)
+                            {
+
+                            }
 
                             if (draw && obj.View.Draw(sb3D, dp, _mouseOverList))
                                 RenderedObjectsCount++;
                         }
-
-                        ClearDeferredEntities();
                     }
+
+                    ClearDeferredEntities();
+                    dp.X -= 44f;
                 }
             }
 #endif
