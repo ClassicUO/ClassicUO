@@ -39,7 +39,6 @@ namespace ClassicUO.Game.Gumps
         private float _sClickTime;
 
 
-        private RenderedText _labelText;
         private Label _label;
 
         public ItemGumpling(Item item)
@@ -102,10 +101,6 @@ namespace ClassicUO.Game.Gumps
                 spriteBatch.Draw2D(Texture, new Vector3(position.X - 5, position.Y - 5, 0), huev);
 
             spriteBatch.Draw2D(Texture, position, huev);
-
-            if (_labelText != null && !Item.IsDisposed && Item.OverHeads.Count > 0 && !Item.OverHeads[0].IsDisposed)
-            _labelText.Draw(spriteBatch,
-                new Vector3(position.X + _labelClickedPosition.X - _labelText.Width / 2, position.Y + _labelClickedPosition.Y - _labelText.Height / 2, 0), RenderExtentions.GetHueVector(0, false, Item.OverHeads[0].Alpha, false));
 
             return base.Draw(spriteBatch, position, hue);
         }
@@ -195,19 +190,11 @@ namespace ClassicUO.Game.Gumps
                 {
                     TextOverhead overhead = Item.OverHeads[0];
 
-                    //_labelText = new RenderedText()
-                    //{
-                    //    Hue = overhead.Hue,
-                    //    Font = overhead.Font,
-                    //    IsUnicode = overhead.IsUnicode,
-                    //    MaxWidth = overhead.MaxWidth,
-                    //    FontStyle = overhead.Style,
-                    //    Align =  TEXT_ALIGN_TYPE.TS_CENTER,
-                    //    Text = overhead.Text
-                    //};
-
                     _label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth,
-                        overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER);
+                        overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER)
+                    {
+                        FadeOut = true
+                    };
 
                     _label.ControlInfo.Layer = UILayer.Over;
                     UIManager.Add(_label);
@@ -221,35 +208,6 @@ namespace ClassicUO.Game.Gumps
                 _label.Dispose();
                 _label = null;
             }
-
-            //int i = 0;
-            //    while (_labels.Count < Item.OverHeads.Count)
-            //    {
-            //        TextOverhead overhead = Item.OverHeads[i++];
-            //        Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth,
-            //            overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER)
-            //        {
-            //            X = _clickedPoint.X,
-            //            Y = _clickedPoint.Y
-            //        };
-            //        label.ControlInfo.Layer = UILayer.Over;
-
-            //        //AddChildren(label);
-
-            //        UIManager.Add(label);
-
-            //        _labels.Add(label);
-            //    }
-            //}
-            //else if (_labels.Count > 0)
-            //{
-            //    for (int i = 0; i < _labels.Count; i++)
-            //    {
-            //        _labels[i].Dispose();
-            //        _labels[i] = null;
-            //    }
-            //    _labels.Clear();
-            //}
         }
 
     }

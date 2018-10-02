@@ -43,7 +43,8 @@ namespace ClassicUO.Game.GameObjects
 
 
             TimeToLive = 2500 + text.Substring(text.IndexOf('>') + 1).Length * 100;
-            if (TimeToLive > 10000.0f) TimeToLive = 10000.0f;
+            if (TimeToLive > 10000.0f)
+                TimeToLive = 10000.0f;
 
             TimeCreated = World.Ticks;
         }
