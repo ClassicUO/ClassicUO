@@ -1735,6 +1735,11 @@ namespace ClassicUO.Network
                     break;
                 case 0x26:
                     byte val = p.ReadByte();
+                    if (val > (int)CharacterSpeedType.FastUnmountAndCantRun)
+                        val = 0;
+
+                    World.Player.SpeedMode = (CharacterSpeedType) val;
+
                     break;
             }
         }

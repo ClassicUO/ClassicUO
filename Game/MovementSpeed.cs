@@ -33,7 +33,10 @@ namespace ClassicUO.Game
 
         public static int TimeToCompleteMovement(Mobile mobile, bool run)
         {
-            if (mobile.IsMounted) return run ? STEP_DELAY_MOUNT_RUN : STEP_DELAY_MOUNT_WALK;
+            bool mounted = (mobile.IsMounted || mobile.SpeedMode == CharacterSpeedType.FastUnmount ||
+                            mobile.SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || mobile.IsFlying);
+
+            if (mounted) return run ? STEP_DELAY_MOUNT_RUN : STEP_DELAY_MOUNT_WALK;
 
             return run ? STEP_DELAY_RUN : STEP_DELAY_WALK;
         }

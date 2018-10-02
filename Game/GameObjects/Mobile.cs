@@ -50,6 +50,14 @@ namespace ClassicUO.Game.GameObjects
         GARGOYLE
     }
 
+    public enum CharacterSpeedType
+    {
+        Normal,
+        FastUnmount,
+        CantRun,
+        FastUnmountAndCantRun
+    }
+
     public partial class Mobile : Entity
     {
         protected const int MAX_STEP_COUNT = 5;
@@ -74,6 +82,8 @@ namespace ClassicUO.Game.GameObjects
         public Mobile(Serial serial) : base(serial) => _lastAnimationChangeTime = World.Ticks;
 
         public Deque<Step> Steps { get; } = new Deque<Step>();
+
+        public CharacterSpeedType SpeedMode { get; internal set; } = CharacterSpeedType.Normal;
 
         public RaceType Race
         {
