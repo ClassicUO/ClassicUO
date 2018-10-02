@@ -35,7 +35,6 @@ namespace ClassicUO.Game.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
 
-
             for (int i = 0; i < _gumpTexture.Length; i++)
             {
                 if (_gumpTexture[i] == null)

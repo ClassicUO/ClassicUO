@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
@@ -31,13 +32,14 @@ namespace ClassicUO.Game.Gumps
 {
     internal class ItemGumpling : GumpControl
     {
-        private HtmlGump _htmlGump;
         private bool _clickedCanDrag;
         private float _picUpTime;
-        private Point _clickedPoint;
+        private Point _clickedPoint, _labelClickedPosition;
         private bool _sendClickIfNotDClick;
         private float _sClickTime;
 
+
+        private List<Label> _labels = new List<Label>();
 
         public ItemGumpling(Item item)
         {
@@ -141,6 +143,9 @@ namespace ClassicUO.Game.Gumps
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
+            _labelClickedPosition.X = x;
+            _labelClickedPosition.Y = y;
+
             if (_clickedCanDrag)
             {
                 _clickedCanDrag = false;
@@ -181,20 +186,42 @@ namespace ClassicUO.Game.Gumps
         {
             if (!isDisposing && Item.OverHeads.Count > 0)
             {
-                if (_htmlGump == null)
+                if (_labels.Count <= 0)
                 {
-                    _htmlGump = new HtmlGump(0, 0, 200, 32, false, false, false, Item.OverHeads[0].Text, 0, false, 1, true,
-                        FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER);
-                    _htmlGump.ControlInfo.Layer = UILayer.Over;
+                    foreach (TextOverhead overhead in Item.OverHeads)
+                    {
+                        Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth,
+                               overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER, overhead.TimeToLive)
+                        {
+                            FadeOut = true,
+                        };
 
-                    UIManager.Add(_htmlGump);
+                        label.ControlInfo.Layer = UILayer.Over;
+
+                        UIManager.Add(label);
+                        _labels.Add(label);
+                    }
                 }
+
+                int y = 0;
+
+                for (int i = _labels.Count - 1; i >= 0; i--)
+                {
+                    Label l = _labels[i];
+
+                    l.X = ScreenCoordinateX + _clickedPoint.X - l.Width / 2;
+                    l.Y = ScreenCoordinateY + _clickedPoint.Y - l.Height / 2 + y;
+
+                    y += l.Height;
+                }
+
             }
-            else if (_htmlGump != null)
+            else if (_labels.Count > 0)
             {
-                _htmlGump.Dispose();
-                _htmlGump = null;
+                _labels.ForEach(s => s.Dispose());
+                _labels.Clear();
             }
         }
+
     }
 }

@@ -197,7 +197,7 @@ namespace ClassicUO.Renderer
             {
                 Texture = Art.GetStaticTexture(Graphic);
 
-                //_blackTexture = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
+                //_blackTexture = new Texture2D(Service.GetByLocalSerial<SpriteBatch3D>().GraphicsDevice, 1, 1);
                 //_blackTexture.SetData(new[] { Color.Black });
 
 

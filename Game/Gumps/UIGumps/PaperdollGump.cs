@@ -73,8 +73,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void BuildGump()
         {
-            //m_World = Service.Get<WorldModel>();
-            //m_Client = Service.Get<INetworkClient>();
+            //m_World = Service.GetByLocalSerial<WorldModel>();
+            //m_Client = Service.GetByLocalSerial<INetworkClient>();
 
             CanMove = true;
             X = 100;
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
 
                 case Buttons.Options:
-                    if (UIManager.Get<OptionsGump>() == null)
+                    if (UIManager.GetByLocalSerial<OptionsGump>() == null)
                         UIManager.Add(new OptionsGump() { X = 80, Y = 80 });
                     else
                         UIManager.Remove<OptionsGump>();
@@ -230,7 +230,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
 
                 case Buttons.Skills:
-                    if (UIManager.Get<SkillGumpAdvanced>() == null)
+                    if (UIManager.GetByLocalSerial<SkillGumpAdvanced>() == null)
                     {
                         UIManager.Add(new SkillGumpAdvanced());
                     }
@@ -247,7 +247,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
 
                 case Buttons.Status:
-                    if (UIManager.Get<StatusGump>() == null)
+                    if (UIManager.GetByLocalSerial<StatusGump>() == null)
                     {
                         UIManager.Add(new StatusGump());
                     }

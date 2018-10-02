@@ -114,7 +114,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     MiniMapGump.Toggle(_scene);
                     break;
                 case Buttons.Paperdoll:
-                    if (UIManager.Get<PaperDollGump>(World.Player) == null)
+                    if (UIManager.GetByLocalSerial<PaperDollGump>(World.Player) == null)
                         GameActions.DoubleClick((Serial) (World.Player.Serial | int.MinValue));
                     else
                         UIManager.Remove<PaperDollGump>(World.Player);
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Service.Get<Log>().Message(LogTypes.Warning, "Inventory button pushed! Not implemented yet!");
                     break;
                 case Buttons.Journal:
-                    if (UIManager.Get<JournalGump>() == null)
+                    if (UIManager.GetByLocalSerial<JournalGump>() == null)
                     {
                         UIManager.Add(new JournalGump());
                     }

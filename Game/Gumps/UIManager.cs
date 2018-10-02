@@ -39,6 +39,7 @@ namespace ClassicUO.Game.Gumps
         private readonly CursorRenderer _cursor;
         private readonly List<object> _inputBlockingObjects = new List<object>();
 
+        private bool _needSort;
 
         public UIManager() => _cursor = new CursorRenderer(this);
 
@@ -72,17 +73,7 @@ namespace ClassicUO.Game.Gumps
             set => _keyboardFocusControl = value;
         }
 
-        public bool IsModalControlOpen
-        {
-            get
-            {
-                foreach (GumpControl c in _gumps)
-                    if (c.ControlInfo.IsModal) return true;
-
-                return false;
-            }
-        }
-
+        public bool IsModalControlOpen => _gumps.Any(s => s.ControlInfo.IsModal);
 
         private bool ObjectsBlockingInputExists => _inputBlockingObjects.Count > 0;
 
@@ -220,7 +211,7 @@ namespace ClassicUO.Game.Gumps
                             gump.CanCloseWithEsc = false;
                             break;
                         case "nomove":
-                            gump.CanMove = false;
+                            gump.BlockMovement = true;
                             break;
                         case "group":
                         case "endgroup":
@@ -250,13 +241,15 @@ namespace ClassicUO.Game.Gumps
             return gump;
         }
 
-        public T Get<T>(Serial? serial = null) where T : GumpControl
+        public T GetByLocalSerial<T>(Serial? serial = null) where T : GumpControl
             => _gumps.OfType<T>()
                 .FirstOrDefault(s => !s.IsDisposed && (!serial.HasValue || s.LocalSerial == serial));
 
-        public Gump Get(Serial serial)
+        public Gump GetByLocalSerial(Serial serial)
             => _gumps.OfType<Gump>().FirstOrDefault(s => !s.IsDisposed && s.LocalSerial == serial);
 
+        public Gump GetByServerSerial(Serial serial)
+            => _gumps.OfType<Gump>().FirstOrDefault(s => !s.IsDisposed && s.ServerSerial == serial);
 
         public void Update(double totalMS, double frameMS)
         {
@@ -273,7 +266,12 @@ namespace ClassicUO.Game.Gumps
             }
 
             for (int i = 0; i < _gumps.Count; i++)
-                if (_gumps[i].IsDisposed) _gumps.RemoveAt(i--);
+            {
+                if (_gumps[i].IsDisposed)
+                {
+                    _gumps.RemoveAt(i--);
+                }
+            }
 
             _cursor.Update(totalMS, frameMS);
 
@@ -299,17 +297,18 @@ namespace ClassicUO.Game.Gumps
 
         public void Add(GumpControl gump)
         {
-            if (gump.IsDisposed)
-                return;
-
-            _gumps.Insert(0, gump);
+            if (!gump.IsDisposed)
+            {
+                _gumps.Insert(0, gump);
+                _needSort = true;
+            }
         }
 
         public void Remove<T>(Serial? local = null) where T : GumpControl
         {
             foreach (GumpControl c in _gumps)
             {
-                if (typeof(T).IsAssignableFrom(c.GetType()))
+                if (c is T)
                 {
                     if (!local.HasValue || c.LocalSerial == local)
                     {
@@ -361,8 +360,11 @@ namespace ClassicUO.Game.Gumps
             {
                 MouseOverControl.InvokeMouseLeft(position);
 
-                if (MouseOverControl.Parent != null && (gump == null || gump.RootParent != MouseOverControl.RootParent))
-                    MouseOverControl.InvokeMouseLeft(position);
+                if (MouseOverControl.RootParent != null)
+                {
+                    if (gump == null || gump.RootParent != MouseOverControl.RootParent)
+                        MouseOverControl.RootParent.InvokeMouseLeft(position);
+                }
             }
 
 
@@ -456,15 +458,7 @@ namespace ClassicUO.Game.Gumps
             if (_isDraggingControl)
                 return _draggingControl;
 
-            List<GumpControl> controls;
-
-            if (IsModalControlOpen)
-            {
-                controls = new List<GumpControl>();
-                controls = _gumps.Where(s => s.ControlInfo.IsModal).ToList();
-            }
-            else
-                controls = _gumps;
+            List<GumpControl> controls = IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal).ToList() : _gumps;
 
             GumpControl[] mouseoverControls = null;
 
@@ -477,63 +471,71 @@ namespace ClassicUO.Game.Gumps
                     break;
                 }
             }
-
-            if (mouseoverControls == null)
-                return null;
-
-            for (int i = 0; i < mouseoverControls.Length; i++)
-            {
-                if (mouseoverControls[i].AcceptMouseInput)
-                    return mouseoverControls[i];
-            }
-
-            return null;
+            return mouseoverControls?.FirstOrDefault(s => s.AcceptMouseInput);
         }
 
         private void MakeTopMostGump(GumpControl control)
         {
-            GumpControl c = control.RootParent;
+            GumpControl c = control;
+            while (c.Parent != null)
+                c = c.Parent;
 
-            for (int i = 0; i < _gumps.Count; i++)
+            for (int i = 1; i < _gumps.Count; i++)
             {
                 if (_gumps[i] == c)
                 {
                     GumpControl cm = _gumps[i];
                     _gumps.RemoveAt(i);
                     _gumps.Insert(0, cm);
+                    _needSort = true;
                 }
             }
         }
 
         private void SortControlsByInfo()
         {
-            List<GumpControl> gumps = _gumps.Where(s => s.ControlInfo.Layer != UILayer.Default).ToList();
-
-            foreach (GumpControl c in gumps)
+            if (_needSort)
             {
-                if (c.ControlInfo.Layer == UILayer.Under)
-                {
-                    for (int i = 0; i < _gumps.Count; i++)
-                    {
-                        if (_gumps[i] == c)
-                        {
-                            _gumps.RemoveAt(i);
-                            _gumps.Insert(_gumps.Count, c);
-                        }
-                    }
-                }
-                else if (c.ControlInfo.Layer == UILayer.Over)
-                {
-                    for (int i = 0; i < _gumps.Count; i++)
-                    {
-                        if (_gumps[i] == c)
-                        {
-                            _gumps.RemoveAt(i);
-                            _gumps.Insert(0, c);
-                        }
-                    }
-                }
+                _gumps.Sort((a, b) => a.ControlInfo.Layer.CompareTo(b.ControlInfo.Layer));
+
+                _needSort = false;
             }
+
+
+            //List<GumpControl> gumps = _gumps.Where(s => s.ControlInfo.Layer != UILayer.Default).ToList();
+
+            //foreach (GumpControl c in gumps)
+            //{
+            //    switch (c.ControlInfo.Layer)
+            //    {
+            //        case UILayer.Under:
+            //        {
+            //            for (int i = 0; i < _gumps.Count - 0; i++)
+            //            {
+            //                if (_gumps[i] == c)
+            //                {
+            //                    _gumps.RemoveAt(i);
+            //                    _gumps.Insert(_gumps.Count, c);
+            //                }
+            //            }
+
+            //            break;
+            //        }
+            //        case UILayer.Over:
+            //        {
+            //            for (int i = 0; i < _gumps.Count; i++)
+            //            {
+            //                if (_gumps[i] == c)
+            //                {
+            //                    _gumps.RemoveAt(i);
+            //                    _gumps.Insert(0, c);
+            //                }
+            //            }
+
+            //            break;
+            //        }
+            //    }
+            //}
         }
 
         private GumpControl _draggingControl;
@@ -549,7 +551,8 @@ namespace ClassicUO.Game.Gumps
             if (!dragTarget.CanMove)
                 return;
 
-            dragTarget = dragTarget.RootParent;
+            while (dragTarget.Parent != null)
+                dragTarget = dragTarget.Parent;
 
             if (dragTarget.CanMove)
             {

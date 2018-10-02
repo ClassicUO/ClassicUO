@@ -36,7 +36,10 @@ namespace ClassicUO.Game.Views
         public MobileView(Mobile mobile) : base(mobile) => _frames = new ViewLayer[(int) Layer.InnerLegs];
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
-            => !PreDraw(position) && DrawInternal(spriteBatch, position, objectList);
+        {
+            PreDraw(position);
+            return DrawInternal(spriteBatch, position, objectList);
+        } 
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
             MouseOverList objectList)

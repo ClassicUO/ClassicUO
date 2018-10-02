@@ -26,25 +26,20 @@ namespace ClassicUO.Game.Gumps
 {
     public class GumpPicTiled : GumpControl
     {
-        private readonly Graphic _graphic;
-
-
         public GumpPicTiled(Graphic graphic)
         {
-            _graphic = graphic;
             CanMove = true;
             Texture = IO.Resources.Gumps.GetGumpTexture(graphic);
+
+            //AcceptMouseInput = false;
         }
 
-        public GumpPicTiled(int x, int y, int width, int heigth, Graphic graphic)
+        public GumpPicTiled(int x, int y, int width, int heigth, Graphic graphic) : this(graphic)
         {
             X = x;
             Y = y;
             Width = width;
             Height = heigth;
-            _graphic = graphic;
-            CanMove = true;
-            Texture = IO.Resources.Gumps.GetGumpTexture(graphic);
         }
 
         public GumpPicTiled(string[] parts) : this(Graphic.Parse(parts[5]))
