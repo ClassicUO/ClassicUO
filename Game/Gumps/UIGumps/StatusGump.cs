@@ -18,14 +18,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private bool _useOldGump = false;
         private PlayerMobile _mobile = World.Player;
         private Label[] _labels = new Label[(int)MobileStats.Max];
+        Texture2D _line;
+       
 
         public StatusGump()
             : base(0, 0)
         {
             CanMove = true;
+            _line = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
+            _line.SetData(new[] { Color.Black });
+       
 
-
-            switch (FileManager.ClientVersion)
+    switch (FileManager.ClientVersion)
             {
                 case var expression when FileManager.ClientVersion >= ClientVersions.CV_308D && !_useOldGump: //ORIGINAL LARGE GUMP
                     _offset = 82;
@@ -61,11 +65,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     AddChildren(_labels[(int)MobileStats.FasterCasting] = new Label(_mobile.FasterCasting.ToString(), false, 997, 400) { X = 5 * _offset - 4, Y = 132 });
                     AddChildren(_labels[(int)MobileStats.FasterCastRecovery] = new Label(_mobile.FasterCastRecovery.ToString(), false, 997, 400) { X = 5 * _offset - 4, Y = 160 });
                     //============================================================================================================================
-                    AddChildren(_labels[(int)MobileStats.AR] = new Label(ConcatCurrentMax(_mobile.ResistPhysical, _mobile.MaxPhysicRes), false, 997, 400) { X = 6 * _offset - 4, Y = 73 });
-                    AddChildren(_labels[(int)MobileStats.RF] = new Label(ConcatCurrentMax(_mobile.ResistFire, _mobile.MaxFireRes), false, 997, 400) { X = 6 * _offset - 4, Y = 90 });
-                    AddChildren(_labels[(int)MobileStats.RC] = new Label(ConcatCurrentMax(_mobile.ResistCold, _mobile.MaxColdRes), false, 997, 400) { X = 6 * _offset - 4, Y = 105 });
-                    AddChildren(_labels[(int)MobileStats.RP] = new Label(ConcatCurrentMax(_mobile.ResistPoison, _mobile.MaxPoisonRes), false, 997, 400) { X = 6 * _offset - 4, Y = 119 });
-                    AddChildren(_labels[(int)MobileStats.RE] = new Label(ConcatCurrentMax(_mobile.ResistEnergy, _mobile.MaxEnergyRes), false, 997, 400) { X = 6 * _offset - 4, Y = 135 });
+                    AddChildren(_labels[(int)MobileStats.AR] = new Label(ConcatCurrentMax(_mobile.ResistPhysical, _mobile.MaxPhysicRes), false, 997, 400) { X = 6 * _offset - 10, Y = 73 });
+                    AddChildren(_labels[(int)MobileStats.RF] = new Label(ConcatCurrentMax(_mobile.ResistFire, _mobile.MaxFireRes), false, 997, 400) { X = 6 * _offset - 10, Y = 90 });
+                    AddChildren(_labels[(int)MobileStats.RC] = new Label(ConcatCurrentMax(_mobile.ResistCold, _mobile.MaxColdRes), false, 997, 400) { X = 6 * _offset - 10, Y = 105 });
+                    AddChildren(_labels[(int)MobileStats.RP] = new Label(ConcatCurrentMax(_mobile.ResistPoison, _mobile.MaxPoisonRes), false, 997, 400) { X = 6 * _offset - 10, Y = 119 });
+                    AddChildren(_labels[(int)MobileStats.RE] = new Label(ConcatCurrentMax(_mobile.ResistEnergy, _mobile.MaxEnergyRes), false, 997, 400) { X = 6 * _offset - 10, Y = 135 });
                     AddChildren(_labels[(int)MobileStats.Gold] = new Label(_mobile.Gold.ToString(), false, 997, 400) { X = 6 * _offset - 4, Y = 160 });
                     break;
                 case var expression when FileManager.ClientVersion < ClientVersions.CV_308D | _useOldGump: //OLD GUMP
@@ -97,12 +101,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch (FileManager.ClientVersion)
             {
                 case var expression when FileManager.ClientVersion >= ClientVersions.CV_308D && !_useOldGump:
-                    Texture2D line = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-                    line.SetData(new[] { Color.Black });
-                    spriteBatch.Draw2D(line, new Rectangle((int)position.X + 2 * 82 - 4, (int)position.Y + 81, 20, 1), Vector3.Zero);
-                    spriteBatch.Draw2D(line, new Rectangle((int)position.X + 2 * 82 - 4, (int)position.Y + 109, 20, 1), Vector3.Zero);
-                    spriteBatch.Draw2D(line, new Rectangle((int)position.X + 2 * 82 - 4, (int)position.Y + 137, 20, 1), Vector3.Zero);
-                    spriteBatch.Draw2D(line, new Rectangle((int)position.X + 3 * 82 - 4, (int)position.Y + 137, 20, 1), Vector3.Zero);
+                    spriteBatch.Draw2D(_line, new Rectangle((int)position.X + 2 * 82 - 4, (int)position.Y + 81, 20, 1), Vector3.Zero);
+                    spriteBatch.Draw2D(_line, new Rectangle((int)position.X + 2 * 82 - 4, (int)position.Y + 109, 20, 1), Vector3.Zero);
+                    spriteBatch.Draw2D(_line, new Rectangle((int)position.X + 2 * 82 - 4, (int)position.Y + 137, 20, 1), Vector3.Zero);
+                    spriteBatch.Draw2D(_line, new Rectangle((int)position.X + 3 * 82 - 4, (int)position.Y + 137, 20, 1), Vector3.Zero);
                     break;
                 default:
                     break;
@@ -112,7 +114,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_refreshTime + 0.5d < totalMS) //need to update
+            if (_refreshTime + 0.5d < totalMS) 
             {
                 _refreshTime = totalMS;
 
@@ -135,11 +137,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         _labels[(int)MobileStats.StatCap].Text = _mobile.StatsCap.ToString();
                         _labels[(int)MobileStats.Luck].Text = _mobile.Luck.ToString();
                         _labels[(int)MobileStats.Gold].Text = _mobile.Gold.ToString();
-                        _labels[(int)MobileStats.AR].Text = _mobile.ResistPhysical.ToString();
-                        _labels[(int)MobileStats.RF].Text = _mobile.ResistFire.ToString();
-                        _labels[(int)MobileStats.RC].Text = _mobile.ResistCold.ToString();
-                        _labels[(int)MobileStats.RP].Text = _mobile.ResistPoison.ToString();
-                        _labels[(int)MobileStats.RE].Text = _mobile.ResistEnergy.ToString();
+                        _labels[(int)MobileStats.AR].Text = ConcatCurrentMax(_mobile.ResistPhysical, _mobile.MaxPhysicRes);
+                        _labels[(int)MobileStats.RF].Text = ConcatCurrentMax(_mobile.ResistFire, _mobile.MaxFireRes);
+                        _labels[(int)MobileStats.RC].Text = ConcatCurrentMax(_mobile.ResistCold, _mobile.MaxColdRes);
+                        _labels[(int)MobileStats.RP].Text = ConcatCurrentMax(_mobile.ResistPoison, _mobile.MaxPoisonRes);
+                        _labels[(int)MobileStats.RE].Text = ConcatCurrentMax(_mobile.ResistEnergy, _mobile.MaxEnergyRes);
                         _labels[(int)MobileStats.Damage].Text = ConcatCurrentMax(_mobile.DamageMin, _mobile.DamageMax);
                         _labels[(int)MobileStats.LowerReagentCost].Text = _mobile.LowerReagentCost.ToString();
                         _labels[(int)MobileStats.SpellDamageInc].Text = _mobile.SpellDamageInc.ToString();
