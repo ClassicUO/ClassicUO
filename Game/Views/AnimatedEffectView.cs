@@ -35,19 +35,16 @@ namespace ClassicUO.Game.Views
         {
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             if (((AnimatedItemEffect) GameObject).IsMoving)
-            {
-                if (PreDraw(position))
-                    return true;
-            }
+                PreDraw(position);
 
             return DrawInternal(spriteBatch, position, objectList);
         }
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
-            MouseOverList<GameObject> objectList)
+            MouseOverList objectList)
         {
             if (GameObject.IsDisposed)
                 return false;
@@ -55,9 +52,6 @@ namespace ClassicUO.Game.Views
             AnimatedItemEffect effect = (AnimatedItemEffect) GameObject;
             if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
-                if (Texture != null && !Texture.IsDisposed)
-                    Texture.Dispose();
-
                 _displayedGraphic = effect.AnimationGraphic;
                 Texture = Art.GetStaticTexture(effect.AnimationGraphic);
                 Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4,
@@ -69,7 +63,7 @@ namespace ClassicUO.Game.Views
             return base.Draw(spriteBatch, position, objectList);
         }
 
-        protected override void MousePick(MouseOverList<GameObject> list, SpriteVertex[] vertex)
+        protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
             int x = list.MousePosition.X - (int) vertex[0].Position.X;
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;

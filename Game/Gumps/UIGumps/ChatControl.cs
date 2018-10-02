@@ -50,8 +50,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private TextBox _textBox;
         private readonly List<ChatLineTime> _textEntries;
         private readonly List<Tuple<ChatMode, string>> _messageHistory;
-        private InputManager _uiManager;
-        private InputManager _inputManager;
+        private readonly InputManager _inputManager;
         private int _messageHistoryIndex = -1;
         private Serial _privateMsgSerial = 0;
         private string _privateMsgName;
@@ -106,7 +105,25 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public void AddLine(string text, byte font, Hue hue, bool isunicode)
         { 
-            _textEntries.Add(new ChatLineTime(text, Width, font, isunicode, hue));
+            _textEntries.Add(new ChatLineTime(text, 320, font, isunicode, hue));
+        }
+
+        protected override void OnResize()
+        {
+            if (_textBox != null)
+            {
+                int height = Fonts.GetHeightUnicode(1, "ABC", Width, 0,
+                    (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
+
+                _textBox.Y = Height - height - 3;
+                _textBox.Width = Width;
+                _textBox.Height = height - 3;
+
+                CheckerTrans trans = GetControls<CheckerTrans>()[0];
+                trans.Location = new Point(_textBox.X, _textBox.Y);
+                trans.Width = Width;
+                trans.Height = height + 5;
+            }
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -116,7 +133,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 int height = Fonts.GetHeightUnicode(1, "ABC", Width, 0,
                     (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
 
-                _textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
+                _textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
                 {
                     X = 0,
                     Y = Height - height - 3,
@@ -127,9 +144,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 Mode = ChatMode.Default;
 
-                AddChildren(new CheckerTrans {X = _textBox.X, Y = _textBox.Y, Width = Width, Height = Height});
+                AddChildren(new CheckerTrans {X = _textBox.X, Y = _textBox.Y, Width = Width, Height = height + 5 });
                 AddChildren(_textBox);
             }
+
+
 
             for (int i = 0; i < _textEntries.Count; i++)
             {
@@ -140,6 +159,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     _textEntries.RemoveAt(i--);
                 }
             }
+
 
             if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_q, false, false, true) &&
                 _messageHistoryIndex > -1)
@@ -168,40 +188,47 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
 
-            if ((Mode == ChatMode.Default && _textBox.Text.Length == 1) ||
-                (Mode != ChatMode.Default && _textBox.Text.Length == 1))
+            if (Mode == ChatMode.Default)
             {
-                switch (_textBox.Text[0])
+                if (_textBox.Text.Length == 1)
                 {
-                    case ':':
-                        Mode = ChatMode.Emote;
-                        break;
-                    case ';':
-                        Mode = ChatMode.Whisper;
-                        break;
-                    case '/':
-                        Mode = ChatMode.Party;
-                        break;
-                    case '\\':
-                        Mode = ChatMode.Guild;
-                        break;
-                    case '|':
-                        Mode = ChatMode.Alliance;
-                        break;
+                    switch (_textBox.Text[0])
+                    {
+                        case ';':
+                            Mode = ChatMode.Whisper;
+                            break;
+                        case '/':
+                            Mode = ChatMode.Party;
+                            break;
+                        case '\\':
+                            Mode = ChatMode.Guild;
+                            break;
+                        case '|':
+                            Mode = ChatMode.Alliance;
+                            break;
+                    }
+                }
+                else if (_textBox.Text.Length == 2 && _textBox.Text[0] == ':' && _textBox.Text[1] == ' ')
+                {
+                    Mode = ChatMode.Emote;
                 }
             }
+
+           
 
             base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            int y = _textBox.Y - (int) position.Y - 6;
+            int y = _textBox.Y + (int) position.Y - 6;
 
             for (int i = _textEntries.Count - 1; i >= 0; i--)
             {
                 y -= _textEntries[i].TextHeight;
-                _textEntries[i].Draw(spriteBatch, new Vector3(position.X + 2, y, 0));
+
+                if (y >= (int)position.Y)
+                    _textEntries[i].Draw(spriteBatch, new Vector3(position.X + 2, y, 0));
             }
 
             return base.Draw(spriteBatch, position, hue);
@@ -249,11 +276,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private class ChatLineTime : IUpdateable, IDrawableUI, IDisposable
         {
             private readonly RenderedText _renderedText;
-            private float _createdTime = float.MinValue;
+            private readonly float _createdTime;
             private int _width;
 
             private const float TIME_DISPLAY = 10000.0f;
-            private const float TIME_FADEOUT = 4000.0f;
+            private const float TIME_FADEOUT = 2000.0f;
 
             public ChatLineTime(string text, int width, byte font, bool isunicode, Hue hue)
             {
@@ -263,33 +290,35 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Font = font,
                     MaxWidth = width,
                     FontStyle = FontStyle.BlackBorder,
-                    Hue = hue
+                    Hue = hue,
+                    Text = text
                 };
 
-                _renderedText.Text = text;
                 _width = width;
+
+                _createdTime = World.Ticks;
             }
 
             public string Text => _renderedText.Text;
             public bool IsExpired { get; private set; }
-            public float Alpha { get; private set; } = 1.0f;
+            public float Alpha { get; private set; }
             public bool AllowedToDraw { get; set; } = true;
             public int TextHeight => _renderedText.Height;
             public SpriteTexture Texture { get; set; }
 
 
             public bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>
-                _renderedText.Draw(spriteBatch, position, RenderExtentions.GetHueVector(0, false, Alpha < 1, true));
+                _renderedText.Draw(spriteBatch, position, RenderExtentions.GetHueVector(0, false, Alpha < 1.0f ? Alpha : 0 , true));
 
             public void Update(double totalMS, double frameMS)
-            {
-                if (_createdTime == float.MinValue)
-                    _createdTime = (float) totalMS;
+            {                    
                 float time = (float) totalMS - _createdTime;
                 if (time > TIME_DISPLAY)
                     IsExpired = true;
                 else if (time > TIME_DISPLAY - TIME_FADEOUT)
-                    Alpha = 1.0f - (time - (TIME_DISPLAY - TIME_FADEOUT)) / TIME_FADEOUT;
+                {
+                    Alpha = (time - (TIME_DISPLAY - TIME_FADEOUT)) / TIME_FADEOUT;
+                }
             }
 
             public void Dispose()

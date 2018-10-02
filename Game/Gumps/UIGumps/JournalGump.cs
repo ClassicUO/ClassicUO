@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -11,9 +12,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     class JournalGump : Gump
     {
-        private ExpandableScroll m_Background;
-        private RenderedTextList m_JournalEntries;
-        private readonly ScrollFlag m_ScrollBar;
+        private ExpandableScroll _background;
+        private RenderedTextList _journalEntries;
+        private readonly ScrollFlag _scrollBar;
 
         public JournalGump()
             : base(0, 0)
@@ -23,11 +24,24 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanMove = true;
             AcceptMouseInput = true;
 
-            AddChildren(m_Background = new ExpandableScroll( 0, 0, 300));
-            m_Background.TitleGumpID = 0x82A;
+            AddChildren(_background = new ExpandableScroll( 0, 0, 300));
+            _background.TitleGumpID = 0x82A;
 
-            AddChildren(m_ScrollBar = new ScrollFlag(this, 0, 0 , Height));
-            AddChildren(m_JournalEntries = new RenderedTextList( 30, 36, 242, 200, m_ScrollBar));
+            AddChildren(_scrollBar = new ScrollFlag(this, 0, 0 , Height));
+            AddChildren(_journalEntries = new RenderedTextList( 30, 36, 242, 200, _scrollBar));
+        }
+
+        protected override void OnMouseWheel(MouseEvent delta)
+        {
+            switch (delta)
+            {
+                case MouseEvent.WheelScrollUp:
+                    _scrollBar.Value -= 5;
+                    break;
+                case MouseEvent.WheelScrollDown:
+                    _scrollBar.Value += 5;
+                    break;
+            }
         }
 
         protected override void OnInitialize()
@@ -45,7 +59,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            m_JournalEntries.Height = Height - 98;
+            _journalEntries.Height = Height - 98;
             base.Update(totalMS, frameMS);
         }
 
@@ -61,23 +75,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
             bool asUnicode = entry.AsUnicode;
             TransformFont(ref font, ref asUnicode);
 
-            m_JournalEntries.AddEntry(text, font, entry.Hue);
+            _journalEntries.AddEntry(text, font, entry.Hue);
         }
 
         private void TransformFont(ref int font, ref bool asUnicode)
         {
             if (asUnicode)
                 return;
-            else
+            switch (font)
             {
-                switch (font)
+                case 3:
                 {
-                    case 3:
-                        {
-                            font = 1;
-                            asUnicode = true;
-                            break;
-                        }
+                    font = 1;
+                    asUnicode = true;
+                    break;
                 }
             }
         }
@@ -89,26 +100,22 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 AddJournalEntry(Service.Get<JournalData>().JournalEntries[i]);
             }
 
-            m_ScrollBar.MinValue = 0;
+            _scrollBar.MinValue = 0;
         }
     }
 
     public class JournalData
     {
-        private readonly List<JournalEntry> m_JournalEntries = new List<JournalEntry>();
-        public List<JournalEntry> JournalEntries
-        {
-            get { return m_JournalEntries; }
-        }
+        public List<JournalEntry> JournalEntries { get; } = new List<JournalEntry>();
 
         public event Action<JournalEntry> OnJournalEntryAdded;
 
         public void AddEntry(string text, int font, ushort hue, string speakerName)
         {
-            while (m_JournalEntries.Count > 99)
-                m_JournalEntries.RemoveAt(0);
-            m_JournalEntries.Add(new JournalEntry(text, font, hue, speakerName));
-            OnJournalEntryAdded?.Invoke(m_JournalEntries[m_JournalEntries.Count - 1]);
+            while (JournalEntries.Count > 99)
+                JournalEntries.RemoveAt(0);
+            JournalEntries.Add(new JournalEntry(text, font, hue, speakerName));
+            OnJournalEntryAdded?.Invoke(JournalEntries[JournalEntries.Count - 1]);
         }
     }
 

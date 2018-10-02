@@ -63,10 +63,10 @@ namespace ClassicUO.Configuration
         private int _containerDefaultX;
         private int _containerDefaultY;
         private int _backpackStyle;
-        private int _gameWindowX;
-        private int _gameWindowY;
-        private int _gameWindowWidth;
-        private int _gameWindowHeight;
+        private int _gameWindowX = 32;
+        private int _gameWindowY = 32;
+        private int _gameWindowWidth = 800;
+        private int _gameWindowHeight = 600;
 
         private int _speechDelay;
         private bool _scaleSpeechDelay;
@@ -88,7 +88,14 @@ namespace ClassicUO.Configuration
         private bool _skillReport;
 
 
+        private bool _useOldStatus;
 
+        private bool _useTooltips;
+        private int _delayAppearTooltips;
+        private ushort _tooltipsTextColor;
+
+        private bool _highlightGameObjects = true;
+        private bool _smoothMovement = true;
 
         [JsonConstructor]
         public Settings()
@@ -404,6 +411,54 @@ namespace ClassicUO.Configuration
         {
             get => _skillReport;
             set => SetProperty(ref _skillReport, value);
+        }
+
+
+
+        [JsonProperty(PropertyName = "use_old_status")]
+        public bool UseOldStatus
+        {
+            get => _useOldStatus;
+            set => SetProperty(ref _useOldStatus, value);
+        }
+
+
+
+
+        [JsonProperty(PropertyName = "use_tooltips")]
+        public bool UseTooltips
+        {
+            get => _useTooltips;
+            set => SetProperty(ref _useTooltips, value);
+        }
+
+        [JsonProperty(PropertyName = "delay_appear_tooltips")]
+        public int DelayAppearTooltips
+        {
+            get => _delayAppearTooltips;
+            set => SetProperty(ref _delayAppearTooltips, value);
+        }
+
+        [JsonProperty(PropertyName = "tooltips_text_color")]
+        public ushort TooltipsTextColor
+        {
+            get => _tooltipsTextColor;
+            set => SetProperty(ref _tooltipsTextColor, value);
+        }
+
+
+        [JsonProperty(PropertyName = "highlight_gameobjects")]
+        public bool HighlightGameObjects
+        {
+            get => _highlightGameObjects;
+            set => SetProperty(ref _highlightGameObjects, value);
+        }
+
+        [JsonProperty(PropertyName = "smooth_movement")]
+        public bool SmoothMovement
+        {
+            get => _smoothMovement;
+            set => SetProperty(ref _smoothMovement, value);
         }
     }
 

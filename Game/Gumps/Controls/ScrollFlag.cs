@@ -90,6 +90,8 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        public int ScrollStep { get; set; } = 5;
+
         protected override void OnInitialize()
         {
             base.OnInitialize();
@@ -173,10 +175,10 @@ namespace ClassicUO.Game.Gumps
             switch (delta)
             {
                 case MouseEvent.WheelScrollUp:
-                    Value--;
+                    Value -= ScrollStep;
                     break;
                 case MouseEvent.WheelScrollDown:
-                    Value++;
+                    Value += ScrollStep;
                     break;
             }
         }

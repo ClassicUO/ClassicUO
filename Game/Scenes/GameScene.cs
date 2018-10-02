@@ -21,6 +21,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.Controls;
@@ -45,15 +46,16 @@ namespace ClassicUO.Game.Scenes
 #if !ORIONSORT
         private readonly List<DeferredEntity> _deferredToRemove = new List<DeferredEntity>();
 #endif
-        private MousePicker<GameObject> _mousePicker;
-        private MouseOverList<GameObject> _mouseOverList;
+        private MousePicker _mousePicker;
+        private MouseOverList _mouseOverList;
 
         private bool _rightMousePressed;
-        private WorldViewportGump _viewPortGump;
+        private WorldViewport _viewPortGump;
         private TopBarGump _topBarGump;
         private StaticManager _staticManager;
+        private Settings _settings;
 
-        private static Hue _savedHue;
+        //private static Hue _savedHue;
         private static GameObject _selectedObject;
 
 
@@ -64,12 +66,11 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-        public int Width { get; set; } = 800;
-        public int Height { get; set; } = 600;
         public int Scale { get; set; } = 1;
         public Texture2D ViewportTexture => _renderTarget;
+        public Point MouseOverWorldPosition => new Point(InputManager.MousePosition.X - _viewPortGump.ScreenCoordinateX, InputManager.MousePosition.Y - _viewPortGump.ScreenCoordinateY);
 
-        public static GameObject SelectedObject
+        public GameObject SelectedObject
         {
             get => _selectedObject;
             set
@@ -77,34 +78,40 @@ namespace ClassicUO.Game.Scenes
                 if (_selectedObject == value)
                     return;
 
-                if (_selectedObject != null) _selectedObject.Hue = _savedHue;
+                //if (_selectedObject != null)
+                //    _selectedObject.Hue = _savedHue;
 
                 if (value == null)
                 {
+                    _selectedObject.View.IsSelected = false;
                     _selectedObject = null;
-                    _savedHue = 0;
+                    //_savedHue = 0;
                 }
                 else
                 {
                     _selectedObject = value;
-                    _savedHue = _selectedObject.Hue;
-                    _selectedObject.Hue = 24;
+                    //_savedHue = _selectedObject.Hue;
+
+                    if (Service.Get<Settings>().HighlightGameObjects)
+                        _selectedObject.View.IsSelected = true;
                 }
             }
         }
-
-        private bool _ADDED;
 
         public override void Load()
         {
             base.Load();
 
-            _mousePicker = new MousePicker<GameObject>();
-            _mouseOverList = new MouseOverList<GameObject>(_mousePicker);
+            _mousePicker = new MousePicker();
+            _mouseOverList = new MouseOverList(_mousePicker);
             _staticManager = new StaticManager();
 
-            UIManager.Add(_viewPortGump = new WorldViewportGump(this));
+            UIManager.Add(new WorldViewportGump(this));
             UIManager.Add(_topBarGump = new TopBarGump(this));
+
+            _viewPortGump = Service.Get<WorldViewport>();
+
+            _settings = Service.Get<Settings>();
 
             GameActions.Initialize(PicupItemBegin);
         }
@@ -195,29 +202,36 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
-            //if (World.Map != null)
-            //{
-            //    if (!_ADDED)
-            //    {
-            //        UIManager.Add(new Gumps.Controls.InGame.MapGump());
-            //        _ADDED = true;
-            //    }
-            //}
-
             World.Ticks = (long) totalMS;
 
-            if (_renderTarget == null || _renderTarget.Width != Width / Scale || _renderTarget.Height != Height / Scale)
+            if (_renderTarget == null || _renderTarget.Width != _settings.GameWindowWidth / Scale || _renderTarget.Height != _settings.GameWindowHeight / Scale)
             {
                 _renderTarget?.Dispose();
-                _renderTarget = new RenderTarget2D(Device, Width / Scale, Height / Scale, false, SurfaceFormat.Bgra5551,
+                _renderTarget = new RenderTarget2D(Device, _settings.GameWindowWidth / Scale, _settings.GameWindowHeight / Scale, false, SurfaceFormat.Bgra5551,
                     DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
+
+            // ============== INPUT ==============          
             HandleMouseActions();
             MouseHandler(frameMS);
 
+
+            if (IsMouseOverWorld)
+            {
+                _mouseOverList.MousePosition = _mousePicker.Position = MouseOverWorldPosition;
+                _mousePicker.PickOnly = PickerType.PickEverything;
+            }
+            else if (SelectedObject != null)
+                SelectedObject = null;
+
+            _mouseOverList.Clear();
+
+
             if (_rightMousePressed)
                 MoveCharacterByInputs();
+            // ===================================
+
 
             World.Update(totalMS, frameMS);
             _staticManager.Update(totalMS, frameMS);
@@ -229,12 +243,9 @@ namespace ClassicUO.Game.Scenes
                 _timePing = DateTime.Now.AddSeconds(10);
             }
 
-            _mouseOverList.MousePosition = _mousePicker.Position = InputManager.MousePosition;
-            _mousePicker.PickOnly = PickerType.PickEverything;
-            _mouseOverList.Clear();
-
             base.Update(totalMS, frameMS);
         }
+
 
         public override bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
         {
@@ -246,7 +257,7 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        private void CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface)
+        private static void CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface)
         {
             maxItemZ = 255;
             drawTerrain = true;
@@ -259,13 +270,13 @@ namespace ClassicUO.Game.Scenes
                 drawTerrain = underGround == null;
                 if (underObject != null)
                 {
-                    if (underObject is Item item)
+                    if (underObject is IDynamicItem item)
                     {
                         if (TileData.IsRoof((long) item.ItemData.Flags))
                             maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
                         else if (TileData.IsSurface((long) item.ItemData.Flags) ||
                                  TileData.IsWall((long) item.ItemData.Flags) &&
-                                 TileData.IsDoor((long) item.ItemData.Flags))
+                                 !TileData.IsDoor((long) item.ItemData.Flags))
                             maxItemZ = item.Position.Z;
                         else
                         {
@@ -273,33 +284,20 @@ namespace ClassicUO.Game.Scenes
                             maxItemZ = z;
                         }
                     }
-                    else if (underObject is Static sta)
-                    {
-                        if (TileData.IsRoof((long) sta.ItemData.Flags))
-                            maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
-                        else if (TileData.IsSurface((long) sta.ItemData.Flags) ||
-                                 TileData.IsWall((long) sta.ItemData.Flags) &&
-                                 TileData.IsDoor((long) sta.ItemData.Flags))
-                            maxItemZ = sta.Position.Z;
-                        else
-                        {
-                            int z = World.Player.Position.Z + (sta.ItemData.Height > 20 ? sta.ItemData.Height : 20);
-                            maxItemZ = z;
-                        }
-                    }
 
-                    if (underObject is Item i && TileData.IsRoof((long) i.ItemData.Flags) ||
-                        underObject is Static s && TileData.IsRoof((long) s.ItemData.Flags))
+                    if (underObject is IDynamicItem sta && TileData.IsRoof((long)sta.ItemData.Flags))
                     {
-                        bool isSE = true;
+                        bool isRoofSouthEast = true;
+
                         if ((tile = World.Map.GetTile(World.Map.Center.X + 1, World.Map.Center.Y)) != null)
                         {
                             tile.IsZUnderObjectOrGround(World.Player.Position.Z, out underObject, out underGround);
-                            isSE = underObject != null;
+                            isRoofSouthEast = underObject != null;
                         }
 
-                        if (!isSE)
+                        if (!isRoofSouthEast)
                             maxItemZ = 255;
+
                     }
 
                     underSurface = maxItemZ != 255;
@@ -307,9 +305,11 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private (Point firstTile, Vector2 renderOffset, Point renderDimensions) GetViewPort(int width, int height,
-            int scale = 1)
+        private static (Point firstTile, Vector2 renderOffset, Point renderDimensions) GetViewPort(int width, int height, int scale)
         {
+            int off = Math.Abs(width / 44 - height / 44) % 3;
+
+
             Point renderDimensions = new Point
             {
                 X = width / scale / 44 + 3,
@@ -381,8 +381,7 @@ namespace ClassicUO.Game.Scenes
                 int x = obj.Position.X;
                 int y = obj.Position.Y;
 
-                Vector3 isometricPosition =
- new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
+                Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
 
                 obj.View.Draw(sb3D, isometricPosition, _mouseOverList);
 
@@ -391,7 +390,7 @@ namespace ClassicUO.Game.Scenes
             //_renderList.Clear();
 #else
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
-            (Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort(Width, Height, Scale);
+            (Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort(_settings.GameWindowWidth, _settings.GameWindowHeight, Scale);
 
             ClearDeferredEntities();
 
@@ -406,7 +405,7 @@ namespace ClassicUO.Game.Scenes
 
                 Point firstTileInRow = new Point(firstTile.X + (y + 1) / 2, firstTile.Y + y / 2);
 
-                for (int x = 0; x < renderDimensions.X + 1; x++, dp.X -= 44f)
+                for (int x = 0; x < renderDimensions.X + 1; x++)
                 {
                     int tileX = firstTileInRow.X - x;
                     int tileY = firstTileInRow.Y + x;
@@ -415,7 +414,9 @@ namespace ClassicUO.Game.Scenes
                     if (tile != null)
                     {
                         IReadOnlyList<GameObject> objects = tile.ObjectsOnTiles;
+
                         bool draw = true;
+
                         for (int k = 0; k < objects.Count; k++)
                         {
                             GameObject obj = objects[k];
@@ -433,17 +434,27 @@ namespace ClassicUO.Game.Scenes
                                  || maxItemZ != 255 && obj is IDynamicItem dyn &&
                                  TileData.IsRoof((long) dyn.ItemData.Flags))
                                 && !(obj is Tile))
+                            {
+                                if (tile == World.Player.Tile)
+                                {
+
+                                }
+
                                 continue;
+                            }
 
-                            View view = obj.View;
+                            if (obj == World.Player)
+                            {
 
+                            }
 
-                            if (draw && view.Draw(sb3D, dp, _mouseOverList))
+                            if (draw && obj.View.Draw(sb3D, dp, _mouseOverList))
                                 RenderedObjectsCount++;
                         }
-
-                        ClearDeferredEntities();
                     }
+
+                    ClearDeferredEntities();
+                    dp.X -= 44f;
                 }
             }
 #endif
@@ -466,6 +477,7 @@ namespace ClassicUO.Game.Scenes
             World.Map.ClearUnusedBlocks();
         }
 
+#if !ORIONSORT
         private void ClearDeferredEntities()
         {
             if (_deferredToRemove.Count > 0)
@@ -479,6 +491,7 @@ namespace ClassicUO.Game.Scenes
                 _deferredToRemove.Clear();
             }
         }
+#endif
 
         public bool IsMouseOverUI => UIManager.IsMouseOverUI && !(UIManager.MouseOverControl is WorldViewport);
         public bool IsMouseOverWorld => UIManager.IsMouseOverUI && UIManager.MouseOverControl is WorldViewport;
@@ -665,7 +678,7 @@ namespace ClassicUO.Game.Scenes
         {
             // TODO: AMOUNT CHECK
 
-            PickupItemDirectly(item, x, y, amount.HasValue ? amount.Value : item.Amount);
+            PickupItemDirectly(item, x, y, amount ?? item.Amount);
         }
 
         private void PickupItemDirectly(Item item, int x, int y, int amount)
@@ -767,7 +780,8 @@ namespace ClassicUO.Game.Scenes
         {
             if (World.InGame)
             {
-                Point center = new Point(Width / 2, Height / 2);
+                Point center = new Point(_settings.GameWindowX + _settings.GameWindowWidth / 2,
+                    _settings.GameWindowY + _settings.GameWindowHeight / 2);
 
                 Direction direction = DirectionHelper.DirectionFromPoints(center, InputManager.MousePosition);
 
@@ -858,7 +872,7 @@ namespace ClassicUO.Game.Scenes
             int charX = entity.Position.X;
             int charY = entity.Position.Y;
 
-            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.Get(entity) : null;
+            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.GetByLocalSerial(entity) : null;
             int dropMaxZIndex = -1;
             if (mob != null)
             {
@@ -914,8 +928,8 @@ namespace ClassicUO.Game.Scenes
             int winGamePosX = 0;
             int winGamePosY = 0;
 
-            int winGameWidth = Width;
-            int winGameHeight = Height;
+            int winGameWidth = _settings.GameWindowWidth;
+            int winGameHeight = _settings.GameWindowHeight;
 
             int winGameCenterX = winGamePosX + (winGameWidth / 2);
             int winGameCenterY = winGamePosY + winGameHeight / 2 + World.Player.Position.Z * 4;

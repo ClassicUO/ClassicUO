@@ -19,6 +19,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -41,9 +43,9 @@ namespace ClassicUO.Game.Gumps
 
         private readonly SpriteTexture[] _textures = new SpriteTexture[3];
         private readonly Graphic[] _gumpGraphics = new Graphic[3];
-        private RenderedText _gText;
+        private readonly RenderedText[] _fontTexture = new RenderedText[2];
         private bool _clicked;
-
+        private readonly string _caption;
 
         public Button(int buttonID, ushort normal, ushort pressed, ushort over = 0, string caption = "", byte font = 0, bool isunicode = true, ushort normalHue = ushort.MaxValue, ushort hoverHue = ushort.MaxValue)
         {
@@ -66,13 +68,36 @@ namespace ClassicUO.Game.Gumps
             
             HueHover = hoverHue == ushort.MaxValue ? normalHue : hoverHue;
 
-            _gText = new RenderedText
+           
+
+
+            if (!string.IsNullOrEmpty(caption) && normalHue != ushort.MaxValue)
             {
-                IsUnicode = isunicode,
-                Hue = FontHue,
-                Font = font,
-                Text = caption
-            };
+                _caption = caption;
+
+                RenderedText renderedText = new RenderedText
+                {
+                    IsUnicode = isunicode,
+                    Hue = FontHue,
+                    Font = font,
+                    Text = caption
+                };
+
+                _fontTexture[0] = renderedText;
+
+                if (hoverHue != ushort.MaxValue)
+                {
+                    renderedText = new RenderedText
+                    {
+                        IsUnicode = isunicode,
+                        Hue = HueHover,
+                        Font = font,
+                        Text = caption
+                    };
+
+                    _fontTexture[1] = renderedText;
+                }
+            }
 
             CanMove = false;
             AcceptMouseInput = true;
@@ -81,19 +106,21 @@ namespace ClassicUO.Game.Gumps
         }
 
         public Button(string[] parts) :
-            this(parts.Length > 7 ? int.Parse(parts[7]) : 0, ushort.Parse(parts[3]), ushort.Parse(parts[4]))
+            this(parts.Length >= 8 ? int.Parse(parts[7]) : 0, ushort.Parse(parts[3]), ushort.Parse(parts[4]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
 
-            ButtonAction = (ButtonAction) int.Parse(parts[5]);
-            ButtonParameter = int.Parse(parts[6]);
+            ButtonAction = parts.Length >= 6 ? (ButtonAction) int.Parse(parts[5]) : 0;
+            ToPage = parts.Length >= 7 ? int.Parse(parts[6]) : 0;
         }
 
 
         public int ButtonID { get; }
         public ButtonAction ButtonAction { get; set; }
-        public int ButtonParameter { get; set; }
+        public int ToPage { get; set; }
+
+        protected override ClickPriority Priority => ClickPriority.High;
 
         public int ButtonGraphicNormal
         {
@@ -137,52 +164,27 @@ namespace ClassicUO.Game.Gumps
                 new Rectangle((int) position.X, (int) position.Y, Width, Height),
                 Vector3.Zero);
 
-            if (_gText.Text != string.Empty)
+            if (!string.IsNullOrEmpty(_caption))
             {
+                var textTexture = _fontTexture[UIManager.MouseOverControl == this ? 1 : 0];
+
                 if (FontCenter)
                 {
                     int yoffset = _clicked ? 1 : 0;
-                    _gText.Draw(spriteBatch,
-                        new Vector3(position.X + (Width - _gText.Width) / 2,
-                            position.Y + yoffset + (Height - _gText.Height) / 2, position.Z));
+
+                    textTexture.Draw(spriteBatch,
+                        new Vector3(position.X + (Width - textTexture.Width) / 2,
+                            position.Y + yoffset + (Height - textTexture.Height) / 2, position.Z));
                 }
                 else
-                    _gText.Draw(spriteBatch, position);
+                {
+                    textTexture.Draw(spriteBatch, position);
+                }
             }
 
             return base.Draw(spriteBatch, position, hue);
         }
 
-        private bool _isHovered;
-
-        protected override void OnMouseEnter(int x, int y)
-        {
-            if (!_isHovered)
-            {
-                _isHovered = true;
-
-                if (HueHover != FontHue && _gText.Hue != HueHover)
-                {
-                    _gText.Hue = HueHover;
-                    _gText.CreateTexture();
-                }
-            }
-        }
-
-        protected override void OnMouseLeft(int x, int y)
-        {
-            if (_isHovered)
-            {
-                _isHovered = false;
-
-                if (_gText != null && _gText.Hue != FontHue)
-                {
-                    _gText.Hue = FontHue;
-                    _gText.CreateTexture();
-                }
-
-            }
-        }
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
@@ -221,7 +223,7 @@ namespace ClassicUO.Game.Gumps
                 switch (ButtonAction)
                 {
                     case ButtonAction.SwitchPage:
-                        ChangePage(ButtonParameter);
+                        ChangePage(ToPage);
                         break;
                     case ButtonAction.Activate:
                         OnButtonClick(ButtonID);
@@ -233,17 +235,5 @@ namespace ClassicUO.Game.Gumps
        
 
         protected override bool Contains(int x, int y) => IO.Resources.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
-
-
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            if (_gText != null)
-            {
-                _gText.Dispose();
-                _gText = null;
-            }
-        }
     }
 }

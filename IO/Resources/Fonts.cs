@@ -355,20 +355,27 @@ namespace ClassicUO.IO.Resources
                 info = ptr;
                 linesCount++;
                 int w = 0;
-                if (ptr.Align == TEXT_ALIGN_TYPE.TS_CENTER)
+
+                switch (ptr.Align)
                 {
-                    w = (w - 10 - ptr.Width) / 2;
-                    if (w < 0)
-                        w = 0;
+                    case TEXT_ALIGN_TYPE.TS_CENTER:
+                    {
+                        w = (w - 10 - ptr.Width) / 2;
+                        if (w < 0)
+                            w = 0;
+                        break;
+                    }
+                    case TEXT_ALIGN_TYPE.TS_RIGHT:
+                    {
+                        w = width - 10 - ptr.Width;
+                        if (w == 0)
+                            w = 0;
+                        break;
+                    }
+                    case TEXT_ALIGN_TYPE.TS_LEFT when (flags & UOFONT_INDENTION) != 0:
+                        w = ptr.IndentionOffset;
+                        break;
                 }
-                else if (ptr.Align == TEXT_ALIGN_TYPE.TS_RIGHT)
-                {
-                    w = width - 10 - ptr.Width;
-                    if (w == 0)
-                        w = 0;
-                }
-                else if (ptr.Align == TEXT_ALIGN_TYPE.TS_LEFT && (flags & UOFONT_INDENTION) != 0)
-                    w = ptr.IndentionOffset;
 
                 int count = ptr.Data.Count;
 
@@ -406,7 +413,7 @@ namespace ClassicUO.IO.Resources
 
                                 int block = testrY * width + x + w;
 
-                                pData[block] = Hues.RgbaToArgb((pcl << 8) | 0xFF);
+                                pData[block] = Hues.RgbaToArgb(pcl << 8 | 0xFF);
                             }
                         }
                     }
@@ -421,8 +428,7 @@ namespace ClassicUO.IO.Resources
             }
 
             ftexture = new FontTexture(width, height, linesCount, null);
-            fixed (uint* ptrData = pData)
-                ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) ptrData, pData.Length);
+            ftexture.SetData(pData);
 
             return partialHue;
         }
@@ -574,8 +580,7 @@ namespace ClassicUO.IO.Resources
                         if (ptr.MaxHeight <= 0)
                             ptr.MaxHeight = 14;
 
-                        // DATA.resize() ??????
-                        ptr.Data.Resize(charCount); //= new List<MultilinesFontData>(charCount);
+                        ptr.Data.Resize(ptr.CharCount);
                         charCount = 0;
 
                         if (isFixed || isCropped)
@@ -607,7 +612,7 @@ namespace ClassicUO.IO.Resources
             ptr.Width += readWidth;
             ptr.CharCount += charCount;
 
-            if ((readWidth <= 0) & (len > 0) && (str[len - 1] == '\n' || str[len - 1] == '\r'))
+            if (readWidth <= 0 && len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
             {
                 ptr.Width = 1;
                 ptr.MaxHeight = 14;

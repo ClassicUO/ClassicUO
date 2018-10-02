@@ -35,12 +35,14 @@ namespace ClassicUO.Game.Views
 
         public MobileView(Mobile mobile) : base(mobile) => _frames = new ViewLayer[(int) Layer.InnerLegs];
 
-
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<GameObject> objectList)
-            => !PreDraw(position) && DrawInternal(spriteBatch, position, objectList);
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        {
+            PreDraw(position);
+            return DrawInternal(spriteBatch, position, objectList);
+        } 
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
-            MouseOverList<GameObject> objectList)
+            MouseOverList objectList)
         {
             if (GameObject.IsDisposed)
                 return false;
@@ -71,6 +73,8 @@ namespace ClassicUO.Game.Views
             else
                 drawX = -22 - (int) mobile.Offset.X;
 
+            Rectangle rect = new Rectangle();
+
             for (int i = 0; i < _layerCount; i++)
             {
                 ref ViewLayer vl = ref _frames[i];
@@ -83,13 +87,31 @@ namespace ClassicUO.Game.Views
 
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-                HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, false, false);
+
+                if (Bounds.X < rect.X)
+                    rect.X = Bounds.X;
+                if (Bounds.Y < rect.Y)
+                    rect.Y = Bounds.Y;
+                if (Bounds.Width > rect.Width)
+                    rect.Width = Bounds.Width;
+                if (Bounds.Height > rect.Height)
+                    rect.Height = Bounds.Height;
+
+                //if (i == 0)
+                //    rect = Bounds;
+
+                HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, 0, false);
 
                 base.Draw(spriteBatch, position, objectList);
 
                 Pick(frame.ID, Bounds, position, objectList);
             }
 
+            //Bounds = bodyFrame.Bounds;
+
+            //int xx = IsFlipped ? (int)position.X + rect.X + 44 : -(int)position.X + rect.X;
+
+            BoudsStrange = new Rectangle((int)position.X + rect.X, (int)position.Y + rect.Y, rect.Width, rect.Height);
 
             //spriteBatch.DrawRectangle(_texture, 
             //    new Rectangle
@@ -129,25 +151,14 @@ namespace ClassicUO.Game.Views
                 Z = position.Z
             };
 
-            //if (!bodyFrame.IsDisposed)
-            //{
-            //    Service.Get<Log>().Message(LogTypes.Trace, "BEFORE: " + yOffset.ToString());
-
-            //    yOffset = bodyFrame.Height + drawY - (int)(mobile.Offset.Z / 4 + GameObject.Position.Z * 4);
-
-            //    Service.Get<Log>().Message(LogTypes.Trace, "AFTER: " + yOffset.ToString());
-            //}
-            //else
-            //{
-            //    yOffset -= -(yOffset + 44);
-            //}
-
             MessageOverHead(spriteBatch, overheadPosition, -22);
             return true;
         }
 
+        
+        public Rectangle BoudsStrange { get; set; }
 
-        private void GetAnimationDimensions(Mobile mobile, byte frameIndex, ref int height, ref int centerY)
+        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, ref int height, ref int centerY)
         {
             byte dir = 0 & 0x7F;
             bool mirror = false;
@@ -173,23 +184,20 @@ namespace ClassicUO.Game.Views
 
                         if (direction.Frames != null && direction.Frames.Length > 0)
                         {
-                            height = direction.Frames[0].Height;
-                            centerY = direction.Frames[0].CenterY;
+                            height = direction.Frames[frameIndex].Height;
+                            centerY = direction.Frames[frameIndex].CenterY;
                             return;
                         }
                     }
                 }
             }
 
-            if (mobile.IsMounted)
-                height = 100;
-            else
-                height = 60;
+            height = mobile.IsMounted ? 100 : 60;
             centerY = 0;
         }
 
 
-        private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList<GameObject> list)
+        private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
         {
             int x;
 

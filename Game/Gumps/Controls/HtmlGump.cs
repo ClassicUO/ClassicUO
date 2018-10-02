@@ -44,32 +44,37 @@ namespace ClassicUO.Game.Gumps
             UseFlagScrollbar = HasScrollbar && parts[7] == "2";
 
             _gameText.IsHTML = true;
+            _gameText.MaxWidth = Width - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0);
 
             InternalBuild(lines[textIndex], 0);
         }
 
-        public HtmlGump(int x, int y, int w, int h, string text, int hasbackground, int hasscrollbar, int hue,
-            bool ishtml, byte font = 1, bool isunicode = true, FontStyle style = FontStyle.None,
+        public HtmlGump(int x, int y, int w, int h, bool hasbackground, bool hasscrollbar, bool useflagscrollbar = false, string text = "", int hue = 0,
+            bool ishtml = false, byte font = 1, bool isunicode = true, FontStyle style = FontStyle.None,
             TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : this()
         {
             X = x;
             Y = y;
             Width = w;
             Height = h;
-            HasBackground = hasbackground == 1;
-            HasScrollbar = hasscrollbar != 0;
-            UseFlagScrollbar = hasscrollbar != 0 && hasscrollbar == 2;
+            HasBackground = hasbackground;
+            HasScrollbar = hasscrollbar;
+            UseFlagScrollbar = useflagscrollbar; //hasscrollbar != 0 && hasscrollbar == 2;
 
-            _gameText.IsHTML = ishtml;
-            _gameText.FontStyle = style;
-            _gameText.Align = align;
-            _gameText.Font = font;
-            _gameText.IsUnicode = isunicode;
+            if (!string.IsNullOrEmpty(text))
+            {
+                _gameText.IsHTML = ishtml;
+                _gameText.FontStyle = style;
+                _gameText.Align = align;
+                _gameText.Font = font;
+                _gameText.IsUnicode = isunicode;
+                _gameText.MaxWidth = w - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0);
+            }
 
             InternalBuild(text, hue);
         }
 
-        public HtmlGump()
+        public HtmlGump() : base()
         {
             _gameText = new RenderedText
             {
@@ -77,6 +82,7 @@ namespace ClassicUO.Game.Gumps
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 Font = 1
             };
+
             CanMove = true;
         }
 
@@ -95,36 +101,38 @@ namespace ClassicUO.Game.Gumps
 
         private void InternalBuild(string text, int hue)
         {
-            if (_gameText.IsHTML)
+            if (!string.IsNullOrEmpty(text))
             {
-                uint htmlColor = 0xFFFFFFFF;
-                ushort color = 0;
+                if (_gameText.IsHTML)
+                {
+                    uint htmlColor = 0xFFFFFFFF;
+                    ushort color = 0;
 
-                if (hue > 0)
-                {
-                    if (hue == 0x00FFFFFF)
-                        htmlColor = 0xFFFFFFFE;
+                    if (hue > 0)
+                    {
+                        if (hue == 0x00FFFFFF)
+                            htmlColor = 0xFFFFFFFE;
+                        else
+                            htmlColor = (Hues.Color16To32((ushort) hue) << 8) | 0xFF;
+                    }
+                    else if (!HasBackground)
+                    {
+                        color = 0xFFFF;
+                        if (!HasScrollbar)
+                            htmlColor = 0x010101FF;
+                    }
                     else
-                        htmlColor = (Hues.Color16To32((ushort) hue) << 8) | 0xFF;
-                }
-                else if (!HasBackground)
-                {
-                    color = 0xFFFF;
-                    if (!HasScrollbar)
                         htmlColor = 0x010101FF;
+
+                    _gameText.HTMLColor = htmlColor;
+                    _gameText.Hue = color;
                 }
                 else
-                    htmlColor = 0x010101FF;
+                    _gameText.Hue = (ushort) hue;
 
-                _gameText.HTMLColor = htmlColor;
-                _gameText.Hue = color;
+                _gameText.ColorBackground = !HasBackground;
+                _gameText.Text = text;
             }
-            else
-                _gameText.Hue = (ushort) hue;
-
-            _gameText.ColorBackground = !HasBackground;
-            _gameText.MaxWidth = Width - (HasScrollbar ? 15 : 0) - (HasBackground ? 8 : 0);
-            _gameText.Text = text;
 
             if (HasBackground)
             {
@@ -152,23 +160,27 @@ namespace ClassicUO.Game.Gumps
                 _scrollBar.MinValue = 0;
                 _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
                 ScrollY = _scrollBar.Value;
-
-                MouseWheel += (sender, e) =>
-                {
-                    switch (e.Direction)
-                    {
-                        case MouseEvent.WheelScrollUp:
-                            _scrollBar.Value--;
-                            break;
-                        case MouseEvent.WheelScrollDown:
-                            _scrollBar.Value++;
-                            break;
-                    }
-                };
             }
 
             if (Width != _gameText.Width)
                 Width = _gameText.Width;
+        }
+
+
+        protected override void OnMouseWheel(MouseEvent delta)
+        {
+            if (!HasScrollbar)
+                return;
+
+            switch (delta)
+            {
+                case MouseEvent.WheelScrollUp:
+                    _scrollBar.Value -= _scrollBar.ScrollStep;
+                    break;
+                case MouseEvent.WheelScrollDown:
+                    _scrollBar.Value += _scrollBar.ScrollStep;
+                    break;
+            }
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -178,6 +190,7 @@ namespace ClassicUO.Game.Gumps
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
                 _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
+                //_scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
                 ScrollY = _scrollBar.Value;
             }
 
@@ -203,15 +216,21 @@ namespace ClassicUO.Game.Gumps
                 {
                     WebLinkRect link = _gameText.Links[i];
                     Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
-                    bool inbounds = rect.Contains(x, y);
+                    bool inbounds = rect.Contains(x, _scrollBar.Value + y);
                     if (inbounds && Fonts.GetWebLink(link.LinkID, out WebLink result))
                     {
-                        Service.Get<Log>().Message(LogTypes.Info, "LINK CLICKED: " + result.Link);
+                        Service.Get<Log>().Message(LogTypes.Info, "LINK CLICKED: " + result.Link);                      
                         BrowserHelper.OpenBrowser(result.Link);
                         break;
                     }
                 }
             }
+            base.OnMouseClick(x, y, button);
+        }
+
+        public override void OnButtonClick(int buttonID)
+        {
+            base.OnButtonClick(buttonID);
         }
     }
 }

@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Input;
@@ -50,11 +51,14 @@ namespace ClassicUO.Renderer
         private bool _needGraphicUpdate;
         private readonly InputManager _inputManager;
         private readonly UIManager _uiManager;
+        private Settings _settings;
 
         public CursorRenderer(UIManager ui)
         {
             _inputManager = Service.Get<InputManager>();
             _uiManager = ui;
+
+            _settings = Service.Get<Settings>();
 
             for (int i = 0; i < 2; i++)
             {
@@ -191,19 +195,16 @@ namespace ClassicUO.Renderer
 
             if (Texture == null || Texture.IsDisposed || _needGraphicUpdate)
             {
-                if (Texture != null && !Texture.IsDisposed)
-                    Texture.Dispose();
-
                 Texture = Art.GetStaticTexture(Graphic);
 
-                //_blackTexture = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
+                //_blackTexture = new Texture2D(Service.GetByLocalSerial<SpriteBatch3D>().GraphicsDevice, 1, 1);
                 //_blackTexture.SetData(new[] { Color.Black });
 
 
                 _needGraphicUpdate = false;
             }
             else
-                Texture.Ticks = World.Ticks;
+                Texture.Ticks = (long)totalMS;
         }
 
         public void Draw(SpriteBatchUI sb)
@@ -236,8 +237,8 @@ namespace ClassicUO.Renderer
             if (!_uiManager.IsMouseOverWorld)
                 return result;
 
-            int windowCenterX = 400;
-            int windowCenterY = 300;
+            int windowCenterX = _settings.GameWindowX + _settings.GameWindowWidth / 2;
+            int windowCenterY = _settings.GameWindowY + _settings.GameWindowHeight / 2;
 
             return _cursorData[war,
                 GetMouseDirection(windowCenterX, windowCenterY, ScreenPosition.X, ScreenPosition.Y, 1)];

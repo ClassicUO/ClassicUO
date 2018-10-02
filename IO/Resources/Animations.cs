@@ -525,7 +525,10 @@ namespace ClassicUO.IO.Resources
 
                     string part0 = line.Substring(0, first);
                     string part1 = line.Substring(first + 1, last - first - 1);
-                    string part2 = line.Substring(last + 1);
+
+                    int canc = line.IndexOf('#');
+
+                    string part2 = line.Substring(last + 1, canc >= 0 ? canc - last - 1 : line.Length - last - 1);
 
                     int comma = part1.IndexOf(',');
                     if (comma > -1)

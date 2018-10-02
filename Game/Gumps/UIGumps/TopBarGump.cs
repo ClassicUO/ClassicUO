@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new ResizePic(9200) {X = 0, Y = 0, Width = 610, Height = 27}, 1);
             AddChildren(
                 new Button(0, 5540, 5542, 5541)
-                    {ButtonAction = ButtonAction.SwitchPage, ButtonParameter = 2, X = 5, Y = 3}, 1);
+                    {ButtonAction = ButtonAction.SwitchPage, ToPage = 2, X = 5, Y = 3}, 1);
             AddChildren(
                 new Button((int) Buttons.Map, 2443, 2443, 0, "Map", 1, true, 0, 0x36)
                 {
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 new ResizePic(9200) {X = 0, Y = 0, Width = 30, Height = 27, IsVisible = false, IsEnabled = false}, 2);
             AddChildren(
                 new Button(0, 5537, 5539, 5538)
-                    {ButtonAction = ButtonAction.SwitchPage, ButtonParameter = 1, X = 5, Y = 3}, 2);
+                    {ButtonAction = ButtonAction.SwitchPage, ToPage = 1, X = 5, Y = 3}, 2);
 
             //layer
             ControlInfo.Layer = UILayer.Over;
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     MiniMapGump.Toggle(_scene);
                     break;
                 case Buttons.Paperdoll:
-                    if (UIManager.Get<PaperDollGump>(World.Player) == null)
+                    if (UIManager.GetByLocalSerial<PaperDollGump>(World.Player) == null)
                         GameActions.DoubleClick((Serial) (World.Player.Serial | int.MinValue));
                     else
                         UIManager.Remove<PaperDollGump>(World.Player);
@@ -123,14 +123,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Service.Get<Log>().Message(LogTypes.Warning, "Inventory button pushed! Not implemented yet!");
                     break;
                 case Buttons.Journal:
-                    if (UIManager.Get<JournalGump>() == null)
+                    if (UIManager.GetByLocalSerial<JournalGump>() == null)
                     {
                         UIManager.Add(new JournalGump());
-                        Service.Get<Log>().Message(LogTypes.Warning, "Journal opened!");
                     }
                     else
                         UIManager.Remove<JournalGump>();
-                        Service.Get<Log>().Message(LogTypes.Warning, "Journal closed!");
                     break;
                 case Buttons.Chat:
                     Service.Get<Log>().Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");

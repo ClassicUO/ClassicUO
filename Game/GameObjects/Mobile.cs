@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Views;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -49,6 +50,14 @@ namespace ClassicUO.Game.GameObjects
         GARGOYLE
     }
 
+    public enum CharacterSpeedType
+    {
+        Normal,
+        FastUnmount,
+        CantRun,
+        FastUnmountAndCantRun
+    }
+
     public partial class Mobile : Entity
     {
         protected const int MAX_STEP_COUNT = 5;
@@ -66,15 +75,15 @@ namespace ClassicUO.Game.GameObjects
         private ushort _manaMax;
         private Notoriety _notoriety;
         private RaceType _race;
-        private bool _renamable;
+        private bool _isRenamable;
         private ushort _stamina;
         private ushort _staminaMax;
 
         public Mobile(Serial serial) : base(serial) => _lastAnimationChangeTime = World.Ticks;
 
-        //public new MobileView View => (MobileView)base.View;
-
         public Deque<Step> Steps { get; } = new Deque<Step>();
+
+        public CharacterSpeedType SpeedMode { get; internal set; } = CharacterSpeedType.Normal;
 
         public RaceType Race
         {
@@ -193,27 +202,27 @@ namespace ClassicUO.Game.GameObjects
         //    }
         //}
 
-        public bool Renamable
+        public bool IsRenamable
         {
-            get => _renamable;
+            get => _isRenamable;
             set
             {
-                if (_renamable != value)
+                if (_isRenamable != value)
                 {
-                    _renamable = value;
+                    _isRenamable = value;
                     _delta |= Delta.Attributes;
                 }
             }
         }
 
-        public bool Paralyzed => ((byte) Flags & 0x01) != 0;
-        public bool YellowBar => ((byte) Flags & 0x08) != 0;
+        public bool IsParalyzed => ((byte) Flags & 0x01) != 0;
+        public bool IsYellowHits => ((byte) Flags & 0x08) != 0;
 
-        public bool Poisoned => FileManager.ClientVersion >= ClientVersions.CV_7000
+        public bool IsPoisoned => FileManager.ClientVersion >= ClientVersions.CV_7000
             ? _isSA_Poisoned
             : ((byte) Flags & 0x04) != 0;
 
-        public bool Hidden => ((byte) Flags & 0x80) != 0;
+        public bool IsHidden => ((byte) Flags & 0x80) != 0;
 
         public bool IsDead
         {
@@ -236,7 +245,8 @@ namespace ClassicUO.Game.GameObjects
                                MathHelper.InRange(Graphic, 0x025D, 0x0260) ||
                                MathHelper.InRange(Graphic, 0x029A, 0x029B) ||
                                MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || Graphic == 0x03DB || Graphic == 0x03DF ||
-                               Graphic == 0x03E2;
+                               Graphic == 0x03E2 || 
+                               Graphic == 0x02E8; // Vampiric
 
         public override bool Exists => World.Contains(Serial);
 
@@ -474,22 +484,26 @@ namespace ClassicUO.Game.GameObjects
 
                     if (AnimationFromServer) SetAnimation(0xFF);
 
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - 15;
+                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (IsMounted ? 1 : 15) ; // default 15 = less smooth
                     int delay = (int) World.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
 
                     if (Position.X != step.X || Position.Y != step.Y)
                     {
-                        float framesPerTile = maxDelay / CHARACTER_ANIMATION_DELAY;
-                        float frameOffset = delay / CHARACTER_ANIMATION_DELAY;
+                      
+                        if (Service.Get<Settings>().SmoothMovement)
+                        {
+                            float framesPerTile = maxDelay / CHARACTER_ANIMATION_DELAY;
+                            float frameOffset = delay / CHARACTER_ANIMATION_DELAY;
 
-                        float x = frameOffset;
-                        float y = frameOffset;
+                            float x = frameOffset;
+                            float y = frameOffset;
 
-                        GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
+                            GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
 
-                        Offset = new Vector3((sbyte) x, (sbyte) y,
-                            (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
+                            Offset = new Vector3((sbyte) x, (sbyte) y,
+                                (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
+                        }
 
                         turnOnly = false;
                     }

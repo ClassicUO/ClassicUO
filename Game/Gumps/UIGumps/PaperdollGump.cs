@@ -73,8 +73,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void BuildGump()
         {
-            //m_World = Service.Get<WorldModel>();
-            //m_Client = Service.Get<INetworkClient>();
+            //m_World = Service.GetByLocalSerial<WorldModel>();
+            //m_Client = Service.GetByLocalSerial<INetworkClient>();
 
             CanMove = true;
             X = 100;
@@ -143,7 +143,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
             // Name and title
             //AddChildren(new HtmlGump(35, 260, 180, 42, string.Format("<span color=#222 style='font-family:uni0;'>{0}", Title), 0, 0, 0, true));
 
-            AddChildren(new HtmlGump(39, 262, 185, 42, Title, 0, 0, 0x0386, false, 1, false));
+            //AddChildren(new HtmlGump(39, 262, 185, 42, Title, 0, 0, 0x0386, false, 1, false, maxWidth: 185));
+
+            Label titleLabel = new Label(Title, false, 0x0386, 185)
+            {
+                X = 39, Y = 262
+            };
+
+            AddChildren(titleLabel);
         }
 
 
@@ -205,11 +212,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 case Buttons.Help:
                     GameActions.RequestHelp();
-                    Service.Get<Log>().Message(LogTypes.Info,"Help request sent!");
                     break;
 
                 case Buttons.Options:
-                    if (UIManager.Get<OptionsGump>() == null)
+                    if (UIManager.GetByLocalSerial<OptionsGump>() == null)
                         UIManager.Add(new OptionsGump() { X = 80, Y = 80 });
                     else
                         UIManager.Remove<OptionsGump>();
@@ -222,11 +228,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 case Buttons.Quests:
                     GameActions.RequestQuestMenu();
-                    Service.Get<Log>().Message(LogTypes.Info, "Quest menu request sent!");
                     break;
 
                 case Buttons.Skills:
-                    //
+                    if (UIManager.GetByLocalSerial<SkillGumpAdvanced>() == null)
+                    {
+                        UIManager.Add(new SkillGumpAdvanced());
+                    }
+                    else
+                        UIManager.Remove<SkillGumpAdvanced>();
                     break;
 
                 case Buttons.Guild:
@@ -235,12 +245,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 case Buttons.PeaceWarToggle:
                     GameActions.ToggleWarMode();
-                    Service.Get<Log>().Message(LogTypes.Info,
-                        $"War mode set {(!World.Player.InWarMode ? "ON" : "OFF")} !");
                     break;
 
                 case Buttons.Status:
-                    //
+                    if (UIManager.GetByLocalSerial<StatusGump>() == null)
+                    {
+                        UIManager.Add(new StatusGump());
+                    }
+                    else
+                        UIManager.Remove<StatusGump>();
                     break;
             }
         }

@@ -21,6 +21,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -71,7 +72,7 @@ namespace ClassicUO.Game.GameObjects
         private readonly Ability[] _ability = new Ability[2] {Ability.None, Ability.None};
 
         private readonly Deque<Step> _requestedSteps = new Deque<Step>();
-        private readonly List<Skill> _sklls;
+        private readonly Skill[] _sklls;
         private ushort _damageMax;
         private ushort _damageMin;
         private ushort _dexterity;
@@ -94,12 +95,42 @@ namespace ClassicUO.Game.GameObjects
         private uint _tithingPoints;
         private ushort _weight;
         private ushort _weightMax;
+        private ushort _statscap;
+        private ushort _hitChanceInc;
+        private ushort _swingSpeedInc;
+        private ushort _damageChanceInc;
+        private ushort _lowerReagentCost;
+        private ushort _hitPointsRegen;
+        private ushort _staminaRegen;
+        private ushort _manaRegen;
+        private ushort _reflectPhysicalDamage;
+        private ushort _enhancePotions;
+        private ushort _defenseChanceInc;
+        private ushort _spellDamageInc;
+        private ushort _fasterCastRecovery;
+        private ushort _fasterCasting;
+        private ushort _lowerManaCost;
+        private ushort _strengthInc;
+        private ushort _dexterityInc;
+        private ushort _intelligenceInc;
+        private ushort _hitPointsInc;
+        private ushort _staminaInc;
+        private ushort _manaInc;
+        private ushort _maximumHitPointsInc;
+        private ushort _maximumStaminaInc;
+        private ushort _maximumManaInc;
 
 
         public PlayerMobile(Serial serial) : base(serial)
         {
-            _sklls = new List<Skill>();
-           
+            _sklls = new Skill[IO.Resources.Skills.SkillsCount];
+            for (int i = 0; i < _sklls.Length; i++)
+            {
+                var skill = IO.Resources.Skills.GetSkill(i);
+                _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasButton);
+            }
+
+            NetClient.Socket.Send((new PSkillsRequest(this)));
         } 
 
 
@@ -341,6 +372,403 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public ushort StatsCap
+        {
+            get => _statscap;
+            set
+            {
+                if (_statscap != value)
+                {
+                    _statscap = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort HitChanceInc
+        {
+            get => _hitChanceInc;
+            set
+            {
+                if (_hitChanceInc != value)
+                {
+                    _hitChanceInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort SwingSpeedInc
+        {
+            get => _swingSpeedInc;
+            set
+            {
+                if (_swingSpeedInc != value)
+                {
+                    _swingSpeedInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort DamageChanceInc
+        {
+            get => _damageChanceInc;
+            set
+            {
+                if (_damageChanceInc != value)
+                {
+                    _damageChanceInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort LowerReagentCost
+        {
+            get => _lowerReagentCost;
+            set
+            {
+                if (_lowerReagentCost != value)
+                {
+                    _lowerReagentCost = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort HitPointsRegen
+        {
+            get => _hitPointsRegen;
+            set
+            {
+                if (_hitPointsRegen != value)
+                {
+                    _hitPointsRegen = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort StaminaRegen
+        {
+            get => _staminaRegen;
+            set
+            {
+                if (_staminaRegen != value)
+                {
+                    _staminaRegen = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort ManaRegen
+        {
+            get => _manaRegen;
+            set
+            {
+                if (_manaRegen != value)
+                {
+                    _manaRegen = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        private ushort _maxPhysicRes;
+        public ushort MaxPhysicRes
+        {
+            get => _maxPhysicRes;
+            set
+            {
+                if (_maxPhysicRes != value)
+                {
+                    _maxPhysicRes = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        private ushort _maxFireRes;
+        public ushort MaxFireRes
+        {
+            get => _maxFireRes;
+            set
+            {
+                if (_maxFireRes != value)
+                {
+                    _maxFireRes = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        private ushort _maxColdcRes;
+        public ushort MaxColdRes
+        {
+            get => _maxColdcRes;
+            set
+            {
+                if (_maxColdcRes != value)
+                {
+                    _maxColdcRes = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        private ushort _maxPoisResUshort;
+        public ushort MaxPoisonRes
+        {
+            get => _maxPoisResUshort;
+            set
+            {
+                if (_maxPoisResUshort != value)
+                {
+                    _maxPoisResUshort = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        private ushort _maxEnergRes;
+        public ushort MaxEnergyRes
+        {
+            get => _maxEnergRes;
+            set
+            {
+                if (_maxEnergRes != value)
+                {
+                    _maxEnergRes = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        private ushort _maxDefChance;
+        public ushort MaxDefChance
+        {
+            get => _maxDefChance;
+            set
+            {
+                if (_maxDefChance != value)
+                {
+                    _maxDefChance = value;
+                    _delta |= Delta.Attributes;
+                }
+            }
+        }
+
+        //====================================================
+        public ushort ReflectPhysicalDamage
+        {
+            get => _reflectPhysicalDamage;
+            set
+            {
+                if (_reflectPhysicalDamage != value)
+                {
+                    _reflectPhysicalDamage = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort EnhancePotions
+        {
+            get => _enhancePotions;
+            set
+            {
+                if (_enhancePotions != value)
+                {
+                    _enhancePotions = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort DefenseChanceInc
+        {
+            get => _defenseChanceInc;
+            set
+            {
+                if (_defenseChanceInc != value)
+                {
+                    _defenseChanceInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort SpellDamageInc
+        {
+            get => _spellDamageInc;
+            set
+            {
+                if (_spellDamageInc != value)
+                {
+                    _spellDamageInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort FasterCastRecovery
+        {
+            get => _fasterCastRecovery;
+            set
+            {
+                if (_fasterCastRecovery != value)
+                {
+                    _fasterCastRecovery = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort FasterCasting
+        {
+            get => _fasterCasting;
+            set
+            {
+                if (_fasterCasting != value)
+                {
+                    _fasterCasting = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort LowerManaCost
+        {
+            get => _lowerManaCost;
+            set
+            {
+                if (_lowerManaCost != value)
+                {
+                    _lowerManaCost = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort StrengthInc
+        {
+            get => _strengthInc;
+            set
+            {
+                if (_strengthInc != value)
+                {
+                    _strengthInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort DexterityInc
+        {
+            get => _dexterityInc;
+            set
+            {
+                if (_dexterityInc != value)
+                {
+                    _dexterityInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort IntelligenceInc
+        {
+            get => _intelligenceInc;
+            set
+            {
+                if (_intelligenceInc != value)
+                {
+                    _intelligenceInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort HitPointsInc
+        {
+            get => _hitPointsInc;
+            set
+            {
+                if (_hitPointsInc != value)
+                {
+                    _hitPointsInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort StaminaInc
+        {
+            get => _staminaInc;
+            set
+            {
+                if (_staminaInc != value)
+                {
+                    _staminaInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort ManaInc
+        {
+            get => _manaInc;
+            set
+            {
+                if (_manaInc != value)
+                {
+                    _manaInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort MaximumHitPointsInc
+        {
+            get => _maximumHitPointsInc;
+            set
+            {
+                if (_maximumHitPointsInc != value)
+                {
+                    _maximumHitPointsInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort MaximumStaminaInc
+        {
+            get => _maximumStaminaInc;
+            set
+            {
+                if (_maximumStaminaInc != value)
+                {
+                    _maximumStaminaInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
+        public ushort MaximumManaInc
+        {
+            get => _maximumManaInc;
+            set
+            {
+                if (_maximumManaInc != value)
+                {
+                    _maximumManaInc = value;
+                    _delta |= Delta.Stats;
+                }
+            }
+        }
+
         public Ability PrimaryAbility
         {
             get => _ability[0];
@@ -357,13 +785,13 @@ namespace ClassicUO.Game.GameObjects
         //protected override bool NoIterateAnimIndex() => false;
         protected override bool IsWalking => LastStepTime > World.Ticks - PLAYER_WALKING_DELAY;
         public byte SequenceNumber { get; set; }
-
+        
 
         public event EventHandler StatsChanged, SkillsChanged;
 
         public void UpdateSkill(int id, ushort realValue, ushort baseValue, SkillLock skillLock, ushort cap)
         {
-            if (id < _sklls.Count)
+            if (id < _sklls.Length)
             {
                 Skill skill = _sklls[id];
                 skill.ValueFixed = realValue;
@@ -376,7 +804,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void UpdateSkillLock(int id, SkillLock skillLock)
         {
-            if (id < _sklls.Count)
+            if (id < _sklls.Length)
             {
                 Skill skill = _sklls[id];
                 skill.Lock = skillLock;
@@ -1058,6 +1486,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (_requestedSteps.Count >= MAX_STEP_COUNT)
             {
+                Service.Get<Log>().Message(LogTypes.Warning, "Resync requested.");
                 NetClient.Socket.Send(new PResend());
                 return false;
             }
@@ -1168,7 +1597,13 @@ namespace ClassicUO.Game.GameObjects
             if (_requestedSteps.Count <= 0){ NetClient.Socket.Send(new PResend()); return;}
 
             Step step = _requestedSteps.Front();
-            if (step.Seq != seq) { NetClient.Socket.Send(new PResend()); return;}
+            if (step.Seq != seq)
+            {
+                Service.Get<Log>().Message(LogTypes.Warning, "Resync requested.");
+
+                NetClient.Socket.Send(new PResend());
+                return;
+            }
 
             _requestedSteps.RemoveFromFront();
 
@@ -1194,60 +1629,62 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_requestedSteps.Count <= 0)
             {
+                Service.Get<Log>().Message(LogTypes.Warning, "Resync requested.");
+
                 NetClient.Socket.Send(new PResend());
                 return;
             }
 
-            Step step = _requestedSteps.Front();
+            //Step step = _requestedSteps.Front();
 
-            if (step.Seq != seq)
-            {
-                return;
-            }
-
-
-            _requestedSteps.RemoveFromFront();
-
-            if (step.Rej == 0)
-            {
-                ResetSteps();
-                ForcePosition(position.X, position.Y, position.Z, dir);
-
-            }
-
-            ProcessDelta();
-
-            //foreach (Step step in _requestedSteps)
+            //if (step.Seq != seq)
             //{
-            //    if (step.Seq == seq)
-            //    {
-            //        ResetSteps();
-            //        Position = new Position(position.X, position.Y, position.Z);
-            //        Direction = dir;
-
-            //        ProcessDelta();
-
-            //        break;
-            //    }
+            //    return;
             //}
+
+
+            //_requestedSteps.RemoveFromFront();
+
+            //if (step.Rej == 0)
+            //{
+            //    ResetSteps();
+            //    ForcePosition(position.X, position.Y, position.Z, dir);
+
+            //}
+
+            //ProcessDelta();
+
+            foreach (Step step in _requestedSteps)
+            {
+                if (step.Seq == seq)
+                {
+                    ResetSteps();
+                    Position = new Position(position.X, position.Y, position.Z);
+                    Direction = dir;
+
+                    ProcessDelta();
+
+                    break;
+                }
+            }
         }
 
         public void ResetSteps()
         {
-            for (int i = 0; i < _requestedSteps.Count; i++)
-            {
-               var s = _requestedSteps[i];
-               s.Rej = 1;
-               _requestedSteps[i] = s;
-            }
+            //for (int i = 0; i < _requestedSteps.Count; i++)
+            //{
+            //   var s = _requestedSteps[i];
+            //   s.Rej = 1;
+            //   _requestedSteps[i] = s;
+            //}
 
-            //_requestedSteps.Clear();
-            //Steps.Clear();
+            _requestedSteps.Clear();
+            Steps.Clear();
 
             SequenceNumber = 0;
             _lastStepRequestedTime = 0;
 
-            //Offset = Vector3.Zero;
+            Offset = Vector3.Zero;
         }
 
         public void ResetRequestedSteps()

@@ -19,6 +19,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using System.Collections.Generic;
 using ClassicUO.Game;
 using ClassicUO.Interfaces;
@@ -27,6 +29,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
 {
+    [Flags]
     public enum FontStyle
     {
         None = 0x00,
@@ -81,7 +84,7 @@ namespace ClassicUO.Renderer
                         IsPartialHue = false;
                         if (IsHTML)
                             Fonts.SetUseHTML(false);
-                        Links = null;
+                        Links.Clear();
                         Texture = null;
                     }
                     else
@@ -119,7 +122,7 @@ namespace ClassicUO.Renderer
         public bool AllowedToDraw { get; set; } = true;
 
         public bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
-            => Draw(spriteBatch, new Rectangle((int) position.X, (int) position.Y, Width, Height), 0, 0);
+            => Draw(spriteBatch, new Rectangle((int) position.X, (int) position.Y, Width, Height), 0, 0, hue);
 
         public bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
         {

@@ -94,7 +94,7 @@ namespace ClassicUO.IO.Resources
         }
 
         //public static bool Contains(ushort g, int x, int y, int extra = 0)
-        //     => _picker.Get(g, x, y, extra);
+        //     => _picker.GetByLocalSerial(g, x, y, extra);
 
         //public static void Clear(ushort g) => _picker.Remove(g);
 

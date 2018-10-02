@@ -26,25 +26,20 @@ namespace ClassicUO.Game.Gumps
 {
     public class GumpPicTiled : GumpControl
     {
-        private readonly Graphic _graphic;
-
-
         public GumpPicTiled(Graphic graphic)
         {
-            _graphic = graphic;
             CanMove = true;
             Texture = IO.Resources.Gumps.GetGumpTexture(graphic);
+
+            //AcceptMouseInput = false;
         }
 
-        public GumpPicTiled(int x, int y, int width, int heigth, Graphic graphic)
+        public GumpPicTiled(int x, int y, int width, int heigth, Graphic graphic) : this(graphic)
         {
             X = x;
             Y = y;
             Width = width;
             Height = heigth;
-            _graphic = graphic;
-            CanMove = true;
-            Texture = IO.Resources.Gumps.GetGumpTexture(graphic);
         }
 
         public GumpPicTiled(string[] parts) : this(Graphic.Parse(parts[5]))
@@ -65,7 +60,7 @@ namespace ClassicUO.Game.Gumps
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             spriteBatch.Draw2DTiled(Texture, new Rectangle((int) position.X, (int) position.Y, Width, Height),
-                RenderExtentions.GetHueVector(0, false, IsTransparent, false));
+                RenderExtentions.GetHueVector(0, false, IsTransparent ? 0.5f : 0, false));
             return base.Draw(spriteBatch, position, hue);
         }
     }

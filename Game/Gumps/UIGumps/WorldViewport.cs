@@ -40,6 +40,8 @@ namespace ClassicUO.Game.Gumps.Controls
             Height = height;
             _scene = scene;
             AcceptMouseInput = true;
+
+            Service.Register(this);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)

@@ -25,12 +25,12 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Interfaces
 {
-    public interface IDrawable<T> where T : class
+    public interface IDrawable
     {
         bool AllowedToDraw { get; set; }
         SpriteTexture Texture { get; set; }
 
-        bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList<T> objectList);
+        bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList);
     }
 
     public interface IDrawableUI

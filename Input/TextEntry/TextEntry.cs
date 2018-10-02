@@ -29,7 +29,7 @@ namespace ClassicUO.Input.TextEntry
     {
         private string _plainText;
 
-        public TextEntry(byte font, int maxcharlength = -1, int width = 0, bool unicode = true,
+        public TextEntry(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool unicode = true,
             FontStyle style = FontStyle.None, ushort hue = 0xFFFF)
         {
             RenderText = new RenderedText
@@ -50,11 +50,13 @@ namespace ClassicUO.Input.TextEntry
             };
 
             MaxCharCount = maxcharlength;
-            Width = width > 0 ? width : 0;
+            Width = width;
+            MaxWidth = maxWidth;
         }
 
         public int MaxCharCount { get; }
         public int Width { get; }
+        public int MaxWidth { get; }
         public bool IsPassword { get; set; }
         public bool NumericOnly { get; set; }
 
@@ -121,14 +123,14 @@ namespace ClassicUO.Input.TextEntry
 
         public void SetText(string text)
         {
-            if (Width > 0)
+            if (RenderText.MaxWidth > 0)
             {
                 int width = RenderText.IsUnicode
                     ? Fonts.GetWidthUnicode(RenderText.Font, text)
                     : Fonts.GetWidthASCII(RenderText.Font, text);
                 int len = text.Length;
 
-                while (Width < width && len > 0)
+                while (RenderText.MaxWidth < width && len > 0)
                 {
                     if (CaretIndex > 0)
                     {
@@ -150,6 +152,8 @@ namespace ClassicUO.Input.TextEntry
             }
 
             CaretIndex = text.Length;
+
+            
             Text = text;
         }
 
@@ -256,9 +260,9 @@ namespace ClassicUO.Input.TextEntry
 
         public int GetLinesCount() => RenderText.IsUnicode
             ? Fonts.GetLinesCountUnicode(RenderText.Font, Text, RenderText.Align, (ushort) RenderText.FontStyle,
-                RenderText.MaxWidth)
+                Width)
             : Fonts.GetLinesCountASCII(RenderText.Font, Text, RenderText.Align, (ushort) RenderText.FontStyle,
-                RenderText.MaxWidth);
+                Width);
 
 
         public void RemoveLineAt(int index)

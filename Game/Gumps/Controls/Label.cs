@@ -29,8 +29,11 @@ namespace ClassicUO.Game.Gumps
     public class Label : GumpControl
     {
         private readonly RenderedText _gText;
+        private float _timeToLive;
+        private float _timeCreated;
+        private float _alpha;
 
-        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT)
+        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, float timeToLive = 0.0f)
         {
             _gText = new RenderedText
             {
@@ -42,18 +45,79 @@ namespace ClassicUO.Game.Gumps
                 MaxWidth = maxwidth,
                 Text = text
             };
+            AcceptMouseInput = false;
+
+            Width = _gText.Width;
+            Height = _gText.Height;
+
+            _timeToLive = timeToLive;
         }
 
-        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, Hue.Parse(parts[3]), 0, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT)
+        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, TransformHue(Hue.Parse(parts[3])), 0, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
         }
 
 
+        private static Hue TransformHue(Hue hue)
+        {
+            if (hue > 1)
+                hue -= 2;
+            if (hue < 2)
+                hue = 1;
+            return hue;
+        }
+
+        public byte Font
+        {
+            get => _gText.Font;
+            set => _gText.Font = value;
+        }
+
+        public string Text
+        {
+            get => _gText.Text;
+            set => _gText.Text = value;
+        }
+
+        public bool FadeOut { get; set; }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            if (IsDisposed)
+                return;
+
+            if (FadeOut)
+            {
+                float time = (float) totalMS - _timeCreated;
+                if (time > _timeToLive)
+                    Dispose();
+                else if (time > _timeToLive - 2000)
+                {
+                    _alpha = (time - (_timeToLive - 2000)) / 2000;
+                }
+            }
+
+            base.Update(totalMS, frameMS);
+
+        }
+
+
+        protected override void OnInitialize()
+        {
+            if (FadeOut)
+            {
+                _timeCreated = World.Ticks;
+            }
+        }
+
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            _gText.Draw(spriteBatch, position);
+            if (FadeOut)
+                hue = RenderExtentions.GetHueVector(hue.HasValue ? (int) hue.Value.X : 0, false, _alpha, false);
+        
+            _gText.Draw(spriteBatch, position, hue);
             return base.Draw(spriteBatch, position, hue);
         }
     }

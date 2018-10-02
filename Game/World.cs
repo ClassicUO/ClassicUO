@@ -372,7 +372,7 @@ namespace ClassicUO.Game
     //        if (!serial.IsValid)
     //            return default;
 
-    //        var obj = Get(serial);
+    //        var obj = GetByLocalSerial(serial);
     //        if (obj == null)
     //        {
     //            if (createPlayer)
@@ -397,7 +397,7 @@ namespace ClassicUO.Game
     //    }
 
 
-    //    public static Entity Get(Serial serial)
+    //    public static Entity GetByLocalSerial(Serial serial)
     //    {
     //        if (_objects.TryGetValue(serial, out var entity) && entity.IsDisposed)
     //        {
@@ -407,14 +407,14 @@ namespace ClassicUO.Game
     //        return entity;
     //    }
 
-    //    public static T Get<T>(Serial serial) where T : Entity
-    //        => (T)Get(serial);
+    //    public static T GetByLocalSerial<T>(Serial serial) where T : Entity
+    //        => (T)GetByLocalSerial(serial);
 
 
-    //    public static bool Exists(Serial serial) => Get(serial) != null;
+    //    public static bool Exists(Serial serial) => GetByLocalSerial(serial) != null;
 
     //    public static void Remove(Serial serial)
-    //        => Get(serial)?.Dispose();
+    //        => GetByLocalSerial(serial)?.Dispose();
 
 
     //    public static void Update(double totalMS, double frameMS)
@@ -526,16 +526,16 @@ namespace ClassicUO.Game
     //    //    return false;
     //    //}
 
-    //    //public static Entity Get(Serial serial)
+    //    //public static Entity GetByLocalSerial(Serial serial)
     //    //{
     //    //    if (serial.IsItem)
     //    //    {
-    //    //        return Items.Get(serial);
+    //    //        return Items.GetByLocalSerial(serial);
     //    //    }
 
     //    //    if (serial.IsMobile)
     //    //    {
-    //    //        return Mobiles.Get(serial);
+    //    //        return Mobiles.GetByLocalSerial(serial);
     //    //    }
 
     //    //    return null;
@@ -543,17 +543,17 @@ namespace ClassicUO.Game
 
     //    //public static Item GetOrCreateItem(Serial serial)
     //    //{
-    //    //    return Items.Get(serial) ?? new Item(serial);
+    //    //    return Items.GetByLocalSerial(serial) ?? new Item(serial);
     //    //}
 
     //    //public static Mobile GetOrCreateMobile(Serial serial)
     //    //{
-    //    //    return Mobiles.Get(serial) ?? new Mobile(serial);
+    //    //    return Mobiles.GetByLocalSerial(serial) ?? new Mobile(serial);
     //    //}
 
     //    //public static bool RemoveItem(Serial serial)
     //    //{
-    //    //    Item item = Items.Get(serial);
+    //    //    Item item = Items.GetByLocalSerial(serial);
     //    //    if (item == null)
     //    //    {
     //    //        ToAdd.RemoveWhere(i => i == serial);
@@ -562,7 +562,7 @@ namespace ClassicUO.Game
 
     //    //    if (item.Layer != Layer.Invalid && item.RootContainer.IsMobile)
     //    //    {
-    //    //        var mobile = Mobiles.Get(item.RootContainer);
+    //    //        var mobile = Mobiles.GetByLocalSerial(item.RootContainer);
     //    //        if (mobile != null)
     //    //        {
     //    //            mobile.Equipment[(int)item.Layer] = null;
@@ -575,7 +575,7 @@ namespace ClassicUO.Game
 
     //    //public static bool RemoveMobile(Serial serial)
     //    //{
-    //    //    Mobile mobile = Mobiles.Get(serial);
+    //    //    Mobile mobile = Mobiles.GetByLocalSerial(serial);
     //    //    if (mobile == null)
     //    //        return false;
 

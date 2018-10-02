@@ -212,6 +212,9 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
 
+        public bool IsSpellBook => Graphic == 0xE3B || Graphic == 0xE3A || Graphic == 0x2252 || Graphic == 0x2253 ||
+                                   Graphic == 0x238C || Graphic == 0x23A0 || Graphic == 0x2D50;
+
         public override bool Exists => World.Contains(Serial);
 
         public bool OnGround => !Container.IsValid;
@@ -238,6 +241,8 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
             if (IsCorpse)
                 ProcessAnimation();
             else if (Effect != null)

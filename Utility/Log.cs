@@ -48,21 +48,25 @@ namespace ClassicUO.Utility
             {LogTypes.Error, ConsoleColor.Red}
         };
 
+        private static readonly object _sync = new object();
 
         public void Message(LogTypes type, string msg, bool newline = true)
         {
-            if (type != LogTypes.None)
-                Console.Write(DateTime.Now.ToString("HH:mm:ss") + " | ");
+            lock (_sync)
+            {
+                if (type != LogTypes.None)
+                    Console.Write(DateTime.Now.ToString("HH:mm:ss") + " | ");
 
-            ConsoleColor prev = Console.ForegroundColor;
-            Console.ForegroundColor = _logMsgColor[type];
-            Console.Write(_logMsgFormat[type]);
-            Console.ForegroundColor = prev;
+                ConsoleColor prev = Console.ForegroundColor;
+                Console.ForegroundColor = _logMsgColor[type];
+                Console.Write(_logMsgFormat[type]);
+                Console.ForegroundColor = prev;
 
-            if (newline)
-                Console.WriteLine(type == LogTypes.None ? string.Empty + msg : " |  " + msg);
-            else
-                Console.Write(type == LogTypes.None ? string.Empty + msg : " |  " + msg);
+                if (newline)
+                    Console.WriteLine(type == LogTypes.None ? string.Empty + msg : " |  " + msg);
+                else
+                    Console.Write(type == LogTypes.None ? string.Empty + msg : " |  " + msg);
+            }
         }
     }
 }

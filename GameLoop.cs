@@ -132,10 +132,15 @@ namespace ClassicUO
             TEST(settings);
             // #####  END TEST  #####
 
-
             base.Initialize();
         }
 
+        protected override void UnloadContent()
+        {
+            ConfigurationResolver.Save(Service.Get<Settings>(), "settings.json");
+
+            base.UnloadContent();
+        }
 
         private void TEST(Settings settings)
         {
@@ -146,7 +151,8 @@ namespace ClassicUO
             NetClient.Connected += (sender, e) =>
             {
                 _log.Message(LogTypes.Info, "Connected!");
-                NetClient.Socket.Send(new PSeed(clientVersionBuffer));
+
+                NetClient.Socket.Send(new PSeed(NetClient.Socket.ClientAddress, clientVersionBuffer));
                 NetClient.Socket.Send(new PFirstLogin(settings.Username, settings.Password.ToString()));
             };
 
@@ -171,10 +177,10 @@ namespace ClassicUO
                             NetClient.Socket.ClientAddress));
                         break;
                     case 0xBD:
-                        NetClient.Socket.Send(new PClientVersion(clientVersionBuffer));
+                        NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
                         break;
                     case 0xBE:
-                        NetClient.Socket.Send(new PAssistVersion(clientVersionBuffer, e.ReadUInt()));
+                        NetClient.Socket.Send(new PAssistVersion(settings.ClientVersion, e.ReadUInt()));
                         break;
                     case 0x55:
                         NetClient.Socket.Send(new PClientViewRange(24));
@@ -240,7 +246,9 @@ namespace ClassicUO
             _sb.Append("Pos: ");
             _sb.AppendLine(World.Player == null ? "" : World.Player.Position.ToString());
             _sb.Append("Selected: ");
-            _sb.AppendLine(GameScene.SelectedObject == null ? "" : GameScene.SelectedObject.ToString());
+
+            if (_sceneManager.CurrentScene is GameScene gameScene)
+                _sb.AppendLine(gameScene.SelectedObject == null ? "" : gameScene.SelectedObject.ToString());
 
             _infoText.Text = _sb.ToString();
             _infoText.Draw(_sbUI, new Vector3( /*Window.ClientBounds.Width - 150*/ 20, 20, 0));

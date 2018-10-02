@@ -103,7 +103,7 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
-        public string ReadASCII(int length)
+        public string ReadASCII(int length, bool exitIfNull = false)
         {
             EnsureSize(length);
             StringBuilder sb = new StringBuilder(length);
@@ -112,7 +112,10 @@ namespace ClassicUO.Network
             for (int i = 0; i < length; i++)
             {
                 c = (char) ReadByte();
-                if (c != '\0') sb.Append(c);
+                if (c != '\0')
+                    sb.Append(c);
+                else if (exitIfNull)
+                    break;
             }
 
             return sb.ToString();
@@ -141,6 +144,17 @@ namespace ClassicUO.Network
             }
 
             return sb.ToString();
+        }
+
+        public byte[] ReadArray(int count)
+        {
+            EnsureSize(count);
+
+            byte[] array = new byte[count];            
+            Buffer.BlockCopy(_data, Position, array, 0, count);
+
+            Position += count;
+            return array;
         }
 
         public string ReadUnicodeReversed(int length)

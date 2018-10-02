@@ -35,6 +35,8 @@ namespace ClassicUO.Game.Gumps
         int Width { get; set; }
         int Height { get; set; }
 
+        int ScrollStep { get; set; }
+
         bool Contains(int x, int y);
 
         bool IsVisible { get; set; } // from AControl
