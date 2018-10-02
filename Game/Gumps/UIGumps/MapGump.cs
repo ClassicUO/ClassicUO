@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 
 
             //using (FileStream stream = File.OpenRead(@"D:\Progetti\UO\map\Maps\2Dmap0.png"))
-            //    _mapTexture = Texture2D.FromStream(Service.Get<SpriteBatch3D>().GraphicsDevice, stream);
+            //    _mapTexture = Texture2D.FromStream(Service.GetByLocalSerial<SpriteBatch3D>().GraphicsDevice, stream);
         }
 
         private unsafe void Load()

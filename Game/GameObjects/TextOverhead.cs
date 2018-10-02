@@ -28,22 +28,18 @@ namespace ClassicUO.Game.GameObjects
     {
         private const float TIME_FADEOUT = 2000.0f;
 
-        private readonly int _maxWidth;
         private readonly ushort _hue;
-        private readonly byte _font;
-        private readonly bool _isUnicode;
-        private readonly FontStyle _style;
 
         public TextOverhead(in GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF,
             byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None) : base(parent.Map)
         {
             Text = text;
             Parent = parent;
-            _maxWidth = maxwidth;
-            _hue = hue;
-            _font = font;
-            _isUnicode = isunicode;
-            _style = style;
+            MaxWidth = maxwidth;
+            Hue = hue;
+            Font = font;
+            IsUnicode = isunicode;
+            Style = style;
 
 
             TimeToLive = 2500 + text.Substring(text.IndexOf('>') + 1).Length * 100;
@@ -60,7 +56,13 @@ namespace ClassicUO.Game.GameObjects
         public float TimeCreated { get; }
         public float Alpha { get; private set; }
 
-        protected override View CreateView() => new TextOverheadView(this, _maxWidth, _hue, _font, _isUnicode, _style);
+        public bool IsUnicode { get; }
+        public byte Font { get; }
+        public int MaxWidth { get; }
+        public FontStyle Style { get; }
+
+
+        protected override View CreateView() => new TextOverheadView(this, MaxWidth, Hue, Font, IsUnicode, Style);
 
         public override void Update(double totalMS, double frameMS)
         {

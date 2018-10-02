@@ -835,7 +835,7 @@ namespace ClassicUO.Network
             Graphic graphic = p.ReadUShort();
 
             UIManager ui = Service.Get<UIManager>();
-            if (ui.Get(item.Serial) != null)
+            if (ui.GetByLocalSerial(item.Serial) != null)
                 return;
 
             if (graphic == 0x30) // vendor
@@ -1257,7 +1257,7 @@ namespace ClassicUO.Network
             byte flags = p.ReadByte();
 
             UIManager ui = Service.Get<UIManager>();
-            if (ui.Get<PaperDollGump>(mobile) == null)
+            if (ui.GetByLocalSerial<PaperDollGump>(mobile) == null)
                 ui.Add(new PaperDollGump(mobile, text) {X = 100, Y = 100});
         }
 
@@ -1519,7 +1519,7 @@ namespace ClassicUO.Network
         {
             //uint version = p.ReadUInt();
 
-            //string[] parts = Service.Get<Settings>().ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            //string[] parts = Service.GetByLocalSerial<Settings>().ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
             //byte[] clientVersionBuffer =
             //    {byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])};
 
@@ -1541,11 +1541,7 @@ namespace ClassicUO.Network
                     uint key = p.ReadUInt();
                     break;
                 case 4: // close generic gump
-                    Serial serial = p.ReadUInt();
-                    int button = (int) p.ReadUInt();
-                    Gump gump = Service.Get<UIManager>().Get(serial);
-                    gump?.OnButtonClick(button);
-
+                    Service.Get<UIManager>().GetByServerSerial(p.ReadUInt())?.OnButtonClick((int)p.ReadUInt());
                     break;
                 case 6: //party
                     break;
@@ -1553,18 +1549,27 @@ namespace ClassicUO.Network
                     World.MapIndex = p.ReadByte();
                     break;
                 case 0x0C: // close statusbar gump
-                    serial = p.ReadUInt();
+                    Serial serial = p.ReadUInt();
                     break;
                 case 0x10: // display equip info
                     Item item = World.Items.Get(p.ReadUInt());
                     if (item == null) return;
 
                     uint cliloc = p.ReadUInt();
+                    string str = string.Empty;
+
                     if (cliloc > 0)
                     {
+                        str = Cliloc.Translate(Cliloc.GetString((int) cliloc), capitalize: true);
+
+                        if (!string.IsNullOrEmpty(str))
+                            item.Name = str;
+
+                        item.AddGameText(MessageType.Label, str, 3, 0x3B2, true);
                     }
 
-                    string str = string.Empty;
+                    str = string.Empty;
+
                     ushort crafterNameLen = 0;
                     uint next = p.ReadUInt();
                     if (next == 0xFFFFFFFD)
@@ -1577,10 +1582,9 @@ namespace ClassicUO.Network
 
                     if (next == 0xFFFFFFFC) str += "[Unidentified";
 
-                    int end = p.Length - 4;
                     byte count = 0;
 
-                    while (p.Position < end)
+                    while (p.Position < p.Length - 4)
                     {
                         if (count != 0 || next == 0xFFFFFFFD || next == 0xFFFFFFFC) next = p.ReadUInt();
 
@@ -2489,7 +2493,7 @@ namespace ClassicUO.Network
 
 //        private static void Damage(Packet p)
 //        {
-//            Mobile mobile = World.Get<Mobile>(p.ReadUInt());
+//            Mobile mobile = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //            if (mobile == null)
 //            {
 //                return;
@@ -2504,7 +2508,7 @@ namespace ClassicUO.Network
 
 //        private static void CharacterStatus(Packet p)
 //        {
-//            Mobile mobile = World.Get<Mobile>(p.ReadUInt());
+//            Mobile mobile = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //            if (mobile == null)
 //            {
 //                return;
@@ -2599,7 +2603,7 @@ namespace ClassicUO.Network
 //                return;
 //            }
 
-//            Mobile mobile = World.Get<Mobile>(p.ReadUInt());
+//            Mobile mobile = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //            if (mobile == null)
 //            {
 //                return;
@@ -2820,7 +2824,7 @@ namespace ClassicUO.Network
 //        private static void Talk(Packet p)
 //        {
 //            Serial serial = p.ReadUInt();
-//            Entity entity = World.Get(serial);
+//            Entity entity = World.GetByLocalSerial(serial);
 //            ushort graphic = p.ReadUShort();
 //            MessageType type = (MessageType)p.ReadByte();
 //            Hue hue = p.ReadUShort();
@@ -2975,7 +2979,7 @@ namespace ClassicUO.Network
 //                graphic = 0x0EF2;
 //            }
 
-//            Entity entity = World.Get(source);
+//            Entity entity = World.GetByLocalSerial(source);
 //            if (entity == null)
 //            {
 //                source = 0;
@@ -2987,7 +2991,7 @@ namespace ClassicUO.Network
 //                sourceZ = entity.Position.Z;
 //            }
 
-//            Entity destEntity = World.Get(dest);
+//            Entity destEntity = World.GetByLocalSerial(dest);
 //            if (destEntity == null)
 //            {
 //                dest = 0;
@@ -3040,7 +3044,7 @@ namespace ClassicUO.Network
 
 //        private static void MobileAttributes(Packet p)
 //        {
-//            Mobile mobile = World.Get<Mobile>(p.ReadUInt());
+//            Mobile mobile = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //            if (mobile == null)
 //            {
 //                return;
@@ -3067,7 +3071,7 @@ namespace ClassicUO.Network
 //            item.Hue = p.ReadUShort();
 //            item.Amount = 1;
 
-//            Mobile mobile = World.Get<Mobile>(item.Container);
+//            Mobile mobile = World.GetByLocalSerial<Mobile>(item.Container);
 //            //if (mobile != null)
 //            {
 //                mobile.Equipment[(int)item.Layer] = item;
@@ -3207,7 +3211,7 @@ namespace ClassicUO.Network
 
 //        private static void CharacterAnimation(Packet p)
 //        {
-//            Mobile mobile = World.Get<Mobile>(p.ReadUInt());
+//            Mobile mobile = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //            if (mobile == null)
 //            {
 //                return;
@@ -3250,13 +3254,13 @@ namespace ClassicUO.Network
 
 //        private static void BuyList(Packet p)
 //        {
-//            Item container = World.Get<Item>(p.ReadUInt());
+//            Item container = World.GetByLocalSerial<Item>(p.ReadUInt());
 //            if (container == null)
 //            {
 //                return;
 //            }
 
-//            Mobile vendor = World.Get<Mobile>(container.Container);
+//            Mobile vendor = World.GetByLocalSerial<Mobile>(container.Container);
 //            if (vendor == null)
 //            {
 //                return;
@@ -3300,7 +3304,7 @@ namespace ClassicUO.Network
 //                return;
 //            }
 
-//            if (World.Get(mobile) == null)
+//            if (World.GetByLocalSerial(mobile) == null)
 //            {
 //                mobile.Position = new Position((ushort)x, (ushort)y, z);
 //                mobile.Direction = direction;
@@ -3389,7 +3393,7 @@ namespace ClassicUO.Network
 //                //World.GetOrCreate<Item>(item);
 //            }
 
-//            if (World.Get(mobile) == null)
+//            if (World.GetByLocalSerial(mobile) == null)
 //            {
 //                mobile.Position = new Position(x, y, z);
 //                mobile.Direction = direction;
@@ -3448,7 +3452,7 @@ namespace ClassicUO.Network
 
 //        private static void OpenPaperdoll(Packet p)
 //        {
-//            Mobile mobile = World.Get<Mobile>(p.ReadUInt());
+//            Mobile mobile = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //            if (mobile == null)
 //            {
 //                return;
@@ -3461,12 +3465,12 @@ namespace ClassicUO.Network
 
 //        private static void CorpseEquipment(Packet p)
 //        {
-//            Entity corpse = World.Get(p.ReadUInt());
+//            Entity corpse = World.GetByLocalSerial(p.ReadUInt());
 //            Layer layer = (Layer)p.ReadByte();
 
 //            while (layer != Layer.Invalid && p.Position < p.Length)
 //            {
-//                Item item = World.Get<Item>(p.ReadUInt());
+//                Item item = World.GetByLocalSerial<Item>(p.ReadUInt());
 //                if (item != null && item.Container == corpse)
 //                {
 //                    // put equip
@@ -3497,7 +3501,7 @@ namespace ClassicUO.Network
 
 //        private static void OpenBook(Packet p)
 //        {
-//            Item book = World.Get<Item>(p.ReadUInt());
+//            Item book = World.GetByLocalSerial<Item>(p.ReadUInt());
 //            byte flags = p.ReadByte();
 //            p.Skip(1);
 //            ushort pages = p.ReadUShort();
@@ -3507,7 +3511,7 @@ namespace ClassicUO.Network
 
 //        private static void DyeData(Packet p)
 //        {
-//            Item item = World.Get<Item>(p.ReadUInt());
+//            Item item = World.GetByLocalSerial<Item>(p.ReadUInt());
 //            p.Skip(2);
 //            Graphic graphic = p.ReadUShort();
 //        }
@@ -3536,7 +3540,7 @@ namespace ClassicUO.Network
 
 //        private static void SellList(Packet p)
 //        {
-//            Mobile vendor = World.Get<Mobile>(p.ReadUInt());
+//            Mobile vendor = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //            if (vendor == null)
 //            {
 //                return;
@@ -3566,7 +3570,7 @@ namespace ClassicUO.Network
 
 //        private static void UpdateHitpoints(Packet p)
 //        {
-//            Mobile mobile = World.Get<Mobile>(p.ReadUInt());
+//            Mobile mobile = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //            if (mobile == null)
 //            {
 //                return;
@@ -3579,7 +3583,7 @@ namespace ClassicUO.Network
 
 //        private static void UpdateMana(Packet p)
 //        {
-//            Mobile mobile = World.Get<Mobile>(p.ReadUInt());
+//            Mobile mobile = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //            if (mobile == null)
 //            {
 //                return;
@@ -3592,7 +3596,7 @@ namespace ClassicUO.Network
 
 //        private static void UpdateStamina(Packet p)
 //        {
-//            Mobile mobile = World.Get<Mobile>(p.ReadUInt());
+//            Mobile mobile = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //            if (mobile == null)
 //            {
 //                return;
@@ -3651,7 +3655,7 @@ namespace ClassicUO.Network
 
 //        private static void AttackCharacter(Packet p)
 //        {
-//            Mobile lastattackedmobile = World.Get<Mobile>(p.ReadUInt());
+//            Mobile lastattackedmobile = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //            if (lastattackedmobile != null)
 //            {
 //            }
@@ -3664,7 +3668,7 @@ namespace ClassicUO.Network
 //        private static void UnicodeTalk(Packet p)
 //        {
 //            Serial serial = p.ReadUInt();
-//            Entity entity = World.Get(serial);
+//            Entity entity = World.GetByLocalSerial(serial);
 //            ushort graphic = p.ReadUShort();
 //            MessageType type = (MessageType)p.ReadByte();
 //            Hue hue = p.ReadUShort();
@@ -3771,7 +3775,7 @@ namespace ClassicUO.Network
 //                    serial = p.ReadUInt();
 //                    break;
 //                case 0x10: // display equip info
-//                    Item item = World.Get<Item>(p.ReadUInt());
+//                    Item item = World.GetByLocalSerial<Item>(p.ReadUInt());
 //                    if (item == null)
 //                    {
 //                        return;
@@ -3873,7 +3877,7 @@ namespace ClassicUO.Network
 //                    switch (version)
 //                    {
 //                        case 0:
-//                            Mobile bonded = World.Get<Mobile>(serial);
+//                            Mobile bonded = World.GetByLocalSerial<Mobile>(serial);
 //                            if (bonded == null)
 //                            {
 //                                break;
@@ -3891,7 +3895,7 @@ namespace ClassicUO.Network
 
 //                            break;
 //                        case 5:
-//                            Mobile character = World.Get<Mobile>(serial);
+//                            Mobile character = World.GetByLocalSerial<Mobile>(serial);
 //                            if (character == null)
 //                            {
 //                                return;
@@ -3908,7 +3912,7 @@ namespace ClassicUO.Network
 //                    break;
 //                case 0x1B: // new spellbook content
 //                    p.Skip(2);
-//                    Item spellbook = World.Get<Item>(p.ReadUInt());
+//                    Item spellbook = World.GetByLocalSerial<Item>(p.ReadUInt());
 //                    if (spellbook == null)
 //                    {
 //                        return;
@@ -3961,7 +3965,7 @@ namespace ClassicUO.Network
 //                    break;
 //                case 0x22:
 //                    p.Skip(1);
-//                    Mobile mobile = World.Get<Mobile>(p.ReadUInt());
+//                    Mobile mobile = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //                    if (mobile != null)
 //                    {
 //                        int damage = p.ReadByte();
@@ -3977,7 +3981,7 @@ namespace ClassicUO.Network
 //        private static void DisplayClilocString(Packet p)
 //        {
 //            Serial serial = p.ReadUInt();
-//            Entity entity = World.Get(serial);
+//            Entity entity = World.GetByLocalSerial(serial);
 //            ushort graphic = p.ReadUShort();
 //            MessageType type = (MessageType)p.ReadByte();
 //            Hue hue = p.ReadUShort();
@@ -4033,7 +4037,7 @@ namespace ClassicUO.Network
 //        private static void MegaCliloc(Packet p)
 //        {
 //            p.Skip(2);
-//            Entity entity = World.Get(p.ReadUInt());
+//            Entity entity = World.GetByLocalSerial(p.ReadUInt());
 //            if (entity == null)
 //            {
 //                return;
@@ -4051,11 +4055,11 @@ namespace ClassicUO.Network
 //        private static void CustomHouse(Packet p)
 //        {
 //            return;
-//            Service.Get<Log>().Message(LogTypes.Info, "CUSTOM HOUSE RECV");
+//            Service.GetByLocalSerial<Log>().Message(LogTypes.Info, "CUSTOM HOUSE RECV");
 
 //            bool compressed = p.ReadByte() == 0x03;
 //            bool enableReponse = p.ReadBool();
-//            Item foundation = World.Get<Item>(p.ReadUInt());
+//            Item foundation = World.GetByLocalSerial<Item>(p.ReadUInt());
 //            uint revision = p.ReadUInt();
 
 //            Multi multi = foundation?.Multi;
@@ -4294,7 +4298,7 @@ namespace ClassicUO.Network
 
 //        private static void NewCharacterAnimation(Packet p)
 //        {
-//            Mobile mobile = World.Get<Mobile>(p.ReadUInt());
+//            Mobile mobile = World.GetByLocalSerial<Mobile>(p.ReadUInt());
 //            if (mobile == null)
 //            {
 //                return;
@@ -4395,7 +4399,7 @@ namespace ClassicUO.Network
 //            item.Container = p.ReadUInt();
 //            item.Hue = p.ReadUShort();
 
-//            Item entity = World.Get<Item>(item.Container);
+//            Item entity = World.GetByLocalSerial<Item>(item.Container);
 //            if (entity != null)
 //            {
 //                entity.AddItem(item);

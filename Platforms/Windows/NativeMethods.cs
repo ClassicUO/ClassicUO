@@ -107,7 +107,7 @@ namespace ClassicUO.Platforms.Windows
 
         internal static uint GetCurrentCodePage()
         {
-            // Get the keyboard layout for the current thread.
+            // GetByLocalSerial the keyboard layout for the current thread.
             IntPtr keybdLayout = GetKeyboardLayout(0);
             // Extract the language ID from it, contained in its low-order word.
             int langID = LOWORD(keybdLayout);

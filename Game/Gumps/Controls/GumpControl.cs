@@ -34,7 +34,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Gumps
 {
-    public abstract class GumpControl : IDrawableUI, IUpdateable, IColorable
+    public abstract class GumpControl : IDrawableUI, IUpdateable, IColorable, IDebuggable
     {
         private readonly List<GumpControl> _children;
         private GumpControl _parent;
@@ -56,6 +56,8 @@ namespace ClassicUO.Game.Gumps
 
             Page = 0;
             UIManager = Service.Get<UIManager>();
+
+            Debug = false;
         }
 
 
@@ -105,6 +107,8 @@ namespace ClassicUO.Game.Gumps
         public bool CanCloseWithEsc { get; set; }
         public bool IsEditable { get; set; }
         public bool IsTransparent { get; set; }
+        public bool IgnoreParentFill { get; set; }
+        public bool Debug { get; set; }
         public IReadOnlyList<GumpControl> Children => _children;
 
         public UIManager UIManager { get; }
@@ -216,7 +220,10 @@ namespace ClassicUO.Game.Gumps
         {
             get
             {
-                GumpControl p = this;
+                if (Parent == null)
+                    return null;
+
+                GumpControl p = Parent;
                 while (p.Parent != null)
                     p = p.Parent;
                 return p;
@@ -225,15 +232,7 @@ namespace ClassicUO.Game.Gumps
 
         private GumpControlInfo _controlInfo;
 
-        public GumpControlInfo ControlInfo
-        {
-            get
-            {
-                if (_controlInfo == null)
-                    _controlInfo = new GumpControlInfo(this);
-                return _controlInfo;
-            }
-        }
+        public GumpControlInfo ControlInfo => _controlInfo ?? (_controlInfo = new GumpControlInfo(this));
 
 
         public void Initialize()
@@ -258,7 +257,7 @@ namespace ClassicUO.Game.Gumps
 
                     if (!initializedKeyboardFocusedControl && c.AcceptKeyboardInput)
                     {
-                        Service.Get<UIManager>().KeyboardFocusControl = c;
+                        UIManager.KeyboardFocusControl = c;
                         initializedKeyboardFocusedControl = true;
                     }
                 }
@@ -297,10 +296,11 @@ namespace ClassicUO.Game.Gumps
 
                 if (!IgnoreParentFill)
                 {
-                    if (w != Width)
+                    if (w != Width || h != Height)
+                    {
                         Width = w;
-                    if (h != Height)
                         Height = h;
+                    }
                 }
 
 
@@ -309,8 +309,7 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public bool IgnoreParentFill { get; set; }
-
+        private static SpriteTexture _debugTexture;
 
         public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
@@ -330,6 +329,17 @@ namespace ClassicUO.Game.Gumps
                         c.Draw(spriteBatch, offset, hue);
                     }
                 }
+            }
+
+            if (IsVisible && Debug)
+            {
+                if (_debugTexture == null)
+                {
+                    _debugTexture = new SpriteTexture(1, 1);
+                    _debugTexture.SetData(new Color[1] { Color.Green });
+                }
+
+                spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
             }
 
             return true;
@@ -485,8 +495,6 @@ namespace ClassicUO.Game.Gumps
             int y = position.Y - Y - ParentY;
             OnMouseLeft(x, y);
             MouseLeft.Raise(new MouseEventArgs(x, y));
-
-            Console.WriteLine(this);
         }
 
         public void InvokeMouseClick(Point position, MouseButton button)

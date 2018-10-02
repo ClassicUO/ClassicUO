@@ -241,6 +241,8 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
             if (IsCorpse)
                 ProcessAnimation();
             else if (Effect != null)

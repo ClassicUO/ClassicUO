@@ -872,7 +872,7 @@ namespace ClassicUO.Game.Scenes
             int charX = entity.Position.X;
             int charY = entity.Position.Y;
 
-            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.Get(entity) : null;
+            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.GetByLocalSerial(entity) : null;
             int dropMaxZIndex = -1;
             if (mob != null)
             {

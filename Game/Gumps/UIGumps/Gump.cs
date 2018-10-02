@@ -32,6 +32,9 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             LocalSerial = local;
             ServerSerial = server;
+
+            AcceptMouseInput = false;
+            AcceptKeyboardInput = false;
         }
 
         public bool BlockMovement { get; set; }
