@@ -54,7 +54,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case 1:
 //                    NetClient.Disconnected += (sender, e) => _log.Message(LogTypes.Warning, "Disconnected!");
 //                    World.InGame 
-                    _log.Message(LogTypes.Trace, "Disconnect Button CLicked...\n", false);
+                    _log.Message(LogTypes.Trace, "Disconnect Button Clicked...\n", false);
                     Dispose();
                     break;
             }
