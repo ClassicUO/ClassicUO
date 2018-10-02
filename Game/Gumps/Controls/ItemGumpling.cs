@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Gumps
         private float _sClickTime;
 
 
-        private Label _label;
+        private List<Label> _labels = new List<Label>();
 
         public ItemGumpling(Item item)
         {
@@ -186,27 +186,40 @@ namespace ClassicUO.Game.Gumps
         {
             if (!isDisposing && Item.OverHeads.Count > 0)
             {
-                if (_label == null)
+                if (_labels.Count <= 0)
                 {
-                    TextOverhead overhead = Item.OverHeads[0];
-
-                    _label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth,
-                        overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER)
+                    foreach (TextOverhead overhead in Item.OverHeads)
                     {
-                        FadeOut = true
-                    };
+                        Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth,
+                               overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER, overhead.TimeToLive)
+                        {
+                            FadeOut = true,
+                        };
 
-                    _label.ControlInfo.Layer = UILayer.Over;
-                    UIManager.Add(_label);
+                        label.ControlInfo.Layer = UILayer.Over;
+
+                        UIManager.Add(label);
+                        _labels.Add(label);
+                    }
                 }
 
-                _label.X = ScreenCoordinateX + _clickedPoint.X - _label.Width / 2;
-                _label.Y = ScreenCoordinateY + _clickedPoint.Y - _label.Height / 2;
+                int y = 0;
+
+                for (int i = _labels.Count - 1; i >= 0; i--)
+                {
+                    Label l = _labels[i];
+
+                    l.X = ScreenCoordinateX + _clickedPoint.X - l.Width / 2;
+                    l.Y = ScreenCoordinateY + _clickedPoint.Y - l.Height / 2 + y;
+
+                    y += l.Height;
+                }
+
             }
-            else if (_label != null)
+            else if (_labels.Count > 0)
             {
-                _label.Dispose();
-                _label = null;
+                _labels.ForEach(s => s.Dispose());
+                _labels.Clear();
             }
         }
 

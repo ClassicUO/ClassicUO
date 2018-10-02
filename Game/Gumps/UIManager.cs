@@ -253,7 +253,7 @@ namespace ClassicUO.Game.Gumps
 
         public void Update(double totalMS, double frameMS)
         {
-            //SortControlsByInfo();
+            SortControlsByInfo();
 
             for (int i = 0; i < _gumps.Count; i++)
             {

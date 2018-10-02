@@ -33,7 +33,7 @@ namespace ClassicUO.Game.Gumps
         private float _timeCreated;
         private float _alpha;
 
-        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT)
+        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, float timeToLive = 0.0f)
         {
             _gText = new RenderedText
             {
@@ -49,6 +49,8 @@ namespace ClassicUO.Game.Gumps
 
             Width = _gText.Width;
             Height = _gText.Height;
+
+            _timeToLive = timeToLive;
         }
 
         public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, TransformHue(Hue.Parse(parts[3])), 0, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT)
@@ -106,10 +108,6 @@ namespace ClassicUO.Game.Gumps
         {
             if (FadeOut)
             {
-                _timeToLive = 2500 + Text.Substring(Text.IndexOf('>') + 1).Length * 100;
-                if (_timeToLive > 10000.0f)
-                    _timeToLive = 10000.0f;
-
                 _timeCreated = World.Ticks;
             }
         }

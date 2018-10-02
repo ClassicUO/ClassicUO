@@ -28,10 +28,8 @@ namespace ClassicUO.Game.GameObjects
     {
         private const float TIME_FADEOUT = 2000.0f;
 
-        private readonly ushort _hue;
-
         public TextOverhead(in GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF,
-            byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None) : base(parent.Map)
+            byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f) : base(parent.Map)
         {
             Text = text;
             Parent = parent;
@@ -42,9 +40,16 @@ namespace ClassicUO.Game.GameObjects
             Style = style;
 
 
-            TimeToLive = 2500 + text.Substring(text.IndexOf('>') + 1).Length * 100;
-            if (TimeToLive > 10000.0f)
-                TimeToLive = 10000.0f;
+            if (timeToLive <= 0.0f)
+            {
+                TimeToLive = 2500 + text.Substring(text.IndexOf('>') + 1).Length * 100;
+                if (TimeToLive > 10000.0f)
+                    TimeToLive = 10000.0f;
+            }
+            else
+            {
+                TimeToLive = timeToLive;
+            }
 
             TimeCreated = World.Ticks;
         }
@@ -52,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
         public string Text { get; }
         public GameObject Parent { get; }
         public bool IsPersistent { get; set; }
-        public float TimeToLive { get; }
+        public float TimeToLive { get; set; }
         public MessageType MessageType { get; set; }
         public float TimeCreated { get; }
         public float Alpha { get; private set; }

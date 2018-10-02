@@ -1448,7 +1448,7 @@ namespace ClassicUO.Network
         private static void UnicodeTalk(Packet p)
         {
             Serial serial = p.ReadUInt();
-            Entity entity = World.Mobiles.Get(serial);
+            Entity entity = World.Get(serial);
             ushort graphic = p.ReadUShort();
             MessageType type = (MessageType) p.ReadByte();
             Hue hue = p.ReadUShort();
@@ -1565,7 +1565,7 @@ namespace ClassicUO.Network
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
 
-                        item.AddGameText(MessageType.Label, str, 3, 0x3B2, true);
+                        item.AddGameText(MessageType.Label, str, 3, 0x3B2, true, 4000.0f);
                     }
 
                     str = string.Empty;

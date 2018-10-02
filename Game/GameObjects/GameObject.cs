@@ -96,7 +96,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual View CreateView() => null;
 
-        public TextOverhead AddGameText(MessageType type, string text, byte font, Hue hue, bool isunicode)
+        public TextOverhead AddGameText(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f)
         {
             if (string.IsNullOrEmpty(text))
                 return null;
@@ -128,7 +128,7 @@ namespace ClassicUO.Game.GameObjects
             else
                 width = 0;
 
-            overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder);
+            overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive);
             InsertGameText(overhead);
 
             if (_overHeads.Count > 5 )
