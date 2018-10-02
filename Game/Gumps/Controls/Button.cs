@@ -111,14 +111,16 @@ namespace ClassicUO.Game.Gumps
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
 
-            ButtonAction = (ButtonAction) int.Parse(parts[5]);
-            ToPage = int.Parse(parts[6]);
+            ButtonAction = parts.Length >= 6 ? (ButtonAction) int.Parse(parts[5]) : 0;
+            ToPage = parts.Length >= 7 ? int.Parse(parts[6]) : 0;
         }
 
 
         public int ButtonID { get; }
         public ButtonAction ButtonAction { get; set; }
         public int ToPage { get; set; }
+
+        protected override ClickPriority Priority => ClickPriority.High;
 
         public int ButtonGraphicNormal
         {

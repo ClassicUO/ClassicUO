@@ -82,6 +82,7 @@ namespace ClassicUO.Game.Gumps
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 Font = 1
             };
+
             CanMove = true;
         }
 
@@ -215,15 +216,21 @@ namespace ClassicUO.Game.Gumps
                 {
                     WebLinkRect link = _gameText.Links[i];
                     Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
-                    bool inbounds = rect.Contains(x, y);
+                    bool inbounds = rect.Contains(x, _scrollBar.Value + y);
                     if (inbounds && Fonts.GetWebLink(link.LinkID, out WebLink result))
                     {
-                        Service.Get<Log>().Message(LogTypes.Info, "LINK CLICKED: " + result.Link);
+                        Service.Get<Log>().Message(LogTypes.Info, "LINK CLICKED: " + result.Link);                      
                         BrowserHelper.OpenBrowser(result.Link);
                         break;
                     }
                 }
             }
+            base.OnMouseClick(x, y, button);
+        }
+
+        public override void OnButtonClick(int buttonID)
+        {
+            base.OnButtonClick(buttonID);
         }
     }
 }

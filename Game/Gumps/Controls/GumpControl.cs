@@ -34,6 +34,13 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Gumps
 {
+    public enum ClickPriority
+    {
+        High,
+        Default,      
+        Low,
+    }
+
     public abstract class GumpControl : IDrawableUI, IUpdateable, IColorable, IDebuggable
     {
         private readonly List<GumpControl> _children;
@@ -45,7 +52,7 @@ namespace ClassicUO.Game.Gumps
         private int _activePage;
         private bool _handlesKeyboardFocus;
 
-
+        protected virtual ClickPriority Priority => ClickPriority.Default;
 
         protected GumpControl(GumpControl parent = null)
         {
@@ -421,7 +428,7 @@ namespace ClassicUO.Game.Gumps
                 }
             }
 
-            return results.Count == 0 ? null : results.ToArray();
+            return results.Count == 0 ? null : results.OrderBy(s => s.Priority).ToArray();
         }
 
         public GumpControl GetFirstControlAcceptKeyboardInput()
