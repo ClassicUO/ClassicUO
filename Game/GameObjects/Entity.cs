@@ -221,7 +221,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Delta d = _delta;
             OnProcessDelta(d);
-            //Items.ProcessDelta();
+            Items.ProcessDelta();
             _delta = Delta.None;
         }
 
@@ -233,11 +233,12 @@ namespace ClassicUO.Game.GameObjects
                 DeferredObject = null;
             }
 
-            foreach (Item i in Items)
-                i.Dispose();
-
-            Items.Clear();
             _properties.Clear();
+            
+            _OnDisposed?.Invoke(this);
+
+            _OnUpdated = null;
+            _OnDisposed = null;
 
             base.Dispose();
         }

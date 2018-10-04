@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
@@ -68,15 +69,22 @@ namespace ClassicUO.Game.GameObjects
 
         private bool _isMulti;
 
-        //private StaticTiles? _itemData;
         private Layer _layer;
 
+
+        private bool _invokeUpdate;
         public Item(Serial serial) : base(serial)
         {
+            Items.Added += ItemsOnAddedAndDeleted;
+            Items.Removed += ItemsOnAddedAndDeleted;
+        }
+
+        private void ItemsOnAddedAndDeleted(object sender, EventArgs e)
+        {
+            _invokeUpdate = true;
         }
 
 
-        //public new ItemView View => /*Graphic <= 0 ? null :*/ (ItemView)base.View;
         public GameEffect Effect { get; set; }
 
         public ushort Amount
@@ -212,8 +220,9 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
 
-        public bool IsSpellBook => Graphic == 0xE3B || Graphic == 0xE3A || Graphic == 0x2252 || Graphic == 0x2253 ||
-                                   Graphic == 0x238C || Graphic == 0x23A0 || Graphic == 0x2D50;
+        public bool IsSpellBook => Graphic == 0x0E38 || Graphic == 0x0EFA || Graphic == 0x2252 ||
+                                   Graphic == 0x2253 || Graphic == 0x238C || Graphic == 0x23A0 ||
+                                   Graphic == 0x2D50;
 
         public override bool Exists => World.Contains(Serial);
 
@@ -242,6 +251,12 @@ namespace ClassicUO.Game.GameObjects
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
+
+            if (_invokeUpdate)
+            {
+                _OnUpdated?.Invoke(this);
+                _invokeUpdate = false;
+            }
 
             if (IsCorpse)
                 ProcessAnimation();
@@ -520,6 +535,41 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
+
+        private ulong _spellsBitFiled;
+        public bool HasSpell(int circle, int index)
+        {
+            index = ((3 - circle % 4) + (circle / 4) * 4) * 8 + (index - 1);
+            ulong flag = ((ulong)1) << index;
+            return (_spellsBitFiled & flag) == flag;
+        }
+
+        public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
+       
+        public void FillSpellbook(SpellBookType type, ulong field)
+        {
+            if (!IsSpellBook)
+                return;
+
+            bool needUpdate = false;
+
+            if (BookType != type)
+            {
+                BookType = type;
+                needUpdate = true;
+            }
+
+            if (_spellsBitFiled != field)
+            {
+                _spellsBitFiled = field;
+                needUpdate = true;
+            }
+
+            if (needUpdate)
+                _OnUpdated?.Invoke(this);
+        }
+
+
         public override void Dispose()
         {
             if (IsMulti && Multi != null)
@@ -530,6 +580,10 @@ namespace ClassicUO.Game.GameObjects
 
             Effect?.Dispose();
             Effect = null;
+
+            Items.Added -= ItemsOnAddedAndDeleted;
+            Items.Removed -= ItemsOnAddedAndDeleted;
+
             base.Dispose();
         }
 

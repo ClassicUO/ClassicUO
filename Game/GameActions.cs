@@ -21,6 +21,7 @@
 #endregion
 using System;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.IO;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework;
 using static ClassicUO.Network.NetClient;
@@ -84,5 +85,11 @@ namespace ClassicUO.Game
 
         public static void RequestQuestMenu()
             => Socket.Send(new PQuestMenuRequest());
+
+        public static void CastSpell(int index)
+            => Socket.Send(new PCastSpell(index));
+
+        public static void CastSpellFromBook(int index, Serial serial)
+            => Socket.Send(new PCastSpellFromBook(index, serial));
     }
 }
