@@ -246,7 +246,7 @@ namespace ClassicUO.Game.GameObjects
                                MathHelper.InRange(Graphic, 0x029A, 0x029B) ||
                                MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || Graphic == 0x03DB || Graphic == 0x03DF ||
                                Graphic == 0x03E2 || 
-                               Graphic == 0x02E8; // Vampiric
+                               Graphic == 0x02E8 || Graphic == 0x02E9; // Vampiric
 
         public override bool Exists => World.Contains(Serial);
 
