@@ -293,7 +293,7 @@ namespace ClassicUO.Network
         {
             string[] version = v.Split('.', StringSplitOptions.RemoveEmptyEntries);
 
-            WriteASCII(string.Format("{0}.{1}.{2}.{3}", version[0], version[1], version[2], version[3]));
+            WriteASCII($"{version[0]}.{version[1]}.{version[2]}.{version[3]}");
         }
     }
 

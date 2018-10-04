@@ -69,7 +69,8 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Add(T entity)
         {
-            if (!_entities.TryAdd(entity.Serial, entity)) return false;
+            if (!_entities.TryAdd(entity.Serial, entity))
+                return false;
 
             _added.Add(entity);
             return true;
@@ -77,7 +78,8 @@ namespace ClassicUO.Game.GameObjects
 
         public T Remove(Serial serial)
         {
-            if (_entities.TryRemove(serial, out T entity)) _removed.Add(entity);
+            if (_entities.TryRemove(serial, out T entity))
+                _removed.Add(entity);
 
             return entity;
         }

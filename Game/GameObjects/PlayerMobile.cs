@@ -868,7 +868,7 @@ namespace ClassicUO.Game.GameObjects
                     case 0x0DF2:
                     case 0x0DF3:
                     case 0x0DF4:
-                    case 0x0DF5: // Wands Type A-D
+                    case 0x0DF5: // Wands BookType A-D
                         _ability[0] = Ability.Dismount;
                         _ability[1] = Ability.Disarm;
                         goto done;

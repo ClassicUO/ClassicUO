@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
@@ -15,7 +16,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             _item = item;
             _data = ContainerManager.Get(gumpid);
-            //_item.SetCallbacks(OnItemUpdated, OnItemDisposed);
 
             CanMove = true;
 
@@ -25,31 +25,50 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnInitialize()
         {
-            foreach (Item y in _item.Items)
-            {
-                AddChildren(new ItemGumpling(y));
-            }
-            base.OnInitialize();
+            foreach (Item item in _item.Items)
+                AddChildren(new ItemGumpling(item));
+
+            _item.SetCallbacks(OnItemUpdated, OnItemDisposed);
         }
+
 
         public override void Dispose()
         {
-            //_item.ClearCallBacks(OnItemUpdated, OnItemDisposed);
+            _item.ClearCallBacks(OnItemUpdated, OnItemDisposed);
 
             base.Dispose();
         }
 
         private void OnItemUpdated(GameObject obj)
         {
-            //foreach (Item item in _item.Items)
-            //{
-            //    AddChildren(new ItemGumpling(item));
-            //}
+            List<GumpControl> toremove = Children.Where(s => s is ItemGumpling ctrl && !_item.Items.Contains(ctrl.Item))
+                .ToList();
+
+            if (toremove.Count > 0)
+                toremove.ForEach(RemoveChildren);
+
+            foreach (Item item in _item.Items)
+            {
+                bool control = false;
+
+                foreach (GumpControl child in Children)
+                {
+                    if (child is ItemGumpling ctrl && ctrl.Item == item)
+                    {
+                        control = true;
+                        break;
+                    }
+                }
+
+                if (!control)
+                    AddChildren(new ItemGumpling(item));
+
+            }
         }
 
         private void OnItemDisposed(GameObject obj)
         {
-
+            Dispose();
         }
     }
 }

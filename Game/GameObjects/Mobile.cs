@@ -232,7 +232,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool IsFlying =>
-            FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte) Flags.Flying & 0x04) != 0;
+            FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte)Flags & 0x04) != 0;
 
         public virtual bool InWarMode
         {

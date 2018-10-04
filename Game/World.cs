@@ -212,8 +212,10 @@ namespace ClassicUO.Game
                 if (mobile != null) mobile.Equipment[(int) item.Layer] = null;
             }
 
-            foreach (Item i in item.Items) RemoveItem(i);
+            foreach (Item i in item.Items)
+                RemoveItem(i);
 
+            item.Items.Clear();
             item.Dispose();
             return true;
         }
@@ -225,7 +227,7 @@ namespace ClassicUO.Game
 
             foreach (Item i in mobile.Items) RemoveItem(i);
 
-
+            mobile.Items.Clear();
             mobile.Dispose();
             return true;
         }
