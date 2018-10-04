@@ -22,7 +22,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -31,17 +33,24 @@ namespace ClassicUO
 {
     internal class MainClass
     {
+
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
 
         private static void Main(string[] args)
         {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+
+            string libsPath = Path.Combine( Path.GetDirectoryName(assembly.Location), "Graphic", "FNA", Environment.Is64BitProcess ? "x64" : "x86");
+
+
+
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                SetDllDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory + "/Graphic/FNA/",
-                    Environment.Is64BitProcess ? "x64" : "x86"));
+                SetDllDirectory(libsPath);
             }
+
 
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
