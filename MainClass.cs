@@ -22,9 +22,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.Loader;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -40,10 +38,7 @@ namespace ClassicUO
 
         private static void Main(string[] args)
         {
-            Assembly assembly = Assembly.GetExecutingAssembly();
-
-            string libsPath = Path.Combine( Path.GetDirectoryName(assembly.Location), "Graphic", "FNA", Environment.Is64BitProcess ? "x64" : "x86");
-
+            string libsPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Graphic", "FNA", Environment.Is64BitProcess ? "x64" : "x86");
 
 
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
