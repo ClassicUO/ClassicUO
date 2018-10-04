@@ -84,5 +84,11 @@ namespace ClassicUO.Game
 
         public static void RequestQuestMenu()
             => Socket.Send(new PQuestMenuRequest());
+
+        public static void ChangeSkillLockStatus(ushort skillindex, byte lockstate)
+            => Socket.Send(new PSkillsStatusChangeRequest(skillindex, lockstate));
+
+        
+
     }
 }

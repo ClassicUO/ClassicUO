@@ -251,10 +251,10 @@ namespace ClassicUO.Network
 
     public sealed class PSkillsStatusChangeRequest : PacketWriter
     {
-        public PSkillsStatusChangeRequest(byte skill, bool state) : base(0x3A)
+        public PSkillsStatusChangeRequest(ushort skillindex, byte lockstate) : base(0x3A)
         {
-            WriteUShort(skill);
-            WriteBool(state);
+            WriteUShort(skillindex);
+            WriteByte(lockstate);
         }
     }
 
