@@ -1573,7 +1573,8 @@ namespace ClassicUO.Network
                 case 4: // close generic gump
                     Service.Get<UIManager>().GetByServerSerial(p.ReadUInt())?.OnButtonClick((int)p.ReadUInt());
                     break;
-                case 6: //party
+                case 6: // party
+
                     break;
                 case 8: // map change
                     World.MapIndex = p.ReadByte();
@@ -2136,7 +2137,7 @@ namespace ClassicUO.Network
             byte type = p.ReadByte();
             if (type == 0xFE)
             {
-                Service.Get<Log>().Message(LogTypes.Info, "Razor ACK sended");
+                Log.Message(LogTypes.Info, "Razor ACK sended");
                 NetClient.Socket.Send(new PRazorAnswer());
             }
         }

@@ -28,22 +28,19 @@ namespace ClassicUO
     public static class Service
     {
         private static readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
-        private static readonly Log _logger;
-
-        static Service() => _logger = new Log();
 
         public static T Register<T>(T service)
         {
             Type type = typeof(T);
             if (_services.ContainsKey(type))
             {
-                _logger.Message(LogTypes.Error,
+                Log.Message(LogTypes.Error,
                     string.Format("Attempted to register service of type {0} twice.", type.Name));
                 _services.Remove(type);
             }
 
             _services.Add(type, service);
-            _logger.Message(LogTypes.Trace, string.Format("Initialized service : {0}", type.Name));
+            Log.Message(LogTypes.Trace, string.Format("Initialized service : {0}", type.Name));
             return service;
         }
 
@@ -54,7 +51,7 @@ namespace ClassicUO
                 _services.Remove(type);
             else
             {
-                _logger.Message(LogTypes.Error,
+                Log.Message(LogTypes.Error,
                     string.Format(
                         "Attempted to unregister service of type {0}, but no service of this type (or type and equality) is registered.",
                         type.Name));
@@ -75,7 +72,7 @@ namespace ClassicUO
 
             if (failIfNotRegistered)
             {
-                _logger.Message(LogTypes.Error,
+                Log.Message(LogTypes.Error,
                     string.Format(
                         "Attempted to get service service of type {0}, but no service of this type is registered.",
                         type.Name));

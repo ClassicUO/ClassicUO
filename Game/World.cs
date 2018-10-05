@@ -78,7 +78,6 @@ namespace ClassicUO.Game
 
         public static bool InGame => Player != null && Map != null;
 
-        public static long Ticks { get; set; }
         public static IsometricLight Light { get; } = new IsometricLight();
 
 

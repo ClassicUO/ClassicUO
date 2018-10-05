@@ -110,7 +110,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.Map:
-                    Service.Get<Log>().Message(LogTypes.Warning, "Map button pushed! Not implemented yet!");
+                    Log.Message(LogTypes.Warning, "Map button pushed! Not implemented yet!");
                     MiniMapGump.Toggle(_scene);
                     break;
                 case Buttons.Paperdoll:
@@ -120,7 +120,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         UIManager.Remove<PaperDollGump>(World.Player);
                     break;
                 case Buttons.Inventory:
-                    Service.Get<Log>().Message(LogTypes.Warning, "Inventory button pushed! Not implemented yet!");
+                    Log.Message(LogTypes.Warning, "Inventory button pushed! Not implemented yet!");
                     break;
                 case Buttons.Journal:
                     if (UIManager.GetByLocalSerial<JournalGump>() == null)
@@ -131,14 +131,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         UIManager.Remove<JournalGump>();
                     break;
                 case Buttons.Chat:
-                    Service.Get<Log>().Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");
+                    Log.Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");
                     break;
                 case Buttons.Help:
                     GameActions.RequestHelp();
-                    Service.Get<Log>().Message(LogTypes.Info, "Help request sent!");
+                    Log.Message(LogTypes.Info, "Help request sent!");
                     break;
                 case Buttons.Debug:
-                    Service.Get<Log>().Message(LogTypes.Warning, "Debug button pushed! Not implemented yet!");
+                    Log.Message(LogTypes.Warning, "Debug button pushed! Not implemented yet!");
                     break;
             }
         }

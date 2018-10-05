@@ -33,15 +33,15 @@ namespace ClassicUO.Utility
         Error
     }
 
-    public class Log
+    public static class Log
     {
-        private static readonly Dictionary<LogTypes, string> _logMsgFormat = new Dictionary<LogTypes, string>
+        private static readonly Dictionary<LogTypes, string> LogMsgFormat = new Dictionary<LogTypes, string>
         {
             {LogTypes.None, string.Empty}, {LogTypes.Trace, "  Trace   "}, {LogTypes.Info, "  Info    "},
             {LogTypes.Warning, "  Warning "}, {LogTypes.Error, "  Error   "}
         };
 
-        private static readonly Dictionary<LogTypes, ConsoleColor> _logMsgColor = new Dictionary<LogTypes, ConsoleColor>
+        private static readonly Dictionary<LogTypes, ConsoleColor> LogMsgColor = new Dictionary<LogTypes, ConsoleColor>
         {
             {LogTypes.None, ConsoleColor.White}, {LogTypes.Trace, ConsoleColor.Green},
             {LogTypes.Info, ConsoleColor.Cyan}, {LogTypes.Warning, ConsoleColor.Yellow},
@@ -50,7 +50,7 @@ namespace ClassicUO.Utility
 
         private static readonly object _sync = new object();
 
-        public void Message(LogTypes type, string msg, bool newline = true)
+        public static void Message(LogTypes type, string msg, bool newline = true)
         {
             lock (_sync)
             {
@@ -58,8 +58,8 @@ namespace ClassicUO.Utility
                     Console.Write(DateTime.Now.ToString("HH:mm:ss") + " | ");
 
                 ConsoleColor prev = Console.ForegroundColor;
-                Console.ForegroundColor = _logMsgColor[type];
-                Console.Write(_logMsgFormat[type]);
+                Console.ForegroundColor = LogMsgColor[type];
+                Console.Write(LogMsgFormat[type]);
                 Console.ForegroundColor = prev;
 
                 if (newline)

@@ -40,7 +40,7 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++) Tiles[i][j] = new Tile();
             }
 
-            LastAccessTime = World.Ticks;
+            LastAccessTime = CoreGame.Ticks;
         }
 
         public ushort X { get; }

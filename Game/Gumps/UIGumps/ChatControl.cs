@@ -296,7 +296,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 _width = width;
 
-                _createdTime = World.Ticks;
+                _createdTime = CoreGame.Ticks;
             }
 
             public string Text => _renderedText.Text;

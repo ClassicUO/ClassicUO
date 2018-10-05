@@ -92,7 +92,7 @@ namespace ClassicUO.Game.Views
 
         private bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-            Texture.Ticks = World.Ticks;
+            Texture.Ticks = CoreGame.Ticks;
 
             _vertex[0].Position = position + _vertex0_yOffset;
             _vertex[1].Position = position + _vertex1_yOffset;
