@@ -36,6 +36,7 @@ namespace ClassicUO
 
         protected CoreGame()
         {
+            
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / 300.0f);
             GraphicsDeviceManager = new GraphicsDeviceManager(this);
 
@@ -89,6 +90,8 @@ namespace ClassicUO
 
         public static long Ticks { get; private set; }
 
+
+
         protected override void Update(GameTime gameTime)
         {
             if (Profiler.InContext("OutOfContext"))
@@ -98,7 +101,8 @@ namespace ClassicUO
             double totalms = gameTime.TotalGameTime.TotalMilliseconds;
             double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
 
-            Ticks += (long)framems;
+            Ticks = (long)totalms;
+
 
             _fpsCounter.Update(gameTime);
 
@@ -109,11 +113,10 @@ namespace ClassicUO
             OnUIUpdate(totalms, framems);
             OnUpdate(totalms, framems);
             // ###############################
-
+          
             Profiler.ExitContext("Update");
 
             _time += (float)framems;
-
             if (_time > IntervalFixedUpdate)
             {
                 _time = _time % IntervalFixedUpdate;

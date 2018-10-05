@@ -1481,7 +1481,8 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (_lastStepRequestedTime > CoreGame.Ticks) return false;
+            if (_lastStepRequestedTime > CoreGame.Ticks)
+                return false;
 
             if (_requestedSteps.Count >= MAX_STEP_COUNT)
             {
@@ -1489,6 +1490,10 @@ namespace ClassicUO.Game.GameObjects
                 NetClient.Socket.Send(new PResend());
                 return false;
             }
+
+            if (SpeedMode >= CharacterSpeedType.CantRun)
+                run = false;
+            // else ALWASY RUN CHECK
 
             int x = 0, y = 0;
             sbyte z = 0;
