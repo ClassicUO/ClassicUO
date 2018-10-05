@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ClassicUO.Utility
 {
@@ -28,13 +29,16 @@ namespace ClassicUO.Utility
         public const int ProfileTimeCount = 60;
 
         private static readonly List<ContextAndTick> m_Context;
-        private static readonly HighPerformanceTimer m_Timer;
         private static readonly List<Tuple<string[], double>> m_ThisFrameData;
         private static readonly List<ProfileData> m_AllFrameData;
         private static readonly ProfileData m_TotalTimeData;
+
+        private static Stopwatch _timer;
+
         private static long m_BeginFrameTicks;
         public static double LastFrameTimeMS { get; private set; }
         public static double TrackedTime => m_TotalTimeData.TimeInContext;
+
 
         static Profiler()
         {
@@ -42,8 +46,7 @@ namespace ClassicUO.Utility
             m_ThisFrameData = new List<Tuple<string[], double>>();
             m_AllFrameData = new List<ProfileData>();
             m_TotalTimeData = new ProfileData(null, 0d);
-            m_Timer = new HighPerformanceTimer();
-            m_Timer.Start();
+            _timer = Stopwatch.StartNew();
         }
 
         public static void BeginFrame()
@@ -69,18 +72,18 @@ namespace ClassicUO.Utility
                 m_ThisFrameData.Clear();
             }
 
-            m_BeginFrameTicks = m_Timer.ElapsedTicks;
+            m_BeginFrameTicks = _timer.ElapsedTicks;
         }
 
         public static void EndFrame()
         {
-            LastFrameTimeMS = HighPerformanceTimer.SecondsFromTicks(m_Timer.ElapsedTicks - m_BeginFrameTicks) * 1000d;
+            LastFrameTimeMS = ((_timer.ElapsedTicks - m_BeginFrameTicks) * 1000d) / Stopwatch.Frequency;
             m_TotalTimeData.AddNewHitLength(LastFrameTimeMS);
         }
 
         public static void EnterContext(string context_name)
         {
-            m_Context.Add(new ContextAndTick(context_name, m_Timer.ElapsedTicks));
+            m_Context.Add(new ContextAndTick(context_name, _timer.ElapsedTicks));
         }
 
         public static void ExitContext(string context_name)
@@ -95,8 +98,7 @@ namespace ClassicUO.Utility
             for (int i = 0; i < m_Context.Count; i++)
                 context[i] = m_Context[i].Name;
 
-            double ms = HighPerformanceTimer.SecondsFromTicks(
-                            m_Timer.ElapsedTicks - m_Context[m_Context.Count - 1].Tick) * 1000d;
+            double ms = ((_timer.ElapsedTicks - m_Context[m_Context.Count - 1].Tick) * 1000d) / Stopwatch.Frequency;
             m_ThisFrameData.Add(new Tuple<string[], double>(context, ms));
             m_Context.RemoveAt(m_Context.Count - 1);
         }

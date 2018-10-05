@@ -87,7 +87,11 @@ namespace ClassicUO.Game
         public static void ChangeSkillLockStatus(ushort skillindex, byte lockstate)
             => Socket.Send(new PSkillsStatusChangeRequest(skillindex, lockstate));
 
-        
+        public static void CastSpellFromBook(int index, Serial bookSerial)
+            => Socket.Send(new PCastSpellFromBook(index, bookSerial));
+
+        public static void CastSpell(int index)
+            => Socket.Send(new PCastSpell(index));
 
     }
 }
