@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -21,7 +20,6 @@
 #endregion
 using System;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.IO;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework;
 using static ClassicUO.Network.NetClient;
@@ -86,10 +84,10 @@ namespace ClassicUO.Game
         public static void RequestQuestMenu()
             => Socket.Send(new PQuestMenuRequest());
 
-        public static void CastSpell(int index)
-            => Socket.Send(new PCastSpell(index));
+        public static void ChangeSkillLockStatus(ushort skillindex, byte lockstate)
+            => Socket.Send(new PSkillsStatusChangeRequest(skillindex, lockstate));
 
-        public static void CastSpellFromBook(int index, Serial serial)
-            => Socket.Send(new PCastSpellFromBook(index, serial));
+        
+
     }
 }
