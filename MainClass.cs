@@ -30,17 +30,21 @@ namespace ClassicUO
 {
     internal class MainClass
     {
+
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
 
         private static void Main(string[] args)
         {
+            string libsPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Graphic", "FNA", Environment.Is64BitProcess ? "x64" : "x86");
+
+
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                SetDllDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory + "/Graphic/FNA/",
-                    Environment.Is64BitProcess ? "x64" : "x86"));
+                SetDllDirectory(libsPath);
             }
+
 
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
@@ -50,7 +54,6 @@ namespace ClassicUO
             {
                 //========================================================
                 //SERVICE STACK
-                Service.Register(new Log());
                 Service.Register(game);
                 Service.Register(new SpriteBatch3D(game));
                 Service.Register(new SpriteBatchUI(game));

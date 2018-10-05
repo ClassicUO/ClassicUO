@@ -66,14 +66,14 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsEnabled)
             {
-                if (LastChangeFrameTime < World.Ticks)
+                if (LastChangeFrameTime < CoreGame.Ticks)
                 {
                     AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                     AnimIndex++;
 
                     if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte) AnimDataFrame.FrameStart;
 
-                    LastChangeFrameTime = World.Ticks + Speed;
+                    LastChangeFrameTime = CoreGame.Ticks + Speed;
                 }
             }
             else if (Graphic != AnimationGraphic) AnimationGraphic = Graphic;

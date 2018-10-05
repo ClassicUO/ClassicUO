@@ -98,7 +98,7 @@ namespace ClassicUO.IO.Resources
                 ref SpriteTexture texture = ref _artCache[_usedIndex[i]];
                 if (texture == null || texture.IsDisposed)
                     _usedIndex.RemoveAt(i--);
-                else if (World.Ticks - texture.Ticks >= 3000)
+                else if (CoreGame.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();
                     texture = null;

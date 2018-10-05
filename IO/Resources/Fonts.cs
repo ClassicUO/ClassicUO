@@ -662,7 +662,7 @@ namespace ClassicUO.IO.Resources
             {
                 if (width <= 0 || string.IsNullOrEmpty(str))
                 {
-                    Service.Get<Log>().Message(LogTypes.Error, "You must set a string or width");
+                    Log.Message(LogTypes.Error, "You must set a string or width");
                     return;
                 }
 

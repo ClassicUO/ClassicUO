@@ -40,8 +40,7 @@ namespace ClassicUO.Game
 
         public static implicit operator ushort(Graphic color) => color._value;
 
-        public static bool operator ==(Graphic g1, Graphic g2) =>
-            g1.IsInvariant || g2.IsInvariant || g1._value == g2._value;
+        public static bool operator ==(Graphic g1, Graphic g2) => g1._value == g2._value;
 
         public static bool operator !=(Graphic g1, Graphic g2) => g1._value != g2._value;
 
@@ -59,11 +58,15 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            if (obj is Graphic) return this == (Graphic) obj;
-
-            if (obj is ushort) return _value == (ushort) obj;
-
-            return false;
+            switch (obj)
+            {
+                case Graphic graphic:
+                    return this == graphic;
+                case ushort @ushort:
+                    return _value == @ushort;
+                default:
+                    return false;
+            }
         }
 
         public static Graphic Parse(string str)

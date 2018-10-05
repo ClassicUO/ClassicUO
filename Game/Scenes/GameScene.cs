@@ -201,8 +201,6 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
-            World.Ticks = (long) totalMS;
-
             if (_renderTarget == null || _renderTarget.Width != _settings.GameWindowWidth / Scale || _renderTarget.Height != _settings.GameWindowHeight / Scale)
             {
                 _renderTarget?.Dispose();

@@ -782,7 +782,7 @@ namespace ClassicUO.Game.GameObjects
 
 
         //protected override bool NoIterateAnimIndex() => false;
-        protected override bool IsWalking => LastStepTime > World.Ticks - PLAYER_WALKING_DELAY;
+        protected override bool IsWalking => LastStepTime > CoreGame.Ticks - PLAYER_WALKING_DELAY;
         public byte SequenceNumber { get; set; }
         
 
@@ -867,7 +867,7 @@ namespace ClassicUO.Game.GameObjects
                     case 0x0DF2:
                     case 0x0DF3:
                     case 0x0DF4:
-                    case 0x0DF5: // Wands Type A-D
+                    case 0x0DF5: // Wands BookType A-D
                         _ability[0] = Ability.Dismount;
                         _ability[1] = Ability.Disarm;
                         goto done;
@@ -1481,11 +1481,11 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (_lastStepRequestedTime > World.Ticks) return false;
+            if (_lastStepRequestedTime > CoreGame.Ticks) return false;
 
             if (_requestedSteps.Count >= MAX_STEP_COUNT)
             {
-                Service.Get<Log>().Message(LogTypes.Warning, "Resync requested.");
+                Log.Message(LogTypes.Warning, "Resync requested.");
                 NetClient.Socket.Send(new PResend());
                 return false;
             }
@@ -1585,7 +1585,7 @@ namespace ClassicUO.Game.GameObjects
             else
                 SequenceNumber++;
 
-            _lastStepRequestedTime = World.Ticks + walkTime;
+            _lastStepRequestedTime = CoreGame.Ticks + walkTime;
 
             GetGroupForAnimation(this);
             return true;
@@ -1598,7 +1598,7 @@ namespace ClassicUO.Game.GameObjects
             Step step = _requestedSteps.Front();
             if (step.Seq != seq)
             {
-                Service.Get<Log>().Message(LogTypes.Warning, "Resync requested.");
+                Log.Message(LogTypes.Warning, "Resync requested.");
 
                 NetClient.Socket.Send(new PResend());
                 return;
@@ -1628,7 +1628,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_requestedSteps.Count <= 0)
             {
-                Service.Get<Log>().Message(LogTypes.Warning, "Resync requested.");
+                Log.Message(LogTypes.Warning, "Resync requested.");
 
                 NetClient.Socket.Send(new PResend());
                 return;

@@ -120,7 +120,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    Service.Get<Log>().Message( LogTypes.Error, e.SocketError.ToString());
+                    Log.Message( LogTypes.Error, e.SocketError.ToString());
                 }
             };
             connectEventArgs.RemoteEndPoint = endpoint;

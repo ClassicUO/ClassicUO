@@ -87,6 +87,7 @@ namespace ClassicUO
         }
         public int CurrentFPS => _fpsCounter.FPS;
 
+        public static long Ticks { get; private set; }
 
         protected override void Update(GameTime gameTime)
         {
@@ -97,9 +98,9 @@ namespace ClassicUO
             double totalms = gameTime.TotalGameTime.TotalMilliseconds;
             double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
 
-            _fpsCounter.Update(gameTime);
+            Ticks += (long)framems;
 
-            base.Update(gameTime);
+            _fpsCounter.Update(gameTime);
 
             // ###############################
             // This should be the right order
@@ -111,7 +112,7 @@ namespace ClassicUO
 
             Profiler.ExitContext("Update");
 
-            _time += (float) framems;
+            _time += (float)framems;
 
             if (_time > IntervalFixedUpdate)
             {

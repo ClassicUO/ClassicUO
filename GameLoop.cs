@@ -40,7 +40,6 @@ namespace ClassicUO
 {
     public class GameLoop : CoreGame
     {
-        private Log _log;
         private UIManager _uiManager;
         private InputManager _inputManager;
         private SceneManager _sceneManager;
@@ -54,7 +53,6 @@ namespace ClassicUO
 
         protected override void Initialize()
         {
-            _log = Service.Get<Log>();
 
             //uncomment it and fill it to save your first settings
             //Settings settings1 = new Settings()
@@ -69,23 +67,23 @@ namespace ClassicUO
 
             Service.Register(settings);
 
-            _log.Message(LogTypes.Trace, "Checking for Ultima Online installation...", false);
+            Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...", false);
             try
             {
                 FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
             }
             catch (FileNotFoundException)
             {
-                _log.Message(LogTypes.None, string.Empty);
-                _log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
+                Log.Message(LogTypes.None, string.Empty);
+                Log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
                 return;
             }
 
-            _log.Message(LogTypes.None, "      Done!");
-            _log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
+            Log.Message(LogTypes.None, "      Done!");
+            Log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
 
 
-            _log.Message(LogTypes.Trace, "Loading files...", false);
+            Log.Message(LogTypes.Trace, "Loading files...", false);
             Stopwatch stopwatch = Stopwatch.StartNew();
             FileManager.LoadFiles();
 
@@ -98,7 +96,7 @@ namespace ClassicUO
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
 
-            _log.Message(LogTypes.None, $"     Done in: {stopwatch.ElapsedMilliseconds} ms!");
+            Log.Message(LogTypes.None, $"     Done in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
 
             Service.Register(_uiManager = new UIManager());
@@ -109,10 +107,10 @@ namespace ClassicUO
             _sb3D = Service.Get<SpriteBatch3D>();
             _sbUI = Service.Get<SpriteBatchUI>();
 
-            _log.Message(LogTypes.Trace, "Network calibration...", false);
+            Log.Message(LogTypes.Trace, "Network calibration...", false);
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
-            _log.Message(LogTypes.None, "      Done!");
+            Log.Message(LogTypes.None, "      Done!");
 
 
             MaxFPS = settings.MaxFPS;
@@ -149,13 +147,13 @@ namespace ClassicUO
 
             NetClient.Connected += (sender, e) =>
             {
-                _log.Message(LogTypes.Info, "Connected!");
+                Log.Message(LogTypes.Info, "Connected!");
 
                 NetClient.Socket.Send(new PSeed(NetClient.Socket.ClientAddress, clientVersionBuffer));
                 NetClient.Socket.Send(new PFirstLogin(settings.Username, settings.Password.ToString()));
             };
 
-            NetClient.Disconnected += (sender, e) => _log.Message(LogTypes.Warning, "Disconnected!");
+            NetClient.Disconnected += (sender, e) => Log.Message(LogTypes.Warning, "Disconnected!");
 
             NetClient.PacketReceived += (sender, e) =>
             {
