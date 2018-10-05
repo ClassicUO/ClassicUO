@@ -1090,7 +1090,7 @@ namespace ClassicUO.IO.Resources
             uint* frameOffset = (uint*) _reader.PositionAddress;
             animDir.Frames = new TextureAnimationFrame[frameCount];
 
-            animDir.LastAccessTime = World.Ticks;
+            animDir.LastAccessTime = CoreGame.Ticks;
 
             for (int i = 0; i < frameCount; i++)
             {
@@ -1186,7 +1186,7 @@ namespace ClassicUO.IO.Resources
 
                 ref AnimationDirection dir = ref DataIndex[info.AnimID].Groups[info.Group].Direction[info.Direction];
 
-                if (World.Ticks - dir.LastAccessTime >= 3000)
+                if (CoreGame.Ticks - dir.LastAccessTime >= 3000)
                 {
                     for (int j = 0; j < dir.FrameCount; j++)
                     {

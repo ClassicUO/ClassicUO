@@ -1573,7 +1573,8 @@ namespace ClassicUO.Network
                 case 4: // close generic gump
                     Service.Get<UIManager>().GetByServerSerial(p.ReadUInt())?.OnButtonClick((int)p.ReadUInt());
                     break;
-                case 6: //party
+                case 6: // party
+
                     break;
                 case 8: // map change
                     World.MapIndex = p.ReadByte();

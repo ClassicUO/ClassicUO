@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Views
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
 
-            Texture.Ticks = World.Ticks;
+            Texture.Ticks = CoreGame.Ticks;
 
             TextOverhead overhead = (TextOverhead) GameObject;
 

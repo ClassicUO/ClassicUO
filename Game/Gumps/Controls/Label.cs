@@ -117,7 +117,7 @@ namespace ClassicUO.Game.Gumps
         {
             if (FadeOut)
             {
-                _timeCreated = World.Ticks;
+                _timeCreated = CoreGame.Ticks;
             }
         }
 

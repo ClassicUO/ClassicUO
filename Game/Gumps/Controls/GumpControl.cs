@@ -323,7 +323,7 @@ namespace ClassicUO.Game.Gumps
             if (IsDisposed) return false;
 
             if (Texture != null && !Texture.IsDisposed)
-                Texture.Ticks = World.Ticks;
+                Texture.Ticks = CoreGame.Ticks;
 
 
             foreach (GumpControl c in Children)
@@ -509,7 +509,7 @@ namespace ClassicUO.Game.Gumps
         {
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
-            float ms = World.Ticks;
+            float ms = CoreGame.Ticks;
 
             bool doubleClick = false;
 

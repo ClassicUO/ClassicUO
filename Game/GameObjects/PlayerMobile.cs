@@ -783,7 +783,7 @@ namespace ClassicUO.Game.GameObjects
 
 
         //protected override bool NoIterateAnimIndex() => false;
-        protected override bool IsWalking => LastStepTime > World.Ticks - PLAYER_WALKING_DELAY;
+        protected override bool IsWalking => LastStepTime > CoreGame.Ticks - PLAYER_WALKING_DELAY;
         public byte SequenceNumber { get; set; }
         
 
@@ -1482,7 +1482,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (_lastStepRequestedTime > World.Ticks) return false;
+            if (_lastStepRequestedTime > CoreGame.Ticks) return false;
 
             if (_requestedSteps.Count >= MAX_STEP_COUNT)
             {
@@ -1586,7 +1586,7 @@ namespace ClassicUO.Game.GameObjects
             else
                 SequenceNumber++;
 
-            _lastStepRequestedTime = World.Ticks + walkTime;
+            _lastStepRequestedTime = CoreGame.Ticks + walkTime;
 
             GetGroupForAnimation(this);
             return true;

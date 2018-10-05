@@ -122,7 +122,7 @@ namespace ClassicUO.Game.Gumps
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
             _clickedCanDrag = true;
-            float totalMS = World.Ticks;
+            float totalMS = CoreGame.Ticks;
             _picUpTime = totalMS + 800f;
             _clickedPoint = new Point(x, y);
         }
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.Gumps
             {
                 _clickedCanDrag = false;
                 _sendClickIfNotDClick = true;
-                float totalMS = World.Ticks;
+                float totalMS = CoreGame.Ticks;
                 _sClickTime = totalMS + 200f;
             }
         }

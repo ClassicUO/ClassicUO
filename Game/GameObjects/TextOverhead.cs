@@ -51,7 +51,7 @@ namespace ClassicUO.Game.GameObjects
                 TimeToLive = timeToLive;
             }
 
-            TimeCreated = World.Ticks;
+            TimeCreated = CoreGame.Ticks;
         }
 
         public string Text { get; }

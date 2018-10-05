@@ -593,7 +593,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 byte dir = (byte) Layer;
 
-                if (_lastAnimationChangeTime < World.Ticks)
+                if (_lastAnimationChangeTime < CoreGame.Ticks)
                 {
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
 
@@ -618,7 +618,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (direction.Address != 0 || direction.IsUOP)
                         {
-                            direction.LastAccessTime = World.Ticks;
+                            direction.LastAccessTime = CoreGame.Ticks;
                             int fc = direction.FrameCount;
 
                             if (frameIndex >= fc) frameIndex = (sbyte) (fc - 1);
@@ -627,7 +627,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    _lastAnimationChangeTime = World.Ticks + (int) CHARACTER_ANIMATION_DELAY;
+                    _lastAnimationChangeTime = CoreGame.Ticks + (int) CHARACTER_ANIMATION_DELAY;
                 }
             }
         }
