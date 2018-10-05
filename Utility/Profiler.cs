@@ -88,7 +88,7 @@ namespace ClassicUO.Utility
         {
             if (m_Context[m_Context.Count - 1].Name != context_name)
             {
-                Service.Get<Log>().Message(LogTypes.Error,
+                Log.Message(LogTypes.Error,
                     "Profiler.ExitProfiledContext: context_name does not match current context.");
             }
 

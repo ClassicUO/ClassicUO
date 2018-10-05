@@ -2136,7 +2136,7 @@ namespace ClassicUO.Network
             byte type = p.ReadByte();
             if (type == 0xFE)
             {
-                Service.Get<Log>().Message(LogTypes.Info, "Razor ACK sended");
+                Log.Message(LogTypes.Info, "Razor ACK sended");
                 NetClient.Socket.Send(new PRazorAnswer());
             }
         }

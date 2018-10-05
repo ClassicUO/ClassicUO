@@ -931,7 +931,7 @@ namespace ClassicUO.IO.Resources
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 &&
                 animData.Offset == 0)
             {
-                Service.Get<Log>().Message(LogTypes.Warning, "uop animData is null");
+                Log.Message(LogTypes.Warning, "uop animData is null");
                 return false;
             }
 
@@ -943,7 +943,7 @@ namespace ClassicUO.IO.Resources
 
             if (!Zlib.Decompress(buffer, 0, decbuffer, decLen))
             {
-                Service.Get<Log>().Message(LogTypes.Error, "Error to decompress uop animation");
+                Log.Message(LogTypes.Error, "Error to decompress uop animation");
                 return false;
             }
 
@@ -1016,7 +1016,7 @@ namespace ClassicUO.IO.Resources
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {
-                    Service.Get<Log>().Message(LogTypes.Warning, "frame size is null");
+                    Log.Message(LogTypes.Warning, "frame size is null");
                     continue;
                 }
 
@@ -1115,7 +1115,7 @@ namespace ClassicUO.IO.Resources
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {
-                    Service.Get<Log>().Message(LogTypes.Warning, "mul frame size is null");
+                    Log.Message(LogTypes.Warning, "mul frame size is null");
                     continue;
                 }
 

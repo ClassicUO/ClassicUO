@@ -1486,7 +1486,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (_requestedSteps.Count >= MAX_STEP_COUNT)
             {
-                Service.Get<Log>().Message(LogTypes.Warning, "Resync requested.");
+                Log.Message(LogTypes.Warning, "Resync requested.");
                 NetClient.Socket.Send(new PResend());
                 return false;
             }
@@ -1599,7 +1599,7 @@ namespace ClassicUO.Game.GameObjects
             Step step = _requestedSteps.Front();
             if (step.Seq != seq)
             {
-                Service.Get<Log>().Message(LogTypes.Warning, "Resync requested.");
+                Log.Message(LogTypes.Warning, "Resync requested.");
 
                 NetClient.Socket.Send(new PResend());
                 return;
@@ -1629,7 +1629,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_requestedSteps.Count <= 0)
             {
-                Service.Get<Log>().Message(LogTypes.Warning, "Resync requested.");
+                Log.Message(LogTypes.Warning, "Resync requested.");
 
                 NetClient.Socket.Send(new PResend());
                 return;

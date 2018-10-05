@@ -159,7 +159,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (args.Button == MouseButton.Left)
             {
                 GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new Serial[1] { Mobile.Serial });
-                Service.Get<Log>().Message(LogTypes.Info, "Virtue DoubleClick event!!");
+                Log.Message(LogTypes.Info, "Virtue DoubleClick event!!");
             }
         }
 
@@ -168,7 +168,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //CALLS PARTYGUMP
             if (args.Button == MouseButton.Left)
             {
-                Service.Get<Log>().Message(LogTypes.Warning, "Party manifest pic event!!");
+                Log.Message(LogTypes.Warning, "Party manifest pic event!!");
                 //if (UserInterface.GetControl<PartyGump>() == null)
                 //    UserInterface.AddControl(new PartyGump(), 200, 40);
                 //else

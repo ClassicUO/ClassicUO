@@ -55,7 +55,6 @@ namespace ClassicUO
             {
                 //========================================================
                 //SERVICE STACK
-                Service.Register(new Log());
                 Service.Register(game);
                 Service.Register(new SpriteBatch3D(game));
                 Service.Register(new SpriteBatchUI(game));
