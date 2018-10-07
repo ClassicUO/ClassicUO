@@ -2,11 +2,11 @@
 
 <img src="https://user-images.githubusercontent.com/4610892/46581209-fdcd4b00-ca34-11e8-8560-c6c1e08b8463.jpg" width="350">
 
-<img src="https://user-images.githubusercontent.com/4610892/46581321-c8c1f800-ca36-11e8-8c31-571134d7ce27.png" width="800">
-ClassicUO Ultima Online Client - Image taken on UOForever (UOF)
-
 ## What is ClassicUO?
 UOClassic is an alternative client for the MMORPG Ultima Online. The goal of the development is to give players a unique and fluid gaming experience with the focus on speed and performance. In addition, the client should address the broad masses of players because it is platform independent, is constantly developed by an experienced team and listen to the opinions of the players.
+
+<img src="https://user-images.githubusercontent.com/4610892/46581321-c8c1f800-ca36-11e8-8c31-571134d7ce27.png" width="800">
+ClassicUO Ultima Online Client - Image taken on UOForever (UOF)
 
 ## So what paltforms is ClassicUO made for?
 In order to provide a platform independence, modern technologies are used, which are represented on the various system types, including:
