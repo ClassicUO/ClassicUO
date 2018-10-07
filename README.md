@@ -1,6 +1,6 @@
 # ClassicUO
-![alt text](https://user-images.githubusercontent.com/4610892/46581209-fdcd4b00-ca34-11e8-8560-c6c1e08b8463.jpg | width=100)
-Test
+
+<img src="https://user-images.githubusercontent.com/4610892/46581209-fdcd4b00-ca34-11e8-8560-c6c1e08b8463.jpg" width="100">
 
 ![alt text](https://serving.photos.photobox.com/16802059d3745e0750d2b1d054284d0e8bd13156ba39240b1c8a37658eb68c2f89b769c1.jpg)
 Image of ClassicUO on UOForever (UOF)
