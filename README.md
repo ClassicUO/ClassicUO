@@ -3,6 +3,21 @@
 ![alt text](https://serving.photos.photobox.com/16802059d3745e0750d2b1d054284d0e8bd13156ba39240b1c8a37658eb68c2f89b769c1.jpg)
 Image of ClassicUO on UOForever (UOF)
 
+# What is ClassicUO?
+UOClassic is an alternative client for the MMORPG Ultima Online. The goal of the development is to give players a unique and fluid gaming experience with the focus on speed and performance. In addition, the client should address the broad masses of players because it is platform independent, is constantly developed by an experienced team and listen to the opinions of the players.
+
+# So what paltforms is ClassicUO made for?
+In order to provide a platform independence, modern technologies are used, which are represented on the various system types, including:
+* Windows
+* Linux
+* MacOS
+
+# Technologies
+We rely on classic and modern technologies, which are updated constantly or as needed to the current state. Main technologies are for example:
+* .Net Core
+* FNA
+
+
 ## Contribute
 
 ### Build for Visual Studio (2017)
