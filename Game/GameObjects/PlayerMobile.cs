@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Network;
 using ClassicUO.Utility;

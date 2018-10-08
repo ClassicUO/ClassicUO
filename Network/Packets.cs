@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO;
 

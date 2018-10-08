@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.Controls.InGame;
 using ClassicUO.Input;
