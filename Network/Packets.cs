@@ -290,7 +290,7 @@ namespace ClassicUO.Network
 
         public PClientVersion(string v) : base(0xBD)
         {
-            string[] version = v.Split('.', StringSplitOptions.RemoveEmptyEntries);
+            string[] version = v.Split(new [] {'.'}, StringSplitOptions.RemoveEmptyEntries);
 
             WriteASCII($"{version[0]}.{version[1]}.{version[2]}.{version[3]}");
         }
@@ -688,7 +688,7 @@ namespace ClassicUO.Network
         {
             WriteUInt(version);
 
-            string[] clientversion = v.Split('.', StringSplitOptions.RemoveEmptyEntries);
+            string[] clientversion = v.Split(new [] {'.'}, StringSplitOptions.RemoveEmptyEntries);
 
             WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2],
                 clientversion[3]));
