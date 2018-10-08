@@ -405,9 +405,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (deltaY > 0) return Direction.Down;
 
-                if (deltaY == 0) return Direction.East;
-
-                return Direction.Right;
+                return deltaY == 0 ? Direction.East : Direction.Right;
             }
 
             if (deltaX == 0)
