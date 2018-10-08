@@ -35,7 +35,7 @@ namespace ClassicUO.IO.Resources
         {
             _entries = new Dictionary<int, StringEntry>();
 
-            string path = Path.Combine(FileManager.UoFolderPath, "Cliloc.ENU");
+            string path = Path.Combine(FileManager.UoFolderPath, "Cliloc.enu");
             if (!File.Exists(path))
                 return;
 
