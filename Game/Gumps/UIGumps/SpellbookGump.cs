@@ -146,7 +146,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
 
 
-            for (int page = 0; page < _maxPage; page++)
+            for (int page = 1; page <= _maxPage; page++)
             {
                 int currentPage = page;
                 int currentSpellCircle = currentPage * 2 - 2;
