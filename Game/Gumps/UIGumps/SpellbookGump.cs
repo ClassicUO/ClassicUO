@@ -275,11 +275,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(new Label(spell.Name, false, 0x0288, 80, 6) { X = isright ? 275 : 112, Y = 34}, page);
 
-
-            AddChildren(new GumpPicTiled(isright ?  225 : 62, 88, 120, 4, 0x0835), page);
-            AddChildren(new Label("Reagents:", false, 0x0288, font: 6){ X = isright ? 225 : 62, Y = 92 }, page);
-            AddChildren(new Label(spell.CreateReagentListString(",\n"), false, 0x0288, font: 9) { X = isright ? 225 : 62, Y = 114 }, page);
-
+            if (spell.Regs.Length > 0)
+            {
+                AddChildren(new GumpPicTiled(isright ? 225 : 62, 88, 120, 4, 0x0835), page);
+                AddChildren(new Label("Reagents:", false, 0x0288, font: 6) {X = isright ? 225 : 62, Y = 92}, page);
+                AddChildren(
+                    new Label(spell.CreateReagentListString(",\n"), false, 0x0288, font: 9)
+                        {X = isright ? 225 : 62, Y = 114}, page);
+            }
         }
 
         private void OnEntityUpdate(Entity entity)
