@@ -23,6 +23,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -63,21 +64,19 @@ namespace ClassicUO.Game.Views
 
             Settings settings = Service.Get<Settings>();
 
-            
+            int width = Texture.Width - Bounds.X;
+            int height = Texture.Height - Bounds.Y;
 
-            if (position.X - Texture.Width < 0)
-                position.X = 0;
-            else if (position.X > settings.GameWindowWidth - Texture.Width)
-            {
-                position.X = settings.GameWindowWidth - Texture.Width;
-            }
 
-            if (position.Y - Texture.Height < 0)
-                position.Y = 0;
-            else if (position.Y > settings.GameWindowHeight - Texture.Height)
-            {
-                position.Y = settings.GameWindowHeight - Texture.Height;
-            }
+            if (position.X < Bounds.X)
+                position.X = Bounds.X;
+            else if (position.X > settings.GameWindowWidth - width)
+                position.X = settings.GameWindowWidth - width;
+
+            if (position.Y - Bounds.Y < 0)
+                position.Y = Bounds.Y;
+            else if (position.Y > settings.GameWindowHeight - height)
+                position.Y = settings.GameWindowHeight - height;
 
 
             return base.Draw(spriteBatch, position, objectList);
