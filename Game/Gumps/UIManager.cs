@@ -333,6 +333,8 @@ namespace ClassicUO.Game.Gumps
                         switch (e.EventType)
                         {
                             case KeyboardEvent.Press:
+                                // TODO: 
+                                break;
                             case KeyboardEvent.Down:
                                 _keyboardFocusControl.InvokeKeyDown(e.KeyCode, e.Mod);
                                 break;
