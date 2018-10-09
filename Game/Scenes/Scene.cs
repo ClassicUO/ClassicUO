@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using ClassicUO.Game.Gumps;
@@ -52,6 +55,19 @@ namespace ClassicUO.Game.Scenes
         public ScenesType SceneType { get; }
 
 
+        public virtual void Dispose()
+        {
+            if (IsDisposed)
+                return;
+            IsDisposed = true;
+            Unload();
+        }
+
+        public virtual void Update(double totalMS, double frameMS)
+        {
+        }
+
+
         public virtual void Load()
         {
         }
@@ -65,20 +81,7 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-        public virtual void Update(double totalMS, double frameMS)
-        {
-        }
-
 
         public virtual bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI) => true;
-
-
-        public virtual void Dispose()
-        {
-            if (IsDisposed)
-                return;
-            IsDisposed = true;
-            Unload();
-        }
     }
 }

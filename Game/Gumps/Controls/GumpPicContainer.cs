@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    class GumpPicContainer : GumpPic
+    internal class GumpPicContainer : GumpPic
     {
         private Item _item;
 

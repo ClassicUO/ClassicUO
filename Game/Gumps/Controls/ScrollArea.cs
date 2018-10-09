@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,23 +18,22 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    class ScrollArea : GumpControl
+    internal class ScrollArea : GumpControl
     {
         private readonly IScrollBar _scrollBar;
 
         private bool _needUpdate = true;
 
-        public ScrollArea(int x, int y, int w, int h, bool normalScrollbar) : base()
+        public ScrollArea(int x, int y, int w, int h, bool normalScrollbar)
         {
             X = x;
             Y = y;
@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 _scrollBar = new ScrollFlag(this)
                 {
                     X = Width - 14,
-                    Height = h,
+                    Height = h
                 };
             }
 
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
                 if (child is IScrollBar)
                 {
-                    child.Draw(spriteBatch, new Vector3(position.X + child.X, position.Y + child.Y, 0));                    
+                    child.Draw(spriteBatch, new Vector3(position.X + child.X, position.Y + child.Y, 0));
                 }
                 else
                 {
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     {
                         // do nothing
                     }
-                    else if(height + child.Height <= maxheight)
+                    else if (height + child.Height <= maxheight)
                     {
                         if (child.Y < 0)
                         {
@@ -113,14 +113,9 @@ namespace ClassicUO.Game.Gumps.Controls
                             child.Draw(spriteBatch, new Vector3(position.X + child.X, position.Y + child.Y, 0));
                         }
                     }
-                    else
-                    {
-                        // TODO: Future implementation
-                    }
 
                     height += child.Height;
                 }
-
             }
 
             return true;
@@ -187,8 +182,5 @@ namespace ClassicUO.Game.Gumps.Controls
                 _scrollBar.Value = 0;
             }
         }
-
-
-        
     }
 }

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,11 +35,15 @@ namespace ClassicUO.Game.Gumps
 {
     public class UIManager
     {
-        private readonly List<GumpControl> _gumps = new List<GumpControl>();
-        private GumpControl _keyboardFocusControl;
-        private readonly GumpControl[] _mouseDownControls = new GumpControl[5];
         private readonly CursorRenderer _cursor;
+        private readonly List<GumpControl> _gumps = new List<GumpControl>();
         private readonly List<object> _inputBlockingObjects = new List<object>();
+        private readonly GumpControl[] _mouseDownControls = new GumpControl[5];
+
+        private GumpControl _draggingControl;
+        private int _dragOriginX, _dragOriginY;
+        private bool _isDraggingControl;
+        private GumpControl _keyboardFocusControl;
 
         private bool _needSort;
 
@@ -135,13 +142,11 @@ namespace ClassicUO.Game.Gumps
 
                             if (gump.Children.Count > 0)
                             {
-
                                 for (int i = 1; i <= gump.Children.Count; i++)
                                 {
                                     GumpControl g = gump.Children[gump.Children.Count - i];
                                     g.IsTransparent = true;
                                 }
-                              
                             }
 
                             //gump.AddChildren(new CheckerTrans(gparams));
@@ -161,7 +166,8 @@ namespace ClassicUO.Game.Gumps
                         case "xmfhtmlgump":
                             gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]),
                                 int.Parse(gparams[3]), int.Parse(gparams[4]),
-                                int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2",
+                                int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0,
+                                gparams[6] != "0" && gparams[7] == "2",
                                 Cliloc.GetString(int.Parse(gparams[5])),
                                 0, true), page);
                             break;
@@ -171,7 +177,8 @@ namespace ClassicUO.Game.Gumps
                                 color = 0x00FFFFFF;
                             gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]),
                                 int.Parse(gparams[3]), int.Parse(gparams[4]),
-                                int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2",
+                                int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0,
+                                gparams[6] != "0" && gparams[7] == "2",
                                 Cliloc.GetString(int.Parse(gparams[5])),
                                 color, true), page);
                             break;
@@ -182,7 +189,8 @@ namespace ClassicUO.Game.Gumps
 
                             gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]),
                                 int.Parse(gparams[3]), int.Parse(gparams[4]),
-                                int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2",
+                                int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0,
+                                gparams[5] != "0" && gparams[6] == "2",
                                 Cliloc.GetString(int.Parse(gparams[8])),
                                 color, true), page);
                             break;
@@ -225,9 +233,6 @@ namespace ClassicUO.Game.Gumps
                         case "tooltip":
                             break;
                         case "noresize":
-                            break;
-
-                        default:
                             break;
                     }
                 }
@@ -403,6 +408,7 @@ namespace ClassicUO.Game.Gumps
                             if (gump.AcceptMouseInput)
                                 gump.InvokeMouseWheel(e.EventType);
                         }
+
                         break;
                     case MouseEvent.Down:
                         if (gump != null)
@@ -459,7 +465,8 @@ namespace ClassicUO.Game.Gumps
             if (_isDraggingControl)
                 return _draggingControl;
 
-            List<GumpControl> controls = IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal).ToList() : _gumps;
+            List<GumpControl> controls =
+                IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal).ToList() : _gumps;
 
             GumpControl[] mouseoverControls = null;
 
@@ -472,6 +479,7 @@ namespace ClassicUO.Game.Gumps
                     break;
                 }
             }
+
             return mouseoverControls?.FirstOrDefault(s => s.AcceptMouseInput);
         }
 
@@ -538,10 +546,6 @@ namespace ClassicUO.Game.Gumps
             //    }
             //}
         }
-
-        private GumpControl _draggingControl;
-        private bool _isDraggingControl;
-        private int _dragOriginX, _dragOriginY;
 
         public void AttemptDragControl(GumpControl control, Point mousePosition, bool attemptAlwaysSuccessful = false)
         {

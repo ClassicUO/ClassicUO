@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
@@ -40,14 +42,13 @@ namespace ClassicUO
 {
     public class GameLoop : CoreGame
     {
-        private UIManager _uiManager;
+        private RenderedText _infoText;
         private InputManager _inputManager;
-        private SceneManager _sceneManager;
         private JournalData _journalManager;
         private SpriteBatch3D _sb3D;
         private SpriteBatchUI _sbUI;
-
-        private RenderedText _infoText;
+        private SceneManager _sceneManager;
+        private UIManager _uiManager;
 
 
         protected override void Initialize()
@@ -169,7 +170,8 @@ namespace ClassicUO
                         e.Seek(0);
                         e.MoveToData();
                         e.Skip(6);
-                        NetClient.Socket.Send(new PSecondLogin(settings.Username, settings.Password.ToString(), e.ReadUInt()));
+                        NetClient.Socket.Send(new PSecondLogin(settings.Username, settings.Password.ToString(),
+                            e.ReadUInt()));
                         break;
                     case 0xA9:
                         NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName,
@@ -230,8 +232,9 @@ namespace ClassicUO
             _uiManager.Draw(_sbUI);
 
 
-            _infoText.Text = $"FPS: {CurrentFPS}\nObjects: {_sceneManager.CurrentScene.RenderedObjectsCount}\nCalls: {_sb3D.Calls}\nMerged: {_sb3D.Merged}\nTotals: {_sb3D.TotalCalls}\nPos: {(World.Player == null ? "" : World.Player.Position.ToString())}\nSelected: {(_sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty)}";
-            _infoText.Draw(_sbUI, new Vector3( Window.ClientBounds.Width - 150, 20, 0));
+            _infoText.Text =
+                $"FPS: {CurrentFPS}\nObjects: {_sceneManager.CurrentScene.RenderedObjectsCount}\nCalls: {_sb3D.Calls}\nMerged: {_sb3D.Merged}\nTotals: {_sb3D.TotalCalls}\nPos: {(World.Player == null ? "" : World.Player.Position.ToString())}\nSelected: {(_sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty)}";
+            _infoText.Draw(_sbUI, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
 
             _sbUI.End();
         }

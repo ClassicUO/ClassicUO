@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,6 +18,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using ClassicUO.Game.GameObjects;
@@ -33,8 +35,8 @@ namespace ClassicUO.Game.Data
 
         public static int TimeToCompleteMovement(Mobile mobile, bool run)
         {
-            bool mounted = (mobile.IsMounted || mobile.SpeedMode == CharacterSpeedType.FastUnmount ||
-                            mobile.SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || mobile.IsFlying);
+            bool mounted = mobile.IsMounted || mobile.SpeedMode == CharacterSpeedType.FastUnmount ||
+                           mobile.SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || mobile.IsFlying;
 
             if (mounted) return run ? STEP_DELAY_MOUNT_RUN : STEP_DELAY_MOUNT_WALK;
 

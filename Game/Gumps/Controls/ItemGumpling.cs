@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
@@ -32,13 +35,13 @@ namespace ClassicUO.Game.Gumps
     internal class ItemGumpling : GumpControl
     {
         private bool _clickedCanDrag;
-        private float _picUpTime;
         private Point _clickedPoint, _labelClickedPosition;
-        private bool _sendClickIfNotDClick;
+
+
+        private readonly List<Label> _labels = new List<Label>();
+        private float _picUpTime;
         private float _sClickTime;
-
-
-        private List<Label> _labels = new List<Label>();
+        private bool _sendClickIfNotDClick;
 
         public ItemGumpling(Item item)
         {
@@ -190,9 +193,9 @@ namespace ClassicUO.Game.Gumps
                     foreach (TextOverhead overhead in Item.OverHeads)
                     {
                         Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth,
-                               style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
+                            style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
                         {
-                            FadeOut = true,
+                            FadeOut = true
                         };
 
                         label.ControlInfo.Layer = UILayer.Over;
@@ -213,7 +216,6 @@ namespace ClassicUO.Game.Gumps
 
                     y += l.Height;
                 }
-
             }
             else if (_labels.Count > 0)
             {
@@ -221,6 +223,5 @@ namespace ClassicUO.Game.Gumps
                 _labels.Clear();
             }
         }
-
     }
 }

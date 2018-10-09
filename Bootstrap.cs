@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,28 +18,25 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using ClassicUO.Input;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 namespace ClassicUO
 {
     internal static class Bootstrap
     {
+        public static string ExeDirectory { get; private set; }
+        public static Assembly Assembly { get; private set; }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
-
-
-        public static string ExeDirectory { get; private set; }
-        public static Assembly Assembly { get; private set; }
 
 
         private static void Main(string[] args)

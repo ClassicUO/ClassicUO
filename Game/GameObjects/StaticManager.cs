@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 using ClassicUO.Interfaces;
 
@@ -27,12 +30,6 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly List<Static> _activeStatics = new List<Static>();
 
-        public void Add(Static stat)
-        {
-            if (!stat.IsDisposed && stat.OverHeads.Count > 0)
-                _activeStatics.Add(stat);
-        }
-
         public void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _activeStatics.Count; i++)
@@ -41,6 +38,12 @@ namespace ClassicUO.Game.GameObjects
                 if (_activeStatics[i].IsDisposed || _activeStatics[i].OverHeads.Count <= 0)
                     _activeStatics.RemoveAt(i);
             }
+        }
+
+        public void Add(Static stat)
+        {
+            if (!stat.IsDisposed && stat.OverHeads.Count > 0)
+                _activeStatics.Add(stat);
         }
     }
 }

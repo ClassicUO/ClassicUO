@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ClassicUO.Configuration;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
@@ -36,22 +38,23 @@ namespace ClassicUO.Game.Gumps
     public enum ClickPriority
     {
         High,
-        Default,      
-        Low,
+        Default,
+        Low
     }
 
     public abstract class GumpControl : IDrawableUI, IUpdateable, IColorable, IDebuggable
     {
+        private static SpriteTexture _debugTexture;
         private readonly List<GumpControl> _children;
-        private GumpControl _parent;
-        private Rectangle _bounds;
-        private Point _lastClickPosition;
-        private float _maxTimeForDClick;
         private bool _acceptKeyboardInput, _acceptMouseInput;
         private int _activePage;
-        private bool _handlesKeyboardFocus;
+        private Rectangle _bounds;
 
-        protected virtual ClickPriority Priority => ClickPriority.Default;
+        private GumpControlInfo _controlInfo;
+        private bool _handlesKeyboardFocus;
+        private Point _lastClickPosition;
+        private float _maxTimeForDClick;
+        private GumpControl _parent;
 
         protected GumpControl(GumpControl parent = null)
         {
@@ -66,24 +69,10 @@ namespace ClassicUO.Game.Gumps
             Debug = false;
         }
 
-
-        //internal event Action<GumpControl, int, int, MouseButton> MouseDoubleClickEvent;
-        public event EventHandler<MouseEventArgs> MouseDown,
-            MouseUp,
-            MouseMove,
-            MouseEnter,
-            MouseLeft,
-            MouseClick,
-            MouseDoubleClick;
-
-        public event EventHandler<MouseWheelEventArgs> MouseWheel;
-        public event EventHandler<KeyboardEventArgs> Keyboard;
+        protected virtual ClickPriority Priority => ClickPriority.Default;
 
         public Serial ServerSerial { get; set; }
         public Serial LocalSerial { get; set; }
-        public bool AllowedToDraw { get; set; }
-        public SpriteTexture Texture { get; set; }
-        public Vector3 HueVector { get; set; }
         public int Page { get; set; }
 
         public Point Location
@@ -114,7 +103,6 @@ namespace ClassicUO.Game.Gumps
         public bool IsEditable { get; set; }
         public bool IsTransparent { get; set; }
         public bool IgnoreParentFill { get; set; }
-        public bool Debug { get; set; }
         public IReadOnlyList<GumpControl> Children => _children;
 
         public UIManager UIManager { get; }
@@ -173,7 +161,7 @@ namespace ClassicUO.Game.Gumps
                     if (IsInitialized)
                         OnResize();
                 }
-            } 
+            }
         }
 
         public int X
@@ -237,38 +225,103 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        private GumpControlInfo _controlInfo;
-
         public GumpControlInfo ControlInfo => _controlInfo ?? (_controlInfo = new GumpControlInfo(this));
 
-
-        public void Initialize()
+        public virtual bool HandlesKeyboardFocus
         {
-            IsDisposed = false;
-            IsEnabled = true;
-            IsInitialized = true;
-            IsVisible = true;
-            InitializeControls();
-            OnInitialize();
+            get
+            {
+                if (!IsEnabled || !IsInitialized || IsDisposed || !IsVisible)
+                    return false;
+
+                if (_handlesKeyboardFocus)
+                    return true;
+
+                if (_children == null)
+                    return false;
+
+                foreach (GumpControl c in _children)
+                {
+                    if (c.HandlesKeyboardFocus)
+                        return true;
+                }
+
+                return false;
+            }
+            set => _handlesKeyboardFocus = value;
         }
 
-        private void InitializeControls()
+        public int ActivePage
         {
-            bool initializedKeyboardFocusedControl = false;
-
-            foreach (GumpControl c in _children)
+            get => _activePage;
+            set
             {
-                if (!c.IsInitialized)
-                {
-                    c.Initialize();
+                UIManager _uiManager = Service.Get<UIManager>();
+                _activePage = value;
 
-                    if (!initializedKeyboardFocusedControl && c.AcceptKeyboardInput)
+                if (_uiManager.KeyboardFocusControl != null)
+                {
+                    if (Children.Contains(_uiManager.KeyboardFocusControl))
                     {
-                        UIManager.KeyboardFocusControl = c;
-                        initializedKeyboardFocusedControl = true;
+                        if (_uiManager.KeyboardFocusControl.Page != 0)
+                            _uiManager.KeyboardFocusControl = null;
+                    }
+                }
+
+                // When ActivePage changes, check to see if there are new text input boxes
+                // that we should redirect text input to.
+                if (_uiManager.KeyboardFocusControl == null)
+                {
+                    foreach (GumpControl c in Children)
+                    {
+                        if (c.HandlesKeyboardFocus && c.Page == _activePage)
+                        {
+                            _uiManager.KeyboardFocusControl = c;
+                            break;
+                        }
                     }
                 }
             }
+        }
+
+        public Vector3 HueVector { get; set; }
+        public bool Debug { get; set; }
+        public bool AllowedToDraw { get; set; }
+        public SpriteTexture Texture { get; set; }
+
+        public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        {
+            if (IsDisposed) return false;
+
+            if (Texture != null && !Texture.IsDisposed)
+                Texture.Ticks = CoreGame.Ticks;
+
+
+            foreach (GumpControl c in Children)
+            {
+                if (c.Page == 0 || c.Page == ActivePage)
+                {
+                    if (c.IsVisible && c.IsInitialized)
+                    {
+                        Vector3 offset = new Vector3(c.X + position.X, c.Y + position.Y, position.Z);
+                        c.Draw(spriteBatch, offset, hue);
+                    }
+                }
+            }
+
+            if (IsVisible && Debug)
+            {
+                if (_debugTexture == null)
+                {
+                    _debugTexture = new SpriteTexture(1, 1);
+                    _debugTexture.SetData(new Color[1] {Color.Green});
+                }
+
+                spriteBatch.DrawRectangle(_debugTexture,
+                    new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
+            }
+
+            return true;
         }
 
         public virtual void Update(double totalMS, double frameMS)
@@ -316,40 +369,47 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        private static SpriteTexture _debugTexture;
 
-        public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        //internal event Action<GumpControl, int, int, MouseButton> MouseDoubleClickEvent;
+        public event EventHandler<MouseEventArgs> MouseDown,
+            MouseUp,
+            MouseMove,
+            MouseEnter,
+            MouseLeft,
+            MouseClick,
+            MouseDoubleClick;
+
+        public event EventHandler<MouseWheelEventArgs> MouseWheel;
+        public event EventHandler<KeyboardEventArgs> Keyboard;
+
+
+        public void Initialize()
         {
-            if (IsDisposed) return false;
+            IsDisposed = false;
+            IsEnabled = true;
+            IsInitialized = true;
+            IsVisible = true;
+            InitializeControls();
+            OnInitialize();
+        }
 
-            if (Texture != null && !Texture.IsDisposed)
-                Texture.Ticks = CoreGame.Ticks;
+        private void InitializeControls()
+        {
+            bool initializedKeyboardFocusedControl = false;
 
-
-            foreach (GumpControl c in Children)
+            foreach (GumpControl c in _children)
             {
-                if (c.Page == 0 || c.Page == ActivePage)
+                if (!c.IsInitialized)
                 {
-                    if (c.IsVisible && c.IsInitialized)
+                    c.Initialize();
+
+                    if (!initializedKeyboardFocusedControl && c.AcceptKeyboardInput)
                     {
-                        Vector3 offset = new Vector3(c.X + position.X, c.Y + position.Y, position.Z);
-                        c.Draw(spriteBatch, offset, hue);
+                        UIManager.KeyboardFocusControl = c;
+                        initializedKeyboardFocusedControl = true;
                     }
                 }
             }
-
-            if (IsVisible && Debug)
-            {
-                if (_debugTexture == null)
-                {
-                    _debugTexture = new SpriteTexture(1, 1);
-                    _debugTexture.SetData(new Color[1] { Color.Green });
-                }
-
-                spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
-            }
-
-            return true;
         }
 
         //TODO: Future implementation
@@ -384,7 +444,6 @@ namespace ClassicUO.Game.Gumps
 
         //    return true; /*spriteBatch.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);*/
         //}
-
 
 
         internal void SetFocused()
@@ -619,42 +678,34 @@ namespace ClassicUO.Game.Gumps
 
         protected virtual void OnMove()
         {
-
         }
 
         protected virtual void OnResize()
         {
-            
         }
 
         protected virtual void OnInitialize()
         {
-
         }
 
         protected virtual void OnClosing()
         {
-
         }
 
         protected virtual void OnFocusEnter()
         {
-
         }
 
         protected virtual void OnFocusLeft()
         {
-
         }
 
         protected virtual void OnChildAdded()
         {
-
         }
 
         protected virtual void OnChildRemoved()
         {
-
         }
 
         protected virtual void CloseWithRightClick()
@@ -693,63 +744,6 @@ namespace ClassicUO.Game.Gumps
         {
             if (Parent != null)
                 Parent.ChangePage(pageIndex);
-        }
-
-        public virtual bool HandlesKeyboardFocus
-        {
-            get
-            {
-                if (!IsEnabled || !IsInitialized || IsDisposed || !IsVisible)
-                    return false;
-
-                if (_handlesKeyboardFocus)
-                    return true;
-
-                if (_children == null)
-                    return false;
-
-                foreach (GumpControl c in _children)
-                {
-                    if (c.HandlesKeyboardFocus)
-                        return true;
-                }
-
-                return false;
-            }
-            set => _handlesKeyboardFocus = value;
-        }
-
-        public int ActivePage
-        {
-            get => _activePage;
-            set
-            {
-                UIManager _uiManager = Service.Get<UIManager>();
-                _activePage = value;
-
-                if (_uiManager.KeyboardFocusControl != null)
-                {
-                    if (Children.Contains(_uiManager.KeyboardFocusControl))
-                    {
-                        if (_uiManager.KeyboardFocusControl.Page != 0)
-                            _uiManager.KeyboardFocusControl = null;
-                    }
-                }
-
-                // When ActivePage changes, check to see if there are new text input boxes
-                // that we should redirect text input to.
-                if (_uiManager.KeyboardFocusControl == null)
-                {
-                    foreach (GumpControl c in Children)
-                    {
-                        if (c.HandlesKeyboardFocus && c.Page == _activePage)
-                        {
-                            _uiManager.KeyboardFocusControl = c;
-                            break;
-                        }
-                    }
-                }
-            }
         }
 
         public virtual void Dispose()

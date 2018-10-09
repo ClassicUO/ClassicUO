@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -32,11 +35,11 @@ namespace ClassicUO.Game.GameObjects
         private readonly List<T> _added = new List<T>(), _removed = new List<T>();
         private readonly ConcurrentDictionary<Serial, T> _entities = new ConcurrentDictionary<Serial, T>();
 
+        public int Count => _entities.Count;
+
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IEnumerator<T> GetEnumerator() => _entities.Values.GetEnumerator();
-
-        public int Count => _entities.Count;
 
 
         public event EventHandler<CollectionChangedEventArgs<T>> Added, Removed;

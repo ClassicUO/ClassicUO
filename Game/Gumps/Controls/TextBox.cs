@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Input;
 using ClassicUO.Input.TextEntry;
 using ClassicUO.Renderer;
@@ -29,9 +32,9 @@ namespace ClassicUO.Game.Gumps
     public class TextBox : GumpControl
     {
         private const float CARAT_BLINK_TIME = 500f;
+        private readonly TextEntry _entry;
 
         private bool _caratBlink;
-        private readonly TextEntry _entry;
 
 
         public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true,
@@ -47,11 +50,11 @@ namespace ClassicUO.Game.Gumps
         }
 
         public TextBox(string[] parts, string[] lines) : this
-        (   1,
-            parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, 
-            parts[0] == "textentrylimited" ? int.Parse(parts[3]) : 0, 
-            width: int.Parse(parts[3]),
-            style: FontStyle.BlackBorder, 
+        (1,
+            parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1,
+            parts[0] == "textentrylimited" ? int.Parse(parts[3]) : 0,
+            int.Parse(parts[3]),
+            style: FontStyle.BlackBorder,
             hue: Hue.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);
@@ -144,7 +147,7 @@ namespace ClassicUO.Game.Gumps
                     //if ((_entry.RenderText.FontStyle & FontStyle.Fixed) == 0)
                     //    _entry.InsertString("\n");
                     //else
-                        Parent.OnKeybaordReturn(Graphic, Text);
+                    Parent.OnKeybaordReturn(Graphic, Text);
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     if (ReplaceDefaultTextOnFirstKeyPress)

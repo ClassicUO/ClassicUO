@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using ClassicUO.Configuration;
 using ClassicUO.IO.Resources;
@@ -45,16 +46,16 @@ namespace ClassicUO.IO
                 //FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(client.FullName);
 
 
-
-                if (!Version.TryParse(Service.Get<Settings>().ClientVersion.Replace(",", ".").Trim(), out Version version))
+                if (!Version.TryParse(Service.Get<Settings>().ClientVersion.Replace(",", ".").Trim(),
+                    out Version version))
                 {
                     Log.Message(LogTypes.Error, "Wrong version.");
                     throw new InvalidDataException("Wrong version");
                 }
 
-                ClientVersion = (ClientVersions)((version.Major << 24) |
+                ClientVersion = (ClientVersions) ((version.Major << 24) |
                                                   (version.Minor << 16) | (version.Build << 8) |
-                                                 version.Revision);
+                                                  version.Revision);
 
                 Log.Message(LogTypes.Trace, $"Client version: {version} - {ClientVersion}");
             }

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -27,16 +30,14 @@ namespace ClassicUO
 {
     public abstract class CoreGame : Microsoft.Xna.Framework.Game
     {
-        private float _time;
-        private readonly FpsCounter _fpsCounter;
-        private int _maxFPS = MIN_FPS;
-
         private const int MIN_FPS = 15;
         private const int MAX_FPS = 250;
+        private readonly FpsCounter _fpsCounter;
+        private int _maxFPS = MIN_FPS;
+        private float _time;
 
         protected CoreGame()
         {
-            
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / 300.0f);
             GraphicsDeviceManager = new GraphicsDeviceManager(this);
 
@@ -86,10 +87,10 @@ namespace ClassicUO
                 }
             }
         }
+
         public int CurrentFPS => _fpsCounter.FPS;
 
         public static long Ticks { get; private set; }
-
 
 
         protected override void Update(GameTime gameTime)
@@ -101,7 +102,7 @@ namespace ClassicUO
             double totalms = gameTime.TotalGameTime.TotalMilliseconds;
             double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
 
-            Ticks = (long)totalms;
+            Ticks = (long) totalms;
 
 
             _fpsCounter.Update(gameTime);
@@ -113,10 +114,10 @@ namespace ClassicUO
             OnUIUpdate(totalms, framems);
             OnUpdate(totalms, framems);
             // ###############################
-          
+
             Profiler.ExitContext("Update");
 
-            _time += (float)framems;
+            _time += (float) framems;
             if (_time > IntervalFixedUpdate)
             {
                 _time = _time % IntervalFixedUpdate;
