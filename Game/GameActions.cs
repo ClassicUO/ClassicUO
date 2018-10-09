@@ -110,7 +110,11 @@ namespace ClassicUO.Game
         public static void RequestTargetObjectPosition(ushort x, ushort y, ushort z, ushort modelNumber, int cursorID, byte targetType)
             => Socket.Send(new PTargetObjectPositionRequest(x,y,z,modelNumber, cursorID, targetType));
 
+        public static void CastSpellFromBook(int index, Serial bookSerial)
+            => Socket.Send(new PCastSpellFromBook(index, bookSerial));
 
+        public static void CastSpell(int index)
+            => Socket.Send(new PCastSpell(index));
 
     }
 }
