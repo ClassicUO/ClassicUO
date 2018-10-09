@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Gumps
                     _transparentTexture.SetData(new Color[1] {Color.Black});
                 }
 
-                _transparentTexture.Ticks = World.Ticks;
+                _transparentTexture.Ticks = CoreGame.Ticks;
                 return _transparentTexture;
             }
         }

@@ -294,7 +294,7 @@ namespace ClassicUO.Game.Views
 
             if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction)) return;
 
-            direction.LastAccessTime = World.Ticks;
+            direction.LastAccessTime = CoreGame.Ticks;
 
             int fc = direction.FrameCount;
             if (fc > 0 && animIndex >= fc) animIndex = 0;

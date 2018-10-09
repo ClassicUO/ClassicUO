@@ -80,7 +80,7 @@ namespace ClassicUO.Game.Map
                 chuck.Load(Index);
             }
 
-            chuck.LastAccessTime = World.Ticks;
+            chuck.LastAccessTime = CoreGame.Ticks;
             return chuck.Tiles[x % 8][y % 8];
 
             //int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < _usedIndices.Count; i++)
             {
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
-                if (World.Ticks - block.LastAccessTime >= 3000 && block.HasNoExternalData())
+                if (CoreGame.Ticks - block.LastAccessTime >= 3000 && block.HasNoExternalData())
                 {
                     block.Unload();
                     block = null;
@@ -279,7 +279,7 @@ namespace ClassicUO.Game.Map
                         tile.Load(Index);
                     }
 
-                    tile.LastAccessTime = World.Ticks;
+                    tile.LastAccessTime = CoreGame.Ticks;
                 }
             }
         }

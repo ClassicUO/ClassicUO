@@ -130,7 +130,7 @@ namespace ClassicUO.Game.Views
         {
             if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed) return false;
 
-            Texture.Ticks = World.Ticks;
+            Texture.Ticks = CoreGame.Ticks;
 
             SpriteVertex[] vertex;
 

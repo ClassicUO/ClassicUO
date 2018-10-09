@@ -163,7 +163,7 @@ namespace ClassicUO.Game.Gumps
         {
             if (index < 0 || index >= _entries.Count)
             {
-                Service.Get<Log>().Message(LogTypes.Error, $"Bad index in RenderedTextList.UpdateEntry: {index.ToString()}");
+                Log.Message(LogTypes.Error, $"Bad index in RenderedTextList.UpdateEntry: {index.ToString()}");
                 return;
             }
 

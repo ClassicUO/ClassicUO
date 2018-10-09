@@ -30,7 +30,7 @@ namespace ClassicUO.Configuration
         {
             if (!File.Exists(file))
             {
-                Service.Get<Log>().Message(LogTypes.Warning, file + " not found.");
+                Log.Message(LogTypes.Warning, file + " not found.");
 
                 return null;
             }

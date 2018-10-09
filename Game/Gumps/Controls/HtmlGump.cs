@@ -218,7 +218,7 @@ namespace ClassicUO.Game.Gumps
                     bool inbounds = rect.Contains(x, _scrollBar.Value + y);
                     if (inbounds && Fonts.GetWebLink(link.LinkID, out WebLink result))
                     {
-                        Service.Get<Log>().Message(LogTypes.Info, "LINK CLICKED: " + result.Link);                      
+                        Log.Message(LogTypes.Info, "LINK CLICKED: " + result.Link);                      
                         BrowserHelper.OpenBrowser(result.Link);
                         break;
                     }

@@ -32,12 +32,16 @@ namespace ClassicUO.Game.Gumps
         private float _timeCreated;
         private float _alpha;
 
-        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, float timeToLive = 0.0f)
+        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, float timeToLive = 0.0f)
         {
+            if (font == 0xFF)
+            {
+                font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
+            }
             _gText = new RenderedText
             {
                 IsUnicode = isunicode,
-                Font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0),
+                Font = font,
                 FontStyle = style,
                 Hue = hue++,
                 Align = align,
@@ -52,7 +56,7 @@ namespace ClassicUO.Game.Gumps
             _timeToLive = timeToLive;
         }
 
-        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, TransformHue(Hue.Parse(parts[3])), 0, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT)
+        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, TransformHue(Hue.Parse(parts[3])), 0, style: FontStyle.BlackBorder)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -77,7 +81,12 @@ namespace ClassicUO.Game.Gumps
         public string Text
         {
             get => _gText.Text;
-            set => _gText.Text = value;
+            set
+            {
+                _gText.Text = value;
+                Width = _gText.Width;
+                Height = _gText.Height;
+            } 
         }
 
         public bool FadeOut { get; set; }
@@ -107,7 +116,7 @@ namespace ClassicUO.Game.Gumps
         {
             if (FadeOut)
             {
-                _timeCreated = World.Ticks;
+                _timeCreated = CoreGame.Ticks;
             }
         }
 

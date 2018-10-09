@@ -322,7 +322,7 @@ namespace ClassicUO.Game.Gumps
             if (IsDisposed) return false;
 
             if (Texture != null && !Texture.IsDisposed)
-                Texture.Ticks = World.Ticks;
+                Texture.Ticks = CoreGame.Ticks;
 
 
             foreach (GumpControl c in Children)
@@ -456,6 +456,7 @@ namespace ClassicUO.Game.Gumps
         public void RemoveChildren(GumpControl c)
         {
             c.Parent = null;
+            _children.Remove(c);
             OnChildRemoved();
         }
 
@@ -473,7 +474,7 @@ namespace ClassicUO.Game.Gumps
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseDown(x, y, button);
-            MouseDown.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed));
+            MouseDown.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
         }
 
         public void InvokeMouseUp(Point position, MouseButton button)
@@ -482,7 +483,7 @@ namespace ClassicUO.Game.Gumps
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseUp(x, y, button);
-            MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released));
+            MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released), this);
         }
 
         public void InvokeMouseEnter(Point position)
@@ -492,7 +493,7 @@ namespace ClassicUO.Game.Gumps
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseEnter(x, y);
-            MouseEnter.Raise(new MouseEventArgs(x, y));
+            MouseEnter.Raise(new MouseEventArgs(x, y), this);
         }
 
         public void InvokeMouseLeft(Point position)
@@ -500,14 +501,14 @@ namespace ClassicUO.Game.Gumps
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseLeft(x, y);
-            MouseLeft.Raise(new MouseEventArgs(x, y));
+            MouseLeft.Raise(new MouseEventArgs(x, y), this);
         }
 
         public void InvokeMouseClick(Point position, MouseButton button)
         {
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
-            float ms = World.Ticks;
+            float ms = CoreGame.Ticks;
 
             bool doubleClick = false;
 
@@ -525,7 +526,7 @@ namespace ClassicUO.Game.Gumps
             if (button == MouseButton.Right)
             {
                 OnMouseClick(x, y, button);
-                MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed));
+                MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
 
                 if (CanCloseWithRightClick)
                     CloseWithRightClick();
@@ -535,12 +536,12 @@ namespace ClassicUO.Game.Gumps
                 if (doubleClick)
                 {
                     OnMouseDoubleClick(x, y, button);
-                    MouseDoubleClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed));
+                    MouseDoubleClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
                 }
                 else
                 {
                     OnMouseClick(x, y, button);
-                    MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed));
+                    MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
                 }
             }
         }
@@ -563,7 +564,7 @@ namespace ClassicUO.Game.Gumps
         public void InvokeMouseWheel(MouseEvent delta)
         {
             OnMouseWheel(delta);
-            MouseWheel.Raise(new MouseWheelEventArgs(delta));
+            MouseWheel.Raise(new MouseWheelEventArgs(delta), this);
         }
 
 
