@@ -61,27 +61,26 @@ namespace ClassicUO
             //ConfigurationResolver.Save(settings1, "settings.json");
 
             Settings settings =
-                ConfigurationResolver.Load<Settings>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json"));
+                ConfigurationResolver.Load<Settings>(Path.Combine(Bootstrap.ExeDirectory, "settings.json"));
 
             Service.Register(settings);
 
-            Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...", false);
+            Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
             try
             {
                 FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
             }
-            catch (FileNotFoundException)
+            catch (FileNotFoundException e)
             {
-                Log.Message(LogTypes.None, string.Empty);
                 Log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
-                return;
+                throw e;
             }
 
-            Log.Message(LogTypes.None, "      Done!");
+            Log.Message(LogTypes.Trace, "Done!");
             Log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
 
 
-            Log.Message(LogTypes.Trace, "Loading files...", false);
+            Log.Message(LogTypes.Trace, "Loading files...");
             Stopwatch stopwatch = Stopwatch.StartNew();
             FileManager.LoadFiles();
 
@@ -94,9 +93,13 @@ namespace ClassicUO
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
 
-            Log.Message(LogTypes.None, $"     Done in: {stopwatch.ElapsedMilliseconds} ms!");
+            Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
 
+            Service.Register(this);
+            Service.Register(new SpriteBatch3D(this));
+            Service.Register(new SpriteBatchUI(this));
+            Service.Register(new InputManager());
             Service.Register(_uiManager = new UIManager());
             Service.Register(_sceneManager = new SceneManager());
             Service.Register(_journalManager = new JournalData());
@@ -105,10 +108,10 @@ namespace ClassicUO
             _sb3D = Service.Get<SpriteBatch3D>();
             _sbUI = Service.Get<SpriteBatchUI>();
 
-            Log.Message(LogTypes.Trace, "Network calibration...", false);
+            Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
-            Log.Message(LogTypes.None, "      Done!");
+            Log.Message(LogTypes.Trace, "Done!");
 
 
             MaxFPS = settings.MaxFPS;

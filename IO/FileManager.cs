@@ -18,9 +18,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using System.Diagnostics;
 using System.IO;
+using ClassicUO.Configuration;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.IO
 {
@@ -38,11 +42,21 @@ namespace ClassicUO.IO
                 if (!client.Exists)
                     throw new FileNotFoundException();
 
-                FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(client.FullName);
+                //FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(client.FullName);
 
-                ClientVersion = (ClientVersions) ((versInfo.ProductMajorPart << 24) |
-                                                  (versInfo.ProductMinorPart << 16) | (versInfo.ProductBuildPart << 8) |
-                                                  versInfo.ProductPrivatePart);
+
+
+                if (!Version.TryParse(Service.Get<Settings>().ClientVersion.Replace(",", ".").Trim(), out Version version))
+                {
+                    Log.Message(LogTypes.Error, "Wrong version.");
+                    throw new InvalidDataException("Wrong version");
+                }
+
+                ClientVersion = (ClientVersions)((version.Major << 24) |
+                                                  (version.Minor << 16) | (version.Build << 8) |
+                                                 version.Revision);
+
+                Log.Message(LogTypes.Trace, $"Client version: {version} - {ClientVersion}");
             }
         }
 

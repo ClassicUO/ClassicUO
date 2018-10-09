@@ -88,7 +88,7 @@ namespace ClassicUO.Renderer
             _effect = new Effect(GraphicsDevice,
                 File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, "Graphic/Shaders/IsometricWorld.fxc")));
 
-            _effect.Parameters["HuesPerTexture"].SetValue( /*IO.Resources.Hues.HuesCount*/3000f);
+            _effect.Parameters["HuesPerTexture"].SetValue((float)IO.Resources.Hues.HuesCount);
 
             _drawLightingEffect = _effect.Parameters["DrawLighting"];
             _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];
