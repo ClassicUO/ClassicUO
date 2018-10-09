@@ -21,6 +21,7 @@
 using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.Controls.InGame;

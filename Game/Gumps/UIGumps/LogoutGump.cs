@@ -1,4 +1,3 @@
-using System.Reflection.Metadata.Ecma335;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.IO.Resources;
