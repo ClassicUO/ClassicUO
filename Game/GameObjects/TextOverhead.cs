@@ -38,6 +38,7 @@ namespace ClassicUO.Game.GameObjects
             IsUnicode = isunicode;
             Style = style;
 
+            IsPersistent = true;
 
             if (timeToLive <= 0.0f)
             {

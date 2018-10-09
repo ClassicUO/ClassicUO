@@ -280,7 +280,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void CreateSpellDetailsPage(int page, bool isright, int circle, SpellDefinition spell)
         {
-            AddChildren(new Label(SpellsMagery.CircleNames[circle], false, 0x0288, font: 6) { X = isright ? 64 + 162 : 85, Y = 10 } , page);
+            if (_spellBookType == SpellBookType.Magery)
+                AddChildren(new Label(SpellsMagery.CircleNames[circle], false, 0x0288, font: 6) { X = isright ? 64 + 162 : 85, Y = 10 } , page);
 
             AddChildren(new GumpPic(isright ? 225 : 62, 40, (Graphic)(spell.GumpIconID - 0x1298), 0), page);
 

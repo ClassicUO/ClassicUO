@@ -140,11 +140,14 @@ namespace ClassicUO.Network
 				if (_isCompressionEnabled)
 					DecompressBuffer(ref buffer, ref length);
 
-                lock (_circularBuffer)
-					_circularBuffer.Enqueue(buffer, 0, length);
+			    //lock (_circularBuffer)
+			    {
+			        _circularBuffer.Enqueue(buffer, 0, length);
 
 
-				ReadData();
+			        ReadData();
+                }
+					
                     
 				_socket.Client.BeginReceive(_recvBuffer, 0, BUFF_SIZE, SocketFlags.None, OnReceive, null);
 			}
@@ -166,7 +169,7 @@ namespace ClassicUO.Network
 		{                          
 			if (!IsConnected || _circularBuffer == null || _circularBuffer.Length <= 0) return;
 
-            lock (_circularBuffer)
+           // lock (_circularBuffer)
             {
                 int length = _circularBuffer.Length;
 
