@@ -231,7 +231,7 @@ namespace ClassicUO.Input
                     OnKeyUp(new InputKeyboardEvent(KeyboardEvent.Up, e->key.keysym.sym, 0, e->key.keysym.mod));
                     break;
                 case SDL_EventType.SDL_TEXTINPUT:
-                    string s = Marshal.PtrToStringUTF8((IntPtr) e->text.text);
+                    string s = Utility.StringHelper.ReadUTF8( e->text.text);
                     if (!string.IsNullOrEmpty(s))
                     {
                         OnTextInput(new InputKeyboardEvent(KeyboardEvent.TextInput, SDL_Keycode.SDLK_UNKNOWN, 0,

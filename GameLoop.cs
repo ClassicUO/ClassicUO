@@ -27,7 +27,6 @@ using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -48,13 +47,11 @@ namespace ClassicUO
         private SpriteBatch3D _sb3D;
         private SpriteBatchUI _sbUI;
 
-        private readonly StringBuilder _sb = new StringBuilder();
         private RenderedText _infoText;
 
 
         protected override void Initialize()
         {
-
             //uncomment it and fill it to save your first settings
             //Settings settings1 = new Settings()
             //{
@@ -123,7 +120,8 @@ namespace ClassicUO
                 IsUnicode = true,
                 Font = 3,
                 FontStyle = FontStyle.BlackBorder,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT
+                Align = TEXT_ALIGN_TYPE.TS_LEFT,
+                MaxWidth = 150
             };
 
             // ##### START TEST #####
@@ -229,29 +227,8 @@ namespace ClassicUO
             _uiManager.Draw(_sbUI);
 
 
-            _sb.Clear();
-            _sb.AppendLine("");
-            _sb.Append("FPS: ");
-            _sb.AppendLine(CurrentFPS.ToString());
-            _sb.Append("Objects: ");
-            _sb.AppendLine(_sceneManager.CurrentScene.RenderedObjectsCount.ToString());
-            _sb.Append("Calls: ");
-            _sb.AppendLine(_sb3D.Calls.ToString());
-            _sb.Append("Merged: ");
-            _sb.AppendLine(_sb3D.Merged.ToString());
-            _sb.Append("Totals: ");
-            _sb.AppendLine(_sb3D.TotalCalls.ToString());
-            _sb.Append("Pos: ");
-            _sb.AppendLine(World.Player == null ? "" : World.Player.Position.ToString());
-            _sb.Append("Target - Last: ");
-            _sb.AppendLine(TargetSystem.LastGameObject == null ? "n/a": TargetSystem.LastGameObject.Graphic.ToString());
-            _sb.Append("Selected: ");
-
-            if (_sceneManager.CurrentScene is GameScene gameScene)
-                _sb.AppendLine(gameScene.SelectedObject == null ? "" : gameScene.SelectedObject.ToString());
-
-            _infoText.Text = _sb.ToString();
-            _infoText.Draw(_sbUI, new Vector3( /*Window.ClientBounds.Width - 150*/ 20, 20, 0));
+            _infoText.Text = $"FPS: {CurrentFPS}\nObjects: {_sceneManager.CurrentScene.RenderedObjectsCount}\nCalls: {_sb3D.Calls}\nMerged: {_sb3D.Merged}\nTotals: {_sb3D.TotalCalls}\nPos: {(World.Player == null ? "" : World.Player.Position.ToString())}\nSelected: {(_sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty)}";
+            _infoText.Draw(_sbUI, new Vector3( Window.ClientBounds.Width - 150, 20, 0));
 
             _sbUI.End();
         }

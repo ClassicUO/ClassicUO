@@ -25,7 +25,7 @@ using System.IO;
 using System.Text;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Data
 {
     public static class ContainerManager
     {    

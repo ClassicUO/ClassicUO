@@ -16,7 +16,7 @@ In order to provide a platform independence, modern technologies are used, which
 
 ## Technologies
 We rely on classic and modern technologies, which are updated constantly or as needed to the current state. Main technologies are for example:
-* .Net Core
+* Mono
 * FNA
 
 # Play
@@ -48,7 +48,8 @@ Configuration.Settings settings1 = new Configuration.Settings()
 ```
 5. Select "ClassicUO" to run
 6. Navigate to "Debug" folder and edit "settings.json". Here is an example:
-```{
+```
+{
   "username": "YOURUSERNAME",
   "password": "YOURPASSWORD",
   "ip": "YOURSERVER",
@@ -93,6 +94,7 @@ Configuration.Settings settings1 = new Configuration.Settings()
   "show_incoming_names": false,
   "stat_report": false,
   "skill_report": false
-}```
+}
+```
 
 7. Enjoy

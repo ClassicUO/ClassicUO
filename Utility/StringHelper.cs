@@ -26,7 +26,7 @@ namespace ClassicUO.Utility
     {
         public static string CapitalizeFirstCharacter(string str)
         {
-            if (str == null || str == string.Empty)
+            if (string.IsNullOrEmpty(str))
                 return string.Empty;
             if (str.Length == 1)
                 return char.ToUpper(str[0]).ToString();
@@ -35,7 +35,7 @@ namespace ClassicUO.Utility
 
         public static string CapitalizeAllWords(string str)
         {
-            if (str == null || str == string.Empty)
+            if (string.IsNullOrEmpty(str))
                 return string.Empty;
             if (str.Length == 1)
                 return char.ToUpper(str[0]).ToString();
@@ -48,10 +48,34 @@ namespace ClassicUO.Utility
                     sb.Append(char.ToUpper(str[i]));
                 else
                     sb.Append(str[i]);
-                capitalizeNext = " .,;!".Contains(str[i]);
+                capitalizeNext = " .,;!".Contains(str[i].ToString());
             }
 
             return sb.ToString();
+        }
+
+        public static unsafe string ReadUTF8(byte* data)
+        {
+            byte* endPtr = data;
+
+            if (*endPtr != 0)
+            {
+                int bytes = 0;
+
+                while (*endPtr != 0)
+                {
+                    endPtr++;
+                    bytes++;
+                }
+
+                char* buffer = stackalloc char[bytes];
+
+                int chars = Encoding.UTF8.GetChars(data, bytes, buffer, bytes);
+
+                return new string(buffer, 0, chars);
+            }
+
+            return string.Empty;
         }
     }
 }

@@ -72,12 +72,6 @@ namespace ClassicUO.Game.Gumps
             return hue;
         }
 
-        public byte Font
-        {
-            get => _gText.Font;
-            set => _gText.Font = value;
-        }
-
         public string Text
         {
             get => _gText.Text;
