@@ -64,7 +64,7 @@ namespace ClassicUO
             //ConfigurationResolver.Save(settings1, "settings.json");
 
             Settings settings =
-                ConfigurationResolver.Load<Settings>(Path.Combine(Environment.CurrentDirectory, "settings.json"));
+                ConfigurationResolver.Load<Settings>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json"));
 
             Service.Register(settings);
 
