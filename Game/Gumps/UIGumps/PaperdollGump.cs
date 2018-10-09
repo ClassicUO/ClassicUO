@@ -167,11 +167,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //CALLS PARTYGUMP
             if (args.Button == MouseButton.Left)
             {
-                Log.Message(LogTypes.Warning, "Party manifest pic event!!");
-                //if (UserInterface.GetControl<PartyGump>() == null)
-                //    UserInterface.AddControl(new PartyGump(), 200, 40);
-                //else
-                //    UserInterface.RemoveControl<PartyGump>();
+                Service.Get<Log>().Message(LogTypes.Warning, "Party manifest pic event!!");
+                if (UIManager.GetByLocalSerial<PartyGumpAdvanced>() == null)
+                {
+                    UIManager.Add(new PartyGumpAdvanced());
+                }
+                else
+                    UIManager.Remove<PartyGumpAdvanced>();
             }
         }
 

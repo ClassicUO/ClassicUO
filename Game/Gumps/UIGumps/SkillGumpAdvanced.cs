@@ -38,6 +38,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private double _totalReal, _totalValue;
         private bool _updateSkillsNeeded;
 
+        
         public SkillGumpAdvanced() : base(0, 0)
         {
             _skillListEntries = new List<SkillListEntry>();
@@ -64,10 +65,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new Label("Cap", true, 1153) { X = 250, Y = 25 });
             //======================================================================================
             AddChildren(new Label("Total", true, 1153) { X = 30, Y = 315 });
+
+            
+
            
-
-
-
             World.Player.SkillsChanged += OnSkillChanged;
         }
 
@@ -105,6 +106,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
+
             base.Draw(spriteBatch, position, hue);
             spriteBatch.Draw2D(_line, new Rectangle((int)position.X + 30, (int)position.Y + 50, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));
             spriteBatch.Draw2D(_line, new Rectangle((int)position.X + 30, (int)position.Y + 310, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));

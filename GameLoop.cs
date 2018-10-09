@@ -27,6 +27,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -242,6 +243,8 @@ namespace ClassicUO
             _sb.AppendLine(_sb3D.TotalCalls.ToString());
             _sb.Append("Pos: ");
             _sb.AppendLine(World.Player == null ? "" : World.Player.Position.ToString());
+            _sb.Append("Target - Last: ");
+            _sb.AppendLine(TargetSystem.LastGameObject == null ? "n/a": TargetSystem.LastGameObject.Graphic.ToString());
             _sb.Append("Selected: ");
 
             if (_sceneManager.CurrentScene is GameScene gameScene)
