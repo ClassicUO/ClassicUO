@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -81,7 +80,7 @@ namespace ClassicUO.Game.Map
                 chuck.Load(Index);
             }
 
-            chuck.LastAccessTime = World.Ticks;
+            chuck.LastAccessTime = CoreGame.Ticks;
             return chuck.Tiles[x % 8][y % 8];
 
             //int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
@@ -194,7 +193,7 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < _usedIndices.Count; i++)
             {
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
-                if (World.Ticks - block.LastAccessTime >= 3000 && block.HasNoExternalData())
+                if (CoreGame.Ticks - block.LastAccessTime >= 3000 && block.HasNoExternalData())
                 {
                     block.Unload();
                     block = null;
@@ -280,7 +279,7 @@ namespace ClassicUO.Game.Map
                         tile.Load(Index);
                     }
 
-                    tile.LastAccessTime = World.Ticks;
+                    tile.LastAccessTime = CoreGame.Ticks;
                 }
             }
         }

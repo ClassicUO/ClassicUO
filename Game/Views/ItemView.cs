@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -159,7 +158,7 @@ namespace ClassicUO.Game.Views
                 if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction))
                     return false;
 
-                direction.LastAccessTime = World.Ticks;
+                direction.LastAccessTime = CoreGame.Ticks;
 
                 int fc = direction.FrameCount;
 

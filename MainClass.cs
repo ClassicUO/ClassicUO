@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -31,17 +30,21 @@ namespace ClassicUO
 {
     internal class MainClass
     {
+
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
 
         private static void Main(string[] args)
         {
+            string libsPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Graphic", "FNA", Environment.Is64BitProcess ? "x64" : "x86");
+
+
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                SetDllDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory + "/Graphic/FNA/",
-                    Environment.Is64BitProcess ? "x64" : "x86"));
+                SetDllDirectory(libsPath);
             }
+
 
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
@@ -51,7 +54,6 @@ namespace ClassicUO
             {
                 //========================================================
                 //SERVICE STACK
-                Service.Register(new Log());
                 Service.Register(game);
                 Service.Register(new SpriteBatch3D(game));
                 Service.Register(new SpriteBatchUI(game));

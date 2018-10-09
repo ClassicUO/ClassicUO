@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -28,6 +27,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -41,7 +41,6 @@ namespace ClassicUO
 {
     public class GameLoop : CoreGame
     {
-        private Log _log;
         private UIManager _uiManager;
         private InputManager _inputManager;
         private SceneManager _sceneManager;
@@ -55,7 +54,6 @@ namespace ClassicUO
 
         protected override void Initialize()
         {
-            _log = Service.Get<Log>();
 
             //uncomment it and fill it to save your first settings
             //Settings settings1 = new Settings()
@@ -66,27 +64,27 @@ namespace ClassicUO
             //ConfigurationResolver.Save(settings1, "settings.json");
 
             Settings settings =
-                ConfigurationResolver.Load<Settings>(Path.Combine(Environment.CurrentDirectory, "settings.json"));
+                ConfigurationResolver.Load<Settings>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json"));
 
             Service.Register(settings);
 
-            _log.Message(LogTypes.Trace, "Checking for Ultima Online installation...", false);
+            Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...", false);
             try
             {
                 FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
             }
             catch (FileNotFoundException)
             {
-                _log.Message(LogTypes.None, string.Empty);
-                _log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
+                Log.Message(LogTypes.None, string.Empty);
+                Log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
                 return;
             }
 
-            _log.Message(LogTypes.None, "      Done!");
-            _log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
+            Log.Message(LogTypes.None, "      Done!");
+            Log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
 
 
-            _log.Message(LogTypes.Trace, "Loading files...", false);
+            Log.Message(LogTypes.Trace, "Loading files...", false);
             Stopwatch stopwatch = Stopwatch.StartNew();
             FileManager.LoadFiles();
 
@@ -99,7 +97,7 @@ namespace ClassicUO
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
 
-            _log.Message(LogTypes.None, $"     Done in: {stopwatch.ElapsedMilliseconds} ms!");
+            Log.Message(LogTypes.None, $"     Done in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
 
             Service.Register(_uiManager = new UIManager());
@@ -110,10 +108,10 @@ namespace ClassicUO
             _sb3D = Service.Get<SpriteBatch3D>();
             _sbUI = Service.Get<SpriteBatchUI>();
 
-            _log.Message(LogTypes.Trace, "Network calibration...", false);
+            Log.Message(LogTypes.Trace, "Network calibration...", false);
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
-            _log.Message(LogTypes.None, "      Done!");
+            Log.Message(LogTypes.None, "      Done!");
 
 
             MaxFPS = settings.MaxFPS;
@@ -150,13 +148,13 @@ namespace ClassicUO
 
             NetClient.Connected += (sender, e) =>
             {
-                _log.Message(LogTypes.Info, "Connected!");
+                Log.Message(LogTypes.Info, "Connected!");
 
                 NetClient.Socket.Send(new PSeed(NetClient.Socket.ClientAddress, clientVersionBuffer));
                 NetClient.Socket.Send(new PFirstLogin(settings.Username, settings.Password.ToString()));
             };
 
-            NetClient.Disconnected += (sender, e) => _log.Message(LogTypes.Warning, "Disconnected!");
+            NetClient.Disconnected += (sender, e) => Log.Message(LogTypes.Warning, "Disconnected!");
 
             NetClient.PacketReceived += (sender, e) =>
             {
@@ -245,6 +243,8 @@ namespace ClassicUO
             _sb.AppendLine(_sb3D.TotalCalls.ToString());
             _sb.Append("Pos: ");
             _sb.AppendLine(World.Player == null ? "" : World.Player.Position.ToString());
+            _sb.Append("Target - Last: ");
+            _sb.AppendLine(TargetSystem.LastGameObject == null ? "n/a": TargetSystem.LastGameObject.Graphic.ToString());
             _sb.Append("Selected: ");
 
             if (_sceneManager.CurrentScene is GameScene gameScene)

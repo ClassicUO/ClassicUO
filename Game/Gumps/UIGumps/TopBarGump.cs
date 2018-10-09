@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -110,7 +109,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.Map:
-                    Service.Get<Log>().Message(LogTypes.Warning, "Map button pushed! Not implemented yet!");
+                    Log.Message(LogTypes.Warning, "Map button pushed! Not implemented yet!");
                     MiniMapGump.Toggle(_scene);
                     break;
                 case Buttons.Paperdoll:
@@ -120,7 +119,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         UIManager.Remove<PaperDollGump>(World.Player);
                     break;
                 case Buttons.Inventory:
-                    Service.Get<Log>().Message(LogTypes.Warning, "Inventory button pushed! Not implemented yet!");
+                    Log.Message(LogTypes.Warning, "Inventory button pushed! Not implemented yet!");
                     break;
                 case Buttons.Journal:
                     if (UIManager.GetByLocalSerial<JournalGump>() == null)
@@ -131,14 +130,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         UIManager.Remove<JournalGump>();
                     break;
                 case Buttons.Chat:
-                    Service.Get<Log>().Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");
+                    Log.Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");
                     break;
                 case Buttons.Help:
                     GameActions.RequestHelp();
-                    Service.Get<Log>().Message(LogTypes.Info, "Help request sent!");
+                    Log.Message(LogTypes.Info, "Help request sent!");
                     break;
                 case Buttons.Debug:
-                    Service.Get<Log>().Message(LogTypes.Warning, "Debug button pushed! Not implemented yet!");
+                    Log.Message(LogTypes.Warning, "Debug button pushed! Not implemented yet!");
                     break;
             }
         }

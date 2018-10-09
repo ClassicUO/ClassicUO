@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -931,7 +930,7 @@ namespace ClassicUO.IO.Resources
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 &&
                 animData.Offset == 0)
             {
-                Service.Get<Log>().Message(LogTypes.Warning, "uop animData is null");
+                Log.Message(LogTypes.Warning, "uop animData is null");
                 return false;
             }
 
@@ -943,7 +942,7 @@ namespace ClassicUO.IO.Resources
 
             if (!Zlib.Decompress(buffer, 0, decbuffer, decLen))
             {
-                Service.Get<Log>().Message(LogTypes.Error, "Error to decompress uop animation");
+                Log.Message(LogTypes.Error, "Error to decompress uop animation");
                 return false;
             }
 
@@ -1016,7 +1015,7 @@ namespace ClassicUO.IO.Resources
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {
-                    Service.Get<Log>().Message(LogTypes.Warning, "frame size is null");
+                    Log.Message(LogTypes.Warning, "frame size is null");
                     continue;
                 }
 
@@ -1090,7 +1089,7 @@ namespace ClassicUO.IO.Resources
             uint* frameOffset = (uint*) _reader.PositionAddress;
             animDir.Frames = new TextureAnimationFrame[frameCount];
 
-            animDir.LastAccessTime = World.Ticks;
+            animDir.LastAccessTime = CoreGame.Ticks;
 
             for (int i = 0; i < frameCount; i++)
             {
@@ -1115,7 +1114,7 @@ namespace ClassicUO.IO.Resources
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {
-                    //Service.Get<Log>().Message(LogTypes.Warning, "mul frame size is null");
+                    Log.Message(LogTypes.Warning, "mul frame size is null");
                     continue;
                 }
 
@@ -1186,7 +1185,7 @@ namespace ClassicUO.IO.Resources
 
                 ref AnimationDirection dir = ref DataIndex[info.AnimID].Groups[info.Group].Direction[info.Direction];
 
-                if (World.Ticks - dir.LastAccessTime >= 3000)
+                if (CoreGame.Ticks - dir.LastAccessTime >= 3000)
                 {
                     for (int j = 0; j < dir.FrameCount; j++)
                     {

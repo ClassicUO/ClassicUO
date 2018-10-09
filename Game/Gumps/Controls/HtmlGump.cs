@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -219,7 +218,7 @@ namespace ClassicUO.Game.Gumps
                     bool inbounds = rect.Contains(x, _scrollBar.Value + y);
                     if (inbounds && Fonts.GetWebLink(link.LinkID, out WebLink result))
                     {
-                        Service.Get<Log>().Message(LogTypes.Info, "LINK CLICKED: " + result.Link);                      
+                        Log.Message(LogTypes.Info, "LINK CLICKED: " + result.Link);                      
                         BrowserHelper.OpenBrowser(result.Link);
                         break;
                     }

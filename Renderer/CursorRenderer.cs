@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -22,11 +21,19 @@
 using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
+using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Gumps.Controls.InGame;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Game.System;
 using ClassicUO.Input;
+using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Entity = ClassicUO.Game.GameObjects.Entity;
 
 namespace ClassicUO.Renderer
 {
@@ -52,9 +59,12 @@ namespace ClassicUO.Renderer
         private readonly InputManager _inputManager;
         private readonly UIManager _uiManager;
         private Settings _settings;
+        
+
 
         public CursorRenderer(UIManager ui)
         {
+            
             _inputManager = Service.Get<InputManager>();
             _uiManager = ui;
 
@@ -158,8 +168,8 @@ namespace ClassicUO.Renderer
                                     break;
                             }
 
-                            _cursorOffset[0, j] = (int) offX;
-                            _cursorOffset[1, j] = (int) offY;
+                            _cursorOffset[0, j] = (int)offX;
+                            _cursorOffset[1, j] = (int)offY;
                         }
                         else
                         {
@@ -192,6 +202,33 @@ namespace ClassicUO.Renderer
         public void Update(double totalMS, double frameMS)
         {
             Graphic = AssignGraphicByState();
+
+            if (TargetSystem.IsTargeting)
+            {
+                switch (TargetSystem.TargetingState)
+                {
+                    case TargetSystem.TargetType.Nothing:
+                        //
+                        break;
+                    case TargetSystem.TargetType.Position:
+                        //
+                        break;
+                    case TargetSystem.TargetType.MultiPlacement:
+                        //
+                        break;
+                    case TargetSystem.TargetType.Object:
+                        Graphic = 0x2076;
+                        if (_inputManager.HandleMouseEvent(MouseEvent.Click, MouseButton.Left))
+                        {
+                            TargetSystem.mouseTargetingEventObject(TargetSystem.LastGameObject = WorldViewportGump.GameScene.SelectedObject);
+                        
+                        }
+                        break;
+                    default:
+                        //
+                        break;
+                }
+            }
 
             if (Texture == null || Texture.IsDisposed || _needGraphicUpdate)
             {
@@ -242,6 +279,8 @@ namespace ClassicUO.Renderer
 
             return _cursorData[war,
                 GetMouseDirection(windowCenterX, windowCenterY, ScreenPosition.X, ScreenPosition.Y, 1)];
+
+
         }
 
 
@@ -273,37 +312,37 @@ namespace ClassicUO.Renderer
             switch (hashf)
             {
                 case 111:
-                    return (int) Direction.West; // W
+                    return (int)Direction.West; // W
                 case 112:
-                    return (int) Direction.Up; // NW
+                    return (int)Direction.Up; // NW
                 case 113:
-                    return (int) Direction.North; // N
+                    return (int)Direction.North; // N
                 case 120:
-                    return (int) Direction.West; // W
+                    return (int)Direction.West; // W
                 case 131:
-                    return (int) Direction.West; // W
+                    return (int)Direction.West; // W
                 case 132:
-                    return (int) Direction.Left; // SW
+                    return (int)Direction.Left; // SW
                 case 133:
-                    return (int) Direction.South; // S
+                    return (int)Direction.South; // S
                 case 210:
-                    return (int) Direction.Right; // N
+                    return (int)Direction.Right; // N
                 case 230:
-                    return (int) Direction.South; // S
+                    return (int)Direction.South; // S
                 case 311:
-                    return (int) Direction.East; // E
+                    return (int)Direction.East; // E
                 case 312:
-                    return (int) Direction.Right; // NE
+                    return (int)Direction.Right; // NE
                 case 313:
-                    return (int) Direction.North; // N
+                    return (int)Direction.North; // N
                 case 320:
-                    return (int) Direction.East; // E
+                    return (int)Direction.East; // E
                 case 331:
-                    return (int) Direction.East; // E
+                    return (int)Direction.East; // E
                 case 332:
-                    return (int) Direction.Down; // SE
+                    return (int)Direction.Down; // SE
                 case 333:
-                    return (int) Direction.South; // S
+                    return (int)Direction.South; // S
             }
 
             return current_facing;
@@ -315,5 +354,8 @@ namespace ClassicUO.Renderer
             int b = val < 0 ? 1 : 0;
             return a - b;
         }
+
+
+
     }
 }

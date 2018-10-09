@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -122,7 +121,7 @@ namespace ClassicUO.Game.Gumps
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
             _clickedCanDrag = true;
-            float totalMS = World.Ticks;
+            float totalMS = CoreGame.Ticks;
             _picUpTime = totalMS + 800f;
             _clickedPoint = new Point(x, y);
         }
@@ -150,7 +149,7 @@ namespace ClassicUO.Game.Gumps
             {
                 _clickedCanDrag = false;
                 _sendClickIfNotDClick = true;
-                float totalMS = World.Ticks;
+                float totalMS = CoreGame.Ticks;
                 _sClickTime = totalMS + 200f;
             }
         }
@@ -191,7 +190,7 @@ namespace ClassicUO.Game.Gumps
                     foreach (TextOverhead overhead in Item.OverHeads)
                     {
                         Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth,
-                               overhead.Style, TEXT_ALIGN_TYPE.TS_CENTER, overhead.TimeToLive)
+                               style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
                         {
                             FadeOut = true,
                         };

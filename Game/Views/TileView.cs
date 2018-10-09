@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -92,7 +91,7 @@ namespace ClassicUO.Game.Views
 
         private bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-            Texture.Ticks = World.Ticks;
+            Texture.Ticks = CoreGame.Ticks;
 
             _vertex[0].Position = position + _vertex0_yOffset;
             _vertex[1].Position = position + _vertex1_yOffset;

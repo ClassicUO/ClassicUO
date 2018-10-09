@@ -1,4 +1,24 @@
-﻿using System;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -8,50 +28,7 @@ using Microsoft.Xna.Framework;
 namespace ClassicUO.Game.GameObjects
 {
     public static class ContainerManager
-    {
-        //private static readonly ContainerData _default = new ContainerData(0x3C, 44, 65, 142, 94, 0x48);
-
-        //static ContainerManager()
-        //{
-        //    try
-        //    {
-        //        using (StreamReader reader = new StreamReader(File.OpenRead(@"D:\Giochi\Ultima Online Classic ORION\OrionData\containers.txt")))
-        //        {
-        //            string line;
-        //            StringBuilder sb = new StringBuilder();
-
-        //            while (!reader.EndOfStream)
-        //            {
-        //                line = reader.ReadLine();
-        //                if (line.StartsWith("#"))
-        //                    continue;
-
-        //                ushort id = ushort.Parse(line.Substring(2, line.IndexOf(" ") - 1), NumberStyles.HexNumber);
-
-        //                line = line.Replace(" ", ",").Remove(line.Length - 1);
-        //                line = $"new ContainerData({line})";
-
-        //                sb.Append("{ 0x");
-        //                sb.Append(id.ToString("X"));
-        //                sb.Append(", ");
-        //                sb.Append(line);
-        //                sb.AppendLine("}, ");
-        //            }
-
-        //            string aaa =
-        //                sb.ToString();
-
-        //        }
-
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine(e);
-        //        throw;
-        //    }
-
-        //}
-
+    {    
         private static readonly Dictionary<Graphic, ContainerData> _data = new Dictionary<Graphic, ContainerData>
         {
             { 0x9, new ContainerData(0x0009,0x0000,0x0000,20,85,124,19)},

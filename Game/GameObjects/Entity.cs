@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -221,7 +220,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Delta d = _delta;
             OnProcessDelta(d);
-            //Items.ProcessDelta();
+            Items.ProcessDelta();
             _delta = Delta.None;
         }
 
@@ -233,11 +232,12 @@ namespace ClassicUO.Game.GameObjects
                 DeferredObject = null;
             }
 
-            foreach (Item i in Items)
-                i.Dispose();
-
-            Items.Clear();
             _properties.Clear();
+            
+            _OnDisposed?.Invoke(this);
+
+            _OnUpdated = null;
+            _OnDisposed = null;
 
             base.Dispose();
         }

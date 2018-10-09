@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -251,10 +250,10 @@ namespace ClassicUO.Network
 
     public sealed class PSkillsStatusChangeRequest : PacketWriter
     {
-        public PSkillsStatusChangeRequest(byte skill, bool state) : base(0x3A)
+        public PSkillsStatusChangeRequest(ushort skillindex, byte lockstate) : base(0x3A)
         {
-            WriteUShort(skill);
-            WriteBool(state);
+            WriteUShort(skillindex);
+            WriteByte(lockstate);
         }
     }
 
@@ -293,7 +292,7 @@ namespace ClassicUO.Network
         {
             string[] version = v.Split('.', StringSplitOptions.RemoveEmptyEntries);
 
-            WriteASCII(string.Format("{0}.{1}.{2}.{3}", version[0], version[1], version[2], version[3]));
+            WriteASCII($"{version[0]}.{version[1]}.{version[2]}.{version[3]}");
         }
     }
 
@@ -496,6 +495,52 @@ namespace ClassicUO.Network
         {
             WriteUShort(id);
             WriteByte(flag);
+        }
+    }
+
+    public sealed class PTargetObjectRequest : PacketWriter
+    {
+        public PTargetObjectRequest(Entity entity, int cursorID, byte cursorType) : base(0x6C)
+        {
+            WriteByte((byte)0x00); 
+            WriteUInt((uint)cursorID); 
+            WriteByte(cursorType); 
+            WriteUInt((Serial)entity.Serial); 
+            WriteUShort((ushort)entity.Position.X); 
+            WriteUShort((ushort)entity.Position.Y); 
+            WriteByte((byte)0x00); 
+            WriteByte((byte)entity.Position.Z);
+            WriteUShort((ushort)0); 
+        }
+    }
+
+    public sealed class PTargetObjectPositionRequest : PacketWriter
+    {
+        public PTargetObjectPositionRequest(ushort x, ushort y, ushort z, ushort modelNumber, int cursorID, byte targetType) : base(0x6C)
+        {
+            WriteByte((byte)0x01); 
+            WriteUInt((uint)cursorID);
+            WriteByte(targetType); 
+            WriteUInt((int)0x00); 
+            WriteUShort(x); 
+            WriteUShort(y); 
+            WriteUShort(z); 
+            WriteUShort(modelNumber); 
+        }
+    }
+
+    public sealed class PTargetCancelRequest : PacketWriter
+    {
+        public PTargetCancelRequest(int cursorID, byte cursorType) : base(0x6C)
+        {
+            WriteByte((byte)0x00); 
+            WriteUInt((uint)cursorID);
+            WriteByte(cursorType); 
+            WriteByte((int)0x00);
+            WriteUShort((ushort)0x00); 
+            WriteUShort((ushort)0x00); 
+            WriteUShort((ushort)0x00); 
+            WriteUShort((ushort)0x00); 
         }
     }
 

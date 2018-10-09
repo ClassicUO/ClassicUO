@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -28,22 +27,19 @@ namespace ClassicUO
     public static class Service
     {
         private static readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
-        private static readonly Log _logger;
-
-        static Service() => _logger = new Log();
 
         public static T Register<T>(T service)
         {
             Type type = typeof(T);
             if (_services.ContainsKey(type))
             {
-                _logger.Message(LogTypes.Error,
+                Log.Message(LogTypes.Error,
                     string.Format("Attempted to register service of type {0} twice.", type.Name));
                 _services.Remove(type);
             }
 
             _services.Add(type, service);
-            _logger.Message(LogTypes.Trace, string.Format("Initialized service : {0}", type.Name));
+            Log.Message(LogTypes.Trace, string.Format("Initialized service : {0}", type.Name));
             return service;
         }
 
@@ -54,7 +50,7 @@ namespace ClassicUO
                 _services.Remove(type);
             else
             {
-                _logger.Message(LogTypes.Error,
+                Log.Message(LogTypes.Error,
                     string.Format(
                         "Attempted to unregister service of type {0}, but no service of this type (or type and equality) is registered.",
                         type.Name));
@@ -75,7 +71,7 @@ namespace ClassicUO
 
             if (failIfNotRegistered)
             {
-                _logger.Message(LogTypes.Error,
+                Log.Message(LogTypes.Error,
                     string.Format(
                         "Attempted to get service service of type {0}, but no service of this type is registered.",
                         type.Name));

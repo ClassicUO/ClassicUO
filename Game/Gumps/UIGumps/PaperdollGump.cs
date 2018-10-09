@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -159,7 +158,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (args.Button == MouseButton.Left)
             {
                 GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new Serial[1] { Mobile.Serial });
-                Service.Get<Log>().Message(LogTypes.Info, "Virtue DoubleClick event!!");
+                Log.Message(LogTypes.Info, "Virtue DoubleClick event!!");
             }
         }
 
@@ -169,10 +168,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (args.Button == MouseButton.Left)
             {
                 Service.Get<Log>().Message(LogTypes.Warning, "Party manifest pic event!!");
-                //if (UserInterface.GetControl<PartyGump>() == null)
-                //    UserInterface.AddControl(new PartyGump(), 200, 40);
-                //else
-                //    UserInterface.RemoveControl<PartyGump>();
+                if (UIManager.GetByLocalSerial<PartyGumpAdvanced>() == null)
+                {
+                    UIManager.Add(new PartyGumpAdvanced());
+                }
+                else
+                    UIManager.Remove<PartyGumpAdvanced>();
             }
         }
 

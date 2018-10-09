@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -79,7 +78,7 @@ namespace ClassicUO.Game.GameObjects
         private ushort _stamina;
         private ushort _staminaMax;
 
-        public Mobile(Serial serial) : base(serial) => _lastAnimationChangeTime = World.Ticks;
+        public Mobile(Serial serial) : base(serial) => _lastAnimationChangeTime = CoreGame.Ticks;
 
         public Deque<Step> Steps { get; } = new Deque<Step>();
 
@@ -232,7 +231,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool IsFlying =>
-            FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte) Flags.Flying & 0x04) != 0;
+            FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte)Flags & 0x04) != 0;
 
         public virtual bool InWarMode
         {
@@ -246,7 +245,7 @@ namespace ClassicUO.Game.GameObjects
                                MathHelper.InRange(Graphic, 0x029A, 0x029B) ||
                                MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || Graphic == 0x03DB || Graphic == 0x03DF ||
                                Graphic == 0x03E2 || 
-                               Graphic == 0x02E8; // Vampiric
+                               Graphic == 0x02E8 || Graphic == 0x02E9; // Vampiric
 
         public override bool Exists => World.Contains(Serial);
 
@@ -268,7 +267,7 @@ namespace ClassicUO.Game.GameObjects
 
         public long LastStepTime { get; set; }
 
-        protected virtual bool IsWalking => LastStepTime > World.Ticks - WALKING_DELAY;
+        protected virtual bool IsWalking => LastStepTime > CoreGame.Ticks - WALKING_DELAY;
         public byte AnimationGroup { get; set; } = 0xFF;
         internal bool IsMoving => Steps.Count > 0;
 
@@ -356,7 +355,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (endX == x && endY == y && endZ == z && endDir == direction) return true;
 
-            if (!IsMoving) LastStepTime = World.Ticks;
+            if (!IsMoving) LastStepTime = CoreGame.Ticks;
 
             Direction moveDir = CalculateDirection(endX, endY, x, y);
 
@@ -464,11 +463,11 @@ namespace ClassicUO.Game.GameObjects
             AnimationDirection = frameDirection;
             AnimationFromServer = false;
 
-            _lastAnimationChangeTime = World.Ticks;
+            _lastAnimationChangeTime = CoreGame.Ticks;
         }
 
         protected virtual bool NoIterateAnimIndex() =>
-            LastStepTime > (uint) (World.Ticks - WALKING_DELAY) && Steps.Count <= 0;
+            LastStepTime > (uint) (CoreGame.Ticks - WALKING_DELAY) && Steps.Count <= 0;
 
         public override void ProcessAnimation()
         {
@@ -485,7 +484,7 @@ namespace ClassicUO.Game.GameObjects
                     if (AnimationFromServer) SetAnimation(0xFF);
 
                     int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (IsMounted ? 1 : 15) ; // default 15 = less smooth
-                    int delay = (int) World.Ticks - (int) LastStepTime;
+                    int delay = (int) CoreGame.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
 
                     if (Position.X != step.X || Position.Y != step.Y)
@@ -533,7 +532,7 @@ namespace ClassicUO.Game.GameObjects
                         Offset = Vector3.Zero;
                         Steps.RemoveFromFront();
 
-                        LastStepTime = World.Ticks;
+                        LastStepTime = CoreGame.Ticks;
 
                         ProcessDelta();
                     }
@@ -541,7 +540,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            if (_lastAnimationChangeTime < World.Ticks && !NoIterateAnimIndex())
+            if (_lastAnimationChangeTime < CoreGame.Ticks && !NoIterateAnimIndex())
             {
                 sbyte frameIndex = AnimIndex;
 
@@ -588,7 +587,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (direction.Address != 0 || direction.IsUOP)
                     {
-                        direction.LastAccessTime = World.Ticks;
+                        direction.LastAccessTime = CoreGame.Ticks;
                         int fc = direction.FrameCount;
 
                         if (AnimationFromServer)
@@ -653,7 +652,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                _lastAnimationChangeTime = World.Ticks + currentDelay;
+                _lastAnimationChangeTime = CoreGame.Ticks + currentDelay;
             }
         }
 

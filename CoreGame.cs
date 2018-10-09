@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -37,6 +36,7 @@ namespace ClassicUO
 
         protected CoreGame()
         {
+            
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / 300.0f);
             GraphicsDeviceManager = new GraphicsDeviceManager(this);
 
@@ -88,6 +88,9 @@ namespace ClassicUO
         }
         public int CurrentFPS => _fpsCounter.FPS;
 
+        public static long Ticks { get; private set; }
+
+
 
         protected override void Update(GameTime gameTime)
         {
@@ -98,9 +101,10 @@ namespace ClassicUO
             double totalms = gameTime.TotalGameTime.TotalMilliseconds;
             double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
 
-            _fpsCounter.Update(gameTime);
+            Ticks = (long)totalms;
 
-            base.Update(gameTime);
+
+            _fpsCounter.Update(gameTime);
 
             // ###############################
             // This should be the right order
@@ -109,11 +113,10 @@ namespace ClassicUO
             OnUIUpdate(totalms, framems);
             OnUpdate(totalms, framems);
             // ###############################
-
+          
             Profiler.ExitContext("Update");
 
-            _time += (float) framems;
-
+            _time += (float)framems;
             if (_time > IntervalFixedUpdate)
             {
                 _time = _time % IntervalFixedUpdate;

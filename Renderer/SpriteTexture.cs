@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -28,7 +27,7 @@ namespace ClassicUO.Renderer
     {
         public SpriteTexture(int width, int height, bool is32bit = true) : base(
             Service.Get<SpriteBatch3D>().GraphicsDevice, width, height, false,
-            is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551) => Ticks = World.Ticks + 3000;
+            is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551) => Ticks = CoreGame.Ticks + 3000;
 
         public long Ticks { get; set; }
     }

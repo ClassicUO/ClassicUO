@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -41,8 +40,7 @@ namespace ClassicUO.Game
 
         public static implicit operator ushort(Graphic color) => color._value;
 
-        public static bool operator ==(Graphic g1, Graphic g2) =>
-            g1.IsInvariant || g2.IsInvariant || g1._value == g2._value;
+        public static bool operator ==(Graphic g1, Graphic g2) => g1._value == g2._value;
 
         public static bool operator !=(Graphic g1, Graphic g2) => g1._value != g2._value;
 
@@ -60,11 +58,15 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            if (obj is Graphic) return this == (Graphic) obj;
-
-            if (obj is ushort) return _value == (ushort) obj;
-
-            return false;
+            switch (obj)
+            {
+                case Graphic graphic:
+                    return this == graphic;
+                case ushort @ushort:
+                    return _value == @ushort;
+                default:
+                    return false;
+            }
         }
 
         public static Graphic Parse(string str)

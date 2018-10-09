@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -78,7 +77,6 @@ namespace ClassicUO.Game
 
         public static bool InGame => Player != null && Map != null;
 
-        public static long Ticks { get; set; }
         public static IsometricLight Light { get; } = new IsometricLight();
 
 
@@ -212,8 +210,10 @@ namespace ClassicUO.Game
                 if (mobile != null) mobile.Equipment[(int) item.Layer] = null;
             }
 
-            foreach (Item i in item.Items) RemoveItem(i);
+            foreach (Item i in item.Items)
+                RemoveItem(i);
 
+            item.Items.Clear();
             item.Dispose();
             return true;
         }
@@ -225,7 +225,7 @@ namespace ClassicUO.Game
 
             foreach (Item i in mobile.Items) RemoveItem(i);
 
-
+            mobile.Items.Clear();
             mobile.Dispose();
             return true;
         }

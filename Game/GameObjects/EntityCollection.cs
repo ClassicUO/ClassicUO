@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -69,7 +68,8 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Add(T entity)
         {
-            if (!_entities.TryAdd(entity.Serial, entity)) return false;
+            if (!_entities.TryAdd(entity.Serial, entity))
+                return false;
 
             _added.Add(entity);
             return true;
@@ -77,7 +77,8 @@ namespace ClassicUO.Game.GameObjects
 
         public T Remove(Serial serial)
         {
-            if (_entities.TryRemove(serial, out T entity)) _removed.Add(entity);
+            if (_entities.TryRemove(serial, out T entity))
+                _removed.Add(entity);
 
             return entity;
         }

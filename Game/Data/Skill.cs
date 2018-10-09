@@ -4,8 +4,7 @@
 //	This project is an alternative client for the game Ultima Online.
 //	The goal of this is to develop a lightweight client considering 
 //	new technologies.  
-//  (Copyright (c) 2018 ClassicUO Development Team)
-//    
+//      
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
@@ -21,15 +20,35 @@
 #endregion
 namespace ClassicUO.Game
 {
-    public struct Property
+    public enum SkillLock : byte
     {
-        public Property(uint cliloc, string args) : this()
+        Up = 0,
+        Down = 1,
+        Locked = 2
+    }
+
+    public sealed class Skill
+    {
+        public Skill(string name, int index, bool click)
         {
-            Cliloc = cliloc;
-            Args = args;
+            Name = name;
+            Index = index;
+            IsClickable = click;
         }
 
-        public uint Cliloc { get; }
-        public string Args { get; }
+        public SkillLock Lock { get; internal set; }
+        public ushort ValueFixed { get; internal set; }
+        public ushort BaseFixed { get; internal set; }
+        public ushort CapFixed { get; internal set; }
+
+        public double Value => ValueFixed / 10.0;
+        public double Base => BaseFixed / 10.0;
+        public double Cap => CapFixed / 10.0;
+
+        public bool IsClickable { get; }
+        public string Name { get; }
+        public int Index { get; }
+
+        public override string ToString() => Name;
     }
 }
