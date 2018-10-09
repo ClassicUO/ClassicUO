@@ -19,8 +19,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -53,13 +56,28 @@ namespace ClassicUO.Game.Views
 
             TextOverhead overhead = (TextOverhead) GameObject;
 
-
-
-
             if (!overhead.IsPersistent && overhead.Alpha < 1.0f)
             {
                 HueVector = RenderExtentions.GetHueVector(0, false, overhead.Alpha, true);
             }
+
+
+            Settings settings = Service.Get<Settings>();
+
+            int width = Texture.Width - Bounds.X;
+            int height = Texture.Height - Bounds.Y;
+
+
+            if (position.X < Bounds.X)
+                position.X = Bounds.X;
+            else if (position.X > settings.GameWindowWidth - width)
+                position.X = settings.GameWindowWidth - width;
+
+            if (position.Y - Bounds.Y < 0)
+                position.Y = Bounds.Y;
+            else if (position.Y > settings.GameWindowHeight - height)
+                position.Y = settings.GameWindowHeight - height;
+
 
             return base.Draw(spriteBatch, position, objectList);
         }

@@ -1,4 +1,3 @@
-using System.Reflection.Metadata.Ecma335;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.IO.Resources;
@@ -18,7 +17,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
 
         private Settings _settings;
-        private Log _log;
         
         public LogoutGump()
             : base(0, 0)
@@ -28,7 +26,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new Button((int) Buttons.Cancel, 0x817, 0x818) { X = 40, Y = 77, ButtonAction = ButtonAction.Activate });
             AddChildren(new Button((int) Buttons.Ok, 0x81A, 0x81B) { X = 100, Y = 77, ButtonAction = ButtonAction.Activate });
             _settings = Service.Get<Settings>();
-            _log = Service.Get<Log>();
 
             CanMove = false;
             ControlInfo.IsModal = true;
@@ -52,9 +49,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Dispose();
                     break;
                 case 1:
-//                    NetClient.Disconnected += (sender, e) => _log.Message(LogTypes.Warning, "Disconnected!");
-//                    World.InGame 
-                    _log.Message(LogTypes.Trace, "Disconnect Button Clicked...\n", false);
+                    //                    NetClient.Disconnected += (sender, e) => _log.Message(LogTypes.Warning, "Disconnected!");
+                    //                    World.InGame 
+                    Log.Message(LogTypes.Trace, "Disconnect Button Clicked...\n", false);
                     Dispose();
                     break;
             }

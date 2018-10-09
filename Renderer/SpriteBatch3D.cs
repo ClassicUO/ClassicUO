@@ -21,6 +21,7 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -50,7 +51,7 @@ namespace ClassicUO.Renderer
         private readonly DepthStencilState _dss = new DepthStencilState
         {
             DepthBufferEnable = true,
-            DepthBufferWriteEnable = true
+            DepthBufferWriteEnable = true,
         };
 
         private readonly Microsoft.Xna.Framework.Game _game;
@@ -202,11 +203,11 @@ namespace ClassicUO.Renderer
 
         private void Enqueue(ref DrawCallInfo call)
         {
-            //if (_enqueuedDrawCalls > 0 && call.TryMerge(ref _drawCalls[_enqueuedDrawCalls - 1]))
-            //{
-            //    Merged++;
-            //    return;
-            //}
+            if (Calls > 0 && call.TryMerge(ref _drawCalls[Calls - 1]))
+            {
+                Merged++;
+                return;
+            }
             _drawCalls[Calls++] = call;
         }
 
@@ -323,7 +324,7 @@ namespace ClassicUO.Renderer
 
         private struct DrawCallInfo : IComparable<DrawCallInfo>
         {
-            public DrawCallInfo(Texture2D texture, int start, int count)
+            public unsafe DrawCallInfo(Texture2D texture, int start, int count)
             {
                 Texture = texture;
                 TextureKey = (uint) texture.GetHashCode();
@@ -338,13 +339,17 @@ namespace ClassicUO.Renderer
 
             public bool TryMerge(ref DrawCallInfo callInfo)
             {
-                if (TextureKey != callInfo.TextureKey)
+                if (TextureKey != callInfo.TextureKey )
                     return false;
                 callInfo.PrimitiveCount += PrimitiveCount;
                 return true;
             }
 
-            public int CompareTo(DrawCallInfo other) => TextureKey.CompareTo(other.TextureKey);
+            public int CompareTo(DrawCallInfo other)
+            {
+                int result = TextureKey.CompareTo(other.TextureKey); 
+                return result;
+            } 
         }
     }
 }

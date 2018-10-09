@@ -27,7 +27,7 @@ namespace ClassicUO.Game.Gumps
     {
         private ushort _lastGump = 0xFFFF;
 
-        public GumpPicBase()
+        protected GumpPicBase()
         {
             CanMove = true;
             AcceptMouseInput = true;

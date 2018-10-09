@@ -20,6 +20,7 @@
 #endregion
 using System;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Views;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -405,9 +406,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (deltaY > 0) return Direction.Down;
 
-                if (deltaY == 0) return Direction.East;
-
-                return Direction.Right;
+                return deltaY == 0 ? Direction.East : Direction.Right;
             }
 
             if (deltaX == 0)

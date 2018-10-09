@@ -38,7 +38,6 @@ namespace ClassicUO.Game.GameObjects
             IsUnicode = isunicode;
             Style = style;
 
-
             if (timeToLive <= 0.0f)
             {
                 TimeToLive = 2500 + text.Substring(text.IndexOf('>') + 1).Length * 100;

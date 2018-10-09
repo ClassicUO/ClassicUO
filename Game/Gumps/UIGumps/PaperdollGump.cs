@@ -167,7 +167,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //CALLS PARTYGUMP
             if (args.Button == MouseButton.Left)
             {
-                Service.Get<Log>().Message(LogTypes.Warning, "Party manifest pic event!!");
+                Log.Message(LogTypes.Warning, "Party manifest pic event!!");
                 if (UIManager.GetByLocalSerial<PartyGumpAdvanced>() == null)
                 {
                     UIManager.Add(new PartyGumpAdvanced());
@@ -224,7 +224,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 case Buttons.LogOut:
                     UIManager.Add(new LogoutGump());
-                    Service.Get<Log>().Message(LogTypes.Info, "Logout request sent!");
+                    Log.Message(LogTypes.Info, "Logout request sent!");
                     break;
 
                 case Buttons.Quests:

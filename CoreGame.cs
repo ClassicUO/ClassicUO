@@ -80,7 +80,7 @@ namespace ClassicUO
                 {
                     _maxFPS = value;
                     if (_maxFPS < MIN_FPS)
-                        _maxFPS = MaxFPS;
+                        _maxFPS = MIN_FPS;
                     else if (_maxFPS > MAX_FPS)
                         _maxFPS = MAX_FPS;
                 }

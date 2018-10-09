@@ -30,8 +30,8 @@ namespace ClassicUO.IO.Resources
 
         public static void Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "Multi.mul");
-            string pathidx = Path.Combine(FileManager.UoFolderPath, "Multi.idx");
+            string path = Path.Combine(FileManager.UoFolderPath, "multi.mul");
+            string pathidx = Path.Combine(FileManager.UoFolderPath, "multi.idx");
 
             if (File.Exists(path) && File.Exists(pathidx))
                 _file = new UOFileMul(path, pathidx, 0x2000, 14);

@@ -119,6 +119,7 @@ namespace ClassicUO.Game.Gumps
 
         public UIManager UIManager { get; }
 
+        public object Tag { get; set; }
 
         public virtual bool AcceptKeyboardInput
         {

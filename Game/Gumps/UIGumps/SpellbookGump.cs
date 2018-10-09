@@ -120,21 +120,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         Y = 52 + 15 * j,
                         AcceptMouseInput = true,
                         LocalSerial = (uint)(index + 1)
-                    }, 1 + i / 2);
-
-                    _indexes[index].MouseClick += (sender, e) =>
-                    {
-
-                    };
-
-                    _indexes[index].MouseDoubleClick += (sender, e) =>
-                    {
-                        GumpControl control = (GumpControl)sender;
-                        if (FileManager.ClientVersion < ClientVersions.CV_308Z)
-                            GameActions.CastSpellFromBook((int)control.LocalSerial.Value, _spellBook.Serial);
-                        else
-                            GameActions.CastSpell((int)control.LocalSerial.Value);
-                    };
+                    }, 1 + i / 2);   
                 }
             }
 
@@ -157,6 +143,72 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
             _maxPage += (totalSpells + 1) / 2;
+
+
+
+            for (int page = 1; page <= _maxPage; page++)
+            {
+                int currentPage = page;
+                int currentSpellCircle = currentPage * 2 - 2;
+                int currentSpellInfoIndex = currentPage * 2 - 10;
+
+                for (int currentCol = 0; currentCol < 2; currentCol++)
+                {
+                    bool isRightPage = currentCol + 1 == 2;
+                    currentSpellInfoIndex += currentCol;
+
+                    if (currentPage <= 4)
+                    {
+                        foreach (KeyValuePair<int, int> spell in _spellList)
+                        {
+                            if (spell.Key == currentSpellCircle)
+                            {
+                                int currentSpellInfoPage = _spellList.IndexOf(spell) / 2;
+                                int spellIndex = currentSpellCircle * 8 + spell.Value;
+                                _indexes[spellIndex - 1].Text = SpellsMagery.GetSpell(spellIndex).Name;
+                                _indexes[spellIndex - 1].Tag = 5 + currentSpellInfoPage;
+
+                                _indexes[spellIndex - 1].MouseClick += (sender, e) =>
+                                {
+                                    SetActivePage((int)_indexes[spellIndex - 1].Tag);
+                                };
+
+                                _indexes[spellIndex - 1].MouseDoubleClick += (sender, e) =>
+                                {
+                                    GumpControl control = (GumpControl)sender;
+                                    if (FileManager.ClientVersion < ClientVersions.CV_308Z)
+                                        GameActions.CastSpellFromBook((int)control.LocalSerial.Value, _spellBook.Serial);
+                                    else
+                                        GameActions.CastSpell((int)control.LocalSerial.Value);
+                                };
+
+
+                                //_indexes[spellIndex - 1].MouseEnter += (sender, e) =>
+                                //{
+                                //    Label control = (Label)sender;
+                                //    control.
+                                //};
+                                //_indexes[spellIndex - 1].MouseLeft += (sender, e) =>
+                                //{
+                                //    Label control = (Label)sender;
+                                //};
+
+                            }
+                        }
+
+                        currentSpellCircle++;
+                    }
+                    else
+                    {
+                        if (currentSpellInfoIndex < _spellList.Count)
+                            CreateSpellDetailsPage(page, isRightPage, _spellList[currentSpellInfoIndex].Key,
+                                SpellsMagery.GetSpell(_spellList[currentSpellInfoIndex].Key * 8 +
+                                                      _spellList[currentSpellInfoIndex].Value));
+                    }
+                }
+
+            }
+
 
             SetActivePage(1);
         }
@@ -221,46 +273,29 @@ namespace ClassicUO.Game.Gumps.UIGumps
             else if (page > _maxPage)
                 page = _maxPage;
 
-            int currentPage = page;
-            int currentSpellCircle = currentPage * 2 - 2;
-            int currentSpellInfoIndex = currentPage * 2 - 10;
-
-            for (int currentCol = 0; currentCol < 2; currentCol++)
-            {
-                bool isRightPage = currentCol + 1 == 2;
-                currentSpellInfoIndex += currentCol;
-
-                if (currentPage <= 4)
-                {
-                    //_indexes[currentSpellCircle].Text = string.Empty;
-
-                    foreach (KeyValuePair<int, int> spell in _spellList)
-                    {
-                        if (spell.Key == currentSpellCircle)
-                        {
-                            int currentSpellInfoPage = _spellList.IndexOf(spell) / 2;
-                            int spellIndex = currentSpellCircle * 8 + spell.Value;
-                            _indexes[spellIndex - 1].Text = SpellsMagery.GetSpell(spellIndex).Name;
-
-                            //_indexes[currentSpellCircle].Text =
-                            //    SpellsMagery.GetSpell(currentSpellCircle * 8 + spell.Value).Name;
-                            //_indexes[spellIndex - 1].Page = 5 + currentSpellInfoPage;
-                        }
-                    }
-
-                    currentSpellCircle++;
-                }
-                else
-                {
-
-                }
-            }
-
             ActivePage = page;
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _maxPage ? 0 : int.MaxValue;
         }
 
+        private void CreateSpellDetailsPage(int page, bool isright, int circle, SpellDefinition spell)
+        {
+            if (_spellBookType == SpellBookType.Magery)
+                AddChildren(new Label(SpellsMagery.CircleNames[circle], false, 0x0288, font: 6) { X = isright ? 64 + 162 : 85, Y = 10 } , page);
+
+            AddChildren(new GumpPic(isright ? 225 : 62, 40, (Graphic)(spell.GumpIconID - 0x1298), 0), page);
+
+            AddChildren(new Label(spell.Name, false, 0x0288, 80, 6) { X = isright ? 275 : 112, Y = 34}, page);
+
+            if (spell.Regs.Length > 0)
+            {
+                AddChildren(new GumpPicTiled(isright ? 225 : 62, 88, 120, 4, 0x0835), page);
+                AddChildren(new Label("Reagents:", false, 0x0288, font: 6) {X = isright ? 225 : 62, Y = 92}, page);
+                AddChildren(
+                    new Label(spell.CreateReagentListString(",\n"), false, 0x0288, font: 9)
+                        {X = isright ? 225 : 62, Y = 114}, page);
+            }
+        }
 
         private void OnEntityUpdate(Entity entity)
         {

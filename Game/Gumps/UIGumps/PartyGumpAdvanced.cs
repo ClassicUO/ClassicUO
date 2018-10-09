@@ -185,7 +185,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Height = 20;
             Member = member;
             //======================================================
-            Name = new Label(member.Name, true, 1153) { Font = 3 };
+            Name = new Label(member.Name, true, 1153, font:3);
             Name.X = 80;
             AddChildren(Name);
             //======================================================

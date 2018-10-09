@@ -37,11 +37,10 @@ namespace ClassicUO
 
         private static void Main(string[] args)
         {
-            string libsPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Graphic", "FNA", Environment.Is64BitProcess ? "x64" : "x86");
-
 
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
+                string libsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "libs", Environment.Is64BitProcess ? "x64" : "x86");
                 SetDllDirectory(libsPath);
             }
 

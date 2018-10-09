@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -1486,7 +1487,6 @@ namespace ClassicUO.Game.GameObjects
 
             if (_requestedSteps.Count >= MAX_STEP_COUNT)
             {
-                Log.Message(LogTypes.Warning, "Resync requested.");
                 NetClient.Socket.Send(new PResend());
                 return false;
             }
@@ -1584,7 +1584,6 @@ namespace ClassicUO.Game.GameObjects
 
             _requestedSteps.AddToBack(step);
             NetClient.Socket.Send(new PWalkRequest(direction, SequenceNumber));
-
             if (SequenceNumber == 0xFF)
                 SequenceNumber = 1;
             else
@@ -1603,11 +1602,11 @@ namespace ClassicUO.Game.GameObjects
             Step step = _requestedSteps.Front();
             if (step.Seq != seq)
             {
-                Log.Message(LogTypes.Warning, "Resync requested.");
 
                 NetClient.Socket.Send(new PResend());
                 return;
             }
+
 
             _requestedSteps.RemoveFromFront();
 
@@ -1633,8 +1632,6 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_requestedSteps.Count <= 0)
             {
-                Log.Message(LogTypes.Warning, "Resync requested.");
-
                 NetClient.Socket.Send(new PResend());
                 return;
             }
