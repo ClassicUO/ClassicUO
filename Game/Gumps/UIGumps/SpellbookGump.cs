@@ -182,6 +182,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
                                         GameActions.CastSpell((int)control.LocalSerial.Value);
                                 };
 
+
+                                //_indexes[spellIndex - 1].MouseEnter += (sender, e) =>
+                                //{
+                                //    Label control = (Label)sender;
+                                //    control.
+                                //};
+                                //_indexes[spellIndex - 1].MouseLeft += (sender, e) =>
+                                //{
+                                //    Label control = (Label)sender;
+                                //};
+
                             }
                         }
 
