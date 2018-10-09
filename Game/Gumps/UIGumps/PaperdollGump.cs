@@ -167,6 +167,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //CALLS PARTYGUMP
             if (args.Button == MouseButton.Left)
             {
+                Service.Get<Log>().Message(LogTypes.Warning, "Party manifest pic event!!");
                 if (UIManager.GetByLocalSerial<PartyGumpAdvanced>() == null)
                 {
                     UIManager.Add(new PartyGumpAdvanced());
