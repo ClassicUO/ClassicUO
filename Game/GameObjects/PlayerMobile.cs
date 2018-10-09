@@ -1487,7 +1487,6 @@ namespace ClassicUO.Game.GameObjects
 
             if (_requestedSteps.Count >= MAX_STEP_COUNT)
             {
-                Log.Message(LogTypes.Warning, "Resync requested in Walk.");
                 NetClient.Socket.Send(new PResend());
                 return false;
             }
@@ -1585,7 +1584,6 @@ namespace ClassicUO.Game.GameObjects
 
             _requestedSteps.AddToBack(step);
             NetClient.Socket.Send(new PWalkRequest(direction, SequenceNumber));
-			Log.Message(LogTypes.Trace, "Sended a step");
             if (SequenceNumber == 0xFF)
                 SequenceNumber = 1;
             else
@@ -1604,14 +1602,11 @@ namespace ClassicUO.Game.GameObjects
             Step step = _requestedSteps.Front();
             if (step.Seq != seq)
             {
-                Log.Message(LogTypes.Warning, "Resync requested in ConfirmWalk.");
 
                 NetClient.Socket.Send(new PResend());
                 return;
             }
 
-
-			Log.Message(LogTypes.Trace, "Removed a step");
 
             _requestedSteps.RemoveFromFront();
 
@@ -1637,8 +1632,6 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_requestedSteps.Count <= 0)
             {
-                Log.Message(LogTypes.Warning, "Resync requested in DenyWalk.");
-
                 NetClient.Socket.Send(new PResend());
                 return;
             }
