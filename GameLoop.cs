@@ -116,7 +116,7 @@ namespace ClassicUO
 
             MaxFPS = settings.MaxFPS;
 
-            _sceneManager.ChangeScene(ScenesType.Loading);
+            _sceneManager.ChangeScene(ScenesType.Login);
 
             _infoText = new RenderedText
             {
@@ -127,7 +127,7 @@ namespace ClassicUO
             };
 
             // ##### START TEST #####
-            TEST(settings);
+            // TEST(settings);
             // #####  END TEST  #####
 
             base.Initialize();

@@ -18,15 +18,28 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.Scenes
 {
     public sealed class LoginScene : Scene
     {
+        SpriteTexture background;
+
         public LoginScene() : base(ScenesType.Login)
         {
         }
 
-
+        public override void Load()
+        {
+            base.Load();
+            
+            UIManager.Add(new LoginGump());
+        }
+        
         private bool OnBeforeLogin() => true;
 
         private bool OnLogin() => true;

@@ -66,7 +66,7 @@ namespace ClassicUO.Game.Gumps
         public Hue Hue { get; set; }
         public Graphic Graphic { get; set; }
         public int MaxCharCount { get; set; }
-        public bool IsPassword { get; set; }
+        public bool IsPassword { get => _entry.IsPassword; set { _entry.IsPassword = value; } }
         public bool NumericOnly { get; set; }
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
         public string Text => _entry.Text;
