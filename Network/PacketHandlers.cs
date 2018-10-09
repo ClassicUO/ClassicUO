@@ -29,8 +29,10 @@ using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.System;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Multi = ClassicUO.Game.GameObjects.Multi;
 
@@ -193,6 +195,7 @@ namespace ClassicUO.Network
             ToClient.Add(0x65, SetWeather);
             ToClient.Add(0x66, BookData); //ToServer.Add(0x66, BookPagesS);
             //ToServer.Add(0x69, ChangeText);
+            ToClient.Add(0x6C, TargetCursor);
             ToClient.Add(0x6E, CharacterAnimation);
             ToClient.Add(0x70, GraphicEffect);
             ToClient.Add(0x71, BulletinBoardData); //ToServer.Add(0x71, BulletinBoardMessagesS);
@@ -294,6 +297,13 @@ namespace ClassicUO.Network
             ToClient.Add(0xF7, PacketList);
         }
 
+        private static void TargetCursor(Packet p)
+        {
+            byte CommandType = p.ReadByte(); 
+            uint CursorID = p.ReadUInt();
+            byte CursorType = p.ReadByte();
+            TargetSystem.SetTargeting((TargetSystem.TargetType)CommandType, (int)CursorID, CursorType);
+        }
 
         private static void ClientTalk(Packet p)
         {
@@ -1532,24 +1542,78 @@ namespace ClassicUO.Network
             {
                 case 0:
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 1: // fast walk prevention
                     for (int i = 0; i < 6; i++) p.ReadUInt();
 
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 2: // add key to fast walk stack
                     uint key = p.ReadUInt();
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 4: // close generic gump
                     Service.Get<UIManager>().GetByServerSerial(p.ReadUInt())?.OnButtonClick((int)p.ReadUInt());
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 6: //party
+                    const byte CommandPartyList = 0x01;
+                    const byte CommandRemoveMember = 0x02;
+                    const byte CommandPrivateMessage = 0x03;
+                    const byte CommandPublicMessage = 0x04;
+                    const byte CommandInvitation = 0x07;
+                    byte SubCommand = p.ReadByte();
+                    switch (SubCommand)
+                    {
+                        case CommandPartyList:
+                            int Count = p.ReadByte();
+                            Serial[] Serials = new Serial[Count];
+                            for (int i = 0; i < Serials.Length; i++)
+                            {
+                                Serials[i] = p.ReadUInt();
+                            }
+                            PartySystem.ReceivePartyMemberList(Serials);
+                            break;
+                        case CommandRemoveMember:
+                            Count = p.ReadByte();
+                            p.ReadUInt();
+                            Serials = new Serial[Count];
+                            for (int i = 0; i < Serials.Length; i++)
+                            {
+                                Serials[i] = p.ReadUInt();
+                            }
+                            PartySystem.ReceiveRemovePartyMember(Serials);
+                            break;
+                        case CommandPrivateMessage:
+                            //Info = new PartyMessageInfo(reader, true);
+                            break;
+                        case CommandPublicMessage:
+                            //Info = new PartyMessageInfo(reader, false);
+                            break;
+                        case CommandInvitation://PARTY INVITE PROGRESS
+                            //Info = new PartyInvitationInfo(reader);
+                            break;
+                        default:
+                            //Tracer.Warn($"Unhandled Subsubcommand {SubsubCommand:X2} in PartyInfo.");
+                            break;
+                    }
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 8: // map change
                     World.MapIndex = p.ReadByte();
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 0x0C: // close statusbar gump
                     Serial serial = p.ReadUInt();
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 0x10: // display equip info
                     Item item = World.Items.Get(p.ReadUInt());
                     if (item == null) return;
@@ -1616,8 +1680,12 @@ namespace ClassicUO.Network
                     }
 
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 0x14: // display popup/context menu
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 0x16: // close user interface windows
                     uint id = p.ReadUInt();
                     serial = p.ReadUInt();
@@ -1634,9 +1702,13 @@ namespace ClassicUO.Network
                     }
 
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 0x18: // enable map patches
 
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 0x19: //extened stats
                     byte version = p.ReadByte();
                     serial = p.ReadUInt();
@@ -1668,6 +1740,8 @@ namespace ClassicUO.Network
                     }
 
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 0x1B: // new spellbook content
                     p.Skip(2);
                     Item spellbook = World.Items.Get(p.ReadUInt());
@@ -1690,6 +1764,8 @@ namespace ClassicUO.Network
                     }
 
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 0x1D: // house revision state
                     serial = p.ReadUInt();
                     uint revision = p.ReadUInt();
@@ -1707,6 +1783,8 @@ namespace ClassicUO.Network
                         NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
 
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 0x20:
                     serial = p.ReadUInt();
                     type = p.ReadByte();
@@ -1717,12 +1795,16 @@ namespace ClassicUO.Network
                     }
 
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 0x21:
 
                     World.Player.PrimaryAbility = (Ability) ((byte) World.Player.PrimaryAbility & 0x7F);
                     World.Player.SecondaryAbility = (Ability) ((byte) World.Player.SecondaryAbility & 0x7F);
 
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 0x22:
                     p.Skip(1);
                     Mobile mobile = World.Mobiles.Get(p.ReadUInt());
@@ -1732,6 +1814,8 @@ namespace ClassicUO.Network
                     }
 
                     break;
+                //===========================================================================================
+                //===========================================================================================
                 case 0x26:
                     byte val = p.ReadByte();
                     if (val > (int)CharacterSpeedType.FastUnmountAndCantRun)

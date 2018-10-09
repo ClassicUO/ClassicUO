@@ -498,6 +498,52 @@ namespace ClassicUO.Network
         }
     }
 
+    public sealed class PTargetObjectRequest : PacketWriter
+    {
+        public PTargetObjectRequest(Entity entity, int cursorID, byte cursorType) : base(0x6C)
+        {
+            WriteByte((byte)0x00); 
+            WriteUInt((uint)cursorID); 
+            WriteByte(cursorType); 
+            WriteUInt((Serial)entity.Serial); 
+            WriteUShort((ushort)entity.Position.X); 
+            WriteUShort((ushort)entity.Position.Y); 
+            WriteByte((byte)0x00); 
+            WriteByte((byte)entity.Position.Z);
+            WriteUShort((ushort)0); 
+        }
+    }
+
+    public sealed class PTargetObjectPositionRequest : PacketWriter
+    {
+        public PTargetObjectPositionRequest(ushort x, ushort y, ushort z, ushort modelNumber, int cursorID, byte targetType) : base(0x6C)
+        {
+            WriteByte((byte)0x01); 
+            WriteUInt((uint)cursorID);
+            WriteByte(targetType); 
+            WriteUInt((int)0x00); 
+            WriteUShort(x); 
+            WriteUShort(y); 
+            WriteUShort(z); 
+            WriteUShort(modelNumber); 
+        }
+    }
+
+    public sealed class PTargetCancelRequest : PacketWriter
+    {
+        public PTargetCancelRequest(int cursorID, byte cursorType) : base(0x6C)
+        {
+            WriteByte((byte)0x00); 
+            WriteUInt((uint)cursorID);
+            WriteByte(cursorType); 
+            WriteByte((int)0x00);
+            WriteUShort((ushort)0x00); 
+            WriteUShort((ushort)0x00); 
+            WriteUShort((ushort)0x00); 
+            WriteUShort((ushort)0x00); 
+        }
+    }
+
     /*public sealed class PASCIIPromptResponse : PacketWriter
     {
         public PASCIIPromptResponse(string text, int len, bool cancel) : base(0x)

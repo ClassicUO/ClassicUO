@@ -41,9 +41,11 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
         private InputManager _inputManager;
         private bool _clicked;
         private Point _lastPosition = Point.Zero;
+        public static GameScene GameScene;
 
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
+            GameScene = scene;
             _settings = Service.Get<Settings>();
             _inputManager = Service.Get<InputManager>();
 

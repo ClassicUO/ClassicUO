@@ -55,18 +55,29 @@ namespace ClassicUO.Game
             MessageFont font = MessageFont.Normal)
             => Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
 
-
         public static void SayParty(string message)
             => Socket.Send(new PPartyMessage(message, World.Player));
 
+        public static void RequestPartyRemoveMember(Serial serial)
+            => Socket.Send(new PPartyRemoveRequest(serial));
+
+        public static void RequestPartyLeave()
+            => Socket.Send(new PPartyRemoveRequest(World.Player));
+
+        public static void RequestPartyInviteByTarget()
+            => Socket.Send(new PPartyInviteRequest());
+
+        public  static void RequestPartyLootState(bool isLootable)
+            => Socket.Send(new PPartyChangeLootTypeRequest(isLootable));
+
         public static void PickUp(Item item, Point point, int? amount = null)
-            => PickUp(item, point.X, point.Y, amount);
+             => PickUp(item, point.X, point.Y, amount);
 
         public static void PickUp(Item item, int x, int y, int? amount = null)
             => _pickUpAction(item, x, y, amount);
 
         public static void DropDown(Serial serial, int x, int y, int z, Serial container)
-            => Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
+            => Socket.Send(new PDropRequestNew(serial, (ushort)x, (ushort)y, (sbyte)z, 0, container));
 
         public static void DropDown(Serial serial, Position position, Serial container)
             => DropDown(serial, position.X, position.Y, position.Z, container);
@@ -87,7 +98,19 @@ namespace ClassicUO.Game
         public static void ChangeSkillLockStatus(ushort skillindex, byte lockstate)
             => Socket.Send(new PSkillsStatusChangeRequest(skillindex, lockstate));
 
-        
+        public static void RequestMobileStatus(Serial serial)
+            => Socket.Send(new PStatusRequest(serial));
+
+        public static void RequestTargetCancel(int cursorID, byte cursorType)
+            => Socket.Send(new PTargetCancelRequest(cursorID, cursorType));
+
+        public static void RequestTargetObject(Entity entity, int cursorID, byte cursorType)
+            => Socket.Send(new PTargetObjectRequest(entity, cursorID, cursorType));
+
+        public static void RequestTargetObjectPosition(ushort x, ushort y, ushort z, ushort modelNumber, int cursorID, byte targetType)
+            => Socket.Send(new PTargetObjectPositionRequest(x,y,z,modelNumber, cursorID, targetType));
+
+
 
     }
 }
