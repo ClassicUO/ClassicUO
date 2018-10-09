@@ -25,8 +25,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             AddChildren(new GumpPic(0, 0, 0x0816, 0));
             AddChildren(new Label("Quit\nUltima Online?", false, 0x0386, 165 ,align: TEXT_ALIGN_TYPE.TS_CENTER ){X = 38, Y = 30});
-            AddChildren(new Button((int) Buttons.Cancel, 0x817, 0x818) { X = 40, Y = 77, ButtonAction = ButtonAction.Activate, ButtonParameter = 0 });
-            AddChildren(new Button((int) Buttons.Ok, 0x81A, 0x81B) { X = 100, Y = 77, ButtonAction = ButtonAction.Activate, ButtonParameter = 1 });
+            AddChildren(new Button((int) Buttons.Cancel, 0x817, 0x818) { X = 40, Y = 77, ButtonAction = ButtonAction.Activate });
+            AddChildren(new Button((int) Buttons.Ok, 0x81A, 0x81B) { X = 100, Y = 77, ButtonAction = ButtonAction.Activate });
             _settings = Service.Get<Settings>();
             _log = Service.Get<Log>();
 
