@@ -96,10 +96,7 @@ namespace ClassicUO.Game.Views
                 return ok;
             }
 
-            if (!item.Effect.IsDisposed)
-                return item.Effect.View.Draw(spriteBatch, position, objectList);
-
-            return false;
+            return !item.Effect.IsDisposed && item.Effect.View.Draw(spriteBatch, position, objectList);
         }
 
 
@@ -120,9 +117,6 @@ namespace ClassicUO.Game.Views
             Animations.Direction = dir;
 
             byte animIndex = (byte) GameObject.AnimIndex;
-            Graphic graphic = 0;
-            EquipConvData? convertedItem = null;
-            Hue color = 0;
 
             for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
             {
@@ -130,6 +124,8 @@ namespace ClassicUO.Game.Views
 
                 if (layer == Layer.Mount) continue;
 
+                Hue color = 0;
+                Graphic graphic = 0;
                 if (layer == Layer.Invalid)
                 {
                     graphic = item.DisplayedGraphic;
@@ -148,7 +144,6 @@ namespace ClassicUO.Game.Views
                     {
                         if (map.TryGetValue(itemEquip.ItemData.AnimID, out EquipConvData data))
                         {
-                            convertedItem = data;
                             graphic = data.Graphic;
                         }
                     }

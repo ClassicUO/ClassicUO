@@ -30,7 +30,6 @@ namespace ClassicUO.Game.Gumps.Controls
     internal class ItemGumplingPaperdoll : ItemGumpling
     {
         private ushort _gumpIndex;
-        private Hue _hueOverride;
 
         public ItemGumplingPaperdoll(int x, int y, Item item) : base(item)
         {
