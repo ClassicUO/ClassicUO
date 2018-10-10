@@ -26,6 +26,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -280,10 +281,10 @@ namespace ClassicUO.Game.GameObjects
         protected override void OnProcessDelta(Delta d)
         {
             base.OnProcessDelta(d);
-            //if (d.HasFlag(Delta.Ownership))
-            //{
-            //    OwnerChanged.Raise(this);
-            //}
+            if (d.HasFlag(Delta.Ownership))
+            {
+                OwnerChanged.Raise(this);
+            }
         }
 
 
