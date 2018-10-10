@@ -110,21 +110,21 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _textEntries.Add(new ChatLineTime(text, 320, font, isunicode, hue));
         }
 
-        protected override void OnResize()
+        internal void Resize()
         {
             if (_textBox != null)
             {
                 int height = Fonts.GetHeightUnicode(1, "ABC", Width, 0,
-                    (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+                    (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
 
                 _textBox.Y = Height - height - 3;
                 _textBox.Width = Width;
-                _textBox.Height = height - 3;
+                _textBox.Height = height + 3;
 
                 CheckerTrans trans = GetControls<CheckerTrans>()[0];
                 trans.Location = new Point(_textBox.X, _textBox.Y);
                 trans.Width = Width;
-                trans.Height = height + 5;
+                trans.Height = height + 3;
             }
         }
 
@@ -141,14 +141,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     X = 0,
                     Y = Height - height - 3,
                     Width = Width,
-                    Height = height - 3
+                    Height = height + 3
                 };
 
 
                 Mode = ChatMode.Default;
 
-                AddChildren(new CheckerTrans {X = _textBox.X, Y = _textBox.Y, Width = Width, Height = height + 5});
+                AddChildren(new CheckerTrans {X = _textBox.X, Y = _textBox.Y, Width = Width, Height = height + 3});
                 AddChildren(_textBox);
+
+
+                Resize();
             }
 
 

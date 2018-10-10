@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Gumps
     {
         private static SpriteTexture _debugTexture;
         private readonly List<GumpControl> _children;
-        private bool _acceptKeyboardInput, _acceptMouseInput;
+        private bool _acceptKeyboardInput, _acceptMouseInput, _mouseIsDown;
         private int _activePage;
         private Rectangle _bounds;
 
@@ -55,6 +55,7 @@ namespace ClassicUO.Game.Gumps
         private Point _lastClickPosition;
         private float _maxTimeForDClick;
         private GumpControl _parent;
+
 
         protected GumpControl(GumpControl parent = null)
         {
@@ -144,8 +145,6 @@ namespace ClassicUO.Game.Gumps
                 if (_bounds.Width != value)
                 {
                     _bounds.Width = value;
-                    if (IsInitialized)
-                        OnResize();
                 }
             }
         }
@@ -158,8 +157,6 @@ namespace ClassicUO.Game.Gumps
                 if (_bounds.Height != value)
                 {
                     _bounds.Height = value;
-                    if (IsInitialized)
-                        OnResize();
                 }
             }
         }
@@ -356,13 +353,11 @@ namespace ClassicUO.Game.Gumps
 
                 if (!IgnoreParentFill)
                 {
-                    if (w != Width || h != Height)
-                    {
+                    if (w != Width)                  
                         Width = w;
-                        Height = h;
-                    }
+                    if (h != Height)
+                        Height = h;              
                 }
-
 
                 if (toremove.Count > 0)
                     toremove.ForEach(s => _children.Remove(s));
@@ -377,7 +372,9 @@ namespace ClassicUO.Game.Gumps
             MouseEnter,
             MouseLeft,
             MouseClick,
-            MouseDoubleClick;
+            MouseDoubleClick,
+            DragBegin,
+            DragEnd;
 
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
         public event EventHandler<KeyboardEventArgs> Keyboard;
@@ -627,14 +624,38 @@ namespace ClassicUO.Game.Gumps
             MouseWheel.Raise(new MouseWheelEventArgs(delta), this);
         }
 
+        public void InvokeDragBegin(Point position)
+        {
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+
+            OnDragBegin(x, y);
+            DragBegin.Raise(new MouseEventArgs(x, y, MouseButton.Left, ButtonState.Pressed), this);
+        }
+
+        public void InvokeDragEnd(Point position)
+        {
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            OnDragEnd(x, y);
+            DragBegin.Raise(new MouseEventArgs(x, y, MouseButton.Left), this);
+        }
 
         protected virtual void OnMouseDown(int x, int y, MouseButton button)
         {
+            _mouseIsDown = true;
             Parent?.OnMouseDown(x, y, button);
         }
 
         protected virtual void OnMouseUp(int x, int y, MouseButton button)
         {
+            _mouseIsDown = false;
+            if (_attempToDrag)
+            {
+                Log.Message(LogTypes.Trace, "END");
+                _attempToDrag = false;
+                InvokeDragEnd(new Point(x, y));
+            }
             Parent?.OnMouseUp(x, y, button);
         }
 
@@ -643,12 +664,19 @@ namespace ClassicUO.Game.Gumps
             Parent?.OnMouseWheel(delta);
         }
 
+        private bool _attempToDrag;
         protected virtual void OnMouseEnter(int x, int y)
         {
+            if (_mouseIsDown && !_attempToDrag && UIManager.InputManager.Offset != Point.Zero)
+            {
+                InvokeDragBegin(new Point(x, y));
+                _attempToDrag = true;
+            }
         }
 
         protected virtual void OnMouseLeft(int x, int y)
         {
+            _attempToDrag = false;
         }
 
         protected virtual void OnMouseClick(int x, int y, MouseButton button)
@@ -659,6 +687,16 @@ namespace ClassicUO.Game.Gumps
         protected virtual void OnMouseDoubleClick(int x, int y, MouseButton button)
         {
             Parent?.OnMouseDoubleClick(x, y, button);
+        }
+
+        protected virtual void OnDragBegin(int x, int y)
+        {
+
+        }
+
+        protected virtual void OnDragEnd(int x, int y)
+        {
+
         }
 
         protected virtual void OnTextInput(string c)
@@ -680,9 +718,6 @@ namespace ClassicUO.Game.Gumps
         {
         }
 
-        protected virtual void OnResize()
-        {
-        }
 
         protected virtual void OnInitialize()
         {

@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="Game\Gumps\UIGumps\LogoutGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyGumpAdvanced.cs" />
+    <Compile Include="Game\Gumps\UIGumps\UseSpellButtonGump.cs" />
     <Compile Include="Game\System\PartySystem.cs" />
     <Compile Include="Game\System\TargetSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

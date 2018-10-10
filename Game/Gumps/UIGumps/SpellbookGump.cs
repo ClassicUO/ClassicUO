@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Utility;
+using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
@@ -214,7 +218,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 SetActivePage((int) ctrl.LocalSerial.Value / 2 + 1);
         }
 
-
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButton.Left && sender is GumpControl ctrl)
@@ -233,6 +236,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void CreateNecromancy()
         {
+
         }
 
         private void CreateChivalry()
@@ -274,16 +278,59 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     new Label(SpellsMagery.CircleNames[circle], false, 0x0288, font: 6)
                         {X = isright ? 64 + 162 : 85, Y = 10}, page);
 
-            AddChildren(new GumpPic(isright ? 225 : 62, 40, (Graphic) (spell.GumpIconID - 0x1298), 0), page);
+            GumpPic spellImage = new GumpPic(isright ? 225 : 62, 40, (Graphic) (spell.GumpIconID - 0x1298), 0)
+            {
+                LocalSerial = (uint)(Graphic)(spell.GumpIconID - 0x1298),
+                Tag = spell.ID
+            };
 
-            AddChildren(new Label(spell.Name, false, 0x0288, 80, 6) {X = isright ? 275 : 112, Y = 34}, page);
+            spellImage.DragBegin += (sender, e) =>
+            {
+                GumpControl ctrl = (GumpControl)sender;
+                SpellDefinition def = SpellsMagery.GetSpell((int) ctrl.Tag);
+                UseSpellButtonGump gump = new UseSpellButtonGump(def)
+                {
+                    X = UIManager.InputManager.MousePosition.X - 22, 
+                    Y = UIManager.InputManager.MousePosition.Y - 22
+                };
+                UIManager.Add(gump);
+                UIManager.AttemptDragControl(gump, UIManager.InputManager.MousePosition, true);
+            };
+       
+            AddChildren(spellImage, page);
+
+            Label spellnameLabel = new Label(spell.Name, false, 0x0288, 80, 6) {X = isright ? 275 : 112, Y = 34};
+            AddChildren(spellnameLabel, page);
 
             if (spell.Regs.Length > 0)
             {
                 AddChildren(new GumpPicTiled(isright ? 225 : 62, 88, 120, 4, 0x0835), page);
                 AddChildren(new Label("Reagents:", false, 0x0288, font: 6) {X = isright ? 225 : 62, Y = 92}, page);
+
+                string reagList = spell.CreateReagentListString(",\n");
+
+                if (_spellBookType == SpellBookType.Magery)
+                {
+                    IEnumerable<char> initials = reagList.Replace(",", string.Empty)
+                        .Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]);
+
+                    foreach (char c in initials)
+                    {
+                        int y = 26;
+
+                        if (spellnameLabel.Height < 24)
+                            y = 31;
+
+                        y += spellnameLabel.Height;
+
+                        AddChildren(new Label(c.ToString(), false, 0x0288, font: 8) {X = isright ? 275 : 112, Y = y},
+                            page);
+                    }
+                }
+
+
                 AddChildren(
-                    new Label(spell.CreateReagentListString(",\n"), false, 0x0288, font: 9)
+                    new Label(reagList, false, 0x0288, font: 9)
                         {X = isright ? 225 : 62, Y = 114}, page);
             }
         }

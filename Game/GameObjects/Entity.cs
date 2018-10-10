@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Interfaces;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -68,6 +69,8 @@ namespace ClassicUO.Game.GameObjects
             Serial = serial;
             Items = new EntityCollection<Item>();
             _position = base.Position;
+
+            PositionChanged += OnPositionChanged;
         }
 
         public EntityCollection<Item> Items { get; }
@@ -199,26 +202,25 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual void OnProcessDelta(Delta d)
         {
-            //if (d.HasFlag(Delta.Appearance))
-            //{
-            //    AppearanceChanged.Raise(this);
-            //}
+            if (d.HasFlag(Delta.Appearance))
+            {
+                AppearanceChanged.Raise(this);
+            }
 
             if (d.HasFlag(Delta.Position))
             {
-                OnPositionChanged(null, EventArgs.Empty);
-                //PositionChanged.Raise(this);
+                PositionChanged.Raise(this);
             }
 
-            //if (d.HasFlag(Delta.Attributes))
-            //{
-            //    AttributesChanged.Raise(this);
-            //}
+            if (d.HasFlag(Delta.Attributes))
+            {
+                AttributesChanged.Raise(this);
+            }
 
-            //if (d.HasFlag(Delta.Properties))
-            //{
-            //    PropertiesChanged.Raise(this);
-            //}
+            if (d.HasFlag(Delta.Properties))
+            {
+                PropertiesChanged.Raise(this);
+            }
         }
 
         public void ProcessDelta()

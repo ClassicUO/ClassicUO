@@ -54,5 +54,7 @@ namespace ClassicUO.Game.Scenes
 
             CurrentScene.Load();
         }
+
+        public T GetScene<T>() where T : Scene => CurrentScene.GetType() == typeof(T) ? (T) CurrentScene : null;
     }
 }

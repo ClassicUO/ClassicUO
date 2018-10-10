@@ -298,20 +298,20 @@ namespace ClassicUO.Game.GameObjects
         protected override void OnProcessDelta(Delta d)
         {
             base.OnProcessDelta(d);
-            //if (d.HasFlag(Delta.Hits))
-            //{
-            //    HitsChanged.Raise(this);
-            //}
+            if (d.HasFlag(Delta.Hits))
+            {
+                HitsChanged.Raise(this);
+            }
 
-            //if (d.HasFlag(Delta.Mana))
-            //{
-            //    ManaChanged.Raise(this);
-            //}
+            if (d.HasFlag(Delta.Mana))
+            {
+                ManaChanged.Raise(this);
+            }
 
-            //if (d.HasFlag(Delta.Stamina))
-            //{
-            //    StaminaChanged.Raise(this);
-            //}
+            if (d.HasFlag(Delta.Stamina))
+            {
+                StaminaChanged.Raise(this);
+            }
         }
 
 

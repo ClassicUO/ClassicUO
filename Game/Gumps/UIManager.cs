@@ -47,7 +47,14 @@ namespace ClassicUO.Game.Gumps
 
         private bool _needSort;
 
-        public UIManager() => _cursor = new CursorRenderer(this);
+        private SpriteBatchUI _sbUI;
+
+        public UIManager()
+        {
+            _cursor = new CursorRenderer(this);
+            _sbUI = Service.Get<SpriteBatchUI>();
+            InputManager = Service.Get<InputManager>();
+        } 
 
 
         public IReadOnlyList<GumpControl> Gumps => _gumps;
@@ -56,6 +63,9 @@ namespace ClassicUO.Game.Gumps
 
         public bool IsMouseOverUI => MouseOverControl != null;
         public bool IsMouseOverWorld => IsMouseOverUI && MouseOverControl is WorldViewport;
+        public int Width => _sbUI.GraphicsDevice.Viewport.Width;
+        public int Height => _sbUI.GraphicsDevice.Viewport.Height;
+        public InputManager InputManager { get; }
 
         public GumpControl KeyboardFocusControl
         {
@@ -355,10 +365,23 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        private void Clip(ref Point position)
+        {
+            if (position.X < -8)
+                position.X = -8;
+            if (position.Y < -8)
+                position.Y = -8;
+            if (position.X >= Width + 8)
+                position.X = Width + 8;
+            if (position.Y >= Height + 8)
+                position.Y = Height + 8;
+        }
+
         private void HandleMouseInput()
         {
-            InputManager inputManager = Service.Get<InputManager>();
-            Point position = inputManager.MousePosition;
+            Point position = InputManager.MousePosition;
+
+            //Clip(ref position);
 
             GumpControl gump = GetMouseOverControl(position);
 
@@ -395,7 +418,7 @@ namespace ClassicUO.Game.Gumps
             if (!IsModalControlOpen && ObjectsBlockingInputExists)
                 return;
 
-            IEnumerable<InputMouseEvent> events = inputManager.GetMouseEvents();
+            IEnumerable<InputMouseEvent> events = InputManager.GetMouseEvents();
 
             foreach (InputMouseEvent e in events)
             {
@@ -573,8 +596,11 @@ namespace ClassicUO.Game.Gumps
                     int deltaX = mousePosition.X - _dragOriginX;
                     int deltaY = mousePosition.Y - _dragOriginY;
 
-                    if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) > 2)
+                    if (attemptAlwaysSuccessful || Math.Abs(deltaX) + Math.Abs(deltaY) > 4)
+                    {
                         _isDraggingControl = true;
+                        dragTarget.InvokeDragBegin(new Point(deltaX, deltaY));
+                    }
                 }
                 else
                 {
@@ -614,6 +640,8 @@ namespace ClassicUO.Game.Gumps
         {
             if (_isDraggingControl)
                 DoDragControl(mousePosition);
+
+            _draggingControl?.InvokeDragEnd(mousePosition);
             _draggingControl = null;
             _isDraggingControl = false;
         }
