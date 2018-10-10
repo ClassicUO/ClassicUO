@@ -208,7 +208,7 @@
     <Compile Include="IO\UOFileIndex.cs" />
     <Compile Include="IO\UOFileMul.cs" />
     <Compile Include="IO\UOFileUop.cs" />
-    <Compile Include="MainClass.cs" />
+    <Compile Include="Bootstrap.cs" />
     <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Network\CircularBuffer.cs" />
     <Compile Include="Network\Huffman.cs" />

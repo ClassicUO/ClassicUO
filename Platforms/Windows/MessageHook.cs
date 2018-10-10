@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Runtime.InteropServices;
 
@@ -25,13 +28,10 @@ namespace ClassicUO.Platforms.Windows
 {
     public abstract class MessageHook : IDisposable
     {
-        public abstract int HookType { get; }
+        private readonly IntPtr m_hIMC;
 
         private readonly WndProcHandler m_Hook;
         private readonly IntPtr m_prevWndProc;
-        private readonly IntPtr m_hIMC;
-
-        public IntPtr HWnd { get; }
 
         protected MessageHook(IntPtr hWnd)
         {
@@ -42,6 +42,15 @@ namespace ClassicUO.Platforms.Windows
                 NativeConstants.GWL_WNDPROC, (int) Marshal.GetFunctionPointerForDelegate(m_Hook));
             m_hIMC = NativeMethods.ImmGetContext(HWnd);
             //Application.AddMessageFilter(new InputMessageFilter(m_Hook));
+        }
+
+        public abstract int HookType { get; }
+
+        public IntPtr HWnd { get; }
+
+        public void Dispose()
+        {
+            Dispose(true);
         }
 
         ~MessageHook()
@@ -67,11 +76,6 @@ namespace ClassicUO.Platforms.Windows
             }
 
             return NativeMethods.CallWindowProc(m_prevWndProc, hWnd, msg, wParam, lParam);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
         }
 
         protected virtual void Dispose(bool disposing)

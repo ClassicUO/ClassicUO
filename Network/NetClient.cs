@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,43 +18,41 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Collections.Generic;
 using System.Net.Sockets;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Network
 {
     public sealed class NetClient
-	{
+    {
         private const int BUFF_SIZE = 0x10000;
-		private static readonly BufferPool _pool = new BufferPool(10, BUFF_SIZE);
-		private CircularBuffer _circularBuffer;
-		private int _incompletePacketLength;
+        private static readonly BufferPool _pool = new BufferPool(10, BUFF_SIZE);
+        private CircularBuffer _circularBuffer;
+        private int _incompletePacketLength;
         private bool _isDisposing, _isCompressionEnabled, _sending;
-        private byte[] _recvBuffer, _incompletePacketBuffer;      
-		private TcpClient _socket;
-		private Queue<Packet> _queue, _workingQueue;
-		private object _sync = new object();
-
-		public static event EventHandler Connected, Disconnected;
-        public static event EventHandler<Packet> PacketReceived, PacketSended;
+        private Queue<Packet> _queue, _workingQueue;
+        private byte[] _recvBuffer, _incompletePacketBuffer;
+        private TcpClient _socket;
+        private readonly object _sync = new object();
 
 
         private NetClient()
-		{
+        {
+        }
 
-		}
 
-        
-		public static NetClient Socket { get; } = new NetClient();
+        public static NetClient Socket { get; } = new NetClient();
 
-		public bool IsConnected => _socket != null && _socket.Connected;
+        public bool IsConnected => _socket != null && _socket.Connected;
 
-		public uint ClientAddress
+        public uint ClientAddress
         {
             get
             {
@@ -63,7 +62,7 @@ namespace ClassicUO.Network
                 if (localEntry.AddressList.Length > 0)
                 {
 #pragma warning disable 618
-                    address = (uint)localEntry.AddressList
+                    address = (uint) localEntry.AddressList
                         .FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
 #pragma warning restore 618
                 }
@@ -75,101 +74,98 @@ namespace ClassicUO.Network
             }
         }
 
+        public static event EventHandler Connected, Disconnected;
+        public static event EventHandler<Packet> PacketReceived, PacketSended;
+
         public async void Connect(string address, ushort port)
-		{
+        {
+            _queue = new Queue<Packet>();
+            _workingQueue = new Queue<Packet>();
 
-			_queue = new Queue<Packet>();
-			_workingQueue = new Queue<Packet>();
 
+            _circularBuffer = new CircularBuffer();
+            _recvBuffer = _pool.GetFreeSegment();
+            _incompletePacketBuffer = _pool.GetFreeSegment();
 
-			_circularBuffer = new CircularBuffer();
-			_recvBuffer = _pool.GetFreeSegment();
-			_incompletePacketBuffer = _pool.GetFreeSegment();
+            _socket = new TcpClient();
+            _socket.ReceiveBufferSize = BUFF_SIZE;
+            await _socket.ConnectAsync(address, port);
 
-			_socket = new TcpClient();
-			_socket.ReceiveBufferSize = BUFF_SIZE;
-			await _socket.ConnectAsync(address, port);
-           
             if (_socket.Connected)
-			{
-				Connected.Raise();
-				_socket.Client.BeginReceive(_recvBuffer, 0, BUFF_SIZE, SocketFlags.None, OnReceive, null);
-			}
-			else
-			{
-				Log.Message(LogTypes.Error, "Impossible to enstablish a connection.");
-			}
-		}
+            {
+                Connected.Raise();
+                _socket.Client.BeginReceive(_recvBuffer, 0, BUFF_SIZE, SocketFlags.None, OnReceive, null);
+            }
+            else
+            {
+                Log.Message(LogTypes.Error, "Impossible to enstablish a connection.");
+            }
+        }
 
         public void Slice()
-		{
-			if (!IsConnected)
-				return;
+        {
+            if (!IsConnected)
+                return;
 
             lock (_sync)
-			{
-				var temp = _workingQueue;
-				_workingQueue = _queue;
-				_queue = temp;
-			}
+            {
+                var temp = _workingQueue;
+                _workingQueue = _queue;
+                _queue = temp;
+            }
 
             while (_queue.Count > 0)
-			{
-				PacketReceived.Raise(_queue.Dequeue());
-			}
+            {
+                PacketReceived.Raise(_queue.Dequeue());
+            }
+        }
 
-		}
-
-		public void EnableCompression()
+        public void EnableCompression()
         {
             _isCompressionEnabled = true;
         }
 
         public void Send(PacketWriter packet)
-		{
-			Send(packet.ToArray());
-		}
+        {
+            Send(packet.ToArray());
+        }
 
         private void OnReceive(IAsyncResult state)
-		{
-			int length = _socket.Client.EndReceive(state);
+        {
+            int length = _socket.Client.EndReceive(state);
             if (length > 0)
-			{
-				byte[] buffer = _recvBuffer;
+            {
+                byte[] buffer = _recvBuffer;
 
-				if (_isCompressionEnabled)
-					DecompressBuffer(ref buffer, ref length);
+                if (_isCompressionEnabled)
+                    DecompressBuffer(ref buffer, ref length);
 
-			    //lock (_circularBuffer)
-			    {
-			        _circularBuffer.Enqueue(buffer, 0, length);
+                //lock (_circularBuffer)
+                {
+                    _circularBuffer.Enqueue(buffer, 0, length);
 
 
-			        ReadData();
+                    ReadData();
                 }
-					
-                    
-				_socket.Client.BeginReceive(_recvBuffer, 0, BUFF_SIZE, SocketFlags.None, OnReceive, null);
-			}
-			else
-			{
 
-			}
-		}
+
+                _socket.Client.BeginReceive(_recvBuffer, 0, BUFF_SIZE, SocketFlags.None, OnReceive, null);
+            }
+        }
 
         private void Send(byte[] buffer)
-		{
+        {
             lock (_socket)
-			{
-				_socket.Client.Send(buffer, 0, buffer.Length, SocketFlags.None);
-			}
-		}
+            {
+                _socket.Client.Send(buffer, 0, buffer.Length, SocketFlags.None);
+            }
+        }
 
         private void ReadData()
-		{                          
-			if (!IsConnected || _circularBuffer == null || _circularBuffer.Length <= 0) return;
+        {
+            if (!IsConnected || _circularBuffer == null || _circularBuffer.Length <= 0) return;
 
-           // lock (_circularBuffer)
+            // lock (_circularBuffer)
             {
                 int length = _circularBuffer.Length;
 
@@ -187,20 +183,19 @@ namespace ClassicUO.Network
 
                     if (length < packetlength) break;
 
-					byte[] data = new byte[packetlength];
+                    byte[] data = new byte[packetlength];
 
-                   // byte[] data = BUFF_SIZE >= packetlength ? _pool.GetFreeSegment() : new byte[packetlength];
+                    // byte[] data = BUFF_SIZE >= packetlength ? _pool.GetFreeSegment() : new byte[packetlength];
                     packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
 
-					//PacketReceived?.Invoke(null, packet);
+                    //PacketReceived?.Invoke(null, packet);
 
-					lock (_sync)
-					{
+                    lock (_sync)
+                    {
                         Packet packet = new Packet(data, packetlength);
 
                         _workingQueue.Enqueue(packet);
-
-					}
+                    }
 
 
                     length = _circularBuffer.Length;
@@ -208,10 +203,10 @@ namespace ClassicUO.Network
                     //if (BUFF_SIZE >= packetlength) _pool.AddFreeSegment(data);
                 }
             }
-		}
+        }
 
 
-		private void DecompressBuffer(ref byte[] buffer, ref int length)
+        private void DecompressBuffer(ref byte[] buffer, ref int length)
         {
             byte[] source = _pool.GetFreeSegment();
             int incompletelength = _incompletePacketLength;
@@ -248,7 +243,7 @@ namespace ClassicUO.Network
                 _incompletePacketLength += l;
             }
         }
-	}
+    }
 
     public sealed class NetClient1
     {
@@ -344,7 +339,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    Log.Message( LogTypes.Error, e.SocketError.ToString());
+                    Log.Message(LogTypes.Error, e.SocketError.ToString());
                 }
             };
             connectEventArgs.RemoteEndPoint = endpoint;
@@ -605,7 +600,7 @@ namespace ClassicUO.Network
         }
 
         private void StartSend()
-		{    
+        {
             if (!_socket.SendAsync(_sendEventArgs)) IO_Socket(null, _sendEventArgs);
         }
 

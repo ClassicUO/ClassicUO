@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Data
 {
@@ -16,7 +14,7 @@ namespace ClassicUO.Game.Data
         SameraiEmpire = 0x40,
         MondainsLegacy = 0x80,
         Splash8 = 0x100,
-        Splash9 = 0x200,            // Ninth Age splash screen, crystal/shadow housing tiles
+        Splash9 = 0x200, // Ninth Age splash screen, crystal/shadow housing tiles
         TenthAge = 0x400,
         MoreStorage = 0x800,
         CharacterSlot7 = 0x1000,

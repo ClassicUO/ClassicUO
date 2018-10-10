@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.IO
 {
@@ -30,16 +34,17 @@ namespace ClassicUO.IO
     {
         private MemoryMappedViewAccessor _accessor;
 
-        public UOFile(string filepath) => Path = filepath;
+        protected UOFile(string filepath) => Path = filepath;
 
         public string Path { get; }
         public UOFileIndex3D[] Entries { get; protected set; }
 
         protected virtual void Load()
         {
+            Log.Message(LogTypes.Trace, $"Loading file:\t\t{Path}");
             FileInfo fileInfo = new FileInfo(Path);
             if (!fileInfo.Exists)
-                throw new UOFileException(Path + " not exists.");
+                throw new FileNotFoundException(fileInfo.FullName);
             long size = fileInfo.Length;
             if (size > 0)
             {
@@ -56,17 +61,18 @@ namespace ClassicUO.IO
                 catch
                 {
                     _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
-                    throw new UOFileException("Something goes wrong...");
+                    throw new Exception("Something goes wrong...");
                 }
             }
             else
-                throw new UOFileException($"{Path} size must has > 0");
+                throw new Exception($"{Path} size must has > 0");
         }
 
         public virtual void Unload()
         {
             _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
             Entries = null;
+            Log.Message(LogTypes.Trace, $"Unloaded:\t\t{Path}");
         }
 
 
@@ -115,13 +121,6 @@ namespace ClassicUO.IO
 
             Seek(e.Offset);
             return (length, extra, false);
-        }
-    }
-
-    public class UOFileException : Exception
-    {
-        public UOFileException(string text) : base(text)
-        {
         }
     }
 }

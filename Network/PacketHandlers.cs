@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,13 +30,11 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
-using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Multi = ClassicUO.Game.GameObjects.Multi;
 
@@ -300,10 +301,10 @@ namespace ClassicUO.Network
 
         private static void TargetCursor(Packet p)
         {
-            byte CommandType = p.ReadByte(); 
+            byte CommandType = p.ReadByte();
             uint CursorID = p.ReadUInt();
             byte CursorType = p.ReadByte();
-            TargetSystem.SetTargeting((TargetSystem.TargetType)CommandType, (int)CursorID, CursorType);
+            TargetSystem.SetTargeting((TargetSystem.TargetType) CommandType, (int) CursorID, CursorType);
         }
 
         private static void ClientTalk(Packet p)
@@ -317,8 +318,6 @@ namespace ClassicUO.Network
                 case 0x25:
                     break;
                 case 0x2E:
-                    break;
-                default:
                     break;
             }
         }
@@ -440,8 +439,6 @@ namespace ClassicUO.Network
                     //World.Player.MaximumHitPointsInc = p.ReadUShort();
                     //World.Player.MaximumStaminaInc = p.ReadUShort();
                     //World.Player.MaximumManaInc = p.ReadUShort();
-
-
                 }
             }
 
@@ -648,10 +645,10 @@ namespace ClassicUO.Network
 
             if (FileManager.ClientVersion >= ClientVersions.CV_200)
             {
-                NetClient.Socket.Send(new PGameWindowSize((uint)settings.GameWindowWidth, (uint)settings.GameWindowHeight));
+                NetClient.Socket.Send(new PGameWindowSize((uint) settings.GameWindowWidth,
+                    (uint) settings.GameWindowHeight));
                 NetClient.Socket.Send(new PLanguage("ENU"));
             }
-
 
 
             GameActions.SingleClick(World.Player);
@@ -784,13 +781,13 @@ namespace ClassicUO.Network
         {
             if (World.Player == null)
                 return;
-            
+
             byte seq = p.ReadByte();
-            byte noto = (byte)(p.ReadByte() & ~0x40);
+            byte noto = (byte) (p.ReadByte() & ~0x40);
             if (noto <= 0 || noto >= 7)
                 noto = 0x01;
 
-            World.Player.Notoriety = (Notoriety)noto;
+            World.Player.Notoriety = (Notoriety) noto;
             World.Player.ConfirmWalk(seq);
             World.Player.ProcessDelta();
         }
@@ -846,7 +843,7 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
 
-            Item item = World.Items.Get(p.ReadUInt());    
+            Item item = World.Items.Get(p.ReadUInt());
             Graphic graphic = p.ReadUShort();
 
             UIManager ui = Service.Get<UIManager>();
@@ -855,7 +852,6 @@ namespace ClassicUO.Network
 
             if (graphic == 0x30) // vendor
             {
-
             }
             else if (graphic == 0xFFFF) // spellbook
             {
@@ -863,7 +859,7 @@ namespace ClassicUO.Network
                 {
                     SpellbookGump spellbookGump = new SpellbookGump(item)
                     {
-                        X = 100, Y = 100,
+                        X = 100, Y = 100
                     };
 
                     ui.Add(spellbookGump);
@@ -873,7 +869,6 @@ namespace ClassicUO.Network
             {
                 if (item.IsCorpse)
                 {
-
                 }
                 else
                 {
@@ -1026,11 +1021,11 @@ namespace ClassicUO.Network
             if (items.Count > 0)
             {
                 Item container = World.Items.Get(items[0].Container);
-                if (container != null && container.IsSpellBook && SpellbookData.GetTypeByGraphic(container.Graphic) != SpellBookType.Unknown)
-                {               
+                if (container != null && container.IsSpellBook &&
+                    SpellbookData.GetTypeByGraphic(container.Graphic) != SpellBookType.Unknown)
+                {
                     SpellbookData.GetData(container, out ulong field, out SpellBookType type);
                     container.FillSpellbook(type, field);
-                    
                 }
             }
 
@@ -1586,7 +1581,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 4: // close generic gump
-                    Service.Get<UIManager>().GetByServerSerial(p.ReadUInt())?.OnButtonClick((int)p.ReadUInt());
+                    Service.Get<UIManager>().GetByServerSerial(p.ReadUInt())?.OnButtonClick((int) p.ReadUInt());
                     break;
                 //===========================================================================================
                 //===========================================================================================
@@ -1606,6 +1601,7 @@ namespace ClassicUO.Network
                             {
                                 Serials[i] = p.ReadUInt();
                             }
+
                             PartySystem.ReceivePartyMemberList(Serials);
                             break;
                         case CommandRemoveMember:
@@ -1616,6 +1612,7 @@ namespace ClassicUO.Network
                             {
                                 Serials[i] = p.ReadUInt();
                             }
+
                             PartySystem.ReceiveRemovePartyMember(Serials);
                             break;
                         case CommandPrivateMessage:
@@ -1624,13 +1621,11 @@ namespace ClassicUO.Network
                         case CommandPublicMessage:
                             //Info = new PartyMessageInfo(reader, false);
                             break;
-                        case CommandInvitation://PARTY INVITE PROGRESS
+                        case CommandInvitation: //PARTY INVITE PROGRESS
                             //Info = new PartyInvitationInfo(reader);
                             break;
-                        default:
-                            //Tracer.Warn($"Unhandled Subsubcommand {SubsubCommand:X2} in PartyInfo.");
-                            break;
                     }
+
                     break;
                 //===========================================================================================
                 //===========================================================================================
@@ -1864,7 +1859,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 case 0x26:
                     byte val = p.ReadByte();
-                    if (val > (int)CharacterSpeedType.FastUnmountAndCantRun)
+                    if (val > (int) CharacterSpeedType.FastUnmountAndCantRun)
                         val = 0;
 
                     World.Player.SpeedMode = (CharacterSpeedType) val;
@@ -2142,7 +2137,7 @@ namespace ClassicUO.Network
             uint clen = p.ReadUInt() - 4;
             uint dlen = p.ReadUInt();
 
-            byte[] data = p.ReadArray((int)clen);
+            byte[] data = p.ReadArray((int) clen);
 
             byte[] decData = new byte[dlen];
 
@@ -2267,7 +2262,6 @@ namespace ClassicUO.Network
         {
             if (World.Player == null)
                 return;
-
         }
 
         private static bool ReadContainerContent(Packet p, List<Item> items)
@@ -2296,7 +2290,7 @@ namespace ClassicUO.Network
                 World.ToAdd.ExceptWith(item.Items);
                 item.ProcessDelta();
                 entity.ProcessDelta();
-  
+
                 return World.Items.Add(item);
             }
 

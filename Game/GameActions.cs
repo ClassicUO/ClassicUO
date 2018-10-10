@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
@@ -67,17 +70,17 @@ namespace ClassicUO.Game
         public static void RequestPartyInviteByTarget()
             => Socket.Send(new PPartyInviteRequest());
 
-        public  static void RequestPartyLootState(bool isLootable)
+        public static void RequestPartyLootState(bool isLootable)
             => Socket.Send(new PPartyChangeLootTypeRequest(isLootable));
 
         public static void PickUp(Item item, Point point, int? amount = null)
-             => PickUp(item, point.X, point.Y, amount);
+            => PickUp(item, point.X, point.Y, amount);
 
         public static void PickUp(Item item, int x, int y, int? amount = null)
             => _pickUpAction(item, x, y, amount);
 
         public static void DropDown(Serial serial, int x, int y, int z, Serial container)
-            => Socket.Send(new PDropRequestNew(serial, (ushort)x, (ushort)y, (sbyte)z, 0, container));
+            => Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
 
         public static void DropDown(Serial serial, Position position, Serial container)
             => DropDown(serial, position.X, position.Y, position.Z, container);
@@ -107,14 +110,14 @@ namespace ClassicUO.Game
         public static void RequestTargetObject(Entity entity, int cursorID, byte cursorType)
             => Socket.Send(new PTargetObjectRequest(entity, cursorID, cursorType));
 
-        public static void RequestTargetObjectPosition(ushort x, ushort y, ushort z, ushort modelNumber, int cursorID, byte targetType)
-            => Socket.Send(new PTargetObjectPositionRequest(x,y,z,modelNumber, cursorID, targetType));
+        public static void RequestTargetObjectPosition(ushort x, ushort y, ushort z, ushort modelNumber, int cursorID,
+            byte targetType)
+            => Socket.Send(new PTargetObjectPositionRequest(x, y, z, modelNumber, cursorID, targetType));
 
         public static void CastSpellFromBook(int index, Serial bookSerial)
             => Socket.Send(new PCastSpellFromBook(index, bookSerial));
 
         public static void CastSpell(int index)
             => Socket.Send(new PCastSpell(index));
-
     }
 }

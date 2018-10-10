@@ -1,35 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.Game.Data
+﻿namespace ClassicUO.Game.Data
 {
     public class Features
     {
-        private FeatureFlags _flags;
+        public FeatureFlags Flags { get; private set; }
 
-        public void SetFlags(FeatureFlags flags) => _flags |= flags;
-
-        public FeatureFlags Flags => _flags;
-
-        public bool T2A => _flags.HasFlag(FeatureFlags.TheSecondAge);
-        public bool UOR => _flags.HasFlag(FeatureFlags.Renaissance);
-        public bool ThirdDawn => _flags.HasFlag(FeatureFlags.ThirdDawn);
-        public bool LBR => _flags.HasFlag(FeatureFlags.LordBlackthornsRevenge);
-        public bool AOS => _flags.HasFlag(FeatureFlags.AgeOfShadows);
-        public bool CharSlots6 => _flags.HasFlag(FeatureFlags.CharacterSlot6);
-        public bool SE => _flags.HasFlag(FeatureFlags.SameraiEmpire);
-        public bool ML => _flags.HasFlag(FeatureFlags.MondainsLegacy);
-        public bool Splash8th => _flags.HasFlag(FeatureFlags.Splash8);
-        public bool Splash9th => _flags.HasFlag(FeatureFlags.Splash9);
-        public bool TenthAge => _flags.HasFlag(FeatureFlags.TenthAge);
-        public bool MoreStorage => _flags.HasFlag(FeatureFlags.MoreStorage);
-        public bool CharSlots7 => _flags.HasFlag(FeatureFlags.TheSecondAge);
-        public bool TenthAgeFaces => _flags.HasFlag(FeatureFlags.TenthAgeFaces);
-        public bool TrialAccount => _flags.HasFlag(FeatureFlags.TrialAccount);
-        public bool EleventhAge => _flags.HasFlag(FeatureFlags.EleventhAge);
-        public bool SA => _flags.HasFlag(FeatureFlags.StygianAbyss);
+        public bool T2A => Flags.HasFlag(FeatureFlags.TheSecondAge);
+        public bool UOR => Flags.HasFlag(FeatureFlags.Renaissance);
+        public bool ThirdDawn => Flags.HasFlag(FeatureFlags.ThirdDawn);
+        public bool LBR => Flags.HasFlag(FeatureFlags.LordBlackthornsRevenge);
+        public bool AOS => Flags.HasFlag(FeatureFlags.AgeOfShadows);
+        public bool CharSlots6 => Flags.HasFlag(FeatureFlags.CharacterSlot6);
+        public bool SE => Flags.HasFlag(FeatureFlags.SameraiEmpire);
+        public bool ML => Flags.HasFlag(FeatureFlags.MondainsLegacy);
+        public bool Splash8th => Flags.HasFlag(FeatureFlags.Splash8);
+        public bool Splash9th => Flags.HasFlag(FeatureFlags.Splash9);
+        public bool TenthAge => Flags.HasFlag(FeatureFlags.TenthAge);
+        public bool MoreStorage => Flags.HasFlag(FeatureFlags.MoreStorage);
+        public bool CharSlots7 => Flags.HasFlag(FeatureFlags.TheSecondAge);
+        public bool TenthAgeFaces => Flags.HasFlag(FeatureFlags.TenthAgeFaces);
+        public bool TrialAccount => Flags.HasFlag(FeatureFlags.TrialAccount);
+        public bool EleventhAge => Flags.HasFlag(FeatureFlags.EleventhAge);
+        public bool SA => Flags.HasFlag(FeatureFlags.StygianAbyss);
 
         public bool TooltipsEnabled => AOS;
+
+        public void SetFlags(FeatureFlags flags) => Flags |= flags;
     }
 }

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
@@ -34,11 +37,14 @@ namespace ClassicUO.Game.Views
 
         public MobileView(Mobile mobile) : base(mobile) => _frames = new ViewLayer[(int) Layer.InnerLegs];
 
+
+        public Rectangle BoudsStrange { get; set; }
+
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             PreDraw(position);
             return DrawInternal(spriteBatch, position, objectList);
-        } 
+        }
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
             MouseOverList objectList)
@@ -110,7 +116,7 @@ namespace ClassicUO.Game.Views
 
             //int xx = IsFlipped ? (int)position.X + rect.X + 44 : -(int)position.X + rect.X;
 
-            BoudsStrange = new Rectangle((int)position.X + rect.X, (int)position.Y + rect.Y, rect.Width, rect.Height);
+            BoudsStrange = new Rectangle((int) position.X + rect.X, (int) position.Y + rect.Y, rect.Width, rect.Height);
 
             //spriteBatch.DrawRectangle(_texture, 
             //    new Rectangle
@@ -153,9 +159,6 @@ namespace ClassicUO.Game.Views
             MessageOverHead(spriteBatch, overheadPosition, -22);
             return true;
         }
-
-        
-        public Rectangle BoudsStrange { get; set; }
 
         private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, ref int height, ref int centerY)
         {

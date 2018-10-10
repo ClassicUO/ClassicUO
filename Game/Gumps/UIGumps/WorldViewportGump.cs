@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,8 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using System;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Scenes;
@@ -30,18 +32,18 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 {
     public class WorldViewportGump : Gump
     {
-        private int _worldWidth;
-        private int _worldHeight;
-        private WorldViewport _viewport;
-        private ChatControl _chatControl;
-        private GameBorder _border;
-        private readonly GameScene _scene;
-        private Settings _settings;
-        private Button _button;
-        private InputManager _inputManager;
-        private bool _clicked;
-        private Point _lastPosition = Point.Zero;
         public static GameScene GameScene;
+        private readonly GameScene _scene;
+        private readonly GameBorder _border;
+        private readonly Button _button;
+        private readonly ChatControl _chatControl;
+        private bool _clicked;
+        private readonly InputManager _inputManager;
+        private Point _lastPosition = Point.Zero;
+        private readonly Settings _settings;
+        private readonly WorldViewport _viewport;
+        private int _worldHeight;
+        private int _worldWidth;
 
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
@@ -63,13 +65,9 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             _worldHeight = _settings.GameWindowHeight;
 
 
-
             _button = new Button(0, 0x837, 0x838, 0x838);
-            
-            _button.MouseDown += (sender, e) =>
-            {
-                _clicked = true;
-            };
+
+            _button.MouseDown += (sender, e) => { _clicked = true; };
             _button.MouseUp += (sender, e) =>
             {
                 _clicked = false;
@@ -77,7 +75,7 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             };
 
 
-            _border = new GameBorder(0,0, _worldWidth + 8, _worldHeight + 12);
+            _border = new GameBorder(0, 0, _worldWidth + 8, _worldHeight + 12);
 
             _viewport = new WorldViewport(scene, 4, 6, _worldWidth, _worldHeight);
             _chatControl = new ChatControl(4, 6, _worldWidth, _worldHeight);
@@ -97,7 +95,7 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
         {
             if (_clicked && _inputManager.Offset != _lastPosition && _inputManager.Offset != Point.Zero)
             {
-                _settings.GameWindowWidth += _inputManager.Offset.X -_lastPosition.X;
+                _settings.GameWindowWidth += _inputManager.Offset.X - _lastPosition.X;
                 _settings.GameWindowHeight += _inputManager.Offset.Y - _lastPosition.Y;
 
                 _lastPosition = _inputManager.Offset;
@@ -139,7 +137,7 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             Location = position;
 
             _settings.GameWindowX = position.X;
-            _settings.GameWindowY = position.Y;        
+            _settings.GameWindowY = position.Y;
         }
 
         protected override void OnResize()
@@ -164,15 +162,13 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             _chatControl.Width = _worldWidth;
             _chatControl.Height = _worldHeight - 2;
         }
-
-
     }
 
-    class GameBorder : GumpControl
+    internal class GameBorder : GumpControl
     {
         private readonly SpriteTexture[] _borders = new SpriteTexture[2];
 
-        public GameBorder(int x, int y, int w, int h) : base()
+        public GameBorder(int x, int y, int w, int h)
         {
             X = x;
             Y = y;
@@ -182,7 +178,6 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             _borders[0] = IO.Resources.Gumps.GetGumpTexture(0x0A8C);
             _borders[1] = IO.Resources.Gumps.GetGumpTexture(0x0A8D);
 
-          
 
             CanMove = true;
             AcceptMouseInput = true;
@@ -199,15 +194,23 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             // sopra
-            spriteBatch.Draw2DTiled(_borders[0], new Rectangle((int)position.X, (int)position.Y + _borders[0].Height / 2, Width - 2, _borders[0].Height), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_borders[0],
+                new Rectangle((int) position.X, (int) position.Y + _borders[0].Height / 2, Width - 2,
+                    _borders[0].Height), Vector3.Zero);
             // sotto
-            spriteBatch.Draw2DTiled(_borders[0], new Rectangle((int)position.X, (int)position.Y + Height - _borders[0].Height * 2 + 1, Width + 1, _borders[0].Height), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_borders[0],
+                new Rectangle((int) position.X, (int) position.Y + Height - _borders[0].Height * 2 + 1, Width + 1,
+                    _borders[0].Height), Vector3.Zero);
             //sx
-            spriteBatch.Draw2DTiled(_borders[1], new Rectangle((int)position.X - _borders[1].Width / 2 + 1, (int)position.Y + _borders[0].Height / 2, _borders[1].Width, Height - _borders[0].Height * 2), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_borders[1],
+                new Rectangle((int) position.X - _borders[1].Width / 2 + 1, (int) position.Y + _borders[0].Height / 2,
+                    _borders[1].Width, Height - _borders[0].Height * 2), Vector3.Zero);
             //dx
-            spriteBatch.Draw2DTiled(_borders[1], new Rectangle((int)position.X + Width - _borders[1].Width + 1, (int)position.Y + 2, _borders[1].Width, Height - _borders[0].Height * 2), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_borders[1],
+                new Rectangle((int) position.X + Width - _borders[1].Width + 1, (int) position.Y + 2, _borders[1].Width,
+                    Height - _borders[0].Height * 2), Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
-        } 
+        }
     }
 }

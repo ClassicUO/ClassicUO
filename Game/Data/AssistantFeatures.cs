@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.Data
 {
@@ -12,16 +10,16 @@ namespace ClassicUO.Game.Data
     public enum AssistantFeatures : ulong
     {
         None = 0,
-        FilterWeather = 1 << 0,  // Weather Filter
-        FilterLight = 1 << 1,  // Light Filter
-        SmartTarget = 1 << 2,  // Smart Last Target
-        RangedTarget = 1 << 3,  // Range Check Last Target
-        AutoOpenDoors = 1 << 4,  // Automatically Open Doors
-        DequipOnCast = 1 << 5,  // Unequip Weapon on spell cast
-        AutoPotionEquip = 1 << 6,  // Un/re-equip weapon on potion use
-        PoisonedChecks = 1 << 7,  // Block heal If poisoned/Macro If Poisoned condition/Heal or Cure self
-        LoopedMacros = 1 << 8,  // Disallow looping or recursive macros
-        UseOnceAgent = 1 << 9,  // The use once agent
+        FilterWeather = 1 << 0, // Weather Filter
+        FilterLight = 1 << 1, // Light Filter
+        SmartTarget = 1 << 2, // Smart Last Target
+        RangedTarget = 1 << 3, // Range Check Last Target
+        AutoOpenDoors = 1 << 4, // Automatically Open Doors
+        DequipOnCast = 1 << 5, // Unequip Weapon on spell cast
+        AutoPotionEquip = 1 << 6, // Un/re-equip weapon on potion use
+        PoisonedChecks = 1 << 7, // Block heal If poisoned/Macro If Poisoned condition/Heal or Cure self
+        LoopedMacros = 1 << 8, // Disallow looping or recursive macros
+        UseOnceAgent = 1 << 9, // The use once agent
         RestockAgent = 1 << 10, // The restock agent
         SellAgent = 1 << 11, // The sell agent
         BuyAgent = 1 << 12, // The buy agent

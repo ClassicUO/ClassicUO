@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
@@ -9,19 +7,18 @@ using ClassicUO.IO;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    class SpellbookGump : Gump
+    internal class SpellbookGump : Gump
     {
+        private readonly Item _spellBook;
+        private readonly List<KeyValuePair<int, int>> _spellList = new List<KeyValuePair<int, int>>();
 
-        private SpellBookType _spellBookType;
-
-        private GumpPic _pageCornerLeft, _pageCornerRight;
+        private Label[] _indexes;
 
         private int _maxPage;
 
-        private Label[] _indexes;
-        private readonly List<KeyValuePair<int, int>> _spellList = new List<KeyValuePair<int, int>>();
+        private GumpPic _pageCornerLeft, _pageCornerRight;
 
-        private readonly Item _spellBook;
+        private SpellBookType _spellBookType;
 
         public SpellbookGump(Item item) : base(item.Serial, 0)
         {
@@ -67,7 +64,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _pageCornerLeft.MouseClick += PageCornerOnMouseClick;
             _pageCornerLeft.MouseDoubleClick += PageCornerOnMouseDoubleClick;
 
-            AddChildren(_pageCornerRight = new GumpPic(321,8, 0x08BC, 0));
+            AddChildren(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
             _pageCornerRight.LocalSerial = 1;
             _pageCornerRight.Page = 1;
             _pageCornerRight.MouseClick += PageCornerOnMouseClick;
@@ -93,19 +90,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
             for (int i = 0; i < 8; i++)
             {
                 AddChildren(new Label("INDEX", false, 0x0288, font: 6)
-                {
-                    X = 106 + (i % 2) * 163,
-                    Y = 10,
-                }, 1 + i / 2);
+                    {
+                        X = 106 + i % 2 * 163,
+                        Y = 10
+                    }, 1 + i / 2);
             }
 
             for (int i = 0; i < 8; i++)
             {
                 AddChildren(new Label(SpellsMagery.CircleNames[i], false, 0x0288, font: 6)
-                {
-                    X = 62 + (i % 2) * 161,
-                    Y = 30,
-                }, 1 + i / 2);
+                    {
+                        X = 62 + i % 2 * 161,
+                        Y = 30
+                    }, 1 + i / 2);
             }
 
             _indexes = new Label[64];
@@ -115,12 +112,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
                     int index = i * 8 + j;
                     AddChildren(_indexes[index] = new Label(string.Empty, false, 0x0288, font: 9)
-                    {
-                        X = (i % 2 ) == 0 ? 64 : 225,
-                        Y = 52 + 15 * j,
-                        AcceptMouseInput = true,
-                        LocalSerial = (uint)(index + 1)
-                    }, 1 + i / 2);   
+                        {
+                            X = i % 2 == 0 ? 64 : 225,
+                            Y = 52 + 15 * j,
+                            AcceptMouseInput = true,
+                            LocalSerial = (uint) (index + 1)
+                        }, 1 + i / 2);
                 }
             }
 
@@ -143,7 +140,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
             _maxPage += (totalSpells + 1) / 2;
-
 
 
             for (int page = 1; page <= _maxPage; page++)
@@ -170,16 +166,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                                 _indexes[spellIndex - 1].MouseClick += (sender, e) =>
                                 {
-                                    SetActivePage((int)_indexes[spellIndex - 1].Tag);
+                                    SetActivePage((int) _indexes[spellIndex - 1].Tag);
                                 };
 
                                 _indexes[spellIndex - 1].MouseDoubleClick += (sender, e) =>
                                 {
-                                    GumpControl control = (GumpControl)sender;
+                                    GumpControl control = (GumpControl) sender;
                                     if (FileManager.ClientVersion < ClientVersions.CV_308Z)
-                                        GameActions.CastSpellFromBook((int)control.LocalSerial.Value, _spellBook.Serial);
+                                        GameActions.CastSpellFromBook((int) control.LocalSerial.Value,
+                                            _spellBook.Serial);
                                     else
-                                        GameActions.CastSpell((int)control.LocalSerial.Value);
+                                        GameActions.CastSpell((int) control.LocalSerial.Value);
                                 };
 
 
@@ -192,7 +189,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                                 //{
                                 //    Label control = (Label)sender;
                                 //};
-
                             }
                         }
 
@@ -206,7 +202,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                                                       _spellList[currentSpellInfoIndex].Value));
                     }
                 }
-
             }
 
 
@@ -216,7 +211,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private void CircleOnMouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButton.Left && sender is GumpControl ctrl)
-                SetActivePage((int)ctrl.LocalSerial.Value / 2 + 1);
+                SetActivePage((int) ctrl.LocalSerial.Value / 2 + 1);
         }
 
 
@@ -232,38 +227,32 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (e.Button == MouseButton.Left && sender is GumpControl ctrl)
             {
-                SetActivePage(ctrl.LocalSerial == 0 ?  1 : _maxPage);
+                SetActivePage(ctrl.LocalSerial == 0 ? 1 : _maxPage);
             }
         }
 
         private void CreateNecromancy()
         {
-
         }
 
         private void CreateChivalry()
         {
-
         }
 
         private void CreateBushido()
         {
-
         }
 
         private void CreateNinjitsu()
         {
-
         }
 
         private void CreateSpellweaving()
         {
-
         }
 
         private void CreateMysticism()
         {
-
         }
 
         private void SetActivePage(int page)
@@ -281,11 +270,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private void CreateSpellDetailsPage(int page, bool isright, int circle, SpellDefinition spell)
         {
             if (_spellBookType == SpellBookType.Magery)
-                AddChildren(new Label(SpellsMagery.CircleNames[circle], false, 0x0288, font: 6) { X = isright ? 64 + 162 : 85, Y = 10 } , page);
+                AddChildren(
+                    new Label(SpellsMagery.CircleNames[circle], false, 0x0288, font: 6)
+                        {X = isright ? 64 + 162 : 85, Y = 10}, page);
 
-            AddChildren(new GumpPic(isright ? 225 : 62, 40, (Graphic)(spell.GumpIconID - 0x1298), 0), page);
+            AddChildren(new GumpPic(isright ? 225 : 62, 40, (Graphic) (spell.GumpIconID - 0x1298), 0), page);
 
-            AddChildren(new Label(spell.Name, false, 0x0288, 80, 6) { X = isright ? 275 : 112, Y = 34}, page);
+            AddChildren(new Label(spell.Name, false, 0x0288, 80, 6) {X = isright ? 275 : 112, Y = 34}, page);
 
             if (spell.Regs.Length > 0)
             {

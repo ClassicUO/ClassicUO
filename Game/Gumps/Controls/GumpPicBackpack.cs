@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 
@@ -25,14 +28,14 @@ namespace ClassicUO.Game.Gumps
 {
     internal class GumpPicBackpack : GumpPic
     {
-        public Item BackpackItem { get; protected set; }
-
         public GumpPicBackpack(int x, int y, Item backpack)
             : base(x, y, 0xC4F6, 0)
         {
             BackpackItem = backpack;
             AcceptMouseInput = false;
         }
+
+        public Item BackpackItem { get; protected set; }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {

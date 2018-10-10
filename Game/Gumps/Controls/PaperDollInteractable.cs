@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
@@ -26,8 +29,35 @@ namespace ClassicUO.Game.Gumps
 {
     internal class PaperDollInteractable : Gump
     {
-        private bool _isFemale;
+        private static readonly PaperDollEquipSlots[] s_DrawOrder =
+        {
+            PaperDollEquipSlots.Footwear,
+            PaperDollEquipSlots.Legging,
+            PaperDollEquipSlots.Shirt,
+            PaperDollEquipSlots.Sleeves,
+            PaperDollEquipSlots.Gloves,
+            PaperDollEquipSlots.Ring,
+            PaperDollEquipSlots.Talisman,
+            PaperDollEquipSlots.Neck,
+            PaperDollEquipSlots.Belt,
+            PaperDollEquipSlots.Chest,
+            PaperDollEquipSlots.Bracelet,
+            PaperDollEquipSlots.Hair,
+            PaperDollEquipSlots.FacialHair,
+            PaperDollEquipSlots.Head,
+            PaperDollEquipSlots.Sash,
+            PaperDollEquipSlots.Earring,
+            PaperDollEquipSlots.Back,
+            PaperDollEquipSlots.Skirt,
+            PaperDollEquipSlots.Robe,
+            PaperDollEquipSlots.LeftHand,
+            PaperDollEquipSlots.RightHand
+        };
+
         private bool _isElf;
+        private bool _isFemale;
+
+        private Entity _sourceEntity;
         private GumpPicBackpack m_Backpack;
 
 
@@ -39,6 +69,31 @@ namespace ClassicUO.Game.Gumps
             _isFemale = (sourceEntity.Flags & Flags.Female) != 0;
             SourceEntity = sourceEntity;
             AcceptMouseInput = false;
+        }
+
+        public Entity SourceEntity
+        {
+            set
+            {
+                if (value != _sourceEntity)
+                {
+                    if (_sourceEntity != null)
+                    {
+                        _sourceEntity.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);
+                        _sourceEntity = null;
+                    }
+
+                    if (value is Mobile)
+                    {
+                        _sourceEntity = value;
+                        // update the gump
+                        OnEntityUpdated(_sourceEntity);
+                        // if the entity changes in the future, update the gump again
+                        _sourceEntity.SetCallbacks(OnEntityUpdated, OnEntityDisposed);
+                    }
+                }
+            }
+            get => _sourceEntity;
         }
 
         public override void Dispose()
@@ -116,33 +171,6 @@ namespace ClassicUO.Game.Gumps
             GameActions.DoubleClick(backpack);
         }
 
-        private Entity _sourceEntity;
-
-        public Entity SourceEntity
-        {
-            set
-            {
-                if (value != _sourceEntity)
-                {
-                    if (_sourceEntity != null)
-                    {
-                        _sourceEntity.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);
-                        _sourceEntity = null;
-                    }
-
-                    if (value is Mobile)
-                    {
-                        _sourceEntity = value;
-                        // update the gump
-                        OnEntityUpdated(_sourceEntity);
-                        // if the entity changes in the future, update the gump again
-                        _sourceEntity.SetCallbacks(OnEntityUpdated, OnEntityDisposed);
-                    }
-                }
-            }
-            get => _sourceEntity;
-        }
-
         private enum PaperDollEquipSlots
         {
             Body = 0,
@@ -170,30 +198,5 @@ namespace ClassicUO.Game.Gumps
             Robe = 22,
             Skirt = 23
         }
-
-        private static readonly PaperDollEquipSlots[] s_DrawOrder =
-        {
-            PaperDollEquipSlots.Footwear,
-            PaperDollEquipSlots.Legging,
-            PaperDollEquipSlots.Shirt,
-            PaperDollEquipSlots.Sleeves,
-            PaperDollEquipSlots.Gloves,
-            PaperDollEquipSlots.Ring,
-            PaperDollEquipSlots.Talisman,
-            PaperDollEquipSlots.Neck,
-            PaperDollEquipSlots.Belt,
-            PaperDollEquipSlots.Chest,
-            PaperDollEquipSlots.Bracelet,
-            PaperDollEquipSlots.Hair,
-            PaperDollEquipSlots.FacialHair,
-            PaperDollEquipSlots.Head,
-            PaperDollEquipSlots.Sash,
-            PaperDollEquipSlots.Earring,
-            PaperDollEquipSlots.Back,
-            PaperDollEquipSlots.Skirt,
-            PaperDollEquipSlots.Robe,
-            PaperDollEquipSlots.LeftHand,
-            PaperDollEquipSlots.RightHand
-        };
     }
 }

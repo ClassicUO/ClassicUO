@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -54,6 +57,10 @@ namespace ClassicUO.Game.GameObjects
         private Hue _hue;
         protected long _lastAnimationChangeTime;
         private string _name;
+        protected Action<Entity> _OnDisposed;
+
+
+        protected Action<Entity> _OnUpdated;
         private Position _position;
 
         protected Entity(Serial serial) : base(World.Map)
@@ -66,29 +73,6 @@ namespace ClassicUO.Game.GameObjects
         public EntityCollection<Item> Items { get; }
         public Serial Serial { get; }
         public IReadOnlyList<Property> Properties => (IReadOnlyList<Property>) _properties.Values;
-
-
-        protected Action<Entity> _OnUpdated;
-        protected Action<Entity> _OnDisposed;
-
-        public void SetCallbacks(Action<Entity> onUpdate, Action<Entity> onDispose)
-        {
-            if (onUpdate != null)
-                _OnUpdated += onUpdate;
-            if (onDispose != null)
-                _OnDisposed += onDispose;
-        }
-
-        public void ClearCallBacks(Action<Entity> onUpdate, Action<Entity> onDispose)
-        {
-            if (_OnUpdated == null && _OnDisposed == null)
-                return;
-
-            if (_OnUpdated.GetInvocationList().Contains(onUpdate))
-                _OnUpdated -= onUpdate;
-            if (_OnDisposed.GetInvocationList().Contains(onDispose))
-                _OnDisposed -= onDispose;
-        }
 
         public override Graphic Graphic
         {
@@ -182,6 +166,26 @@ namespace ClassicUO.Game.GameObjects
         public virtual bool Exists => World.Contains(Serial);
 
         public DeferredEntity DeferredObject { get; set; }
+
+        public void SetCallbacks(Action<Entity> onUpdate, Action<Entity> onDispose)
+        {
+            if (onUpdate != null)
+                _OnUpdated += onUpdate;
+            if (onDispose != null)
+                _OnDisposed += onDispose;
+        }
+
+        public void ClearCallBacks(Action<Entity> onUpdate, Action<Entity> onDispose)
+        {
+            if (_OnUpdated == null && _OnDisposed == null)
+                return;
+
+            if (_OnUpdated.GetInvocationList().Contains(onUpdate))
+                _OnUpdated -= onUpdate;
+            if (_OnDisposed.GetInvocationList().Contains(onDispose))
+                _OnDisposed -= onDispose;
+        }
+
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
 
         public void UpdateProperties(IEnumerable<Property> props)
@@ -234,7 +238,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             _properties.Clear();
-            
+
             _OnDisposed?.Invoke(this);
 
             _OnUpdated = null;

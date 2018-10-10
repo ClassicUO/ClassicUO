@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace ClassicUO.Game.Data
 {
@@ -18,7 +16,8 @@ namespace ClassicUO.Game.Data
         public readonly int MinSkill;
         public readonly int TithingCost;
 
-        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, int manacost, int minkill, int tithingcost, params Reagents[] regs)
+        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, int manacost, int minkill,
+            int tithingcost, params Reagents[] regs)
         {
             Name = name;
             ID = index;
@@ -32,7 +31,8 @@ namespace ClassicUO.Game.Data
         }
 
 
-        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, int manacost, int minkill, params Reagents[] regs)
+        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, int manacost, int minkill,
+            params Reagents[] regs)
         {
             Name = name;
             ID = index;
@@ -110,9 +110,11 @@ namespace ClassicUO.Game.Data
                         sb.Append("Unknown reagent");
                         break;
                 }
+
                 if (i < Regs.Length - 1)
                     sb.Append(separator);
             }
+
             return sb.ToString();
         }
     }

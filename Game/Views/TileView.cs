@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,8 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Game.GameObjects;
+
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -46,8 +48,8 @@ namespace ClassicUO.Game.Views
         };
 
         private bool _needUpdateStrechedTile = true;
-        private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
         private Vector3 _storedHue;
+        private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
 
 
         public TileView(Tile tile) : base(tile)
@@ -88,7 +90,6 @@ namespace ClassicUO.Game.Views
         }
 
 
-
         private bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             Texture.Ticks = CoreGame.Ticks;
@@ -114,10 +115,10 @@ namespace ClassicUO.Game.Views
             }
 
             if (HueVector != _vertex[0].Hue)
-            _vertex[0].Hue =
-                _vertex[1].Hue =
-                    _vertex[2].Hue =
-                        _vertex[3].Hue = HueVector;
+                _vertex[0].Hue =
+                    _vertex[1].Hue =
+                        _vertex[2].Hue =
+                            _vertex[3].Hue = HueVector;
 
 
             if (!spriteBatch.DrawSprite(Texture, _vertex)) return false;

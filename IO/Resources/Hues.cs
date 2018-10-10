@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -147,8 +150,8 @@ namespace ClassicUO.IO.Resources
             (uint) (_table[(c >> 10) & 0x1F] | (_table[(c >> 5) & 0x1F] << 8) | (_table[c & 0x1F] << 16));
 
         public static ushort Color32To16(uint c) => (ushort) (((c & 0xFF) * 32 / 256) |
-                                                             ((((c >> 16) & 0xff) * 32 / 256) << 10) |
-                                                             ((((c >> 8) & 0xff) * 32 / 256) << 5));
+                                                              ((((c >> 16) & 0xff) * 32 / 256) << 10) |
+                                                              ((((c >> 8) & 0xff) * 32 / 256) << 5));
 
         public static ushort ConvertToGray(ushort c) =>
             (ushort) (((c & 0x1F) * 299 + ((c >> 5) & 0x1F) * 587 + ((c >> 10) & 0x1F) * 114) / 1000);

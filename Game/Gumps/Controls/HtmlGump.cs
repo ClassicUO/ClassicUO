@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -48,7 +51,8 @@ namespace ClassicUO.Game.Gumps
             InternalBuild(lines[textIndex], 0);
         }
 
-        public HtmlGump(int x, int y, int w, int h, bool hasbackground, bool hasscrollbar, bool useflagscrollbar = false, string text = "", int hue = 0,
+        public HtmlGump(int x, int y, int w, int h, bool hasbackground, bool hasscrollbar,
+            bool useflagscrollbar = false, string text = "", int hue = 0,
             bool ishtml = false, byte font = 1, bool isunicode = true, FontStyle style = FontStyle.None,
             TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT) : this()
         {
@@ -73,7 +77,7 @@ namespace ClassicUO.Game.Gumps
             InternalBuild(text, hue);
         }
 
-        public HtmlGump() : base()
+        public HtmlGump()
         {
             _gameText = new RenderedText
             {
@@ -218,12 +222,13 @@ namespace ClassicUO.Game.Gumps
                     bool inbounds = rect.Contains(x, _scrollBar.Value + y);
                     if (inbounds && Fonts.GetWebLink(link.LinkID, out WebLink result))
                     {
-                        Log.Message(LogTypes.Info, "LINK CLICKED: " + result.Link);                      
+                        Log.Message(LogTypes.Info, "LINK CLICKED: " + result.Link);
                         BrowserHelper.OpenBrowser(result.Link);
                         break;
                     }
                 }
             }
+
             base.OnMouseClick(x, y, button);
         }
 

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,18 +18,18 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using System;
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    class ContainerGump : Gump
+    internal class ContainerGump : Gump
     {
         private readonly ContainerData _data;
         private readonly Item _item;
@@ -83,7 +84,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 if (!control)
                     AddChildren(new ItemGumpling(item));
-
             }
         }
 
