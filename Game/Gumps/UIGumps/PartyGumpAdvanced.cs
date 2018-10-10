@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using ClassicUO.Game.Gumps.Controls;
-using ClassicUO.Game.Gumps.Controls.InGame;
 using ClassicUO.Game.System;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;

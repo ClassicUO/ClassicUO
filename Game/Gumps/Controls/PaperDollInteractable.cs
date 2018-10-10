@@ -23,9 +23,9 @@
 
 using System;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Gumps.UIGumps;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     internal class PaperDollInteractable : Gump
     {

@@ -33,7 +33,7 @@ using Microsoft.Xna.Framework.Input;
 using SDL2;
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public enum ClickPriority
     {

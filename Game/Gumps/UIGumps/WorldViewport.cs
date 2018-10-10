@@ -21,13 +21,13 @@
 
 #endregion
 
-using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps.Controls
+namespace ClassicUO.Game.Gumps.UIGumps
 {
     public class WorldViewport : GumpControl
     {

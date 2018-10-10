@@ -30,7 +30,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ClassicUO.Game.Gumps.Controls.InGame
+namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class MapGump : Gump
     {

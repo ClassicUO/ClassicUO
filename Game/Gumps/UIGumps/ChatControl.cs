@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;

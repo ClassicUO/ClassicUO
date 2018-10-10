@@ -28,7 +28,6 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.Controls;
-using ClassicUO.Game.Gumps.Controls.InGame;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;

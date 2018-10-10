@@ -27,7 +27,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using SDL2;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public class TextBox : GumpControl
     {
