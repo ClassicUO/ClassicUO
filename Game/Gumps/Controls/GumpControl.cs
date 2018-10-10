@@ -652,7 +652,6 @@ namespace ClassicUO.Game.Gumps.Controls
             _mouseIsDown = false;
             if (_attempToDrag)
             {
-                Log.Message(LogTypes.Trace, "END");
                 _attempToDrag = false;
                 InvokeDragEnd(new Point(x, y));
             }

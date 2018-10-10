@@ -274,7 +274,7 @@ namespace ClassicUO.Game.GameObjects
                 if (Effect.IsDisposed)
                     Effect = null;
                 else
-                    Effect.UpdateAnimation(frameMS);
+                    Effect.Update(totalMS, frameMS);
             }
         }
 

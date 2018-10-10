@@ -90,27 +90,24 @@ namespace ClassicUO.Game.GameObjects
 
         protected override View CreateView() => new AnimatedEffectView(this);
 
-        public override void UpdateAnimation(double ms)
-        {
-            base.UpdateAnimation(ms);
-
-            if (LastChangeFrameTime >= Duration && Duration >= 0)
-                Dispose();
-            else
-            {
-                (int x, int y, int z) = GetSource();
-
-                if (Position.X != x || Position.Y != y || Position.Z != z)
-                    Position = new Position((ushort) x, (ushort) y, (sbyte) z);
-            }
-        }
 
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
 
-            if (!IsDisposed) UpdateAnimation(frameMS);
+            if (!IsDisposed)
+            {
+                if (LastChangeFrameTime >= Duration && Duration >= 0)
+                    Dispose();
+                else
+                {
+                    (int x, int y, int z) = GetSource();
+
+                    if (Position.X != x || Position.Y != y || Position.Z != z)
+                        Position = new Position((ushort)x, (ushort)y, (sbyte)z);
+                }
+            }
         }
     }
 }

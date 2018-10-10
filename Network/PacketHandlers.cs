@@ -1100,6 +1100,17 @@ namespace ClassicUO.Network
 
         private static void GraphicEffect(Packet p)
         {
+            GraphicEffectType type = (GraphicEffectType) p.ReadByte();
+            Serial source = p.ReadUInt();
+            Serial target = p.ReadUInt();
+            Graphic graphic = p.ReadUShort();
+            Position srcPos = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            Position targPos = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            byte speed = p.ReadByte();
+            byte duration = p.ReadByte();
+            p.Skip(2);
+            bool fixedDirection = p.ReadBool();
+            bool doesExplode = p.ReadBool();
         }
 
         private static void ClientViewRange(Packet p)

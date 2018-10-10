@@ -65,16 +65,20 @@ namespace ClassicUO.Game.GameObjects
             Speed = AnimDataFrame.FrameInterval * 45;
         }
 
-        public virtual void UpdateAnimation(double ms)
+    
+
+        public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
             if (IsEnabled)
             {
                 if (LastChangeFrameTime < CoreGame.Ticks)
                 {
-                    AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                    AnimationGraphic = (Graphic)(Graphic + AnimDataFrame.FrameData[AnimIndex]);
                     AnimIndex++;
 
-                    if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte) AnimDataFrame.FrameStart;
+                    if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte)AnimDataFrame.FrameStart;
 
                     LastChangeFrameTime = CoreGame.Ticks + Speed;
                 }

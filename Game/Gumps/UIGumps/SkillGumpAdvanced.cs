@@ -129,6 +129,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Dispose()
         {
+            _line.Dispose();
             World.Player.SkillsChanged -= OnSkillChanged;
             base.Dispose();
         }
