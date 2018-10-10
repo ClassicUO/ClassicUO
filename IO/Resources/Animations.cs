@@ -1100,25 +1100,15 @@ namespace ClassicUO.IO.Resources
                 if (animDir.Frames[i] != null /*&& !animDir.Frames[i].IsDisposed*/)
                     continue;
 
-                //animDir.Frames[i] = new AnimationFrame();
-
                 _reader.SetData(dataStart + (int) frameOffset[i]);
 
                 short imageCenterX = _reader.ReadShort();
-                //animDir.Frames[i].CenterX = imageCenterX;
-
                 short imageCenterY = _reader.ReadShort();
-                //animDir.Frames[i].CenterY = imageCenterY;
-
                 short imageWidth = _reader.ReadShort();
-                //animDir.Frames[i].Width = imageWidth;
-
                 short imageHeight = _reader.ReadShort();
-                //animDir.Frames[i].Height = imageHeight;
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {
-                    Log.Message(LogTypes.Warning, "mul frame size is null");
                     continue;
                 }
 
