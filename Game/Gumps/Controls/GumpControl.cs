@@ -56,6 +56,7 @@ namespace ClassicUO.Game.Gumps
         private float _maxTimeForDClick;
         private GumpControl _parent;
 
+
         protected GumpControl(GumpControl parent = null)
         {
             Parent = parent;
@@ -144,8 +145,6 @@ namespace ClassicUO.Game.Gumps
                 if (_bounds.Width != value)
                 {
                     _bounds.Width = value;
-                    if (IsInitialized)
-                        OnResize();
                 }
             }
         }
@@ -158,8 +157,6 @@ namespace ClassicUO.Game.Gumps
                 if (_bounds.Height != value)
                 {
                     _bounds.Height = value;
-                    if (IsInitialized)
-                        OnResize();
                 }
             }
         }
@@ -356,13 +353,11 @@ namespace ClassicUO.Game.Gumps
 
                 if (!IgnoreParentFill)
                 {
-                    if (w != Width || h != Height)
-                    {
+                    if (w != Width)                  
                         Width = w;
-                        Height = h;
-                    }
+                    if (h != Height)
+                        Height = h;              
                 }
-
 
                 if (toremove.Count > 0)
                     toremove.ForEach(s => _children.Remove(s));
@@ -723,9 +718,6 @@ namespace ClassicUO.Game.Gumps
         {
         }
 
-        protected virtual void OnResize()
-        {
-        }
 
         protected virtual void OnInitialize()
         {

@@ -27,6 +27,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Gumps.Controls.InGame
 {
@@ -44,6 +45,9 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
         private readonly WorldViewport _viewport;
         private int _worldHeight;
         private int _worldWidth;
+
+        private const int BORDER_WIDTH = 5;
+        private const int BORDER_HEIGHT = 5;
 
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
@@ -74,11 +78,13 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
                 _lastPosition = Point.Zero;
             };
 
+            Width = _worldWidth + BORDER_WIDTH * 2;
+            Height = _worldHeight + BORDER_HEIGHT * 2;
 
-            _border = new GameBorder(0, 0, _worldWidth + 8, _worldHeight + 12);
+            _border = new GameBorder(0, 0, Width, Height, 4);
 
-            _viewport = new WorldViewport(scene, 4, 6, _worldWidth, _worldHeight);
-            _chatControl = new ChatControl(4, 6, _worldWidth, _worldHeight);
+            _viewport = new WorldViewport(scene, BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
+            _chatControl = new ChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
 
             AddChildren(_border);
             AddChildren(_button);
@@ -88,6 +94,10 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             Service.Register(_chatControl);
 
             _scene = scene;
+
+          
+
+            Resize();
         }
 
 
@@ -112,7 +122,11 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
                 _worldWidth = _settings.GameWindowWidth;
                 _worldHeight = _settings.GameWindowHeight;
 
-                OnResize();
+                Width = _worldWidth + BORDER_WIDTH * 2;
+                Height = _worldHeight + BORDER_HEIGHT * 2;
+
+                Resize();
+                //OnResize();
             }
 
             base.Update(totalMS, frameMS);
@@ -124,15 +138,15 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 
             SpriteBatch3D sb = Service.Get<SpriteBatch3D>();
 
-            if (position.X + Width - 4 > sb.GraphicsDevice.Viewport.Width)
-                position.X = sb.GraphicsDevice.Viewport.Width - (Width - 4);
-            if (position.X < -4)
-                position.X = -4;
+            if (position.X + Width - BORDER_WIDTH > sb.GraphicsDevice.Viewport.Width)
+                position.X = sb.GraphicsDevice.Viewport.Width - (Width - BORDER_WIDTH);
+            if (position.X < -BORDER_WIDTH)
+                position.X = -BORDER_WIDTH;
 
-            if (position.Y + Height - 6 > sb.GraphicsDevice.Viewport.Height)
-                position.Y = sb.GraphicsDevice.Viewport.Height - (Height - 6);
-            if (position.Y < -6)
-                position.Y = -6;
+            if (position.Y + Height - BORDER_HEIGHT > sb.GraphicsDevice.Viewport.Height)
+                position.Y = sb.GraphicsDevice.Viewport.Height - (Height - BORDER_HEIGHT);
+            if (position.Y < -BORDER_HEIGHT)
+                position.Y = -BORDER_HEIGHT;
 
             Location = position;
 
@@ -140,35 +154,32 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             _settings.GameWindowY = position.Y;
         }
 
-        protected override void OnResize()
+        private void Resize()
         {
-            Width = _worldWidth + 8;
-            Height = _worldHeight + 12;
-
             _border.Width = Width;
             _border.Height = Height;
 
 
             _button.X = Width - 6;
-            _button.Y = Height - 8;
+            _button.Y = Height - 6;
 
 
             _viewport.Width = _worldWidth;
             _viewport.Height = _worldHeight;
 
-
-            _chatControl.X = 4;
-            _chatControl.Y = 6;
             _chatControl.Width = _worldWidth;
-            _chatControl.Height = _worldHeight - 2;
+            _chatControl.Height = _worldHeight;
+
+            _chatControl.Resize();
         }
     }
 
     internal class GameBorder : GumpControl
     {
         private readonly SpriteTexture[] _borders = new SpriteTexture[2];
+        private readonly int _borderSize;
 
-        public GameBorder(int x, int y, int w, int h)
+        public GameBorder(int x, int y, int w, int h, int borderSize)
         {
             X = x;
             Y = y;
@@ -178,6 +189,7 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             _borders[0] = IO.Resources.Gumps.GetGumpTexture(0x0A8C);
             _borders[1] = IO.Resources.Gumps.GetGumpTexture(0x0A8D);
 
+            _borderSize = borderSize;
 
             CanMove = true;
             AcceptMouseInput = true;
@@ -195,20 +207,20 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
         {
             // sopra
             spriteBatch.Draw2DTiled(_borders[0],
-                new Rectangle((int) position.X, (int) position.Y + _borders[0].Height / 2, Width - 2,
-                    _borders[0].Height), Vector3.Zero);
+                new Rectangle((int)position.X, (int)position.Y, Width,
+                    _borderSize), Vector3.Zero);
             // sotto
             spriteBatch.Draw2DTiled(_borders[0],
-                new Rectangle((int) position.X, (int) position.Y + Height - _borders[0].Height * 2 + 1, Width + 1,
-                    _borders[0].Height), Vector3.Zero);
+                new Rectangle((int)position.X, (int)position.Y + Height - _borderSize, Width,
+                    _borderSize), Vector3.Zero);
             //sx
             spriteBatch.Draw2DTiled(_borders[1],
-                new Rectangle((int) position.X - _borders[1].Width / 2 + 1, (int) position.Y + _borders[0].Height / 2,
-                    _borders[1].Width, Height - _borders[0].Height * 2), Vector3.Zero);
+                new Rectangle((int)position.X, (int)position.Y,
+                    _borderSize, Height), Vector3.Zero);
             //dx
             spriteBatch.Draw2DTiled(_borders[1],
-                new Rectangle((int) position.X + Width - _borders[1].Width + 1, (int) position.Y + 2, _borders[1].Width,
-                    Height - _borders[0].Height * 2), Vector3.Zero);
+                new Rectangle((int)position.X + Width - _borderSize, (int)position.Y + _borders[1].Width / 2, _borderSize,
+                    Height - _borderSize), Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
         }

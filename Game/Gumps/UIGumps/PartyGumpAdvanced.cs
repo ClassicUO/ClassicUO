@@ -34,10 +34,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanMove = true;
             AcceptMouseInput = false;
 
-            AddChildren(new GameBorder(0, 0, 320, 400));
+            AddChildren(new GameBorder(0, 0, 320, 400, 4));
 
-            AddChildren(new GumpPicTiled(4, 6, 320 - 8, 400 - 12, 0x0A40) {IsTransparent = true});
-            AddChildren(new GumpPicTiled(4, 6, 320 - 8, 400 - 12, 0x0A40) {IsTransparent = true});
+            AddChildren(new GumpPicTiled(4, 4, 320 - 8, 400 - 8, 0x0A40) {IsTransparent = true});
+            AddChildren(new GumpPicTiled(4, 4, 320 - 8, 400 - 8, 0x0A40) {IsTransparent = true});
 
             _scrollArea = new ScrollArea(20, 60, 295, 190, true) {AcceptMouseInput = true};
             AddChildren(_scrollArea);
