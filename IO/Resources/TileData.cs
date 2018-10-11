@@ -455,7 +455,7 @@ namespace ClassicUO.IO.Resources
         /// <summary>
         ///     Unknown.
         /// </summary>
-        Unknown2 = 0x00080000,
+        NoHouse = 0x00080000,
 
         /// <summary>
         ///     The tile is a map--in the cartography sense. Unknown usage.
@@ -490,7 +490,7 @@ namespace ClassicUO.IO.Resources
         /// <summary>
         ///     Unknown.
         /// </summary>
-        Unknown3 = 0x04000000,
+        NoDiagonal = 0x04000000,
 
         /// <summary>
         ///     Not yet documented.
@@ -515,6 +515,27 @@ namespace ClassicUO.IO.Resources
         /// <summary>
         ///     Not yet documented.
         /// </summary>
-        StairRight = 0x80000000
+        StairRight = 0x80000000,
+
+        /// Blend Alphas, tile blending.
+        AlphaBlend = 0x0100000000,
+
+        /// Uses new art style?
+        UseNewArt = 0x0200000000,
+
+        /// Has art being used?
+        ArtUsed = 0x0400000000,
+
+        /// Disallow shadow on this tile, lightsource? lava? 
+        NoShadow = 0x1000000000,
+
+        /// Let pixels bleed in to other tiles? Is this Disabling Texture Clamp?
+        PixelBleed = 0x2000000000,
+
+        /// Play tile animation once.
+        PlayAnimOnce = 0x4000000000,
+
+        /// Movable multi? Cool ships and vehicles etc?
+        MultiMovable = 0x10000000000
     }
 }
