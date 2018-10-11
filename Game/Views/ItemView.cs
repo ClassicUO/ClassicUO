@@ -103,6 +103,11 @@ namespace ClassicUO.Game.Views
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
             MouseOverList objectList)
         {
+            PreDraw(position);
+
+            if (GameObject.IsDisposed)
+                return false;
+
             Item item = (Item) GameObject;
 
             spriteBatch.GetZ();
@@ -171,7 +176,7 @@ namespace ClassicUO.Game.Views
                     if (frame == null || frame.IsDisposed) return false;
 
                     int drawCenterY = frame.CenterY;
-                    int drawX = -22;
+                    const int drawX = -22;
                     int drawY = drawCenterY + GameObject.Position.Z * 4 - 22 - 3;
 
                     int x = drawX + frame.CenterX;
@@ -181,10 +186,26 @@ namespace ClassicUO.Game.Views
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                     HueVector = RenderExtentions.GetHueVector(color);
                     base.Draw(spriteBatch, position, objectList);
+                    Pick(frame.ID, Bounds, position, objectList);
                 }
             }
 
             return true;
+        }
+
+
+        private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
+        {
+            int x;
+
+            if (IsFlipped)
+                x = (int)drawPosition.X + area.X + 44 - list.MousePosition.X;
+            else
+                x = list.MousePosition.X - (int)drawPosition.X + area.X;
+
+            int y = list.MousePosition.Y - ((int)drawPosition.Y - area.Y);
+
+            if (Animations.Contains(id, x, y)) list.Add(GameObject, drawPosition);
         }
 
         protected override void MousePick(MouseOverList objectList, SpriteVertex[] vertex)

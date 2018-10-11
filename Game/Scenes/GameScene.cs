@@ -440,15 +440,12 @@ namespace ClassicUO.Game.Scenes
                                  TileData.IsRoof((long) dyn.ItemData.Flags))
                                 && !(obj is Tile))
                             {
-                                if (tile == World.Player.Tile)
-                                {
-                                }
-
                                 continue;
                             }
 
                             if (obj == World.Player)
                             {
+
                             }
 
                             if (draw && obj.View.Draw(sb3D, dp, _mouseOverList))
@@ -875,7 +872,7 @@ namespace ClassicUO.Game.Scenes
             int charX = entity.Position.X;
             int charY = entity.Position.Y;
 
-            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.GetByLocalSerial(entity) : null;
+            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.Get(entity) : null;
             int dropMaxZIndex = -1;
             if (mob != null)
             {

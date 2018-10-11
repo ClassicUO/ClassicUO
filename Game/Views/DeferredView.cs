@@ -39,7 +39,19 @@ namespace ClassicUO.Game.Views
             _position = position;
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList) =>
-            _baseView.DrawInternal(spriteBatch, _position, objectList);
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        {
+            //if (_baseView.GameObject is Mobile mobile)
+            //{
+            //    if (mobile.IsDead || mobile.IsDisposed || mobile.Graphic == 0)
+            //    {
+            //        GameObject.Dispose();
+            //        return false;
+            //    }
+            //}
+
+            return _baseView.DrawInternal(spriteBatch, _position, objectList);
+        }
+            
     }
 }

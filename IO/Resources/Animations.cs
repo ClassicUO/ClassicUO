@@ -29,6 +29,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {

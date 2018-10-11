@@ -27,6 +27,7 @@ using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {

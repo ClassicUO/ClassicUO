@@ -2,6 +2,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
@@ -45,7 +46,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case 1:
                     //                    NetClient.Disconnected += (sender, e) => _log.Message(LogTypes.Warning, "Disconnected!");
                     //                    World.InGame 
-                    Log.Message(LogTypes.Trace, "Disconnect Button Clicked...\n", false);
+                    Log.Message(LogTypes.Trace, "Disconnect Button Clicked...\n");
                     Dispose();
                     break;
             }

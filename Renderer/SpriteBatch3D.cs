@@ -245,9 +245,9 @@ namespace ClassicUO.Renderer
             _vertexBuffer.SetData(_vertices, 0, _vertexCount);
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
-            SortIndicesAndMerge();
+            //SortIndicesAndMerge();
 
-            _indexBuffer.SetData(_sortedIndices, 0, _indicesCount);
+            _indexBuffer.SetData(_indices, 0, _indicesCount);
             GraphicsDevice.Indices = _indexBuffer;
 
             _indicesCount = 0;
@@ -313,23 +313,30 @@ namespace ClassicUO.Renderer
             GraphicsDevice.DepthStencilState = _dss;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void InternalDraw()
         {
+            if (Calls == 0)
+                return;
+
             _effect.CurrentTechnique = _huesTechnique;
             _effect.CurrentTechnique.Passes[0].Apply();
 
             for (int i = 0; i < Calls; i++)
             {
-                ref DrawCallInfo call = ref _drawCalls[i];
-
-                GraphicsDevice.Textures[0] = call.Texture;
-                GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, call.StartIndex,
-                    call.PrimitiveCount);
+                DoDraw(ref _drawCalls[i]);
             }
 
             Array.Clear(_drawCalls, 0, Calls);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void DoDraw(ref DrawCallInfo call)
+        {
+            GraphicsDevice.Textures[0] = call.Texture;
+            GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, call.StartIndex,
+                call.PrimitiveCount);
+        }
+
 
 
         private struct DrawCallInfo : IComparable<DrawCallInfo>

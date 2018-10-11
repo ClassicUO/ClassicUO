@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;ORIONSORT_</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -242,7 +242,10 @@
     <Compile Include="Utility\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />
     <Compile Include="Utility\IPoolable.cs" />
-    <Compile Include="Utility\Log.cs" />
+    <Compile Include="Utility\Logging\Log.cs" />
+    <Compile Include="Utility\Logging\LogFile.cs" />
+    <Compile Include="Utility\Logging\Logger.cs" />
+    <Compile Include="Utility\Logging\LogTypes.cs" />
     <Compile Include="Utility\MathHelper.cs" />
     <Compile Include="Utility\ObjectPool.cs" />
     <Compile Include="Utility\Pool.cs" />
