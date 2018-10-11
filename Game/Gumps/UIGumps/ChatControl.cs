@@ -159,31 +159,33 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
             }
 
-
-            if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_q, false, false, true) &&
-                _messageHistoryIndex > -1)
+            if (IsFocused)
             {
-                if (_messageHistoryIndex > 0)
-                    _messageHistoryIndex--;
-                Mode = _messageHistory[_messageHistoryIndex].Item1;
-                _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
-            }
-            else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_w, false, false, true))
-            {
-                if (_messageHistoryIndex < _messageHistory.Count - 1)
+                if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_q, false, false, true) &&
+                    _messageHistoryIndex > -1)
                 {
-                    _messageHistoryIndex++;
+                    if (_messageHistoryIndex > 0)
+                        _messageHistoryIndex--;
                     Mode = _messageHistory[_messageHistoryIndex].Item1;
                     _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
                 }
-                else
+                else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_w, false, false, true))
                 {
-                    _textBox.SetText(string.Empty);
+                    if (_messageHistoryIndex < _messageHistory.Count - 1)
+                    {
+                        _messageHistoryIndex++;
+                        Mode = _messageHistory[_messageHistoryIndex].Item1;
+                        _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
+                    }
+                    else
+                    {
+                        _textBox.SetText(string.Empty);
+                    }
                 }
-            }
-            else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_BACKSPACE, false, false, false) && _textBox.Text == string.Empty)
-            {
-                Mode = ChatMode.Default;
+                else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_BACKSPACE, false, false, false) && _textBox.Text == string.Empty)
+                {
+                    Mode = ChatMode.Default;
+                }
             }
 
 
