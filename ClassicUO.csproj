@@ -244,12 +244,9 @@
     <Compile Include="Renderer\SpriteVertex.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="Utility\Bag.cs" />
-    <Compile Include="Utility\BrowserHelper.cs" />
     <Compile Include="Utility\CoordsHelper.cs" />
-    <Compile Include="Utility\Coroutine.cs" />
     <Compile Include="Utility\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />
-    <Compile Include="Utility\GarbageCollectionWatcher.cs" />
     <Compile Include="Utility\IPoolable.cs" />
     <Compile Include="Utility\Log.cs" />
     <Compile Include="Utility\MathHelper.cs" />

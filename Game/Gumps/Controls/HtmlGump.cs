@@ -21,6 +21,7 @@
 
 #endregion
 
+using System.Diagnostics;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -223,7 +224,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     if (inbounds && Fonts.GetWebLink(link.LinkID, out WebLink result))
                     {
                         Log.Message(LogTypes.Info, "LINK CLICKED: " + result.Link);
-                        BrowserHelper.OpenBrowser(result.Link);
+                        Process.Start(result.Link);
                         break;
                     }
                 }
