@@ -193,8 +193,11 @@ namespace ClassicUO.Renderer
         private void Build(Texture2D texture, SpriteVertex[] vertices)
         {
             AddQuadrilateralIndices(_vertexCount);
+            
+			if (_vertexCount + VERTEX_COUNT > _vertices.Length || _indicesCount + INDEX_COUNT > _indices.Length)
+				Flush(false);
 
-            DrawCallInfo call = new DrawCallInfo(texture, _indicesCount, PRIMITIVES_COUNT);
+            DrawCallInfo call = new DrawCallInfo(texture, _indicesCount, PRIMITIVES_COUNT, 0);
 
             Array.Copy(vertices, 0, _vertices, _vertexCount, VERTEX_COUNT);
             _vertexCount += VERTEX_COUNT;
@@ -211,6 +214,9 @@ namespace ClassicUO.Renderer
                 Merged++;
                 return;
             }
+
+			if (Calls >= _drawCalls.Length)
+				Flush(false);
 
             _drawCalls[Calls++] = call;
         }
@@ -239,9 +245,9 @@ namespace ClassicUO.Renderer
             _vertexBuffer.SetData(_vertices, 0, _vertexCount);
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
-            //SortIndicesAndMerge();
+            SortIndicesAndMerge();
 
-            _indexBuffer.SetData(_indices, 0, _indicesCount);
+            _indexBuffer.SetData(_sortedIndices, 0, _indicesCount);
             GraphicsDevice.Indices = _indexBuffer;
 
             _indicesCount = 0;
@@ -328,22 +334,24 @@ namespace ClassicUO.Renderer
 
         private struct DrawCallInfo : IComparable<DrawCallInfo>
         {
-            public DrawCallInfo(Texture2D texture, int start, int count)
+            public unsafe DrawCallInfo(Texture2D texture, int start, int count, float depth)
             {
                 Texture = texture;
-                TextureKey = (uint) texture.GetHashCode();
+				TextureKey = (uint)RuntimeHelpers.GetHashCode(texture);
                 StartIndex = start;
                 PrimitiveCount = count;
+				DepthKey = *(uint*)&depth;
             }
 
             public readonly Texture2D Texture;
             public readonly uint TextureKey;
             public int StartIndex;
             public int PrimitiveCount;
+			public readonly uint DepthKey;
 
             public bool TryMerge(ref DrawCallInfo callInfo)
             {
-                if (TextureKey != callInfo.TextureKey)
+                if (TextureKey != callInfo.TextureKey || DepthKey != callInfo.DepthKey)
                     return false;
                 callInfo.PrimitiveCount += PrimitiveCount;
                 return true;
@@ -351,8 +359,12 @@ namespace ClassicUO.Renderer
 
             public int CompareTo(DrawCallInfo other)
             {
-                int result = TextureKey.CompareTo(other.TextureKey);
-                return result;
+				var result = TextureKey.CompareTo(other.TextureKey); ;
+                if (result != 0)
+                    return result;
+                result = DepthKey.CompareTo(other.DepthKey);
+
+				return result;
             }
         }
     }
