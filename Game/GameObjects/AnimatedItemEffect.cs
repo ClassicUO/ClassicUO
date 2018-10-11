@@ -31,7 +31,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Graphic = graphic;
             Hue = hue;
-            Duration = duration;
+            Duration = duration > 0 ? CoreGame.Ticks + duration : -1;
 
             Load();
         }
@@ -84,10 +84,6 @@ namespace ClassicUO.Game.GameObjects
                 SetSource(sourceX, sourceY, sourceZ);
         }
 
-        public int Duration { get; set; }
-        //public new AnimatedEffectView View => (AnimatedEffectView)base.View;
-
-
         protected override View CreateView() => new AnimatedEffectView(this);
 
 
@@ -98,15 +94,15 @@ namespace ClassicUO.Game.GameObjects
 
             if (!IsDisposed)
             {
-                if (LastChangeFrameTime >= Duration && Duration >= 0)
-                    Dispose();
-                else
-                {
-                    (int x, int y, int z) = GetSource();
 
-                    if (Position.X != x || Position.Y != y || Position.Z != z)
-                        Position = new Position((ushort)x, (ushort)y, (sbyte)z);
+                (int x, int y, int z) = GetSource();
+
+                if (Position.X != x || Position.Y != y || Position.Z != z)
+                {
+                    Position = new Position((ushort)x, (ushort)y, (sbyte)z);
+                    Tile = World.Map.GetTile(x, y);
                 }
+                
             }
         }
     }

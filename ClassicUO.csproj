@@ -62,12 +62,15 @@
     <Compile Include="Game\Data\GraphicEffectType.cs" />
     <Compile Include="Game\GameObjects\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
+    <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Game\Gumps\UIGumps\LogoutGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\Gumps\UIGumps\UseSpellButtonGump.cs" />
     <Compile Include="Game\System\PartySystem.cs" />
     <Compile Include="Game\System\TargetSystem.cs" />
     <Compile Include="Game\Views\LightningEffectView.cs" />
+    <Compile Include="Game\Views\MovingEffectView.cs" />
+    <Compile Include="Interfaces\ISmoothMovable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Configuration\ConfigurationResolver.cs" />
     <Compile Include="Configuration\Settings.cs" />

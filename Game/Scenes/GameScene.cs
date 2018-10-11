@@ -54,6 +54,7 @@ namespace ClassicUO.Game.Scenes
         private WorldViewport _viewPortGump;
         private TopBarGump _topBarGump;
         private StaticManager _staticManager;
+        private EffectManager _effectManager;
         private Settings _settings;
 
         //private static Hue _savedHue;
@@ -115,6 +116,8 @@ namespace ClassicUO.Game.Scenes
             _viewPortGump = Service.Get<WorldViewport>();
 
             _settings = Service.Get<Settings>();
+
+            Service.Register(_effectManager = new EffectManager());
 
             GameActions.Initialize(PicupItemBegin);
         }
@@ -238,7 +241,7 @@ namespace ClassicUO.Game.Scenes
 
             World.Update(totalMS, frameMS);
             _staticManager.Update(totalMS, frameMS);
-
+            _effectManager.Update(totalMS, frameMS);
 
             if (DateTime.Now > _timePing)
             {
@@ -441,11 +444,6 @@ namespace ClassicUO.Game.Scenes
                                 && !(obj is Tile))
                             {
                                 continue;
-                            }
-
-                            if (obj == World.Player)
-                            {
-
                             }
 
                             if (draw && obj.View.Draw(sb3D, dp, _mouseOverList))
