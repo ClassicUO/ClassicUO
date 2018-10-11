@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ClassicUO.Game.Views;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -31,6 +32,10 @@ namespace ClassicUO.Game.GameObjects
             else
                 SetSource(x, y, z);
         }
+
+
+        protected override View CreateView() => new LightningEffectView(this);
+
 
         public override void Update(double totalMS, double frameMS)
         {

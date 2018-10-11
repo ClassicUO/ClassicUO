@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -25,6 +26,8 @@ namespace ClassicUO.Game.Views
             new Point(80, 0)
         };
 
+        private Graphic _displayedGraphic = Graphic.Invalid;
+
         public LightningEffectView(LightningEffect effect) : base(effect)
         {
 
@@ -39,6 +42,20 @@ namespace ClassicUO.Game.Views
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
+            LightningEffect effect = (LightningEffect) GameObject;
+
+            if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
+            {
+                if (effect.AnimationGraphic > 0x4E29)
+                    return false;
+
+                _displayedGraphic = effect.AnimationGraphic;
+                Texture = Art.GetStaticTexture(effect.AnimationGraphic);
+                Point offset = _offsets[_displayedGraphic - 20000];
+                Bounds = new Rectangle(offset.X, Texture.Height - 33 + (effect.Position.Z * 4)+ offset.Y, Texture.Width, Texture.Height);
+            }
+
+            HueVector = RenderExtentions.GetHueVector(effect.Hue);
 
             return base.DrawInternal(spriteBatch, position, objectList);
         }
