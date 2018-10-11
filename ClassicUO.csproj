@@ -174,7 +174,6 @@
     <Compile Include="Game\Views\TileView.cs" />
     <Compile Include="Game\Views\View.cs" />
     <Compile Include="Game\World.cs" />
-    <Compile Include="Input\Culture.cs" />
     <Compile Include="Input\EventArgs.cs" />
     <Compile Include="Input\InputEvent.cs" />
     <Compile Include="Input\InputKeyboardEvent.cs" />
@@ -227,11 +226,6 @@
     <Compile Include="Network\PacketsTable.cs" />
     <Compile Include="Network\PacketWriter.cs" />
     <Compile Include="Network\SendQueue.cs" />
-    <Compile Include="Platforms\Windows\Message.cs" />
-    <Compile Include="Platforms\Windows\MessageHook.cs" />
-    <Compile Include="Platforms\Windows\NativeConstants.cs" />
-    <Compile Include="Platforms\Windows\NativeMethods.cs" />
-    <Compile Include="Platforms\Windows\WndProc.cs" />
     <Compile Include="Renderer\CursorRenderer.cs" />
     <Compile Include="Renderer\IsometricLight.cs" />
     <Compile Include="Renderer\OverheadManager.cs" />
