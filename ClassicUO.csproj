@@ -40,8 +40,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FNA">
-      <HintPath>Graphic\FNA\FNA.dll</HintPath>
+    <Reference Include="FNA, Version=18.10.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Users\andre\source\repos\ClassicUO-Mono\libs\FNA\FNA.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -261,11 +262,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Graphic\FNA\FNA.dll" />
-    <None Include="Graphic\FNA\FNA.dll.config" />
-    <None Include="Graphic\Shaders\compile_shaders.bat" />
-    <None Include="Graphic\Shaders\IsometricWorld.fx" />
-    <None Include="Graphic\Shaders\IsometricWorld.fxc">
+    <None Include="libs\FNA\FNA.dll" />
+    <None Include="libs\FNA\FNA.dll.config" />
+    <None Include="shaders\compile_shaders.bat" />
+    <None Include="shaders\IsometricWorld.fx" />
+    <None Include="shaders\IsometricWorld.fxc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="libs\lib64\libFAudio.so">

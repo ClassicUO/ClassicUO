@@ -89,7 +89,7 @@ namespace ClassicUO.Renderer
             _game = game;
 
             _effect = new Effect(GraphicsDevice,
-                File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, "Graphic/Shaders/IsometricWorld.fxc")));
+                File.ReadAllBytes(Path.Combine(Bootstrap.ExeDirectory, "shaders/IsometricWorld.fxc")));
 
             _effect.Parameters["HuesPerTexture"].SetValue((float) IO.Resources.Hues.HuesCount);
 
