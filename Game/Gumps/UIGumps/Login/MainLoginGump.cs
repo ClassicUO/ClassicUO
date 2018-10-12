@@ -44,13 +44,13 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             //    (CGUICheckbox*)AddChildren(new CGUICheckbox(ID_MS_AUTOLOGIN, 0x00D2, 0x00D3, 0x00D2, 183, 417));
             //g_MainScreen.m_AutoLogin->SetTextParameters(9, "Auto Login", 0x0386, STP_RIGHT_CENTER);
 
-            AddChildren(new Label("Log in to Ultima Online", false, 0x0386) { X = 253, Y = 305 });
+            AddChildren(new Label("Log in to Ultima Online", false, 0x0386, font: 2) { X = 253, Y = 305 });
 
-            AddChildren(new Label("Account Name", false, 0x0386) { X = 183, Y = 345 });
-            AddChildren(new Label("Password", false, 0x0386) { X = 183, Y = 385 });
+            AddChildren(new Label("Account Name", false, 0x0386, font: 2) { X = 183, Y = 345 });
+            AddChildren(new Label("Password", false, 0x0386, font: 2) { X = 183, Y = 385 });
 
-            AddChildren(new Label("UO Version " + settings.ClientVersion + ".", false, 0x034E) { X = 286, Y = 455 });
-            AddChildren(new Label("ClassicUO Version xxx", false, 0x034E) { X = 286, Y = 467 });
+            AddChildren(new Label("UO Version " + settings.ClientVersion + ".", false, 0x034E, font: 9) { X = 286, Y = 453 });
+            AddChildren(new Label("ClassicUO Version xxx", false, 0x034E, font: 9) { X = 286, Y = 465 });
 
             // Text Inputs
             AddChildren(_textboxAccount = new TextBox(5, 32, 190, 190, false) { X = 335, Y = 343, Width = 190, Height = 25 });
