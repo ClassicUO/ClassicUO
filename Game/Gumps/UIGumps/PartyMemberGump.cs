@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ClassicUO.Renderer;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -26,6 +27,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private float _currentManaBarLength;
         private float _maxBarWidth;
         private PartyMember _partyMember;
+        
 
         public PartyMemberGump(PartyMember member) : base(member.Serial, 0)
         {
@@ -91,14 +93,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             
         }
 
-        public bool IsMemberGumpActive(PartyMember member)
-        {
-            return _partyMember == member ? true : false;
-
-        }
-
-
-
+        
 
         //private void OnHitsChanged(object sender, EventArgs e)
         //{
@@ -156,6 +151,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             spriteBatch.Draw2D(_manaBar, new Rectangle(X + 25, Y + 61, (int)_currentManaBarLength, 10), RenderExtentions.GetHueVector(0, true, 0.2f, true));
             return base.Draw(spriteBatch, position);
             
+        }
+
+        public override void Dispose()
+        {
+            PartySystem.PartyMemberGumpStack.Remove(_partyMember);
+            base.Dispose();
         }
 
         private string concatLabel(string a, string b)

@@ -306,6 +306,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case ChatMode.Emote:
                     break;
                 case ChatMode.Party:
+                    PartySystem.PartyMessage(text);
                     break;
                 case ChatMode.PartyPrivate:
                     break;
