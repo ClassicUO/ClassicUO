@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -38,7 +41,7 @@ namespace ClassicUO.Game.Gumps
             for (int i = 0; i < _frame.Length; i++)
             {
                 if (_frame[i] != null)
-                    _frame[i].Ticks = (long)totalMS;
+                    _frame[i].Ticks = (long) totalMS;
             }
 
             base.Update(totalMS, frameMS);

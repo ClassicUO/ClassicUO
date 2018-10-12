@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
@@ -31,18 +34,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class MiniMapGump : Gump
     {
-        private GameScene _scene;
         private const float ReticleBlinkMS = 250f;
-        private bool _useLargeMap;
-        private float _timeMS;
-        private double _frameMS;
-        private SpriteTexture _gumpTexture, _mapTexture;
-        private Texture2D _playerIndicator;
-        private bool _miniMap_LargeFormat, _forceUpdate;
-
-        private ushort _x, _y;
 
         private static MiniMapGump _self;
+        private double _frameMS;
+        private SpriteTexture _gumpTexture, _mapTexture;
+        private bool _miniMap_LargeFormat, _forceUpdate;
+        private Texture2D _playerIndicator;
+        private GameScene _scene;
+        private float _timeMS;
+        private bool _useLargeMap;
+
+        private ushort _x, _y;
 
 
         public MiniMapGump(GameScene scene) : base(0, 0)

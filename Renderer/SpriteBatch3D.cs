@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -39,13 +42,15 @@ namespace ClassicUO.Renderer
 
     public class SpriteBatch3D
     {
-        private const int VERTEX_COUNT = 4;                 
+        private const int VERTEX_COUNT = 4;
         private const int INDEX_COUNT = 6;
         private const int PRIMITIVES_COUNT = 2;
 
         private const int MAX_VERTICES_PER_DRAW = 0x8000 * 4;
         private const int INITIAL_TEXTURE_COUNT = 0x800;
         private const float MAX_ACCURATE_SINGLE_FLOAT = 65536;
+        private readonly DrawCallInfo[] _drawCalls;
+        private readonly EffectParameter _drawLightingEffect;
 
         private readonly DepthStencilState _dss = new DepthStencilState
         {
@@ -53,31 +58,30 @@ namespace ClassicUO.Renderer
             DepthBufferWriteEnable = true
         };
 
+        private readonly Effect _effect;
+
         private readonly Microsoft.Xna.Framework.Game _game;
-        private readonly short[] _indices = new short[MAX_VERTICES_PER_DRAW * 6];
-        private readonly short[] _sortedIndices = new short[MAX_VERTICES_PER_DRAW * 6];
         private readonly short[] _geometryIndices = new short[6];
 
-        private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
-        private readonly SpriteVertex[] _vertices = new SpriteVertex[MAX_VERTICES_PER_DRAW];
-
         private readonly EffectTechnique _huesTechnique;
-        private readonly Effect _effect;
+        private readonly IndexBuffer _indexBuffer;
+        private readonly short[] _indices = new short[MAX_VERTICES_PER_DRAW * 6];
+
+        private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
+        private readonly EffectParameter _projectionMatrixEffect;
+        private readonly short[] _sortedIndices = new short[MAX_VERTICES_PER_DRAW * 6];
+        private readonly VertexBuffer _vertexBuffer;
+        private readonly SpriteVertex[] _vertices = new SpriteVertex[MAX_VERTICES_PER_DRAW];
         private readonly EffectParameter _viewportEffect;
         private readonly EffectParameter _worldMatrixEffect;
-        private readonly EffectParameter _projectionMatrixEffect;
-        private readonly EffectParameter _drawLightingEffect;
 
         private BoundingBox _drawingArea;
-        private float _z;
-        private readonly DrawCallInfo[] _drawCalls;
+        private int _indicesCount;
         private bool _isStarted;
 
 
         private int _vertexCount;
-        private int _indicesCount;
-        private readonly VertexBuffer _vertexBuffer;
-        private readonly IndexBuffer _indexBuffer;
+        private float _z;
 
 
         public SpriteBatch3D(Microsoft.Xna.Framework.Game game)
@@ -87,7 +91,7 @@ namespace ClassicUO.Renderer
             _effect = new Effect(GraphicsDevice,
                 File.ReadAllBytes(Path.Combine(Environment.CurrentDirectory, "Graphic/Shaders/IsometricWorld.fxc")));
 
-            _effect.Parameters["HuesPerTexture"].SetValue( /*IO.Resources.Hues.HuesCount*/3000f);
+            _effect.Parameters["HuesPerTexture"].SetValue((float) IO.Resources.Hues.HuesCount);
 
             _drawLightingEffect = _effect.Parameters["DrawLighting"];
             _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];
@@ -202,11 +206,12 @@ namespace ClassicUO.Renderer
 
         private void Enqueue(ref DrawCallInfo call)
         {
-            //if (_enqueuedDrawCalls > 0 && call.TryMerge(ref _drawCalls[_enqueuedDrawCalls - 1]))
-            //{
-            //    Merged++;
-            //    return;
-            //}
+            if (Calls > 0 && call.TryMerge(ref _drawCalls[Calls - 1]))
+            {
+                Merged++;
+                return;
+            }
+
             _drawCalls[Calls++] = call;
         }
 
@@ -344,7 +349,11 @@ namespace ClassicUO.Renderer
                 return true;
             }
 
-            public int CompareTo(DrawCallInfo other) => TextureKey.CompareTo(other.TextureKey);
+            public int CompareTo(DrawCallInfo other)
+            {
+                int result = TextureKey.CompareTo(other.TextureKey);
+                return result;
+            }
         }
     }
 }

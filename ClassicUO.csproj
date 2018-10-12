@@ -1,129 +1,352 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{71F289FA-0EF8-4F72-A26E-A8280C0931C5}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <SignAssembly>false</SignAssembly>
+    <RootNamespace>ClassicUO</RootNamespace>
+    <AssemblyName>ClassicUO</AssemblyName>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
-    <DefineConstants>TRACE;ORIONSORT!</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Service\**" />
-    <EmbeddedResource Remove="Service\**" />
-    <None Remove="Service\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Audio\" />
-    <Folder Include="Platforms\MacOS\" />
-    <Folder Include="Platforms\Linux\" />
-    <Folder Include="Properties\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-  </ItemGroup>
-
   <ItemGroup>
     <Reference Include="FNA">
       <HintPath>Graphic\FNA\FNA.dll</HintPath>
     </Reference>
-    <Reference Include="System">
-      <HintPath>System</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
-
   <ItemGroup>
-    <None Update="Graphic\FNA\FNA.dll">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x64\libjpeg-9.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x64\libogg-0.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x64\libpng16-16.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x64\libtheoradec-1.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x64\libtheorafile.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x64\libvorbis-0.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x64\libvorbisfile.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x64\MojoShader.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x64\SDL2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x64\SDL2_image.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x64\soft_oal.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x64\zlib1.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x86\libjpeg-9.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x86\libogg-0.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x86\libpng16-16.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x86\libtheoradec-1.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x86\libtheorafile.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x86\libvorbis-0.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x86\libvorbisfile.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x86\MojoShader.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x86\SDL2.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x86\SDL2_image.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x86\soft_oal.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\FNA\x86\zlib1.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Graphic\Shaders\IsometricWorld.fxc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Compile Include="Game\Gumps\UIGumps\Login\CharacterSelectionGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\Login\LoadingGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\Login\LoginGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\Login\MainLoginGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\Login\ServerSelectionGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\LogoutGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\PartyGumpAdvanced.cs" />
+    <Compile Include="Game\Gumps\UIGumps\UseSpellButtonGump.cs" />
+    <Compile Include="Game\System\PartySystem.cs" />
+    <Compile Include="Game\System\TargetSystem.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Configuration\ConfigurationResolver.cs" />
+    <Compile Include="Configuration\Settings.cs" />
+    <Compile Include="CoreGame.cs" />
+    <Compile Include="FpsCounter.cs" />
+    <Compile Include="GameLoop.cs" />
+    <Compile Include="Game\Chat.cs" />
+    <Compile Include="Game\Data\AssistantFeatures.cs" />
+    <Compile Include="Game\Data\ContainerManager.cs" />
+    <Compile Include="Game\Data\Direction.cs" />
+    <Compile Include="Game\Data\Features.cs" />
+    <Compile Include="Game\Data\FeaturesFlags.cs" />
+    <Compile Include="Game\Data\MovementSpeed.cs" />
+    <Compile Include="Game\Data\Property.cs" />
+    <Compile Include="Game\Data\Reagents.cs" />
+    <Compile Include="Game\Data\Skill.cs" />
+    <Compile Include="Game\Data\SpellbookData.cs" />
+    <Compile Include="Game\Data\SpellbookTypes.cs" />
+    <Compile Include="Game\Data\SpellDefinition.cs" />
+    <Compile Include="Game\Data\SpellsMagery.cs" />
+    <Compile Include="Game\GameActions.cs" />
+    <Compile Include="Game\GameObjects\AnimatedItemEffect.cs" />
+    <Compile Include="Game\GameObjects\DeferredEntity.cs" />
+    <Compile Include="Game\GameObjects\Entity.cs" />
+    <Compile Include="Game\GameObjects\EntityCollection.cs" />
+    <Compile Include="Game\GameObjects\GameEffect.cs" />
+    <Compile Include="Game\GameObjects\GameObject.cs" />
+    <Compile Include="Game\GameObjects\House.cs" />
+    <Compile Include="Game\GameObjects\Item.cs" />
+    <Compile Include="Game\GameObjects\Mobile.cs" />
+    <Compile Include="Game\GameObjects\MobileAnimation.cs" />
+    <Compile Include="Game\GameObjects\Multi.cs" />
+    <Compile Include="Game\GameObjects\PlayerMobile.cs" />
+    <Compile Include="Game\GameObjects\Static.cs" />
+    <Compile Include="Game\GameObjects\StaticManager.cs" />
+    <Compile Include="Game\GameObjects\TextOverhead.cs" />
+    <Compile Include="Game\Graphic.cs" />
+    <Compile Include="Game\Gumps\Controls\Button.cs" />
+    <Compile Include="Game\Gumps\Controls\Checkbox.cs" />
+    <Compile Include="Game\Gumps\Controls\CheckerTrans.cs" />
+    <Compile Include="Game\Gumps\Controls\ColorPickerBox.cs" />
+    <Compile Include="Game\Gumps\Controls\CroppedText.cs" />
+    <Compile Include="Game\Gumps\Controls\EquipmentSlot.cs" />
+    <Compile Include="Game\Gumps\Controls\ExpandableScroll.cs" />
+    <Compile Include="Game\Gumps\Controls\GumpControl.cs" />
+    <Compile Include="Game\Gumps\Controls\GumpControlInfo.cs" />
+    <Compile Include="Game\Gumps\Controls\GumpPic.cs" />
+    <Compile Include="Game\Gumps\Controls\GumpPicBackpack.cs" />
+    <Compile Include="Game\Gumps\Controls\GumpPicContainer.cs" />
+    <Compile Include="Game\Gumps\Controls\GumpPicTiled.cs" />
+    <Compile Include="Game\Gumps\Controls\HSliderBar.cs" />
+    <Compile Include="Game\Gumps\Controls\HtmlGump.cs" />
+    <Compile Include="Game\Gumps\Controls\IScrollBar.cs" />
+    <Compile Include="Game\Gumps\Controls\ItemGumpling.cs" />
+    <Compile Include="Game\Gumps\Controls\ItemGumplingPaperdoll.cs" />
+    <Compile Include="Game\Gumps\Controls\Label.cs" />
+    <Compile Include="Game\Gumps\Controls\Panel.cs" />
+    <Compile Include="Game\Gumps\Controls\PaperDollInteractable.cs" />
+    <Compile Include="Game\Gumps\Controls\RadioButton.cs" />
+    <Compile Include="Game\Gumps\Controls\RenderedTextList.cs" />
+    <Compile Include="Game\Gumps\Controls\ResizePic.cs" />
+    <Compile Include="Game\Gumps\Controls\ScrollArea.cs" />
+    <Compile Include="Game\Gumps\Controls\ScrollBar.cs" />
+    <Compile Include="Game\Gumps\Controls\ScrollFlag.cs" />
+    <Compile Include="Game\Gumps\Controls\StaticPic.cs" />
+    <Compile Include="Game\Gumps\Controls\TextBox.cs" />
+    <Compile Include="Game\Gumps\UIGumps\ChatControl.cs" />
+    <Compile Include="Game\Gumps\UIGumps\ColorPickerGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\ContainerGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\DevConsole.cs" />
+    <Compile Include="Game\Gumps\UIGumps\Gump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\JournalGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\MapGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\MiniMapGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\OptionsGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\PaperdollGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\SkillGumpAdvanced.cs" />
+    <Compile Include="Game\Gumps\UIGumps\SpellbookGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\StatusGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\TopBarGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\WorldViewport.cs" />
+    <Compile Include="Game\Gumps\UIGumps\WorldViewportGump.cs" />
+    <Compile Include="Game\Gumps\UIManager.cs" />
+    <Compile Include="Game\Hue.cs" />
+    <Compile Include="Game\Map\Facet.cs" />
+    <Compile Include="Game\Map\MapChunk.cs" />
+    <Compile Include="Game\Map\Tile.cs" />
+    <Compile Include="Game\Map\TileSorter.cs" />
+    <Compile Include="Game\Pathfinder.cs" />
+    <Compile Include="Game\Position.cs" />
+    <Compile Include="Game\Scenes\GameScene.cs" />
+    <Compile Include="Game\Scenes\LoginScene.cs" />
+    <Compile Include="Game\Scenes\Scene.cs" />
+    <Compile Include="Game\Scenes\SceneManager.cs" />
+    <Compile Include="Game\Serial.cs" />
+    <Compile Include="Game\Views\AnimatedEffectView.cs" />
+    <Compile Include="Game\Views\DeferredView.cs" />
+    <Compile Include="Game\Views\ItemView.cs" />
+    <Compile Include="Game\Views\LayerOrder.cs" />
+    <Compile Include="Game\Views\MobileView.cs" />
+    <Compile Include="Game\Views\StaticView.cs" />
+    <Compile Include="Game\Views\TextOverHeadView.cs" />
+    <Compile Include="Game\Views\TileView.cs" />
+    <Compile Include="Game\Views\View.cs" />
+    <Compile Include="Game\World.cs" />
+    <Compile Include="Input\Culture.cs" />
+    <Compile Include="Input\EventArgs.cs" />
+    <Compile Include="Input\InputEvent.cs" />
+    <Compile Include="Input\InputKeyboardEvent.cs" />
+    <Compile Include="Input\InputManager.cs" />
+    <Compile Include="Input\InputMouseEvent.cs" />
+    <Compile Include="Input\KeyboardEvent.cs" />
+    <Compile Include="Input\MouseButtons.cs" />
+    <Compile Include="Input\MouseEvent.cs" />
+    <Compile Include="Input\MouseOverList.cs" />
+    <Compile Include="Input\MousePicker.cs" />
+    <Compile Include="Input\PickerType.cs" />
+    <Compile Include="Input\TextEntry\TextEntry.cs" />
+    <Compile Include="Interfaces\IColorable.cs" />
+    <Compile Include="Interfaces\IDebuggable.cs" />
+    <Compile Include="Interfaces\IDeferreable.cs" />
+    <Compile Include="Interfaces\IDrawable.cs" />
+    <Compile Include="Interfaces\IDynamicItem.cs" />
+    <Compile Include="Interfaces\IUpdateable.cs" />
+    <Compile Include="IO\ClientVersions.cs" />
+    <Compile Include="IO\DataReader.cs" />
+    <Compile Include="IO\FileManager.cs" />
+    <Compile Include="IO\Resources\Animations.cs" />
+    <Compile Include="IO\Resources\AnimData.cs" />
+    <Compile Include="IO\Resources\Art.cs" />
+    <Compile Include="IO\Resources\Cliloc.cs" />
+    <Compile Include="IO\Resources\Fonts.cs" />
+    <Compile Include="IO\Resources\Gumps.cs" />
+    <Compile Include="IO\Resources\Hues.cs" />
+    <Compile Include="IO\Resources\Light.cs" />
+    <Compile Include="IO\Resources\Map.cs" />
+    <Compile Include="IO\Resources\Multi.cs" />
+    <Compile Include="IO\Resources\Skills.cs" />
+    <Compile Include="IO\Resources\SpecialKeywords.cs" />
+    <Compile Include="IO\Resources\TexmapTextures.cs" />
+    <Compile Include="IO\Resources\TileData.cs" />
+    <Compile Include="IO\Resources\Verdata.cs" />
+    <Compile Include="IO\UOFile.cs" />
+    <Compile Include="IO\UOFileIndex.cs" />
+    <Compile Include="IO\UOFileMul.cs" />
+    <Compile Include="IO\UOFileUop.cs" />
+    <Compile Include="Bootstrap.cs" />
+    <Compile Include="Network\BufferPool.cs" />
+    <Compile Include="Network\CircularBuffer.cs" />
+    <Compile Include="Network\Huffman.cs" />
+    <Compile Include="Network\NetClient.cs" />
+    <Compile Include="Network\Packet.cs" />
+    <Compile Include="Network\PacketBase.cs" />
+    <Compile Include="Network\PacketHandlers.cs" />
+    <Compile Include="Network\Packets.cs" />
+    <Compile Include="Network\PacketsTable.cs" />
+    <Compile Include="Network\PacketWriter.cs" />
+    <Compile Include="Network\SendQueue.cs" />
+    <Compile Include="Platforms\Windows\Message.cs" />
+    <Compile Include="Platforms\Windows\MessageHook.cs" />
+    <Compile Include="Platforms\Windows\NativeConstants.cs" />
+    <Compile Include="Platforms\Windows\NativeMethods.cs" />
+    <Compile Include="Platforms\Windows\WndProc.cs" />
+    <Compile Include="Renderer\CursorRenderer.cs" />
+    <Compile Include="Renderer\IsometricLight.cs" />
+    <Compile Include="Renderer\OverheadManager.cs" />
+    <Compile Include="Renderer\PixelPicking.cs" />
+    <Compile Include="Renderer\RenderedText.cs" />
+    <Compile Include="Renderer\RenderExtentions.cs" />
+    <Compile Include="Renderer\SpriteBatch3D.cs" />
+    <Compile Include="Renderer\SpriteBatchUI.cs" />
+    <Compile Include="Renderer\SpriteTexture.cs" />
+    <Compile Include="Renderer\SpriteVertex.cs" />
+    <Compile Include="Service.cs" />
+    <Compile Include="Utility\Bag.cs" />
+    <Compile Include="Utility\BrowserHelper.cs" />
+    <Compile Include="Utility\CoordsHelper.cs" />
+    <Compile Include="Utility\Coroutine.cs" />
+    <Compile Include="Utility\Deque.cs" />
+    <Compile Include="Utility\Exstentions.cs" />
+    <Compile Include="Utility\GarbageCollectionWatcher.cs" />
+    <Compile Include="Utility\IPoolable.cs" />
+    <Compile Include="Utility\Log.cs" />
+    <Compile Include="Utility\MathHelper.cs" />
+    <Compile Include="Utility\ObjectPool.cs" />
+    <Compile Include="Utility\Pool.cs" />
+    <Compile Include="Utility\Profiler.cs" />
+    <Compile Include="Utility\RandomHelper.cs" />
+    <Compile Include="Utility\StringHelper.cs" />
+    <Compile Include="Utility\ZLib.cs" />
   </ItemGroup>
-
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Graphic\FNA\FNA.dll" />
+    <None Include="Graphic\FNA\FNA.dll.config" />
+    <None Include="Graphic\Shaders\compile_shaders.bat" />
+    <None Include="Graphic\Shaders\IsometricWorld.fx" />
+    <None Include="Graphic\Shaders\IsometricWorld.fxc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\lib64\libFAudio.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\lib64\libmojoshader.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\lib64\libSDL2-2.0.so.0">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\lib64\libSDL2_image-2.0.so.0">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\lib64\libtheorafile.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\lib\libFAudio.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\lib\libmojoshader.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\lib\libSDL2-2.0.so.0">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\lib\libSDL2_image-2.0.so.0">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\lib\libtheorafile.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\osx\libFAudio.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\osx\libmojoshader.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\osx\libSDL2-2.0.0.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\osx\libSDL2_image-2.0.0.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="libs\osx\libtheorafile.dylib">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="libs\x64\FAudio.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\x64\libtheorafile.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\x64\MojoShader.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\x64\SDL2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\x64\SDL2_image.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\x86\FAudio.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\x86\libtheorafile.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\x86\MojoShader.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\x86\SDL2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\x86\SDL2_image.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

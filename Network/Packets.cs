@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO;
 
@@ -30,18 +34,42 @@ namespace ClassicUO.Network
     {
         public PACKTalk() : base(0x03)
         {
-            WriteByte(0x20); WriteByte(0x00); WriteByte(0x34);
-            WriteByte(0x00); WriteByte(0x03); WriteByte(0xdb);
-            WriteByte(0x13); WriteByte(0x14); WriteByte(0x3f);
-            WriteByte(0x45); WriteByte(0x2c); WriteByte(0x58);
-            WriteByte(0x0f); WriteByte(0x5d); WriteByte(0x44);
-            WriteByte(0x2e); WriteByte(0x50); WriteByte(0x11);
-            WriteByte(0xdf); WriteByte(0x75); WriteByte(0x5c);
-            WriteByte(0xe0); WriteByte(0x3e); WriteByte(0x71);
-            WriteByte(0x4f); WriteByte(0x31); WriteByte(0x34);
-            WriteByte(0x05); WriteByte(0x4e); WriteByte(0x18);
-            WriteByte(0x1e); WriteByte(0x72); WriteByte(0x0f);
-            WriteByte(0x59); WriteByte(0xad); WriteByte(0xf5);
+            WriteByte(0x20);
+            WriteByte(0x00);
+            WriteByte(0x34);
+            WriteByte(0x00);
+            WriteByte(0x03);
+            WriteByte(0xdb);
+            WriteByte(0x13);
+            WriteByte(0x14);
+            WriteByte(0x3f);
+            WriteByte(0x45);
+            WriteByte(0x2c);
+            WriteByte(0x58);
+            WriteByte(0x0f);
+            WriteByte(0x5d);
+            WriteByte(0x44);
+            WriteByte(0x2e);
+            WriteByte(0x50);
+            WriteByte(0x11);
+            WriteByte(0xdf);
+            WriteByte(0x75);
+            WriteByte(0x5c);
+            WriteByte(0xe0);
+            WriteByte(0x3e);
+            WriteByte(0x71);
+            WriteByte(0x4f);
+            WriteByte(0x31);
+            WriteByte(0x34);
+            WriteByte(0x05);
+            WriteByte(0x4e);
+            WriteByte(0x18);
+            WriteByte(0x1e);
+            WriteByte(0x72);
+            WriteByte(0x0f);
+            WriteByte(0x59);
+            WriteByte(0xad);
+            WriteByte(0xf5);
             WriteByte(0x00);
         }
     }
@@ -223,8 +251,6 @@ namespace ClassicUO.Network
             {
                 WriteByte(emptyByte);
             }
-            
-
         }
     }
 
@@ -290,7 +316,7 @@ namespace ClassicUO.Network
 
         public PClientVersion(string v) : base(0xBD)
         {
-            string[] version = v.Split('.', StringSplitOptions.RemoveEmptyEntries);
+            string[] version = v.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
 
             WriteASCII($"{version[0]}.{version[1]}.{version[2]}.{version[3]}");
         }
@@ -323,22 +349,22 @@ namespace ClassicUO.Network
 
             if (triggerCount > 0)
             {
-                byte[] t = new byte[(int)Math.Ceiling((triggerCount + 1) * 1.5f)];
+                byte[] t = new byte[(int) Math.Ceiling((triggerCount + 1) * 1.5f)];
                 // write 12 bits at a time. first write count: byte then half byte.
-                t[0] = (byte)((triggerCount & 0x0FF0) >> 4);
-                t[1] = (byte)((triggerCount & 0x000F) << 4);
+                t[0] = (byte) ((triggerCount & 0x0FF0) >> 4);
+                t[1] = (byte) ((triggerCount & 0x000F) << 4);
                 for (int i = 0; i < triggerCount; i++)
                 {
-                    int index = (int)((i + 1) * 1.5f);
+                    int index = (int) ((i + 1) * 1.5f);
                     if (i % 2 == 0) // write half byte and then byte
                     {
-                        t[index + 0] |= (byte)((triggers[i] & 0x0F00) >> 8);
-                        t[index + 1] = (byte)(triggers[i] & 0x00FF);
+                        t[index + 0] |= (byte) ((triggers[i] & 0x0F00) >> 8);
+                        t[index + 1] = (byte) (triggers[i] & 0x00FF);
                     }
                     else // write byte and then half byte
                     {
-                        t[index] = (byte)((triggers[i] & 0x0FF0) >> 4);
-                        t[index + 1] = (byte)((triggers[i] & 0x000F) << 4);
+                        t[index] = (byte) ((triggers[i] & 0x0FF0) >> 4);
+                        t[index + 1] = (byte) ((triggers[i] & 0x000F) << 4);
                     }
                 }
 
@@ -457,7 +483,6 @@ namespace ClassicUO.Network
     public sealed class PVirtueGumpReponse : PacketWriter
     {
         public PVirtueGumpReponse() : base(0xB1) => throw new NotImplementedException();
-
     }
 
     public sealed class PMenuResponse : PacketWriter
@@ -502,30 +527,31 @@ namespace ClassicUO.Network
     {
         public PTargetObjectRequest(Entity entity, int cursorID, byte cursorType) : base(0x6C)
         {
-            WriteByte((byte)0x00); 
-            WriteUInt((uint)cursorID); 
-            WriteByte(cursorType); 
-            WriteUInt((Serial)entity.Serial); 
-            WriteUShort((ushort)entity.Position.X); 
-            WriteUShort((ushort)entity.Position.Y); 
-            WriteByte((byte)0x00); 
-            WriteByte((byte)entity.Position.Z);
-            WriteUShort((ushort)0); 
+            WriteByte(0x00);
+            WriteUInt((uint) cursorID);
+            WriteByte(cursorType);
+            WriteUInt(entity.Serial);
+            WriteUShort(entity.Position.X);
+            WriteUShort(entity.Position.Y);
+            WriteByte(0x00);
+            WriteByte((byte) entity.Position.Z);
+            WriteUShort(0);
         }
     }
 
     public sealed class PTargetObjectPositionRequest : PacketWriter
     {
-        public PTargetObjectPositionRequest(ushort x, ushort y, ushort z, ushort modelNumber, int cursorID, byte targetType) : base(0x6C)
+        public PTargetObjectPositionRequest(ushort x, ushort y, ushort z, ushort modelNumber, int cursorID,
+            byte targetType) : base(0x6C)
         {
-            WriteByte((byte)0x01); 
-            WriteUInt((uint)cursorID);
-            WriteByte(targetType); 
-            WriteUInt((int)0x00); 
-            WriteUShort(x); 
-            WriteUShort(y); 
-            WriteUShort(z); 
-            WriteUShort(modelNumber); 
+            WriteByte(0x01);
+            WriteUInt((uint) cursorID);
+            WriteByte(targetType);
+            WriteUInt(0x00);
+            WriteUShort(x);
+            WriteUShort(y);
+            WriteUShort(z);
+            WriteUShort(modelNumber);
         }
     }
 
@@ -533,14 +559,14 @@ namespace ClassicUO.Network
     {
         public PTargetCancelRequest(int cursorID, byte cursorType) : base(0x6C)
         {
-            WriteByte((byte)0x00); 
-            WriteUInt((uint)cursorID);
-            WriteByte(cursorType); 
-            WriteByte((int)0x00);
-            WriteUShort((ushort)0x00); 
-            WriteUShort((ushort)0x00); 
-            WriteUShort((ushort)0x00); 
-            WriteUShort((ushort)0x00); 
+            WriteByte(0x00);
+            WriteUInt((uint) cursorID);
+            WriteByte(cursorType);
+            WriteByte(0x00);
+            WriteUShort(0x00);
+            WriteUShort(0x00);
+            WriteUShort(0x00);
+            WriteUShort(0x00);
         }
     }
 
@@ -734,7 +760,7 @@ namespace ClassicUO.Network
         {
             WriteUInt(version);
 
-            string[] clientversion = v.Split('.', StringSplitOptions.RemoveEmptyEntries);
+            string[] clientversion = v.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
 
             WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2],
                 clientversion[3]));
@@ -986,7 +1012,7 @@ namespace ClassicUO.Network
         public PResend() : base(0x22)
         {
             WriteByte(World.Player.SequenceNumber);
-            WriteByte((byte)World.Player.Notoriety);
+            WriteByte((byte) World.Player.Notoriety);
         }
     }
 

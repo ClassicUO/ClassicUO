@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -47,6 +49,8 @@ namespace ClassicUO.IO.Resources
         private static readonly DataReader _reader = new DataReader();
 
         private static readonly PixelPicking _picker = new PixelPicking();
+
+        private static readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>();
 
         public static ushort Color { get; set; }
         public static byte AnimGroup { get; set; }
@@ -1096,25 +1100,15 @@ namespace ClassicUO.IO.Resources
                 if (animDir.Frames[i] != null /*&& !animDir.Frames[i].IsDisposed*/)
                     continue;
 
-                //animDir.Frames[i] = new AnimationFrame();
-
                 _reader.SetData(dataStart + (int) frameOffset[i]);
 
                 short imageCenterX = _reader.ReadShort();
-                //animDir.Frames[i].CenterX = imageCenterX;
-
                 short imageCenterY = _reader.ReadShort();
-                //animDir.Frames[i].CenterY = imageCenterY;
-
                 short imageWidth = _reader.ReadShort();
-                //animDir.Frames[i].Width = imageWidth;
-
                 short imageHeight = _reader.ReadShort();
-                //animDir.Frames[i].Height = imageHeight;
 
                 if (imageWidth <= 0 || imageHeight <= 0)
                 {
-                    Log.Message(LogTypes.Warning, "mul frame size is null");
                     continue;
                 }
 
@@ -1210,8 +1204,6 @@ namespace ClassicUO.IO.Resources
             public int Group;
             public int Direction;
         }
-
-        private static readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>();
 
         private struct UOPFrameData
         {

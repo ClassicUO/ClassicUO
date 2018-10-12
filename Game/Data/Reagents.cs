@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClassicUO.Game.Data
+﻿namespace ClassicUO.Game.Data
 {
     public enum Reagents
     {
@@ -15,17 +11,20 @@ namespace ClassicUO.Game.Data
         Nightshade,
         SulfurousAsh,
         SpidersSilk,
+
         // pagan reagents
         BatWing,
         GraveDust,
         DaemonBlood,
         NoxCrystal,
         PigIron,
+
         // Other
         Bone,
         FertileDirt,
         DragonsBlood,
         DemonBone,
+
         // None
         None
     }

@@ -28,14 +28,16 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             AddChildren(new GumpPicTiled(0, 0, 640, 480, 0x0E14));
             // Border
             AddChildren(new GumpPic(0, 0, 0x157C, 0));
-            
+
+            AddChildren(currentStepGump = GetGumpForStep(loginScene.CurrentLoginStep));
+
             // UO Flag
             AddChildren(new GumpPic(0, 4, 0x15A0, 0));
             
             // Quit Button
             AddChildren(new Button(0, 0x1589, 0x158B, over: 0x158A) { X = 555, Y = 4 });
             
-            AddChildren(currentStepGump = GetGumpForStep(loginScene.CurrentLoginStep));
+            
         }
 
         public override void Update(double totalMS, double frameMS)

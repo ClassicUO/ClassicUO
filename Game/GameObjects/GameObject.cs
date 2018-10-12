@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
@@ -29,9 +32,9 @@ namespace ClassicUO.Game.GameObjects
 {
     public abstract class GameObject : IUpdateable
     {
+        private readonly List<TextOverhead> _overHeads;
         private Tile _tile;
         private View _view;
-        private readonly List<TextOverhead> _overHeads;
 
         protected GameObject(Facet map)
         {
@@ -75,6 +78,24 @@ namespace ClassicUO.Game.GameObjects
 
         public int Distance => DistanceTo(World.Player);
 
+        public virtual void Update(double totalMS, double frameMS)
+        {
+            if (IsDisposed) return;
+
+            for (int i = 0; i < OverHeads.Count; i++)
+            {
+                TextOverhead gt = OverHeads[i];
+
+                gt.Update(totalMS, frameMS);
+
+                if (gt.IsDisposed)
+                {
+                    _overHeads.RemoveAt(i);
+                    i--;
+                }
+            }
+        }
+
         public int DistanceTo(GameObject entity)
         {
             if (entity is Mobile mob)
@@ -95,7 +116,8 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual View CreateView() => null;
 
-        public TextOverhead AddGameText(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f)
+        public TextOverhead AddGameText(MessageType type, string text, byte font, Hue hue, bool isunicode,
+            float timeToLive = 0.0f)
         {
             if (string.IsNullOrEmpty(text))
                 return null;
@@ -130,7 +152,7 @@ namespace ClassicUO.Game.GameObjects
             overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive);
             InsertGameText(overhead);
 
-            if (_overHeads.Count > 5 )
+            if (_overHeads.Count > 5)
             {
                 TextOverhead over = _overHeads[_overHeads.Count - 1];
                 if (!over.IsPersistent && over.MessageType != MessageType.Spell)
@@ -146,24 +168,6 @@ namespace ClassicUO.Game.GameObjects
 
         private void InsertGameText(TextOverhead gameText) =>
             _overHeads.Insert(OverHeads.Count == 0 || OverHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
-
-        public virtual void Update(double totalMS, double frameMS)
-        {
-            if (IsDisposed) return;
-
-            for (int i = 0; i < OverHeads.Count; i++)
-            {
-                TextOverhead gt = OverHeads[i];
-
-                gt.Update(totalMS, frameMS);
-
-                if (gt.IsDisposed)
-                {
-                    _overHeads.RemoveAt(i);
-                    i--;
-                }
-            }
-        }
 
         protected void DisposeView()
         {

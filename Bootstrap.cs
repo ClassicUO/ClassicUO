@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,31 +18,36 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
-using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
-using ClassicUO.Input;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 namespace ClassicUO
 {
-    internal class MainClass
+    internal static class Bootstrap
     {
+        public static string ExeDirectory { get; private set; }
+        public static Assembly Assembly { get; private set; }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
 
+
         private static void Main(string[] args)
         {
-            string libsPath = Path.Combine( AppDomain.CurrentDomain.BaseDirectory, "Graphic", "FNA", Environment.Is64BitProcess ? "x64" : "x86");
+            Assembly = Assembly.GetExecutingAssembly();
+            ExeDirectory = Path.GetDirectoryName(Assembly.Location);
 
-
+            // We can use the mono's dllmap feature, but 99% of people use VS to compile.
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
+                string libsPath = Path.Combine(ExeDirectory, "libs", Environment.Is64BitProcess ? "x64" : "x86");
                 SetDllDirectory(libsPath);
             }
 
@@ -52,17 +58,7 @@ namespace ClassicUO
 
             using (GameLoop game = new GameLoop())
             {
-                //========================================================
-                //SERVICE STACK
-                Service.Register(game);
-                Service.Register(new SpriteBatch3D(game));
-                Service.Register(new SpriteBatchUI(game));
-                Service.Register(new InputManager());
-                //========================================================
-
-                bool isHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
-                if (isHighDPI)
-                    Debug.WriteLine("HiDPI Enabled");
+                Log.Message(LogTypes.Trace, $"Exe directory: {ExeDirectory}");
 
                 game.Run();
             }

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -40,7 +43,7 @@ namespace ClassicUO.Input.TextEntry
                 Hue = hue
             };
 
-            RenderCaret = new RenderedText()
+            RenderCaret = new RenderedText
             {
                 IsUnicode = unicode,
                 Font = font,
@@ -152,7 +155,7 @@ namespace ClassicUO.Input.TextEntry
 
             CaretIndex = text.Length;
 
-            
+
             Text = text;
         }
 

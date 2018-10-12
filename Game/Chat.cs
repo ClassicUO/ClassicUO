@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps;
@@ -91,34 +94,36 @@ namespace ClassicUO.Game
                 case MessageType.Regular:
                     if (entity != null && entity.Serial.IsValid)
                     {
-                        entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
-                        Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, entity.Name);
+                        entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
+                        Service.Get<JournalData>().AddEntry(args.Text, (byte) args.Font, args.Hue, entity.Name);
                     }
                     else
                     {
-                        Service.Get<ChatControl>().AddLine(args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
-                        Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "System");
+                        Service.Get<ChatControl>().AddLine(args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
+                        Service.Get<JournalData>().AddEntry(args.Text, (byte) args.Font, args.Hue, "System");
                     }
+
                     break;
                 case MessageType.System:
-                    Service.Get<ChatControl>().AddLine(args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
-                    Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "System");
+                    Service.Get<ChatControl>().AddLine(args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
+                    Service.Get<JournalData>().AddEntry(args.Text, (byte) args.Font, args.Hue, "System");
                     break;
                 case MessageType.Emote:
                     if (entity != null && entity.Serial.IsValid)
                     {
-                        entity.AddGameText(args.Type, $"*{args.Text}*", (byte)args.Font, args.Hue, args.IsUnicode);
-                        Service.Get<JournalData>().AddEntry($"*{args.Text}*", (byte)args.Font, args.Hue, entity.Name);
+                        entity.AddGameText(args.Type, $"*{args.Text}*", (byte) args.Font, args.Hue, args.IsUnicode);
+                        Service.Get<JournalData>().AddEntry($"*{args.Text}*", (byte) args.Font, args.Hue, entity.Name);
                     }
                     else
                     {
-                        Service.Get<JournalData>().AddEntry($"*{args.Text}*", (byte)args.Font, args.Hue, "System");
+                        Service.Get<JournalData>().AddEntry($"*{args.Text}*", (byte) args.Font, args.Hue, "System");
                     }
+
                     break;
                 case MessageType.Label:
                     if (entity != null && entity.Serial.IsValid)
-                        entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
-                    Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "You see");
+                        entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
+                    Service.Get<JournalData>().AddEntry(args.Text, (byte) args.Font, args.Hue, "You see");
                     break;
                 case MessageType.Focus:
                     break;
@@ -129,9 +134,10 @@ namespace ClassicUO.Game
                 case MessageType.Spell:
                     if (entity != null && entity.Serial.IsValid)
                     {
-                        entity.AddGameText(args.Type, args.Text, (byte)args.Font, args.Hue, args.IsUnicode);
-                        Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, entity.Name);
+                        entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
+                        Service.Get<JournalData>().AddEntry(args.Text, (byte) args.Font, args.Hue, entity.Name);
                     }
+
                     break;
                 case MessageType.Guild:
                     break;

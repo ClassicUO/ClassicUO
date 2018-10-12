@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -28,14 +31,14 @@ namespace ClassicUO.Game.Gumps
     {
         private readonly Graphic _graphic;
 
-        private bool _isPartial;
+        private readonly bool _isPartial;
 
         public StaticPic(Graphic graphic, Hue hue)
         {
             _graphic = graphic;
             Hue = hue;
 
-            _isPartial = IO.Resources.TileData.IsPartialHue((long) IO.Resources.TileData.StaticData[_graphic].Flags);
+            _isPartial = TileData.IsPartialHue((long) TileData.StaticData[_graphic].Flags);
 
             CanMove = true;
         }

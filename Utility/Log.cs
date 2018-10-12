@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -52,9 +55,8 @@ namespace ClassicUO.Utility
             {LogTypes.Error, ConsoleColor.Red}
         };
 
-        private static readonly BlockingCollection<Tuple<LogTypes, string, string, bool>> _loqQueue = new BlockingCollection<Tuple<LogTypes, string, string, bool>>();
-
-        public static bool IsLogging { get; private set; }
+        private static readonly BlockingCollection<Tuple<LogTypes, string, string, bool>> _loqQueue =
+            new BlockingCollection<Tuple<LogTypes, string, string, bool>>();
 
         //public Log(string file)
         //{
@@ -97,12 +99,13 @@ namespace ClassicUO.Utility
                             Console.Write(type == LogTypes.None ? text : " |  " + text);
                     }
                 }
-
-            }){ IsBackground = true};
+            }) {IsBackground = true};
 
             logThread.Start();
             IsLogging = logThread.ThreadState == ThreadState.Running || logThread.ThreadState == ThreadState.Background;
         }
+
+        public static bool IsLogging { get; private set; }
 
         public static void Message(LogTypes type, string msg, bool newline = true)
         {
@@ -115,10 +118,9 @@ namespace ClassicUO.Utility
     {
         private readonly FileStream logStream;
 
-        public LogFile(string directory, string file)
-        {
-            logStream = new FileStream($"{directory}/{DateTime.Now:yyyy-MM-dd_hh-mm-ss}_{file}", FileMode.Append, FileAccess.Write, FileShare.ReadWrite, 4096, true);
-        }
+        public LogFile(string directory, string file) => logStream = new FileStream(
+            $"{directory}/{DateTime.Now:yyyy-MM-dd_hh-mm-ss}_{file}", FileMode.Append, FileAccess.Write,
+            FileShare.ReadWrite, 4096, true);
 
         public void Dispose()
         {

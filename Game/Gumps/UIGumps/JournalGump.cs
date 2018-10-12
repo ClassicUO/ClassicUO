@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,24 +18,23 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    class JournalGump : Gump
+    internal class JournalGump : Gump
     {
-        private ExpandableScroll _background;
-        private RenderedTextList _journalEntries;
         private readonly ScrollFlag _scrollBar;
+        private readonly ExpandableScroll _background;
+        private readonly RenderedTextList _journalEntries;
 
         public JournalGump()
             : base(0, 0)
@@ -44,11 +44,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanMove = true;
             AcceptMouseInput = true;
 
-            AddChildren(_background = new ExpandableScroll( 0, 0, 300));
+            AddChildren(_background = new ExpandableScroll(0, 0, 300));
             _background.TitleGumpID = 0x82A;
 
-            AddChildren(_scrollBar = new ScrollFlag(this, 0, 0 , Height));
-            AddChildren(_journalEntries = new RenderedTextList( 30, 36, 242, 200, _scrollBar));
+            AddChildren(_scrollBar = new ScrollFlag(this, 0, 0, Height));
+            AddChildren(_journalEntries = new RenderedTextList(30, 36, 242, 200, _scrollBar));
         }
 
         protected override void OnMouseWheel(MouseEvent delta)
@@ -68,7 +68,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             InitializeJournalEntries();
             Service.Get<JournalData>().OnJournalEntryAdded += AddJournalEntry;
-            
         }
 
         public override void Dispose()
@@ -83,14 +82,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
-        {
-            return base.Draw(spriteBatch, position, hue);
-        }
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>
+            base.Draw(spriteBatch, position, hue);
 
         private void AddJournalEntry(JournalEntry entry)
         {
-            string text = string.Format("{0}{1}", entry.SpeakerName != string.Empty ? entry.SpeakerName + ": " : string.Empty, entry.Text);
+            string text = string.Format("{0}{1}",
+                entry.SpeakerName != string.Empty ? entry.SpeakerName + ": " : string.Empty, entry.Text);
             int font = entry.Font;
             bool asUnicode = entry.AsUnicode;
             TransformFont(ref font, ref asUnicode);
@@ -141,11 +139,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
     public class JournalEntry
     {
-        public readonly string Text;
+        public readonly bool AsUnicode;
         public readonly int Font;
         public readonly ushort Hue;
         public readonly string SpeakerName;
-        public readonly bool AsUnicode;
+        public readonly string Text;
 
         public JournalEntry(string text, int font, ushort hue, string speakerName)
         {
@@ -153,7 +151,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Font = font;
             Hue = hue;
             SpeakerName = speakerName;
-            
         }
     }
 }

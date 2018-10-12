@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -30,8 +33,8 @@ namespace ClassicUO.IO.Resources
 
         public static void Load()
         {
-            string path = Path.Combine(FileManager.UoFolderPath, "Multi.mul");
-            string pathidx = Path.Combine(FileManager.UoFolderPath, "Multi.idx");
+            string path = Path.Combine(FileManager.UoFolderPath, "multi.mul");
+            string pathidx = Path.Combine(FileManager.UoFolderPath, "multi.idx");
 
             if (File.Exists(path) && File.Exists(pathidx))
                 _file = new UOFileMul(path, pathidx, 0x2000, 14);

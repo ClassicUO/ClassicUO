@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,17 +18,17 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -41,20 +42,17 @@ namespace ClassicUO
 {
     public class GameLoop : CoreGame
     {
-        private UIManager _uiManager;
+        private RenderedText _infoText;
         private InputManager _inputManager;
-        private SceneManager _sceneManager;
         private JournalData _journalManager;
         private SpriteBatch3D _sb3D;
         private SpriteBatchUI _sbUI;
-
-        private readonly StringBuilder _sb = new StringBuilder();
-        private RenderedText _infoText;
+        private SceneManager _sceneManager;
+        private UIManager _uiManager;
 
 
         protected override void Initialize()
         {
-
             //uncomment it and fill it to save your first settings
             //Settings settings1 = new Settings()
             //{
@@ -64,27 +62,26 @@ namespace ClassicUO
             //ConfigurationResolver.Save(settings1, "settings.json");
 
             Settings settings =
-                ConfigurationResolver.Load<Settings>(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json"));
+                ConfigurationResolver.Load<Settings>(Path.Combine(Bootstrap.ExeDirectory, "settings.json"));
 
             Service.Register(settings);
 
-            Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...", false);
+            Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
             try
             {
                 FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
             }
-            catch (FileNotFoundException)
+            catch (FileNotFoundException e)
             {
-                Log.Message(LogTypes.None, string.Empty);
                 Log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
-                return;
+                throw e;
             }
 
-            Log.Message(LogTypes.None, "      Done!");
+            Log.Message(LogTypes.Trace, "Done!");
             Log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
 
 
-            Log.Message(LogTypes.Trace, "Loading files...", false);
+            Log.Message(LogTypes.Trace, "Loading files...");
             Stopwatch stopwatch = Stopwatch.StartNew();
             FileManager.LoadFiles();
 
@@ -97,9 +94,13 @@ namespace ClassicUO
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
 
-            Log.Message(LogTypes.None, $"     Done in: {stopwatch.ElapsedMilliseconds} ms!");
+            Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
 
+            Service.Register(this);
+            Service.Register(new SpriteBatch3D(this));
+            Service.Register(new SpriteBatchUI(this));
+            Service.Register(new InputManager());
             Service.Register(_uiManager = new UIManager());
             Service.Register(_sceneManager = new SceneManager());
             Service.Register(_journalManager = new JournalData());
@@ -108,10 +109,10 @@ namespace ClassicUO
             _sb3D = Service.Get<SpriteBatch3D>();
             _sbUI = Service.Get<SpriteBatchUI>();
 
-            Log.Message(LogTypes.Trace, "Network calibration...", false);
+            Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
-            Log.Message(LogTypes.None, "      Done!");
+            Log.Message(LogTypes.Trace, "Done!");
 
 
             MaxFPS = settings.MaxFPS;
@@ -123,7 +124,8 @@ namespace ClassicUO
                 IsUnicode = true,
                 Font = 3,
                 FontStyle = FontStyle.BlackBorder,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT
+                Align = TEXT_ALIGN_TYPE.TS_LEFT,
+                MaxWidth = 150
             };
 
             // ##### START TEST #####
@@ -168,7 +170,8 @@ namespace ClassicUO
                         e.Seek(0);
                         e.MoveToData();
                         e.Skip(6);
-                        NetClient.Socket.Send(new PSecondLogin(settings.Username, settings.Password.ToString(), e.ReadUInt()));
+                        NetClient.Socket.Send(new PSecondLogin(settings.Username, settings.Password.ToString(),
+                            e.ReadUInt()));
                         break;
                     case 0xA9:
                         NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName,
@@ -229,29 +232,9 @@ namespace ClassicUO
             _uiManager.Draw(_sbUI);
 
 
-            _sb.Clear();
-            _sb.AppendLine("");
-            _sb.Append("FPS: ");
-            _sb.AppendLine(CurrentFPS.ToString());
-            _sb.Append("Objects: ");
-            _sb.AppendLine(_sceneManager.CurrentScene.RenderedObjectsCount.ToString());
-            _sb.Append("Calls: ");
-            _sb.AppendLine(_sb3D.Calls.ToString());
-            _sb.Append("Merged: ");
-            _sb.AppendLine(_sb3D.Merged.ToString());
-            _sb.Append("Totals: ");
-            _sb.AppendLine(_sb3D.TotalCalls.ToString());
-            _sb.Append("Pos: ");
-            _sb.AppendLine(World.Player == null ? "" : World.Player.Position.ToString());
-            _sb.Append("Target - Last: ");
-            _sb.AppendLine(TargetSystem.LastGameObject == null ? "n/a": TargetSystem.LastGameObject.Graphic.ToString());
-            _sb.Append("Selected: ");
-
-            if (_sceneManager.CurrentScene is GameScene gameScene)
-                _sb.AppendLine(gameScene.SelectedObject == null ? "" : gameScene.SelectedObject.ToString());
-
-            _infoText.Text = _sb.ToString();
-            _infoText.Draw(_sbUI, new Vector3( /*Window.ClientBounds.Width - 150*/ 20, 20, 0));
+            _infoText.Text =
+                $"FPS: {CurrentFPS}\nObjects: {_sceneManager.CurrentScene.RenderedObjectsCount}\nCalls: {_sb3D.Calls}\nMerged: {_sb3D.Merged}\nTotals: {_sb3D.TotalCalls}\nPos: {(World.Player == null ? "" : World.Player.Position.ToString())}\nSelected: {(_sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty)}";
+            _infoText.Draw(_sbUI, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
 
             _sbUI.End();
         }

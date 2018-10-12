@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -35,7 +38,7 @@ namespace ClassicUO.IO.Resources
         {
             _entries = new Dictionary<int, StringEntry>();
 
-            string path = Path.Combine(FileManager.UoFolderPath, "Cliloc.ENU");
+            string path = Path.Combine(FileManager.UoFolderPath, "Cliloc.enu");
             if (!File.Exists(path))
                 return;
 

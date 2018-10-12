@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -25,10 +28,10 @@ namespace ClassicUO.Game.Gumps
 {
     public class ResizePic : GumpControl
     {
-        private readonly SpriteTexture[] _gumpTexture = new SpriteTexture[9];
         private readonly Graphic _graphic;
+        private readonly SpriteTexture[] _gumpTexture = new SpriteTexture[9];
 
-        public ResizePic(Graphic graphic): base()
+        public ResizePic(Graphic graphic)
         {
             _graphic = graphic;
             CanMove = true;
@@ -63,7 +66,7 @@ namespace ClassicUO.Game.Gumps
             int centerHeight = Height - _gumpTexture[0].Height - _gumpTexture[6].Height;
             int line2Y = (int) position.Y + _gumpTexture[0].Height;
             int line3Y = (int) position.Y + Height - _gumpTexture[6].Height;
-          
+
             // top row
             spriteBatch.Draw2D(_gumpTexture[0], new Vector3(position.X, position.Y, 0), Vector3.Zero);
             spriteBatch.Draw2DTiled(_gumpTexture[1],
@@ -78,14 +81,14 @@ namespace ClassicUO.Game.Gumps
 
             if (IsTransparent)
             {
-                spriteBatch.Draw2D(CheckerTrans.TransparentTexture, 
-                    new Rectangle((int)position.X + _gumpTexture[3].Width, line2Y, centerWidth, centerHeight),
+                spriteBatch.Draw2D(CheckerTrans.TransparentTexture,
+                    new Rectangle((int) position.X + _gumpTexture[3].Width, line2Y, centerWidth, centerHeight),
                     RenderExtentions.GetHueVector(0, false, .5f, true));
             }
             else
             {
                 spriteBatch.Draw2DTiled(_gumpTexture[4],
-                    new Rectangle((int)position.X + _gumpTexture[3].Width, line2Y, centerWidth, centerHeight),
+                    new Rectangle((int) position.X + _gumpTexture[3].Width, line2Y, centerWidth, centerHeight),
                     RenderExtentions.GetHueVector(0, false, 0, false));
             }
 
@@ -93,7 +96,7 @@ namespace ClassicUO.Game.Gumps
             spriteBatch.Draw2DTiled(_gumpTexture[5],
                 new Rectangle((int) position.X + Width - _gumpTexture[5].Width, line2Y, _gumpTexture[5].Width,
                     centerHeight), Vector3.Zero);
-          
+
             // bottom
             spriteBatch.Draw2D(_gumpTexture[6], new Vector3(position.X, line3Y, 0), Vector3.Zero);
             spriteBatch.Draw2DTiled(_gumpTexture[7],

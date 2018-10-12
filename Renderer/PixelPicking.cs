@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 
 namespace ClassicUO.Renderer
@@ -26,10 +29,10 @@ namespace ClassicUO.Renderer
     {
         private const int InitialDataCount = 0x40000; // 256kb
 
-        private readonly Dictionary<int, int> _ids = new Dictionary<int, int>();
+        private readonly List<byte> _data = new List<byte>(InitialDataCount); // list<t> access is 10% slower than t[].
         private readonly Dictionary<int, int> _ends = new Dictionary<int, int>();
 
-        private readonly List<byte> _data = new List<byte>(InitialDataCount); // list<t> access is 10% slower than t[].
+        private readonly Dictionary<int, int> _ids = new Dictionary<int, int>();
 
         public bool Get(int textureID, int x, int y, int extraRange = 0)
         {

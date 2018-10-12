@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -28,16 +31,18 @@ namespace ClassicUO.Game.Gumps
     public class Label : GumpControl
     {
         private readonly RenderedText _gText;
-        private float _timeToLive;
-        private float _timeCreated;
         private float _alpha;
+        private float _timeCreated;
+        private readonly float _timeToLive;
 
-        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, float timeToLive = 0.0f)
+        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF,
+            FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, float timeToLive = 0.0f)
         {
             if (font == 0xFF)
             {
                 font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
             }
+
             _gText = new RenderedText
             {
                 IsUnicode = isunicode,
@@ -56,26 +61,11 @@ namespace ClassicUO.Game.Gumps
             _timeToLive = timeToLive;
         }
 
-        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, TransformHue(Hue.Parse(parts[3])), 0, style: FontStyle.BlackBorder)
+        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true,
+            TransformHue(Hue.Parse(parts[3])), 0, style: FontStyle.BlackBorder)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
-        }
-
-
-        private static Hue TransformHue(Hue hue)
-        {
-            if (hue > 1)
-                hue -= 2;
-            if (hue < 2)
-                hue = 1;
-            return hue;
-        }
-
-        public byte Font
-        {
-            get => _gText.Font;
-            set => _gText.Font = value;
         }
 
         public string Text
@@ -86,7 +76,7 @@ namespace ClassicUO.Game.Gumps
                 _gText.Text = value;
                 Width = _gText.Width;
                 Height = _gText.Height;
-            } 
+            }
         }
 
         public Hue Hue
@@ -96,6 +86,16 @@ namespace ClassicUO.Game.Gumps
         }
 
         public bool FadeOut { get; set; }
+
+
+        private static Hue TransformHue(Hue hue)
+        {
+            if (hue > 1)
+                hue -= 2;
+            if (hue < 2)
+                hue = 1;
+            return hue;
+        }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -114,7 +114,6 @@ namespace ClassicUO.Game.Gumps
             }
 
             base.Update(totalMS, frameMS);
-
         }
 
 
@@ -130,7 +129,7 @@ namespace ClassicUO.Game.Gumps
         {
             if (FadeOut)
                 hue = RenderExtentions.GetHueVector(hue.HasValue ? (int) hue.Value.X : 0, false, _alpha, false);
-        
+
             _gText.Draw(spriteBatch, position, hue);
             return base.Draw(spriteBatch, position, hue);
         }

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,8 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -86,6 +90,7 @@ namespace ClassicUO.Game.Views
                     Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
                     base.Draw(spriteBatch, offsetDrawPosition, objectList);
                 }
+
                 bool ok = base.Draw(spriteBatch, position, objectList);
                 MessageOverHead(spriteBatch, position, Bounds.Y - 22);
                 return ok;

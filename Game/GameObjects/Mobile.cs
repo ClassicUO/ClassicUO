@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Views;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -69,12 +73,12 @@ namespace ClassicUO.Game.GameObjects
         private ushort _hits;
         private ushort _hitsMax;
         private bool _isDead;
+        private bool _isRenamable;
         private bool _isSA_Poisoned;
         private ushort _mana;
         private ushort _manaMax;
         private Notoriety _notoriety;
         private RaceType _race;
-        private bool _isRenamable;
         private ushort _stamina;
         private ushort _staminaMax;
 
@@ -231,7 +235,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool IsFlying =>
-            FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte)Flags & 0x04) != 0;
+            FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte) Flags & 0x04) != 0;
 
         public virtual bool InWarMode
         {
@@ -244,7 +248,7 @@ namespace ClassicUO.Game.GameObjects
                                MathHelper.InRange(Graphic, 0x025D, 0x0260) ||
                                MathHelper.InRange(Graphic, 0x029A, 0x029B) ||
                                MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || Graphic == 0x03DB || Graphic == 0x03DF ||
-                               Graphic == 0x03E2 || 
+                               Graphic == 0x03E2 ||
                                Graphic == 0x02E8 || Graphic == 0x02E9; // Vampiric
 
         public override bool Exists => World.Contains(Serial);
@@ -294,20 +298,20 @@ namespace ClassicUO.Game.GameObjects
         protected override void OnProcessDelta(Delta d)
         {
             base.OnProcessDelta(d);
-            //if (d.HasFlag(Delta.Hits))
-            //{
-            //    HitsChanged.Raise(this);
-            //}
+            if (d.HasFlag(Delta.Hits))
+            {
+                HitsChanged.Raise(this);
+            }
 
-            //if (d.HasFlag(Delta.Mana))
-            //{
-            //    ManaChanged.Raise(this);
-            //}
+            if (d.HasFlag(Delta.Mana))
+            {
+                ManaChanged.Raise(this);
+            }
 
-            //if (d.HasFlag(Delta.Stamina))
-            //{
-            //    StaminaChanged.Raise(this);
-            //}
+            if (d.HasFlag(Delta.Stamina))
+            {
+                StaminaChanged.Raise(this);
+            }
         }
 
 
@@ -405,9 +409,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (deltaY > 0) return Direction.Down;
 
-                if (deltaY == 0) return Direction.East;
-
-                return Direction.Right;
+                return deltaY == 0 ? Direction.East : Direction.Right;
             }
 
             if (deltaX == 0)
@@ -483,13 +485,14 @@ namespace ClassicUO.Game.GameObjects
 
                     if (AnimationFromServer) SetAnimation(0xFF);
 
-                    int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (IsMounted ? 1 : 15) ; // default 15 = less smooth
+                    int maxDelay =
+                        MovementSpeed.TimeToCompleteMovement(this, step.Run) -
+                        (IsMounted ? 1 : 15); // default 15 = less smooth
                     int delay = (int) CoreGame.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
 
                     if (Position.X != step.X || Position.Y != step.Y)
                     {
-                      
                         if (Service.Get<Settings>().SmoothMovement)
                         {
                             float framesPerTile = maxDelay / CHARACTER_ANIMATION_DELAY;

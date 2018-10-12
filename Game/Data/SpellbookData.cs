@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Game.GameObjects;
+﻿using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Data
 {
@@ -32,6 +29,7 @@ namespace ClassicUO.Game.Data
                     bookType = SpellBookType.Spellweaving;
                     break;
             }
+
             return bookType;
         }
 
@@ -60,18 +58,18 @@ namespace ClassicUO.Game.Data
         {
             type = GetTypeByGraphic(spellbook.Graphic);
             field = 0;
-            if (type == SpellBookType.Unknown)                
+            if (type == SpellBookType.Unknown)
                 return;
 
             int offset = GetOffsetFromSpellbookType(type);
 
             foreach (Item item in spellbook.Items)
             {
-                int index = ((item.Amount - offset) & 0x0000003F);
+                int index = (item.Amount - offset) & 0x0000003F;
                 int circle = index / 8;
                 index %= 8;
-                index = ((3 - circle % 4) + (circle / 4) * 4) * 8 + index;
-                field |= (ulong)1 << index;
+                index = (3 - circle % 4 + circle / 4 * 4) * 8 + index;
+                field |= (ulong) 1 << index;
             }
         }
     }
