@@ -37,10 +37,14 @@ namespace ClassicUO.Game.GameObjects
                     effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue)
                     {
                         Blend = blendmode,
+                        Tile = World.Map.GetTile(srcPos.X, srcPos.Y)
                     };
 
                     if (doesExplode)
-                        effect.AddChildEffect(new AnimatedItemEffect(target, targPos.X, targPos.Y, targPos.Z, 0x36Cb, hue, 9));
+                        effect.AddChildEffect(new AnimatedItemEffect(target, targPos.X, targPos.Y, targPos.Z, 0x36Cb, hue, 9)
+                        {
+                            Tile = effect.Tile
+                        });
                     break;
                 case GraphicEffectType.Lightning:
                     effect = new LightningEffect(source, srcPos.X, srcPos.Y, srcPos.Z, hue);

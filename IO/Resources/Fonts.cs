@@ -2071,7 +2071,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            if (l == null || !l.HasValue)
+            if (!l.HasValue)
             {
                 linkID = (ushort) (_webLinks.Count + 1);
                 _webLinks[linkID] = new WebLink {IsVisited = false, Link = link};
@@ -2088,13 +2088,10 @@ namespace ClassicUO.IO.Resources
 
         public static bool GetWebLink(ushort link, out WebLink result)
         {
-            if (_webLinks.TryGetValue(link, out result))
-            {
-                result.IsVisited = true;
-                return true;
-            }
+            if (!_webLinks.TryGetValue(link, out result)) return false;
+            result.IsVisited = true;
+            return true;
 
-            return false;
         }
 
         private static unsafe uint GetHTMLColorFromText(ref string str)

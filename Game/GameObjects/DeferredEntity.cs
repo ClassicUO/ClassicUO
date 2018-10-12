@@ -39,16 +39,17 @@ namespace ClassicUO.Game.GameObjects
         public sbyte Z { get; set; }
         public Tile AssociatedTile { get; set; }
 
-        private View GetBaseView(GameObject entity)
-        {
-            if (entity is Mobile)
-                return (MobileView) entity.View;
-            if (entity is AnimatedItemEffect)
-                return (AnimatedEffectView) entity.View;
-            if (entity is Item item && item.IsCorpse)
-                return (ItemView) entity.View;
-            return null;
-        }
+        //private View GetBaseView(GameObject entity)
+        //{
+        //    if (entity is Mobile)
+        //        return (MobileView) entity.View;
+        //    if (entity is AnimatedItemEffect)
+        //        return (AnimatedEffectView) entity.View;
+        //    if (entity is )
+        //    if (entity is Item item && item.IsCorpse)
+        //        return (ItemView) entity.View;
+        //    return null;
+        //}
 
         public void Reset()
         {
@@ -61,7 +62,7 @@ namespace ClassicUO.Game.GameObjects
             Z = sbyte.MinValue;
         }
 
-        protected override View CreateView() => new DeferredView(this, GetBaseView(Entity), AtPosition);
+        protected override View CreateView() => new DeferredView(this, Entity.View, AtPosition);
 
         public override void Dispose()
         {

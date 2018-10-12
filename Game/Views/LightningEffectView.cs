@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Views
         {
             PreDraw(position);
 
-            return base.Draw(spriteBatch, position, list);
+            return base.DrawInternal(spriteBatch, position, list);
         }
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Views
 
             HueVector = RenderExtentions.GetHueVector(effect.Hue);
 
-            return base.DrawInternal(spriteBatch, position, objectList);
+            return base.Draw(spriteBatch, position, objectList);
         }
     }
 }

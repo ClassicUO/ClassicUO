@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ClassicUO.Configuration;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using Microsoft.Xna.Framework;
 
@@ -110,7 +112,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                _timeActive += (float) frameMS;
+                _timeActive += (float)frameMS;
             }
 
             if (_timeActive >= _timeUntilHit)
@@ -124,11 +126,10 @@ namespace ClassicUO.Game.GameObjects
                 float z = (sz + (_timeActive / _timeUntilHit) * (float)(tz - sz));
 
                 Position = new Position((ushort)x, (ushort)y, (sbyte)z);
-                //TODO: offset
+                Tile = World.Map.GetTile((int) x, (int) y);
+                Offset = new Vector3(x % 1, y % 1, z % 1);
                 AngleToTarget = -((float)Math.Atan2((ty - sy), (tx - sx)) + (float)(Math.PI) * (1f / 4f));
             }
         }
-
-
     }
 }
