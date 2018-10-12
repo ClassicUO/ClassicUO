@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-            if (((AnimatedItemEffect) GameObject).IsMoving)
+            //if (((AnimatedItemEffect) GameObject).IsMoving)
                 PreDraw(position);
 
             return DrawInternal(spriteBatch, position, objectList);

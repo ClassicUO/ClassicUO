@@ -54,7 +54,7 @@ namespace ClassicUO.Game.GameObjects
         public int Speed { get; set; }
         public long LastChangeFrameTime { get; set; }
         public bool IsEnabled { get; set; }
-        public Graphic AnimationGraphic { get; private set; }
+        public Graphic AnimationGraphic { get; set; } = Graphic.Invalid;
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
         public DeferredEntity DeferredObject { get; set; }
         public GraphicEffectBlendMode Blend { get; set; }
@@ -84,10 +84,19 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (LastChangeFrameTime < totalMS)
                 {
-                    AnimationGraphic = (Graphic)(Graphic + AnimDataFrame.FrameData[AnimIndex]);
-                    AnimIndex++;
 
-                    if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte)AnimDataFrame.FrameStart;
+                    if (AnimDataFrame.FrameCount > 0)
+                    {
+                        AnimationGraphic = (Graphic)(Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                        AnimIndex++;
+
+                        if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte)AnimDataFrame.FrameStart;
+                    }
+                    else
+                    {
+                        AnimIndex++;
+                    }
+
 
                     LastChangeFrameTime = (long)totalMS + Speed;
                 }

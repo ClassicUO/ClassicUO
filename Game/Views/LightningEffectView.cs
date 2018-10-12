@@ -26,8 +26,6 @@ namespace ClassicUO.Game.Views
             new Point(80, 0)
         };
 
-        private Graphic _displayedGraphic = Graphic.Invalid;
-
         public LightningEffectView(LightningEffect effect) : base(effect)
         {
 
@@ -44,14 +42,16 @@ namespace ClassicUO.Game.Views
         {
             LightningEffect effect = (LightningEffect) GameObject;
 
-            if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
-            {
-                if (effect.AnimationGraphic > 0x4E29)
-                    return false;
+            Graphic displayed = (Graphic) (effect.Graphic + effect.AnimIndex);
 
-                _displayedGraphic = effect.AnimationGraphic;
-                Texture = Art.GetStaticTexture(effect.AnimationGraphic);
-                Point offset = _offsets[_displayedGraphic - 20000];
+            if (displayed > 0x4E29)
+                return false;
+
+            if (effect.AnimationGraphic != displayed || Texture == null || Texture.IsDisposed)
+            {
+                effect.AnimationGraphic = displayed;
+                Texture = IO.Resources.Gumps.GetGumpTexture(effect.AnimationGraphic);
+                Point offset = _offsets[displayed - 20000];
                 Bounds = new Rectangle(offset.X, Texture.Height - 33 + (effect.Position.Z * 4)+ offset.Y, Texture.Width, Texture.Height);
             }
 

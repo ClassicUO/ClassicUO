@@ -11,7 +11,13 @@ namespace ClassicUO.Game.GameObjects
     {
         public LightningEffect(Hue hue)
         {
+            Graphic = 0x4E20;
             Hue = hue;
+
+            IsEnabled = true;
+            Speed = 50;
+            AnimIndex = 0;
+            //Load();
         }
 
         public LightningEffect(GameObject source, Hue hue) : this(hue)
@@ -40,16 +46,20 @@ namespace ClassicUO.Game.GameObjects
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
+
             if (!IsDisposed)
             {
-                if (LastChangeFrameTime >= 10) //TODO: fix time
+                if (AnimIndex >= 10) //TODO: fix time
                     Dispose();
                 else
                 {
                     (int x, int y, int z) = GetSource();
 
                     if (Position.X != x || Position.Y != y || Position.Z != z)
+                    {
                         Position = new Position((ushort)x, (ushort)y, (sbyte)z);
+                        Tile = World.Map.GetTile(x, y);
+                    }
                 }
             }
         }

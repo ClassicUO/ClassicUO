@@ -18,6 +18,8 @@ namespace ClassicUO.Game.GameObjects
         {
             Hue = hue;
             Graphic = graphic;
+
+            Load();
         }
 
         public MovingEffect(GameObject source, GameObject target, Graphic graphic, Hue hue) : this(graphic, hue)
