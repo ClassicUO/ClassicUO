@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
-using ClassicUO.Game.Gumps.Controls.InGame;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -40,9 +39,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanMove = true;
             AcceptMouseInput = false;
 
-            AddChildren(_gameBorder = new GameBorder(0, 0, 320, 400));
+            AddChildren(_gameBorder = new GameBorder(0, 0, 320, 400, 4));
 
-            AddChildren(_gumpPicTiled = new GumpPicTiled(4, 6, 320 - 8, 400 - 12, 0x0A40) { IsTransparent = true });
+            AddChildren(_gumpPicTiled = new GumpPicTiled(4, 4, 320 - 8, 400 - 8, 0x0A40) { IsTransparent = true });
             AddChildren(_gumpPicTiled);
 
             _scrollArea = new ScrollArea(20, 60, 295, 190, true) { AcceptMouseInput = true };

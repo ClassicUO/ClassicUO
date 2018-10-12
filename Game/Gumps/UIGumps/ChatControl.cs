@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
@@ -152,7 +153,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _textEntries.Add(new ChatLineTime(text, 320, font, isunicode, hue));
         }
 
-        protected override void OnResize()
+        internal void Resize()
         {
             if (_textBox != null)
             {
