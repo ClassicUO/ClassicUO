@@ -55,7 +55,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private readonly List<ChatLineTime> _textEntries;
         private readonly List<Tuple<ChatMode, string>> _messageHistory;
         private Label _currentChatModeLabel;
-        private CheckerTrans _currentChatModeLabelBackground;
         private readonly InputManager _inputManager;
         private int _messageHistoryIndex = -1;
         private Serial _privateMsgSerial = 0;
@@ -105,14 +104,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private void AppendChatModePrefix(string labelText, Hue hue)
         {
             _currentChatModeLabel = new Label(labelText, true, hue) {X = _textBox.X, Y = _textBox.Y};
-            _currentChatModeLabelBackground = new CheckerTrans();
-            _currentChatModeLabelBackground.Location = new Point(_currentChatModeLabel.X, _currentChatModeLabel.Y);
-            _currentChatModeLabelBackground.Width = _currentChatModeLabel.Width;
-            _currentChatModeLabelBackground.Height = _currentChatModeLabel.Height;
             _textBox.X = _currentChatModeLabel.Width;
             _textBox.Hue = hue;
             _textBox.SetText(string.Empty);
-            AddChildren(_currentChatModeLabelBackground);
             AddChildren(_currentChatModeLabel);
            
         }
@@ -124,7 +118,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _textBox.Hue = 33;
                 _textBox.X -= _currentChatModeLabel.Width;
                 _currentChatModeLabel.Dispose();
-                _currentChatModeLabelBackground.Dispose();
                 _currentChatModeLabel = null;
 
             }
