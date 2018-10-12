@@ -85,7 +85,7 @@ namespace ClassicUO.Configuration
 
         private int _speechDelay;
         private bool _statReport;
-        private ushort _tooltipsTextColor;
+        private ushort _tooltipsTextColor = 0xFFFF;
         private string _uoDir;
 
 

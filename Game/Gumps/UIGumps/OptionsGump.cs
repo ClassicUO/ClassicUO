@@ -273,14 +273,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 HSliderBarStyle.MetalWidgetRecessedBar, true);
             AddChildren(_sliderDelayAppearTooltips, 3);
 
-
-            AddChildren(new Button((int) Buttons.TextColor, 0x00D4, 0x00D4)
+            Button button = new Button((int) Buttons.TextColor, 0x00D4, 0x00D4)
             {
                 X = 64,
                 Y = 151,
                 ButtonAction = ButtonAction.Activate,
                 ToPage = 3
-            }, 3);
+            };
+            button.MouseClick += (sender, e) =>
+            {
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => _colorPickerTooltipText.SetHue(s));
+                UIManager.Add(pickerGump);
+            };
+            AddChildren(button, 3);
 
             uint color = 0xFF7F7F7F;
 
@@ -289,12 +294,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.TooltipsTextColor) << 8) | 0xFF);
             }
 
-            _colorPickerTooltipText = new ColorPickerBox(67, 154, 1, 1, 13, 14, (int) color);
-            _colorPickerTooltipText.MouseClick += (sender, e) =>
-            {
-                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => _colorPickerTooltipText.SetHue(s));
-                UIManager.Add(pickerGump);
-            };
+            _colorPickerTooltipText = new ColorPickerBox(67, 154, 1, 1, 13, 14);
+            _colorPickerTooltipText.SetHue(color);
+
             AddChildren(_colorPickerTooltipText, 3);
 
             label = new Label("Color of tooltips text", true, 0)
