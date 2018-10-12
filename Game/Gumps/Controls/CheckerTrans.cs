@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,15 +18,27 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public class CheckerTrans : GumpControl
     {
         private static SpriteTexture _transparentTexture;
+
+        public CheckerTrans() => AcceptMouseInput = false;
+
+        public CheckerTrans(string[] parts) : this()
+        {
+            X = int.Parse(parts[1]);
+            Y = int.Parse(parts[2]);
+            Width = int.Parse(parts[3]);
+            Height = int.Parse(parts[4]);
+        }
 
         public static SpriteTexture TransparentTexture
         {
@@ -40,19 +53,6 @@ namespace ClassicUO.Game.Gumps
                 _transparentTexture.Ticks = CoreGame.Ticks;
                 return _transparentTexture;
             }
-        }
-
-        public CheckerTrans()
-        {
-            AcceptMouseInput = false;
-        }
-
-        public CheckerTrans(string[] parts) : this()
-        {
-            X = int.Parse(parts[1]);
-            Y = int.Parse(parts[2]);
-            Width = int.Parse(parts[3]);
-            Height = int.Parse(parts[4]);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>

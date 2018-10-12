@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,25 +18,28 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class PaperDollGump : Gump
     {
-        private bool _isWarMode;
-        private Button _warModeBtn;
         private readonly ushort[] PeaceModeBtnGumps = {0x07e5, 0x07e6, 0x07e7};
         private readonly ushort[] WarModeBtnGumps = {0x07e8, 0x07e9, 0x07ea};
-        private GumpPic _virtueMenuPic;
-        private GumpPic _specialMovesBookPic;
+        private bool _isWarMode;
         private GumpPic _partyManifestPic;
+        private GumpPic _specialMovesBookPic;
+        private GumpPic _virtueMenuPic;
+        private Button _warModeBtn;
 
         public PaperDollGump()
             : base(0, 0) => AcceptMouseInput = false;
@@ -157,7 +161,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (args.Button == MouseButton.Left)
             {
-                GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new Serial[1] { Mobile.Serial });
+                GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new Serial[1] {Mobile.Serial});
                 Log.Message(LogTypes.Info, "Virtue DoubleClick event!!");
             }
         }
@@ -217,7 +221,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 case Buttons.Options:
                     if (UIManager.GetByLocalSerial<OptionsGump>() == null)
-                        UIManager.Add(new OptionsGump() { X = 80, Y = 80 });
+                        UIManager.Add(new OptionsGump {X = 80, Y = 80});
                     else
                         UIManager.Remove<OptionsGump>();
                     break;
@@ -238,6 +242,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     }
                     else
                         UIManager.Remove<SkillGumpAdvanced>();
+
                     break;
 
                 case Buttons.Guild:
@@ -255,6 +260,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     }
                     else
                         UIManager.Remove<StatusGump>();
+
                     break;
             }
         }

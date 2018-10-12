@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,50 +18,57 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
-using System.Text;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
-    enum HSliderBarStyle
+    internal enum HSliderBarStyle
     {
         MetalWidgetRecessedBar,
         BlueWidgetNoBar
     }
 
-    class HSliderBar : GumpControl
+    internal class HSliderBar : GumpControl
     {
-        private int _value = -1;
-        //private int _newValue;
-        private int _sliderX;
-        private SpriteTexture _gumpWidget;
-        private SpriteTexture[] _gumpSpliderBackground;
-        private HSliderBarStyle _style;
-        private List<HSliderBar> _pairedSliders = new List<HSliderBar>();
-        private Rectangle _rect;
         private bool _clicked;
         private Point _clickPosition;
-        private RenderedText _text;
+        private SpriteTexture[] _gumpSpliderBackground;
+        private SpriteTexture _gumpWidget;
+        private readonly List<HSliderBar> _pairedSliders = new List<HSliderBar>();
+
+        private Rectangle _rect;
+
+        //private int _newValue;
+        private int _sliderX;
+        private readonly HSliderBarStyle _style;
+        private readonly RenderedText _text;
+        private int _value = -1;
 
 
-        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false, byte font = 0, ushort color = 0, bool unicode = true) : base()
+        public EventHandler ValueChanged;
+
+
+        public HSliderBar(int x, int y, int w, int min, int max, int value, HSliderBarStyle style, bool hasText = false,
+            byte font = 0, ushort color = 0, bool unicode = true)
         {
             X = x;
             Y = y;
 
             if (hasText)
             {
-                _text = new RenderedText()
+                _text = new RenderedText
                 {
                     Font = font,
                     Hue = color,
-                    IsUnicode = unicode,
+                    IsUnicode = unicode
                 };
             }
 
@@ -70,12 +78,9 @@ namespace ClassicUO.Game.Gumps
             Value = value;
             _style = style;
 
-           
+
             AcceptMouseInput = true;
         }
-
-
-        public EventHandler ValueChanged;
 
 
         public int MinValue { get; set; }
@@ -138,15 +143,15 @@ namespace ClassicUO.Game.Gumps
             {
                 for (int i = 0; i < _gumpSpliderBackground.Length; i++)
                 {
-                    _gumpSpliderBackground[i].Ticks = (long)totalMS;
+                    _gumpSpliderBackground[i].Ticks = (long) totalMS;
                 }
             }
 
             //ModifyPairedValues(_newValue - Value);
-            _gumpWidget.Ticks = (long)totalMS;
+            _gumpWidget.Ticks = (long) totalMS;
 
-           // if (_value != _newValue)
-                //_value = _newValue;
+            // if (_value != _newValue)
+            //_value = _newValue;
 
             base.Update(totalMS, frameMS);
         }
@@ -156,12 +161,18 @@ namespace ClassicUO.Game.Gumps
             if (_gumpSpliderBackground != null)
             {
                 spriteBatch.Draw2D(_gumpSpliderBackground[0], new Vector3(position.X, position.Y, 0), Vector3.Zero);
-                spriteBatch.Draw2DTiled(_gumpSpliderBackground[1], new Rectangle((int)position.X + _gumpSpliderBackground[0].Width, (int)position.Y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height), Vector3.Zero);
-                spriteBatch.Draw2D(_gumpSpliderBackground[2], new Vector3(position.X + BarWidth - _gumpSpliderBackground[2].Width, position.Y, 0), Vector3.Zero);
+                spriteBatch.Draw2DTiled(_gumpSpliderBackground[1],
+                    new Rectangle((int) position.X + _gumpSpliderBackground[0].Width, (int) position.Y,
+                        BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width,
+                        _gumpSpliderBackground[1].Height), Vector3.Zero);
+                spriteBatch.Draw2D(_gumpSpliderBackground[2],
+                    new Vector3(position.X + BarWidth - _gumpSpliderBackground[2].Width, position.Y, 0), Vector3.Zero);
             }
+
             spriteBatch.Draw2D(_gumpWidget, new Vector3(position.X + _sliderX, position.Y, 0), Vector3.Zero);
 
-            _text?.Draw(spriteBatch, new Vector3(position.X + BarWidth + 2, position.Y + Height / 2 - _text.Height / 2, 0));
+            _text?.Draw(spriteBatch,
+                new Vector3(position.X + BarWidth + 2, position.Y + Height / 2 - _text.Height / 2, 0));
 
             return base.Draw(spriteBatch, position, hue);
         }
@@ -196,7 +207,6 @@ namespace ClassicUO.Game.Gumps
                 case MouseEvent.WheelScrollDown:
                     Value++;
                     break;
-                    
             }
 
             CalculateOffset();
@@ -206,7 +216,6 @@ namespace ClassicUO.Game.Gumps
         {
             if (_clicked)
             {
-
                 CalculateNew(x);
 
                 //_sliderX = _sliderX + (x - _clickPosition.X);
@@ -214,7 +223,6 @@ namespace ClassicUO.Game.Gumps
                 //    _sliderX = 0;
                 //if (_sliderX > BarWidth - _gumpWidget.Width)
                 //    _sliderX = BarWidth - _gumpWidget.Width;
-
 
 
                 //_clickPosition.X = x;
@@ -235,9 +243,9 @@ namespace ClassicUO.Game.Gumps
 
             len -= _gumpWidget.Width;
 
-            float perc = (x / (float)len) * 100.0f;
+            float perc = x / (float) len * 100.0f;
 
-            Value = (int)((maxValue * perc) / 100.0f) + MinValue;
+            Value = (int) (maxValue * perc / 100.0f) + MinValue;
 
 
             CalculateOffset();
@@ -257,13 +265,13 @@ namespace ClassicUO.Game.Gumps
             length -= _gumpWidget.Width;
 
             if (maxValue > 0)
-                Percents = ((value / (float) maxValue) * 100.0f);
+                Percents = value / (float) maxValue * 100.0f;
             else
             {
                 Percents = 0;
             }
 
-            _sliderX = (int) ((length * Percents) / 100.0f);
+            _sliderX = (int) (length * Percents / 100.0f);
             if (_sliderX < 0)
                 _sliderX = 0;
         }
@@ -281,7 +289,7 @@ namespace ClassicUO.Game.Gumps
 
 
         private void RecalculateSliderX() =>
-            _sliderX = (int) ((BarWidth - _gumpWidget.Width) * ((Value - MinValue) / (MaxValue - MinValue)));
+            _sliderX = (BarWidth - _gumpWidget.Width) * ((Value - MinValue) / (MaxValue - MinValue));
 
         public void AddParisSlider(HSliderBar s) => _pairedSliders.Add(s);
 
@@ -291,7 +299,7 @@ namespace ClassicUO.Game.Gumps
                 return;
 
             bool updateSinceLastCycle = true;
-            int d = (delta > 0) ? -1 : 1;
+            int d = delta > 0 ? -1 : 1;
             int points = Math.Abs(delta);
             int sliderIndex = Value % _pairedSliders.Count;
             while (points > 0)
@@ -325,6 +333,5 @@ namespace ClassicUO.Game.Gumps
                 }
             }
         }
-        
     }
 }

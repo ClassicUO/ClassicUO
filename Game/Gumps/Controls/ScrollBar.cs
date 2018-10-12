@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,28 +18,30 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public class ScrollBar : GumpControl, IScrollBar
     {
         private const float TIME_BETWEEN_CLICKS = 500f;
+        private bool _btUpClicked, _btDownClicked, _btSliderClicked;
+        private Point _clickPosition;
+        private int _max;
+        private int _min;
+
+        private float _sliderPosition, _value;
+        private SpriteTexture _textureSlider;
 
 
         private SpriteTexture[] _textureUpButton, _textureDownButton, _textureBackground;
-        private SpriteTexture _textureSlider;
-
-        private float _sliderPosition, _value;
-        private int _max;
-        private int _min;
-        private bool _btUpClicked, _btDownClicked, _btSliderClicked;
-        private Point _clickPosition;
 
         private float _timeUntilNextClick;
 
@@ -95,6 +98,8 @@ namespace ClassicUO.Game.Gumps
         }
 
         public int ScrollStep { get; set; } = 5;
+
+        bool IScrollBar.Contains(int x, int y) => Contains(x, y);
 
 
         protected override void OnInitialize()
@@ -291,7 +296,5 @@ namespace ClassicUO.Game.Gumps
 
 
         protected override bool Contains(int x, int y) => new Rectangle(0, 0, Width, Height).Contains(x, y);
-
-        bool IScrollBar.Contains(int x, int y) => Contains(x, y);
     }
 }

@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using static SDL2.SDL;
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
@@ -33,24 +35,18 @@ namespace ClassicUO.Input
         private const int MOUSE_DRAG_BEGIN_DISTANCE = 2;
         private const int MOUSE_CLICK_MAX_DELTA = 2;
         private const int MOUSE_DOUBLE_CLICK_TIME = 200;
+        private readonly Queue<InputEvent> _events = new Queue<InputEvent>();
 
 
         private readonly SDL_EventFilter _hookDel;
-        private readonly Queue<InputEvent> _events = new Queue<InputEvent>();
         private readonly Queue<InputEvent> _nextEvents = new Queue<InputEvent>();
         private SDL_Keycode _lastKey;
-        private bool _mouseIsDragging;
         private InputMouseEvent _lastMouseDown, _lastMouseClick;
-        private float _time = -1f;
         private float _lastMouseDownTime, _lastMouseClickTime;
 
         private bool _leftButtonPressed;
-
-        public Point MousePosition { get; private set; }
-
-        public Point LeftDragPosition { get; private set; }
-
-        public Point Offset => _leftButtonPressed ? MousePosition - LeftDragPosition : Point.Zero;
+        private bool _mouseIsDragging;
+        private float _time = -1f;
 
         public InputManager()
         {
@@ -58,8 +54,27 @@ namespace ClassicUO.Input
             SDL_AddEventWatch(_hookDel, IntPtr.Zero);
         }
 
+        public Point MousePosition { get; private set; }
+
+        public Point LeftDragPosition { get; private set; }
+
+        public Point Offset => _leftButtonPressed ? MousePosition - LeftDragPosition : Point.Zero;
+
 
         public void Dispose() => SDL_DelEventWatch(_hookDel, IntPtr.Zero);
+
+        public void Update(double totalMS, double frameMS)
+        {
+            _time = (float) totalMS;
+
+            lock (_nextEvents)
+            {
+                _events.Clear();
+
+                while (_nextEvents.Count > 0)
+                    _events.Enqueue(_nextEvents.Dequeue());
+            }
+        }
 
         public IEnumerable<InputKeyboardEvent> GetKeyboardEvents() =>
             _events.Where(s => s is InputKeyboardEvent e && !e.IsHandled).Cast<InputKeyboardEvent>();
@@ -96,21 +111,8 @@ namespace ClassicUO.Input
             return false;
         }
 
-        public void Update(double totalMS, double frameMS)
-        {
-            _time = (float) totalMS;
-
-            lock (_nextEvents)
-            {
-                _events.Clear();
-
-                while (_nextEvents.Count > 0)
-                    _events.Enqueue(_nextEvents.Dequeue());
-            }
-        }
-
         private void OnKeyDown(InputKeyboardEvent e)
-        {          
+        {
             if (_lastKey == SDL_Keycode.SDLK_LCTRL && e.KeyCode == SDL_Keycode.SDLK_v)
             {
                 OnTextInput(
@@ -126,7 +128,7 @@ namespace ClassicUO.Input
 
                 _lastKey = e.KeyCode;
                 AddEvent(e);
-            }       
+            }
         }
 
         private void OnKeyUp(InputKeyboardEvent e)
@@ -144,7 +146,7 @@ namespace ClassicUO.Input
                 _leftButtonPressed = true;
                 LeftDragPosition = MousePosition;
             }
-            
+
 
             _lastMouseDown = e;
             _lastMouseDownTime = _time;
@@ -154,7 +156,7 @@ namespace ClassicUO.Input
         private void OnMouseUp(InputMouseEvent e)
         {
             if (_mouseIsDragging)
-            {              
+            {
                 AddEvent(new InputMouseEvent(MouseEvent.DragEnd, e));
                 _mouseIsDragging = false;
             }
@@ -231,7 +233,7 @@ namespace ClassicUO.Input
                     OnKeyUp(new InputKeyboardEvent(KeyboardEvent.Up, e->key.keysym.sym, 0, e->key.keysym.mod));
                     break;
                 case SDL_EventType.SDL_TEXTINPUT:
-                    string s = Utility.StringHelper.ReadUTF8( e->text.text);
+                    string s = Utility.StringHelper.ReadUTF8(e->text.text);
                     if (!string.IsNullOrEmpty(s))
                     {
                         OnTextInput(new InputKeyboardEvent(KeyboardEvent.TextInput, SDL_Keycode.SDLK_UNKNOWN, 0,

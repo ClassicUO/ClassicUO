@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,16 +18,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-namespace ClassicUO.Game.Gumps
+
+namespace ClassicUO.Game.Gumps.Controls
 {
     internal class EquipmentSlot : GumpControl
     {
-        private double _frameMS;
-
         public EquipmentSlot(int x, int y)
         {
-            AcceptMouseInput = true;
             X = x;
             Y = y;
             AddChildren(new GumpPicTiled(0, 0, 19, 20, 0x243A));

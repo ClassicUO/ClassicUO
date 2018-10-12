@@ -1,4 +1,5 @@
-#region license
+﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,9 +18,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
-﻿#region license
+#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -39,12 +42,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     internal interface IScrollBar
     {
@@ -57,9 +61,9 @@ namespace ClassicUO.Game.Gumps
 
         int ScrollStep { get; set; }
 
-        bool Contains(int x, int y);
-
         bool IsVisible { get; set; } // from AControl
+
+        bool Contains(int x, int y);
 
         event EventHandler ValueChanged;
     }

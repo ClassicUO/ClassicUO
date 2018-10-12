@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Runtime.InteropServices;
 using ClassicUO.Game.GameObjects;
@@ -109,7 +112,7 @@ namespace ClassicUO.Game.Map
 
         private IndexMap GetIndex(int map) => GetIndex(map, X, Y);
 
-        private IndexMap GetIndex(int map, int x, int y)
+        private static IndexMap GetIndex(int map, int x, int y)
             => IO.Resources.Map.GetIndex(map, x, y);
 
 

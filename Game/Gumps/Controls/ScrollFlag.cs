@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,26 +18,27 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public class ScrollFlag : GumpControl, IScrollBar
     {
-        private SpriteTexture _texture;
-        private int _sliderExtentTop, _sliderExtentHeight;
-        private float _sliderPosition;
-        private float _value;
-        private int _max, _min;
-
         private bool _btnSliderClicked;
         private Point _clickPosition;
+        private int _max, _min;
         private Rectangle _rect;
+        private int _sliderExtentTop, _sliderExtentHeight;
+        private float _sliderPosition;
+        private SpriteTexture _texture;
+        private float _value;
 
 
         public ScrollFlag(GumpControl parent, int x, int y, int height) : this(parent)
@@ -49,7 +51,7 @@ namespace ClassicUO.Game.Gumps
         public ScrollFlag(GumpControl parent) : base(parent) => AcceptMouseInput = true;
 
 
-        public event EventHandler ValueChanged; 
+        public event EventHandler ValueChanged;
 
         public int Value
         {
@@ -89,6 +91,9 @@ namespace ClassicUO.Game.Gumps
         }
 
         public int ScrollStep { get; set; } = 5;
+
+        bool IScrollBar.Contains(int x, int y)
+            => Contains(x, y);
 
         protected override void OnInitialize()
         {
@@ -184,14 +189,11 @@ namespace ClassicUO.Game.Gumps
         protected override bool Contains(int x, int y)
         {
             x -= 5;
-            _rect.Y = (int)_sliderPosition;
+            _rect.Y = (int) _sliderPosition;
             _rect.Width = _texture.Width;
             _rect.Height = _texture.Height;
 
             return _rect.Contains(x, y);
         }
-
-        bool IScrollBar.Contains(int x, int y)
-            => Contains(x, y);
     }
 }

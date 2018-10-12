@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,15 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -66,21 +70,20 @@ namespace ClassicUO.Game.GameObjects
         private Serial _container;
         private Graphic? _displayedGraphic;
 
+
+        private bool _invokeUpdate;
+
         private bool _isMulti;
 
         private Layer _layer;
 
 
-        private bool _invokeUpdate;
+        private ulong _spellsBitFiled;
+
         public Item(Serial serial) : base(serial)
         {
             Items.Added += ItemsOnAddedAndDeleted;
             Items.Removed += ItemsOnAddedAndDeleted;
-        }
-
-        private void ItemsOnAddedAndDeleted(object sender, EventArgs e)
-        {
-            _invokeUpdate = true;
         }
 
 
@@ -96,16 +99,6 @@ namespace ClassicUO.Game.GameObjects
                     _amount = value;
                     _delta |= Delta.Attributes;
                 }
-            }
-        }
-
-        public override Graphic Graphic
-        {
-            get => base.Graphic;
-            set
-            {
-                Name = ItemData.Name;
-                base.Graphic = value;
             }
         }
 
@@ -238,9 +231,26 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
+
+        public override Graphic Graphic
+        {
+            get => base.Graphic;
+            set
+            {
+                Name = ItemData.Name;
+                base.Graphic = value;
+            }
+        }
+
         public StaticTiles ItemData => TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
 
         public bool IsAtWorld(int x, int y) => Position.X == x && Position.Y == y;
+
+        private void ItemsOnAddedAndDeleted(object sender, EventArgs e)
+        {
+            _invokeUpdate = true;
+        }
 
 
         public event EventHandler OwnerChanged;
@@ -264,17 +274,17 @@ namespace ClassicUO.Game.GameObjects
                 if (Effect.IsDisposed)
                     Effect = null;
                 else
-                    Effect.UpdateAnimation(frameMS);
+                    Effect.Update(totalMS, frameMS);
             }
         }
 
         protected override void OnProcessDelta(Delta d)
         {
             base.OnProcessDelta(d);
-            //if (d.HasFlag(Delta.Ownership))
-            //{
-            //    OwnerChanged.Raise(this);
-            //}
+            if (d.HasFlag(Delta.Ownership))
+            {
+                OwnerChanged.Raise(this);
+            }
         }
 
 
@@ -533,18 +543,13 @@ namespace ClassicUO.Game.GameObjects
             return graphic;
         }
 
-
-
-        private ulong _spellsBitFiled;
         public bool HasSpell(int circle, int index)
         {
-            index = ((3 - circle % 4) + (circle / 4) * 4) * 8 + (index - 1);
-            ulong flag = ((ulong)1) << index;
+            index = (3 - circle % 4 + circle / 4 * 4) * 8 + (index - 1);
+            ulong flag = (ulong) 1 << index;
             return (_spellsBitFiled & flag) == flag;
         }
 
-        public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
-       
         public void FillSpellbook(SpellBookType type, ulong field)
         {
             if (!IsSpellBook)

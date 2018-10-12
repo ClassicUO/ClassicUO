@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,10 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Utility
 {
@@ -33,11 +37,9 @@ namespace ClassicUO.Utility
         private static readonly List<ProfileData> m_AllFrameData;
         private static readonly ProfileData m_TotalTimeData;
 
-        private static Stopwatch _timer;
+        private static readonly Stopwatch _timer;
 
         private static long m_BeginFrameTicks;
-        public static double LastFrameTimeMS { get; private set; }
-        public static double TrackedTime => m_TotalTimeData.TimeInContext;
 
 
         static Profiler()
@@ -48,6 +50,9 @@ namespace ClassicUO.Utility
             m_TotalTimeData = new ProfileData(null, 0d);
             _timer = Stopwatch.StartNew();
         }
+
+        public static double LastFrameTimeMS { get; private set; }
+        public static double TrackedTime => m_TotalTimeData.TimeInContext;
 
         public static void BeginFrame()
         {
@@ -77,7 +82,7 @@ namespace ClassicUO.Utility
 
         public static void EndFrame()
         {
-            LastFrameTimeMS = ((_timer.ElapsedTicks - m_BeginFrameTicks) * 1000d) / Stopwatch.Frequency;
+            LastFrameTimeMS = (_timer.ElapsedTicks - m_BeginFrameTicks) * 1000d / Stopwatch.Frequency;
             m_TotalTimeData.AddNewHitLength(LastFrameTimeMS);
         }
 
@@ -98,7 +103,7 @@ namespace ClassicUO.Utility
             for (int i = 0; i < m_Context.Count; i++)
                 context[i] = m_Context[i].Name;
 
-            double ms = ((_timer.ElapsedTicks - m_Context[m_Context.Count - 1].Tick) * 1000d) / Stopwatch.Frequency;
+            double ms = (_timer.ElapsedTicks - m_Context[m_Context.Count - 1].Tick) * 1000d / Stopwatch.Frequency;
             m_ThisFrameData.Add(new Tuple<string[], double>(context, ms));
             m_Context.RemoveAt(m_Context.Count - 1);
         }
@@ -123,9 +128,17 @@ namespace ClassicUO.Utility
 
         public class ProfileData
         {
-            public string[] Context;
+            public static ProfileData Empty = new ProfileData(null, 0d);
             private readonly double[] m_LastTimes = new double[ProfileTimeCount];
+            public string[] Context;
             private uint m_LastIndex;
+
+            public ProfileData(string[] context, double time)
+            {
+                Context = context;
+                m_LastIndex = 0;
+                AddNewHitLength(time);
+            }
 
             public double LastTime => m_LastTimes[m_LastIndex % ProfileTimeCount];
 
@@ -140,13 +153,6 @@ namespace ClassicUO.Utility
             }
 
             public double AverageTime => TimeInContext / ProfileTimeCount;
-
-            public ProfileData(string[] context, double time)
-            {
-                Context = context;
-                m_LastIndex = 0;
-                AddNewHitLength(time);
-            }
 
             public bool MatchesContext(string[] context)
             {
@@ -179,8 +185,6 @@ namespace ClassicUO.Utility
 
                 return $"{name} - {TimeInContext:0.0}ms";
             }
-
-            public static ProfileData Empty = new ProfileData(null, 0d);
         }
 
         private struct ContextAndTick

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
@@ -25,10 +28,8 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.Controls;
-using ClassicUO.Game.Gumps.Controls.InGame;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
-using ClassicUO.Game.Views;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
@@ -53,6 +54,7 @@ namespace ClassicUO.Game.Scenes
         private WorldViewport _viewPortGump;
         private TopBarGump _topBarGump;
         private StaticManager _staticManager;
+        private EffectManager _effectManager;
         private Settings _settings;
 
         //private static Hue _savedHue;
@@ -68,7 +70,9 @@ namespace ClassicUO.Game.Scenes
 
         public int Scale { get; set; } = 1;
         public Texture2D ViewportTexture => _renderTarget;
-        public Point MouseOverWorldPosition => new Point(InputManager.MousePosition.X - _viewPortGump.ScreenCoordinateX, InputManager.MousePosition.Y - _viewPortGump.ScreenCoordinateY);
+
+        public Point MouseOverWorldPosition => new Point(InputManager.MousePosition.X - _viewPortGump.ScreenCoordinateX,
+            InputManager.MousePosition.Y - _viewPortGump.ScreenCoordinateY);
 
         public GameObject SelectedObject
         {
@@ -112,6 +116,8 @@ namespace ClassicUO.Game.Scenes
             _viewPortGump = Service.Get<WorldViewport>();
 
             _settings = Service.Get<Settings>();
+
+            Service.Register(_effectManager = new EffectManager());
 
             GameActions.Initialize(PicupItemBegin);
         }
@@ -202,10 +208,12 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_renderTarget == null || _renderTarget.Width != _settings.GameWindowWidth / Scale || _renderTarget.Height != _settings.GameWindowHeight / Scale)
+            if (_renderTarget == null || _renderTarget.Width != _settings.GameWindowWidth / Scale ||
+                _renderTarget.Height != _settings.GameWindowHeight / Scale)
             {
                 _renderTarget?.Dispose();
-                _renderTarget = new RenderTarget2D(Device, _settings.GameWindowWidth / Scale, _settings.GameWindowHeight / Scale, false, SurfaceFormat.Bgra5551,
+                _renderTarget = new RenderTarget2D(Device, _settings.GameWindowWidth / Scale,
+                    _settings.GameWindowHeight / Scale, false, SurfaceFormat.Bgra5551,
                     DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
@@ -233,7 +241,7 @@ namespace ClassicUO.Game.Scenes
 
             World.Update(totalMS, frameMS);
             _staticManager.Update(totalMS, frameMS);
-
+            _effectManager.Update(totalMS, frameMS);
 
             if (DateTime.Now > _timePing)
             {
@@ -283,7 +291,7 @@ namespace ClassicUO.Game.Scenes
                         }
                     }
 
-                    if (underObject is IDynamicItem sta && TileData.IsRoof((long)sta.ItemData.Flags))
+                    if (underObject is IDynamicItem sta && TileData.IsRoof((long) sta.ItemData.Flags))
                     {
                         bool isRoofSouthEast = true;
 
@@ -295,7 +303,6 @@ namespace ClassicUO.Game.Scenes
 
                         if (!isRoofSouthEast)
                             maxItemZ = 255;
-
                     }
 
                     underSurface = maxItemZ != 255;
@@ -303,7 +310,8 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private static (Point firstTile, Vector2 renderOffset, Point renderDimensions) GetViewPort(int width, int height, int scale)
+        private static (Point firstTile, Vector2 renderOffset, Point renderDimensions) GetViewPort(int width,
+            int height, int scale)
         {
             int off = Math.Abs(width / 44 - height / 44) % 3;
 
@@ -379,7 +387,8 @@ namespace ClassicUO.Game.Scenes
                 int x = obj.Position.X;
                 int y = obj.Position.Y;
 
-                Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
+                Vector3 isometricPosition =
+ new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
 
                 obj.View.Draw(sb3D, isometricPosition, _mouseOverList);
 
@@ -388,7 +397,8 @@ namespace ClassicUO.Game.Scenes
             //_renderList.Clear();
 #else
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
-            (Point firstTile, Vector2 renderOffset, Point renderDimensions) = GetViewPort(_settings.GameWindowWidth, _settings.GameWindowHeight, Scale);
+            (Point firstTile, Vector2 renderOffset, Point renderDimensions) =
+                GetViewPort(_settings.GameWindowWidth, _settings.GameWindowHeight, Scale);
 
             ClearDeferredEntities();
 
@@ -433,17 +443,7 @@ namespace ClassicUO.Game.Scenes
                                  TileData.IsRoof((long) dyn.ItemData.Flags))
                                 && !(obj is Tile))
                             {
-                                if (tile == World.Player.Tile)
-                                {
-
-                                }
-
                                 continue;
-                            }
-
-                            if (obj == World.Player)
-                            {
-
                             }
 
                             if (draw && obj.View.Draw(sb3D, dp, _mouseOverList))
@@ -870,7 +870,7 @@ namespace ClassicUO.Game.Scenes
             int charX = entity.Position.X;
             int charY = entity.Position.Y;
 
-            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.GetByLocalSerial(entity) : null;
+            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.Get(entity) : null;
             int dropMaxZIndex = -1;
             if (mob != null)
             {

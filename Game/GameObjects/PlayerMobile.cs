@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -73,52 +74,64 @@ namespace ClassicUO.Game.GameObjects
 
         private readonly Deque<Step> _requestedSteps = new Deque<Step>();
         private readonly Skill[] _sklls;
+        private ushort _damageChanceInc;
         private ushort _damageMax;
         private ushort _damageMin;
+        private ushort _defenseChanceInc;
         private ushort _dexterity;
+        private ushort _dexterityInc;
+        private ushort _enhancePotions;
+        private ushort _fasterCasting;
+        private ushort _fasterCastRecovery;
         private bool _female;
         private byte _followers;
         private byte _followersMax;
         private uint _gold;
+        private ushort _hitChanceInc;
+        private ushort _hitPointsInc;
+        private ushort _hitPointsRegen;
         private ushort _intelligence;
+        private ushort _intelligenceInc;
         private long _lastStepRequestedTime;
+        private ushort _lowerManaCost;
+        private ushort _lowerReagentCost;
         private ushort _luck;
+        private ushort _manaInc;
+        private ushort _manaRegen;
+
+        private ushort _maxColdcRes;
+
+        private ushort _maxDefChance;
+
+        private ushort _maxEnergRes;
+
+        private ushort _maxFireRes;
+        private ushort _maximumHitPointsInc;
+        private ushort _maximumManaInc;
+        private ushort _maximumStaminaInc;
+
+        private ushort _maxPhysicRes;
+
+        private ushort _maxPoisResUshort;
 
 
         private PlayerMovementState _movementState = PlayerMovementState.ANIMATE_IMMEDIATELY;
+        private ushort _reflectPhysicalDamage;
         private ushort _resistCold;
         private ushort _resistEnergy;
         private ushort _resistFire;
         private ushort _resistPhysical;
         private ushort _resistPoison;
+        private ushort _spellDamageInc;
+        private ushort _staminaInc;
+        private ushort _staminaRegen;
+        private ushort _statscap;
         private ushort _strength;
+        private ushort _strengthInc;
+        private ushort _swingSpeedInc;
         private uint _tithingPoints;
         private ushort _weight;
         private ushort _weightMax;
-        private ushort _statscap;
-        private ushort _hitChanceInc;
-        private ushort _swingSpeedInc;
-        private ushort _damageChanceInc;
-        private ushort _lowerReagentCost;
-        private ushort _hitPointsRegen;
-        private ushort _staminaRegen;
-        private ushort _manaRegen;
-        private ushort _reflectPhysicalDamage;
-        private ushort _enhancePotions;
-        private ushort _defenseChanceInc;
-        private ushort _spellDamageInc;
-        private ushort _fasterCastRecovery;
-        private ushort _fasterCasting;
-        private ushort _lowerManaCost;
-        private ushort _strengthInc;
-        private ushort _dexterityInc;
-        private ushort _intelligenceInc;
-        private ushort _hitPointsInc;
-        private ushort _staminaInc;
-        private ushort _manaInc;
-        private ushort _maximumHitPointsInc;
-        private ushort _maximumStaminaInc;
-        private ushort _maximumManaInc;
 
 
         public PlayerMobile(Serial serial) : base(serial)
@@ -130,8 +143,8 @@ namespace ClassicUO.Game.GameObjects
                 _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasButton);
             }
 
-            NetClient.Socket.Send((new PSkillsRequest(this)));
-        } 
+            NetClient.Socket.Send(new PSkillsRequest(this));
+        }
 
 
         public IReadOnlyList<Skill> Skills => _sklls;
@@ -476,7 +489,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private ushort _maxPhysicRes;
         public ushort MaxPhysicRes
         {
             get => _maxPhysicRes;
@@ -490,7 +502,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private ushort _maxFireRes;
         public ushort MaxFireRes
         {
             get => _maxFireRes;
@@ -504,7 +515,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private ushort _maxColdcRes;
         public ushort MaxColdRes
         {
             get => _maxColdcRes;
@@ -518,7 +528,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private ushort _maxPoisResUshort;
         public ushort MaxPoisonRes
         {
             get => _maxPoisResUshort;
@@ -532,7 +541,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private ushort _maxEnergRes;
         public ushort MaxEnergyRes
         {
             get => _maxEnergRes;
@@ -546,7 +554,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        private ushort _maxDefChance;
         public ushort MaxDefChance
         {
             get => _maxDefChance;
@@ -785,7 +792,7 @@ namespace ClassicUO.Game.GameObjects
         //protected override bool NoIterateAnimIndex() => false;
         protected override bool IsWalking => LastStepTime > CoreGame.Ticks - PLAYER_WALKING_DELAY;
         public byte SequenceNumber { get; set; }
-        
+
 
         public event EventHandler StatsChanged, SkillsChanged;
 
@@ -1597,12 +1604,15 @@ namespace ClassicUO.Game.GameObjects
 
         public void ConfirmWalk(byte seq)
         {
-            if (_requestedSteps.Count <= 0){ NetClient.Socket.Send(new PResend()); return;}
+            if (_requestedSteps.Count <= 0)
+            {
+                NetClient.Socket.Send(new PResend());
+                return;
+            }
 
             Step step = _requestedSteps.Front();
             if (step.Seq != seq)
             {
-
                 NetClient.Socket.Send(new PResend());
                 return;
             }

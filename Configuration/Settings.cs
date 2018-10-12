@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,83 +18,81 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
-using System.Security;
 using ClassicUO.Utility;
 using Newtonsoft.Json;
-
 
 namespace ClassicUO.Configuration
 {
     public class Settings : NotifyPropertyChange
     {
-        private string _username;
-        private string _password;
-        private string _ip;
-        private ushort _port;
-        private string _lastCharName;
-        private string _uoDir;
-        private string _clientVersion;
-        private int _maxFPS;
-        private bool _debug;
-        private bool _profiler;
-
-        private bool _sound;
-        private int _soundVolume;
-        private bool _music;
-        private int _musicVolume;
-        private bool _footstepsSound;
-        private bool _combatMusic;
+        private int _allyMessageColor;
+        private bool _alwaysRun;
         private bool _backgroundSound;
+        private int _backpackStyle;
 
-
-     
 
         private byte _chatFont;
-
-        private bool _enablePathfind;
-        private bool _alwaysRun;
-
-        private bool _reduceFpsInactiveWindow;
+        private string _clientVersion;
+        private bool _combatMusic;
 
 
         private int _containerDefaultX;
         private int _containerDefaultY;
-        private int _backpackStyle;
-        private int _gameWindowX = 32;
-        private int _gameWindowY = 32;
-        private int _gameWindowWidth = 800;
-        private int _gameWindowHeight = 600;
-
-        private int _speechDelay;
-        private bool _scaleSpeechDelay;
-        private int _speechColor;
-        private int _emoteColor;
-        private int _partyMessageColor;
-        private int _guildMessageColor;
-        private int _allyMessageColor;
-
-        private int _innocentColor;
-        private int _friendColor;
-        private int _criminalColor;
-        private int _enemyColor;
-        private int _murdererColor;
 
         private bool _criminalActionQuery;
+        private int _criminalColor;
+        private bool _debug;
+        private int _delayAppearTooltips;
+        private int _emoteColor;
+
+        private bool _enablePathfind;
+        private int _enemyColor;
+        private bool _footstepsSound;
+        private int _friendColor;
+        private int _gameWindowHeight = 600;
+        private int _gameWindowWidth = 800;
+        private int _gameWindowX = 32;
+        private int _gameWindowY = 32;
+        private int _guildMessageColor;
+
+        private bool _highlightGameObjects = true;
+
+        private int _innocentColor;
+        private string _ip;
+        private string _lastCharName;
+        private int _maxFPS;
+        private int _murdererColor;
+        private bool _music;
+        private int _musicVolume;
+        private int _partyMessageColor;
+        private string _password;
+        private ushort _port;
+        private bool _profiler;
+
+        private bool _reduceFpsInactiveWindow;
+        private bool _scaleSpeechDelay;
         private bool _showIncomingNames;
-        private bool _statReport;
         private bool _skillReport;
+        private bool _smoothMovement = true;
+
+        private bool _sound;
+        private int _soundVolume;
+        private int _speechColor;
+
+        private int _speechDelay;
+        private bool _statReport;
+        private ushort _tooltipsTextColor;
+        private string _uoDir;
 
 
         private bool _useOldStatus;
+        private string _username;
 
         private bool _useTooltips;
-        private int _delayAppearTooltips;
-        private ushort _tooltipsTextColor;
-
-        private bool _highlightGameObjects = true;
-        private bool _smoothMovement = true;
 
         [JsonConstructor]
         public Settings()
@@ -412,15 +411,12 @@ namespace ClassicUO.Configuration
         }
 
 
-
         [JsonProperty(PropertyName = "use_old_status")]
         public bool UseOldStatus
         {
             get => _useOldStatus;
             set => SetProperty(ref _useOldStatus, value);
         }
-
-
 
 
         [JsonProperty(PropertyName = "use_tooltips")]
@@ -462,8 +458,7 @@ namespace ClassicUO.Configuration
 
     public abstract class NotifyPropertyChange
     {
-        [JsonIgnore]
-        public EventHandler PropertyChanged;
+        [JsonIgnore] public EventHandler PropertyChanged;
 
         public virtual bool SetProperty<T>(ref T storage, T value)
         {

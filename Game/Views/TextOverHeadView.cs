@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using System;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -34,7 +34,7 @@ namespace ClassicUO.Game.Views
         public TextOverheadView(TextOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0,
             bool isunicode = false, FontStyle style = FontStyle.None) : base(parent)
         {
-            RenderedText text = new RenderedText()
+            RenderedText text = new RenderedText
             {
                 MaxWidth = maxwidth,
                 Hue = hue,
@@ -81,8 +81,6 @@ namespace ClassicUO.Game.Views
 
             return base.Draw(spriteBatch, position, objectList);
         }
-
-
 
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,16 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public class Checkbox : GumpControl
     {
@@ -32,8 +35,8 @@ namespace ClassicUO.Game.Gumps
         private const int ACTIVE = 1;
 
         private readonly SpriteTexture[] _textures = new SpriteTexture[2];
-        private RenderedText _text;
         private bool _isChecked;
+        private readonly RenderedText _text;
 
 
         public Checkbox(ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0)
@@ -45,7 +48,7 @@ namespace ClassicUO.Game.Gumps
             Width = t.Width;
             Height = t.Height;
 
-            _text = new RenderedText()
+            _text = new RenderedText
             {
                 Font = font,
                 Hue = color,
@@ -67,8 +70,6 @@ namespace ClassicUO.Game.Gumps
             LocalSerial = Serial.Parse(parts[6]);
         }
 
-        public event EventHandler ValueChanged;
-
         public bool IsChecked
         {
             get => _isChecked;
@@ -84,12 +85,14 @@ namespace ClassicUO.Game.Gumps
 
         public string Text => _text.Text;
 
+        public event EventHandler ValueChanged;
+
         public override void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _textures.Length; i++)
             {
                 if (_textures[i] != null)
-                    _textures[i].Ticks = (long)totalMS;
+                    _textures[i].Ticks = (long) totalMS;
             }
 
             base.Update(totalMS, frameMS);
@@ -103,11 +106,10 @@ namespace ClassicUO.Game.Gumps
             spriteBatch.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
 
             _text.Draw(spriteBatch, new Vector3(position.X + _textures[ACTIVE].Width + 2, position.Y, 0));
-           
+
             return ok;
         }
 
-    
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {

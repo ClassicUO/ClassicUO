@@ -1,30 +1,25 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.IO.Resources;
-using ClassicUO.Network;
 using ClassicUO.Utility;
-using Microsoft.Xna.Framework.Input;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    class LogoutGump : Gump
+    internal class LogoutGump : Gump
     {
-        private enum Buttons
-        {
-            Cancel,
-            Ok
-
-        }
-
         private Settings _settings;
-        
+
         public LogoutGump()
             : base(0, 0)
         {
             AddChildren(new GumpPic(0, 0, 0x0816, 0));
-            AddChildren(new Label("Quit\nUltima Online?", false, 0x0386, 165 ,align: TEXT_ALIGN_TYPE.TS_CENTER ){X = 38, Y = 30});
-            AddChildren(new Button((int) Buttons.Cancel, 0x817, 0x818) { X = 40, Y = 77, ButtonAction = ButtonAction.Activate });
-            AddChildren(new Button((int) Buttons.Ok, 0x81A, 0x81B) { X = 100, Y = 77, ButtonAction = ButtonAction.Activate });
+            AddChildren(new Label("Quit\nUltima Online?", false, 0x0386, 165, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                {X = 38, Y = 30});
+            AddChildren(new Button((int) Buttons.Cancel, 0x817, 0x818)
+                {X = 40, Y = 77, ButtonAction = ButtonAction.Activate});
+            AddChildren(new Button((int) Buttons.Ok, 0x81A, 0x81B)
+                {X = 100, Y = 77, ButtonAction = ButtonAction.Activate});
             _settings = Service.Get<Settings>();
 
             CanMove = false;
@@ -51,10 +46,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case 1:
                     //                    NetClient.Disconnected += (sender, e) => _log.Message(LogTypes.Warning, "Disconnected!");
                     //                    World.InGame 
-                    Log.Message(LogTypes.Trace, "Disconnect Button Clicked...\n", false);
+                    Log.Message(LogTypes.Trace, "Disconnect Button Clicked...\n");
                     Dispose();
                     break;
             }
+        }
+
+        private enum Buttons
+        {
+            Cancel,
+            Ok
         }
     }
 }

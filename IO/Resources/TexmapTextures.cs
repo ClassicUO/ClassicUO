@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,12 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
-using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
@@ -36,8 +38,6 @@ namespace ClassicUO.IO.Resources
 
         private static SpriteTexture[] _textmapCache;
         private static readonly List<int> _usedIndex = new List<int>();
-
-        //private static readonly PixelPicking _picker = new PixelPicking();
 
 
         public static void Load()
@@ -92,11 +92,6 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        //public static bool Contains(ushort g, int x, int y, int extra = 0)
-        //     => _picker.GetByLocalSerial(g, x, y, extra);
-
-        //public static void Clear(ushort g) => _picker.Remove(g);
-
         public static SpriteTexture GetTextmapTexture(ushort g)
         {
             ref SpriteTexture texture = ref _textmapCache[g];
@@ -107,8 +102,6 @@ namespace ClassicUO.IO.Resources
                 texture.SetData(pixels);
 
                 _usedIndex.Add(g);
-
-                //_picker.Set(g, size, size, pixels);
             }
 
             return texture;

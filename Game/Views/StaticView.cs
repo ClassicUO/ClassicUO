@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,12 +18,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
@@ -56,7 +58,8 @@ namespace ClassicUO.Game.Views
                     check = World.Player.Position.Y <= st.Position.Y && World.Player.Position.X <= st.Position.X + 1;
 
                     if (!check)
-                        check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y + 1;
+                        check = World.Player.Position.X <= st.Position.X &&
+                                World.Player.Position.Y <= st.Position.Y + 1;
                 }
 
                 if (check)
@@ -69,7 +72,7 @@ namespace ClassicUO.Game.Views
                 }
             }
 
-            HueVector = RenderExtentions.GetHueVector(GameObject.Hue, false, alpha, false );
+            HueVector = RenderExtentions.GetHueVector(GameObject.Hue, false, alpha, false);
             MessageOverHead(spriteBatch, position, Bounds.Y - 22);
             return base.Draw(spriteBatch, position, objectList);
         }

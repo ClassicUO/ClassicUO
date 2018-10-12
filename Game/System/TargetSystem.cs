@@ -1,14 +1,10 @@
 ﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ClassicUO.Game.System
 {
-    class TargetSystem
+    internal class TargetSystem
     {
-        
         public enum TargetType
         {
             Nothing = -1,
@@ -17,54 +13,49 @@ namespace ClassicUO.Game.System
             MultiPlacement = 2
         }
 
-        private static TargetType _targeting = TargetType.Nothing;
         private static int _targetCursorId;
         private static byte _targetCursorType;
 
-        public static TargetType TargetingState
-        {
-            get { return _targeting; }
-        }
+        private int _multiModel;
+
+        public static TargetType TargetingState { get; private set; } = TargetType.Nothing;
 
         public static GameObject LastGameObject { get; set; }
 
-        public static bool IsTargeting
-        {
-            get { return _targeting != TargetType.Nothing; }
-        }
+        public static bool IsTargeting => TargetingState != TargetType.Nothing;
 
         public static void ClearTargetingWithoutTargetCancelPacket()
         {
-            _targeting = TargetType.Nothing;
+            TargetingState = TargetType.Nothing;
         }
 
         public static void SetTargeting(TargetType targeting, int cursorID, byte cursorType)
         {
-            if (_targeting != targeting || cursorID != _targetCursorId || cursorType != _targetCursorType)
+            if (TargetingState != targeting || cursorID != _targetCursorId || cursorType != _targetCursorType)
             {
                 if (targeting == TargetType.Nothing)
                 {
                     GameActions.RequestTargetCancel(_targetCursorId, _targetCursorType);
                 }
+
                 //else
                 //{
                 //    // if we start targeting, we cancel movement.
                 //        m_World.Input.ContinuousMouseMovementCheck = false;
                 //}
-                _targeting = targeting;
+                TargetingState = targeting;
                 _targetCursorId = cursorID;
                 _targetCursorType = cursorType;
             }
         }
 
-        int _multiModel;
         public void SetTargetingMulti(int deedSerial, int model, byte targetType)
         {
             SetTargeting(TargetType.MultiPlacement, deedSerial, targetType);
             _multiModel = model;
         }
 
-        void mouseTargetingEventXYZ(Entity selectedEntity)
+        private void mouseTargetingEventXYZ(Entity selectedEntity)
         {
             int modelNumber = 0;
             if (selectedEntity is IDynamicItem)
@@ -72,7 +63,8 @@ namespace ClassicUO.Game.System
                 modelNumber = selectedEntity.Graphic;
             }
 
-            GameActions.RequestTargetObjectPosition((ushort)selectedEntity.Position.X, (ushort)selectedEntity.Position.Y, (ushort)selectedEntity.Position.Z, (ushort)modelNumber, _targetCursorId, _targetCursorType);
+            GameActions.RequestTargetObjectPosition(selectedEntity.Position.X, selectedEntity.Position.Y,
+                (ushort) selectedEntity.Position.Z, (ushort) modelNumber, _targetCursorId, _targetCursorType);
             ClearTargetingWithoutTargetCancelPacket();
         }
 
@@ -89,9 +81,11 @@ namespace ClassicUO.Game.System
                 if (selectedEntity is Item item)
                 {
                     int modelNumber = selectedEntity.Graphic;
-                    GameActions.RequestTargetObjectPosition((ushort)selectedEntity.Position.X, (ushort)selectedEntity.Position.Y, (ushort)selectedEntity.Position.Z, (ushort)modelNumber, _targetCursorId, _targetCursorType);
+                    GameActions.RequestTargetObjectPosition(selectedEntity.Position.X, selectedEntity.Position.Y,
+                        (ushort) selectedEntity.Position.Z, (ushort) modelNumber, _targetCursorId, _targetCursorType);
                 }
             }
+
             ClearTargetingWithoutTargetCancelPacket();
         }
     }

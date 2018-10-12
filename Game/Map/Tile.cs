@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Views;
@@ -31,8 +34,9 @@ namespace ClassicUO.Game.Map
     {
         private static readonly List<GameObject> _itemsAtZ = new List<GameObject>();
         private readonly List<GameObject> _objectsOnTile;
+
+        private readonly List<Static> _statics = new List<Static>();
         private bool _needSort;
-        private LandTiles? _tileData;
 
         public Tile() : base(World.Map) => _objectsOnTile = new List<GameObject>();
 
@@ -58,29 +62,21 @@ namespace ClassicUO.Game.Map
 
         public override Position Position { get; set; }
 
-        public LandTiles TileData
-        {
-            get
-            {
-                if (!_tileData.HasValue)
-                    _tileData = IO.Resources.TileData.LandData[Graphic];
-                return _tileData.Value;
-            }
-        }
+        public LandTiles TileData => IO.Resources.TileData.LandData[Graphic];
+
 
 
         public void AddGameObject(GameObject obj)
         {
-            if (obj is IDynamicItem)
+            if (obj is IDynamicItem dyn)
             {
                 for (int i = 0; i < _objectsOnTile.Count; i++)
                 {
-                    if (_objectsOnTile[i] is Item || _objectsOnTile[i] is Static)
+                    if (_objectsOnTile[i] is IDynamicItem dynComp)
                     {
-                        if (obj.Graphic == _objectsOnTile[i].Graphic && obj.Position.Z == _objectsOnTile[i].Position.Z)
+                        if (dynComp.Graphic == dyn.Graphic && dynComp.Position.Z == dyn.Position.Z)
                         {
-                            _objectsOnTile.RemoveAt(i);
-                            i--;
+                            _objectsOnTile.RemoveAt(i--);
                         }
                     }
                 }
@@ -267,7 +263,8 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < ObjectsOnTiles.Count; i++)
             {
                 if (MathHelper.InRange(ObjectsOnTiles[i].Position.Z, z0, z1))
-                    if (ObjectsOnTiles[i] is IDynamicItem) items.Add(ObjectsOnTiles[i]);
+                    if (ObjectsOnTiles[i] is IDynamicItem)
+                        items.Add(ObjectsOnTiles[i]);
             }
 
             return items;
@@ -275,7 +272,7 @@ namespace ClassicUO.Game.Map
 
         public bool IsZUnderObjectOrGround(sbyte z, out GameObject entity, out GameObject ground)
         {
-            List<GameObject> list = (List < GameObject > )ObjectsOnTiles;
+            List<GameObject> list = (List<GameObject>) ObjectsOnTiles;
 
             entity = null;
             ground = null;
@@ -289,9 +286,10 @@ namespace ClassicUO.Game.Map
                     StaticTiles itemdata = dyn.ItemData;
                     if (IO.Resources.TileData.IsRoof((long) itemdata.Flags) ||
                         IO.Resources.TileData.IsSurface((long) itemdata.Flags) ||
-                        (IO.Resources.TileData.IsWall((long) itemdata.Flags) &&
-                        IO.Resources.TileData.IsImpassable((long) itemdata.Flags)))
-                        if (entity == null || list[i].Position.Z < entity.Position.Z) entity = list[i];
+                        IO.Resources.TileData.IsWall((long) itemdata.Flags) &&
+                        IO.Resources.TileData.IsImpassable((long) itemdata.Flags))
+                        if (entity == null || list[i].Position.Z < entity.Position.Z)
+                            entity = list[i];
                 }
 
                 else if (list[i] is Tile tile && tile.View.SortZ >= z + 12) ground = list[i];
@@ -299,8 +297,6 @@ namespace ClassicUO.Game.Map
 
             return entity != null || ground != null;
         }
-
-        private readonly List<Static> _statics = new List<Static>();
 
         public List<Static> GetStatics()
         {
@@ -316,13 +312,6 @@ namespace ClassicUO.Game.Map
             return items;
         }
 
-        //public T[] GetGameObjects<T>() where T : GameObject
-        //{
-        //    return (T[])_objectsOnTile.OfType<T>();
-        //}
-
-        // create view only when TileID is initialized
-        protected override View CreateView() =>
-            Graphic <= 0 || Position == Position.Invalid ? null : new TileView(this);
+        protected override View CreateView() => new TileView(this);
     }
 }

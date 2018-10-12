@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
@@ -48,10 +51,8 @@ namespace ClassicUO.Game.Map
 
         private static int Compare(GameObject x, GameObject y)
         {
-            int comparison;
-
 #if ORIONSORT
-            comparison = x.PriorityZ - y.PriorityZ;
+            int comparison = x.PriorityZ - y.PriorityZ;
 #else
             (int xZ, int xType, int xThreshold, int xTierbreaker) = GetSortValues(x);
             (int yZ, int yType, int yThreshold, int yTierbreaker) = GetSortValues(y);
@@ -59,7 +60,7 @@ namespace ClassicUO.Game.Map
             xZ += xThreshold;
             yZ += yThreshold;
 
-            comparison = xZ - yZ;
+            int comparison = xZ - yZ;
             if (comparison == 0)
                 comparison = xType - yType;
 

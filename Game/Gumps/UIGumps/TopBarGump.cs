@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,11 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
@@ -44,42 +48,42 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(
                 new Button((int) Buttons.Map, 2443, 2443, 0, "Map", 1, true, 0, 0x36)
                 {
-                    ButtonAction = ButtonAction.Activate, X = 30, Y = 3, FontCenter = true,
+                    ButtonAction = ButtonAction.Activate, X = 30, Y = 3, FontCenter = true
                 }, 1);
             AddChildren(
                 new Button((int) Buttons.Paperdoll, 2445, 2445, 0, "Paperdoll", 1, true, 0, 0x36)
                 {
-                    ButtonAction = ButtonAction.Activate, X = 93, Y = 3, 
-                    FontCenter = true,
+                    ButtonAction = ButtonAction.Activate, X = 93, Y = 3,
+                    FontCenter = true
                 }, 1);
             AddChildren(
                 new Button((int) Buttons.Inventory, 2445, 2445, 0, "Inventory", 1, true, 0, 0x36)
                 {
-                    ButtonAction = ButtonAction.Activate, X = 201, Y = 3, 
-                    FontCenter = true,
+                    ButtonAction = ButtonAction.Activate, X = 201, Y = 3,
+                    FontCenter = true
                 }, 1);
             AddChildren(
                 new Button((int) Buttons.Journal, 2445, 2445, 0, "Journal", 1, true, 0, 0x36)
                 {
-                    ButtonAction = ButtonAction.Activate, X = 309, Y = 3, FontCenter = true,
+                    ButtonAction = ButtonAction.Activate, X = 309, Y = 3, FontCenter = true
                 }, 1);
             AddChildren(
                 new Button((int) Buttons.Chat, 2443, 2443, 0, "Chat", 1, true, 0, 0x36)
                 {
-                    ButtonAction = ButtonAction.Activate, X = 417, Y = 3, 
-                    FontCenter = true,
+                    ButtonAction = ButtonAction.Activate, X = 417, Y = 3,
+                    FontCenter = true
                 }, 1);
             AddChildren(
                 new Button((int) Buttons.Help, 2443, 2443, 0, "Help", 1, true, 0, 0x36)
                 {
                     ButtonAction = ButtonAction.Activate, X = 480, Y = 3,
-                    FontCenter = true,
+                    FontCenter = true
                 }, 1);
             AddChildren(
                 new Button((int) Buttons.Debug, 2443, 2443, 0, "Debug", 1, true, 0, 0x36)
                 {
                     ButtonAction = ButtonAction.Activate, X = 543, Y = 3,
-                    FontCenter = true,
+                    FontCenter = true
                 }, 1);
 
             //minimized view
@@ -128,6 +132,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     }
                     else
                         UIManager.Remove<JournalGump>();
+
                     break;
                 case Buttons.Chat:
                     Log.Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");

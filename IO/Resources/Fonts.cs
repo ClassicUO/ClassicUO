@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,6 +28,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
@@ -298,7 +302,7 @@ namespace ClassicUO.IO.Resources
             return result;
         }
 
-        private static unsafe bool GeneratePixelsASCII(out FontTexture ftexture, byte font, string str, ushort color,
+        private static bool GeneratePixelsASCII(out FontTexture ftexture, byte font, string str, ushort color,
             int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
             uint[] pData;
@@ -412,7 +416,7 @@ namespace ClassicUO.IO.Resources
 
                                 int block = testrY * width + x + w;
 
-                                pData[block] = Hues.RgbaToArgb(pcl << 8 | 0xFF);
+                                pData[block] = Hues.RgbaToArgb((pcl << 8) | 0xFF);
                             }
                         }
                     }
@@ -641,18 +645,6 @@ namespace ClassicUO.IO.Resources
             _HTMLBackgroundCanBeColored = backgroundCanBeColored;
         }
 
-        public class FontTexture : SpriteTexture
-        {
-            public FontTexture(int width, int height, int linescount, List<WebLinkRect> links) : base(width, height)
-            {
-                LinesCount = linescount;
-                Links = links;
-            }
-
-            public int LinesCount { get; }
-            public List<WebLinkRect> Links { get; }
-        }
-
         public static void GenerateUnicode(out FontTexture ftexture, byte font, string str, ushort color, byte cell,
             int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
@@ -704,7 +696,7 @@ namespace ClassicUO.IO.Resources
                 if (offset > 0 && offset != 0xFFFFFFFF)
                 {
                     byte* ptr = (byte*) ((IntPtr) table + (int) offset);
-                    charWidth = (sbyte) ((sbyte)ptr[0] + (sbyte)ptr[2] + 1);
+                    charWidth = (sbyte) ((sbyte) ptr[0] + (sbyte) ptr[2] + 1);
                 }
                 else if (c == ' ')
                     charWidth = UNICODE_SPACE_WIDTH;
@@ -738,7 +730,7 @@ namespace ClassicUO.IO.Resources
                 if (offset > 0 && offset != 0xFFFFFFFF)
                 {
                     byte* ptr = (byte*) ((IntPtr) table + (int) offset);
-                    textLength += (sbyte)ptr[0] + (sbyte)ptr[2] + 1;
+                    textLength += (sbyte) ptr[0] + (sbyte) ptr[2] + 1;
                 }
                 else if (c == ' ')
                     textLength += UNICODE_SPACE_WIDTH;
@@ -846,7 +838,7 @@ namespace ClassicUO.IO.Resources
                     lastaspace_current_charcolor = current_charcolor;
                 }
 
-                if (ptr.Width + readWidth + ((sbyte)data[0] + (sbyte)data[2]) > width || si == '\n')
+                if (ptr.Width + readWidth + (sbyte) data[0] + (sbyte) data[2] > width || si == '\n')
                 {
                     if (lastSpace == ptr.CharStart && lastSpace <= 0 && si != '\n')
                         ptr.CharStart = 1;
@@ -879,7 +871,8 @@ namespace ClassicUO.IO.Resources
                         ptr.IndentionOffset = 0;
                         continue;
                     }
-                    else if (lastSpace + 1 == ptr.CharStart && !isFixed && !isCropped)
+
+                    if (lastSpace + 1 == ptr.CharStart && !isFixed && !isCropped)
                     {
                         ptr.Width += readWidth;
                         ptr.CharCount += charCount;
@@ -915,10 +908,10 @@ namespace ClassicUO.IO.Resources
                             };
 
                             ptr.Data.Add(mfd1);
-                            readWidth += (sbyte)data[0] + (sbyte)data[2] + 1;
+                            readWidth += (sbyte) data[0] + (sbyte) data[2] + 1;
 
-                            if ((sbyte)data[1] + (sbyte)data[3] > ptr.MaxHeight)
-                                ptr.MaxHeight = (sbyte)data[1] + (sbyte)data[3];
+                            if ((sbyte) data[1] + (sbyte) data[3] > ptr.MaxHeight)
+                                ptr.MaxHeight = (sbyte) data[1] + (sbyte) data[3];
 
                             charCount++;
 
@@ -970,9 +963,9 @@ namespace ClassicUO.IO.Resources
                 }
                 else
                 {
-                    readWidth += (sbyte)data[0] + (sbyte)data[2] + 1;
-                    if ((sbyte)data[1] + (sbyte)data[3] > ptr.MaxHeight)
-                        ptr.MaxHeight = (sbyte)data[1] + (sbyte)data[3];
+                    readWidth += (sbyte) data[0] + (sbyte) data[2] + 1;
+                    if ((sbyte) data[1] + (sbyte) data[3] > ptr.MaxHeight)
+                        ptr.MaxHeight = (sbyte) data[1] + (sbyte) data[3];
                 }
 
                 charCount++;
@@ -1181,10 +1174,10 @@ namespace ClassicUO.IO.Resources
                     }
                     else
                     {
-                        offsX = (sbyte)data[0] + 1;
-                        offsY = (sbyte)data[1];
-                        dw = (sbyte)data[2];
-                        dh = (sbyte)data[3];
+                        offsX = (sbyte) data[0] + 1;
+                        offsY = (sbyte) data[1];
+                        dw = (sbyte) data[2];
+                        dh = (sbyte) data[3];
 
                         data += 4;
                     }
@@ -1424,7 +1417,7 @@ namespace ClassicUO.IO.Resources
 
                         byte* aData = (byte*) ((IntPtr) table + (int) table[(byte) 'a']);
 
-                        int testY = lineOffsY + (sbyte)aData[1] + (sbyte)aData[3];
+                        int testY = lineOffsY + (sbyte) aData[1] + (sbyte) aData[3];
 
                         if (testY >= height)
                             break;
@@ -1524,7 +1517,7 @@ namespace ClassicUO.IO.Resources
                 }
 
                 int solidWidth = htmlData[i].Flags & UOFONT_SOLID;
-                if (ptr.Width + readWidth + (sbyte)data[0] + (sbyte)data[2] + solidWidth > width || si == '\n')
+                if (ptr.Width + readWidth + (sbyte) data[0] + (sbyte) data[2] + solidWidth > width || si == '\n')
                 {
                     if (lastSpace == ptr.CharStart && lastSpace <= 0 && si != '\n')
                         ptr.CharStart = 1;
@@ -1596,7 +1589,7 @@ namespace ClassicUO.IO.Resources
 
                             ptr.Data.Add(mfd1);
 
-                            readWidth += (sbyte)data[0] + (sbyte)data[2] + 1;
+                            readWidth += (sbyte) data[0] + (sbyte) data[2] + 1;
                             ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
 
                             charCount++;
@@ -1646,7 +1639,7 @@ namespace ClassicUO.IO.Resources
                 if (si == ' ')
                     readWidth += UNICODE_SPACE_WIDTH;
                 else
-                    readWidth += (sbyte)data[0] + (sbyte)data[2] + 1 + solidWidth;
+                    readWidth += (sbyte) data[0] + (sbyte) data[2] + 1 + solidWidth;
 
                 charCount++;
             }
@@ -2339,7 +2332,7 @@ namespace ClassicUO.IO.Resources
                             if (offset > 0 && offset != 0xFFFFFFFF)
                             {
                                 byte* cptr = (byte*) ((IntPtr) table + (int) offset);
-                                width += (sbyte)cptr[0] + (sbyte)cptr[2] + 1;
+                                width += (sbyte) cptr[0] + (sbyte) cptr[2] + 1;
                             }
                             else if (ch == ' ')
                                 width += UNICODE_SPACE_WIDTH;
@@ -2403,7 +2396,7 @@ namespace ClassicUO.IO.Resources
                         if (offset > 0 && offset != 0xFFFFFFFF)
                         {
                             byte* cptr = (byte*) ((IntPtr) table + (int) offset);
-                            x += (sbyte)cptr[0] + (sbyte)cptr[2] + 1;
+                            x += (sbyte) cptr[0] + (sbyte) cptr[2] + 1;
                         }
                         else if (ch == ' ')
                             x += UNICODE_SPACE_WIDTH;
@@ -2578,6 +2571,18 @@ namespace ClassicUO.IO.Resources
             }
 
             return count;
+        }
+
+        public class FontTexture : SpriteTexture
+        {
+            public FontTexture(int width, int height, int linescount, List<WebLinkRect> links) : base(width, height)
+            {
+                LinesCount = linescount;
+                Links = links;
+            }
+
+            public int LinesCount { get; }
+            public List<WebLinkRect> Links { get; }
         }
     }
 

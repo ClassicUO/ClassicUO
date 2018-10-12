@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,13 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using System;
+
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public enum ButtonAction
     {
@@ -37,15 +39,16 @@ namespace ClassicUO.Game.Gumps
         private const int NORMAL = 0;
         private const int PRESSED = 1;
         private const int OVER = 2;
+        private readonly string _caption;
+        private readonly RenderedText[] _fontTexture = new RenderedText[2];
+        private readonly Graphic[] _gumpGraphics = new Graphic[3];
 
 
         private readonly SpriteTexture[] _textures = new SpriteTexture[3];
-        private readonly Graphic[] _gumpGraphics = new Graphic[3];
-        private readonly RenderedText[] _fontTexture = new RenderedText[2];
         private bool _clicked;
-        private readonly string _caption;
 
-        public Button(int buttonID, ushort normal, ushort pressed, ushort over = 0, string caption = "", byte font = 0, bool isunicode = true, ushort normalHue = ushort.MaxValue, ushort hoverHue = ushort.MaxValue)
+        public Button(int buttonID, ushort normal, ushort pressed, ushort over = 0, string caption = "", byte font = 0,
+            bool isunicode = true, ushort normalHue = ushort.MaxValue, ushort hoverHue = ushort.MaxValue)
         {
             ButtonID = buttonID;
 
@@ -62,11 +65,9 @@ namespace ClassicUO.Game.Gumps
             Width = t.Width;
             Height = t.Height;
 
-            FontHue = normalHue == ushort.MaxValue ? (ushort)0 : normalHue;
-            
-            HueHover = hoverHue == ushort.MaxValue ? normalHue : hoverHue;
+            FontHue = normalHue == ushort.MaxValue ? (ushort) 0 : normalHue;
 
-           
+            HueHover = hoverHue == ushort.MaxValue ? normalHue : hoverHue;
 
 
             if (!string.IsNullOrEmpty(caption) && normalHue != ushort.MaxValue)
@@ -230,8 +231,8 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-       
 
-        protected override bool Contains(int x, int y) => IO.Resources.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
+        protected override bool Contains(int x, int y) =>
+            IO.Resources.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
     }
 }

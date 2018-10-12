@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Text;
 
@@ -149,7 +152,7 @@ namespace ClassicUO.Network
         {
             EnsureSize(count);
 
-            byte[] array = new byte[count];            
+            byte[] array = new byte[count];
             Buffer.BlockCopy(_data, Position, array, 0, count);
 
             Position += count;

@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Game.Views;
 
 namespace ClassicUO.Game.GameObjects
@@ -28,7 +31,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Graphic = graphic;
             Hue = hue;
-            Duration = duration;
+            Duration = duration > 0 ? CoreGame.Ticks + duration : -1;
 
             Load();
         }
@@ -81,33 +84,26 @@ namespace ClassicUO.Game.GameObjects
                 SetSource(sourceX, sourceY, sourceZ);
         }
 
-        public int Duration { get; set; }
-        //public new AnimatedEffectView View => (AnimatedEffectView)base.View;
-
-
         protected override View CreateView() => new AnimatedEffectView(this);
 
-        public override void UpdateAnimation(double ms)
-        {
-            base.UpdateAnimation(ms);
-
-            if (LastChangeFrameTime >= Duration && Duration >= 0)
-                Dispose();
-            else
-            {
-                (int x, int y, int z) = GetSource();
-
-                if (Position.X != x || Position.Y != y || Position.Z != z)
-                    Position = new Position((ushort) x, (ushort) y, (sbyte) z);
-            }
-        }
 
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
 
-            if (!IsDisposed) UpdateAnimation(frameMS);
+            if (!IsDisposed)
+            {
+
+                (int x, int y, int z) = GetSource();
+
+                if (Position.X != x || Position.Y != y || Position.Z != z)
+                {
+                    Position = new Position((ushort)x, (ushort)y, (sbyte)z);
+                    Tile = World.Map.GetTile(x, y);
+                }
+                
+            }
         }
     }
 }

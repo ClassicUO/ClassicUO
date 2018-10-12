@@ -1,4 +1,5 @@
 #region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,8 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
-using ClassicUO.Game.GameObjects;
+
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -46,8 +48,8 @@ namespace ClassicUO.Game.Views
         };
 
         private bool _needUpdateStrechedTile = true;
-        private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
         private Vector3 _storedHue;
+        private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
 
 
         public TileView(Tile tile) : base(tile)
@@ -61,14 +63,15 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw || GameObject.IsDisposed) return false;
+            if (!AllowedToDraw || GameObject.IsDisposed)
+                return false;
 
             Tile tile = (Tile) GameObject;
 
             if (Texture == null || Texture.IsDisposed)
             {
                 if (tile.IsStretched)
-                    Texture = TextmapTextures.GetTextmapTexture(((Tile) GameObject).TileData.TexID);
+                    Texture = TextmapTextures.GetTextmapTexture(tile.TileData.TexID);
                 else
                 {
                     Texture = Art.GetLandTexture(GameObject.Graphic);
@@ -82,11 +85,12 @@ namespace ClassicUO.Game.Views
                 _needUpdateStrechedTile = false;
             }
 
+            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
+
             return !tile.IsStretched
                 ? base.Draw(spriteBatch, position, objectList)
                 : Draw3DStretched(spriteBatch, position, objectList);
         }
-
 
 
         private bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
@@ -99,7 +103,6 @@ namespace ClassicUO.Game.Views
             _vertex[3].Position = position + _vertex3_yOffset;
 
 
-            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 
             if (IsSelected)
             {
@@ -114,10 +117,10 @@ namespace ClassicUO.Game.Views
             }
 
             if (HueVector != _vertex[0].Hue)
-            _vertex[0].Hue =
-                _vertex[1].Hue =
-                    _vertex[2].Hue =
-                        _vertex[3].Hue = HueVector;
+                _vertex[0].Hue =
+                    _vertex[1].Hue =
+                        _vertex[2].Hue =
+                            _vertex[3].Hue = HueVector;
 
 
             if (!spriteBatch.DrawSprite(Texture, _vertex)) return false;
@@ -131,11 +134,11 @@ namespace ClassicUO.Game.Views
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
-            //int x = list.MousePosition.X - (int)vertex[0].Position.X;
-            //int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
+            int x = list.MousePosition.X - (int)vertex[0].Position.X;
+            int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
 
-            //if (IO.Resources.Art.Contains(GameObject.Graphic, x, y))
-            //    list.Add(GameObject, vertex[0].Position);
+            if (Art.Contains(GameObject.Graphic, x, y))
+                list.Add(GameObject, vertex[0].Position);
         }
 
 

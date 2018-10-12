@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,18 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System.Collections.Generic;
+using ClassicUO.Game.Data;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameEffect : GameObject, IDeferreable
+    public abstract class GameEffect : GameObject, IDeferreable, ISmoothMovable
     {
         private readonly List<GameEffect> _children;
 
@@ -49,10 +54,10 @@ namespace ClassicUO.Game.GameObjects
         public int Speed { get; set; }
         public long LastChangeFrameTime { get; set; }
         public bool IsEnabled { get; set; }
-        public Graphic AnimationGraphic { get; set; }
+        public Graphic AnimationGraphic { get; private set; }
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
         public DeferredEntity DeferredObject { get; set; }
-
+        public GraphicEffectBlendMode Blend { get; set; }
 
         public void Load()
         {
@@ -62,23 +67,42 @@ namespace ClassicUO.Game.GameObjects
             Speed = AnimDataFrame.FrameInterval * 45;
         }
 
-        public virtual void UpdateAnimation(double ms)
+    
+
+        public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
+            if (IsDisposed)
+                return;
+
             if (IsEnabled)
             {
-                if (LastChangeFrameTime < CoreGame.Ticks)
+                if (Duration < totalMS && Duration >= 0)
                 {
-                    AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                    Dispose();
+                }
+                else if (LastChangeFrameTime < totalMS)
+                {
+                    AnimationGraphic = (Graphic)(Graphic + AnimDataFrame.FrameData[AnimIndex]);
                     AnimIndex++;
 
-                    if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte) AnimDataFrame.FrameStart;
+                    if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte)AnimDataFrame.FrameStart;
 
-                    LastChangeFrameTime = CoreGame.Ticks + Speed;
+                    LastChangeFrameTime = (long)totalMS + Speed;
                 }
+
             }
             else if (Graphic != AnimationGraphic) AnimationGraphic = Graphic;
         }
 
+        public long Duration { get; set; } = -1;
+        public Vector3 Offset { get; set; }
+
+        //public int CurrentFrame => (int)(LastChangeFrameTime / 50d);
+
+        //public Graphic CurrentGraphicByFrame =>
+        //    (Graphic) (Graphic + CurrentFrame / AnimDataFrame.FrameInterval % AnimDataFrame.FrameCount);
 
         public void AddChildEffect(GameEffect effect)
         {

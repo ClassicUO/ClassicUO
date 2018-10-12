@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using ClassicUO.Game.Views;
 using ClassicUO.Renderer;
 
@@ -28,7 +31,8 @@ namespace ClassicUO.Game.GameObjects
         private const float TIME_FADEOUT = 2000.0f;
 
         public TextOverhead(in GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF,
-            byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f) : base(parent.Map)
+            byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f) : base(
+            parent.Map)
         {
             Text = text;
             Parent = parent;
