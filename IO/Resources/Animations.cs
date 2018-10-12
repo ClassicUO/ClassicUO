@@ -243,8 +243,8 @@ namespace ClassicUO.IO.Resources
 
                     ushort group = ushort.Parse(parts[0]);
 
-                    int first = parts[1].IndexOf("{");
-                    int last = parts[1].IndexOf("}");
+                    int first = parts[1].IndexOf("{", StringComparison.Ordinal);
+                    int last = parts[1].IndexOf("}", StringComparison.Ordinal);
 
                     int replaceGroup = int.Parse(parts[1].Substring(first + 1, last - 1));
 
@@ -287,7 +287,7 @@ namespace ClassicUO.IO.Resources
                         if (newgraphic >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             newgraphic = graphic;
 
-                        ushort gump = (ushort) int.Parse(parts[3]);
+                        int gump = int.Parse(parts[3]);
                         if (gump > ushort.MaxValue)
                             continue;
                         if (gump == 0)
@@ -304,7 +304,7 @@ namespace ClassicUO.IO.Resources
                                 continue;
                         }
 
-                        dict.Add(graphic, new EquipConvData(newgraphic, gump, color));
+                        dict.Add(graphic, new EquipConvData(newgraphic, (ushort)gump, color));
                     }
                 }
             }

@@ -38,7 +38,7 @@ namespace ClassicUO.IO.Resources
             }
             else
             {
-                File = new UOFileMul("verdata.mul");
+                File = new UOFileMul(path);
                 Patches = new UOFileIndex5D[File.ReadInt()];
 
                 Patches = File.ReadArray<UOFileIndex5D>(File.ReadInt());
