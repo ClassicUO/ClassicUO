@@ -429,7 +429,7 @@ namespace ClassicUO.IO.Resources
                 info = null;
             }
 
-            ftexture = new FontTexture(width, height, linesCount, null);
+            ftexture = new FontTexture(width, height, linesCount, new List<WebLinkRect>());
             ftexture.SetData(pData);
 
             return partialHue;

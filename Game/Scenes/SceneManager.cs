@@ -41,9 +41,6 @@ namespace ClassicUO.Game.Scenes
 
             switch (type)
             {
-                case ScenesType.Loading:
-                    CurrentScene = new LoadScene();
-                    break;
                 case ScenesType.Login:
                     CurrentScene = new LoginScene();
                     break;
