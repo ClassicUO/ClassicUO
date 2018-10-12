@@ -34,7 +34,7 @@ namespace ClassicUO.Game
         Regular = 0,
         System = 1,
         Emote = 2,
-
+        Party = 0x10,
         Label = 6,
         Focus = 7,
         Whisper = 8,
@@ -80,8 +80,6 @@ namespace ClassicUO.Game
         //public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PUnicodeSpeechRequest(entity.Serial, entity.Graphic, type, hue, font, _language, entity.Name ?? string.Empty, message).SendToClient();
         public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular,
             MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
-
-        public static void SayParty(string message) => GameActions.SayParty(message);
 
 
         public static event EventHandler<UOMessageEventArgs> Message;
@@ -138,6 +136,10 @@ namespace ClassicUO.Game
                         Service.Get<JournalData>().AddEntry(args.Text, (byte) args.Font, args.Hue, entity.Name);
                     }
 
+                    break;
+                case MessageType.Party:
+                    Service.Get<ChatControl>().AddLine($"[Party] [{entity.Name}]: {args.Text}", (byte)args.Font, args.Hue, args.IsUnicode);
+                    Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "Party");
                     break;
                 case MessageType.Guild:
                     break;

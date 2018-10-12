@@ -79,19 +79,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         AppendChatModePrefix("[Whisper]: ", 33);
                         break;
                     case ChatMode.Emote:
-                        AppendChatModePrefix("[Emote]: ", 33);
+                        AppendChatModePrefix("[Emote]: ", 646);
                         break;
                     case ChatMode.Party:
-                        AppendChatModePrefix("[Party]: ", 1918);
+                        AppendChatModePrefix("[Party]: ", 68);
                         break;
                     case ChatMode.PartyPrivate:
                         AppendChatModePrefix("[Private Party Message]: ", 1918);
                         break;
                     case ChatMode.Guild:
-                        AppendChatModePrefix("[Guild]: ", 1918);
+                        AppendChatModePrefix("[Guild]: ", 70);
                         break;
                     case ChatMode.Alliance:
-                        AppendChatModePrefix("[Aliance]: ", 1918);
+                        AppendChatModePrefix("[Aliance]: ", 487);
                         break;
                     case ChatMode.ClientCommand:
                         AppendChatModePrefix("[Command]: ", 1161);
