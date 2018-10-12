@@ -22,6 +22,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -57,6 +58,9 @@ namespace ClassicUO
                 Service.Register(new SpriteBatch3D(game));
                 Service.Register(new SpriteBatchUI(game));
                 Service.Register(new InputManager());
+                //========================================================
+                //CommandSystem
+                PartySystem.RegisterCommands();
                 //========================================================
 
                 bool isHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";

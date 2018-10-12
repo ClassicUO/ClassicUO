@@ -15,6 +15,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     class PartyGumpAdvanced : Gump
     {
+        private GameBorder _gameBorder;
+        private GumpPicTiled _gumpPicTiled;
         private ScrollArea _scrollArea;
         private Texture2D _line;
         private List<PartyListEntry> _partyListEntries;
@@ -25,7 +27,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private Button _lootMeButton;
         private Label _messagePartyLabel;
         private Button _messagePartyButton;
-        private Label _partyLeader;
+        private Button _createAddButton;
 
         public PartyGumpAdvanced() : base(0, 0)
         {
@@ -38,10 +40,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanMove = true;
             AcceptMouseInput = false;
 
-            AddChildren(new GameBorder(0, 0, 320, 400));
+            AddChildren(_gameBorder = new GameBorder(0, 0, 320, 400));
 
-            AddChildren(new GumpPicTiled(4, 6, 320 - 8, 400 - 12, 0x0A40) { IsTransparent = true });
-            AddChildren(new GumpPicTiled(4, 6, 320 - 8, 400 - 12, 0x0A40) { IsTransparent = true });
+            AddChildren(_gumpPicTiled = new GumpPicTiled(4, 6, 320 - 8, 400 - 12, 0x0A40) { IsTransparent = true });
+            AddChildren(_gumpPicTiled);
 
             _scrollArea = new ScrollArea(20, 60, 295, 190, true) { AcceptMouseInput = true };
             AddChildren(_scrollArea);
@@ -59,10 +61,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(_leaveButton = new Button((int)Buttons.Leave, 0xFAE, 0xFAF, 0xFB0) { X = 30, Y = 325, ButtonAction = ButtonAction.Activate, IsVisible = false});
             AddChildren(_leaveLabel = new Label("Leave party", true, 1153) { X = 70, Y = 325, IsVisible = false});
             //======================================================
-            AddChildren(new Button((int)Buttons.Add, 0xFA8, 0xFA9, 0xFAA) { X = 30, Y = 350, ButtonAction = ButtonAction.Activate });
+            AddChildren(_createAddButton = new Button((int)Buttons.Add, 0xFA8, 0xFA9, 0xFAA) { X = 30, Y = 350, ButtonAction = ButtonAction.Activate });
             AddChildren(_createAddLabel = new Label("Add party member", true, 1153) { X = 70, Y = 350 });
             //======================================================
-            AddChildren(_partyLeader = new Label("Leader: ", true, 1161) { X = 180, Y = 275, IsVisible = false });
+           
 
             PartySystem.PartyMemberChanged += OnPartyMemberChanged;
 
@@ -112,6 +114,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (!PartySystem.IsInParty)
             {
+                //Set gump size if player is NOT in party
+                _gameBorder.Height = 320;
+                _gumpPicTiled.Height = _gameBorder.Height - 12;
+                //Set contents if player is NOT in party
+                _createAddButton.Y = 270;
+                _createAddLabel.Y = _createAddButton.Y;
                 _createAddLabel.Text = "Create a party";
                 _leaveButton.IsVisible = false;
                 _leaveLabel.IsVisible = false;
@@ -119,10 +127,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _lootMeLabel.IsVisible = false;
                 _messagePartyButton.IsVisible = false;
                 _messagePartyLabel.IsVisible = false;
-                _partyLeader.IsVisible = false;
+               
             }
             else
             {
+                //Set gump size if player is in party
+                _gameBorder.Height = 400;
+                _gumpPicTiled.Height = _gameBorder.Height - 12;
+                //Set contents if player is in party
+                _createAddButton.Y = 350;
+                _createAddLabel.Y = _createAddButton.Y;
                 _createAddLabel.Text = "Add a member";
                 _leaveButton.IsVisible = true;
                 _leaveLabel.IsVisible = true;
@@ -131,8 +145,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _lootMeLabel.Text = (!PartySystem.AllowPartyLoot) ? "Party CANNOT loot me" : "Party ALLOWED looting me";
                 _messagePartyButton.IsVisible = true;
                 _messagePartyLabel.IsVisible = true;
-                _partyLeader.Text = PartySystem.LeaderName != String.Empty ? $"Leader: {PartySystem.LeaderName}": "";
-                _partyLeader.IsVisible = true;
+                
             }
 
             
@@ -185,8 +198,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Height = 20;
             Member = member;
             //======================================================
-            Name = new Label(member.Name, true, 1153, font:3);
-            Name.X = 80;
+            //Name = new Label(member.Name, true, 1153, font:3);
+            //Name.X = 80;
+            Name = (PartySystem.Leader == member.Serial)
+                ? new Label(member.Name+"(L)", true, 1161, font: 3) {X = 80}
+                : new Label(member.Name, true, 1153, font: 3) {X = 80};
+           
             AddChildren(Name);
             //======================================================
             if (Member.Mobile.IsDead)
@@ -219,8 +236,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     PartySystem.RemovePartyMember(Member.Serial);
                     break;
                 case Buttons.PM:
-                    //
-                    var test2 = "";
+                    if (UIManager.GetByLocalSerial<PartyMemberGump>() == null)
+                    {
+                        UIManager.Add(new PartyMemberGump(Member));
+                    }
+                    else if (UIManager.GetByLocalSerial<PartyMemberGump>() != null && !UIManager.GetByLocalSerial<PartyMemberGump>().IsMemberGumpActive(Member))
+                    {
+                        UIManager.Add(new PartyMemberGump(Member));
+                    }
+                        
+                    
                     break;
 
             }

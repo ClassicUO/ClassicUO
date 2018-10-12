@@ -83,6 +83,12 @@ namespace ClassicUO.Game.Gumps
             } 
         }
 
+        public Hue Hue
+        {
+            get => _gText.Hue;
+            set => _gText.Hue = value;
+        }
+
         public bool FadeOut { get; set; }
 
         public override void Update(double totalMS, double frameMS)

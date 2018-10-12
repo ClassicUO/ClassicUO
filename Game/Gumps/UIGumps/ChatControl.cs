@@ -20,12 +20,15 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
@@ -39,7 +42,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
         Party,
         PartyPrivate,
         Guild,
-        Alliance
+        Alliance,
+        ClientCommand
     }
 
     internal class ChatControl : GumpControl
@@ -49,11 +53,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private TextBox _textBox;
         private readonly List<ChatLineTime> _textEntries;
         private readonly List<Tuple<ChatMode, string>> _messageHistory;
+        private Label _currentChatModeLabel;
+        private CheckerTrans _currentChatModeLabelBackground;
         private readonly InputManager _inputManager;
         private int _messageHistoryIndex = -1;
         private Serial _privateMsgSerial = 0;
         private string _privateMsgName;
 
+        
         private ChatMode _mode = ChatMode.Default;
 
         private ChatMode Mode
@@ -65,28 +72,66 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 switch (value)
                 {
                     case ChatMode.Default:
-                        _textBox.Hue = 33;                       
+                        _textBox.Hue = 33;
+                        _textBox.SetText(string.Empty);
                         break;
                     case ChatMode.Whisper:
+                        AppendChatModePrefix("[Whisper]: ", 33);
                         break;
                     case ChatMode.Emote:
+                        AppendChatModePrefix("[Emote]: ", 33);
                         break;
                     case ChatMode.Party:
+                        AppendChatModePrefix("[Party]: ", 1918);
                         break;
                     case ChatMode.PartyPrivate:
+                        AppendChatModePrefix("[Private Party Message]: ", 1918);
                         break;
                     case ChatMode.Guild:
+                        AppendChatModePrefix("[Guild]: ", 1918);
                         break;
                     case ChatMode.Alliance:
+                        AppendChatModePrefix("[Aliance]: ", 1918);
+                        break;
+                    case ChatMode.ClientCommand:
+                        AppendChatModePrefix("[Command]: ", 1161);
                         break;
                 }
+                
+            }
+        }
 
-                _textBox.SetText(string.Empty);
+        private void AppendChatModePrefix(string labelText, Hue hue)
+        {
+            _currentChatModeLabel = new Label(labelText, true, hue) {X = _textBox.X, Y = _textBox.Y};
+            _currentChatModeLabelBackground = new CheckerTrans();
+            _currentChatModeLabelBackground.Location = new Point(_currentChatModeLabel.X, _currentChatModeLabel.Y);
+            _currentChatModeLabelBackground.Width = _currentChatModeLabel.Width;
+            _currentChatModeLabelBackground.Height = _currentChatModeLabel.Height;
+            _textBox.X = _currentChatModeLabel.Width;
+            _textBox.Hue = hue;
+            _textBox.SetText(string.Empty);
+            AddChildren(_currentChatModeLabelBackground);
+            AddChildren(_currentChatModeLabel);
+           
+        }
+
+        private void DisposeChatModePrefix()
+        {
+            if (_currentChatModeLabel != null)
+            {
+                _textBox.Hue = 33;
+                _textBox.X -= _currentChatModeLabel.Width;
+                _currentChatModeLabel.Dispose();
+                _currentChatModeLabelBackground.Dispose();
+                _currentChatModeLabel = null;
+
             }
         }
 
         public ChatControl(int x, int y, int w, int h)
         {
+            
             X = x;
             Y = y;
             Width = w;
@@ -209,6 +254,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         case '|':
                             Mode = ChatMode.Alliance;
                             break;
+                        case '#':
+                            Mode = ChatMode.ClientCommand;
+                            break;
                     }
                 }
                 else if (_textBox.Text.Length == 2 && _textBox.Text[0] == ':' && _textBox.Text[1] == ' ')
@@ -237,6 +285,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return base.Draw(spriteBatch, position, hue);
         }
 
+
         public override void OnKeybaordReturn(int textID, string text)
         {
             if (string.IsNullOrEmpty((text)))
@@ -256,6 +305,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case ChatMode.Default:
                     speechType = MessageType.Regular;
                     hue = 33;
+                    NetClient.Socket.Send(new PUnicodeSpeechRequest(text, speechType, MessageFont.Normal, hue, "ENU"));
                     break;
                 case ChatMode.Whisper:
                     break;
@@ -269,10 +319,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case ChatMode.Alliance:
                     break;
+                case ChatMode.ClientCommand:
+                    CommandSystem.TriggerCommandHandler(text);
+                    break;
             }
+            DisposeChatModePrefix();
 
             //GameActions.Say(text, hue, speechType, 0);
-            NetClient.Socket.Send(new PUnicodeSpeechRequest(text, speechType, MessageFont.Normal, hue, "ENU"));
+           
         }
 
 

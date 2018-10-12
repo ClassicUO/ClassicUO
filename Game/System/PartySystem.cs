@@ -9,16 +9,25 @@ namespace ClassicUO.Game.System
 {
     class PartySystem
     {
+        
         private static readonly List<PartyMember> _partyMemberList = new List<PartyMember>();
         private static Serial _leader;
         private static bool _allowPartyLoot = false;
         public static event EventHandler PartyMemberChanged;
 
+        
         public static bool IsInParty => _partyMemberList.Count > 1;
         public static bool IsPlayerLeader => IsInParty && Leader == World.Player;
         public static Serial Leader => _leader;
-        public static string LeaderName => _leader != null ? World.Mobiles.Get(_leader).Name : "";
+        public static string LeaderName => (_leader != null && _leader.IsValid) ? World.Mobiles.Get(_leader).Name : "";
         public static List<PartyMember> Members => _partyMemberList;
+
+        public static void RegisterCommands()
+        {
+            CommandSystem.Register("add", (sender, args) => TriggerAddPartyMember());
+            CommandSystem.Register("leave", (sender, args) => LeaveParty());
+            CommandSystem.Register("loot", (sender, args) => AllowPartyLoot = (!AllowPartyLoot) ? true : false);
+        }
 
         public static bool AllowPartyLoot
         {
