@@ -27,7 +27,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using SDL2;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public class TextBox : GumpControl
     {
@@ -66,7 +66,12 @@ namespace ClassicUO.Game.Gumps
         }
 
 
-        public Hue Hue { get; set; }
+        public Hue Hue
+        {
+            get => _entry.Hue;
+            set => _entry.Hue = value;
+            
+        }
         public Graphic Graphic { get; set; }
         public int MaxCharCount { get; set; }
         public bool IsPassword { get; set; }

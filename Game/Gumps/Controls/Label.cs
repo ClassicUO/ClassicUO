@@ -26,7 +26,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public class Label : GumpControl
     {
@@ -77,6 +77,12 @@ namespace ClassicUO.Game.Gumps
                 Width = _gText.Width;
                 Height = _gText.Height;
             }
+        }
+
+        public Hue Hue
+        {
+            get => _gText.Hue;
+            set => _gText.Hue = value;
         }
 
         public bool FadeOut { get; set; }

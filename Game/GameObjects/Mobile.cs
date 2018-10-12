@@ -25,6 +25,7 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Views;
+using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -61,7 +62,7 @@ namespace ClassicUO.Game.GameObjects
         FastUnmountAndCantRun
     }
 
-    public partial class Mobile : Entity
+    public partial class Mobile : Entity, ISmoothMovable
     {
         protected const int MAX_STEP_COUNT = 5;
         protected const int TURN_DELAY = 100;

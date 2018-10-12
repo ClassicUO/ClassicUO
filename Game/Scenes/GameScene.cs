@@ -28,7 +28,6 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.Controls;
-using ClassicUO.Game.Gumps.Controls.InGame;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
@@ -55,6 +54,7 @@ namespace ClassicUO.Game.Scenes
         private WorldViewport _viewPortGump;
         private TopBarGump _topBarGump;
         private StaticManager _staticManager;
+        private EffectManager _effectManager;
         private Settings _settings;
 
         //private static Hue _savedHue;
@@ -116,6 +116,8 @@ namespace ClassicUO.Game.Scenes
             _viewPortGump = Service.Get<WorldViewport>();
 
             _settings = Service.Get<Settings>();
+
+            Service.Register(_effectManager = new EffectManager());
 
             GameActions.Initialize(PicupItemBegin);
         }
@@ -239,7 +241,7 @@ namespace ClassicUO.Game.Scenes
 
             World.Update(totalMS, frameMS);
             _staticManager.Update(totalMS, frameMS);
-
+            _effectManager.Update(totalMS, frameMS);
 
             if (DateTime.Now > _timePing)
             {
@@ -441,15 +443,7 @@ namespace ClassicUO.Game.Scenes
                                  TileData.IsRoof((long) dyn.ItemData.Flags))
                                 && !(obj is Tile))
                             {
-                                if (tile == World.Player.Tile)
-                                {
-                                }
-
                                 continue;
-                            }
-
-                            if (obj == World.Player)
-                            {
                             }
 
                             if (draw && obj.View.Draw(sb3D, dp, _mouseOverList))
@@ -876,7 +870,7 @@ namespace ClassicUO.Game.Scenes
             int charX = entity.Position.X;
             int charY = entity.Position.Y;
 
-            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.GetByLocalSerial(entity) : null;
+            Mobile mob = entity.Serial.IsMobile ? World.Mobiles.Get(entity) : null;
             int dropMaxZIndex = -1;
             if (mob != null)
             {

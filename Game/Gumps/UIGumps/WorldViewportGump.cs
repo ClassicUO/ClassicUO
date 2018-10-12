@@ -22,19 +22,16 @@
 #endregion
 
 using ClassicUO.Configuration;
-using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
-namespace ClassicUO.Game.Gumps.Controls.InGame
+namespace ClassicUO.Game.Gumps.UIGumps
 {
     public class WorldViewportGump : Gump
     {
-        public static GameScene GameScene;
-        private readonly GameScene _scene;
         private readonly GameBorder _border;
         private readonly Button _button;
         private readonly ChatControl _chatControl;
@@ -51,7 +48,6 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
 
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
-            GameScene = scene;
             _settings = Service.Get<Settings>();
             _inputManager = Service.Get<InputManager>();
 
@@ -92,9 +88,6 @@ namespace ClassicUO.Game.Gumps.Controls.InGame
             AddChildren(_chatControl);
 
             Service.Register(_chatControl);
-
-            _scene = scene;
-
           
 
             Resize();

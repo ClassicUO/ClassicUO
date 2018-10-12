@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>ClassicUO</RootNamespace>
     <AssemblyName>ClassicUO</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;ORIONSORT_</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -40,8 +40,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FNA">
-      <HintPath>Graphic\FNA\FNA.dll</HintPath>
+    <Reference Include="FNA, Version=18.10.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Users\andre\source\repos\ClassicUO-Mono\libs\FNA\FNA.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -57,11 +58,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
+    <Compile Include="Game\Data\GraphicEffectType.cs" />
+    <Compile Include="Game\GameObjects\EffectManager.cs" />
+    <Compile Include="Game\GameObjects\LightningEffect.cs" />
+    <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Game\Gumps\UIGumps\LogoutGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyGumpAdvanced.cs" />
+    <Compile Include="Game\Gumps\UIGumps\PartyMemberGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\UseSpellButtonGump.cs" />
+    <Compile Include="Game\System\CommandSystem.cs" />
     <Compile Include="Game\System\PartySystem.cs" />
     <Compile Include="Game\System\TargetSystem.cs" />
+    <Compile Include="Game\Views\LightningEffectView.cs" />
+    <Compile Include="Game\Views\MovingEffectView.cs" />
+    <Compile Include="Interfaces\ISmoothMovable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Configuration\ConfigurationResolver.cs" />
     <Compile Include="Configuration\Settings.cs" />
@@ -168,7 +179,6 @@
     <Compile Include="Game\Views\TileView.cs" />
     <Compile Include="Game\Views\View.cs" />
     <Compile Include="Game\World.cs" />
-    <Compile Include="Input\Culture.cs" />
     <Compile Include="Input\EventArgs.cs" />
     <Compile Include="Input\InputEvent.cs" />
     <Compile Include="Input\InputKeyboardEvent.cs" />
@@ -221,11 +231,6 @@
     <Compile Include="Network\PacketsTable.cs" />
     <Compile Include="Network\PacketWriter.cs" />
     <Compile Include="Network\SendQueue.cs" />
-    <Compile Include="Platforms\Windows\Message.cs" />
-    <Compile Include="Platforms\Windows\MessageHook.cs" />
-    <Compile Include="Platforms\Windows\NativeConstants.cs" />
-    <Compile Include="Platforms\Windows\NativeMethods.cs" />
-    <Compile Include="Platforms\Windows\WndProc.cs" />
     <Compile Include="Renderer\CursorRenderer.cs" />
     <Compile Include="Renderer\IsometricLight.cs" />
     <Compile Include="Renderer\OverheadManager.cs" />
@@ -238,14 +243,14 @@
     <Compile Include="Renderer\SpriteVertex.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="Utility\Bag.cs" />
-    <Compile Include="Utility\BrowserHelper.cs" />
     <Compile Include="Utility\CoordsHelper.cs" />
-    <Compile Include="Utility\Coroutine.cs" />
     <Compile Include="Utility\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />
-    <Compile Include="Utility\GarbageCollectionWatcher.cs" />
     <Compile Include="Utility\IPoolable.cs" />
-    <Compile Include="Utility\Log.cs" />
+    <Compile Include="Utility\Logging\Log.cs" />
+    <Compile Include="Utility\Logging\LogFile.cs" />
+    <Compile Include="Utility\Logging\Logger.cs" />
+    <Compile Include="Utility\Logging\LogTypes.cs" />
     <Compile Include="Utility\MathHelper.cs" />
     <Compile Include="Utility\ObjectPool.cs" />
     <Compile Include="Utility\Pool.cs" />
@@ -256,11 +261,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Graphic\FNA\FNA.dll" />
-    <None Include="Graphic\FNA\FNA.dll.config" />
-    <None Include="Graphic\Shaders\compile_shaders.bat" />
-    <None Include="Graphic\Shaders\IsometricWorld.fx" />
-    <None Include="Graphic\Shaders\IsometricWorld.fxc">
+    <None Include="libs\FNA\FNA.dll" />
+    <None Include="libs\FNA\FNA.dll.config" />
+    <None Include="shaders\compile_shaders.bat" />
+    <None Include="shaders\IsometricWorld.fx" />
+    <None Include="shaders\IsometricWorld.fxc">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="libs\lib64\libFAudio.so">

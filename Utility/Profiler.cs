@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Utility
 {

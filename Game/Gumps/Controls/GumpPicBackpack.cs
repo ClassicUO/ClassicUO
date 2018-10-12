@@ -24,7 +24,7 @@
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     internal class GumpPicBackpack : GumpPic
     {

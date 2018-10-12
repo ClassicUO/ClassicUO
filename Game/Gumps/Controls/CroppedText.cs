@@ -25,7 +25,7 @@ using ClassicUO.IO;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public class CroppedText : GumpControl
     {

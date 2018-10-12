@@ -29,12 +29,14 @@ using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -97,6 +99,7 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
 
+            //Register Service Stack
             Service.Register(this);
             Service.Register(new SpriteBatch3D(this));
             Service.Register(new SpriteBatchUI(this));
@@ -104,6 +107,9 @@ namespace ClassicUO
             Service.Register(_uiManager = new UIManager());
             Service.Register(_sceneManager = new SceneManager());
             Service.Register(_journalManager = new JournalData());
+            //Register Command Stack
+            PartySystem.RegisterCommands();
+            
 
             _inputManager = Service.Get<InputManager>();
             _sb3D = Service.Get<SpriteBatch3D>();

@@ -37,7 +37,6 @@ namespace ClassicUO.Game.Map
 
         private readonly List<Static> _statics = new List<Static>();
         private bool _needSort;
-        private LandTiles? _tileData;
 
         public Tile() : base(World.Map) => _objectsOnTile = new List<GameObject>();
 
@@ -63,29 +62,21 @@ namespace ClassicUO.Game.Map
 
         public override Position Position { get; set; }
 
-        public LandTiles TileData
-        {
-            get
-            {
-                if (!_tileData.HasValue)
-                    _tileData = IO.Resources.TileData.LandData[Graphic];
-                return _tileData.Value;
-            }
-        }
+        public LandTiles TileData => IO.Resources.TileData.LandData[Graphic];
+
 
 
         public void AddGameObject(GameObject obj)
         {
-            if (obj is IDynamicItem)
+            if (obj is IDynamicItem dyn)
             {
                 for (int i = 0; i < _objectsOnTile.Count; i++)
                 {
-                    if (_objectsOnTile[i] is Item || _objectsOnTile[i] is Static)
+                    if (_objectsOnTile[i] is IDynamicItem dynComp)
                     {
-                        if (obj.Graphic == _objectsOnTile[i].Graphic && obj.Position.Z == _objectsOnTile[i].Position.Z)
+                        if (dynComp.Graphic == dyn.Graphic && dynComp.Position.Z == dyn.Position.Z)
                         {
-                            _objectsOnTile.RemoveAt(i);
-                            i--;
+                            _objectsOnTile.RemoveAt(i--);
                         }
                     }
                 }
@@ -321,13 +312,6 @@ namespace ClassicUO.Game.Map
             return items;
         }
 
-        //public T[] GetGameObjects<T>() where T : GameObject
-        //{
-        //    return (T[])_objectsOnTile.OfType<T>();
-        //}
-
-        // create view only when TileID is initialized
-        protected override View CreateView() =>
-            Graphic <= 0 || Position == Position.Invalid ? null : new TileView(this);
+        protected override View CreateView() => new TileView(this);
     }
 }

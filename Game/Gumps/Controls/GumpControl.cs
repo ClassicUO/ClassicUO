@@ -33,7 +33,7 @@ using Microsoft.Xna.Framework.Input;
 using SDL2;
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public enum ClickPriority
     {
@@ -652,7 +652,6 @@ namespace ClassicUO.Game.Gumps
             _mouseIsDown = false;
             if (_attempToDrag)
             {
-                Log.Message(LogTypes.Trace, "END");
                 _attempToDrag = false;
                 InvokeDragEnd(new Point(x, y));
             }

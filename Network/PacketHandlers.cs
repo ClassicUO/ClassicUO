@@ -36,6 +36,7 @@ using ClassicUO.Game.System;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Network
@@ -1100,6 +1101,28 @@ namespace ClassicUO.Network
 
         private static void GraphicEffect(Packet p)
         {
+            GraphicEffectType type = (GraphicEffectType) p.ReadByte();
+            Serial source = p.ReadUInt();
+            Serial target = p.ReadUInt();
+            Graphic graphic = p.ReadUShort();
+            Position srcPos = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            Position targPos = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            byte speed = p.ReadByte();
+            ushort duration = (ushort)(p.ReadByte() * 50);
+            p.Skip(2);
+            bool fixedDirection = p.ReadBool();
+            bool doesExplode = p.ReadBool();
+
+            Hue hue = 0;
+            GraphicEffectBlendMode blendmode = 0;
+            if (p.ID != 0x70)
+            {
+                hue = p.ReadUShort();
+                blendmode = (GraphicEffectBlendMode) p.ReadUInt();
+            }
+
+
+            Service.Get<EffectManager>().Add(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDirection, doesExplode, false, blendmode);
         }
 
         private static void ClientViewRange(Packet p)

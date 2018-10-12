@@ -200,7 +200,7 @@ namespace ClassicUO.Game.Map
                 {
                     block.Unload();
                     block = null;
-                    _usedIndices.RemoveAt(i++);
+                    _usedIndices.RemoveAt(i--);
                     if (++count >= 5)
                         break;
                 }

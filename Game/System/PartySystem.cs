@@ -1,25 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.System
 {
-    internal class PartySystem
+    class PartySystem
     {
-        private static bool _allowPartyLoot;
+        
+        private static readonly List<PartyMember> _partyMemberList = new List<PartyMember>();
+        private static Serial _leader;
+        private static bool _allowPartyLoot = false;
+        public static event EventHandler PartyMemberChanged;
 
-        public static bool IsInParty => Members.Count > 1;
+        
+        public static bool IsInParty => _partyMemberList.Count > 1;
         public static bool IsPlayerLeader => IsInParty && Leader == World.Player;
-        public static Serial Leader { get; private set; }
+        public static Serial Leader => _leader;
+        public static string LeaderName => (_leader != null && _leader.IsValid) ? World.Mobiles.Get(_leader).Name : "";
+        public static List<PartyMember> Members => _partyMemberList;
 
-        public static string LeaderName => Leader != null ? World.Mobiles.Get(Leader).Name : "";
-        public static List<PartyMember> Members { get; } = new List<PartyMember>();
+        public static void RegisterCommands()
+        {
+            CommandSystem.Register("add", (sender, args) => TriggerAddPartyMember());
+            CommandSystem.Register("leave", (sender, args) => LeaveParty());
+            CommandSystem.Register("loot", (sender, args) => AllowPartyLoot = (!AllowPartyLoot) ? true : false);
+        }
 
         public static bool AllowPartyLoot
         {
-            get => _allowPartyLoot;
+            get { return _allowPartyLoot; }
             set
             {
                 _allowPartyLoot = value;
@@ -27,35 +39,32 @@ namespace ClassicUO.Game.System
             }
         }
 
-        public static event EventHandler PartyMemberChanged;
-
         public static void ReceivePartyMemberList(Serial[] mobileSerials)
         {
-            Members.Clear();
+            _partyMemberList.Clear();
             foreach (var serial in mobileSerials)
             {
                 AddPartyMember(serial);
             }
-
             PartyMemberChanged.Raise();
         }
 
         public static void ReceiveRemovePartyMember(Serial[] mobileSerials)
         {
-            Members.Clear();
+            _partyMemberList.Clear();
             foreach (var serial in mobileSerials)
             {
                 AddPartyMember(serial);
             }
-
             PartyMemberChanged.Raise();
+
         }
 
         public static void TriggerAddPartyMember()
         {
             if (!IsInParty)
             {
-                Leader = World.Player;
+                _leader = World.Player;
                 GameActions.RequestPartyInviteByTarget();
             }
             else if (IsInParty && IsPlayerLeader)
@@ -71,18 +80,19 @@ namespace ClassicUO.Game.System
 
         private static void AddPartyMember(Serial mobileSerial)
         {
-            if (!Members.Any(p => p.Serial == mobileSerial))
+            if (!_partyMemberList.Any(p => p.Serial == mobileSerial))
             {
-                Members.Add(new PartyMember(mobileSerial));
+                _partyMemberList.Add(new PartyMember(mobileSerial));
                 GameActions.RequestMobileStatus(mobileSerial);
             }
+            
         }
 
         public static void RemovePartyMember(Serial mobileSerial)
         {
-            if (Members.Any(p => p.Serial == mobileSerial))
+            if (_partyMemberList.Any(p => p.Serial == mobileSerial))
             {
-                Members.RemoveAt(Members.FindIndex(p => p.Serial == mobileSerial));
+                _partyMemberList.RemoveAt(_partyMemberList.FindIndex(p => p.Serial == mobileSerial));
                 GameActions.RequestPartyRemoveMember(mobileSerial);
             }
         }
@@ -90,21 +100,20 @@ namespace ClassicUO.Game.System
         public static void LeaveParty()
         {
             GameActions.RequestPartyLeave();
-            Members.Clear();
+            _partyMemberList.Clear();
+            
         }
+
+        
+
+        
+        
     }
 
     public class PartyMember
     {
         public readonly Serial Serial;
         private string _name;
-
-        public PartyMember(Serial serial)
-        {
-            Serial = serial;
-            _name = Name;
-        }
-
         public Mobile Mobile => World.Mobiles.Get(Serial);
 
         public string Name
@@ -115,9 +124,14 @@ namespace ClassicUO.Game.System
                 {
                     _name = Mobile.Name;
                 }
-
                 return _name;
             }
+        }
+
+        public PartyMember(Serial serial)
+        {
+            Serial = serial;
+            _name = Name;
         }
     }
 }

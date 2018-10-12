@@ -63,14 +63,15 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw || GameObject.IsDisposed) return false;
+            if (!AllowedToDraw || GameObject.IsDisposed)
+                return false;
 
             Tile tile = (Tile) GameObject;
 
             if (Texture == null || Texture.IsDisposed)
             {
                 if (tile.IsStretched)
-                    Texture = TextmapTextures.GetTextmapTexture(((Tile) GameObject).TileData.TexID);
+                    Texture = TextmapTextures.GetTextmapTexture(tile.TileData.TexID);
                 else
                 {
                     Texture = Art.GetLandTexture(GameObject.Graphic);
@@ -83,6 +84,8 @@ namespace ClassicUO.Game.Views
                 UpdateStreched(World.Map);
                 _needUpdateStrechedTile = false;
             }
+
+            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 
             return !tile.IsStretched
                 ? base.Draw(spriteBatch, position, objectList)
@@ -100,7 +103,6 @@ namespace ClassicUO.Game.Views
             _vertex[3].Position = position + _vertex3_yOffset;
 
 
-            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 
             if (IsSelected)
             {
@@ -132,11 +134,11 @@ namespace ClassicUO.Game.Views
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
-            //int x = list.MousePosition.X - (int)vertex[0].Position.X;
-            //int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
+            int x = list.MousePosition.X - (int)vertex[0].Position.X;
+            int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
 
-            //if (IO.Resources.Art.Contains(GameObject.Graphic, x, y))
-            //    list.Add(GameObject, vertex[0].Position);
+            if (Art.Contains(GameObject.Graphic, x, y))
+                list.Add(GameObject, vertex[0].Position);
         }
 
 

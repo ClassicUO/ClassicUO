@@ -26,6 +26,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO
 {
@@ -41,6 +42,8 @@ namespace ClassicUO
 
         private static void Main(string[] args)
         {
+            Log.Start(LogTypes.All);
+
             Assembly = Assembly.GetExecutingAssembly();
             ExeDirectory = Path.GetDirectoryName(Assembly.Location);
 

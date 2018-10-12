@@ -112,7 +112,7 @@ namespace ClassicUO.Game.Map
 
         private IndexMap GetIndex(int map) => GetIndex(map, X, Y);
 
-        private IndexMap GetIndex(int map, int x, int y)
+        private static IndexMap GetIndex(int map, int x, int y)
             => IO.Resources.Map.GetIndex(map, x, y);
 
 

@@ -25,12 +25,11 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     internal class ItemGumplingPaperdoll : ItemGumpling
     {
         private ushort _gumpIndex;
-        private Hue _hueOverride;
 
         public ItemGumplingPaperdoll(int x, int y, Item item) : base(item)
         {

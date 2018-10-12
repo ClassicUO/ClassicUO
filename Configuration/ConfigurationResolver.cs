@@ -23,6 +23,7 @@
 
 using System.IO;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration

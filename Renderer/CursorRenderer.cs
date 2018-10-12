@@ -26,7 +26,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps;
-using ClassicUO.Game.Gumps.Controls.InGame;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -216,8 +216,9 @@ namespace ClassicUO.Renderer
                         Graphic = 0x2076;
                         if (_inputManager.HandleMouseEvent(MouseEvent.Click, MouseButton.Left))
                         {
+                            
                             TargetSystem.mouseTargetingEventObject(TargetSystem.LastGameObject =
-                                WorldViewportGump.GameScene.SelectedObject);
+                                Service.Get<SceneManager>().GetScene<GameScene>()?.SelectedObject);
                         }
 
                         break;

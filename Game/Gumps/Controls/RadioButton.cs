@@ -24,7 +24,7 @@
 using System.Linq;
 using ClassicUO.Input;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public class RadioButton : Checkbox
     {

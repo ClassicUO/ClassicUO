@@ -96,16 +96,18 @@ namespace ClassicUO.Game.Views
                 return ok;
             }
 
-            if (!item.Effect.IsDisposed)
-                return item.Effect.View.Draw(spriteBatch, position, objectList);
-
-            return false;
+            return !item.Effect.IsDisposed && item.Effect.View.Draw(spriteBatch, position, objectList);
         }
 
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
             MouseOverList objectList)
         {
+            PreDraw(position);
+
+            if (GameObject.IsDisposed)
+                return false;
+
             Item item = (Item) GameObject;
 
             spriteBatch.GetZ();
@@ -120,9 +122,6 @@ namespace ClassicUO.Game.Views
             Animations.Direction = dir;
 
             byte animIndex = (byte) GameObject.AnimIndex;
-            Graphic graphic = 0;
-            EquipConvData? convertedItem = null;
-            Hue color = 0;
 
             for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
             {
@@ -130,6 +129,8 @@ namespace ClassicUO.Game.Views
 
                 if (layer == Layer.Mount) continue;
 
+                Hue color = 0;
+                Graphic graphic = 0;
                 if (layer == Layer.Invalid)
                 {
                     graphic = item.DisplayedGraphic;
@@ -148,7 +149,6 @@ namespace ClassicUO.Game.Views
                     {
                         if (map.TryGetValue(itemEquip.ItemData.AnimID, out EquipConvData data))
                         {
-                            convertedItem = data;
                             graphic = data.Graphic;
                         }
                     }
@@ -176,7 +176,7 @@ namespace ClassicUO.Game.Views
                     if (frame == null || frame.IsDisposed) return false;
 
                     int drawCenterY = frame.CenterY;
-                    int drawX = -22;
+                    const int drawX = -22;
                     int drawY = drawCenterY + GameObject.Position.Z * 4 - 22 - 3;
 
                     int x = drawX + frame.CenterX;
@@ -186,10 +186,26 @@ namespace ClassicUO.Game.Views
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                     HueVector = RenderExtentions.GetHueVector(color);
                     base.Draw(spriteBatch, position, objectList);
+                    Pick(frame.ID, Bounds, position, objectList);
                 }
             }
 
             return true;
+        }
+
+
+        private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
+        {
+            int x;
+
+            if (IsFlipped)
+                x = (int)drawPosition.X + area.X + 44 - list.MousePosition.X;
+            else
+                x = list.MousePosition.X - (int)drawPosition.X + area.X;
+
+            int y = list.MousePosition.Y - ((int)drawPosition.Y - area.Y);
+
+            if (Animations.Contains(id, x, y)) list.Add(GameObject, drawPosition);
         }
 
         protected override void MousePick(MouseOverList objectList, SpriteVertex[] vertex)

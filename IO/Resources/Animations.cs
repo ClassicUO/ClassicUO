@@ -29,6 +29,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO.Resources
 {
@@ -78,7 +79,7 @@ namespace ClassicUO.IO.Resources
 
                 if (i > 0 && FileManager.ClientVersion >= ClientVersions.CV_7000)
                 {
-                    string pathuop = Path.Combine(FileManager.UoFolderPath, string.Format("AnimationFrame{0}.uop", i));
+                    string pathuop = Path.Combine(FileManager.UoFolderPath, $"AnimationFrame{i}.uop");
                     if (File.Exists(pathuop))
                     {
                         _filesUop[i - 1] = new UOFileUopAnimation(pathuop, i - 1);

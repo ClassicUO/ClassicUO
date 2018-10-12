@@ -21,10 +21,11 @@
 
 #endregion
 
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps.Controls
+namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class DevConsole : Gump
     {

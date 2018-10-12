@@ -21,7 +21,7 @@
 
 #endregion
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public enum UILayer
     {

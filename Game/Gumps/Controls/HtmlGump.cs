@@ -21,13 +21,15 @@
 
 #endregion
 
+using System.Diagnostics;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public class HtmlGump : GumpControl
     {
@@ -223,7 +225,7 @@ namespace ClassicUO.Game.Gumps
                     if (inbounds && Fonts.GetWebLink(link.LinkID, out WebLink result))
                     {
                         Log.Message(LogTypes.Info, "LINK CLICKED: " + result.Link);
-                        BrowserHelper.OpenBrowser(result.Link);
+                        Process.Start(result.Link);
                         break;
                     }
                 }
