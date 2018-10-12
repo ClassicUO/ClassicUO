@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.System
@@ -14,8 +16,8 @@ namespace ClassicUO.Game.System
         private static Serial _leader;
         private static bool _allowPartyLoot = false;
         public static event EventHandler PartyMemberChanged;
+        public static Dictionary<PartyMember, PartyMemberGump> PartyMemberGumpStack = new Dictionary<PartyMember, PartyMemberGump>();
 
-        
         public static bool IsInParty => _partyMemberList.Count > 1;
         public static bool IsPlayerLeader => IsInParty && Leader == World.Player;
         public static Serial Leader => _leader;
@@ -104,8 +106,11 @@ namespace ClassicUO.Game.System
             
         }
 
-        
 
+        public static void PartyMessage(string message)
+        {
+            GameActions.SayParty(message);
+        }
         
         
     }
