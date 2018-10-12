@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++) Tiles[i][j] = new Tile();
             }
 
-            LastAccessTime = CoreGame.Ticks;
+            LastAccessTime = CoreGame.Ticks + 0;
         }
 
         public ushort X { get; }
@@ -112,7 +112,7 @@ namespace ClassicUO.Game.Map
 
         private IndexMap GetIndex(int map) => GetIndex(map, X, Y);
 
-        private IndexMap GetIndex(int map, int x, int y)
+        private static IndexMap GetIndex(int map, int x, int y)
             => IO.Resources.Map.GetIndex(map, x, y);
 
 

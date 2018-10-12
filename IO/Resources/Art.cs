@@ -33,7 +33,10 @@ namespace ClassicUO.IO.Resources
         private static UOFile _file;
 
         private static SpriteTexture[] _artCache;
+        private static SpriteTexture[] _landCache;
+
         private static readonly List<int> _usedIndex = new List<int>();
+        private static readonly List<int> _usedIndexLand = new List<int>();
 
         private static readonly PixelPicking _picker = new PixelPicking();
 
@@ -53,6 +56,7 @@ namespace ClassicUO.IO.Resources
 
 
             _artCache = new SpriteTexture[ART_COUNT];
+            _landCache = new SpriteTexture[ART_COUNT];
         }
 
         public static bool Contains(ushort g, int x, int y, int extra = 0) => _picker.Get(g, x, y, extra);
@@ -76,7 +80,7 @@ namespace ClassicUO.IO.Resources
 
         public static SpriteTexture GetLandTexture(ushort g)
         {
-            ref SpriteTexture texture = ref _artCache[g];
+            ref SpriteTexture texture = ref _landCache[g];
             if (texture == null || texture.IsDisposed)
             {
                 const int SIZE = 44;
@@ -84,7 +88,7 @@ namespace ClassicUO.IO.Resources
                 ushort[] pixels = ReadLandArt(g);
                 texture = new SpriteTexture(SIZE, SIZE, false);
                 texture.SetData(pixels);
-                _usedIndex.Add(g);
+                _usedIndexLand.Add(g);
 
                 _picker.Set(g, SIZE, SIZE, pixels);
             }
@@ -106,6 +110,23 @@ namespace ClassicUO.IO.Resources
                     texture = null;
 
                     _usedIndex.RemoveAt(i--);
+                    if (++count >= 5)
+                        break;
+                }
+            }
+
+            count = 0;
+            for (int i = 0; i < _usedIndexLand.Count; i++)
+            {
+                ref SpriteTexture texture = ref _artCache[_usedIndexLand[i]];
+                if (texture == null || texture.IsDisposed)
+                    _usedIndexLand.RemoveAt(i--);
+                else if (CoreGame.Ticks - texture.Ticks >= 3000)
+                {
+                    texture.Dispose();
+                    texture = null;
+
+                    _usedIndexLand.RemoveAt(i--);
                     if (++count >= 5)
                         break;
                 }
@@ -135,15 +156,13 @@ namespace ClassicUO.IO.Resources
 
             int x = 0;
             int y = 0;
-            ushort xoffs = 0;
-            ushort run = 0;
 
             ptr = (ushort*) (datastart + lineoffsets[0] * 2);
 
             while (y < height)
             {
-                xoffs = *ptr++;
-                run = *ptr++;
+                ushort xoffs = *ptr++;
+                ushort run = *ptr++;
 
                 if (xoffs + run >= 2048)
                 {
