@@ -58,6 +58,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
         public DeferredEntity DeferredObject { get; set; }
         public GraphicEffectBlendMode Blend { get; set; }
+        public bool IsItemEffect => Source is Item item && item.OnGround;
 
         public void Load()
         {
