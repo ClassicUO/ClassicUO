@@ -1210,7 +1210,8 @@ namespace ClassicUO.Network
             mobile.Flags = (Flags) p.ReadByte();
             mobile.Notoriety = (Notoriety) p.ReadByte();
 
-            if (p.ID != 0x78) p.Skip(6);
+            if (p.ID != 0x78)
+                p.Skip(6);
 
             uint itemSerial;
             while ((itemSerial = p.ReadUInt()) != 0)
@@ -1220,18 +1221,29 @@ namespace ClassicUO.Network
                 item.Layer = (Layer) p.ReadByte();
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_70331)
-                {
                     item.Hue = p.ReadUShort();
-                    item.Graphic = graphic;
-                }
-                else if (FileManager.ClientVersion >= ClientVersions.CV_7000)
+                else if ((graphic & 0x8000) != 0)
                 {
-                    item.Graphic = (ushort) (graphic & 0x7FFF);
+                    graphic &= 0x7FFF;
                     item.Hue = p.ReadUShort();
                 }
                 else
-                    item.Graphic = (ushort) (graphic & 0x3FFF);
+                    graphic &= 0x3FFF;
 
+                //if (FileManager.ClientVersion >= ClientVersions.CV_70331)
+                //{
+                //    item.Hue = p.ReadUShort();
+                //    item.Graphic = graphic;
+                //}
+                //else if (FileManager.ClientVersion >= ClientVersions.CV_7000)
+                //{
+                //    item.Graphic = (ushort) (graphic & 0x7FFF);
+                //    item.Hue = p.ReadUShort();
+                //}
+                //else
+                //    item.Graphic = (ushort) (graphic & 0x3FFF);
+
+                item.Graphic = graphic;
                 item.Amount = 1;
                 item.Container = mobile;
                 mobile.Items.Add(item);

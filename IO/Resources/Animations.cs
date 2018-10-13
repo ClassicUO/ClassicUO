@@ -138,16 +138,16 @@ namespace ClassicUO.IO.Resources
 
             int animIdxBlockSize = Marshal.SizeOf<AnimIdxBlock>();
 
-            UOFile idxfile0 = _files[0].IdxFile;
-            long maxAddress0 = (long) idxfile0.StartAddress + idxfile0.Length;
-            UOFile idxfile2 = _files[1].IdxFile;
-            long maxAddress2 = (long) idxfile2.StartAddress + idxfile2.Length;
-            UOFile idxfile3 = _files[2].IdxFile;
-            long maxAddress3 = (long) idxfile3.StartAddress + idxfile3.Length;
-            UOFile idxfile4 = _files[3].IdxFile;
-            long maxAddress4 = (long) idxfile4.StartAddress + idxfile4.Length;
-            UOFile idxfile5 = _files[4].IdxFile;
-            long maxAddress5 = (long) idxfile5.StartAddress + idxfile5.Length;
+            UOFile idxfile0 = _files[0]?.IdxFile;
+            long? maxAddress0 = (long?) idxfile0?.StartAddress + idxfile0?.Length;
+            UOFile idxfile2 = _files[1]?.IdxFile;
+            long? maxAddress2 = (long?) idxfile2?.StartAddress + idxfile2?.Length;
+            UOFile idxfile3 = _files[2]?.IdxFile;
+            long? maxAddress3 = (long?) idxfile3?.StartAddress + idxfile3?.Length;
+            UOFile idxfile4 = _files[3]?.IdxFile;
+            long? maxAddress4 = (long?) idxfile4?.StartAddress + idxfile4?.Length;
+            UOFile idxfile5 = _files[4]?.IdxFile;
+            long? maxAddress5 = (long?) idxfile5?.StartAddress + idxfile5?.Length;
 
             for (int i = 0; i < MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
             {
@@ -343,7 +343,7 @@ namespace ClassicUO.IO.Resources
                         sbyte mountedHeightOffset = 0;
                         ANIMATION_GROUPS_TYPE groupType = ANIMATION_GROUPS_TYPE.UNKNOWN;
 
-                        if (anim[0] != -1 && maxAddress2 != 0)
+                        if (anim[0] != -1 && maxAddress2.HasValue && maxAddress2 != 0)
                         {
                             animFile = 1;
                             realAnimID = (ushort) anim[0];
@@ -362,7 +362,7 @@ namespace ClassicUO.IO.Resources
                                 groupType = ANIMATION_GROUPS_TYPE.MONSTER;
                             }
                         }
-                        else if (anim[1] != -1 && maxAddress3 != 0)
+                        else if (anim[1] != -1 && maxAddress3.HasValue && maxAddress3 != 0)
                         {
                             animFile = 2;
                             realAnimID = (ushort) anim[1];
@@ -386,7 +386,7 @@ namespace ClassicUO.IO.Resources
                                 groupType = ANIMATION_GROUPS_TYPE.MONSTER;
                             }
                         }
-                        else if (anim[2] != -1 && maxAddress4 != 0)
+                        else if (anim[2] != -1 && maxAddress4.HasValue && maxAddress4 != 0)
                         {
                             animFile = 3;
                             realAnimID = (ushort) anim[2];
@@ -410,7 +410,7 @@ namespace ClassicUO.IO.Resources
                                 groupType = ANIMATION_GROUPS_TYPE.MONSTER;
                             }
                         }
-                        else if (anim[3] != -1 && maxAddress5 != 0)
+                        else if (anim[3] != -1 && maxAddress5.HasValue && maxAddress5 != 0)
                         {
                             animFile = 4;
                             realAnimID = (ushort) anim[3];
