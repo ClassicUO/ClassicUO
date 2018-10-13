@@ -58,6 +58,8 @@ namespace ClassicUO.Game.Views
         public Vector3 HueVector { get; set; }
         public bool AllowedToDraw { get; set; }
 
+        protected float ShadowZDepth { get; set; }
+
         public SpriteTexture Texture { get; set; }
 
         public virtual bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
@@ -143,6 +145,11 @@ namespace ClassicUO.Game.Views
                 return false;
 
             MousePick(list, vertex);
+
+            if (HasShadow)
+            {
+                spriteBatch.DrawShadow(Texture, vertex, new Vector2(position.X + 22f, position.Y +  GameObject.Offset.Y  - (GameObject.Offset.Z / 4 + GameObject.Position.Z) * 4 + 22f), IsFlipped, ShadowZDepth);
+            }
 
             return true;
         }

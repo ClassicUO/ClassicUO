@@ -29,7 +29,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameEffect : GameObject, IDeferreable, ISmoothMovable
+    public abstract class GameEffect : GameObject, IDeferreable
     {
         private readonly List<GameEffect> _children;
 
@@ -107,7 +107,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public long Duration { get; set; } = -1;
-        public Vector3 Offset { get; set; }
 
         //public int CurrentFrame => (int)(LastChangeFrameTime / 50d);
 

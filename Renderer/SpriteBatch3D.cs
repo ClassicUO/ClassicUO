@@ -63,7 +63,7 @@ namespace ClassicUO.Renderer
         private readonly Microsoft.Xna.Framework.Game _game;
         private readonly short[] _geometryIndices = new short[6];
 
-        private readonly EffectTechnique _huesTechnique;
+        private readonly EffectTechnique _huesTechnique, _shadowTechnique;
         private readonly IndexBuffer _indexBuffer;
         private readonly short[] _indices = new short[MAX_VERTICES_PER_DRAW * 6];
 
@@ -99,7 +99,7 @@ namespace ClassicUO.Renderer
             _viewportEffect = _effect.Parameters["Viewport"];
 
             _huesTechnique = _effect.Techniques["HueTechnique"];
-
+            _shadowTechnique = _effect.Techniques["ShadowSetTechnique"];
 
             _drawCalls = new DrawCallInfo[MAX_VERTICES_PER_DRAW];
 
@@ -160,7 +160,7 @@ namespace ClassicUO.Renderer
             _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
         }
 
-        public bool DrawSprite(Texture2D texture, SpriteVertex[] vertices)
+        public bool DrawSprite(Texture2D texture, SpriteVertex[] vertices, Techniques technique = Techniques.Default)
         {
             if (!_isStarted)
                 throw new Exception();
@@ -184,20 +184,42 @@ namespace ClassicUO.Renderer
 #if !ORIONSORT
             vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
 #endif
-            Build(texture, vertices);
+            Build(texture, vertices, technique);
 
             return true;
         }
 
+        public void DrawShadow(Texture2D texture, SpriteVertex[] vertices, Vector2 position, bool flip, float z)
+        {
+            if (texture == null || texture.IsDisposed)
+                return;
 
-        private void Build(Texture2D texture, SpriteVertex[] vertices)
+            vertices[0].Position.Z =
+                vertices[1].Position.Z =
+                    vertices[2].Position.Z =
+                        vertices[3].Position.Z = z;
+            float skewHorizTop = (vertices[0].Position.Y - position.Y) * .5f;
+            float skewHorizBottom = (vertices[3].Position.Y - position.Y) * .5f;
+            vertices[0].Position.X -= skewHorizTop;
+            vertices[0].Position.Y -= skewHorizTop;
+            vertices[flip ? 2 : 1].Position.X -= skewHorizTop;
+            vertices[flip ? 2 : 1].Position.Y -= skewHorizTop;
+            vertices[flip ? 1 : 2].Position.X -= skewHorizBottom;
+            vertices[flip ? 1 : 2].Position.Y -= skewHorizBottom;
+            vertices[3].Position.X -= skewHorizBottom;
+            vertices[3].Position.Y -= skewHorizBottom;
+
+            Build(texture, vertices, Techniques.ShadowSet);
+        }
+
+        private void Build(Texture2D texture, SpriteVertex[] vertices, Techniques technique)
         {
             AddQuadrilateralIndices(_vertexCount);
             
 			if (_vertexCount + VERTEX_COUNT > _vertices.Length || _indicesCount + INDEX_COUNT > _indices.Length)
 				Flush(false);
 
-            DrawCallInfo call = new DrawCallInfo(texture, _indicesCount, PRIMITIVES_COUNT, 0);
+            DrawCallInfo call = new DrawCallInfo(texture, technique, _indicesCount, PRIMITIVES_COUNT, 0);
 
             Array.Copy(vertices, 0, _vertices, _vertexCount, VERTEX_COUNT);
             _vertexCount += VERTEX_COUNT;
@@ -318,12 +340,37 @@ namespace ClassicUO.Renderer
             if (Calls == 0)
                 return;
 
-            _effect.CurrentTechnique = _huesTechnique;
-            _effect.CurrentTechnique.Passes[0].Apply();
-
+            Techniques last = Techniques.None;
+            
             for (int i = 0; i < Calls; i++)
             {
-                DoDraw(ref _drawCalls[i]);
+
+                ref var call = ref _drawCalls[i];
+
+                switch (call.Technique)
+                {
+                    case Techniques.Hued:
+                        if (last != call.Technique)
+                        {
+                            _effect.CurrentTechnique = _huesTechnique;
+                            _effect.CurrentTechnique.Passes[0].Apply();
+                        }
+                        break;
+                    case Techniques.ShadowSet:
+                        if (last != call.Technique)
+                        {
+                            _effect.CurrentTechnique = _shadowTechnique;
+                            _effect.CurrentTechnique.Passes[0].Apply();
+                        }
+                        break;
+                }
+
+                last = call.Technique;
+
+
+
+
+                DoDraw(ref call);
             }
 
             Array.Clear(_drawCalls, 0, Calls);
@@ -341,10 +388,11 @@ namespace ClassicUO.Renderer
 
         private struct DrawCallInfo : IComparable<DrawCallInfo>
         {
-            public unsafe DrawCallInfo(Texture2D texture, int start, int count, float depth)
+            public unsafe DrawCallInfo(Texture2D texture, Techniques technique, int start, int count, float depth)
             {
                 Texture = texture;
 				TextureKey = (uint)RuntimeHelpers.GetHashCode(texture);
+                Technique = technique;
                 StartIndex = start;
                 PrimitiveCount = count;
 				DepthKey = *(uint*)&depth;
@@ -355,10 +403,11 @@ namespace ClassicUO.Renderer
             public int StartIndex;
             public int PrimitiveCount;
 			public readonly uint DepthKey;
+            public readonly Techniques Technique;
 
             public bool TryMerge(ref DrawCallInfo callInfo)
             {
-                if (TextureKey != callInfo.TextureKey || DepthKey != callInfo.DepthKey)
+                if (Technique != callInfo.Technique || TextureKey != callInfo.TextureKey || DepthKey != callInfo.DepthKey)
                     return false;
                 callInfo.PrimitiveCount += PrimitiveCount;
                 return true;
@@ -366,12 +415,13 @@ namespace ClassicUO.Renderer
 
             public int CompareTo(DrawCallInfo other)
             {
-				var result = TextureKey.CompareTo(other.TextureKey); ;
+
+				var result = TextureKey.CompareTo(other.TextureKey);
                 if (result != 0)
                     return result;
                 result = DepthKey.CompareTo(other.DepthKey);
 
-				return result;
+                return result != 0 ? result : ((byte)Technique).CompareTo((byte)other.Technique);
             }
         }
     }

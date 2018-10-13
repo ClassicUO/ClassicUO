@@ -62,7 +62,7 @@ namespace ClassicUO.Game.GameObjects
         FastUnmountAndCantRun
     }
 
-    public partial class Mobile : Entity, ISmoothMovable
+    public partial class Mobile : Entity
     {
         protected const int MAX_STEP_COUNT = 5;
         protected const int TURN_DELAY = 100;
@@ -268,7 +268,6 @@ namespace ClassicUO.Game.GameObjects
         public bool AnimationFromServer { get; set; }
         public bool AnimationDirection { get; set; }
 
-        public Vector3 Offset { get; set; }
 
         public long LastStepTime { get; set; }
 
