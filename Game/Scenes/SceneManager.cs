@@ -25,7 +25,6 @@ namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType
     {
-        Loading,
         Login,
         Game
     }
@@ -41,9 +40,6 @@ namespace ClassicUO.Game.Scenes
 
             switch (type)
             {
-                case ScenesType.Loading:
-                    CurrentScene = new LoadScene();
-                    break;
                 case ScenesType.Login:
                     CurrentScene = new LoginScene();
                     break;

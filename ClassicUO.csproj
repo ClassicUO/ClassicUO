@@ -63,6 +63,11 @@
     <Compile Include="Game\GameObjects\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
+    <Compile Include="Game\Gumps\UIGumps\Login\CharacterSelectionGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\Login\LoadingGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\Login\LoginGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\Login\MainLoginGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\Login\ServerSelectionGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\LogoutGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyMemberGump.cs" />
@@ -164,7 +169,6 @@
     <Compile Include="Game\Pathfinder.cs" />
     <Compile Include="Game\Position.cs" />
     <Compile Include="Game\Scenes\GameScene.cs" />
-    <Compile Include="Game\Scenes\LoadScene.cs" />
     <Compile Include="Game\Scenes\LoginScene.cs" />
     <Compile Include="Game\Scenes\Scene.cs" />
     <Compile Include="Game\Scenes\SceneManager.cs" />

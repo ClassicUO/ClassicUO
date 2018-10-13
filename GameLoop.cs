@@ -123,7 +123,7 @@ namespace ClassicUO
 
             MaxFPS = settings.MaxFPS;
 
-            _sceneManager.ChangeScene(ScenesType.Loading);
+            _sceneManager.ChangeScene(ScenesType.Login);
 
             _infoText = new RenderedText
             {
@@ -133,11 +133,7 @@ namespace ClassicUO
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 MaxWidth = 150
             };
-
-            // ##### START TEST #####
-            TEST(settings);
-            // #####  END TEST  #####
-
+            
             base.Initialize();
         }
 
@@ -147,59 +143,7 @@ namespace ClassicUO
 
             base.UnloadContent();
         }
-
-        private void TEST(Settings settings)
-        {
-            string[] parts = settings.ClientVersion.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
-            byte[] clientVersionBuffer =
-                {byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])};
-
-            NetClient.Connected += (sender, e) =>
-            {
-                Log.Message(LogTypes.Info, "Connected!");
-
-                NetClient.Socket.Send(new PSeed(NetClient.Socket.ClientAddress, clientVersionBuffer));
-                NetClient.Socket.Send(new PFirstLogin(settings.Username, settings.Password.ToString()));
-            };
-
-            NetClient.Disconnected += (sender, e) => Log.Message(LogTypes.Warning, "Disconnected!");
-
-            NetClient.PacketReceived += (sender, e) =>
-            {
-                switch (e.ID)
-                {
-                    case 0xA8:
-                        NetClient.Socket.Send(new PSelectServer(0));
-                        break;
-                    case 0x8C:
-                        NetClient.Socket.EnableCompression();
-                        e.Seek(0);
-                        e.MoveToData();
-                        e.Skip(6);
-                        NetClient.Socket.Send(new PSecondLogin(settings.Username, settings.Password.ToString(),
-                            e.ReadUInt()));
-                        break;
-                    case 0xA9:
-                        NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName,
-                            NetClient.Socket.ClientAddress));
-                        break;
-                    case 0xBD:
-                        NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
-                        break;
-                    case 0xBE:
-                        NetClient.Socket.Send(new PAssistVersion(settings.ClientVersion, e.ReadUInt()));
-                        break;
-                    case 0x55:
-                        NetClient.Socket.Send(new PClientViewRange(24));
-                        break;
-                }
-            };
-
-
-            NetClient.Socket.Connect(settings.IP, settings.Port);
-        }
-
-
+        
         protected override void OnInputUpdate(double totalMS, double frameMS)
         {
             _inputManager.Update(totalMS, frameMS);
