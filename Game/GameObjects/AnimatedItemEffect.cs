@@ -97,6 +97,11 @@ namespace ClassicUO.Game.GameObjects
 
                 (int x, int y, int z) = GetSource();
 
+                if (Source is Mobile mobile)
+                {
+                    Offset = mobile.Offset;
+                }
+
                 if (Position.X != x || Position.Y != y || Position.Z != z)
                 {
                     Position = new Position((ushort)x, (ushort)y, (sbyte)z);

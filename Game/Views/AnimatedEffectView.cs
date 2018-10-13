@@ -60,6 +60,12 @@ namespace ClassicUO.Game.Views
                     Texture.Width, Texture.Height);
             }
 
+            if (effect.Offset != Vector3.Zero)
+            {
+                position.X += effect.Offset.X;
+                position.Y = position.Y - effect.Position.Z * 4 + (effect.Offset.Y - effect.Offset.Z) + (Texture.Height - 44 - 8);
+            }
+
             HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 
             return base.Draw(spriteBatch, position, objectList);
