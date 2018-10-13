@@ -38,20 +38,21 @@ namespace ClassicUO.Game.Views
             return base.DrawInternal(spriteBatch, position, list);
         }
 
+        private Graphic _displayed = Graphic.Invalid;
+
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             LightningEffect effect = (LightningEffect) GameObject;
 
-            Graphic displayed = (Graphic) (effect.Graphic + effect.AnimIndex);
-
-            if (displayed > 0x4E29)
-                return false;
-
-            if (effect.AnimationGraphic != displayed || Texture == null || Texture.IsDisposed)
+            if (effect.AnimationGraphic != _displayed || Texture == null || Texture.IsDisposed)
             {
-                effect.AnimationGraphic = displayed;
-                Texture = IO.Resources.Gumps.GetGumpTexture(effect.AnimationGraphic);
-                Point offset = _offsets[displayed - 20000];
+                _displayed = effect.AnimationGraphic;
+
+                if (_displayed > 0x4E29)
+                    return false;
+
+                Texture = IO.Resources.Gumps.GetGumpTexture(_displayed);
+                Point offset = _offsets[_displayed - 20000];
                 Bounds = new Rectangle(offset.X, Texture.Height - 33 + (effect.Position.Z * 4)+ offset.Y, Texture.Width, Texture.Height);
             }
 

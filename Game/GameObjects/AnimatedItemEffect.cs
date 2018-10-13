@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Game.Views;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -97,9 +98,9 @@ namespace ClassicUO.Game.GameObjects
 
                 (int x, int y, int z) = GetSource();
 
-                if (Source is Mobile mobile)
+                if (Source != null && Source.Offset != Vector3.Zero)
                 {
-                    Offset = mobile.Offset;
+                    Offset = Source.Offset;
                 }
 
                 if (Position.X != x || Position.Y != y || Position.Z != z)

@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -52,6 +53,7 @@ namespace ClassicUO.Game.Views
                 return false;
 
             AnimatedItemEffect effect = (AnimatedItemEffect) GameObject;
+
             if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _displayedGraphic = effect.AnimationGraphic;
