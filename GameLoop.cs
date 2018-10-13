@@ -24,6 +24,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
@@ -148,6 +149,9 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
+        private Action _secondConnection;
+        private bool _doSecondConnection;
+
         private void TEST(Settings settings)
         {
             string[] parts = settings.ClientVersion.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
@@ -158,8 +162,8 @@ namespace ClassicUO
             {
                 Log.Message(LogTypes.Info, "Connected!");
 
-                NetClient.Socket.Send(new PSeed(NetClient.Socket.ClientAddress, clientVersionBuffer));
-                NetClient.Socket.Send(new PFirstLogin(settings.Username, settings.Password.ToString()));
+                NetClient.LoginSocket.Send(new PSeed(NetClient.Socket.ClientAddress, clientVersionBuffer));
+                NetClient.LoginSocket.Send(new PFirstLogin(settings.Username, settings.Password));
             };
 
             NetClient.Disconnected += (sender, e) => Log.Message(LogTypes.Warning, "Disconnected!");
@@ -169,15 +173,31 @@ namespace ClassicUO
                 switch (e.ID)
                 {
                     case 0xA8:
-                        NetClient.Socket.Send(new PSelectServer(0));
+                        NetClient.LoginSocket.Send(new PSelectServer(0));
                         break;
                     case 0x8C:
-                        NetClient.Socket.EnableCompression();
+                        //NetClient.LoginSocket.EnableCompression();
                         e.Seek(0);
                         e.MoveToData();
-                        e.Skip(6);
-                        NetClient.Socket.Send(new PSecondLogin(settings.Username, settings.Password.ToString(),
-                            e.ReadUInt()));
+
+                        byte[] ipbytes = new byte[4] {e.ReadByte(), e.ReadByte(), e.ReadByte(), e.ReadByte()};
+                        ushort port = e.ReadUShort();
+                        uint seed = e.ReadUInt();
+
+                        //_secondConnection = () =>
+                        //{
+
+                        //};
+
+                        NetClient.Socket.Connect(new IPAddress(ipbytes), port);
+                        NetClient.Socket.EnableCompression();
+
+                        NetClient.Socket.Send(new PSeed(seed, clientVersionBuffer));
+                        NetClient.Socket.Send(new PSecondLogin(settings.Username, settings.Password, seed));
+
+                        NetClient.LoginSocket.Disconnect();
+                        _doSecondConnection = true;
+
                         break;
                     case 0xA9:
                         NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName,
@@ -195,8 +215,8 @@ namespace ClassicUO
                 }
             };
 
-
-            NetClient.Socket.Connect(settings.IP, settings.Port);
+            _doSecondConnection = false;
+            NetClient.LoginSocket.Connect(settings.IP, settings.Port);
         }
 
 
@@ -207,6 +227,15 @@ namespace ClassicUO
 
         protected override void OnNetworkUpdate(double totalMS, double frameMS)
         {
+
+            //if (_doSecondConnection)
+            //{
+            //    _secondConnection();
+
+            //    _doSecondConnection = false;
+            //}    
+
+            NetClient.LoginSocket.Slice();
             NetClient.Socket.Slice();
         }
 

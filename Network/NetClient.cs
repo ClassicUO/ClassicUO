@@ -266,6 +266,7 @@ namespace ClassicUO.Network
         {
         }
 
+        public static NetClient LoginSocket { get; } = new NetClient();
         public static NetClient Socket { get; } = new NetClient();
 
         public bool IsConnected => _socket != null && _socket.Connected;
@@ -341,6 +342,7 @@ namespace ClassicUO.Network
                 else
                 {
                     Log.Message(LogTypes.Error, e.SocketError.ToString());
+                    Disconnect();
                 }
             };
             connectEventArgs.RemoteEndPoint = endpoint;
@@ -448,6 +450,11 @@ namespace ClassicUO.Network
                     Packet packet = new Packet(data, packetlength);
                     PacketReceived?.Invoke(null, packet);
 
+                    if (!IsConnected)
+                    {
+                        if (BUFF_SIZE >= packetlength) _pool.AddFreeSegment(data);
+                        break;
+                    }
                     length = _circularBuffer.Length;
 
                     if (BUFF_SIZE >= packetlength) _pool.AddFreeSegment(data);
@@ -455,7 +462,7 @@ namespace ClassicUO.Network
             }
         }
 
-        private void Send(byte[] data)
+        public void Send(byte[] data)
         {
             if (_socket == null) return;
 

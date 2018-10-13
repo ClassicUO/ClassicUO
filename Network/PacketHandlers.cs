@@ -302,10 +302,7 @@ namespace ClassicUO.Network
 
         private static void TargetCursor(Packet p)
         {
-            byte CommandType = p.ReadByte();
-            uint CursorID = p.ReadUInt();
-            byte CursorType = p.ReadByte();
-            TargetSystem.SetTargeting((TargetSystem.TargetType) CommandType, (int) CursorID, CursorType);
+            TargetSystem.SetTargeting((TargetSystem.TargetType)p.ReadByte(), (int)p.ReadUInt(), p.ReadByte());
         }
 
         private static void ClientTalk(Packet p)
@@ -329,6 +326,8 @@ namespace ClassicUO.Network
             if (mobile == null) return;
 
             ushort damage = p.ReadUShort();
+
+            //mobile.AddGameText(MessageType.Label, damage.ToString(), 3, (Hue)(mobile == World.Player ? 0x0034 : 0x0021), false)
         }
 
         private static void EditTileDataGodClientR(Packet p)
