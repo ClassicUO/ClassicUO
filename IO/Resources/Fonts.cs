@@ -62,7 +62,7 @@ namespace ClassicUO.IO.Resources
         HTT_LEFT,
         HTT_CENTER,
         HTT_RIGHT,
-        HTT_DIV
+        HTT_DIV,  
     }
 
     public static class Fonts
@@ -1841,6 +1841,7 @@ namespace ClassicUO.IO.Resources
                 i++;
             }
 
+
             while (str[i] == ' ' && i < len)
                 i++;
 
@@ -1927,6 +1928,21 @@ namespace ClassicUO.IO.Resources
                     case "div":
                         tag = HTML_TAG_TYPE.HTT_DIV;
                         break;
+
+                    default:
+
+                        if (str.Contains("bodybgcolor"))
+                        {
+                            tag = HTML_TAG_TYPE.HTT_BODY;
+
+                            j = str.IndexOf("bgcolor", StringComparison.Ordinal);
+                        }
+                        else
+                        {
+                            Log.Message(LogTypes.Warning, $"Unhandled HTML param:\t{str}");
+                        }
+
+                        break;
                 }
 
 
@@ -1942,6 +1958,8 @@ namespace ClassicUO.IO.Resources
                             case HTML_TAG_TYPE.HTT_BASEFONT:
                             case HTML_TAG_TYPE.HTT_A:
                             case HTML_TAG_TYPE.HTT_DIV:
+
+                            
 
                                 cmdLen = i - j;
                                 string content = str.Substring(j, cmdLen);
