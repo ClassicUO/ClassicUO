@@ -101,7 +101,7 @@ namespace ClassicUO.Network
         private void Connect(IPEndPoint endpoint)
         {
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.Debug, 1);
+            //_socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.Debug, 1);
 
             _recvBuffer = _pool.GetFreeSegment();
             _incompletePacketBuffer = _pool.GetFreeSegment();

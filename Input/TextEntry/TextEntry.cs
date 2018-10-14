@@ -77,7 +77,7 @@ namespace ClassicUO.Input.TextEntry
 
         public string Text
         {
-            get => IsPassword ? _plainText : RenderText.Text;
+            get => RenderText.Text;
             set
             {
                 _plainText = value;
