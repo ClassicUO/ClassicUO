@@ -168,6 +168,9 @@ namespace ClassicUO.Game.Scenes
                     var settings = Service.Get<Settings>();
                     NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
                     break;
+                case 0x82: // login error
+                    
+                    break;
             }
         }
 

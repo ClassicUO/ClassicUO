@@ -1270,7 +1270,7 @@ namespace ClassicUO.Network
 
         private static void LoginError(Packet p)
         {
-            byte errorCode = p.ReadByte();
+
         }
 
         private static void ResendCharacterList(Packet p)
