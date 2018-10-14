@@ -339,7 +339,7 @@ namespace ClassicUO.Network
             }
         }
 
-        public static event EventHandler Connected, Disconnected;
+        public event EventHandler Connected, Disconnected;
         public static event EventHandler<Packet> PacketReceived, PacketSended;
 
 

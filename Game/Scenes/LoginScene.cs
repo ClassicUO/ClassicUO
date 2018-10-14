@@ -73,8 +73,8 @@ namespace ClassicUO.Game.Scenes
             UIManager.Add(new LoginGump());
 
             // Registering Packet Events
-            NetClient.Connected += NetClient_Connected;
-            NetClient.Disconnected += NetClient_Disconnected;
+            NetClient.LoginSocket.Connected += NetClient_Connected;
+            NetClient.LoginSocket.Disconnected += NetClient_Disconnected;
             NetClient.PacketReceived += NetClient_PacketReceived;
 
             var settings = Service.Get<Settings>();
@@ -90,9 +90,9 @@ namespace ClassicUO.Game.Scenes
             UIManager.Remove<LoginGump>();
             Service.Unregister<LoginScene>();
 
-            // UnRegistering Packet Events
-            NetClient.Connected -= NetClient_Connected;
-            NetClient.Disconnected -= NetClient_Disconnected;
+            // UnRegistering Packet Events           
+            NetClient.Socket.Connected -= NetClient_Connected;
+            NetClient.Socket.Disconnected -= NetClient_Disconnected;
             NetClient.PacketReceived -= NetClient_PacketReceived;
         }
 
@@ -187,6 +187,8 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
 
             NetClient.LoginSocket.Disconnect();
+            NetClient.LoginSocket.Connected -= NetClient_Connected;
+            NetClient.LoginSocket.Disconnected -= NetClient_Disconnected;
         }
 
         private void ParseServerList(Packet reader)

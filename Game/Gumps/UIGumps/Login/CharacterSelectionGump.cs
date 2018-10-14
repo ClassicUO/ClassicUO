@@ -85,11 +85,9 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 AddChildren(new ResizePic(0x0BB8) { X = 0, Y = 0, Width = 280, Height = 30 });
 
                 // Char Name
-                AddChildren(new Label(character.Name, false, 0x034F, 270, font: 5, align: IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER)
+                AddChildren(new Label(character.Name, false, 0x034F, 270, 5, align: IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER)
                 {
-                    X = 5,
-                    Y = 0,
-                    Width = 270
+                    X = 0
                 });
 
                 AcceptMouseInput = true;

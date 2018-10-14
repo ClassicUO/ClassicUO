@@ -305,7 +305,6 @@ namespace ClassicUO.IO.Resources
         private static bool GeneratePixelsASCII(out FontTexture ftexture, byte font, string str, ushort color,
             int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
-            uint[] pData;
             ftexture = null;
 
             if (font >= FontCount)
@@ -343,7 +342,7 @@ namespace ClassicUO.IO.Resources
             }
 
             int blocksize = height * width;
-            pData = new uint[blocksize];
+            uint[] pData = new uint[blocksize];
 
             int lineOffsY = 0;
             MultilinesFontInfo ptr = info;
@@ -363,7 +362,7 @@ namespace ClassicUO.IO.Resources
                 {
                     case TEXT_ALIGN_TYPE.TS_CENTER:
                     {
-                        w = (w - 10 - ptr.Width) / 2;
+                        w = (width - 10 - ptr.Width) / 2;
                         if (w < 0)
                             w = 0;
                         break;
