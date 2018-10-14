@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             _scrollArea = new ScrollArea(20, 60, 295, 190, true) { AcceptMouseInput = true };
             AddChildren(_scrollArea);
-            AddChildren(new Label("PM", true, 1153) { X = 30, Y = 25 });
+            AddChildren(new Label("Bar", true, 1153) { X = 30, Y = 25 });
             AddChildren(new Label("Kick", true, 1153) { X = 60, Y = 25 });
             AddChildren(new Label("Player", true, 1153) { X = 100, Y = 25 });
             AddChildren(new Label("Status", true, 1153) { X = 250, Y = 25 });
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
             AddChildren(Status);
             //======================================================
-            PMButton = new Button((int) Buttons.PM, 0xFBD, 0xFBE, 0xFBF)
+            PMButton = new Button((int) Buttons.GetBar, 0xFAE, 0xFAF, 0xFB0)
                 {X = 10, ButtonAction = ButtonAction.Activate};
             AddChildren(PMButton);
             //======================================================
@@ -234,18 +234,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     //
                     PartySystem.RemovePartyMember(Member.Serial);
                     break;
-                case Buttons.PM:
-                    if (UIManager.GetByLocalSerial<PartyMemberGump>() == null)
+                case Buttons.GetBar:
+                    if (!PartySystem.PartyMemberGumpStack.ContainsKey(Member))
                     {
-                        UIManager.Add(new PartyMemberGump(Member));
+                        PartyMemberGump partymemberGump = new PartyMemberGump(Member);
+                        UIManager.Add(partymemberGump);
+                        PartySystem.PartyMemberGumpStack.Add(Member, partymemberGump);
                     }
-                    else if (UIManager.GetByLocalSerial<PartyMemberGump>() != null && !UIManager.GetByLocalSerial<PartyMemberGump>().IsMemberGumpActive(Member))
-                    {
-                        UIManager.Add(new PartyMemberGump(Member));
-                    }
-                        
-                    
-                    break;
+                   break;
 
             }
         }
@@ -253,7 +249,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private enum Buttons
         {
             Kick = 1,
-            PM
+            GetBar
         }
 
 

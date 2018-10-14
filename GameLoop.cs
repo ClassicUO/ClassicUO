@@ -24,7 +24,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
@@ -124,7 +123,7 @@ namespace ClassicUO
 
             MaxFPS = settings.MaxFPS;
 
-            _sceneManager.ChangeScene(ScenesType.Loading);
+            _sceneManager.ChangeScene(ScenesType.Login);
 
             _infoText = new RenderedText
             {
@@ -134,11 +133,7 @@ namespace ClassicUO
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 MaxWidth = 150
             };
-
-            // ##### START TEST #####
-            TEST(settings);
-            // #####  END TEST  #####
-
+            
             base.Initialize();
         }
 
@@ -148,78 +143,7 @@ namespace ClassicUO
 
             base.UnloadContent();
         }
-
-        private Action _secondConnection;
-        private bool _doSecondConnection;
-
-        private void TEST(Settings settings)
-        {
-            string[] parts = settings.ClientVersion.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
-            byte[] clientVersionBuffer =
-                {byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])};
-
-            NetClient.Connected += (sender, e) =>
-            {
-                Log.Message(LogTypes.Info, "Connected!");
-
-                NetClient.LoginSocket.Send(new PSeed(NetClient.Socket.ClientAddress, clientVersionBuffer));
-                NetClient.LoginSocket.Send(new PFirstLogin(settings.Username, settings.Password));
-            };
-
-            NetClient.Disconnected += (sender, e) => Log.Message(LogTypes.Warning, "Disconnected!");
-
-            NetClient.PacketReceived += (sender, e) =>
-            {
-                switch (e.ID)
-                {
-                    case 0xA8:
-                        NetClient.LoginSocket.Send(new PSelectServer(0));
-                        break;
-                    case 0x8C:
-                        //NetClient.LoginSocket.EnableCompression();
-                        e.Seek(0);
-                        e.MoveToData();
-
-                        byte[] ipbytes = new byte[4] {e.ReadByte(), e.ReadByte(), e.ReadByte(), e.ReadByte()};
-                        ushort port = e.ReadUShort();
-                        uint seed = e.ReadUInt();
-
-                        //_secondConnection = () =>
-                        //{
-
-                        //};
-
-                        NetClient.Socket.Connect(new IPAddress(ipbytes), port);
-                        NetClient.Socket.EnableCompression();
-
-                        NetClient.Socket.Send(new PSeed(seed, clientVersionBuffer));
-                        NetClient.Socket.Send(new PSecondLogin(settings.Username, settings.Password, seed));
-
-                        NetClient.LoginSocket.Disconnect();
-                        _doSecondConnection = true;
-
-                        break;
-                    case 0xA9:
-                        NetClient.Socket.Send(new PSelectCharacter(0, settings.LastCharacterName,
-                            NetClient.Socket.ClientAddress));
-                        break;
-                    case 0xBD:
-                        NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
-                        break;
-                    case 0xBE:
-                        NetClient.Socket.Send(new PAssistVersion(settings.ClientVersion, e.ReadUInt()));
-                        break;
-                    case 0x55:
-                        NetClient.Socket.Send(new PClientViewRange(24));
-                        break;
-                }
-            };
-
-            _doSecondConnection = false;
-            NetClient.LoginSocket.Connect(settings.IP, settings.Port);
-        }
-
-
+        
         protected override void OnInputUpdate(double totalMS, double frameMS)
         {
             _inputManager.Update(totalMS, frameMS);
@@ -227,15 +151,6 @@ namespace ClassicUO
 
         protected override void OnNetworkUpdate(double totalMS, double frameMS)
         {
-
-            //if (_doSecondConnection)
-            //{
-            //    _secondConnection();
-
-            //    _doSecondConnection = false;
-            //}    
-
-            NetClient.LoginSocket.Slice();
             NetClient.Socket.Slice();
         }
 

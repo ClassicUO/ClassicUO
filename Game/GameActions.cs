@@ -59,7 +59,7 @@ namespace ClassicUO.Game
             => Socket.Send(new PUnicodeSpeechRequest(message, type, font, hue, "ENU"));
 
         public static void SayParty(string message)
-            => Socket.Send(new PPartyMessage(message, World.Player));
+            => Socket.Send(new PPartyMessage(message, 0));
 
         public static void RequestPartyRemoveMember(Serial serial)
             => Socket.Send(new PPartyRemoveRequest(serial));
