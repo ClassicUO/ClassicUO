@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Gumps
                 Y = y,
                 CanMove = true,
                 CanCloseWithRightClick = true,
-                CanCloseWithEsc = true
+                CanCloseWithEsc = true,
             };
 
             int group = 0;

@@ -353,10 +353,10 @@ namespace ClassicUO.Game.Gumps.Controls
 
                 if (!IgnoreParentFill)
                 {
-                    if (w != Width)                  
+                    if (w != Width)
                         Width = w;
                     if (h != Height)
-                        Height = h;              
+                        Height = h;
                 }
 
                 if (toremove.Count > 0)
