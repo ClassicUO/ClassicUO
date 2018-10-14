@@ -27,10 +27,12 @@ using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
+using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameObject : IUpdateable
+    public abstract class GameObject : IUpdateable, ISmoothMovable
     {
         private readonly List<TextOverhead> _overHeads;
         private Tile _tile;
@@ -73,6 +75,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public Vector3 Offset { get; set; }
         public Facet Map { get; set; }
         public bool IsDisposed { get; private set; }
 

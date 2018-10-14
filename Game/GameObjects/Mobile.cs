@@ -62,7 +62,7 @@ namespace ClassicUO.Game.GameObjects
         FastUnmountAndCantRun
     }
 
-    public partial class Mobile : Entity, ISmoothMovable
+    public partial class Mobile : Entity
     {
         protected const int MAX_STEP_COUNT = 5;
         protected const int TURN_DELAY = 100;
@@ -268,7 +268,6 @@ namespace ClassicUO.Game.GameObjects
         public bool AnimationFromServer { get; set; }
         public bool AnimationDirection { get; set; }
 
-        public Vector3 Offset { get; set; }
 
         public long LastStepTime { get; set; }
 
@@ -294,7 +293,6 @@ namespace ClassicUO.Game.GameObjects
             base.Update(totalMS, frameMS);
             ProcessAnimation();
         }
-
 
         protected override void OnProcessDelta(Delta d)
         {
@@ -502,10 +500,10 @@ namespace ClassicUO.Game.GameObjects
                             float x = frameOffset;
                             float y = frameOffset;
 
-                            GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
+                            MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
 
-                            Offset = new Vector3((sbyte) x, (sbyte) y,
-                                (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
+                            Offset = new Vector3((sbyte)x, (sbyte)y,
+                                (int)((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
                         }
 
                         turnOnly = false;
@@ -661,91 +659,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        private static void GetPixelOffset(byte dir, ref float x, ref float y, float framesPerTile)
-        {
-            float step_NESW_D = 44.0f / framesPerTile;
-            float step_NESW = 22.0f / framesPerTile;
-
-            int checkX = 22;
-            int checkY = 22;
-
-            switch (dir & 7)
-            {
-                case 0:
-                {
-                    x *= step_NESW;
-                    y *= -step_NESW;
-                    break;
-                }
-                case 1:
-                {
-                    x *= step_NESW_D;
-                    checkX = 44;
-                    y = 0.0f;
-                    break;
-                }
-                case 2:
-                {
-                    x *= step_NESW;
-                    y *= step_NESW;
-                    break;
-                }
-                case 3:
-                {
-                    x = 0.0f;
-                    y *= step_NESW_D;
-                    checkY = 44;
-                    break;
-                }
-                case 4:
-                {
-                    x *= -step_NESW;
-                    y *= step_NESW;
-                    break;
-                }
-                case 5:
-                {
-                    x *= -step_NESW_D;
-                    checkX = 44;
-                    y = 0.0f;
-                    break;
-                }
-                case 6:
-                {
-                    x *= -step_NESW;
-                    y *= -step_NESW;
-                    break;
-                }
-                case 7:
-                {
-                    x = 0.0f;
-                    y *= -step_NESW_D;
-                    checkY = 44;
-                    break;
-                }
-            }
-
-            int valueX = (int) x;
-
-
-            if (Math.Abs(valueX) > checkX)
-            {
-                if (valueX < 0)
-                    x = -checkX;
-                else
-                    x = checkX;
-            }
-
-            int valueY = (int) y;
-
-            if (Math.Abs(valueY) > checkY)
-            {
-                if (valueY < 0)
-                    y = -checkY;
-                else
-                    y = checkY;
-            }
-        }
 
         public override void Dispose()
         {

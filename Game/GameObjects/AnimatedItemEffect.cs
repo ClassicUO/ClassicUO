@@ -21,7 +21,9 @@
 
 #endregion
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Views;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -97,6 +99,9 @@ namespace ClassicUO.Game.GameObjects
 
                 (int x, int y, int z) = GetSource();
 
+                if (Source != null)
+                    Offset = Source.Offset;
+               
                 if (Position.X != x || Position.Y != y || Position.Z != z)
                 {
                     Position = new Position((ushort)x, (ushort)y, (sbyte)z);

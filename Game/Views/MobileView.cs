@@ -35,7 +35,11 @@ namespace ClassicUO.Game.Views
         private readonly ViewLayer[] _frames;
         private int _layerCount;
 
-        public MobileView(Mobile mobile) : base(mobile) => _frames = new ViewLayer[(int) Layer.InnerLegs];
+        public MobileView(Mobile mobile) : base(mobile)
+        {
+            _frames = new ViewLayer[(int)Layer.InnerLegs];
+            HasShadow = true;
+        } 
 
 
         public Rectangle BoudsStrange { get; set; }
@@ -52,7 +56,7 @@ namespace ClassicUO.Game.Views
             if (GameObject.IsDisposed)
                 return false;
 
-            spriteBatch.GetZ();
+            ShadowZDepth = spriteBatch.GetZ();
 
             Mobile mobile = (Mobile) GameObject;
 

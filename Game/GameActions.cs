@@ -119,5 +119,8 @@ namespace ClassicUO.Game
 
         public static void CastSpell(int index)
             => Socket.Send(new PCastSpell(index));
+
+        public static void OpenGuildGump()
+            => Socket.Send(new PGuildMenuRequest());
     }
 }

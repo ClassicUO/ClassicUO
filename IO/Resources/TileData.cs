@@ -65,6 +65,9 @@ namespace ClassicUO.IO.Resources
                 tiledata.Skip(4);
                 for (int j = 0; j < 32; j++)
                 {
+                    if (tiledata.Position + (isold ? 4 : 8) + 2 + 20 > tiledata.Length)
+                        goto END;
+                    
                     int idx = i * 32 + j;
                     LandData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     LandData[idx].TexID = tiledata.ReadUShort();
@@ -74,11 +77,16 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
+            END:
+
             for (int i = 0; i < staticscount; i++)
             {
                 tiledata.Skip(4);
                 for (int j = 0; j < 32; j++)
                 {
+                    if (tiledata.Position + (isold ? 4 : 8) + 13 + 20 > tiledata.Length)
+                        goto END_2;
+
                     int idx = i * 32 + j;
                     StaticData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     StaticData[idx].Weight = tiledata.ReadByte();
@@ -93,6 +101,8 @@ namespace ClassicUO.IO.Resources
                     StaticData[idx].Name = Encoding.UTF8.GetString(bufferString).TrimEnd('\0');
                 }
             }
+
+            END_2:
 
 
             tiledata.Unload();

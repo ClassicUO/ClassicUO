@@ -62,7 +62,7 @@ namespace ClassicUO.IO.Resources
         HTT_LEFT,
         HTT_CENTER,
         HTT_RIGHT,
-        HTT_DIV
+        HTT_DIV,  
     }
 
     public static class Fonts
@@ -305,7 +305,6 @@ namespace ClassicUO.IO.Resources
         private static bool GeneratePixelsASCII(out FontTexture ftexture, byte font, string str, ushort color,
             int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
-            uint[] pData;
             ftexture = null;
 
             if (font >= FontCount)
@@ -343,7 +342,7 @@ namespace ClassicUO.IO.Resources
             }
 
             int blocksize = height * width;
-            pData = new uint[blocksize];
+            uint[] pData = new uint[blocksize];
 
             int lineOffsY = 0;
             MultilinesFontInfo ptr = info;
@@ -363,7 +362,7 @@ namespace ClassicUO.IO.Resources
                 {
                     case TEXT_ALIGN_TYPE.TS_CENTER:
                     {
-                        w = (w - 10 - ptr.Width) / 2;
+                        w = (width - 10 - ptr.Width) / 2;
                         if (w < 0)
                             w = 0;
                         break;
@@ -1842,6 +1841,7 @@ namespace ClassicUO.IO.Resources
                 i++;
             }
 
+
             while (str[i] == ' ' && i < len)
                 i++;
 
@@ -1928,6 +1928,21 @@ namespace ClassicUO.IO.Resources
                     case "div":
                         tag = HTML_TAG_TYPE.HTT_DIV;
                         break;
+
+                    default:
+
+                        if (str.Contains("bodybgcolor"))
+                        {
+                            tag = HTML_TAG_TYPE.HTT_BODY;
+
+                            j = str.IndexOf("bgcolor", StringComparison.Ordinal);
+                        }
+                        else
+                        {
+                            Log.Message(LogTypes.Warning, $"Unhandled HTML param:\t{str}");
+                        }
+
+                        break;
                 }
 
 
@@ -1943,6 +1958,8 @@ namespace ClassicUO.IO.Resources
                             case HTML_TAG_TYPE.HTT_BASEFONT:
                             case HTML_TAG_TYPE.HTT_A:
                             case HTML_TAG_TYPE.HTT_DIV:
+
+                            
 
                                 cmdLen = i - j;
                                 string content = str.Substring(j, cmdLen);
@@ -2071,7 +2088,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            if (l == null || !l.HasValue)
+            if (!l.HasValue)
             {
                 linkID = (ushort) (_webLinks.Count + 1);
                 _webLinks[linkID] = new WebLink {IsVisited = false, Link = link};
@@ -2088,13 +2105,10 @@ namespace ClassicUO.IO.Resources
 
         public static bool GetWebLink(ushort link, out WebLink result)
         {
-            if (_webLinks.TryGetValue(link, out result))
-            {
-                result.IsVisited = true;
-                return true;
-            }
+            if (!_webLinks.TryGetValue(link, out result)) return false;
+            result.IsVisited = true;
+            return true;
 
-            return false;
         }
 
         private static unsafe uint GetHTMLColorFromText(ref string str)

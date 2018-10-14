@@ -86,8 +86,17 @@ namespace ClassicUO.Game.GameObjects
             Items.Removed += ItemsOnAddedAndDeleted;
         }
 
+        private GameEffect _effect;
 
-        public GameEffect Effect { get; set; }
+        public GameEffect Effect
+        {
+            get => _effect;
+            set
+            {
+                _effect?.Dispose();
+                _effect = value;
+            }
+        }
 
         public ushort Amount
         {

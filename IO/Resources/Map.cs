@@ -48,30 +48,37 @@ namespace ClassicUO.IO.Resources
 
         public static void Load()
         {
-            string path = string.Empty;
+            string path;
+
+            bool foundedOneMap = false;
 
             for (int i = 0; i < MAPS_COUNT; i++)
             {
-                path = Path.Combine(FileManager.UoFolderPath, string.Format("map{0}LegacyMUL.uop", i));
+                path = Path.Combine(FileManager.UoFolderPath, $"map{i}LegacyMUL.uop");
                 if (File.Exists(path))
+                {
                     _filesMap[i] = new UOFileUop(path, ".dat");
+                    foundedOneMap = true;
+                }
                 else
                 {
-                    path = Path.Combine(FileManager.UoFolderPath, string.Format("map{0}.mul", i));
-                    if (!File.Exists(path))
-                        throw new FileNotFoundException();
-
-                    _filesMap[i] = new UOFileMul(path);
+                    path = Path.Combine(FileManager.UoFolderPath, $"map{i}.mul");
+                    if (File.Exists(path))
+                    {
+                        _filesMap[i] = new UOFileMul(path);
+                        foundedOneMap = true;
+                    }
                 }
 
-
-                path = Path.Combine(FileManager.UoFolderPath, string.Format("statics{0}.mul", i));
+                path = Path.Combine(FileManager.UoFolderPath, $"statics{i}.mul");
                 if (File.Exists(path)) _filesStatics[i] = new UOFileMul(path);
 
-                path = Path.Combine(FileManager.UoFolderPath, string.Format("staidx{0}.mul", i));
+                path = Path.Combine(FileManager.UoFolderPath, $"staidx{i}.mul");
                 if (File.Exists(path)) _filesIdxStatics[i] = new UOFileMul(path);
             }
 
+            if (!foundedOneMap)
+                throw new FileNotFoundException("No maps founded.");
 
             int mapblocksize = Marshal.SizeOf<MapBlock>();
 

@@ -47,8 +47,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public EventHandler ColorSelectedIndex;
 
-        public ColorPickerBox(int x, int y, int rows = 10, int columns = 20, int cellW = 8, int cellH = 8,
-            int graduation = 0)
+        public ColorPickerBox(int x, int y, int rows = 10, int columns = 20, int cellW = 8, int cellH = 8)
         {
             X = x;
             Y = y;
@@ -97,13 +96,16 @@ namespace ClassicUO.Game.Gumps.Controls
         public ushort SelectedHue =>
             SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
 
-        public void SetHue(ushort hue)
+        public void SetHue(ushort hue)     
+            => SetHue(Hues.RgbaToArgb((Hues.GetPolygoneColor(12, hue) << 8) | 0xFF));
+        
+        public void SetHue(uint hue)
         {
             if (_colorTable != null && !_colorTable.IsDisposed)
                 _colorTable.Dispose();
 
             _colorTable = new SpriteTexture(1, 1);
-            uint[] color = new uint[1] {Hues.RgbaToArgb((Hues.GetPolygoneColor(12, hue) << 8) | 0xFF)};
+            uint[] color = new uint[1] { hue };
             _colorTable.SetData(color);
         }
 
@@ -118,6 +120,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             base.Update(totalMS, frameMS);
         }
+
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {

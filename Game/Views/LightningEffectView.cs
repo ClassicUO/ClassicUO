@@ -26,8 +26,6 @@ namespace ClassicUO.Game.Views
             new Point(80, 0)
         };
 
-        private Graphic _displayedGraphic = Graphic.Invalid;
-
         public LightningEffectView(LightningEffect effect) : base(effect)
         {
 
@@ -37,27 +35,30 @@ namespace ClassicUO.Game.Views
         {
             PreDraw(position);
 
-            return base.Draw(spriteBatch, position, list);
+            return base.DrawInternal(spriteBatch, position, list);
         }
+
+        private Graphic _displayed = Graphic.Invalid;
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             LightningEffect effect = (LightningEffect) GameObject;
 
-            if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
+            if (effect.AnimationGraphic != _displayed || Texture == null || Texture.IsDisposed)
             {
-                if (effect.AnimationGraphic > 0x4E29)
+                _displayed = effect.AnimationGraphic;
+
+                if (_displayed > 0x4E29)
                     return false;
 
-                _displayedGraphic = effect.AnimationGraphic;
-                Texture = Art.GetStaticTexture(effect.AnimationGraphic);
-                Point offset = _offsets[_displayedGraphic - 20000];
+                Texture = IO.Resources.Gumps.GetGumpTexture(_displayed);
+                Point offset = _offsets[_displayed - 20000];
                 Bounds = new Rectangle(offset.X, Texture.Height - 33 + (effect.Position.Z * 4)+ offset.Y, Texture.Width, Texture.Height);
             }
 
             HueVector = RenderExtentions.GetHueVector(effect.Hue);
 
-            return base.DrawInternal(spriteBatch, position, objectList);
+            return base.Draw(spriteBatch, position, objectList);
         }
     }
 }

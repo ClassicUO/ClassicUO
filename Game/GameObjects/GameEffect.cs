@@ -29,7 +29,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameEffect : GameObject, IDeferreable, ISmoothMovable
+    public abstract class GameEffect : GameObject, IDeferreable
     {
         private readonly List<GameEffect> _children;
 
@@ -54,10 +54,11 @@ namespace ClassicUO.Game.GameObjects
         public int Speed { get; set; }
         public long LastChangeFrameTime { get; set; }
         public bool IsEnabled { get; set; }
-        public Graphic AnimationGraphic { get; private set; }
+        public Graphic AnimationGraphic { get; set; } = Graphic.Invalid;
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
         public DeferredEntity DeferredObject { get; set; }
         public GraphicEffectBlendMode Blend { get; set; }
+        public bool IsItemEffect => Source is Item item && item.OnGround;
 
         public void Load()
         {
@@ -84,10 +85,20 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (LastChangeFrameTime < totalMS)
                 {
-                    AnimationGraphic = (Graphic)(Graphic + AnimDataFrame.FrameData[AnimIndex]);
-                    AnimIndex++;
 
-                    if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte)AnimDataFrame.FrameStart;
+                    if (AnimDataFrame.FrameCount > 0)
+                    {
+                        AnimationGraphic = (Graphic)(Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                        AnimIndex++;
+
+                        if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte)AnimDataFrame.FrameStart;
+                    }
+                    else
+                    {
+                        if (Graphic != AnimationGraphic)
+                            AnimationGraphic = Graphic;
+                    }
+
 
                     LastChangeFrameTime = (long)totalMS + Speed;
                 }
@@ -97,7 +108,6 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public long Duration { get; set; } = -1;
-        public Vector3 Offset { get; set; }
 
         //public int CurrentFrame => (int)(LastChangeFrameTime / 50d);
 

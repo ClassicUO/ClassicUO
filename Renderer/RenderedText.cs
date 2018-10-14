@@ -67,7 +67,7 @@ namespace ClassicUO.Renderer
         public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
         public Hue Hue { get; set; }
         public uint HTMLColor { get; set; } = 0xFFFFFFFF;
-        public bool ColorBackground { get; set; }
+        public bool HasBackgroundColor { get; set; }
 
         public string Text
         {
@@ -164,7 +164,7 @@ namespace ClassicUO.Renderer
         private Fonts.FontTexture InternalCreateTexture()
         {
             if (IsHTML)
-                Fonts.SetUseHTML(true, HTMLColor, ColorBackground);
+                Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
 
             Fonts.FontTexture ftexture;
 

@@ -51,7 +51,6 @@ namespace ClassicUO.Game.GameObjects
                     effect = new AnimatedItemEffect(srcPos.X, srcPos.Y, srcPos.Z, graphic, hue, duration)
                     {
                         Blend = blendmode,
-                        Tile = World.Map.GetTile(srcPos.X, srcPos.Y),
                     };
                     break;
                 case GraphicEffectType.FixedFrom:
@@ -60,7 +59,6 @@ namespace ClassicUO.Game.GameObjects
                     effect = new AnimatedItemEffect(source, srcPos.X, srcPos.Y, srcPos.Z, graphic, hue, duration)
                     {
                         Blend = blendmode,
-                        Tile = World.Map.GetTile(srcPos.X, srcPos.Y),
                     };
                     break;
                 case GraphicEffectType.ScreenFade:

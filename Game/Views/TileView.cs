@@ -54,7 +54,7 @@ namespace ClassicUO.Game.Views
 
         public TileView(Tile tile) : base(tile)
         {
-            tile.IsStretched = !(tile.TileData.TexID <= 0 && TileData.IsWet((long) tile.TileData.Flags));
+            tile.IsStretched = tile.TileData.TexID > 0; // !(tile.TileData.TexID <= 0 && TileData.IsWet((long) tile.TileData.Flags));
             AllowedToDraw = !tile.IsIgnored;
             tile.AverageZ = SortZ;
             tile.MinZ = tile.Position.Z;

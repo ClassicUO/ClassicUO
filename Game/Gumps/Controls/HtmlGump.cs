@@ -135,7 +135,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 else
                     _gameText.Hue = (ushort) hue;
 
-                _gameText.ColorBackground = !HasBackground;
+                _gameText.HasBackgroundColor = !HasBackground;
                 _gameText.Text = text;
             }
 
@@ -167,8 +167,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 ScrollY = _scrollBar.Value;
             }
 
-            if (Width != _gameText.Width)
-                Width = _gameText.Width;
+            //if (Width != _gameText.Width)
+            //    Width = _gameText.Width;
         }
 
 

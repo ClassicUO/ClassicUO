@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -39,7 +40,7 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-            if (((AnimatedItemEffect) GameObject).IsMoving)
+            if (!((AnimatedItemEffect) GameObject).IsItemEffect)
                 PreDraw(position);
 
             return DrawInternal(spriteBatch, position, objectList);
@@ -52,13 +53,19 @@ namespace ClassicUO.Game.Views
                 return false;
 
             AnimatedItemEffect effect = (AnimatedItemEffect) GameObject;
+
             if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _displayedGraphic = effect.AnimationGraphic;
                 Texture = Art.GetStaticTexture(effect.AnimationGraphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4,
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + effect.Position.Z * 4,
                     Texture.Width, Texture.Height);
             }
+
+            
+            Bounds.X = Texture.Width / 2 - 22 - (int) effect.Offset.X;
+            Bounds.Y = Texture.Height - 44 + (int) (effect.Offset.Z / 4 + effect.Position.Z * 4) -
+                       (int) effect.Offset.Y;
 
             HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 
