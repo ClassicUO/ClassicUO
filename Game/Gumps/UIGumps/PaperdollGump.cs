@@ -24,6 +24,7 @@
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -246,7 +247,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
 
                 case Buttons.Guild:
-                    //
+                    NetClient.Socket.Send(new PGuildMenuRequest());
                     break;
 
                 case Buttons.PeaceWarToggle:

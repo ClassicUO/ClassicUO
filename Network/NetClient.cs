@@ -509,7 +509,7 @@ namespace ClassicUO.Network
             }
         }
 
-        public void Send(byte[] data)
+        private void Send(byte[] data)
         {
             if (_socket == null) return;
 
