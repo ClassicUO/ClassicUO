@@ -400,45 +400,21 @@ namespace ClassicUO.Network
 
                 if (type >= 6)
                 {
-                    World.Player.MaxPhysicRes = p.ReadUShort();
-                    World.Player.MaxFireRes = p.ReadUShort();
-                    World.Player.MaxColdRes = p.ReadUShort();
-                    World.Player.MaxPoisonRes = p.ReadUShort();
-                    World.Player.MaxEnergyRes = p.ReadUShort();
-                    World.Player.DefenseChanceInc = p.ReadUShort();
-                    World.Player.MaxDefChance = p.ReadUShort();
-                    World.Player.HitChanceInc = p.ReadUShort();
-                    World.Player.SwingSpeedInc = p.ReadUShort();
-                    World.Player.DamageChanceInc = p.ReadUShort();
-                    World.Player.LowerReagentCost = p.ReadUShort();
-                    World.Player.SpellDamageInc = p.ReadUShort();
-                    World.Player.FasterCastRecovery = p.ReadUShort();
-                    World.Player.FasterCasting = p.ReadUShort();
-                    World.Player.LowerManaCost = p.ReadUShort();
-
-                    //World.Player.HitChanceInc = p.ReadUShort();
-                    //World.Player.SwingSpeedInc = p.ReadUShort();
-                    //World.Player.DamageChanceInc = p.ReadUShort();
-                    //World.Player.LowerReagentCost = p.ReadUShort();
-                    //World.Player.HitPointsRegen = p.ReadUShort();
-                    //World.Player.StaminaRegen = p.ReadUShort(); 
-                    //World.Player.ManaRegen = p.ReadUShort(); 
-                    //World.Player.ReflectPhysicalDamage = p.ReadUShort();
-                    //World.Player.EnhancePotions = p.ReadUShort();
-                    //World.Player.DefenseChanceInc = p.ReadUShort();
-                    //World.Player.SpellDamageInc = p.ReadUShort();
-                    //World.Player.FasterCastRecovery = p.ReadUShort();
-                    //World.Player.FasterCasting = p.ReadUShort();
-                    //World.Player.LowerManaCost = p.ReadUShort();
-                    //World.Player.StrengthInc = p.ReadUShort();
-                    //World.Player.DexterityInc = p.ReadUShort();
-                    //World.Player.IntelligenceInc = p.ReadUShort();
-                    //World.Player.HitPointsInc = p.ReadUShort();
-                    //World.Player.StaminaInc = p.ReadUShort();
-                    //World.Player.ManaInc = p.ReadUShort();
-                    //World.Player.MaximumHitPointsInc = p.ReadUShort();
-                    //World.Player.MaximumStaminaInc = p.ReadUShort();
-                    //World.Player.MaximumManaInc = p.ReadUShort();
+                    World.Player.MaxPhysicRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.MaxFireRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.MaxColdRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.MaxPoisonRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.MaxEnergyRes = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.DefenseChanceInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.MaxDefChance = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.HitChanceInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.SwingSpeedInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.DamageChanceInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.LowerReagentCost = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.SpellDamageInc = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.FasterCastRecovery = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.FasterCasting = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
+                    World.Player.LowerManaCost = p.Position + 2 > p.Length ? (ushort)0 : p.ReadUShort();
                 }
             }
 
@@ -1116,7 +1092,7 @@ namespace ClassicUO.Network
             GraphicEffectBlendMode blendmode = 0;
             if (p.ID != 0x70)
             {
-                hue = p.ReadUShort();
+                hue = (ushort)p.ReadUInt();
                 blendmode = (GraphicEffectBlendMode) p.ReadUInt();
             }
 
