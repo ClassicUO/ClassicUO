@@ -246,6 +246,13 @@ namespace ClassicUO.Network
 //        }
 //    }
 
+
+    public enum SocketConnectionType
+    {
+        Login,
+        Game
+    }
+
     public sealed class NetClient
     {
         private const int BUFF_SIZE = 0x10000;
@@ -268,6 +275,45 @@ namespace ClassicUO.Network
 
         public static NetClient LoginSocket { get; } = new NetClient();
         public static NetClient Socket { get; } = new NetClient();
+
+        //public static NetClient Socket
+        //{
+        //    get
+        //    {
+        //        switch (ConnectionType)
+        //        {
+        //            case SocketConnectionType.Game: return _gameSocket;
+        //            case SocketConnectionType.Login: return _loginSocket;
+        //        }
+
+        //        return null;
+        //    }
+        //}
+
+        //private static NetClient _gameSocket, _loginSocket;
+
+        //public static SocketConnectionType ConnectionType { get; private set; }
+
+        //public static void SwitchSocket(SocketConnectionType type)
+        //{
+        //    switch (type)
+        //    {
+        //        case SocketConnectionType.Game:
+        //            _loginSocket?.Disconnect();
+        //            _loginSocket = null;
+
+        //            _gameSocket = new NetClient();
+        //            break;
+        //        case SocketConnectionType.Login:
+        //            _gameSocket?.Disconnect();
+        //            _gameSocket = null;
+
+        //            _loginSocket = new NetClient();
+        //            break;
+        //    }
+
+        //    ConnectionType = type;
+        //}
 
         public bool IsConnected => _socket != null && _socket.Connected;
 
@@ -455,6 +501,7 @@ namespace ClassicUO.Network
                         if (BUFF_SIZE >= packetlength) _pool.AddFreeSegment(data);
                         break;
                     }
+
                     length = _circularBuffer.Length;
 
                     if (BUFF_SIZE >= packetlength) _pool.AddFreeSegment(data);

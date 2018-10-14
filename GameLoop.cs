@@ -151,6 +151,7 @@ namespace ClassicUO
 
         protected override void OnNetworkUpdate(double totalMS, double frameMS)
         {
+            NetClient.LoginSocket.Slice();
             NetClient.Socket.Slice();
         }
 

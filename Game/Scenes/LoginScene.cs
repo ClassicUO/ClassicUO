@@ -31,6 +31,7 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using System;
 using System.ComponentModel;
+using System.Net;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -49,6 +50,8 @@ namespace ClassicUO.Game.Scenes
         }
 
         private LoginStep _loginStep = LoginStep.Main;
+
+        private byte[] _clientVersionBuffer;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -73,6 +76,13 @@ namespace ClassicUO.Game.Scenes
             NetClient.Connected += NetClient_Connected;
             NetClient.Disconnected += NetClient_Disconnected;
             NetClient.PacketReceived += NetClient_PacketReceived;
+
+            var settings = Service.Get<Settings>();
+            string[] parts = settings.ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            _clientVersionBuffer = new []
+            {
+                byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])
+            };
         }
         
         public override void Unload()
@@ -94,7 +104,8 @@ namespace ClassicUO.Game.Scenes
                 Password = password;
 
                 var settings = Service.Get<Settings>();
-                NetClient.Socket.Connect(settings.IP, settings.Port);
+
+                NetClient.LoginSocket.Connect(settings.IP, settings.Port);
 
                 CurrentLoginStep = LoginStep.Connecting;
             }
@@ -105,7 +116,7 @@ namespace ClassicUO.Game.Scenes
             if (CurrentLoginStep == LoginStep.ServerSelection)
             {
                 CurrentLoginStep = LoginStep.LoginInToServer;
-                NetClient.Socket.Send(new PSelectServer(index));
+                NetClient.LoginSocket.Send(new PSelectServer(index));
             }
         }
 
@@ -123,15 +134,10 @@ namespace ClassicUO.Game.Scenes
             Log.Message(LogTypes.Info, "Connected!");
             CurrentLoginStep = LoginStep.VerifyingAccount;
 
-            var settings = Service.Get<Settings>();
-            string[] parts = settings.ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-            byte[] clientVersionBuffer =
-            {
-                byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])
-            };
+           
 
-            NetClient.Socket.Send(new PSeed(NetClient.Socket.ClientAddress, clientVersionBuffer));
-            NetClient.Socket.Send(new PFirstLogin(Account, Password));
+            NetClient.LoginSocket.Send(new PSeed(NetClient.LoginSocket.ClientAddress, _clientVersionBuffer));
+            NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
         }
 
         private void NetClient_Disconnected(object sender, global::System.EventArgs e)
@@ -165,13 +171,22 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void HandleRelayServerPacket(Packet reader)
+        private void HandleRelayServerPacket(Packet p)
         {
+            p.Seek(0);
+            p.MoveToData();
+
+            byte[] ip =  {p.ReadByte(), p.ReadByte(), p.ReadByte(), p.ReadByte()};
+            ushort port = p.ReadUShort();
+            uint seed = p.ReadUInt();
+            
+            NetClient.Socket.Connect(new IPAddress(ip), port);
             NetClient.Socket.EnableCompression();
-            reader.Seek(0);
-            reader.MoveToData();
-            reader.Skip(6);
-            NetClient.Socket.Send(new PSecondLogin(Account, Password, reader.ReadUInt()));
+
+            NetClient.Socket.Send(new PSeed(seed, _clientVersionBuffer));
+            NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
+
+            NetClient.LoginSocket.Disconnect();
         }
 
         private void ParseServerList(Packet reader)
