@@ -53,6 +53,8 @@ namespace ClassicUO.Game.GameObjects
                     Dispose();
                 else
                 {
+                    Graphic = (Graphic)(Graphic + AnimIndex++);
+
                     (int x, int y, int z) = GetSource();
 
                     if (Position.X != x || Position.Y != y || Position.Z != z)

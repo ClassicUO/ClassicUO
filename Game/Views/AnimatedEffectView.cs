@@ -58,15 +58,14 @@ namespace ClassicUO.Game.Views
             {
                 _displayedGraphic = effect.AnimationGraphic;
                 Texture = Art.GetStaticTexture(effect.AnimationGraphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4,
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + effect.Position.Z * 4,
                     Texture.Width, Texture.Height);
             }
 
-            if (effect.Offset != Vector3.Zero)
-            {
-                position.X += effect.Offset.X;
-                position.Y = position.Y - effect.Position.Z * 4 + (effect.Offset.Y - effect.Offset.Z) + (Texture.Height - 44 - 8);
-            }
+            
+            Bounds.X = Texture.Width / 2 - 22 - (int) effect.Offset.X;
+            Bounds.Y = Texture.Height - 44 + (int) (effect.Offset.Z / 4 + effect.Position.Z * 4) -
+                       (int) effect.Offset.Y;
 
             HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 

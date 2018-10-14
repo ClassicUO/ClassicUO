@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Data
@@ -41,6 +42,92 @@ namespace ClassicUO.Game.Data
             if (mounted) return run ? STEP_DELAY_MOUNT_RUN : STEP_DELAY_MOUNT_WALK;
 
             return run ? STEP_DELAY_RUN : STEP_DELAY_WALK;
+        }
+
+        public static void GetPixelOffset(byte dir, ref float x, ref float y, float framesPerTile)
+        {
+            float step_NESW_D = 44.0f / framesPerTile;
+            float step_NESW = 22.0f / framesPerTile;
+
+            int checkX = 22;
+            int checkY = 22;
+
+            switch (dir & 7)
+            {
+                case 0:
+                    {
+                        x *= step_NESW;
+                        y *= -step_NESW;
+                        break;
+                    }
+                case 1:
+                    {
+                        x *= step_NESW_D;
+                        checkX = 44;
+                        y = 0.0f;
+                        break;
+                    }
+                case 2:
+                    {
+                        x *= step_NESW;
+                        y *= step_NESW;
+                        break;
+                    }
+                case 3:
+                    {
+                        x = 0.0f;
+                        y *= step_NESW_D;
+                        checkY = 44;
+                        break;
+                    }
+                case 4:
+                    {
+                        x *= -step_NESW;
+                        y *= step_NESW;
+                        break;
+                    }
+                case 5:
+                    {
+                        x *= -step_NESW_D;
+                        checkX = 44;
+                        y = 0.0f;
+                        break;
+                    }
+                case 6:
+                    {
+                        x *= -step_NESW;
+                        y *= -step_NESW;
+                        break;
+                    }
+                case 7:
+                    {
+                        x = 0.0f;
+                        y *= -step_NESW_D;
+                        checkY = 44;
+                        break;
+                    }
+            }
+
+            int valueX = (int)x;
+
+
+            if (Math.Abs(valueX) > checkX)
+            {
+                if (valueX < 0)
+                    x = -checkX;
+                else
+                    x = checkX;
+            }
+
+            int valueY = (int)y;
+
+            if (Math.Abs(valueY) > checkY)
+            {
+                if (valueY < 0)
+                    y = -checkY;
+                else
+                    y = checkY;
+            }
         }
     }
 }

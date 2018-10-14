@@ -95,7 +95,8 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        AnimationGraphic = (Graphic) (Graphic + AnimIndex++);
+                        if (Graphic != AnimationGraphic)
+                            AnimationGraphic = Graphic;
                     }
 
 

@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
@@ -123,7 +124,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         UIManager.Remove<PaperDollGump>(World.Player);
                     break;
                 case Buttons.Inventory:
-                    Log.Message(LogTypes.Warning, "Inventory button pushed! Not implemented yet!");
+                    Item backpack = World.Player.Equipment[(int) Layer.Backpack];
+
+                    if (backpack != null && !backpack.IsDisposed)
+                    {
+                        if (UIManager.GetByLocalSerial(backpack) == null)
+                            GameActions.DoubleClick(backpack);
+                        else
+                            UIManager.Remove<Gump>(backpack);
+                    }
+
                     break;
                 case Buttons.Journal:
                     if (UIManager.GetByLocalSerial<JournalGump>() == null)

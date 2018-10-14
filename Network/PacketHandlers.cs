@@ -1120,7 +1120,6 @@ namespace ClassicUO.Network
                 blendmode = (GraphicEffectBlendMode) p.ReadUInt();
             }
 
-
             Service.Get<EffectManager>().Add(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDirection, doesExplode, false, blendmode);
         }
 
