@@ -208,10 +208,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>
-            base.Draw(spriteBatch, position, hue);
-
-
         public override void OnButtonClick(int buttonID)
         {
             switch ((Buttons) buttonID)
@@ -247,7 +243,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
 
                 case Buttons.Guild:
-                    NetClient.Socket.Send(new PGuildMenuRequest());
+                    GameActions.OpenGuildGump();
                     break;
 
                 case Buttons.PeaceWarToggle:

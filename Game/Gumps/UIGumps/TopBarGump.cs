@@ -149,7 +149,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.Help:
                     GameActions.RequestHelp();
-                    Log.Message(LogTypes.Info, "Help request sent!");
                     break;
                 case Buttons.Debug:
                     Log.Message(LogTypes.Warning, "Debug button pushed! Not implemented yet!");
