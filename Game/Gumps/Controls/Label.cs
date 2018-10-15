@@ -48,7 +48,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 IsUnicode = isunicode,
                 Font = font,
                 FontStyle = style,
-                Hue = hue++,
+                Hue = hue,
                 Align = align,
                 MaxWidth = maxwidth,
                 Text = text
@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Gumps.Controls
         }
 
         public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true,
-            TransformHue(Hue.Parse(parts[3])), 0, style: FontStyle.BlackBorder)
+            ((Hue)( Hue.Parse(parts[3]) + 1)), 0, style: FontStyle.BlackBorder)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

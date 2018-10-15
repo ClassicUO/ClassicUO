@@ -96,7 +96,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Vector3 huev =
                 RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver
                     ? GameScene.MouseOverItemHue
-                    : Item.Hue);
+                    : Item.Hue, TileData.IsPartialHue((long)Item.ItemData.Flags), 0, false);
 
             if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags) &&
                 Item.DisplayedGraphic == Item.Graphic)
@@ -195,7 +195,7 @@ namespace ClassicUO.Game.Gumps.Controls
                         Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth,
                             style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
                         {
-                            FadeOut = true
+                            FadeOut = true,
                         };
 
                         label.ControlInfo.Layer = UILayer.Over;

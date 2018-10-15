@@ -151,7 +151,7 @@ namespace ClassicUO.Game.Views
             int height = 0;
             int centerY = 0;
 
-            GetAnimationDimensions(mobile, 0, ref height, ref centerY);
+            GetAnimationDimensions(mobile, 0xFF, ref height, ref centerY);
 
             Vector3 overheadPosition = new Vector3
             {
@@ -167,39 +167,20 @@ namespace ClassicUO.Game.Views
         private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, ref int height, ref int centerY)
         {
             byte dir = 0 & 0x7F;
+            byte animGroup = 0;
             bool mirror = false;
 
             Animations.GetAnimDirection(ref dir, ref mirror);
-            byte group = Mobile.GetGroupForAnimation(mobile);
 
-            if (mobile.Graphic <= Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            if (frameIndex == 0xFF)
+                frameIndex = (byte) mobile.AnimIndex;
+
+            Animations.GetAnimationDimensions(frameIndex, mobile.Graphic, dir, animGroup, out int x, out centerY, out int w, out height);
+
+            if (x <= 0 && centerY <= 0 && w <= 0 && height <= 0)
             {
-                if (dir < 5)
-                {
-                    ref AnimationDirection direction =
-                        ref Animations.DataIndex[mobile.Graphic].Groups[group].Direction[dir];
-
-                    if (direction.FrameCount > 0 || Animations.LoadDirectionGroup(ref direction))
-                    {
-                        int fc = direction.FrameCount;
-                        if (fc > 0)
-                        {
-                            if (frameIndex >= fc)
-                                frameIndex = 0;
-                        }
-
-                        if (direction.Frames != null && direction.Frames.Length > 0)
-                        {
-                            height = direction.Frames[frameIndex].Height;
-                            centerY = direction.Frames[frameIndex].CenterY;
-                            return;
-                        }
-                    }
-                }
+                height = mobile.IsMounted ? 100 : 60;
             }
-
-            height = mobile.IsMounted ? 100 : 60;
-            centerY = 0;
         }
 
 

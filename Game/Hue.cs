@@ -44,9 +44,9 @@ namespace ClassicUO.Game
 
         public static implicit operator ushort(Hue color) => color._value;
 
-        public static bool operator ==(Hue h1, Hue h2) => h1.IsInvariant || h2.IsInvariant || h1._value == h2._value;
+        public static bool operator ==(Hue h1, Hue h2) => h1._value == h2._value;
 
-        public static bool operator !=(Hue h1, Hue h2) => !h1.IsInvariant && !h2.IsInvariant && h1._value != h2._value;
+        public static bool operator !=(Hue h1, Hue h2) => h1._value != h2._value;
 
         public static bool operator <(Hue h1, Hue h2) => h1._value < h2._value;
 
@@ -62,18 +62,16 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            if (obj is Hue) return this == (Hue) obj;
+            if (obj is Hue hue) return this == hue;
 
-            if (obj is ushort) return _value == (ushort) obj;
+            if (obj is ushort @ushort) return _value == @ushort;
 
             return false;
         }
 
         public static Hue Parse(string str)
         {
-            if (str.StartsWith("0x")) return ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber);
-
-            return ushort.Parse(str);
+            return str.StartsWith("0x") ? ushort.Parse(str.Remove(0, 2), NumberStyles.HexNumber) : ushort.Parse(str);
         }
     }
 }

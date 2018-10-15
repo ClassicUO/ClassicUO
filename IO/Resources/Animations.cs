@@ -27,6 +27,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -939,6 +940,8 @@ namespace ClassicUO.IO.Resources
                 return false;
             }
 
+            animDirection.LastAccessTime = CoreGame.Ticks;
+
             int decLen = (int) animData.DecompressedLength;
             UOFileUopAnimation file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
@@ -993,7 +996,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            animDirection.FrameCount = (byte) (pixelDataOffsets.Count / 5);
+            animDirection.FrameCount = (byte) ((pixelDataOffsets.Count / 5) - 0);
             int dirFrameStartIdx = animDirection.FrameCount * Direction;
             if (animDirection.Frames == null)
                 animDirection.Frames = new TextureAnimationFrame[animDirection.FrameCount];
@@ -1083,6 +1086,8 @@ namespace ClassicUO.IO.Resources
 
         private static unsafe void ReadFramesPixelData(ref AnimationDirection animDir)
         {
+            animDir.LastAccessTime = CoreGame.Ticks;
+
             ushort* palette = (ushort*) _reader.StartAddress;
             _reader.Skip(512);
             IntPtr dataStart = _reader.PositionAddress;
@@ -1093,8 +1098,6 @@ namespace ClassicUO.IO.Resources
 
             uint* frameOffset = (uint*) _reader.PositionAddress;
             animDir.Frames = new TextureAnimationFrame[frameCount];
-
-            animDir.LastAccessTime = CoreGame.Ticks;
 
             for (int i = 0; i < frameCount; i++)
             {
@@ -1169,6 +1172,67 @@ namespace ClassicUO.IO.Resources
         }
 
         public static bool Contains(int g, int x, int y, int extra = 0) => _picker.Get(g, x, y, extra);
+
+        public static void GetAnimationDimensions(byte frameIndex, Graphic id, byte dir, byte animGroup, out int x, out int y, out int w, out int h)
+        {
+            if (id < MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            {
+                if (dir < 5)
+                {
+                    ref AnimationDirection direction =
+                        ref DataIndex[id].Groups[animGroup].Direction[dir];
+
+                    int fc = direction.FrameCount;
+
+                    if (fc > 0)
+                    {
+                        if (frameIndex >= fc)
+                        {
+                            frameIndex = 0;
+                        }
+
+                        if (direction.Frames != null)
+                        {
+                            ref TextureAnimationFrame texture = ref direction.Frames[frameIndex];
+                            x = texture.CenterX;
+                            y = texture.CenterY;
+                            w = texture.Width;
+                            h = texture.Height;
+
+                            return;
+                        }
+                    }
+
+                }
+
+
+                ref AnimationDirection direction1 =
+                    ref DataIndex[id].Groups[animGroup].Direction[0];
+
+                if (direction1.Address != 0)
+                {
+                    LoadDirectionGroup(ref direction1);
+
+                    if (direction1.Frames != null)
+                    {
+                        ref TextureAnimationFrame texture = ref direction1.Frames[frameIndex];
+                        x = texture.CenterX;
+                        y = texture.CenterY;
+                        w = texture.Width;
+                        h = texture.Height;
+
+                        return;
+                    }
+                }
+            }
+
+            x = 0;
+            y = 0;
+            w = 0;
+            h = 0;
+        }
+
+
 
         public static void ClearUnusedTextures()
         {

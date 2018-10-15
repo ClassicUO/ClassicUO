@@ -53,14 +53,15 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             if (buttonID >= (int)Buttons.Character)
             {
                 var index = buttonID - (int)Buttons.Character;
-                loginScene.SelectCharacter(loginScene.Characters[index].Name);
-            } else
+                loginScene.SelectCharacter((byte)index, loginScene.Characters[index].Name);
+            }
+            else
             {
                 switch((Buttons)buttonID)
                 {
                     case Buttons.Next:
                         if (loginScene.Characters.Count() > 0)
-                            loginScene.SelectCharacter(loginScene.Characters[0].Name);
+                            loginScene.SelectCharacter(0, loginScene.Characters[0].Name);
                         break;
                 }
             }

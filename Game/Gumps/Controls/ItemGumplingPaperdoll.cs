@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -52,7 +53,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 Height = Texture.Height;
             }
 
-            spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue));
+            spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue, TileData.IsPartialHue((long) Item.ItemData.Flags), 0, false));
 
             return base.Draw(spriteBatch, position, hue);
         }
