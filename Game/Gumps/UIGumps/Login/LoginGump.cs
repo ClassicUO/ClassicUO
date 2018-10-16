@@ -42,10 +42,12 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (loginScene.CurrentLoginStep != currentStep)
+            if (loginScene.UpdateScreen)
             {
                 RemoveChildren(currentStepGump);
                 AddChildren(currentStepGump = GetGumpForStep(loginScene.CurrentLoginStep));
+
+                loginScene.UpdateScreen = false;
             }
 
             base.Update(totalMS, frameMS);

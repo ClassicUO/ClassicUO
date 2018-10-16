@@ -62,6 +62,9 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                         if (loginScene.Characters.Count() > 0)
                             loginScene.SelectCharacter(loginScene.Characters[0].Name);
                         break;
+                    case Buttons.Prev:
+                        loginScene.StepBack();
+                        break;
                 }
             }
 

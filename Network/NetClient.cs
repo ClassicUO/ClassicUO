@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -39,6 +40,7 @@ namespace ClassicUO.Network
         private readonly object _sendLock = new object();
         private CircularBuffer _circularBuffer;
 
+        private ManualResetEvent _packetProcessingEvent;
         private int _incompletePacketLength;
         private bool _isDisposing, _isCompressionEnabled, _sending;
         private byte[] _recvBuffer, _incompletePacketBuffer;
@@ -100,6 +102,7 @@ namespace ClassicUO.Network
 
         private void Connect(IPEndPoint endpoint)
         {
+            _packetProcessingEvent = new ManualResetEvent(true);
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.Debug, 1);
 
@@ -137,8 +140,18 @@ namespace ClassicUO.Network
         public void Disconnect()
         {
             if (_isDisposing) return;
+            if (_socket == null) return;
 
             _isDisposing = true;
+
+            
+            _packetProcessingEvent.Reset();
+            while (_circularBuffer.Length > 0)
+            {
+                _packetProcessingEvent.WaitOne();
+                _packetProcessingEvent.Reset();
+            }
+            
 
             Flush();
 
@@ -179,7 +192,7 @@ namespace ClassicUO.Network
             }
 
             _circularBuffer = null;
-
+            
             Disconnected?.Invoke(null, EventArgs.Empty);
         }
 
@@ -204,6 +217,8 @@ namespace ClassicUO.Network
             {
                 ExtractPackets();
                 Flush();
+
+                _packetProcessingEvent.Set();
             }
         }
 
