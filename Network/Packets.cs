@@ -166,7 +166,7 @@ namespace ClassicUO.Network
 
     public sealed class PSelectCharacter : PacketWriter
     {
-        public PSelectCharacter(byte index, string name, uint ipclient) : base(0x5D)
+        public PSelectCharacter(uint index, string name, uint ipclient) : base(0x5D)
         {
             WriteUInt(0xEDEDEDED);
             WriteASCII(name, 30);
