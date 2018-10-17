@@ -30,7 +30,7 @@ namespace ClassicUO.Renderer
     {
         private readonly SpriteVertex[] _vertexBufferUI = new SpriteVertex[4];
 
-        public SpriteBatchUI(Microsoft.Xna.Framework.Game game) : base(game)
+        public SpriteBatchUI(GraphicsDevice device) : base(device)
         {
         }
 

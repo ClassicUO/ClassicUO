@@ -40,389 +40,391 @@ namespace ClassicUO.Renderer
         }
     }
 
-    public class SpriteBatch3D
-    {
-        private const int VERTEX_COUNT = 4;
-        private const int INDEX_COUNT = 6;
-        private const int PRIMITIVES_COUNT = 2;
+//    public class SpriteBatch3D
+//    {
+//        private const int VERTEX_COUNT = 4;
+//        private const int INDEX_COUNT = 6;
+//        private const int PRIMITIVES_COUNT = 2;
 
-        private const int MAX_VERTICES_PER_DRAW = 0x8000 * 4;
-        private const int INITIAL_TEXTURE_COUNT = 0x800;
-        private const float MAX_ACCURATE_SINGLE_FLOAT = 65536;
-        private readonly DrawCallInfo[] _drawCalls;
-        private readonly EffectParameter _drawLightingEffect;
+//        private const int MAX_SPRITES = 0x800;
+//        private const int MAX_VERTICES_PER_DRAW = MAX_SPRITES * 2;
+//        private const int INITIAL_TEXTURE_COUNT = 0x800;
+//        private const float MAX_ACCURATE_SINGLE_FLOAT = 65536;
+//        private readonly DrawCallInfo[] _drawCalls;
 
-        private readonly DepthStencilState _dss = new DepthStencilState
-        {
-            DepthBufferEnable = true,
-            DepthBufferWriteEnable = true
-        };
+//        private readonly DepthStencilState _dss = new DepthStencilState
+//        {
+//            DepthBufferEnable = true,
+//            DepthBufferWriteEnable = true
+//        };
 
-        private readonly Effect _effect;
+//        private readonly Effect _effect;
 
-        private readonly Microsoft.Xna.Framework.Game _game;
-        private readonly short[] _geometryIndices = new short[6];
+//        private readonly Microsoft.Xna.Framework.Game _game;
+//        private readonly short[] _geometryIndices = new short[6];
 
-        private readonly EffectTechnique _huesTechnique, _shadowTechnique;
-        private readonly IndexBuffer _indexBuffer;
-        private readonly short[] _indices = new short[MAX_VERTICES_PER_DRAW * 6];
+//        private readonly EffectTechnique _huesTechnique, _shadowTechnique;
+//        private readonly IndexBuffer _indexBuffer;
+//        private readonly short[] _indices = new short[MAX_VERTICES_PER_DRAW * 6];
 
-        private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
-        private readonly EffectParameter _projectionMatrixEffect;
-        private readonly short[] _sortedIndices = new short[MAX_VERTICES_PER_DRAW * 6];
-        private readonly VertexBuffer _vertexBuffer;
-        private readonly SpriteVertex[] _vertices = new SpriteVertex[MAX_VERTICES_PER_DRAW];
-        private readonly EffectParameter _viewportEffect;
-        private readonly EffectParameter _worldMatrixEffect;
+//        private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
+//        private readonly short[] _sortedIndices = new short[MAX_VERTICES_PER_DRAW * 6];
+//        private readonly VertexBuffer _vertexBuffer;
+//        private readonly SpriteVertex[] _vertices = new SpriteVertex[MAX_VERTICES_PER_DRAW * 4];
 
-        private BoundingBox _drawingArea;
-        private int _indicesCount;
-        private bool _isStarted;
+//        private readonly EffectParameter _viewportEffect;
+//        private readonly EffectParameter _worldMatrixEffect;
+//        private readonly EffectParameter _drawLightingEffect;
+//        private readonly EffectParameter _projectionMatrixEffect;
 
-
-        private int _vertexCount;
-        private float _z;
+//        private BoundingBox _drawingArea;
+//        private int _indicesCount;
+//        private bool _isStarted;
 
 
-        public SpriteBatch3D(Microsoft.Xna.Framework.Game game)
-        {
-            _game = game;
-
-            _effect = new Effect(GraphicsDevice,
-                File.ReadAllBytes(Path.Combine(Bootstrap.ExeDirectory, "shaders/IsometricWorld.fxc")));
-
-            _effect.Parameters["HuesPerTexture"].SetValue((float) IO.Resources.Hues.HuesCount);
-
-            _drawLightingEffect = _effect.Parameters["DrawLighting"];
-            _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];
-            _worldMatrixEffect = _effect.Parameters["WorldMatrix"];
-            _viewportEffect = _effect.Parameters["Viewport"];
-
-            _huesTechnique = _effect.Techniques["HueTechnique"];
-            _shadowTechnique = _effect.Techniques["ShadowSetTechnique"];
-
-            _drawCalls = new DrawCallInfo[MAX_VERTICES_PER_DRAW];
-
-            _vertexBuffer = new DynamicVertexBuffer(GraphicsDevice, SpriteVertex.VertexDeclaration, _vertices.Length,
-                BufferUsage.WriteOnly);
-            _indexBuffer = new DynamicIndexBuffer(GraphicsDevice, IndexElementSize.SixteenBits, _indices.Length,
-                BufferUsage.WriteOnly);
-        }
+//        private int _vertexCount;
+//        private float _z;
 
 
-        public GraphicsDevice GraphicsDevice => _game?.GraphicsDevice;
-        public Matrix ProjectionMatrixWorld => Matrix.Identity;
 
-        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width,
-            GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
+//        public SpriteBatch3D(Microsoft.Xna.Framework.Game game)
+//        {
+//            _game = game;
 
-        public int Merged { get; private set; }
-        public int Calls { get; private set; }
+//            _effect = new Effect(GraphicsDevice,
+//                File.ReadAllBytes(Path.Combine(Bootstrap.ExeDirectory, "shaders/IsometricWorld.fxc")));
 
-        public int TotalCalls => Merged + Calls;
+//            _effect.Parameters["HuesPerTexture"].SetValue((float) IO.Resources.Hues.HuesCount);
+
+//            _drawLightingEffect = _effect.Parameters["DrawLighting"];
+//            _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];
+//            _worldMatrixEffect = _effect.Parameters["WorldMatrix"];
+//            _viewportEffect = _effect.Parameters["Viewport"];
+
+//            _huesTechnique = _effect.Techniques["HueTechnique"];
+//            _shadowTechnique = _effect.Techniques["ShadowSetTechnique"];
+
+//            _drawCalls = new DrawCallInfo[MAX_SPRITES];
+
+//            _vertexBuffer = new DynamicVertexBuffer(GraphicsDevice, SpriteVertex.VertexDeclaration, _vertices.Length,
+//                BufferUsage.WriteOnly);
+//            _indexBuffer = new DynamicIndexBuffer(GraphicsDevice, IndexElementSize.SixteenBits, _indices.Length,
+//                BufferUsage.WriteOnly);
+//        }
 
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void AddQuadrilateralIndices(int indexOffset)
-        {
-            _geometryIndices[0] = (short) (0 + indexOffset);
-            _geometryIndices[1] = (short) (1 + indexOffset);
-            _geometryIndices[2] = (short) (2 + indexOffset);
-            _geometryIndices[3] = (short) (1 + indexOffset);
-            _geometryIndices[4] = (short) (3 + indexOffset);
-            _geometryIndices[5] = (short) (2 + indexOffset);
-        }
+//        public GraphicsDevice GraphicsDevice => _game?.GraphicsDevice;
+//        public Matrix ProjectionMatrixWorld => Matrix.Identity;
 
-        public void SetLightDirection(Vector3 dir)
-        {
-            _effect.Parameters["lightDirection"].SetValue(dir);
-        }
+//        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width,
+//            GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
 
-        public void SetLightIntensity(float inte)
-        {
-            _effect.Parameters["lightIntensity"].SetValue(inte);
-        }
+//        public int Merged { get; private set; }
+//        public int Calls { get; private set; }
 
-        public float GetZ() => _z++;
+//        public int TotalCalls => Merged + Calls;
 
-        public void Begin()
-        {
-            if (_isStarted)
-                throw new Exception("");
 
-            _isStarted = true;
+//        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+//        private void AddQuadrilateralIndices(int indexOffset)
+//        {
+//            _geometryIndices[0] = (short) (0 + indexOffset);
+//            _geometryIndices[1] = (short) (1 + indexOffset);
+//            _geometryIndices[2] = (short) (2 + indexOffset);
+//            _geometryIndices[3] = (short) (1 + indexOffset);
+//            _geometryIndices[4] = (short) (3 + indexOffset);
+//            _geometryIndices[5] = (short) (2 + indexOffset);
+//        }
 
-            Calls = 0;
-            Merged = 0;
+//        public void SetLightDirection(Vector3 dir)
+//        {
+//            _effect.Parameters["lightDirection"].SetValue(dir);
+//        }
 
-            _z = 0;
-            _drawingArea.Min = _minVector3;
-            _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
-        }
+//        public void SetLightIntensity(float inte)
+//        {
+//            _effect.Parameters["lightIntensity"].SetValue(inte);
+//        }
 
-        public bool DrawSprite(Texture2D texture, SpriteVertex[] vertices, Techniques technique = Techniques.Default)
-        {
-            if (!_isStarted)
-                throw new Exception();
+//        public float GetZ() => _z++;
 
-            if (texture == null || texture.IsDisposed) return false;
+//        public void Begin()
+//        {
+//            if (_isStarted)
+//                throw new Exception();
 
-            bool draw = false;
+//            _isStarted = true;
 
-            for (byte i = 0; i < 4; i++)
-            {
-                if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
-                {
-                    draw = true;
-                    break;
-                }
-            }
+//            //Calls = 0;
+//            //Merged = 0;
 
-            if (!draw)
-                return false;
+//            _z = 0;
+//            _drawingArea.Min = _minVector3;
+//            _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
+//        }
 
-#if !ORIONSORT
-            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
-#endif
-            Build(texture, vertices, technique);
+//        public bool DrawSprite(Texture2D texture, SpriteVertex[] vertices, Techniques technique = Techniques.Default)
+//        {
+//            if (!_isStarted)
+//                throw new Exception();
 
-            return true;
-        }
+//            if (texture == null || texture.IsDisposed) return false;
 
-        public void DrawShadow(Texture2D texture, SpriteVertex[] vertices, Vector2 position, bool flip, float z)
-        {
-            if (texture == null || texture.IsDisposed)
-                return;
+//            bool draw = false;
 
-            vertices[0].Position.Z =
-                vertices[1].Position.Z =
-                    vertices[2].Position.Z =
-                        vertices[3].Position.Z = z;
-            float skewHorizTop = (vertices[0].Position.Y - position.Y) * .5f;
-            float skewHorizBottom = (vertices[3].Position.Y - position.Y) * .5f;
-            vertices[0].Position.X -= skewHorizTop;
-            vertices[0].Position.Y -= skewHorizTop;
-            vertices[flip ? 2 : 1].Position.X -= skewHorizTop;
-            vertices[flip ? 2 : 1].Position.Y -= skewHorizTop;
-            vertices[flip ? 1 : 2].Position.X -= skewHorizBottom;
-            vertices[flip ? 1 : 2].Position.Y -= skewHorizBottom;
-            vertices[3].Position.X -= skewHorizBottom;
-            vertices[3].Position.Y -= skewHorizBottom;
+//            for (byte i = 0; i < 4; i++)
+//            {
+//                if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
+//                {
+//                    draw = true;
+//                    break;
+//                }
+//            }
 
-            Build(texture, vertices, Techniques.ShadowSet);
-        }
+//            if (!draw)
+//                return false;
 
-        private void Build(Texture2D texture, SpriteVertex[] vertices, Techniques technique)
-        {
-            AddQuadrilateralIndices(_vertexCount);
+//#if !ORIONSORT
+//            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
+//#endif
+//            Build(texture, vertices, technique);
+
+//            return true;
+//        }
+
+//        public void DrawShadow(Texture2D texture, SpriteVertex[] vertices, Vector2 position, bool flip, float z)
+//        {
+//            if (texture == null || texture.IsDisposed)
+//                return;
+
+//            vertices[0].Position.Z =
+//                vertices[1].Position.Z =
+//                    vertices[2].Position.Z =
+//                        vertices[3].Position.Z = z;
+//            float skewHorizTop = (vertices[0].Position.Y - position.Y) * .5f;
+//            float skewHorizBottom = (vertices[3].Position.Y - position.Y) * .5f;
+//            vertices[0].Position.X -= skewHorizTop;
+//            vertices[0].Position.Y -= skewHorizTop;
+//            vertices[flip ? 2 : 1].Position.X -= skewHorizTop;
+//            vertices[flip ? 2 : 1].Position.Y -= skewHorizTop;
+//            vertices[flip ? 1 : 2].Position.X -= skewHorizBottom;
+//            vertices[flip ? 1 : 2].Position.Y -= skewHorizBottom;
+//            vertices[3].Position.X -= skewHorizBottom;
+//            vertices[3].Position.Y -= skewHorizBottom;
+
+//            Build(texture, vertices, Techniques.ShadowSet);
+//        }
+
+//        private void Build(Texture2D texture, SpriteVertex[] vertices, Techniques technique)
+//        {
+//            AddQuadrilateralIndices(_vertexCount);
             
-			if (_vertexCount + VERTEX_COUNT > _vertices.Length || _indicesCount + INDEX_COUNT > _indices.Length)
-				Flush(false);
+//			if (_vertexCount + VERTEX_COUNT > _vertices.Length || _indicesCount + INDEX_COUNT > _indices.Length)
+//				Flush(false);
 
-            DrawCallInfo call = new DrawCallInfo(texture, technique, _indicesCount, PRIMITIVES_COUNT, 0);
+//            DrawCallInfo call = new DrawCallInfo(texture, technique, _indicesCount, PRIMITIVES_COUNT, 0);
 
-            Array.Copy(vertices, 0, _vertices, _vertexCount, VERTEX_COUNT);
-            _vertexCount += VERTEX_COUNT;
-            Array.Copy(_geometryIndices, 0, _indices, _indicesCount, INDEX_COUNT);
-            _indicesCount += INDEX_COUNT;
+//            Array.Copy(vertices, 0, _vertices, _vertexCount, VERTEX_COUNT);
+//            _vertexCount += VERTEX_COUNT;
 
-            Enqueue(ref call);
-        }
+//            Array.Copy(_geometryIndices, 0, _indices, _indicesCount, INDEX_COUNT);
+//            _indicesCount += INDEX_COUNT;
 
-        private void Enqueue(ref DrawCallInfo call)
-        {
-            if (Calls > 0 && call.TryMerge(ref _drawCalls[Calls - 1]))
-            {
-                Merged++;
-                return;
-            }
+//            Enqueue(ref call);
+//        }
 
-			if (Calls >= _drawCalls.Length)
-				Flush(false);
+//        private void Enqueue(ref DrawCallInfo call)
+//        {
+//            if (Calls > 0 && call.TryMerge(ref _drawCalls[Calls - 1]))
+//            {
+//                //Merged++;
+//                return;
+//            }
 
-            _drawCalls[Calls++] = call;
-        }
+//            if (Calls >= _drawCalls.Length)
+//				Flush(false);
 
-        public void End(bool light = false)
-        {
-            if (!_isStarted)
-                throw new Exception();
+//            _drawCalls[Calls++] = call;
+//        }
 
-            Flush(light);
-            _isStarted = false;
-        }
+//        public void End(bool light = false)
+//        {
+//            if (!_isStarted)
+//                throw new Exception();
 
-        private void Flush(bool light)
-        {
-            if (Calls == 0)
-                return;
+//            Flush(light);
+//            _isStarted = false;
+//        }
 
-            SetupBuffers();
-            ApplyStates(light);
-            InternalDraw();
-        }
+//        private void Flush(bool light)
+//        {
+//            if (Calls == 0)
+//                return;
 
-        private void SetupBuffers()
-        {
-            _vertexBuffer.SetData(_vertices, 0, _vertexCount);
-            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
-
-            //SortIndicesAndMerge();
-
-            _indexBuffer.SetData(_indices, 0, _indicesCount);
-            GraphicsDevice.Indices = _indexBuffer;
-
-            _indicesCount = 0;
-            _vertexCount = 0;
-        }
-
-        private void SortIndicesAndMerge()
-        {
-            Array.Sort(_drawCalls, 0, Calls);
+//            SetupBuffers();
+//            ApplyStates(light);
+//            InternalDraw();
+//        }
 
 
-            int newDrawCallCount = 0;
-            int start = _drawCalls[0].StartIndex;
+//        private void SetupBuffers()
+//        {
+//            _vertexBuffer.SetData(_vertices, 0, _vertexCount);
+//            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
-            _drawCalls[0].StartIndex = 0;
-            DrawCallInfo currentDrawCall = _drawCalls[0];
-            _drawCalls[newDrawCallCount++] = _drawCalls[0];
+//            //SortIndicesAndMerge();
 
-            int drawCallIndexCount = currentDrawCall.PrimitiveCount * 3;
-            Array.Copy(_indices, start, _sortedIndices, 0, drawCallIndexCount);
-            int sortedIndexCount = drawCallIndexCount;
+//            _indexBuffer.SetData(_indices, 0, _indicesCount);
+//            GraphicsDevice.Indices = _indexBuffer;
 
-            for (int i = 1; i < Calls; i++)
-            {
-                currentDrawCall = _drawCalls[i];
-                drawCallIndexCount = currentDrawCall.PrimitiveCount * 3;
-                Array.Copy(_indices, currentDrawCall.StartIndex, _sortedIndices, sortedIndexCount, drawCallIndexCount);
+//            _indicesCount = 0;
+//            _vertexCount = 0;
+//        }
 
-                sortedIndexCount += drawCallIndexCount;
-                if (currentDrawCall.TryMerge(ref _drawCalls[newDrawCallCount - 1]))
-                {
-                    Merged++;
-                    continue;
-                }
+//        private void SortIndicesAndMerge()
+//        {
+//            Array.Sort(_drawCalls, 0, Calls);
 
-                currentDrawCall.StartIndex = sortedIndexCount - drawCallIndexCount;
-                _drawCalls[newDrawCallCount++] = currentDrawCall;
-            }
 
-            Calls = newDrawCallCount;
-        }
+//            int newDrawCallCount = 0;
+//            int start = _drawCalls[0].StartIndex;
 
-        private void ApplyStates(bool light)
-        {
-            GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            //GraphicsDevice.BlendState.ColorBlendFunction = BlendFunction.Add;
-            //GraphicsDevice.BlendState.AlphaSourceBlend = Blend.SourceColor;
+//            _drawCalls[0].StartIndex = 0;
+//            DrawCallInfo currentDrawCall = _drawCalls[0];
+//            _drawCalls[newDrawCallCount++] = _drawCalls[0];
 
-            GraphicsDevice.RasterizerState = RasterizerState.CullNone;
-            GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
-            GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
-            GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
+//            int drawCallIndexCount = currentDrawCall.PrimitiveCount * 3;
+//            Array.Copy(_indices, start, _sortedIndices, 0, drawCallIndexCount);
+//            int sortedIndexCount = drawCallIndexCount;
 
-            //GraphicsDevice.SamplerStates[3] = SamplerState.PointClamp;
-            //GraphicsDevice.SamplerStates[4] = SamplerState.PointWrap;
+//            for (int i = 1; i < Calls; i++)
+//            {
+//                currentDrawCall = _drawCalls[i];
+//                drawCallIndexCount = currentDrawCall.PrimitiveCount * 3;
+//                Array.Copy(_indices, currentDrawCall.StartIndex, _sortedIndices, sortedIndexCount, drawCallIndexCount);
 
-            _drawLightingEffect.SetValue(light);
-            // set up viewport.
-            _projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
-            _worldMatrixEffect.SetValue(ProjectionMatrixWorld);
-            _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+//                sortedIndexCount += drawCallIndexCount;
+//                if (currentDrawCall.TryMerge(ref _drawCalls[newDrawCallCount - 1]))
+//                {
+//                    //Merged++;
+//                    continue;
+//                }
 
-            GraphicsDevice.DepthStencilState = _dss;
-        }
+//                currentDrawCall.StartIndex = sortedIndexCount - drawCallIndexCount;
+//                _drawCalls[newDrawCallCount++] = currentDrawCall;
+//            }
 
-        private void InternalDraw()
-        {
-            if (Calls == 0)
-                return;
+//            Calls = newDrawCallCount;
+//        }
 
-            Techniques last = Techniques.None;
+//        private void ApplyStates(bool light)
+//        {
+//            GraphicsDevice.BlendState = BlendState.AlphaBlend;
+//            //GraphicsDevice.BlendState.ColorBlendFunction = BlendFunction.Add;
+//            //GraphicsDevice.BlendState.AlphaSourceBlend = Blend.SourceColor;
+
+//            GraphicsDevice.RasterizerState = RasterizerState.CullNone;
+//            GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
+//            GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
+//            GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
+
+//            //GraphicsDevice.SamplerStates[3] = SamplerState.PointClamp;
+//            //GraphicsDevice.SamplerStates[4] = SamplerState.PointWrap;
+
+//            _drawLightingEffect.SetValue(light);
+//            // set up viewport.
+//            _projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
+//            _worldMatrixEffect.SetValue(ProjectionMatrixWorld);
+//            _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+
+//            GraphicsDevice.DepthStencilState = _dss;
+//        }
+
+//        private void InternalDraw()
+//        {
+//            if (Calls == 0)
+//                return;
+
+//            Techniques last = Techniques.None;
             
-            for (int i = 0; i < Calls; i++)
-            {
+//            for (int i = 0; i < Calls; i++)
+//            {
 
-                ref var call = ref _drawCalls[i];
+//                ref DrawCallInfo call = ref _drawCalls[i];
 
-                switch (call.Technique)
-                {
-                    case Techniques.Hued:
-                        if (last != call.Technique)
-                        {
-                            _effect.CurrentTechnique = _huesTechnique;
-                            _effect.CurrentTechnique.Passes[0].Apply();
-                        }
-                        break;
-                    case Techniques.ShadowSet:
-                        if (last != call.Technique)
-                        {
-                            _effect.CurrentTechnique = _shadowTechnique;
-                            _effect.CurrentTechnique.Passes[0].Apply();
-                        }
-                        break;
-                }
+//                switch (call.Technique)
+//                {
+//                    case Techniques.Hued:
+//                        if (last != call.Technique)
+//                        {
+//                            _effect.CurrentTechnique = _huesTechnique;
+//                            _effect.CurrentTechnique.Passes[0].Apply();
+//                        }
+//                        break;
+//                    case Techniques.ShadowSet:
+//                        if (last != call.Technique)
+//                        {
+//                            _effect.CurrentTechnique = _shadowTechnique;
+//                            _effect.CurrentTechnique.Passes[0].Apply();
+//                        }
+//                        break;
+//                }
 
-                last = call.Technique;
+//                last = call.Technique;
 
+//                DoDraw(ref call);
+//            }
 
+//            Array.Clear(_drawCalls, 0, Calls);
+//            Calls = 0;
+//        }
 
-
-                DoDraw(ref call);
-            }
-
-            Array.Clear(_drawCalls, 0, Calls);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void DoDraw(ref DrawCallInfo call)
-        {
-            GraphicsDevice.Textures[0] = call.Texture;
-            GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, call.StartIndex,
-                call.PrimitiveCount);
-        }
+//        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+//        private void DoDraw(ref DrawCallInfo call)
+//        {
+//            GraphicsDevice.Textures[0] = call.Texture;
+//            GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, call.StartIndex, call.PrimitiveCount);
+//        }
 
 
 
-        private struct DrawCallInfo : IComparable<DrawCallInfo>
-        {
-            public unsafe DrawCallInfo(Texture2D texture, Techniques technique, int start, int count, float depth)
-            {
-                Texture = texture;
-				TextureKey = (uint)RuntimeHelpers.GetHashCode(texture);
-                Technique = technique;
-                StartIndex = start;
-                PrimitiveCount = count;
-				DepthKey = *(uint*)&depth;
-            }
+//        private struct DrawCallInfo : IComparable<DrawCallInfo>
+//        {
+//            public unsafe DrawCallInfo(Texture2D texture, Techniques technique, int start, int count, float depth)
+//            {
+//                Texture = texture;
+//				TextureKey = (uint)RuntimeHelpers.GetHashCode(texture);
+//                Technique = technique;
+//                StartIndex = start;
+//                PrimitiveCount = count;
+//				DepthKey = *(uint*)&depth;
+//            }
 
-            public readonly Texture2D Texture;
-            public readonly uint TextureKey;
-            public int StartIndex;
-            public int PrimitiveCount;
-			public readonly uint DepthKey;
-            public readonly Techniques Technique;
+//            public readonly Texture2D Texture;
+//            public readonly uint TextureKey;
+//            public int StartIndex;
+//            public int PrimitiveCount;
+//			public readonly uint DepthKey;
+//            public readonly Techniques Technique;
 
-            public bool TryMerge(ref DrawCallInfo callInfo)
-            {
-                if (Technique != callInfo.Technique || TextureKey != callInfo.TextureKey || DepthKey != callInfo.DepthKey)
-                    return false;
-                callInfo.PrimitiveCount += PrimitiveCount;
-                return true;
-            }
+//            public bool TryMerge(ref DrawCallInfo callInfo)
+//            {
+//                if (Technique != callInfo.Technique || TextureKey != callInfo.TextureKey || DepthKey != callInfo.DepthKey)
+//                    return false;
+//                callInfo.PrimitiveCount += PrimitiveCount;
+//                return true;
+//            }
 
-            public int CompareTo(DrawCallInfo other)
-            {
+//            public int CompareTo(DrawCallInfo other)
+//            {
 
-				var result = TextureKey.CompareTo(other.TextureKey);
-                if (result != 0)
-                    return result;
-                result = DepthKey.CompareTo(other.DepthKey);
+//				var result = TextureKey.CompareTo(other.TextureKey);
+//                if (result != 0)
+//                    return result;
+//                result = DepthKey.CompareTo(other.DepthKey);
 
-                return result != 0 ? result : ((byte)Technique).CompareTo((byte)other.Technique);
-            }
-        }
-    }
+//                return result != 0 ? result : ((byte)Technique).CompareTo((byte)other.Technique);
+//            }
+//        }
+//    }
 }

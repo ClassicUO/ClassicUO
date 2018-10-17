@@ -104,7 +104,8 @@ namespace ClassicUO.IO
 
         internal (int, int, bool) SeekByEntryIndex(int entryidx)
         {
-            if (entryidx < 0 || entryidx >= Entries.Length) return (0, 0, false);
+            if (entryidx < 0 || entryidx >= Entries.Length)
+                return (0, 0, false);
 
             UOFileIndex3D e = Entries[entryidx];
             if (e.Offset < 0) return (0, 0, false);

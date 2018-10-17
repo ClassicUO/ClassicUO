@@ -61,19 +61,27 @@ namespace ClassicUO.IO
         internal void Seek(long idx)
         {
             Position = idx;
+            EnsureSize(0);
         }
 
         internal void Seek(int idx)
         {
             Position = idx;
+            EnsureSize(0);
         }
 
         internal void Skip(int count)
         {
+            EnsureSize(count);
+
             Position += count;
         }
 
-        internal byte ReadByte() => _data[Position++];
+        internal byte ReadByte()
+        {
+            EnsureSize(1);
+            return _data[Position++];
+        }
 
         internal sbyte ReadSByte() => (sbyte) ReadByte();
 
@@ -92,5 +100,11 @@ namespace ClassicUO.IO
                                     ((long) ReadByte() << 48) | ((long) ReadByte() << 56);
 
         internal ulong ReadULong() => (ulong) ReadLong();
+
+        private void EnsureSize(int size)
+        {
+            if (Position + size > Length)
+                throw new IndexOutOfRangeException();
+        }
     }
 }

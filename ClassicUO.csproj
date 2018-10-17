@@ -242,6 +242,7 @@
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\RenderExtentions.cs" />
     <Compile Include="Renderer\SpriteBatch3D.cs" />
+    <Compile Include="Renderer\SpriteBatch3D1.cs" />
     <Compile Include="Renderer\SpriteBatchUI.cs" />
     <Compile Include="Renderer\SpriteTexture.cs" />
     <Compile Include="Renderer\SpriteVertex.cs" />
@@ -351,6 +352,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="libs\x86\SDL2_image.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="libs\zlibwapi64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

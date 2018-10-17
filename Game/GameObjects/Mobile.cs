@@ -486,7 +486,7 @@ namespace ClassicUO.Game.GameObjects
 
                     int maxDelay =
                         MovementSpeed.TimeToCompleteMovement(this, step.Run) -
-                        (IsMounted ? 1 : 15); // default 15 = less smooth
+                        (IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ? 1 : 15); // default 15 = less smooth
                     int delay = (int) CoreGame.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
 

@@ -101,8 +101,8 @@ namespace ClassicUO
 
             //Register Service Stack
             Service.Register(this);
-            Service.Register(new SpriteBatch3D(this));
-            Service.Register(new SpriteBatchUI(this));
+            Service.Register(new SpriteBatch3D(GraphicsDevice));
+            Service.Register(new SpriteBatchUI(GraphicsDevice));
             Service.Register(new InputManager());
             Service.Register(_uiManager = new UIManager());
             Service.Register(_sceneManager = new SceneManager());
@@ -184,7 +184,7 @@ namespace ClassicUO
 
 
             _infoText.Text =
-                $"FPS: {CurrentFPS}\nObjects: {_sceneManager.CurrentScene.RenderedObjectsCount}\nCalls: {_sb3D.Calls}\nMerged: {_sb3D.Merged}\nTotals: {_sb3D.TotalCalls}\nPos: {(World.Player == null ? "" : World.Player.Position.ToString())}\nSelected: {(_sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty)}";
+                $"FPS: {CurrentFPS}\nObjects: {_sceneManager.CurrentScene.RenderedObjectsCount}\nCalls: {_sb3D.Calls}\nMerged: {_sb3D.Merged}\nPos: {(World.Player == null ? "" : World.Player.Position.ToString())}\nSelected: {(_sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty)}";
             _infoText.Draw(_sbUI, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
 
             _sbUI.End();
