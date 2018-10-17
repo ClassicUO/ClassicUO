@@ -12,7 +12,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
     {
         private const ushort SELECTED_COLOR = 0x0021;
         private const ushort NORMAL_COLOR = 0x034F;
-        private CharacterListEntry _selectedCharacter = null;
+        private byte _selectedCharacter = -1;
 
         public CharacterSelectionGump()
             : base(0, 0)
@@ -55,7 +55,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             AddChildren(new Button((int)Buttons.Next, 0x15A4, 0x15A6, over: 0x15A5) { X = 610, Y = 445, ButtonAction = ButtonAction.Activate });
 
             if (loginScene.Characters.Length > 0)
-                _selectedCharacter = loginScene.Characters[0];
+                _selectedCharacter = 0;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -65,11 +65,11 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             if (buttonID >= (int)Buttons.Character)
             {
                 var index = buttonID - (int)Buttons.Character;
-                if (_selectedCharacter == loginScene.Characters[index])
+                if (_selectedCharacter == index)
                     loginScene.SelectCharacter((byte)index, loginScene.Characters[index].Name);
                 else
                 {
-                    _selectedCharacter = loginScene.Characters[index];
+                    _selectedCharacter = (byte)index;
 
                     foreach(var characterGump in GetControls<CharacterEntryGump>())
                     {
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 {
                     case Buttons.Next:
                         if (loginScene.Characters.Count() > 0)
-                            loginScene.SelectCharacter(0, _selectedCharacter.Name);
+                            loginScene.SelectCharacter(_selectedCharacter, loginScene.Characters[_selectedCharacter].Name);
                         break;
                     case Buttons.Prev:
                         loginScene.StepBack();
