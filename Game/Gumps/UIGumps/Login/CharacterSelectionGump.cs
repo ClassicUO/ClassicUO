@@ -10,6 +10,10 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 {
     class CharacterSelectionGump : Gump
     {
+        private const ushort SELECTED_COLOR = 0x0021;
+        private const ushort NORMAL_COLOR = 0x034F;
+        private CharacterListEntry _selectedCharacter = null;
+
         public CharacterSelectionGump()
             : base(0, 0)
         {
@@ -32,7 +36,12 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
             var loginScene = Service.Get<LoginScene>();
             foreach(var character in loginScene.Characters) {
-                AddChildren(new CharacterEntryGump(character, posInList) { X = 224, Y = yOffset + (posInList * 40) });
+                AddChildren(new CharacterEntryGump(character, posInList)
+                {
+                    X = 224,
+                    Y = yOffset + (posInList * 40),
+                    Hue = posInList == 0 ? SELECTED_COLOR : NORMAL_COLOR
+                });
 
                 posInList++;
             }
@@ -44,6 +53,9 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             AddChildren(new Button((int)Buttons.Delete, 0x159A, 0x159C, over: 0x159B) { X = 442, Y = 350 + yBonus });
             AddChildren(new Button((int)Buttons.Prev, 0x15A1, 0x15A3, over: 0x15A2) { X = 586, Y = 445, ButtonAction = ButtonAction.Activate });
             AddChildren(new Button((int)Buttons.Next, 0x15A4, 0x15A6, over: 0x15A5) { X = 610, Y = 445, ButtonAction = ButtonAction.Activate });
+
+            if (loginScene.Characters.Length > 0)
+                _selectedCharacter = loginScene.Characters[0];
         }
 
         public override void OnButtonClick(int buttonID)
@@ -53,14 +65,27 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             if (buttonID >= (int)Buttons.Character)
             {
                 var index = buttonID - (int)Buttons.Character;
-                loginScene.SelectCharacter(loginScene.Characters[index].Name);
+                if (_selectedCharacter == loginScene.Characters[index])
+                    loginScene.SelectCharacter((byte)index, loginScene.Characters[index].Name);
+                else
+                {
+                    _selectedCharacter = loginScene.Characters[index];
+
+                    foreach(var characterGump in GetControls<CharacterEntryGump>())
+                    {
+                        if (characterGump.CharacterIndex == index)
+                            characterGump.Hue = SELECTED_COLOR;
+                        else
+                            characterGump.Hue = NORMAL_COLOR;
+                    }
+                }
             } else
             {
                 switch((Buttons)buttonID)
                 {
                     case Buttons.Next:
                         if (loginScene.Characters.Count() > 0)
-                            loginScene.SelectCharacter(loginScene.Characters[0].Name);
+                            loginScene.SelectCharacter(0, _selectedCharacter.Name);
                         break;
                     case Buttons.Prev:
                         loginScene.StepBack();
@@ -78,17 +103,24 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
         private class CharacterEntryGump : GumpControl
         {
-            int _buttonId;
+            private Label _label;
+            public int CharacterIndex { get; private set; }
+
+            public ushort Hue
+            {
+                get => _label.Hue;
+                set => _label.Hue = value;
+            }
 
             public CharacterEntryGump(CharacterListEntry character, int index)
             {
-                _buttonId = index;
+                CharacterIndex = index;
 
                 // Bg
                 AddChildren(new ResizePic(0x0BB8) { X = 0, Y = 0, Width = 280, Height = 30 });
 
                 // Char Name
-                AddChildren(new Label(character.Name, false, 0x034F, 270, 5, align: IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER)
+                AddChildren(_label = new Label(character.Name, false, NORMAL_COLOR, 270, 5, align: IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER)
                 {
                     X = 0
                 });
@@ -100,7 +132,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             {
                 if (button == MouseButton.Left)
                 {
-                    OnButtonClick((int)Buttons.Character + _buttonId);
+                    OnButtonClick((int)Buttons.Character + CharacterIndex);
                 }
             }
         }
