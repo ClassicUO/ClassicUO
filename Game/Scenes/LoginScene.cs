@@ -137,12 +137,12 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public void SelectCharacter(byte index, string name)
+        public void SelectCharacter(uint index)
         {
             if (CurrentLoginStep == LoginStep.CharacterSelection)
             {
                 CurrentLoginStep = LoginStep.EnteringBritania;
-                NetClient.Socket.Send(new PSelectCharacter(index, name, NetClient.Socket.ClientAddress));
+                NetClient.Socket.Send(new PSelectCharacter(index, Characters[index].Name, NetClient.Socket.ClientAddress));
             }
         }
 
