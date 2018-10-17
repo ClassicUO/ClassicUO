@@ -5,11 +5,16 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Input;
+using System;
 
 namespace ClassicUO.Game.Gumps.UIGumps.Login
 {
     class CharacterSelectionGump : Gump
     {
+        private const ushort SELECTED_COLOR = 0x0021;
+        private const ushort NORMAL_COLOR = 0x034F;
+        private uint _selectedCharacter = 0;
+
         public CharacterSelectionGump()
             : base(0, 0)
         {
@@ -32,7 +37,12 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
             var loginScene = Service.Get<LoginScene>();
             foreach(var character in loginScene.Characters) {
-                AddChildren(new CharacterEntryGump(character, posInList) { X = 224, Y = yOffset + (posInList * 40) });
+                AddChildren(new CharacterEntryGump((uint)posInList, character, SelectCharacter, LoginCharacter)
+                {
+                    X = 224,
+                    Y = yOffset + (posInList * 40),
+                    Hue = posInList == 0 ? SELECTED_COLOR : NORMAL_COLOR
+                });
 
                 posInList++;
             }
@@ -44,61 +54,99 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             AddChildren(new Button((int)Buttons.Delete, 0x159A, 0x159C, over: 0x159B) { X = 442, Y = 350 + yBonus });
             AddChildren(new Button((int)Buttons.Prev, 0x15A1, 0x15A3, over: 0x15A2) { X = 586, Y = 445, ButtonAction = ButtonAction.Activate });
             AddChildren(new Button((int)Buttons.Next, 0x15A4, 0x15A6, over: 0x15A5) { X = 610, Y = 445, ButtonAction = ButtonAction.Activate });
+
+            if (loginScene.Characters.Length > 0)
+                _selectedCharacter = 0;
         }
 
         public override void OnButtonClick(int buttonID)
         {
             var loginScene = Service.Get<LoginScene>();
 
-            if (buttonID >= (int)Buttons.Character)
+            switch ((Buttons)buttonID)
             {
-                var index = buttonID - (int)Buttons.Character;
-                loginScene.SelectCharacter((byte)index, loginScene.Characters[index].Name);
-            }
-            else
-            {
-                switch((Buttons)buttonID)
-                {
-                    case Buttons.Next:
-                        if (loginScene.Characters.Count() > 0)
-                            loginScene.SelectCharacter(0, loginScene.Characters[0].Name);
-                        break;
-                }
+                case Buttons.Next:
+                    LoginCharacter(_selectedCharacter);
+                    break;
+                case Buttons.Prev:
+                    loginScene.StepBack();
+                    break;
             }
 
             base.OnButtonClick(buttonID);
         }
 
+        private void SelectCharacter(uint index)
+        {
+            _selectedCharacter = index;
+
+            foreach (var characterGump in GetControls<CharacterEntryGump>())
+            {
+                if (characterGump.CharacterIndex == index)
+                    characterGump.Hue = SELECTED_COLOR;
+                else
+                    characterGump.Hue = NORMAL_COLOR;
+            }
+        }
+
+        private void LoginCharacter(uint index)
+        {
+            var loginScene = Service.Get<LoginScene>();
+            if (loginScene.Characters.Length > index && !string.IsNullOrEmpty(loginScene.Characters[index].Name))
+                loginScene.SelectCharacter(index);
+        }
+
         private enum Buttons
         {
-            New, Delete, Next, Prev, Character = 99
+            New, Delete, Next, Prev
         }
 
         private class CharacterEntryGump : GumpControl
         {
-            int _buttonId;
+            private Label _label;
+            private Action<uint> _selectedFn;
+            private Action<uint> _loginFn;
 
-            public CharacterEntryGump(CharacterListEntry character, int index)
+            public uint CharacterIndex { get; private set; }
+            
+            public ushort Hue
             {
-                _buttonId = index;
+                get => _label.Hue;
+                set => _label.Hue = value;
+            }
+
+            public CharacterEntryGump(uint index, CharacterListEntry character, Action<uint> selectedFn, Action<uint> loginFn)
+            {
+                CharacterIndex = index;
+
+                _selectedFn = selectedFn;
+                _loginFn = loginFn;
 
                 // Bg
                 AddChildren(new ResizePic(0x0BB8) { X = 0, Y = 0, Width = 280, Height = 30 });
 
                 // Char Name
-                AddChildren(new Label(character.Name, false, 0x034F, 270, 5, align: IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER)
+                AddChildren(_label = new Label(character.Name, false, NORMAL_COLOR, 270, 5, align: IO.Resources.TEXT_ALIGN_TYPE.TS_CENTER)
                 {
                     X = 0
                 });
 
                 AcceptMouseInput = true;
             }
-            
+
+            protected override void OnMouseDoubleClick(int x, int y, MouseButton button)
+            {
+                if (button == MouseButton.Left)
+                {
+                    _loginFn(CharacterIndex);
+                }
+            }
+
             protected override void OnMouseClick(int x, int y, MouseButton button)
             {
                 if (button == MouseButton.Left)
                 {
-                    OnButtonClick((int)Buttons.Character + _buttonId);
+                    _selectedFn(CharacterIndex);
                 }
             }
         }

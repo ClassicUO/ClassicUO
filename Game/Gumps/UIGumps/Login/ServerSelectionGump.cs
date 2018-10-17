@@ -83,6 +83,9 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                         if (loginScene.Servers.Count() > 0)
                             loginScene.SelectServer(0);
                         break;
+                    case Buttons.Prev:
+                        loginScene.StepBack();
+                        break;
                 }
             }
         }

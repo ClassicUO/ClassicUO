@@ -35,7 +35,7 @@ using System.Net;
 
 namespace ClassicUO.Game.Scenes
 {
-    public sealed class LoginScene : Scene, INotifyPropertyChanged
+    public sealed class LoginScene : Scene
     {
         public enum LoginStep
         {
@@ -45,17 +45,34 @@ namespace ClassicUO.Game.Scenes
             ServerSelection,
             LoginInToServer,
             CharacterSelection,
-            EnteringBritania,
-            Error
+            EnteringBritania
+        }
+
+        public enum LoginRejectionReasons : byte
+        {
+            InvalidAccountPassword = 0x00,
+            AccountInUse = 0x01,
+            AccountBlocked = 0x02,
+            BadPassword = 0x03,
+            IdleExceeded = 0xFE,
+            BadCommuncation = 0xFF
         }
 
         private LoginStep _loginStep = LoginStep.Main;
-
+        private LoginRejectionReasons? _loginRejectionReason = null;
         private byte[] _clientVersionBuffer;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public LoginStep CurrentLoginStep { get => _loginStep; private set => SetProperty("CurrentLoginStep", ref _loginStep, value); }
+        
+        public bool UpdateScreen { get; set; }
+        public LoginStep CurrentLoginStep
+        {
+            get => _loginStep;
+            private set => SetProperty(ref _loginStep, value);
+        }
+        public LoginRejectionReasons? LoginRejectionReason
+        {
+            get => _loginRejectionReason;
+            private set => SetProperty(ref _loginRejectionReason, value);
+        }
         public ServerListEntry[] Servers { get; private set; }
         public CharacterListEntry[] Characters { get; private set; }
         public string Account { get; private set; }
@@ -73,9 +90,11 @@ namespace ClassicUO.Game.Scenes
             UIManager.Add(new LoginGump());
 
             // Registering Packet Events
+            NetClient.PacketReceived += NetClient_PacketReceived;
+            // NetClient.Socket.Connected += NetClient_Connected;
+            NetClient.Socket.Disconnected += NetClient_Disconnected;
             NetClient.LoginSocket.Connected += NetClient_Connected;
             NetClient.LoginSocket.Disconnected += NetClient_Disconnected;
-            NetClient.PacketReceived += NetClient_PacketReceived;
 
             var settings = Service.Get<Settings>();
             string[] parts = settings.ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
@@ -91,26 +110,24 @@ namespace ClassicUO.Game.Scenes
             Service.Unregister<LoginScene>();
 
             // UnRegistering Packet Events           
-            NetClient.Socket.Connected -= NetClient_Connected;
+            // NetClient.Socket.Connected -= NetClient_Connected;
             NetClient.Socket.Disconnected -= NetClient_Disconnected;
+            NetClient.LoginSocket.Connected -= NetClient_Connected;
+            NetClient.LoginSocket.Disconnected -= NetClient_Disconnected;
             NetClient.PacketReceived -= NetClient_PacketReceived;
         }
 
         public void Connect(string account, string password)
         {
-            if (CurrentLoginStep == LoginStep.Main)
-            {
-                Account = account;
-                Password = password;
+            Account = account;
+            Password = password;
 
-                var settings = Service.Get<Settings>();
+            var settings = Service.Get<Settings>();
+            NetClient.LoginSocket.Connect(settings.IP, settings.Port);
 
-                NetClient.LoginSocket.Connect(settings.IP, settings.Port);
-
-                CurrentLoginStep = LoginStep.Connecting;
-            }
+            CurrentLoginStep = LoginStep.Connecting;
         }
-
+        
         public void SelectServer(byte index)
         {
             if (CurrentLoginStep == LoginStep.ServerSelection)
@@ -120,22 +137,43 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public void SelectCharacter(byte index, string name)
+        public void SelectCharacter(uint index)
         {
             if (CurrentLoginStep == LoginStep.CharacterSelection)
             {
                 CurrentLoginStep = LoginStep.EnteringBritania;
-                NetClient.Socket.Send(new PSelectCharacter(index, name, NetClient.Socket.ClientAddress));
+                NetClient.Socket.Send(new PSelectCharacter(index, Characters[index].Name, NetClient.Socket.ClientAddress));
             }
         }
 
+        public void StepBack()
+        {
+            _loginRejectionReason = null;
+
+            switch (CurrentLoginStep)
+            {
+                case LoginStep.Connecting:
+                case LoginStep.VerifyingAccount:
+                case LoginStep.ServerSelection:
+                    Servers = null;
+                    CurrentLoginStep = LoginStep.Main;
+                    NetClient.LoginSocket.Disconnect();
+                    break;
+                case LoginStep.LoginInToServer:
+                case LoginStep.CharacterSelection:
+                    NetClient.Socket.Disconnect();
+                    Characters = null;
+                    Servers = null;
+                    Connect(Account, Password);
+                    break;
+            }
+        }
+        
         private void NetClient_Connected(object sender, global::System.EventArgs e)
         {
             Log.Message(LogTypes.Info, "Connected!");
             CurrentLoginStep = LoginStep.VerifyingAccount;
-
-           
-
+            
             NetClient.LoginSocket.Send(new PSeed(NetClient.LoginSocket.ClientAddress, _clientVersionBuffer));
             NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
         }
@@ -168,8 +206,8 @@ namespace ClassicUO.Game.Scenes
                     var settings = Service.Get<Settings>();
                     NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
                     break;
-                case 0x82: // login error
-                    
+                case 0x82: // ReceiveLoginRejection
+                    HandleLoginRejection(e);
                     break;
             }
         }
@@ -190,8 +228,6 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
 
             NetClient.LoginSocket.Disconnect();
-            NetClient.LoginSocket.Connected -= NetClient_Connected;
-            NetClient.LoginSocket.Disconnected -= NetClient_Disconnected;
         }
 
         private void ParseServerList(Packet reader)
@@ -219,10 +255,17 @@ namespace ClassicUO.Game.Scenes
             }
         }
         
-        private void SetProperty<T>(string prop, ref T storage, T value)
+        private void HandleLoginRejection(Packet reader)
+        {
+            reader.MoveToData();
+            var reasonId = reader.ReadByte();
+            LoginRejectionReason = (LoginRejectionReasons)reasonId;
+        }
+
+        private void SetProperty<T>(ref T storage, T value)
         {
             storage = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+            UpdateScreen = true;
         }
     }
 

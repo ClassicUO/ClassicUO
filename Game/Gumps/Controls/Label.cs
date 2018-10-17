@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Gumps.Controls
         public Hue Hue
         {
             get => _gText.Hue;
-            set => _gText.Hue = value;
+            set { _gText.Hue = value; _gText.CreateTexture(); }
         }
 
         public bool FadeOut { get; set; }
