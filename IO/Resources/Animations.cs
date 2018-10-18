@@ -225,7 +225,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            void readAnimDef(StreamReader reader, int idx)
+            void readAnimDef(TextReader reader, int idx)
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
@@ -744,8 +744,6 @@ namespace ClassicUO.IO.Resources
             // https://github.com/AimedNuu/OrionUO/blob/f27a29806aab9379fa004af953832f3e2ffe248d/OrionUO/Managers/FileManager.cpp#L738
 
             UOFileUop animSeq = new UOFileUop(Path.Combine(FileManager.UoFolderPath, "AnimationSequence.uop"), ".bin", MAX_ANIMATIONS_DATA_INDEX_COUNT);
-            long addressLast = 0;
-            UOFileIndex3D lastentry = default;
 
             for (int i = 0; i < animSeq.Entries.Length; i++)
             {
@@ -753,12 +751,7 @@ namespace ClassicUO.IO.Resources
 
                 if (entry.Length > 0 && entry.Offset > 0)
                 {
-                    lastentry = entry;
                     animSeq.Seek(entry.Offset);
-                    addressLast = animSeq.PositionAddress.ToInt64();
-
-                    uint extraaddress = (uint)entry.Extra;
-                    
 
                     byte[] buffer = animSeq.ReadArray<byte>(entry.Length);
 
@@ -773,7 +766,7 @@ namespace ClassicUO.IO.Resources
 
 
                     ref var index = ref DataIndex[animID];
-                    //index.IsUOP = true;
+                    index.IsUOP = true;
 
                     _reader.Skip(48);
 
@@ -790,40 +783,35 @@ namespace ClassicUO.IO.Resources
                         uint frameCount = _reader.ReadUInt(); // frame count
                         int newIDX = _reader.ReadInt();
 
-                        if (frameCount <= 0)
+                        if (frameCount <= 0 && newIDX != -1)
                         {
-                            if (newIDX != -1)
+                            
+                            //if (animID == 432 && oldIDX == 0)
+                            //    newIDX = 25;
+
+                            //if (animID == 432)
+                            //{
+                            //    Log.Message(LogTypes.Trace, $"old: {oldIDX}  new: {newIDX}");
+                            //}
+                 
+                            var newgroup = index.Groups[newIDX];
+                            index.Groups[oldIDX] = newgroup;
+
+                            
+                        }
+                        else
+                        {
+                            //var newgroup = index.Groups[frameCount];
+                            //    index.Groups[oldIDX] = newgroup;
+                            if (animID == 735)
                             {
-                                //if (animID == 432 && oldIDX == 0)
-                                //    newIDX = 25;
 
-                                if (animID == 432)
-                                {
-                                    Log.Message(LogTypes.Trace, $"old: {oldIDX}  new: {newIDX}");
-
-                                }
-
-
-
-                                var newgroup = index.Groups[newIDX];
-                                index.Groups[oldIDX] = newgroup;
-
-                                //var file = _filesUop[newgroup.UOPAnimData.FileIndex];
-                                //file.Seek((int)addressLast);
-                                //unsafe
-                                //{
-                                //    byte* data = (byte*) file.StartAddress + addressLast;
-
-                                //    _reader.SetData(data, file.Length);
-
-                                //    byte[] managedData = new byte[file.Length];
-
-                                //    for (int k = 0; k < managedData.Length; k++)
-                                //        managedData[k] = _reader.ReadByte();
-
-
-                                //}
-
+                               
+                            }
+                            for (uint k = 0; k < 5; k++)
+                            {
+                                index.Groups[oldIDX].Direction[k].FrameCount = (byte)frameCount;
+                                //index.Groups[replaces + k] = newgroup;
                             }
                         }
 
@@ -1067,7 +1055,7 @@ namespace ClassicUO.IO.Resources
             int dcsize = _reader.ReadInt();
             int animID = _reader.ReadInt();
             _reader.Skip(16);
-            int frameCount = _reader.ReadInt();
+            int frameCount = _reader.ReadInt() + animDirection.FrameCount;
             IntPtr dataStart = _reader.StartAddress + _reader.ReadInt();
             _reader.SetData(dataStart);
             List<UOPFrameData> pixelDataOffsets = new List<UOPFrameData>();
