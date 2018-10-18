@@ -156,9 +156,9 @@ namespace ClassicUO
                 NetClient.LoginSocket.Disconnect();
             }
             else if (!NetClient.Socket.IsConnected)
-                NetClient.LoginSocket.Slice();
+                NetClient.LoginSocket.Update();
             else if (!NetClient.Socket.IsDisposed)
-                NetClient.Socket.Slice();
+                NetClient.Socket.Update();
         }
 
         protected override void OnUIUpdate(double totalMS, double frameMS)

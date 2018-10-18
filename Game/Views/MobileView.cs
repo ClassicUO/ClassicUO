@@ -26,6 +26,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
@@ -274,7 +275,7 @@ namespace ClassicUO.Game.Views
                                     if (mountGraphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                         mountOffset = Animations.DataIndex[mountGraphic].MountedHeightOffset;
 
-                                    AddLayer(dir, mount.GetMountAnimation(), mount.Hue, ref mobile, true);
+                                    AddLayer(dir, mountGraphic, mount.Hue, ref mobile, true);
                                 }
                             }
                             else
@@ -324,7 +325,7 @@ namespace ClassicUO.Game.Views
             ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup]
                 .Direction[Animations.Direction];
 
-            if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction))
+            if ((direction.FrameCount == 0 || direction.Frames == null) && !Animations.LoadDirectionGroup(ref direction))
                 return;
 
             direction.LastAccessTime = CoreGame.Ticks;

@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using ClassicUO.Game;
 using ClassicUO.Renderer;
@@ -763,77 +764,107 @@ namespace ClassicUO.IO.Resources
 
                     uint animID = _reader.ReadUInt();
 
-
+              
 
                     ref var index = ref DataIndex[animID];
                     index.IsUOP = true;
 
                     _reader.Skip(48);
 
-                    uint replaces = _reader.ReadUInt();
+                    int replaces = _reader.ReadInt();
 
                     if (replaces == 48 || replaces == 68)
                         continue;
 
+                    //StringBuilder sb = new StringBuilder();
+                    //sb.AppendLine($"- 0x{animID:X4},\ttype: {replaces}");
 
-                    while (_reader.Position + 4 * 3 <= _reader.Length)
+                    while (_reader.Position + 4 * 3 < _reader.Length)
                     {
-
-                        uint oldIDX = _reader.ReadUInt(); // old idx
-                        uint frameCount = _reader.ReadUInt(); // frame count
+                        int oldIdx = _reader.ReadInt();
+                        uint frameCount = _reader.ReadUInt();
                         int newIDX = _reader.ReadInt();
 
-                        if (frameCount <= 0 && newIDX != -1)
+
+                        //sb.AppendLine($"\t - old:\t{oldIdx}   \tframecount:\t{frameCount}   \tnewIDX:\t{newIDX}");
+
+                        if (oldIdx == 0 && frameCount == 0 && newIDX == 0)
                         {
-                            
-                            //if (animID == 432 && oldIDX == 0)
-                            //    newIDX = 25;
 
-                            //if (animID == 432)
+                            _reader.Skip((int)Math.Min(28, _reader.Length - _reader.Position));
+                            continue;
+                        }
+
+
+                        if (frameCount == 0 && newIDX != -1 && oldIdx != -1)
+                        {
+                            switch (oldIdx)
+                            {
+                                case 0:
+                                    break;
+                                case 1:
+                                    break;
+                                case 2:
+                                    break;
+                                case 3:
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            //if (animID == 0x1b0 && newIDX == 29)
                             //{
-                            //    Log.Message(LogTypes.Trace, $"old: {oldIDX}  new: {newIDX}");
-                            //}
-                 
-                            var newgroup = index.Groups[newIDX];
-                            index.Groups[oldIDX] = newgroup;
 
-                            
+                            //    int a = replaces % newIDX;
+                            //    int b = newIDX % replaces;
+
+                               
+
+                            //    oldIdx = 25;
+
+                                
+                            //}
+
+                            //oldIdx += 25;
+
+                            oldIdx = 25 - oldIdx;
+
+                            index.Groups[oldIdx] = index.Groups[newIDX];
                         }
                         else
                         {
-                            //var newgroup = index.Groups[frameCount];
-                            //    index.Groups[oldIDX] = newgroup;
-                            if (animID == 735)
-                            {
 
-                               
-                            }
-                            for (uint k = 0; k < 5; k++)
-                            {
-                                index.Groups[oldIDX].Direction[k].FrameCount = (byte)frameCount;
-                                //index.Groups[replaces + k] = newgroup;
-                            }
                         }
 
+                        if (_reader.Position + 1 >= _reader.Length)
+                            break;
 
-                        //ushort zero = _reader.ReadUShort();
-                        //byte nextToRead = _reader.ReadByte();
-                        //byte unk2 = _reader.ReadByte();
+                        ushort unk = _reader.ReadUShort();
+                        byte len = _reader.ReadByte();
 
-                        //byte[] data1 = new byte[nextToRead];
-                        //for (int k = 0; k < nextToRead && _reader.Position < _reader.Length; k++)
-                        //    data1[k] = _reader.ReadByte();
+                        if (_reader.Position + 1 >= _reader.Length)
+                            break;
 
+                        byte unk1 = _reader.ReadByte();
 
-                        //len = /*nextToRead == 0 ? (int)(_reader.Length - _reader.Position) : */(int) Math.Min(40, _reader.Length - _reader.Position);
+                        if (len == 0 && unk1 == 0)
+                        {
+                            _reader.Skip((int)Math.Min(28 * 2, _reader.Length - _reader.Position));
+                        }
 
-                        _reader.Skip((int)Math.Min(60, _reader.Length - _reader.Position));
+                        byte[] unkData = new byte[len];
+                        for (int k = 0; k < len && _reader.Position + 1 < _reader.Length; k++)
+                            unkData[k] = _reader.ReadByte();
 
                     }
+                    
 
+                    //Log.Message(LogTypes.Panic, sb.ToString());
                 }
             }
 
+
+            animSeq.Unload();
         }
 
         public static void Clear(byte id, byte group, byte dir)
@@ -1055,7 +1086,7 @@ namespace ClassicUO.IO.Resources
             int dcsize = _reader.ReadInt();
             int animID = _reader.ReadInt();
             _reader.Skip(16);
-            int frameCount = _reader.ReadInt() + animDirection.FrameCount;
+            int frameCount = _reader.ReadInt();
             IntPtr dataStart = _reader.StartAddress + _reader.ReadInt();
             _reader.SetData(dataStart);
             List<UOPFrameData> pixelDataOffsets = new List<UOPFrameData>();

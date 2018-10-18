@@ -210,10 +210,10 @@ namespace ClassicUO.Network
         }
 
 
-        public void Slice()
+        public void Update()
         {
-            if (!IsConnected)
-                return;
+            //if (!IsConnected)
+            //    return;
 
             lock (_sync)
             {
