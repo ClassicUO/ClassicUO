@@ -312,8 +312,11 @@ namespace ClassicUO.Game.Views
             ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup]
                 .Direction[Animations.Direction];
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && !Animations.LoadDirectionGroup(ref direction))
+            if ((direction.FrameCount == 0 || direction.Frames == null) &&
+                !Animations.LoadDirectionGroup(ref direction))
+            {                              
                 return;
+            }
 
             direction.LastAccessTime = CoreGame.Ticks;
 
@@ -327,11 +330,19 @@ namespace ClassicUO.Game.Views
                 if (frame == null || frame.IsDisposed)
                 {
                     if (!Animations.LoadDirectionGroup(ref direction))
+                    {
+                        Log.Message(LogTypes.Panic, $"graphic: {graphic}\tgroup: {animGroup}");
+
                         return;
+                    }
 
                     frame = ref direction.Frames[animIndex];
-                    if (frame == null)
+                    if (frame == null && !Animations.AnimationSequenceFrameMissing(ref direction, graphic, animGroup, animIndex))
+                    {
+                        Log.Message(LogTypes.Panic, $"graphic: {graphic}\tgroup: {animGroup}\tframe missed: {animIndex}");
+
                         return;
+                    }
                 }
 
                 if (hue == 0)

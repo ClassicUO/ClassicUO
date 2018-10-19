@@ -747,6 +747,9 @@ namespace ClassicUO.IO.Resources
 
             UOFileUop animSeq = new UOFileUop(Path.Combine(FileManager.UoFolderPath, "AnimationSequence.uop"), ".bin", MAX_ANIMATIONS_DATA_INDEX_COUNT);
 
+
+            //LogFile file = new LogFile(Bootstrap.ExeDirectory, "file.txt");
+
             for (int i = 0; i < animSeq.Entries.Length; i++)
             {
                 UOFileIndex3D entry = animSeq.Entries[i];
@@ -757,7 +760,7 @@ namespace ClassicUO.IO.Resources
 
                     byte[] buffer = animSeq.ReadArray<byte>(entry.Length);
 
-                    byte[] decbuffer = new byte[entry.Length];
+                    byte[] decbuffer = new byte[entry.DecompressedLength];
 
                     Zlib.Decompress(buffer, 0, decbuffer, decbuffer.Length);
 
@@ -767,7 +770,7 @@ namespace ClassicUO.IO.Resources
 
               
 
-                    ref var index = ref DataIndex[animID];
+                    ref IndexAnimation index = ref DataIndex[animID];
                     index.IsUOP = true;
 
                     _reader.Skip(48);
@@ -797,67 +800,86 @@ namespace ClassicUO.IO.Resources
                             break;
                     }
 
-                    while (_reader.Position + 4 * 3 < _reader.Length)
+
+                    for (int k = 0; k < replaces; k++)                  
                     {
                         int oldIdx = _reader.ReadInt();
                         uint frameCount = _reader.ReadUInt();
                         int newIDX = _reader.ReadInt();
 
+                        //sb.AppendLine($"\t\told: {oldIdx}\t\tframecount: {frameCount}\t\tnew: {newIDX}");
 
-                        //sb.AppendLine($"\t - old:\t{oldIdx}   \tframecount:\t{frameCount}   \tnewIDX:\t{newIDX}");
-
-                        if (oldIdx == 0 && frameCount == 0 && newIDX == 0)
+                        if (frameCount == 0 && oldIdx != -1 && newIDX != -1)
                         {
-
-                            _reader.Skip((int)Math.Min(28, _reader.Length - _reader.Position));
-                            continue;
-                        }
-
-
-                        if (frameCount == 0 && newIDX != -1 && oldIdx != -1)
-                        {
-                            index.Groups[25 - oldIdx] = index.Groups[newIDX];
+                            index.Groups[oldIdx] = index.Groups[newIDX];
                         }
                         else
                         {
-                            if (animID == 735)
+                            // here should be the missing frame
+
+                            //if (!_animSeqIndexReplaces.TryGetValue((Graphic) animID, out List<Tuple<int,int>> list))
+                            //{
+                            //    list = new List<Tuple<int, int>>();
+                            //    _animSeqIndexReplaces.Add((Graphic)animID, list);
+                            //}
+
+                            //list.Add(Tuple.Create( oldIdx, (int)frameCount));
+
+
+                            if (!_animSeqIndexReplaces.TryGetValue((Graphic)animID, out var list))
                             {
-                                //index.Groups[4] = index.Groups[0];
+                                list = new AnimSeqInfo[replaces];
+                                _animSeqIndexReplaces.Add((Graphic)animID, list);
                             }
 
-
-                            //index.Groups[25 - oldIdx] = index.Groups[oldIdx];
+                            AnimSeqInfo info = new AnimSeqInfo(oldIdx, (int)frameCount);
+                            list[k] = info;
                         }
 
-                        if (_reader.Position + 1 >= _reader.Length)
-                            break;
-
-                        ushort unk = _reader.ReadUShort();
-                        byte len = _reader.ReadByte();
-
-                        if (_reader.Position + 1 >= _reader.Length)
-                            break;
-
-                        byte unk1 = _reader.ReadByte();
-
-                        if (len == 0 && unk1 == 0)
-                        {
-                            _reader.Skip((int)Math.Min(28 * 2, _reader.Length - _reader.Position));
-                        }
-
-                        byte[] unkData = new byte[len];
-                        for (int k = 0; k < len && _reader.Position + 1 < _reader.Length; k++)
-                            unkData[k] = _reader.ReadByte();
-
+                        _reader.Skip(60);
                     }
-                    
 
-                    //Log.Message(LogTypes.Panic, sb.ToString());
+                 
                 }
             }
 
 
             animSeq.Unload();
+        }
+
+        struct AnimSeqInfo
+        {
+            public AnimSeqInfo(int group, int newindex)
+            {
+                Group = group;
+                NewIndex = newindex;
+            }
+
+            public readonly int Group;
+            public readonly int NewIndex;
+        }
+
+        private static readonly Dictionary<Graphic, AnimSeqInfo[]> _animSeqIndexReplaces = new Dictionary<Graphic, AnimSeqInfo[]>();
+
+        public static bool AnimationSequenceFrameMissing(ref AnimationDirection direction, Graphic graphic, int group, int index)
+        {
+            if (!direction.IsUOP) 
+                return false;
+
+
+            if (TryReadUOPAnimDimension(ref direction) && direction.FrameCount > 0 && direction.Frames != null && _animSeqIndexReplaces.TryGetValue(graphic, out AnimSeqInfo[] list))
+            {
+
+                AnimSeqInfo info = list[index];
+
+                if (direction.Frames[info.NewIndex] != null)
+                {
+                    direction.Frames[index] = direction.Frames[info.NewIndex];
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static void UpdateAnimationTable(uint flags)
@@ -1070,7 +1092,7 @@ namespace ClassicUO.IO.Resources
             int dcsize = _reader.ReadInt();
             int animID = _reader.ReadInt();
             _reader.Skip(16);
-            int frameCount = _reader.ReadInt();
+            int frameCount = _reader.ReadInt() /*+ animDirection.FrameCount*/;
             IntPtr dataStart = _reader.StartAddress + _reader.ReadInt();
             _reader.SetData(dataStart);
             List<UOPFrameData> pixelDataOffsets = new List<UOPFrameData>();
@@ -1096,18 +1118,19 @@ namespace ClassicUO.IO.Resources
                 pixelDataOffsets.Add(data);
             }
 
-            int vectorSize = pixelDataOffsets.Count;
-            if (vectorSize < 50)
-            {
-                while (vectorSize != 50)
-                {
-                    pixelDataOffsets.Add(new UOPFrameData());
-                    vectorSize++;
-                }
-            }
+            //int vectorSize = pixelDataOffsets.Count;
+            //if (vectorSize < 50)
+            //{
+            //    while (vectorSize != 50)
+            //    {
+            //        pixelDataOffsets.Add(new UOPFrameData());
+            //        vectorSize++;
+            //    }
+            //}
 
             animDirection.FrameCount = (byte)(pixelDataOffsets.Count / 5);
             int dirFrameStartIdx = animDirection.FrameCount * Direction;
+
             if (animDirection.Frames == null)
                 animDirection.Frames = new TextureAnimationFrame[animDirection.FrameCount];
 

@@ -105,7 +105,7 @@ namespace ClassicUO.IO
                                 "hashes dictionary and files collection have different count of entries!");
                         }
 
-                        Entries[idx] = new UOFileIndex3D(offset + headerLength, length);
+                        Entries[idx] = new UOFileIndex3D(offset + headerLength, length, decompressedLength);
 
                         // extra?
                         if (_hasExtra)
