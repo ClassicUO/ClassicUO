@@ -33,15 +33,15 @@ namespace ClassicUO.Utility
 
         public static bool Decompress(byte[] source, int offset, byte[] dest, int length)
         {
-            //using (MemoryStream ms = new MemoryStream(source, offset, source.Length - offset))
-            //{
-            //    ms.Seek(2, SeekOrigin.Begin);
-            //    using (DeflateStream stream = new DeflateStream(ms, CompressionMode.Decompress))
-            //        stream.Read(dest, 0, length);
-            //}
+            using (MemoryStream ms = new MemoryStream(source, offset, source.Length - offset))
+            {
+                ms.Seek(2, SeekOrigin.Begin);
+                using (DeflateStream stream = new DeflateStream(ms, CompressionMode.Decompress))
+                    stream.Read(dest, 0, length);
+            }
 
-            //return true;
-            return Uncompress(dest, ref length, source, source.Length) == ZLibError.Z_OK;
+            return true;
+            //return Uncompress(dest, ref length, source, source.Length) == ZLibError.Z_OK;
         }
 
 

@@ -32,6 +32,7 @@ using ClassicUO.Game;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
@@ -779,6 +780,23 @@ namespace ClassicUO.IO.Resources
                     //StringBuilder sb = new StringBuilder();
                     //sb.AppendLine($"- 0x{animID:X4},\ttype: {replaces}");
 
+
+                    switch (replaces)
+                    {
+                        case 29:
+                            index.Type = ANIMATION_GROUPS_TYPE.MONSTER;
+                            break;
+                        case 31: // what is this?
+                            break;
+                        case 32:
+                            index.Type = ANIMATION_GROUPS_TYPE.EQUIPMENT;
+                            break;
+                        case 48:
+                        case 68:
+                            index.Type = ANIMATION_GROUPS_TYPE.HUMAN;
+                            break;
+                    }
+
                     while (_reader.Position + 4 * 3 < _reader.Length)
                     {
                         int oldIdx = _reader.ReadInt();
@@ -798,42 +816,17 @@ namespace ClassicUO.IO.Resources
 
                         if (frameCount == 0 && newIDX != -1 && oldIdx != -1)
                         {
-                            switch (oldIdx)
-                            {
-                                case 0:
-                                    break;
-                                case 1:
-                                    break;
-                                case 2:
-                                    break;
-                                case 3:
-                                    break;
-                                default:
-                                    break;
-                            }
-
-                            //if (animID == 0x1b0 && newIDX == 29)
-                            //{
-
-                            //    int a = replaces % newIDX;
-                            //    int b = newIDX % replaces;
-
-                               
-
-                            //    oldIdx = 25;
-
-                                
-                            //}
-
-                            //oldIdx += 25;
-
-                            oldIdx = 25 - oldIdx;
-
-                            index.Groups[oldIdx] = index.Groups[newIDX];
+                            index.Groups[25 - oldIdx] = index.Groups[newIDX];
                         }
                         else
                         {
+                            if (animID == 735)
+                            {
+                                //index.Groups[4] = index.Groups[0];
+                            }
 
+
+                            //index.Groups[25 - oldIdx] = index.Groups[oldIdx];
                         }
 
                         if (_reader.Position + 1 >= _reader.Length)
@@ -865,15 +858,6 @@ namespace ClassicUO.IO.Resources
 
 
             animSeq.Unload();
-        }
-
-        public static void Clear(byte id, byte group, byte dir)
-        {
-            ref AnimationDirection it = ref DataIndex[id].Groups[group].Direction[dir];
-
-            Array.Clear(it.Frames, 0, it.Frames.Length);
-            it.Frames = null;
-            it.FrameCount = 0;
         }
 
         public static void UpdateAnimationTable(uint flags)
@@ -1299,10 +1283,23 @@ namespace ClassicUO.IO.Resources
 
         public static bool Contains(int g, int x, int y, int extra = 0) => _picker.Get(g, x, y, extra);
 
+        private static readonly Dictionary<Graphic, Rectangle> _animDimensionCache = new Dictionary<Graphic, Rectangle>();
+
         public static void GetAnimationDimensions(byte frameIndex, Graphic id, byte dir, byte animGroup, out int x, out int y, out int w, out int h)
         {
             if (id < MAX_ANIMATIONS_DATA_INDEX_COUNT)
             {
+
+                if (_animDimensionCache.TryGetValue(id, out Rectangle rect))
+                {
+                    x = rect.X;
+                    y = rect.Y;
+                    w = rect.Width;
+                    h = rect.Height;
+                    return;
+                }
+
+
                 if (dir < 5)
                 {
                     ref AnimationDirection direction =
@@ -1325,6 +1322,7 @@ namespace ClassicUO.IO.Resources
                             w = texture.Width;
                             h = texture.Height;
 
+                            _animDimensionCache.Add(id, new Rectangle(x, y, w, h));
                             return;
                         }
                     }
@@ -1342,6 +1340,7 @@ namespace ClassicUO.IO.Resources
                         UOFileMul file = _files[direction1.FileIndex];
                         _reader.SetData(file.StartAddress + (int)direction1.Address, direction1.Size);
                         ReadFrameDimensionData(frameIndex, out x, out y, out w, out h);
+                        _animDimensionCache.Add(id, new Rectangle(x, y, w, h));
 
                         return;
                     }
@@ -1395,6 +1394,7 @@ namespace ClassicUO.IO.Resources
                             w = _reader.ReadShort();
                             h = _reader.ReadShort();
 
+                            _animDimensionCache.Add(id, new Rectangle(x, y, w, h));
                             return;
                         }
                     }
@@ -1659,6 +1659,12 @@ namespace ClassicUO.IO.Resources
         // 5
         public AnimationDirection[] Direction;
         public UOPAnimationData UOPAnimData;
+
+
+        public override string ToString()
+        {
+            return UOPAnimData.Offset != 0 ? "Has data" : "-";
+        }
     }
 
     public struct AnimationDirection

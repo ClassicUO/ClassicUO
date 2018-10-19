@@ -197,13 +197,6 @@ namespace ClassicUO.Game.Views
 
         private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int height, out int centerY)
         {
-            //if (_animDimensionCache.TryGetValue(mobile.Graphic, out Point point))
-            //{
-            //    height = point.X;
-            //    centerY = point.Y;
-            //    return;
-            //}
-
             byte dir = 0 & 0x7F;
             byte animGroup = 0;
             bool mirror = false;
@@ -218,15 +211,9 @@ namespace ClassicUO.Game.Views
             if (x <= 0 && centerY <= 0 && w <= 0 && height <= 0)
             {
                 height = mobile.IsMounted ? 100 : 60;
-
-                //return;
-            }
-
-            
-            //_animDimensionCache[mobile.Graphic] = new Point(height, centerY);
+            }     
         }
 
-        private static readonly Dictionary<Graphic, Point> _animDimensionCache = new Dictionary<Graphic, Point>();
 
 
         private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
