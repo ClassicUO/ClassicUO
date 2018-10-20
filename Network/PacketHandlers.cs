@@ -2203,13 +2203,14 @@ namespace ClassicUO.Network
             ushort type = p.ReadUShort();
             ushort action = p.ReadUShort();
             byte mode = p.ReadByte();
+
             byte group = Mobile.GetObjectNewAnimation(mobile, type, action, mode);
 
             mobile.SetAnimation(group);
             mobile.AnimationRepeatMode = 1;
             mobile.AnimationDirection = true;
 
-            if ((type == 1 || type == 2) && mobile.Graphic == 0x015) mobile.AnimationRepeat = true;
+            if ((type == 1 || type == 2) && mobile.Graphic == 0x0015) mobile.AnimationRepeat = true;
 
             mobile.AnimationFromServer = true;
         }

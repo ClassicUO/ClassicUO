@@ -259,7 +259,7 @@ namespace ClassicUO.Game.GameObjects
 
 
         public bool IsMounted => Equipment[(int) Layer.Mount] != null;
-        public bool IsRunning => (Direction & Direction.Running) == Direction.Running;
+        public bool IsRunning => (Direction & Direction.Running) != 0;
 
         public byte AnimationInterval { get; set; }
         public byte AnimationFrameCount { get; set; }

@@ -771,7 +771,7 @@ namespace ClassicUO.IO.Resources
               
 
                     ref IndexAnimation index = ref DataIndex[animID];
-                    index.IsUOP = true;
+                    //index.IsUOP = true;
 
                     _reader.Skip(48);
 
@@ -784,21 +784,21 @@ namespace ClassicUO.IO.Resources
                     //sb.AppendLine($"- 0x{animID:X4},\ttype: {replaces}");
 
 
-                    switch (replaces)
-                    {
-                        case 29:
-                            index.Type = ANIMATION_GROUPS_TYPE.MONSTER;
-                            break;
-                        case 31: // what is this?
-                            break;
-                        case 32:
-                            index.Type = ANIMATION_GROUPS_TYPE.EQUIPMENT;
-                            break;
-                        case 48:
-                        case 68:
-                            index.Type = ANIMATION_GROUPS_TYPE.HUMAN;
-                            break;
-                    }
+                    //switch (replaces)
+                    //{
+                    //    case 29:
+                    //        index.Type = ANIMATION_GROUPS_TYPE.MONSTER;
+                    //        break;
+                    //    case 31: // what is this?
+                    //        break;
+                    //    case 32:
+                    //        index.Type = ANIMATION_GROUPS_TYPE.EQUIPMENT;
+                    //        break;
+                    //    case 48:
+                    //    case 68:
+                    //        index.Type = ANIMATION_GROUPS_TYPE.HUMAN;
+                    //        break;
+                    //}
 
 
                     for (int k = 0; k < replaces; k++)                  
@@ -863,14 +863,11 @@ namespace ClassicUO.IO.Resources
 
         public static bool AnimationSequenceFrameMissing(ref AnimationDirection direction, Graphic graphic, int group, int index)
         {
-            if (!direction.IsUOP) 
-                return false;
 
-
-            if (TryReadUOPAnimDimension(ref direction) && direction.FrameCount > 0 && direction.Frames != null && _animSeqIndexReplaces.TryGetValue(graphic, out AnimSeqInfo[] list))
+            if (direction.IsUOP && direction.FrameCount > 0 && direction.Frames != null && _animSeqIndexReplaces.TryGetValue(graphic, out AnimSeqInfo[] list))
             {
 
-                AnimSeqInfo info = list[index];
+                AnimSeqInfo info = list[group];
 
                 if (direction.Frames[info.NewIndex] != null)
                 {
@@ -882,6 +879,7 @@ namespace ClassicUO.IO.Resources
             return false;
         }
 
+       
         public static void UpdateAnimationTable(uint flags)
         {
             for (int i = 0; i < MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
