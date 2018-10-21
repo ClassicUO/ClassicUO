@@ -73,9 +73,9 @@ namespace ClassicUO.IO.Resources
             for (int i = 0; i < 5; i++)
             {
                 string pathmul = Path.Combine(FileManager.UoFolderPath,
-                    "anim" + (i == 0 ? "" : (i + 1).ToString()) + ".mul");
+                    "anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul");
                 string pathidx = Path.Combine(FileManager.UoFolderPath,
-                    "anim" + (i == 0 ? "" : (i + 1).ToString()) + ".idx");
+                    "anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx");
 
                 if (File.Exists(pathmul) && File.Exists(pathidx))
                     _files[i] = new UOFileMul(pathmul, pathidx, 0, i == 0 ? 6 : 0);
@@ -807,77 +807,79 @@ namespace ClassicUO.IO.Resources
                         uint frameCount = _reader.ReadUInt();
                         int newIDX = _reader.ReadInt();
 
+
                         //sb.AppendLine($"\t\told: {oldIdx}\t\tframecount: {frameCount}\t\tnew: {newIDX}");
 
-                        if (frameCount == 0 && oldIdx != -1 && newIDX != -1)
+                        if (frameCount == 0)
                         {
                             index.Groups[oldIdx] = index.Groups[newIDX];
                         }
                         else
                         {
-                            // here should be the missing frame
-
-                            //if (!_animSeqIndexReplaces.TryGetValue((Graphic) animID, out List<Tuple<int,int>> list))
-                            //{
-                            //    list = new List<Tuple<int, int>>();
-                            //    _animSeqIndexReplaces.Add((Graphic)animID, list);
-                            //}
-
-                            //list.Add(Tuple.Create( oldIdx, (int)frameCount));
-
-
-                            if (!_animSeqIndexReplaces.TryGetValue((Graphic)animID, out var list))
+                            //int offset = 64;
+                            if (animID == 0x02df)
                             {
-                                list = new AnimSeqInfo[replaces];
-                                _animSeqIndexReplaces.Add((Graphic)animID, list);
+                                //_reader.Skip((int)frameCount);
+                                //offset -= (int) frameCount;
+
+                                //uint boh = _reader.ReadUInt();
+
+                                //offset -= 4;
+
+
                             }
 
-                            AnimSeqInfo info = new AnimSeqInfo(oldIdx, (int)frameCount);
-                            list[k] = info;
+
+                            //_reader.Skip(40);
+
+                            //byte[] unk = new byte[20];
+
+                            //for (int o = 0; o < 20; o++)
+                            //{
+                            //    unk[o] = _reader.ReadByte();
+                            //}
+
+                            //for (int j = 0; j < 5; j++)
+                            //{
+                            //    index.Groups[oldIdx].Direction[j].FrameCount = (byte) frameCount;
+                            //}
+
                         }
 
                         _reader.Skip(60);
+
                     }
 
-                 
+                    if (animID == 0x02df)
+                    {
+
+                    }
+
+                    int toread = (int)(_reader.Length - _reader.Position);
+
+                    byte[] data = _reader.ReadArray(toread);
+
+                    _reader.SetData(data, toread);
+
+                    //sb.AppendLine("Data len: " + toread);
+                    //for (int ii = 0; ii < toread; ii++)
+                    //{
+                    //    sb.AppendLine($"\t\tbyte[{ii}]   {data[ii]}");
+                    //}
+
+                    //uint unk0 = _reader.ReadUInt();
+                    //uint unk1 = _reader.ReadUInt();
+                    //uint unk2 = _reader.ReadUInt();
+                    //uint unk3 = _reader.ReadUInt();
+                    //file.WriteAsync(sb.ToString());
+
                 }
+
             }
 
-
+            //file.Dispose();
             animSeq.Unload();
-        }
-
-        struct AnimSeqInfo
-        {
-            public AnimSeqInfo(int group, int newindex)
-            {
-                Group = group;
-                NewIndex = newindex;
-            }
-
-            public readonly int Group;
-            public readonly int NewIndex;
-        }
-
-        private static readonly Dictionary<Graphic, AnimSeqInfo[]> _animSeqIndexReplaces = new Dictionary<Graphic, AnimSeqInfo[]>();
-
-        public static bool AnimationSequenceFrameMissing(ref AnimationDirection direction, Graphic graphic, int group, int index)
-        {
-
-            if (direction.IsUOP && direction.FrameCount > 0 && direction.Frames != null && _animSeqIndexReplaces.TryGetValue(graphic, out AnimSeqInfo[] list))
-            {
-
-                AnimSeqInfo info = list[group];
-
-                if (direction.Frames[info.NewIndex] != null)
-                {
-                    direction.Frames[index] = direction.Frames[info.NewIndex];
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        }   
 
        
         public static void UpdateAnimationTable(uint flags)
@@ -1090,7 +1092,7 @@ namespace ClassicUO.IO.Resources
             int dcsize = _reader.ReadInt();
             int animID = _reader.ReadInt();
             _reader.Skip(16);
-            int frameCount = _reader.ReadInt() /*+ animDirection.FrameCount*/;
+            int frameCount = _reader.ReadInt();
             IntPtr dataStart = _reader.StartAddress + _reader.ReadInt();
             _reader.SetData(dataStart);
             List<UOPFrameData> pixelDataOffsets = new List<UOPFrameData>();

@@ -12,12 +12,11 @@ namespace ClassicUO.Utility.Logging
     {
         public static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> LogTypeInfo = new Dictionary<LogTypes, Tuple<ConsoleColor, string>> { { LogTypes.None, Tuple.Create(ConsoleColor.White, "") }, { LogTypes.Info, Tuple.Create(ConsoleColor.Green, "  Info    ") }, { LogTypes.Debug, Tuple.Create(ConsoleColor.DarkGreen, "  Debug   ") }, { LogTypes.Trace, Tuple.Create(ConsoleColor.Green, "  Trace   ") }, { LogTypes.Warning, Tuple.Create(ConsoleColor.Yellow, "  Warning ") }, { LogTypes.Error, Tuple.Create(ConsoleColor.Red, "  Error   ") }, { LogTypes.Panic, Tuple.Create(ConsoleColor.Red, "  Panic   ") } };
 
-        private readonly BlockingCollection<Tuple<LogTypes, string, string>> logQueue;
-        private bool isLogging;
+        private readonly BlockingCollection<Tuple<LogTypes, string, string>> _logQueue = new BlockingCollection<Tuple<LogTypes, string, string>>();
+        private bool _isLogging;
 
         public Logger()
         {
-            logQueue = new BlockingCollection<Tuple<LogTypes, string, string>>();
         }
 
         // No volatile support for properties, let's use a private backing field.
@@ -29,17 +28,17 @@ namespace ClassicUO.Utility.Logging
         {
             var logThread = new Thread(async () =>
             {
-                using (logQueue)
+                using (_logQueue)
                 using (logFile)
                 {
-                    isLogging = true;
+                    _isLogging = true;
 
-                    while (isLogging)
+                    while (_isLogging)
                     {
                         Thread.Sleep(1);
 
                         // Do nothing if logging is turned off (LogTypes.None) & the log queue is empty, but continue the loop.
-                        if (LogTypes == LogTypes.None || !logQueue.TryTake(out Tuple<LogTypes, string, string> log))
+                        if (LogTypes == LogTypes.None || !_logQueue.TryTake(out Tuple<LogTypes, string, string> log))
                             continue;
 
                         if (log.Item1 == LogTypes.Table)
@@ -79,12 +78,12 @@ namespace ClassicUO.Utility.Logging
             { IsBackground = true };
             logThread.Start();
 
-            isLogging = logThread.ThreadState == ThreadState.Running || logThread.ThreadState == ThreadState.Background;
+            _isLogging = logThread.ThreadState == ThreadState.Running || logThread.ThreadState == ThreadState.Background;
         }
 
         public void Stop()
         {
-            isLogging = false;
+            _isLogging = false;
         }
 
         public void Message(LogTypes logType, string text)
@@ -111,7 +110,7 @@ namespace ClassicUO.Utility.Logging
         {
             if ((LogTypes & type) == type)
             {
-                logQueue.Add(type == LogTypes.None
+                _logQueue.Add(type == LogTypes.None
                     ? Tuple.Create(type, "", text)
                     : Tuple.Create(type, DateTime.Now.ToString("T"), text));
             }

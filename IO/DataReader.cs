@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace ClassicUO.IO
 {
@@ -100,6 +101,16 @@ namespace ClassicUO.IO
                                     ((long) ReadByte() << 48) | ((long) ReadByte() << 56);
 
         internal ulong ReadULong() => (ulong) ReadLong();
+
+        internal byte[] ReadArray(int count)
+        {
+            byte[] data = new byte[count];
+
+            for (int i = 0; i < count; i++)
+                data[i] = ReadByte();
+
+            return data;
+        }
 
         private void EnsureSize(int size)
         {

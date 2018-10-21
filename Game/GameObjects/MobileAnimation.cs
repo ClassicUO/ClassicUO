@@ -468,7 +468,13 @@ namespace ClassicUO.Game.GameObjects
                     case PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
                         animation = (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1;
                         break;
+                    default:
+                        break;
                 }
+
+                if (!Animations.AnimationExists(graphic, animation))
+                    animation = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+
             }
         }
 

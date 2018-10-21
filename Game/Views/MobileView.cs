@@ -301,8 +301,6 @@ namespace ClassicUO.Game.Views
             EquipConvData? convertedItem = null, bool ispartial = false)
         {
             byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic);
-
-
             sbyte animIndex = GameObject.AnimIndex;
 
             Animations.AnimID = graphic;
@@ -337,7 +335,7 @@ namespace ClassicUO.Game.Views
                     }
 
                     frame = ref direction.Frames[animIndex];
-                    if (frame == null && !Animations.AnimationSequenceFrameMissing(ref direction, graphic, animGroup, animIndex))
+                    if (frame == null)
                     {
                         Log.Message(LogTypes.Panic, $"graphic: {graphic}\tgroup: {animGroup}\tframe missed: {animIndex}");
 
