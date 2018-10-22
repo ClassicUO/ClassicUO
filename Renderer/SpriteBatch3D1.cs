@@ -12,7 +12,7 @@ namespace ClassicUO.Renderer
 {
     public class SpriteBatch3D
     {
-        private const int MAX_SPRITES = 0x800 * 10 * 10;
+        private const int MAX_SPRITES = 0x800 * 40;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;
 
@@ -36,7 +36,9 @@ namespace ClassicUO.Renderer
         private readonly SpriteVertex[] _vertexInfo;
         private bool _started;
 
+#if !ORIONSORT
         private float _z;
+#endif
 
         private int _numSprites;
 
@@ -70,10 +72,7 @@ namespace ClassicUO.Renderer
 
         public GraphicsDevice GraphicsDevice { get; }
         public Matrix ProjectionMatrixWorld => Matrix.Identity;
-
-        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width,
-            GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
-
+        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
         public int Calls { get; set; }
         public int Merged { get; set; }
 
@@ -87,8 +86,9 @@ namespace ClassicUO.Renderer
             _effect.Parameters["lightIntensity"].SetValue(inte);
         }
 
+#if !ORIONSORT
         public float GetZ() => _z++;
-
+#endif
 
         public void Begin()
         {
@@ -97,9 +97,11 @@ namespace ClassicUO.Renderer
             _started = true;
             Calls = 0;
             Merged = 0;
-            _z = 0;
-        }
 
+#if !ORIONSORT
+            _z = 0;
+#endif
+        }
 
         public void End(bool light = false)
         {
@@ -119,8 +121,9 @@ namespace ClassicUO.Renderer
             if (_numSprites >= MAX_SPRITES)
                 Flush();
 
+#if !ORIONSORT
             vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
-
+#endif
 
              _textureInfo[_numSprites] = new DrawInfo(texture, technique);
            
@@ -139,10 +142,13 @@ namespace ClassicUO.Renderer
             if (texture == null || texture.IsDisposed)
                 return;
 
-            vertices[0].Position.Z =
-                vertices[1].Position.Z =
-                    vertices[2].Position.Z =
-                        vertices[3].Position.Z = z;
+            if (_numSprites >= MAX_SPRITES)
+                Flush();
+
+#if !ORIONSORT
+            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = z;
+#endif
+
             float skewHorizTop = (vertices[0].Position.Y - position.Y) * .5f;
             float skewHorizBottom = (vertices[3].Position.Y - position.Y) * .5f;
             vertices[0].Position.X -= skewHorizTop;
@@ -199,10 +205,8 @@ namespace ClassicUO.Renderer
             GraphicsDevice.DepthStencilState = _dss;
 
 
-
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
             GraphicsDevice.Indices = _indexBuffer;
-
         }
 
         private void Flush()
@@ -242,38 +246,31 @@ namespace ClassicUO.Renderer
             _numSprites = 0;
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void LastTecnhique(Techniques current, ref Techniques technique)
+        private void InternalDraw(DrawInfo info, int baseSprite, int batchSize, ref Techniques last)
         {
-            switch (current)
+            switch (info.Technique)
             {
                 case Techniques.Default:
-                    if (technique != current)
+                    if (last != info.Technique)
                     {
                         _effect.CurrentTechnique = _huesTechnique;
-                        technique = current;
+                        last = info.Technique;
 
                         _effect.CurrentTechnique.Passes[0].Apply();
 
                     }
                     break;
                 case Techniques.ShadowSet:
-                    if (technique != current)
+                    if (last != info.Technique)
                     {
                         _effect.CurrentTechnique = _shadowTechnique;
-                        technique = current;
+                        last = info.Technique;
 
                         _effect.CurrentTechnique.Passes[0].Apply();
                     }
                     break;
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void InternalDraw(DrawInfo info, int baseSprite, int batchSize, ref Techniques last)
-        {
-            LastTecnhique(info.Technique, ref last);
 
             GraphicsDevice.Textures[0] = info.Texture;
             GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite * 4, 0, batchSize * 2);

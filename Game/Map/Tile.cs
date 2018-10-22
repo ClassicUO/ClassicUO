@@ -89,39 +89,31 @@ namespace ClassicUO.Game.Map
             switch (obj)
             {
                 case Tile tile:
-                    {
-                        if (tile.IsStretched)
-                            priorityZ = (short)(((TileView)tile.View).SortZ - 1);
-                        else
-                            priorityZ--;
-                    }
+                {
+
+                    if (tile.IsStretched)
+                        priorityZ = (short) (tile.AverageZ - 1); //(short)(((TileView)tile.View). - 1);
+                    else
+                        priorityZ--;
+                }
                     break;
-                case Mobile mobile:
+                case Mobile _:
                     priorityZ++;
                     break;
-                case Item item:
-                    if (item.IsCorpse)
-                        priorityZ++;
-                    else
-                        goto default;
+                case Item item when item.IsCorpse:
+                    priorityZ++;
                     break;
-                case GameEffect effect:
+                case GameEffect _:
                     priorityZ += 2;
                     break;
-                //case DeferredEntity deferred:
-                //    if (deferred.Entity is Mobile)
-                //        priorityZ++;
-                //    else if (deferred.Entity is GameEffect)
-                //        priorityZ += 2;
-                //    break;
                 default:
                     {
-                        IDynamicItem dyn = (IDynamicItem)obj;
+                        IDynamicItem dyn1 = (IDynamicItem)obj;
 
-                        if (IO.Resources.TileData.IsBackground((long)dyn.ItemData.Flags))
+                        if (IO.Resources.TileData.IsBackground((long)dyn1.ItemData.Flags))
                             priorityZ--;
 
-                        if (dyn.ItemData.Height > 0)
+                        if (dyn1.ItemData.Height > 0)
                             priorityZ++;
                     }
                     break;
@@ -131,27 +123,6 @@ namespace ClassicUO.Game.Map
             obj.PriorityZ = priorityZ;
 
 #endif
-
-            //GameObject found = null;
-            //var objFirst = _objectsOnTile.Count > 0 ? _objectsOnTile[0] : null;
-            //if (objFirst != null)
-            //{
-            //    for (int i = 0; i < _objectsOnTile.Count - 1; i++)
-            //    {
-            //        int test = _objectsOnTile[i].PriorityZ;
-            //        if (test > priorityZ || (test == priorityZ && obj is Tile && !(objFirst is Tile)))
-            //            break;
-
-            //        found = objFirst;
-            //        objFirst = _objectsOnTile[i + 1];
-            //    }
-            //}
-
-            //if (found != null)
-            //{
-
-            //}
-
 
             _objectsOnTile.Add(obj);
 

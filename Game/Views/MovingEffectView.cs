@@ -22,7 +22,9 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
         {
+#if !ORIONSORT
             PreDraw(position);
+#endif
 
             return DrawInternal(spriteBatch, position, list);
         }

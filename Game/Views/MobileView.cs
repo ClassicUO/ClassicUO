@@ -45,7 +45,9 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
+#if !ORIONSORT
             PreDraw(position);
+#endif
             return DrawInternal(spriteBatch, position, objectList);
         }
 
@@ -55,7 +57,9 @@ namespace ClassicUO.Game.Views
             if (GameObject.IsDisposed)
                 return false;
 
+#if !ORIONSORT
             ShadowZDepth = spriteBatch.GetZ();
+#endif
 
             Mobile mobile = (Mobile) GameObject;
 
@@ -81,11 +85,9 @@ namespace ClassicUO.Game.Views
             else
                 drawX = -22 - (int) mobile.Offset.X;
 
-            Rectangle rect = new Rectangle();
-
             for (int i = 0; i < _layerCount; i++)
             {
-                ref ViewLayer vl = ref _frames[i];
+                ViewLayer vl = _frames[i];
                 TextureAnimationFrame frame = vl.Frame;
 
                 if (frame.IsDisposed) continue;
@@ -95,23 +97,9 @@ namespace ClassicUO.Game.Views
 
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-
-                if (Bounds.X < rect.X)
-                    rect.X = Bounds.X;
-                if (Bounds.Y < rect.Y)
-                    rect.Y = Bounds.Y;
-                if (Bounds.Width > rect.Width)
-                    rect.Width = Bounds.Width;
-                if (Bounds.Height > rect.Height)
-                    rect.Height = Bounds.Height;
-
-                //if (i == 0)
-                //    rect = Bounds;
-
                 HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, 0, false);
 
                 base.Draw(spriteBatch, position, objectList);
-
                 Pick(frame.ID, Bounds, position, objectList);
             }
 

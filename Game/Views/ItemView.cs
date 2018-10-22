@@ -103,15 +103,17 @@ namespace ClassicUO.Game.Views
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
             MouseOverList objectList)
         {
+#if !ORIONSORT
             PreDraw(position);
+#endif
 
             if (GameObject.IsDisposed)
                 return false;
 
             Item item = (Item) GameObject;
-
+#if !ORIONSORT
             spriteBatch.GetZ();
-
+#endif
             byte dir = (byte) ((byte) item.Layer & 0x7F & 7);
             bool mirror = false;
 

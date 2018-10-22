@@ -759,9 +759,12 @@ namespace ClassicUO.IO.Resources
 
                     byte[] buffer = animSeq.ReadArray<byte>(entry.Length);
 
-                    byte[] decbuffer = new byte[entry.DecompressedLength];
+                    int decLen = entry.DecompressedLength;
+                    byte[] decbuffer = new byte[decLen];
 
-                    Zlib.Decompress(buffer, 0, decbuffer, decbuffer.Length);
+                    ZLib.Decompress(buffer, 0, decbuffer, decbuffer.Length);
+
+                    //ZLib.Unpack(decbuffer, ref decLen, buffer, entry.Length);
 
                     _reader.SetData(decbuffer, decbuffer.Length);
 
@@ -843,16 +846,30 @@ namespace ClassicUO.IO.Resources
 
                     }
 
-                    if (animID == 0x02df)
-                    {
-
-                    }
+                   
 
                     int toread = (int)(_reader.Length - _reader.Position);
 
                     byte[] data = _reader.ReadArray(toread);
 
                     _reader.SetData(data, toread);
+
+                    if (animID == 0x02df)
+                    {
+                        //int len = entry.Length;
+                        //byte[] decc = new byte[len];
+
+                        //ZLib.Compress(decbuffer, ref decc);
+
+                       // ZLib.Pack(decc, ref len, decbuffer, decLen);
+
+
+
+                        //using (BinaryWriter writer = new BinaryWriter(File.Create("file")))
+                        //{
+                        //    writer.Write(data);
+                        //}
+                    }
 
                     //sb.AppendLine("Data len: " + toread);
                     //for (int ii = 0; ii < toread; ii++)
@@ -1074,11 +1091,13 @@ namespace ClassicUO.IO.Resources
             byte[] buffer = file.ReadArray<byte>((int)animData.CompressedLength);
             byte[] decbuffer = new byte[decLen];
 
-            if (!Zlib.Decompress(buffer, 0, decbuffer, decLen))
-            {
-                Log.Message(LogTypes.Error, "Error to decompress uop animation");
-                return false;
-            }
+            ZLib.Decompress(buffer, 0, decbuffer, decLen);
+
+            //if (ZLib.Unpack(decbuffer, ref decLen, buffer, buffer.Length) != ZLib.ZLibError.Okay)
+            //{
+            //    Log.Message(LogTypes.Error, "Error to decompress uop animation");
+            //    return false;
+            //}
 
             _reader.SetData(decbuffer, decLen);
 
@@ -1381,8 +1400,10 @@ namespace ClassicUO.IO.Resources
                         byte[] buffer = file.ReadArray<byte>((int)animDataStruct.CompressedLength);
                         byte[] decbuffer = new byte[decLen];
 
-                        if (Zlib.Decompress(buffer, 0, decbuffer, decLen))
-                        {
+                        ZLib.Decompress(buffer, 0, decbuffer, decLen);
+
+                        //if (ZLib.Unpack(decbuffer, ref decLen, buffer, buffer.Length) == ZLib.ZLibError.Okay)
+                        //{
                             _reader.SetData(decbuffer, decLen);
 
                             _reader.Skip(8);
@@ -1413,7 +1434,7 @@ namespace ClassicUO.IO.Resources
 
                             _animDimensionCache.Add(id, new Rectangle(x, y, w, h));
                             return;
-                        }
+                        //}
                     }
                 }
             }

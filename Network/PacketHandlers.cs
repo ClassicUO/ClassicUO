@@ -2010,7 +2010,7 @@ namespace ClassicUO.Network
             for (int plane = 0; plane < planes; plane++)
             {
                 uint header = p.ReadUInt();
-                ulong dlen = ((header & 0xFF0000) >> 16) | ((header & 0xF0) << 4);
+                int dlen = (int)(((header & 0xFF0000) >> 16) | ((header & 0xF0) << 4));
                 int clen = (int) (((header & 0xFF00) >> 8) | ((header & 0x0F) << 8));
                 int planeZ = (int) ((header & 0x0F000000) >> 24);
                 int planeMode = (int) ((header & 0xF0000000) >> 28);
@@ -2020,7 +2020,10 @@ namespace ClassicUO.Network
                 Buffer.BlockCopy(p.ToArray(), p.Position, compressedBytes, 0, clen);
 
                 byte[] decompressedBytes = new byte[dlen];
-                Zlib.Decompress(compressedBytes, 0, decompressedBytes, (int) dlen);
+
+                ZLib.Decompress(compressedBytes, 0, decompressedBytes, (int) dlen);
+
+               //ZLib.Unpack(decompressedBytes, ref dlen, compressedBytes, clen);
 
                 Packet stream = new Packet(decompressedBytes, (int) dlen);
                 // using (BinaryReader stream = new BinaryReader(new MemoryStream(decompressedBytes)))
@@ -2163,13 +2166,14 @@ namespace ClassicUO.Network
             uint x = p.ReadUInt();
             uint y = p.ReadUInt();
             uint clen = p.ReadUInt() - 4;
-            uint dlen = p.ReadUInt();
+            int dlen = (int)p.ReadUInt();
 
             byte[] data = p.ReadArray((int) clen);
 
             byte[] decData = new byte[dlen];
 
-            Zlib.Decompress(data, 0, decData, (int) dlen);
+            ZLib.Decompress(data, 0, decData,  dlen);
+            //ZLib.Unpack(decData, ref dlen, data, (int)clen);
 
             string layout = Encoding.UTF8.GetString(decData);
 
@@ -2179,13 +2183,15 @@ namespace ClassicUO.Network
             if (linesNum > 0)
             {
                 clen = p.ReadUInt() - 4;
-                dlen = p.ReadUInt();
+                dlen = (int)p.ReadUInt();
 
                 data = new byte[clen];
-                for (int i = 0; i < data.Length; i++) data[i] = p.ReadByte();
+                for (int i = 0; i < clen; i++)
+                    data[i] = p.ReadByte();
 
                 decData = new byte[dlen];
-                Zlib.Decompress(data, 0, decData, (int) dlen);
+                ZLib.Decompress(data, 0, decData, dlen);
+                //ZLib.Unpack(decData, ref dlen, data, data.Length);
 
                 lines = new string[linesNum];
 
