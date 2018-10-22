@@ -739,7 +739,7 @@ namespace ClassicUO.IO.Resources
 
             if (_animGroupCount < maxGroup)
                 _animGroupCount = maxGroup;
-            
+
 
             // AnimationSequence.uop
             // https://github.com/AimedNuu/OrionUO/blob/f27a29806aab9379fa004af953832f3e2ffe248d/OrionUO/Managers/FileManager.cpp#L738
@@ -767,10 +767,11 @@ namespace ClassicUO.IO.Resources
 
                     uint animID = _reader.ReadUInt();
 
-              
 
                     ref IndexAnimation index = ref DataIndex[animID];
-                    //index.IsUOP = true;
+
+                    if (!index.IsUOP )
+                        continue;
 
                     _reader.Skip(48);
 
@@ -1679,7 +1680,7 @@ namespace ClassicUO.IO.Resources
 
         public override string ToString()
         {
-            return UOPAnimData.Offset != 0 ? "Has data" : "-";
+            return UOPAnimData.Offset != 0 ? "Has uop data" : Direction[0].Address != 0 ? "Has mul data" : "-";
         }
     }
 
