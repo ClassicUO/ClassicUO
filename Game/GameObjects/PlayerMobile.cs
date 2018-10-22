@@ -1494,7 +1494,6 @@ namespace ClassicUO.Game.GameObjects
 
             if (_requestedSteps.Count >= MAX_STEP_COUNT)
             {
-                NetClient.Socket.Send(new PResend());
                 return false;
             }
 
@@ -1517,8 +1516,8 @@ namespace ClassicUO.Game.GameObjects
                 oldDirection = (Direction) step1.Direction;
             }
 
-            oldDirection = oldDirection & Direction.Up;
-            direction = direction & Direction.Up;
+            //oldDirection = oldDirection & Direction.Up;
+            //direction = direction & Direction.Up;
 
             ushort walkTime;
             Direction newDirection = direction;
@@ -1567,9 +1566,9 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (run) direction |= Direction.Running;
+            //if (run) direction |= Direction.Running;
 
-            Step step = new Step {X = x, Y = y, Z = z, Direction = (byte) direction, Run = run, Seq = SequenceNumber};
+            Step step = new Step {X = x, Y = y, Z = z, Direction = (byte) direction, Run = run, Seq = SequenceNumber, Rej = 0};
 
 
             if (_movementState == PlayerMovementState.ANIMATE_IMMEDIATELY)
@@ -1590,7 +1589,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             _requestedSteps.AddToBack(step);
-            NetClient.Socket.Send(new PWalkRequest(direction, SequenceNumber));
+            NetClient.Socket.Send(new PWalkRequest(direction, SequenceNumber, run));
             if (SequenceNumber == 0xFF)
                 SequenceNumber = 1;
             else
@@ -1610,15 +1609,13 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            Step step = _requestedSteps.Front();
+            _requestedSteps.RemoveFromFront(out Step step);
+
             if (step.Seq != seq)
             {
                 NetClient.Socket.Send(new PResend());
                 return;
             }
-
-
-            _requestedSteps.RemoveFromFront();
 
             if (!step.Anim)
             {
@@ -1646,7 +1643,22 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            //Step step = _requestedSteps.Front();
+            _requestedSteps.RemoveFromFront(out Step step);
+
+            if (step.Rej == 0)
+            {
+                ResetSteps();
+                ForcePosition(position.X, position.Y, position.Z, dir);
+
+                if (step.Seq != seq)
+                {
+                    NetClient.Socket.Send(new PResend());
+                }
+            }
+            else
+            {
+                
+            }
 
             //if (step.Seq != seq)
             //{
@@ -1665,37 +1677,37 @@ namespace ClassicUO.Game.GameObjects
 
             //ProcessDelta();
 
-            foreach (Step step in _requestedSteps)
-            {
-                if (step.Seq == seq)
-                {
-                    ResetSteps();
-                    Position = new Position(position.X, position.Y, position.Z);
-                    Direction = dir;
+            //foreach (Step step in _requestedSteps)
+            //{
+            //    if (step.Seq == seq)
+            //    {
+            //        ResetSteps();
+            //        Position = new Position(position.X, position.Y, position.Z);
+            //        Direction = dir;
 
-                    ProcessDelta();
+            //        ProcessDelta();
 
-                    break;
-                }
-            }
+            //        break;
+            //    }
+            //}
         }
 
         public void ResetSteps()
         {
-            //for (int i = 0; i < _requestedSteps.Count; i++)
-            //{
-            //   var s = _requestedSteps[i];
-            //   s.Rej = 1;
-            //   _requestedSteps[i] = s;
-            //}
+            for (int i = 0; i < _requestedSteps.Count; i++)
+            {
+                var s = _requestedSteps[i];
+                s.Rej = 1;
+                _requestedSteps[i] = s;
+            }
 
-            _requestedSteps.Clear();
-            Steps.Clear();
+            //_requestedSteps.Clear();
+            //Steps.Clear();
 
             SequenceNumber = 0;
             _lastStepRequestedTime = 0;
 
-            Offset = Vector3.Zero;
+            //Offset = Vector3.Zero;
         }
 
         public void ResetRequestedSteps()

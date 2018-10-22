@@ -739,8 +739,7 @@ namespace ClassicUO.IO.Resources
 
             if (_animGroupCount < maxGroup)
                 _animGroupCount = maxGroup;
-
-
+            
 
             // AnimationSequence.uop
             // https://github.com/AimedNuu/OrionUO/blob/f27a29806aab9379fa004af953832f3e2ffe248d/OrionUO/Managers/FileManager.cpp#L738
@@ -819,13 +818,6 @@ namespace ClassicUO.IO.Resources
                             //int offset = 64;
                             if (animID == 0x02df)
                             {
-                                //_reader.Skip((int)frameCount);
-                                //offset -= (int) frameCount;
-
-                                //uint boh = _reader.ReadUInt();
-
-                                //offset -= 4;
-
 
                             }
 
@@ -867,8 +859,9 @@ namespace ClassicUO.IO.Resources
                     //    sb.AppendLine($"\t\tbyte[{ii}]   {data[ii]}");
                     //}
 
-                    //uint unk0 = _reader.ReadUInt();
-                    //uint unk1 = _reader.ReadUInt();
+                    uint unk0 = _reader.ReadUInt();
+                    _reader.Skip(1);
+                    uint unk1 = _reader.ReadUInt();
                     //uint unk2 = _reader.ReadUInt();
                     //uint unk3 = _reader.ReadUInt();
                     //file.WriteAsync(sb.ToString());

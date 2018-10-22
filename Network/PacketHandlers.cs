@@ -610,7 +610,9 @@ namespace ClassicUO.Network
             World.Player.Graphic = p.ReadUShort();
             World.Player.Position = new Position(p.ReadUShort(), p.ReadUShort(), (sbyte) p.ReadUShort());
             //World.Player.Position.Set(p.ReadUShort(), p.ReadUShort(), (sbyte)p.ReadUShort());
-            World.Player.Direction = (Direction) p.ReadByte();
+            Direction direction = (Direction)p.ReadByte();
+            World.Player.Direction = direction & Direction.Up;
+            World.Player.IsRunning = (direction & Direction.Running) != 0;
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
 
@@ -718,18 +720,24 @@ namespace ClassicUO.Network
 
             World.Player.GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
 
-            World.Player.SequenceNumber = 0;
+            //World.Player.SequenceNumber = 0;
+
+            World.Player.ResetSteps();
+
+            Direction dir = direction & Direction.Up;
+            bool isrun = (direction & Direction.Running) != 0;
 
             if (endX != x || endY != y)
             {
-                //World.Player.ForcePosition(x, y, z, direction);
+                World.Player.ForcePosition(x, y, z, direction);
 
-                World.Player.ResetSteps();
-                World.Player.Position = new Position(x, y, z);
-                World.Player.Direction = direction;
+                //World.Player.ResetSteps();
+                //World.Player.Position = new Position(x, y, z);
+                //World.Player.Direction = dir;
+                //World.Player.IsRunning = isrun;
             }
-            else if ((endDir & Direction.Up) != (direction & Direction.Up))
-                World.Player.EnqueueStep(x, y, z, direction, (direction & Direction.Running) != 0);
+            else if (endDir != dir)
+                World.Player.EnqueueStep(x, y, z, dir, isrun);
             else if (World.Player.Tile == null)
                 World.Player.Tile = World.Map.GetTile(x, y);
 
@@ -746,6 +754,7 @@ namespace ClassicUO.Network
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             Direction direction = (Direction) p.ReadByte();
+            direction &= Direction.Up;
             sbyte z = p.ReadSByte();
             Position position = new Position(x, y, z);
 
@@ -1152,20 +1161,27 @@ namespace ClassicUO.Network
             mobile.Flags = (Flags) p.ReadByte();
             mobile.Notoriety = (Notoriety) p.ReadByte();
             mobile.ProcessDelta();
-            if (World.Mobiles.Add(mobile)) World.Mobiles.ProcessDelta();
+            if (World.Mobiles.Add(mobile))
+                World.Mobiles.ProcessDelta();
 
-            if (mobile == World.Player) return;
+            if (mobile == World.Player)
+                return;
+
+            Direction dir = direction & Direction.Up;
+            bool isrun = (direction & Direction.Running) != 0;
 
             if (World.Get(mobile) == null)
             {
                 mobile.Position = new Position((ushort) x, (ushort) y, z);
-                mobile.Direction = direction;
+                mobile.Direction = dir;
+                mobile.IsRunning = isrun;
             }
 
-            if (!mobile.EnqueueStep(x, y, z, direction, (direction & Direction.Running) != 0))
+            if (!mobile.EnqueueStep(x, y, z, dir, isrun))
             {
                 mobile.Position = new Position((ushort) x, (ushort) y, z);
-                mobile.Direction = direction;
+                mobile.Direction = dir;
+                mobile.IsRunning = isrun;
                 mobile.ClearSteps();
             }
         }
@@ -1235,18 +1251,21 @@ namespace ClassicUO.Network
             }
             else
             {
-                direction &= Direction.Up;
+                Direction dir = direction & Direction.Up;
+                bool isrun = (direction & Direction.Running) != 0;
 
                 if (World.Get(mobile) == null)
                 {
                     mobile.Position = new Position(x, y, z);
-                    mobile.Direction = direction;
+                    mobile.Direction = dir;
+                    mobile.IsRunning = isrun;
                 }
 
-                if (!mobile.EnqueueStep(x, y, z, direction, (direction & Direction.Running) != 0))
+                if (!mobile.EnqueueStep(x, y, z, dir, isrun))
                 {
                     mobile.Position = new Position(x, y, z);
-                    mobile.Direction = direction;
+                    mobile.Direction = dir;
+                    mobile.IsRunning = isrun;
                     mobile.ClearSteps();
                 }
             }
