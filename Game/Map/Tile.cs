@@ -22,6 +22,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
@@ -89,13 +90,10 @@ namespace ClassicUO.Game.Map
             switch (obj)
             {
                 case Tile tile:
-                {
-
                     if (tile.IsStretched)
                         priorityZ = (short) (tile.AverageZ - 1); //(short)(((TileView)tile.View). - 1);
                     else
-                        priorityZ--;
-                }
+                        priorityZ--;               
                     break;
                 case Mobile _:
                     priorityZ++;
@@ -125,7 +123,6 @@ namespace ClassicUO.Game.Map
 #endif
 
             _objectsOnTile.Add(obj);
-
 
             _needSort = true;
         }

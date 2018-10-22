@@ -71,8 +71,7 @@ namespace ClassicUO.Game.Scenes
         public float Scale { get; set; } = 1f;
         public Texture2D ViewportTexture => _renderTarget;
 
-        public Point MouseOverWorldPosition => new Point(InputManager.MousePosition.X - _viewPortGump.ScreenCoordinateX,
-            InputManager.MousePosition.Y - _viewPortGump.ScreenCoordinateY);
+        public Point MouseOverWorldPosition => new Point(InputManager.MousePosition.X - _viewPortGump.ScreenCoordinateX, InputManager.MousePosition.Y - _viewPortGump.ScreenCoordinateY);
 
         public GameObject SelectedObject
         {
@@ -140,6 +139,7 @@ namespace ClassicUO.Game.Scenes
             (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
             _maxZ = maxItemZ;
+            _drawTerrain = drawTerrain;
 
             _renderListCount = 0;
 
@@ -729,6 +729,7 @@ namespace ClassicUO.Game.Scenes
         private Point _offset, _maxTile, _minTile;
         private Vector2 _minPixel, _maxPixel;
         private int _maxZ;
+        private bool _drawTerrain;
 
         private void AddTileToRenderList(IReadOnlyList<GameObject> objList, int worldX, int worldY, bool useObjectHandles, int maxZ)
         {
@@ -765,12 +766,19 @@ namespace ClassicUO.Game.Scenes
 
                 obj.CurrentRenderIndex = _renderIndex;
 
-                if (obj is IDynamicItem dyn1 && TileData.IsInternal((long)dyn1.ItemData.Flags))
-                    continue;
-                 if (!(obj is Tile) && z >= _maxZ)
+              
+                if (!(obj is Tile) && (z >= _maxZ ||   
+                                       (obj is IDynamicItem dyn2 && 
+                                        (TileData.IsInternal((long)dyn2.ItemData.Flags) || 
+                                         (_maxZ != 255 && TileData.IsRoof((long)dyn2.ItemData.Flags))
+                                         )
+                                        )
+                                       )
+                    )
                 {
                     continue;
                 }
+
 
                 int testMinZ = drawY + (z * 4);
                 int testMaxZ = drawY;

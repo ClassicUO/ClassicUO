@@ -81,7 +81,7 @@ namespace ClassicUO.Game.Map
             switch (e)
             {
                 case GameEffect effect:
-                    return (effect.Position.Z, 4, 2, 0);
+                    return (effect.Position.Z, effect.IsItemEffect ? 2 : 4, 2, 0);
                 case DeferredEntity def:
                     return (def.Position.Z, 2, 1, 0);
                 case Mobile mobile:
