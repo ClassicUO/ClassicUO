@@ -522,7 +522,7 @@ namespace ClassicUO.Game.Scenes
                                 }
 
                                 break;
-                            case Tile tile:
+                            case Tile _:
                                 DropHeldItemToWorld(obj.Position);
                                 break;
                             default:
@@ -583,53 +583,53 @@ namespace ClassicUO.Game.Scenes
                     }
                     break;
                 case MouseEvent.Click:
-                {
-                    switch (obj)
                     {
-                        case Static st:
+                        switch (obj)
                         {
-                            if (string.IsNullOrEmpty(st.Name))
-                                TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
+                            case Static st:
+                            {
+                                if (string.IsNullOrEmpty(st.Name))
+                                    TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
 
-                            obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
+                                obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
 
-                            _staticManager.Add(st);
-                            break;
+                                _staticManager.Add(st);
+                                break;
+                            }
+                            case Entity entity:
+                                GameActions.SingleClick(entity);
+                                break;
                         }
-                        case Entity entity:
-                            GameActions.SingleClick(entity);
-                            break;
                     }
-                }
                     break;
                 case MouseEvent.DoubleClick:
-                {
-                    switch (obj)
                     {
-                        case Item item:
-                            GameActions.DoubleClick(item);
-                            break;
-                        //TODO: attack request also
-                        case Mobile mob when World.Player.InWarMode:
-                            break;
-                        case Mobile mob:
-                            GameActions.DoubleClick(mob);
-                            break;
+                        switch (obj)
+                        {
+                            case Item item:
+                                GameActions.DoubleClick(item);
+                                break;
+                            //TODO: attack request also
+                            case Mobile mob when World.Player.InWarMode:
+                                break;
+                            case Mobile mob:
+                                GameActions.DoubleClick(mob);
+                                break;
+                        }
                     }
-                }
                     break;
                 case MouseEvent.DragBegin:
-                {
-                    switch (obj)
                     {
-                        case Mobile mobile:
-                            // get the lifebar
-                            break;
-                        case Item item:
-                            PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
-                            break;
+                        switch (obj)
+                        {
+                            case Mobile mobile:
+                                // get the lifebar
+                                break;
+                            case Item item:
+                                PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
+                                break;
+                        }
                     }
-                }
                     break;
             }
 
@@ -780,11 +780,11 @@ namespace ClassicUO.Game.Scenes
             _queuedEvent = e;
         }
 
-        private void CheckForQueuedClicks(double framMS)
+        private void CheckForQueuedClicks(double frameMS)
         {
             if (_inqueue)
             {
-                _dequeueAt -= framMS;
+                _dequeueAt -= frameMS;
                 if (_dequeueAt <= 0d)
                 {
                     DoMouseButton(_queuedEvent, _queuedObject, _queuedPosition);
@@ -911,8 +911,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
-
         private void AddOffsetCharacterTileToRenderList(Entity entity, bool useObjectHandles)
         {
             int charX = entity.Position.X;
@@ -965,7 +963,6 @@ namespace ClassicUO.Game.Scenes
                 AddTileToRenderList(tile.ObjectsOnTiles, x, y, useObjectHandles, currentMaxZ);
             }
         }
-
 
         private (Point, Point, Vector2, Vector2, Point, Point, Point, int) GetViewPort()
         {

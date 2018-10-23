@@ -29,8 +29,6 @@ namespace ClassicUO.Game.GameObjects
 {
     public class Static : GameObject, IDynamicItem
     {
-        //private StaticTiles? _itemData;
-
         public Static(Graphic tileID, Hue hue, int index) : base(World.Map)
         {
             Graphic = tileID;
@@ -40,7 +38,6 @@ namespace ClassicUO.Game.GameObjects
 
         public int Index { get; }
 
-        //public new StaticView View => (StaticView)base.View;
         public string Name => ItemData.Name;
         public override Position Position { get; set; }
 

@@ -215,7 +215,7 @@ namespace ClassicUO.Input
 
         private void AddEvent(InputEvent e) => _nextEvents.Enqueue(e);
 
-        private bool DistanceBetweenPoints(Point initial, Point final, int distance)
+        private static bool DistanceBetweenPoints(Point initial, Point final, int distance)
             => Math.Abs(final.X - initial.X) + Math.Abs(final.Y - initial.Y) > distance;
 
         private unsafe int HookFunc(IntPtr userdata, IntPtr ev)
@@ -265,7 +265,7 @@ namespace ClassicUO.Input
             return 1;
         }
 
-        private MouseButton CovertMouseButton(byte button)
+        private static MouseButton CovertMouseButton(byte button)
         {
             switch (button)
             {
@@ -284,7 +284,7 @@ namespace ClassicUO.Input
             }
         }
 
-        private MouseEvent ConvertWheelDirection(int x, int y)
+        private static MouseEvent ConvertWheelDirection(int x, int y)
         {
             MouseEvent dir = MouseEvent.WheelScroll;
 

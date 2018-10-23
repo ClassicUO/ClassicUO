@@ -3,16 +3,16 @@ using ClassicUO.Interfaces;
 
 namespace ClassicUO.Game.System
 {
+    public enum TargetType
+    {
+        Nothing = -1,
+        Object = 0,
+        Position = 1,
+        MultiPlacement = 2
+    }
+
     internal static class TargetSystem
     {
-        public enum TargetType
-        {
-            Nothing = -1,
-            Object = 0,
-            Position = 1,
-            MultiPlacement = 2
-        }
-
         private static Serial _targetCursorId;
         private static byte _targetCursorType;
         private static int _multiModel;
@@ -33,14 +33,9 @@ namespace ClassicUO.Game.System
             {
                 if (targeting == TargetType.Nothing)
                 {
-                    GameActions.RequestTargetCancel(_targetCursorId, _targetCursorType);
+                    GameActions.TargetCancel(_targetCursorId, _targetCursorType);
                 }
 
-                //else
-                //{
-                //    // if we start targeting, we cancel movement.
-                //        m_World.Input.ContinuousMouseMovementCheck = false;
-                //}
                 TargetingState = targeting;
                 _targetCursorId = cursorID;
                 _targetCursorType = cursorType;
@@ -55,14 +50,15 @@ namespace ClassicUO.Game.System
 
         private static void MouseTargetingEventXYZ(GameObject selectedEntity)
         {
-            int modelNumber = 0;
-            if (selectedEntity is Static)
+            Graphic modelNumber = 0;
+            short z = selectedEntity.Position.Z;
+            if (selectedEntity is Static st)
             {
                 modelNumber = selectedEntity.Graphic;
+                z += st.ItemData.Height;
             }
 
-            GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y,
-                (ushort) selectedEntity.Position.Z, (ushort) modelNumber, _targetCursorId, _targetCursorType);
+            GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, _targetCursorType);
             ClearTargetingWithoutTargetCancelPacket();
         }
 
@@ -77,11 +73,14 @@ namespace ClassicUO.Game.System
             else
             {
                 Graphic modelNumber = 0;
-                if (selectedEntity is Static)
+                short z = selectedEntity.Position.Z;
+                if (selectedEntity is Static st)
+                {
                     modelNumber = selectedEntity.Graphic;
+                    z += st.ItemData.Height;
+                }
 
-                GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y,
-                        (ushort) selectedEntity.Position.Z, modelNumber, _targetCursorId, _targetCursorType);
+                GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, _targetCursorType);
                 
             }
 

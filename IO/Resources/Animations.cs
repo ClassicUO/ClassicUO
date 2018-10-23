@@ -861,16 +861,19 @@ namespace ClassicUO.IO.Resources
 
                         //ZLib.Compress(decbuffer, ref decc);
 
-                       // ZLib.Pack(decc, ref len, decbuffer, decLen);
+                        // ZLib.Pack(decc, ref len, decbuffer, decLen);
 
 
-
-                        //using (BinaryWriter writer = new BinaryWriter(File.Create("file")))
-                        //{
-                        //    writer.Write(data);
-                        //}
+                        
                     }
 
+                    //if (!Directory.Exists("files"))
+                    //    Directory.CreateDirectory("files");
+
+                    //using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine("files", $"file_0x{animID:X4}"))))
+                    //{
+                    //    writer.Write(data);
+                    //}
                     //sb.AppendLine("Data len: " + toread);
                     //for (int ii = 0; ii < toread; ii++)
                     //{
@@ -1029,7 +1032,6 @@ namespace ClassicUO.IO.Resources
                 return false;
 
             UOFileMul file = _files[animDir.FileIndex];
-            //byte[] animData = file.ReadArray<byte>(animDir.Address, (int)animDir.Size);
 
             // long to int can loss data
             _reader.SetData(file.StartAddress + (int)animDir.Address, animDir.Size);
@@ -1038,39 +1040,6 @@ namespace ClassicUO.IO.Resources
 
             return true;
         }
-
-
-        //public static AnimationFrame[] GetAnimationFrames(ushort graphic,  byte group,  byte dir)
-        //{
-        //    // TODO: REMOVE THESE
-        //    AnimID = graphic;
-        //    AnimGroup = group;
-        //    Direction = dir;
-
-        //    var direction = _dataIndex[graphic].Groups[group].Direction[dir];
-
-        //    if (direction.FrameCount == 0 && !LoadDirectionGroup(ref direction))
-        //        return null;
-
-        //    if (direction.IsUOP)
-        //    {
-        //        if (!TryReadUOPAnimDimension(ref direction))
-        //            return null;
-        //        return direction.Frames;
-        //    }
-        //    if (direction.Address == 0)
-        //        return null;
-
-        //    var file = _files[direction.FileIndex];
-
-        //    // long to int can loss data
-        //    _reader.SetData(file.StartAddress + (int)direction.Address, direction.Size);
-
-        //    ReadFramesPixelData(ref direction);
-
-        //    return direction.Frames;
-        //}
-
 
         private static unsafe bool TryReadUOPAnimDimension(ref AnimationDirection animDirection)
         {

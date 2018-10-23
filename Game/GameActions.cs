@@ -104,14 +104,14 @@ namespace ClassicUO.Game
         public static void RequestMobileStatus(Serial serial)
             => Socket.Send(new PStatusRequest(serial));
 
-        public static void RequestTargetCancel(Serial cursorID, byte cursorType)
-            => Socket.Send(new PTargetCancelRequest(cursorID, cursorType));
+        public static void TargetCancel(Serial cursorID, byte cursorType)
+            => Socket.Send(new PTargetCancel(cursorID, cursorType));
 
         public static void RequestTargetObject(Entity entity, Serial cursorID, byte cursorType)
-            => Socket.Send(new PTargetObjectRequest(entity, cursorID, cursorType));
+            => Socket.Send(new PTargetObject(entity, cursorID, cursorType));
 
-        public static void TargetXYZ(ushort x, ushort y, ushort z, ushort modelNumber, Serial cursorID, byte targetType)
-            => Socket.Send(new PTargetObjectPositionRequest(x, y, z, modelNumber, cursorID, targetType));
+        public static void TargetXYZ(ushort x, ushort y, short z, ushort modelNumber, Serial cursorID, byte targetType)
+            => Socket.Send(new PTargetXYZ(x, y, z, modelNumber, cursorID, targetType));
 
         public static void CastSpellFromBook(int index, Serial bookSerial)
             => Socket.Send(new PCastSpellFromBook(index, bookSerial));

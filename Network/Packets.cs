@@ -523,25 +523,25 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PTargetObjectRequest : PacketWriter
+    public sealed class PTargetObject : PacketWriter
     {
-        public PTargetObjectRequest(Entity entity, Serial cursorID, byte cursorType) : base(0x6C)
+        public PTargetObject(Entity entity, Serial cursorID, byte cursorType) : base(0x6C)
         {
             WriteByte(0x00);
-            WriteUInt(cursorID);
-            WriteByte(cursorType);
+            WriteUInt(0);
+            WriteByte(0);
             WriteUInt(entity.Serial);
             WriteUShort(entity.Position.X);
             WriteUShort(entity.Position.Y);
-            WriteByte(0x00);
-            WriteByte((byte) entity.Position.Z);
-            WriteUShort(0);
+            WriteByte(0xFF);
+            WriteSByte(entity.Position.Z);
+            WriteUShort(entity.Graphic);
         }
     }
 
-    public sealed class PTargetObjectPositionRequest : PacketWriter
+    public sealed class PTargetXYZ : PacketWriter
     {
-        public PTargetObjectPositionRequest(ushort x, ushort y, ushort z, ushort modelNumber, Serial cursorID, byte targetType) : base(0x6C)
+        public PTargetXYZ(ushort x, ushort y, short z, ushort modelNumber, Serial cursorID, byte targetType) : base(0x6C)
         {
             WriteByte(0x01);
             WriteUInt(cursorID);
@@ -549,19 +549,19 @@ namespace ClassicUO.Network
             WriteUInt(0x00);
             WriteUShort(x);
             WriteUShort(y);
-            WriteUShort(z);
+            WriteUShort((ushort)z);
             WriteUShort(modelNumber);
         }
     }
 
-    public sealed class PTargetCancelRequest : PacketWriter
+    public sealed class PTargetCancel : PacketWriter
     {
-        public PTargetCancelRequest(Serial cursorID, byte cursorType) : base(0x6C)
+        public PTargetCancel(Serial cursorID, byte cursorType) : base(0x6C)
         {
             WriteByte(0x00);
             WriteUInt(cursorID);
             WriteByte(cursorType);
-            WriteByte(0x00);
+            WriteUInt(0x00);
             WriteUShort(0x00);
             WriteUShort(0x00);
             WriteUShort(0x00);
