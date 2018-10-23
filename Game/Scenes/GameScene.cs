@@ -441,7 +441,45 @@ namespace ClassicUO.Game.Scenes
                 {
                     GumpControl target = UIManager.MouseOverControl;
 
-                    // TODO: ITEMGUMPLING
+                    if (target is ItemGumpling gumpling && !(target is ItemGumplingPaperdoll))
+                    {
+                        Item item = gumpling.Item;
+                        SelectedObject = item;
+
+                        if (TileData.IsContainer((long) item.ItemData.Flags))
+                        {
+                            DropHeldItemToContainer(item);
+                        }
+                        else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable((long)HeldItem.ItemData.Flags))
+                        {
+                            MergeHeldItem(item);
+                        }
+                        else
+                        {
+                            if (item.Container.IsItem)
+                            {
+                                DropHeldItemToContainer(World.Items.Get(item.Container), (ushort)(target.X + (InputManager.MousePosition.X - target.ScreenCoordinateX)- _heldOffset.X), (ushort)(target.Y + (InputManager.MousePosition.Y - target.ScreenCoordinateY) - _heldOffset.Y));
+                            }
+                        }
+                    }
+                    else if (target is GumpPicContainer container)
+                    {
+                        SelectedObject = container.Item;
+
+                        int x = InputManager.MousePosition.X - _heldOffset.X - (target.X + target.Parent.X);
+                        int y = InputManager.MousePosition.Y - _heldOffset.Y - (target.Y + target.Parent.Y);
+
+                        DropHeldItemToContainer(container.Item, (ushort)x, (ushort)y);
+                    }
+                    else if (target is ItemGumplingPaperdoll || target is GumpPic pic && pic.IsPaperdoll || target is EquipmentSlot)
+                    {
+                        if (TileData.IsWearable((long)HeldItem.ItemData.Flags))
+                            WearHeldItem();
+                    }
+                    else if (target is GumpPicBackpack backpack)
+                    {
+                        DropHeldItemToContainer(backpack.BackpackItem);
+                    }
                 }
                 else if (IsMouseOverWorld)
                 {
@@ -656,11 +694,28 @@ namespace ClassicUO.Game.Scenes
 
         private void DropHeldItemToContainer(Item container)
         {
-            DropHeldItemToContainer(container, 0, 0);
+            Rectangle bounds = ContainerManager.Get(container.Graphic).Bounds;
+
+            ushort x = (ushort) (Utility.RandomHelper.GetValue(bounds.Left, bounds.Right));
+            ushort y = (ushort)(Utility.RandomHelper.GetValue(bounds.Top, bounds.Bottom));
+
+            DropHeldItemToContainer(container, x, y);
         }
 
         private void DropHeldItemToContainer(Item container, ushort x, ushort y)
         {
+            Rectangle bounds = ContainerManager.Get(container.Graphic).Bounds;
+            SpriteTexture texture = Art.GetStaticTexture(HeldItem.DisplayedGraphic);
+
+            if (x < bounds.X)
+                x = (ushort)bounds.X;
+            if (x > bounds.Width - texture.Width)
+                x = (ushort)(bounds.Width - texture.Width);
+            if (y < bounds.Y)
+                y = (ushort)bounds.Y;
+            if (y > bounds.Height - texture.Height)
+                y = (ushort)(bounds.Height - texture.Height);
+
             GameActions.DropDown(HeldItem.Serial, x, y, 0, container);
             ClearHolding();
         }
