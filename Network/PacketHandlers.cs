@@ -302,7 +302,7 @@ namespace ClassicUO.Network
 
         private static void TargetCursor(Packet p)
         {
-            TargetSystem.SetTargeting((TargetSystem.TargetType)p.ReadByte(), (int)p.ReadUInt(), p.ReadByte());
+            TargetSystem.SetTargeting((TargetSystem.TargetType)p.ReadByte(), p.ReadUInt(), p.ReadByte());
         }
 
         private static void ClientTalk(Packet p)

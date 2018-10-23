@@ -30,6 +30,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -222,32 +223,6 @@ namespace ClassicUO.Renderer
         {
             Graphic = AssignGraphicByState();
 
-            if (TargetSystem.IsTargeting)
-            {
-                switch (TargetSystem.TargetingState)
-                {
-                    case TargetSystem.TargetType.Nothing:
-                        //
-                        break;
-                    case TargetSystem.TargetType.Position:
-                        //
-                        break;
-                    case TargetSystem.TargetType.MultiPlacement:
-                        //
-                        break;
-                    case TargetSystem.TargetType.Object:
-                        Graphic = 0x2076;
-                        if (_inputManager.HandleMouseEvent(MouseEvent.Click, MouseButton.Left))
-                        {
-                            
-                            TargetSystem.mouseTargetingEventObject(TargetSystem.LastGameObject =
-                                Service.Get<SceneManager>().GetScene<GameScene>()?.SelectedObject);
-                        }
-
-                        break;
-                }
-            }
-
             if (Texture == null || Texture.IsDisposed || _needGraphicUpdate)
             {
                 Texture = Art.GetStaticTexture(Graphic);
@@ -265,6 +240,25 @@ namespace ClassicUO.Renderer
             if (_draggingItem)
             {
                 _draggedItemTexture.Ticks = (long)totalMS;
+            }
+
+
+            if (TargetSystem.IsTargeting)
+            {
+                switch (TargetSystem.TargetingState)
+                {
+                    case TargetSystem.TargetType.Position:
+                    case TargetSystem.TargetType.Object:
+                        if (_inputManager.HandleMouseEvent(MouseEvent.Click, MouseButton.Left))
+                        {
+                            TargetSystem.MouseTargetingEventObject(TargetSystem.LastGameObject =
+                                Service.Get<SceneManager>().GetScene<GameScene>()?.SelectedObject);
+                        }
+                        break;
+                    default:
+                        Log.Message(LogTypes.Warning, "Not implemented.");
+                        break;
+                }
             }
         }
 
@@ -297,11 +291,50 @@ namespace ClassicUO.Renderer
             int war = World.InGame && World.Player.InWarMode ? 1 : 0;
             ushort result = _cursorData[war, 9];
 
+            if (TargetSystem.IsTargeting)
+                return _cursorData[war, 12];
+
             if (!_uiManager.IsMouseOverWorld)
                 return result;
 
             int windowCenterX = _settings.GameWindowX + _settings.GameWindowWidth / 2;
             int windowCenterY = _settings.GameWindowY + _settings.GameWindowHeight / 2;
+
+
+
+            //if (TargetSystem.IsTargeting)
+            //{
+            //    switch (TargetSystem.TargetingState)
+            //    {
+            //        case TargetSystem.TargetType.Nothing:
+            //            //
+            //            break;
+            //        case TargetSystem.TargetType.MultiPlacement:
+            //            //
+            //            break;
+            //        case TargetSystem.TargetType.Position:
+            //        case TargetSystem.TargetType.Object:
+
+            //            var ui = Service.Get<UIManager>();
+            //            if (ui.IsMouseOverUI)
+            //            {
+
+            //            }
+            //            else if (ui.IsMouseOverWorld)
+            //            {
+
+            //            }
+            //            Graphic = 0x2076;
+            //            if (_inputManager.HandleMouseEvent(MouseEvent.Click, MouseButton.Left))
+            //            {
+
+            //                TargetSystem.MouseTargetingEventObject(TargetSystem.LastGameObject =
+            //                    Service.Get<SceneManager>().GetScene<GameScene>()?.SelectedObject);
+            //            }
+
+            //            break;
+            //    }
+            //}
 
             return _cursorData[war,
                 GetMouseDirection(windowCenterX, windowCenterY, ScreenPosition.X, ScreenPosition.Y, 1)];

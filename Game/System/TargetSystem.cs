@@ -3,7 +3,7 @@ using ClassicUO.Interfaces;
 
 namespace ClassicUO.Game.System
 {
-    internal class TargetSystem
+    internal static class TargetSystem
     {
         public enum TargetType
         {
@@ -13,23 +13,21 @@ namespace ClassicUO.Game.System
             MultiPlacement = 2
         }
 
-        private static int _targetCursorId;
+        private static Serial _targetCursorId;
         private static byte _targetCursorType;
-
-        private int _multiModel;
+        private static int _multiModel;
 
         public static TargetType TargetingState { get; private set; } = TargetType.Nothing;
-
         public static GameObject LastGameObject { get; set; }
-
         public static bool IsTargeting => TargetingState != TargetType.Nothing;
+
 
         public static void ClearTargetingWithoutTargetCancelPacket()
         {
             TargetingState = TargetType.Nothing;
         }
 
-        public static void SetTargeting(TargetType targeting, int cursorID, byte cursorType)
+        public static void SetTargeting(TargetType targeting, Serial cursorID, byte cursorType)
         {
             if (TargetingState != targeting || cursorID != _targetCursorId || cursorType != _targetCursorType)
             {
@@ -49,26 +47,26 @@ namespace ClassicUO.Game.System
             }
         }
 
-        public void SetTargetingMulti(int deedSerial, int model, byte targetType)
+        public static void SetTargetingMulti(Serial deedSerial, int model, byte targetType)
         {
             SetTargeting(TargetType.MultiPlacement, deedSerial, targetType);
             _multiModel = model;
         }
 
-        private void mouseTargetingEventXYZ(Entity selectedEntity)
+        private static void MouseTargetingEventXYZ(GameObject selectedEntity)
         {
             int modelNumber = 0;
-            if (selectedEntity is IDynamicItem)
+            if (selectedEntity is Static)
             {
                 modelNumber = selectedEntity.Graphic;
             }
 
-            GameActions.RequestTargetObjectPosition(selectedEntity.Position.X, selectedEntity.Position.Y,
+            GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y,
                 (ushort) selectedEntity.Position.Z, (ushort) modelNumber, _targetCursorId, _targetCursorType);
             ClearTargetingWithoutTargetCancelPacket();
         }
 
-        public static void mouseTargetingEventObject(GameObject selectedEntity)
+        public static void MouseTargetingEventObject(GameObject selectedEntity)
         {
             if (selectedEntity == null)
                 return;
@@ -78,12 +76,13 @@ namespace ClassicUO.Game.System
             }
             else
             {
-                if (selectedEntity is Item item)
-                {
-                    int modelNumber = selectedEntity.Graphic;
-                    GameActions.RequestTargetObjectPosition(selectedEntity.Position.X, selectedEntity.Position.Y,
-                        (ushort) selectedEntity.Position.Z, (ushort) modelNumber, _targetCursorId, _targetCursorType);
-                }
+                Graphic modelNumber = 0;
+                if (selectedEntity is Static)
+                    modelNumber = selectedEntity.Graphic;
+
+                GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y,
+                        (ushort) selectedEntity.Position.Z, modelNumber, _targetCursorId, _targetCursorType);
+                
             }
 
             ClearTargetingWithoutTargetCancelPacket();

@@ -525,10 +525,10 @@ namespace ClassicUO.Network
 
     public sealed class PTargetObjectRequest : PacketWriter
     {
-        public PTargetObjectRequest(Entity entity, int cursorID, byte cursorType) : base(0x6C)
+        public PTargetObjectRequest(Entity entity, Serial cursorID, byte cursorType) : base(0x6C)
         {
             WriteByte(0x00);
-            WriteUInt((uint) cursorID);
+            WriteUInt(cursorID);
             WriteByte(cursorType);
             WriteUInt(entity.Serial);
             WriteUShort(entity.Position.X);
@@ -541,11 +541,10 @@ namespace ClassicUO.Network
 
     public sealed class PTargetObjectPositionRequest : PacketWriter
     {
-        public PTargetObjectPositionRequest(ushort x, ushort y, ushort z, ushort modelNumber, int cursorID,
-            byte targetType) : base(0x6C)
+        public PTargetObjectPositionRequest(ushort x, ushort y, ushort z, ushort modelNumber, Serial cursorID, byte targetType) : base(0x6C)
         {
             WriteByte(0x01);
-            WriteUInt((uint) cursorID);
+            WriteUInt(cursorID);
             WriteByte(targetType);
             WriteUInt(0x00);
             WriteUShort(x);
@@ -557,10 +556,10 @@ namespace ClassicUO.Network
 
     public sealed class PTargetCancelRequest : PacketWriter
     {
-        public PTargetCancelRequest(int cursorID, byte cursorType) : base(0x6C)
+        public PTargetCancelRequest(Serial cursorID, byte cursorType) : base(0x6C)
         {
             WriteByte(0x00);
-            WriteUInt((uint) cursorID);
+            WriteUInt(cursorID);
             WriteByte(cursorType);
             WriteByte(0x00);
             WriteUShort(0x00);
