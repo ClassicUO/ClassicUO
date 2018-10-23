@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public Tile GetTile(short x, short y)
+        public Tile GetTile(short x, short y, bool load = true)
         {
             if (x < 0 || y < 0) return null;
 
@@ -78,9 +78,16 @@ namespace ClassicUO.Game.Map
 
             if (chuck == null)
             {
-                _usedIndices.Add(block);
-                chuck = new MapChunk((ushort) cellX, (ushort) cellY);
-                chuck.Load(Index);
+                if (load)
+                {
+                    _usedIndices.Add(block);
+                    chuck = new MapChunk((ushort) cellX, (ushort) cellY);
+                    chuck.Load(Index);
+                }
+                else
+                {
+                    return null;
+                }
             }
 
             chuck.LastAccessTime = CoreGame.Ticks;
@@ -100,8 +107,8 @@ namespace ClassicUO.Game.Map
             //return tile.Tiles[x % 8][y % 8];
         }
 
-        public Tile GetTile(int x, int y)
-            => GetTile((short) x, (short) y);
+        public Tile GetTile(int x, int y, bool load = true)
+            => GetTile((short) x, (short) y, load);
 
         public sbyte GetTileZ(short x, short y)
         {
@@ -117,10 +124,12 @@ namespace ClassicUO.Game.Map
                 //Chunks[index].Load(Index);
                 //return Chunks[index].Tiles[x % 8][y % 8].Position.Z;
 
-                if (x < 0 || y < 0) return -125;
+                if (x < 0 || y < 0)
+                    return -125;
 
                 IndexMap blockIndex = GetIndex(x / 8, y / 8);
-                if (blockIndex.MapAddress == 0) return -125;
+                if (blockIndex == null || blockIndex.MapAddress == 0)
+                    return -125;
 
                 int mx = x % 8;
                 int my = y % 8;

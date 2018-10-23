@@ -827,11 +827,10 @@ namespace ClassicUO.Game.Scenes
 
             Mobile mob = World.Mobiles.Get(entity);
             int dropMaxZIndex = -1;
-            if (mob != null)
-            {
-                if (mob.IsMoving && (mob.Steps.Back().Direction & 7) == 2)
-                    dropMaxZIndex = 0;
-            }
+            
+            if (mob != null && mob.IsMoving && mob.Steps.Back().Direction == 2)
+                dropMaxZIndex = 0;
+            
 
             int[,] coordinates = new int[8, 2];
 

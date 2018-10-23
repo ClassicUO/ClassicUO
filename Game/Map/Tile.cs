@@ -90,6 +90,8 @@ namespace ClassicUO.Game.Map
             switch (obj)
             {
                 case Tile tile:
+                    var t = tile.View;
+
                     if (tile.IsStretched)
                         priorityZ = (short) (tile.AverageZ - 1); //(short)(((TileView)tile.View). - 1);
                     else
@@ -137,53 +139,7 @@ namespace ClassicUO.Game.Map
             _needSort = true;
         }
 
-        //public void Clear()
-        //{
-
-        //    for (int k = 0; k < _objectsOnTile.Count; k++)
-        //    {
-        //        var obj = _objectsOnTile[k];
-        //        if (obj is Tile || obj is Static)
-        //        {
-        //            int count = _objectsOnTile.Count;
-        //            obj.Dispose();
-        //            if (count == _objectsOnTile.Count)
-        //                _objectsOnTile.RemoveAt(k);
-        //            k--;
-        //        }
-        //    }
-
-        //    _statics.Clear();
-
-        //    //for (int i = 0; i < _objectsOnTile.Count; i++)
-        //    //{
-        //    //    var obj = _objectsOnTile[i];
-
-        //    //    if (obj is Entity || obj is Tile)
-        //    //        continue;
-
-        //    //    int count = _objectsOnTile.Count;
-
-        //    //    obj.Dispose();
-
-        //    //    if (count == _objectsOnTile.Count)
-        //    //    {
-        //    //        _objectsOnTile.RemoveAt(i);
-        //    //    }
-
-        //    //    i--;           
-        //    //}
-
-        //    //_objectsOnTile.Clear();
-
-        //    //DisposeView();
-        //    //Graphic = 0;
-        //    //Position = Position.Invalid;
-        //    //_tileData = null;
-        //    //_needSort = false;
-        //    //_statics.Clear();
-        //}
-
+     
 
         private void RemoveDuplicates()
         {
@@ -280,6 +236,7 @@ namespace ClassicUO.Game.Map
             return items;
         }
 
-        protected override View CreateView() => new TileView(this);
+        protected override View CreateView() => 
+            new TileView(this);
     }
 }
