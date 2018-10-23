@@ -148,7 +148,7 @@ namespace ClassicUO.Game.Views
             MousePick(list, vertex);
 
             if (HasShadow)
-                spriteBatch.DrawShadow(Texture, vertex, new Vector2(position.X + 22f, position.Y +  GameObject.Offset.Y  - (GameObject.Offset.Z / 4 + GameObject.Position.Z) * 4 + 22f), IsFlipped, ShadowZDepth);
+                spriteBatch.DrawShadow(Texture, vertex, new Vector2(position.X + 22f, position.Y + GameObject.Offset.Y - (GameObject.Offset.Z / 4 + GameObject.Position.Z) * 4 + 22f), IsFlipped, ShadowZDepth);
 
             return true;
         }

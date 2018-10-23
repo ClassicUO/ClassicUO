@@ -21,7 +21,7 @@ namespace ClassicUO.Renderer
         private readonly EffectParameter _worldMatrixEffect;
         private readonly EffectParameter _drawLightingEffect;
         private readonly EffectParameter _projectionMatrixEffect;
-        private readonly EffectTechnique _huesTechnique, _shadowTechnique;
+        private readonly EffectTechnique _huesTechnique, _shadowTechnique, _landTechnique;
         private readonly Effect _effect;
         private readonly DepthStencilState _dss = new DepthStencilState
         {
@@ -60,6 +60,7 @@ namespace ClassicUO.Renderer
 
             _huesTechnique = _effect.Techniques["HueTechnique"];
             _shadowTechnique = _effect.Techniques["ShadowSetTechnique"];
+            _landTechnique = _effect.Techniques["LandTechnique"];
 
             _textureInfo = new DrawInfo[MAX_SPRITES];
             _vertexInfo = new SpriteVertex[MAX_VERTICES];
@@ -86,6 +87,8 @@ namespace ClassicUO.Renderer
             _effect.Parameters["lightIntensity"].SetValue(inte);
         }
 
+        public void EnableLight(bool value) => _drawLightingEffect.SetValue(value);
+
 #if !ORIONSORT
         public float GetZ() => _z++;
 #endif
@@ -103,7 +106,7 @@ namespace ClassicUO.Renderer
 #endif
         }
 
-        public void End(bool light = false)
+        public void End()
         {
             EnsureStarted();
 
@@ -182,7 +185,7 @@ namespace ClassicUO.Renderer
                 throw new InvalidOperationException();
         }
 
-        private void ApplyStates(bool light)
+        private void ApplyStates()
         {
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             //GraphicsDevice.BlendState.ColorBlendFunction = BlendFunction.Add;
@@ -196,7 +199,7 @@ namespace ClassicUO.Renderer
             //GraphicsDevice.SamplerStates[3] = SamplerState.PointClamp;
             //GraphicsDevice.SamplerStates[4] = SamplerState.PointWrap;
 
-            //_drawLightingEffect.SetValue(light);
+            
             // set up viewport.
             _projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
             _worldMatrixEffect.SetValue(ProjectionMatrixWorld);
@@ -218,7 +221,7 @@ namespace ClassicUO.Renderer
 
             Techniques last = Techniques.None;
 
-            ApplyStates(false);
+            ApplyStates();
 
             _vertexBuffer.SetData(0, _vertexInfo, 0, _numSprites * 4, SpriteVertex.SizeInBytes);
 
@@ -251,14 +254,12 @@ namespace ClassicUO.Renderer
         {
             switch (info.Technique)
             {
-                case Techniques.Default:
+                case Techniques.Hued:
                     if (last != info.Technique)
                     {
                         _effect.CurrentTechnique = _huesTechnique;
                         last = info.Technique;
-
                         _effect.CurrentTechnique.Passes[0].Apply();
-
                     }
                     break;
                 case Techniques.ShadowSet:
@@ -266,7 +267,14 @@ namespace ClassicUO.Renderer
                     {
                         _effect.CurrentTechnique = _shadowTechnique;
                         last = info.Technique;
-
+                        _effect.CurrentTechnique.Passes[0].Apply();
+                    }
+                    break;
+                case Techniques.Land:
+                    if (last != info.Technique)
+                    {
+                        _effect.CurrentTechnique = _landTechnique;
+                        last = info.Technique;
                         _effect.CurrentTechnique.Passes[0].Apply();
                     }
                     break;

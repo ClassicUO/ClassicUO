@@ -1028,12 +1028,13 @@ namespace ClassicUO.Network
         private static void PersonalLightLevel(Packet p)
         {
             World.Light.Personal = 0;
-            // if (World.Player == p.ReadUInt()) World.Light.Personal = 0; // p.ReadByte();
+             //World.Light.Personal = p.ReadByte();
         }
 
         private static void LightLevel(Packet p)
         {
-            World.Light.Overall = 0; // p.ReadByte();
+            World.Light.Overall = 0;
+            //World.Light.Overall = p.ReadByte();
         }
 
         private static void ErrorCode(Packet p)

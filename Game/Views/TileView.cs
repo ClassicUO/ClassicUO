@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Views
             }
 
 
-            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
+            HueVector = RenderExtentions.GetHueVector(GameObject.Hue, false, 0.0f, true);
 
             return !tile.IsStretched
                 ? base.Draw(spriteBatch, position, objectList)
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.Views
                             _vertex[3].Hue = HueVector;
 
 
-            if (!spriteBatch.DrawSprite(Texture, _vertex)) return false;
+            if (!spriteBatch.DrawSprite(Texture, _vertex, Techniques.Hued)) return false;
 
             if (objectList.IsMouseInObjectIsometric(_vertex))
                 objectList.Add(GameObject, _vertex[0].Position);

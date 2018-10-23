@@ -15,10 +15,11 @@ namespace ClassicUO.Renderer
         Grayscale = 2,
         ShadowSet = 3,
         StencilSet = 4,
+        Land = 5,
 
         Default = Hued,
         FirstDrawn = Hued,
-        LastDrawn = StencilSet,
-        All = StencilSet
+        LastDrawn = Land,
+        All = Land
     }
 }

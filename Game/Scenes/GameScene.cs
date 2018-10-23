@@ -261,6 +261,7 @@ namespace ClassicUO.Game.Scenes
         private void DrawWorld(SpriteBatch3D sb3D)
         {
             sb3D.Begin();
+            sb3D.EnableLight(true);
             sb3D.SetLightIntensity(World.Light.IsometricLevel);
             sb3D.SetLightDirection(World.Light.IsometricDirection);
 
@@ -348,7 +349,8 @@ namespace ClassicUO.Game.Scenes
 
             sb3D.GraphicsDevice.SetRenderTarget(_renderTarget);
             sb3D.GraphicsDevice.Clear(Color.Black);
-            sb3D.End(true);
+            sb3D.End();
+            sb3D.EnableLight(false);
             sb3D.GraphicsDevice.SetRenderTarget(null);
         }
 
