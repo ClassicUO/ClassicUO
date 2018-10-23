@@ -85,7 +85,8 @@ namespace ClassicUO.Game.Views
                 _needUpdateStrechedTile = false;
             }
 
-            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
+
+            HueVector = RenderExtentions.GetHueVector(GameObject.Hue, false, 0.0f, true);
 
             return !tile.IsStretched
                 ? base.Draw(spriteBatch, position, objectList)
@@ -123,7 +124,7 @@ namespace ClassicUO.Game.Views
                             _vertex[3].Hue = HueVector;
 
 
-            if (!spriteBatch.DrawSprite(Texture, _vertex)) return false;
+            if (!spriteBatch.DrawSprite(Texture, _vertex, Techniques.Hued)) return false;
 
             if (objectList.IsMouseInObjectIsometric(_vertex))
                 objectList.Add(GameObject, _vertex[0].Position);
@@ -162,10 +163,12 @@ namespace ClassicUO.Game.Views
                 sbyte low = 0, high = 0;
                 sbyte sort = (sbyte) map.GetAverageZ(GameObject.Position.Z, leftZ, rightZ, bottomZ, ref low, ref high);
                 tile.AverageZ = sort;
+                tile.MinZ = low;
+
+                tile.PriorityZ = (short) (sort - 1);
+
                 if (sort != SortZ)
                 {
-                    tile.MinZ = low;
-
                     SortZ = sort;
                     map.GetTile((short) GameObject.Position.X, (short) GameObject.Position.Y).ForceSort();
                 }

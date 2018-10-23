@@ -214,7 +214,7 @@ namespace ClassicUO.Network
             0x0009, // 0xB6
             -1, // 0xB7
             -1, // 0xB8
-            0x0005, // 0xB9 //aggiornato da 3 a 5
+            0x0003, // 0xB9 //aggiornato da 3 a 5
             0x0006, // 0xBA
             0x0009, // 0xBB
             0x0003, // 0xBC

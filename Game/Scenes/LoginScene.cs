@@ -169,7 +169,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
         
-        private void NetClient_Connected(object sender, global::System.EventArgs e)
+        private void NetClient_Connected(object sender, EventArgs e)
         {
             Log.Message(LogTypes.Info, "Connected!");
             CurrentLoginStep = LoginStep.VerifyingAccount;
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Send(new PFirstLogin(Account, Password));
         }
 
-        private void NetClient_Disconnected(object sender, global::System.EventArgs e)
+        private void NetClient_Disconnected(object sender, EventArgs e)
         {
             Log.Message(LogTypes.Warning, "Disconnected!");
             // TODO: Reset

@@ -30,144 +30,179 @@ namespace ClassicUO.Game.GameObjects
 {
     public partial class Mobile
     {
-        private static readonly byte[,] _animAssociateTable =
+        private static readonly byte[][] _animAssociateTable = new byte[][]
         {
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_RUN, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_RUN, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_2, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_3,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_ONEHANDED
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_1
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_2
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_3,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_DOWN
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_WIDE
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_JAB
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_CAST_DIRECTED
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_3,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_CAST_AREA
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_BOW
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_CROSSBOW
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_GET_HIT_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_GET_HIT
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_DIE_1, (byte) HIGHT_ANIMATION_GROUP.HAG_DIE_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_DIE_1
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_DIE_2, (byte) HIGHT_ANIMATION_GROUP.HAG_DIE_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_DIE_2
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_RUN, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK_BOW
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK_CROSSBOW
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_SLAP_HORSE
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_TURN
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_AND_WALK
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_EMOTE_BOW
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_EMOTE_SALUTE
             },
+            new []
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3
@@ -203,7 +238,7 @@ namespace ClassicUO.Game.GameObjects
         public static void GetGroupForAnimation(ANIMATION_GROUPS group, ref byte animation)
         {
             if ((sbyte) group > 0 && animation < (byte) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT)
-                animation = _animAssociateTable[animation, (sbyte) group - 1];
+                animation = _animAssociateTable[animation][(sbyte) group - 1];
         }
 
         public static byte GetGroupForAnimation(Mobile mobile, ushort checkGraphic = 0)
@@ -264,7 +299,8 @@ namespace ClassicUO.Game.GameObjects
                     mobile.AnimIndex = 0;
                 }
 
-                if (graphic == 151) result++;
+                if (graphic == 151)
+                    result++;
             }
             else if (groupIndex == ANIMATION_GROUPS.AG_PEOPLE)
             {
@@ -423,6 +459,22 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if (!Animations.AnimationExists(graphic, animation)) animation = (byte) HIGHT_ANIMATION_GROUP.HAG_STAND;
+            }
+            else if (group == ANIMATION_GROUPS.AG_PEOPLE)
+            {
+                switch ((PEOPLE_ANIMATION_GROUP)animation)
+                {
+                    case PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
+                    case PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
+                        animation = (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (!Animations.AnimationExists(graphic, animation))
+                    animation = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
+
             }
         }
 

@@ -259,7 +259,7 @@ namespace ClassicUO.Game.GameObjects
 
 
         public bool IsMounted => Equipment[(int) Layer.Mount] != null;
-        public bool IsRunning => (Direction & Direction.Running) == Direction.Running;
+        public bool IsRunning { get; internal set; }
 
         public byte AnimationInterval { get; set; }
         public byte AnimationFrameCount { get; set; }
@@ -344,9 +344,9 @@ namespace ClassicUO.Game.GameObjects
             if (Steps.Count >= MAX_STEP_COUNT)
                 return false;
 
-            Direction dirRun = run ? Direction.Running : Direction.North;
+            //Direction dirRun = run ? Direction.Running : Direction.North;
 
-            direction = direction & Direction.Up;
+            //direction = direction & Direction.Up;
 
             int endX = 0, endY = 0;
             sbyte endZ = 0;
@@ -354,7 +354,7 @@ namespace ClassicUO.Game.GameObjects
 
             GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
 
-            endDir = endDir & Direction.Up;
+           //endDir = endDir & Direction.Up;
 
             if (endX == x && endY == y && endZ == z && endDir == direction) return true;
 
@@ -371,7 +371,7 @@ namespace ClassicUO.Game.GameObjects
                     step.X = endX;
                     step.Y = endY;
                     step.Z = endZ;
-                    step.Direction = (byte) (moveDir | dirRun);
+                    step.Direction = (byte) moveDir;
                     step.Run = run;
 
                     Steps.AddToBack(step);
@@ -380,7 +380,7 @@ namespace ClassicUO.Game.GameObjects
                 step.X = x;
                 step.Y = y;
                 step.Z = z;
-                step.Direction = (byte) (moveDir | dirRun);
+                step.Direction = (byte) moveDir;
                 step.Run = run;
                 Steps.AddToBack(step);
             }
@@ -391,7 +391,7 @@ namespace ClassicUO.Game.GameObjects
                 step.X = x;
                 step.Y = y;
                 step.Z = z;
-                step.Direction = (byte) (direction | dirRun);
+                step.Direction = (byte) direction;
                 step.Run = run;
                 Steps.AddToBack(step);
             }
@@ -450,6 +450,8 @@ namespace ClassicUO.Game.GameObjects
             Direction = dir;
 
             Offset = Vector3.Zero;
+
+            ProcessDelta();
         }
 
         public void SetAnimation(byte id, byte interval = 0, byte frameCount = 0, byte repeatCount = 0,
@@ -486,7 +488,7 @@ namespace ClassicUO.Game.GameObjects
 
                     int maxDelay =
                         MovementSpeed.TimeToCompleteMovement(this, step.Run) -
-                        (IsMounted ? 1 : 15); // default 15 = less smooth
+                        (IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ? 1 : 15); // default 15 = less smooth
                     int delay = (int) CoreGame.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
 
@@ -530,6 +532,7 @@ namespace ClassicUO.Game.GameObjects
 
                         Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
                         Direction = (Direction) step.Direction;
+                        IsRunning = step.Run;
 
                         Offset = Vector3.Zero;
                         Steps.RemoveFromFront();

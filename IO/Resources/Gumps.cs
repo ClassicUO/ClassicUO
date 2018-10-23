@@ -74,6 +74,16 @@ namespace ClassicUO.IO.Resources
                     int outgump = int.Parse(defs[1].Replace("{", string.Empty).Replace("}", string.Empty));
                     int outhue = int.Parse(defs[2]);
 
+                    //if (ingump > 60000)
+                    //    ingump -= 60000;
+                    //else if (ingump > 50000)
+                    //    ingump -= 50000;
+
+                    //if (outgump > 60000)
+                    //    outgump -= 60000;
+                    //else if (outgump > 50000)
+                    //    outgump -= 50000;
+
                     _file.Entries[ingump] = _file.Entries[outgump];
                 }
             }

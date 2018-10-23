@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Text = text
         };
 
-        public CroppedText(string[] parts, string[] lines) : this(lines[int.Parse(parts[6])], Hue.Parse(parts[5]),
+        public CroppedText(string[] parts, string[] lines) : this(lines[int.Parse(parts[6])], (Hue)(Hue.Parse(parts[5]) + 1),
             int.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);

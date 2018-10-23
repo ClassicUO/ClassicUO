@@ -113,9 +113,9 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	{
 		float3 light = normalize(lightDirection);
 		float3 normal = normalize(IN.Normal);
-		float3 nDotL = min(saturate(dot(light, normal)), 1.0f);
+		float3 nDotL = min(dot(light, normal)), 1.0f);
 
-		color.rgb = saturate((color.rgb * nDotL * lightIntensity * 0.2f + color.rgb * lightIntensity * 0.8f));
+		color.rgb = (color.rgb * nDotL * lightIntensity * 0.2f + color.rgb * lightIntensity * 0.8f));
 	}
 
 	return color;
@@ -150,7 +150,7 @@ float4 PixelShader_Grayscale(PS_INPUT IN) : COLOR0
 	// Darken the color based on the ambient lighting and the normal.
 	if (DrawLighting)
 	{
-		float3 light = normalize(lightDirection);
+			float3 light = normalize(lightDirection);
 			float3 normal = normalize(IN.Normal);
 			float3 nDotL = min(saturate(dot(light, normal)), 1.0f);
 
@@ -169,6 +169,23 @@ float4 PixelShader_ShadowSet(PS_INPUT IN) : COLOR0
 	// if pixel was opaque, return black half-transparent.
 	// we use the stencil buffer to only write one shadow pixel to each screen pixel.
 	return float4(0, 0, 0, .5);
+}
+
+float4 PixelShader_Land(PS_INPUT IN) : COLOR0
+{
+	// Get the initial pixel and discard it if the alpha == 0
+	float4 color = tex2D(DrawSampler, IN.TexCoord);
+	if (color.a == 0)
+		discard;
+
+	float3 light = normalize(lightDirection);
+	float3 normal = normalize(IN.Normal);
+	float3 nDotL = max(saturate(dot(light, normal)), 0.0f);
+
+
+	//color.rgb = saturate((color.rgb * nDotL * 0.5f) + (color.rgb * 0.5f));
+	color.rgb = saturate((color.rgb * nDotL * lightIntensity * 0.2f + color.rgb * lightIntensity * 0.8f));
+	return color;
 }
 
 
@@ -205,5 +222,14 @@ technique ShadowSetTechnique
 	{
 		VertexShader = compile vs_2_0 VertexShaderFunction();
 		PixelShader = compile ps_2_0 PixelShader_ShadowSet();
+	}
+}
+
+technique LandTechnique
+{
+	pass p0
+	{
+		VertexShader = compile vs_2_0 VertexShaderFunction();
+		PixelShader = compile ps_2_0 PixelShader_Land();		
 	}
 }

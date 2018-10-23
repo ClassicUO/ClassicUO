@@ -141,15 +141,14 @@ namespace ClassicUO.Game.Views
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
+
             if (!spriteBatch.DrawSprite(Texture, vertex))
                 return false;
 
             MousePick(list, vertex);
 
             if (HasShadow)
-            {
-                spriteBatch.DrawShadow(Texture, vertex, new Vector2(position.X + 22f, position.Y +  GameObject.Offset.Y  - (GameObject.Offset.Z / 4 + GameObject.Position.Z) * 4 + 22f), IsFlipped, ShadowZDepth);
-            }
+                spriteBatch.DrawShadow(Texture, vertex, new Vector2(position.X + 22f, position.Y + GameObject.Offset.Y - (GameObject.Offset.Z / 4 + GameObject.Position.Z) * 4 + 22f), IsFlipped, ShadowZDepth);
 
             return true;
         }

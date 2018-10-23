@@ -26,6 +26,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
@@ -42,11 +43,11 @@ namespace ClassicUO.Game.Views
         } 
 
 
-        public Rectangle BoudsStrange { get; set; }
-
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
+#if !ORIONSORT
             PreDraw(position);
+#endif
             return DrawInternal(spriteBatch, position, objectList);
         }
 
@@ -56,7 +57,9 @@ namespace ClassicUO.Game.Views
             if (GameObject.IsDisposed)
                 return false;
 
+#if !ORIONSORT
             ShadowZDepth = spriteBatch.GetZ();
+#endif
 
             Mobile mobile = (Mobile) GameObject;
 
@@ -82,11 +85,9 @@ namespace ClassicUO.Game.Views
             else
                 drawX = -22 - (int) mobile.Offset.X;
 
-            Rectangle rect = new Rectangle();
-
             for (int i = 0; i < _layerCount; i++)
             {
-                ref ViewLayer vl = ref _frames[i];
+                ViewLayer vl = _frames[i];
                 TextureAnimationFrame frame = vl.Frame;
 
                 if (frame.IsDisposed) continue;
@@ -96,23 +97,9 @@ namespace ClassicUO.Game.Views
 
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-
-                if (Bounds.X < rect.X)
-                    rect.X = Bounds.X;
-                if (Bounds.Y < rect.Y)
-                    rect.Y = Bounds.Y;
-                if (Bounds.Width > rect.Width)
-                    rect.Width = Bounds.Width;
-                if (Bounds.Height > rect.Height)
-                    rect.Height = Bounds.Height;
-
-                //if (i == 0)
-                //    rect = Bounds;
-
                 HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, 0, false);
 
                 base.Draw(spriteBatch, position, objectList);
-
                 Pick(frame.ID, Bounds, position, objectList);
             }
 
@@ -120,7 +107,7 @@ namespace ClassicUO.Game.Views
 
             //int xx = IsFlipped ? (int)position.X + rect.X + 44 : -(int)position.X + rect.X;
 
-            BoudsStrange = new Rectangle((int) position.X + rect.X, (int) position.Y + rect.Y, rect.Width, rect.Height);
+            //BoudsStrange = new Rectangle((int) position.X + rect.X, (int) position.Y + rect.Y, rect.Width, rect.Height);
 
             //spriteBatch.DrawRectangle(_texture, 
             //    new Rectangle
@@ -147,60 +134,74 @@ namespace ClassicUO.Game.Views
 
             //    RenderExtentions.GetHueVector(38));
 
+            //mirror = false;
+            //dir = 0 & 0x7F;
+            //Animations.GetAnimDirection(ref dir, ref mirror);
 
-            int height = 0;
-            int centerY = 0;
+            //ref var direction = ref Animations.DataIndex[GameObject.Graphic].Groups[0].Direction[0];
 
-            GetAnimationDimensions(mobile, 0, ref height, ref centerY);
+            //if (direction.Address > 0 || direction.IsUOP)
+            //{
+            //    if (direction.Frames != null || direction.FrameCount > 0)
+            //    {
+            //        if (Animations.LoadDirectionGroup(ref direction))
+            //        {
+            //            centerY = direction.Frames[0].CenterY;
+            //            height = direction.Frames[0].Height;
+            //        }
+            //        else
+            //        {
+            //            height = mobile.IsMounted ? 100 : 60;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        height = mobile.IsMounted ? 100 : 60;
+            //    }
+            //}
+            //else
+            //{
+            //    height = mobile.IsMounted ? 100 : 60;
+            //}
 
-            Vector3 overheadPosition = new Vector3
+            if (GameObject.OverHeads.Count > 0)
             {
-                X = position.X + mobile.Offset.X,
-                Y = position.Y - mobile.Position.Z * 4 + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
-                Z = position.Z
-            };
+                GetAnimationDimensions(mobile, 0xFF, out int height, out int centerY);
 
-            MessageOverHead(spriteBatch, overheadPosition, -22);
+                Vector3 overheadPosition = new Vector3
+                {
+                    X = position.X + mobile.Offset.X,
+                    Y = position.Y - mobile.Position.Z * 4 + (mobile.Offset.Y - mobile.Offset.Z) -
+                        (height + centerY + 8),
+                    Z = position.Z
+                };
+
+                MessageOverHead(spriteBatch, overheadPosition, mobile.IsMounted ? 0 : -22);
+            }
+
+
             return true;
         }
 
-        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, ref int height, ref int centerY)
+        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int height, out int centerY)
         {
             byte dir = 0 & 0x7F;
+            byte animGroup = 0;
             bool mirror = false;
 
             Animations.GetAnimDirection(ref dir, ref mirror);
-            byte group = Mobile.GetGroupForAnimation(mobile);
 
-            if (mobile.Graphic <= Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+            if (frameIndex == 0xFF)
+                frameIndex = (byte) mobile.AnimIndex;
+
+            Animations.GetAnimationDimensions(frameIndex, mobile.Graphic, dir, animGroup, out int x, out centerY, out int w, out height);
+
+            if (x <= 0 && centerY <= 0 && w <= 0 && height <= 0)
             {
-                if (dir < 5)
-                {
-                    ref AnimationDirection direction =
-                        ref Animations.DataIndex[mobile.Graphic].Groups[group].Direction[dir];
-
-                    if (direction.FrameCount > 0 || Animations.LoadDirectionGroup(ref direction))
-                    {
-                        int fc = direction.FrameCount;
-                        if (fc > 0)
-                        {
-                            if (frameIndex >= fc)
-                                frameIndex = 0;
-                        }
-
-                        if (direction.Frames != null && direction.Frames.Length > 0)
-                        {
-                            height = direction.Frames[frameIndex].Height;
-                            centerY = direction.Frames[frameIndex].CenterY;
-                            return;
-                        }
-                    }
-                }
-            }
-
-            height = mobile.IsMounted ? 100 : 60;
-            centerY = 0;
+                height = mobile.IsMounted ? 100 : 60;
+            }     
         }
+
 
 
         private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
@@ -249,7 +250,7 @@ namespace ClassicUO.Game.Views
                                     if (mountGraphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                         mountOffset = Animations.DataIndex[mountGraphic].MountedHeightOffset;
 
-                                    AddLayer(dir, mount.GetMountAnimation(), mount.Hue, ref mobile, true);
+                                    AddLayer(dir, mountGraphic, mount.Hue, ref mobile, true);
                                 }
                             }
                             else
@@ -288,8 +289,6 @@ namespace ClassicUO.Game.Views
             EquipConvData? convertedItem = null, bool ispartial = false)
         {
             byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic);
-
-
             sbyte animIndex = GameObject.AnimIndex;
 
             Animations.AnimID = graphic;
@@ -299,7 +298,11 @@ namespace ClassicUO.Game.Views
             ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup]
                 .Direction[Animations.Direction];
 
-            if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction)) return;
+            if ((direction.FrameCount == 0 || direction.Frames == null) &&
+                !Animations.LoadDirectionGroup(ref direction))
+            {                              
+                return;
+            }
 
             direction.LastAccessTime = CoreGame.Ticks;
 
@@ -312,11 +315,20 @@ namespace ClassicUO.Game.Views
 
                 if (frame == null || frame.IsDisposed)
                 {
-                    if (!Animations.LoadDirectionGroup(ref direction)) return;
+                    if (!Animations.LoadDirectionGroup(ref direction))
+                    {
+                        Log.Message(LogTypes.Panic, $"graphic: {graphic}\tgroup: {animGroup}");
+
+                        return;
+                    }
 
                     frame = ref direction.Frames[animIndex];
                     if (frame == null)
+                    {
+                        Log.Message(LogTypes.Panic, $"graphic: {graphic}\tgroup: {animGroup}\tframe missed: {animIndex}");
+
                         return;
+                    }
                 }
 
                 if (hue == 0)

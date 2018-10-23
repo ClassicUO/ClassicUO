@@ -22,6 +22,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
@@ -89,39 +90,30 @@ namespace ClassicUO.Game.Map
             switch (obj)
             {
                 case Tile tile:
-                    {
-                        if (tile.IsStretched)
-                            priorityZ = (short)(((TileView)tile.View).SortZ - 1);
-                        else
-                            priorityZ--;
-                    }
+                    var t = tile.View;
+
+                    if (tile.IsStretched)
+                        priorityZ = (short) (tile.AverageZ - 1); //(short)(((TileView)tile.View). - 1);
+                    else
+                        priorityZ--;               
                     break;
-                case Mobile mobile:
+                case Mobile _:
                     priorityZ++;
                     break;
-                case Item item:
-                    if (item.IsCorpse)
-                        priorityZ++;
-                    else
-                        goto default;
+                case Item item when item.IsCorpse:
+                    priorityZ++;
                     break;
-                case GameEffect effect:
+                case GameEffect _:
                     priorityZ += 2;
                     break;
-                //case DeferredEntity deferred:
-                //    if (deferred.Entity is Mobile)
-                //        priorityZ++;
-                //    else if (deferred.Entity is GameEffect)
-                //        priorityZ += 2;
-                //    break;
                 default:
                     {
-                        IDynamicItem dyn = (IDynamicItem)obj;
+                        IDynamicItem dyn1 = (IDynamicItem)obj;
 
-                        if (IO.Resources.TileData.IsBackground((long)dyn.ItemData.Flags))
+                        if (IO.Resources.TileData.IsBackground((long)dyn1.ItemData.Flags))
                             priorityZ--;
 
-                        if (dyn.ItemData.Height > 0)
+                        if (dyn1.ItemData.Height > 0)
                             priorityZ++;
                     }
                     break;
@@ -132,29 +124,7 @@ namespace ClassicUO.Game.Map
 
 #endif
 
-            //GameObject found = null;
-            //var objFirst = _objectsOnTile.Count > 0 ? _objectsOnTile[0] : null;
-            //if (objFirst != null)
-            //{
-            //    for (int i = 0; i < _objectsOnTile.Count - 1; i++)
-            //    {
-            //        int test = _objectsOnTile[i].PriorityZ;
-            //        if (test > priorityZ || (test == priorityZ && obj is Tile && !(objFirst is Tile)))
-            //            break;
-
-            //        found = objFirst;
-            //        objFirst = _objectsOnTile[i + 1];
-            //    }
-            //}
-
-            //if (found != null)
-            //{
-
-            //}
-
-
             _objectsOnTile.Add(obj);
-
 
             _needSort = true;
         }
@@ -169,53 +139,7 @@ namespace ClassicUO.Game.Map
             _needSort = true;
         }
 
-        //public void Clear()
-        //{
-
-        //    for (int k = 0; k < _objectsOnTile.Count; k++)
-        //    {
-        //        var obj = _objectsOnTile[k];
-        //        if (obj is Tile || obj is Static)
-        //        {
-        //            int count = _objectsOnTile.Count;
-        //            obj.Dispose();
-        //            if (count == _objectsOnTile.Count)
-        //                _objectsOnTile.RemoveAt(k);
-        //            k--;
-        //        }
-        //    }
-
-        //    _statics.Clear();
-
-        //    //for (int i = 0; i < _objectsOnTile.Count; i++)
-        //    //{
-        //    //    var obj = _objectsOnTile[i];
-
-        //    //    if (obj is Entity || obj is Tile)
-        //    //        continue;
-
-        //    //    int count = _objectsOnTile.Count;
-
-        //    //    obj.Dispose();
-
-        //    //    if (count == _objectsOnTile.Count)
-        //    //    {
-        //    //        _objectsOnTile.RemoveAt(i);
-        //    //    }
-
-        //    //    i--;           
-        //    //}
-
-        //    //_objectsOnTile.Clear();
-
-        //    //DisposeView();
-        //    //Graphic = 0;
-        //    //Position = Position.Invalid;
-        //    //_tileData = null;
-        //    //_needSort = false;
-        //    //_statics.Clear();
-        //}
-
+     
 
         private void RemoveDuplicates()
         {
@@ -312,6 +236,7 @@ namespace ClassicUO.Game.Map
             return items;
         }
 
-        protected override View CreateView() => new TileView(this);
+        protected override View CreateView() => 
+            new TileView(this);
     }
 }

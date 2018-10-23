@@ -25,15 +25,17 @@ namespace ClassicUO.IO
 {
     public struct UOFileIndex3D
     {
-        public UOFileIndex3D(long offset, int length, int extra = 0)
+        public UOFileIndex3D(long offset, int length, int decompressed, int extra = 0)
         {
             Offset = offset;
             Length = length;
+            DecompressedLength = decompressed;
             Extra = extra;
         }
 
         public long Offset;
         public int Length;
+        public int DecompressedLength;
         public int Extra;
     }
 

@@ -51,9 +51,7 @@ namespace ClassicUO.Game.Map
 
         private static int Compare(GameObject x, GameObject y)
         {
-#if ORIONSORT
-            int comparison = x.PriorityZ - y.PriorityZ;
-#else
+
             (int xZ, int xType, int xThreshold, int xTierbreaker) = GetSortValues(x);
             (int yZ, int yType, int yThreshold, int yTierbreaker) = GetSortValues(y);
 
@@ -69,7 +67,12 @@ namespace ClassicUO.Game.Map
 
             if (comparison == 0)
                 comparison = xTierbreaker - yTierbreaker;
+
+#if ORIONSORT
+            if (comparison == 0)
+                comparison = x.PriorityZ - y.PriorityZ;
 #endif
+
             return comparison;
         }
 
@@ -78,7 +81,7 @@ namespace ClassicUO.Game.Map
             switch (e)
             {
                 case GameEffect effect:
-                    return (effect.Position.Z, 4, 2, 0);
+                    return (effect.Position.Z, effect.IsItemEffect ? 2 : 4, 2, 0);
                 case DeferredEntity def:
                     return (def.Position.Z, 2, 1, 0);
                 case Mobile mobile:

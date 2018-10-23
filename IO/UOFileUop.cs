@@ -105,18 +105,13 @@ namespace ClassicUO.IO
                                 "hashes dictionary and files collection have different count of entries!");
                         }
 
-                        Entries[idx] = new UOFileIndex3D(offset + headerLength, length);
+                        Entries[idx] = new UOFileIndex3D(offset + headerLength, length, decompressedLength);
 
                         // extra?
                         if (_hasExtra)
                         {
                             long curpos = Position;
                             Seek(offset + headerLength);
-
-                            //byte[] extra = ReadArray<byte>(8);
-                            //ushort extra1 = (ushort) ((extra[3] << 24) | (extra[2] << 16) | (extra[1] << 8) | extra[0]);
-                            //ushort extra2 = (ushort) ((extra[7] << 24) | (extra[6] << 16) | (extra[5] << 8) | extra[4]);
-
 
                             int extra1 = ReadInt();
                             int extra2 = ReadInt();
@@ -131,7 +126,7 @@ namespace ClassicUO.IO
                     else
                     {
                         throw new ArgumentException(string.Format(
-                            "File with hash 0x{0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!",
+                            "File with hash {0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!",
                             hash));
                     }
                 }

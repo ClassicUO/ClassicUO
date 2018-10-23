@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ORIONSORT_</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;ORIONSORT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -32,7 +32,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;ORIONSORT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -242,6 +242,7 @@
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\RenderExtentions.cs" />
     <Compile Include="Renderer\SpriteBatch3D.cs" />
+    <Compile Include="Renderer\SpriteBatch3D1.cs" />
     <Compile Include="Renderer\SpriteBatchUI.cs" />
     <Compile Include="Renderer\SpriteTexture.cs" />
     <Compile Include="Renderer\SpriteVertex.cs" />

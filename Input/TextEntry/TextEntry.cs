@@ -212,12 +212,12 @@ namespace ClassicUO.Input.TextEntry
 
             if (RenderText.IsUnicode)
             {
-                (x, y) = Fonts.GetCaretPosUnicode(RenderText.Font, Text, CaretIndex, Width, RenderText.Align,
+                (x, y) = Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align,
                     (ushort) RenderText.FontStyle);
             }
             else
             {
-                (x, y) = Fonts.GetCaretPosASCII(RenderText.Font, Text, CaretIndex, Width, RenderText.Align,
+                (x, y) = Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align,
                     (ushort) RenderText.FontStyle);
             }
 
@@ -246,12 +246,12 @@ namespace ClassicUO.Input.TextEntry
 
             if (RenderText.IsUnicode)
             {
-                CaretIndex = Fonts.CalculateCaretPosUnicode(RenderText.Font, Text, x, y, Width, RenderText.Align,
+                CaretIndex = Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align,
                     (ushort) RenderText.FontStyle);
             }
             else
             {
-                CaretIndex = Fonts.CalculateCaretPosASCII(RenderText.Font, Text, x, y, Width, RenderText.Align,
+                CaretIndex = Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align,
                     (ushort) RenderText.FontStyle);
             }
 
@@ -261,9 +261,9 @@ namespace ClassicUO.Input.TextEntry
         }
 
         public int GetLinesCount() => RenderText.IsUnicode
-            ? Fonts.GetLinesCountUnicode(RenderText.Font, Text, RenderText.Align, (ushort) RenderText.FontStyle,
+            ? Fonts.GetLinesCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle,
                 Width)
-            : Fonts.GetLinesCountASCII(RenderText.Font, Text, RenderText.Align, (ushort) RenderText.FontStyle,
+            : Fonts.GetLinesCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle,
                 Width);
 
 

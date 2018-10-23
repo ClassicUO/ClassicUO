@@ -109,11 +109,6 @@ namespace ClassicUO.Game.GameObjects
 
         public long Duration { get; set; } = -1;
 
-        //public int CurrentFrame => (int)(LastChangeFrameTime / 50d);
-
-        //public Graphic CurrentGraphicByFrame =>
-        //    (Graphic) (Graphic + CurrentFrame / AnimDataFrame.FrameInterval % AnimDataFrame.FrameCount);
-
         public void AddChildEffect(GameEffect effect)
         {
             _children.Add(effect);

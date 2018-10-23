@@ -610,7 +610,9 @@ namespace ClassicUO.Network
             World.Player.Graphic = p.ReadUShort();
             World.Player.Position = new Position(p.ReadUShort(), p.ReadUShort(), (sbyte) p.ReadUShort());
             //World.Player.Position.Set(p.ReadUShort(), p.ReadUShort(), (sbyte)p.ReadUShort());
-            World.Player.Direction = (Direction) p.ReadByte();
+            Direction direction = (Direction)p.ReadByte();
+            World.Player.Direction = direction & Direction.Up;
+            World.Player.IsRunning = (direction & Direction.Running) != 0;
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
 
@@ -718,18 +720,24 @@ namespace ClassicUO.Network
 
             World.Player.GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
 
-            World.Player.SequenceNumber = 0;
+            //World.Player.SequenceNumber = 0;
+
+            World.Player.ResetSteps();
+
+            Direction dir = direction & Direction.Up;
+            bool isrun = (direction & Direction.Running) != 0;
 
             if (endX != x || endY != y)
             {
-                //World.Player.ForcePosition(x, y, z, direction);
+                World.Player.ForcePosition(x, y, z, direction);
 
-                World.Player.ResetSteps();
-                World.Player.Position = new Position(x, y, z);
-                World.Player.Direction = direction;
+                //World.Player.ResetSteps();
+                //World.Player.Position = new Position(x, y, z);
+                //World.Player.Direction = dir;
+                //World.Player.IsRunning = isrun;
             }
-            else if ((endDir & Direction.Up) != (direction & Direction.Up))
-                World.Player.EnqueueStep(x, y, z, direction, (direction & Direction.Running) != 0);
+            else if (endDir != dir)
+                World.Player.EnqueueStep(x, y, z, dir, isrun);
             else if (World.Player.Tile == null)
                 World.Player.Tile = World.Map.GetTile(x, y);
 
@@ -746,6 +754,7 @@ namespace ClassicUO.Network
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             Direction direction = (Direction) p.ReadByte();
+            direction &= Direction.Up;
             sbyte z = p.ReadSByte();
             Position position = new Position(x, y, z);
 
@@ -1019,12 +1028,13 @@ namespace ClassicUO.Network
         private static void PersonalLightLevel(Packet p)
         {
             World.Light.Personal = 0;
-            // if (World.Player == p.ReadUInt()) World.Light.Personal = 0; // p.ReadByte();
+             //World.Light.Personal = p.ReadByte();
         }
 
         private static void LightLevel(Packet p)
         {
-            World.Light.Overall = 0; // p.ReadByte();
+            World.Light.Overall = 0;
+            //World.Light.Overall = p.ReadByte();
         }
 
         private static void ErrorCode(Packet p)
@@ -1152,20 +1162,27 @@ namespace ClassicUO.Network
             mobile.Flags = (Flags) p.ReadByte();
             mobile.Notoriety = (Notoriety) p.ReadByte();
             mobile.ProcessDelta();
-            if (World.Mobiles.Add(mobile)) World.Mobiles.ProcessDelta();
+            if (World.Mobiles.Add(mobile))
+                World.Mobiles.ProcessDelta();
 
-            if (mobile == World.Player) return;
+            if (mobile == World.Player)
+                return;
+
+            Direction dir = direction & Direction.Up;
+            bool isrun = (direction & Direction.Running) != 0;
 
             if (World.Get(mobile) == null)
             {
                 mobile.Position = new Position((ushort) x, (ushort) y, z);
-                mobile.Direction = direction;
+                mobile.Direction = dir;
+                mobile.IsRunning = isrun;
             }
 
-            if (!mobile.EnqueueStep(x, y, z, direction, (direction & Direction.Running) != 0))
+            if (!mobile.EnqueueStep(x, y, z, dir, isrun))
             {
                 mobile.Position = new Position((ushort) x, (ushort) y, z);
-                mobile.Direction = direction;
+                mobile.Direction = dir;
+                mobile.IsRunning = isrun;
                 mobile.ClearSteps();
             }
         }
@@ -1235,18 +1252,21 @@ namespace ClassicUO.Network
             }
             else
             {
-                direction &= Direction.Up;
+                Direction dir = direction & Direction.Up;
+                bool isrun = (direction & Direction.Running) != 0;
 
                 if (World.Get(mobile) == null)
                 {
                     mobile.Position = new Position(x, y, z);
-                    mobile.Direction = direction;
+                    mobile.Direction = dir;
+                    mobile.IsRunning = isrun;
                 }
 
-                if (!mobile.EnqueueStep(x, y, z, direction, (direction & Direction.Running) != 0))
+                if (!mobile.EnqueueStep(x, y, z, dir, isrun))
                 {
                     mobile.Position = new Position(x, y, z);
-                    mobile.Direction = direction;
+                    mobile.Direction = dir;
+                    mobile.IsRunning = isrun;
                     mobile.ClearSteps();
                 }
             }
@@ -1270,7 +1290,7 @@ namespace ClassicUO.Network
 
         private static void LoginError(Packet p)
         {
-            byte errorCode = p.ReadByte();
+
         }
 
         private static void ResendCharacterList(Packet p)
@@ -1991,7 +2011,7 @@ namespace ClassicUO.Network
             for (int plane = 0; plane < planes; plane++)
             {
                 uint header = p.ReadUInt();
-                ulong dlen = ((header & 0xFF0000) >> 16) | ((header & 0xF0) << 4);
+                int dlen = (int)(((header & 0xFF0000) >> 16) | ((header & 0xF0) << 4));
                 int clen = (int) (((header & 0xFF00) >> 8) | ((header & 0x0F) << 8));
                 int planeZ = (int) ((header & 0x0F000000) >> 24);
                 int planeMode = (int) ((header & 0xF0000000) >> 28);
@@ -2001,7 +2021,10 @@ namespace ClassicUO.Network
                 Buffer.BlockCopy(p.ToArray(), p.Position, compressedBytes, 0, clen);
 
                 byte[] decompressedBytes = new byte[dlen];
-                Zlib.Decompress(compressedBytes, 0, decompressedBytes, (int) dlen);
+
+                ZLib.Decompress(compressedBytes, 0, decompressedBytes, (int) dlen);
+
+               //ZLib.Unpack(decompressedBytes, ref dlen, compressedBytes, clen);
 
                 Packet stream = new Packet(decompressedBytes, (int) dlen);
                 // using (BinaryReader stream = new BinaryReader(new MemoryStream(decompressedBytes)))
@@ -2144,13 +2167,14 @@ namespace ClassicUO.Network
             uint x = p.ReadUInt();
             uint y = p.ReadUInt();
             uint clen = p.ReadUInt() - 4;
-            uint dlen = p.ReadUInt();
+            int dlen = (int)p.ReadUInt();
 
             byte[] data = p.ReadArray((int) clen);
 
             byte[] decData = new byte[dlen];
 
-            Zlib.Decompress(data, 0, decData, (int) dlen);
+            ZLib.Decompress(data, 0, decData,  dlen);
+            //ZLib.Unpack(decData, ref dlen, data, (int)clen);
 
             string layout = Encoding.UTF8.GetString(decData);
 
@@ -2160,13 +2184,15 @@ namespace ClassicUO.Network
             if (linesNum > 0)
             {
                 clen = p.ReadUInt() - 4;
-                dlen = p.ReadUInt();
+                dlen = (int)p.ReadUInt();
 
                 data = new byte[clen];
-                for (int i = 0; i < data.Length; i++) data[i] = p.ReadByte();
+                for (int i = 0; i < clen; i++)
+                    data[i] = p.ReadByte();
 
                 decData = new byte[dlen];
-                Zlib.Decompress(data, 0, decData, (int) dlen);
+                ZLib.Decompress(data, 0, decData, dlen);
+                //ZLib.Unpack(decData, ref dlen, data, data.Length);
 
                 lines = new string[linesNum];
 
@@ -2203,13 +2229,14 @@ namespace ClassicUO.Network
             ushort type = p.ReadUShort();
             ushort action = p.ReadUShort();
             byte mode = p.ReadByte();
+
             byte group = Mobile.GetObjectNewAnimation(mobile, type, action, mode);
 
             mobile.SetAnimation(group);
             mobile.AnimationRepeatMode = 1;
             mobile.AnimationDirection = true;
 
-            if ((type == 1 || type == 2) && mobile.Graphic == 0x015) mobile.AnimationRepeat = true;
+            if ((type == 1 || type == 2) && mobile.Graphic == 0x0015) mobile.AnimationRepeat = true;
 
             mobile.AnimationFromServer = true;
         }
