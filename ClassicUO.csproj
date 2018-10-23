@@ -235,7 +235,7 @@
     <Compile Include="Network\PacketsTable.cs" />
     <Compile Include="Network\PacketWriter.cs" />
     <Compile Include="Network\SendQueue.cs" />
-    <Compile Include="Renderer\CursorRenderer.cs" />
+    <Compile Include="Renderer\GameCursor.cs" />
     <Compile Include="Renderer\IsometricLight.cs" />
     <Compile Include="Renderer\OverheadManager.cs" />
     <Compile Include="Renderer\PixelPicking.cs" />

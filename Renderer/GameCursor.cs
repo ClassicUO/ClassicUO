@@ -35,7 +35,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    public sealed class CursorRenderer
+    public sealed class GameCursor
     {
         private static readonly ushort[,] _cursorData = new ushort[2, 16]
         {
@@ -59,7 +59,7 @@ namespace ClassicUO.Renderer
         private readonly Settings _settings;
 
 
-        public CursorRenderer(UIManager ui)
+        public GameCursor(UIManager ui)
         {
             _inputManager = Service.Get<InputManager>();
             _uiManager = ui;
@@ -195,6 +195,29 @@ namespace ClassicUO.Renderer
         public Point ScreenPosition => _inputManager.MousePosition;
 
 
+        private SpriteTexture _draggedItemTexture;
+        private Hue _hue;
+        private bool _draggingItem;
+        private Point _offset;
+        private Rectangle _rect;
+
+        public void SetDraggedItem(Graphic graphic, Hue hue, Point offset)
+        {
+            _draggedItemTexture = Art.GetStaticTexture(graphic);
+            _hue = hue;
+            _offset = offset;
+            _rect = new Rectangle(0,0 ,_draggedItemTexture.Width, _draggedItemTexture.Height);
+            _draggingItem = true;
+        }
+
+        public void UpdateDraggedItemOffset(Point offset) => _offset = offset;
+
+        public void ClearDraggedItem()
+        {
+            _draggingItem = false;
+        }
+
+
         public void Update(double totalMS, double frameMS)
         {
             Graphic = AssignGraphicByState();
@@ -237,6 +260,12 @@ namespace ClassicUO.Renderer
             }
             else
                 Texture.Ticks = (long) totalMS;
+
+
+            if (_draggingItem)
+            {
+                _draggedItemTexture.Ticks = (long)totalMS;
+            }
         }
 
         public void Draw(SpriteBatchUI sb)
@@ -250,10 +279,12 @@ namespace ClassicUO.Renderer
 
             if (id < 16)
             {
-                Vector3 v = new Vector3(ScreenPosition.X + _cursorOffset[0, id],
-                    ScreenPosition.Y + _cursorOffset[1, id], 0);
-                sb.Draw2D(Texture, v, Vector3.Zero);
+                Vector3 v = new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0);    
 
+                if (_draggingItem)
+                    sb.Draw2D(_draggedItemTexture, new Vector3(v.X  - _offset.X, v.Y - _offset.Y, 0), _rect, RenderExtentions.GetHueVector(_hue));
+
+                sb.Draw2D(Texture, v, Vector3.Zero);
 
                 // tooltip testing, very nice!
                 //sb.Draw2D(_blackTexture, new Rectangle(ScreenPosition.X + _cursorOffset[0, id] - 100, ScreenPosition.Y + _cursorOffset[1, id] - 50, 100, 50), RenderExtentions.GetHueVector(0, false, true, false));

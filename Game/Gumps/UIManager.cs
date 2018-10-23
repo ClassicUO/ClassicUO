@@ -36,7 +36,6 @@ namespace ClassicUO.Game.Gumps
 {
     public class UIManager
     {
-        private readonly CursorRenderer _cursor;
         private readonly List<GumpControl> _gumps = new List<GumpControl>();
         private readonly List<object> _inputBlockingObjects = new List<object>();
         private readonly GumpControl[] _mouseDownControls = new GumpControl[5];
@@ -52,7 +51,7 @@ namespace ClassicUO.Game.Gumps
 
         public UIManager()
         {
-            _cursor = new CursorRenderer(this);
+            GameCursor = new GameCursor(this);
             _sbUI = Service.Get<SpriteBatchUI>();
             InputManager = Service.Get<InputManager>();
         } 
@@ -67,6 +66,7 @@ namespace ClassicUO.Game.Gumps
         public int Width => _sbUI.GraphicsDevice.Viewport.Width;
         public int Height => _sbUI.GraphicsDevice.Viewport.Height;
         public InputManager InputManager { get; }
+        public GameCursor GameCursor { get; }
 
         public GumpControl KeyboardFocusControl
         {
@@ -288,7 +288,7 @@ namespace ClassicUO.Game.Gumps
                 }
             }
 
-            _cursor.Update(totalMS, frameMS);
+            GameCursor.Update(totalMS, frameMS);
 
 
             HandleKeyboardInput();
@@ -306,7 +306,7 @@ namespace ClassicUO.Game.Gumps
                     g.Draw(spriteBatch, new Vector3(g.X, g.Y, 0));
             }
 
-            _cursor.Draw(spriteBatch);
+            GameCursor.Draw(spriteBatch);
         }
 
 
