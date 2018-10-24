@@ -221,8 +221,9 @@ namespace ClassicUO.Game.Scenes
                 {
                     case TargetType.Position:
                     case TargetType.Object:
-                        if (InputManager.HandleMouseEvent(MouseEvent.Click, MouseButton.Left))
+                        if (InputManager.HandleMouseEvent(MouseEvent.Up, MouseButton.Left))
                         {
+                            InputManager.IgnoreNextMouseEvent(MouseEvent.Click);
                             InputManager.IgnoreNextMouseEvent(MouseEvent.DoubleClick);
 
                             TargetSystem.MouseTargetingEventObject(SelectedObject);
@@ -230,7 +231,6 @@ namespace ClassicUO.Game.Scenes
 
                         break;
                     case TargetType.Nothing:
-                        InputManager.CancelNextIgnoreMouseEvent();
                         break;
                     default:
                         Log.Message(LogTypes.Warning, "Not implemented.");

@@ -24,6 +24,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using static SDL2.SDL;
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
@@ -111,16 +113,14 @@ namespace ClassicUO.Input
             return false;
         }
 
-        private bool _ignoreNext;
-        private MouseEvent _eventMouseToIgnore;
 
         public void IgnoreNextMouseEvent(MouseEvent type)
         {
-            _ignoreNext = true;
-            _eventMouseToIgnore = type;
+            foreach (InputMouseEvent inputEvent in _events.OfType<InputMouseEvent>().Where(s => s.EventType == type))
+            {
+                inputEvent.IsHandled = true;
+            }
         }
-
-        public void CancelNextIgnoreMouseEvent() => _ignoreNext = false;
 
         private void OnKeyDown(InputKeyboardEvent e)
         {
@@ -179,8 +179,7 @@ namespace ClassicUO.Input
                     {
                         AddEvent(new InputMouseEvent(MouseEvent.Click, e));
 
-                        if (_time - _lastMouseClickTime <= MOUSE_DOUBLE_CLICK_TIME && _lastMouseClick != null &&
-                            !DistanceBetweenPoints(_lastMouseClick.Position, e.Position, MOUSE_CLICK_MAX_DELTA))
+                        if (_time - _lastMouseClickTime <= MOUSE_DOUBLE_CLICK_TIME && _lastMouseClick != null && !DistanceBetweenPoints(_lastMouseClick.Position, e.Position, MOUSE_CLICK_MAX_DELTA))
                         {
                             _lastMouseClickTime = 0f;
                             AddEvent(new InputMouseEvent(MouseEvent.DoubleClick, e));
@@ -223,16 +222,8 @@ namespace ClassicUO.Input
             AddEvent(new InputMouseEvent(ConvertWheelDirection(e.X, e.Y), e));
         }
 
+        private void AddEvent(InputEvent e) => _nextEvents.Enqueue(e);
 
-        private void AddEvent(InputEvent e)
-        {
-            if (_ignoreNext && e is InputMouseEvent me && me.EventType == _eventMouseToIgnore)
-            {
-                _ignoreNext = false;
-            }
-            else
-                _nextEvents.Enqueue(e);
-        }
 
         private static bool DistanceBetweenPoints(Point initial, Point final, int distance)
             => Math.Abs(final.X - initial.X) + Math.Abs(final.Y - initial.Y) > distance;
