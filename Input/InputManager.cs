@@ -111,6 +111,17 @@ namespace ClassicUO.Input
             return false;
         }
 
+        private bool _ignoreNext;
+        private MouseEvent _eventMouseToIgnore;
+
+        public void IgnoreNextMouseEvent(MouseEvent type)
+        {
+            _ignoreNext = true;
+            _eventMouseToIgnore = type;
+        }
+
+        public void CancelNextIgnoreMouseEvent() => _ignoreNext = false;
+
         private void OnKeyDown(InputKeyboardEvent e)
         {
             if (_lastKey == SDL_Keycode.SDLK_LCTRL && e.KeyCode == SDL_Keycode.SDLK_v)
@@ -213,7 +224,15 @@ namespace ClassicUO.Input
         }
 
 
-        private void AddEvent(InputEvent e) => _nextEvents.Enqueue(e);
+        private void AddEvent(InputEvent e)
+        {
+            if (_ignoreNext && e is InputMouseEvent me && me.EventType == _eventMouseToIgnore)
+            {
+                _ignoreNext = false;
+            }
+            else
+                _nextEvents.Enqueue(e);
+        }
 
         private static bool DistanceBetweenPoints(Point initial, Point final, int distance)
             => Math.Abs(final.X - initial.X) + Math.Abs(final.Y - initial.Y) > distance;

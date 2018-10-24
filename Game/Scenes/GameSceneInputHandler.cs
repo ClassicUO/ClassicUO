@@ -8,6 +8,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
@@ -194,14 +195,15 @@ namespace ClassicUO.Game.Scenes
                         break;
                     case MouseButton.Left:
 
-                        if (e.EventType == MouseEvent.Click)
+                        switch (e.EventType)
                         {
-                            EnqueueSingleClick(e, _mousePicker.MouseOverObject, _mousePicker.MouseOverObjectPoint);
-                            continue;
+                            case MouseEvent.Click:
+                                EnqueueSingleClick(e, _mousePicker.MouseOverObject, _mousePicker.MouseOverObjectPoint);
+                                continue;
+                            case MouseEvent.DoubleClick:
+                                ClearQueuedClicks();
+                                break;
                         }
-
-                        if (e.EventType == MouseEvent.DoubleClick)
-                            ClearQueuedClicks();
 
                         DoMouseButton(e, _mousePicker.MouseOverObject, _mousePicker.MouseOverObjectPoint);
                         break;

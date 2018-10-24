@@ -208,10 +208,39 @@ namespace ClassicUO.Game.Scenes
             }
 
 
-            // ============== INPUT ==============          
+            // ============== INPUT ==============      
+
+            if (TargetSystem.IsTargeting)
+            {
+                if (InputManager.HandleKeybaordEvent(KeyboardEvent.Press, SDL.SDL_Keycode.SDLK_ESCAPE, false, false, false))
+                {
+                    TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+                }
+
+                switch (TargetSystem.TargetingState)
+                {
+                    case TargetType.Position:
+                    case TargetType.Object:
+                        if (InputManager.HandleMouseEvent(MouseEvent.Click, MouseButton.Left))
+                        {
+                            InputManager.IgnoreNextMouseEvent(MouseEvent.DoubleClick);
+
+                            TargetSystem.MouseTargetingEventObject(SelectedObject);
+                        }
+
+                        break;
+                    case TargetType.Nothing:
+                        InputManager.CancelNextIgnoreMouseEvent();
+                        break;
+                    default:
+                        Log.Message(LogTypes.Warning, "Not implemented.");
+                        break;
+                }
+            }
+
+
             HandleMouseActions();
             MouseHandler(frameMS);
-
 
             if (IsMouseOverWorld)
             {
@@ -229,29 +258,6 @@ namespace ClassicUO.Game.Scenes
 
             if (IsHoldingItem)
                 UIManager.GameCursor.UpdateDraggedItemOffset(_heldOffset);
-
-            if (TargetSystem.IsTargeting)
-            {
-                if (InputManager.HandleKeybaordEvent(KeyboardEvent.Press, SDL.SDL_Keycode.SDLK_ESCAPE, false, false, false))
-                {
-                    TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
-                }
-
-                switch (TargetSystem.TargetingState)
-                {
-                    case TargetType.Position:
-                    case TargetType.Object:
-                        if (InputManager.HandleMouseEvent(MouseEvent.Click, MouseButton.Left))
-                        {
-                            TargetSystem.MouseTargetingEventObject(Service.Get<SceneManager>().GetScene<GameScene>()?.SelectedObject);
-                        }
-                        break;
-                    default:
-                        Log.Message(LogTypes.Warning, "Not implemented.");
-                        break;
-                }
-            }
-
             // ===================================
 
 

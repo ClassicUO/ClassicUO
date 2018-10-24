@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Data
 {

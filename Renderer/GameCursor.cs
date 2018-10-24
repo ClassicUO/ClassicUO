@@ -237,6 +237,29 @@ namespace ClassicUO.Renderer
             {
                 _draggedItemTexture.Ticks = (long)totalMS;
             }
+
+
+            //if (TargetSystem.IsTargeting)
+            //{
+            //    if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Press, SDL.SDL_Keycode.SDLK_ESCAPE, false, false, false))
+            //    {
+            //        TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+            //    }
+
+            //    switch (TargetSystem.TargetingState)
+            //    {
+            //        case TargetType.Position:
+            //        case TargetType.Object:
+            //            if (_inputManager.HandleMouseEvent(MouseEvent.Click, MouseButton.Left))
+            //            {
+            //                TargetSystem.MouseTargetingEventObject(Service.Get<SceneManager>().GetScene<GameScene>()?.SelectedObject);
+            //            }
+            //            break;
+            //        default:
+            //            Log.Message(LogTypes.Warning, "Not implemented.");
+            //            break;
+            //    }
+            //}
         }
 
         public void Draw(SpriteBatchUI sb)

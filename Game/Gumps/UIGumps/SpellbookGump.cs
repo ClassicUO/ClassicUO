@@ -311,27 +311,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 if (_spellBookType == SpellBookType.Magery)
                 {
-                    IEnumerable<char> initials = reagList.Replace(",", string.Empty)
-                        .Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]);
-
-                    foreach (char c in initials)
-                    {
-                        int y = 26;
-
-                        if (spellnameLabel.Height < 24)
-                            y = 31;
-
-                        y += spellnameLabel.Height;
-
-                        AddChildren(new Label(c.ToString(), false, 0x0288, font: 8) {X = isright ? 275 : 112, Y = y},
-                            page);
-                    }
+                    int y = spellnameLabel.Height < 24 ? 31 : 24;
+                    y += spellnameLabel.Height;
+                    AddChildren(new Label(SpellsMagery.SpecialReagentsChars[spell.ID - 1][1], false, 0x0288, font: 8) { X = isright ? 275 : 112, Y = y }, page);
                 }
-
-
-                AddChildren(
-                    new Label(reagList, false, 0x0288, font: 9)
-                        {X = isright ? 225 : 62, Y = 114}, page);
+                
+                AddChildren(new Label(reagList, false, 0x0288, font: 9) {X = isright ? 225 : 62, Y = 114}, page);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ClassicUO.Game.Data
@@ -254,9 +255,77 @@ namespace ClassicUO.Game.Data
             "Fifth Circle", "Sixth Circle", "Seventh Circle", "Eighth Circle"
         };
 
+        public static string[][] SpecialReagentsChars { get; } =
+        {
+            new []   { "Clumsy", "U J" },
+            new []   { "Create Food", "I M Y" },
+            new []   { "Feeblemind", "R W" },
+            new []   { "Heal", "I M" },
+            new []   { "Magic Arrow", "I P Y" },
+            new []   { "Night Sight", "I L" },
+            new []   { "Reactive Armor", "F S" },
+            new []   { "Weaken", "D M" },
+            new []   { "Agility", "E U" },
+            new []   { "Cunning", "U W" },
+            new []   { "Cure", "A N" },
+            new []   { "Harm", "A M" },
+            new []   { "Magic Trap", "I J" },
+            new []   { "Magic Untrap", "A J" },
+            new []   { "Protection", "U S" },
+            new []   { "Strength", "U M" },
+            new []   { "Bless", "R S" },
+            new []   { "Fireball", "V F" },
+            new []   { "Magic Lock", "A P" },
+            new []   { "Poison", "I N" },
+            new []   { "Telekinesis", "O P Y" },
+            new []   { "Teleport", "R P" },
+            new []   { "Unlock", "E P" },
+            new []   { "Wall of Stone", "I S Y" },
+            new []   { "Arch Cure", "V A N" },
+            new []   { "Arch Protection", "V U S" },
+            new []   { "Curse", "D S" },
+            new []   { "Fire Field", "I F G" },
+            new []   { "Greater Heal", "I V M" },
+            new []   { "Lightning", "P O G" },
+            new []   { "Mana Drain", "O R" },
+            new []   { "Recall", "K O P" },
+            new []   { "Blade Spirits", "I H J Y" },
+            new []   { "Dispel Field", "A G" },
+            new []   { "Incognito", "K I E" },
+            new []   { "Magic Reflection", "I J S" },
+            new []   { "Mind Blast", "P C W" },
+            new []   { "Paralyze", "A E P" },
+            new []   { "Poison Field", "I N G" },
+            new []   { "Summ. Creature", "K X" },
+            new []   { "Dispel", "A O" },
+            new []   { "Energy Bolt", "C P" },
+            new []   { "Explosion", "V O F" },
+            new []   { "Invisibility", "A L X" },
+            new []   { "Mark", "K P Y" },
+            new []   { "Mass Curse", "V D S" },
+            new []   { "Paralyze Field", "I E G" },
+            new []   { "Reveal", "W Q" },
+            new []   { "Chain Lightning", "V O G" },
+            new []   { "Energy Field", "I S G" },
+            new []   { "Flame Strike", "K V F" },
+            new []   { "Gate Travel", "V R P" },
+            new []   { "Mana Vampire", "O S" },
+            new []   { "Mass Dispel", "V A O" },
+            new []   { "Meteor Swarm", "F K D Y" },
+            new []   { "Polymorph", "V Y R" },
+            new []   { "Earthquake", "I V P" },
+            new []   { "Energy Vortex", "V C P" },
+            new []   { "Resurrection", "A C" },
+            new []   { "Air Elemental", "K V X H" },
+            new []   { "Summon Daemon", "K V X C" },
+            new []   { "Earth Elemental", "K V X Y" },
+            new []   { "Fire Elemental", "K V X F" },
+            new []   { "Water Elemental", "K V X A" }
+        };
+
 
         public static SpellDefinition GetSpell(int index) => _spellsDict.TryGetValue(index, out SpellDefinition spell)
-            ? spell
-            : SpellDefinition.EmptySpell;
+                ? spell
+                : SpellDefinition.EmptySpell;
     }
 }

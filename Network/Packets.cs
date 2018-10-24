@@ -528,8 +528,8 @@ namespace ClassicUO.Network
         public PTargetObject(Entity entity, Serial cursorID, byte cursorType) : base(0x6C)
         {
             WriteByte(0x00);
-            WriteUInt(0);
-            WriteByte(0);
+            WriteUInt(cursorID);
+            WriteByte(cursorType);
             WriteUInt(entity.Serial);
             WriteUShort(entity.Position.X);
             WriteUShort(entity.Position.Y);

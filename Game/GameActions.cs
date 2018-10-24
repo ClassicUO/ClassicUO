@@ -107,7 +107,7 @@ namespace ClassicUO.Game
         public static void TargetCancel(Serial cursorID, byte cursorType)
             => Socket.Send(new PTargetCancel(cursorID, cursorType));
 
-        public static void RequestTargetObject(Entity entity, Serial cursorID, byte cursorType)
+        public static void TargetObject(Entity entity, Serial cursorID, byte cursorType)
             => Socket.Send(new PTargetObject(entity, cursorID, cursorType));
 
         public static void TargetXYZ(ushort x, ushort y, short z, ushort modelNumber, Serial cursorID, byte targetType)

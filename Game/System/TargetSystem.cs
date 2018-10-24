@@ -1,5 +1,6 @@
 ﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
+using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.System
 {
@@ -71,7 +72,7 @@ namespace ClassicUO.Game.System
 
             if (selectedEntity is Mobile mobile && mobile.Serial.IsValid)
             {
-                GameActions.RequestTargetObject(mobile, _targetCursorId, _targetCursorType);
+                GameActions.TargetObject(mobile, _targetCursorId, _targetCursorType);
             }
             else
             {
@@ -80,7 +81,9 @@ namespace ClassicUO.Game.System
                 if (selectedEntity is Static st)
                 {
                     modelNumber = selectedEntity.Graphic;
-                    z += st.ItemData.Height;
+
+                    if (TileData.IsSurface((long)st.ItemData.Flags))
+                        z += st.ItemData.Height;
                 }
 
                 GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, _targetCursorType);
