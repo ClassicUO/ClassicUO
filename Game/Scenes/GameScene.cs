@@ -31,17 +31,20 @@ using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
-    public class GameScene : Scene
+    public partial class GameScene : Scene
     {
         private RenderTarget2D _renderTarget;
         private DateTime _timePing;
@@ -50,15 +53,11 @@ namespace ClassicUO.Game.Scenes
 #endif
         private MousePicker _mousePicker;
         private MouseOverList _mouseOverList;
-
-        private bool _rightMousePressed;
         private WorldViewport _viewPortGump;
         private TopBarGump _topBarGump;
         private StaticManager _staticManager;
         private EffectManager _effectManager;
         private Settings _settings;
-
-        //private static Hue _savedHue;
         private static GameObject _selectedObject;
 
 
@@ -71,9 +70,7 @@ namespace ClassicUO.Game.Scenes
 
         public float Scale { get; set; } = 1f;
         public Texture2D ViewportTexture => _renderTarget;
-
         public Point MouseOverWorldPosition => new Point(InputManager.MousePosition.X - _viewPortGump.ScreenCoordinateX, InputManager.MousePosition.Y - _viewPortGump.ScreenCoordinateY);
-
         public GameObject SelectedObject
         {
             get => _selectedObject;
@@ -82,19 +79,14 @@ namespace ClassicUO.Game.Scenes
                 if (_selectedObject == value)
                     return;
 
-                //if (_selectedObject != null)
-                //    _selectedObject.Hue = _savedHue;
-
                 if (value == null)
                 {
                     _selectedObject.View.IsSelected = false;
                     _selectedObject = null;
-                    //_savedHue = 0;
                 }
                 else
                 {
                     _selectedObject = value;
-                    //_savedHue = _selectedObject.Hue;
 
                     if (Service.Get<Settings>().HighlightGameObjects)
                         _selectedObject.View.IsSelected = true;
@@ -125,11 +117,12 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
-            _topBarGump.Dispose();
-            Service.Unregister<GameScene>();
-
-            _viewPortGump.Dispose();
+            NetClient.Socket.Disconnect();
+            _renderTarget?.Dispose();
+            UIManager.Clear();
             CleaningResources();
+            World.Clear();
+            Service.Unregister<GameScene>();
             base.Unload();
         }
 
@@ -205,8 +198,8 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_renderTarget == null || _renderTarget.Width != _settings.GameWindowWidth / Scale ||
-                _renderTarget.Height != _settings.GameWindowHeight / Scale)
+            if (_renderTarget == null || _renderTarget.Width != (int)(_settings.GameWindowWidth / Scale) ||
+                _renderTarget.Height != (int)(_settings.GameWindowHeight / Scale))
             {
                 _renderTarget?.Dispose();
                 _renderTarget = new RenderTarget2D(Device, (int)(_settings.GameWindowWidth / Scale),
@@ -236,6 +229,29 @@ namespace ClassicUO.Game.Scenes
 
             if (IsHoldingItem)
                 UIManager.GameCursor.UpdateDraggedItemOffset(_heldOffset);
+
+            if (TargetSystem.IsTargeting)
+            {
+                if (InputManager.HandleKeybaordEvent(KeyboardEvent.Press, SDL.SDL_Keycode.SDLK_ESCAPE, false, false, false))
+                {
+                    TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+                }
+
+                switch (TargetSystem.TargetingState)
+                {
+                    case TargetType.Position:
+                    case TargetType.Object:
+                        if (InputManager.HandleMouseEvent(MouseEvent.Click, MouseButton.Left))
+                        {
+                            TargetSystem.MouseTargetingEventObject(Service.Get<SceneManager>().GetScene<GameScene>()?.SelectedObject);
+                        }
+                        break;
+                    default:
+                        Log.Message(LogTypes.Warning, "Not implemented.");
+                        break;
+                }
+            }
+
             // ===================================
 
 
@@ -368,742 +384,5 @@ namespace ClassicUO.Game.Scenes
             World.Map.ClearUnusedBlocks();
         }
 
-        private static void CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface)
-        {
-            maxItemZ = 255;
-            drawTerrain = true;
-            underSurface = false;
-
-            Tile tile = World.Map.GetTile(World.Map.Center.X, World.Map.Center.Y);
-            if (tile != null && tile.IsZUnderObjectOrGround(World.Player.Position.Z, out GameObject underObject,
-                    out GameObject underGround))
-            {
-                drawTerrain = underGround == null;
-                if (underObject != null)
-                {
-                    if (underObject is IDynamicItem item)
-                    {
-                        if (TileData.IsRoof((long)item.ItemData.Flags))
-                            maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
-                        else if (TileData.IsSurface((long)item.ItemData.Flags) ||
-                                 TileData.IsWall((long)item.ItemData.Flags) &&
-                                 !TileData.IsDoor((long)item.ItemData.Flags))
-                            maxItemZ = item.Position.Z;
-                        else
-                        {
-                            int z = World.Player.Position.Z + (item.ItemData.Height > 20 ? item.ItemData.Height : 20);
-                            maxItemZ = z;
-                        }
-                    }
-
-                    if (underObject is IDynamicItem sta && TileData.IsRoof((long)sta.ItemData.Flags))
-                    {
-                        bool isRoofSouthEast = true;
-
-                        if ((tile = World.Map.GetTile(World.Map.Center.X + 1, World.Map.Center.Y)) != null)
-                        {
-                            tile.IsZUnderObjectOrGround(World.Player.Position.Z, out underObject, out underGround);
-                            isRoofSouthEast = underObject != null;
-                        }
-
-                        if (!isRoofSouthEast)
-                            maxItemZ = 255;
-                    }
-
-                    underSurface = maxItemZ != 255;
-                }
-            }
-        }
-
-#if !ORIONSORT
-        private void ClearDeferredEntities()
-        {
-            if (_deferredToRemove.Count > 0)
-            {
-                foreach (DeferredEntity def in _deferredToRemove)
-                {
-                    def.Reset();
-                    def.AssociatedTile.RemoveGameObject(def);
-                }
-
-                _deferredToRemove.Clear();
-            }
-        }
-#endif
-
-        public bool IsMouseOverUI => UIManager.IsMouseOverUI && !(UIManager.MouseOverControl is WorldViewport);
-        public bool IsMouseOverWorld => UIManager.IsMouseOverUI && UIManager.MouseOverControl is WorldViewport;
-
-
-        private void HandleMouseActions()
-        {
-            SelectedObject = null;
-
-            if (IsHoldingItem && InputManager.HandleMouseEvent(MouseEvent.Up, MouseButton.Left))
-            {
-                if (IsMouseOverUI)
-                {
-                    GumpControl target = UIManager.MouseOverControl;
-
-                    if (target is ItemGumpling gumpling && !(target is ItemGumplingPaperdoll))
-                    {
-                        Item item = gumpling.Item;
-                        SelectedObject = item;
-
-                        if (TileData.IsContainer((long) item.ItemData.Flags))
-                        {
-                            DropHeldItemToContainer(item);
-                        }
-                        else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable((long)HeldItem.ItemData.Flags))
-                        {
-                            MergeHeldItem(item);
-                        }
-                        else
-                        {
-                            if (item.Container.IsItem)
-                            {
-                                DropHeldItemToContainer(World.Items.Get(item.Container), (ushort)(target.X + (InputManager.MousePosition.X - target.ScreenCoordinateX)- _heldOffset.X), (ushort)(target.Y + (InputManager.MousePosition.Y - target.ScreenCoordinateY) - _heldOffset.Y));
-                            }
-                        }
-                    }
-                    else if (target is GumpPicContainer container)
-                    {
-                        SelectedObject = container.Item;
-
-                        int x = InputManager.MousePosition.X - _heldOffset.X - (target.X + target.Parent.X);
-                        int y = InputManager.MousePosition.Y - _heldOffset.Y - (target.Y + target.Parent.Y);
-
-                        DropHeldItemToContainer(container.Item, (ushort)x, (ushort)y);
-                    }
-                    else if (target is ItemGumplingPaperdoll || target is GumpPic pic && pic.IsPaperdoll || target is EquipmentSlot)
-                    {
-                        if (TileData.IsWearable((long)HeldItem.ItemData.Flags))
-                            WearHeldItem();
-                    }
-                    else if (target is GumpPicBackpack backpack)
-                    {
-                        DropHeldItemToContainer(backpack.BackpackItem);
-                    }
-                }
-                else if (IsMouseOverWorld)
-                {
-                    GameObject obj = _mousePicker.MouseOverObject;
-
-                    if (obj != null)
-                    {
-                        switch (obj)
-                        {
-                            case Mobile mobile:
-                                MergeHeldItem(mobile);
-                                break;
-                            case IDynamicItem dyn:
-                                if (dyn is Item item)
-                                {
-                                    if (item.IsCorpse)
-                                        MergeHeldItem(item);
-                                    else
-                                    {
-                                        SelectedObject = item;
-
-                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 &&
-                                            TileData.IsStackable((long) dyn1.ItemData.Flags))
-                                            MergeHeldItem(item);
-                                        else
-                                        {
-                                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y,
-                                                (sbyte) (obj.Position.Z + dyn.ItemData.Height));
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y,
-                                        (sbyte) (obj.Position.Z + dyn.ItemData.Height));
-                                }
-
-                                break;
-                            case Tile _:
-                                DropHeldItemToWorld(obj.Position);
-                                break;
-                            default:
-                                return;
-                        }
-                    }
-                }
-            }
-
-
-            if (SelectedObject == null) SelectedObject = _mousePicker.MouseOverObject;
-        }
-
-        private void MouseHandler(double frameMS)
-        {
-            if (!IsMouseOverWorld)
-            {
-                if (_rightMousePressed)
-                    _rightMousePressed = false;
-                return;
-            }
-
-            foreach (InputMouseEvent e in InputManager.GetMouseEvents())
-            {
-                switch (e.Button)
-                {
-                    case MouseButton.Right:
-                        _rightMousePressed = e.EventType == MouseEvent.Down;
-                        e.IsHandled = true;
-                        break;
-                    case MouseButton.Left:
-
-                        if (e.EventType == MouseEvent.Click)
-                        {
-                            EnqueueSingleClick(e, _mousePicker.MouseOverObject, _mousePicker.MouseOverObjectPoint);
-                            continue;
-                        }
-
-                        if (e.EventType == MouseEvent.DoubleClick)
-                            ClearQueuedClicks();
-
-                        DoMouseButton(e, _mousePicker.MouseOverObject, _mousePicker.MouseOverObjectPoint);
-                        break;
-                }
-            }
-
-            CheckForQueuedClicks(frameMS);
-        }
-
-        private void DoMouseButton(InputMouseEvent e, GameObject obj, Point point)
-        {
-            switch (e.EventType)
-            {
-                case MouseEvent.Down:
-                    {
-                        _dragginObject = obj;
-                        _dragOffset = point;
-                    }
-                    break;
-                case MouseEvent.Click:
-                    {
-                        switch (obj)
-                        {
-                            case Static st:
-                            {
-                                if (string.IsNullOrEmpty(st.Name))
-                                    TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
-
-                                obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
-
-                                _staticManager.Add(st);
-                                break;
-                            }
-                            case Entity entity:
-                                GameActions.SingleClick(entity);
-                                break;
-                        }
-                    }
-                    break;
-                case MouseEvent.DoubleClick:
-                    {
-                        switch (obj)
-                        {
-                            case Item item:
-                                GameActions.DoubleClick(item);
-                                break;
-                            //TODO: attack request also
-                            case Mobile mob when World.Player.InWarMode:
-                                break;
-                            case Mobile mob:
-                                GameActions.DoubleClick(mob);
-                                break;
-                        }
-                    }
-                    break;
-                case MouseEvent.DragBegin:
-                    {
-                        switch (obj)
-                        {
-                            case Mobile mobile:
-                                // get the lifebar
-                                break;
-                            case Item item:
-                                PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
-                                break;
-                        }
-                    }
-                    break;
-            }
-
-            e.IsHandled = true;
-        }
-
-        private GameObject _dragginObject;
-        private Point _dragOffset, _heldOffset;
-        private Item _heldItem;
-
-        public Item HeldItem
-        {
-            get => _heldItem;
-            set
-            {
-                if (value == null && _heldItem != null)
-                {
-                    UIManager.RemoveInputBlocker(this);
-                    UIManager.GameCursor.ClearDraggedItem();
-                }
-                else if (value != null && _heldItem == null)
-                {
-                    UIManager.AddInputBlocker(this);
-                    UIManager.GameCursor.SetDraggedItem(value.Graphic, value.Hue, _heldOffset);
-                }
-
-                _heldItem = value;
-            }
-        }
-
-        public bool IsHoldingItem => HeldItem != null;
-
-        private void MergeHeldItem(Entity entity)
-        {
-            GameActions.DropDown(HeldItem, Position.Invalid, entity.Serial);
-            ClearHolding();
-        }
-
-        private void PickupItemBegin(Item item, int x, int y, int? amount = null)
-        {
-            // TODO: AMOUNT CHECK
-
-            PickupItemDirectly(item, x, y, amount ?? item.Amount);
-        }
-
-        private void PickupItemDirectly(Item item, int x, int y, int amount)
-        {
-            if (!item.IsPickable)
-                return;
-
-            if (item.Container.IsValid)
-            {
-                Entity entity = World.Get(item.Container);
-                item.Position = entity.Position;
-                entity.Items.Remove(item);
-                item.Container = Serial.Invalid;
-            }
-
-            CloseItemGumps(item);
-            item.Amount = (ushort) amount;
-            HeldItem = item;
-            _heldOffset = new Point(x, y);
-
-            NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
-        }
-
-        private void CloseItemGumps(Item item)
-        {
-            UIManager.Remove<Gump>(item);
-            if (item.Container.IsValid)
-            {
-                foreach (Item i in item.Items)
-                {
-                    CloseItemGumps(i);
-                }
-            }
-        }
-
-        private void DropHeldItemToWorld(Position position)
-            => DropHeldItemToWorld(position.X, position.Y, position.Z);
-
-        private void DropHeldItemToWorld(ushort x, ushort y, sbyte z)
-        {
-            GameObject obj = SelectedObject;
-            Serial serial;
-            if (obj is Item item && TileData.IsContainer((long) item.ItemData.Flags))
-            {
-                serial = item;
-                x = y = 0xFFFF;
-                z = 0;
-            }
-            else
-                serial = Serial.MinusOne;
-
-            GameActions.DropDown(HeldItem.Serial, x, y, z, serial);
-            ClearHolding();
-        }
-
-        private void DropHeldItemToContainer(Item container)
-        {
-            Rectangle bounds = ContainerManager.Get(container.Graphic).Bounds;
-
-            ushort x = (ushort) (Utility.RandomHelper.GetValue(bounds.Left, bounds.Right));
-            ushort y = (ushort)(Utility.RandomHelper.GetValue(bounds.Top, bounds.Bottom));
-
-            DropHeldItemToContainer(container, x, y);
-        }
-
-        private void DropHeldItemToContainer(Item container, ushort x, ushort y)
-        {
-            Rectangle bounds = ContainerManager.Get(container.Graphic).Bounds;
-            SpriteTexture texture = Art.GetStaticTexture(HeldItem.DisplayedGraphic);
-
-            if (x < bounds.X)
-                x = (ushort)bounds.X;
-            if (x > bounds.Width - texture.Width)
-                x = (ushort)(bounds.Width - texture.Width);
-            if (y < bounds.Y)
-                y = (ushort)bounds.Y;
-            if (y > bounds.Height - texture.Height)
-                y = (ushort)(bounds.Height - texture.Height);
-
-            GameActions.DropDown(HeldItem.Serial, x, y, 0, container);
-            ClearHolding();
-        }
-
-        private void WearHeldItem()
-        {
-            GameActions.Equip(HeldItem, Layer.Invalid);
-            ClearHolding();
-        }
-
-        private void ClearHolding() => HeldItem = null;
-
-
-        private GameObject _queuedObject;
-        private Point _queuedPosition;
-        private InputMouseEvent _queuedEvent;
-        private double _dequeueAt;
-        private bool _inqueue;
-
-        private void EnqueueSingleClick(InputMouseEvent e, GameObject obj, Point point)
-        {
-            _inqueue = true;
-            _queuedObject = obj;
-            _queuedPosition = point;
-            _dequeueAt = 200f;
-            _queuedEvent = e;
-        }
-
-        private void CheckForQueuedClicks(double frameMS)
-        {
-            if (_inqueue)
-            {
-                _dequeueAt -= frameMS;
-                if (_dequeueAt <= 0d)
-                {
-                    DoMouseButton(_queuedEvent, _queuedObject, _queuedPosition);
-                    ClearQueuedClicks();
-                }
-            }
-        }
-
-        private void ClearQueuedClicks()
-        {
-            _inqueue = false;
-            _queuedEvent = null;
-            _queuedObject = null;
-        }
-
-
-        private void MoveCharacterByInputs()
-        {
-            if (World.InGame)
-            {
-                Point center = new Point(_settings.GameWindowX + _settings.GameWindowWidth / 2,
-                    _settings.GameWindowY + _settings.GameWindowHeight / 2);
-
-                Direction direction = DirectionHelper.DirectionFromPoints(center, InputManager.MousePosition);
-
-                World.Player.Walk(direction, true);
-            }
-        }
-
-
-#if ORIONSORT
-        private int _renderIndex = 1;
-        private int _renderListCount = 0;
-        private GameObject[] _renderList = new GameObject[2000];
-        private Point _offset, _maxTile, _minTile;
-        private Vector2 _minPixel, _maxPixel;
-        private int _maxZ;
-        private bool _drawTerrain;
-
-        private void AddTileToRenderList(IReadOnlyList<GameObject> objList, int worldX, int worldY, bool useObjectHandles, int maxZ)
-        {
-            for (int i = 0; i < objList.Count; i++)
-            {
-                GameObject obj = objList[i];
-
-                if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
-                    continue;
-
-                obj.UseInRender = 0xFF;
-                int drawX = (obj.Position.X - obj.Position.Y) * 22 - _offset.X;
-                int drawY = ((obj.Position.X + obj.Position.Y) * 22 - (obj.Position.Z * 4)) - _offset.Y;
-
-                if (drawX < _minPixel.X || drawX > _maxPixel.X)
-                    break;
-
-                int z = obj.Position.Z;
-                int maxObjectZ = obj.PriorityZ;
-
-                switch (obj)
-                {
-                    case Mobile _:
-                        maxObjectZ += 16;
-                        break;
-                    case IDynamicItem dyn:
-                        maxObjectZ += dyn.ItemData.Height;
-                        break;
-                }
-
-
-                if (maxObjectZ > maxZ)
-                    break;
-
-                obj.CurrentRenderIndex = _renderIndex;
-
-              
-                if (!(obj is Tile) && (z >= _maxZ ||   
-                                       (obj is IDynamicItem dyn2 && 
-                                        (TileData.IsInternal((long)dyn2.ItemData.Flags) || 
-                                         (_maxZ != 255 && TileData.IsRoof((long)dyn2.ItemData.Flags))
-                                         )
-                                        )
-                                       )
-                    )
-                {
-                    continue;
-                }
-
-
-                int testMinZ = drawY + (z * 4);
-                int testMaxZ = drawY;
-
-
-                if (obj is Tile t && t.IsStretched)
-                    testMinZ -= (t.MinZ * 4);
-                else
-                    testMinZ = testMaxZ;
-
-                if (testMinZ < _minPixel.Y || testMaxZ > _maxPixel.Y)
-                    continue;
-
-                switch (obj)
-                {
-                    case Mobile mob:
-                        AddOffsetCharacterTileToRenderList(mob, useObjectHandles);
-                        break;
-                    case Item item when item.IsCorpse:
-                        AddOffsetCharacterTileToRenderList(item, useObjectHandles);
-                        break;
-                }
-
-
-                if (_renderListCount >= _renderList.Length)
-                {
-                    int newsize = _renderList.Length + 1000;
-
-                    Array.Resize(ref _renderList, newsize);
-                }
-
-
-                _renderList[_renderListCount] = obj;
-
-                obj.UseInRender = (byte)_renderIndex;
-                _renderListCount++;
-            }
-        }
-
-        private void AddOffsetCharacterTileToRenderList(Entity entity, bool useObjectHandles)
-        {
-            int charX = entity.Position.X;
-            int charY = entity.Position.Y;
-
-            Mobile mob = World.Mobiles.Get(entity);
-            int dropMaxZIndex = -1;
-            
-            if (mob != null && mob.IsMoving && mob.Steps.Back().Direction == 2)
-                dropMaxZIndex = 0;
-            
-
-            int[,] coordinates = new int[8, 2];
-
-            coordinates[0, 0] = charX + 1;
-            coordinates[0, 1] = charY - 1;
-            coordinates[1, 0] = charX + 1;
-            coordinates[1, 1] = charY - 2;
-            coordinates[2, 0] = charX + 2;
-            coordinates[2, 1] = charY - 2;
-            coordinates[3, 0] = charX - 1;
-            coordinates[3, 1] = charY + 2;
-            coordinates[4, 0] = charX;
-            coordinates[4, 1] = charY + 1;
-            coordinates[5, 0] = charX + 1;
-            coordinates[5, 1] = charY;
-            coordinates[6, 0] = charX + 2;
-            coordinates[6, 1] = charY - 1;
-            coordinates[7, 0] = charX + 1;
-            coordinates[7, 1] = charY + 1;
-
-
-            int maxZ = entity.PriorityZ;
-
-            for (int i = 0; i < 8; i++)
-            {
-                int x = coordinates[i, 0];
-                int y = coordinates[i, 1];
-
-                if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
-                    continue;
-
-                Tile tile = World.Map.GetTile(x, y);
-
-                int currentMaxZ = maxZ;
-
-                if (i == dropMaxZIndex)
-                    currentMaxZ += 20;
-
-                AddTileToRenderList(tile.ObjectsOnTiles, x, y, useObjectHandles, currentMaxZ);
-            }
-        }
-
-        private (Point, Point, Vector2, Vector2, Point, Point, Point, int) GetViewPort()
-        {
-            int winGamePosX = 0;
-            int winGamePosY = 0;
-
-            int winGameWidth = _settings.GameWindowWidth;
-            int winGameHeight = _settings.GameWindowHeight;
-
-            int winGameCenterX = winGamePosX + (winGameWidth / 2);
-            int winGameCenterY = winGamePosY + winGameHeight / 2 + World.Player.Position.Z * 4;
-
-            winGameCenterX -= (int)World.Player.Offset.X;
-            winGameCenterY -= (int)(World.Player.Offset.Y - World.Player.Offset.Z);
-
-            int winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX;
-            int winDrawOffsetY = (World.Player.Position.X + World.Player.Position.Y) * 22 - winGameCenterY;
-
-            float left = winGamePosX;
-            float right = winGameWidth + left;
-            float top = winGamePosY;
-            float bottom = winGameHeight + top;
-
-            float newRight = right * Scale;
-            float newBottom = bottom * Scale;
-
-            int winGameScaledOffsetX = (int)(left * Scale - (newRight - right));
-            int winGameScaledOffsetY = (int)(top * Scale - (newBottom - bottom));
-
-            int winGameScaledWidth = (int)(newRight - winGameScaledOffsetX);
-            int winGameScaledHeight = (int)(newBottom - winGameScaledOffsetY);
-
-
-            int width = (int)((winGameWidth / 44 + 1) * Scale);
-            int height = (int)((winGameHeight / 44 + 1) * Scale);
-
-            if (width < height)
-                width = height;
-            else
-                height = width;
-
-            int realMinRangeX = World.Player.Position.X - width;
-            if (realMinRangeX < 0)
-                realMinRangeX = 0;
-            int realMaxRangeX = World.Player.Position.X + width;
-            if (realMaxRangeX >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][0])
-                realMaxRangeX = IO.Resources.Map.MapsDefaultSize[World.Map.Index][0];
-
-            int realMinRangeY = World.Player.Position.Y - height;
-            if (realMinRangeY < 0)
-                realMinRangeY = 0;
-            int realMaxRangeY = World.Player.Position.Y + height;
-            if (realMaxRangeY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][1])
-                realMaxRangeY = IO.Resources.Map.MapsDefaultSize[World.Map.Index][1];
-
-            int minBlockX = realMinRangeX / 8 - 1;
-            int minBlockY = realMinRangeY / 8 - 1;
-            int maxBlockX = realMaxRangeX / 8 + 1;
-            int maxBlockY = realMaxRangeY / 8 + 1;
-
-            if (minBlockX < 0)
-                minBlockX = 0;
-            if (minBlockY < 0)
-                minBlockY = 0;
-            if (maxBlockX >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][0])
-                maxBlockX = IO.Resources.Map.MapsDefaultSize[World.Map.Index][0] - 1;
-            if (maxBlockY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][1])
-                maxBlockY = IO.Resources.Map.MapsDefaultSize[World.Map.Index][1] - 1;
-
-            int drawOffset = (int)(Scale * 40.0f);
-
-            float maxX = winGamePosX + winGameWidth + drawOffset;
-            float maxY = winGamePosY + winGameHeight + drawOffset;
-            float newMaxX = maxX * Scale;
-            float newMaxY = maxY * Scale;
-
-            int minPixelsX = (int)((winGamePosX - drawOffset) * Scale - (newMaxX - maxX));
-            int maxPixelsX = (int)newMaxX;
-            int minPixelsY = (int)((winGamePosY - drawOffset) * Scale - (newMaxY - maxY));
-            int maxPixlesY = (int)newMaxY;
-
-            return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY), new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY), new Point(winDrawOffsetX, winDrawOffsetY), new Point(winGameCenterX, winGameCenterY), new Point(realMinRangeX + width - 1, realMinRangeY - 1), Math.Max(width, height));
-        }
-#else
-        private static (Point firstTile, Vector2 renderOffset, Point renderDimensions) GetViewPort(int width, int height, int scale)
-        {
-            int off = Math.Abs(width / 44 - height / 44) % 3;
-
-
-            Point renderDimensions = new Point
-            {
-                X = width / scale / 44 + 3,
-                Y = height / scale / 44 + 6
-            };
-
-            int renderDimensionDiff = Math.Abs(renderDimensions.X - renderDimensions.Y);
-            renderDimensionDiff -= renderDimensionDiff % 2;
-
-            int firstZOffset = World.Player.Position.Z > 0
-                ? (int) Math.Abs((World.Player.Position.Z + World.Player.Offset.Z / 4) / 11)
-                : 0;
-
-            Point firstTile = new Point
-            {
-                X = World.Player.Position.X - firstZOffset,
-                Y = World.Player.Position.Y - renderDimensions.Y - firstZOffset
-            };
-
-            if (renderDimensions.Y > renderDimensions.X)
-            {
-                firstTile.X -= renderDimensionDiff / 2;
-                firstTile.Y -= renderDimensionDiff / 2;
-            }
-            else
-            {
-                firstTile.X += renderDimensionDiff / 2;
-                firstTile.Y -= renderDimensionDiff / 2;
-            }
-
-            //Vector2 renderOffset = new Vector2
-            //{
-            //    X = (_graphics.PreferredBackBufferWidth / scale + renderDimensions.Y * 44) / 2 - 22f - (int)World.Player.Offset.X - (firstTile.X - firstTile.Y) * 22f + renderDimensionDiff * 22f,
-            //    Y = _graphics.PreferredBackBufferHeight / scale / 2 - renderDimensions.Y * 44 / 2 + (World.Player.Position.Z + World.Player.Offset.Z / 4) * 4 - (int)World.Player.Offset.Y - (firstTile.X + firstTile.Y) * 22f - 22f - firstZOffset * 44f };
-
-            Vector2 renderOffset = new Vector2();
-
-            renderOffset.X = (width / scale + renderDimensions.Y * 44) / 2 - 22f;
-            renderOffset.X -= (int) World.Player.Offset.X;
-            renderOffset.X -= (firstTile.X - firstTile.Y) * 22f;
-            renderOffset.X += renderDimensionDiff * 22f;
-
-            renderOffset.Y = height / scale / 2 - renderDimensions.Y * 44 / 2;
-            renderOffset.Y += (World.Player.Position.Z + World.Player.Offset.Z / 4) * 4;
-            renderOffset.Y -= (int) World.Player.Offset.Y;
-            renderOffset.Y -= (firstTile.X + firstTile.Y) * 22f;
-            renderOffset.Y -= 22f;
-            renderOffset.Y -= firstZOffset * 44f;
-
-            return (firstTile, renderOffset, renderDimensions);
-        }
-
-#endif
     }
 }

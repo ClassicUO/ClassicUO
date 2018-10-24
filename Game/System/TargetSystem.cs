@@ -18,7 +18,7 @@ namespace ClassicUO.Game.System
         private static int _multiModel;
 
         public static TargetType TargetingState { get; private set; } = TargetType.Nothing;
-        public static GameObject LastGameObject { get; set; }
+        public static GameObject LastGameObject { get; private set; }
         public static bool IsTargeting => TargetingState != TargetType.Nothing;
 
 
@@ -66,6 +66,9 @@ namespace ClassicUO.Game.System
         {
             if (selectedEntity == null)
                 return;
+
+            LastGameObject = selectedEntity;
+
             if (selectedEntity is Mobile mobile && mobile.Serial.IsValid)
             {
                 GameActions.RequestTargetObject(mobile, _targetCursorId, _targetCursorType);

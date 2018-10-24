@@ -37,6 +37,7 @@ namespace ClassicUO.Game.Scenes
         public void ChangeScene(ScenesType type)
         {
             CurrentScene?.Dispose();
+            CurrentScene = null;
 
             switch (type)
             {

@@ -48,7 +48,7 @@ namespace ClassicUO.Game
             {
                 if (MapIndex != value)
                 {
-                    Clear(true);
+                    InternalMapChangeClear(true);
 
                     if (Map != null)
                     {
@@ -227,17 +227,27 @@ namespace ClassicUO.Game
             return true;
         }
 
-        public static void Clear(bool noplayer = false)
+        public static void Clear()
+        {
+            Items.Clear();
+            Mobiles.Clear();
+            Player = null;
+            Map = null;
+            ToAdd.Clear();
+        }
+
+        private static void InternalMapChangeClear(bool noplayer)
         {
             if (!noplayer)
             {
                 Map = null;
+                Player.Dispose();
                 Player = null;
             }
 
             foreach (Item item in Items)
             {
-                if (noplayer)
+                if (noplayer && Player != null && !Player.IsDisposed)
                 {
                     if (item.RootContainer == Player)
                         continue;
@@ -248,7 +258,7 @@ namespace ClassicUO.Game
 
             foreach (Mobile mob in Mobiles)
             {
-                if (noplayer)
+                if (noplayer && Player != null && !Player.IsDisposed)
                 {
                     if (mob == Player)
                         continue;

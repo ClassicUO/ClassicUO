@@ -334,6 +334,12 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        public void Clear()
+        {
+            GameCursor?.ClearDraggedItem();
+            _gumps.ForEach(s => s.Dispose());
+        }
+
         private void HandleKeyboardInput()
         {
             if (KeyboardFocusControl != null)
