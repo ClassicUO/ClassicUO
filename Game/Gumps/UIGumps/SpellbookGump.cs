@@ -32,29 +32,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanMove = true;
             AcceptMouseInput = false;
 
-            switch (item.Graphic)
-            {
-                default:
-                case 0x0EFA:
-                    _spellBookType = SpellBookType.Magery;
-                    CreateMagery();
-                    break;
-                case 0x2253:
-                    _spellBookType = SpellBookType.Necromancy;
-                    break;
-                case 0x2252:
-                    _spellBookType = SpellBookType.Chivalry;
-                    break;
-                case 0x238C:
-                    _spellBookType = SpellBookType.Bushido;
-                    break;
-                case 0x23A0:
-                    _spellBookType = SpellBookType.Ninjitsu;
-                    break;
-                case 0x2D50:
-                    _spellBookType = SpellBookType.Spellweaving;
-                    break;
-            }
+            OnEntityUpdate(item);
         }
 
         private void CreateMagery()
@@ -236,6 +214,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void CreateNecromancy()
         {
+            Clear();
+            AddChildren(new GumpPic(0, 0, 0x2B00, 0));
+            AddChildren(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
+            _pageCornerLeft.LocalSerial = 0;
+            _pageCornerLeft.Page = int.MaxValue;
+            _pageCornerLeft.MouseClick += PageCornerOnMouseClick;
+            _pageCornerLeft.MouseDoubleClick += PageCornerOnMouseDoubleClick;
+
+            AddChildren(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
+            _pageCornerRight.LocalSerial = 1;
+            _pageCornerRight.Page = 1;
+            _pageCornerRight.MouseClick += PageCornerOnMouseClick;
+            _pageCornerRight.MouseDoubleClick += PageCornerOnMouseDoubleClick;
 
         }
 
@@ -331,18 +322,23 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case 0x2253:
                     _spellBookType = SpellBookType.Necromancy;
+                    CreateNecromancy();
                     break;
                 case 0x2252:
                     _spellBookType = SpellBookType.Chivalry;
+                    CreateChivalry();
                     break;
                 case 0x238C:
                     _spellBookType = SpellBookType.Bushido;
+                    CreateBushido();
                     break;
                 case 0x23A0:
                     _spellBookType = SpellBookType.Ninjitsu;
+                    CreateNinjitsu();
                     break;
                 case 0x2D50:
                     _spellBookType = SpellBookType.Spellweaving;
+                    CreateSpellweaving();
                     break;
             }
         }

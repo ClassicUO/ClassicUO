@@ -239,7 +239,6 @@ namespace ClassicUO.Game.Scenes
                             else if (IsMouseOverWorld)
                             {
                                 TargetSystem.MouseTargetingEventObject(SelectedObject);
-
                             }
                         }
 
