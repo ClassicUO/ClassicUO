@@ -103,11 +103,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 _lastPosition = _inputManager.Offset;
 
-                if (_settings.GameWindowWidth < 640)
-                    _settings.GameWindowWidth = 640;
+                if (_settings.GameWindowWidth < 350)
+                    _settings.GameWindowWidth = 350;
 
-                if (_settings.GameWindowHeight < 500)
-                    _settings.GameWindowHeight = 500;
+                if (_settings.GameWindowHeight < 350)
+                    _settings.GameWindowHeight = 350;
             }
 
             if (_worldWidth != _settings.GameWindowWidth || _worldHeight != _settings.GameWindowHeight)
@@ -119,7 +119,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 Height = _worldHeight + BORDER_HEIGHT * 2;
 
                 Resize();
-                //OnResize();
             }
 
             base.Update(totalMS, frameMS);
