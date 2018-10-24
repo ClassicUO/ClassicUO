@@ -70,9 +70,9 @@ namespace ClassicUO.Game.System
 
             LastGameObject = selectedEntity;
 
-            if (selectedEntity is Mobile mobile && mobile.Serial.IsValid)
+            if (selectedEntity is Entity entity)
             {
-                GameActions.TargetObject(mobile, _targetCursorId, _targetCursorType);
+                GameActions.TargetObject(entity, _targetCursorId, _targetCursorType);
             }
             else
             {
@@ -86,8 +86,7 @@ namespace ClassicUO.Game.System
                         z += st.ItemData.Height;
                 }
 
-                GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, _targetCursorType);
-                
+                GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, _targetCursorType);            
             }
 
             ClearTargetingWithoutTargetCancelPacket();

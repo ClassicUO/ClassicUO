@@ -227,7 +227,20 @@ namespace ClassicUO.Game.Scenes
                             InputManager.IgnoreNextMouseEvent(MouseEvent.Click);
                             InputManager.IgnoreNextMouseEvent(MouseEvent.DoubleClick);
 
-                            TargetSystem.MouseTargetingEventObject(SelectedObject);
+                            if (IsMouseOverUI)
+                            {
+                                GumpControl control = UIManager.MouseOverControl;
+
+                                if (control is ItemGumpling gumpling)
+                                    TargetSystem.MouseTargetingEventObject(gumpling.Item);
+                                //else if (control.RootParent is Mobil)
+
+                            }
+                            else if (IsMouseOverWorld)
+                            {
+                                TargetSystem.MouseTargetingEventObject(SelectedObject);
+
+                            }
                         }
 
                         break;
