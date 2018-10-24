@@ -12,6 +12,7 @@ using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Scenes
@@ -79,9 +80,9 @@ namespace ClassicUO.Game.Scenes
         {
             SelectedObject = null;
 
-            if (IsHoldingItem && InputManager.HandleMouseEvent(MouseEvent.Up, MouseButton.Left))
+            if (IsHoldingItem)
             {
-                if (IsMouseOverUI)
+                if (IsMouseOverUI && InputManager.HandleMouseEvent(MouseEvent.Up, MouseButton.Left))
                 {
                     GumpControl target = UIManager.MouseOverControl;
 
@@ -129,7 +130,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     GameObject obj = _mousePicker.MouseOverObject;
 
-                    if (obj != null)
+                    if (obj != null && obj.Distance < 5 && InputManager.HandleMouseEvent(MouseEvent.Up, MouseButton.Left))
                     {
                         switch (obj)
                         {
@@ -166,6 +167,7 @@ namespace ClassicUO.Game.Scenes
                                 DropHeldItemToWorld(obj.Position);
                                 break;
                             default:
+                                Log.Message(LogTypes.Warning, "Unhandled mouse inputs for GameObject type " + obj.GetType());
                                 return;
                         }
                     }
