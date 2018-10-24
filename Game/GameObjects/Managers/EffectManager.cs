@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using ClassicUO.Game.Data;
-using ClassicUO.Input;
-using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
-using Microsoft.Xna.Framework;
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.GameObjects.Managers
 {
     class EffectManager : IUpdateable
     {

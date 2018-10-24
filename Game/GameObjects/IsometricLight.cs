@@ -24,7 +24,7 @@
 using System;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Renderer
+namespace ClassicUO.Game.GameObjects
 {
     public sealed class IsometricLight
     {

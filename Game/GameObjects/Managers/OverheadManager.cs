@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
@@ -22,28 +22,40 @@
 #endregion
 
 using System.Collections.Generic;
-using ClassicUO.Interfaces;
+using ClassicUO.Game.Views;
+using ClassicUO.Input;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.GameObjects.Managers
 {
-    public class StaticManager : IUpdateable
+    public static class OverheadManager
     {
-        private readonly List<Static> _activeStatics = new List<Static>();
+        private static readonly List<ViewWithDrawInfo> _views = new List<ViewWithDrawInfo>();
 
-        public void Update(double totalMS, double frameMS)
+        public static void AddView(View view, Vector3 position) =>
+            _views.Add(new ViewWithDrawInfo {View = view, DrawPosition = position});
+
+        public static void Draw(SpriteBatch3D spriteBatch, MouseOverList objectList)
         {
-            for (int i = 0; i < _activeStatics.Count; i++)
+            if (_views.Count > 0)
             {
-                _activeStatics[i].Update(totalMS, frameMS);
-                if (_activeStatics[i].IsDisposed || _activeStatics[i].OverHeads.Count <= 0)
-                    _activeStatics.RemoveAt(i);
+                for (int i = 0; i < _views.Count; i++)
+                {
+                    var v = _views[i];
+
+
+                    v.View.Draw(spriteBatch, v.DrawPosition, objectList);
+                }
+
+                _views.Clear();
             }
         }
 
-        public void Add(Static stat)
+        private struct ViewWithDrawInfo
         {
-            if (!stat.IsDisposed && stat.OverHeads.Count > 0)
-                _activeStatics.Add(stat);
+            public View View;
+            public Vector3 DrawPosition;
         }
     }
 }

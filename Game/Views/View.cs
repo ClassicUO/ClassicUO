@@ -24,6 +24,7 @@
 using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
