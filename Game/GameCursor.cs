@@ -229,34 +229,8 @@ namespace ClassicUO.Game
 
             Texture.Ticks = (long) totalMS;
 
-
             if (_draggingItem)
-            {
                 _draggedItemTexture.Ticks = (long)totalMS;
-            }
-
-
-            //if (TargetSystem.IsTargeting)
-            //{
-            //    if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Press, SDL.SDL_Keycode.SDLK_ESCAPE, false, false, false))
-            //    {
-            //        TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
-            //    }
-
-            //    switch (TargetSystem.TargetingState)
-            //    {
-            //        case TargetType.Position:
-            //        case TargetType.Object:
-            //            if (_inputManager.HandleMouseEvent(MouseEvent.Click, MouseButton.Left))
-            //            {
-            //                TargetSystem.MouseTargetingEventObject(Service.Get<SceneManager>().GetScene<GameScene>()?.SelectedObject);
-            //            }
-            //            break;
-            //        default:
-            //            Log.Message(LogTypes.Warning, "Not implemented.");
-            //            break;
-            //    }
-            //}
         }
 
         public void Draw(SpriteBatchUI sb)
@@ -270,12 +244,10 @@ namespace ClassicUO.Game
 
             if (id < 16)
             {
-                Vector3 v = new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0);
-
                 if (_draggingItem)
-                    sb.Draw2D(_draggedItemTexture, new Vector3(v.X - _offset.X, v.Y - _offset.Y, 0), _rect, RenderExtentions.GetHueVector(_hue));
+                    sb.Draw2D(_draggedItemTexture, new Vector3(ScreenPosition.X - _offset.X, ScreenPosition.Y - _offset.Y, 0), _rect, RenderExtentions.GetHueVector(_hue));
 
-                sb.Draw2D(Texture, v, Vector3.Zero);
+                sb.Draw2D(Texture, new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0), Vector3.Zero);
             }
         }
 
