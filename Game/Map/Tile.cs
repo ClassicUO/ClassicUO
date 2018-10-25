@@ -151,10 +151,10 @@ namespace ClassicUO.Game.Map
                             }
                             else if (_objectsOnTile[i] is Item item)
                             {
-                                for (int j = i + 1; j < _objectsOnTile.Count; j++)
-                                    if (_objectsOnTile[i].Position.Z == _objectsOnTile[j].Position.Z)
-                                        if (_objectsOnTile[j] is Static stj && item.ItemData.Name == stj.ItemData.Name || _objectsOnTile[j] is Item itemj && item.Serial == itemj.Serial)
-                                            toremove[index++] = j;
+                                for (int jj = i + 1; jj < _objectsOnTile.Count; jj++)
+                                    if (_objectsOnTile[i].Position.Z == _objectsOnTile[jj].Position.Z)
+                                        if (_objectsOnTile[jj] is Static stj1 && item.ItemData.Name == stj1.ItemData.Name || _objectsOnTile[jj] is Item itemj && item.Serial == itemj.Serial)
+                                            toremove[index++] = jj;
                             }
 
             for (int i = 0; i < index; i++) _objectsOnTile.RemoveAt(toremove[i] - i);
