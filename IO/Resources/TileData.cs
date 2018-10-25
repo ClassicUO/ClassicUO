@@ -74,6 +74,8 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < staticscount; i++)
             {
+                if(tiledata.Position >= tiledata.Length)
+                    goto END_2;
                 tiledata.Skip(4);
 
                 for (int j = 0; j < 32; j++)
