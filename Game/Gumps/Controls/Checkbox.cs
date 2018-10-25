@@ -22,9 +22,11 @@
 #endregion
 
 using System;
+
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -33,17 +35,14 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private const int INACTIVE = 0;
         private const int ACTIVE = 1;
-
+        private readonly RenderedText _text;
         private readonly SpriteTexture[] _textures = new SpriteTexture[2];
         private bool _isChecked;
-        private readonly RenderedText _text;
-
 
         public Checkbox(ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0)
         {
             _textures[INACTIVE] = IO.Resources.Gumps.GetGumpTexture(inactive);
             _textures[ACTIVE] = IO.Resources.Gumps.GetGumpTexture(active);
-
             ref SpriteTexture t = ref _textures[INACTIVE];
             Width = t.Width;
             Height = t.Height;
@@ -55,17 +54,14 @@ namespace ClassicUO.Game.Gumps.Controls
                 IsUnicode = true,
                 Text = text
             };
-
             CanMove = false;
             AcceptMouseInput = true;
         }
-
 
         public Checkbox(string[] parts, string[] lines) : this(ushort.Parse(parts[3]), ushort.Parse(parts[4]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
-
             IsChecked = parts[5] == "1";
             LocalSerial = Serial.Parse(parts[6]);
         }
@@ -90,26 +86,19 @@ namespace ClassicUO.Game.Gumps.Controls
         public override void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _textures.Length; i++)
-            {
                 if (_textures[i] != null)
                     _textures[i].Ticks = (long) totalMS;
-            }
-
             base.Update(totalMS, frameMS);
         }
-
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             bool ok = base.Draw(spriteBatch, position);
-
             spriteBatch.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
-
             _text.Draw(spriteBatch, new Vector3(position.X + _textures[ACTIVE].Width + 2, position.Y, 0));
 
             return ok;
         }
-
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {

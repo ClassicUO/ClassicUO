@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassicUO.Utility.Logging
 {
@@ -16,9 +12,7 @@ namespace ClassicUO.Utility.Logging
         Warning = 0x08,
         Error = 0x10,
         Panic = 0x20,
-
         Table = 0x30,
-
         All = byte.MaxValue
     }
 }

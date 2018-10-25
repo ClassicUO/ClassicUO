@@ -22,12 +22,11 @@
 #endregion
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
+
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -36,19 +35,16 @@ namespace ClassicUO.Network
     public sealed class NetClient
     {
         private const int BUFF_SIZE = 0x10000;
-
         private static readonly BufferPool _pool = new BufferPool(10, BUFF_SIZE);
         private readonly object _sendLock = new object();
+        private readonly object _sync = new object();
         private CircularBuffer _circularBuffer;
-
         private int _incompletePacketLength;
         private bool _isCompressionEnabled, _sending;
+        private Queue<Packet> _queue = new Queue<Packet>(), _workingQueue = new Queue<Packet>();
         private byte[] _recvBuffer, _incompletePacketBuffer;
         private SocketAsyncEventArgs _sendEventArgs, _recvEventArgs;
         private SendQueue _sendQueue;
-        private readonly object _sync = new object();
-        private Queue<Packet> _queue = new Queue<Packet>(), _workingQueue = new Queue<Packet>();
-
         private Socket _socket;
 
         private NetClient()
@@ -56,6 +52,7 @@ namespace ClassicUO.Network
         }
 
         public static NetClient LoginSocket { get; } = new NetClient();
+
         public static NetClient Socket { get; } = new NetClient();
 
         public bool IsConnected => _socket != null && _socket.Connected;
@@ -72,26 +69,25 @@ namespace ClassicUO.Network
                 if (localEntry.AddressList.Length > 0)
                 {
 #pragma warning disable 618
-                    address = (uint) localEntry.AddressList
-                        .FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
+                    address = (uint) localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
 #pragma warning restore 618
                 }
                 else
+                {
                     address = 0x100007f;
+                }
 
-                return ((address & 0xff) << 0x18) | ((address & 65280) << 8) | ((address >> 8) & 65280) |
-                       ((address >> 0x18) & 0xff);
+                return ((address & 0xff) << 0x18) | ((address & 65280) << 8) | ((address >> 8) & 65280) | ((address >> 0x18) & 0xff);
             }
         }
 
         public event EventHandler Connected, Disconnected;
-        public static event EventHandler<Packet> PacketReceived, PacketSended;
 
+        public static event EventHandler<Packet> PacketReceived, PacketSended;
 
         public void Connect(string ip, ushort port)
         {
             IsDisposed = _sending = false;
-
             IPAddress address = ResolveIP(ip);
             IPEndPoint endpoint = new IPEndPoint(address, port);
             Connect(endpoint);
@@ -108,23 +104,19 @@ namespace ClassicUO.Network
         {
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, 1);
-
             _recvBuffer = _pool.GetFreeSegment();
             _incompletePacketBuffer = _pool.GetFreeSegment();
             _sendQueue = new SendQueue();
             _circularBuffer = new CircularBuffer();
-
             _sendEventArgs = new SocketAsyncEventArgs();
             _sendEventArgs.Completed += IO_Socket;
-
             _recvEventArgs = new SocketAsyncEventArgs();
             _recvEventArgs.Completed += IO_Socket;
             _recvEventArgs.SetBuffer(_recvBuffer, 0, _recvBuffer.Length);
-
             _queue.Clear();
             _workingQueue.Clear();
-
             SocketAsyncEventArgs connectEventArgs = new SocketAsyncEventArgs();
+
             connectEventArgs.Completed += (sender, e) =>
             {
                 if (e.SocketError == SocketError.Success)
@@ -150,8 +142,6 @@ namespace ClassicUO.Network
 
             if (_socket == null)
                 return;
-
-
             Flush();
 
             try
@@ -165,16 +155,16 @@ namespace ClassicUO.Network
             _socket.Close();
 
             if (_recvBuffer != null)
-            {
                 lock (_pool)
+                {
                     _pool.AddFreeSegment(_recvBuffer);
-            }
+                }
 
             if (_incompletePacketBuffer != null)
-            {
                 lock (_pool)
+                {
                     _pool.AddFreeSegment(_incompletePacketBuffer);
-            }
+                }
 
             _incompletePacketBuffer = null;
             _incompletePacketLength = 0;
@@ -191,7 +181,6 @@ namespace ClassicUO.Network
             }
 
             _circularBuffer = null;
-            
             Disconnected.Raise();
         }
 
@@ -205,10 +194,8 @@ namespace ClassicUO.Network
             byte[] data = p.ToArray();
             Packet packet = new Packet(data, p.Length);
             PacketSended.Raise(packet);
-
             if (!packet.Filter) Send(data);
         }
-
 
         public void Update()
         {
@@ -222,12 +209,8 @@ namespace ClassicUO.Network
                 _queue = temp;
             }
 
-            while (_queue.Count > 0)
-            {
-                PacketReceived.Raise(_queue.Dequeue());
-            }
-
-            Flush();            
+            while (_queue.Count > 0) PacketReceived.Raise(_queue.Dequeue());
+            Flush();
         }
 
         private void ExtractPackets()
@@ -242,6 +225,7 @@ namespace ClassicUO.Network
                 {
                     byte id = _circularBuffer.GetID();
                     int packetlength = PacketsTable.GetPacketLength(id);
+
                     if (packetlength == -1)
                     {
                         if (length >= 3)
@@ -252,11 +236,9 @@ namespace ClassicUO.Network
 
                     if (length < packetlength)
                         break;
-
                     byte[] data = /*BUFF_SIZE >= packetlength ? _pool.GetFreeSegment() : */new byte[packetlength];
                     packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
 
-                    
                     //PacketReceived?.Invoke(null, packet);
 
                     //_packetsToRead.Enqueue(packet);
@@ -274,7 +256,6 @@ namespace ClassicUO.Network
             }
         }
 
-
         private void Send(byte[] data)
         {
             if (_socket == null) return;
@@ -288,7 +269,11 @@ namespace ClassicUO.Network
                     lock (_sendLock)
                     {
                         SendQueue.Gram gram;
-                        lock (_sendQueue) gram = _sendQueue.Enqueue(data, 0, data.Length);
+
+                        lock (_sendQueue)
+                        {
+                            gram = _sendQueue.Enqueue(data, 0, data.Length);
+                        }
 
                         if (gram != null && !_sending)
                         {
@@ -304,7 +289,9 @@ namespace ClassicUO.Network
                 }
             }
             else
+            {
                 Disconnect();
+            }
         }
 
         private void IO_Socket(object sender, SocketAsyncEventArgs e)
@@ -316,12 +303,10 @@ namespace ClassicUO.Network
                     if (!IsDisposed) StartRecv();
 
                     break;
-
                 case SocketAsyncOperation.Send:
                     ProcessSend(e);
 
                     if (IsDisposed) return;
-
                     SendQueue.Gram gram;
 
                     lock (_sendQueue)
@@ -338,11 +323,14 @@ namespace ClassicUO.Network
                     else
                     {
                         lock (_sendLock)
+                        {
                             _sending = false;
+                        }
                     }
 
                     break;
                 default:
+
                     throw new ArgumentException("The last operation completed on the socket was not a receive or send");
             }
         }
@@ -352,9 +340,11 @@ namespace ClassicUO.Network
             try
             {
                 bool ok = false;
+
                 do
                 {
                     ok = !_socket.ReceiveAsync(_recvEventArgs);
+
                     if (ok)
                         ProcessRecv(_recvEventArgs);
                 } while (ok);
@@ -372,15 +362,19 @@ namespace ClassicUO.Network
             if (bytesLen > 0 && e.SocketError == SocketError.Success)
             {
                 byte[] buffer = _recvBuffer;
-
                 if (_isCompressionEnabled) DecompressBuffer(ref buffer, ref bytesLen);
 
-                lock (_circularBuffer) _circularBuffer.Enqueue(buffer, 0, bytesLen);
+                lock (_circularBuffer)
+                {
+                    _circularBuffer.Enqueue(buffer, 0, bytesLen);
+                }
 
                 ExtractPackets();
             }
             else
+            {
                 Disconnect();
+            }
         }
 
         private void DecompressBuffer(ref byte[] buffer, ref int length)
@@ -397,13 +391,11 @@ namespace ClassicUO.Network
 
             // if outbounds exception, BUFF_SIZE must be increased
             Buffer.BlockCopy(buffer, 0, source, incompletelength, length);
-
             int processedOffset = 0;
             int sourceOffset = 0;
             int offset = 0;
 
-            while (Huffman.DecompressChunk(ref source, ref sourceOffset, sourcelength, ref buffer, offset,
-                out int outSize))
+            while (Huffman.DecompressChunk(ref source, ref sourceOffset, sourcelength, ref buffer, offset, out int outSize))
             {
                 processedOffset = sourceOffset;
                 offset += outSize;
@@ -412,7 +404,9 @@ namespace ClassicUO.Network
             length = offset;
 
             if (processedOffset >= sourcelength)
+            {
                 _pool.AddFreeSegment(source);
+            }
             else
             {
                 int l = sourcelength - processedOffset;
@@ -432,7 +426,9 @@ namespace ClassicUO.Network
             {
             }
             else
+            {
                 Disconnect();
+            }
         }
 
         private void Flush()
@@ -442,13 +438,11 @@ namespace ClassicUO.Network
             lock (_sendLock)
             {
                 if (_sending) return;
-
                 SendQueue.Gram gram;
 
                 lock (_sendQueue)
                 {
                     if (!_sendQueue.IsFlushReady) return;
-
                     gram = _sendQueue.CheckFlushReady();
                 }
 
@@ -461,24 +455,23 @@ namespace ClassicUO.Network
             }
         }
 
-
         private static IPAddress ResolveIP(string addr)
         {
             IPAddress result = IPAddress.None;
+
             if (string.IsNullOrEmpty(addr)) return result;
 
             if (!IPAddress.TryParse(addr, out result))
-            {
                 try
                 {
                     IPHostEntry hostEntry = Dns.GetHostEntry(addr);
+
                     if (hostEntry.AddressList.Length != 0)
                         result = hostEntry.AddressList[hostEntry.AddressList.Length - 1];
                 }
                 catch
                 {
                 }
-            }
 
             return result;
         }

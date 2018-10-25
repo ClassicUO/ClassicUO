@@ -23,8 +23,10 @@
 
 using System;
 using System.Collections.Generic;
+
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -35,7 +37,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             LocalSerial = local;
             ServerSerial = server;
-
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
         }
@@ -48,18 +49,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
             set => base.CanMove = value;
         }
 
-
         public override void Dispose()
         {
             base.Dispose();
         }
 
-
         public override void Update(double totalMS, double frameMS)
         {
             if (ActivePage == 0)
                 ActivePage = 1;
-
             base.Update(totalMS, frameMS);
         }
 
@@ -67,19 +65,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             SpriteBatchUI sb = Service.Get<SpriteBatchUI>();
             Point position = Location;
-
             int halfWidth = Width / 2;
             int halfHeight = Height / 2;
 
             if (X < -halfWidth)
                 position.X = -halfWidth;
+
             if (Y < -halfHeight)
                 position.Y = -halfHeight;
+
             if (X > sb.GraphicsDevice.Viewport.Width - halfWidth)
                 position.X = sb.GraphicsDevice.Viewport.Width - halfWidth;
+
             if (Y > sb.GraphicsDevice.Viewport.Height - halfHeight)
                 position.Y = sb.GraphicsDevice.Viewport.Height - halfHeight;
-
             Location = position;
         }
 
@@ -88,29 +87,27 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (LocalSerial != 0)
             {
                 if (buttonID == 0) // cancel
+                {
                     GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, null, null);
+                }
                 else
                 {
                     List<Serial> switches = new List<Serial>();
                     List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();
 
                     foreach (GumpControl control in Children)
-                    {
                         if (control is Checkbox checkbox && checkbox.IsChecked)
                             switches.Add(control.LocalSerial);
                         else if (control is RadioButton radioButton && radioButton.IsChecked)
                             switches.Add(control.LocalSerial);
                         else if (control is TextBox textBox)
                             entries.Add(new Tuple<ushort, string>((ushort) LocalSerial, textBox.Text));
-                    }
-
                     GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
                 }
 
                 Dispose();
             }
         }
-
 
         protected override void CloseWithRightClick()
         {

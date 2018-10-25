@@ -1,5 +1,4 @@
 ﻿using ClassicUO.Game.GameObjects;
-using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.System
@@ -19,9 +18,10 @@ namespace ClassicUO.Game.System
         private static int _multiModel;
 
         public static TargetType TargetingState { get; private set; } = TargetType.Nothing;
-        public static GameObject LastGameObject { get; private set; }
-        public static bool IsTargeting => TargetingState != TargetType.Nothing;
 
+        public static GameObject LastGameObject { get; private set; }
+
+        public static bool IsTargeting => TargetingState != TargetType.Nothing;
 
         public static void ClearTargetingWithoutTargetCancelPacket()
         {
@@ -32,11 +32,7 @@ namespace ClassicUO.Game.System
         {
             if (TargetingState != targeting || cursorID != _targetCursorId || cursorType != _targetCursorType)
             {
-                if (targeting == TargetType.Nothing)
-                {
-                    GameActions.TargetCancel(_targetCursorId, _targetCursorType);
-                }
-
+                if (targeting == TargetType.Nothing) GameActions.TargetCancel(_targetCursorId, _targetCursorType);
                 TargetingState = targeting;
                 _targetCursorId = cursorID;
                 _targetCursorType = cursorType;
@@ -53,6 +49,7 @@ namespace ClassicUO.Game.System
         {
             Graphic modelNumber = 0;
             short z = selectedEntity.Position.Z;
+
             if (selectedEntity is Static st)
             {
                 modelNumber = selectedEntity.Graphic;
@@ -67,7 +64,6 @@ namespace ClassicUO.Game.System
         {
             if (selectedEntity == null)
                 return;
-
             LastGameObject = selectedEntity;
 
             if (selectedEntity is Entity entity)
@@ -78,15 +74,16 @@ namespace ClassicUO.Game.System
             {
                 Graphic modelNumber = 0;
                 short z = selectedEntity.Position.Z;
+
                 if (selectedEntity is Static st)
                 {
                     modelNumber = selectedEntity.Graphic;
 
-                    if (TileData.IsSurface((long)st.ItemData.Flags))
+                    if (TileData.IsSurface((long) st.ItemData.Flags))
                         z += st.ItemData.Height;
                 }
 
-                GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, _targetCursorType);            
+                GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, _targetCursorType);
             }
 
             ClearTargetingWithoutTargetCancelPacket();

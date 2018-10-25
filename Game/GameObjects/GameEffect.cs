@@ -22,10 +22,10 @@
 #endregion
 
 using System.Collections.Generic;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -33,32 +33,48 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly List<GameEffect> _children;
 
-        protected GameEffect() : base(World.Map) => _children = new List<GameEffect>();
+        protected GameEffect() : base(World.Map)
+        {
+            _children = new List<GameEffect>();
+        }
 
         public IReadOnlyList<GameEffect> Children => _children;
 
         protected GameObject Source { get; set; }
+
         protected GameObject Target { get; set; }
 
         protected int SourceX { get; set; }
+
         protected int SourceY { get; set; }
+
         protected int SourceZ { get; set; }
 
         protected int TargetX { get; set; }
+
         protected int TargetY { get; set; }
+
         protected int TargetZ { get; set; }
 
         protected AnimDataFrame AnimDataFrame { get; set; }
 
-
         public int Speed { get; set; }
+
         public long LastChangeFrameTime { get; set; }
+
         public bool IsEnabled { get; set; }
+
         public Graphic AnimationGraphic { get; set; } = Graphic.Invalid;
+
         public bool IsMoving => Target != null || TargetX != 0 && TargetY != 0;
-        public DeferredEntity DeferredObject { get; set; }
+
         public GraphicEffectBlendMode Blend { get; set; }
+
         public bool IsItemEffect => Source is Item item && item.OnGround;
+
+        public long Duration { get; set; } = -1;
+
+        public DeferredEntity DeferredObject { get; set; }
 
         public void Load()
         {
@@ -67,8 +83,6 @@ namespace ClassicUO.Game.GameObjects
             AnimIndex = (sbyte) AnimDataFrame.FrameStart;
             Speed = AnimDataFrame.FrameInterval * 45;
         }
-
-    
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -85,13 +99,11 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (LastChangeFrameTime < totalMS)
                 {
-
                     if (AnimDataFrame.FrameCount > 0)
                     {
-                        AnimationGraphic = (Graphic)(Graphic + AnimDataFrame.FrameData[AnimIndex]);
+                        AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                         AnimIndex++;
-
-                        if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte)AnimDataFrame.FrameStart;
+                        if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte) AnimDataFrame.FrameStart;
                     }
                     else
                     {
@@ -99,15 +111,14 @@ namespace ClassicUO.Game.GameObjects
                             AnimationGraphic = Graphic;
                     }
 
-
-                    LastChangeFrameTime = (long)totalMS + Speed;
+                    LastChangeFrameTime = (long) totalMS + Speed;
                 }
-
             }
-            else if (Graphic != AnimationGraphic) AnimationGraphic = Graphic;
+            else if (Graphic != AnimationGraphic)
+            {
+                AnimationGraphic = Graphic;
+            }
         }
-
-        public long Duration { get; set; } = -1;
 
         public void AddChildEffect(GameEffect effect)
         {

@@ -40,21 +40,20 @@ namespace ClassicUO.IO.Resources
                 _file = new UOFileMul(path, pathidx, 0x2000, 14);
             else
                 throw new FileNotFoundException();
-
-            _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090
-                ? Marshal.SizeOf<MultiBlockNew>()
-                : Marshal.SizeOf<MultiBlock>();
+            _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? Marshal.SizeOf<MultiBlockNew>() : Marshal.SizeOf<MultiBlock>();
         }
 
-        public static unsafe MultiBlock GetMulti(int index) =>
-            *(MultiBlock*) (_file.PositionAddress + index * _itemOffset);
-
+        public static unsafe MultiBlock GetMulti(int index)
+        {
+            return *(MultiBlock*) (_file.PositionAddress + index * _itemOffset);
+        }
 
         public static int GetCount(int graphic)
         {
             graphic &= FileManager.GraphicMask;
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
             int count = length / _itemOffset;
+
             return count;
         }
     }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ClassicUO.Renderer
+﻿namespace ClassicUO.Renderer
 {
     public enum Techniques
     {
@@ -16,7 +10,6 @@ namespace ClassicUO.Renderer
         ShadowSet = 3,
         StencilSet = 4,
         Land = 5,
-
         Default = Hued,
         FirstDrawn = Hued,
         LastDrawn = Land,

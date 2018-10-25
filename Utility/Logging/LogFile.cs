@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,8 +21,7 @@ namespace ClassicUO.Utility.Logging
 
         public async Task WriteAsync(string logMessage)
         {
-            var logBytes = Encoding.UTF8.GetBytes($"{logMessage}\n");
-
+            byte[] logBytes = Encoding.UTF8.GetBytes($"{logMessage}\n");
             await logStream.WriteAsync(logBytes, 0, logBytes.Length);
             await logStream.FlushAsync();
         }

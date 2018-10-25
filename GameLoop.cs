@@ -21,9 +21,9 @@
 
 #endregion
 
-using System;
 using System.Diagnostics;
 using System.IO;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
@@ -35,8 +35,8 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -52,7 +52,6 @@ namespace ClassicUO
         private SceneManager _sceneManager;
         private UIManager _uiManager;
 
-
         protected override void Initialize()
         {
             //uncomment it and fill it to save your first settings
@@ -62,13 +61,10 @@ namespace ClassicUO
             //};
 
             //ConfigurationResolver.Save(settings1, "settings.json");
-
-            Settings settings =
-                ConfigurationResolver.Load<Settings>(Path.Combine(Bootstrap.ExeDirectory, "settings.json"));
-
+            Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine(Bootstrap.ExeDirectory, "settings.json"));
             Service.Register(settings);
-
             Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
+
             try
             {
                 FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
@@ -76,26 +72,22 @@ namespace ClassicUO
             catch (FileNotFoundException e)
             {
                 Log.Message(LogTypes.Error, "Wrong Ultima Online installation folder.");
+
                 throw e;
             }
 
             Log.Message(LogTypes.Trace, "Done!");
             Log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
-
-
             Log.Message(LogTypes.Trace, "Loading files...");
             Stopwatch stopwatch = Stopwatch.StartNew();
             FileManager.LoadFiles();
-
             uint[] hues = Hues.CreateShaderColors();
             Texture2D texture0 = new Texture2D(GraphicsDevice, 32, 3000);
             texture0.SetData(hues, 0, 32 * 3000);
             Texture2D texture1 = new Texture2D(GraphicsDevice, 32, 3000);
             texture1.SetData(hues, 32 * 3000, 32 * 3000);
-
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
-
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
 
@@ -109,20 +101,14 @@ namespace ClassicUO
             Service.Register(_journalManager = new JournalData());
             //Register Command Stack
             PartySystem.RegisterCommands();
-            
-
             _inputManager = Service.Get<InputManager>();
             _sb3D = Service.Get<SpriteBatch3D>();
             _sbUI = Service.Get<SpriteBatchUI>();
-
             Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
             Log.Message(LogTypes.Trace, "Done!");
-
-
             MaxFPS = settings.MaxFPS;
-
             _sceneManager.ChangeScene(ScenesType.Login);
 
             _infoText = new RenderedText
@@ -133,17 +119,15 @@ namespace ClassicUO
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 MaxWidth = 150
             };
-            
             base.Initialize();
         }
 
         protected override void UnloadContent()
         {
             ConfigurationResolver.Save(Service.Get<Settings>(), "settings.json");
-
             base.UnloadContent();
         }
-        
+
         protected override void OnInputUpdate(double totalMS, double frameMS)
         {
             _inputManager.Update(totalMS, frameMS);
@@ -152,9 +136,7 @@ namespace ClassicUO
         protected override void OnNetworkUpdate(double totalMS, double frameMS)
         {
             if (NetClient.LoginSocket.IsDisposed && NetClient.LoginSocket.IsConnected)
-            {
                 NetClient.LoginSocket.Disconnect();
-            }
             else if (!NetClient.Socket.IsConnected)
                 NetClient.LoginSocket.Update();
             else if (!NetClient.Socket.IsDisposed)
@@ -182,17 +164,11 @@ namespace ClassicUO
         {
             if (World.InGame)
                 _sceneManager.CurrentScene.Draw(_sb3D, _sbUI);
-
             _sbUI.GraphicsDevice.Clear(Color.Transparent);
             _sbUI.Begin();
-
             _uiManager.Draw(_sbUI);
-
-
-            _infoText.Text =
-                $"FPS: {CurrentFPS}\nObjects: {_sceneManager.CurrentScene.RenderedObjectsCount}\nCalls: {_sb3D.Calls}\nMerged: {_sb3D.Merged}\nPos: {(World.Player == null ? "" : World.Player.Position.ToString())}\nSelected: {(_sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty)}";
+            _infoText.Text = $"FPS: {CurrentFPS}\nObjects: {_sceneManager.CurrentScene.RenderedObjectsCount}\nCalls: {_sb3D.Calls}\nMerged: {_sb3D.Merged}\nPos: {(World.Player == null ? "" : World.Player.Position.ToString())}\nSelected: {(_sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty)}";
             _infoText.Draw(_sbUI, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
-
             _sbUI.End();
         }
     }

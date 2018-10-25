@@ -33,24 +33,18 @@ namespace ClassicUO.IO.Resources
         //private static UOFile _file;
         //private static readonly List<KeywordEntry> _keywords = new List<KeywordEntry>();
 
-
         //public static IReadOnlyList<KeywordEntry> Keywords => _keywords;
-
-
         private static readonly List<Dictionary<int, List<Regex>>> _speeches = new List<Dictionary<int, List<Regex>>>();
-
 
         public static void Load()
         {
             if (_speeches.Count > 0)
                 return;
-
             string path = Path.Combine(FileManager.UoFolderPath, "speech.mul");
+
             if (!File.Exists(path))
                 throw new FileNotFoundException();
-
             UOFileMul file = new UOFileMul(path);
-
             Dictionary<int, List<Regex>> table = null;
             int lastIndex = -1;
 
@@ -61,7 +55,6 @@ namespace ClassicUO.IO.Resources
 
                 if (length > 128)
                     length = 128;
-
                 string text = Encoding.UTF8.GetString(file.ReadArray<byte>(length)).Trim();
 
                 if (text.Length == 0)
@@ -72,20 +65,15 @@ namespace ClassicUO.IO.Resources
                     if (id == 0 && text == "*withdraw*")
                         _speeches.Insert(0, table = new Dictionary<int, List<Regex>>());
                     else
-                    {
                         _speeches.Add(table = new Dictionary<int, List<Regex>>());
-                    }
                 }
 
                 lastIndex = id;
-
                 table.TryGetValue(id, out List<Regex> regex);
 
                 if (regex == null)
                     table[id] = regex = new List<Regex>();
-
                 regex.Add(new Regex(text.Replace("*", @".*"), RegexOptions.IgnoreCase));
-
 
                 //_keywords.Add(new KeywordEntry
                 //    {Code = id, Text = Encoding.UTF8.GetString(_file.ReadArray<byte>(length)).Trim()});
@@ -99,18 +87,10 @@ namespace ClassicUO.IO.Resources
             List<int> t = new List<int>();
             int speechTable = 0;
 
-
             foreach (KeyValuePair<int, List<Regex>> e in _speeches[speechTable])
-            {
                 for (int i = 0; i < e.Value.Count; i++)
-                {
                     if (e.Value[i].IsMatch(text) && !t.Contains(e.Key))
-                    {
                         t.Add(e.Key);
-                    }
-                }
-            }
-
             count = t.Count;
             triggers = t.ToArray();
         }

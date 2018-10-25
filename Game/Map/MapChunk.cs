@@ -23,6 +23,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 
@@ -34,8 +35,8 @@ namespace ClassicUO.Game.Map
         {
             X = x;
             Y = y;
-
             Tiles = new Tile[8][];
+
             for (int i = 0; i < 8; i++)
             {
                 Tiles[i] = new Tile[8];
@@ -46,38 +47,33 @@ namespace ClassicUO.Game.Map
         }
 
         public ushort X { get; }
-        public ushort Y { get; }
-        public Tile[][] Tiles { get; }
-        public long LastAccessTime { get; set; }
 
+        public ushort Y { get; }
+
+        public Tile[][] Tiles { get; }
+
+        public long LastAccessTime { get; set; }
 
         public unsafe void Load(int map)
         {
             IndexMap im = GetIndex(map);
+
             if (im.MapAddress != 0)
             {
                 MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr) im.MapAddress);
-
-
                 int bx = X * 8;
                 int by = Y * 8;
 
                 for (int x = 0; x < 8; x++)
-                {
                     for (int y = 0; y < 8; y++)
                     {
                         int pos = y * 8 + x;
-
                         ushort tileID = (ushort) (block.Cells[pos].TileID & 0x3FFF);
                         sbyte z = block.Cells[pos].Z;
-
-
                         Tiles[x][y].Graphic = tileID;
                         Tiles[x][y].Position = new Position((ushort) (bx + x), (ushort) (by + y), z);
-
                         Tiles[x][y].AddGameObject(Tiles[x][y]);
                     }
-                }
 
                 if (im.StaticAddress != 0)
                 {
@@ -88,60 +84,54 @@ namespace ClassicUO.Game.Map
                         int count = (int) im.StaticCount;
 
                         for (int i = 0; i < count; i++, sb++)
-                        {
                             if (sb->Color > 0 && sb->Color != 0xFFFF)
                             {
                                 ushort x = sb->X;
                                 ushort y = sb->Y;
-
                                 int pos = y * 8 + x;
+
                                 if (pos >= 64)
                                     continue;
-
                                 sbyte z = sb->Z;
-                                Static staticObject = new Static(sb->Color, sb->Hue, pos)
-                                    {Position = new Position((ushort) (bx + x), (ushort) (by + y), z)};
-
+                                Static staticObject = new Static(sb->Color, sb->Hue, pos) {Position = new Position((ushort) (bx + x), (ushort) (by + y), z)};
                                 Tiles[x][y].AddGameObject(staticObject);
                             }
-                        }
                     }
                 }
             }
         }
 
-        private IndexMap GetIndex(int map) => GetIndex(map, X, Y);
+        private IndexMap GetIndex(int map)
+        {
+            return GetIndex(map, X, Y);
+        }
 
         private static IndexMap GetIndex(int map, int x, int y)
-            => IO.Resources.Map.GetIndex(map, x, y);
-
+        {
+            return IO.Resources.Map.GetIndex(map, x, y);
+        }
 
         public void Unload()
         {
             for (int i = 0; i < 8; i++)
-            {
                 for (int j = 0; j < 8; j++)
                 {
                     Tiles[i][j].Dispose();
                     Tiles[i][j] = null;
                 }
-            }
         }
 
         public bool HasNoExternalData()
         {
             for (int i = 0; i < 8; i++)
-            {
                 for (int j = 0; j < 8; j++)
                 {
                     ref Tile tile = ref Tiles[i][j];
+
                     foreach (GameObject o in tile.ObjectsOnTiles)
-                    {
                         if (!(o is Tile) && !(o is Static))
                             return false;
-                    }
                 }
-            }
 
             return true;
         }

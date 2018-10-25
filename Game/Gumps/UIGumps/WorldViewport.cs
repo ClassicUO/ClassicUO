@@ -25,6 +25,7 @@ using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -42,7 +43,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Height = height;
             _scene = scene;
             AcceptMouseInput = true;
-
             Service.Register(this);
         }
 
@@ -52,12 +52,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _rect.Y = (int) position.Y;
             _rect.Width = Width;
             _rect.Height = Height;
-
             spriteBatch.Draw2D(_scene.ViewportTexture, _rect, Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
         }
-
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {

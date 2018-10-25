@@ -23,9 +23,9 @@
 
 using System;
 using System.IO;
+
 using ClassicUO.Configuration;
 using ClassicUO.IO.Resources;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
@@ -46,26 +46,23 @@ namespace ClassicUO.IO
 
                 //FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(client.FullName);
 
-
-                if (!Version.TryParse(Service.Get<Settings>().ClientVersion.Replace(",", ".").Trim(),
-                    out Version version))
+                if (!Version.TryParse(Service.Get<Settings>().ClientVersion.Replace(",", ".").Trim(), out Version version))
                 {
                     Log.Message(LogTypes.Error, "Wrong version.");
+
                     throw new InvalidDataException("Wrong version");
                 }
 
-                ClientVersion = (ClientVersions) ((version.Major << 24) |
-                                                  (version.Minor << 16) | (version.Build << 8) |
-                                                  version.Revision);
-
+                ClientVersion = (ClientVersions) ((version.Major << 24) | (version.Minor << 16) | (version.Build << 8) | version.Revision);
                 Log.Message(LogTypes.Trace, $"Client version: {version} - {ClientVersion}");
             }
         }
 
         public static ClientVersions ClientVersion { get; private set; }
-        public static bool IsUOPInstallation => ClientVersion >= ClientVersions.CV_70240;
-        public static ushort GraphicMask => IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
 
+        public static bool IsUOPInstallation => ClientVersion >= ClientVersions.CV_70240;
+
+        public static ushort GraphicMask => IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
 
         public static void LoadFiles()
         {

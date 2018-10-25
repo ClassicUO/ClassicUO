@@ -49,8 +49,8 @@ namespace ClassicUO.Network
         public override byte[] ToArray()
         {
             if (Length > Position) Array.Resize(ref _data, Position);
-
             WriteSize();
+
             return _data;
         }
 

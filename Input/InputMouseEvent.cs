@@ -22,6 +22,7 @@
 #endregion
 
 using Microsoft.Xna.Framework;
+
 using SDL2;
 
 namespace ClassicUO.Input
@@ -31,8 +32,7 @@ namespace ClassicUO.Input
         private readonly int _clicks;
         private readonly int _data;
 
-        public InputMouseEvent(MouseEvent type, MouseButton button, int clicks, int x, int y, int data,
-            SDL.SDL_Keymod mod) : base(mod)
+        public InputMouseEvent(MouseEvent type, MouseButton button, int clicks, int x, int y, int data, SDL.SDL_Keymod mod) : base(mod)
         {
             EventType = type;
             Button = button;
@@ -52,11 +52,14 @@ namespace ClassicUO.Input
             _data = parent._data;
         }
 
-
         public int X { get; }
+
         public int Y { get; }
+
         public MouseEvent EventType { get; }
+
         public Point Position => new Point(X, Y);
+
         public MouseButton Button { get; }
 
         //{

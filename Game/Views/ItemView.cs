@@ -22,11 +22,13 @@
 #endregion
 
 using System.Collections.Generic;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
@@ -40,31 +42,33 @@ namespace ClassicUO.Game.Views
             if (TileData.IsWet((long) item.ItemData.Flags)) SortZ++;
 
             if (!item.IsCorpse)
+            {
                 AllowedToDraw = item.Graphic > 2 && item.DisplayedGraphic > 2 && !IsNoDrawable(item.Graphic);
+            }
             else
             {
                 item.AnimIndex = 99;
+
                 if ((item.Direction & Direction.Running) != 0)
                 {
                     item.UsedLayer = true;
                     item.Direction &= (Direction) 0x7F;
                 }
                 else
+                {
                     item.UsedLayer = false;
+                }
 
                 item.Layer = (Layer) item.Direction;
-
                 AllowedToDraw = true;
                 item.DisplayedGraphic = item.Amount;
             }
         }
 
-
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
-
             Item item = (Item) GameObject;
 
             if (item.IsCorpse)
@@ -76,16 +80,12 @@ namespace ClassicUO.Game.Views
                 {
                     _originalGraphic = item.DisplayedGraphic;
                     Texture = Art.GetStaticTexture(_originalGraphic);
-                    Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4,
-                        Texture.Width, Texture.Height);
+                    Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
                 }
 
-                HueVector = RenderExtentions.GetHueVector(GameObject.Hue,
-                    TileData.IsPartialHue((long) item.ItemData.Flags),
-                    TileData.IsTranslucent((long) item.ItemData.Flags) ? .5f : 0, false);
+                HueVector = RenderExtentions.GetHueVector(GameObject.Hue, TileData.IsPartialHue((long) item.ItemData.Flags), TileData.IsTranslucent((long) item.ItemData.Flags) ? .5f : 0, false);
 
-                if (item.Amount > 1 && TileData.IsStackable((long) item.ItemData.Flags) &&
-                    item.DisplayedGraphic == GameObject.Graphic)
+                if (item.Amount > 1 && TileData.IsStackable((long) item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
                 {
                     Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
                     base.Draw(spriteBatch, offsetDrawPosition, objectList);
@@ -93,15 +93,14 @@ namespace ClassicUO.Game.Views
 
                 bool ok = base.Draw(spriteBatch, position, objectList);
                 MessageOverHead(spriteBatch, position, Bounds.Y - 22);
+
                 return ok;
             }
 
             return !item.Effect.IsDisposed && item.Effect.View.Draw(spriteBatch, position, objectList);
         }
 
-
-        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
-            MouseOverList objectList)
+        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
 #if !ORIONSORT
             PreDraw(position);
@@ -109,20 +108,15 @@ namespace ClassicUO.Game.Views
 
             if (GameObject.IsDisposed)
                 return false;
-
             Item item = (Item) GameObject;
 #if !ORIONSORT
             spriteBatch.GetZ();
 #endif
             byte dir = (byte) ((byte) item.Layer & 0x7F & 7);
             bool mirror = false;
-
             Animations.GetAnimDirection(ref dir, ref mirror);
-
             IsFlipped = mirror;
-
             Animations.Direction = dir;
-
             byte animIndex = (byte) GameObject.AnimIndex;
 
             for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
@@ -130,9 +124,9 @@ namespace ClassicUO.Game.Views
                 Layer layer = LayerOrder.UsedLayers[dir, i];
 
                 if (layer == Layer.Mount) continue;
-
                 Hue color = 0;
                 Graphic graphic = 0;
+
                 if (layer == Layer.Invalid)
                 {
                     graphic = item.DisplayedGraphic;
@@ -142,33 +136,23 @@ namespace ClassicUO.Game.Views
                 else
                 {
                     Item itemEquip = item.Equipment[(int) layer];
-                    if (itemEquip == null) continue;
 
+                    if (itemEquip == null) continue;
                     graphic = itemEquip.ItemData.AnimID;
 
-                    if (Animations.EquipConversions.TryGetValue(itemEquip.Graphic,
-                        out Dictionary<ushort, EquipConvData> map))
-                    {
+                    if (Animations.EquipConversions.TryGetValue(itemEquip.Graphic, out Dictionary<ushort, EquipConvData> map))
                         if (map.TryGetValue(itemEquip.ItemData.AnimID, out EquipConvData data))
-                        {
                             graphic = data.Graphic;
-                        }
-                    }
-
                     color = itemEquip.Hue;
                 }
 
                 Animations.AnimID = graphic;
+                ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup].Direction[Animations.Direction];
 
-                ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID]
-                    .Groups[Animations.AnimGroup].Direction[Animations.Direction];
                 if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction))
                     return false;
-
                 direction.LastAccessTime = CoreGame.Ticks;
-
                 int fc = direction.FrameCount;
-
                 if (fc > 0 && animIndex >= fc) animIndex = (byte) (fc - 1);
 
                 if (animIndex < direction.FrameCount)
@@ -176,14 +160,11 @@ namespace ClassicUO.Game.Views
                     TextureAnimationFrame frame = direction.Frames[animIndex];
 
                     if (frame == null || frame.IsDisposed) return false;
-
                     int drawCenterY = frame.CenterY;
                     const int drawX = -22;
                     int drawY = drawCenterY + GameObject.Position.Z * 4 - 22 - 3;
-
                     int x = drawX + frame.CenterX;
                     int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
-
                     Texture = frame;
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                     HueVector = RenderExtentions.GetHueVector(color);
@@ -195,18 +176,15 @@ namespace ClassicUO.Game.Views
             return true;
         }
 
-
         private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
         {
             int x;
 
             if (IsFlipped)
-                x = (int)drawPosition.X + area.X + 44 - list.MousePosition.X;
+                x = (int) drawPosition.X + area.X + 44 - list.MousePosition.X;
             else
-                x = list.MousePosition.X - (int)drawPosition.X + area.X;
-
-            int y = list.MousePosition.Y - ((int)drawPosition.Y - area.Y);
-
+                x = list.MousePosition.X - (int) drawPosition.X + area.X;
+            int y = list.MousePosition.Y - ((int) drawPosition.Y - area.Y);
             if (Animations.Contains(id, x, y)) list.Add(GameObject, drawPosition);
         }
 

@@ -22,8 +22,9 @@
 #endregion
 
 using System.IO;
-using ClassicUO.Utility;
+
 using ClassicUO.Utility.Logging;
+
 using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
@@ -40,6 +41,7 @@ namespace ClassicUO.Configuration
             }
 
             T settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
+
             return settings;
         }
 

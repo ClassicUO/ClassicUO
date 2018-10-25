@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Utility
@@ -80,18 +81,18 @@ namespace ClassicUO.Utility
             }, TaskContinuationOptions.OnlyOnFaulted);
         }
 
-
         public static void Resize<T>(this List<T> list, int size, T element = default)
         {
             int count = list.Count;
 
             if (size < count)
+            {
                 list.RemoveRange(size, count - size);
+            }
             else if (size > count)
             {
                 if (size > list.Capacity) // Optimization
                     list.Capacity = size;
-
                 list.AddRange(Enumerable.Repeat(element, size - count));
             }
         }
@@ -118,10 +119,7 @@ namespace ClassicUO.Utility
 
             if (inrect)
             {
-                if (rect.Y < r.Y)
-                {
-                    inrect = r.Y < rect.Bottom;
-                }
+                if (rect.Y < r.Y) inrect = r.Y < rect.Bottom;
             }
             else
             {

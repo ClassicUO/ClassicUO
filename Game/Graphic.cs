@@ -30,44 +30,82 @@ namespace ClassicUO.Game
     {
         public const ushort Invariant = ushort.MaxValue;
         public static Graphic Invalid = new Graphic(-1);
-
         private readonly ushort _value;
 
-        public Graphic(ushort graphic) => _value = graphic;
+        public Graphic(ushort graphic)
+        {
+            _value = graphic;
+        }
 
-        public Graphic(int graphic) => _value = (ushort) graphic;
+        public Graphic(int graphic)
+        {
+            _value = (ushort) graphic;
+        }
 
         public bool IsInvariant => _value == Invariant;
 
-        public static implicit operator Graphic(ushort value) => new Graphic(value);
+        public static implicit operator Graphic(ushort value)
+        {
+            return new Graphic(value);
+        }
 
-        public static implicit operator ushort(Graphic color) => color._value;
+        public static implicit operator ushort(Graphic color)
+        {
+            return color._value;
+        }
 
-        public static bool operator ==(Graphic g1, Graphic g2) => g1._value == g2._value;
+        public static bool operator ==(Graphic g1, Graphic g2)
+        {
+            return g1._value == g2._value;
+        }
 
-        public static bool operator !=(Graphic g1, Graphic g2) => g1._value != g2._value;
+        public static bool operator !=(Graphic g1, Graphic g2)
+        {
+            return g1._value != g2._value;
+        }
 
-        public static bool operator <(Graphic g1, Graphic g2) => g1._value < g2._value;
+        public static bool operator <(Graphic g1, Graphic g2)
+        {
+            return g1._value < g2._value;
+        }
 
-        public static bool operator >(Graphic g1, Graphic g2) => g1._value > g2._value;
+        public static bool operator >(Graphic g1, Graphic g2)
+        {
+            return g1._value > g2._value;
+        }
 
-        public int CompareTo(object obj) => _value.CompareTo(obj);
+        public int CompareTo(object obj)
+        {
+            return _value.CompareTo(obj);
+        }
 
-        public int CompareTo(ushort other) => _value.CompareTo(other);
+        public int CompareTo(ushort other)
+        {
+            return _value.CompareTo(other);
+        }
 
-        public override string ToString() => string.Format("0x{0:X4}", _value);
+        public override string ToString()
+        {
+            return string.Format("0x{0:X4}", _value);
+        }
 
-        public override int GetHashCode() => _value.GetHashCode();
+        public override int GetHashCode()
+        {
+            return _value.GetHashCode();
+        }
 
         public override bool Equals(object obj)
         {
             switch (obj)
             {
                 case Graphic graphic:
+
                     return this == graphic;
                 case ushort @ushort:
+
                     return _value == @ushort;
                 default:
+
                     return false;
             }
         }

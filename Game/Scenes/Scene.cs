@@ -23,10 +23,12 @@
 
 using System;
 using System.Collections.Generic;
+
 using ClassicUO.Game.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Scenes
@@ -37,7 +39,6 @@ namespace ClassicUO.Game.Scenes
         {
             ChainActions = new List<Func<bool>>();
             SceneType = type;
-
             Game = Service.Get<GameLoop>();
             Device = Game.GraphicsDevice;
             UIManager = Service.Get<UIManager>();
@@ -45,15 +46,20 @@ namespace ClassicUO.Game.Scenes
         }
 
         public IReadOnlyList<Func<bool>> ChainActions { get; }
+
         protected GraphicsDevice Device { get; }
+
         public bool IsDisposed { get; private set; }
+
         protected GameLoop Game { get; }
+
         protected UIManager UIManager { get; }
+
         protected InputManager InputManager { get; }
+
         public int RenderedObjectsCount { get; protected set; }
 
         public ScenesType SceneType { get; }
-
 
         public virtual void Dispose()
         {
@@ -67,7 +73,6 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-
         public virtual void Load()
         {
         }
@@ -76,12 +81,13 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-
         public virtual void FixedUpdate(double totalMS, double frameMS)
         {
         }
 
-
-        public virtual bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI) => true;
+        public virtual bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
+        {
+            return true;
+        }
     }
 }

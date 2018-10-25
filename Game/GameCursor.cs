@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps;
@@ -29,6 +30,7 @@ using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -47,32 +49,30 @@ namespace ClassicUO.Game
                 0x2060, 0x2061, 0x2062
             }
         };
-
         private readonly int[,] _cursorOffset = new int[2, 16];
         private readonly InputManager _inputManager;
-        private readonly UIManager _uiManager;
-
-        private Texture2D _blackTexture;
-        private Graphic _graphic = 0x2073;
-        private bool _needGraphicUpdate;
         private readonly Settings _settings;
-
+        private readonly UIManager _uiManager;
+        private Texture2D _blackTexture;
+        private SpriteTexture _draggedItemTexture;
+        private bool _draggingItem;
+        private Graphic _graphic = 0x2073;
+        private Hue _hue;
+        private bool _needGraphicUpdate;
+        private Point _offset;
+        private Rectangle _rect;
 
         public GameCursor(UIManager ui)
         {
             _inputManager = Service.Get<InputManager>();
             _uiManager = ui;
-
             _settings = Service.Get<Settings>();
 
             for (int i = 0; i < 2; i++)
-            {
                 for (int j = 0; j < 16; j++)
                 {
                     ushort id = _cursorData[i, j];
-
                     Texture2D texture = Art.GetStaticTexture(id);
-
 
                     if (i == 0)
                     {
@@ -80,14 +80,17 @@ namespace ClassicUO.Game
                         {
                             float offX = 0;
                             float offY = 0;
-
                             float dw = texture.Width;
                             float dh = texture.Height;
 
                             if (id == 0x206A)
+                            {
                                 offX = -4f;
+                            }
                             else if (id == 0x206B)
+                            {
                                 offX = -dw + 3f;
+                            }
                             else if (id == 0x206C)
                             {
                                 offX = -dw + 3f;
@@ -104,11 +107,17 @@ namespace ClassicUO.Game
                                 offY = -dh;
                             }
                             else if (id == 0x206F)
+                            {
                                 offY = -dh + 4f;
+                            }
                             else if (id == 0x2070)
+                            {
                                 offY = -dh + 4f;
+                            }
                             else if (id == 0x2075)
+                            {
                                 offY = -4f;
+                            }
                             else if (id == 0x2076)
                             {
                                 offX = -12f;
@@ -120,46 +129,60 @@ namespace ClassicUO.Game
                                 offY = -(dh / 2f);
                             }
                             else if (id == 0x2078)
+                            {
                                 offY = -(dh * 0.66f);
-                            else if (id == 0x2079) offY = -(dh / 2f);
+                            }
+                            else if (id == 0x2079)
+                            {
+                                offY = -(dh / 2f);
+                            }
 
                             switch (id)
                             {
                                 case 0x206B:
                                     offX = -29;
                                     offY = -1;
+
                                     break;
                                 case 0x206C:
                                     offX = -41;
                                     offY = -9;
+
                                     break;
                                 case 0x206D:
                                     offX = -36;
                                     offY = -25;
+
                                     break;
                                 case 0x206E:
                                     offX = -14;
                                     offY = -33;
+
                                     break;
                                 case 0x206F:
                                     offX = -2;
                                     offY = -26;
+
                                     break;
                                 case 0x2070:
                                     offX = -3;
                                     offY = -8;
+
                                     break;
                                 case 0x2071:
                                     offX = -1;
                                     offY = -1;
+
                                     break;
                                 case 0x206A:
                                     offX = -4;
                                     offY = -2;
+
                                     break;
                                 case 0x2075:
                                     offX = -2;
                                     offY = -10;
+
                                     break;
                             }
 
@@ -173,9 +196,7 @@ namespace ClassicUO.Game
                         }
                     }
                 }
-            }
         }
-
 
         public Graphic Graphic
         {
@@ -191,14 +212,8 @@ namespace ClassicUO.Game
         }
 
         public SpriteTexture Texture { get; private set; }
+
         public Point ScreenPosition => _inputManager.MousePosition;
-
-
-        private SpriteTexture _draggedItemTexture;
-        private Hue _hue;
-        private bool _draggingItem;
-        private Point _offset;
-        private Rectangle _rect;
 
         public void SetDraggedItem(Graphic graphic, Hue hue, Point offset)
         {
@@ -209,13 +224,15 @@ namespace ClassicUO.Game
             _draggingItem = true;
         }
 
-        public void UpdateDraggedItemOffset(Point offset) => _offset = offset;
+        public void UpdateDraggedItemOffset(Point offset)
+        {
+            _offset = offset;
+        }
 
         public void ClearDraggedItem()
         {
             _draggingItem = false;
         }
-
 
         public void Update(double totalMS, double frameMS)
         {
@@ -230,7 +247,7 @@ namespace ClassicUO.Game
             Texture.Ticks = (long) totalMS;
 
             if (_draggingItem)
-                _draggedItemTexture.Ticks = (long)totalMS;
+                _draggedItemTexture.Ticks = (long) totalMS;
         }
 
         public void Draw(SpriteBatchUI sb)
@@ -246,11 +263,9 @@ namespace ClassicUO.Game
             {
                 if (_draggingItem)
                     sb.Draw2D(_draggedItemTexture, new Vector3(ScreenPosition.X - _offset.X, ScreenPosition.Y - _offset.Y, 0), _rect, RenderExtentions.GetHueVector(_hue));
-
                 sb.Draw2D(Texture, new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0), Vector3.Zero);
             }
         }
-
 
         private ushort AssignGraphicByState()
         {
@@ -262,19 +277,16 @@ namespace ClassicUO.Game
 
             if (!_uiManager.IsMouseOverWorld)
                 return result;
-
             int windowCenterX = _settings.GameWindowX + _settings.GameWindowWidth / 2;
             int windowCenterY = _settings.GameWindowY + _settings.GameWindowHeight / 2;
 
             return _cursorData[war, GetMouseDirection(windowCenterX, windowCenterY, ScreenPosition.X, ScreenPosition.Y, 1)];
         }
 
-
         private static int GetMouseDirection(int x1, int y1, int to_x, int to_y, int current_facing)
         {
             int shiftX = to_x - x1;
             int shiftY = to_y - y1;
-
             int hashf = 100 * (Sgn(shiftX) + 2) + 10 * (Sgn(shiftY) + 2);
 
             if (shiftX != 0 && shiftY != 0)
@@ -298,36 +310,52 @@ namespace ClassicUO.Game
             switch (hashf)
             {
                 case 111:
+
                     return (int) Direction.West; // W
                 case 112:
+
                     return (int) Direction.Up; // NW
                 case 113:
+
                     return (int) Direction.North; // N
                 case 120:
+
                     return (int) Direction.West; // W
                 case 131:
+
                     return (int) Direction.West; // W
                 case 132:
+
                     return (int) Direction.Left; // SW
                 case 133:
+
                     return (int) Direction.South; // S
                 case 210:
+
                     return (int) Direction.Right; // N
                 case 230:
+
                     return (int) Direction.South; // S
                 case 311:
+
                     return (int) Direction.East; // E
                 case 312:
+
                     return (int) Direction.Right; // NE
                 case 313:
+
                     return (int) Direction.North; // N
                 case 320:
+
                     return (int) Direction.East; // E
                 case 331:
+
                     return (int) Direction.East; // E
                 case 332:
+
                     return (int) Direction.Down; // SE
                 case 333:
+
                     return (int) Direction.South; // S
             }
 
@@ -338,6 +366,7 @@ namespace ClassicUO.Game
         {
             int a = 0 < val ? 1 : 0;
             int b = val < 0 ? 1 : 0;
+
             return a - b;
         }
     }

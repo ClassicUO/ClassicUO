@@ -33,7 +33,6 @@ namespace ClassicUO.Game.Scenes
     {
         public Scene CurrentScene { get; private set; }
 
-
         public void ChangeScene(ScenesType type)
         {
             CurrentScene?.Dispose();
@@ -43,15 +42,20 @@ namespace ClassicUO.Game.Scenes
             {
                 case ScenesType.Login:
                     CurrentScene = new LoginScene();
+
                     break;
                 case ScenesType.Game:
                     CurrentScene = new GameScene();
+
                     break;
             }
 
             CurrentScene.Load();
         }
 
-        public T GetScene<T>() where T : Scene => CurrentScene?.GetType() == typeof(T) ? (T) CurrentScene : null;
+        public T GetScene<T>() where T : Scene
+        {
+            return CurrentScene?.GetType() == typeof(T) ? (T) CurrentScene : null;
+        }
     }
 }

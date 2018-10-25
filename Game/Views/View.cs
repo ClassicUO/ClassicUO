@@ -22,25 +22,25 @@
 #endregion
 
 using System;
-using ClassicUO.Game.Data;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
-using ClassicUO.Game.Map;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
+
+using IDrawable = ClassicUO.Interfaces.IDrawable;
 
 namespace ClassicUO.Game.Views
 {
-    public abstract class View : Interfaces.IDrawable, IColorable
+    public abstract class View : IDrawable, IColorable
     {
         protected static float PI = (float) Math.PI;
-
         private Vector3 _storedHue;
         public Rectangle Bounds;
-
 
         protected View(GameObject parent)
         {
@@ -50,25 +50,29 @@ namespace ClassicUO.Game.Views
         }
 
         public GameObject GameObject { get; }
+
         public sbyte SortZ { get; protected set; }
+
         protected bool HasShadow { get; set; }
+
         protected bool IsFlipped { get; set; }
+
         protected float Rotation { get; set; }
 
         public bool IsSelected { get; set; }
-        public Vector3 HueVector { get; set; }
-        public bool AllowedToDraw { get; set; }
 
         protected float ShadowZDepth { get; set; }
+
+        public Vector3 HueVector { get; set; }
+
+        public bool AllowedToDraw { get; set; }
 
         public SpriteTexture Texture { get; set; }
 
         public virtual bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
         {
             if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed) return false;
-
             Texture.Ticks = CoreGame.Ticks;
-
             SpriteVertex[] vertex;
 
             if (Rotation != 0)
@@ -80,7 +84,6 @@ namespace ClassicUO.Game.Views
                 float cosx = (float) Math.Cos(Rotation) * w;
                 float siny = (float) Math.Sin(Rotation) * h;
                 float cosy = (float) Math.Cos(Rotation) * h;
-
                 vertex = SpriteVertex.PolyBufferFlipped;
                 vertex[0].Position = center;
                 vertex[0].Position.X += cosx - -siny;
@@ -126,7 +129,6 @@ namespace ClassicUO.Game.Views
                 vertex[3].Position.Y += Bounds.Height;
             }
 
-
             if (IsSelected)
             {
                 if (_storedHue == Vector3.Zero)
@@ -142,10 +144,8 @@ namespace ClassicUO.Game.Views
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
-
             if (!spriteBatch.DrawSprite(Texture, vertex))
                 return false;
-
             MousePick(list, vertex);
 
             if (HasShadow)
@@ -153,7 +153,6 @@ namespace ClassicUO.Game.Views
 
             return true;
         }
-
 
         protected bool PreDraw(Vector3 position)
         {
@@ -224,10 +223,10 @@ namespace ClassicUO.Game.Views
             return false;
         }
 
-
-        public virtual bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
-            MouseOverList objectList) => false;
-
+        public virtual bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        {
+            return false;
+        }
 
         protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
@@ -238,8 +237,7 @@ namespace ClassicUO.Game.Views
             for (int i = 0; i < GameObject.OverHeads.Count; i++)
             {
                 View v = GameObject.OverHeads[i].View;
-                v.Bounds = new Rectangle(v.Texture.Width / 2 - 22, offY + v.Texture.Height, v.Texture.Width,
-                    v.Texture.Height);
+                v.Bounds = new Rectangle(v.Texture.Width / 2 - 22, offY + v.Texture.Height, v.Texture.Width, v.Texture.Height);
                 OverheadManager.AddView(v, position);
                 offY += v.Texture.Height;
             }
@@ -255,17 +253,16 @@ namespace ClassicUO.Game.Views
                 case 0x9E64:
                 case 0x9E65:
                 case 0x9E7D:
+
                     return true;
             }
 
             if (g != 0x63D3)
             {
                 if (g >= 0x2198 && g <= 0x21A4) return true;
-
                 long flags = (long) TileData.StaticData[g].Flags;
 
-                if (!TileData.IsNoDiagonal(flags) || TileData.IsAnimated(flags) && World.Player != null &&
-                    World.Player.Race == RaceType.GARGOYLE) return false;
+                if (!TileData.IsNoDiagonal(flags) || TileData.IsAnimated(flags) && World.Player != null && World.Player.Race == RaceType.GARGOYLE) return false;
             }
 
             return true;

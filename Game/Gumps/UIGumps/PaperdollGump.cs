@@ -24,11 +24,7 @@
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
-using ClassicUO.Network;
-using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
@@ -42,18 +38,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private GumpPic _virtueMenuPic;
         private Button _warModeBtn;
 
-        public PaperDollGump()
-            : base(0, 0) => AcceptMouseInput = false;
+        public PaperDollGump() : base(0, 0)
+        {
+            AcceptMouseInput = false;
+        }
 
-        public PaperDollGump(Serial serial, string mobileTitle)
-            : this()
+        public PaperDollGump(Serial serial, string mobileTitle) : this()
         {
             Mobile mobile = World.Mobiles.Get(serial);
+
             if (mobile != null)
             {
                 Mobile = mobile;
                 Title = mobileTitle;
-
                 BuildGump();
             }
         }
@@ -61,7 +58,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public Mobile Mobile { get; private set; }
 
         public string Title { get; }
-
 
         public override void Dispose()
         {
@@ -79,44 +75,33 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             //m_World = Service.GetByLocalSerial<WorldModel>();
             //m_Client = Service.GetByLocalSerial<INetworkClient>();
-
             CanMove = true;
             X = 100;
             Y = 100;
             //SaveOnWorldStop = true;
             LocalSerial = Mobile.Serial;
 
-
             if (Mobile == World.Player)
             {
                 AddChildren(new GumpPic(0, 0, 0x07d0, 0) {CanMove = true});
                 //HELP BUTTON
-                AddChildren(new Button((int) Buttons.Help, 0x07ef, 0x07f0, 0x07f1)
-                    {X = 185, Y = 44 + 27 * 0, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.Help, 0x07ef, 0x07f0, 0x07f1) {X = 185, Y = 44 + 27 * 0, ButtonAction = ButtonAction.Activate});
                 //OPTIONS BUTTON
-                AddChildren(new Button((int) Buttons.Options, 0x07d6, 0x07d7, 0x07d8)
-                    {X = 185, Y = 44 + 27 * 1, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.Options, 0x07d6, 0x07d7, 0x07d8) {X = 185, Y = 44 + 27 * 1, ButtonAction = ButtonAction.Activate});
                 // LOG OUT BUTTON
-                AddChildren(new Button((int) Buttons.LogOut, 0x07d9, 0x07da, 0x07db)
-                    {X = 185, Y = 44 + 27 * 2, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.LogOut, 0x07d9, 0x07da, 0x07db) {X = 185, Y = 44 + 27 * 2, ButtonAction = ButtonAction.Activate});
                 // QUESTS BUTTON
-                AddChildren(new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
-                    {X = 185, Y = 44 + 27 * 3, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6) {X = 185, Y = 44 + 27 * 3, ButtonAction = ButtonAction.Activate});
                 // SKILLS BUTTON
-                AddChildren(new Button((int) Buttons.Skills, 0x07df, 0x07e0, 0x07e1)
-                    {X = 185, Y = 44 + 27 * 4, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.Skills, 0x07df, 0x07e0, 0x07e1) {X = 185, Y = 44 + 27 * 4, ButtonAction = ButtonAction.Activate});
                 // GUILD BUTTON
-                AddChildren(new Button((int) Buttons.Guild, 0x57b2, 0x57b4, 0x57b3)
-                    {X = 185, Y = 44 + 27 * 5, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.Guild, 0x57b2, 0x57b4, 0x57b3) {X = 185, Y = 44 + 27 * 5, ButtonAction = ButtonAction.Activate});
                 // TOGGLE PEACE/WAR BUTTON
                 _isWarMode = Mobile.InWarMode;
                 ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
-                AddChildren(_warModeBtn =
-                    new Button((int) Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2])
-                        {X = 185, Y = 44 + 27 * 6, ButtonAction = ButtonAction.Activate});
+                AddChildren(_warModeBtn = new Button((int) Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2]) {X = 185, Y = 44 + 27 * 6, ButtonAction = ButtonAction.Activate});
                 // STATUS BUTTON
-                AddChildren(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
-                    {X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed) {X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate});
                 // Virtue menu
                 AddChildren(_virtueMenuPic = new GumpPic(80, 8, 0x0071, 0));
                 _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
@@ -127,19 +112,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 AddChildren(_partyManifestPic = new GumpPic(44, 195, 2002, 0));
                 _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;
                 // Equipment slots for hat/earrings/neck/ring/bracelet
-                AddChildren(new EquipmentSlot(2,
-                    76)); //AddControl(new EquipmentSlot(this, 2, 76, Mobile, EquipLayer.Helm));
-                AddChildren(new EquipmentSlot(2,
-                    76 + 22 * 1)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 1, Mobile, EquipLayer.Earrings));
-                AddChildren(new EquipmentSlot(2,
-                    76 + 22 * 2)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 2, Mobile, EquipLayer.Neck));
-                AddChildren(new EquipmentSlot(2,
-                    76 + 22 * 3)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 3, Mobile, EquipLayer.Ring));
-                AddChildren(new EquipmentSlot(2,
-                    76 + 22 * 4)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 4, Mobile, EquipLayer.Bracelet));
+                AddChildren(new EquipmentSlot(2, 76)); //AddControl(new EquipmentSlot(this, 2, 76, Mobile, EquipLayer.Helmet));
+                AddChildren(new EquipmentSlot(2, 76 + 22 * 1)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 1, Mobile, EquipLayer.Earrings));
+                AddChildren(new EquipmentSlot(2, 76 + 22 * 2)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 2, Mobile, EquipLayer.Necklace));
+                AddChildren(new EquipmentSlot(2, 76 + 22 * 3)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 3, Mobile, EquipLayer.Ring));
+                AddChildren(new EquipmentSlot(2, 76 + 22 * 4)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 4, Mobile, EquipLayer.Bracelet));
             }
             else
+            {
                 AddChildren(new GumpPic(0, 0, 0x07d1, 0));
+            }
 
             // Paperdoll control!
             AddChildren(new PaperDollInteractable(8, 21, Mobile));
@@ -153,10 +135,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 X = 39, Y = 262
             };
-
             AddChildren(titleLabel);
         }
-
 
         private void VirtueMenu_MouseDoubleClickEvent(object sender, MouseEventArgs args)
         {
@@ -173,15 +153,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (args.Button == MouseButton.Left)
             {
                 Log.Message(LogTypes.Warning, "Party manifest pic event!!");
+
                 if (UIManager.GetByLocalSerial<PartyGumpAdvanced>() == null)
-                {
                     UIManager.Add(new PartyGumpAdvanced());
-                }
                 else
                     UIManager.Remove<PartyGumpAdvanced>();
             }
         }
-
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -191,6 +169,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (Mobile == null)
             {
                 Dispose();
+
                 return;
             }
 
@@ -204,7 +183,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _warModeBtn.ButtonGraphicOver = btngumps[2];
             }
 
-
             base.Update(totalMS, frameMS);
         }
 
@@ -214,54 +192,51 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 case Buttons.Help:
                     GameActions.RequestHelp();
-                    break;
 
+                    break;
                 case Buttons.Options:
+
                     if (UIManager.GetByLocalSerial<OptionsGump>() == null)
                         UIManager.Add(new OptionsGump {X = 80, Y = 80});
                     else
                         UIManager.Remove<OptionsGump>();
-                    break;
 
+                    break;
                 case Buttons.LogOut:
                     UIManager.Add(new LogoutGump());
                     Log.Message(LogTypes.Info, "Logout request sent!");
-                    break;
 
+                    break;
                 case Buttons.Quests:
                     GameActions.RequestQuestMenu();
-                    break;
 
+                    break;
                 case Buttons.Skills:
+
                     if (UIManager.GetByLocalSerial<SkillGumpAdvanced>() == null)
-                    {
                         UIManager.Add(new SkillGumpAdvanced());
-                    }
                     else
                         UIManager.Remove<SkillGumpAdvanced>();
 
                     break;
-
                 case Buttons.Guild:
                     GameActions.OpenGuildGump();
-                    break;
 
+                    break;
                 case Buttons.PeaceWarToggle:
                     GameActions.ToggleWarMode();
-                    break;
 
+                    break;
                 case Buttons.Status:
+
                     if (UIManager.GetByLocalSerial<StatusGump>() == null)
-                    {
                         UIManager.Add(new StatusGump());
-                    }
                     else
                         UIManager.Remove<StatusGump>();
 
                     break;
             }
         }
-
 
         private enum Buttons
         {

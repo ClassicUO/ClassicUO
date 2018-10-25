@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
@@ -34,11 +35,8 @@ namespace ClassicUO.IO.Resources
         private static UOFile _file;
         private static readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
         private static readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
-
-
         private static SpriteTexture[] _textmapCache;
         private static readonly List<int> _usedIndex = new List<int>();
-
 
         public static void Load()
         {
@@ -47,37 +45,34 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
-
             _file = new UOFileMul(path, pathidx, TEXTMAP_COUNT, 10);
-
             _textmapCache = new SpriteTexture[TEXTMAP_COUNT];
-
             string pathdef = Path.Combine(FileManager.UoFolderPath, "TexTerr.def");
+
             if (!File.Exists(pathdef))
                 return;
 
             using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
             {
                 string line;
+
                 while ((line = reader.ReadLine()) != null)
                 {
                     line = line.Trim();
+
                     if (line.Length <= 0 || line[0] == '#')
                         continue;
                     string[] defs = line.Split(new[] {'\t', ' ', '#'}, StringSplitOptions.RemoveEmptyEntries);
+
                     if (defs.Length < 2)
                         continue;
-
                     int index = int.Parse(defs[0]);
 
                     if (index < 0 || index >= TEXTMAP_COUNT)
                         continue;
-
                     int first = defs[1].IndexOf("{");
                     int last = defs[1].IndexOf("}");
-
-                    string[] newdef = defs[1].Substring(first + 1, last - 1)
-                        .Split(new[] {' ', ','}, StringSplitOptions.RemoveEmptyEntries);
+                    string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[] {' ', ','}, StringSplitOptions.RemoveEmptyEntries);
 
                     foreach (string s in newdef)
                     {
@@ -85,7 +80,6 @@ namespace ClassicUO.IO.Resources
 
                         if (checkindex < 0 || checkindex >= TEXTMAP_COUNT)
                             continue;
-
                         _file.Entries[index] = _file.Entries[checkindex];
                     }
                 }
@@ -95,12 +89,12 @@ namespace ClassicUO.IO.Resources
         public static SpriteTexture GetTextmapTexture(ushort g)
         {
             ref SpriteTexture texture = ref _textmapCache[g];
+
             if (texture == null || texture.IsDisposed)
             {
                 ushort[] pixels = GetTextmapTexture(g, out int size);
                 texture = new SpriteTexture(size, size, false);
                 texture.SetData(pixels);
-
                 _usedIndex.Add(g);
             }
 
@@ -110,17 +104,21 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
+
             for (int i = 0; i < _usedIndex.Count; i++)
             {
                 ref SpriteTexture texture = ref _textmapCache[_usedIndex[i]];
+
                 if (texture == null || texture.IsDisposed)
+                {
                     _usedIndex.RemoveAt(i--);
+                }
                 else if (CoreGame.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();
                     texture = null;
-
                     _usedIndex.RemoveAt(i--);
+
                     if (++count >= 5)
                         break;
                 }
@@ -134,6 +132,7 @@ namespace ClassicUO.IO.Resources
             if (length <= 0)
             {
                 size = 0;
+
                 return null;
             }
 
@@ -153,6 +152,7 @@ namespace ClassicUO.IO.Resources
             for (int i = 0; i < size; i++)
             {
                 int pos = i * size;
+
                 for (int j = 0; j < size; j++)
                     pixels[pos + j] = (ushort) (0x8000 | _file.ReadUShort());
             }

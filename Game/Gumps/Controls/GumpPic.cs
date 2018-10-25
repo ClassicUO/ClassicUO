@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -37,16 +38,16 @@ namespace ClassicUO.Game.Gumps.Controls
         }
 
         public Graphic Graphic { get; set; }
-        public Hue Hue { get; set; }
-        public bool IsPaperdoll { get; set; }
 
+        public Hue Hue { get; set; }
+
+        public bool IsPaperdoll { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
             if (Texture == null || Texture.IsDisposed || Graphic != _lastGump)
             {
                 _lastGump = Graphic;
-
                 Texture = IO.Resources.Gumps.GetGumpTexture(Graphic);
                 Width = Texture.Width;
                 Height = Texture.Height;
@@ -56,7 +57,9 @@ namespace ClassicUO.Game.Gumps.Controls
         }
 
         protected override bool Contains(int x, int y)
-            => IO.Resources.Gumps.Contains(Graphic, x, y);
+        {
+            return IO.Resources.Gumps.Contains(Graphic, x, y);
+        }
     }
 
     public class GumpPic : GumpPicBase
@@ -69,15 +72,14 @@ namespace ClassicUO.Game.Gumps.Controls
             Hue = hue;
         }
 
-        public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]),
-            parts.Length > 4 ? Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) : (Hue) 0)
+        public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) : (Hue) 0)
         {
         }
-
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Hue));
+
             return base.Draw(spriteBatch, position, hue);
         }
     }

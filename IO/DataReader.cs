@@ -22,7 +22,6 @@
 #endregion
 
 using System;
-using System.Runtime.InteropServices;
 
 namespace ClassicUO.IO
 {
@@ -31,9 +30,11 @@ namespace ClassicUO.IO
         private byte* _data;
 
         internal long Position { get; set; }
+
         internal long Length { get; private set; }
 
         internal IntPtr StartAddress => (IntPtr) _data;
+
         internal IntPtr PositionAddress => (IntPtr) (_data + Position);
 
         internal void SetData(byte* data, long length)
@@ -45,7 +46,10 @@ namespace ClassicUO.IO
 
         internal void SetData(byte[] data, long length)
         {
-            fixed (byte* ptr = data) SetData(ptr, length);
+            fixed (byte* ptr = data)
+            {
+                SetData(ptr, length);
+            }
         }
 
         internal void SetData(IntPtr data, long length)
@@ -57,7 +61,6 @@ namespace ClassicUO.IO
         {
             SetData((byte*) data, Length);
         }
-
 
         internal void Seek(long idx)
         {
@@ -74,33 +77,55 @@ namespace ClassicUO.IO
         internal void Skip(int count)
         {
             EnsureSize(count);
-
             Position += count;
         }
 
         internal byte ReadByte()
         {
             EnsureSize(1);
+
             return _data[Position++];
         }
 
-        internal sbyte ReadSByte() => (sbyte) ReadByte();
+        internal sbyte ReadSByte()
+        {
+            return (sbyte) ReadByte();
+        }
 
-        internal bool ReadBool() => ReadByte() != 0;
+        internal bool ReadBool()
+        {
+            return ReadByte() != 0;
+        }
 
-        internal short ReadShort() => (short) (ReadByte() | (ReadByte() << 8));
+        internal short ReadShort()
+        {
+            return (short) (ReadByte() | (ReadByte() << 8));
+        }
 
-        internal ushort ReadUShort() => (ushort) ReadShort();
+        internal ushort ReadUShort()
+        {
+            return (ushort) ReadShort();
+        }
 
-        internal int ReadInt() => ReadByte() | (ReadByte() << 8) | (ReadByte() << 16) | (ReadByte() << 24);
+        internal int ReadInt()
+        {
+            return ReadByte() | (ReadByte() << 8) | (ReadByte() << 16) | (ReadByte() << 24);
+        }
 
-        internal uint ReadUInt() => (uint) ReadInt();
+        internal uint ReadUInt()
+        {
+            return (uint) ReadInt();
+        }
 
-        internal long ReadLong() => ReadByte() | ((long) ReadByte() << 8) | ((long) ReadByte() << 16) |
-                                    ((long) ReadByte() << 24) | ((long) ReadByte() << 32) | ((long) ReadByte() << 40) |
-                                    ((long) ReadByte() << 48) | ((long) ReadByte() << 56);
+        internal long ReadLong()
+        {
+            return ReadByte() | ((long) ReadByte() << 8) | ((long) ReadByte() << 16) | ((long) ReadByte() << 24) | ((long) ReadByte() << 32) | ((long) ReadByte() << 40) | ((long) ReadByte() << 48) | ((long) ReadByte() << 56);
+        }
 
-        internal ulong ReadULong() => (ulong) ReadLong();
+        internal ulong ReadULong()
+        {
+            return (ulong) ReadLong();
+        }
 
         internal byte[] ReadArray(int count)
         {

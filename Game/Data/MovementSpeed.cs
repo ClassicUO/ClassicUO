@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+
 using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Data
@@ -33,11 +34,9 @@ namespace ClassicUO.Game.Data
         private const int STEP_DELAY_RUN = 200;
         private const int STEP_DELAY_WALK = 400;
 
-
         public static int TimeToCompleteMovement(Mobile mobile, bool run)
         {
-            bool mounted = mobile.IsMounted || mobile.SpeedMode == CharacterSpeedType.FastUnmount ||
-                           mobile.SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || mobile.IsFlying;
+            bool mounted = mobile.IsMounted || mobile.SpeedMode == CharacterSpeedType.FastUnmount || mobile.SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || mobile.IsFlying;
 
             if (mounted) return run ? STEP_DELAY_MOUNT_RUN : STEP_DELAY_MOUNT_WALK;
 
@@ -48,68 +47,82 @@ namespace ClassicUO.Game.Data
         {
             float step_NESW_D = 44.0f / framesPerTile;
             float step_NESW = 22.0f / framesPerTile;
-
             int checkX = 22;
             int checkY = 22;
 
             switch (dir & 7)
             {
                 case 0:
-                    {
-                        x *= step_NESW;
-                        y *= -step_NESW;
-                        break;
-                    }
+
+                {
+                    x *= step_NESW;
+                    y *= -step_NESW;
+
+                    break;
+                }
                 case 1:
-                    {
-                        x *= step_NESW_D;
-                        checkX = 44;
-                        y = 0.0f;
-                        break;
-                    }
+
+                {
+                    x *= step_NESW_D;
+                    checkX = 44;
+                    y = 0.0f;
+
+                    break;
+                }
                 case 2:
-                    {
-                        x *= step_NESW;
-                        y *= step_NESW;
-                        break;
-                    }
+
+                {
+                    x *= step_NESW;
+                    y *= step_NESW;
+
+                    break;
+                }
                 case 3:
-                    {
-                        x = 0.0f;
-                        y *= step_NESW_D;
-                        checkY = 44;
-                        break;
-                    }
+
+                {
+                    x = 0.0f;
+                    y *= step_NESW_D;
+                    checkY = 44;
+
+                    break;
+                }
                 case 4:
-                    {
-                        x *= -step_NESW;
-                        y *= step_NESW;
-                        break;
-                    }
+
+                {
+                    x *= -step_NESW;
+                    y *= step_NESW;
+
+                    break;
+                }
                 case 5:
-                    {
-                        x *= -step_NESW_D;
-                        checkX = 44;
-                        y = 0.0f;
-                        break;
-                    }
+
+                {
+                    x *= -step_NESW_D;
+                    checkX = 44;
+                    y = 0.0f;
+
+                    break;
+                }
                 case 6:
-                    {
-                        x *= -step_NESW;
-                        y *= -step_NESW;
-                        break;
-                    }
+
+                {
+                    x *= -step_NESW;
+                    y *= -step_NESW;
+
+                    break;
+                }
                 case 7:
-                    {
-                        x = 0.0f;
-                        y *= -step_NESW_D;
-                        checkY = 44;
-                        break;
-                    }
+
+                {
+                    x = 0.0f;
+                    y *= -step_NESW_D;
+                    checkY = 44;
+
+                    break;
+                }
             }
 
-            int valueX = (int)x;
-
+            int valueX = (int) x;
 
             if (Math.Abs(valueX) > checkX)
             {
@@ -119,7 +132,7 @@ namespace ClassicUO.Game.Data
                     x = checkX;
             }
 
-            int valueY = (int)y;
+            int valueY = (int) y;
 
             if (Math.Abs(valueY) > checkY)
             {

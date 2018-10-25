@@ -23,6 +23,7 @@
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Input
@@ -32,15 +33,20 @@ namespace ClassicUO.Input
         private MouseOverItem _overObject;
         private MouseOverItem _overTile;
 
-        public MousePicker() => PickOnly = PickerType.PickNothing;
+        public MousePicker()
+        {
+            PickOnly = PickerType.PickNothing;
+        }
 
         public PickerType PickOnly { get; set; }
+
         public Point Position { get; set; }
+
         public GameObject MouseOverObject => _overObject?.Object;
+
         public GameObject MouseOverTile => _overTile?.Object;
 
         public Point MouseOverObjectPoint => _overObject?.InTexturePoint ?? Point.Zero;
-
 
         public void UpdateOverObjects(MouseOverList list, Point position)
         {

@@ -28,8 +28,7 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     internal class GumpPicBackpack : GumpPic
     {
-        public GumpPicBackpack(int x, int y, Item backpack)
-            : base(x, y, 0xC4F6, 0)
+        public GumpPicBackpack(int x, int y, Item backpack) : base(x, y, 0xC4F6, 0)
         {
             BackpackItem = backpack;
             AcceptMouseInput = false;

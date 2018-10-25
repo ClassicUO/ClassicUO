@@ -29,8 +29,7 @@ namespace ClassicUO.Input
     {
         private readonly int _keyDataExtra;
 
-        public InputKeyboardEvent(KeyboardEvent eventtype, SDL_Keycode keycode, int key, SDL_Keymod modifiers) :
-            base(modifiers)
+        public InputKeyboardEvent(KeyboardEvent eventtype, SDL_Keycode keycode, int key, SDL_Keymod modifiers) : base(modifiers)
         {
             EventType = eventtype;
             KeyCode = keycode;
@@ -45,8 +44,11 @@ namespace ClassicUO.Input
         }
 
         public KeyboardEvent EventType { get; }
+
         public SDL_Keycode KeyCode { get; }
+
         public bool IsChar => KeyChar.Length > 0 && KeyChar[0] != '\0';
+
         public string KeyChar { get; set; }
     }
 }

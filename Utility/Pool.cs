@@ -40,8 +40,7 @@ namespace ClassicUO.Utility
             _freeItems = new Deque<T>(capacity);
         }
 
-        public Pool(Func<T> createItem, int capacity = 16, int maximum = int.MaxValue) : this(createItem, _ => { },
-            capacity, maximum)
+        public Pool(Func<T> createItem, int capacity = 16, int maximum = int.MaxValue) : this(createItem, _ => { }, capacity, maximum)
         {
         }
 
@@ -61,7 +60,6 @@ namespace ClassicUO.Utility
 
             if (_freeItems.Count < _maximum)
                 _freeItems.AddToBack(item);
-
             _resetItem(item);
         }
 

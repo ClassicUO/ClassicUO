@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.IO.Resources;
@@ -31,65 +32,39 @@ namespace ClassicUO.Game.Gumps.UIGumps
     public class OptionsGump : Gump
     {
         private readonly Settings _settings;
-
-        private Checkbox _checkboxSound,
-            _checkboxMusic,
-            _checboxFootstepsSound,
-            _checkboxPlayCombatMusic,
-            _checkboxPlaySoundsInBackground,
-            _checkboxHighlightGameObjects,
-            _checkboxUseTooltips,
-            _checkboxSmoothMovement;
-
+        private Checkbox _checkboxSound, _checkboxMusic, _checboxFootstepsSound, _checkboxPlayCombatMusic, _checkboxPlaySoundsInBackground, _checkboxHighlightGameObjects, _checkboxUseTooltips, _checkboxSmoothMovement;
         private ColorPickerGump _colorPickerGump;
         private ColorPickerBox _colorPickerTooltipText;
         private HSliderBar _sliderSound, _sliderMusic, _sliderFPS, _sliderDelayAppearTooltips;
-
 
         public OptionsGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = false;
-
             _settings = Service.Get<Settings>();
 
             // base
             AddChildren(new ResizePic(0x0A28) {X = 40, Y = 0, Width = 550, Height = 450});
 
             // left
-            AddChildren(new Button((int) Buttons.SoundAndMusic, 0x00DA, 0x00DA)
-                {X = 0, Y = 45, ButtonAction = ButtonAction.SwitchPage, ToPage = 1});
-            AddChildren(new Button((int) Buttons.Configuration, 0x00DC, 0x00DC)
-                {X = 0, Y = 111, ButtonAction = ButtonAction.SwitchPage, ToPage = 2});
-            AddChildren(new Button((int) Buttons.Language, 0x00DE, 0x00DE)
-                {X = 0, Y = 177, ButtonAction = ButtonAction.SwitchPage, ToPage = 3});
-            AddChildren(new Button((int) Buttons.Chat, 0x00E0, 0x00E0)
-                {X = 0, Y = 243, ButtonAction = ButtonAction.SwitchPage, ToPage = 4});
-            AddChildren(new Button((int) Buttons.Macro, 0x00ED, 0x00ED)
-                {X = 0, Y = 309, ButtonAction = ButtonAction.SwitchPage, ToPage = 5});
+            AddChildren(new Button((int) Buttons.SoundAndMusic, 0x00DA, 0x00DA) {X = 0, Y = 45, ButtonAction = ButtonAction.SwitchPage, ToPage = 1});
+            AddChildren(new Button((int) Buttons.Configuration, 0x00DC, 0x00DC) {X = 0, Y = 111, ButtonAction = ButtonAction.SwitchPage, ToPage = 2});
+            AddChildren(new Button((int) Buttons.Language, 0x00DE, 0x00DE) {X = 0, Y = 177, ButtonAction = ButtonAction.SwitchPage, ToPage = 3});
+            AddChildren(new Button((int) Buttons.Chat, 0x00E0, 0x00E0) {X = 0, Y = 243, ButtonAction = ButtonAction.SwitchPage, ToPage = 4});
+            AddChildren(new Button((int) Buttons.Macro, 0x00ED, 0x00ED) {X = 0, Y = 309, ButtonAction = ButtonAction.SwitchPage, ToPage = 5});
 
             // right
-            AddChildren(new Button((int) Buttons.Interface, 0x00E2, 0x00E2)
-                {X = 576, Y = 45, ButtonAction = ButtonAction.SwitchPage, ToPage = 6});
-            AddChildren(new Button((int) Buttons.Display, 0x00E4, 0x00E4)
-                {X = 576, Y = 111, ButtonAction = ButtonAction.SwitchPage, ToPage = 7});
-            AddChildren(new Button((int) Buttons.Reputation, 0x00E6, 0x00E6)
-                {X = 576, Y = 177, ButtonAction = ButtonAction.SwitchPage, ToPage = 8});
-            AddChildren(new Button((int) Buttons.Misc, 0x00E8, 0x00E8)
-                {X = 576, Y = 243, ButtonAction = ButtonAction.SwitchPage, ToPage = 9});
-            AddChildren(new Button((int) Buttons.FilterOptions, 0x00EB, 0x00EB)
-                {X = 576, Y = 309, ButtonAction = ButtonAction.SwitchPage, ToPage = 10});
+            AddChildren(new Button((int) Buttons.Interface, 0x00E2, 0x00E2) {X = 576, Y = 45, ButtonAction = ButtonAction.SwitchPage, ToPage = 6});
+            AddChildren(new Button((int) Buttons.Display, 0x00E4, 0x00E4) {X = 576, Y = 111, ButtonAction = ButtonAction.SwitchPage, ToPage = 7});
+            AddChildren(new Button((int) Buttons.Reputation, 0x00E6, 0x00E6) {X = 576, Y = 177, ButtonAction = ButtonAction.SwitchPage, ToPage = 8});
+            AddChildren(new Button((int) Buttons.Misc, 0x00E8, 0x00E8) {X = 576, Y = 243, ButtonAction = ButtonAction.SwitchPage, ToPage = 9});
+            AddChildren(new Button((int) Buttons.FilterOptions, 0x00EB, 0x00EB) {X = 576, Y = 309, ButtonAction = ButtonAction.SwitchPage, ToPage = 10});
 
             // bottom
-            AddChildren(new Button((int) Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
-                {X = 154, Y = 405, ButtonAction = ButtonAction.Activate, ToPage = 0});
-            AddChildren(new Button((int) Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
-                {X = 248, Y = 405, ButtonAction = ButtonAction.Activate, ToPage = 0});
-            AddChildren(new Button((int) Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
-                {X = 346, Y = 405, ButtonAction = ButtonAction.Activate, ToPage = 0});
-            AddChildren(new Button((int) Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
-                {X = 443, Y = 405, ButtonAction = ButtonAction.Activate, ToPage = 0});
-
+            AddChildren(new Button((int) Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2) {X = 154, Y = 405, ButtonAction = ButtonAction.Activate, ToPage = 0});
+            AddChildren(new Button((int) Buttons.Apply, 0x00EF, 0x00F0, 0x00EE) {X = 248, Y = 405, ButtonAction = ButtonAction.Activate, ToPage = 0});
+            AddChildren(new Button((int) Buttons.Default, 0x00F6, 0x00F4, 0x00F5) {X = 346, Y = 405, ButtonAction = ButtonAction.Activate, ToPage = 0});
+            AddChildren(new Button((int) Buttons.Ok, 0x00F9, 0x00F8, 0x00F7) {X = 443, Y = 405, ButtonAction = ButtonAction.Activate, ToPage = 0});
             BuildPage1();
             BuildPage2();
             BuildPage3();
@@ -100,10 +75,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             BuildPage8();
             BuildPage9();
             BuildPage10();
-
             ChangePage(2);
         }
-
 
         private void BuildPage1()
         {
@@ -116,8 +89,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             AddChildren(label, 1);
 
-            label = new Label("These settings affect the sound and music you will hear while playing Ultima Online.",
-                true, 0, 500)
+            label = new Label("These settings affect the sound and music you will hear while playing Ultima Online.", true, 0, 500)
             {
                 X = 64,
                 Y = 44
@@ -130,12 +102,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 IsChecked = _settings.Sound
             };
             AddChildren(_checkboxSound, 1);
-
             label = new Label("Sound Volume", true, 0) {X = 64, Y = 112};
             AddChildren(label, 1);
-
-            _sliderSound = new HSliderBar(64, 133, 90, 0, 255, _settings.SoundVolume,
-                HSliderBarStyle.MetalWidgetRecessedBar, true);
+            _sliderSound = new HSliderBar(64, 133, 90, 0, 255, _settings.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true);
             AddChildren(_sliderSound, 1);
 
             _checkboxMusic = new Checkbox(0x00D2, 0x00D3, "Music On/Off")
@@ -143,12 +112,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 64, Y = 151, IsChecked = _settings.Music
             };
             AddChildren(_checkboxMusic, 1);
-
             label = new Label("Music volume", true, 0) {X = 64, Y = 173};
             AddChildren(label, 1);
-
-            _sliderMusic = new HSliderBar(64, 194, 90, 0, 255, _settings.MusicVolume,
-                HSliderBarStyle.MetalWidgetRecessedBar, true);
+            _sliderMusic = new HSliderBar(64, 194, 90, 0, 255, _settings.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true);
             AddChildren(_sliderMusic, 1);
 
             _checboxFootstepsSound = new Checkbox(0x00D2, 0x00D3, "Play footsteps sound")
@@ -181,11 +147,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 84, Y = 22
             };
             AddChildren(label, 2);
-
-
             ScrollArea scrollArea = new ScrollArea(64, 90, 500, 300, true);
             AddChildren(scrollArea, 2);
-
 
             label = new Label("FPS:", true, 0)
             {
@@ -193,11 +156,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 Y = 0
             };
             scrollArea.AddChildren(label);
-
-            _sliderFPS = new HSliderBar(0, 21, 90, 15, 250, _settings.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar,
-                true);
+            _sliderFPS = new HSliderBar(0, 21, 90, 15, 250, _settings.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true);
             scrollArea.AddChildren(_sliderFPS);
-
 
             _checkboxHighlightGameObjects = new Checkbox(0x00D2, 0x00D3, "Highlight game objects")
             {
@@ -205,14 +165,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             scrollArea.AddChildren(_checkboxHighlightGameObjects);
 
-
             _checkboxSmoothMovement = new Checkbox(0x00D2, 0x00D3, "Smooth movement")
             {
                 X = 0, Y = 61, IsChecked = _settings.SmoothMovement
             };
             scrollArea.AddChildren(_checkboxSmoothMovement);
-
             int y = 81;
+
             for (int i = 0; i < 400; i++)
             {
                 Checkbox ck = new Checkbox(0x00D2, 0x00D3, "TRY " + i)
@@ -268,9 +227,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 64, Y = 112
             };
             AddChildren(label, 3);
-
-            _sliderDelayAppearTooltips = new HSliderBar(64, 133, 90, 0, 5000, _settings.DelayAppearTooltips,
-                HSliderBarStyle.MetalWidgetRecessedBar, true);
+            _sliderDelayAppearTooltips = new HSliderBar(64, 133, 90, 0, 5000, _settings.DelayAppearTooltips, HSliderBarStyle.MetalWidgetRecessedBar, true);
             AddChildren(_sliderDelayAppearTooltips, 3);
 
             Button button = new Button((int) Buttons.TextColor, 0x00D4, 0x00D4)
@@ -280,32 +237,24 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 ButtonAction = ButtonAction.Activate,
                 ToPage = 3
             };
+
             button.MouseClick += (sender, e) =>
             {
                 ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => _colorPickerTooltipText.SetHue(s));
                 UIManager.Add(pickerGump);
             };
             AddChildren(button, 3);
-
             uint color = 0xFF7F7F7F;
-
-            if (_settings.TooltipsTextColor != 0xFFFF)
-            {
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.TooltipsTextColor) << 8) | 0xFF);
-            }
-
+            if (_settings.TooltipsTextColor != 0xFFFF) color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.TooltipsTextColor) << 8) | 0xFF);
             _colorPickerTooltipText = new ColorPickerBox(67, 154, 1, 1, 13, 14);
             _colorPickerTooltipText.SetHue(color);
-
             AddChildren(_colorPickerTooltipText, 3);
 
             label = new Label("Color of tooltips text", true, 0)
             {
                 X = 88, Y = 151
             };
-
             AddChildren(label, 3);
-
 
             AddChildren(new Button((int) Buttons.TextFont, 0x00D0, 0x00D0)
             {
@@ -319,7 +268,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 X = 88, Y = 173
             };
-
             AddChildren(label, 3);
         }
 
@@ -370,7 +318,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new GumpPic(576, 309, 0x00EA, 0) {CanMove = false}, 10);
         }
 
-
         private void ApplySettings()
         {
             _settings.Sound = _checkboxSound.IsChecked;
@@ -379,17 +326,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _settings.MusicVolume = _sliderMusic.Value;
             _settings.UseTooltips = _checkboxUseTooltips.IsChecked;
             _settings.DelayAppearTooltips = _sliderDelayAppearTooltips.Value;
-
             _settings.MaxFPS = Service.Get<GameLoop>().MaxFPS = _sliderFPS.Value;
             _settings.HighlightGameObjects = _checkboxHighlightGameObjects.IsChecked;
             _settings.SmoothMovement = _checkboxSmoothMovement.IsChecked;
         }
 
-
         private void RestoreDefaultSettings()
         {
         }
-
 
         public override void OnButtonClick(int buttonID)
         {
@@ -399,43 +343,60 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.SoundAndMusic:
+
                     break;
                 case Buttons.Configuration:
+
                     break;
                 case Buttons.Language:
+
                     break;
                 case Buttons.Chat:
+
                     break;
                 case Buttons.Macro:
+
                     break;
                 case Buttons.Interface:
+
                     break;
                 case Buttons.Display:
+
                     break;
                 case Buttons.Reputation:
+
                     break;
                 case Buttons.Misc:
+
                     break;
                 case Buttons.FilterOptions:
+
                     break;
                 case Buttons.TextColor:
+
                     break;
                 case Buttons.TextFont:
+
                     break;
                 case Buttons.Cancel:
                     Dispose();
+
                     break;
                 case Buttons.Apply:
                     ApplySettings();
+
                     break;
                 case Buttons.Default:
                     RestoreDefaultSettings();
+
                     break;
                 case Buttons.Ok:
                     ApplySettings();
                     Dispose();
+
                     break;
                 default:
+
                     throw new ArgumentOutOfRangeException(nameof(buttonID), buttonID, null);
             }
         }
@@ -452,11 +413,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Reputation,
             Misc,
             FilterOptions,
-
             TextColor,
             TextFont,
-
-
             Cancel,
             Apply,
             Default,

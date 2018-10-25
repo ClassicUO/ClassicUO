@@ -22,9 +22,11 @@
 #endregion
 
 using System.Collections.Generic;
+
 using ClassicUO.Game.Views;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects.Managers
@@ -33,8 +35,10 @@ namespace ClassicUO.Game.GameObjects.Managers
     {
         private static readonly List<ViewWithDrawInfo> _views = new List<ViewWithDrawInfo>();
 
-        public static void AddView(View view, Vector3 position) =>
+        public static void AddView(View view, Vector3 position)
+        {
             _views.Add(new ViewWithDrawInfo {View = view, DrawPosition = position});
+        }
 
         public static void Draw(SpriteBatch3D spriteBatch, MouseOverList objectList)
         {
@@ -42,9 +46,7 @@ namespace ClassicUO.Game.GameObjects.Managers
             {
                 for (int i = 0; i < _views.Count; i++)
                 {
-                    var v = _views[i];
-
-
+                    ViewWithDrawInfo v = _views[i];
                     v.View.Draw(spriteBatch, v.DrawPosition, objectList);
                 }
 

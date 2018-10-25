@@ -22,7 +22,9 @@
 #endregion
 
 using System;
+
 using ClassicUO.Utility;
+
 using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
@@ -33,22 +35,16 @@ namespace ClassicUO.Configuration
         private bool _alwaysRun;
         private bool _backgroundSound;
         private int _backpackStyle;
-
-
         private byte _chatFont;
         private string _clientVersion;
         private bool _combatMusic;
-
-
         private int _containerDefaultX;
         private int _containerDefaultY;
-
         private bool _criminalActionQuery;
         private int _criminalColor;
         private bool _debug;
         private int _delayAppearTooltips;
         private int _emoteColor;
-
         private bool _enablePathfind;
         private int _enemyColor;
         private bool _footstepsSound;
@@ -58,9 +54,7 @@ namespace ClassicUO.Configuration
         private int _gameWindowX = 32;
         private int _gameWindowY = 32;
         private int _guildMessageColor;
-
         private bool _highlightGameObjects = true;
-
         private int _innocentColor;
         private string _ip;
         private string _lastCharName;
@@ -72,26 +66,20 @@ namespace ClassicUO.Configuration
         private string _password;
         private ushort _port;
         private bool _profiler;
-
         private bool _reduceFpsInactiveWindow;
         private bool _scaleSpeechDelay;
         private bool _showIncomingNames;
         private bool _skillReport;
         private bool _smoothMovement = true;
-
         private bool _sound;
         private int _soundVolume;
         private int _speechColor;
-
         private int _speechDelay;
         private bool _statReport;
         private ushort _tooltipsTextColor = 0xFFFF;
         private string _uoDir;
-
-
         private bool _useOldStatus;
         private string _username;
-
         private bool _useTooltips;
 
         [JsonConstructor]
@@ -386,14 +374,12 @@ namespace ClassicUO.Configuration
             set => SetProperty(ref _criminalActionQuery, value);
         }
 
-
         [JsonProperty(PropertyName = "show_incoming_names")]
         public bool ShowIncomingNames
         {
             get => _showIncomingNames;
             set => SetProperty(ref _showIncomingNames, value);
         }
-
 
         [JsonProperty(PropertyName = "stat_report")]
         public bool StatReport
@@ -402,7 +388,6 @@ namespace ClassicUO.Configuration
             set => SetProperty(ref _statReport, value);
         }
 
-
         [JsonProperty(PropertyName = "skill_report")]
         public bool SkillReport
         {
@@ -410,14 +395,12 @@ namespace ClassicUO.Configuration
             set => SetProperty(ref _skillReport, value);
         }
 
-
         [JsonProperty(PropertyName = "use_old_status")]
         public bool UseOldStatus
         {
             get => _useOldStatus;
             set => SetProperty(ref _useOldStatus, value);
         }
-
 
         [JsonProperty(PropertyName = "use_tooltips")]
         public bool UseTooltips
@@ -439,7 +422,6 @@ namespace ClassicUO.Configuration
             get => _tooltipsTextColor;
             set => SetProperty(ref _tooltipsTextColor, value);
         }
-
 
         [JsonProperty(PropertyName = "highlight_gameobjects")]
         public bool HighlightGameObjects
@@ -464,35 +446,27 @@ namespace ClassicUO.Configuration
         {
             if (EqualityHelper.IsEqual(storage, value))
                 return false;
-
             storage = value;
             OnPropertyChanged();
+
             return true;
         }
 
-        protected virtual void OnPropertyChanged() => PropertyChanged.Raise();
+        protected virtual void OnPropertyChanged()
+        {
+            PropertyChanged.Raise();
+        }
     }
 
     public static class EqualityHelper
     {
         public static bool IsEqual<T>(T oldValue, T newValue)
         {
-            if (oldValue == null && newValue == null)
-            {
-                return true;
-            }
-
-            if (oldValue == null || newValue == null)
-            {
-                return false;
-            }
-
+            if (oldValue == null && newValue == null) return true;
+            if (oldValue == null || newValue == null) return false;
             Type type = typeof(T);
 
-            if (type.IsValueType)
-            {
-                return oldValue.Equals(newValue);
-            }
+            if (type.IsValueType) return oldValue.Equals(newValue);
 
             return Equals(oldValue, newValue);
         }

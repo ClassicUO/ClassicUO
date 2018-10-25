@@ -23,6 +23,7 @@
 
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Interfaces
@@ -30,6 +31,7 @@ namespace ClassicUO.Interfaces
     public interface IDrawable
     {
         bool AllowedToDraw { get; set; }
+
         SpriteTexture Texture { get; set; }
 
         bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList);
@@ -38,6 +40,7 @@ namespace ClassicUO.Interfaces
     public interface IDrawableUI
     {
         bool AllowedToDraw { get; set; }
+
         SpriteTexture Texture { get; set; }
 
         bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null);

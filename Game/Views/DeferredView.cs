@@ -24,6 +24,7 @@
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
@@ -52,6 +53,5 @@ namespace ClassicUO.Game.Views
 
             return _baseView.DrawInternal(spriteBatch, _position, objectList);
         }
-            
     }
 }

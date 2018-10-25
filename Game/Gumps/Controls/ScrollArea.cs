@@ -23,6 +23,7 @@
 
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -30,7 +31,6 @@ namespace ClassicUO.Game.Gumps.Controls
     internal class ScrollArea : GumpControl
     {
         private readonly IScrollBar _scrollBar;
-
         private bool _needUpdate = true;
 
         public ScrollArea(int x, int y, int w, int h, bool normalScrollbar)
@@ -41,25 +41,18 @@ namespace ClassicUO.Game.Gumps.Controls
             Height = h;
 
             if (normalScrollbar)
-            {
                 _scrollBar = new ScrollBar(this, Width - 14, 0, Height);
-            }
             else
-            {
                 _scrollBar = new ScrollFlag(this)
                 {
                     X = Width - 14,
                     Height = h
                 };
-            }
-
             _scrollBar.MinValue = 0;
             _scrollBar.MaxValue = Height;
-
             IgnoreParentFill = true;
             AcceptMouseInput = false;
         }
-
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -73,13 +66,11 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-
         protected override void OnInitialize()
         {
             _needUpdate = true;
             base.OnInitialize();
         }
-
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
@@ -88,7 +79,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             for (int i = 0; i < Children.Count; i++)
             {
-                var child = Children[i];
+                GumpControl child = Children[i];
 
                 if (child is IScrollBar)
                 {
@@ -121,16 +112,17 @@ namespace ClassicUO.Game.Gumps.Controls
             return true;
         }
 
-
         protected override void OnMouseWheel(MouseEvent delta)
         {
             switch (delta)
             {
                 case MouseEvent.WheelScrollUp:
                     _scrollBar.Value -= _scrollBar.ScrollStep;
+
                     break;
                 case MouseEvent.WheelScrollDown:
                     _scrollBar.Value += _scrollBar.ScrollStep;
+
                     break;
             }
         }
@@ -158,21 +150,18 @@ namespace ClassicUO.Game.Gumps.Controls
         private void CalculateScrollBarMaxValue()
         {
             _scrollBar.Height = Height;
-
             bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
-
             int height = 0;
+
             for (int i = 0; i < Children.Count; i++)
-            {
                 if (!(Children[i] is IScrollBar))
                     height += Children[i].Height;
-            }
-
             height -= _scrollBar.Height;
 
             if (height > 0)
             {
                 _scrollBar.MaxValue = height;
+
                 if (maxValue)
                     _scrollBar.Value = _scrollBar.MaxValue;
             }

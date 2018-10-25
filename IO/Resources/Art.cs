@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
@@ -31,13 +32,10 @@ namespace ClassicUO.IO.Resources
     {
         public const int ART_COUNT = 0x10000;
         private static UOFile _file;
-
         private static SpriteTexture[] _artCache;
         private static SpriteTexture[] _landCache;
-
         private static readonly List<int> _usedIndex = new List<int>();
         private static readonly List<int> _usedIndexLand = new List<int>();
-
         private static readonly PixelPicking _picker = new PixelPicking();
 
         public static void Load()
@@ -45,33 +43,37 @@ namespace ClassicUO.IO.Resources
             string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
 
             if (File.Exists(filepath))
+            {
                 _file = new UOFileUop(filepath, ".tga", ART_COUNT);
+            }
             else
             {
                 filepath = Path.Combine(FileManager.UoFolderPath, "art.mul");
                 string idxpath = Path.Combine(FileManager.UoFolderPath, "artidx.mul");
+
                 if (File.Exists(filepath) && File.Exists(idxpath))
                     _file = new UOFileMul(filepath, idxpath, ART_COUNT);
             }
-
 
             _artCache = new SpriteTexture[ART_COUNT];
             _landCache = new SpriteTexture[ART_COUNT];
         }
 
-        public static bool Contains(ushort g, int x, int y, int extra = 0) => _picker.Get(g, x, y, extra);
+        public static bool Contains(ushort g, int x, int y, int extra = 0)
+        {
+            return _picker.Get(g, x, y, extra);
+        }
 
         public static SpriteTexture GetStaticTexture(ushort g)
         {
             ref SpriteTexture texture = ref _artCache[g];
+
             if (texture == null || texture.IsDisposed)
             {
                 ushort[] pixels = ReadStaticArt(g, out short w, out short h);
-
                 texture = new SpriteTexture(w, h, false);
                 texture.SetData(pixels);
                 _usedIndex.Add(g);
-
                 _picker.Set(g, w, h, pixels);
             }
 
@@ -81,15 +83,14 @@ namespace ClassicUO.IO.Resources
         public static SpriteTexture GetLandTexture(ushort g)
         {
             ref SpriteTexture texture = ref _landCache[g];
+
             if (texture == null || texture.IsDisposed)
             {
                 const int SIZE = 44;
-
                 ushort[] pixels = ReadLandArt(g);
                 texture = new SpriteTexture(SIZE, SIZE, false);
                 texture.SetData(pixels);
                 _usedIndexLand.Add(g);
-
                 _picker.Set(g, SIZE, SIZE, pixels);
             }
 
@@ -99,34 +100,42 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
+
             for (int i = 0; i < _usedIndex.Count; i++)
             {
                 ref SpriteTexture texture = ref _artCache[_usedIndex[i]];
+
                 if (texture == null || texture.IsDisposed)
+                {
                     _usedIndex.RemoveAt(i--);
+                }
                 else if (CoreGame.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();
                     texture = null;
-
                     _usedIndex.RemoveAt(i--);
+
                     if (++count >= 5)
                         break;
                 }
             }
 
             count = 0;
+
             for (int i = 0; i < _usedIndexLand.Count; i++)
             {
                 ref SpriteTexture texture = ref _artCache[_usedIndexLand[i]];
+
                 if (texture == null || texture.IsDisposed)
+                {
                     _usedIndexLand.RemoveAt(i--);
+                }
                 else if (CoreGame.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();
                     texture = null;
-
                     _usedIndexLand.RemoveAt(i--);
+
                     if (++count >= 5)
                         break;
                 }
@@ -136,27 +145,19 @@ namespace ClassicUO.IO.Resources
         private static unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height)
         {
             graphic &= FileManager.GraphicMask;
-
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
-
             _file.Skip(4);
-
             width = _file.ReadShort();
             height = _file.ReadShort();
 
             if (width <= 0 || height <= 0)
                 return new ushort[0];
-
             ushort[] pixels = new ushort[width * height];
-
             ushort* ptr = (ushort*) _file.PositionAddress;
-
             ushort* lineoffsets = ptr;
             byte* datastart = (byte*) ptr + height * 2;
-
             int x = 0;
             int y = 0;
-
             ptr = (ushort*) (datastart + lineoffsets[0] * 2);
 
             while (y < height)
@@ -167,6 +168,7 @@ namespace ClassicUO.IO.Resources
                 if (xoffs + run >= 2048)
                 {
                     pixels = new ushort[width * height];
+
                     return pixels;
                 }
 
@@ -174,9 +176,11 @@ namespace ClassicUO.IO.Resources
                 {
                     x += xoffs;
                     int pos = y * width + x;
+
                     for (int j = 0; j < run; j++)
                     {
                         ushort val = *ptr++;
+
                         if (val > 0)
                             val = (ushort) (0x8000 | val);
                         pixels[pos++] = val;
@@ -213,9 +217,7 @@ namespace ClassicUO.IO.Resources
         private static ushort[] ReadLandArt(ushort graphic)
         {
             graphic &= FileManager.GraphicMask;
-
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
-
             ushort[] pixels = new ushort[44 * 44];
 
             for (int i = 0; i < 22; i++)
@@ -227,9 +229,9 @@ namespace ClassicUO.IO.Resources
                 for (int j = start; j < end; j++)
                 {
                     ushort val = _file.ReadUShort();
+
                     if (val > 0)
                         val = (ushort) (0x8000 | val);
-
                     pixels[pos++] = val;
                 }
             }
@@ -242,9 +244,9 @@ namespace ClassicUO.IO.Resources
                 for (int j = i; j < end; j++)
                 {
                     ushort val = _file.ReadUShort();
+
                     if (val > 0)
                         val = (ushort) (0x8000 | val);
-
                     pixels[pos++] = val;
                 }
             }

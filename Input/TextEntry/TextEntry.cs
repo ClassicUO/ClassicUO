@@ -23,6 +23,7 @@
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Input.TextEntry
@@ -31,8 +32,7 @@ namespace ClassicUO.Input.TextEntry
     {
         private string _plainText;
 
-        public TextEntry(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool unicode = true,
-            FontStyle style = FontStyle.None, ushort hue = 0xFFFF)
+        public TextEntry(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool unicode = true, FontStyle style = FontStyle.None, ushort hue = 0xFFFF)
         {
             RenderText = new RenderedText
             {
@@ -50,16 +50,19 @@ namespace ClassicUO.Input.TextEntry
                 Hue = hue,
                 Text = "_"
             };
-
             MaxCharCount = maxcharlength;
             Width = width;
             MaxWidth = maxWidth;
         }
 
         public int MaxCharCount { get; }
+
         public int Width { get; }
+
         public int MaxWidth { get; }
+
         public bool IsPassword { get; set; }
+
         public bool NumericOnly { get; set; }
 
         public ushort Hue
@@ -69,10 +72,15 @@ namespace ClassicUO.Input.TextEntry
         }
 
         public bool IsChanged { get; set; }
+
         public int Offset { get; set; }
+
         public Point CaretPosition { get; set; }
+
         protected int CaretIndex { get; set; }
+
         public RenderedText RenderText { get; }
+
         public RenderedText RenderCaret { get; }
 
         public string Text
@@ -85,7 +93,6 @@ namespace ClassicUO.Input.TextEntry
                 IsChanged = true;
             }
         }
-
 
         protected virtual void OnTextChanged()
         {
@@ -114,12 +121,13 @@ namespace ClassicUO.Input.TextEntry
                         return;
                 }
                 else if (Text.Length >= MaxCharCount)
+                {
                     return;
+                }
             }
 
             string text = Text.Insert(CaretIndex, c);
             CaretIndex += c.Length;
-
             SetText(text);
         }
 
@@ -127,9 +135,7 @@ namespace ClassicUO.Input.TextEntry
         {
             if (RenderText.MaxWidth > 0)
             {
-                int width = RenderText.IsUnicode
-                    ? Fonts.GetWidthUnicode(RenderText.Font, text)
-                    : Fonts.GetWidthASCII(RenderText.Font, text);
+                int width = RenderText.IsUnicode ? Fonts.GetWidthUnicode(RenderText.Font, text) : Fonts.GetWidthASCII(RenderText.Font, text);
                 int len = text.Length;
 
                 while (RenderText.MaxWidth < width && len > 0)
@@ -145,17 +151,12 @@ namespace ClassicUO.Input.TextEntry
                         text = text.Remove(CaretIndex, 1);
                     else
                         text = text.Remove(text.Length - 1);
-
                     len--;
-                    width = RenderText.IsUnicode
-                        ? Fonts.GetWidthUnicode(RenderText.Font, text)
-                        : Fonts.GetWidthASCII(RenderText.Font, text);
+                    width = RenderText.IsUnicode ? Fonts.GetWidthUnicode(RenderText.Font, text) : Fonts.GetWidthASCII(RenderText.Font, text);
                 }
             }
 
             CaretIndex = text.Length;
-
-
             Text = text;
         }
 
@@ -188,7 +189,6 @@ namespace ClassicUO.Input.TextEntry
 
             if (CaretIndex > Text.Length)
                 CaretIndex = Text.Length;
-
             IsChanged = true;
         }
 
@@ -201,26 +201,17 @@ namespace ClassicUO.Input.TextEntry
 
             if (CaretIndex > Text.Length)
                 CaretIndex = Text.Length;
-
             IsChanged = true;
         }
-
 
         public void UpdateCaretPosition()
         {
             int x, y;
 
             if (RenderText.IsUnicode)
-            {
-                (x, y) = Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align,
-                    (ushort) RenderText.FontStyle);
-            }
+                (x, y) = Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort) RenderText.FontStyle);
             else
-            {
-                (x, y) = Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align,
-                    (ushort) RenderText.FontStyle);
-            }
-
+                (x, y) = Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort) RenderText.FontStyle);
             CaretPosition = new Point(x, y);
 
             if (Offset > 0)
@@ -231,59 +222,56 @@ namespace ClassicUO.Input.TextEntry
                     Offset = Width - CaretPosition.X;
             }
             else if (Width + Offset < CaretPosition.X)
+            {
                 Offset = Width - CaretPosition.X;
+            }
             else
+            {
                 Offset = 0;
+            }
 
             if (IsChanged)
                 IsChanged = false;
         }
-
 
         public void OnMouseClick(int x, int y)
         {
             int oldPos = CaretIndex;
 
             if (RenderText.IsUnicode)
-            {
-                CaretIndex = Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align,
-                    (ushort) RenderText.FontStyle);
-            }
+                CaretIndex = Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle);
             else
-            {
-                CaretIndex = Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align,
-                    (ushort) RenderText.FontStyle);
-            }
-
+                CaretIndex = Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle);
 
             if (oldPos != CaretIndex)
                 UpdateCaretPosition();
         }
 
-        public int GetLinesCount() => RenderText.IsUnicode
-            ? Fonts.GetLinesCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle,
-                Width)
-            : Fonts.GetLinesCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle,
-                Width);
-
+        public int GetLinesCount()
+        {
+            return RenderText.IsUnicode ? Fonts.GetLinesCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width) : Fonts.GetLinesCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width);
+        }
 
         public void RemoveLineAt(int index)
         {
             int count = GetLinesCount();
+
             if (count <= index)
                 return;
-
             int current = 0;
             int foundedIndex = 0;
+
             while (index != count)
             {
                 int first = Text.IndexOf('\n', foundedIndex);
+
                 if (first == -1)
                     break;
 
                 if (index == current)
                 {
                     Text = Text.Remove(foundedIndex, first - foundedIndex + 1);
+
                     break;
                 }
 

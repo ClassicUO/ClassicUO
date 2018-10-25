@@ -39,12 +39,19 @@ namespace ClassicUO.Game.GameObjects
         public int Index { get; }
 
         public string Name => ItemData.Name;
+
         public override Position Position { get; set; }
 
         public StaticTiles ItemData => TileData.StaticData[Graphic];
 
-        public bool IsAtWorld(int x, int y) => Position.X == x && Position.Y == y;
+        public bool IsAtWorld(int x, int y)
+        {
+            return Position.X == x && Position.Y == y;
+        }
 
-        protected override View CreateView() => new StaticView(this);
+        protected override View CreateView()
+        {
+            return new StaticView(this);
+        }
     }
 }

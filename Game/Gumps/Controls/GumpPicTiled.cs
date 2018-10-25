@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -52,7 +53,6 @@ namespace ClassicUO.Game.Gumps.Controls
             Height = int.Parse(parts[4]);
         }
 
-
         public override void Update(double totalMS, double frameMS)
         {
             Texture.Ticks = (long) totalMS;
@@ -61,8 +61,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            spriteBatch.Draw2DTiled(Texture, new Rectangle((int) position.X, (int) position.Y, Width, Height),
-                RenderExtentions.GetHueVector(0, false, IsTransparent ? 0.5f : 0, false));
+            spriteBatch.Draw2DTiled(Texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, IsTransparent ? 0.5f : 0, false));
+
             return base.Draw(spriteBatch, position, hue);
         }
     }

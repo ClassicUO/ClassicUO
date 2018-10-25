@@ -23,6 +23,7 @@
 
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -42,33 +43,23 @@ namespace ClassicUO.Game.Gumps.Controls
         private readonly string _caption;
         private readonly RenderedText[] _fontTexture = new RenderedText[2];
         private readonly Graphic[] _gumpGraphics = new Graphic[3];
-
-
         private readonly SpriteTexture[] _textures = new SpriteTexture[3];
         private bool _clicked;
 
-        public Button(int buttonID, ushort normal, ushort pressed, ushort over = 0, string caption = "", byte font = 0,
-            bool isunicode = true, ushort normalHue = ushort.MaxValue, ushort hoverHue = ushort.MaxValue)
+        public Button(int buttonID, ushort normal, ushort pressed, ushort over = 0, string caption = "", byte font = 0, bool isunicode = true, ushort normalHue = ushort.MaxValue, ushort hoverHue = ushort.MaxValue)
         {
             ButtonID = buttonID;
-
             _gumpGraphics[NORMAL] = normal;
             _gumpGraphics[PRESSED] = pressed;
             _gumpGraphics[OVER] = over;
-
             _textures[NORMAL] = IO.Resources.Gumps.GetGumpTexture(normal);
             _textures[PRESSED] = IO.Resources.Gumps.GetGumpTexture(pressed);
             if (over > 0) _textures[OVER] = IO.Resources.Gumps.GetGumpTexture(over);
-
             ref SpriteTexture t = ref _textures[NORMAL];
-
             Width = t.Width;
             Height = t.Height;
-
             FontHue = normalHue == ushort.MaxValue ? (ushort) 0 : normalHue;
-
             HueHover = hoverHue == ushort.MaxValue ? normalHue : hoverHue;
-
 
             if (!string.IsNullOrEmpty(caption) && normalHue != ushort.MaxValue)
             {
@@ -81,7 +72,6 @@ namespace ClassicUO.Game.Gumps.Controls
                     Font = font,
                     Text = caption
                 };
-
                 _fontTexture[0] = renderedText;
 
                 if (hoverHue != ushort.MaxValue)
@@ -93,7 +83,6 @@ namespace ClassicUO.Game.Gumps.Controls
                         Font = font,
                         Text = caption
                     };
-
                     _fontTexture[1] = renderedText;
                 }
             }
@@ -104,19 +93,18 @@ namespace ClassicUO.Game.Gumps.Controls
             CanCloseWithEsc = false;
         }
 
-        public Button(string[] parts) :
-            this(parts.Length >= 8 ? int.Parse(parts[7]) : 0, ushort.Parse(parts[3]), ushort.Parse(parts[4]))
+        public Button(string[] parts) : this(parts.Length >= 8 ? int.Parse(parts[7]) : 0, ushort.Parse(parts[3]), ushort.Parse(parts[4]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
-
             ButtonAction = parts.Length >= 6 ? (ButtonAction) int.Parse(parts[5]) : 0;
             ToPage = parts.Length >= 7 ? int.Parse(parts[6]) : 0;
         }
 
-
         public int ButtonID { get; }
+
         public ButtonAction ButtonAction { get; set; }
+
         public int ToPage { get; set; }
 
         protected override ClickPriority Priority => ClickPriority.High;
@@ -140,40 +128,32 @@ namespace ClassicUO.Game.Gumps.Controls
         }
 
         public Hue FontHue { get; }
-        public Hue HueHover { get; }
-        public bool FontCenter { get; set; }
 
+        public Hue HueHover { get; }
+
+        public bool FontCenter { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _textures.Length; i++)
-            {
                 if (_textures[i] != null)
                     _textures[i].Ticks = CoreGame.Ticks;
-            }
-
             base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             SpriteTexture texture = GetTextureByState();
-
-            spriteBatch.Draw2D(texture,
-                new Rectangle((int) position.X, (int) position.Y, Width, Height),
-                Vector3.Zero);
+            spriteBatch.Draw2D(texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), Vector3.Zero);
 
             if (!string.IsNullOrEmpty(_caption))
             {
-                var textTexture = _fontTexture[UIManager.MouseOverControl == this ? 1 : 0];
+                RenderedText textTexture = _fontTexture[UIManager.MouseOverControl == this ? 1 : 0];
 
                 if (FontCenter)
                 {
                     int yoffset = _clicked ? 1 : 0;
-
-                    textTexture.Draw(spriteBatch,
-                        new Vector3(position.X + (Width - textTexture.Width) / 2,
-                            position.Y + yoffset + (Height - textTexture.Height) / 2, position.Z));
+                    textTexture.Draw(spriteBatch, new Vector3(position.X + (Width - textTexture.Width) / 2, position.Y + yoffset + (Height - textTexture.Height) / 2, position.Z));
                 }
                 else
                 {
@@ -183,7 +163,6 @@ namespace ClassicUO.Game.Gumps.Controls
 
             return base.Draw(spriteBatch, position, hue);
         }
-
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
@@ -201,8 +180,10 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (_clicked && _textures[PRESSED] != null)
                 return _textures[PRESSED];
+
             if (UIManager.MouseOverControl == this && _textures[OVER] != null)
                 return _textures[OVER];
+
             return _textures[NORMAL];
         }
 
@@ -210,29 +191,32 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (_clicked && _textures[PRESSED] != null)
                 return _gumpGraphics[PRESSED];
+
             if (UIManager.MouseOverControl == this && _textures[OVER] != null)
                 return _gumpGraphics[OVER];
+
             return _gumpGraphics[NORMAL];
         }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
-            {
                 switch (ButtonAction)
                 {
                     case ButtonAction.SwitchPage:
                         ChangePage(ToPage);
+
                         break;
                     case ButtonAction.Activate:
                         OnButtonClick(ButtonID);
+
                         break;
                 }
-            }
         }
 
-
-        protected override bool Contains(int x, int y) =>
-            IO.Resources.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
+        protected override bool Contains(int x, int y)
+        {
+            return IO.Resources.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
+        }
     }
 }

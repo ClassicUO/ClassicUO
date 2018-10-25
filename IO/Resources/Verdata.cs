@@ -40,9 +40,7 @@ namespace ClassicUO.IO.Resources
             {
                 File = new UOFileMul(path);
                 Patches = new UOFileIndex5D[File.ReadInt()];
-
                 Patches = File.ReadArray<UOFileIndex5D>(File.ReadInt());
-
                 /* for (int i = 0; i < Patches.Length; i++)
                  {
                      Patches[i].File = File.ReadInt();
@@ -76,6 +74,7 @@ namespace ClassicUO.IO.Resources
         //31 - animdata.mul 
 
         public static UOFileIndex5D[] Patches { get; }
+
         public static UOFileMul File { get; }
     }
 }

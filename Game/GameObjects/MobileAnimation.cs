@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+
 using ClassicUO.Game.Data;
 using ClassicUO.IO.Resources;
 
@@ -30,179 +31,179 @@ namespace ClassicUO.Game.GameObjects
 {
     public partial class Mobile
     {
-        private static readonly byte[][] _animAssociateTable = new byte[][]
+        private static readonly byte[][] _animAssociateTable =
         {
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_RUN, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_RUN, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_2, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_3,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_ONEHANDED
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_1
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_2
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_3,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_DOWN
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_WIDE
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_JAB
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_CAST_DIRECTED
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_3,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_CAST_AREA
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_BOW
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_CROSSBOW
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_GET_HIT_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_GET_HIT
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_DIE_1, (byte) HIGHT_ANIMATION_GROUP.HAG_DIE_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_DIE_1
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_DIE_2, (byte) HIGHT_ANIMATION_GROUP.HAG_DIE_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_DIE_2
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_RUN, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK_BOW
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK_CROSSBOW
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_SLAP_HORSE
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_TURN
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_AND_WALK
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_EMOTE_BOW
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_EMOTE_SALUTE
             },
-            new []
+            new[]
             {
                 (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1,
                 (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3
@@ -217,8 +218,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 case 0x0192:
                 case 0x0193:
+
                 {
                     g -= 2;
+
                     break;
                 }
             }
@@ -229,7 +232,6 @@ namespace ClassicUO.Game.GameObjects
         public Direction GetDirectionForAnimation()
         {
             Direction dir = Direction & Direction.Up;
-
             if (Steps.Count > 0) dir = (Direction) Steps.Front().Direction & Direction.Up;
 
             return dir;
@@ -245,12 +247,10 @@ namespace ClassicUO.Game.GameObjects
         {
             Graphic graphic = checkGraphic;
             if (graphic == 0) graphic = mobile.GetGraphicForAnimation();
-
             ANIMATION_GROUPS groupIndex = Animations.GetGroupIndex(graphic);
             byte result = mobile.AnimationGroup;
 
-            if (result != 0xFF && (mobile.Serial & 0x80000000) <= 0 &&
-                (!mobile.AnimationFromServer || checkGraphic > 0))
+            if (result != 0xFF && (mobile.Serial & 0x80000000) <= 0 && (!mobile.AnimationFromServer || checkGraphic > 0))
             {
                 GetGroupForAnimation(groupIndex, ref result);
 
@@ -287,11 +287,10 @@ namespace ClassicUO.Game.GameObjects
                 if (isWalking)
                 {
                     result = (byte) HIGHT_ANIMATION_GROUP.HAG_WALK;
+
                     if (isRun)
-                    {
                         if (Animations.AnimationExists(graphic, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY))
                             result = (byte) HIGHT_ANIMATION_GROUP.HAG_FLY;
-                    }
                 }
                 else if (mobile.AnimationGroup == 0xFF)
                 {
@@ -312,8 +311,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (mobile.Equipment[(int) Layer.Mount] != null)
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST;
-                        else if (mobile.Equipment[(int) Layer.OneHanded] != null ||
-                                 mobile.Equipment[(int) Layer.TwoHanded] != null)
+                        else if (mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null)
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED;
                         else
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED;
@@ -321,9 +319,10 @@ namespace ClassicUO.Game.GameObjects
                         if (!mobile.IsHuman && !Animations.AnimationExists(graphic, result))
                         {
                             if (mobile.Equipment[(int) Layer.Mount] != null)
+                            {
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
-                            else if ((mobile.Equipment[(int) Layer.TwoHanded] != null ||
-                                      mobile.Equipment[(int) Layer.OneHanded] != null) && !mobile.IsDead)
+                            }
+                            else if ((mobile.Equipment[(int) Layer.TwoHanded] != null || mobile.Equipment[(int) Layer.OneHanded] != null) && !mobile.IsDead)
                             {
                                 if (inWar)
                                     result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
@@ -331,17 +330,22 @@ namespace ClassicUO.Game.GameObjects
                                     result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
                             }
                             else if (inWar && !mobile.IsDead)
+                            {
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                            }
                             else
+                            {
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
+                            }
                         }
                     }
                     else
                     {
                         if (mobile.Equipment[(int) Layer.Mount] != null)
+                        {
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
-                        else if ((mobile.Equipment[(int) Layer.OneHanded] != null ||
-                                  mobile.Equipment[(int) Layer.TwoHanded] != null) && !mobile.IsDead)
+                        }
+                        else if ((mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null) && !mobile.IsDead)
                         {
                             if (inWar)
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
@@ -349,15 +353,21 @@ namespace ClassicUO.Game.GameObjects
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
                         }
                         else if (inWar && !mobile.IsDead)
+                        {
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
+                        }
                         else
+                        {
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
+                        }
                     }
                 }
                 else if (mobile.AnimationGroup == 0xFF)
                 {
                     if (mobile.Equipment[(int) Layer.Mount] != null)
+                    {
                         result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
+                    }
                     else if (inWar && !mobile.IsDead)
                     {
                         if (mobile.Equipment[(int) Layer.OneHanded] != null)
@@ -368,13 +378,14 @@ namespace ClassicUO.Game.GameObjects
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
                     }
                     else
+                    {
                         result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
+                    }
 
                     mobile.AnimIndex = 0;
                 }
 
                 if (mobile.Race == RaceType.GARGOYLE)
-                {
                     if (mobile.IsFlying)
                     {
                         if (result == 0 || result == 1)
@@ -403,12 +414,10 @@ namespace ClassicUO.Game.GameObjects
                             result = 75;
                         else if (result >= 260 && result <= 270) result = 75;
                     }
-                }
             }
 
             return result;
         }
-
 
         private static void CorrectAnimationGroup(ushort graphic, ANIMATION_GROUPS group, ref byte animation)
         {
@@ -418,13 +427,16 @@ namespace ClassicUO.Game.GameObjects
                 {
                     case LOW_ANIMATION_GROUP.LAG_DIE_2:
                         animation = (byte) LOW_ANIMATION_GROUP.LAG_DIE_1;
+
                         break;
                     case LOW_ANIMATION_GROUP.LAG_FIDGET_2:
                         animation = (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1;
+
                         break;
                     case LOW_ANIMATION_GROUP.LAG_ATTACK_3:
                     case LOW_ANIMATION_GROUP.LAG_ATTACK_2:
                         animation = (byte) LOW_ANIMATION_GROUP.LAG_ATTACK_1;
+
                         break;
                 }
 
@@ -436,25 +448,31 @@ namespace ClassicUO.Game.GameObjects
                 {
                     case HIGHT_ANIMATION_GROUP.HAG_DIE_2:
                         animation = (byte) HIGHT_ANIMATION_GROUP.HAG_DIE_1;
+
                         break;
                     case HIGHT_ANIMATION_GROUP.HAG_FIDGET_2:
                         animation = (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1;
+
                         break;
                     case HIGHT_ANIMATION_GROUP.HAG_ATTACK_3:
                     case HIGHT_ANIMATION_GROUP.HAG_ATTACK_2:
                         animation = (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1;
+
                         break;
                     case HIGHT_ANIMATION_GROUP.HAG_GET_HIT_3:
                     case HIGHT_ANIMATION_GROUP.HAG_GET_HIT_2:
                         animation = (byte) HIGHT_ANIMATION_GROUP.HAG_GET_HIT_1;
+
                         break;
                     case HIGHT_ANIMATION_GROUP.HAG_MISC_4:
                     case HIGHT_ANIMATION_GROUP.HAG_MISC_3:
                     case HIGHT_ANIMATION_GROUP.HAG_MISC_2:
                         animation = (byte) HIGHT_ANIMATION_GROUP.HAG_MISC_1;
+
                         break;
                     case HIGHT_ANIMATION_GROUP.HAG_FLY:
                         animation = (byte) HIGHT_ANIMATION_GROUP.HAG_WALK;
+
                         break;
                 }
 
@@ -462,19 +480,17 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (group == ANIMATION_GROUPS.AG_PEOPLE)
             {
-                switch ((PEOPLE_ANIMATION_GROUP)animation)
+                switch ((PEOPLE_ANIMATION_GROUP) animation)
                 {
                     case PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
                     case PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
                         animation = (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1;
-                        break;
-                    default:
+
                         break;
                 }
 
                 if (!Animations.AnimationExists(graphic, animation))
-                    animation = (byte)PEOPLE_ANIMATION_GROUP.PAG_STAND;
-
+                    animation = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
             }
         }
 
@@ -483,14 +499,12 @@ namespace ClassicUO.Game.GameObjects
             ushort getReplacedGroup(IReadOnlyList<Tuple<ushort, byte>> list, ushort idx, ushort walkIdx)
             {
                 foreach (Tuple<ushort, byte> item in list)
-                {
                     if (item.Item1 == idx)
                     {
                         if (item.Item2 == 0xFF) return walkIdx;
 
                         return item.Item2;
                     }
-                }
 
                 return idx;
             }
@@ -498,18 +512,10 @@ namespace ClassicUO.Game.GameObjects
             ANIMATION_GROUPS group = Animations.GetGroupIndex(mobile.Graphic);
 
             if (group == ANIMATION_GROUPS.AG_LOW)
-            {
-                return (byte) (getReplacedGroup(Animations.GroupReplaces[0], index,
-                                   (ushort) LOW_ANIMATION_GROUP.LAG_WALK) %
-                               (ushort) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT);
-            }
+                return (byte) (getReplacedGroup(Animations.GroupReplaces[0], index, (ushort) LOW_ANIMATION_GROUP.LAG_WALK) % (ushort) LOW_ANIMATION_GROUP.LAG_ANIMATION_COUNT);
 
             if (group == ANIMATION_GROUPS.AG_PEOPLE)
-            {
-                return (byte) (getReplacedGroup(Animations.GroupReplaces[1], index,
-                                   (ushort) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED) %
-                               (ushort) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT);
-            }
+                return (byte) (getReplacedGroup(Animations.GroupReplaces[1], index, (ushort) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED) % (ushort) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT);
 
             return (byte) (index % (ushort) HIGHT_ANIMATION_GROUP.HAG_ANIMATION_COUNT);
         }
@@ -521,27 +527,37 @@ namespace ClassicUO.Game.GameObjects
             switch (type)
             {
                 case 0:
+
                     return GetObjectNewAnimationType_0(mobile, action, mode);
                 case 1:
                 case 2:
+
                     return GetObjectNewAnimationType_1_2(mobile, action, mode);
                 case 3:
+
                     return GetObjectNewAnimationType_3(mobile, action, mode);
                 case 4:
+
                     return GetObjectNewAnimationType_4(mobile, action, mode);
                 case 5:
+
                     return GetObjectNewAnimationType_5(mobile, action, mode);
                 case 6:
                 case 14:
+
                     return GetObjectNewAnimationType_6_14(mobile, action, mode);
                 case 7:
+
                     return GetObjectNewAnimationType_7(mobile, action, mode);
                 case 8:
+
                     return GetObjectNewAnimationType_8(mobile, action, mode);
                 case 9:
                 case 10:
+
                     return GetObjectNewAnimationType_9_10(mobile, action, mode);
                 case 11:
+
                     return GetObjectNewAnimationType_11(mobile, action, mode);
             }
 
@@ -554,7 +570,6 @@ namespace ClassicUO.Game.GameObjects
             {
                 ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
                 ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-
                 if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
                 if (type == ANIMATION_GROUPS_TYPE.MONSTER)
@@ -562,14 +577,17 @@ namespace ClassicUO.Game.GameObjects
                     switch (mode % 4)
                     {
                         case 1:
+
                             return 5;
                         case 2:
+
                             return 6;
                         case 3:
-                            if ((ia.Flags & 1) != 0) return 12;
 
+                            if ((ia.Flags & 1) != 0) return 12;
                             goto case 0;
                         case 0:
+
                             return 4;
                     }
                 }
@@ -577,6 +595,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (mode % 2 != 0)
                         return 6;
+
                     return 5;
                 }
                 else if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
@@ -586,7 +605,6 @@ namespace ClassicUO.Game.GameObjects
                         if (action > 0)
                         {
                             if (action == 1) return 27;
-
                             if (action == 2) return 28;
 
                             return 26;
@@ -598,22 +616,31 @@ namespace ClassicUO.Game.GameObjects
                     switch (action)
                     {
                         default:
+
                             return 31;
                         case 1:
+
                             return 18;
                         case 2:
+
                             return 19;
                         case 6:
+
                             return 12;
                         case 7:
+
                             return 13;
                         case 8:
+
                             return 14;
                         case 3:
+
                             return 11;
                         case 4:
+
                             return 9;
                         case 5:
+
                             return 10;
                     }
                 }
@@ -651,7 +678,6 @@ namespace ClassicUO.Game.GameObjects
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
@@ -679,7 +705,6 @@ namespace ClassicUO.Game.GameObjects
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
@@ -701,7 +726,6 @@ namespace ClassicUO.Game.GameObjects
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
             if (type <= ANIMATION_GROUPS_TYPE.SEA_MONSTER)
@@ -714,7 +738,6 @@ namespace ClassicUO.Game.GameObjects
             if (type != ANIMATION_GROUPS_TYPE.ANIMAL)
             {
                 if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
-
                 if (mode % 2 != 0) return 6;
 
                 return 5;
@@ -723,8 +746,10 @@ namespace ClassicUO.Game.GameObjects
             switch (mode % 3)
             {
                 case 1:
+
                     return 10;
                 case 2:
+
                     return 3;
             }
 
@@ -735,7 +760,6 @@ namespace ClassicUO.Game.GameObjects
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
@@ -743,7 +767,6 @@ namespace ClassicUO.Game.GameObjects
                 if (type != ANIMATION_GROUPS_TYPE.SEA_MONSTER)
                 {
                     if (type == ANIMATION_GROUPS_TYPE.ANIMAL) return 3;
-
                     if (mobile.Equipment[(int) Layer.Mount] != null) return 0xFF;
 
                     return 34;
@@ -764,7 +787,9 @@ namespace ClassicUO.Game.GameObjects
                 if (action == 1) return 33;
             }
             else
+            {
                 return 32;
+            }
 
             return 0;
         }
@@ -773,7 +798,6 @@ namespace ClassicUO.Game.GameObjects
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
@@ -795,7 +819,6 @@ namespace ClassicUO.Game.GameObjects
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
             return type != ANIMATION_GROUPS_TYPE.MONSTER ? (byte) 0xFF : (byte) 20;
@@ -805,7 +828,6 @@ namespace ClassicUO.Game.GameObjects
         {
             ref IndexAnimation ia = ref Animations.DataIndex[mobile.Graphic];
             ANIMATION_GROUPS_TYPE type = ANIMATION_GROUPS_TYPE.MONSTER;
-
             if ((ia.Flags & 0x80000000) != 0) type = ia.Type;
 
             if (type != ANIMATION_GROUPS_TYPE.MONSTER)
@@ -818,6 +840,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         case 1:
                         case 2:
+
                             return 17;
                     }
 
