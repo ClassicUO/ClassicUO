@@ -223,7 +223,8 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsSpellBook => Graphic == 0x0E38 || Graphic == 0x0EFA || Graphic == 0x2252 ||
                                    Graphic == 0x2253 || Graphic == 0x238C || Graphic == 0x23A0 ||
-                                   Graphic == 0x2D50;
+                                   Graphic == 0x2D50 ||
+                                   Graphic == 0x2D9D; // mysticism
 
         public override bool Exists => World.Contains(Serial);
 

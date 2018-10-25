@@ -64,11 +64,5 @@ namespace ClassicUO.Game.Data
             new [] { "Exorcism", "Ort Corp Grav" }
         };
 
-        public static int[][] SpellsRequires => new int[17][]
-        {
-            new [] { 23, 40 },  new [] { 13, 20 },  new [] { 11, 20 },  new [] { 7, 0 }, new [] { 11, 20 }, new [] { 11, 40 },
-            new []{ 23, 70 },  new []{ 17, 30 },  new []{ 5, 20 },   new []{ 17, 50 }, new [] { 29, 65 }, new [] { 17, 30 },
-            new []{ 23, 99 },  new []{ 41, 80 }, new [] { 23, 60 }, new [] { 17, 20 },  new []{ 40, 80 }
-        };
 }
 }

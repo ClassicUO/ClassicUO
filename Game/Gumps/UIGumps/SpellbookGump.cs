@@ -311,7 +311,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
             }
 
-            _maxPage = 4 + (totalSpells + 1) / 2;
+            _maxPage = dictionaryPagesCount / 2 + (totalSpells + 1) / 2;
 
             int offs = 0;
 
@@ -338,7 +338,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 for (int j = 0; j < 2; j++)
                 {
-                    if (page == 0 && _spellBookType == SpellBookType.Chivalry)
+                    if (page == 1 && _spellBookType == SpellBookType.Chivalry)
                     {
                         Label label = new Label("Tithing points\nAvailable: " + World.Player.TithingPoints, false, 0x0288, font: 6) {X = 62, Y = 162};
                         AddChildren(label, page);
@@ -367,14 +367,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     for (int k = 0; k < spellsOnPage; k++)
                     {
-                        if (_spells[i] > 0)
+                        if (_spells[offs] > 0)
                         {
-                            SpellDefinition spell = SpellsMagery.GetSpell(offs + 1);
-                            text = new Label(spell.Name, false, 0x0288, font: 9)
+                            GetSpellNames(offs, out string name, out string abbreviature, out string reagents);
+
+                            text = new Label(name, false, 0x0288, font: 9)
                             {
                                 X = dataX,
                                 Y = 52 + y,
-                                LocalSerial = (uint)(4 + (offs / 2) + 1),
+                                LocalSerial = (uint)(dictionaryPagesCount / 2 + (offs / 2) + 1),
                                 AcceptMouseInput = true
                             };
                             text.MouseClick += (sender, e) =>
@@ -413,7 +414,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if (i % 2 != 0)
                 {
                     iconX = 225;
-                    topTextX = 244;
+                    topTextX = 244 - 20;
                     iconTextX = 275;
                     iconSerial = 1000 + (uint) i;
                 }
@@ -483,8 +484,37 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 icon.DragBegin += (sender, e) =>
                 {
                     GumpControl ctrl = (GumpControl)sender;
-                    SpellDefinition def = SpellsMagery.GetSpell( (int)(ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial - 100) + 1);
-                    UseSpellButtonGump gump = new UseSpellButtonGump(def)
+                    int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial - 100) + 1;
+                    SpellDefinition? def = null;
+
+                    switch (_spellBookType)
+                    {
+                        case SpellBookType.Magery:
+                            def = SpellsMagery.GetSpell(idx);
+                            break;
+                        case SpellBookType.Necromancy:
+                            def = SpellsNecromancy.GetSpell(idx);
+                            break;
+                        case SpellBookType.Chivalry:
+                            def = SpellsChivalry.GetSpell(idx);
+                            break;
+                        case SpellBookType.Bushido:
+                            def = SpellsBushido.GetSpell(idx);
+                            break;
+                        case SpellBookType.Ninjitsu:
+                            def = SpellsNinjitsu.GetSpell(idx);
+                            break;
+                        case SpellBookType.Spellweaving:
+                            def = SpellsSpellweaving.GetSpell(idx);
+                            break;
+                        case SpellBookType.Mysticism:
+                            def = SpellsMysticism.GetSpell(idx);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    UseSpellButtonGump gump = new UseSpellButtonGump(def.Value)
                     {
                         X = UIManager.InputManager.MousePosition.X - 22,
                         Y = UIManager.InputManager.MousePosition.Y - 22
@@ -576,11 +606,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     spellIndexOffset = 105;
                     break;
                 case SpellBookType.Mysticism:
-                    maxSpellsCount = 30;
-                    bookGraphic = 0;
-                    minimizedGraphic = 0;
-                    iconStartGraphic = 0;
-                    spellIndexOffset = 0;
+                    maxSpellsCount = 16;
+                    bookGraphic = 0x2B32;
+                    minimizedGraphic = 0; // TODO: i dunno
+                    iconStartGraphic = 0x5DC0;
+                    spellIndexOffset = 121;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -609,18 +639,36 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     abbreviature = SpellsNecromancy.SpellsSpecialsName[offset][1];
                     reagents = def.CreateReagentListString("\n");
                     break;
-                //case SpellBookType.Chivalry:
-                //    break;
-                //case SpellBookType.Bushido:
-                //    break;
-                //case SpellBookType.Ninjitsu:
-                //    break;
-                //case SpellBookType.Spellweaving:
-                //    break;
-                //case SpellBookType.Mysticism:
-                //    break;
-                //case SpellBookType.Unknown:
-                //    break;
+                case SpellBookType.Chivalry:
+                    def = SpellsChivalry.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = string.Empty;
+                    break;
+                case SpellBookType.Bushido:
+                    def = SpellsBushido.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = string.Empty;
+                    break;
+                case SpellBookType.Ninjitsu:
+                    def = SpellsNinjitsu.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = string.Empty;
+                    break;
+                case SpellBookType.Spellweaving:
+                    def = SpellsSpellweaving.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = string.Empty;
+                    break;
+                case SpellBookType.Mysticism:
+                    def = SpellsMysticism.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -636,17 +684,34 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch (_spellBookType)
             {
                 case SpellBookType.Necromancy:
-                    int[] req = SpellsNecromancy.SpellsRequires[offset];
-                    manaCost = req[0];
-                    minSkill = req[1];
+                    SpellDefinition def = SpellsNecromancy.GetSpell(offset + 1);
+                    manaCost = def.ManaCost;
+                    minSkill = def.MinSkill;
                     break;
                 case SpellBookType.Chivalry:
+                    def = SpellsChivalry.GetSpell(offset + 1);
+                    manaCost = def.ManaCost;
+                    minSkill = def.MinSkill;
                     break;
                 case SpellBookType.Bushido:
+                    def = SpellsBushido.GetSpell(offset + 1);
+                    manaCost = def.ManaCost;
+                    minSkill = def.MinSkill;
                     break;
                 case SpellBookType.Ninjitsu:
+                    def = SpellsNinjitsu.GetSpell(offset + 1);
+                    manaCost = def.ManaCost;
+                    minSkill = def.MinSkill;
                     break;
                 case SpellBookType.Spellweaving:
+                    def = SpellsSpellweaving.GetSpell(offset + 1);
+                    manaCost = def.ManaCost;
+                    minSkill = def.MinSkill;
+                    break;
+                case SpellBookType.Mysticism:
+                    def = SpellsMysticism.GetSpell(offset + 1);
+                    manaCost = def.ManaCost;
+                    minSkill = def.MinSkill;
                     break;
             }
 
@@ -742,6 +807,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case 0x2D50:
                     _spellBookType = SpellBookType.Spellweaving;
                     //CreateSpellweaving();
+                    break;
+                case 0x2D9D:
+                    _spellBookType = SpellBookType.Mysticism;
                     break;
             }
 

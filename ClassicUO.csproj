@@ -60,7 +60,12 @@
   <ItemGroup>
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
+    <Compile Include="Game\Data\SpellsBushido.cs" />
+    <Compile Include="Game\Data\SpellsChivalry.cs" />
+    <Compile Include="Game\Data\SpellsMysticism.cs" />
     <Compile Include="Game\Data\SpellsNecromancy.cs" />
+    <Compile Include="Game\Data\SpellsNinjitsu.cs" />
+    <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\GameObjects\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
