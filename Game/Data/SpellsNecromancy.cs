@@ -43,5 +43,32 @@ namespace ClassicUO.Game.Data
 
         public static SpellDefinition GetSpell(int spellIndex) => _spellsDict.TryGetValue(spellIndex, out SpellDefinition spell) ? spell : SpellDefinition.EmptySpell;
 
-    }
+        public static string[][] SpellsSpecialsName => new string[17][]
+        {
+            new [] { "Animate Dead", "Uus Corp" },
+            new [] { "Blood Oath", "In Jux Mani Xen" },
+            new [] { "Corpse Skin", "In Aglo Corp Ylem" },
+            new [] { "Curse Weapon", "An Sanct Gra Char" },
+            new [] { "Evil Omen", "Pas Tym An Sanct" },
+            new [] { "Horrific Beast", "Rel Xen Vas Bal" },
+            new [] { "Lich Form", "Rel Xen Corp Ort" },
+            new [] { "Mind Rot", "Wis An Ben" },
+            new [] { "Pain Spike", "In Sar" },
+            new [] { "Poison Strike", "In Vas Nox" },
+            new [] { "Strangle", "In Bal Nox" },
+            new [] { "Summon Familiar", "Kal Xen Bal" },
+            new [] { "Vampiric Embrace", "Rel Xen An Sanct" },
+            new [] { "Vengeful Spirit", "Kal Xen Bal Beh" },
+            new [] { "Wither", "Kal Vas An Flam" },
+            new [] { "Wraith Form", "Rel Xen Um" },
+            new [] { "Exorcism", "Ort Corp Grav" }
+        };
+
+        public static int[][] SpellsRequires => new int[17][]
+        {
+            new [] { 23, 40 },  new [] { 13, 20 },  new [] { 11, 20 },  new [] { 7, 0 }, new [] { 11, 20 }, new [] { 11, 40 },
+            new []{ 23, 70 },  new []{ 17, 30 },  new []{ 5, 20 },   new []{ 17, 50 }, new [] { 29, 65 }, new [] { 17, 30 },
+            new []{ 23, 99 },  new []{ 41, 80 }, new [] { 23, 60 }, new [] { 17, 20 },  new []{ 40, 80 }
+        };
+}
 }
