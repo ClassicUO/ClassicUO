@@ -46,12 +46,12 @@ namespace ClassicUO.Game.Views
         {
             GameObject = parent;
             AllowedToDraw = true;
-            SortZ = parent.Position.Z;
+            //SortZ = parent.Position.Z;
         }
 
         public GameObject GameObject { get; }
 
-        public sbyte SortZ { get; protected set; }
+        //public sbyte SortZ { get; protected set; }
 
         protected bool HasShadow { get; set; }
 
@@ -144,13 +144,24 @@ namespace ClassicUO.Game.Views
             if (vertex[0].Hue != HueVector)
                 vertex[0].Hue = vertex[1].Hue = vertex[2].Hue = vertex[3].Hue = HueVector;
 
+            if (HasShadow)
+            {
+                SpriteVertex[] vertexS = new SpriteVertex[4]
+                {
+                    vertex[0],
+                    vertex[1],
+                    vertex[2],
+                    vertex[3]
+                };
+
+                spriteBatch.DrawShadow(Texture, vertexS, new Vector2(position.X + 22f, position.Y + GameObject.Offset.Y - (GameObject.Offset.Z / 4 + GameObject.Position.Z) * 4 + 22f), IsFlipped, ShadowZDepth);
+            }
+
             if (!spriteBatch.DrawSprite(Texture, vertex))
                 return false;
             MousePick(list, vertex);
 
-            if (HasShadow)
-                spriteBatch.DrawShadow(Texture, vertex, new Vector2(position.X + 22f, position.Y + GameObject.Offset.Y - (GameObject.Offset.Z / 4 + GameObject.Position.Z) * 4 + 22f), IsFlipped, ShadowZDepth);
-
+         
             return true;
         }
 

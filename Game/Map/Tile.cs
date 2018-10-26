@@ -21,13 +21,17 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
-using ClassicUO.Utility;
+
+using Microsoft.Xna.Framework;
+
+using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.Map
 {
@@ -50,7 +54,7 @@ namespace ClassicUO.Game.Map
 
         public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
 
-        public bool IsStretched { get { return _Stretchables.Contains(Graphic); } }
+        public bool IsStretched => _Stretchables.Contains(Graphic);
 
         public IReadOnlyList<GameObject> ObjectsOnTiles
         {
@@ -84,10 +88,8 @@ namespace ClassicUO.Game.Map
             switch (obj)
             {
                 case Tile tile:
-                    View t = tile.View;
-
                     if (tile.IsStretched)
-                        priorityZ = (short) (tile.AverageZ - 1); //(short)(((TileView)tile.View). - 1);
+                        priorityZ = (short) (tile.AverageZ - 1);
                     else
                         priorityZ--;
 
@@ -192,7 +194,7 @@ namespace ClassicUO.Game.Map
                         if (entity == null || list[i].Position.Z < entity.Position.Z)
                             entity = list[i];
                 }
-                else if (list[i] is Tile tile && tile.View.SortZ >= z + 12)
+                else if (list[i] is Tile tile && tile.AverageZ >= z + 12)
                 {
                     ground = list[i];
                 }
@@ -212,6 +214,42 @@ namespace ClassicUO.Game.Map
 
             return items;
         }
+
+        public void UpdateZ(int zTop, int zRight, int zBottom)
+        {
+            if (IsStretched)
+            {
+                int x = Position.Z * 4 + 1;
+                int y = zTop * 4;
+                int w = zRight * 4 - x;
+                int h = zBottom * 4 + 1 - y;
+
+                Rectangle = new Rectangle(x, y, w, h);
+
+                int average = AverageZ;
+
+                if (Math.Abs(Position.Z - zRight) <= Math.Abs(zBottom - zTop))
+                    AverageZ = (Position.Z + zRight) >> 1;
+                else
+                    AverageZ = (zBottom + zTop) >> 1;
+
+                if (AverageZ != average)
+                    ForceSort();
+
+                MinZ = Position.Z;
+
+                if (zTop < MinZ)
+                    MinZ = zTop;
+
+                if (zRight < MinZ)
+                    MinZ = zRight;
+
+                if (zBottom < MinZ)
+                    MinZ = zBottom;
+            }
+        }
+
+        public Rectangle Rectangle;
 
         protected override View CreateView()
         {

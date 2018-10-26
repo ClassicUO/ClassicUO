@@ -1003,14 +1003,28 @@ namespace ClassicUO.Network
 
         private static void PersonalLightLevel(Packet p)
         {
-            World.Light.Personal = 0;
-            //World.Light.Personal = p.ReadByte();
+            if (!World.InGame)
+                return;
+
+            if (World.Player == p.ReadUInt())
+            {
+                byte level = p.ReadByte();
+
+                if (level > 0x1F)
+                    level = 0x1F;
+
+                World.Light.Personal = level;
+            }
         }
 
         private static void LightLevel(Packet p)
         {
-            World.Light.Overall = 0;
-            //World.Light.Overall = p.ReadByte();
+            byte level = p.ReadByte();
+
+            if (level > 0x1F)
+                level = 0x1F;
+
+            World.Light.Overall = level;
         }
 
         private static void ErrorCode(Packet p)

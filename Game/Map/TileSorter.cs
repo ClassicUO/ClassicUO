@@ -91,7 +91,7 @@ namespace ClassicUO.Game.Map
                     return (mobile.Position.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);
                 case Tile tile:
 
-                    return (tile.View.SortZ, 0, 0, 0);
+                    return (tile.AverageZ, 0, 0, 0);
                 case Static staticitem:
 
                     return (staticitem.Position.Z, 1, (staticitem.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground((long) staticitem.ItemData.Flags) ? 0 : 1), staticitem.Index);

@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Views
 
         public ItemView(Item item) : base(item)
         {
-            if (TileData.IsWet((long) item.ItemData.Flags)) SortZ++;
+            //if (TileData.IsWet((long) item.ItemData.Flags)) SortZ++;
 
             if (!item.IsCorpse)
             {

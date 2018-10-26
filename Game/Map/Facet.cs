@@ -109,11 +109,11 @@ namespace ClassicUO.Game.Map
             return GetTile((short) x, (short) y, load);
         }
 
-        public sbyte GetTileZ(short x, short y)
+        public sbyte GetTileZ(int x, int y)
         {
-            Tile tile = GetTile(x, y);
+            //Tile tile = GetTile(x, y);
 
-            if (tile == null)
+            //if (tile == null)
             {
                 //int cellX = x / 8;
                 //int cellY = y / 8;
@@ -136,7 +136,7 @@ namespace ClassicUO.Game.Map
                 return Marshal.PtrToStructure<MapBlock>((IntPtr) blockIndex.MapAddress).Cells[my * 8 + mx].Z;
             }
 
-            return tile.Position.Z;
+            //return tile.Position.Z;
         }
 
         public IndexMap GetIndex(int blockX, int blockY)
@@ -149,6 +149,8 @@ namespace ClassicUO.Game.Map
             return blockX * IO.Resources.Map.MapBlocksSize[Index][1] + blockY;
         }
 
+
+
         public int GetAverageZ(sbyte top, sbyte left, sbyte right, sbyte bottom, ref sbyte low, ref sbyte high)
         {
             high = top;
@@ -160,22 +162,22 @@ namespace ClassicUO.Game.Map
             if (right < low) low = right;
             if (bottom < low) low = bottom;
 
-            //if (top < low)
-            //    low = top;
-            //if (right < low)
-            //    low = right;
-            //if (bottom < low)
-            //    low = bottom;
+            if (top < low)
+                low = top;
+            if (right < low)
+                low = right;
+            if (bottom < low)
+                low = bottom;
 
-            //if (Math.Abs(high - right) <= Math.Abs(bottom - top))
-            //    return (high + right) >> 1;
-            //else
-            //    return (bottom + top) >> 1;
+            if (Math.Abs(high - right) <= Math.Abs(bottom - top))
+                return (high + right) >> 1;
+            else
+                return (bottom + top) >> 1;
 
-            //if (Math.Abs(left - right) <= Math.Abs(bottom - top))
-            //    return (left + right) >> 1;
-            //else
-            //    return (bottom + top) >> 1;
+            if (Math.Abs(left - right) <= Math.Abs(bottom - top))
+                return (left + right) >> 1;
+            else
+                return (bottom + top) >> 1;
 
             if (Math.Abs(top - bottom) > Math.Abs(left - right)) return FloorAverage(left, right);
 
@@ -184,7 +186,7 @@ namespace ClassicUO.Game.Map
 
         public int GetAverageZ(short x, short y, ref sbyte low, ref sbyte top)
         {
-            return GetAverageZ(GetTileZ(x, y), GetTileZ(x, (short) (y + 1)), GetTileZ((short) (x + 1), y), GetTileZ((short) (x + 1), (short) (y + 1)), ref low, ref top);
+            return GetAverageZ(GetTileZ(x, y), GetTileZ(x, (short)(y + 1)), GetTileZ((short)(x + 1), y), GetTileZ((short)(x + 1), (short)(y + 1)), ref low, ref top);
         }
 
         private static int FloorAverage(int a, int b)
