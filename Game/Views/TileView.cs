@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Views
                 _needUpdateStrechedTile = false;
             }
 
-            HueVector = RenderExtentions.GetHueVector(GameObject.Hue, false, 0.0f, true);
+            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 
             return !tile.IsStretched ? base.Draw(spriteBatch, position, objectList) : Draw3DStretched(spriteBatch, position, objectList);
         }

@@ -85,7 +85,11 @@ namespace ClassicUO.Game
 
         public static bool InGame => Player != null && Map != null;
 
-        public static IsometricLight Light { get; } = new IsometricLight();
+        public static IsometricLight Light { get; } = new IsometricLight()
+        {
+            Overall = 0,
+            Personal = 0
+        };
 
         public static void Update(double totalMS, double frameMS)
         {
