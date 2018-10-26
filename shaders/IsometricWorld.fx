@@ -113,11 +113,14 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	{
 		float3 light = normalize(lightDirection);
 		float3 normal = normalize(IN.Normal);
-		float3 nDotL = max(saturate(dot(normal, light) + 0.5f), 0.0f);
+		float3 nDotL = max((dot(normal, light) + 0.5f), 0.0f);
 
 		//color.rgb = saturate((color.rgb * nDotL * 0.5f) + (color.rgb * 0.5f));
 		//color.rgb = saturate(( (color.rgb * nDotL * lightIntensity * 0.5f) +  (color.rgb * lightIntensity * 0.5f) ));
-		color.rgb = saturate(color.rgb * nDotL * lightIntensity * 0.5f + color.rgb * lightIntensity * 0.5f);
+
+		//color.rgb = saturate(color.rgb * nDotL * lightIntensity * 0.5f + color.rgb * lightIntensity * 0.5f);
+
+		color.rgb = (color.rgb * nDotL);
 
 		//float3 light = normalize(lightDirection);
 		//float3 normal = normalize(IN.Normal);

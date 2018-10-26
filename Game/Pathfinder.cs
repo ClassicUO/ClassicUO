@@ -392,6 +392,7 @@ namespace ClassicUO.Game
             bool landBlocks = TileData.IsImpassable((long) mapTile.TileData.Flags);
             sbyte landLow = 0, landTop = 0;
             int landCenter = World.Map.GetAverageZ((short) xCheck, (short) yCheck, ref landLow, ref landTop);
+
             bool considerLand = !mapTile.IsIgnored;
             int zCenter = 0;
             zLow = 0;

@@ -83,8 +83,9 @@ namespace ClassicUO.Game.GameObjects
         private void Recalculate()
         {           
             IsometricLevel = (32 - Overall + Personal) / 32.0f;
-            _direction = 1.2f;
-            IsometricDirection = Vector3.Normalize(new Vector3((float)Math.Cos(_direction), (float)Math.Sin(_direction), 1f));
+            //_direction = 1.2f;
+            //IsometricDirection = Vector3.Normalize(new Vector3((float)Math.Cos(_direction), (float)Math.Sin(_direction), 1f));
+            IsometricDirection = new Vector3(-1.0f, -1.0f, .5f);
         }
     }
 }

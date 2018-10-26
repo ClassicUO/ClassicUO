@@ -33,6 +33,18 @@ namespace ClassicUO.Utility
 {
     public static class Exstentions
     {
+        //public static void Merge(this Vector3 v, float x, float y, float z)
+        //{
+        //    float newX = v.Y * z - v.Z * y;
+        //    float newY = v.Z * x - v.X * z;
+        //    float newZ = v.X * y - v.Y * x;
+
+        //    v.X = newX;
+        //    v.Y = newY;
+        //    v.Z = newZ;
+        //}
+
+
         public static void Raise(this EventHandler handler, object sender = null)
         {
             handler?.Invoke(sender, EventArgs.Empty);

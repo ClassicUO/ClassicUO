@@ -46,12 +46,12 @@ namespace ClassicUO.Game.Views
         {
             GameObject = parent;
             AllowedToDraw = true;
-            SortZ = parent.Position.Z;
+            //SortZ = parent.Position.Z;
         }
 
         public GameObject GameObject { get; }
 
-        public sbyte SortZ { get; protected set; }
+        //public sbyte SortZ { get; protected set; }
 
         protected bool HasShadow { get; set; }
 

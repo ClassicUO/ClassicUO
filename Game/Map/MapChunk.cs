@@ -72,6 +72,8 @@ namespace ClassicUO.Game.Map
                         sbyte z = block.Cells[pos].Z;
                         Tiles[x][y].Graphic = tileID;
                         Tiles[x][y].Position = new Position((ushort) (bx + x), (ushort) (by + y), z);
+                        Tiles[x][y].AverageZ = z;
+                        Tiles[x][y].MinZ = z;
                         Tiles[x][y].AddGameObject(Tiles[x][y]);
                     }
 
