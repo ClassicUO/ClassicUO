@@ -860,6 +860,13 @@ namespace ClassicUO.Network
 
         private static void DenyMoveItem(Packet p)
         {
+            if (!World.InGame)
+                return;
+
+            GameScene scene = Service.Get<SceneManager>().GetScene<GameScene>();
+            if (scene == null)
+                throw new Exception("Where is my fucking GameScene?");
+            scene.ClearHolding();
         }
 
         private static void EndDraggingItem(Packet p)

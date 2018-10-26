@@ -138,7 +138,7 @@ namespace ClassicUO.Game.Scenes
             ClearHolding();
         }
 
-        private void ClearHolding()
+        public void ClearHolding()
         {
             HeldItem = null;
         }
