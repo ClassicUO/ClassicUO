@@ -177,18 +177,7 @@ namespace ClassicUO.Game.Gumps
 
                             break;
                         case "xmfhtmlgump":
-						    StringBuilder sb = null;
-                            if (gparams.Length > 9)
-                            {
-                                sb = new StringBuilder();
-                                sb.Append(gparams[9]);
-                                for (int i = 10; i < gparams.Length; i++)
-                                {
-                                    sb.Append('\t');
-                                    sb.Append(gparams[i]);
-                                }
-                            }
-                            gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", (sb == null ? Cliloc.GetString(int.Parse(gparams[8])) : Cliloc.Translate(Cliloc.GetString(int.Parse(gparams[8])), sb.ToString().Trim('@'))), color, true), page);
+                            gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[6]) == 1, int.Parse(gparams[7]) != 0, gparams[6] != "0" && gparams[7] == "2", Cliloc.GetString(int.Parse(gparams[5])), 0, true), page);
 
                             break;
                         case "xmfhtmlgumpcolor":
@@ -204,7 +193,18 @@ namespace ClassicUO.Game.Gumps
 
                             if (color == 0x7FFF)
                                 color = 0x00FFFFFF;
-                            gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", Cliloc.GetString(int.Parse(gparams[8])), color, true), page);
+							StringBuilder sb = null;
+                            if (gparams.Length > 9)
+                            {
+                                sb = new StringBuilder();
+                                sb.Append(gparams[9]);
+                                for (int i = 10; i < gparams.Length; i++)
+                                {
+                                    sb.Append('\t');
+                                    sb.Append(gparams[i]);
+                                }
+                            }
+                            gump.AddChildren(new HtmlGump(int.Parse(gparams[1]), int.Parse(gparams[2]), int.Parse(gparams[3]), int.Parse(gparams[4]), int.Parse(gparams[5]) == 1, int.Parse(gparams[6]) != 0, gparams[5] != "0" && gparams[6] == "2", (sb == null ? Cliloc.GetString(int.Parse(gparams[8])) : Cliloc.Translate(Cliloc.GetString(int.Parse(gparams[8])), sb.ToString().Trim('@'))), color, true), page);
 
                             break;
                         case "page":
