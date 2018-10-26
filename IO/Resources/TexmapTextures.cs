@@ -84,6 +84,15 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
+            if (ClassicUO.Game.Map.Tile._Stretchables.Count == 0)
+            {
+                for (int i = TEXTMAP_COUNT - 1; i >= 0; --i)
+                {
+                    (int length, int extra, bool patched) = _file.SeekByEntryIndex(i);
+                    if (length > 0)
+                        ClassicUO.Game.Map.Tile._Stretchables.Add((ushort)i);
+                }
+            }
         }
 
         public static SpriteTexture GetTextmapTexture(ushort g)

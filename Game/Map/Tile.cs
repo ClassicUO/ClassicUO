@@ -33,6 +33,7 @@ namespace ClassicUO.Game.Map
 {
     public sealed class Tile : GameObject
     {
+        public static readonly HashSet<ushort> _Stretchables = new HashSet<ushort>();
         private static readonly List<GameObject> _itemsAtZ = new List<GameObject>();
         private readonly List<GameObject> _objectsOnTile;
         private readonly List<Static> _statics = new List<Static>();
@@ -49,7 +50,7 @@ namespace ClassicUO.Game.Map
 
         public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
 
-        public bool IsStretched { get; set; }
+        public bool IsStretched { get { return _Stretchables.Contains(Graphic); } }
 
         public IReadOnlyList<GameObject> ObjectsOnTiles
         {
