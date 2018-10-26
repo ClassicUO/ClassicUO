@@ -176,6 +176,9 @@ namespace ClassicUO.Game.Scenes
             if (_renderIndex >= 100)
                 _renderIndex = 1;
 #endif
+
+            Pathfinder.ProcessAutoWalk();
+
             CleaningResources();
             base.FixedUpdate(totalMS, frameMS);
         }

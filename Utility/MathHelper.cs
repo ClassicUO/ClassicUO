@@ -21,6 +21,10 @@
 
 #endregion
 
+using System;
+
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Utility
 {
     public static class MathHelper
@@ -28,6 +32,6 @@ namespace ClassicUO.Utility
         public static bool InRange(int input, int low, int high)
         {
             return input >= low && input <= high;
-        }
+        }       
     }
 }

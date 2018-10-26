@@ -1,4 +1,6 @@
-﻿using ClassicUO.Game.Data;
+﻿using System.Runtime.Remoting.Lifetime;
+
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
@@ -177,6 +179,27 @@ namespace ClassicUO.Game.Scenes
                     case MouseButton.Right:
                         _rightMousePressed = e.EventType == MouseEvent.Down;
                         e.IsHandled = true;
+
+                        if (e.EventType == MouseEvent.DoubleClick)
+                        {
+                            GameObject obj = null;
+
+                            if (_mousePicker.MouseOverTile is Tile tile)
+                            {
+                                obj = tile;
+                            }
+                            else if (_mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long)dyn.ItemData.Flags))
+                            {
+                                obj = _mousePicker.MouseOverObject;
+                            }
+
+                            if (obj != null)
+                            {
+                                if (Pathfinder.WalkTo(obj.Position.X, obj.Position.Y, obj.Position.Z, 0))
+                                    World.Player.AddGameText(MessageType.Label, "Pathfinding!", 3, 0, false);
+                            }
+
+                        }
 
                         break;
                     case MouseButton.Left:
