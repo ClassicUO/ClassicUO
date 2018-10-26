@@ -22,9 +22,11 @@
 #endregion
 
 using System;
+
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -40,7 +42,6 @@ namespace ClassicUO.Game.Gumps.Controls
         private SpriteTexture _texture;
         private float _value;
 
-
         public ScrollFlag(GumpControl parent, int x, int y, int height) : this(parent)
         {
             Location = new Point(x, y);
@@ -48,8 +49,10 @@ namespace ClassicUO.Game.Gumps.Controls
             _sliderExtentHeight = height;
         }
 
-        public ScrollFlag(GumpControl parent) : base(parent) => AcceptMouseInput = true;
-
+        public ScrollFlag(GumpControl parent) : base(parent)
+        {
+            AcceptMouseInput = true;
+        }
 
         public event EventHandler ValueChanged;
 
@@ -59,11 +62,12 @@ namespace ClassicUO.Game.Gumps.Controls
             set
             {
                 _value = value;
+
                 if (_value < MinValue)
                     _value = MinValue;
+
                 if (_value > MaxValue)
                     _value = MaxValue;
-
                 ValueChanged.Raise();
             }
         }
@@ -74,6 +78,7 @@ namespace ClassicUO.Game.Gumps.Controls
             set
             {
                 _min = value;
+
                 if (_value < _min)
                     _value = _min;
             }
@@ -85,6 +90,7 @@ namespace ClassicUO.Game.Gumps.Controls
             set
             {
                 _max = value;
+
                 if (_value > _max)
                     _value = _max;
             }
@@ -93,12 +99,13 @@ namespace ClassicUO.Game.Gumps.Controls
         public int ScrollStep { get; set; } = 5;
 
         bool IScrollBar.Contains(int x, int y)
-            => Contains(x, y);
+        {
+            return Contains(x, y);
+        }
 
         protected override void OnInitialize()
         {
             base.OnInitialize();
-
             _texture = IO.Resources.Gumps.GetGumpTexture(0x0828);
             Width = _texture.Width;
             Height = _texture.Height;
@@ -110,19 +117,14 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (MaxValue <= MinValue || MinValue >= MaxValue)
                 Value = MaxValue = MinValue;
-
             _sliderPosition = GetSliderYPosition();
-
             _texture.Ticks = (long) totalMS;
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             if (MaxValue != MinValue)
-            {
-                spriteBatch.Draw2D(_texture, new Vector3(position.X - 5, position.Y + _sliderPosition, 0),
-                    Vector3.Zero);
-            }
+                spriteBatch.Draw2D(_texture, new Vector3(position.X - 5, position.Y + _sliderPosition, 0), Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
         }
@@ -131,10 +133,14 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (MaxValue - MinValue == 0)
                 return 0f;
+
             return GetScrollableArea() * ((_value - MinValue) / (MaxValue - MinValue));
         }
 
-        private float GetScrollableArea() => Height - _texture.Height;
+        private float GetScrollableArea()
+        {
+            return Height - _texture.Height;
+        }
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
@@ -153,24 +159,20 @@ namespace ClassicUO.Game.Gumps.Controls
         protected override void OnMouseEnter(int x, int y)
         {
             if (_btnSliderClicked)
-            {
                 if (y != _clickPosition.Y)
                 {
                     float sliderY = _sliderPosition + (y - _clickPosition.Y);
 
                     if (sliderY < 0)
                         sliderY = 0;
-
                     float scrollableArea = GetScrollableArea();
+
                     if (sliderY > scrollableArea)
                         sliderY = scrollableArea;
-
                     _clickPosition = new Point(x, y);
-
                     _value = sliderY / scrollableArea * (MaxValue - MinValue) + MinValue;
                     _sliderPosition = sliderY;
                 }
-            }
         }
 
         protected override void OnMouseWheel(MouseEvent delta)
@@ -179,9 +181,11 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 case MouseEvent.WheelScrollUp:
                     Value -= ScrollStep;
+
                     break;
                 case MouseEvent.WheelScrollDown:
                     Value += ScrollStep;
+
                     break;
             }
         }

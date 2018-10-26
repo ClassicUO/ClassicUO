@@ -24,6 +24,7 @@
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -31,17 +32,13 @@ namespace ClassicUO.Game.Gumps.Controls
     public class Label : GumpControl
     {
         private readonly RenderedText _gText;
+        private readonly float _timeToLive;
         private float _alpha;
         private float _timeCreated;
-        private readonly float _timeToLive;
 
-        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF,
-            FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, float timeToLive = 0.0f)
+        public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, float timeToLive = 0.0f)
         {
-            if (font == 0xFF)
-            {
-                font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
-            }
+            if (font == 0xFF) font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0);
 
             _gText = new RenderedText
             {
@@ -54,15 +51,12 @@ namespace ClassicUO.Game.Gumps.Controls
                 Text = text
             };
             AcceptMouseInput = false;
-
             Width = _gText.Width;
             Height = _gText.Height;
-
             _timeToLive = timeToLive;
         }
 
-        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true,
-            ((Hue)( Hue.Parse(parts[3]) + 1)), 0, style: FontStyle.BlackBorder)
+        public Label(string[] parts, string[] lines) : this(lines[int.Parse(parts[4])], true, (Hue) (Hue.Parse(parts[3]) + 1), 0, style: FontStyle.BlackBorder)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -82,18 +76,23 @@ namespace ClassicUO.Game.Gumps.Controls
         public Hue Hue
         {
             get => _gText.Hue;
-            set { _gText.Hue = value; _gText.CreateTexture(); }
+            set
+            {
+                _gText.Hue = value;
+                _gText.CreateTexture();
+            }
         }
 
         public bool FadeOut { get; set; }
-
 
         private static Hue TransformHue(Hue hue)
         {
             if (hue > 1)
                 hue -= 2;
+
             if (hue < 2)
                 hue = 1;
+
             return hue;
         }
 
@@ -105,32 +104,26 @@ namespace ClassicUO.Game.Gumps.Controls
             if (FadeOut)
             {
                 float time = (float) totalMS - _timeCreated;
+
                 if (time > _timeToLive)
                     Dispose();
-                else if (time > _timeToLive - 2000)
-                {
-                    _alpha = (time - (_timeToLive - 2000)) / 2000;
-                }
+                else if (time > _timeToLive - 2000) _alpha = (time - (_timeToLive - 2000)) / 2000;
             }
 
             base.Update(totalMS, frameMS);
         }
 
-
         protected override void OnInitialize()
         {
-            if (FadeOut)
-            {
-                _timeCreated = CoreGame.Ticks;
-            }
+            if (FadeOut) _timeCreated = CoreGame.Ticks;
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             if (FadeOut)
                 hue = RenderExtentions.GetHueVector(hue.HasValue ? (int) hue.Value.X : 0, false, _alpha, false);
-
             _gText.Draw(spriteBatch, position, hue);
+
             return base.Draw(spriteBatch, position, hue);
         }
     }

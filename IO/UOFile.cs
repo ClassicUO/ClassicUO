@@ -25,8 +25,8 @@ using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
+
 using ClassicUO.IO.Resources;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
@@ -35,38 +35,46 @@ namespace ClassicUO.IO
     {
         private MemoryMappedViewAccessor _accessor;
 
-        protected UOFile(string filepath) => Path = filepath;
+        protected UOFile(string filepath)
+        {
+            Path = filepath;
+        }
 
         public string Path { get; }
+
         public UOFileIndex3D[] Entries { get; protected set; }
 
         protected virtual void Load()
         {
             Log.Message(LogTypes.Trace, $"Loading file:\t\t{Path}");
             FileInfo fileInfo = new FileInfo(Path);
+
             if (!fileInfo.Exists)
                 throw new FileNotFoundException(fileInfo.FullName);
             long size = fileInfo.Length;
+
             if (size > 0)
             {
                 MemoryMappedFile file = MemoryMappedFile.CreateFromFile(fileInfo.FullName, FileMode.Open);
                 _accessor = file.CreateViewAccessor(0, size, MemoryMappedFileAccess.Read);
-
                 byte* ptr = null;
+
                 try
                 {
                     _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
-
                     SetData(ptr, (long) _accessor.SafeMemoryMappedViewHandle.ByteLength);
                 }
                 catch
                 {
                     _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
+
                     throw new Exception("Something goes wrong...");
                 }
             }
             else
+            {
                 throw new Exception($"{Path} size must has > 0");
+            }
         }
 
         public virtual void Unload()
@@ -75,7 +83,6 @@ namespace ClassicUO.IO
             Entries = null;
             Log.Message(LogTypes.Trace, $"Unloaded:\t\t{Path}");
         }
-
 
         internal void Fill(byte[] buffer, int count)
         {
@@ -86,6 +93,7 @@ namespace ClassicUO.IO
         {
             T[] t = ReadArray<T>(Position, count);
             Position += Marshal.SizeOf<T>() * count;
+
             return t;
         }
 
@@ -93,12 +101,14 @@ namespace ClassicUO.IO
         {
             T[] array = new T[count];
             _accessor.ReadArray(position, array, 0, count);
+
             return array;
         }
 
         internal T ReadStruct<T>(long position) where T : struct
         {
             _accessor.Read(position, out T s);
+
             return s;
         }
 
@@ -106,22 +116,22 @@ namespace ClassicUO.IO
         {
             if (entryidx < 0 || entryidx >= Entries.Length)
                 return (0, 0, false);
-
             UOFileIndex3D e = Entries[entryidx];
-            if (e.Offset < 0) return (0, 0, false);
 
+            if (e.Offset < 0) return (0, 0, false);
             int length = e.Length & 0x7FFFFFFF;
             int extra = e.Extra;
 
             if ((e.Length & (1 << 31)) != 0)
             {
                 Verdata.File.Seek(e.Offset);
+
                 return (length, extra, true);
             }
 
             if (e.Length < 0) return (0, 0, false);
-
             Seek(e.Offset);
+
             return (length, extra, false);
         }
     }

@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -30,7 +31,10 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private static SpriteTexture _transparentTexture;
 
-        public CheckerTrans() => AcceptMouseInput = false;
+        public CheckerTrans()
+        {
+            AcceptMouseInput = false;
+        }
 
         public CheckerTrans(string[] parts) : this()
         {
@@ -51,12 +55,14 @@ namespace ClassicUO.Game.Gumps.Controls
                 }
 
                 _transparentTexture.Ticks = CoreGame.Ticks;
+
                 return _transparentTexture;
             }
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>
-            spriteBatch.Draw2D(TransparentTexture, new Rectangle((int) position.X, (int) position.Y, Width, Height),
-                RenderExtentions.GetHueVector(0, false, .5f, true));
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        {
+            return spriteBatch.Draw2D(TransparentTexture, new Rectangle((int) position.X, (int) position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, .5f, true));
+        }
     }
 }

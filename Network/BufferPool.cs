@@ -44,7 +44,6 @@ namespace ClassicUO.Network
             lock (this)
             {
                 if (_freeSegment.Count > 0) return _freeSegment.Dequeue();
-
                 for (int i = 0; i < _capacity; i++) _freeSegment.Enqueue(new byte[_arraySize]);
 
                 return _freeSegment.Dequeue();
@@ -55,7 +54,10 @@ namespace ClassicUO.Network
         {
             if (segment == null) return;
 
-            lock (this) _freeSegment.Enqueue(segment);
+            lock (this)
+            {
+                _freeSegment.Enqueue(segment);
+            }
         }
     }
 }

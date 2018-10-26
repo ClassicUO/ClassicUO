@@ -24,6 +24,7 @@
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -40,8 +41,8 @@ namespace ClassicUO.Game.Gumps.Controls
         }
 
         public int SlotIndex { get; set; }
-        public bool IsFemale { get; set; }
 
+        public bool IsFemale { get; set; }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
@@ -59,6 +60,8 @@ namespace ClassicUO.Game.Gumps.Controls
         }
 
         protected override bool Contains(int x, int y)
-            => IO.Resources.Gumps.Contains(_gumpIndex, x, y);
+        {
+            return IO.Resources.Gumps.Contains(_gumpIndex, x, y);
+        }
     }
 }

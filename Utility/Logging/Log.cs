@@ -1,26 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ClassicUO.Utility.Logging
+﻿namespace ClassicUO.Utility.Logging
 {
-    class Log
+    internal class Log
     {
         private static Logger logger;
 
         public static void Start(LogTypes logTypes, LogFile logFile = null)
         {
-            logger = logger ?? new Logger { LogTypes = logTypes };
-
+            logger = logger ?? new Logger {LogTypes = logTypes};
             logger?.Start(logFile);
         }
 
         public static void Stop()
         {
             logger?.Stop();
-
             logger = null;
         }
 

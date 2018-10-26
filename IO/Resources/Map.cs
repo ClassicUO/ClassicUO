@@ -24,6 +24,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+
 using ClassicUO.Game.Views;
 
 namespace ClassicUO.IO.Resources
@@ -31,12 +32,12 @@ namespace ClassicUO.IO.Resources
     public static class Map
     {
         private const int MAPS_COUNT = 6;
-
         private static readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];
         private static readonly UOFileMul[] _filesStatics = new UOFileMul[MAPS_COUNT];
         private static readonly UOFileMul[] _filesIdxStatics = new UOFileMul[MAPS_COUNT];
 
         public static IndexMap[][] BlockData { get; } = new IndexMap[MAPS_COUNT][];
+
         public static int[][] MapBlocksSize { get; } = new int[MAPS_COUNT][];
 
         public static int[][] MapsDefaultSize { get; } = new int[MAPS_COUNT][]
@@ -45,16 +46,15 @@ namespace ClassicUO.IO.Resources
             new int[2] {1448, 1448}, new int[2] {1280, 4096}
         };
 
-
         public static void Load()
         {
             string path;
-
             bool foundedOneMap = false;
 
             for (int i = 0; i < MAPS_COUNT; i++)
             {
                 path = Path.Combine(FileManager.UoFolderPath, $"map{i}LegacyMUL.uop");
+
                 if (File.Exists(path))
                 {
                     _filesMap[i] = new UOFileUop(path, ".dat");
@@ -63,6 +63,7 @@ namespace ClassicUO.IO.Resources
                 else
                 {
                     path = Path.Combine(FileManager.UoFolderPath, $"map{i}.mul");
+
                     if (File.Exists(path))
                     {
                         _filesMap[i] = new UOFileMul(path);
@@ -72,62 +73,47 @@ namespace ClassicUO.IO.Resources
 
                 path = Path.Combine(FileManager.UoFolderPath, $"statics{i}.mul");
                 if (File.Exists(path)) _filesStatics[i] = new UOFileMul(path);
-
                 path = Path.Combine(FileManager.UoFolderPath, $"staidx{i}.mul");
                 if (File.Exists(path)) _filesIdxStatics[i] = new UOFileMul(path);
             }
 
             if (!foundedOneMap)
                 throw new FileNotFoundException("No maps founded.");
-
             int mapblocksize = Marshal.SizeOf<MapBlock>();
 
             if (_filesMap[0].Length / mapblocksize == 393216 || FileManager.ClientVersion < ClientVersions.CV_4011D)
                 MapsDefaultSize[0][0] = MapsDefaultSize[1][0] = 6144;
 
-
             for (int i = 0; i < MAPS_COUNT; i++)
                 MapBlocksSize[i] = new int[2] {MapsDefaultSize[i][0] / 8, MapsDefaultSize[i][1] / 8};
         }
-
 
         public static void LoadMap(int i)
         {
             int mapblocksize = Marshal.SizeOf<MapBlock>();
             int staticidxblocksize = Marshal.SizeOf<StaidxBlock>();
             int staticblocksize = Marshal.SizeOf<StaticsBlock>();
-
-
             int width = MapBlocksSize[i][0];
             int height = MapBlocksSize[i][1];
-
             int maxblockcount = width * height;
-
             BlockData[i] = new IndexMap[maxblockcount];
-
             UOFile file = _filesMap[i];
             UOFile fileidx = _filesIdxStatics[i];
             UOFile staticfile = _filesStatics[i];
-
             ulong staticidxaddress = (ulong) fileidx.StartAddress;
             ulong endstaticidxaddress = staticidxaddress + (ulong) fileidx.Length;
-
             ulong staticaddress = (ulong) staticfile.StartAddress;
             ulong endstaticaddress = staticaddress + (ulong) staticfile.Length;
-
             ulong mapddress = (ulong) file.StartAddress;
             ulong endmapaddress = mapddress + (ulong) file.Length;
-
             ulong uopoffset = 0;
             int fileNumber = -1;
-
             bool isuop = file is UOFileUop;
 
             for (int block = 0; block < maxblockcount; block++)
             {
                 ulong realmapaddress = 0, realstaticaddress = 0;
                 uint realstaticcount = 0;
-
                 int blocknum = block;
 
                 if (isuop)
@@ -148,7 +134,6 @@ namespace ClassicUO.IO.Resources
 
                 if (address < endmapaddress)
                     realmapaddress = address;
-
                 ulong stidxaddress = staticidxaddress + (ulong) (block * staticidxblocksize);
                 StaidxBlock bb = fileidx.ReadStruct<StaidxBlock>(block * staticidxblocksize);
 
@@ -172,7 +157,6 @@ namespace ClassicUO.IO.Resources
                     OriginalMapAddress = realmapaddress,
                     OriginalStaticAddress = realstaticaddress,
                     OriginalStaticCount = realstaticcount,
-
                     MapAddress = realmapaddress,
                     StaticAddress = realstaticaddress,
                     StaticCount = realstaticcount
@@ -188,15 +172,14 @@ namespace ClassicUO.IO.Resources
         public static unsafe RadarMapBlock? GetRadarMapBlock(int map, int blockX, int blockY)
         {
             IndexMap indexMap = GetIndex(map, blockX, blockY);
+
             if (indexMap == null || indexMap.MapAddress == 0)
                 return null;
-
             MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr) indexMap.MapAddress);
             RadarMapBlock mb = new RadarMapBlock();
             mb.Cells = new RadarMapcells[8, 8];
 
             for (int x = 0; x < 8; x++)
-            {
                 for (int y = 0; y < 8; y++)
                 {
                     ref MapCells cell = ref block.Cells[y * 8 + x];
@@ -205,7 +188,6 @@ namespace ClassicUO.IO.Resources
                     outcell.Z = cell.Z;
                     outcell.IsLand = true;
                 }
-            }
 
             StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
 
@@ -218,6 +200,7 @@ namespace ClassicUO.IO.Resources
                     if (sb->Color > 0 && sb->Color != 0xFFFF && !View.IsNoDrawable(sb->Color))
                     {
                         ref RadarMapcells outcell = ref mb.Cells[sb->X, sb->Y];
+
                         if (outcell.Z <= sb->Z)
                         {
                             outcell.Graphic = sb->Color;
@@ -236,6 +219,7 @@ namespace ClassicUO.IO.Resources
         public static IndexMap GetIndex(int map, int x, int y)
         {
             int block = x * MapBlocksSize[map][1] + y;
+
             return BlockData[map][block];
         }
     }
@@ -269,7 +253,6 @@ namespace ClassicUO.IO.Resources
     public struct MapBlock
     {
         public readonly uint Header;
-
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
         public MapCells[] Cells;
     }

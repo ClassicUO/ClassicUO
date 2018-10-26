@@ -29,7 +29,6 @@ namespace ClassicUO.IO
     public class UOFileUop : UOFile
     {
         private const uint UOP_MAGIC_NUMBER = 0x50594D;
-
         private readonly string _extension;
         private readonly bool _hasExtra;
         private int _count;
@@ -39,14 +38,12 @@ namespace ClassicUO.IO
             _extension = extension;
             _count = count;
             _hasExtra = hasextra;
-
             Load();
         }
 
         protected override void Load()
         {
             base.Load();
-
             Seek(0);
 
             if (ReadUInt() != UOP_MAGIC_NUMBER)
@@ -55,26 +52,24 @@ namespace ClassicUO.IO
             Skip(4);
             long nextBlock = ReadLong();
             Skip(4);
-
             int count = ReadInt();
+
             if (_count <= 0)
                 _count = count;
-
             Entries = new UOFileIndex3D[_count];
             Dictionary<ulong, int> hashes = new Dictionary<ulong, int>();
-
             string pattern = System.IO.Path.GetFileNameWithoutExtension(Path).ToLowerInvariant();
 
             for (int i = 0; i < _count; i++)
             {
                 string file = string.Format("build/{0}/{1:D8}{2}", pattern, i, _extension);
                 ulong hash = CreateHash(file);
+
                 if (!hashes.ContainsKey(hash))
                     hashes.Add(hash, i);
             }
 
             Seek(nextBlock);
-
             int total = 0;
 
             do
@@ -92,19 +87,15 @@ namespace ClassicUO.IO
                     ulong hash = ReadULong();
                     Skip(4);
                     short flag = ReadShort();
-
                     int length = flag == 1 ? compressedLength : decompressedLength;
+
                     if (offset == 0)
                         continue;
 
                     if (hashes.TryGetValue(hash, out int idx))
                     {
                         if (idx < 0 || idx > Entries.Length)
-                        {
-                            throw new IndexOutOfRangeException(
-                                "hashes dictionary and files collection have different count of entries!");
-                        }
-
+                            throw new IndexOutOfRangeException("hashes dictionary and files collection have different count of entries!");
                         Entries[idx] = new UOFileIndex3D(offset + headerLength, length, decompressedLength);
 
                         // extra?
@@ -112,29 +103,23 @@ namespace ClassicUO.IO
                         {
                             long curpos = Position;
                             Seek(offset + headerLength);
-
                             int extra1 = ReadInt();
                             int extra2 = ReadInt();
-
                             Entries[idx].Offset += 8;
                             Entries[idx].Extra = (extra1 << 16) | extra2;
                             Entries[idx].Length -= 8;
-
                             Seek(curpos);
                         }
                     }
                     else
                     {
-                        throw new ArgumentException(string.Format(
-                            "File with hash {0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!",
-                            hash));
+                        throw new ArgumentException(string.Format("File with hash {0:X8} was not found in hashes dictionary! EA Mythic changed UOP format!", hash));
                     }
                 }
 
                 Seek(nextBlock);
             } while (nextBlock != 0);
         }
-
 
         internal long GetOffsetFromUOP(long offset)
         {
@@ -143,6 +128,7 @@ namespace ClassicUO.IO
             foreach (UOFileIndex3D t in Entries)
             {
                 long currpos = pos + t.Length;
+
                 if (offset < currpos)
                     return t.Offset + (offset - pos);
                 pos = currpos;
@@ -154,10 +140,8 @@ namespace ClassicUO.IO
         internal static ulong CreateHash(string s)
         {
             uint eax, ecx, edx, ebx, esi, edi;
-
             eax = ecx = edx = ebx = esi = edi = 0;
             ebx = edi = esi = (uint) s.Length + 0xDEADBEEF;
-
             int i = 0;
 
             for (i = 0; i + 12 < s.Length; i += 12)
@@ -165,7 +149,6 @@ namespace ClassicUO.IO
                 edi = (uint) ((s[i + 7] << 24) | (s[i + 6] << 16) | (s[i + 5] << 8) | s[i + 4]) + edi;
                 esi = (uint) ((s[i + 11] << 24) | (s[i + 10] << 16) | (s[i + 9] << 8) | s[i + 8]) + esi;
                 edx = (uint) ((s[i + 3] << 24) | (s[i + 2] << 16) | (s[i + 1] << 8) | s[i]) - esi;
-
                 edx = (edx + ebx) ^ (esi >> 28) ^ (esi << 4);
                 esi += edi;
                 edi = (edi - edx) ^ (edx >> 26) ^ (edx << 6);
@@ -219,6 +202,7 @@ namespace ClassicUO.IO
                         goto case 1;
                     case 1:
                         ebx += s[i];
+
                         break;
                 }
 

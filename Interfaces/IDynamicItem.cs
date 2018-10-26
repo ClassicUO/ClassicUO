@@ -31,6 +31,7 @@ namespace ClassicUO.Interfaces
         StaticTiles ItemData { get; }
 
         Graphic Graphic { get; set; }
+
         Position Position { get; set; }
 
         bool IsAtWorld(int x, int y);

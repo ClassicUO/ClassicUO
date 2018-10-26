@@ -37,50 +37,93 @@ namespace ClassicUO.Game
         }
 
         public ushort X { get; set; }
+
         public ushort Y { get; set; }
+
         public sbyte Z { get; set; }
 
+        public static bool operator ==(Position p1, Position p2)
+        {
+            return p1.X == p2.X && p1.Y == p2.Y && p1.Z == p2.Z;
+        }
 
-        public static bool operator ==(Position p1, Position p2) => p1.X == p2.X && p1.Y == p2.Y && p1.Z == p2.Z;
+        public static bool operator !=(Position p1, Position p2)
+        {
+            return p1.X != p2.X || p1.Y != p2.Y || p1.Z != p2.Z;
+        }
 
-        public static bool operator !=(Position p1, Position p2) => p1.X != p2.X || p1.Y != p2.Y || p1.Z != p2.Z;
+        public static Position operator +(Position p1, Position p2)
+        {
+            return new Position((ushort) (p1.X + p2.X), (ushort) (p1.Y + p2.Y), (sbyte) (p1.Z + p2.Z));
+        }
 
-        public static Position operator +(Position p1, Position p2) => new Position((ushort) (p1.X + p2.X),
-            (ushort) (p1.Y + p2.Y), (sbyte) (p1.Z + p2.Z));
+        public static Position operator -(Position p1, Position p2)
+        {
+            return new Position((ushort) (p1.X - p2.X), (ushort) (p1.Y - p2.Y), (sbyte) (p1.Z - p2.Z));
+        }
 
-        public static Position operator -(Position p1, Position p2) => new Position((ushort) (p1.X - p2.X),
-            (ushort) (p1.Y - p2.Y), (sbyte) (p1.Z - p2.Z));
+        public static Position operator *(Position p1, Position p2)
+        {
+            return new Position((ushort) (p1.X * p2.X), (ushort) (p1.Y * p2.Y), (sbyte) (p1.Z * p2.Z));
+        }
 
-        public static Position operator *(Position p1, Position p2) => new Position((ushort) (p1.X * p2.X),
-            (ushort) (p1.Y * p2.Y), (sbyte) (p1.Z * p2.Z));
+        public static Position operator /(Position p1, Position p2)
+        {
+            return new Position((ushort) (p1.X / p2.X), (ushort) (p1.Y / p2.Y), (sbyte) (p1.Z / p2.Z));
+        }
 
-        public static Position operator /(Position p1, Position p2) => new Position((ushort) (p1.X / p2.X),
-            (ushort) (p1.Y / p2.Y), (sbyte) (p1.Z / p2.Z));
+        public static bool operator <(Position p1, Position p2)
+        {
+            return p1.X < p2.X && p1.Y < p2.Y;
+        }
 
-        public static bool operator <(Position p1, Position p2) => p1.X < p2.X && p1.Y < p2.Y;
-        public static bool operator >(Position p1, Position p2) => p1.X > p2.X && p1.Y > p2.Y;
-        public static bool operator <=(Position p1, Position p2) => p1.X <= p2.X && p1.Y <= p2.Y;
-        public static bool operator >=(Position p1, Position p2) => p1.X >= p2.X && p1.Y >= p2.Y;
+        public static bool operator >(Position p1, Position p2)
+        {
+            return p1.X > p2.X && p1.Y > p2.Y;
+        }
 
+        public static bool operator <=(Position p1, Position p2)
+        {
+            return p1.X <= p2.X && p1.Y <= p2.Y;
+        }
 
-        public int DistanceTo(Position position) => Math.Max(Math.Abs(position.X - X), Math.Abs(position.Y - Y));
+        public static bool operator >=(Position p1, Position p2)
+        {
+            return p1.X >= p2.X && p1.Y >= p2.Y;
+        }
+
+        public int DistanceTo(Position position)
+        {
+            return Math.Max(Math.Abs(position.X - X), Math.Abs(position.Y - Y));
+        }
 
         public double DistanceToSqrt(Position position)
         {
             int a = position.X - X;
             int b = position.Y - Y;
+
             return Math.Sqrt(a * a + b * b);
         }
 
-        public override int GetHashCode() => X ^ Y ^ Z;
+        public override int GetHashCode()
+        {
+            return X ^ Y ^ Z;
+        }
 
-        public override bool Equals(object obj) => obj is Position && this == (Position) obj;
+        public override bool Equals(object obj)
+        {
+            return obj is Position && this == (Position) obj;
+        }
 
-        public override string ToString() => $"{X}.{Y}.{Z}";
+        public override string ToString()
+        {
+            return $"{X}.{Y}.{Z}";
+        }
 
         public static Position Parse(string str)
         {
             string[] args = str.Split('.');
+
             return new Position(ushort.Parse(args[0]), ushort.Parse(args[1]), sbyte.Parse(args[2]));
         }
     }

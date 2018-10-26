@@ -22,13 +22,17 @@
 #endregion
 
 using System.Linq;
+
 using ClassicUO.Input;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
     public class RadioButton : Checkbox
     {
-        public RadioButton(int group, string[] parts, string[] lines) : base(parts, lines) => GroupIndex = group;
+        public RadioButton(int group, string[] parts, string[] lines) : base(parts, lines)
+        {
+            GroupIndex = group;
+        }
 
         public int GroupIndex { get; set; }
 
@@ -38,13 +42,9 @@ namespace ClassicUO.Game.Gumps.Controls
             base.OnMouseClick(x, y, button);
         }
 
-
         private void HandleClick()
         {
-            Parent?.GetControls<RadioButton>()
-                .Where(s => s.GroupIndex == GroupIndex)
-                .ToList()
-                .ForEach(s => s.IsChecked = false);
+            Parent?.GetControls<RadioButton>().Where(s => s.GroupIndex == GroupIndex).ToList().ForEach(s => s.IsChecked = false);
         }
     }
 }

@@ -26,73 +26,59 @@ using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
     public class WorldViewportGump : Gump
     {
+        private const int BORDER_WIDTH = 5;
+        private const int BORDER_HEIGHT = 5;
         private readonly GameBorder _border;
         private readonly Button _button;
         private readonly ChatControl _chatControl;
-        private bool _clicked;
         private readonly InputManager _inputManager;
-        private Point _lastPosition = Point.Zero;
         private readonly Settings _settings;
         private readonly WorldViewport _viewport;
+        private bool _clicked;
+        private Point _lastPosition = Point.Zero;
         private int _worldHeight;
         private int _worldWidth;
-
-        private const int BORDER_WIDTH = 5;
-        private const int BORDER_HEIGHT = 5;
 
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
             _settings = Service.Get<Settings>();
             _inputManager = Service.Get<InputManager>();
-
             AcceptMouseInput = false;
             CanMove = true;
             CanCloseWithEsc = false;
             CanCloseWithRightClick = false;
             ControlInfo.Layer = UILayer.Under;
-
             X = _settings.GameWindowX;
             Y = _settings.GameWindowY;
-
-
             _worldWidth = _settings.GameWindowWidth;
             _worldHeight = _settings.GameWindowHeight;
-
-
             _button = new Button(0, 0x837, 0x838, 0x838);
-
             _button.MouseDown += (sender, e) => { _clicked = true; };
+
             _button.MouseUp += (sender, e) =>
             {
                 _clicked = false;
                 _lastPosition = Point.Zero;
             };
-
             Width = _worldWidth + BORDER_WIDTH * 2;
             Height = _worldHeight + BORDER_HEIGHT * 2;
-
             _border = new GameBorder(0, 0, Width, Height, 4);
-
             _viewport = new WorldViewport(scene, BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
             _chatControl = new ChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
-
             AddChildren(_border);
             AddChildren(_button);
             AddChildren(_viewport);
             AddChildren(_chatControl);
-
             Service.Register(_chatControl);
-          
-
             Resize();
         }
-
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -100,26 +86,22 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 _settings.GameWindowWidth += _inputManager.Offset.X - _lastPosition.X;
                 _settings.GameWindowHeight += _inputManager.Offset.Y - _lastPosition.Y;
-
                 _lastPosition = _inputManager.Offset;
 
-                if (_settings.GameWindowWidth < 640)
-                    _settings.GameWindowWidth = 640;
+                if (_settings.GameWindowWidth < 350)
+                    _settings.GameWindowWidth = 350;
 
-                if (_settings.GameWindowHeight < 500)
-                    _settings.GameWindowHeight = 500;
+                if (_settings.GameWindowHeight < 350)
+                    _settings.GameWindowHeight = 350;
             }
 
             if (_worldWidth != _settings.GameWindowWidth || _worldHeight != _settings.GameWindowHeight)
             {
                 _worldWidth = _settings.GameWindowWidth;
                 _worldHeight = _settings.GameWindowHeight;
-
                 Width = _worldWidth + BORDER_WIDTH * 2;
                 Height = _worldHeight + BORDER_HEIGHT * 2;
-
                 Resize();
-                //OnResize();
             }
 
             base.Update(totalMS, frameMS);
@@ -128,21 +110,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
         protected override void OnMove()
         {
             Point position = Location;
-
             SpriteBatch3D sb = Service.Get<SpriteBatch3D>();
 
             if (position.X + Width - BORDER_WIDTH > sb.GraphicsDevice.Viewport.Width)
                 position.X = sb.GraphicsDevice.Viewport.Width - (Width - BORDER_WIDTH);
+
             if (position.X < -BORDER_WIDTH)
                 position.X = -BORDER_WIDTH;
 
             if (position.Y + Height - BORDER_HEIGHT > sb.GraphicsDevice.Viewport.Height)
                 position.Y = sb.GraphicsDevice.Viewport.Height - (Height - BORDER_HEIGHT);
+
             if (position.Y < -BORDER_HEIGHT)
                 position.Y = -BORDER_HEIGHT;
-
             Location = position;
-
             _settings.GameWindowX = position.X;
             _settings.GameWindowY = position.Y;
         }
@@ -151,18 +132,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             _border.Width = Width;
             _border.Height = Height;
-
-
             _button.X = Width - 6;
             _button.Y = Height - 6;
-
-
             _viewport.Width = _worldWidth;
             _viewport.Height = _worldHeight;
-
             _chatControl.Width = _worldWidth;
             _chatControl.Height = _worldHeight;
-
             _chatControl.Resize();
         }
     }
@@ -178,12 +153,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Y = y;
             Width = w;
             Height = h;
-
             _borders[0] = IO.Resources.Gumps.GetGumpTexture(0x0A8C);
             _borders[1] = IO.Resources.Gumps.GetGumpTexture(0x0A8D);
-
             _borderSize = borderSize;
-
             CanMove = true;
             AcceptMouseInput = true;
         }
@@ -192,28 +164,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             for (int i = 0; i < _borders.Length; i++)
                 _borders[i].Ticks = (long) totalMS;
-
             base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             // sopra
-            spriteBatch.Draw2DTiled(_borders[0],
-                new Rectangle((int)position.X, (int)position.Y, Width,
-                    _borderSize), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_borders[0], new Rectangle((int) position.X, (int) position.Y, Width, _borderSize), Vector3.Zero);
             // sotto
-            spriteBatch.Draw2DTiled(_borders[0],
-                new Rectangle((int)position.X, (int)position.Y + Height - _borderSize, Width,
-                    _borderSize), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_borders[0], new Rectangle((int) position.X, (int) position.Y + Height - _borderSize, Width, _borderSize), Vector3.Zero);
             //sx
-            spriteBatch.Draw2DTiled(_borders[1],
-                new Rectangle((int)position.X, (int)position.Y,
-                    _borderSize, Height), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_borders[1], new Rectangle((int) position.X, (int) position.Y, _borderSize, Height), Vector3.Zero);
             //dx
-            spriteBatch.Draw2DTiled(_borders[1],
-                new Rectangle((int)position.X + Width - _borderSize, (int)position.Y + _borders[1].Width / 2, _borderSize,
-                    Height - _borderSize), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_borders[1], new Rectangle((int) position.X + Width - _borderSize, (int) position.Y + _borders[1].Width / 2, _borderSize, Height - _borderSize), Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
         }

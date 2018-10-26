@@ -25,14 +25,17 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
 {
     public class StaticView : View
     {
-        public StaticView(Static st) : base(st) => AllowedToDraw = !IsNoDrawable(st.Graphic);
-
+        public StaticView(Static st) : base(st)
+        {
+            AllowedToDraw = !IsNoDrawable(st.Graphic);
+        }
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
@@ -41,12 +44,10 @@ namespace ClassicUO.Game.Views
             if (Texture == null || Texture.IsDisposed)
             {
                 Texture = Art.GetStaticTexture(GameObject.Graphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4,
-                    Texture.Width, Texture.Height);
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
             }
 
             Static st = (Static) GameObject;
-
             float alpha = 0;
 
             if (TileData.IsFoliage((long) st.ItemData.Flags))
@@ -58,8 +59,7 @@ namespace ClassicUO.Game.Views
                     check = World.Player.Position.Y <= st.Position.Y && World.Player.Position.X <= st.Position.X + 1;
 
                     if (!check)
-                        check = World.Player.Position.X <= st.Position.X &&
-                                World.Player.Position.Y <= st.Position.Y + 1;
+                        check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y + 1;
                 }
 
                 if (check)
@@ -74,15 +74,14 @@ namespace ClassicUO.Game.Views
 
             HueVector = RenderExtentions.GetHueVector(GameObject.Hue, false, alpha, false);
             MessageOverHead(spriteBatch, position, Bounds.Y - 22);
+
             return base.Draw(spriteBatch, position, objectList);
         }
-
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
             int x = list.MousePosition.X - (int) vertex[0].Position.X;
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
-
             if (Art.Contains(GameObject.Graphic, x, y)) list.Add(GameObject, vertex[0].Position);
         }
     }

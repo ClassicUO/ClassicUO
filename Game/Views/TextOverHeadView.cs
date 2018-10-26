@@ -25,14 +25,14 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
 {
     public class TextOverheadView : View
     {
-        public TextOverheadView(TextOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0,
-            bool isunicode = false, FontStyle style = FontStyle.None) : base(parent)
+        public TextOverheadView(TextOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent)
         {
             RenderedText text = new RenderedText
             {
@@ -43,7 +43,6 @@ namespace ClassicUO.Game.Views
                 FontStyle = style,
                 Text = parent.Text
             };
-
             Texture = text.Texture;
         }
 
@@ -51,22 +50,12 @@ namespace ClassicUO.Game.Views
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
-
             Texture.Ticks = CoreGame.Ticks;
-
             TextOverhead overhead = (TextOverhead) GameObject;
-
-            if (!overhead.IsPersistent && overhead.Alpha < 1.0f)
-            {
-                HueVector = RenderExtentions.GetHueVector(0, false, overhead.Alpha, true);
-            }
-
-
+            if (!overhead.IsPersistent && overhead.Alpha < 1.0f) HueVector = RenderExtentions.GetHueVector(0, false, overhead.Alpha, true);
             Settings settings = Service.Get<Settings>();
-
             int width = Texture.Width - Bounds.X;
             int height = Texture.Height - Bounds.Y;
-
 
             if (position.X < Bounds.X)
                 position.X = Bounds.X;
@@ -78,10 +67,8 @@ namespace ClassicUO.Game.Views
             else if (position.Y > settings.GameWindowHeight - height)
                 position.Y = settings.GameWindowHeight - height;
 
-
             return base.Draw(spriteBatch, position, objectList);
         }
-
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {

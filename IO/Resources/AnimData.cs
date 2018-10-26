@@ -34,10 +34,8 @@ namespace ClassicUO.IO.Resources
         public static void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "animdata.mul");
-
             if (File.Exists(path)) _file = new UOFileMul(path);
         }
-
 
         public static AnimDataFrame CalculateCurrentGraphic(ushort graphic)
         {
@@ -46,7 +44,6 @@ namespace ClassicUO.IO.Resources
             if (address != IntPtr.Zero)
             {
                 int addr = graphic * 68 + 4 * (graphic / 8 + 1);
-
                 AnimDataFrame pad = Marshal.PtrToStructure<AnimDataFrame>(address + addr);
 
                 //if (pad.FrameCount == 0)
@@ -70,7 +67,6 @@ namespace ClassicUO.IO.Resources
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
         public readonly sbyte[] FrameData;
-
         public readonly byte Unknown;
         public readonly byte FrameCount;
         public readonly byte FrameInterval;

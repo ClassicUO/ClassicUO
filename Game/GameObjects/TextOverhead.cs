@@ -30,9 +30,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private const float TIME_FADEOUT = 2000.0f;
 
-        public TextOverhead(in GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF,
-            byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f) : base(
-            parent.Map)
+        public TextOverhead(in GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f) : base(parent.Map)
         {
             Text = text;
             Parent = parent;
@@ -45,6 +43,7 @@ namespace ClassicUO.Game.GameObjects
             if (timeToLive <= 0.0f)
             {
                 TimeToLive = 2500 + text.Substring(text.IndexOf('>') + 1).Length * 100;
+
                 if (TimeToLive > 10000.0f)
                     TimeToLive = 10000.0f;
             }
@@ -57,20 +56,31 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public string Text { get; }
+
         public GameObject Parent { get; }
+
         public bool IsPersistent { get; set; }
+
         public float TimeToLive { get; set; }
+
         public MessageType MessageType { get; set; }
+
         public float TimeCreated { get; }
+
         public float Alpha { get; private set; }
 
         public bool IsUnicode { get; }
+
         public byte Font { get; }
+
         public int MaxWidth { get; }
+
         public FontStyle Style { get; }
 
-
-        protected override View CreateView() => new TextOverheadView(this, MaxWidth, Hue, Font, IsUnicode, Style);
+        protected override View CreateView()
+        {
+            return new TextOverheadView(this, MaxWidth, Hue, Font, IsUnicode, Style);
+        }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -78,15 +88,11 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsPersistent || IsDisposed)
                 return;
-
             float time = (float) totalMS - TimeCreated;
 
             if (time > TimeToLive)
                 Dispose();
-            else if (time > TimeToLive - TIME_FADEOUT)
-            {
-                Alpha = (time - (TimeToLive - TIME_FADEOUT)) / TIME_FADEOUT;
-            }
+            else if (time > TimeToLive - TIME_FADEOUT) Alpha = (time - (TimeToLive - TIME_FADEOUT)) / TIME_FADEOUT;
         }
     }
 }

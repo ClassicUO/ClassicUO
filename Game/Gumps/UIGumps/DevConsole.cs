@@ -23,6 +23,7 @@
 
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -31,9 +32,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
     {
         private const ushort BLACK = 0x243A;
         private const ushort GRAY = 0x248A;
-
         private const int MAX_LINES = 15;
-
         private readonly TextBox _textbox;
 
         public DevConsole() : base(0, 0)
@@ -41,7 +40,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
             CanMove = true;
-
             X = 150;
             Y = 50;
 
@@ -59,7 +57,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             });
         }
 
-        public void Append(string line) => _textbox.SetText(line, true);
+        public void Append(string line)
+        {
+            _textbox.SetText(line, true);
+        }
 
         public void AppendLine(string line)
         {
@@ -79,7 +80,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>
-            base.Draw(spriteBatch, position, hue);
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        {
+            return base.Draw(spriteBatch, position, hue);
+        }
     }
 }

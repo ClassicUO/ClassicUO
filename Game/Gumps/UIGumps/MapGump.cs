@@ -23,10 +23,12 @@
 
 using System;
 using System.Runtime.InteropServices;
+
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -40,10 +42,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-
             Width = 400;
             Height = 400;
-
 
             //using (FileStream stream = File.OpenRead(@"D:\Progetti\UO\map\Maps\2Dmap0.png"))
             //    _mapTexture = Texture2D.FromStream(Service.GetByLocalSerial<SpriteBatch3D>().GraphicsDevice, stream);
@@ -51,36 +51,30 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private unsafe void Load()
         {
-            int size = IO.Resources.Map.MapsDefaultSize[World.MapIndex][0] *
-                       IO.Resources.Map.MapsDefaultSize[World.MapIndex][1];
-
+            int size = IO.Resources.Map.MapsDefaultSize[World.MapIndex][0] * IO.Resources.Map.MapsDefaultSize[World.MapIndex][1];
             ushort[] buffer = new ushort[size];
-
-
             int maxBlock = size - 1;
 
             for (int bx = 0; bx < IO.Resources.Map.MapBlocksSize[World.MapIndex][0]; bx++)
             {
                 int mapX = bx * 8;
+
                 for (int by = 0; by < IO.Resources.Map.MapBlocksSize[World.MapIndex][1]; by++)
                 {
                     IndexMap indexMap = World.Map.GetIndex(bx, by);
 
                     if (indexMap == null || indexMap.MapAddress == 0)
                         continue;
-
                     int mapY = by * 8;
 
                     MapBlock info = new MapBlock
                     {
                         Cells = new MapCells[64]
                     };
-
                     MapBlock mapBlock = Marshal.PtrToStructure<MapBlock>((IntPtr) indexMap.MapAddress);
                     int pos = 0;
 
                     for (int y = 0; y < 8; y++)
-                    {
                         for (int x = 0; x < 8; x++)
                         {
                             ref MapCells cell = ref mapBlock.Cells[pos];
@@ -89,7 +83,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                             infoCell.Z = cell.Z;
                             pos++;
                         }
-                    }
 
                     StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
 
@@ -101,11 +94,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         {
                             StaticsBlock staticBlock = sb[c];
 
-                            if (staticBlock.Color > 0 && staticBlock.Color != 0xFFFF &&
-                                !View.IsNoDrawable(staticBlock.Color))
+                            if (staticBlock.Color > 0 && staticBlock.Color != 0xFFFF && !View.IsNoDrawable(staticBlock.Color))
                             {
                                 pos = staticBlock.Y * 8 + staticBlock.X;
-
                                 ref MapCells cell = ref info.Cells[pos];
 
                                 if (cell.Z <= staticBlock.Z)
@@ -126,12 +117,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         for (int x = 0; x < 8; x++)
                         {
                             ushort color = (ushort) (0x8000 | Hues.GetRadarColorData(info.Cells[pos].TileID));
-
                             buffer[block] = color;
 
                             if (y < 7 && x < 7 && block < maxBlock)
                                 buffer[block + 1] = color;
-
                             block++;
                             pos++;
                         }
@@ -139,8 +128,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
             }
 
-            _mapTexture = new SpriteTexture(IO.Resources.Map.MapsDefaultSize[World.MapIndex][0],
-                IO.Resources.Map.MapsDefaultSize[World.MapIndex][1], false);
+            _mapTexture = new SpriteTexture(IO.Resources.Map.MapsDefaultSize[World.MapIndex][0], IO.Resources.Map.MapsDefaultSize[World.MapIndex][1], false);
             _mapTexture.SetData(buffer);
         }
 
@@ -148,16 +136,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             int lastX = World.Player.Position.X;
             int lastY = World.Player.Position.Y;
-
             int blockOffsetX = Width / 4;
             int blockOffsetY = Height / 4;
-
             int gumpCenterX = Width / 2;
             int gumpCenterY = Height / 2;
 
             //0xFF080808 - pixel32
             //0x8421 - pixel16
-
             int minBlockX = (lastX - blockOffsetX) / 8 - 1;
             int minBlockY = (lastY - blockOffsetY) / 8 - 1;
             int maxBlockX = (lastX + blockOffsetX) / 8 + 1;
@@ -168,10 +153,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             if (minBlockY < 0)
                 minBlockY = 0;
-
             int maxBlockIndex = World.Map.MapBlockIndex;
             int mapBlockHeight = IO.Resources.Map.MapBlocksSize[World.MapIndex][1];
-
             ushort[] data = new ushort[Width * Height];
 
             for (int i = minBlockX; i <= maxBlockX; i++)
@@ -184,15 +167,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     if (blockIndex >= maxBlockIndex)
                         break;
-
                     RadarMapBlock? mbbv = IO.Resources.Map.GetRadarMapBlock(World.MapIndex, i, j);
+
                     if (!mbbv.HasValue)
                         break;
-
                     RadarMapBlock mb = mbbv.Value;
-
                     MapChunk mapBlock = World.Map.Chunks[blockIndex];
-
                     int realBlockX = i * 8;
                     int realBlockY = j * 8;
 
@@ -203,10 +183,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         for (int y = 0; y < 8; y++)
                         {
                             int py = realBlockY + y - lastY;
-
                             int gx = px - py;
                             int gy = px + py;
-
                             uint color = mb.Cells[x, y].Graphic;
                             bool island = mb.Cells[x, y].IsLand;
 
@@ -217,9 +195,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                             if (!island)
                                 color += 0x4000;
-
                             int tableSize = 2;
-
                             color = (uint) (0x8000 | Hues.GetRadarColorData((int) color));
 
                             Point[] table = new Point[2]
@@ -227,8 +203,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                                 new Point(0, 0),
                                 new Point(0, 1)
                             };
-
-
                             CreatePixels(data, (int) color, gx, gy, Width, Height, table, tableSize);
                         }
                     }
@@ -254,12 +228,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 if (gx < 0 || gx >= w)
                     continue;
-
                 int gy = py;
 
                 if (gy < 0 || gy >= h)
                     break;
-
                 int block = gy * w + gx;
 
                 if (data[block] == 0x8421)
@@ -282,11 +254,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             float cosRadians = (float) Math.Cos(radians);
             float sinRadians = (float) Math.Sin(radians);
-
             Vector2 translatedPoint = new Vector2();
             translatedPoint.X = point.X - pivot.X;
             translatedPoint.Y = point.Y - pivot.Y;
-
             Vector2 rotatedPoint = new Vector2();
             rotatedPoint.X = translatedPoint.X * cosRadians - translatedPoint.Y * sinRadians + pivot.X;
             rotatedPoint.Y = translatedPoint.X * sinRadians + translatedPoint.Y * cosRadians + pivot.Y;
@@ -300,13 +270,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             //if (offsetX > Width || offsetX < -MaxWidth || offsetY > Height || offsetY < -Height)
             //    return false;
-
             src.X = offsetX;
             src.Y = offsetY;
-
             int maxX = src.X + dst.Width;
+
             if (maxX <= Width)
+            {
                 src.Width = dst.Width;
+            }
             else
             {
                 src.Width = Width - src.X;
@@ -314,8 +285,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
             int maxY = src.Y + dst.Height;
+
             if (maxY <= Height)
+            {
                 src.Height = dst.Height;
+            }
             else
             {
                 src.Height = Height - src.Y;

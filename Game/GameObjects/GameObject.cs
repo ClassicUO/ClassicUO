@@ -22,12 +22,15 @@
 #endregion
 
 using System.Collections.Generic;
+
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
+
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
@@ -45,13 +48,21 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public virtual Position Position { get; set; } = Position.Invalid;
+
         public virtual Hue Hue { get; set; }
+
         public virtual Graphic Graphic { get; set; }
+
         public View View => _view ?? (_view = CreateView());
+
         public sbyte AnimIndex { get; set; }
+
         public IReadOnlyList<TextOverhead> OverHeads => _overHeads;
+
         public int CurrentRenderIndex { get; set; }
+
         public byte UseInRender { get; set; }
+
         public short PriorityZ { get; set; }
 
         public Tile Tile
@@ -62,11 +73,12 @@ namespace ClassicUO.Game.GameObjects
                 if (_tile != value)
                 {
                     _tile?.RemoveGameObject(this);
-
                     _tile = value;
 
                     if (_tile != null)
+                    {
                         _tile.AddGameObject(this);
+                    }
                     else
                     {
                         if (this != World.Player && !IsDisposed) Dispose();
@@ -75,11 +87,13 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public Vector3 Offset { get; set; }
         public Facet Map { get; set; }
+
         public bool IsDisposed { get; private set; }
 
         public int Distance => DistanceTo(World.Player);
+
+        public Vector3 Offset { get; set; }
 
         public virtual void Update(double totalMS, double frameMS)
         {
@@ -88,7 +102,6 @@ namespace ClassicUO.Game.GameObjects
             for (int i = 0; i < OverHeads.Count; i++)
             {
                 TextOverhead gt = OverHeads[i];
-
                 gt.Update(totalMS, frameMS);
 
                 if (gt.IsDisposed)
@@ -102,41 +115,38 @@ namespace ClassicUO.Game.GameObjects
         public int DistanceTo(GameObject entity)
         {
             if (entity is Mobile mob)
-            {
                 if (mob.Steps.Count > 0)
                 {
                     Mobile.Step step = mob.Steps.Back();
-
                     Position pos = new Position((ushort) step.X, (ushort) step.Y);
 
                     return Position.DistanceTo(pos);
                 }
-            }
 
             return Position.DistanceTo(entity.Position);
         }
 
+        protected virtual View CreateView()
+        {
+            return null;
+        }
 
-        protected virtual View CreateView() => null;
-
-        public TextOverhead AddGameText(MessageType type, string text, byte font, Hue hue, bool isunicode,
-            float timeToLive = 0.0f)
+        public TextOverhead AddGameText(MessageType type, string text, byte font, Hue hue, bool isunicode, float timeToLive = 0.0f)
         {
             if (string.IsNullOrEmpty(text))
                 return null;
-
             TextOverhead overhead;
 
             for (int i = 0; i < OverHeads.Count; i++)
             {
                 overhead = OverHeads[i];
 
-                if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type &&
-                    !overhead.IsDisposed)
+                if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
                 {
                     overhead.Hue = hue;
                     _overHeads.RemoveAt(i);
                     InsertGameText(overhead);
+
                     return overhead;
                 }
             }
@@ -144,20 +154,16 @@ namespace ClassicUO.Game.GameObjects
             int width = isunicode ? Fonts.GetWidthUnicode(font, text) : Fonts.GetWidthASCII(font, text);
 
             if (width > 200)
-            {
-                width = isunicode
-                    ? Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder)
-                    : Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
-            }
+                width = isunicode ? Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
             else
                 width = 0;
-
             overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive);
             InsertGameText(overhead);
 
             if (_overHeads.Count > 5)
             {
                 TextOverhead over = _overHeads[_overHeads.Count - 1];
+
                 if (!over.IsPersistent && over.MessageType != MessageType.Spell)
                 {
                     over.Dispose();
@@ -168,9 +174,10 @@ namespace ClassicUO.Game.GameObjects
             return overhead;
         }
 
-
-        private void InsertGameText(TextOverhead gameText) =>
+        private void InsertGameText(TextOverhead gameText)
+        {
             _overHeads.Insert(OverHeads.Count == 0 || OverHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
+        }
 
         protected void DisposeView()
         {
@@ -182,7 +189,6 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsDisposed)
                 return;
-
             IsDisposed = true;
             DisposeView();
             Tile = null;

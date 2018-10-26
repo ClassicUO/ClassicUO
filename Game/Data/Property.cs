@@ -32,6 +32,7 @@ namespace ClassicUO.Game.Data
         }
 
         public uint Cliloc { get; }
+
         public string Args { get; }
     }
 }

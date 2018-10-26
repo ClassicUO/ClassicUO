@@ -22,13 +22,17 @@
 #endregion
 
 using System.Collections.Generic;
+
 using ClassicUO.Game.Map;
 
 namespace ClassicUO.Game.GameObjects
 {
     public class House : Item
     {
-        public House(Serial serial) : base(serial) => Items = new List<Static>();
+        public House(Serial serial) : base(serial)
+        {
+            Items = new List<Static>();
+        }
 
         public uint Revision { get; set; }
 

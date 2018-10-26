@@ -37,7 +37,6 @@ namespace ClassicUO.Network
             IsDynamic = PacketsTable.GetPacketLength(ID) < 0;
         }
 
-
         protected override byte this[int index]
         {
             get
@@ -49,7 +48,6 @@ namespace ClassicUO.Network
             set
             {
                 if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException("index");
-
                 _data[index] = value;
                 IsChanged = true;
             }
@@ -58,9 +56,13 @@ namespace ClassicUO.Network
         public override int Length { get; }
 
         public bool IsChanged { get; private set; }
+
         public bool Filter { get; set; }
 
-        public override byte[] ToArray() => _data;
+        public override byte[] ToArray()
+        {
+            return _data;
+        }
 
         public void MoveToData()
         {
@@ -75,22 +77,31 @@ namespace ClassicUO.Network
         public byte ReadByte()
         {
             EnsureSize(1);
+
             return this[Position++];
         }
 
-        public sbyte ReadSByte() => (sbyte) ReadByte();
+        public sbyte ReadSByte()
+        {
+            return (sbyte) ReadByte();
+        }
 
-        public bool ReadBool() => ReadByte() != 0;
+        public bool ReadBool()
+        {
+            return ReadByte() != 0;
+        }
 
         public ushort ReadUShort()
         {
             EnsureSize(2);
+
             return (ushort) ((ReadByte() << 8) | ReadByte());
         }
 
         public uint ReadUInt()
         {
             EnsureSize(4);
+
             return (uint) ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
         }
 
@@ -99,7 +110,6 @@ namespace ClassicUO.Network
             EnsureSize(1);
             StringBuilder sb = new StringBuilder();
             char c;
-
             while ((c = (char) ReadByte()) != '\0') sb.Append(c);
 
             return sb.ToString();
@@ -114,6 +124,7 @@ namespace ClassicUO.Network
             for (int i = 0; i < length; i++)
             {
                 c = (char) ReadByte();
+
                 if (c != '\0')
                     sb.Append(c);
                 else if (exitIfNull)
@@ -128,7 +139,6 @@ namespace ClassicUO.Network
             EnsureSize(2);
             StringBuilder sb = new StringBuilder();
             char c;
-
             while ((c = (char) ReadUShort()) != '\0') sb.Append(c);
 
             return sb.ToString();
@@ -139,6 +149,7 @@ namespace ClassicUO.Network
             EnsureSize(length);
             StringBuilder sb = new StringBuilder(length);
             char c;
+
             for (int i = 0; i < length; i++)
             {
                 c = (char) ReadUShort();
@@ -151,11 +162,10 @@ namespace ClassicUO.Network
         public byte[] ReadArray(int count)
         {
             EnsureSize(count);
-
             byte[] array = new byte[count];
             Buffer.BlockCopy(_data, Position, array, 0, count);
-
             Position += count;
+
             return array;
         }
 
@@ -163,7 +173,6 @@ namespace ClassicUO.Network
         {
             EnsureSize(length);
             length /= 2;
-
             StringBuilder sb = new StringBuilder(length);
             char c;
 
@@ -176,6 +185,9 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
-        public ushort ReadUShortReversed() => (ushort) (ReadByte() | (ReadByte() << 8));
+        public ushort ReadUShortReversed()
+        {
+            return (ushort) (ReadByte() | (ReadByte() << 8));
+        }
     }
 }

@@ -22,9 +22,10 @@
 #endregion
 
 using System.Collections.Generic;
+
 using ClassicUO.Interfaces;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.GameObjects.Managers
 {
     public class StaticManager : IUpdateable
     {
@@ -35,6 +36,7 @@ namespace ClassicUO.Game.GameObjects
             for (int i = 0; i < _activeStatics.Count; i++)
             {
                 _activeStatics[i].Update(totalMS, frameMS);
+
                 if (_activeStatics[i].IsDisposed || _activeStatics[i].OverHeads.Count <= 0)
                     _activeStatics.RemoveAt(i);
             }

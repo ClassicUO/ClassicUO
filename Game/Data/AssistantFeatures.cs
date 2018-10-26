@@ -3,8 +3,8 @@
 namespace ClassicUO.Game.Data
 {
     /// <summary>
-    /// These are the features that are made available by Razor. Servers can explicitly disallow enabling these
-    /// features. However, because this client doesn't support Razor, for the most part, you can ignore these.
+    ///     These are the features that are made available by Razor. Servers can explicitly disallow enabling these
+    ///     features. However, because this client doesn't support Razor, for the most part, you can ignore these.
     /// </summary>
     [Flags]
     public enum AssistantFeatures : ulong
@@ -35,7 +35,6 @@ namespace ClassicUO.Game.Data
         EnemyTargetShare = 1 << 22, // Enemy target share on guild, party or alliance chat
         FilterSeason = 1 << 23, // Season Filter
         SpellTargetShare = 1 << 24, // Spell target share on guild, party or alliance chat
-
         All = ulong.MaxValue
     }
 }

@@ -25,7 +25,6 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -40,65 +39,58 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AcceptMouseInput = true;
             CanCloseWithRightClick = false;
 
-
             // maximized view
             AddChildren(new ResizePic(9200) {X = 0, Y = 0, Width = 610, Height = 27}, 1);
-            AddChildren(
-                new Button(0, 5540, 5542, 5541)
-                    {ButtonAction = ButtonAction.SwitchPage, ToPage = 2, X = 5, Y = 3}, 1);
-            AddChildren(
-                new Button((int) Buttons.Map, 2443, 2443, 0, "Map", 1, true, 0, 0x36)
-                {
-                    ButtonAction = ButtonAction.Activate, X = 30, Y = 3, FontCenter = true
-                }, 1);
-            AddChildren(
-                new Button((int) Buttons.Paperdoll, 2445, 2445, 0, "Paperdoll", 1, true, 0, 0x36)
-                {
-                    ButtonAction = ButtonAction.Activate, X = 93, Y = 3,
-                    FontCenter = true
-                }, 1);
-            AddChildren(
-                new Button((int) Buttons.Inventory, 2445, 2445, 0, "Inventory", 1, true, 0, 0x36)
-                {
-                    ButtonAction = ButtonAction.Activate, X = 201, Y = 3,
-                    FontCenter = true
-                }, 1);
-            AddChildren(
-                new Button((int) Buttons.Journal, 2445, 2445, 0, "Journal", 1, true, 0, 0x36)
-                {
-                    ButtonAction = ButtonAction.Activate, X = 309, Y = 3, FontCenter = true
-                }, 1);
-            AddChildren(
-                new Button((int) Buttons.Chat, 2443, 2443, 0, "Chat", 1, true, 0, 0x36)
-                {
-                    ButtonAction = ButtonAction.Activate, X = 417, Y = 3,
-                    FontCenter = true
-                }, 1);
-            AddChildren(
-                new Button((int) Buttons.Help, 2443, 2443, 0, "Help", 1, true, 0, 0x36)
-                {
-                    ButtonAction = ButtonAction.Activate, X = 480, Y = 3,
-                    FontCenter = true
-                }, 1);
-            AddChildren(
-                new Button((int) Buttons.Debug, 2443, 2443, 0, "Debug", 1, true, 0, 0x36)
-                {
-                    ButtonAction = ButtonAction.Activate, X = 543, Y = 3,
-                    FontCenter = true
-                }, 1);
+            AddChildren(new Button(0, 5540, 5542, 5541) {ButtonAction = ButtonAction.SwitchPage, ToPage = 2, X = 5, Y = 3}, 1);
+
+            AddChildren(new Button((int) Buttons.Map, 2443, 2443, 0, "Map", 1, true, 0, 0x36)
+            {
+                ButtonAction = ButtonAction.Activate, X = 30, Y = 3, FontCenter = true
+            }, 1);
+
+            AddChildren(new Button((int) Buttons.Paperdoll, 2445, 2445, 0, "Paperdoll", 1, true, 0, 0x36)
+            {
+                ButtonAction = ButtonAction.Activate, X = 93, Y = 3,
+                FontCenter = true
+            }, 1);
+
+            AddChildren(new Button((int) Buttons.Inventory, 2445, 2445, 0, "Inventory", 1, true, 0, 0x36)
+            {
+                ButtonAction = ButtonAction.Activate, X = 201, Y = 3,
+                FontCenter = true
+            }, 1);
+
+            AddChildren(new Button((int) Buttons.Journal, 2445, 2445, 0, "Journal", 1, true, 0, 0x36)
+            {
+                ButtonAction = ButtonAction.Activate, X = 309, Y = 3, FontCenter = true
+            }, 1);
+
+            AddChildren(new Button((int) Buttons.Chat, 2443, 2443, 0, "Chat", 1, true, 0, 0x36)
+            {
+                ButtonAction = ButtonAction.Activate, X = 417, Y = 3,
+                FontCenter = true
+            }, 1);
+
+            AddChildren(new Button((int) Buttons.Help, 2443, 2443, 0, "Help", 1, true, 0, 0x36)
+            {
+                ButtonAction = ButtonAction.Activate, X = 480, Y = 3,
+                FontCenter = true
+            }, 1);
+
+            AddChildren(new Button((int) Buttons.Debug, 2443, 2443, 0, "Debug", 1, true, 0, 0x36)
+            {
+                ButtonAction = ButtonAction.Activate, X = 543, Y = 3,
+                FontCenter = true
+            }, 1);
 
             //minimized view
-            AddChildren(
-                new ResizePic(9200) {X = 0, Y = 0, Width = 30, Height = 27, IsVisible = false, IsEnabled = false}, 2);
-            AddChildren(
-                new Button(0, 5537, 5539, 5538)
-                    {ButtonAction = ButtonAction.SwitchPage, ToPage = 1, X = 5, Y = 3}, 2);
+            AddChildren(new ResizePic(9200) {X = 0, Y = 0, Width = 30, Height = 27, IsVisible = false, IsEnabled = false}, 2);
+            AddChildren(new Button(0, 5537, 5539, 5538) {ButtonAction = ButtonAction.SwitchPage, ToPage = 1, X = 5, Y = 3}, 2);
 
             //layer
             ControlInfo.Layer = UILayer.Over;
             _scene = scene;
         }
-
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
@@ -116,12 +108,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case Buttons.Map:
                     Log.Message(LogTypes.Warning, "Map button pushed! Not implemented yet!");
                     MiniMapGump.Toggle(_scene);
+
                     break;
                 case Buttons.Paperdoll:
+
                     if (UIManager.GetByLocalSerial<PaperDollGump>(World.Player) == null)
                         GameActions.DoubleClick((Serial) (World.Player.Serial | int.MinValue));
                     else
                         UIManager.Remove<PaperDollGump>(World.Player);
+
                     break;
                 case Buttons.Inventory:
                     Item backpack = World.Player.Equipment[(int) Layer.Backpack];
@@ -136,22 +131,24 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     break;
                 case Buttons.Journal:
+
                     if (UIManager.GetByLocalSerial<JournalGump>() == null)
-                    {
                         UIManager.Add(new JournalGump());
-                    }
                     else
                         UIManager.Remove<JournalGump>();
 
                     break;
                 case Buttons.Chat:
                     Log.Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");
+
                     break;
                 case Buttons.Help:
                     GameActions.RequestHelp();
+
                     break;
                 case Buttons.Debug:
                     Log.Message(LogTypes.Warning, "Debug button pushed! Not implemented yet!");
+
                     break;
             }
         }

@@ -23,22 +23,22 @@
 
 using System;
 using System.Collections.Generic;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
     internal class ItemGumpling : GumpControl
     {
+        private readonly List<Label> _labels = new List<Label>();
         private bool _clickedCanDrag;
         private Point _clickedPoint, _labelClickedPosition;
-
-
-        private readonly List<Label> _labels = new List<Label>();
         private float _picUpTime;
         private float _sClickTime;
         private bool _sendClickIfNotDClick;
@@ -46,7 +46,6 @@ namespace ClassicUO.Game.Gumps.Controls
         public ItemGumpling(Item item)
         {
             AcceptMouseInput = true;
-
             Item = item;
             X = item.Position.X;
             Y = item.Position.Y;
@@ -55,15 +54,17 @@ namespace ClassicUO.Game.Gumps.Controls
         }
 
         public Item Item { get; }
-        public bool HighlightOnMouseOver { get; set; }
-        public bool CanPickUp { get; set; }
 
+        public bool HighlightOnMouseOver { get; set; }
+
+        public bool CanPickUp { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
             if (Item.IsDisposed)
             {
                 Dispose();
+
                 return;
             }
 
@@ -80,7 +81,6 @@ namespace ClassicUO.Game.Gumps.Controls
             }
 
             UpdateLabel();
-
             base.Update(totalMS, frameMS);
         }
 
@@ -93,15 +93,10 @@ namespace ClassicUO.Game.Gumps.Controls
                 Height = Texture.Height;
             }
 
-            Vector3 huev =
-                RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver
-                    ? GameScene.MouseOverItemHue
-                    : Item.Hue, TileData.IsPartialHue((long)Item.ItemData.Flags), 0, false);
+            Vector3 huev = RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver ? GameScene.MouseOverItemHue : Item.Hue, TileData.IsPartialHue((long) Item.ItemData.Flags), 0, false);
 
-            if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags) &&
-                Item.DisplayedGraphic == Item.Graphic)
+            if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
                 spriteBatch.Draw2D(Texture, new Vector3(position.X - 5, position.Y - 5, 0), huev);
-
             spriteBatch.Draw2D(Texture, position, huev);
 
             return base.Draw(spriteBatch, position, hue);
@@ -113,10 +108,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 return true;
 
             if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags))
-            {
                 if (Art.Contains(Item.DisplayedGraphic, x - 5, y - 5))
                     return true;
-            }
 
             return false;
         }
@@ -176,11 +169,12 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (this is ItemGumplingPaperdoll)
                 {
                     Rectangle bounds = Art.GetStaticTexture(Item.DisplayedGraphic).Bounds;
-
                     GameActions.PickUp(Item, bounds.Width / 2, bounds.Height / 2);
                 }
                 else
+                {
                     GameActions.PickUp(Item, _clickedPoint);
+                }
             }
         }
 
@@ -189,31 +183,24 @@ namespace ClassicUO.Game.Gumps.Controls
             if (!isDisposing && Item.OverHeads.Count > 0)
             {
                 if (_labels.Count <= 0)
-                {
                     foreach (TextOverhead overhead in Item.OverHeads)
                     {
-                        Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth,
-                            style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
+                        Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth, style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
                         {
-                            FadeOut = true,
+                            FadeOut = true
                         };
-
                         label.ControlInfo.Layer = UILayer.Over;
-
                         UIManager.Add(label);
                         _labels.Add(label);
                     }
-                }
 
                 int y = 0;
 
                 for (int i = _labels.Count - 1; i >= 0; i--)
                 {
                     Label l = _labels[i];
-
                     l.X = ScreenCoordinateX + _clickedPoint.X - l.Width / 2;
                     l.Y = ScreenCoordinateY + _clickedPoint.Y - l.Height / 2 + y;
-
                     y += l.Height;
                 }
             }

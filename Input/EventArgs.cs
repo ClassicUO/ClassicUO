@@ -22,16 +22,17 @@
 #endregion
 
 using System;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+
 using static SDL2.SDL;
 
 namespace ClassicUO.Input
 {
     public sealed class MouseEventArgs : EventArgs
     {
-        public MouseEventArgs(int x, int y, MouseButton button = MouseButton.None,
-            ButtonState state = ButtonState.Released)
+        public MouseEventArgs(int x, int y, MouseButton button = MouseButton.None, ButtonState state = ButtonState.Released)
         {
             Location = new Point(x, y);
             Button = button;
@@ -39,9 +40,13 @@ namespace ClassicUO.Input
         }
 
         public Point Location { get; }
+
         public int X => Location.X;
+
         public int Y => Location.Y;
+
         public MouseButton Button { get; }
+
         public ButtonState ButtonState { get; }
     }
 
@@ -49,10 +54,8 @@ namespace ClassicUO.Input
     {
         public MouseWheelEventArgs(MouseEvent direction)
         {
-            if (direction != MouseEvent.WheelScroll && direction != MouseEvent.WheelScrollDown &&
-                direction != MouseEvent.WheelScrollUp)
+            if (direction != MouseEvent.WheelScroll && direction != MouseEvent.WheelScrollDown && direction != MouseEvent.WheelScrollUp)
                 throw new Exception("Wrong scroll direction: " + direction);
-
             Direction = direction;
         }
 
@@ -69,7 +72,9 @@ namespace ClassicUO.Input
         }
 
         public SDL_Keycode Key { get; }
+
         public SDL_Keymod Mod { get; }
+
         public KeyboardEvent KeyboardEvent { get; }
     }
 }

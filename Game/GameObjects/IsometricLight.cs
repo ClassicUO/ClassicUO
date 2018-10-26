@@ -22,9 +22,12 @@
 #endregion
 
 using System;
+
+using ClassicUO.IO.Resources;
+
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Renderer
+namespace ClassicUO.Game.GameObjects
 {
     public sealed class IsometricLight
     {
@@ -74,17 +77,15 @@ namespace ClassicUO.Renderer
         }
 
         public float IsometricLevel { get; private set; }
+
         public Vector3 IsometricDirection { get; private set; }
 
         private void Recalculate()
-        {
-            float light = Math.Min(30 - Overall + Personal, 30f);
-            light = Math.Max(light, 0);
-            IsometricLevel = light / 30;
-
-            _direction = 1.2f;
-            IsometricDirection =
-                Vector3.Normalize(new Vector3((float) Math.Cos(_direction), (float) Math.Sin(_direction), 1f));
+        {           
+            IsometricLevel = (32 - Overall + Personal) / 32.0f;
+            //_direction = 1.2f;
+            //IsometricDirection = Vector3.Normalize(new Vector3((float)Math.Cos(_direction), (float)Math.Sin(_direction), 1f));
+            IsometricDirection = new Vector3(-1.0f, -1.0f, .5f);
         }
     }
 }

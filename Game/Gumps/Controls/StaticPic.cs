@@ -23,6 +23,7 @@
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -30,28 +31,23 @@ namespace ClassicUO.Game.Gumps.Controls
     public class StaticPic : GumpControl
     {
         private readonly Graphic _graphic;
-
         private readonly bool _isPartial;
 
         public StaticPic(Graphic graphic, Hue hue)
         {
             _graphic = graphic;
             Hue = hue;
-
             _isPartial = TileData.IsPartialHue((long) TileData.StaticData[_graphic].Flags);
-
             CanMove = true;
         }
 
-        public StaticPic(string[] parts) : this(Graphic.Parse(parts[3]),
-            parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue) 0)
+        public StaticPic(string[] parts) : this(Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4]) : (Hue) 0)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
         }
 
         public Hue Hue { get; set; }
-
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -69,6 +65,7 @@ namespace ClassicUO.Game.Gumps.Controls
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Hue, _isPartial, 0, true));
+
             return base.Draw(spriteBatch, position, hue);
         }
     }

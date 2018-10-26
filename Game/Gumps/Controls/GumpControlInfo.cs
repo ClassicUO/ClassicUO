@@ -32,11 +32,17 @@ namespace ClassicUO.Game.Gumps.Controls
 
     public class GumpControlInfo
     {
-        public GumpControlInfo(GumpControl control) => Control = control;
+        public GumpControlInfo(GumpControl control)
+        {
+            Control = control;
+        }
 
         public UILayer Layer { get; set; } = UILayer.Default;
+
         public bool IsModal { get; set; }
+
         public bool ModalClickOutsideAreaClosesThisControl { get; set; }
+
         public GumpControl Control { get; }
     }
 }

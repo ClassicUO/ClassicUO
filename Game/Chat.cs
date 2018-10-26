@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Utility;
@@ -72,17 +73,17 @@ namespace ClassicUO.Game
     public static class Chat
     {
         private const ushort defaultHue = 0x0017;
-
-        private static readonly Mobile _system = new Mobile(Serial.Invalid)
-            {Graphic = Graphic.Invariant, Name = "System"};
+        private static readonly Mobile _system = new Mobile(Serial.Invalid) {Graphic = Graphic.Invariant, Name = "System"};
 
         //public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
         //public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PUnicodeSpeechRequest(entity.Serial, entity.Graphic, type, hue, font, _language, entity.Name ?? string.Empty, message).SendToClient();
-        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular,
-            MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
-
+        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal)
+        {
+            GameActions.Say(message, hue, type, font);
+        }
 
         public static event EventHandler<UOMessageEventArgs> Message;
+
         public static event EventHandler<UOMessageEventArgs> LocalizedMessage;
 
         public static void OnMessage(Entity entity, UOMessageEventArgs args)
@@ -90,6 +91,7 @@ namespace ClassicUO.Game
             switch (args.Type)
             {
                 case MessageType.Regular:
+
                     if (entity != null && entity.Serial.IsValid)
                     {
                         entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
@@ -105,8 +107,10 @@ namespace ClassicUO.Game
                 case MessageType.System:
                     Service.Get<ChatControl>().AddLine(args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
                     Service.Get<JournalData>().AddEntry(args.Text, (byte) args.Font, args.Hue, "System");
+
                     break;
                 case MessageType.Emote:
+
                     if (entity != null && entity.Serial.IsValid)
                     {
                         entity.AddGameText(args.Type, $"*{args.Text}*", (byte) args.Font, args.Hue, args.IsUnicode);
@@ -119,17 +123,23 @@ namespace ClassicUO.Game
 
                     break;
                 case MessageType.Label:
+
                     if (entity != null && entity.Serial.IsValid)
                         entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
                     Service.Get<JournalData>().AddEntry(args.Text, (byte) args.Font, args.Hue, "You see");
+
                     break;
                 case MessageType.Focus:
+
                     break;
                 case MessageType.Whisper:
+
                     break;
                 case MessageType.Yell:
+
                     break;
                 case MessageType.Spell:
+
                     if (entity != null && entity.Serial.IsValid)
                     {
                         entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
@@ -138,18 +148,24 @@ namespace ClassicUO.Game
 
                     break;
                 case MessageType.Party:
-                    Service.Get<ChatControl>().AddLine($"[Party] [{entity.Name}]: {args.Text}", (byte)args.Font, args.Hue, args.IsUnicode);
-                    Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "Party");
+                    Service.Get<ChatControl>().AddLine($"[Party] [{entity.Name}]: {args.Text}", (byte) args.Font, args.Hue, args.IsUnicode);
+                    Service.Get<JournalData>().AddEntry(args.Text, (byte) args.Font, args.Hue, "Party");
+
                     break;
                 case MessageType.Guild:
+
                     break;
                 case MessageType.Alliance:
+
                     break;
                 case MessageType.Command:
+
                     break;
                 case MessageType.Encoded:
+
                     break;
                 default:
+
                     throw new ArgumentOutOfRangeException();
             }
 
@@ -164,8 +180,7 @@ namespace ClassicUO.Game
 
     public class UOMessageEventArgs : EventArgs
     {
-        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, bool unicode = false,
-            string lang = null)
+        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {
             Text = text;
             Hue = hue;
@@ -176,8 +191,7 @@ namespace ClassicUO.Game
             IsUnicode = unicode;
         }
 
-        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, uint cliloc,
-            bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
+        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, uint cliloc, bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
         {
             Text = text;
             Hue = hue;
@@ -190,13 +204,21 @@ namespace ClassicUO.Game
         }
 
         public string Text { get; }
+
         public Hue Hue { get; }
+
         public MessageType Type { get; }
+
         public MessageFont Font { get; }
+
         public string Language { get; }
+
         public uint Cliloc { get; }
+
         public AffixType AffixType { get; }
+
         public string Affix { get; }
+
         public bool IsUnicode { get; }
     }
 }

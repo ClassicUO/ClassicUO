@@ -46,6 +46,7 @@
 #endregion
 
 using System;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -53,10 +54,15 @@ namespace ClassicUO.Game.Gumps.Controls
     internal interface IScrollBar
     {
         int Value { get; set; }
+
         int MinValue { get; set; }
+
         int MaxValue { get; set; }
+
         Point Location { get; set; }
+
         int Width { get; set; }
+
         int Height { get; set; }
 
         int ScrollStep { get; set; }

@@ -23,6 +23,7 @@
 
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
@@ -33,10 +34,12 @@ namespace ClassicUO.Game.GameObjects
         {
         }
 
-
         public GameObject Entity { get; set; }
+
         public Vector3 AtPosition { get; set; }
+
         public sbyte Z { get; set; }
+
         public Tile AssociatedTile { get; set; }
 
         //private View GetBaseView(GameObject entity)
@@ -62,7 +65,10 @@ namespace ClassicUO.Game.GameObjects
             Z = sbyte.MinValue;
         }
 
-        protected override View CreateView() => new DeferredView(this, Entity.View, AtPosition);
+        protected override View CreateView()
+        {
+            return new DeferredView(this, Entity.View, AtPosition);
+        }
 
         public override void Dispose()
         {
@@ -70,6 +76,9 @@ namespace ClassicUO.Game.GameObjects
             base.Dispose();
         }
 
-        public override string ToString() => $"{base.ToString()} | deferred";
+        public override string ToString()
+        {
+            return $"{base.ToString()} | deferred";
+        }
     }
 }

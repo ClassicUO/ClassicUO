@@ -26,6 +26,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
@@ -37,10 +38,15 @@ namespace ClassicUO.Game.GameObjects
 
         public int Count => _entities.Count;
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
-        public IEnumerator<T> GetEnumerator() => _entities.Values.GetEnumerator();
-
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _entities.Values.GetEnumerator();
+        }
 
         public event EventHandler<CollectionChangedEventArgs<T>> Added, Removed;
 
@@ -61,11 +67,15 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool Contains(Serial serial) => _entities.ContainsKey(serial);
+        public bool Contains(Serial serial)
+        {
+            return _entities.ContainsKey(serial);
+        }
 
         public T Get(Serial serial)
         {
             _entities.TryGetValue(serial, out T entity);
+
             return entity;
         }
 
@@ -73,8 +83,8 @@ namespace ClassicUO.Game.GameObjects
         {
             if (!_entities.TryAdd(entity.Serial, entity))
                 return false;
-
             _added.Add(entity);
+
             return true;
         }
 
@@ -94,17 +104,25 @@ namespace ClassicUO.Game.GameObjects
         }
     }
 
-
     public class CollectionChangedEventArgs<T> : EventArgs, IEnumerable<T>
     {
         private readonly IReadOnlyList<T> _data;
 
-        public CollectionChangedEventArgs(IEnumerable<T> list) => _data = list.ToArray();
+        public CollectionChangedEventArgs(IEnumerable<T> list)
+        {
+            _data = list.ToArray();
+        }
 
         public int Count => _data.Count;
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
-        public IEnumerator<T> GetEnumerator() => _data.GetEnumerator();
+        public IEnumerator<T> GetEnumerator()
+        {
+            return _data.GetEnumerator();
+        }
     }
 }

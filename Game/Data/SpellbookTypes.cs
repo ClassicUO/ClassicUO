@@ -9,7 +9,6 @@
         Ninjitsu,
         Spellweaving,
         Mysticism,
-
         Unknown = 0xFF
     }
 }

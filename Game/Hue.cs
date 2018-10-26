@@ -33,37 +33,68 @@ namespace ClassicUO.Game
         public static Hue Good = new Hue(68);
         public static Hue Error = new Hue(37);
         public static Hue Warning = new Hue(1174);
-
         private readonly ushort _value;
 
-        public Hue(ushort hue) => _value = hue;
+        public Hue(ushort hue)
+        {
+            _value = hue;
+        }
 
         public bool IsInvariant => _value == Invariant;
 
-        public static implicit operator Hue(ushort value) => new Hue(value);
+        public static implicit operator Hue(ushort value)
+        {
+            return new Hue(value);
+        }
 
-        public static implicit operator ushort(Hue color) => color._value;
+        public static implicit operator ushort(Hue color)
+        {
+            return color._value;
+        }
 
-        public static bool operator ==(Hue h1, Hue h2) => h1._value == h2._value;
+        public static bool operator ==(Hue h1, Hue h2)
+        {
+            return h1._value == h2._value;
+        }
 
-        public static bool operator !=(Hue h1, Hue h2) => h1._value != h2._value;
+        public static bool operator !=(Hue h1, Hue h2)
+        {
+            return h1._value != h2._value;
+        }
 
-        public static bool operator <(Hue h1, Hue h2) => h1._value < h2._value;
+        public static bool operator <(Hue h1, Hue h2)
+        {
+            return h1._value < h2._value;
+        }
 
-        public static bool operator >(Hue h1, Hue h2) => h1._value > h2._value;
+        public static bool operator >(Hue h1, Hue h2)
+        {
+            return h1._value > h2._value;
+        }
 
-        public int CompareTo(object obj) => _value.CompareTo(obj);
+        public int CompareTo(object obj)
+        {
+            return _value.CompareTo(obj);
+        }
 
-        public int CompareTo(ushort other) => _value.CompareTo(other);
+        public int CompareTo(ushort other)
+        {
+            return _value.CompareTo(other);
+        }
 
-        public override string ToString() => $"0x{_value:X4}";
+        public override string ToString()
+        {
+            return $"0x{_value:X4}";
+        }
 
-        public override int GetHashCode() => _value.GetHashCode();
+        public override int GetHashCode()
+        {
+            return _value.GetHashCode();
+        }
 
         public override bool Equals(object obj)
         {
             if (obj is Hue hue) return this == hue;
-
             if (obj is ushort @ushort) return _value == @ushort;
 
             return false;

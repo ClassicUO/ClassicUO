@@ -30,9 +30,13 @@ namespace ClassicUO.Network
         protected abstract byte this[int index] { get; set; }
 
         public abstract int Length { get; }
+
         public byte ID => this[0];
+
         public bool IsDynamic { get; protected set; }
+
         public int Position { get; protected set; }
+
         protected abstract void EnsureSize(int length);
         public abstract byte[] ToArray();
 
@@ -84,15 +88,14 @@ namespace ClassicUO.Network
         {
             EnsureSize(value.Length + 1);
             foreach (char c in value) WriteByte((byte) c);
-
             WriteByte(0);
         }
 
         public void WriteASCII(string value, int length)
         {
             EnsureSize(length);
-            if (value.Length > length) throw new ArgumentOutOfRangeException();
 
+            if (value.Length > length) throw new ArgumentOutOfRangeException();
             for (int i = 0; i < value.Length; i++) WriteByte((byte) value[i]);
 
             if (value.Length < length)
@@ -105,6 +108,7 @@ namespace ClassicUO.Network
         public void WriteUnicode(string value)
         {
             EnsureSize((value.Length + 1) * 2);
+
             foreach (char c in value)
             {
                 WriteByte((byte) (c >> 8));
@@ -117,6 +121,7 @@ namespace ClassicUO.Network
         public void WriteUnicode(string value, int length)
         {
             EnsureSize(length);
+
             if (value.Length > length) throw new ArgumentOutOfRangeException();
 
             for (int i = 0; i < value.Length; i++)

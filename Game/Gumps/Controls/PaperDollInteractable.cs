@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps;
 
@@ -53,16 +54,12 @@ namespace ClassicUO.Game.Gumps.Controls
             PaperDollEquipSlots.LeftHand,
             PaperDollEquipSlots.RightHand
         };
-
         private bool _isElf;
         private bool _isFemale;
-
         private Entity _sourceEntity;
         private GumpPicBackpack m_Backpack;
 
-
-        public PaperDollInteractable(int x, int y, Mobile sourceEntity)
-            : base(0, 0)
+        public PaperDollInteractable(int x, int y, Mobile sourceEntity) : base(0, 0)
         {
             X = x;
             Y = y;
@@ -117,6 +114,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private void OnEntityUpdated(Entity entity)
         {
             Clear();
+
             // Add the base gump - the semi-naked paper doll.
             if (true)
             {
@@ -131,15 +129,17 @@ namespace ClassicUO.Game.Gumps.Controls
             for (int i = 0; i < s_DrawOrder.Length; i++)
             {
                 Item item = ((Mobile) _sourceEntity).Equipment[(int) s_DrawOrder[i]];
+
                 if (item == null)
                     continue;
-
                 bool canPickUp = true;
+
                 switch (s_DrawOrder[i])
                 {
                     case PaperDollEquipSlots.FacialHair:
                     case PaperDollEquipSlots.Hair:
                         canPickUp = false;
+
                         break;
                 }
 

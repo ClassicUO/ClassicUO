@@ -23,6 +23,7 @@
 
 using ClassicUO.IO;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -31,18 +32,20 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private readonly RenderedText _gameText;
 
-        public CroppedText(string text, Hue hue, int maxWidth = 0) => _gameText = new RenderedText
+        public CroppedText(string text, Hue hue, int maxWidth = 0)
         {
-            IsUnicode = true,
-            Font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0),
-            FontStyle = maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
-            Hue = hue,
-            MaxWidth = maxWidth,
-            Text = text
-        };
+            _gameText = new RenderedText
+            {
+                IsUnicode = true,
+                Font = (byte) (FileManager.ClientVersion >= ClientVersions.CV_305D ? 1 : 0),
+                FontStyle = maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
+                Hue = hue,
+                MaxWidth = maxWidth,
+                Text = text
+            };
+        }
 
-        public CroppedText(string[] parts, string[] lines) : this(lines[int.Parse(parts[6])], (Hue)(Hue.Parse(parts[5]) + 1),
-            int.Parse(parts[3]))
+        public CroppedText(string[] parts, string[] lines) : this(lines[int.Parse(parts[6])], (Hue) (Hue.Parse(parts[5]) + 1), int.Parse(parts[3]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -50,10 +53,10 @@ namespace ClassicUO.Game.Gumps.Controls
             Height = int.Parse(parts[4]);
         }
 
-
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             _gameText.Draw(spriteBatch, position);
+
             return base.Draw(spriteBatch, position, hue);
         }
     }

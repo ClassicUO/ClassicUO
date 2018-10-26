@@ -35,41 +35,35 @@ namespace ClassicUO.IO.Resources
             0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBD, 0xC5, 0xCD, 0xD5, 0xDE, 0xE6, 0xEE, 0xF6, 0xFF
         };
 
-
         public static HuesGroup[] HuesRange { get; private set; }
+
         public static int HuesCount { get; private set; }
+
         public static FloatHues[] Palette { get; private set; }
+
         public static ushort[] RadarCol { get; private set; }
 
         public static void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "hues.mul");
+
             if (!File.Exists(path))
                 throw new FileNotFoundException();
-
             UOFileMul file = new UOFileMul(path);
-
-
             int groupSize = Marshal.SizeOf<HuesGroup>();
-
             int entrycount = (int) file.Length / groupSize;
-
             HuesCount = entrycount * 8;
             HuesRange = new HuesGroup[entrycount];
-
             ulong addr = (ulong) file.StartAddress;
 
             for (int i = 0; i < entrycount; i++)
                 HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr) (addr + (ulong) (i * groupSize)));
-
             path = Path.Combine(FileManager.UoFolderPath, "radarcol.mul");
+
             if (!File.Exists(path))
                 throw new FileNotFoundException();
-
             UOFileMul radarcol = new UOFileMul(path);
-
             RadarCol = radarcol.ReadArray<ushort>((int) radarcol.Length / 2);
-
             file.Unload();
             radarcol.Unload();
         }
@@ -78,24 +72,23 @@ namespace ClassicUO.IO.Resources
         {
             Palette = new FloatHues[HuesCount];
             int entrycount = HuesCount / 8;
+
             for (int i = 0; i < entrycount; i++)
-            for (int j = 0; j < 8; j++)
-            {
-                int idx = i * 8 + j;
-
-                Palette[idx].Palette = new float[32 * 3];
-
-                for (int h = 0; h < 32; h++)
+                for (int j = 0; j < 8; j++)
                 {
-                    int idx1 = h * 3;
-                    ushort c = HuesRange[i].Entries[j].ColorTable[h];
-                    Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
-                    Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
-                    Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
-                }
-            }
-        }
+                    int idx = i * 8 + j;
+                    Palette[idx].Palette = new float[32 * 3];
 
+                    for (int h = 0; h < 32; h++)
+                    {
+                        int idx1 = h * 3;
+                        ushort c = HuesRange[i].Entries[j].ColorTable[h];
+                        Palette[idx].Palette[idx1] = ((c >> 10) & 0x1F) / 31.0f;
+                        Palette[idx].Palette[idx1 + 1] = ((c >> 5) & 0x1F) / 31.0f;
+                        Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
+                    }
+                }
+        }
 
         public static uint[] CreateShaderColors()
         {
@@ -103,13 +96,12 @@ namespace ClassicUO.IO.Resources
             int len = HuesRange.Length;
 
             for (int r = 0; r < len; r++)
-            for (int y = 0; y < 8; y++)
-            for (int x = 0; x < 32; x++)
-            {
-                int idx = r * 8 * 32 + y * 32 + x;
-
-                hues[idx] = Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
-            }
+                for (int y = 0; y < 8; y++)
+                    for (int x = 0; x < 32; x++)
+                    {
+                        int idx = r * 8 * 32 + y * 32 + x;
+                        hues[idx] = Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
+                    }
 
             return hues;
         }
@@ -121,6 +113,7 @@ namespace ClassicUO.IO.Resources
                 if (color >= HuesCount)
                 {
                     color %= (ushort) HuesCount;
+
                     if (color <= 0)
                         color = 1;
                 }
@@ -146,15 +139,20 @@ namespace ClassicUO.IO.Resources
         //    for (int i = 0; i < 8; i++) HuesRange[index].Entries[i].ColorTable = group.Entries[i].ColorTable;
         //}
 
-        public static uint Color16To32(ushort c) =>
-            (uint) (_table[(c >> 10) & 0x1F] | (_table[(c >> 5) & 0x1F] << 8) | (_table[c & 0x1F] << 16));
+        public static uint Color16To32(ushort c)
+        {
+            return (uint) (_table[(c >> 10) & 0x1F] | (_table[(c >> 5) & 0x1F] << 8) | (_table[c & 0x1F] << 16));
+        }
 
-        public static ushort Color32To16(uint c) => (ushort) (((c & 0xFF) * 32 / 256) |
-                                                              ((((c >> 16) & 0xff) * 32 / 256) << 10) |
-                                                              ((((c >> 8) & 0xff) * 32 / 256) << 5));
+        public static ushort Color32To16(uint c)
+        {
+            return (ushort) (((c & 0xFF) * 32 / 256) | ((((c >> 16) & 0xff) * 32 / 256) << 10) | ((((c >> 8) & 0xff) * 32 / 256) << 5));
+        }
 
-        public static ushort ConvertToGray(ushort c) =>
-            (ushort) (((c & 0x1F) * 299 + ((c >> 5) & 0x1F) * 587 + ((c >> 10) & 0x1F) * 114) / 1000);
+        public static ushort ConvertToGray(ushort c)
+        {
+            return (ushort) (((c & 0x1F) * 299 + ((c >> 5) & 0x1F) * 587 + ((c >> 10) & 0x1F) * 114) / 1000);
+        }
 
         public static ushort GetColor16(ushort c, ushort color)
         {
@@ -219,9 +217,7 @@ namespace ClassicUO.IO.Resources
                 color -= 1;
                 int g = color / 8;
                 int e = color % 8;
-
                 uint cl = Color16To32(c);
-
                 (byte B, byte G, byte R, byte A) = GetBGRA(cl);
                 //(byte R, byte G, byte B, byte A) = GetBGRA(cl);
 
@@ -234,28 +230,33 @@ namespace ClassicUO.IO.Resources
             return Color16To32(c);
         }
 
-        public static ushort GetRadarColorData(int c) => c < RadarCol.Length ? RadarCol[c] : (ushort) 0;
+        public static ushort GetRadarColorData(int c)
+        {
+            return c < RadarCol.Length ? RadarCol[c] : (ushort) 0;
+        }
 
+        public static (byte, byte, byte, byte) GetBGRA(uint cl)
+        {
+            return ((byte) (cl & 0xFF), // B
+                    (byte) ((cl >> 8) & 0xFF), // G
+                    (byte) ((cl >> 16) & 0xFF), // R
+                    (byte) ((cl >> 24) & 0xFF) // A
+                   );
+        }
 
-        public static (byte, byte, byte, byte) GetBGRA(uint cl) => ((byte) (cl & 0xFF), // B
-                (byte) ((cl >> 8) & 0xFF), // G
-                (byte) ((cl >> 16) & 0xFF), // R
-                (byte) ((cl >> 24) & 0xFF) // A
-            );
-
-        public static uint RgbaToArgb(uint rgba) => (rgba >> 8) | (rgba << 24);
+        public static uint RgbaToArgb(uint rgba)
+        {
+            return (rgba >> 8) | (rgba << 24);
+        }
     }
-
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct HuesBlock
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public readonly ushort[] ColorTable;
-
         public readonly ushort TableStart;
         public readonly ushort TableEnd;
-
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
         public readonly char[] Name;
     }
@@ -264,24 +265,19 @@ namespace ClassicUO.IO.Resources
     public readonly struct HuesGroup
     {
         public readonly uint Header;
-
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         public readonly HuesBlock[] Entries;
     }
-
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public readonly struct VerdataHuesBlock
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public readonly ushort[] ColorTable;
-
         public readonly ushort TableStart;
         public readonly ushort TableEnd;
-
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
         public readonly char[] Name;
-
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public readonly ushort[] Unk;
     }
@@ -290,7 +286,6 @@ namespace ClassicUO.IO.Resources
     public readonly struct VerdataHuesGroup
     {
         public readonly uint Header;
-
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
         public readonly HuesBlock[] Entries;
     }

@@ -28,7 +28,9 @@ namespace ClassicUO.Game.Gumps.Controls
     internal class GumpPicContainer : GumpPic
     {
         public GumpPicContainer(int x, int y, Graphic graphic, Hue hue, Item item) : base(x, y, graphic, hue)
-            => Item = item;
+        {
+            Item = item;
+        }
 
         public Item Item { get; }
     }

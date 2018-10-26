@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ClassicUO.Game.GameObjects;
+﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
 {
-    class LightningEffectView : View
+    internal class LightningEffectView : View
     {
-        private static readonly Point[] _offsets = {
+        private static readonly Point[] _offsets =
+        {
             new Point(48, 0),
             new Point(68, 0),
             new Point(92, 0),
@@ -25,10 +21,10 @@ namespace ClassicUO.Game.Views
             new Point(92, 0),
             new Point(80, 0)
         };
+        private Graphic _displayed = Graphic.Invalid;
 
         public LightningEffectView(LightningEffect effect) : base(effect)
         {
-
         }
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
@@ -38,8 +34,6 @@ namespace ClassicUO.Game.Views
 #endif
             return base.DrawInternal(spriteBatch, position, list);
         }
-
-        private Graphic _displayed = Graphic.Invalid;
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
@@ -51,10 +45,9 @@ namespace ClassicUO.Game.Views
 
                 if (_displayed > 0x4E29)
                     return false;
-
                 Texture = IO.Resources.Gumps.GetGumpTexture(_displayed);
                 Point offset = _offsets[_displayed - 20000];
-                Bounds = new Rectangle(offset.X, Texture.Height - 33 + (effect.Position.Z * 4)+ offset.Y, Texture.Width, Texture.Height);
+                Bounds = new Rectangle(offset.X, Texture.Height - 33 + effect.Position.Z * 4 + offset.Y, Texture.Width, Texture.Height);
             }
 
             HueVector = RenderExtentions.GetHueVector(effect.Hue);

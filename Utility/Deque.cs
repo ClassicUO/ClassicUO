@@ -73,7 +73,10 @@ namespace ClassicUO.Utility
         ///     </para>
         ///     <para>This constructor is an O(1) operation.</para>
         /// </remarks>
-        public Deque() => _items = _emptyArray;
+        public Deque()
+        {
+            _items = _emptyArray;
+        }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Deque{T}" /> class that contains elements copied from the specified
@@ -92,12 +95,13 @@ namespace ClassicUO.Utility
         {
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection));
-
             T[] array = collection as T[] ?? collection.ToArray();
             int count = array.Length;
 
             if (count == 0)
+            {
                 _items = _emptyArray;
+            }
             else
             {
                 _items = new T[count];
@@ -133,7 +137,6 @@ namespace ClassicUO.Utility
         {
             if (capacity < 0)
                 throw new ArgumentOutOfRangeException(nameof(capacity), "Capacity was less than zero.");
-
             _items = capacity == 0 ? _emptyArray : new T[capacity];
         }
 
@@ -180,12 +183,12 @@ namespace ClassicUO.Utility
                 if (value == 0)
                 {
                     _items = _emptyArray;
+
                     return;
                 }
 
                 T[] newItems = new T[value];
                 CopyTo(newItems);
-
                 _frontArrayIndex = 0;
                 _items = null;
                 _items = newItems;
@@ -213,23 +216,18 @@ namespace ClassicUO.Utility
             get
             {
                 int arrayIndex = GetArrayIndex(index);
+
                 if (arrayIndex == -1)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(index),
-                        "Index was out of range. Must be non-negative and less than the size of the collection.");
-                }
+                    throw new ArgumentOutOfRangeException(nameof(index), "Index was out of range. Must be non-negative and less than the size of the collection.");
 
                 return _items[arrayIndex];
             }
             set
             {
                 int arrayIndex = GetArrayIndex(index);
-                if (arrayIndex == -1)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(index),
-                        "Index was out of range. Must be non-negative and less than the size of the collection.");
-                }
 
+                if (arrayIndex == -1)
+                    throw new ArgumentOutOfRangeException(nameof(index), "Index was out of range. Must be non-negative and less than the size of the collection.");
                 _items[arrayIndex] = value;
             }
         }
@@ -260,12 +258,16 @@ namespace ClassicUO.Utility
             {
                 for (int i = _frontArrayIndex; i < Capacity; i++)
                     yield return _items[i];
+
                 for (int i = 0; i < (_frontArrayIndex + Count) % Capacity; i++)
                     yield return _items[i];
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
         void ICollection<T>.Add(T item)
         {
@@ -296,24 +298,26 @@ namespace ClassicUO.Utility
 
             if (Get(0, out T checkFrontBackItem) && comparer.Equals(checkFrontBackItem, item))
                 return 0;
-
             int backIndex = Count - 1;
 
             if (Get(backIndex, out checkFrontBackItem) && comparer.Equals(checkFrontBackItem, item))
                 return backIndex;
-
             int index;
 
             if (Count <= _items.Length - _frontArrayIndex)
+            {
                 index = Array.IndexOf(_items, item, _frontArrayIndex, Count);
+            }
             else
             {
                 index = Array.IndexOf(_items, item, _frontArrayIndex, _items.Length - _frontArrayIndex);
+
                 if (index < 0)
                     index = Array.IndexOf(_items, item, 0, _frontArrayIndex + Count - _items.Length);
             }
 
             int circularIndex = (index - _frontArrayIndex + _items.Length) % _items.Length;
+
             return circularIndex;
         }
 
@@ -342,10 +346,11 @@ namespace ClassicUO.Utility
         public bool Remove(T item)
         {
             int index = IndexOf(item);
+
             if (index == -1)
                 return false;
-
             RemoveAt(index);
+
             return true;
         }
 
@@ -364,17 +369,18 @@ namespace ClassicUO.Utility
                 throw new ArgumentOutOfRangeException(nameof(index), index, "Index was less than zero.");
 
             if (index >= Count)
-            {
-                throw new ArgumentOutOfRangeException(nameof(index), index,
-                    "Index was equal or greater than TotalCount.");
-            }
+                throw new ArgumentOutOfRangeException(nameof(index), index, "Index was equal or greater than TotalCount.");
 
             if (index == 0)
+            {
                 RemoveFromFront();
+            }
             else
             {
                 if (index == Count - 1)
+                {
                     RemoveFromBack();
+                }
                 else
                 {
                     if (index < Count / 2)
@@ -386,6 +392,7 @@ namespace ClassicUO.Utility
                         // the first element in the arrya is now either a duplicate or it's default value
                         // to be safe set it to it's default value regardless of circumstance
                         _items[0] = default;
+
                         // if we shifted the front element, adjust the front index
                         if (_frontArrayIndex < arrayIndex)
                             _frontArrayIndex = (_frontArrayIndex + 1) % _items.Length;
@@ -398,11 +405,11 @@ namespace ClassicUO.Utility
                         // shift the array from the center of the array to before the index to remove by 1 to the right
                         // the element to remove is replaced by the copy
                         int arrayCenterIndex = _items.Length / 2;
-                        Array.Copy(_items, arrayCenterIndex, _items, arrayCenterIndex + 1,
-                            _items.Length - 1 - arrayIndex);
+                        Array.Copy(_items, arrayCenterIndex, _items, arrayCenterIndex + 1, _items.Length - 1 - arrayIndex);
                         // the last element in the array is now either a duplicate or it's default value
                         // to be safe set it to it's default value regardless of circumstance
                         _items[_items.Length - 1] = default;
+
                         // if we shifted the front element, adjust the front index
                         if (_frontArrayIndex < arrayIndex)
                             _frontArrayIndex = (_frontArrayIndex + 1) % _items.Length;
@@ -442,7 +449,9 @@ namespace ClassicUO.Utility
                 Array.Clear(_items, 0, _frontArrayIndex + Count - _items.Length);
             }
             else
+            {
                 Array.Clear(_items, _frontArrayIndex, Count);
+            }
 
             Count = 0;
             _frontArrayIndex = 0;
@@ -467,7 +476,10 @@ namespace ClassicUO.Utility
         ///         <see cref="Count" />.
         ///     </para>
         /// </remarks>
-        public bool Contains(T item) => this.Contains(item, EqualityComparer<T>.Default);
+        public bool Contains(T item)
+        {
+            return this.Contains(item, EqualityComparer<T>.Default);
+        }
 
         /// <summary>
         ///     Copies the entire <see cref="Deque{T}" /> to a compatible one-dimensional array, starting at the specified index of
@@ -498,16 +510,10 @@ namespace ClassicUO.Utility
                 throw new ArgumentException("Only single dimensional arrays are supported for the requested action.");
 
             if (arrayIndex < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(arrayIndex),
-                    "Index was less than the array's lower bound.");
-            }
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Index was less than the array's lower bound.");
 
             if (arrayIndex >= array.Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(arrayIndex),
-                    "Index was greater than the array's upper bound.");
-            }
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), "Index was greater than the array's upper bound.");
 
             if (array.Length - arrayIndex < Count)
                 throw new ArgumentException("Destination array was not long enough.");
@@ -515,23 +521,23 @@ namespace ClassicUO.Utility
             if (Count == 0)
                 return;
 
-
             try
             {
                 bool loopsAround = Count > _items.Length - _frontArrayIndex;
+
                 if (!loopsAround)
+                {
                     Array.Copy(_items, _frontArrayIndex, array, arrayIndex, Count);
+                }
                 else
                 {
                     Array.Copy(_items, _frontArrayIndex, array, arrayIndex, Capacity - _frontArrayIndex);
-                    Array.Copy(_items, 0, array, arrayIndex + Capacity - _frontArrayIndex,
-                        _frontArrayIndex + (Count - Capacity));
+                    Array.Copy(_items, 0, array, arrayIndex + Capacity - _frontArrayIndex, _frontArrayIndex + (Count - Capacity));
                 }
             }
             catch (ArrayTypeMismatchException)
             {
-                throw new ArgumentException(
-                    "Target array type is not compatible with the type of items in the collection.");
+                throw new ArgumentException("Target array type is not compatible with the type of items in the collection.");
             }
         }
 
@@ -569,6 +575,7 @@ namespace ClassicUO.Utility
         {
             if (index < 0 || index >= Count)
                 return -1;
+
             return _items.Length != 0 ? (_frontArrayIndex + index) % _items.Length : 0;
         }
 
@@ -577,6 +584,7 @@ namespace ClassicUO.Utility
             if (_items.Length >= minimumCapacity)
                 return;
             int newCapacity = _defaultCapacity;
+
             if (_items.Length > 0)
                 newCapacity = _resizeFunction(_items.Length);
             newCapacity = Math.Max(newCapacity, minimumCapacity);
@@ -645,13 +653,16 @@ namespace ClassicUO.Utility
         public bool Get(int index, out T item)
         {
             int arrayIndex = GetArrayIndex(index);
+
             if (arrayIndex == -1)
             {
                 item = default;
+
                 return false;
             }
 
             item = _items[arrayIndex];
+
             return true;
         }
 
@@ -667,7 +678,10 @@ namespace ClassicUO.Utility
         ///     <c>true</c> if <paramref name="item" /> was successfully from the beginning of the <see cref="Deque{T}" />;
         ///     otherwise, <c>false</c> if the <see cref="Deque{T}" /> is empty.
         /// </returns>
-        public bool GetFront(out T item) => Get(0, out item);
+        public bool GetFront(out T item)
+        {
+            return Get(0, out item);
+        }
 
         /// <summary>
         ///     Returns the element at the end of the <see cref="Deque{T}" />.
@@ -681,17 +695,22 @@ namespace ClassicUO.Utility
         ///     <c>true</c> if <paramref name="item" /> was successfully from the end of the <see cref="Deque{T}" />;
         ///     otherwise, <c>false</c> if the <see cref="Deque{T}" /> is empty.
         /// </returns>
-        public bool GetBack(out T item) => Get(Count - 1, out item);
+        public bool GetBack(out T item)
+        {
+            return Get(Count - 1, out item);
+        }
 
         public T Front()
         {
             GetFront(out T t);
+
             return t;
         }
 
         public T Back()
         {
             GetBack(out T t);
+
             return t;
         }
 
@@ -728,6 +747,7 @@ namespace ClassicUO.Utility
             if (Count == 0)
             {
                 item = default;
+
                 return false;
             }
 
@@ -736,6 +756,7 @@ namespace ClassicUO.Utility
             _items[index] = default;
             _frontArrayIndex = (_frontArrayIndex + 1) % _items.Length;
             Count--;
+
             return true;
         }
 
@@ -765,11 +786,11 @@ namespace ClassicUO.Utility
         {
             if (Count == 0)
                 return false;
-
             int index = _frontArrayIndex % _items.Length;
             _items[index] = default;
             _frontArrayIndex = (_frontArrayIndex + 1) % _items.Length;
             Count--;
+
             return true;
         }
 
@@ -806,6 +827,7 @@ namespace ClassicUO.Utility
             if (Count == 0)
             {
                 item = default;
+
                 return false;
             }
 
@@ -813,6 +835,7 @@ namespace ClassicUO.Utility
             item = _items[circularBackIndex];
             _items[circularBackIndex] = default;
             Count--;
+
             return true;
         }
 
@@ -842,10 +865,10 @@ namespace ClassicUO.Utility
         {
             if (Count == 0)
                 return false;
-
             int circularBackIndex = (_frontArrayIndex + (Count - 1)) % _items.Length;
             _items[circularBackIndex] = default;
             Count--;
+
             return true;
         }
 

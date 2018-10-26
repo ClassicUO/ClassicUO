@@ -31,8 +31,10 @@ namespace ClassicUO.Utility
         {
             if (string.IsNullOrEmpty(str))
                 return string.Empty;
+
             if (str.Length == 1)
                 return char.ToUpper(str[0]).ToString();
+
             return char.ToUpper(str[0]) + str.Substring(1);
         }
 
@@ -40,11 +42,12 @@ namespace ClassicUO.Utility
         {
             if (string.IsNullOrEmpty(str))
                 return string.Empty;
+
             if (str.Length == 1)
                 return char.ToUpper(str[0]).ToString();
-
             StringBuilder sb = new StringBuilder();
             bool capitalizeNext = true;
+
             for (int i = 0; i < str.Length; i++)
             {
                 if (capitalizeNext)
@@ -72,7 +75,6 @@ namespace ClassicUO.Utility
                 }
 
                 char* buffer = stackalloc char[bytes];
-
                 int chars = Encoding.UTF8.GetChars(data, bytes, buffer, bytes);
 
                 return new string(buffer, 0, chars);

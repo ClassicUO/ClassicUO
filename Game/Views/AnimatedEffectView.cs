@@ -21,11 +21,11 @@
 
 #endregion
 
-using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
@@ -48,27 +48,21 @@ namespace ClassicUO.Game.Views
             return DrawInternal(spriteBatch, position, objectList);
         }
 
-        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position,
-            MouseOverList objectList)
+        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             if (GameObject.IsDisposed)
                 return false;
-
             AnimatedItemEffect effect = (AnimatedItemEffect) GameObject;
 
             if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _displayedGraphic = effect.AnimationGraphic;
                 Texture = Art.GetStaticTexture(effect.AnimationGraphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + effect.Position.Z * 4,
-                    Texture.Width, Texture.Height);
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + effect.Position.Z * 4, Texture.Width, Texture.Height);
             }
 
-            
             Bounds.X = Texture.Width / 2 - 22 - (int) effect.Offset.X;
-            Bounds.Y = Texture.Height - 44 + (int) (effect.Offset.Z / 4 + effect.Position.Z * 4) -
-                       (int) effect.Offset.Y;
-
+            Bounds.Y = Texture.Height - 44 + (int) (effect.Offset.Z / 4 + effect.Position.Z * 4) - (int) effect.Offset.Y;
             HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 
             return base.Draw(spriteBatch, position, objectList);
@@ -78,7 +72,6 @@ namespace ClassicUO.Game.Views
         {
             int x = list.MousePosition.X - (int) vertex[0].Position.X;
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
-
             if (Art.Contains(GameObject.Graphic, x, y)) list.Add(GameObject, vertex[0].Position);
         }
     }

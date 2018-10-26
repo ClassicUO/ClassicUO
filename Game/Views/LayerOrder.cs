@@ -32,52 +32,44 @@ namespace ClassicUO.Game.Views
         public static Layer[,] UsedLayers { get; } = new Layer[8, USED_LAYER_COUNT]
         {
             {
-                Layer.Mount, Layer.Invalid, Layer.Cloak, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs,
-                Layer.InnerTorso, Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves,
-                Layer.OuterLegs, Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist,
-                Layer.FacialHair, Layer.Earrings, Layer.OneHanded, Layer.Helm, Layer.TwoHanded
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Torso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
+                Layer.Face, Layer.Arms, Layer.Gloves, Layer.Skirt, Layer.Tunic, Layer.Robe, Layer.Waist, Layer.Necklace,
+                Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Cloak
             },
             {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
-                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
-                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Torso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
+                Layer.Face, Layer.Arms, Layer.Gloves, Layer.Skirt, Layer.Tunic, Layer.Robe, Layer.Waist, Layer.Necklace,
+                Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Cloak
             },
             {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
-                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
-                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Torso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
+                Layer.Face, Layer.Arms, Layer.Gloves, Layer.Skirt, Layer.Tunic, Layer.Robe, Layer.Waist, Layer.Necklace,
+                Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.Cloak, Layer.TwoHanded
             },
             {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
-                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
-                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+                Layer.Mount, Layer.Invalid, Layer.Cloak, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Torso, Layer.Ring, Layer.Talisman,
+                Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.Skirt, Layer.Tunic, Layer.Robe, Layer.Waist,
+                Layer.Necklace, Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded
             },
             {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
-                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
-                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Torso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
+                Layer.Face, Layer.Arms, Layer.Gloves, Layer.Skirt, Layer.Tunic, Layer.Robe, Layer.Waist, Layer.Necklace,
+                Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.Cloak, Layer.TwoHanded
             },
             {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
-                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
-                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Torso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
+                Layer.Face, Layer.Arms, Layer.Gloves, Layer.Skirt, Layer.Tunic, Layer.Robe, Layer.Waist, Layer.Necklace,
+                Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Cloak
             },
             {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
-                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
-                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Torso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
+                Layer.Face, Layer.Arms, Layer.Gloves, Layer.Skirt, Layer.Tunic, Layer.Robe, Layer.Waist, Layer.Necklace,
+                Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Cloak
             },
             {
-                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.InnerLegs, Layer.InnerTorso,
-                Layer.Ring, Layer.Talisman, Layer.Bracelet, Layer.Face, Layer.Arms, Layer.Gloves, Layer.OuterLegs,
-                Layer.MiddleTorso, Layer.Neck, Layer.Hair, Layer.OuterTorso, Layer.Waist, Layer.FacialHair,
-                Layer.Earrings, Layer.OneHanded, Layer.Cloak, Layer.Helm, Layer.TwoHanded
+                Layer.Mount, Layer.Invalid, Layer.Shirt, Layer.Pants, Layer.Shoes, Layer.Legs, Layer.Torso, Layer.Ring, Layer.Talisman, Layer.Bracelet,
+                Layer.Face, Layer.Arms, Layer.Gloves, Layer.Skirt, Layer.Tunic, Layer.Robe, Layer.Waist, Layer.Necklace,
+                Layer.Hair, Layer.Beard, Layer.Earrings, Layer.Helmet, Layer.OneHanded, Layer.TwoHanded, Layer.Cloak
             }
         };
     }

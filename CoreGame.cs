@@ -22,7 +22,9 @@
 #endregion
 
 using System;
+
 using ClassicUO.Utility;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -40,20 +42,15 @@ namespace ClassicUO
         {
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / 300.0f);
             GraphicsDeviceManager = new GraphicsDeviceManager(this);
-
-            GraphicsDeviceManager.PreparingDeviceSettings += (sender, e) =>
-                e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage =
-                    RenderTargetUsage.PreserveContents;
+            GraphicsDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
             if (GraphicsDeviceManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
                 GraphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
-
             GraphicsDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             GraphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
             GraphicsDeviceManager.PreferredBackBufferWidth = 1000; // should be changed by settings file
             GraphicsDeviceManager.PreferredBackBufferHeight = 800; // should be changed by settings file
             GraphicsDeviceManager.ApplyChanges();
-
 
             Window.ClientSizeChanged += (sender, e) =>
             {
@@ -61,16 +58,13 @@ namespace ClassicUO
                 GraphicsDeviceManager.PreferredBackBufferHeight = Window.ClientBounds.Height;
                 GraphicsDeviceManager.ApplyChanges();
             };
-
             Window.AllowUserResizing = true;
-
             _fpsCounter = new FpsCounter();
         }
 
-
         protected GraphicsDeviceManager GraphicsDeviceManager { get; }
-        protected float IntervalFixedUpdate => 1000.0f / MaxFPS;
 
+        protected float IntervalFixedUpdate => 1000.0f / MaxFPS;
 
         public int MaxFPS
         {
@@ -80,6 +74,7 @@ namespace ClassicUO
                 if (_maxFPS != value)
                 {
                     _maxFPS = value;
+
                     if (_maxFPS < MIN_FPS)
                         _maxFPS = MIN_FPS;
                     else if (_maxFPS > MAX_FPS)
@@ -92,19 +87,14 @@ namespace ClassicUO
 
         public static long Ticks { get; private set; }
 
-
         protected override void Update(GameTime gameTime)
         {
             if (Profiler.InContext("OutOfContext"))
                 Profiler.ExitContext("OutOfContext");
             Profiler.EnterContext("Update");
-
             double totalms = gameTime.TotalGameTime.TotalMilliseconds;
             double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
-
             Ticks = (long) totalms;
-
-
             _fpsCounter.Update(gameTime);
 
             // ###############################
@@ -114,10 +104,9 @@ namespace ClassicUO
             OnUIUpdate(totalms, framems);
             OnUpdate(totalms, framems);
             // ###############################
-
             Profiler.ExitContext("Update");
-
             _time += (float) framems;
+
             if (_time > IntervalFixedUpdate)
             {
                 _time = _time % IntervalFixedUpdate;
@@ -126,7 +115,9 @@ namespace ClassicUO
                 Profiler.ExitContext("FixedUpdate");
             }
             else
+            {
                 SuppressDraw();
+            }
 
             Profiler.EnterContext("OutOfContext");
         }
@@ -135,6 +126,7 @@ namespace ClassicUO
         {
             Profiler.EndFrame();
             Profiler.BeginFrame();
+
             if (Profiler.InContext("OutOfContext"))
                 Profiler.ExitContext("OutOfContext");
             Profiler.EnterContext("RenderFrame");
@@ -142,7 +134,6 @@ namespace ClassicUO
             OnDraw(gameTime.ElapsedGameTime.TotalMilliseconds);
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
-
             UpdateWindowCaption(gameTime);
         }
 
@@ -155,20 +146,12 @@ namespace ClassicUO
             double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate + timeFixedUpdate;
             double timeTotal = Profiler.TrackedTime;
             double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
-
-            Window.Title = string.Format(
-                "ClassicUO - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}",
-                100d * (timeDraw / timeTotal),
-                100d * (timeUpdate / timeTotal),
-                100d * (timeFixedUpdate / timeTotal),
-                avgDrawMs,
-                gameTime.IsRunningSlowly ? "*" : string.Empty, CurrentFPS);
+            Window.Title = string.Format("ClassicUO - Draw:{0:0.0}% Update:{1:0.0}% Fixed:{2:0.0}% AvgDraw:{3:0.0}ms {4} - FPS: {5}", 100d * (timeDraw / timeTotal), 100d * (timeUpdate / timeTotal), 100d * (timeFixedUpdate / timeTotal), avgDrawMs, gameTime.IsRunningSlowly ? "*" : string.Empty, CurrentFPS);
         }
 
         protected abstract void OnUpdate(double totalMS, double frameMS);
         protected abstract void OnFixedUpdate(double totalMS, double frameMS);
         protected abstract void OnDraw(double frameMS);
-
         protected abstract void OnNetworkUpdate(double totalMS, double frameMS);
         protected abstract void OnInputUpdate(double totalMS, double frameMS);
         protected abstract void OnUIUpdate(double totalMS, double frameMS);

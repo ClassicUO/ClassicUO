@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ClassicUO.Game.Data
+﻿namespace ClassicUO.Game.Data
 {
     public enum GraphicEffectBlendMode
     {
-        Normal = 0x00,                  // normal, black is transparent
-        Multiply = 0x01,                // darken
-        Screen = 0x02,                  // lighten
-        ScreenMore = 0x03,              // lighten more (slightly)
-        ScreenLess = 0x04,              // lighten less
-        NormalHalfTransparent = 0x05,   // transparent but with black edges - 50% transparency?
-        ShadowBlue = 0x06,              // complete shadow with blue edges
-        ScreenRed = 0x07                // transparent more red
+        Normal = 0x00, // normal, black is transparent
+        Multiply = 0x01, // darken
+        Screen = 0x02, // lighten
+        ScreenMore = 0x03, // lighten more (slightly)
+        ScreenLess = 0x04, // lighten less
+        NormalHalfTransparent = 0x05, // transparent but with black edges - 50% transparency?
+        ShadowBlue = 0x06, // complete shadow with blue edges
+        ScreenRed = 0x07 // transparent more red
     }
 }

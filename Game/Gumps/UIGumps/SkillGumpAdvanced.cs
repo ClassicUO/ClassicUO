@@ -23,11 +23,13 @@
 
 using System;
 using System.Collections.Generic;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -41,7 +43,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private double _totalReal, _totalValue;
         private bool _updateSkillsNeeded;
 
-
         public SkillGumpAdvanced() : base(0, 0)
         {
             _skillListEntries = new List<SkillListEntry>();
@@ -49,17 +50,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _line.SetData(new[] {Color.White});
             _totalReal = 0;
             _totalValue = 0;
-
             X = 100;
             Y = 100;
             CanMove = true;
             AcceptMouseInput = false;
-
             AddChildren(new GameBorder(0, 0, 320, 350, 4));
-
             AddChildren(new GumpPicTiled(4, 4, 320 - 8, 350 - 8, 0x0A40) {IsTransparent = true});
             AddChildren(new GumpPicTiled(4, 4, 320 - 8, 350 - 8, 0x0A40) {IsTransparent = true});
-
             _scrollArea = new ScrollArea(20, 60, 295, 250, true) {AcceptMouseInput = true};
             AddChildren(_scrollArea);
             AddChildren(new Label("Skill", true, 1153) {X = 30, Y = 25});
@@ -68,8 +65,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new Label("Cap", true, 1153) {X = 250, Y = 25});
             //======================================================================================
             AddChildren(new Label("Total", true, 1153) {X = 30, Y = 315});
-
-
             World.Player.SkillsChanged += OnSkillChanged;
         }
 
@@ -79,7 +74,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _totalValue = 0;
             _scrollArea.Clear();
 
-            foreach (var entry in _skillListEntries)
+            foreach (SkillListEntry entry in _skillListEntries)
             {
                 entry.Clear();
                 entry.Dispose();
@@ -98,28 +93,23 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _skillListEntries.Add(new SkillListEntry(skillName, skillValueBase, skillValue, skillCap, skill));
             }
 
-            for (int i = 0; i < _skillListEntries.Count; i++)
-            {
-                _scrollArea.AddChildren(_skillListEntries[i]);
-            }
-
-            AddChildren(new Label($"{_totalReal.ToString()} | {_totalValue.ToString()}", true, 1153)
-                {X = 170, Y = 315});
+            for (int i = 0; i < _skillListEntries.Count; i++) _scrollArea.AddChildren(_skillListEntries[i]);
+            AddChildren(new Label($"{_totalReal.ToString()} | {_totalValue.ToString()}", true, 1153) {X = 170, Y = 315});
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             base.Draw(spriteBatch, position, hue);
-            spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 30, (int) position.Y + 50, 260, 1),
-                RenderExtentions.GetHueVector(0, false, .5f, false));
-            spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 30, (int) position.Y + 310, 260, 1),
-                RenderExtentions.GetHueVector(0, false, .5f, false));
+            spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 30, (int) position.Y + 50, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));
+            spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 30, (int) position.Y + 310, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));
+
             return true;
         }
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
+
             if (_updateSkillsNeeded)
             {
                 OnInitialize();
@@ -133,7 +123,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             World.Player.SkillsChanged -= OnSkillChanged;
             base.Dispose();
         }
-
 
         private void OnSkillChanged(object sender, EventArgs args)
         {
@@ -149,7 +138,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             IO.Resources.Gumps.GetGumpTexture(0x985),
             IO.Resources.Gumps.GetGumpTexture(0x82C)
         };
-
         public readonly Skill Skill;
         public readonly Label SkillCap;
         public readonly Label SkillName;
@@ -159,14 +147,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public SkillListEntry(Label skillname, Label skillvaluebase, Label skillvalue, Label skillcap, Skill skill)
         {
             Height = 20;
-
             SkillName = skillname;
             SkillValueBase = skillvaluebase;
             SkillValue = skillvalue;
             SkillCap = skillcap;
             Skill = skill;
-
-
             SkillName.X = 10;
             AddChildren(SkillName);
             //======================
@@ -189,34 +174,32 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             base.Draw(spriteBatch, position, hue);
-
-            spriteBatch.Draw2D(_textures[(int) Skill.Lock], new Vector3(position.X + 210, position.Y + 5, position.Z),
-                Vector3.Zero);
+            spriteBatch.Draw2D(_textures[(int) Skill.Lock], new Vector3(position.X + 210, position.Y + 5, position.Z), Vector3.Zero);
 
             return true;
         }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left && x >= 210 && x <= 210 + _textures[(int) Skill.Lock].Width && y >= 0 &&
-                y <= _textures[(int) Skill.Lock].Height)
-            {
+            if (button == MouseButton.Left && x >= 210 && x <= 210 + _textures[(int) Skill.Lock].Width && y >= 0 && y <= _textures[(int) Skill.Lock].Height)
                 switch (Skill.Lock)
                 {
                     case SkillLock.Up:
                         Skill.Lock = SkillLock.Down;
                         GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) SkillLock.Down);
+
                         break;
                     case SkillLock.Down:
                         Skill.Lock = SkillLock.Locked;
                         GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) SkillLock.Locked);
+
                         break;
                     case SkillLock.Locked:
                         Skill.Lock = SkillLock.Up;
                         GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) SkillLock.Up);
+
                         break;
                 }
-            }
         }
     }
 }

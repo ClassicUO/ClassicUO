@@ -22,6 +22,7 @@
 #endregion
 
 using System.Collections.Generic;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Data
@@ -72,9 +73,10 @@ namespace ClassicUO.Game.Data
             {0x484, new ContainerData(0x0484, 0x064F, 0x0000, 5, 43, 160, 100)}
         };
 
-
-        public static ContainerData Get(Graphic graphic) =>
-            !_data.TryGetValue(graphic, out ContainerData value) ? _data[0x3C] : value;
+        public static ContainerData Get(Graphic graphic)
+        {
+            return !_data.TryGetValue(graphic, out ContainerData value) ? _data[0x3C] : value;
+        }
     }
 
     public class ContainerData
@@ -88,8 +90,11 @@ namespace ClassicUO.Game.Data
         }
 
         public Graphic Graphic { get; }
+
         public Rectangle Bounds { get; }
+
         public ushort OpenSound { get; }
+
         public ushort ClosedSound { get; }
     }
 }

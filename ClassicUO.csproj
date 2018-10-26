@@ -60,7 +60,13 @@
   <ItemGroup>
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
-    <Compile Include="Game\GameObjects\EffectManager.cs" />
+    <Compile Include="Game\Data\SpellsBushido.cs" />
+    <Compile Include="Game\Data\SpellsChivalry.cs" />
+    <Compile Include="Game\Data\SpellsMysticism.cs" />
+    <Compile Include="Game\Data\SpellsNecromancy.cs" />
+    <Compile Include="Game\Data\SpellsNinjitsu.cs" />
+    <Compile Include="Game\Data\SpellsSpellweaving.cs" />
+    <Compile Include="Game\GameObjects\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Game\Gumps\UIGumps\Login\CharacterSelectionGump.cs" />
@@ -72,6 +78,9 @@
     <Compile Include="Game\Gumps\UIGumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyMemberGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\UseSpellButtonGump.cs" />
+    <Compile Include="Game\Scenes\GameSceneDragAndDropHandler.cs" />
+    <Compile Include="Game\Scenes\GameSceneDrawingSorting.cs" />
+    <Compile Include="Game\Scenes\GameSceneInputHandler.cs" />
     <Compile Include="Game\System\CommandSystem.cs" />
     <Compile Include="Game\System\PartySystem.cs" />
     <Compile Include="Game\System\TargetSystem.cs" />
@@ -112,7 +121,7 @@
     <Compile Include="Game\GameObjects\Multi.cs" />
     <Compile Include="Game\GameObjects\PlayerMobile.cs" />
     <Compile Include="Game\GameObjects\Static.cs" />
-    <Compile Include="Game\GameObjects\StaticManager.cs" />
+    <Compile Include="Game\GameObjects\Managers\StaticManager.cs" />
     <Compile Include="Game\GameObjects\TextOverhead.cs" />
     <Compile Include="Game\Graphic.cs" />
     <Compile Include="Game\Gumps\Controls\Button.cs" />
@@ -235,9 +244,9 @@
     <Compile Include="Network\PacketsTable.cs" />
     <Compile Include="Network\PacketWriter.cs" />
     <Compile Include="Network\SendQueue.cs" />
-    <Compile Include="Renderer\CursorRenderer.cs" />
-    <Compile Include="Renderer\IsometricLight.cs" />
-    <Compile Include="Renderer\OverheadManager.cs" />
+    <Compile Include="Game\GameCursor.cs" />
+    <Compile Include="Game\GameObjects\IsometricLight.cs" />
+    <Compile Include="Game\GameObjects\Managers\OverheadManager.cs" />
     <Compile Include="Renderer\PixelPicking.cs" />
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\RenderExtentions.cs" />

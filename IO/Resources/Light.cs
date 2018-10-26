@@ -37,22 +37,20 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
-
             _file = new UOFileMul(path, pathidx, LIGHT_COUNT);
         }
 
         public static ushort[] GetLight(int idx, out int width, out int height)
         {
             (int length, int extra, bool patched) = _file.SeekByEntryIndex(idx);
-
             width = extra & 0xFFFF;
             height = (extra >> 16) & 0xFFFF;
-
             ushort[] pixels = new ushort[width * height];
 
             for (int i = 0; i < height; i++)
             {
                 int pos = i * width;
+
                 for (int j = 0; j < width; j++)
                 {
                     ushort val = _file.ReadUShort();

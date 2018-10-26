@@ -32,46 +32,39 @@ namespace ClassicUO.IO.Resources
     {
         private const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
         private const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
+
         public static LandTiles[] LandData { get; private set; }
+
         public static StaticTiles[] StaticData { get; private set; }
 
         public static void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "tiledata.mul");
+
             if (!File.Exists(path))
                 throw new FileNotFoundException();
-
             UOFileMul tiledata = new UOFileMul(path);
-
-
             bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
-
-            int staticscount = !isold
-                ? (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupNew>()) / Marshal.SizeOf<StaticGroupNew>()
-                : (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupOld>()) / Marshal.SizeOf<StaticGroupOld>();
+            int staticscount = !isold ? (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupNew>()) / Marshal.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupOld>()) / Marshal.SizeOf<StaticGroupOld>();
 
             if (staticscount > 2048)
                 staticscount = 2048;
-
             tiledata.Seek(0);
-
             LandData = new LandTiles[512 * 32];
             StaticData = new StaticTiles[staticscount * 32];
-
             byte[] bufferString = new byte[20];
 
             for (int i = 0; i < 512; i++)
             {
                 tiledata.Skip(4);
+
                 for (int j = 0; j < 32; j++)
                 {
                     if (tiledata.Position + (isold ? 4 : 8) + 2 + 20 > tiledata.Length)
                         goto END;
-                    
                     int idx = i * 32 + j;
                     LandData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     LandData[idx].TexID = tiledata.ReadUShort();
-
                     tiledata.Fill(bufferString, 20);
                     LandData[idx].Name = Encoding.UTF8.GetString(bufferString).TrimEnd('\0');
                 }
@@ -81,12 +74,14 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < staticscount; i++)
             {
+                if(tiledata.Position >= tiledata.Length)
+                    goto END_2;
                 tiledata.Skip(4);
+
                 for (int j = 0; j < 32; j++)
                 {
                     if (tiledata.Position + (isold ? 4 : 8) + 13 + 20 > tiledata.Length)
                         goto END_2;
-
                     int idx = i * 32 + j;
                     StaticData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     StaticData[idx].Weight = tiledata.ReadByte();
@@ -96,15 +91,12 @@ namespace ClassicUO.IO.Resources
                     StaticData[idx].Hue = tiledata.ReadUShort();
                     StaticData[idx].LightIndex = tiledata.ReadUShort();
                     StaticData[idx].Height = tiledata.ReadByte();
-
                     tiledata.Fill(bufferString, 20);
                     StaticData[idx].Name = Encoding.UTF8.GetString(bufferString).TrimEnd('\0');
                 }
             }
 
             END_2:
-
-
             tiledata.Unload();
 
             //string pathdef = Path.Combine(FileManager.UoFolderPath, "art.def");
@@ -167,72 +159,166 @@ namespace ClassicUO.IO.Resources
             //}
         }
 
+        public static bool IsBackground(long flags)
+        {
+            return (flags & 0x00000001) != 0;
+        }
 
-        public static bool IsBackground(long flags) => (flags & 0x00000001) != 0;
+        public static bool IsWeapon(long flags)
+        {
+            return (flags & 0x00000002) != 0;
+        }
 
-        public static bool IsWeapon(long flags) => (flags & 0x00000002) != 0;
+        public static bool IsTransparent(long flags)
+        {
+            return (flags & 0x00000004) != 0;
+        }
 
-        public static bool IsTransparent(long flags) => (flags & 0x00000004) != 0;
+        public static bool IsTranslucent(long flags)
+        {
+            return (flags & 0x00000008) != 0;
+        }
 
-        public static bool IsTranslucent(long flags) => (flags & 0x00000008) != 0;
+        public static bool IsWall(long flags)
+        {
+            return (flags & 0x00000010) != 0;
+        }
 
-        public static bool IsWall(long flags) => (flags & 0x00000010) != 0;
+        public static bool IsDamaging(long flags)
+        {
+            return (flags & 0x00000020) != 0;
+        }
 
-        public static bool IsDamaging(long flags) => (flags & 0x00000020) != 0;
+        public static bool IsImpassable(long flags)
+        {
+            return (flags & 0x00000040) != 0;
+        }
 
-        public static bool IsImpassable(long flags) => (flags & 0x00000040) != 0;
+        public static bool IsWet(long flags)
+        {
+            return (flags & 0x00000080) != 0;
+        }
 
-        public static bool IsWet(long flags) => (flags & 0x00000080) != 0;
+        public static bool IsUnknown(long flags)
+        {
+            return (flags & 0x00000100) != 0;
+        }
 
-        public static bool IsUnknown(long flags) => (flags & 0x00000100) != 0;
+        public static bool IsSurface(long flags)
+        {
+            return (flags & 0x00000200) != 0;
+        }
 
-        public static bool IsSurface(long flags) => (flags & 0x00000200) != 0;
+        public static bool IsBridge(long flags)
+        {
+            return (flags & 0x00000400) != 0;
+        }
 
-        public static bool IsBridge(long flags) => (flags & 0x00000400) != 0;
+        public static bool IsStackable(long flags)
+        {
+            return (flags & 0x00000800) != 0;
+        }
 
-        public static bool IsStackable(long flags) => (flags & 0x00000800) != 0;
+        public static bool IsWindow(long flags)
+        {
+            return (flags & 0x00001000) != 0;
+        }
 
-        public static bool IsWindow(long flags) => (flags & 0x00001000) != 0;
+        public static bool IsNoShoot(long flags)
+        {
+            return (flags & 0x00002000) != 0;
+        }
 
-        public static bool IsNoShoot(long flags) => (flags & 0x00002000) != 0;
+        public static bool IsPrefixA(long flags)
+        {
+            return (flags & 0x00004000) != 0;
+        }
 
-        public static bool IsPrefixA(long flags) => (flags & 0x00004000) != 0;
+        public static bool IsPrefixAn(long flags)
+        {
+            return (flags & 0x00008000) != 0;
+        }
 
-        public static bool IsPrefixAn(long flags) => (flags & 0x00008000) != 0;
+        public static bool IsInternal(long flags)
+        {
+            return (flags & 0x00010000) != 0;
+        }
 
-        public static bool IsInternal(long flags) => (flags & 0x00010000) != 0;
+        public static bool IsFoliage(long flags)
+        {
+            return (flags & 0x00020000) != 0;
+        }
 
-        public static bool IsFoliage(long flags) => (flags & 0x00020000) != 0;
+        public static bool IsPartialHue(long flags)
+        {
+            return (flags & 0x00040000) != 0;
+        }
 
-        public static bool IsPartialHue(long flags) => (flags & 0x00040000) != 0;
+        public static bool IsUnknown1(long flags)
+        {
+            return (flags & 0x00080000) != 0;
+        }
 
-        public static bool IsUnknown1(long flags) => (flags & 0x00080000) != 0;
+        public static bool IsMap(long flags)
+        {
+            return (flags & 0x00100000) != 0;
+        }
 
-        public static bool IsMap(long flags) => (flags & 0x00100000) != 0;
+        public static bool IsContainer(long flags)
+        {
+            return (flags & 0x00200000) != 0;
+        }
 
-        public static bool IsContainer(long flags) => (flags & 0x00200000) != 0;
+        public static bool IsWearable(long flags)
+        {
+            return (flags & 0x00400000) != 0;
+        }
 
-        public static bool IsWearable(long flags) => (flags & 0x00400000) != 0;
+        public static bool IsLightSource(long flags)
+        {
+            return (flags & 0x00800000) != 0;
+        }
 
-        public static bool IsLightSource(long flags) => (flags & 0x00800000) != 0;
+        public static bool IsAnimated(long flags)
+        {
+            return (flags & 0x01000000) != 0;
+        }
 
-        public static bool IsAnimated(long flags) => (flags & 0x01000000) != 0;
+        public static bool IsNoDiagonal(long flags)
+        {
+            return (flags & 0x02000000) != 0;
+        }
 
-        public static bool IsNoDiagonal(long flags) => (flags & 0x02000000) != 0;
+        public static bool IsUnknown2(long flags)
+        {
+            return (flags & 0x04000000) != 0;
+        }
 
-        public static bool IsUnknown2(long flags) => (flags & 0x04000000) != 0;
+        public static bool IsArmor(long flags)
+        {
+            return (flags & 0x08000000) != 0;
+        }
 
-        public static bool IsArmor(long flags) => (flags & 0x08000000) != 0;
+        public static bool IsRoof(long flags)
+        {
+            return (flags & 0x10000000) != 0;
+        }
 
-        public static bool IsRoof(long flags) => (flags & 0x10000000) != 0;
+        public static bool IsDoor(long flags)
+        {
+            return (flags & 0x20000000) != 0;
+        }
 
-        public static bool IsDoor(long flags) => (flags & 0x20000000) != 0;
+        public static bool IsStairBack(long flags)
+        {
+            return (flags & 0x40000000) != 0;
+        }
 
-        public static bool IsStairBack(long flags) => (flags & 0x40000000) != 0;
-
-        public static bool IsStairRight(long flags) => (flags & 0x80000000) != 0;
+        public static bool IsStairRight(long flags)
+        {
+            return (flags & 0x80000000) != 0;
+        }
     }
-
 
     //[StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct LandTiles
@@ -246,7 +332,6 @@ namespace ClassicUO.IO.Resources
     public readonly struct LandGroup
     {
         public readonly uint Unknown;
-
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public readonly LandTiles[] Tiles;
     }
@@ -271,7 +356,6 @@ namespace ClassicUO.IO.Resources
     public readonly struct LandGroupOld
     {
         public readonly uint Unknown;
-
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public readonly LandTilesOld[] Tiles;
     }
@@ -281,7 +365,6 @@ namespace ClassicUO.IO.Resources
     {
         public readonly uint Flags;
         public readonly ushort TexID;
-
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
         public readonly string Name;
     }
@@ -290,7 +373,6 @@ namespace ClassicUO.IO.Resources
     public readonly struct StaticGroupOld
     {
         public readonly uint Unk;
-
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public readonly StaticTilesOld[] Tiles;
     }
@@ -306,11 +388,9 @@ namespace ClassicUO.IO.Resources
         public readonly ushort Hue;
         public readonly ushort LightIndex;
         public readonly byte Height;
-
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
         public readonly string Name;
     }
-
 
     // new 
 
@@ -318,7 +398,6 @@ namespace ClassicUO.IO.Resources
     public readonly struct LandGroupNew
     {
         public readonly uint Unknown;
-
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public readonly LandTilesNew[] Tiles;
     }
@@ -328,7 +407,6 @@ namespace ClassicUO.IO.Resources
     {
         public readonly TileFlag Flags;
         public readonly ushort TexID;
-
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
         public readonly string Name;
     }
@@ -337,7 +415,6 @@ namespace ClassicUO.IO.Resources
     public readonly struct StaticGroupNew
     {
         public readonly uint Unk;
-
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)]
         public readonly StaticTilesNew[] Tiles;
     }
@@ -353,11 +430,9 @@ namespace ClassicUO.IO.Resources
         public readonly ushort Hue;
         public readonly ushort LightIndex;
         public readonly byte Height;
-
         [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
         public readonly string Name;
     }
-
 
     [Flags]
     public enum TileFlag : ulong
@@ -366,185 +441,146 @@ namespace ClassicUO.IO.Resources
         ///     Nothing is flagged.
         /// </summary>
         None = 0x00000000,
-
         /// <summary>
         ///     Not yet documented.
         /// </summary>
         Background = 0x00000001,
-
         /// <summary>
         ///     Not yet documented.
         /// </summary>
         Weapon = 0x00000002,
-
         /// <summary>
         ///     Not yet documented.
         /// </summary>
         Transparent = 0x00000004,
-
         /// <summary>
         ///     The tile is rendered with partial alpha-transparency.
         /// </summary>
         Translucent = 0x00000008,
-
         /// <summary>
         ///     The tile is a wall.
         /// </summary>
         Wall = 0x00000010,
-
         /// <summary>
         ///     The tile can cause damage when moved over.
         /// </summary>
         Damaging = 0x00000020,
-
         /// <summary>
         ///     The tile may not be moved over or through.
         /// </summary>
         Impassable = 0x00000040,
-
         /// <summary>
         ///     Not yet documented.
         /// </summary>
         Wet = 0x00000080,
-
         /// <summary>
         ///     Unknown.
         /// </summary>
         Unknown1 = 0x00000100,
-
         /// <summary>
         ///     The tile is a surface. It may be moved over, but not through.
         /// </summary>
         Surface = 0x00000200,
-
         /// <summary>
         ///     The tile is a stair, ramp, or ladder.
         /// </summary>
         Bridge = 0x00000400,
-
         /// <summary>
         ///     The tile is stackable
         /// </summary>
         Generic = 0x00000800,
-
         /// <summary>
         ///     The tile is a window. Like <see cref="TileFlag.NoShoot" />, tiles with this flag block line of sight.
         /// </summary>
         Window = 0x00001000,
-
         /// <summary>
         ///     The tile blocks line of sight.
         /// </summary>
         NoShoot = 0x00002000,
-
         /// <summary>
         ///     For single-amount tiles, the string "a " should be prepended to the tile name.
         /// </summary>
         ArticleA = 0x00004000,
-
         /// <summary>
         ///     For single-amount tiles, the string "an " should be prepended to the tile name.
         /// </summary>
         ArticleAn = 0x00008000,
-
         /// <summary>
         ///     Not yet documented.
         /// </summary>
         Internal = 0x00010000,
-
         /// <summary>
         ///     The tile becomes translucent when walked behind. Boat masts also have this flag.
         /// </summary>
         Foliage = 0x00020000,
-
         /// <summary>
         ///     Only gray pixels will be hued
         /// </summary>
         PartialHue = 0x00040000,
-
         /// <summary>
         ///     Unknown.
         /// </summary>
         NoHouse = 0x00080000,
-
         /// <summary>
         ///     The tile is a map--in the cartography sense. Unknown usage.
         /// </summary>
         Map = 0x00100000,
-
         /// <summary>
         ///     The tile is a container.
         /// </summary>
         Container = 0x00200000,
-
         /// <summary>
         ///     The tile may be equiped.
         /// </summary>
         Wearable = 0x00400000,
-
         /// <summary>
         ///     The tile gives off light.
         /// </summary>
         LightSource = 0x00800000,
-
         /// <summary>
         ///     The tile is animated.
         /// </summary>
         Animation = 0x01000000,
-
         /// <summary>
         ///     Gargoyles can fly over
         /// </summary>
         HoverOver = 0x02000000,
-
         /// <summary>
         ///     Unknown.
         /// </summary>
         NoDiagonal = 0x04000000,
-
         /// <summary>
         ///     Not yet documented.
         /// </summary>
         Armor = 0x08000000,
-
         /// <summary>
         ///     The tile is a slanted roof.
         /// </summary>
         Roof = 0x10000000,
-
         /// <summary>
         ///     The tile is a door. Tiles with this flag can be moved through by ghosts and GMs.
         /// </summary>
         Door = 0x20000000,
-
         /// <summary>
         ///     Not yet documented.
         /// </summary>
         StairBack = 0x40000000,
-
         /// <summary>
         ///     Not yet documented.
         /// </summary>
         StairRight = 0x80000000,
-
         /// Blend Alphas, tile blending.
         AlphaBlend = 0x0100000000,
-
         /// Uses new art style?
         UseNewArt = 0x0200000000,
-
         /// Has art being used?
         ArtUsed = 0x0400000000,
-
-        /// Disallow shadow on this tile, lightsource? lava? 
+        /// Disallow shadow on this tile, lightsource? lava?
         NoShadow = 0x1000000000,
-
         /// Let pixels bleed in to other tiles? Is this Disabling Texture Clamp?
         PixelBleed = 0x2000000000,
-
         /// Play tile animation once.
         PlayAnimOnce = 0x4000000000,
-
         /// Movable multi? Cool ships and vehicles etc?
         MultiMovable = 0x10000000000
     }

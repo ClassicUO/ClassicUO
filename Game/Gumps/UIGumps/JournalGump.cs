@@ -23,30 +23,29 @@
 
 using System;
 using System.Collections.Generic;
+
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class JournalGump : Gump
     {
-        private readonly ScrollFlag _scrollBar;
         private readonly ExpandableScroll _background;
         private readonly RenderedTextList _journalEntries;
+        private readonly ScrollFlag _scrollBar;
 
-        public JournalGump()
-            : base(0, 0)
+        public JournalGump() : base(0, 0)
         {
             X = 100;
             Y = 100;
             CanMove = true;
             AcceptMouseInput = true;
-
             AddChildren(_background = new ExpandableScroll(0, 0, 300));
             _background.TitleGumpID = 0x82A;
-
             AddChildren(_scrollBar = new ScrollFlag(this, 0, 0, Height));
             AddChildren(_journalEntries = new RenderedTextList(30, 36, 242, 200, _scrollBar));
         }
@@ -57,9 +56,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 case MouseEvent.WheelScrollUp:
                     _scrollBar.Value -= 5;
+
                     break;
                 case MouseEvent.WheelScrollDown:
                     _scrollBar.Value += 5;
+
                     break;
             }
         }
@@ -82,17 +83,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null) =>
-            base.Draw(spriteBatch, position, hue);
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        {
+            return base.Draw(spriteBatch, position, hue);
+        }
 
         private void AddJournalEntry(JournalEntry entry)
         {
-            string text = string.Format("{0}{1}",
-                entry.SpeakerName != string.Empty ? entry.SpeakerName + ": " : string.Empty, entry.Text);
+            string text = string.Format("{0}{1}", entry.SpeakerName != string.Empty ? entry.SpeakerName + ": " : string.Empty, entry.Text);
             int font = entry.Font;
             bool asUnicode = entry.AsUnicode;
             TransformFont(ref font, ref asUnicode);
-
             _journalEntries.AddEntry(text, font, entry.Hue);
         }
 
@@ -100,12 +101,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (asUnicode)
                 return;
+
             switch (font)
             {
                 case 3:
+
                 {
                     font = 1;
                     asUnicode = true;
+
                     break;
                 }
             }
@@ -113,11 +117,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void InitializeJournalEntries()
         {
-            for (int i = 0; i < Service.Get<JournalData>().JournalEntries.Count; i++)
-            {
-                AddJournalEntry(Service.Get<JournalData>().JournalEntries[i]);
-            }
-
+            for (int i = 0; i < Service.Get<JournalData>().JournalEntries.Count; i++) AddJournalEntry(Service.Get<JournalData>().JournalEntries[i]);
             _scrollBar.MinValue = 0;
         }
     }

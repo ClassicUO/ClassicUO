@@ -25,7 +25,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using ClassicUO.Utility;
+
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO
@@ -33,17 +33,16 @@ namespace ClassicUO
     internal static class Bootstrap
     {
         public static string ExeDirectory { get; private set; }
+
         public static Assembly Assembly { get; private set; }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
 
-
         private static void Main(string[] args)
         {
             Log.Start(LogTypes.All);
-
             Assembly = Assembly.GetExecutingAssembly();
             ExeDirectory = Path.GetDirectoryName(Assembly.Location);
 
@@ -54,15 +53,12 @@ namespace ClassicUO
                 SetDllDirectory(libsPath);
             }
 
-
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
-
 
             using (GameLoop game = new GameLoop())
             {
                 Log.Message(LogTypes.Trace, $"Exe directory: {ExeDirectory}");
-
                 game.Run();
             }
         }

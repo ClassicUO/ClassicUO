@@ -30,6 +30,7 @@ namespace ClassicUO
         private int _totalFrames;
 
         public int FPS { get; private set; }
+
         public double CurrentFpsTime { get; private set; }
 
         public void Update(GameTime gameTime)

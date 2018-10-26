@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Utility
@@ -31,16 +32,12 @@ namespace ClassicUO.Utility
     public static class Profiler
     {
         public const int ProfileTimeCount = 60;
-
         private static readonly List<ContextAndTick> m_Context;
         private static readonly List<Tuple<string[], double>> m_ThisFrameData;
         private static readonly List<ProfileData> m_AllFrameData;
         private static readonly ProfileData m_TotalTimeData;
-
         private static readonly Stopwatch _timer;
-
         private static long m_BeginFrameTicks;
-
 
         static Profiler()
         {
@@ -52,6 +49,7 @@ namespace ClassicUO.Utility
         }
 
         public static double LastFrameTimeMS { get; private set; }
+
         public static double TrackedTime => m_TotalTimeData.TimeInContext;
 
         public static void BeginFrame()
@@ -61,15 +59,15 @@ namespace ClassicUO.Utility
                 for (int i = 0; i < m_ThisFrameData.Count; i++)
                 {
                     bool added = false;
+
                     for (int j = 0; j < m_AllFrameData.Count; j++)
-                    {
                         if (m_AllFrameData[j].MatchesContext(m_ThisFrameData[i].Item1))
                         {
                             m_AllFrameData[j].AddNewHitLength(m_ThisFrameData[i].Item2);
                             added = true;
+
                             break;
                         }
-                    }
 
                     if (!added) m_AllFrameData.Add(new ProfileData(m_ThisFrameData[i].Item1, m_ThisFrameData[i].Item2));
                 }
@@ -94,15 +92,11 @@ namespace ClassicUO.Utility
         public static void ExitContext(string context_name)
         {
             if (m_Context[m_Context.Count - 1].Name != context_name)
-            {
-                Log.Message(LogTypes.Error,
-                    "Profiler.ExitProfiledContext: context_name does not match current context.");
-            }
-
+                Log.Message(LogTypes.Error, "Profiler.ExitProfiledContext: context_name does not match current context.");
             string[] context = new string[m_Context.Count];
+
             for (int i = 0; i < m_Context.Count; i++)
                 context[i] = m_Context[i].Name;
-
             double ms = (_timer.ElapsedTicks - m_Context[m_Context.Count - 1].Tick) * 1000d / Stopwatch.Frequency;
             m_ThisFrameData.Add(new Tuple<string[], double>(context, ms));
             m_Context.RemoveAt(m_Context.Count - 1);
@@ -112,16 +106,15 @@ namespace ClassicUO.Utility
         {
             if (m_Context.Count == 0)
                 return false;
+
             return m_Context[m_Context.Count - 1].Name == context_name;
         }
 
         public static ProfileData GetContext(string context_name)
         {
             for (int i = 0; i < m_AllFrameData.Count; i++)
-            {
                 if (m_AllFrameData[i].Context[m_AllFrameData[i].Context.Length - 1] == context_name)
                     return m_AllFrameData[i];
-            }
 
             return ProfileData.Empty;
         }
@@ -148,6 +141,7 @@ namespace ClassicUO.Utility
                 {
                     double time = 0;
                     for (int i = 0; i < ProfileTimeCount; i++) time += m_LastTimes[i];
+
                     return time;
                 }
             }
@@ -158,11 +152,10 @@ namespace ClassicUO.Utility
             {
                 if (Context.Length != context.Length)
                     return false;
+
                 for (int i = 0; i < Context.Length; i++)
-                {
                     if (Context[i] != context[i])
                         return false;
-                }
 
                 return true;
             }
@@ -176,6 +169,7 @@ namespace ClassicUO.Utility
             public override string ToString()
             {
                 string name = string.Empty;
+
                 for (int i = 0; i < Context.Length; i++)
                 {
                     if (name != string.Empty)
@@ -198,7 +192,10 @@ namespace ClassicUO.Utility
                 Tick = tick;
             }
 
-            public override string ToString() => string.Format("{0} [{1}]", Name, Tick);
+            public override string ToString()
+            {
+                return string.Format("{0} [{1}]", Name, Tick);
+            }
         }
     }
 }

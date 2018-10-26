@@ -38,20 +38,16 @@ namespace ClassicUO.Utility
     public class ObjectPool<T> : IEnumerable<T> where T : class, IPoolable
     {
         private readonly Deque<T> _freeItems; // circular buffer for O(1) operations
-
         private readonly Func<T> _instantiationFunction;
         private readonly ReturnToPoolDelegate _returnToPoolDelegate;
         private T _headNode; // linked list for iteration
         private T _tailNode;
 
-        public ObjectPool(Func<T> instantiationFunc, int capacity = 16,
-            ObjectPoolIsFullPolicy isFullPolicy = ObjectPoolIsFullPolicy.ReturnNull)
+        public ObjectPool(Func<T> instantiationFunc, int capacity = 16, ObjectPoolIsFullPolicy isFullPolicy = ObjectPoolIsFullPolicy.ReturnNull)
         {
             if (instantiationFunc == null)
                 throw new ArgumentNullException(nameof(instantiationFunc));
-
             _returnToPoolDelegate = Return;
-
             _instantiationFunction = instantiationFunc;
             _freeItems = new Deque<T>(capacity);
             IsFullPolicy = isFullPolicy;
@@ -64,14 +60,19 @@ namespace ClassicUO.Utility
         }
 
         public ObjectPoolIsFullPolicy IsFullPolicy { get; }
+
         public int Capacity { get; private set; }
+
         public int TotalCount { get; private set; }
+
         public int AvailableCount => _freeItems.Count;
+
         public int InUseCount => TotalCount - AvailableCount;
 
         public IEnumerator<T> GetEnumerator()
         {
             T node = _headNode;
+
             while (node != null)
             {
                 yield return node;
@@ -79,9 +80,13 @@ namespace ClassicUO.Utility
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
         public event Action<T> ItemUsed;
+
         public event Action<T> ItemReturned;
 
         public T New()
@@ -91,30 +96,34 @@ namespace ClassicUO.Utility
                 if (TotalCount <= Capacity)
                     poolable = CreateObject();
                 else
-                {
                     switch (IsFullPolicy)
                     {
                         case ObjectPoolIsFullPolicy.ReturnNull:
+
                             return null;
                         case ObjectPoolIsFullPolicy.IncreaseSize:
                             Capacity++;
                             poolable = CreateObject();
+
                             break;
                         case ObjectPoolIsFullPolicy.KillExisting:
+
                             if (_headNode == null)
                                 return null;
                             T newHeadNode = (T) _headNode.NextNode;
                             _headNode.Return();
                             _freeItems.RemoveFromBack(out poolable);
                             _headNode = newHeadNode;
+
                             break;
                         default:
+
                             throw new ArgumentOutOfRangeException();
                     }
-                }
             }
 
             Use(poolable);
+
             return poolable;
         }
 
@@ -122,42 +131,44 @@ namespace ClassicUO.Utility
         {
             TotalCount++;
             T item = _instantiationFunction();
+
             if (item == null)
                 throw new NullReferenceException($"The created pooled object of type '{typeof(T).Name}' is null.");
             item.PreviousNode = _tailNode;
             item.NextNode = null;
+
             if (_headNode == null)
                 _headNode = item;
+
             if (_tailNode != null)
                 _tailNode.NextNode = item;
             _tailNode = item;
+
             return item;
         }
 
         private void Return(IPoolable item)
         {
             Debug.Assert(item != null);
-
             T poolable1 = (T) item;
-
             T previousNode = (T) item.PreviousNode;
             T nextNode = (T) item.NextNode;
 
             if (previousNode != null)
                 previousNode.NextNode = nextNode;
+
             if (nextNode != null)
                 nextNode.PreviousNode = previousNode;
 
             if (item == _headNode)
                 _headNode = nextNode;
+
             if (item == _tailNode)
                 _tailNode = previousNode;
 
             if (_tailNode != null)
                 _tailNode.NextNode = null;
-
             _freeItems.AddToBack(poolable1);
-
             ItemReturned?.Invoke((T) item);
         }
 
@@ -165,6 +176,7 @@ namespace ClassicUO.Utility
         {
             item.Initialize(_returnToPoolDelegate);
             item.NextNode = null;
+
             if (item != _tailNode)
             {
                 item.PreviousNode = _tailNode;

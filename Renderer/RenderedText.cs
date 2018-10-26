@@ -23,9 +23,11 @@
 
 using System;
 using System.Collections.Generic;
+
 using ClassicUO.Game;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
@@ -34,7 +36,6 @@ namespace ClassicUO.Renderer
     public enum FontStyle
     {
         None = 0x00,
-
         Solid = 0x01,
         Italic = 0x02,
         Indention = 0x04,
@@ -58,15 +59,25 @@ namespace ClassicUO.Renderer
         }
 
         public bool IsUnicode { get; set; }
+
         public byte Font { get; set; }
+
         public TEXT_ALIGN_TYPE Align { get; set; }
+
         public int MaxWidth { get; set; }
+
         public FontStyle FontStyle { get; set; }
+
         public byte Cell { get; set; }
+
         public bool IsHTML { get; set; }
+
         public List<WebLinkRect> Links { get; set; } = new List<WebLinkRect>();
+
         public Hue Hue { get; set; }
+
         public uint HTMLColor { get; set; } = 0xFFFFFFFF;
+
         public bool HasBackgroundColor { get; set; }
 
         public string Text
@@ -83,6 +94,7 @@ namespace ClassicUO.Renderer
                         Width = 0;
                         Height = 0;
                         IsPartialHue = false;
+
                         if (IsHTML)
                             Fonts.SetUseHTML(false);
                         Links.Clear();
@@ -97,12 +109,14 @@ namespace ClassicUO.Renderer
         }
 
         public int LinesCount => _texture == null || _texture.IsDisposed ? 0 : _texture.LinesCount;
+
         public bool IsPartialHue { get; set; }
+
         public bool IsDisposed { get; private set; }
 
         public int Width { get; private set; }
-        public int Height { get; private set; }
 
+        public int Height { get; private set; }
 
         public SpriteTexture Texture
         {
@@ -110,6 +124,7 @@ namespace ClassicUO.Renderer
             {
                 if (!string.IsNullOrEmpty(_text) && (_texture == null || _texture.IsDisposed))
                     _texture = InternalCreateTexture();
+
                 return _texture;
             }
             set
@@ -123,24 +138,26 @@ namespace ClassicUO.Renderer
         public bool AllowedToDraw { get; set; } = true;
 
         public bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
-            => Draw(spriteBatch, new Rectangle((int) position.X, (int) position.Y, Width, Height), 0, 0, hue);
+        {
+            return Draw(spriteBatch, new Rectangle((int) position.X, (int) position.Y, Width, Height), 0, 0, hue);
+        }
 
         public bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
         {
             if (string.IsNullOrEmpty(Text))
                 return false;
-
             Rectangle src = new Rectangle();
 
             if (offsetX > Width || offsetX < -MaxWidth || offsetY > Height || offsetY < -Height)
                 return false;
-
             src.X = offsetX;
             src.Y = offsetY;
-
             int maxX = src.X + dst.Width;
+
             if (maxX <= Width)
+            {
                 src.Width = dst.Width;
+            }
             else
             {
                 src.Width = Width - src.X;
@@ -148,8 +165,11 @@ namespace ClassicUO.Renderer
             }
 
             int maxY = src.Y + dst.Height;
+
             if (maxY <= Height)
+            {
                 src.Height = dst.Height;
+            }
             else
             {
                 src.Height = Height - src.Y;
@@ -159,13 +179,15 @@ namespace ClassicUO.Renderer
             return spriteBatch.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);
         }
 
-        public void CreateTexture() => Texture = InternalCreateTexture();
+        public void CreateTexture()
+        {
+            Texture = InternalCreateTexture();
+        }
 
         private Fonts.FontTexture InternalCreateTexture()
         {
             if (IsHTML)
                 Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
-
             Fonts.FontTexture ftexture;
 
             if (IsUnicode)
@@ -179,7 +201,6 @@ namespace ClassicUO.Renderer
                 Height = ftexture.Height;
                 Links = ftexture.Links;
             }
-
 
             if (IsHTML)
                 Fonts.SetUseHTML(false);

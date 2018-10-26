@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Data
@@ -38,20 +39,20 @@ namespace ClassicUO.Game.Data
         West = 0x06,
         Up = 0x07,
         Running = 0x80,
-
         NONE = 0xED
     }
 
     public static class DirectionHelper
     {
-        public static Direction DirectionFromPoints(Point from, Point to) =>
-            DirectionFromVectors(new Vector2(from.X, from.Y), new Vector2(to.X, to.Y));
+        public static Direction DirectionFromPoints(Point from, Point to)
+        {
+            return DirectionFromVectors(new Vector2(from.X, from.Y), new Vector2(to.X, to.Y));
+        }
 
         public static Direction DirectionFromVectors(Vector2 fromPosition, Vector2 toPosition)
         {
             double Angle = Math.Atan2(toPosition.Y - fromPosition.Y, toPosition.X - fromPosition.X);
             if (Angle < 0) Angle = Math.PI + (Math.PI + Angle);
-
             double piPerSegment = Math.PI * 2f / 8f;
             double segmentValue = Math.PI * 2f / 16f;
             int direction = int.MaxValue;
@@ -61,6 +62,7 @@ namespace ClassicUO.Game.Data
                 if (Angle >= segmentValue && Angle <= segmentValue + piPerSegment)
                 {
                     direction = i + 1;
+
                     break;
                 }
 
@@ -68,14 +70,19 @@ namespace ClassicUO.Game.Data
             }
 
             if (direction == int.MaxValue) direction = 0;
-
             direction = direction >= 7 ? direction - 7 : direction + 1;
 
             return (Direction) direction;
         }
 
-        public static Direction GetCardinal(Direction inDirection) => inDirection & (Direction) 0x6;
+        public static Direction GetCardinal(Direction inDirection)
+        {
+            return inDirection & (Direction) 0x6;
+        }
 
-        public static Direction Reverse(Direction inDirection) => (Direction) ((int) inDirection + 0x04) & Direction.Up;
+        public static Direction Reverse(Direction inDirection)
+        {
+            return (Direction) ((int) inDirection + 0x04) & Direction.Up;
+        }
     }
 }

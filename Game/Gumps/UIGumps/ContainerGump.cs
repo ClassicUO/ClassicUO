@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
@@ -38,33 +39,26 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             _item = item;
             _data = ContainerManager.Get(gumpid);
-
             CanMove = true;
-
             AddChildren(new GumpPicContainer(0, 0, _data.Graphic, 0, item));
         }
-
 
         protected override void OnInitialize()
         {
             foreach (Item item in _item.Items)
                 AddChildren(new ItemGumpling(item));
-
             _item.SetCallbacks(OnItemUpdated, OnItemDisposed);
         }
-
 
         public override void Dispose()
         {
             _item.ClearCallBacks(OnItemUpdated, OnItemDisposed);
-
             base.Dispose();
         }
 
         private void OnItemUpdated(GameObject obj)
         {
-            List<GumpControl> toremove = Children.Where(s => s is ItemGumpling ctrl && !_item.Items.Contains(ctrl.Item))
-                .ToList();
+            List<GumpControl> toremove = Children.Where(s => s is ItemGumpling ctrl && !_item.Items.Contains(ctrl.Item)).ToList();
 
             if (toremove.Count > 0)
                 toremove.ForEach(RemoveChildren);
@@ -74,13 +68,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 bool control = false;
 
                 foreach (GumpControl child in Children)
-                {
                     if (child is ItemGumpling ctrl && ctrl.Item == item)
                     {
                         control = true;
+
                         break;
                     }
-                }
 
                 if (!control)
                     AddChildren(new ItemGumpling(item));

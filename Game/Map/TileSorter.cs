@@ -22,6 +22,7 @@
 #endregion
 
 using System.Collections.Generic;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 
@@ -34,9 +35,11 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < objects.Count - 1; i++)
             {
                 int j = i + 1;
+
                 while (j > 0)
                 {
                     int result = Compare(objects[j - 1], objects[j]);
+
                     if (result > 0)
                     {
                         GameObject temp = objects[j - 1];
@@ -51,14 +54,12 @@ namespace ClassicUO.Game.Map
 
         private static int Compare(GameObject x, GameObject y)
         {
-
             (int xZ, int xType, int xThreshold, int xTierbreaker) = GetSortValues(x);
             (int yZ, int yType, int yThreshold, int yTierbreaker) = GetSortValues(y);
-
             xZ += xThreshold;
             yZ += yThreshold;
-
             int comparison = xZ - yZ;
+
             if (comparison == 0)
                 comparison = xType - yType;
 
@@ -67,7 +68,6 @@ namespace ClassicUO.Game.Map
 
             if (comparison == 0)
                 comparison = xTierbreaker - yTierbreaker;
-
 #if ORIONSORT
             if (comparison == 0)
                 comparison = x.PriorityZ - y.PriorityZ;
@@ -81,23 +81,25 @@ namespace ClassicUO.Game.Map
             switch (e)
             {
                 case GameEffect effect:
+
                     return (effect.Position.Z, effect.IsItemEffect ? 2 : 4, 2, 0);
                 case DeferredEntity def:
+
                     return (def.Position.Z, 2, 1, 0);
                 case Mobile mobile:
-                    return (mobile.Position.Z, 3 /* is sitting */, 2,
-                        mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);
+
+                    return (mobile.Position.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);
                 case Tile tile:
-                    return (tile.View.SortZ, 0, 0, 0);
+
+                    return (tile.AverageZ, 0, 0, 0);
                 case Static staticitem:
-                    return (staticitem.Position.Z, 1,
-                        (staticitem.ItemData.Height > 0 ? 1 : 0) +
-                        (TileData.IsBackground((long) staticitem.ItemData.Flags) ? 0 : 1), staticitem.Index);
+
+                    return (staticitem.Position.Z, 1, (staticitem.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground((long) staticitem.ItemData.Flags) ? 0 : 1), staticitem.Index);
                 case Item item:
-                    return (item.Position.Z, item.IsCorpse ? 4 : 2,
-                        (item.ItemData.Height > 0 ? 1 : 0) +
-                        (TileData.IsBackground((long) item.ItemData.Flags) ? 0 : 1), (int) item.Serial.Value);
+
+                    return (item.Position.Z, item.IsCorpse ? 4 : 2, (item.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground((long) item.ItemData.Flags) ? 0 : 1), (int) item.Serial.Value);
                 default:
+
                     return (0, 0, 0, 0);
             }
         }

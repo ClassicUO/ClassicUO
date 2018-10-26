@@ -286,7 +286,10 @@ namespace ClassicUO.Network
             -1 // ff
         };
 
-        public static short GetPacketLength(int id) => _packetsTable[id];
+        public static short GetPacketLength(int id)
+        {
+            return _packetsTable[id];
+        }
 
         public static void AdjustPacketSizeByVersion(ClientVersions version)
         {

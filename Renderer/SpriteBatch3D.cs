@@ -21,10 +21,6 @@
 
 #endregion
 
-using System;
-using System.IO;
-using System.Runtime.CompilerServices;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
@@ -33,8 +29,7 @@ namespace ClassicUO.Renderer
 
     public static class Ext
     {
-        public static void DrawIndexedPrimitives(this GraphicsDevice self, PrimitiveType primitiveType, int baseVertex,
-            int startIndex, int primitiveCount)
+        public static void DrawIndexedPrimitives(this GraphicsDevice self, PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount)
         {
             self.DrawIndexedPrimitives(primitiveType, baseVertex, 0, primitiveCount * 2, startIndex, primitiveCount);
         }
@@ -81,11 +76,8 @@ namespace ClassicUO.Renderer
 //        private int _indicesCount;
 //        private bool _isStarted;
 
-
 //        private int _vertexCount;
 //        private float _z;
-
-
 
 //        public SpriteBatch3D(Microsoft.Xna.Framework.Game game)
 //        {
@@ -112,7 +104,6 @@ namespace ClassicUO.Renderer
 //                BufferUsage.WriteOnly);
 //        }
 
-
 //        public GraphicsDevice GraphicsDevice => _game?.GraphicsDevice;
 //        public Matrix ProjectionMatrixWorld => Matrix.Identity;
 
@@ -123,7 +114,6 @@ namespace ClassicUO.Renderer
 //        public int Calls { get; private set; }
 
 //        public int TotalCalls => Merged + Calls;
-
 
 //        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 //        private void AddQuadrilateralIndices(int indexOffset)
@@ -218,7 +208,7 @@ namespace ClassicUO.Renderer
 //        private void Build(Texture2D texture, SpriteVertex[] vertices, Techniques technique)
 //        {
 //            AddQuadrilateralIndices(_vertexCount);
-            
+
 //			if (_vertexCount + VERTEX_COUNT > _vertices.Length || _indicesCount + INDEX_COUNT > _indices.Length)
 //				Flush(false);
 
@@ -266,7 +256,6 @@ namespace ClassicUO.Renderer
 //            InternalDraw();
 //        }
 
-
 //        private void SetupBuffers()
 //        {
 //            _vertexBuffer.SetData(_vertices, 0, _vertexCount);
@@ -284,7 +273,6 @@ namespace ClassicUO.Renderer
 //        private void SortIndicesAndMerge()
 //        {
 //            Array.Sort(_drawCalls, 0, Calls);
-
 
 //            int newDrawCallCount = 0;
 //            int start = _drawCalls[0].StartIndex;
@@ -346,7 +334,7 @@ namespace ClassicUO.Renderer
 //                return;
 
 //            Techniques last = Techniques.None;
-            
+
 //            for (int i = 0; i < Calls; i++)
 //            {
 
@@ -385,8 +373,6 @@ namespace ClassicUO.Renderer
 //            GraphicsDevice.Textures[0] = call.Texture;
 //            GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, call.StartIndex, call.PrimitiveCount);
 //        }
-
-
 
 //        private struct DrawCallInfo : IComparable<DrawCallInfo>
 //        {

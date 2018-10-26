@@ -39,7 +39,9 @@ namespace ClassicUO.Utility
         }
 
         public int Capacity => _items.Length;
+
         public bool IsEmpty => Count == 0;
+
         public int Count { get; private set; }
 
         public T this[in int index]
@@ -48,15 +50,22 @@ namespace ClassicUO.Utility
             set
             {
                 EnsureCapacity(index + 1);
+
                 if (index >= Count)
                     Count = index + 1;
                 _items[index] = value;
             }
         }
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => new BagEnumerator(this);
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return new BagEnumerator(this);
+        }
 
-        IEnumerator IEnumerable.GetEnumerator() => new BagEnumerator(this);
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new BagEnumerator(this);
+        }
 
         public void Add(T element)
         {
@@ -75,7 +84,6 @@ namespace ClassicUO.Utility
         {
             if (Count == 0)
                 return;
-
             Count = 0;
 
             // non-primitive types are cleared so the garbage collector can release them
@@ -86,10 +94,8 @@ namespace ClassicUO.Utility
         public bool Contains(T element)
         {
             for (int index = Count - 1; index >= 0; --index)
-            {
                 if (element.Equals(_items[index]))
                     return true;
-            }
 
             return false;
         }
@@ -100,13 +106,13 @@ namespace ClassicUO.Utility
             --Count;
             _items[index] = _items[Count];
             _items[Count] = default;
+
             return result;
         }
 
         public bool Remove(T element)
         {
             for (int index = Count - 1; index >= 0; --index)
-            {
                 if (element.Equals(_items[index]))
                 {
                     --Count;
@@ -115,7 +121,6 @@ namespace ClassicUO.Utility
 
                     return true;
                 }
-            }
 
             return false;
         }
@@ -125,10 +130,8 @@ namespace ClassicUO.Utility
             bool isResult = false;
 
             for (int index = bag.Count - 1; index >= 0; --index)
-            {
                 if (Remove(bag[index]))
                     isResult = true;
-            }
 
             return isResult;
         }
@@ -137,7 +140,6 @@ namespace ClassicUO.Utility
         {
             if (capacity < _items.Length)
                 return;
-
             int newCapacity = Math.Max((int) (_items.Length * 1.5), capacity);
             T[] oldElements = _items;
             _items = new T[newCapacity];
@@ -156,9 +158,13 @@ namespace ClassicUO.Utility
             }
 
             T IEnumerator<T>.Current => _bag[_index];
+
             object IEnumerator.Current => _bag[_index];
 
-            public bool MoveNext() => ++_index < _bag.Count;
+            public bool MoveNext()
+            {
+                return ++_index < _bag.Count;
+            }
 
             public void Dispose()
             {

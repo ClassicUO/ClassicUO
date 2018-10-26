@@ -30,7 +30,6 @@ namespace ClassicUO.IO.Resources
     public static class Skills
     {
         private static UOFileMul _file;
-
         private static readonly Dictionary<int, SkillEntry> _skills = new Dictionary<int, SkillEntry>();
 
         public static int SkillsCount => _skills.Count;
@@ -39,15 +38,12 @@ namespace ClassicUO.IO.Resources
         {
             if (SkillsCount > 0)
                 return;
-
             string path = Path.Combine(FileManager.UoFolderPath, "skills.mul");
             string pathidx = Path.Combine(FileManager.UoFolderPath, "Skills.idx");
 
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
-
             _file = new UOFileMul(path, pathidx, 56, 16);
-
             int i = 0;
             while (_file.Position < _file.Length) GetSkill(i++);
         }
@@ -57,18 +53,17 @@ namespace ClassicUO.IO.Resources
             if (!_skills.TryGetValue(index, out SkillEntry value))
             {
                 (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
+
                 if (length == 0)
                     return default;
 
                 //SkillEntryI entry = _file.ReadStruct<SkillEntryI>(_file.Position );
-
 
                 value = new SkillEntry
                 {
                     HasButton = _file.ReadBool(), Name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)),
                     Index = index
                 };
-
                 _skills[index] = value;
             }
 

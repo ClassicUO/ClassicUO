@@ -25,6 +25,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Interfaces;
 using ClassicUO.Utility;
@@ -48,8 +49,6 @@ namespace ClassicUO.Game.GameObjects
     public abstract class Entity : GameObject, IDeferreable
     {
         protected const float CHARACTER_ANIMATION_DELAY = 80;
-
-
         private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
         protected Delta _delta;
         private Direction _direction;
@@ -59,8 +58,6 @@ namespace ClassicUO.Game.GameObjects
         protected long _lastAnimationChangeTime;
         private string _name;
         protected Action<Entity> _OnDisposed;
-
-
         protected Action<Entity> _OnUpdated;
         private Position _position;
 
@@ -69,12 +66,13 @@ namespace ClassicUO.Game.GameObjects
             Serial = serial;
             Items = new EntityCollection<Item>();
             _position = base.Position;
-
             PositionChanged += OnPositionChanged;
         }
 
         public EntityCollection<Item> Items { get; }
+
         public Serial Serial { get; }
+
         public IReadOnlyList<Property> Properties => (IReadOnlyList<Property>) _properties.Values;
 
         public override Graphic Graphic
@@ -100,11 +98,12 @@ namespace ClassicUO.Game.GameObjects
                 if (fixedColor > 0)
                 {
                     if (fixedColor >= 0x0BB8) fixedColor = 1;
-
                     fixedColor |= (ushort) (value & 0xC000);
                 }
                 else
+                {
                     fixedColor = (ushort) (value & 0x8000);
+                }
 
                 if (_hue != fixedColor)
                 {
@@ -174,6 +173,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (onUpdate != null)
                 _OnUpdated += onUpdate;
+
             if (onDispose != null)
                 _OnDisposed += onDispose;
         }
@@ -185,6 +185,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (_OnUpdated.GetInvocationList().Contains(onUpdate))
                 _OnUpdated -= onUpdate;
+
             if (_OnDisposed.GetInvocationList().Contains(onDispose))
                 _OnDisposed -= onDispose;
         }
@@ -196,31 +197,15 @@ namespace ClassicUO.Game.GameObjects
             _properties.Clear();
             int temp = 0;
             foreach (Property p in props) _properties.TryAdd(temp++, p);
-
             _delta |= Delta.Properties;
         }
 
         protected virtual void OnProcessDelta(Delta d)
         {
-            if (d.HasFlag(Delta.Appearance))
-            {
-                AppearanceChanged.Raise(this);
-            }
-
-            if (d.HasFlag(Delta.Position))
-            {
-                PositionChanged.Raise(this);
-            }
-
-            if (d.HasFlag(Delta.Attributes))
-            {
-                AttributesChanged.Raise(this);
-            }
-
-            if (d.HasFlag(Delta.Properties))
-            {
-                PropertiesChanged.Raise(this);
-            }
+            if (d.HasFlag(Delta.Appearance)) AppearanceChanged.Raise(this);
+            if (d.HasFlag(Delta.Position)) PositionChanged.Raise(this);
+            if (d.HasFlag(Delta.Attributes)) AttributesChanged.Raise(this);
+            if (d.HasFlag(Delta.Properties)) PropertiesChanged.Raise(this);
         }
 
         public void ProcessDelta()
@@ -240,24 +225,31 @@ namespace ClassicUO.Game.GameObjects
             }
 
             _properties.Clear();
-
             _OnDisposed?.Invoke(this);
-
             _OnUpdated = null;
             _OnDisposed = null;
-
             base.Dispose();
         }
 
-        protected virtual void OnPositionChanged(object sender, EventArgs e) =>
+        protected virtual void OnPositionChanged(object sender, EventArgs e)
+        {
             Tile = World.Map.GetTile((short) Position.X, (short) Position.Y);
+        }
 
-        public static implicit operator Serial(Entity entity) => entity.Serial;
+        public static implicit operator Serial(Entity entity)
+        {
+            return entity.Serial;
+        }
 
-        public static implicit operator uint(Entity entity) => entity.Serial;
+        public static implicit operator uint(Entity entity)
+        {
+            return entity.Serial;
+        }
 
-        public override int GetHashCode() => Serial.GetHashCode();
-
+        public override int GetHashCode()
+        {
+            return Serial.GetHashCode();
+        }
 
         public virtual void ProcessAnimation()
         {

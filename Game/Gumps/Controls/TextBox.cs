@@ -24,7 +24,9 @@
 using ClassicUO.Input;
 using ClassicUO.Input.TextEntry;
 using ClassicUO.Renderer;
+
 using Microsoft.Xna.Framework;
+
 using SDL2;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -33,29 +35,18 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private const float CARAT_BLINK_TIME = 500f;
         private readonly TextEntry _entry;
-
         private bool _caratBlink;
 
-
-        public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true,
-            FontStyle style = FontStyle.None, ushort hue = 0)
+        public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
         {
             _entry = new TextEntry(font, maxcharlength, maxWidth, width, isunicode, style, hue);
-
             Hue = hue;
-
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
             IsEditable = true;
         }
 
-        public TextBox(string[] parts, string[] lines) : this
-        (1,
-            parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1,
-            parts[0] == "textentrylimited" ? int.Parse(parts[3]) : 0,
-            int.Parse(parts[3]),
-            style: FontStyle.BlackBorder,
-            hue: Hue.Parse(parts[5]))
+        public TextBox(string[] parts, string[] lines) : this(1, parts[0] == "textentrylimited" ? int.Parse(parts[8]) : -1, parts[0] == "textentrylimited" ? int.Parse(parts[3]) : 0, int.Parse(parts[3]), style: FontStyle.BlackBorder, hue: Hue.Parse(parts[5]))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -65,23 +56,32 @@ namespace ClassicUO.Game.Gumps.Controls
             SetText(lines[int.Parse(parts[7])]);
         }
 
-
         public Hue Hue
         {
             get => _entry.Hue;
             set => _entry.Hue = value;
-            
         }
+
         public Graphic Graphic { get; set; }
+
         public int MaxCharCount { get; set; }
-        public bool IsPassword { get => _entry.IsPassword; set { _entry.IsPassword = value; } }
+
+        public bool IsPassword
+        {
+            get => _entry.IsPassword;
+            set => _entry.IsPassword = value;
+        }
+
         public bool NumericOnly { get; set; }
+
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
+
         public string Text => _entry.Text;
 
         public int LinesCount => _entry.GetLinesCount();
 
         public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
+
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 
         public void SetText(string text, bool append = false)
@@ -112,7 +112,6 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (_entry.IsChanged)
                 _entry.UpdateCaretPosition();
-
             base.Update(totalMS, frameMS);
         }
 
@@ -121,19 +120,16 @@ namespace ClassicUO.Game.Gumps.Controls
             _entry.RenderText.Draw(spriteBatch, new Vector3(position.X + _entry.Offset, position.Y, 0));
 
             if (IsEditable)
-            {
                 if (_caratBlink)
-                {
-                    _entry.RenderCaret.Draw(spriteBatch,
-                        new Vector3(position.X + _entry.Offset + _entry.CaretPosition.X,
-                            position.Y + _entry.CaretPosition.Y, 0));
-                }
-            }
+                    _entry.RenderCaret.Draw(spriteBatch, new Vector3(position.X + _entry.Offset + _entry.CaretPosition.X, position.Y + _entry.CaretPosition.Y, 0));
 
             return base.Draw(spriteBatch, position, hue);
         }
 
-        public void RemoveLineAt(int index) => _entry.RemoveLineAt(index);
+        public void RemoveLineAt(int index)
+        {
+            _entry.RemoveLineAt(index);
+        }
 
         protected override void OnTextInput(string c)
         {
@@ -153,31 +149,35 @@ namespace ClassicUO.Game.Gumps.Controls
                     //    _entry.InsertString("\n");
                     //else
                     Parent.OnKeybaordReturn(Graphic, Text);
+
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
+
                     if (ReplaceDefaultTextOnFirstKeyPress)
-                    {
-                        //Text = string.Empty;
                         ReplaceDefaultTextOnFirstKeyPress = false;
-                    }
                     else
                         _entry.RemoveChar(true);
 
                     break;
                 case SDL.SDL_Keycode.SDLK_LEFT:
                     _entry.SeekCaretPosition(-1);
+
                     break;
                 case SDL.SDL_Keycode.SDLK_RIGHT:
                     _entry.SeekCaretPosition(1);
+
                     break;
                 case SDL.SDL_Keycode.SDLK_DELETE:
                     _entry.RemoveChar(false);
+
                     break;
                 case SDL.SDL_Keycode.SDLK_HOME:
                     _entry.SetCaretPosition(0);
+
                     break;
                 case SDL.SDL_Keycode.SDLK_END:
                     _entry.SetCaretPosition(Text.Length - 1);
+
                     break;
             }
         }
