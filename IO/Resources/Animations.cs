@@ -717,131 +717,133 @@ namespace ClassicUO.IO.Resources
 
             if (_animGroupCount < maxGroup)
                 _animGroupCount = maxGroup;
-
-            // AnimationSequence.uop
-            // https://github.com/AimedNuu/OrionUO/blob/f27a29806aab9379fa004af953832f3e2ffe248d/OrionUO/Managers/FileManager.cpp#L738
-            UOFileUop animSeq = new UOFileUop(Path.Combine(FileManager.UoFolderPath, "AnimationSequence.uop"), ".bin", MAX_ANIMATIONS_DATA_INDEX_COUNT);
-
-            //LogFile file = new LogFile(Bootstrap.ExeDirectory, "file.txt");
-
-            for (int i = 0; i < animSeq.Entries.Length; i++)
+            if (FileManager.ClientVersion > ClientVersions.CV_60144)
             {
-                UOFileIndex3D entry = animSeq.Entries[i];
+                // AnimationSequence.uop
+                // https://github.com/AimedNuu/OrionUO/blob/f27a29806aab9379fa004af953832f3e2ffe248d/OrionUO/Managers/FileManager.cpp#L738
+                UOFileUop animSeq = new UOFileUop(Path.Combine(FileManager.UoFolderPath, "AnimationSequence.uop"), ".bin", MAX_ANIMATIONS_DATA_INDEX_COUNT);
 
-                if (entry.Length > 0 && entry.Offset > 0)
+                //LogFile file = new LogFile(Bootstrap.ExeDirectory, "file.txt");
+
+                for (int i = 0; i < animSeq.Entries.Length; i++)
                 {
-                    animSeq.Seek(entry.Offset);
-                    byte[] buffer = animSeq.ReadArray<byte>(entry.Length);
-                    int decLen = entry.DecompressedLength;
-                    byte[] decbuffer = new byte[decLen];
-                    ZLib.Decompress(buffer, 0, decbuffer, decbuffer.Length);
+                    UOFileIndex3D entry = animSeq.Entries[i];
 
-                    //ZLib.Unpack(decbuffer, ref decLen, buffer, entry.Length);
-                    _reader.SetData(decbuffer, decbuffer.Length);
-                    uint animID = _reader.ReadUInt();
-                    ref IndexAnimation index = ref DataIndex[animID];
-
-                    if (!index.IsUOP)
-                        continue;
-                    _reader.Skip(48);
-                    int replaces = _reader.ReadInt();
-
-                    if (replaces == 48 || replaces == 68)
-                        continue;
-
-                    //StringBuilder sb = new StringBuilder();
-                    //sb.AppendLine($"- 0x{animID:X4},\ttype: {replaces}");
-
-                    //switch (replaces)
-                    //{
-                    //    case 29:
-                    //        index.Type = ANIMATION_GROUPS_TYPE.MONSTER;
-                    //        break;
-                    //    case 31: // what is this?
-                    //        break;
-                    //    case 32:
-                    //        index.Type = ANIMATION_GROUPS_TYPE.EQUIPMENT;
-                    //        break;
-                    //    case 48:
-                    //    case 68:
-                    //        index.Type = ANIMATION_GROUPS_TYPE.HUMAN;
-                    //        break;
-                    //}
-
-                    for (int k = 0; k < replaces; k++)
+                    if (entry.Length > 0 && entry.Offset > 0)
                     {
-                        int oldIdx = _reader.ReadInt();
-                        uint frameCount = _reader.ReadUInt();
-                        int newIDX = _reader.ReadInt();
+                        animSeq.Seek(entry.Offset);
+                        byte[] buffer = animSeq.ReadArray<byte>(entry.Length);
+                        int decLen = entry.DecompressedLength;
+                        byte[] decbuffer = new byte[decLen];
+                        ZLib.Decompress(buffer, 0, decbuffer, decbuffer.Length);
 
-                        //sb.AppendLine($"\t\told: {oldIdx}\t\tframecount: {frameCount}\t\tnew: {newIDX}");
+                        //ZLib.Unpack(decbuffer, ref decLen, buffer, entry.Length);
+                        _reader.SetData(decbuffer, decbuffer.Length);
+                        uint animID = _reader.ReadUInt();
+                        ref IndexAnimation index = ref DataIndex[animID];
 
-                        if (frameCount == 0)
+                        if (!index.IsUOP)
+                            continue;
+                        _reader.Skip(48);
+                        int replaces = _reader.ReadInt();
+
+                        if (replaces == 48 || replaces == 68)
+                            continue;
+
+                        //StringBuilder sb = new StringBuilder();
+                        //sb.AppendLine($"- 0x{animID:X4},\ttype: {replaces}");
+
+                        //switch (replaces)
+                        //{
+                        //    case 29:
+                        //        index.Type = ANIMATION_GROUPS_TYPE.MONSTER;
+                        //        break;
+                        //    case 31: // what is this?
+                        //        break;
+                        //    case 32:
+                        //        index.Type = ANIMATION_GROUPS_TYPE.EQUIPMENT;
+                        //        break;
+                        //    case 48:
+                        //    case 68:
+                        //        index.Type = ANIMATION_GROUPS_TYPE.HUMAN;
+                        //        break;
+                        //}
+
+                        for (int k = 0; k < replaces; k++)
                         {
-                            index.Groups[oldIdx] = index.Groups[newIDX];
-                        }
-                        else
-                        {
-                            //int offset = 64;
-                            if (animID == 0x02df)
+                            int oldIdx = _reader.ReadInt();
+                            uint frameCount = _reader.ReadUInt();
+                            int newIDX = _reader.ReadInt();
+
+                            //sb.AppendLine($"\t\told: {oldIdx}\t\tframecount: {frameCount}\t\tnew: {newIDX}");
+
+                            if (frameCount == 0)
                             {
+                                index.Groups[oldIdx] = index.Groups[newIDX];
+                            }
+                            else
+                            {
+                                //int offset = 64;
+                                if (animID == 0x02df)
+                                {
+                                }
+
+                                //_reader.Skip(40);
+
+                                //byte[] unk = new byte[20];
+
+                                //for (int o = 0; o < 20; o++)
+                                //{
+                                //    unk[o] = _reader.ReadByte();
+                                //}
+
+                                //for (int j = 0; j < 5; j++)
+                                //{
+                                //    index.Groups[oldIdx].Direction[j].FrameCount = (byte) frameCount;
+                                //}
                             }
 
-                            //_reader.Skip(40);
-
-                            //byte[] unk = new byte[20];
-
-                            //for (int o = 0; o < 20; o++)
-                            //{
-                            //    unk[o] = _reader.ReadByte();
-                            //}
-
-                            //for (int j = 0; j < 5; j++)
-                            //{
-                            //    index.Groups[oldIdx].Direction[j].FrameCount = (byte) frameCount;
-                            //}
+                            _reader.Skip(60);
                         }
 
-                        _reader.Skip(60);
+                        int toread = (int)(_reader.Length - _reader.Position);
+                        byte[] data = _reader.ReadArray(toread);
+                        _reader.SetData(data, toread);
+
+                        if (animID == 0x02df)
+                        {
+                            //int len = entry.Length;
+                            //byte[] decc = new byte[len];
+
+                            //ZLib.Compress(decbuffer, ref decc);
+
+                            // ZLib.Pack(decc, ref len, decbuffer, decLen);
+                        }
+
+                        //if (!Directory.Exists("files"))
+                        //    Directory.CreateDirectory("files");
+
+                        //using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine("files", $"file_0x{animID:X4}"))))
+                        //{
+                        //    writer.Write(data);
+                        //}
+                        //sb.AppendLine("Data len: " + toread);
+                        //for (int ii = 0; ii < toread; ii++)
+                        //{
+                        //    sb.AppendLine($"\t\tbyte[{ii}]   {data[ii]}");
+                        //}
+                        uint unk0 = _reader.ReadUInt();
+                        _reader.Skip(1);
+                        uint unk1 = _reader.ReadUInt();
+                        //uint unk2 = _reader.ReadUInt();
+                        //uint unk3 = _reader.ReadUInt();
+                        //file.WriteAsync(sb.ToString());
                     }
-
-                    int toread = (int) (_reader.Length - _reader.Position);
-                    byte[] data = _reader.ReadArray(toread);
-                    _reader.SetData(data, toread);
-
-                    if (animID == 0x02df)
-                    {
-                        //int len = entry.Length;
-                        //byte[] decc = new byte[len];
-
-                        //ZLib.Compress(decbuffer, ref decc);
-
-                        // ZLib.Pack(decc, ref len, decbuffer, decLen);
-                    }
-
-                    //if (!Directory.Exists("files"))
-                    //    Directory.CreateDirectory("files");
-
-                    //using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine("files", $"file_0x{animID:X4}"))))
-                    //{
-                    //    writer.Write(data);
-                    //}
-                    //sb.AppendLine("Data len: " + toread);
-                    //for (int ii = 0; ii < toread; ii++)
-                    //{
-                    //    sb.AppendLine($"\t\tbyte[{ii}]   {data[ii]}");
-                    //}
-                    uint unk0 = _reader.ReadUInt();
-                    _reader.Skip(1);
-                    uint unk1 = _reader.ReadUInt();
-                    //uint unk2 = _reader.ReadUInt();
-                    //uint unk3 = _reader.ReadUInt();
-                    //file.WriteAsync(sb.ToString());
                 }
-            }
 
-            //file.Dispose();
-            animSeq.Unload();
+                //file.Dispose();
+                animSeq.Unload();
+            }
         }
 
         public static void UpdateAnimationTable(uint flags)
