@@ -182,23 +182,16 @@ namespace ClassicUO.Game.Scenes
 
                         if (e.EventType == MouseEvent.DoubleClick)
                         {
-                            GameObject obj = null;
-
-                            if (_mousePicker.MouseOverTile is Tile tile)
+                            if (!Pathfinder.AutoWalking)
                             {
-                                obj = tile;
-                            }
-                            else if (_mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long)dyn.ItemData.Flags))
-                            {
-                                obj = _mousePicker.MouseOverObject;
-                            }
+                                if (_mousePicker.MouseOverObject is Tile || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long)dyn.ItemData.Flags))
+                                {
+                                    GameObject obj = _mousePicker.MouseOverObject;
 
-                            if (obj != null)
-                            {
-                                if (Pathfinder.WalkTo(obj.Position.X, obj.Position.Y, obj.Position.Z, 0))
-                                    World.Player.AddGameText(MessageType.Label, "Pathfinding!", 3, 0, false);
+                                    if (Pathfinder.WalkTo(obj.Position.X, obj.Position.Y, obj.Position.Z, 0))
+                                        World.Player.AddGameText(MessageType.Label, "Pathfinding!", 3, 0, false);
+                                }
                             }
-
                         }
 
                         break;

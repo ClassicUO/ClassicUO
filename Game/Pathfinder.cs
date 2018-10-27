@@ -74,9 +74,9 @@ namespace ClassicUO.Game
         private static bool _goalFound;
         private static int _activeOpenNodes, _activeCloseNodes, _pathfindDistance;
 
-        private static PathNode[] _openList = new PathNode[PATHFINDER_MAX_NODES];
-        private static PathNode[] _closedList = new PathNode[PATHFINDER_MAX_NODES];
-        private static PathNode[] _path = new PathNode[PATHFINDER_MAX_NODES];
+        private static readonly PathNode[] _openList = new PathNode[PATHFINDER_MAX_NODES];
+        private static readonly PathNode[] _closedList = new PathNode[PATHFINDER_MAX_NODES];
+        private static readonly PathNode[] _path = new PathNode[PATHFINDER_MAX_NODES];
 
         private static int _pointIndex, _pathSize;
 
@@ -323,21 +323,7 @@ namespace ClassicUO.Game
             if (!CreateItemList(ref list, x, y, stepState) || list.Count <= 0)
                 return false;
 
-
-            list.Sort((a, b) =>
-            {
-                int result = 0;
-
-                if (a != null && b != null)
-                {
-                    result = a.Z - b.Z;
-
-                    if (result <= 0)
-                        result = a.Height - b.Height;
-                }
-
-                return result;
-            });
+            list.Sort();
 
             list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, 128, 128, 128, null));
 
@@ -536,9 +522,9 @@ namespace ClassicUO.Game
             return allowed;
         }
 
-        private static Vector2 _startPoint, _endPoint;
+        private static Point _startPoint, _endPoint;
 
-        private static int GetGoalDistCost(Vector2 point, int cost) => (int)(Math.Abs(_endPoint.X - point.X) + Math.Abs(_endPoint.Y - point.Y)) * cost;
+        private static int GetGoalDistCost(Point point, int cost) => (Math.Abs(_endPoint.X - point.X) + Math.Abs(_endPoint.Y - point.Y)) * cost;
 
         private static bool DoesNotExistOnOpenList(int x, int y, int z)
         {
@@ -590,14 +576,14 @@ namespace ClassicUO.Game
                                 node.Y = y;
                                 node.Z = z;
 
-                                Vector2 p = new Vector2(x, y);
+                                Point p = new Point(x, y);
 
                                 node.DistFromGoalCost = GetGoalDistCost(p, cost);
                                 node.DistFromStartCost = parent.DistFromStartCost + cost;
                                 node.Cost = node.DistFromGoalCost + node.DistFromStartCost;
                                 node.Parent = parent;
-
-                                if (Vector2.Distance(_endPoint, p) <= _pathfindDistance)
+                                
+                                if (MathHelper.GetDistance(_endPoint, p) <= _pathfindDistance)
                                 {
                                     _goalFound = true;
                                     _goalNode = i;
@@ -875,7 +861,7 @@ namespace ClassicUO.Game
             public int X, Y, Direction;
         }
 
-        class PathObject
+        class PathObject : IComparable<PathObject>
         {
             public PathObject(uint flags, int z, int avgZ, int h, GameObject obj)
             {
@@ -886,16 +872,36 @@ namespace ClassicUO.Game
                 Object = obj;
             }
 
-            public uint Flags { get; set; }
-            public int Z { get; set; }
-            public int AverageZ { get; set; }
-            public int Height { get; set; }
+            public uint Flags { get; }
+            public int Z { get; }
+            public int AverageZ { get; }
+            public int Height { get; }
             public GameObject Object { get; }
+
+            public int CompareTo(PathObject other)
+            {
+                if (other == null)
+                    return 0;
+
+                int r = Z - other.Z;
+
+                if (r <= 0)
+                {
+                    r = Height - other.Height;
+
+                    if (r > 0)
+                        return -1;
+                    if (r == 0)
+                        return 0;
+                    return 1;
+                }
+
+                return -1;
+            }
         }
 
         class PathNode
         {
-
             public int X { get; set; }
             public int Y { get; set; }
             public int Z { get; set; }
@@ -904,7 +910,6 @@ namespace ClassicUO.Game
             public int Cost { get; set; }
             public int DistFromStartCost { get; set; }
             public int DistFromGoalCost { get; set; }
-
             public PathNode Parent { get; set; }
 
             public void Reset()

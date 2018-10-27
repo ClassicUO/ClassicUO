@@ -32,6 +32,17 @@ namespace ClassicUO.Utility
         public static bool InRange(int input, int low, int high)
         {
             return input >= low && input <= high;
-        }       
+        }
+
+        public static int GetDistance(Point current, Point target)
+        {
+            int distx = Math.Abs(target.X - current.X);
+            int disty = Math.Abs(target.Y - current.Y);
+
+            if (disty > distx)
+                distx = disty;
+
+            return distx;
+        }
     }
 }
