@@ -182,7 +182,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (e.EventType == MouseEvent.DoubleClick)
                         {
-                            if (!Pathfinder.AutoWalking)
+                            if (_settings.EnablePathfind  && !Pathfinder.AutoWalking)
                             {
                                 if (_mousePicker.MouseOverObject is Tile || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long)dyn.ItemData.Flags))
                                 {
