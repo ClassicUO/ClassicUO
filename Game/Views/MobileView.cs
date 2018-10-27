@@ -79,6 +79,8 @@ namespace ClassicUO.Game.Views
             else
                 drawX = -22 - (int) mobile.Offset.X;
 
+            Rectangle total = new Rectangle();
+
             for (int i = 0; i < _layerCount; i++)
             {
                 ViewLayer vl = _frames[i];
@@ -87,6 +89,19 @@ namespace ClassicUO.Game.Views
                 if (frame.IsDisposed) continue;
                 int x = drawX + frame.CenterX;
                 int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
+
+                if (total.X > x)
+                    total.X = x;
+
+                if (total.Y > y)
+                    total.Y = y;
+
+                if (total.Width < frame.Width)
+                    total.Width = frame.Width;
+
+                if (total.Height < frame.Height)
+                    total.Height = frame.Height;
+
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                 HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, 0, false);
@@ -94,66 +109,7 @@ namespace ClassicUO.Game.Views
                 Pick(frame.ID, Bounds, position, objectList);
             }
 
-            //Bounds = bodyFrame.Bounds;
-
-            //int xx = IsFlipped ? (int)position.X + rect.X + 44 : -(int)position.X + rect.X;
-
-            //BoudsStrange = new Rectangle((int) position.X + rect.X, (int) position.Y + rect.Y, rect.Width, rect.Height);
-
-            //spriteBatch.DrawRectangle(_texture, 
-            //    new Rectangle
-            //    (
-            //        (int)position.X + (IsFlipped ? drawX + bodyFrame.CenterX + 44 - bodyFrame.Width : -(drawX + bodyFrame.CenterX)), 
-            //        (int)position.Y - (drawY + (bodyFrame.Height + bodyFrame.CenterY)), 
-            //        bodyFrame.Width, 
-            //        bodyFrame.Height
-            //    ), 
-
-            //    RenderExtentions.GetHueVector(38));
-
-            //int xx = drawX + bodyFrame.CenterX;
-            //int yy = -drawY - (bodyFrame.Height + bodyFrame.CenterY) + drawCenterY;
-
-            //spriteBatch.DrawRectangle(_texture,
-            //    new Rectangle
-            //    (
-            //        (int)position.X - xx,
-            //        (int)position.Y + yy - (GameObject.IsMounted ? 16 : 0),
-            //        bodyFrame.Width,
-            //        bodyFrame.Height + (GameObject.IsMounted ? 16 : 0)
-            //    ),
-
-            //    RenderExtentions.GetHueVector(38));
-
-            //mirror = false;
-            //dir = 0 & 0x7F;
-            //Animations.GetAnimDirection(ref dir, ref mirror);
-
-            //ref var direction = ref Animations.DataIndex[GameObject.Graphic].Groups[0].Direction[0];
-
-            //if (direction.Address > 0 || direction.IsUOP)
-            //{
-            //    if (direction.Frames != null || direction.FrameCount > 0)
-            //    {
-            //        if (Animations.LoadDirectionGroup(ref direction))
-            //        {
-            //            centerY = direction.Frames[0].CenterY;
-            //            height = direction.Frames[0].Height;
-            //        }
-            //        else
-            //        {
-            //            height = mobile.IsMounted ? 100 : 60;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        height = mobile.IsMounted ? 100 : 60;
-            //    }
-            //}
-            //else
-            //{
-            //    height = mobile.IsMounted ? 100 : 60;
-            //}
+            Bounds = total;
 
             if (GameObject.OverHeads.Count > 0)
             {

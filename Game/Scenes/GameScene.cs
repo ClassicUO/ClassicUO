@@ -288,10 +288,10 @@ namespace ClassicUO.Game.Scenes
 
                 if (obj == null)
                     continue;
-                int x = obj.Position.X;
-                int y = obj.Position.Y;
-                Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
-                obj.View.Draw(sb3D, isometricPosition, _mouseOverList);
+                //int x = obj.Position.X;
+                //int y = obj.Position.Y;
+                //Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
+                obj.View.Draw(sb3D, obj.ScreenPosition, _mouseOverList);
             }
 #else
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);

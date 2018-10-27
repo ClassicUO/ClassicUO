@@ -3,8 +3,11 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -94,11 +97,18 @@ namespace ClassicUO.Game.Scenes
                 if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
                     continue;
                 obj.UseInRender = 0xFF;
-                int drawX = (obj.Position.X - obj.Position.Y) * 22 - _offset.X;
-                int drawY = (obj.Position.X + obj.Position.Y) * 22 - obj.Position.Z * 4 - _offset.Y;
+
+                int sX = (obj.Position.X - obj.Position.Y) * 22 - _offset.X;
+                int sY = (obj.Position.X + obj.Position.Y) *22 - _offset.Y;
+
+                int drawX = sX;
+                int drawY = sY - obj.Position.Z * 4 ;
 
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
                     break;
+
+                obj.ScreenPosition = new Vector3(sX - 22, sY - 22, 0);
+
                 int z = obj.Position.Z;
                 int maxObjectZ = obj.PriorityZ;
 
@@ -143,6 +153,7 @@ namespace ClassicUO.Game.Scenes
                         break;
                 }
 
+
                 if (_renderListCount >= _renderList.Length)
                 {
                     int newsize = _renderList.Length + 1000;
@@ -154,6 +165,8 @@ namespace ClassicUO.Game.Scenes
                 _renderListCount++;
             }
         }
+
+        private sbyte _foliageIndex;
 
         private void AddOffsetCharacterTileToRenderList(Entity entity, bool useObjectHandles)
         {
