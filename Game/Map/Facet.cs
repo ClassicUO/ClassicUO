@@ -71,6 +71,10 @@ namespace ClassicUO.Game.Map
             int cellX = x / 8;
             int cellY = y / 8;
             int block = GetBlock(cellX, cellY);
+
+            if (block >= Chunks.Length)
+                return null;
+
             ref MapChunk chuck = ref Chunks[block];
 
             if (chuck == null)
@@ -141,7 +145,10 @@ namespace ClassicUO.Game.Map
 
         public IndexMap GetIndex(int blockX, int blockY)
         {
-            return IO.Resources.Map.BlockData[Index][GetBlock(blockX, blockY)];
+            int block = GetBlock(blockX, blockY);
+            IndexMap[] list = IO.Resources.Map.BlockData[Index];
+
+            return block >= list.Length ? null : list[block];
         }
 
         private int GetBlock(int blockX, int blockY)
