@@ -151,14 +151,19 @@ namespace ClassicUO.Game.Gumps
                             break;
                         case "checkertrans":
 
-                            if (gump.Children.Count > 0)
-                                for (int i = 1; i <= gump.Children.Count; i++)
-                                {
-                                    GumpControl g = gump.Children[gump.Children.Count - i];
-                                    g.IsTransparent = true;
-                                }
+                            //if (gump.Children.Count > 0)
+                            //foreach (GumpControl child in gump.Children)
+                            //{
+                            //    child.IsTransparent = true;
+                            //}
 
-                            //gump.AddChildren(new CheckerTrans(gparams));
+                            //for (int i = 0; i < gump.Children.Count - 1; i++)
+                            //{
+                            //    GumpControl g = gump.Children[i];
+                            //    g.IsTransparent = false;
+                            //}
+
+                            gump.AddChildren(new CheckerTrans(gparams));
                             break;
                         case "croppedtext":
                             gump.AddChildren(new CroppedText(gparams, lines), page);

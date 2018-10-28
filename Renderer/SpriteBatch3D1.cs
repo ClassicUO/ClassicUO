@@ -25,6 +25,20 @@ namespace ClassicUO.Renderer
             DepthBufferEnable = true,
             DepthBufferWriteEnable = true
         };
+        private readonly DepthStencilState _dssStencil = new DepthStencilState
+        {
+            StencilEnable = true,
+
+            StencilFunction = CompareFunction.Always,
+            ReferenceStencil = 0,
+            StencilMask = 1,
+
+
+            StencilFail = StencilOperation.Keep,
+            StencilDepthBufferFail = StencilOperation.Keep,
+            StencilPass = StencilOperation.Replace,
+
+        };
         private readonly VertexBuffer _vertexBuffer;
         private readonly IndexBuffer _indexBuffer;
         private readonly DrawInfo[] _textureInfo;
@@ -147,6 +161,12 @@ namespace ClassicUO.Renderer
             for (int i = 0; i < 4; i++)
                 _vertexInfo[_numSprites * 4 + i] = vertices[i];
             _numSprites++;
+        }
+
+        private bool _stencil = false;
+        public void SetStencil(bool t)
+        {
+            _stencil = t;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

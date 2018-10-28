@@ -137,7 +137,7 @@ namespace ClassicUO.Game.Views
             if (frameIndex == 0xFF)
                 frameIndex = (byte) mobile.AnimIndex;
             Animations.GetAnimationDimensions(frameIndex, mobile.Graphic, dir, animGroup, out int x, out centerY, out int w, out height);
-            if (x <= 0 && centerY <= 0 && w <= 0 && height <= 0) height = mobile.IsMounted ? 100 : 60;
+            if (x == 0 && centerY == 0 && w == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
 
         private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
@@ -260,7 +260,7 @@ namespace ClassicUO.Game.Views
                 {
                     if (direction.Address != direction.PatchedAddress)
                         hue = Animations.DataIndex[Animations.AnimID].Color;
-                    if (hue <= 0 && convertedItem.HasValue) hue = convertedItem.Value.Color;
+                    if (hue == 0 && convertedItem.HasValue) hue = convertedItem.Value.Color;
                 }
 
                 _frames[_layerCount++] = new ViewLayer

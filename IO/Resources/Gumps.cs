@@ -160,7 +160,7 @@ namespace ClassicUO.IO.Resources
             width = (extra >> 16) & 0xFFFF;
             height = extra & 0xFFFF;
 
-            if (width <= 0 || height <= 0)
+            if (width == 0 || height == 0)
                 return null;
 
             //width = PaddedRowWidth(16, width, 4) / 2;

@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Map
 {
     public sealed class Tile : GameObject
     {
-        public static readonly HashSet<ushort> _Stretchables = new HashSet<ushort>();
+        //public static readonly HashSet<ushort> _Stretchables = new HashSet<ushort>();
         private static readonly List<GameObject> _itemsAtZ = new List<GameObject>();
         private readonly List<GameObject> _objectsOnTile;
         private readonly List<Static> _statics = new List<Static>();
@@ -54,7 +54,7 @@ namespace ClassicUO.Game.Map
 
         public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
 
-        public bool IsStretched => _Stretchables.Contains(Graphic);
+        public bool IsStretched { get; set; }
 
         public IReadOnlyList<GameObject> ObjectsOnTiles
         {
@@ -251,9 +251,9 @@ namespace ClassicUO.Game.Map
 
         public int CalculateCurrentAverageZ(int direction)
         {
-            int result = GetDirectionZ(((byte) (direction >> 1) + 1) & 3);
+            int result = GetDirectionZ(((byte)(direction >> 1) + 1) & 3);
 
-            if ((direction & 1) != 0)
+            if ((direction & 1) > 0)
                 return result;
 
             return (result + GetDirectionZ(direction >> 1)) >> 1;

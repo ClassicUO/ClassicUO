@@ -239,7 +239,7 @@ namespace ClassicUO.Game.GameObjects
 
         public static void GetGroupForAnimation(ANIMATION_GROUPS group, ref byte animation)
         {
-            if ((sbyte) group > 0 && animation < (byte) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT)
+            if ((sbyte) group != 0 && animation < (byte) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT)
                 animation = _animAssociateTable[animation][(sbyte) group - 1];
         }
 
@@ -250,7 +250,7 @@ namespace ClassicUO.Game.GameObjects
             ANIMATION_GROUPS groupIndex = Animations.GetGroupIndex(graphic);
             byte result = mobile.AnimationGroup;
 
-            if (result != 0xFF && (mobile.Serial & 0x80000000) <= 0 && (!mobile.AnimationFromServer || checkGraphic > 0))
+            if (result != 0xFF && (mobile.Serial & 0x80000000) == 0 && (!mobile.AnimationFromServer || checkGraphic > 0))
             {
                 GetGroupForAnimation(groupIndex, ref result);
 
