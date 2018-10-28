@@ -230,6 +230,8 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsHidden => ((byte) Flags & 0x80) != 0;
 
+        public bool IgnoreCharacters => ((byte) Flags & 0x10) != 0;
+
         public bool IsDead
         {
             get => MathHelper.InRange(Graphic, 0x0192, 0x0193) || MathHelper.InRange(Graphic, 0x025F, 0x0260) || MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || _isDead;

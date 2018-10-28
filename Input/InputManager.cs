@@ -116,11 +116,6 @@ namespace ClassicUO.Input
             return false;
         }
 
-        public void IgnoreNextMouseEvent(MouseEvent type)
-        {
-            foreach (InputMouseEvent inputEvent in _events.OfType<InputMouseEvent>().Where(s => s.EventType == type)) inputEvent.IsHandled = true;
-        }
-
         private void OnKeyDown(InputKeyboardEvent e)
         {
             if (_lastKey == SDL_Keycode.SDLK_LCTRL && e.KeyCode == SDL_Keycode.SDLK_v)

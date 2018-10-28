@@ -21,10 +21,12 @@
 
 #endregion
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -64,11 +66,20 @@ namespace ClassicUO.Game.Views
 
                 if (check)
                 {
-                    //Rectangle pos = new Rectangle((int)position.X + Bounds.X, (int)position.Y + Bounds.Y, Bounds.Width, Bounds.Height);
-                    ////Rectangle pos1 = new Rectangle((int)position.X - World.Player.View.Bounds.X, (int)position.Y - World.Player.View.Bounds.Y, World.Player.View.Bounds.Width, World.Player.View.Bounds.Height);
+                    Rectangle fol = Bounds;
+                    fol.X = (int) position.X - Bounds.X;
+                    fol.Y = (int) position.Y - Bounds.Y;
 
-                    //if (pos.InRect(((MobileView)World.Player.View).BoudsStrange))
-                    //    alpha = .6f;
+                    Rectangle prect = World.Player.View.Bounds;
+                    Vector3 pos = World.Player.ScreenPosition;
+                    prect.X += (int) pos.X;
+                    prect.Y += (int) pos.Y;
+
+                    if (fol.Contains(prect))
+                    {
+                        alpha = .6f;
+                    }
+
                 }
             }
 

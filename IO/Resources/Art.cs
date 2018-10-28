@@ -124,7 +124,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < _usedIndexLand.Count; i++)
             {
-                ref SpriteTexture texture = ref _artCache[_usedIndexLand[i]];
+                ref SpriteTexture texture = ref _landCache[_usedIndexLand[i]];
 
                 if (texture == null || texture.IsDisposed)
                 {

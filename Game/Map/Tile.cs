@@ -249,6 +249,27 @@ namespace ClassicUO.Game.Map
             }
         }
 
+        public int CalculateCurrentAverageZ(int direction)
+        {
+            int result = GetDirectionZ(((byte) (direction >> 1) + 1) & 3);
+
+            if ((direction & 1) != 0)
+                return result;
+
+            return (result + GetDirectionZ(direction >> 1)) >> 1;
+        }
+
+        private int GetDirectionZ(int direction)
+        {
+            switch (direction)
+            {
+                case 1: return Rectangle.Bottom / 4;
+                case 2: return Rectangle.Right / 4;
+                case 3: return Rectangle.Top / 4;
+                default: return Position.Z;
+            }
+        }
+
         public Rectangle Rectangle;
 
         protected override View CreateView()

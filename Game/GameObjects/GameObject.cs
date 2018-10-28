@@ -47,6 +47,19 @@ namespace ClassicUO.Game.GameObjects
             _overHeads = new List<TextOverhead>();
         }
 
+        private Vector3 _screenPosition;
+        public Vector3 ScreenPosition
+        {
+            get => _screenPosition;
+            set
+            {
+                if (_screenPosition != value)
+                {
+                    _screenPosition = value;
+                }
+            }
+        }
+
         public virtual Position Position { get; set; } = Position.Invalid;
 
         public virtual Hue Hue { get; set; }

@@ -143,6 +143,10 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool InWarMode { get; set; }
 
+        public Deque<Step> RequestedSteps => _requestedSteps;
+
+        public long LastStepRequestTime => _lastStepRequestedTime;
+
         public ushort Strength
         {
             get => _strength;
@@ -1627,7 +1631,8 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_lastStepRequestedTime > CoreGame.Ticks)
                 return false;
-            if (_requestedSteps.Count >= MAX_STEP_COUNT) return false;
+            if (_requestedSteps.Count >= MAX_STEP_COUNT)
+                return false;
 
             if (SpeedMode >= CharacterSpeedType.CantRun)
                 run = false;
@@ -1659,7 +1664,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (oldDirection == newDirection)
             {
-                if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection)) return false;
+                //if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection)) return false;
+                if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
+                    return false;
 
                 if (newDirection != direction)
                 {
@@ -1677,9 +1684,16 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection))
+                //if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection))
+                //    if (oldDirection == newDirection)
+                //        return false;
+
+
+                if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
+                {
                     if (oldDirection == newDirection)
                         return false;
+                }
 
                 if (oldDirection == newDirection)
                 {
