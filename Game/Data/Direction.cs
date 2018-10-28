@@ -38,6 +38,7 @@ namespace ClassicUO.Game.Data
         Left = 0x05,
         West = 0x06,
         Up = 0x07,
+        Mask = 0x7,
         Running = 0x80,
         NONE = 0xED
     }

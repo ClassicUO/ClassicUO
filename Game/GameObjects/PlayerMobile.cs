@@ -1658,13 +1658,11 @@ namespace ClassicUO.Game.GameObjects
             //direction = direction & Direction.Up;
             ushort walkTime;
             Direction newDirection = direction;
-            if (run)
-                newDirection |= Direction.Running;
             int newX = x;
             int newY = y;
             sbyte newZ = z;
 
-            if (oldDirection == newDirection)
+            if ((oldDirection & Direction.Mask) == (newDirection & Direction.Mask))
             {
                 //if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection)) return false;
                 if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
@@ -1693,11 +1691,11 @@ namespace ClassicUO.Game.GameObjects
 
                 if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
                 {
-                    if (oldDirection == newDirection)
+                    if ((oldDirection & Direction.Mask) == (newDirection & Direction.Mask))
                         return false;
                 }
 
-                if (oldDirection == newDirection)
+                if ((oldDirection & Direction.Mask) == (newDirection & Direction.Mask))
                 {
                     direction = newDirection;
                     x = newX;
