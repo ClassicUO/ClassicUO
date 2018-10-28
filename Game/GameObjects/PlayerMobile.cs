@@ -1658,6 +1658,8 @@ namespace ClassicUO.Game.GameObjects
             //direction = direction & Direction.Up;
             ushort walkTime;
             Direction newDirection = direction;
+            if (run)
+                newDirection |= Direction.Running;
             int newX = x;
             int newY = y;
             sbyte newZ = z;
