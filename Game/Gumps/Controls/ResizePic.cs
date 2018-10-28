@@ -65,24 +65,51 @@ namespace ClassicUO.Game.Gumps.Controls
             int line2Y = (int) position.Y + _gumpTexture[0].Height;
             int line3Y = (int) position.Y + Height - _gumpTexture[6].Height;
 
-            // top row
-            spriteBatch.Draw2D(_gumpTexture[0], new Vector3(position.X, position.Y, 0), Vector3.Zero);
-            spriteBatch.Draw2DTiled(_gumpTexture[1], new Rectangle((int) position.X + _gumpTexture[0].Width, (int) position.Y, centerWidth, _gumpTexture[0].Height), Vector3.Zero);
-            spriteBatch.Draw2D(_gumpTexture[2], new Vector3(position.X + Width - _gumpTexture[2].Width, position.Y, 0), Vector3.Zero);
-
-            // middle
-            spriteBatch.Draw2DTiled(_gumpTexture[3], new Rectangle((int) position.X, line2Y, _gumpTexture[3].Width, centerHeight), Vector3.Zero);
 
             if (IsTransparent)
-                spriteBatch.Draw2D(CheckerTrans.TransparentTexture, new Rectangle((int) position.X + _gumpTexture[3].Width, line2Y, centerWidth, centerHeight), RenderExtentions.GetHueVector(0, false, .5f, true));
-            else
-                spriteBatch.Draw2DTiled(_gumpTexture[4], new Rectangle((int) position.X + _gumpTexture[3].Width, line2Y, centerWidth, centerHeight), RenderExtentions.GetHueVector(0, false, 0, false));
-            spriteBatch.Draw2DTiled(_gumpTexture[5], new Rectangle((int) position.X + Width - _gumpTexture[5].Width, line2Y, _gumpTexture[5].Width, centerHeight), Vector3.Zero);
+            {
+                // top row
+                spriteBatch.Draw2D(_gumpTexture[0], new Vector3(position.X, position.Y, 0), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+                spriteBatch.Draw2DTiled(_gumpTexture[1], new Rectangle((int)position.X + _gumpTexture[0].Width, (int)position.Y, centerWidth, _gumpTexture[0].Height), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+                spriteBatch.Draw2D(_gumpTexture[2], new Vector3(position.X + Width - _gumpTexture[2].Width, position.Y, 0), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
 
-            // bottom
-            spriteBatch.Draw2D(_gumpTexture[6], new Vector3(position.X, line3Y, 0), Vector3.Zero);
-            spriteBatch.Draw2DTiled(_gumpTexture[7], new Rectangle((int) position.X + _gumpTexture[6].Width, line3Y, centerWidth, _gumpTexture[6].Height), Vector3.Zero);
-            spriteBatch.Draw2D(_gumpTexture[8], new Vector3(position.X + Width - _gumpTexture[8].Width, line3Y, 0), Vector3.Zero);
+                // middle
+                spriteBatch.Draw2DTiled(_gumpTexture[3], new Rectangle((int)position.X, line2Y, _gumpTexture[3].Width, centerHeight), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+
+                spriteBatch.Draw2D(_gumpTexture[4], new Rectangle((int)position.X + _gumpTexture[3].Width, line2Y, centerWidth, centerHeight), RenderExtentions.GetHueVector(0, false, .5f, true));
+
+                spriteBatch.Draw2DTiled(_gumpTexture[5], new Rectangle((int)position.X + Width - _gumpTexture[5].Width, line2Y, _gumpTexture[5].Width, centerHeight), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+
+                // bottom
+                spriteBatch.Draw2D(_gumpTexture[6], new Vector3(position.X, line3Y, 0), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+                spriteBatch.Draw2DTiled(_gumpTexture[7], new Rectangle((int)position.X + _gumpTexture[6].Width, line3Y, centerWidth, _gumpTexture[6].Height), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+                spriteBatch.Draw2D(_gumpTexture[8], new Vector3(position.X + Width - _gumpTexture[8].Width, line3Y, 0), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+
+            }
+            else
+            {
+                // top row
+                spriteBatch.Draw2D(_gumpTexture[0], new Vector3(position.X, position.Y, 0), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+                spriteBatch.Draw2DTiled(_gumpTexture[1], new Rectangle((int)position.X + _gumpTexture[0].Width, (int)position.Y, centerWidth, _gumpTexture[0].Height), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+                spriteBatch.Draw2D(_gumpTexture[2], new Vector3(position.X + Width - _gumpTexture[2].Width, position.Y, 0), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+
+                // middle
+                spriteBatch.Draw2DTiled(_gumpTexture[3], new Rectangle((int)position.X, line2Y, _gumpTexture[3].Width, centerHeight), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+
+                if (IsTransparent)
+                    spriteBatch.Draw2D(CheckerTrans.TransparentTexture, new Rectangle((int)position.X + _gumpTexture[3].Width, line2Y, centerWidth, centerHeight), RenderExtentions.GetHueVector(0, false, .5f, true));
+                else
+                    spriteBatch.Draw2DTiled(_gumpTexture[4], new Rectangle((int)position.X + _gumpTexture[3].Width, line2Y, centerWidth, centerHeight), RenderExtentions.GetHueVector(0, false, 0, false));
+
+                spriteBatch.Draw2DTiled(_gumpTexture[5], new Rectangle((int)position.X + Width - _gumpTexture[5].Width, line2Y, _gumpTexture[5].Width, centerHeight), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+
+                // bottom
+                spriteBatch.Draw2D(_gumpTexture[6], new Vector3(position.X, line3Y, 0), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+                spriteBatch.Draw2DTiled(_gumpTexture[7], new Rectangle((int)position.X + _gumpTexture[6].Width, line3Y, centerWidth, _gumpTexture[6].Height), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+                spriteBatch.Draw2D(_gumpTexture[8], new Vector3(position.X + Width - _gumpTexture[8].Width, line3Y, 0), IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero);
+
+            }
+
 
             return base.Draw(spriteBatch, position, hue);
         }

@@ -150,7 +150,7 @@ namespace ClassicUO.IO.Resources
             width = _file.ReadShort();
             height = _file.ReadShort();
 
-            if (width <= 0 || height <= 0)
+            if (width == 0 || height == 0)
                 return new ushort[0];
             ushort[] pixels = new ushort[width * height];
             ushort* ptr = (ushort*) _file.PositionAddress;

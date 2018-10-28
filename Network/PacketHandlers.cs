@@ -643,7 +643,7 @@ namespace ClassicUO.Network
             string name = p.ReadASCII(30);
             string text = p.ReadASCII();
 
-            if (serial <= 0 && graphic <= 0 && type == MessageType.Regular && font == MessageFont.INVALID && hue == 0xFFFF && name.StartsWith("SYSTEM"))
+            if (serial == 0 && graphic == 0 && type == MessageType.Regular && font == MessageFont.INVALID && hue == 0xFFFF && name.StartsWith("SYSTEM"))
             {
                 NetClient.Socket.Send(new PACKTalk());
 

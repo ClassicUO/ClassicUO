@@ -120,7 +120,7 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 		//color.rgb = saturate(color.rgb * nDotL * lightIntensity * 0.5f + color.rgb * lightIntensity * 0.5f);
 
-		color.rgb = (color.rgb * nDotL);
+		color.rgb = (color.rgb * nDotL) * lightIntensity;
 
 		//float3 light = normalize(lightDirection);
 		//float3 normal = normalize(IN.Normal);

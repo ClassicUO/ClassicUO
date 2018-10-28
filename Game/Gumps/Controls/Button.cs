@@ -144,7 +144,8 @@ namespace ClassicUO.Game.Gumps.Controls
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             SpriteTexture texture = GetTextureByState();
-            spriteBatch.Draw2D(texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), Vector3.Zero);
+
+            spriteBatch.Draw2D(texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), IsTransparent  ? RenderExtentions.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 
             if (!string.IsNullOrEmpty(_caption))
             {

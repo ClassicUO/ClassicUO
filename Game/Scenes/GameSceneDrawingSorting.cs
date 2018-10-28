@@ -204,6 +204,9 @@ namespace ClassicUO.Game.Scenes
                 if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
                     continue;
                 Tile tile = World.Map.GetTile(x, y);
+                if (tile == null)
+                    continue;
+
                 int currentMaxZ = maxZ;
 
                 if (i == dropMaxZIndex)

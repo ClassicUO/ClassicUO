@@ -260,7 +260,7 @@ namespace ClassicUO.IO.Resources
                 linesCount--;
                 ftexture = null;
 
-                if (width <= 0 || string.IsNullOrEmpty(str))
+                if (width == 0 || string.IsNullOrEmpty(str))
                     return false;
                 int realWidth = GetWidthASCII(font, str);
 
@@ -497,7 +497,7 @@ namespace ClassicUO.IO.Resources
 
                 if (si == '\n' || ptr.Width + readWidth + fcd.Width > width)
                 {
-                    if (lastSpace == ptr.CharStart && lastSpace <= 0 && si != '\n')
+                    if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n')
                         ptr.CharStart = 1;
 
                     if (si == '\n')
@@ -604,7 +604,7 @@ namespace ClassicUO.IO.Resources
             ptr.Width += readWidth;
             ptr.CharCount += charCount;
 
-            if (readWidth <= 0 && len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
+            if (readWidth == 0 && len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
             {
                 ptr.Width = 1;
                 ptr.MaxHeight = 14;
@@ -640,7 +640,7 @@ namespace ClassicUO.IO.Resources
 
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0)
             {
-                if (width <= 0 || string.IsNullOrEmpty(str))
+                if (width == 0 || string.IsNullOrEmpty(str))
                 {
                     Log.Message(LogTypes.Error, "You must set a string or width");
 
@@ -805,7 +805,7 @@ namespace ClassicUO.IO.Resources
                         si = '\n';
                 }
 
-                if ((table[si] <= 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n')
+                if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n')
                     continue;
                 byte* data = (byte*) ((IntPtr) table + (int) table[si]);
 
@@ -822,7 +822,7 @@ namespace ClassicUO.IO.Resources
 
                 if (ptr.Width + readWidth + (sbyte) data[0] + (sbyte) data[2] > width || si == '\n')
                 {
-                    if (lastSpace == ptr.CharStart && lastSpace <= 0 && si != '\n')
+                    if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n')
                         ptr.CharStart = 1;
 
                     if (si == '\n')
@@ -947,7 +947,7 @@ namespace ClassicUO.IO.Resources
             ptr.Width += readWidth;
             ptr.CharCount += charCount;
 
-            if (readWidth <= 0 && len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
+            if (readWidth == 0 && len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
             {
                 ptr.Width = 1;
                 ptr.MaxHeight = 14;
@@ -1001,7 +1001,7 @@ namespace ClassicUO.IO.Resources
                     return;
             }
 
-            if (oldWidth <= 0 && RecalculateWidthByInfo)
+            if (oldWidth == 0 && RecalculateWidthByInfo)
             {
                 MultilinesFontInfo ptr1 = info;
                 width = 0;
@@ -1099,7 +1099,7 @@ namespace ClassicUO.IO.Resources
                             linkStartY = lineOffsY + 3;
                         }
                     }
-                    else if (dataPtr.LinkID <= 0 || i + 1 == dataSize)
+                    else if (dataPtr.LinkID == 0 || i + 1 == dataSize)
                     {
                         isLink = false;
                         int linkHeight = lineOffsY - linkStartY;
@@ -1112,7 +1112,7 @@ namespace ClassicUO.IO.Resources
                         {
                             ofsX = UNICODE_SPACE_WIDTH;
                         }
-                        else if ((table[si] <= 0 || table[si] == 0xFFFFFFFF) && si != ' ')
+                        else if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ')
                         {
                         }
                         else
@@ -1130,7 +1130,7 @@ namespace ClassicUO.IO.Resources
                         oldLink = 0;
                     }
 
-                    if ((table[si] <= 0 || table[si] == 0xFFFFFFFF) && si != ' ')
+                    if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ')
                         continue;
                     byte* data = (byte*) ((IntPtr) table + (int) table[si]);
                     int offsX = 0;
@@ -1240,7 +1240,7 @@ namespace ClassicUO.IO.Resources
                                         break;
                                     int block = testY * width + testX;
 
-                                    if (pData[block] <= 0 && pData[block] != solidColor)
+                                    if (pData[block] == 0 && pData[block] != solidColor)
                                     {
                                         int endX = cx < dw ? 2 : 1;
 
@@ -1316,7 +1316,7 @@ namespace ClassicUO.IO.Resources
                                         break;
                                     int block = testY * width + testX;
 
-                                    if (pData[block] <= 0 && pData[block] != blackColor)
+                                    if (pData[block] == 0 && pData[block] != blackColor)
                                     {
                                         int startX = cx > 0 ? -1 : 0;
                                         int startY = cy > 0 ? -1 : 0;
@@ -1454,7 +1454,7 @@ namespace ClassicUO.IO.Resources
                         si = '\n';
                 }
 
-                if ((table[si] <= 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n')
+                if ((table[si] == 0 || table[si] == 0xFFFFFFFF) && si != ' ' && si != '\n')
                     continue;
                 byte* data = (byte*) ((IntPtr) table + (int) table[si]);
 
@@ -1471,7 +1471,7 @@ namespace ClassicUO.IO.Resources
 
                 if (ptr.Width + readWidth + (sbyte) data[0] + (sbyte) data[2] + solidWidth > width || si == '\n')
                 {
-                    if (lastSpace == ptr.CharStart && lastSpace <= 0 && si != '\n')
+                    if (lastSpace == ptr.CharStart && lastSpace == 0 && si != '\n')
                         ptr.CharStart = 1;
 
                     if (si == '\n')

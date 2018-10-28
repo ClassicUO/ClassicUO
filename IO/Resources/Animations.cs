@@ -99,7 +99,7 @@ namespace ClassicUO.IO.Resources
                     {
                         line = line.Trim();
 
-                        if (line.Length <= 0 || line.Length < 3 || line[0] == '#')
+                        if (line.Length == 0 || line.Length < 3 || line[0] == '#')
                             continue;
                         string[] parts = line.Split(new[] {'\t', ' '}, StringSplitOptions.RemoveEmptyEntries);
                         int id = int.Parse(parts[0]);
@@ -1091,7 +1091,7 @@ namespace ClassicUO.IO.Resources
 
                 //animDirection.Frames[i] = new AnimationFrame() { CenterX = imageCenterX, CenterY = imageCenterY };
 
-                if (imageWidth <= 0 || imageHeight <= 0)
+                if (imageWidth == 0 || imageHeight == 0)
                 {
                     Log.Message(LogTypes.Warning, "frame size is null");
 
@@ -1169,7 +1169,7 @@ namespace ClassicUO.IO.Resources
                 short imageWidth = _reader.ReadShort();
                 short imageHeight = _reader.ReadShort();
 
-                if (imageWidth <= 0 || imageHeight <= 0) continue;
+                if (imageWidth == 0 || imageHeight == 0) continue;
                 int wantSize = imageWidth * imageHeight;
                 ushort[] pixels = new ushort[wantSize];
                 uint header = _reader.ReadUInt();

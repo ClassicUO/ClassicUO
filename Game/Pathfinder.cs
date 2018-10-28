@@ -86,6 +86,9 @@ namespace ClassicUO.Game
         {
             Tile tile = World.Map.GetTile(x, y);
 
+            if (tile == null)
+                return false;
+
             bool ignoreGameCharacters = (IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Player.Map.Index == 0));
             bool isGM = World.Player.Graphic == 0x03DB;
 
@@ -209,7 +212,7 @@ namespace ClassicUO.Game
                                         flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
                                 }
 
-                                if (flags > 0)
+                                if (flags != 0)
                                 {
                                     int objZ = obj.Position.Z;
                                     int staticHeight = dyn.ItemData.Height;
@@ -269,10 +272,10 @@ namespace ClassicUO.Game
                 }
                 else
                 {
-                    if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) > 0 && averageZ <= currentZ && minZ < averageZ)
+                    if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) != 0 && averageZ <= currentZ && minZ < averageZ)
                         minZ = averageZ;
 
-                    if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) > 0 && currentZ == averageZ)
+                    if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) != 0 && currentZ == averageZ)
                     {
                         int z = obj.Z;
                         int height = z + obj.Height;
@@ -290,6 +293,7 @@ namespace ClassicUO.Game
 
             return maxZ;
         }
+
 
         private static bool CalculateNewZ(int x, int y, ref sbyte z, int direction)
         {
@@ -323,58 +327,20 @@ namespace ClassicUO.Game
             if (!CreateItemList(ref list, x, y, stepState) || list.Count <= 0)
                 return false;
 
-            //list.Sort();
-
-            //int comparer(PathObject a, PathObject b)
-            //{
-            //    int comparision = a.Z - b.Z;
-
-            //    if (comparision <= 0)
-            //        comparision = a.Height - b.Height;
-
-            //    return comparision;
-            //}
-
-
             list.Sort((a, b) =>
             {
                 int comparision = a.Z - b.Z;
-                if (comparision <= 0)
+                if (comparision == 0)
                     comparision = a.Height - b.Height;
 
-                if (comparision < 0)
-                    return 1;
+                //if (comparision < 0)
+                //    return 1;
 
-                if (comparision > 0)
-                    return -1;
+                //if (comparision > 0)
+                //    return -1;
 
-                return 0;
-                //int result = a.Z.CompareTo(b.Z);
-
-                //if (result == 0)
-                //    result = a.Height.CompareTo(b.Height);
-
-                //return result;
+                return comparision;
             });
-
-            //for (int i = 0; i < list.Count - 1; i++)
-            //{
-            //    int j = i + 1;
-
-            //    while (j > 0)
-            //    {
-            //        int result = comparer(list[j - 1], list[j]);
-
-            //        if (result != 0)
-            //        {
-            //            PathObject temp = list[j - 1];
-            //            list[j - 1] = list[j];
-            //            list[j] = temp;
-            //        }
-
-            //        j--;
-            //    }
-            //}
 
 
             list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, 128, 128, 128, null));
@@ -391,7 +357,7 @@ namespace ClassicUO.Game
             {
                 PathObject obj = list[i];
 
-                if ((obj.Flags & (uint)PATH_OBJECT_FLAGS.POF_NO_DIAGONAL) > 0 && stepState == (int)PATH_STEP_STATE.PSS_FLYING)
+                if ((obj.Flags & (uint)PATH_OBJECT_FLAGS.POF_NO_DIAGONAL) != 0 && stepState == (int)PATH_STEP_STATE.PSS_FLYING)
                 {
                     int objAverageZ = obj.AverageZ;
                     int delta = Math.Abs(objAverageZ - z);
@@ -406,7 +372,7 @@ namespace ClassicUO.Game
 
                 const int DEFAULT_BLOCK_HEIGHT = 16;
 
-                if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) > 0)
+                if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) != 0)
                 {
                     int objZ = obj.Z;
 
@@ -416,13 +382,13 @@ namespace ClassicUO.Game
                         {
                             PathObject tempObj = list[j];
 
-                            if ((tempObj.Flags & (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE)) > 0)
+                            if ((tempObj.Flags & (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE)) != 0)
                             {
                                 int tempAverageZ = tempObj.AverageZ;
 
                                 if (tempAverageZ >= currentZ && objZ - tempAverageZ >= DEFAULT_BLOCK_HEIGHT && 
-                                    ((tempAverageZ <= maxZ && (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_SURFACE) > 0) || 
-                                    ((tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) > 0 && tempObj.Z <= maxZ)))
+                                    ((tempAverageZ <= maxZ && (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_SURFACE) != 0) || 
+                                    ((tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) != 0 && tempObj.Z <= maxZ)))
                                 {
                                     int delta = Math.Abs(z - tempAverageZ);
 
@@ -533,7 +499,7 @@ namespace ClassicUO.Game
 
             bool passed = CalculateNewZ(newX, newY, ref newZ, (byte) direction);
 
-            if ((sbyte) direction % 2 > 0)
+            if ((sbyte) direction % 2 != 0)
             {
                 if (passed)
                 {
@@ -613,7 +579,7 @@ namespace ClassicUO.Game
 
         private static int AddNodeToList(int list, int direction, int x, int y, int z, PathNode parent, int cost)
         {
-            if (list <= 0)
+            if (list == 0)
             {
                 if (!DoesNotExistOnClosedList(x, y, z))
                 {
@@ -732,7 +698,7 @@ namespace ClassicUO.Game
 
                     int diagonal = i % 2;
 
-                    if (diagonal > 0)
+                    if (diagonal != 0)
                     {
                         Direction wantDirection = (Direction) i;
 
@@ -814,7 +780,7 @@ namespace ClassicUO.Game
 
                     goalNode = _openList[_goalNode];
 
-                    while (totalNodes > 0)
+                    while (totalNodes != 0)
                     {
                         totalNodes--;
                         _path[totalNodes] = goalNode;
@@ -917,7 +883,7 @@ namespace ClassicUO.Game
             public int X, Y, Direction;
         }
 
-        class PathObject
+        class PathObject //: IComparable, IComparable<PathObject>
         {
             public PathObject(uint flags, int z, int avgZ, int h, GameObject obj)
             {
@@ -939,34 +905,39 @@ namespace ClassicUO.Game
                 return $"Z: {Z}, Height: {Height}";
             }
 
+            //public int CompareTo(object obj)
+            //{
+            //    return CompareTo((PathObject) obj);
+            //}
+
             //public int CompareTo(PathObject other)
             //{
-            //    if (other == null)
-            //        return -1;
+            //    //if (other == null)
+            //    //    return -1;
 
-            //    int r = Z.CompareTo(other.Z);
+            //    //int r = Z.CompareTo(other.Z);
 
-            //    if (r == 0)
-            //    {
-            //        r = Height.CompareTo(other.Height);
-            //    }
-
-            //    return r;
-
-            //    //int r = Z - other.Z;
-
-            //    //if (r <= 0)
+            //    //if (r == 0)
             //    //{
-            //    //    r = Height - other.Height;
-
-            //    //    if (r > 0)
-            //    //        return -1;
-            //    //    if (r == 0)
-            //    //        return 0;
-            //    //    return 1;
+            //    //    r = Height.CompareTo(other.Height);
             //    //}
 
-            //    //return -1;
+            //    //return r;
+
+            //    int r = Z - other.Z;
+
+            //    if (r <= 0)
+            //    {
+            //        r = Height - other.Height;
+
+            //        if (r > 0)
+            //            return -1;
+            //        if (r == 0)
+            //            return 0;
+            //        return 1;
+            //    }
+
+            //    return -1;
             //}
         }
 
