@@ -166,7 +166,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private sbyte _foliageIndex;
 
         private void AddOffsetCharacterTileToRenderList(Entity entity, bool useObjectHandles)
         {

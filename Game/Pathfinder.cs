@@ -817,8 +817,15 @@ namespace ClassicUO.Game
                 _closedList[i].Reset();
             }
 
-            _startPoint.X = World.Player.Position.X;
-            _startPoint.Y = World.Player.Position.Y;
+            int playerX = 0;
+            int playerY = 0;
+            sbyte playerZ = 0;
+            Direction playerDir = Direction.NONE;
+
+            World.Player.GetEndPosition(ref playerX, ref playerY, ref playerZ, ref playerDir);
+
+            _startPoint.X = playerX;
+            _startPoint.Y = playerY;
             _endPoint.X = x;
             _endPoint.Y = y;
             _goalNode = 0;

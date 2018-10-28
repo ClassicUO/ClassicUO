@@ -1020,7 +1020,7 @@ namespace ClassicUO.Network
                 if (level > 0x1F)
                     level = 0x1F;
 
-                World.Light.Personal = level;
+                //World.Light.Personal = level;
             }
         }
 
@@ -1031,7 +1031,7 @@ namespace ClassicUO.Network
             if (level > 0x1F)
                 level = 0x1F;
 
-            World.Light.Overall = level;
+           // World.Light.Overall = level;
         }
 
         private static void ErrorCode(Packet p)

@@ -178,11 +178,12 @@ namespace ClassicUO.Game.Scenes
                 {
                     case MouseButton.Right:
                         _rightMousePressed = e.EventType == MouseEvent.Down;
+
                         e.IsHandled = true;
 
                         if (e.EventType == MouseEvent.DoubleClick)
                         {
-                            if (_settings.EnablePathfind  && !Pathfinder.AutoWalking)
+                            if (_settings.EnablePathfind && !Pathfinder.AutoWalking)
                             {
                                 if (_mousePicker.MouseOverObject is Tile || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long)dyn.ItemData.Flags))
                                 {
@@ -224,77 +225,80 @@ namespace ClassicUO.Game.Scenes
 
         private void DoMouseButton(InputMouseEvent e, GameObject obj, Point point)
         {
-            switch (e.EventType)
+            if (e.Button == MouseButton.Left)
             {
-                case MouseEvent.Down:
-
+                switch (e.EventType)
                 {
-                    _dragginObject = obj;
-                    _dragOffset = point;
-                }
+                    case MouseEvent.Down:
 
-                    break;
-                case MouseEvent.Click:
-
-                {
-                    switch (obj)
                     {
-                        case Static st:
+                        _dragginObject = obj;
+                        _dragOffset = point;
+                    }
 
+                        break;
+                    case MouseEvent.Click:
+
+                    {
+                        switch (obj)
                         {
-                            if (string.IsNullOrEmpty(st.Name))
-                                TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
-                            obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
-                            _staticManager.Add(st);
+                            case Static st:
 
-                            break;
+                            {
+                                if (string.IsNullOrEmpty(st.Name))
+                                    TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
+                                obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
+                                _staticManager.Add(st);
+
+                                break;
+                            }
+                            case Entity entity:
+                                GameActions.SingleClick(entity);
+
+                                break;
                         }
-                        case Entity entity:
-                            GameActions.SingleClick(entity);
-
-                            break;
                     }
-                }
 
-                    break;
-                case MouseEvent.DoubleClick:
+                        break;
+                    case MouseEvent.DoubleClick:
 
-                {
-                    switch (obj)
                     {
-                        case Item item:
-                            GameActions.DoubleClick(item);
+                        switch (obj)
+                        {
+                            case Item item:
+                                GameActions.DoubleClick(item);
 
-                            break;
-                        //TODO: attack request also
-                        case Mobile mob when World.Player.InWarMode:
+                                break;
+                            //TODO: attack request also
+                            case Mobile mob when World.Player.InWarMode:
 
-                            break;
-                        case Mobile mob:
-                            GameActions.DoubleClick(mob);
+                                break;
+                            case Mobile mob:
+                                GameActions.DoubleClick(mob);
 
-                            break;
+                                break;
+                        }
                     }
-                }
 
-                    break;
-                case MouseEvent.DragBegin:
+                        break;
+                    case MouseEvent.DragBegin:
 
-                {
-                    switch (obj)
                     {
-                        case Mobile mobile:
+                        switch (obj)
+                        {
+                            case Mobile mobile:
 
-                            // get the lifebar
-                            break;
-                        case Item item:
-                            PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
+                                // get the lifebar
+                                break;
+                            case Item item:
+                                PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
 
-                            break;
+                                break;
+                        }
                     }
-                }
 
-                    break;
+                        break;
+                }
             }
 
             e.IsHandled = true;
