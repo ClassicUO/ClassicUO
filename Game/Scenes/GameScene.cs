@@ -176,9 +176,6 @@ namespace ClassicUO.Game.Scenes
             if (_renderIndex >= 100)
                 _renderIndex = 1;
 #endif
-
-            Pathfinder.ProcessAutoWalk();
-
             CleaningResources();
             base.FixedUpdate(totalMS, frameMS);
         }
@@ -190,6 +187,8 @@ namespace ClassicUO.Game.Scenes
                 _renderTarget?.Dispose();
                 _renderTarget = new RenderTarget2D(Device, (int) (_settings.GameWindowWidth / Scale), (int) (_settings.GameWindowHeight / Scale), false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
+
+            Pathfinder.ProcessAutoWalk();
 
             // ============== INPUT ==============      
 
@@ -204,8 +203,11 @@ namespace ClassicUO.Game.Scenes
 
                         if (InputManager.HandleMouseEvent(MouseEvent.Up, MouseButton.Left))
                         {
-                            InputManager.IgnoreNextMouseEvent(MouseEvent.Click);
-                            InputManager.IgnoreNextMouseEvent(MouseEvent.DoubleClick);
+                            //InputManager.IgnoreNextMouseEvent(MouseEvent.Click);
+                            //InputManager.IgnoreNextMouseEvent(MouseEvent.DoubleClick);
+
+                            InputManager.HandleMouseEvent(MouseEvent.Click, MouseButton.Left);
+                            InputManager.HandleMouseEvent(MouseEvent.DoubleClick, MouseButton.Left);
 
                             if (IsMouseOverUI)
                             {

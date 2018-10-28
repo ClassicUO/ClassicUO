@@ -86,8 +86,8 @@ namespace ClassicUO.Game
         {
             Tile tile = World.Map.GetTile(x, y);
 
-            bool ignoreGameCharacters = (IgnoreStaminaCheck || (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM) || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Player.Map.Index == 0));
-            bool isGM = (World.Player.Graphic == 0x03DB);
+            bool ignoreGameCharacters = (IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Player.Map.Index == 0));
+            bool isGM = World.Player.Graphic == 0x03DB;
 
             foreach (GameObject obj in tile.ObjectsOnTiles)
             {
@@ -140,14 +140,14 @@ namespace ClassicUO.Game
                             {
                                 if (!ignoreGameCharacters && !mobile.IsDead && !mobile.IgnoreCharacters)
                                 {
-                                    list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Position.Z, mobile.Position.Z + 16, 15, mobile));
+                                    list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Position.Z, mobile.Position.Z + 16, 16, mobile));
                                 }
 
                                 canBeAdd = false;
 
                                 break;
                             }
-                            case Item item when TileData.IsInternal((long)item.ItemData.Flags):
+                            case Item item when item.IsMulti || TileData.IsInternal((long)item.ItemData.Flags):
 
                             {
                                 canBeAdd = false;
@@ -269,10 +269,10 @@ namespace ClassicUO.Game
                 }
                 else
                 {
-                    if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) != 0 && averageZ <= currentZ && minZ < averageZ)
+                    if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) > 0 && averageZ <= currentZ && minZ < averageZ)
                         minZ = averageZ;
 
-                    if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) != 0 && currentZ == averageZ)
+                    if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) > 0 && currentZ == averageZ)
                     {
                         int z = obj.Z;
                         int height = z + obj.Height;
@@ -323,7 +323,59 @@ namespace ClassicUO.Game
             if (!CreateItemList(ref list, x, y, stepState) || list.Count <= 0)
                 return false;
 
-            list.Sort();
+            //list.Sort();
+
+            //int comparer(PathObject a, PathObject b)
+            //{
+            //    int comparision = a.Z - b.Z;
+
+            //    if (comparision <= 0)
+            //        comparision = a.Height - b.Height;
+
+            //    return comparision;
+            //}
+
+
+            list.Sort((a, b) =>
+            {
+                int comparision = a.Z - b.Z;
+                if (comparision <= 0)
+                    comparision = a.Height - b.Height;
+
+                if (comparision < 0)
+                    return 1;
+
+                if (comparision > 0)
+                    return -1;
+
+                return 0;
+                //int result = a.Z.CompareTo(b.Z);
+
+                //if (result == 0)
+                //    result = a.Height.CompareTo(b.Height);
+
+                //return result;
+            });
+
+            //for (int i = 0; i < list.Count - 1; i++)
+            //{
+            //    int j = i + 1;
+
+            //    while (j > 0)
+            //    {
+            //        int result = comparer(list[j - 1], list[j]);
+
+            //        if (result != 0)
+            //        {
+            //            PathObject temp = list[j - 1];
+            //            list[j - 1] = list[j];
+            //            list[j] = temp;
+            //        }
+
+            //        j--;
+            //    }
+            //}
+
 
             list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, 128, 128, 128, null));
 
@@ -335,18 +387,16 @@ namespace ClassicUO.Game
             int currentTempObjZ = 1000000;
             int currentZ = -128;
 
-            int listSize = list.Count;
-
-            for (int i = 0; i < listSize; i++)
+            for (int i = 0; i < list.Count; i++)
             {
                 PathObject obj = list[i];
 
-                if ((obj.Flags & (uint)PATH_OBJECT_FLAGS.POF_NO_DIAGONAL) != 0 && stepState == (int)PATH_STEP_STATE.PSS_FLYING)
+                if ((obj.Flags & (uint)PATH_OBJECT_FLAGS.POF_NO_DIAGONAL) > 0 && stepState == (int)PATH_STEP_STATE.PSS_FLYING)
                 {
                     int objAverageZ = obj.AverageZ;
-                    int delt = Math.Abs(objAverageZ - z);
+                    int delta = Math.Abs(objAverageZ - z);
 
-                    if (delt <= 25)
+                    if (delta <= 25)
                     {
                         resultZ = objAverageZ != -128 ? objAverageZ : currentZ;
 
@@ -356,7 +406,7 @@ namespace ClassicUO.Game
 
                 const int DEFAULT_BLOCK_HEIGHT = 16;
 
-                if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) != 0)
+                if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) > 0)
                 {
                     int objZ = obj.Z;
 
@@ -366,13 +416,13 @@ namespace ClassicUO.Game
                         {
                             PathObject tempObj = list[j];
 
-                            if ((tempObj.Flags & (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE)) != 0)
+                            if ((tempObj.Flags & (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE)) > 0)
                             {
                                 int tempAverageZ = tempObj.AverageZ;
 
                                 if (tempAverageZ >= currentZ && objZ - tempAverageZ >= DEFAULT_BLOCK_HEIGHT && 
-                                    ((tempAverageZ <= maxZ && (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_SURFACE) != 0) || 
-                                    ((tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) != 0 && tempObj.Z <= maxZ)))
+                                    ((tempAverageZ <= maxZ && (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_SURFACE) > 0) || 
+                                    ((tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) > 0 && tempObj.Z <= maxZ)))
                                 {
                                     int delta = Math.Abs(z - tempAverageZ);
 
@@ -470,56 +520,61 @@ namespace ClassicUO.Game
         }
 
 
-        private static readonly sbyte[] _dirOffset = {-1, 1};
-
-        private static readonly sbyte[] _directions = { 0, 1, -1};
+        private static readonly sbyte[] _dirOffset = {1, -1};
 
         public static bool CanWalk(ref Direction direction, ref int x, ref int y, ref sbyte z)
         {
-            bool allowed = false;
+            int newX = x;
+            int newY = y;
+            sbyte newZ = z;
+            byte newDirection = (byte) direction;
 
-            for (int i = 0; i < 3; i++)
+            GetNewXY((byte)direction, ref newX, ref newY);
+
+            bool passed = CalculateNewZ(newX, newY, ref newZ, (byte) direction);
+
+            if ((sbyte) direction % 2 > 0)
             {
-                int newX = x;
-                int newY = y;
-                sbyte newZ = z;
-                Direction newDirection = (Direction)(((int)direction + _directions[i]) % 8);
-
-                GetNewXY((byte)newDirection, ref newX, ref newY);
-                allowed = CalculateNewZ(newX, newY, ref newZ, (byte)newDirection);
-
-                if (!allowed)
-                    continue;
-
-                if ((byte) newDirection % 2 > 0)
+                if (passed)
                 {
-                    for (int j = 0; j < 2; j++)
+                    for (int i = 0; i < 2 && passed; i++)
                     {
                         int testX = x;
                         int testY = y;
                         sbyte testZ = z;
+                        byte testDir = (byte) (((byte)direction + _dirOffset[i]) % 8);
 
-                        Direction testDir = (Direction)(((int)newDirection + _dirOffset[j]) % 8);
+                        GetNewXY(testDir, ref testX, ref testY);
 
-                        GetNewXY((byte)testDir, ref testX, ref testY);
-                        allowed = CalculateNewZ(testX, testY, ref testZ, (byte)testDir);
-
-                        if (!allowed)
-                            break;
+                        passed = CalculateNewZ(testX, testY, ref testZ, testDir);
                     }
                 }
 
-                if (allowed)
+                if (!passed)
                 {
-                    x = newX;
-                    y = newY;
-                    z = newZ;
-                    direction = newDirection;
-                    break;
+                    for (int i = 0; i < 2 && !passed; i++)
+                    {
+                        newX = x;
+                        newY = y;
+                        newZ = z;
+
+                        newDirection = (byte) (((byte) direction + _dirOffset[i]) % 8);
+                        GetNewXY(newDirection, ref newX, ref newY);
+
+                        passed = CalculateNewZ(newX, newY, ref newZ, newDirection);
+                    }
                 }
             }
 
-            return allowed;
+            if (passed)
+            {
+                x = newX;
+                y = newY;
+                z = newZ;
+                direction = (Direction) newDirection;
+            }
+
+            return passed;         
         }
 
         private static Point _startPoint, _endPoint;
@@ -786,12 +841,13 @@ namespace ClassicUO.Game
             {
                 if (_openList[i] == null)
                     _openList[i] = new PathNode();
-
                 _openList[i].Reset();
+            }
 
+            for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
+            { 
                 if (_closedList[i] == null)
                     _closedList[i] = new PathNode();
-
                 _closedList[i].Reset();
             }
 
@@ -861,7 +917,7 @@ namespace ClassicUO.Game
             public int X, Y, Direction;
         }
 
-        class PathObject : IComparable<PathObject>
+        class PathObject
         {
             public PathObject(uint flags, int z, int avgZ, int h, GameObject obj)
             {
@@ -878,26 +934,40 @@ namespace ClassicUO.Game
             public int Height { get; }
             public GameObject Object { get; }
 
-            public int CompareTo(PathObject other)
+            public override string ToString()
             {
-                if (other == null)
-                    return 0;
-
-                int r = Z - other.Z;
-
-                if (r <= 0)
-                {
-                    r = Height - other.Height;
-
-                    if (r > 0)
-                        return -1;
-                    if (r == 0)
-                        return 0;
-                    return 1;
-                }
-
-                return -1;
+                return $"Z: {Z}, Height: {Height}";
             }
+
+            //public int CompareTo(PathObject other)
+            //{
+            //    if (other == null)
+            //        return -1;
+
+            //    int r = Z.CompareTo(other.Z);
+
+            //    if (r == 0)
+            //    {
+            //        r = Height.CompareTo(other.Height);
+            //    }
+
+            //    return r;
+
+            //    //int r = Z - other.Z;
+
+            //    //if (r <= 0)
+            //    //{
+            //    //    r = Height - other.Height;
+
+            //    //    if (r > 0)
+            //    //        return -1;
+            //    //    if (r == 0)
+            //    //        return 0;
+            //    //    return 1;
+            //    //}
+
+            //    //return -1;
+            //}
         }
 
         class PathNode

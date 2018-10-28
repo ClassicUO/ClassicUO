@@ -1631,7 +1631,8 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_lastStepRequestedTime > CoreGame.Ticks)
                 return false;
-            if (_requestedSteps.Count >= MAX_STEP_COUNT) return false;
+            if (_requestedSteps.Count >= MAX_STEP_COUNT)
+                return false;
 
             if (SpeedMode >= CharacterSpeedType.CantRun)
                 run = false;
