@@ -98,6 +98,8 @@ namespace ClassicUO.IO.Resources
             if (texture == null || texture.IsDisposed)
             {
                 ushort[] pixels = GetGumpPixels(g, out int w, out int h);
+				if(pixels==null && g>=60000)
+                    pixels = GetGumpPixels(g - 10000, out w, out h);
                 texture = new SpriteTexture(w, h, false);
                 texture.SetData(pixels);
                 _usedIndex.Add(g);
