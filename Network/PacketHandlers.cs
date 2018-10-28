@@ -718,7 +718,7 @@ namespace ClassicUO.Network
             Direction dir = direction & Direction.Up;
             bool isrun = (direction & Direction.Running) != 0;
 
-            if (endX != x || endY != y)
+            if (endX != x || endY != y || endZ != z)
                 World.Player.ForcePosition(x, y, z, direction);
             else if (endDir != dir)
                 World.Player.EnqueueStep(x, y, z, dir, isrun);
