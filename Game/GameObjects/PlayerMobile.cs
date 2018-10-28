@@ -1668,7 +1668,7 @@ namespace ClassicUO.Game.GameObjects
                 if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
                     return false;
 
-                if (newDirection != direction)
+                if ((newDirection & Direction.Mask) != (direction & Direction.Mask))
                 {
                     direction = newDirection;
                     walkTime = TURN_DELAY;
