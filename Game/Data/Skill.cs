@@ -23,7 +23,7 @@
 
 namespace ClassicUO.Game.Data
 {
-    public enum SkillLock : byte
+    public enum Lock : byte
     {
         Up = 0,
         Down = 1,
@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Data
             IsClickable = click;
         }
 
-        public SkillLock Lock { get; internal set; }
+        public Lock Lock { get; internal set; }
 
         public ushort ValueFixed { get; internal set; }
 

@@ -784,6 +784,10 @@ namespace ClassicUO.Game.GameObjects
             set => _ability[1] = value;
         }
 
+        public Lock StrLock { get; set; }
+        public Lock DexLock { get; set; }
+        public Lock IntLock { get; set; }
+
         //protected override bool NoIterateAnimIndex() => false;
         protected override bool IsWalking => LastStepTime > CoreGame.Ticks - PLAYER_WALKING_DELAY;
 
@@ -791,25 +795,25 @@ namespace ClassicUO.Game.GameObjects
 
         public event EventHandler StatsChanged, SkillsChanged;
 
-        public void UpdateSkill(int id, ushort realValue, ushort baseValue, SkillLock skillLock, ushort cap)
+        public void UpdateSkill(int id, ushort realValue, ushort baseValue, Lock @lock, ushort cap)
         {
             if (id < _sklls.Length)
             {
                 Skill skill = _sklls[id];
                 skill.ValueFixed = realValue;
                 skill.BaseFixed = baseValue;
-                skill.Lock = skillLock;
+                skill.Lock = @lock;
                 skill.CapFixed = cap;
                 _delta |= Delta.Skills;
             }
         }
 
-        public void UpdateSkillLock(int id, SkillLock skillLock)
+        public void UpdateSkillLock(int id, Lock @lock)
         {
             if (id < _sklls.Length)
             {
                 Skill skill = _sklls[id];
-                skill.Lock = skillLock;
+                skill.Lock = @lock;
                 _delta |= Delta.Skills;
             }
         }

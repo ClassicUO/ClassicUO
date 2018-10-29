@@ -184,19 +184,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (button == MouseButton.Left && x >= 210 && x <= 210 + _textures[(int) Skill.Lock].Width && y >= 0 && y <= _textures[(int) Skill.Lock].Height)
                 switch (Skill.Lock)
                 {
-                    case SkillLock.Up:
-                        Skill.Lock = SkillLock.Down;
-                        GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) SkillLock.Down);
+                    case Lock.Up:
+                        Skill.Lock = Lock.Down;
+                        GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) Lock.Down);
 
                         break;
-                    case SkillLock.Down:
-                        Skill.Lock = SkillLock.Locked;
-                        GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) SkillLock.Locked);
+                    case Lock.Down:
+                        Skill.Lock = Lock.Locked;
+                        GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) Lock.Locked);
 
                         break;
-                    case SkillLock.Locked:
-                        Skill.Lock = SkillLock.Up;
-                        GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) SkillLock.Up);
+                    case Lock.Locked:
+                        Skill.Lock = Lock.Up;
+                        GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) Lock.Up);
 
                         break;
                 }

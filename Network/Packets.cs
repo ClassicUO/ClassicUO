@@ -915,7 +915,7 @@ namespace ClassicUO.Network
 
     public sealed class PChangeStatLockStateRequest : PacketWriter
     {
-        public PChangeStatLockStateRequest(byte stat, SkillLock state) : base(0xBF)
+        public PChangeStatLockStateRequest(byte stat, Lock state) : base(0xBF)
         {
             WriteUShort(0x1A);
             WriteByte(stat);

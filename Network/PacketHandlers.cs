@@ -942,23 +942,23 @@ namespace ClassicUO.Network
                 case 0:
 
                     while ((id = p.ReadUShort()) > 0)
-                        World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (SkillLock) p.ReadByte(), 100);
+                        World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), 100);
 
                     break;
                 case 2:
 
                     while ((id = p.ReadUShort()) > 0)
-                        World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (SkillLock) p.ReadByte(), p.ReadUShort());
+                        World.Player.UpdateSkill(id - 1, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), p.ReadUShort());
 
                     break;
                 case 0xDF:
                     id = p.ReadUShort();
-                    World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (SkillLock) p.ReadByte(), p.ReadUShort());
+                    World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), p.ReadUShort());
 
                     break;
                 case 0xFF:
                     id = p.ReadUShort();
-                    World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (SkillLock) p.ReadByte(), 100);
+                    World.Player.UpdateSkill(id, p.ReadUShort(), p.ReadUShort(), (Lock) p.ReadByte(), 100);
 
                     break;
             }
@@ -1781,6 +1781,12 @@ namespace ClassicUO.Network
                             {
                                 byte updategump = p.ReadByte();
                                 byte state = p.ReadByte();
+
+                                //TODO: drawstatlockers = true
+
+                                World.Player.StrLock = (Lock) ((state >> 4) & 3);
+                                World.Player.DexLock = (Lock) ((state >> 2) & 3);
+                                World.Player.IntLock = (Lock) (state & 3);
                             }
 
                             break;
