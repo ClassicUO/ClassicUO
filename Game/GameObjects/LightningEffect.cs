@@ -11,7 +11,6 @@ namespace ClassicUO.Game.GameObjects
             IsEnabled = true;
             Speed = 50;
             AnimIndex = 0;
-            //Load();
         }
 
         public LightningEffect(GameObject source, Hue hue) : this(hue)
@@ -41,7 +40,8 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
-            base.Update(totalMS, frameMS);
+            if (IsDisposed)
+                return;
 
             if (!IsDisposed)
             {
@@ -51,7 +51,14 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    Graphic = (Graphic) (Graphic + AnimIndex++);
+                    AnimationGraphic = (Graphic) (Graphic + AnimIndex);
+
+                    if (LastChangeFrameTime < totalMS)
+                    {
+                        AnimIndex++;
+                        LastChangeFrameTime = (long)totalMS + Speed;
+                    }
+
                     (int x, int y, int z) = GetSource();
 
                     if (Position.X != x || Position.Y != y || Position.Z != z)

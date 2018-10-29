@@ -124,8 +124,8 @@ namespace ClassicUO.Game.Views
                 Layer layer = LayerOrder.UsedLayers[dir, i];
 
                 if (layer == Layer.Mount) continue;
-                Hue color = 0;
-                Graphic graphic = 0;
+                Graphic graphic;
+                Hue color;
 
                 if (layer == Layer.Invalid)
                 {

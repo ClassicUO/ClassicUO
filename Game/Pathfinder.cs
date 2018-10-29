@@ -295,7 +295,7 @@ namespace ClassicUO.Game
         }
 
 
-        private static bool CalculateNewZ(int x, int y, ref sbyte z, int direction)
+        public static bool CalculateNewZ(int x, int y, ref sbyte z, int direction)
         {
             int stepState = (int) PATH_STEP_STATE.PSS_NORMAL;
 
@@ -817,12 +817,12 @@ namespace ClassicUO.Game
                 _closedList[i].Reset();
             }
 
-            int playerX = 0;
-            int playerY = 0;
-            sbyte playerZ = 0;
-            Direction playerDir = Direction.NONE;
+            int playerX = World.Player.Position.X;
+            int playerY = World.Player.Position.Y;
+            //sbyte playerZ = 0;
+            //Direction playerDir = Direction.NONE;
 
-            World.Player.GetEndPosition(ref playerX, ref playerY, ref playerZ, ref playerDir);
+            //World.Player.GetEndPosition(ref playerX, ref playerY, ref playerZ, ref playerDir);
 
             _startPoint.X = playerX;
             _startPoint.Y = playerY;

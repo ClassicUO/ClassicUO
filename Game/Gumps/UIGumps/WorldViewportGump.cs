@@ -82,11 +82,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_clicked && _inputManager.Offset != _lastPosition && _inputManager.Offset != Point.Zero)
+            if (_clicked && Mouse.LDroppedOffset != _lastPosition && Mouse.LDroppedOffset != Point.Zero)
             {
-                _settings.GameWindowWidth += _inputManager.Offset.X - _lastPosition.X;
-                _settings.GameWindowHeight += _inputManager.Offset.Y - _lastPosition.Y;
-                _lastPosition = _inputManager.Offset;
+                _settings.GameWindowWidth += Mouse.LDroppedOffset.X - _lastPosition.X;
+                _settings.GameWindowHeight += Mouse.LDroppedOffset.Y - _lastPosition.Y;
+                _lastPosition = Mouse.LDroppedOffset;
 
                 if (_settings.GameWindowWidth < 350)
                     _settings.GameWindowWidth = 350;

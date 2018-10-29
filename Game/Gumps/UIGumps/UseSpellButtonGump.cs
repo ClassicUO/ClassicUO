@@ -24,6 +24,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(_button);
         }
 
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+            return true;
+        }
+
         private void ButtonOnMouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButton.Left)

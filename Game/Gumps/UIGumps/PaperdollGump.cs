@@ -138,6 +138,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(titleLabel);
         }
 
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+            return true;
+        }
+
         private void VirtueMenu_MouseDoubleClickEvent(object sender, MouseEventArgs args)
         {
             if (args.Button == MouseButton.Left)

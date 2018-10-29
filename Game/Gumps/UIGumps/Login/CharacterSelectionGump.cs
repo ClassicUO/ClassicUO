@@ -132,9 +132,16 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 set => _label.Hue = value;
             }
 
-            protected override void OnMouseDoubleClick(int x, int y, MouseButton button)
+            protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
             {
-                if (button == MouseButton.Left) _loginFn(CharacterIndex);
+                if (button == MouseButton.Left)
+                {
+                    _loginFn(CharacterIndex);
+
+                    return true;
+                }
+
+                return false;
             }
 
             protected override void OnMouseClick(int x, int y, MouseButton button)

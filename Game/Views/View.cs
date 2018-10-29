@@ -23,8 +23,10 @@
 
 using System;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
+using ClassicUO.Game.Map;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
@@ -46,12 +48,9 @@ namespace ClassicUO.Game.Views
         {
             GameObject = parent;
             AllowedToDraw = true;
-            //SortZ = parent.Position.Z;
         }
 
         public GameObject GameObject { get; }
-
-        //public sbyte SortZ { get; protected set; }
 
         protected bool HasShadow { get; set; }
 
@@ -214,7 +213,10 @@ namespace ClassicUO.Game.Views
 
                     if (GameObject is Mobile mob)
                     {
-                        if (!Pathfinder.TryGetNextZ(mob, mob.Position, check, out sbyte z)) return false;
+                        sbyte z = 0;
+
+                        if (!Pathfinder.CalculateNewZ(mob.Position.X, mob.Position.Y, ref z, (int)check))
+                            return false;
 
                         deferreable.DeferredObject.Z = z;
                         deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, z);

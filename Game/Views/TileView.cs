@@ -45,14 +45,9 @@ namespace ClassicUO.Game.Views
         private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
 
         public TileView(Tile tile) : base(tile)
-        {
-            //tile.IsStretched = tile.TileData.TexID > 0 && !TileData.IsWet((long)tile.TileData.Flags);
-
-            
+        {         
             AllowedToDraw = !tile.IsIgnored;
-
-            if (tile.IsStretched)
-                UpdateStreched(World.Map);
+            UpdateStreched(World.Map);
         }
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
@@ -78,10 +73,18 @@ namespace ClassicUO.Game.Views
             }
 
 
+            if (tile.IsStretched)
+            {
+                HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 
-            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
+                return Draw3DStretched(spriteBatch, position, objectList);
+            }
+            else
+            {
+                HueVector = RenderExtentions.GetHueVector(GameObject.Hue, false, 0, true);
 
-            return !tile.IsStretched ? base.Draw(spriteBatch, position, objectList) : Draw3DStretched(spriteBatch, position, objectList);
+                return base.Draw(spriteBatch, position, objectList);
+            }
         }
 
         private bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
@@ -130,14 +133,16 @@ namespace ClassicUO.Game.Views
         {
             Tile tile = (Tile) GameObject;
 
-            if (/*tile.IsStretched && !TestStretched(tile.Position.X, tile.Position.Y, tile.Position.Z, true)*/ TextmapTextures.GetTextmapTexture(tile.TileData.TexID) == null)
+            if (tile.IsStretched || TextmapTextures.GetTextmapTexture(tile.TileData.TexID) == null || !TestStretched(tile.Position.X, tile.Position.Y, tile.Position.Z, true))
             {
                 tile.IsStretched = false;
                 tile.MinZ = tile.Position.Z;
+                tile.PriorityZ = (short)(tile.Position.Z - 1);
+
             }
             else
             {
-                //tile.IsStretched = true;
+                tile.IsStretched = true;
 
                 tile.UpdateZ(map.GetTileZ(tile.Position.X, tile.Position.Y + 1), map.GetTileZ(tile.Position.X + 1, tile.Position.Y + 1), map.GetTileZ(tile.Position.X + 1, tile.Position.Y));
                 tile.PriorityZ = (short) (tile.AverageZ - 1);
@@ -243,11 +248,6 @@ namespace ClassicUO.Game.Views
             }
 
             return result;
-        }
-
-        private static Vector3 CalculateNormal(float a, float b, float c, float d)
-        {
-            return Vector3.Normalize(new Vector3(a - b, 1f, c - d));
         }
 
         private static void Merge(ref Vector3 v, float x, float y, float z)

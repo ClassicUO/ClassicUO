@@ -37,7 +37,6 @@ namespace ClassicUO.Game.Map
 {
     public sealed class Tile : GameObject
     {
-        //public static readonly HashSet<ushort> _Stretchables = new HashSet<ushort>();
         private static readonly List<GameObject> _itemsAtZ = new List<GameObject>();
         private readonly List<GameObject> _objectsOnTile;
         private readonly List<Static> _statics = new List<Static>();
@@ -88,6 +87,7 @@ namespace ClassicUO.Game.Map
             switch (obj)
             {
                 case Tile tile:
+                    var t = tile.View;
                     if (tile.IsStretched)
                         priorityZ = (short) (tile.AverageZ - 1);
                     else
@@ -272,9 +272,6 @@ namespace ClassicUO.Game.Map
 
         public Rectangle Rectangle;
 
-        protected override View CreateView()
-        {
-            return new TileView(this);
-        }
+        protected override View CreateView() => new TileView(this);
     }
 }

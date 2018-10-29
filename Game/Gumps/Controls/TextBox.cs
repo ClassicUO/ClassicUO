@@ -180,6 +180,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
                     break;
             }
+            base.OnKeyDown(key, mod);
         }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)

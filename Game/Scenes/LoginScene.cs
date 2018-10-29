@@ -120,9 +120,13 @@ namespace ClassicUO.Game.Scenes
 
         public void Connect(string account, string password)
         {
+            if (CurrentLoginStep == LoginStep.Connecting)
+                return;
+
             Account = account;
             Password = password;
             Settings settings = Service.Get<Settings>();
+            Log.Message(LogTypes.Trace, "Start login...");
             NetClient.LoginSocket.Connect(settings.IP, settings.Port);
             CurrentLoginStep = LoginStep.Connecting;
         }

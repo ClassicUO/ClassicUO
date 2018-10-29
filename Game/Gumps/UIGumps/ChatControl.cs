@@ -194,33 +194,33 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
             }
 
-            if (IsFocused)
-            {
-                if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_q, false, false, true) && _messageHistoryIndex > -1)
-                {
-                    if (_messageHistoryIndex > 0)
-                        _messageHistoryIndex--;
-                    Mode = _messageHistory[_messageHistoryIndex].Item1;
-                    _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
-                }
-                else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_w, false, false, true))
-                {
-                    if (_messageHistoryIndex < _messageHistory.Count - 1)
-                    {
-                        _messageHistoryIndex++;
-                        Mode = _messageHistory[_messageHistoryIndex].Item1;
-                        _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
-                    }
-                    else
-                    {
-                        _textBox.SetText(string.Empty);
-                    }
-                }
-                else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_BACKSPACE, false, false, false) && _textBox.Text == string.Empty)
-                {
-                    Mode = ChatMode.Default;
-                }
-            }
+            //if (IsFocused)
+            //{
+            //    if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_q, false, false, true) && _messageHistoryIndex > -1)
+            //    {
+            //        if (_messageHistoryIndex > 0)
+            //            _messageHistoryIndex--;
+            //        Mode = _messageHistory[_messageHistoryIndex].Item1;
+            //        _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
+            //    }
+            //    else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_w, false, false, true))
+            //    {
+            //        if (_messageHistoryIndex < _messageHistory.Count - 1)
+            //        {
+            //            _messageHistoryIndex++;
+            //            Mode = _messageHistory[_messageHistoryIndex].Item1;
+            //            _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
+            //        }
+            //        else
+            //        {
+            //            _textBox.SetText(string.Empty);
+            //        }
+            //    }
+            //    else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_BACKSPACE, false, false, false) && _textBox.Text == string.Empty)
+            //    {
+            //        Mode = ChatMode.Default;
+            //    }
+            //}
 
             if (Mode == ChatMode.Default)
             {
@@ -267,6 +267,34 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
             return base.Draw(spriteBatch, position, hue);
+        }
+
+        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            switch (key)
+            {
+                case SDL.SDL_Keycode.SDLK_q when mod == SDL.SDL_Keymod.KMOD_LCTRL && _messageHistoryIndex > -1:
+                    if (_messageHistoryIndex > 0)
+                        _messageHistoryIndex--;
+                    Mode = _messageHistory[_messageHistoryIndex].Item1;
+                    _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
+                    break;
+                case SDL.SDL_Keycode.SDLK_w when mod == SDL.SDL_Keymod.KMOD_LCTRL:
+                    if (_messageHistoryIndex < _messageHistory.Count - 1)
+                    {
+                        _messageHistoryIndex++;
+                        Mode = _messageHistory[_messageHistoryIndex].Item1;
+                        _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
+                    }
+                    else
+                    {
+                        _textBox.SetText(string.Empty);
+                    }
+                    break;
+                case SDL.SDL_Keycode.SDLK_BACKSPACE when mod == SDL.SDL_Keymod.KMOD_NONE && string.IsNullOrEmpty(_textBox.Text):
+                    Mode = ChatMode.Default;
+                    break;
+            }
         }
 
         public override void OnKeybaordReturn(int textID, string text)

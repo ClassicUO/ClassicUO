@@ -213,7 +213,7 @@ namespace ClassicUO.Game
 
         public SpriteTexture Texture { get; private set; }
 
-        public Point ScreenPosition => _inputManager.MousePosition;
+        //public Point ScreenPosition => _Mouse.Position;
 
         public void SetDraggedItem(Graphic graphic, Hue hue, Point offset)
         {
@@ -262,8 +262,8 @@ namespace ClassicUO.Game
             if (id < 16)
             {
                 if (_draggingItem)
-                    sb.Draw2D(_draggedItemTexture, new Vector3(ScreenPosition.X - _offset.X, ScreenPosition.Y - _offset.Y, 0), _rect, RenderExtentions.GetHueVector(_hue));
-                sb.Draw2D(Texture, new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0), Vector3.Zero);
+                    sb.Draw2D(_draggedItemTexture, new Vector3(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y, 0), _rect, RenderExtentions.GetHueVector(_hue));
+                sb.Draw2D(Texture, new Vector3(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id], 0), Vector3.Zero);
             }
         }
 
@@ -280,7 +280,7 @@ namespace ClassicUO.Game
             int windowCenterX = _settings.GameWindowX + _settings.GameWindowWidth / 2;
             int windowCenterY = _settings.GameWindowY + _settings.GameWindowHeight / 2;
 
-            return _cursorData[war, GetMouseDirection(windowCenterX, windowCenterY, ScreenPosition.X, ScreenPosition.Y, 1)];
+            return _cursorData[war, GetMouseDirection(windowCenterX, windowCenterY, Mouse.Position.X, Mouse.Position.Y, 1)];
         }
 
         private static int GetMouseDirection(int x1, int y1, int to_x, int to_y, int current_facing)

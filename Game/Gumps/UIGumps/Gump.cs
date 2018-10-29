@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;

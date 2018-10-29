@@ -252,11 +252,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     UseSpellButtonGump gump = new UseSpellButtonGump(def.Value)
                     {
-                        X = UIManager.InputManager.MousePosition.X - 22,
-                        Y = UIManager.InputManager.MousePosition.Y - 22
+                        X = Mouse.Position.X - 22,
+                        Y = Mouse.Position.Y - 22
                     };
                     UIManager.Add(gump);
-                    UIManager.AttemptDragControl(gump, UIManager.InputManager.MousePosition, true);
+                    UIManager.AttemptDragControl(gump, Mouse.Position, true);
                 };
                 AddChildren(icon, page1);
 
@@ -504,11 +504,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 UseSpellButtonGump gump = new UseSpellButtonGump(def)
                 {
-                    X = UIManager.InputManager.MousePosition.X - 22,
-                    Y = UIManager.InputManager.MousePosition.Y - 22
+                    X = Mouse.Position.X - 22,
+                    Y = Mouse.Position.Y - 22
                 };
                 UIManager.Add(gump);
-                UIManager.AttemptDragControl(gump, UIManager.InputManager.MousePosition, true);
+                UIManager.AttemptDragControl(gump, Mouse.Position, true);
             };
             AddChildren(spellImage, page);
             Label spellnameLabel = new Label(spell.Name, false, 0x0288, 80, 6) {X = isright ? 275 : 112, Y = 34};

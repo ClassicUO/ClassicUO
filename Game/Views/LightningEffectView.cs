@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Views
 #if !ORIONSORT
             PreDraw(position);
 #endif
-            return base.DrawInternal(spriteBatch, position, list);
+            return DrawInternal(spriteBatch, position, list);
         }
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)

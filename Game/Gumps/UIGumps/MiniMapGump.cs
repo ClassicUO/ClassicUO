@@ -74,9 +74,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (_gumpTexture == null || _gumpTexture.IsDisposed || _useLargeMap != _miniMap_LargeFormat || _forceUpdate)
             {
                 _useLargeMap = _miniMap_LargeFormat;
-
-                if (_gumpTexture != null)
-                    _gumpTexture.Dispose();
                 _gumpTexture = IO.Resources.Gumps.GetGumpTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
                 Width = _gumpTexture.Width;
                 Height = _gumpTexture.Height;
@@ -120,20 +117,25 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return base.Draw(spriteBatch, position, hue);
         }
 
-        protected override void OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
             {
                 MiniMap_LargeFormat = !MiniMap_LargeFormat;
                 _miniMap_LargeFormat = MiniMap_LargeFormat;
                 _forceUpdate = true;
+
+                return true;
             }
+
+            return false;
         }
 
         private void CreateMiniMapTexture()
         {
             if (_gumpTexture == null || _gumpTexture.IsDisposed)
                 return;
+
             ushort lastX = World.Player.Position.X;
             ushort lastY = World.Player.Position.Y;
 

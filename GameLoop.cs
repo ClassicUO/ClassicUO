@@ -118,7 +118,7 @@ namespace ClassicUO
                 FontStyle = FontStyle.BlackBorder,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 MaxWidth = 150
-            };
+            }; 
             base.Initialize();
         }
 
@@ -130,7 +130,7 @@ namespace ClassicUO
 
         protected override void OnInputUpdate(double totalMS, double frameMS)
         {
-            _inputManager.Update(totalMS, frameMS);
+            //_inputManager.Update(totalMS, frameMS);
         }
 
         protected override void OnNetworkUpdate(double totalMS, double frameMS)
@@ -150,20 +150,18 @@ namespace ClassicUO
 
         protected override void OnUpdate(double totalMS, double frameMS)
         {
-            if (World.InGame)
-                _sceneManager.CurrentScene.Update(totalMS, frameMS);
+            _sceneManager.CurrentScene.Update(totalMS, frameMS);
         }
 
         protected override void OnFixedUpdate(double totalMS, double frameMS)
         {
-            if (World.InGame)
-                _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
+            _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
 
         protected override void OnDraw(double frameMS)
         {
-            if (World.InGame)
-                _sceneManager.CurrentScene.Draw(_sb3D, _sbUI);
+            _sceneManager.CurrentScene.Draw(_sb3D, _sbUI);
+
             _sbUI.GraphicsDevice.Clear(Color.Transparent);
             _sbUI.Begin();
             _uiManager.Draw(_sbUI);

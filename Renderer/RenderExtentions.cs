@@ -41,7 +41,7 @@ namespace ClassicUO.Renderer
             if ((hue & 0x4000) != 0) alpha = ALPHA;
             if ((hue & 0x8000) != 0) partial = true;
 
-            return hue == 0 ? new Vector3(0, 0, alpha) : new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), alpha);
+            return hue == 0 ? new Vector3(0, (noLighting ? 4 : 0), alpha) : new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), alpha);
         }
     }
 }

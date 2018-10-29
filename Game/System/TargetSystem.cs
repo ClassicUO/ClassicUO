@@ -1,4 +1,5 @@
 ﻿using ClassicUO.Game.GameObjects;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.System
@@ -69,6 +70,8 @@ namespace ClassicUO.Game.System
             if (selectedEntity is Entity entity)
             {
                 GameActions.TargetObject(entity, _targetCursorId, _targetCursorType);
+
+                Mouse.CancelDoubleClick = true;
             }
             else
             {
@@ -84,6 +87,8 @@ namespace ClassicUO.Game.System
                 }
 
                 GameActions.TargetXYZ(selectedEntity.Position.X, selectedEntity.Position.Y, z, modelNumber, _targetCursorId, _targetCursorType);
+
+                Mouse.CancelDoubleClick = true;
             }
 
             ClearTargetingWithoutTargetCancelPacket();

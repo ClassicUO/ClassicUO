@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Views
 
                 if (frame.IsDisposed) continue;
                 int x = drawX + frame.CenterX;
-                int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
+                int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY - vl.OffsetY;
 
                 if (total.X > x)
                     total.X = x;
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.Views
 
                                     if (mountGraphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                         mountOffset = Animations.DataIndex[mountGraphic].MountedHeightOffset;
-                                    AddLayer(dir, mountGraphic, mount.Hue, ref mobile, true);
+                                    AddLayer(dir, mountGraphic, mount.Hue, ref mobile, true, offsetY: mountOffset);
                                 }
                             }
                             else
@@ -218,7 +218,7 @@ namespace ClassicUO.Game.Views
             }
         }
 
-        private void AddLayer(byte dir, Graphic graphic, Hue hue, ref Mobile mobile, bool mounted = false, EquipConvData? convertedItem = null, bool ispartial = false)
+        private void AddLayer(byte dir, Graphic graphic, Hue hue, ref Mobile mobile, bool mounted = false, EquipConvData? convertedItem = null, bool ispartial = false, int offsetY = 0)
         {
             byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic);
             sbyte animIndex = GameObject.AnimIndex;
@@ -268,7 +268,8 @@ namespace ClassicUO.Game.Views
                     Hue = hue,
                     Frame = frame,
                     Graphic = graphic,
-                    IsParital = ispartial
+                    IsParital = ispartial,
+                    OffsetY = offsetY,
                 };
             }
         }
@@ -279,6 +280,7 @@ namespace ClassicUO.Game.Views
             public TextureAnimationFrame Frame;
             public Graphic Graphic;
             public bool IsParital;
+            public int OffsetY;
         }
     }
 }

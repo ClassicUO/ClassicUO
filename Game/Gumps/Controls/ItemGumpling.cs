@@ -76,9 +76,10 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (_sendClickIfNotDClick && totalMS >= _sClickTime)
             {
-                _sendClickIfNotDClick = false;
                 GameActions.SingleClick(Item);
+                _sendClickIfNotDClick = false;
             }
+
 
             UpdateLabel();
             base.Update(totalMS, frameMS);
@@ -146,14 +147,16 @@ namespace ClassicUO.Game.Gumps.Controls
                 _clickedCanDrag = false;
                 _sendClickIfNotDClick = true;
                 float totalMS = CoreGame.Ticks;
-                _sClickTime = totalMS + 200f;
+                _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
             }
         }
 
-        protected override void OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
             GameActions.DoubleClick(Item);
             _sendClickIfNotDClick = false;
+
+            return true;
         }
 
         public override void Dispose()

@@ -36,6 +36,7 @@ using Microsoft.Xna.Framework.Input;
 using SDL2;
 
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
+using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
@@ -97,7 +98,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool IsDisposed { get; private set; }
 
-        public bool IsVisible { get; set; }
+        public bool IsVisible { get; set; } = true;
 
         public bool IsEnabled { get; set; }
 
@@ -378,7 +379,6 @@ namespace ClassicUO.Game.Gumps.Controls
             IsDisposed = false;
             IsEnabled = true;
             IsInitialized = true;
-            IsVisible = true;
             InitializeControls();
             OnInitialize();
         }
@@ -509,6 +509,8 @@ namespace ClassicUO.Game.Gumps.Controls
             return Children.OfType<T>().ToArray();
         }
 
+
+
         public void InvokeMouseDown(Point position, MouseButton button)
         {
             _lastClickPosition = position;
@@ -549,21 +551,21 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
-            float ms = CoreGame.Ticks;
+            //float ms = CoreGame.Ticks;
             bool doubleClick = false;
 
-            if (_maxTimeForDClick != 0f)
-            {
-                if (ms <= _maxTimeForDClick)
-                {
-                    _maxTimeForDClick = 0;
-                    doubleClick = true;
-                }
-            }
-            else
-            {
-                _maxTimeForDClick = ms + 200;
-            }
+            //if (_maxTimeForDClick != 0f)
+            //{
+            //    if (ms <= _maxTimeForDClick)
+            //    {
+            //        _maxTimeForDClick = 0;
+            //        //doubleClick = true;
+            //    }
+            //}
+            //else
+            //{
+            //    _maxTimeForDClick = ms + InputManager.MOUSE_DOUBLE_CLICK_TIME;
+            //}
 
             if (button == MouseButton.Right)
             {
@@ -586,6 +588,20 @@ namespace ClassicUO.Game.Gumps.Controls
                     MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
                 }
             }
+        }
+
+        public bool InvokeMouseDoubleClick(Point position, MouseButton button)
+        {
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+
+            if (OnMouseDoubleClick(x, y, button))
+            {
+                MouseDoubleClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
+
+                return true;
+            }
+            return false;
         }
 
         public void InvokeTextInput(string c)
@@ -651,7 +667,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected virtual void OnMouseEnter(int x, int y)
         {
-            if (_mouseIsDown && !_attempToDrag && UIManager.InputManager.Offset != Point.Zero)
+            if (_mouseIsDown && !_attempToDrag && Mouse.LDropPosition != Point.Zero)
             {
                 InvokeDragBegin(new Point(x, y));
                 _attempToDrag = true;
@@ -668,9 +684,9 @@ namespace ClassicUO.Game.Gumps.Controls
             Parent?.OnMouseClick(x, y, button);
         }
 
-        protected virtual void OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected virtual bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            Parent?.OnMouseDoubleClick(x, y, button);
+            return Parent?.OnMouseDoubleClick(x, y, button) ?? false;
         }
 
         protected virtual void OnDragBegin(int x, int y)
@@ -687,10 +703,13 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected virtual void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
+            Parent?.OnKeyDown(key, mod);
         }
 
         protected virtual void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
+            Parent?.OnKeyUp(key, mod);
+
         }
 
         protected virtual bool Contains(int x, int y)

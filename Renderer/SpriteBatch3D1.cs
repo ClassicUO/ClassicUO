@@ -28,16 +28,9 @@ namespace ClassicUO.Renderer
         private readonly DepthStencilState _dssStencil = new DepthStencilState
         {
             StencilEnable = true,
-
             StencilFunction = CompareFunction.Always,
-            ReferenceStencil = 0,
-            StencilMask = 1,
-
-
-            StencilFail = StencilOperation.Keep,
-            StencilDepthBufferFail = StencilOperation.Keep,
             StencilPass = StencilOperation.Replace,
-
+            DepthBufferEnable = false,
         };
         private readonly VertexBuffer _vertexBuffer;
         private readonly IndexBuffer _indexBuffer;
@@ -200,7 +193,7 @@ namespace ClassicUO.Renderer
             _projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
             _worldMatrixEffect.SetValue(ProjectionMatrixWorld);
             _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-            GraphicsDevice.DepthStencilState = _dss;
+            GraphicsDevice.DepthStencilState = _dssStencil;
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
             GraphicsDevice.Indices = _indexBuffer;
         }
