@@ -292,7 +292,7 @@ namespace ClassicUO.Game.Scenes
             return false;
         }
 
-        private void OnMouseDragging(object sender, EventArgs e)
+        private void OnMouseDragBegin(object sender, EventArgs e)
         {
             if (Mouse.LButtonPressed && !IsHoldingItem && IsMouseOverWorld)
             {

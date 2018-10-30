@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -234,11 +235,13 @@ namespace ClassicUO.Input
 
         public static event EventHandler<bool> MouseWheel;
 
-        public static event EventHandler MouseDragging;
+        public static event EventHandler MouseDragging, DragBegin, DragEnd;
 
         public static event EventHandler<SDL_KeyboardEvent> KeyDown, KeyUp;
         public static event EventHandler<string> TextInput;
 
+
+        private static bool _dragStarted;
 
         private unsafe int HookFunc(IntPtr userdata, IntPtr ev)
         {
@@ -268,6 +271,13 @@ namespace ClassicUO.Input
                         MouseDragging.Raise();
                     }
 
+                    if (Mouse.IsDragging && !_dragStarted)
+                    {
+                        DragBegin.Raise();
+                        _dragStarted = true;
+                    }
+                   
+
                     break;
                 case SDL_EventType.SDL_MOUSEWHEEL:
                     Mouse.Update();
@@ -281,6 +291,13 @@ namespace ClassicUO.Input
                     Mouse.Update();
 
                     bool isDown = e->type == SDL_EventType.SDL_MOUSEBUTTONDOWN;
+
+                    if (_dragStarted && !isDown)
+                    {
+                        DragEnd.Raise();
+                        _dragStarted = false;
+                    }
+
                     SDL_MouseButtonEvent mouse = e->button;
 
                     switch ((uint)mouse.button)
