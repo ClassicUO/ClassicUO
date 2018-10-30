@@ -12,7 +12,7 @@ namespace ClassicUO.Renderer
 #if SB1
     public class SpriteBatch3D
     {
-        private const int MAX_SPRITES = 0x800 ;
+        private const int MAX_SPRITES = 0x800 * 40;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;
 

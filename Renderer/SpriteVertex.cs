@@ -21,11 +21,14 @@
 
 #endregion
 
+using System.Runtime.InteropServices;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SpriteVertex : IVertexType
     {
         public SpriteVertex(Vector3 position, Vector3 normal, Vector3 textureCoordinate)

@@ -294,10 +294,9 @@ namespace ClassicUO.Game.Scenes
 
         private void OnMouseDragging(object sender, EventArgs e)
         {
-            if (Mouse.LButtonPressed && !IsHoldingItem)
+            if (Mouse.LButtonPressed && !IsHoldingItem && IsMouseOverWorld)
             {
                 GameObject obj = _mousePicker.MouseOverObject;
-                Point point = _mousePicker.MouseOverObjectPoint;
 
                 switch (obj)
                 {
