@@ -89,9 +89,9 @@ namespace ClassicUO.Renderer
 
         public GraphicsDevice GraphicsDevice { get; }
 
-        //public Matrix ProjectionMatrixWorld => Matrix.Identity;
+        public Matrix ProjectionMatrixWorld => Matrix.Identity;
 
-        //public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
+        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
 
         public int Calls { get; set; }
 
@@ -201,23 +201,24 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.DepthStencilState = DepthStencilState.None;
-            GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
+            GraphicsDevice.RasterizerState = RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
 
             Viewport viewport = GraphicsDevice.Viewport;
-            _projectionMatrix.M11 = (float)(2.0 / (double)(viewport.Width / 2 * 2 - 1));
-            _projectionMatrix.M22 = (float)(-2.0 / (double)(viewport.Height / 2 * 2 - 1));
+            _projectionMatrix.M11 = (float)(2.0 / (double)viewport.Width);
+            _projectionMatrix.M22 = (float)(-2.0 / (double)viewport.Height);
             _projectionMatrix.M41 = -1 - 0.5f * _projectionMatrix.M11;
             _projectionMatrix.M42 = 1 - 0.5f * _projectionMatrix.M22;
 
             Matrix.Multiply(ref _transformMatrix, ref _projectionMatrix, out _matrixTransformMatrix);
             _projectionMatrixEffect.SetValue(_matrixTransformMatrix);
+            _worldMatrixEffect.SetValue(_transformMatrix);
 
             //_projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
-            _worldMatrixEffect.SetValue(_transformMatrix);
+            //_worldMatrixEffect.SetValue(ProjectionMatrixWorld);
 
             _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
 
