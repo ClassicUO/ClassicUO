@@ -23,6 +23,7 @@
 
 using System;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
 
@@ -165,6 +166,11 @@ namespace ClassicUO.Game
         public static void OpenGuildGump()
         {
             Socket.Send(new PGuildMenuRequest());
+        }
+
+        public static void ChangeStatLock(byte stat, Lock state)
+        {
+            Socket.Send(new PChangeStatLockStateRequest(stat, state));
         }
     }
 }

@@ -39,6 +39,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
     internal class StatusGump : Gump
     {
         private readonly Label[] _labels = new Label[(int) MobileStats.Max];
+        private readonly GumpPic[] _lockers = new GumpPic[3];
         private readonly PlayerMobile _mobile = World.Player;
         private double _refreshTime;
 
@@ -102,13 +103,30 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     gumpID = 0x0986; //Down
                 else if (status == Lock.Locked)
                     gumpID = 0x082C; //Lock
-
-                AddChildren(new Button((int)ButtonType.LockerStr, gumpID, gumpID)
+                AddChildren(_lockers[0] = new GumpPic(xOffset, 76, gumpID, 0));
+                _lockers[0].MouseClick += (sender, e) =>
                 {
-                    X = xOffset,
-                    Y = 76,
-                    ButtonAction = ButtonAction.Activate
-                });
+                    World.Player.StrLock = (Lock)(((byte)World.Player.StrLock + 1) % 3);
+                    GameActions.ChangeStatLock(0, World.Player.StrLock);
+
+                    Lock st = World.Player.StrLock;
+                    ushort gumpid = 0x0984; //Up
+                    if (st == Lock.Down)
+                        gumpid = 0x0986; //Down
+                    else if (st == Lock.Locked)
+                        gumpid = 0x082C; //Lock
+
+                    _lockers[0].Graphic = gumpid;
+                    _lockers[0].Texture = IO.Resources.Gumps.GetGumpTexture(gumpid);
+                };
+
+                //AddChildren(_lockers[0] = new Button((int)ButtonType.LockerStr, gumpID, gumpID)
+                //{
+                //    X = xOffset,
+                //    Y = 76,
+                //    ButtonAction = ButtonAction.Activate,                   
+                //});
+
 
 
                 status = World.Player.DexLock;
@@ -118,13 +136,28 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     gumpID = 0x0986; //Down
                 else if (status == Lock.Locked)
                     gumpID = 0x082C; //Lock
-
-                AddChildren(new Button((int)ButtonType.LockerDex, gumpID, gumpID)
+                AddChildren(_lockers[1] = new GumpPic(xOffset, 102, gumpID, 0));
+                _lockers[1].MouseClick += (sender, e) =>
                 {
-                    X = xOffset,
-                    Y = 102,
-                    ButtonAction = ButtonAction.Activate
-                });
+                    World.Player.DexLock = (Lock)(((byte)World.Player.DexLock + 1) % 3);
+                    GameActions.ChangeStatLock(1, World.Player.DexLock);
+
+                    Lock st = World.Player.DexLock;
+                    ushort gumpid = 0x0984; //Up
+                    if (st == Lock.Down)
+                        gumpid = 0x0986; //Down
+                    else if (st == Lock.Locked)
+                        gumpid = 0x082C; //Lock
+
+                    _lockers[1].Graphic = gumpid;
+                    _lockers[1].Texture = IO.Resources.Gumps.GetGumpTexture(gumpid);
+                };
+                //AddChildren(_lockers[1] = new Button((int)ButtonType.LockerDex, gumpID, gumpID)
+                //{
+                //    X = xOffset,
+                //    Y = 102,
+                //    ButtonAction = ButtonAction.Activate
+                //});
 
 
                 status = World.Player.IntLock;
@@ -134,13 +167,28 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     gumpID = 0x0986; //Down
                 else if (status == Lock.Locked)
                     gumpID = 0x082C; //Lock
-
-                AddChildren(new Button((int)ButtonType.LockerInt, gumpID, gumpID)
+                AddChildren(_lockers[2] = new GumpPic(xOffset, 132, gumpID, 0));
+                _lockers[2].MouseClick += (sender, e) =>
                 {
-                    X = xOffset,
-                    Y = 132,
-                    ButtonAction = ButtonAction.Activate
-                });
+                    World.Player.IntLock = (Lock)(((byte)World.Player.IntLock + 1) % 3);
+                    GameActions.ChangeStatLock(2, World.Player.IntLock);
+
+                    Lock st = World.Player.IntLock;
+                    ushort gumpid = 0x0984; //Up
+                    if (st == Lock.Down)
+                        gumpid = 0x0986; //Down
+                    else if (st == Lock.Locked)
+                        gumpid = 0x082C; //Lock
+
+                    _lockers[2].Graphic = gumpid;
+                    _lockers[2].Texture = IO.Resources.Gumps.GetGumpTexture(gumpid);
+                };
+                //AddChildren(_lockers[2] = new Button((int)ButtonType.LockerInt, gumpID, gumpID)
+                //{
+                //    X = xOffset,
+                //    Y = 132,
+                //    ButtonAction = ButtonAction.Activate
+                //});
 
 
                 if (_useUOPGumps)
@@ -736,12 +784,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case ButtonType.BuffIcon:
                     BuffGump.Toggle();
                     break;
-                case ButtonType.LockerStr:
-                    break;
-                case ButtonType.LockerDex:
-                    break;
-                case ButtonType.LockerInt:
-                    break;
+                //case ButtonType.LockerStr:
+                //    World.Player.StrLock = (Lock)(((byte)World.Player.StrLock + 1) % 3);
+                //    GameActions.ChangeStatLock(0, World.Player.StrLock);
+                //    break;
+                //case ButtonType.LockerDex:
+                //    World.Player.DexLock = (Lock)(((byte)World.Player.DexLock + 1) % 3);
+                //    GameActions.ChangeStatLock(1, World.Player.DexLock);
+                //    break;
+                //case ButtonType.LockerInt:
+                //    World.Player.IntLock = (Lock)(((byte)World.Player.IntLock + 1) % 3);
+                //    GameActions.ChangeStatLock(2, World.Player.IntLock);
+                //    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(buttonID), buttonID, null);
             }
