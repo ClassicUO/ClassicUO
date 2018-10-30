@@ -48,33 +48,11 @@ namespace ClassicUO.Game.GameObjects
         }
 
 
-        //public int DrawX { get; private set; }
-        //public int DrawY { get; private set; }
-
-        //public int RealDrawX { get; private set; }
-        //public int RealDrawY { get; private set; }
-
-
-        //public bool IsPositionChanged { get; private set; }
-
-
-        //public void UpdateRealScreenPosition()
-        //{
-        //    RealDrawX = (Position.X - Position.Y) * 22;
-        //    RealDrawY = (Position.X + Position.Y) * 22 - (Position.Z * 4);
-        //    IsPositionChanged = true;
-        //}
-
-        //public void UpdateScreenPosition(Point offset)
-        //{
-        //    DrawX = RealDrawX - offset.X;
-        //    DrawY = RealDrawY - offset.Y;
-        //    IsPositionChanged = false;
-        //}
+  
 
         private Vector3 _screenPosition;
 
-        public Vector3 ScreenPosition
+        protected Vector3 ScreenPosition
         {
             get => _screenPosition;
             set

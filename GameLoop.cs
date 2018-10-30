@@ -23,6 +23,7 @@
 
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -109,7 +110,6 @@ namespace ClassicUO
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
             Log.Message(LogTypes.Trace, "Done!");
             MaxFPS = settings.MaxFPS;
-            _sceneManager.ChangeScene(ScenesType.Login);
 
             _infoText = new RenderedText
             {
@@ -120,6 +120,13 @@ namespace ClassicUO
                 MaxWidth = 150
             }; 
             base.Initialize();
+        }
+
+        protected override void LoadContent()
+        {
+            _sceneManager.ChangeScene(ScenesType.Login);
+
+            base.LoadContent();
         }
 
         protected override void UnloadContent()

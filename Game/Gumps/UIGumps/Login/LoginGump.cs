@@ -1,5 +1,6 @@
 ﻿using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
+using ClassicUO.IO;
 
 using static ClassicUO.Game.Scenes.LoginScene;
 
@@ -9,7 +10,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
     {
         private readonly LoginScene loginScene;
         private LoginStep currentStep;
-        private Gump currentStepGump;
+        private GumpControl currentStepGump;
 
         public LoginGump() : base(0, 0)
         {
@@ -26,7 +27,9 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             AddChildren(new GumpPic(0, 4, 0x15A0, 0));
 
             // Quit Button
-            AddChildren(new Button(0, 0x1589, 0x158B, 0x158A) {X = 555, Y = 4});
+            AddChildren(new Button(0, 0x1589, 0x158B, 0x158A) {X = 555, Y = 4, ButtonAction = ButtonAction.Activate});
+
+
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -41,7 +44,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             base.Update(totalMS, frameMS);
         }
 
-        private Gump GetGumpForStep(LoginStep step)
+        private GumpControl GetGumpForStep(LoginStep step)
         {
             currentStep = step;
 

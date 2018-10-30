@@ -235,12 +235,15 @@ namespace ClassicUO.Game.Scenes
 
             int winGamePosX = 0;
             int winGamePosY = 0;
+
             int winGameWidth = _settings.GameWindowWidth;
             int winGameHeight = _settings.GameWindowHeight;
+
             int winGameCenterX = winGamePosX + winGameWidth / 2;
             int winGameCenterY = winGamePosY + winGameHeight / 2 + World.Player.Position.Z * 4;
             winGameCenterX -= (int) World.Player.Offset.X;
             winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
+
             int winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX;
             int winDrawOffsetY = (World.Player.Position.X + World.Player.Position.Y) * 22 - winGameCenterY;
             float left = winGamePosX;

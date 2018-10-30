@@ -5,13 +5,13 @@ using ClassicUO.IO;
 
 namespace ClassicUO.Game.Gumps.UIGumps.Login
 {
-    internal class MainLoginGump : Gump
+    internal class MainLoginGump : GumpControl
     {
         private readonly TextBox _textboxAccount;
         private readonly TextBox _textboxPassword;
         private Checkbox _checkboxSaveAccount;
 
-        public MainLoginGump() : base(0, 0)
+        public MainLoginGump()
         {
             Settings settings = Service.Get<Settings>();
 
