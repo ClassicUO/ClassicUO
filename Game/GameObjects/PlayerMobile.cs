@@ -93,7 +93,6 @@ namespace ClassicUO.Game.GameObjects
         private ushort _hitPointsRegen;
         private ushort _intelligence;
         private ushort _intelligenceInc;
-        private long _lastStepRequestedTime;
         private ushort _lowerManaCost;
         private ushort _lowerReagentCost;
         private ushort _luck;
@@ -147,7 +146,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Deque<Step> RequestedSteps => _requestedSteps;
 
-        public long LastStepRequestTime => _lastStepRequestedTime;
+        public long LastStepRequestTime { get; private set; }
 
         public IReadOnlyDictionary<Graphic, BuffIcon> BuffIcons => _buffIcons;
 
@@ -1648,7 +1647,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (_lastStepRequestedTime > CoreGame.Ticks)
+            if (LastStepRequestTime > CoreGame.Ticks)
                 return false;
             if (_requestedSteps.Count >= MAX_STEP_COUNT)
                 return false;
@@ -1757,7 +1756,7 @@ namespace ClassicUO.Game.GameObjects
                 SequenceNumber = 1;
             else
                 SequenceNumber++;
-            _lastStepRequestedTime = CoreGame.Ticks + walkTime;
+            LastStepRequestTime = CoreGame.Ticks + walkTime;
             GetGroupForAnimation(this);
 
             return true;
@@ -1856,7 +1855,7 @@ namespace ClassicUO.Game.GameObjects
             //_requestedSteps.Clear();
             //Steps.Clear();
             SequenceNumber = 0;
-            _lastStepRequestedTime = 0;
+            LastStepRequestTime = 0;
 
             //Offset = Vector3.Zero;
         }

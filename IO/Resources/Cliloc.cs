@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -88,7 +89,7 @@ namespace ClassicUO.IO.Resources
 
             if (arg == null)
                 return capitalize ? StringHelper.CapitalizeFirstCharacter(baseCliloc) : baseCliloc;
-            string[] args = arg.Split('\t');
+            string[] args = arg.Split(new [] { '\t' }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < args.Length; i++)
                 if (args[i].Length > 0 && args[i][0] == '#')

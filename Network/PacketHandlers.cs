@@ -1926,7 +1926,7 @@ namespace ClassicUO.Network
 
             if (p.Position < p.Length)
                 arguments = p.ReadUnicodeReversed(p.Length - p.Position);
-            string text = Cliloc.Translate(Cliloc.GetString((int) cliloc), arguments);
+            string text = Cliloc.Translate((int)cliloc, arguments);
 
             if (!Fonts.UnicodeFontExists((byte) font))
                 font = MessageFont.Bold;
@@ -2224,7 +2224,7 @@ namespace ClassicUO.Network
 
                     if (descriptionCliloc != 0)
                     {
-                        string args = p.ReadUnicode();
+                        string args = p.ReadUnicodeReversed();
                         description = "\n" + Cliloc.Translate((int)descriptionCliloc, args, true);
 
                         if (description.Length < 2)
