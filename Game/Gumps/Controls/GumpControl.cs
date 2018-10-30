@@ -494,6 +494,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public void RemoveChildren(GumpControl c)
         {
+            if (c == null)
+                return;
+
             c.Parent = null;
             _children.Remove(c);
             OnChildRemoved();

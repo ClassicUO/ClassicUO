@@ -58,6 +58,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Game\Data\BuffIcon.cs" />
+    <Compile Include="Game\Data\BuffTable.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
@@ -70,6 +72,7 @@
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Game\Gumps\Controls\Line.cs" />
+    <Compile Include="Game\Gumps\UIGumps\BuffGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\Login\CharacterSelectionGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\Login\LoadingGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\Login\LoginGump.cs" />

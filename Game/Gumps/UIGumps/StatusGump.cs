@@ -23,6 +23,7 @@
 
 using System;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
@@ -49,11 +50,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanMove = true;
 
             _useUOPGumps = FileManager.UseUOPGumps;
+            bool oldStatus = Service.Get<Settings>().UseOldStatus;
 
             Point p = Point.Zero;
 
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_308D)
+            if (FileManager.ClientVersion >= ClientVersions.CV_308D && !oldStatus)
             {
                 AddChildren(new GumpPic(0, 0, 0x2A6C, 0));
             }
@@ -67,7 +69,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             int xOffset = 0;
 
-            if (FileManager.ClientVersion >= ClientVersions.CV_308Z)
+            if (FileManager.ClientVersion >= ClientVersions.CV_308Z && !oldStatus)
             {
                 p.X = 389;
                 p.Y = 152;
@@ -316,7 +318,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if (_useUOPGumps)
                 {
                     xOffset = 320;
-                    text = new Label(World.Player.DamageChanceInc.ToString(), false, 0x0386, font: 1)
+                    text = new Label(World.Player.DamageIncrease.ToString(), false, 0x0386, font: 1)
                     {
                         X = xOffset,
                         Y = 105
@@ -569,6 +571,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     X = 171,
                     Y = 73
                 };
+                _labels[(int) MobileStats.ManaCurrent] = text;
                 AddChildren(text);
 
                 text = new Label($"{World.Player.Stamina}/{World.Player.StaminaMax}", false, 0x0386, font: 1)
@@ -594,25 +597,43 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 };
                 _labels[(int)MobileStats.WeightCurrent] = text;
                 AddChildren(text);
+
+                if (!oldStatus)
+                {
+                    if (FileManager.ClientVersion == ClientVersions.CV_308D)
+                    {
+                        text = new Label(World.Player.StatsCap.ToString(), false, 0x0386, font: 1)
+                        {
+                            X = 171, Y = 124
+                        };
+                        _labels[(int) MobileStats.StatCap] = text;
+                        AddChildren(text);
+                    }
+                    else if (FileManager.ClientVersion == ClientVersions.CV_308J)
+                    {
+                        text = new Label(World.Player.StatsCap.ToString(), false, 0x0386, font: 1)
+                        {
+                            X = 180,
+                            Y = 131
+                        };
+                        _labels[(int)MobileStats.StatCap] = text;
+                        AddChildren(text);
+
+                        text = new Label($"{World.Player.Followers}/{World.Player.FollowersMax}", false, 0x0386, font: 1)
+                        {
+                            X = 180,
+                            Y = 144
+                        };
+                        _labels[(int)MobileStats.Followers] = text;
+                        AddChildren(text);
+                    }
+                }
             }
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-            base.Draw(spriteBatch, position, hue);
-
-            //switch (FileManager.ClientVersion)
-            //{
-            //    case var expression when FileManager.ClientVersion >= ClientVersions.CV_308D && !_useOldGump:
-            //        spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 2 * 82 - 4, (int) position.Y + 81, 20, 1), Vector3.Zero);
-            //        spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 2 * 82 - 4, (int) position.Y + 109, 20, 1), Vector3.Zero);
-            //        spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 2 * 82 - 4, (int) position.Y + 137, 20, 1), Vector3.Zero);
-            //        spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 3 * 82 - 4, (int) position.Y + 137, 20, 1), Vector3.Zero);
-
-            //        break;
-            //}
-
-            return true;
+            return base.Draw(spriteBatch, position, hue);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -621,56 +642,87 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 _refreshTime = totalMS + 250;
 
-                switch (FileManager.ClientVersion)
+                bool oldStatus = Service.Get<Settings>().UseOldStatus;
+
+                if (FileManager.ClientVersion > ClientVersions.CV_308Z && !oldStatus)
                 {
-                    case var expression when FileManager.ClientVersion >= ClientVersions.CV_308D && _useUOPGumps:
-                        _labels[(int) MobileStats.Name].Text = _mobile.Name;
-                        _labels[(int) MobileStats.Strength].Text = _mobile.Strength.ToString();
-                        _labels[(int) MobileStats.Dexterity].Text = _mobile.Dexterity.ToString();
-                        _labels[(int) MobileStats.Intelligence].Text = _mobile.Intelligence.ToString();
-                        _labels[(int) MobileStats.HealthCurrent].Text = _mobile.Hits.ToString();
-                        _labels[(int) MobileStats.HealthMax].Text = _mobile.HitsMax.ToString();
-                        _labels[(int) MobileStats.StaminaCurrent].Text = _mobile.Stamina.ToString();
-                        _labels[(int) MobileStats.StaminaMax].Text = _mobile.StaminaMax.ToString();
-                        _labels[(int) MobileStats.ManaCurrent].Text = _mobile.Mana.ToString();
-                        _labels[(int) MobileStats.ManaMax].Text = _mobile.ManaMax.ToString();
-                        _labels[(int) MobileStats.Followers].Text = ConcatCurrentMax(_mobile.Followers, _mobile.FollowersMax);
-                        _labels[(int) MobileStats.WeightCurrent].Text = _mobile.Weight.ToString();
-                        _labels[(int) MobileStats.WeightMax].Text = _mobile.WeightMax.ToString();
-                        _labels[(int) MobileStats.StatCap].Text = _mobile.StatsCap.ToString();
-                        _labels[(int) MobileStats.Luck].Text = _mobile.Luck.ToString();
-                        _labels[(int) MobileStats.Gold].Text = _mobile.Gold.ToString();
-                        _labels[(int) MobileStats.AR].Text = ConcatCurrentMax(_mobile.ResistPhysical, _mobile.MaxPhysicRes);
-                        _labels[(int) MobileStats.RF].Text = ConcatCurrentMax(_mobile.ResistFire, _mobile.MaxFireRes);
-                        _labels[(int) MobileStats.RC].Text = ConcatCurrentMax(_mobile.ResistCold, _mobile.MaxColdRes);
-                        _labels[(int) MobileStats.RP].Text = ConcatCurrentMax(_mobile.ResistPoison, _mobile.MaxPoisonRes);
-                        _labels[(int) MobileStats.RE].Text = ConcatCurrentMax(_mobile.ResistEnergy, _mobile.MaxEnergyRes);
-                        _labels[(int) MobileStats.Damage].Text = ConcatCurrentMax(_mobile.DamageMin, _mobile.DamageMax);
-                        _labels[(int) MobileStats.LowerReagentCost].Text = _mobile.LowerReagentCost.ToString();
-                        _labels[(int) MobileStats.SpellDamageInc].Text = _mobile.SpellDamageInc.ToString();
-                        _labels[(int) MobileStats.FasterCasting].Text = _mobile.FasterCasting.ToString();
-                        _labels[(int) MobileStats.FasterCastRecovery].Text = _mobile.FasterCastRecovery.ToString();
-                        _labels[(int) MobileStats.HitChanceInc].Text = _mobile.HitChanceInc.ToString();
-                        _labels[(int) MobileStats.DefenseChanceInc].Text = _mobile.DefenseChanceInc.ToString();
-                        _labels[(int) MobileStats.LowerManaCost].Text = _mobile.LowerManaCost.ToString();
-                        _labels[(int) MobileStats.DamageChanceInc].Text = _mobile.DamageChanceInc.ToString();
-                        _labels[(int) MobileStats.SwingSpeedInc].Text = _mobile.SwingSpeedInc.ToString();
+                    _labels[(int)MobileStats.Name].Text = World.Player.Name;
+                    if (_useUOPGumps)
+                        _labels[(int) MobileStats.HitChanceInc].Text = World.Player.HitChanceInc.ToString();
+                    _labels[(int) MobileStats.Strength].Text = World.Player.Strength.ToString();
+                    _labels[(int) MobileStats.Dexterity].Text = World.Player.Dexterity.ToString();
+                    _labels[(int) MobileStats.Intelligence].Text = World.Player.Intelligence.ToString();
+                    if (_useUOPGumps)
+                        _labels[(int)MobileStats.DefenseChanceInc].Text = $"{World.Player.DefenseChanceInc}/{World.Player.MaxDefChance}";
+                    _labels[(int)MobileStats.HealthCurrent].Text = World.Player.Hits.ToString();
+                    _labels[(int)MobileStats.HealthMax].Text = World.Player.HitsMax.ToString();
+                    _labels[(int)MobileStats.StaminaCurrent].Text = World.Player.Stamina.ToString();
+                    _labels[(int)MobileStats.StaminaMax].Text = World.Player.StaminaMax.ToString();
+                    _labels[(int)MobileStats.ManaCurrent].Text = World.Player.Mana.ToString();
+                    _labels[(int)MobileStats.ManaMax].Text = World.Player.ManaMax.ToString();
 
-                        break;
-                    case var expression when (FileManager.ClientVersion < ClientVersions.CV_308D) && !_useUOPGumps: //OLD GUMP
-                        _labels[(int) MobileStats.Name].Text = _mobile.Name;
-                        _labels[(int) MobileStats.Strength].Text = _mobile.Strength.ToString();
-                        _labels[(int) MobileStats.Dexterity].Text = _mobile.Dexterity.ToString();
-                        _labels[(int) MobileStats.Intelligence].Text = _mobile.Intelligence.ToString();
-                        _labels[(int) MobileStats.HealthCurrent].Text = ConcatCurrentMax(_mobile.Hits, _mobile.HitsMax);
-                        _labels[(int) MobileStats.StaminaCurrent].Text = ConcatCurrentMax(_mobile.Stamina, _mobile.StaminaMax);
-                        _labels[(int) MobileStats.ManaCurrent].Text = ConcatCurrentMax(_mobile.Mana, _mobile.ManaMax);
-                        _labels[(int) MobileStats.WeightCurrent].Text = ConcatCurrentMax(_mobile.Weight, _mobile.WeightMax);
-                        _labels[(int) MobileStats.Gold].Text = _mobile.Gold.ToString();
-                        _labels[(int) MobileStats.AR].Text = _mobile.ResistPhysical.ToString();
-                        _labels[(int) MobileStats.Sex].Text = (_mobile.Flags & Flags.Female) != 0 ? "F" : "M";
+                    if (_useUOPGumps)                    
+                        _labels[(int)MobileStats.LowerManaCost].Text = World.Player.LowerManaCost.ToString();
+                    _labels[(int)MobileStats.StatCap].Text = World.Player.StatsCap.ToString();
+                    _labels[(int)MobileStats.Luck].Text = World.Player.Luck.ToString();
+                    _labels[(int)MobileStats.WeightCurrent].Text = World.Player.Weight.ToString();
+                    _labels[(int)MobileStats.WeightMax].Text = World.Player.WeightMax.ToString();
 
-                        break;
+                    if (_useUOPGumps)
+                    {
+                        _labels[(int) MobileStats.DamageChanceInc].Text = World.Player.DamageIncrease.ToString();
+                        _labels[(int) MobileStats.SwingSpeedInc].Text = World.Player.SwingSpeedInc.ToString();
+                    }
+
+                    _labels[(int)MobileStats.Gold].Text = World.Player.Gold.ToString();
+                    _labels[(int)MobileStats.Damage].Text = $"{World.Player.DamageMin}-{World.Player.DamageMax}";
+                    _labels[(int)MobileStats.Followers].Text = $"{World.Player.Followers}/{World.Player.FollowersMax}";
+
+                    if (_useUOPGumps)
+                    {
+                        _labels[(int) MobileStats.LowerReagentCost].Text = World.Player.LowerReagentCost.ToString();
+                        _labels[(int) MobileStats.SpellDamageInc].Text = World.Player.SpellDamageInc.ToString();
+                        _labels[(int) MobileStats.FasterCasting].Text = World.Player.FasterCasting.ToString();
+                        _labels[(int) MobileStats.FasterCastRecovery].Text = World.Player.FasterCastRecovery.ToString();
+                        _labels[(int) MobileStats.AR].Text = $"{World.Player.ResistPhysical}/{World.Player.MaxPhysicRes}";
+                        _labels[(int) MobileStats.RF].Text = $"{World.Player.ResistFire}/{World.Player.MaxFireRes}";
+                        _labels[(int) MobileStats.RC].Text = $"{World.Player.ResistCold}/{World.Player.MaxColdRes}";
+                        _labels[(int) MobileStats.RP].Text = $"{World.Player.ResistPoison}/{World.Player.MaxPoisonRes}";
+                        _labels[(int) MobileStats.RE].Text = $"{World.Player.ResistEnergy}/{World.Player.MaxEnergyRes}";
+                    }
+                    else
+                    {
+                        _labels[(int) MobileStats.AR].Text = World.Player.ResistPhysical.ToString();
+                        _labels[(int) MobileStats.RF].Text = World.Player.ResistFire.ToString();
+                        _labels[(int) MobileStats.RC].Text = World.Player.ResistCold.ToString();
+                        _labels[(int) MobileStats.RP].Text = World.Player.ResistPoison.ToString();
+                        _labels[(int) MobileStats.RE].Text = World.Player.ResistEnergy.ToString();
+                    }
+                }
+                else
+                {
+                    _labels[(int)MobileStats.Name].Text = World.Player.Name;
+                    _labels[(int)MobileStats.Strength].Text = World.Player.Strength.ToString();
+                    _labels[(int)MobileStats.Dexterity].Text = World.Player.Dexterity.ToString();
+                    _labels[(int)MobileStats.Intelligence].Text = World.Player.Intelligence.ToString();
+                    _labels[(int)MobileStats.Sex].Text = World.Player.IsFemale ? "F" : "M";
+                    _labels[(int)MobileStats.AR].Text = World.Player.ResistPhysical.ToString();
+                    _labels[(int)MobileStats.HealthCurrent].Text = $"{World.Player.Hits}/{World.Player.HitsMax}";
+                    _labels[(int)MobileStats.ManaCurrent].Text = $"{World.Player.Mana}/{World.Player.ManaMax}";
+                    _labels[(int)MobileStats.StaminaCurrent].Text = $"{World.Player.Stamina}/{World.Player.StaminaMax}";
+                    _labels[(int)MobileStats.Gold].Text = World.Player.Gold.ToString();
+                    _labels[(int)MobileStats.WeightCurrent].Text = World.Player.Weight.ToString();
+
+                    if (!oldStatus)
+                    {
+                        if (FileManager.ClientVersion == ClientVersions.CV_308D)
+                            _labels[(int)MobileStats.StatCap].Text = World.Player.StatsCap.ToString();
+                        else if (FileManager.ClientVersion == ClientVersions.CV_308J)
+                        {
+                            _labels[(int)MobileStats.StatCap].Text = World.Player.StatsCap.ToString();
+                            _labels[(int)MobileStats.Followers].Text = $"{World.Player.Followers}/{World.Player.FollowersMax}";
+                        }
+                    }
                 }
             }
 
@@ -679,7 +731,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void OnButtonClick(int buttonID)
         {
-
+            switch ((ButtonType)buttonID)
+            {
+                case ButtonType.BuffIcon:
+                    BuffGump.Toggle();
+                    break;
+                case ButtonType.LockerStr:
+                    break;
+                case ButtonType.LockerDex:
+                    break;
+                case ButtonType.LockerInt:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(buttonID), buttonID, null);
+            }
         }
 
         private string ConcatCurrentMax(int min, int max) => $"{min}/{max}";

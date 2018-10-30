@@ -75,7 +75,7 @@ namespace ClassicUO.Game.GameObjects
         private readonly Ability[] _ability = new Ability[2] {Ability.None, Ability.None};
         private readonly Deque<Step> _requestedSteps = new Deque<Step>();
         private readonly Skill[] _sklls;
-        private ushort _damageChanceInc;
+        private ushort _damageIncrease;
         private ushort _damageMax;
         private ushort _damageMin;
         private ushort _defenseChanceInc;
@@ -420,14 +420,14 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public ushort DamageChanceInc
+        public ushort DamageIncrease
         {
-            get => _damageChanceInc;
+            get => _damageIncrease;
             set
             {
-                if (_damageChanceInc != value)
+                if (_damageIncrease != value)
                 {
-                    _damageChanceInc = value;
+                    _damageIncrease = value;
                     _delta |= Delta.Stats;
                 }
             }

@@ -78,6 +78,9 @@ namespace ClassicUO.IO.Resources
             return res;
         }
 
+        public static string Translate(int baseCliloc, string arg = null, bool capitalize = false) => Translate(GetString(baseCliloc), arg, capitalize);
+
+
         public static string Translate(string baseCliloc, string arg = null, bool capitalize = false)
         {
             if (string.IsNullOrEmpty(baseCliloc))
