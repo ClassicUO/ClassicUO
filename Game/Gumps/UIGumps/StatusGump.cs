@@ -38,23 +38,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
     internal class StatusGump : Gump
     {
         private readonly Label[] _labels = new Label[(int) MobileStats.Max];
-        //private readonly Texture2D _line;
         private readonly PlayerMobile _mobile = World.Player;
-        private readonly int _offset;
-        private readonly bool _useOldGump = false;
         private double _refreshTime;
 
-        private bool _useUOPGumps = true;
+        private readonly bool _useUOPGumps;
 
 
         public StatusGump() : base(0, 0)
         {
             CanMove = true;
-            //_line = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
-            //_line.SetData(new[] {Color.Black});
 
-
-            _offset = 82;
+            _useUOPGumps = FileManager.UseUOPGumps;
 
             Point p = Point.Zero;
 
@@ -601,71 +595,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _labels[(int)MobileStats.WeightCurrent] = text;
                 AddChildren(text);
             }
-
-
-            //switch (FileManager.ClientVersion)
-            //{
-            //    case var expression when FileManager.ClientVersion >= ClientVersions.CV_308D && !_useOldGump: //ORIGINAL LARGE GUMP
-
-
-            //        AddChildren(_labels[(int) MobileStats.Name] = new Label(_mobile.Name, false, 997, 400) {X = 260 - Width / 2, Y = 48});
-            //        //============================================================================================================================
-            //        AddChildren(_labels[(int) MobileStats.Strength] = new Label(_mobile.Name, false, 997, 400) {X = _offset - 4, Y = 76});
-            //        AddChildren(_labels[(int) MobileStats.Dexterity] = new Label(_mobile.Dexterity.ToString(), false, 997, 400) {X = _offset - 4, Y = 104});
-            //        AddChildren(_labels[(int) MobileStats.Intelligence] = new Label(_mobile.Intelligence.ToString(), false, 997, 400) {X = _offset - 4, Y = 132});
-            //        AddChildren(_labels[(int) MobileStats.HitChanceInc] = new Label(_mobile.HitChanceInc.ToString(), false, 997, 400) {X = _offset - 4, Y = 160});
-            //        //============================================================================================================================
-            //        AddChildren(_labels[(int) MobileStats.HealthCurrent] = new Label(_mobile.Hits.ToString(), false, 997, 400) {X = 2 * _offset - 4, Y = 69});
-            //        AddChildren(_labels[(int) MobileStats.HealthMax] = new Label(_mobile.HitsMax.ToString(), false, 997, 400) {X = 2 * _offset - 4, Y = 82});
-            //        AddChildren(_labels[(int) MobileStats.StaminaCurrent] = new Label(_mobile.Stamina.ToString(), false, 997, 400) {X = 2 * _offset - 4, Y = 97});
-            //        AddChildren(_labels[(int) MobileStats.StaminaMax] = new Label(_mobile.StaminaMax.ToString(), false, 997, 400) {X = 2 * _offset - 4, Y = 110});
-            //        AddChildren(_labels[(int) MobileStats.ManaCurrent] = new Label(_mobile.Mana.ToString(), false, 997, 400) {X = 2 * _offset - 4, Y = 125});
-            //        AddChildren(_labels[(int) MobileStats.ManaMax] = new Label(_mobile.ManaMax.ToString(), false, 997, 400) {X = 2 * _offset - 4, Y = 138});
-            //        AddChildren(_labels[(int) MobileStats.DefenseChanceInc] = new Label(_mobile.DefenseChanceInc.ToString(), false, 997, 400) {X = 2 * _offset - 4, Y = 160});
-            //        //============================================================================================================================
-            //        AddChildren(_labels[(int) MobileStats.StatCap] = new Label(_mobile.StatsCap.ToString(), false, 997, 400) {X = 3 * _offset - 4, Y = 76});
-            //        AddChildren(_labels[(int) MobileStats.Luck] = new Label(_mobile.Luck.ToString(), false, 997, 400) {X = 3 * _offset - 4, Y = 102});
-            //        AddChildren(_labels[(int) MobileStats.WeightCurrent] = new Label(_mobile.Weight.ToString(), false, 997, 400) {X = 3 * _offset - 4, Y = 125});
-            //        AddChildren(_labels[(int) MobileStats.WeightMax] = new Label(_mobile.WeightMax.ToString(), false, 997, 400) {X = 3 * _offset - 4, Y = 138});
-            //        AddChildren(_labels[(int) MobileStats.LowerManaCost] = new Label(_mobile.LowerManaCost.ToString(), false, 997, 400) {X = 3 * _offset - 4, Y = 160});
-            //        //============================================================================================================================
-            //        AddChildren(_labels[(int) MobileStats.Damage] = new Label(ConcatCurrentMax(_mobile.DamageMin, _mobile.DamageMax), false, 997, 400) {X = 4 * _offset - 4, Y = 75});
-            //        AddChildren(_labels[(int) MobileStats.DamageChanceInc] = new Label(_mobile.DamageChanceInc.ToString(), false, 997, 400) {X = 4 * _offset - 4, Y = 102});
-            //        AddChildren(_labels[(int) MobileStats.Followers] = new Label(ConcatCurrentMax(_mobile.Followers, _mobile.FollowersMax), false, 997, 400) {X = 4 * _offset - 4, Y = 132});
-            //        AddChildren(_labels[(int) MobileStats.SwingSpeedInc] = new Label(_mobile.SwingSpeedInc.ToString(), false, 997, 400) {X = 4 * _offset - 4, Y = 160});
-            //        //============================================================================================================================
-            //        AddChildren(_labels[(int) MobileStats.LowerReagentCost] = new Label(_mobile.LowerReagentCost.ToString(), false, 997, 400) {X = 5 * _offset - 4, Y = 76});
-            //        AddChildren(_labels[(int) MobileStats.SpellDamageInc] = new Label(_mobile.SpellDamageInc.ToString(), false, 997, 400) {X = 5 * _offset - 4, Y = 102});
-            //        AddChildren(_labels[(int) MobileStats.FasterCasting] = new Label(_mobile.FasterCasting.ToString(), false, 997, 400) {X = 5 * _offset - 4, Y = 132});
-            //        AddChildren(_labels[(int) MobileStats.FasterCastRecovery] = new Label(_mobile.FasterCastRecovery.ToString(), false, 997, 400) {X = 5 * _offset - 4, Y = 160});
-            //        //============================================================================================================================
-            //        AddChildren(_labels[(int) MobileStats.AR] = new Label(ConcatCurrentMax(_mobile.ResistPhysical, _mobile.MaxPhysicRes), false, 997, 400) {X = 6 * _offset - 10, Y = 73});
-            //        AddChildren(_labels[(int) MobileStats.RF] = new Label(ConcatCurrentMax(_mobile.ResistFire, _mobile.MaxFireRes), false, 997, 400) {X = 6 * _offset - 10, Y = 90});
-            //        AddChildren(_labels[(int) MobileStats.RC] = new Label(ConcatCurrentMax(_mobile.ResistCold, _mobile.MaxColdRes), false, 997, 400) {X = 6 * _offset - 10, Y = 105});
-            //        AddChildren(_labels[(int) MobileStats.RP] = new Label(ConcatCurrentMax(_mobile.ResistPoison, _mobile.MaxPoisonRes), false, 997, 400) {X = 6 * _offset - 10, Y = 119});
-            //        AddChildren(_labels[(int) MobileStats.RE] = new Label(ConcatCurrentMax(_mobile.ResistEnergy, _mobile.MaxEnergyRes), false, 997, 400) {X = 6 * _offset - 10, Y = 135});
-            //        AddChildren(_labels[(int) MobileStats.Gold] = new Label(_mobile.Gold.ToString(), false, 997, 400) {X = 6 * _offset - 4, Y = 160});
-
-            //        break;
-            //    case var expression when (FileManager.ClientVersion < ClientVersions.CV_308D) | _useOldGump: //OLD GUMP
-            //        _offset = 84;
-            //        AddChildren(new GumpPic(0, 0, 0x802, 0));
-            //        //============================================================================================================================
-            //        AddChildren(_labels[(int) MobileStats.Name] = new Label(_mobile.Name, false, 997, 400) {X = _offset, Y = 42});
-            //        AddChildren(_labels[(int) MobileStats.Strength] = new Label(_mobile.Strength.ToString(), false, 997, 400) {X = _offset, Y = 62});
-            //        AddChildren(_labels[(int) MobileStats.Dexterity] = new Label(_mobile.Dexterity.ToString(), false, 997, 400) {X = _offset, Y = 74});
-            //        AddChildren(_labels[(int) MobileStats.Intelligence] = new Label(_mobile.Intelligence.ToString(), false, 997, 400) {X = _offset, Y = 85});
-            //        AddChildren(_labels[(int) MobileStats.Sex] = new Label((_mobile.Flags & Flags.Female) != 0 ? "F" : "M", false, 997, 400) {X = _offset, Y = 98});
-            //        AddChildren(_labels[(int) MobileStats.AR] = new Label(ConcatCurrentMax(_mobile.ResistPhysical, _mobile.MaxPhysicRes), false, 997, 400) {X = _offset, Y = 110});
-            //        //============================================================================================================================
-            //        AddChildren(_labels[(int) MobileStats.HealthCurrent] = new Label(_mobile.Hits.ToString(), false, 997, 400) {X = 2 * _offset + 3, Y = 62});
-            //        AddChildren(_labels[(int) MobileStats.ManaCurrent] = new Label(_mobile.Mana.ToString(), false, 997, 400) {X = 2 * _offset + 3, Y = 74});
-            //        AddChildren(_labels[(int) MobileStats.StaminaCurrent] = new Label(_mobile.Stamina.ToString(), false, 997, 400) {X = 2 * _offset + 3, Y = 85});
-            //        AddChildren(_labels[(int) MobileStats.Gold] = new Label(_mobile.Gold.ToString(), false, 997, 400) {X = 2 * _offset + 3, Y = 98});
-            //        AddChildren(_labels[(int) MobileStats.WeightCurrent] = new Label(_mobile.Weight.ToString(), false, 997, 400) {X = 2 * _offset + 3, Y = 110});
-
-            //        break;
-            //}
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
@@ -688,9 +617,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_refreshTime + 0.5d < totalMS)
+            if (_refreshTime < totalMS)
             {
-                _refreshTime = totalMS;
+                _refreshTime = totalMS + 250;
 
                 switch (FileManager.ClientVersion)
                 {

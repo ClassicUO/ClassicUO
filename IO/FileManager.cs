@@ -64,6 +64,8 @@ namespace ClassicUO.IO
 
         public static ushort GraphicMask => IsUOPInstallation ? (ushort) 0xFFFF : (ushort) 0x3FFF;
 
+        public static bool UseUOPGumps { get; set; }
+
         public static void LoadFiles()
         {
             Map.Load();

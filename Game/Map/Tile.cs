@@ -87,7 +87,6 @@ namespace ClassicUO.Game.Map
             switch (obj)
             {
                 case Tile tile:
-                    var t = tile.View;
                     if (tile.IsStretched)
                         priorityZ = (short) (tile.AverageZ - 1);
                     else

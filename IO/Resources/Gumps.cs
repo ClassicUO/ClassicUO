@@ -45,12 +45,14 @@ namespace ClassicUO.IO.Resources
             if (File.Exists(path))
             {
                 _file = new UOFileUop(path, ".tga", GUMP_COUNT, true);
+                FileManager.UseUOPGumps = true;
             }
             else
             {
                 path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");
                 string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
                 if (File.Exists(path) && File.Exists(pathidx)) _file = new UOFileMul(path, pathidx, GUMP_COUNT, 12);
+                FileManager.UseUOPGumps = false;
             }
 
             _gumpCache = new SpriteTexture[GUMP_COUNT];
