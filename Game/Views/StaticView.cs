@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Views
             if (Texture == null || Texture.IsDisposed)
             {
                 Texture = Art.GetStaticTexture(GameObject.Graphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44 + GameObject.Position.Z * 4, Texture.Width, Texture.Height);
+                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
             Static st = (Static) GameObject;
@@ -66,19 +66,18 @@ namespace ClassicUO.Game.Views
 
                 if (check)
                 {
-                    Rectangle fol = Bounds;
-                    fol.X = (int) position.X - Bounds.X;
-                    fol.Y = (int) position.Y - Bounds.Y;
+                    //Rectangle fol = Bounds;
+                    //fol.X = (int) position.X - Bounds.X;
+                    //fol.Y = (int) position.Y - Bounds.Y;
 
-                    Rectangle prect = World.Player.View.Bounds;
-                    Vector3 pos = World.Player.ScreenPosition;
-                    prect.X += (int) pos.X;
-                    prect.Y += (int) pos.Y;
+                    //Rectangle prect = World.Player.View.Bounds;
+                    //prect.X += (int) World.Player.DrawX;
+                    //prect.Y += (int) World.Player.DrawY;
 
-                    if (fol.Contains(prect))
-                    {
-                        alpha = .6f;
-                    }
+                    //if (fol.Contains(prect))
+                    //{
+                    //    alpha = .6f;
+                    //}
 
                 }
             }

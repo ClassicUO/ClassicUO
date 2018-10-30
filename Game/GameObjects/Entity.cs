@@ -30,6 +30,8 @@ using ClassicUO.Game.Data;
 using ClassicUO.Interfaces;
 using ClassicUO.Utility;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.GameObjects
 {
     [Flags]
@@ -59,13 +61,13 @@ namespace ClassicUO.Game.GameObjects
         private string _name;
         protected Action<Entity> _OnDisposed;
         protected Action<Entity> _OnUpdated;
-        private Position _position;
+       // private Position _position;
 
         protected Entity(Serial serial) : base(World.Map)
         {
             Serial = serial;
             Items = new EntityCollection<Item>();
-            _position = base.Position;
+            //_position = base.Position;
             PositionChanged += OnPositionChanged;
         }
 
@@ -128,12 +130,12 @@ namespace ClassicUO.Game.GameObjects
 
         public override Position Position
         {
-            get => _position;
+            get => base.Position;
             set
             {
-                if (_position != value)
+                if (base.Position != value)
                 {
-                    _position = value;
+                    base.Position = value;
                     _delta |= Delta.Position;
                 }
             }

@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Views
                 return false;
             int drawCenterY = bodyFrame.CenterY;
             int drawX;
-            int drawY = mountOffset + drawCenterY + (int) (mobile.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
+            int drawY = mountOffset + drawCenterY + (int) (mobile.Offset.Z / 4) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
 
             if (IsFlipped)
                 drawX = -22 + (int) mobile.Offset.X;
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Views
                 Vector3 overheadPosition = new Vector3
                 {
                     X = position.X + mobile.Offset.X,
-                    Y = position.Y - mobile.Position.Z * 4 + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
+                    Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
                     Z = position.Z
                 };
                 MessageOverHead(spriteBatch, overheadPosition, mobile.IsMounted ? 0 : -22);

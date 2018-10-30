@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Views
                     return false;
                 Texture = IO.Resources.Gumps.GetGumpTexture(_displayed);
                 Point offset = _offsets[_displayed - 20000];
-                Bounds = new Rectangle(offset.X, Texture.Height - 33 + effect.Position.Z * 4 + offset.Y, Texture.Width, Texture.Height);
+                Bounds = new Rectangle(offset.X, Texture.Height - 33 + offset.Y, Texture.Width, Texture.Height);
             }
 
             HueVector = RenderExtentions.GetHueVector(effect.Hue);

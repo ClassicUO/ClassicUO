@@ -153,7 +153,7 @@ namespace ClassicUO.Game.Views
                     vertex[3]
                 };
 
-                spriteBatch.DrawShadow(Texture, vertexS, new Vector2(position.X + 22f, position.Y + GameObject.Offset.Y - (GameObject.Offset.Z / 4 + GameObject.Position.Z) * 4 + 22f), IsFlipped, ShadowZDepth);
+                spriteBatch.DrawShadow(Texture, vertexS, new Vector2(position.X + 22, position.Y + GameObject.Offset.Y - GameObject.Offset.Z + 22), IsFlipped, ShadowZDepth);
             }
 
             if (!spriteBatch.DrawSprite(Texture, vertex))

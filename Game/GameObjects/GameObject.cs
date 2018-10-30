@@ -47,7 +47,33 @@ namespace ClassicUO.Game.GameObjects
             _overHeads = new List<TextOverhead>();
         }
 
+
+        //public int DrawX { get; private set; }
+        //public int DrawY { get; private set; }
+
+        //public int RealDrawX { get; private set; }
+        //public int RealDrawY { get; private set; }
+
+
+        //public bool IsPositionChanged { get; private set; }
+
+
+        //public void UpdateRealScreenPosition()
+        //{
+        //    RealDrawX = (Position.X - Position.Y) * 22;
+        //    RealDrawY = (Position.X + Position.Y) * 22 - (Position.Z * 4);
+        //    IsPositionChanged = true;
+        //}
+
+        //public void UpdateScreenPosition(Point offset)
+        //{
+        //    DrawX = RealDrawX - offset.X;
+        //    DrawY = RealDrawY - offset.Y;
+        //    IsPositionChanged = false;
+        //}
+
         private Vector3 _screenPosition;
+
         public Vector3 ScreenPosition
         {
             get => _screenPosition;
@@ -56,12 +82,37 @@ namespace ClassicUO.Game.GameObjects
                 if (_screenPosition != value)
                 {
                     _screenPosition = value;
+                    IsPositionChanged = true;
                 }
             }
         }
 
-        public virtual Position Position { get; set; } = Position.Invalid;
+        public Vector3 RealScreenPosition { get; protected set; }
 
+        public void UpdateRealScreenPosition(Point offset)
+        {
+            RealScreenPosition = new Vector3(_screenPosition.X - offset.X - 22, _screenPosition.Y - offset.Y - 22, 0);
+            IsPositionChanged = false;
+        }
+
+        public bool IsPositionChanged { get; protected set; }
+
+
+        private Position _position = Position.Invalid;
+
+        public virtual Position Position
+        {
+            get => _position;
+            set
+            {
+                if (_position != value)
+                {
+                    _position = value;
+                    ScreenPosition = new Vector3(
+                                                 (_position.X - _position.Y) * 22, (_position.X + _position.Y) * 22 - (_position.Z * 4), 0);
+                }
+            }
+        }
         public virtual Hue Hue { get; set; }
 
         public virtual Graphic Graphic { get; set; }

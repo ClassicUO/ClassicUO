@@ -70,8 +70,6 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public override Position Position { get; set; }
-
         public LandTiles TileData => IO.Resources.TileData.LandData[Graphic];
 
         public void AddGameObject(GameObject obj)

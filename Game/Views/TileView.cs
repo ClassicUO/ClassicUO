@@ -66,7 +66,7 @@ namespace ClassicUO.Game.Views
                 else
                 {
                     Texture = Art.GetLandTexture(GameObject.Graphic);
-                    Bounds = new Rectangle(0, GameObject.Position.Z * 4, 44, 44);
+                    Bounds = new Rectangle(0, 0, 44, 44);
 
                 }
 
@@ -95,6 +95,11 @@ namespace ClassicUO.Game.Views
             _vertex[1].Position = position + _vertex1_yOffset;
             _vertex[2].Position = position + _vertex2_yOffset;
             _vertex[3].Position = position + _vertex3_yOffset;
+
+            int z = GameObject.Position.Z * 4;
+
+            for (int i = 0; i < 4; i++)
+                _vertex[i].Position.Y += z;
 
             if (IsSelected)
             {

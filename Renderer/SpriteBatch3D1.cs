@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
+#if SB1
     public class SpriteBatch3D
     {
         private const int MAX_SPRITES = 0x800 * 40;
@@ -46,7 +47,7 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice = device;
             _effect = new Effect(GraphicsDevice, File.ReadAllBytes(Path.Combine(Bootstrap.ExeDirectory, "shaders/IsometricWorld.fxc")));
-            _effect.Parameters["HuesPerTexture"].SetValue((float) Hues.HuesCount);
+            _effect.Parameters["HuesPerTexture"].SetValue((float)Hues.HuesCount);
             _drawLightingEffect = _effect.Parameters["DrawLighting"];
             _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];
             _worldMatrixEffect = _effect.Parameters["WorldMatrix"];
@@ -272,12 +273,12 @@ namespace ClassicUO.Renderer
 
             for (int i = 0, j = 0; i < MAX_INDICES; i += 6, j += 4)
             {
-                result[i] = (short) j;
-                result[i + 1] = (short) (j + 1);
-                result[i + 2] = (short) (j + 2);
-                result[i + 3] = (short) (j + 1);
-                result[i + 4] = (short) (j + 3);
-                result[i + 5] = (short) (j + 2);
+                result[i] = (short)j;
+                result[i + 1] = (short)(j + 1);
+                result[i + 2] = (short)(j + 2);
+                result[i + 3] = (short)(j + 1);
+                result[i + 4] = (short)(j + 3);
+                result[i + 5] = (short)(j + 2);
             }
 
             return result;
@@ -295,4 +296,5 @@ namespace ClassicUO.Renderer
             public readonly Techniques Technique;
         }
     }
+#endif
 }

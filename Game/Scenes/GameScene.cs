@@ -219,6 +219,8 @@ namespace ClassicUO.Game.Scenes
 
             if (_renderIndex >= 100)
                 _renderIndex = 1;
+
+            _updateDrawPosition = false;
 #endif
             CleaningResources();
             base.FixedUpdate(totalMS, frameMS);
@@ -305,7 +307,7 @@ namespace ClassicUO.Game.Scenes
             for (int i = 0; i < _renderListCount; i++)
             {
                 GameObject obj = _renderList[i];
-                obj?.View.Draw(sb3D, obj.ScreenPosition, _mouseOverList);
+                obj?.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList);
             }
 #else
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);

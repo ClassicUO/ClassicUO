@@ -25,6 +25,8 @@ using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.GameObjects
 {
     public class Static : GameObject, IDynamicItem
@@ -39,8 +41,6 @@ namespace ClassicUO.Game.GameObjects
         public int Index { get; }
 
         public string Name => ItemData.Name;
-
-        public override Position Position { get; set; }
 
         public StaticTiles ItemData => TileData.StaticData[Graphic];
 

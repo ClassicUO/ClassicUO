@@ -87,6 +87,7 @@ namespace ClassicUO.Game.Scenes
         private Vector2 _minPixel, _maxPixel;
         private int _maxZ;
         private bool _drawTerrain;
+        private bool _updateDrawPosition;
 
         private void AddTileToRenderList(IReadOnlyList<GameObject> objList, int worldX, int worldY, bool useObjectHandles, int maxZ)
         {
@@ -96,18 +97,31 @@ namespace ClassicUO.Game.Scenes
 
                 if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
                     continue;
+
+                //if (/*obj.CurrentRenderIndex != _renderIndex ||*/ obj.IsPositionChanged)
+                //{
+                //    obj.UpdateScreenPosition(_offset);
+                //}
+
+                
+                if ( (_updateDrawPosition && obj.CurrentRenderIndex != _renderIndex) || obj.IsPositionChanged)
+                {
+                    obj.UpdateRealScreenPosition(_offset);
+                }
+
+                //int sX = (obj.Position.X - obj.Position.Y) * 22 - _offset.X;
+                //int sY = (obj.Position.X + obj.Position.Y) * 22 - _offset.Y;
+
+
                 obj.UseInRender = 0xFF;
 
-                int sX = (obj.Position.X - obj.Position.Y) * 22 - _offset.X;
-                int sY = (obj.Position.X + obj.Position.Y) *22 - _offset.Y;
-
-                int drawX = sX;
-                int drawY = sY - obj.Position.Z * 4 ;
+                int drawX = (int) obj.RealScreenPosition.X;
+                int drawY = (int) obj.RealScreenPosition.Y;
 
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
                     break;
 
-                obj.ScreenPosition = new Vector3(sX - 22, sY - 22, 0);
+                //obj.ScreenPosition = new Vector3(sX - 22, sY - 22, 0);
 
                 int z = obj.Position.Z;
                 int maxObjectZ = obj.PriorityZ;
@@ -216,6 +230,9 @@ namespace ClassicUO.Game.Scenes
 
         private (Point, Point, Vector2, Vector2, Point, Point, Point, int) GetViewPort()
         {
+            int oldDrawOffsetX = _offset.X;
+            int oldDrawOffsetY = _offset.Y;
+
             int winGamePosX = 0;
             int winGamePosY = 0;
             int winGameWidth = _settings.GameWindowWidth;
@@ -284,6 +301,11 @@ namespace ClassicUO.Game.Scenes
             int maxPixelsX = (int) newMaxX;
             int minPixelsY = (int) ((winGamePosY - drawOffset) * Scale - (newMaxY - maxY));
             int maxPixlesY = (int) newMaxY;
+
+            if (_updateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY)
+            {
+                _updateDrawPosition = true;
+            }
 
             return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY), new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY), new Point(winDrawOffsetX, winDrawOffsetY), new Point(winGameCenterX, winGameCenterY), new Point(realMinRangeX + width - 1, realMinRangeY - 1), Math.Max(width, height));
         }
