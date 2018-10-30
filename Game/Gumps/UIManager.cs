@@ -424,6 +424,10 @@ namespace ClassicUO.Game.Gumps
                         case "noresize":
 
                             break;
+
+                        case "mastergump":
+
+                            break;
                     }
                 }
                 else

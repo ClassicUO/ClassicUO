@@ -2202,48 +2202,49 @@ namespace ClassicUO.Network
 
                 BuffGump gump = ui.GetByLocalSerial<BuffGump>();
 
-                if (gump != null)
+                ushort mode = p.ReadUShort();
+
+                if (mode != 0)
                 {
-                    ushort mode = p.ReadUShort();
+                    p.Skip(12);
 
-                    if (mode != 0)
+                    ushort timer = p.ReadUShort();
+
+                    p.Skip(3);
+
+                    uint titleCliloc = p.ReadUInt();
+                    uint descriptionCliloc = p.ReadUInt();
+                    uint wtfCliloc = p.ReadUInt();
+
+                    p.Skip(4);
+
+                    string title = Cliloc.GetString((int)titleCliloc);
+                    string description = string.Empty;
+                    string wtf = string.Empty;
+
+                    if (descriptionCliloc != 0)
                     {
-                        p.Skip(12);
+                        string args = p.ReadUnicode();
+                        description = "\n" + Cliloc.Translate((int)descriptionCliloc, args, true);
 
-                        ushort timer = p.ReadUShort();
-
-                        p.Skip(3);
-
-                        uint titleCliloc = p.ReadUInt();
-                        uint descriptionCliloc = p.ReadUInt();
-                        uint wtfCliloc = p.ReadUInt();
-
-                        p.Skip(4);
-
-                        string title = Cliloc.GetString((int)titleCliloc);
-                        string description = string.Empty;
-                        string wtf = string.Empty;
-
-                        if (descriptionCliloc != 0)
-                        {
-                            string args = p.ReadUnicode();
-                            description = "\n" + Cliloc.Translate((int)descriptionCliloc, args, true);
-
-                            if (description.Length < 2)
-                                description = string.Empty;
-                        }
-
-                        if (wtfCliloc != 0)
-                            wtf = "\n" + Cliloc.GetString((int)wtfCliloc);
-
-                        string text = $"<left>{title}{description}{wtf}</left>";
-
-                        gump.AddBuff(BuffTable.Table[iconID], timer, text);
+                        if (description.Length < 2)
+                            description = string.Empty;
                     }
-                    else
-                    {
-                        gump.RemoveBuff(BuffTable.Table[iconID]);
-                    }
+
+                    if (wtfCliloc != 0)
+                        wtf = "\n" + Cliloc.GetString((int)wtfCliloc);
+
+                    string text = $"<left>{title}{description}{wtf}</left>";
+
+
+                    World.Player.AddBuff(BuffTable.Table[iconID], timer, text);
+                    gump?.AddBuff(BuffTable.Table[iconID]);
+
+                }
+                else
+                {
+                    World.Player.RemoveBuff(BuffTable.Table[iconID]);
+                    gump?.RemoveBuff(BuffTable.Table[iconID]);
                 }
             }
         }

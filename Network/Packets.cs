@@ -452,7 +452,7 @@ namespace ClassicUO.Network
             {
                 WriteUInt((uint) switches.Length);
 
-                for (int i = 0; i < switches.Length; i++)
+                for (int i = switches.Length - 1; i >= 0 ; i--)
                     WriteUInt(switches[i]);
             }
 
@@ -464,7 +464,7 @@ namespace ClassicUO.Network
             {
                 WriteUInt((uint) entries.Length);
 
-                for (int i = 0; i < entries.Length; i++)
+                for (int i = entries.Length - 1; i >= 0; i--)
                 {
                     int length = entries[i].Item2.Length * 2;
                     WriteUShort(entries[i].Item1);

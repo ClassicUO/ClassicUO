@@ -125,6 +125,8 @@ namespace ClassicUO.Game.GameObjects
         private uint _tithingPoints;
         private ushort _weight;
         private ushort _weightMax;
+        private readonly Dictionary<Graphic, BuffIcon> _buffIcons = new Dictionary<Graphic, BuffIcon>();
+
 
         public PlayerMobile(Serial serial) : base(serial)
         {
@@ -146,6 +148,19 @@ namespace ClassicUO.Game.GameObjects
         public Deque<Step> RequestedSteps => _requestedSteps;
 
         public long LastStepRequestTime => _lastStepRequestedTime;
+
+        public IReadOnlyDictionary<Graphic, BuffIcon> BuffIcons => _buffIcons;
+
+
+        public void AddBuff(Graphic graphic, uint time, string text)
+        {
+            _buffIcons[graphic] = new BuffIcon(graphic, time, text);
+        }
+
+        public void RemoveBuff(Graphic graphic)
+        {
+            _buffIcons.Remove(graphic);
+        }
 
         public ushort Strength
         {

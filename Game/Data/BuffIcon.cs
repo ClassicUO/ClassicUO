@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Game.Data
 {
-    class BuffIcon
+    public class BuffIcon
     {
         public BuffIcon(Graphic graphic, long timer, string text)
         {
