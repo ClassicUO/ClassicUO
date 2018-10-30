@@ -12,9 +12,14 @@ namespace ClassicUO.Renderer
 #if SB1
     public class SpriteBatch3D
     {
-        private const int MAX_SPRITES = 0x800 * 40;
+        private const int MAX_SPRITES = 0x800 ;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;
+
+        private Matrix _projectionMatrix;
+        private Matrix _matrixTransformMatrix;
+        private Matrix _transformMatrix = Matrix.Identity;
+
         private readonly EffectParameter _viewportEffect;
         private readonly EffectParameter _worldMatrixEffect;
         private readonly EffectParameter _drawLightingEffect;
@@ -60,13 +65,33 @@ namespace ClassicUO.Renderer
             _vertexBuffer = new DynamicVertexBuffer(GraphicsDevice, SpriteVertex.VertexDeclaration, MAX_VERTICES, BufferUsage.WriteOnly);
             _indexBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.SixteenBits, MAX_INDICES, BufferUsage.WriteOnly);
             _indexBuffer.SetData(GenerateIndexArray());
+
+
+            _projectionMatrix = new Matrix(
+                                           0f, //(float)( 2.0 / (double)viewport.Width ) is the actual value we will use
+                                           0.0f,
+                                           0.0f,
+                                           0.0f,
+                                           0.0f,
+                                           0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
+                                           0.0f,
+                                           0.0f,
+                                           0.0f,
+                                           0.0f,
+                                           1.0f,
+                                           0.0f,
+                                           -1.0f,
+                                           1.0f,
+                                           0.0f,
+                                           1.0f
+                                          );
         }
 
         public GraphicsDevice GraphicsDevice { get; }
 
-        public Matrix ProjectionMatrixWorld => Matrix.Identity;
+        //public Matrix ProjectionMatrixWorld => Matrix.Identity;
 
-        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
+        //public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
 
         public int Calls { get; set; }
 
@@ -157,20 +182,15 @@ namespace ClassicUO.Renderer
             _numSprites++;
         }
 
-        private bool _stencil = false;
-        public void SetStencil(bool t)
-        {
-            _stencil = t;
-        }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Conditional("DEBUG")]
         private void EnsureStarted()
         {
             if (!_started)
                 throw new InvalidOperationException();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [System.Diagnostics.Conditional("DEBUG")]
         private void EnsureNotStarted()
         {
             if (_started)
@@ -180,21 +200,27 @@ namespace ClassicUO.Renderer
         private void ApplyStates()
         {
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            //GraphicsDevice.BlendState.ColorBlendFunction = BlendFunction.Add;
-            //GraphicsDevice.BlendState.AlphaSourceBlend = Blend.SourceColor;
-            GraphicsDevice.RasterizerState = RasterizerState.CullNone;
+            GraphicsDevice.DepthStencilState = DepthStencilState.None;
+            GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
-            //GraphicsDevice.SamplerStates[3] = SamplerState.PointClamp;
-            //GraphicsDevice.SamplerStates[4] = SamplerState.PointWrap;
 
-            // set up viewport.
-            _projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
-            _worldMatrixEffect.SetValue(ProjectionMatrixWorld);
+            Viewport viewport = GraphicsDevice.Viewport;
+            _projectionMatrix.M11 = (float)(2.0 / (double)(viewport.Width / 2 * 2 - 1));
+            _projectionMatrix.M22 = (float)(-2.0 / (double)(viewport.Height / 2 * 2 - 1));
+            _projectionMatrix.M41 = -1 - 0.5f * _projectionMatrix.M11;
+            _projectionMatrix.M42 = 1 - 0.5f * _projectionMatrix.M22;
+
+            Matrix.Multiply(ref _transformMatrix, ref _projectionMatrix, out _matrixTransformMatrix);
+            _projectionMatrixEffect.SetValue(_matrixTransformMatrix);
+
+            //_projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
+            _worldMatrixEffect.SetValue(_transformMatrix);
+
             _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-            GraphicsDevice.DepthStencilState = _dssStencil;
+
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
             GraphicsDevice.Indices = _indexBuffer;
         }

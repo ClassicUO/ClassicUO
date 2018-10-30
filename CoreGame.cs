@@ -48,8 +48,8 @@ namespace ClassicUO
                 GraphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
             GraphicsDeviceManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             GraphicsDeviceManager.SynchronizeWithVerticalRetrace = false;
-            GraphicsDeviceManager.PreferredBackBufferWidth = 1000; // should be changed by settings file
-            GraphicsDeviceManager.PreferredBackBufferHeight = 800; // should be changed by settings file
+            GraphicsDeviceManager.PreferredBackBufferWidth = 640; // should be changed by settings file
+            GraphicsDeviceManager.PreferredBackBufferHeight = 480; // should be changed by settings file
             GraphicsDeviceManager.ApplyChanges();
 
             Window.ClientSizeChanged += (sender, e) =>
@@ -60,6 +60,8 @@ namespace ClassicUO
             };
             Window.AllowUserResizing = true;
             _fpsCounter = new FpsCounter();
+
+
         }
 
         protected GraphicsDeviceManager GraphicsDeviceManager { get; }
@@ -86,6 +88,37 @@ namespace ClassicUO
         public int CurrentFPS => _fpsCounter.FPS;
 
         public static long Ticks { get; private set; }
+
+
+        public bool IsFullScreen
+        {
+            get => GraphicsDeviceManager.IsFullScreen;
+            set
+            {
+                GraphicsDeviceManager.IsFullScreen = value;
+                GraphicsDeviceManager.ApplyChanges();
+            } 
+        }
+
+        public int WindowWidth
+        {
+            get => GraphicsDeviceManager.PreferredBackBufferWidth;
+            set
+            {
+                GraphicsDeviceManager.PreferredBackBufferWidth = value;
+                GraphicsDeviceManager.ApplyChanges();
+            } 
+        }
+
+        public int WindowHeight
+        {
+            get => GraphicsDeviceManager.PreferredBackBufferHeight;
+            set
+            {
+                GraphicsDeviceManager.PreferredBackBufferHeight = value;
+                GraphicsDeviceManager.ApplyChanges();
+            }
+        }
 
         protected override void Update(GameTime gameTime)
         {
