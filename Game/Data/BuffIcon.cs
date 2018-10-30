@@ -8,7 +8,7 @@ namespace ClassicUO.Game.Data
 {
     class BuffIcon
     {
-        public BuffIcon(Graphic graphic, ushort timer, string text)
+        public BuffIcon(Graphic graphic, long timer, string text)
         {
             Graphic = graphic;
             Timer = timer;
@@ -16,7 +16,7 @@ namespace ClassicUO.Game.Data
         }
 
         public Graphic Graphic { get; }
-        public ushort Timer { get; }
+        public long Timer { get; }
         public string Text { get; }
     }
 }
