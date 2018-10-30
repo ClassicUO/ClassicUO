@@ -47,8 +47,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 ButtonAction = ButtonAction.Activate
             });
             _direction = GumpDirection.LEFT_HORIZONTAL;
-        }
 
+            foreach (KeyValuePair<Graphic, BuffIcon> k in World.Player.BuffIcons)
+                AddChildren(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
+            UpdateElements();
+        }
 
 
         public static void Toggle()
@@ -111,20 +114,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        protected override void OnInitialize()
-        {
-            foreach (KeyValuePair<Graphic, BuffIcon> k in World.Player.BuffIcons)
-            {
-                AddChildren(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
-            }
-
-            UpdateElements();
-        }
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-        }
 
         public override void OnButtonClick(int buttonID)
         {
@@ -176,31 +165,33 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         class BuffControlEntry : GumpPic
         {
+            private uint _timer;
+            private byte _alpha;
+            private bool _decreaseAlpha;
+
             public BuffControlEntry(BuffIcon icon) : base(0, 0, icon.Graphic, 0)
             {
                 Icon = icon;
                 Texture = IO.Resources.Gumps.GetGumpTexture(icon.Graphic);
                 Width = Texture.Width;
                 Height = Texture.Height;
-                Alpha = 0xFF;
-                DecreaseAlpha = true;
-                Timer =  (uint) (  icon.Timer <= 0 ? 0xFFFF_FFFF : CoreGame.Ticks + icon.Timer * 1000 );
+                _alpha = 0xFF;
+                _decreaseAlpha = true;
+                _timer =  (uint) (  icon.Timer <= 0 ? 0xFFFF_FFFF : CoreGame.Ticks + (icon.Timer * 1000) );
             }
 
-            public byte Alpha { get; set; }
-            public bool DecreaseAlpha { get; set; }
+
             public BuffIcon Icon { get; }
-            public uint Timer { get; }
+
 
 
             public override void Update(double totalMS, double frameMS)
             {
                 Texture.Ticks = (long)totalMS;
 
-                int delta = (int) (Timer - totalMS);
+                int delta = (int) (_timer - totalMS);
 
-
-                if (Timer != 0xFFFF_FFFF && delta < 10000)
+                if (_timer != 0xFFFF_FFFF && delta < 10000)
                 {
                     if (delta <= 0)
                     {
@@ -208,14 +199,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     }
                     else
                     {
-                        int alpha = (int) Alpha;
+                        int alpha = _alpha;
                         int addVal = (10000 - delta) / 600;
 
-                        if (DecreaseAlpha)
+                        if (_decreaseAlpha)
                         {
+                            alpha -= addVal;
+
                             if (alpha <= 60)
                             {
-                                DecreaseAlpha = false;
+                                _decreaseAlpha = false;
                                 alpha = 60;
                             }
                         }
@@ -225,14 +218,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                             if (alpha >= 255)
                             {
-                                DecreaseAlpha = true;
+                                _decreaseAlpha = true;
                                 alpha = 255;
                             }
                         }
 
-                        Log.Message(LogTypes.Panic, "ALPHA: " + alpha.ToString());
-
-                        Alpha = (byte) alpha;
+                        _alpha = (byte) alpha;
                     }
                 }
 
@@ -241,8 +232,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
             {
-                HueVector = RenderExtentions.GetHueVector(0, false, 0 , false);
-                return base.Draw(spriteBatch, position, hue);
+                return spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(0, false, 1.0f - (_alpha / 255f), false));
             }
         }
     }
