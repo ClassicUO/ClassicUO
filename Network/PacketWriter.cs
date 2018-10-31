@@ -31,6 +31,11 @@ namespace ClassicUO.Network
 
         public PacketWriter(byte id)
         {
+            SetPacketId(id);
+        }
+
+        protected void SetPacketId(byte id)
+        {
             short len = PacketsTable.GetPacketLength(id);
             IsDynamic = len < 0;
             _data = new byte[IsDynamic ? 32 : len];

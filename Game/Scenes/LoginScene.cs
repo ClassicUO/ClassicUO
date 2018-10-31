@@ -25,6 +25,8 @@ using System;
 using System.Net;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Gumps.UIGumps.Login;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
@@ -51,7 +53,8 @@ namespace ClassicUO.Game.Scenes
             ServerSelection,
             LoginInToServer,
             CharacterSelection,
-            EnteringBritania
+            EnteringBritania,
+            CharCreation,
         }
 
         private byte[] _clientVersionBuffer;
@@ -80,8 +83,8 @@ namespace ClassicUO.Game.Scenes
 
         public CharacterListEntry[] Characters { get; private set; }
 
+        public byte ServerIndex { get; private set; }
         public string Account { get; private set; }
-
         public string Password { get; private set; }
 
         public override void Load()
@@ -138,6 +141,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginStep.ServerSelection)
             {
+                ServerIndex = index;
                 CurrentLoginStep = LoginStep.LoginInToServer;
                 NetClient.LoginSocket.Send(new PSelectServer(index));
             }
@@ -150,6 +154,22 @@ namespace ClassicUO.Game.Scenes
                 CurrentLoginStep = LoginStep.EnteringBritania;
                 NetClient.Socket.Send(new PSelectCharacter(index, Characters[index].Name, NetClient.Socket.ClientAddress));
             }
+        }
+
+        public void StartCharCreation()
+        {
+            if (CurrentLoginStep == LoginStep.CharacterSelection)
+                CurrentLoginStep = LoginStep.CharCreation;
+        }
+
+        public void CreateCharacter(PlayerMobile character)
+        {
+            int i = 0;
+            for (i = 0; i < Characters.Length; i++)
+                if (string.IsNullOrEmpty(Characters[i].Name))
+                    break;
+
+            NetClient.Socket.Send(new PCreateCharacter(character, NetClient.Socket.ClientAddress, ServerIndex, (uint)i));
         }
 
         public void StepBack()
@@ -220,6 +240,9 @@ namespace ClassicUO.Game.Scenes
                 case 0x82: // ReceiveLoginRejection
                     HandleLoginRejection(e);
 
+                    break;
+                default:
+                    Log.Message(LogTypes.Debug, e.ID.ToString());
                     break;
             }
         }

@@ -90,6 +90,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 if (_value != value)
                 {
+                    var oldValue = _value;
                     _value = /*_newValue =*/ value;
                     //if (IsInitialized)
                     //    RecalculateSliderX();
@@ -101,6 +102,10 @@ namespace ClassicUO.Game.Gumps.Controls
 
                     if (_text != null)
                         _text.Text = Value.ToString();
+
+                    if (_value != oldValue)
+                        ModifyPairedValues(_value - oldValue);
+
                     ValueChanged.Raise();
                 }
             }
@@ -160,6 +165,15 @@ namespace ClassicUO.Game.Gumps.Controls
             _text?.Draw(spriteBatch, new Vector3(position.X + BarWidth + 2, position.Y + Height / 2 - _text.Height / 2, 0));
 
             return base.Draw(spriteBatch, position, hue);
+        }
+
+        private void InternalSetValue(int value)
+        {
+            _value = value;
+            CalculateOffset();
+
+            if (_text != null)
+                _text.Text = Value.ToString();
         }
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
@@ -268,7 +282,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     if (_pairedSliders[sliderIndex].Value < _pairedSliders[sliderIndex].MaxValue)
                     {
                         updateSinceLastCycle = true;
-                        _pairedSliders[sliderIndex].Value += d;
+                        _pairedSliders[sliderIndex].InternalSetValue(_pairedSliders[sliderIndex].Value + d);
                         points--;
                     }
                 }
@@ -277,7 +291,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     if (_pairedSliders[sliderIndex].Value > _pairedSliders[sliderIndex].MinValue)
                     {
                         updateSinceLastCycle = true;
-                        _pairedSliders[sliderIndex].Value += d;
+                        _pairedSliders[sliderIndex].InternalSetValue(_pairedSliders[sliderIndex]._value + d);
                         points--;
                     }
                 }

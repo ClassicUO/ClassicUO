@@ -22,6 +22,7 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Text;
 
@@ -33,6 +34,7 @@ namespace ClassicUO.IO.Resources
         private static readonly Dictionary<int, SkillEntry> _skills = new Dictionary<int, SkillEntry>();
 
         public static int SkillsCount => _skills.Count;
+        public static string[] SkillNames => _skills.Select(o => o.Value.Name).ToArray();
 
         public static void Load()
         {

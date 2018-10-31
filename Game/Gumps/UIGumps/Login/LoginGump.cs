@@ -1,4 +1,7 @@
-﻿using ClassicUO.Game.Gumps.Controls;
+
+﻿using ClassicUO.Configuration;
+using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Gumps.UIGumps.CharCreation;
 using ClassicUO.Game.Scenes;
 
 using static ClassicUO.Game.Scenes.LoginScene;
@@ -8,6 +11,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
     internal class LoginGump : Gump
     {
         private readonly LoginScene loginScene;
+        
         private LoginStep currentStep;
         private GumpControl currentStepGump;
 
@@ -65,6 +69,8 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 case LoginStep.ServerSelection:
 
                     return new ServerSelectionGump();
+                case LoginStep.CharCreation:
+                    return new CharCreationGump();
             }
 
             return null;

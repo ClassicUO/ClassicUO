@@ -91,6 +91,17 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
+        public void Update()
+        {
+            if (_sourceEntity != null)
+            {
+                _isFemale = (((Mobile)_sourceEntity).Flags & Flags.Female) != 0;
+                _isElf = false;
+            }
+
+            OnEntityUpdated(_sourceEntity);
+        }
+
         private void OnEntityUpdated(Entity entity)
         {
             Clear();
