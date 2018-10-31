@@ -298,6 +298,9 @@ namespace ClassicUO.Game.Scenes
 
         private void DrawWorld(SpriteBatch3D sb3D)
         {
+            sb3D.GraphicsDevice.Clear(Color.Black);
+            sb3D.GraphicsDevice.SetRenderTarget(_renderTarget);
+
             sb3D.Begin();
             sb3D.EnableLight(true);
             sb3D.SetLightIntensity(World.Light.IsometricLevel);
@@ -373,8 +376,7 @@ namespace ClassicUO.Game.Scenes
 #endif
             // Draw in game overhead text messages
             OverheadManager.Draw(sb3D, _mouseOverList);
-            sb3D.GraphicsDevice.SetRenderTarget(_renderTarget);
-            sb3D.GraphicsDevice.Clear(Color.Black);
+           
             sb3D.End();
             sb3D.EnableLight(false);
             sb3D.GraphicsDevice.SetRenderTarget(null);

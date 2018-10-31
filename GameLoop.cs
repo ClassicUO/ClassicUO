@@ -94,17 +94,16 @@ namespace ClassicUO
 
             //Register Service Stack
             Service.Register(this);
-            Service.Register(new SpriteBatch3D(GraphicsDevice));
-            Service.Register(new SpriteBatchUI(GraphicsDevice));
+            Service.Register(_sb3D = new SpriteBatch3D(GraphicsDevice));
+            Service.Register(_sbUI = new SpriteBatchUI(GraphicsDevice));
             Service.Register(new InputManager());
             Service.Register(_uiManager = new UIManager());
             Service.Register(_sceneManager = new SceneManager());
             Service.Register(_journalManager = new JournalData());
+
             //Register Command Stack
             PartySystem.RegisterCommands();
             _inputManager = Service.Get<InputManager>();
-            _sb3D = Service.Get<SpriteBatch3D>();
-            _sbUI = Service.Get<SpriteBatchUI>();
             Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);

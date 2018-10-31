@@ -12,7 +12,7 @@ namespace ClassicUO.Renderer
 #if SB1
     public class SpriteBatch3D
     {
-        private const int MAX_SPRITES = 0x800 * 40;
+        private const int MAX_SPRITES = 0x800 ;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;
 
@@ -26,18 +26,18 @@ namespace ClassicUO.Renderer
         private readonly EffectParameter _projectionMatrixEffect;
         private readonly EffectTechnique _huesTechnique, _shadowTechnique, _landTechnique;
         private readonly Effect _effect;
-        private readonly DepthStencilState _dss = new DepthStencilState
-        {
-            DepthBufferEnable = true,
-            DepthBufferWriteEnable = true
-        };
-        private readonly DepthStencilState _dssStencil = new DepthStencilState
-        {
-            StencilEnable = true,
-            StencilFunction = CompareFunction.Always,
-            StencilPass = StencilOperation.Replace,
-            DepthBufferEnable = false,
-        };
+        //private readonly DepthStencilState _dss = new DepthStencilState
+        //{
+        //    DepthBufferEnable = true,
+        //    DepthBufferWriteEnable = true
+        //};
+        //private readonly DepthStencilState _dssStencil = new DepthStencilState
+        //{
+        //    StencilEnable = true,
+        //    StencilFunction = CompareFunction.Always,
+        //    StencilPass = StencilOperation.Replace,
+        //    DepthBufferEnable = false,
+        //};
         private readonly VertexBuffer _vertexBuffer;
         private readonly IndexBuffer _indexBuffer;
         private readonly DrawInfo[] _textureInfo;
@@ -135,7 +135,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool DrawSprite(Texture2D texture, SpriteVertex[] vertices, Techniques technique = Techniques.Default)
+        public unsafe bool DrawSprite(Texture2D texture, SpriteVertex[] vertices, Techniques technique = Techniques.Default)
         {
             if (texture == null || texture.IsDisposed)
                 return false;
@@ -147,8 +147,20 @@ namespace ClassicUO.Renderer
 #endif
             _textureInfo[_numSprites] = new DrawInfo(texture, technique);
 
-            for (int i = 0; i < 4; i++)
-                _vertexInfo[_numSprites * 4 + i] = vertices[i];
+
+            fixed (SpriteVertex* p = &_vertexInfo[_numSprites * 4])
+            {
+                fixed (SpriteVertex* t = &vertices[0])
+                {
+                    SpriteVertex* ptr0 = p;
+                    ptr0[0] = t[0];
+                    ptr0[1] = t[1];
+                    ptr0[2] = t[2];
+                    ptr0[3] = t[3];
+                }
+               
+            }
+
             _numSprites++;
 
             return true;
@@ -226,15 +238,24 @@ namespace ClassicUO.Renderer
             GraphicsDevice.Indices = _indexBuffer;
         }
 
-        private void Flush()
-        {
+        private unsafe void Flush()
+        {       
+           
+            ApplyStates();
+
             if (_numSprites == 0)
                 return;
+
+
+            fixed (SpriteVertex* p = &_vertexInfo[0])
+            {
+                _vertexBuffer.SetDataPointerEXT(0, (IntPtr)p, _numSprites * 4 * SpriteVertex.SizeInBytes, SetDataOptions.None);
+            }
+
+            //_vertexBuffer.SetData(0, _vertexInfo, 0, _numSprites * 4, SpriteVertex.SizeInBytes);
+            DrawInfo current = _textureInfo[0];
             int offset = 0;
             Techniques last = Techniques.None;
-            ApplyStates();
-            _vertexBuffer.SetData(0, _vertexInfo, 0, _numSprites * 4, SpriteVertex.SizeInBytes);
-            DrawInfo current = _textureInfo[0];
 
             for (int i = 1; i < _numSprites; i++)
                 if (_textureInfo[i].Texture != current.Texture || _textureInfo[i].Technique != current.Technique)
@@ -264,7 +285,6 @@ namespace ClassicUO.Renderer
                     {
                         _effect.CurrentTechnique = _huesTechnique;
                         last = info.Technique;
-                        _effect.CurrentTechnique.Passes[0].Apply();
                     }
 
                     break;
@@ -274,7 +294,6 @@ namespace ClassicUO.Renderer
                     {
                         _effect.CurrentTechnique = _shadowTechnique;
                         last = info.Technique;
-                        _effect.CurrentTechnique.Passes[0].Apply();
                     }
 
                     break;
@@ -284,11 +303,11 @@ namespace ClassicUO.Renderer
                     {
                         _effect.CurrentTechnique = _landTechnique;
                         last = info.Technique;
-                        _effect.CurrentTechnique.Passes[0].Apply();
                     }
 
                     break;
             }
+            _effect.CurrentTechnique.Passes[0].Apply();
 
             GraphicsDevice.Textures[0] = info.Texture;
             GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite * 4, 0, batchSize * 2);

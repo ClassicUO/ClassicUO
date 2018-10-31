@@ -479,6 +479,7 @@ namespace ClassicUO.Game.Gumps
 
         public void Draw(SpriteBatchUI spriteBatch)
         {
+
             SortControlsByInfo();
 
             for (int i = _gumps.Count - 1; i >= 0; i--)

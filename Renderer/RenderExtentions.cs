@@ -39,9 +39,33 @@ namespace ClassicUO.Renderer
         public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool noLighting)
         {
             if ((hue & 0x4000) != 0) alpha = ALPHA;
-            if ((hue & 0x8000) != 0) partial = true;
+
+            if ((hue & 0x8000) != 0)
+            {
+                partial = true;
+               // hue &= 0x7FFF;
+            }
+
+            //if ((hue & 0x0FFF) == 1)
+            //{
+            //    hue &= 0x7FFF;
+            //}
 
             return hue == 0 ? new Vector3(0, (noLighting ? 4 : 0), alpha) : new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), alpha);
+        }
+
+
+        //private int GetShadersType(ref int hue, ref bool partial, ref float alpha, ref bool noLighting)
+        //{
+
+        //}
+
+        enum ShadersEffectType
+        {
+            Hued,
+            PartialHued,
+            Land,
+            Spectral,
         }
     }
 }
