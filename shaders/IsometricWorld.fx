@@ -1,3 +1,16 @@
+#define NOCOLOR 0
+#define COLOR 1
+#define PARTIAL_COLOR 2
+#define LAND 6
+#define LAND_COLOR 7
+#define SPECTRAL 10
+#define SHADOW 12
+
+const float HuesPerTexture = 3000;
+const float ToGrayScale = 3;
+
+
+
 float4x4 ProjectionMatrix;
 float4x4 WorldMatrix;
 float2 Viewport;
@@ -6,15 +19,14 @@ bool DrawLighting;
 float3 lightDirection;
 float lightIntensity;
 
-const float HuesPerTexture = 3000;
-const float ToGrayScale = 3;
+
+
 
 
 
 sampler DrawSampler : register(s0);
 sampler HueSampler0 : register(s1);
 sampler HueSampler1 : register(s2);
-sampler HueSampler2 : register(s3);
 sampler MiniMapSampler : register(s4);
 
 struct VS_INPUT
@@ -60,76 +72,75 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 
 	float alpha = 1 - IN.Hue.z;
 
-	// ethereal mount fix
-	if (IN.Hue.x == 1 && IN.Hue.z > 0.0f)
-		alpha = 1 - color.r * 1.5;
+	int mode = int(IN.Hue.y);
 
-
-	// flag for no lighting
-	bool drawLighting = true;
-	if (IN.Hue.y >= 4)
-	{
-		IN.Hue.y -= 4;
-		drawLighting = false;
-	}
-	
-	// Hue the color if the hue vector y component is greater than 0.
-	if (IN.Hue.y > 0)
+	if (mode == COLOR)
 	{
 		float4 hueColor;
-
 		if (IN.Hue.x < HuesPerTexture)
-		{
-			hueColor = tex2D(HueSampler0, float2(color.r , IN.Hue.x / HuesPerTexture));
-		}
-		else 
-		{
-			hueColor = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture));
-		}
-
-		hueColor.a = color.a;
-		
-		
-
-		if (IN.Hue.y >= 2) 
-		{
-			// partial hue - map any grayscale pixels to the hue. Colored pixels remain colored.
-			if ((color.r == color.g) && (color.r == color.b))
-				color = hueColor;
-		}
+			hueColor = tex2D(HueSampler0, float2(color.r, IN.Hue.x / HuesPerTexture));
 		else
-		{
-			// normal hue - map the hue to the grayscale.
-			color = hueColor;
-		}
+			hueColor = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture));
+		hueColor.a = color.a;
+
+
+		color = hueColor;
 	}
+	else if (mode == PARTIAL_COLOR)
+	{
+		float4 hueColor;
+		if (IN.Hue.x < HuesPerTexture)
+			hueColor = tex2D(HueSampler0, float2(color.r, IN.Hue.x / HuesPerTexture));
+		else
+			hueColor = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture));
+		hueColor.a = color.a;
 
-	
-	// Hue.z is the transparency value. alpha = (1 - Hue.z)	
-	color *= alpha;
-
-	// Darken the color based on the ambient lighting and the normal.
-	if (DrawLighting && drawLighting)
+		if ((color.r == color.g) && (color.r == color.b))
+			color = hueColor;
+	}
+	else if (mode == LAND)
 	{
 		float3 light = normalize(lightDirection);
 		float3 normal = normalize(IN.Normal);
 		float3 nDotL = max((dot(normal, light) + 0.5f), 0.0f);
 
-		//color.rgb = saturate((color.rgb * nDotL * 0.5f) + (color.rgb * 0.5f));
-		//color.rgb = saturate(( (color.rgb * nDotL * lightIntensity * 0.5f) +  (color.rgb * lightIntensity * 0.5f) ));
+		color.rgb = (color.rgb * nDotL);
+	}
+	else if (mode == LAND_COLOR)
+	{
+		float4 hueColor;
+		if (IN.Hue.x < HuesPerTexture)
+			hueColor = tex2D(HueSampler0, float2(color.r, IN.Hue.x / HuesPerTexture));
+		else
+			hueColor = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture));
+		hueColor.a = color.a;
 
-		//color.rgb = saturate(color.rgb * nDotL * lightIntensity * 0.5f + color.rgb * lightIntensity * 0.5f);
+		color = hueColor;
 
-		color.rgb = (color.rgb * nDotL) * lightIntensity;
+		float3 light = normalize(lightDirection);
+		float3 normal = normalize(IN.Normal);
+		float3 nDotL = max((dot(normal, light) + 0.5f), 0.0f);
 
-		//float3 light = normalize(lightDirection);
-		//float3 normal = normalize(IN.Normal);
-		//float3 nDotL = min((dot(light, normal) + 0.5f), 1.0f);
+		color.rgb = (color.rgb * nDotL);
+	}
+	else if (mode == SPECTRAL)
+	{
+		float4 hueColor;
+		if (IN.Hue.x < HuesPerTexture)
+			hueColor = tex2D(HueSampler0, float2(color.r, IN.Hue.x / HuesPerTexture));
+		else
+			hueColor = tex2D(HueSampler1, float2(color.r, (IN.Hue.x - HuesPerTexture) / HuesPerTexture));
+		hueColor.a = color.a;
 
-		//color.rgb = ((color.rgb * nDotL * lightIntensity * 0.5f + color.rgb * lightIntensity * 0.5f));
+		float red = color.r * 1.5f;
+		alpha = 1 - red;
+
+		color = hueColor;
 	}
 
-	
+	if (DrawLighting)
+		color.rgb *= lightIntensity;
+	color *= alpha;
 
 	return color;
 }

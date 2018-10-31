@@ -54,6 +54,10 @@ namespace ClassicUO.Renderer
         private const float MAX_ACCURATE_SINGLE_FLOAT = 65536;
         private readonly DrawCallInfo[] _drawCalls;
 
+        private Matrix _projectionMatrix;
+        private Matrix _matrixTransformMatrix;
+        private Matrix _transformMatrix = Matrix.Identity;
+
         private readonly DepthStencilState _dss = new DepthStencilState
         {
             DepthBufferEnable = true,
@@ -111,6 +115,26 @@ namespace ClassicUO.Renderer
                 BufferUsage.WriteOnly);
             _indexBuffer = new DynamicIndexBuffer(GraphicsDevice, IndexElementSize.SixteenBits, _indices.Length,
                 BufferUsage.WriteOnly);
+
+
+            _projectionMatrix = new Matrix(
+                                           0f, //(float)( 2.0 / (double)viewport.Width ) is the actual value we will use
+                                           0.0f,
+                                           0.0f,
+                                           0.0f,
+                                           0.0f,
+                                           0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
+                                           0.0f,
+                                           0.0f,
+                                           0.0f,
+                                           0.0f,
+                                           1.0f,
+                                           0.0f,
+                                           -1.0f,
+                                           1.0f,
+                                           0.0f,
+                                           1.0f
+                                          );
         }
 
         public GraphicsDevice GraphicsDevice { get;}
@@ -152,7 +176,7 @@ namespace ClassicUO.Renderer
         public void Begin()
         {
             if (_isStarted)
-                throw new Exception();
+                throw new InvalidOperationException();
 
             _isStarted = true;
 
@@ -188,7 +212,7 @@ namespace ClassicUO.Renderer
 #if !ORIONSORT
             vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
 #endif
-            Build(texture, vertices, technique);
+            Push(texture, vertices, technique);
 
             return true;
         }
@@ -213,10 +237,10 @@ namespace ClassicUO.Renderer
             vertices[3].Position.X -= skewHorizBottom;
             vertices[3].Position.Y -= skewHorizBottom;
 
-            Build(texture, vertices, Techniques.ShadowSet);
+            Push(texture, vertices, Techniques.ShadowSet);
         }
 
-        private unsafe void Build(Texture2D texture, SpriteVertex[] vertices, Techniques technique)
+        private unsafe void Push(Texture2D texture, SpriteVertex[] vertices, Techniques technique)
         {
             AddQuadrilateralIndices(_vertexCount);
 
@@ -225,7 +249,6 @@ namespace ClassicUO.Renderer
 
             DrawCallInfo call = new DrawCallInfo(texture, technique, _indicesCount, PRIMITIVES_COUNT, 0);
 
-            //Array.Copy(vertices, 0, _vertices, _vertexCount, VERTEX_COUNT);
 
             fixed (SpriteVertex* p = &_vertices[_vertexCount])
             {
@@ -240,10 +263,6 @@ namespace ClassicUO.Renderer
                     *ptr = *tptr;
                 }
             }
-
-            _vertexCount += VERTEX_COUNT;
-
-            //Array.Copy(_geometryIndices, 0, _indices, _indicesCount, INDEX_COUNT);
 
             fixed (short* p = &_indices[_indicesCount])
             {
@@ -261,6 +280,7 @@ namespace ClassicUO.Renderer
                 }
             }
 
+            _vertexCount += VERTEX_COUNT;
             _indicesCount += INDEX_COUNT;
 
             Enqueue(ref call);
@@ -268,11 +288,11 @@ namespace ClassicUO.Renderer
 
         private void Enqueue(ref DrawCallInfo call)
         {
-            if (Calls > 0 && call.TryMerge(ref _drawCalls[Calls - 1]))
-            {
-                Merged++;
-                return;
-            }
+            //if (Calls > 0 && call.TryMerge(ref _drawCalls[Calls - 1]))
+            //{
+            //    Merged++;
+            //    return;
+            //}
 
             if (Calls >= _drawCalls.Length)
                 Flush();
@@ -283,7 +303,7 @@ namespace ClassicUO.Renderer
         public void End()
         {
             if (!_isStarted)
-                throw new Exception();
+                throw new InvalidOperationException();
 
             Flush();
             _isStarted = false;
@@ -306,8 +326,6 @@ namespace ClassicUO.Renderer
 
         private unsafe void SetupBuffers()
         {
-            //_vertexBuffer.SetData(_vertices, 0, _vertexCount);
-
             fixed (SpriteVertex* p = &_vertices[0])
             {
                 _vertexBuffer.SetDataPointerEXT(0, (IntPtr)p, _vertexCount * SpriteVertex.SizeInBytes, SetDataOptions.None);
@@ -356,6 +374,7 @@ namespace ClassicUO.Renderer
                 _drawCalls[newDrawCallCount++] = currentDrawCall;
             }
 
+
             Calls = newDrawCallCount;
         }
 
@@ -368,8 +387,18 @@ namespace ClassicUO.Renderer
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
 
             // set up viewport.
-            _projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
-            _worldMatrixEffect.SetValue(ProjectionMatrixWorld);
+            Viewport viewport = GraphicsDevice.Viewport;
+            _projectionMatrix.M11 = (float)(2.0 / (double)viewport.Width);
+            _projectionMatrix.M22 = (float)(-2.0 / (double)viewport.Height);
+            _projectionMatrix.M41 = -1 - 0.5f * _projectionMatrix.M11;
+            _projectionMatrix.M42 = 1 - 0.5f * _projectionMatrix.M22;
+
+            Matrix.Multiply(ref _transformMatrix, ref _projectionMatrix, out _matrixTransformMatrix);
+            _projectionMatrixEffect.SetValue(_matrixTransformMatrix);
+            _worldMatrixEffect.SetValue(_transformMatrix);
+
+            //_projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
+            //_worldMatrixEffect.SetValue(ProjectionMatrixWorld);
             _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
 
             GraphicsDevice.DepthStencilState = _dss;
@@ -455,7 +484,7 @@ namespace ClassicUO.Renderer
                     return result;
                 result = DepthKey.CompareTo(other.DepthKey);
 
-                return result != 0 ? result : ((byte)Technique).CompareTo((byte)other.Technique);
+                return result != 0 ? result : Technique.CompareTo(other.Technique);
             }
         }
     }

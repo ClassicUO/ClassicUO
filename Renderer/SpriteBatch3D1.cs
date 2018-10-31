@@ -304,6 +304,8 @@ namespace ClassicUO.Renderer
                     {
                         _effect.CurrentTechnique = _huesTechnique;
                         last = info.Technique;
+                        _effect.CurrentTechnique.Passes[0].Apply();
+
                     }
 
                     break;
@@ -313,6 +315,8 @@ namespace ClassicUO.Renderer
                     {
                         _effect.CurrentTechnique = _shadowTechnique;
                         last = info.Technique;
+                        _effect.CurrentTechnique.Passes[0].Apply();
+
                     }
 
                     break;
@@ -322,11 +326,12 @@ namespace ClassicUO.Renderer
                     {
                         _effect.CurrentTechnique = _landTechnique;
                         last = info.Technique;
+                        _effect.CurrentTechnique.Passes[0].Apply();
+
                     }
 
                     break;
             }
-            _effect.CurrentTechnique.Passes[0].Apply();
 
             GraphicsDevice.Textures[0] = info.Texture;
             GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite * 4, 0, batchSize * 2);

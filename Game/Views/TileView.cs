@@ -75,17 +75,19 @@ namespace ClassicUO.Game.Views
 
             if (tile.IsStretched)
             {
-                HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
+                HueVector = GetHueVector(GameObject.Hue, true);
 
                 return Draw3DStretched(spriteBatch, position, objectList);
             }
             else
             {
-                HueVector = RenderExtentions.GetHueVector(GameObject.Hue, false, 0, true);
+                HueVector = GetHueVector(GameObject.Hue, false);
 
                 return base.Draw(spriteBatch, position, objectList);
             }
         }
+
+        private static Vector3 GetHueVector(int hue, bool stretched) => hue != 0 ? new Vector3(hue, (stretched ? (int) ShadersEffectType.LandHued : (int) ShadersEffectType.Hued), 0) : new Vector3(hue, (stretched ? (int)ShadersEffectType.Land : (int)ShadersEffectType.None), 0);
 
         private bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {

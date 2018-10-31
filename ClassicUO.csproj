@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ORIONSORT,SB</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;ORIONSORT,SB1</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -252,6 +252,7 @@
     <Compile Include="Game\GameCursor.cs" />
     <Compile Include="Game\GameObjects\IsometricLight.cs" />
     <Compile Include="Game\GameObjects\Managers\OverheadManager.cs" />
+    <Compile Include="Renderer\GraphicEngine.cs" />
     <Compile Include="Renderer\PixelPicking.cs" />
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\RenderExtentions.cs" />
