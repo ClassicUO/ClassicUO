@@ -28,597 +28,893 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Interfaces;
-using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+
+using Microsoft.Xna.Framework;
+
+using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game
 {
     public static class Pathfinder
     {
-        private const long IMPASSABLE_SURFACE = 0x00000040 | 0x00000200;
-        private const int PERSON_HEIGHT = 16;
-        private const int STEP_HEIGHT = 2;
-        private static readonly List<IDynamicItem>[] _pool = {new List<IDynamicItem>(), new List<IDynamicItem>(), new List<IDynamicItem>(), new List<IDynamicItem>()};
-        private static readonly List<Tile> _tiles = new List<Tile>();
-
-        public static bool CanWalk(Mobile m, ref int newX, ref int newY, ref sbyte newZ, ref Direction newDir)
+        private const int PATHFINDER_MAX_NODES = 10000;
+        private static int _goalNode;
+        private static bool _goalFound;
+        private static int _activeOpenNodes, _activeCloseNodes, _pathfindDistance;
+        private static readonly PathNode[] _openList = new PathNode[PATHFINDER_MAX_NODES];
+        private static readonly PathNode[] _closedList = new PathNode[PATHFINDER_MAX_NODES];
+        private static readonly PathNode[] _path = new PathNode[PATHFINDER_MAX_NODES];
+        private static int _pointIndex, _pathSize;
+        private static readonly int[] _offsetX =
         {
-            (int tileX, int tileY) = OffsetTile(m.Position, newDir);
-
-            return GetNextTile(m, m.Position, tileX, tileY, out newDir, out newX, out newY, out newZ);
-        }
-
-        public static bool GetNextTile(Mobile m, Position current, int goalX, int goalY, out Direction direction, out int nextX, out int nextY, out sbyte nextZ)
+            0, 1, 1, 1, 0, -1, -1, -1, 0, 1
+        };
+        private static readonly int[] _offsetY =
         {
-            direction = GetNextDirection(current, goalX, goalY);
-            Direction initialDir = direction;
-            (nextX, nextY) = OffsetTile(current, direction);
-            bool moveIsOK = CheckMovement(m, current, direction, out nextZ);
-
-            if (!moveIsOK)
-            {
-                direction = (Direction) (((byte) direction - 1) & 0x87);
-                (nextX, nextY) = OffsetTile(current, direction);
-                moveIsOK = CheckMovement(m, current, direction, out nextZ);
-            }
-
-            if (!moveIsOK)
-            {
-                direction = (Direction) (((byte) direction + 2) & 0x87);
-                (nextX, nextY) = OffsetTile(current, direction);
-                moveIsOK = CheckMovement(m, current, direction, out nextZ);
-            }
-
-            if (!moveIsOK)
-                direction = initialDir;
-
-            return moveIsOK;
-        }
-
-        private static Direction GetNextDirection(Position current, int goalX, int goalY)
+            -1, -1, 0, 1, 1, 1, 0, -1, -1, -1
+        };
+        private static readonly sbyte[] _dirOffset =
         {
-            Direction direction;
+            1, -1
+        };
+        private static Point _startPoint, _endPoint;
 
-            if (goalX < current.X)
-            {
-                if (goalY < current.Y)
-                    direction = Direction.Up;
-                else if (goalY > current.Y)
-                    direction = Direction.Left;
-                else
-                    direction = Direction.West;
-            }
-            else if (goalX > current.X)
-            {
-                if (goalY < current.Y)
-                    direction = Direction.Right;
-                else if (goalY > current.Y)
-                    direction = Direction.Down;
-                else
-                    direction = Direction.East;
-            }
-            else
-            {
-                if (goalY < current.Y)
-                    direction = Direction.North;
-                else if (goalY > current.Y)
-                    direction = Direction.South;
-                else
-                    throw new Exception("Wrong direction");
-            }
+        public static bool AutoWalking { get; set; }
 
-            return direction;
-        }
+        public static bool PathindingCanBeCancelled { get; set; }
 
-        private static (int, int) OffsetTile(Position position, Direction direction)
+        public static bool BlockMoving { get; set; }
+
+        public static bool FastRotation { get; set; }
+
+        public static bool IgnoreStaminaCheck { get; set; }
+
+        private static bool CreateItemList(ref List<PathObject> list, int x, int y, int stepState)
         {
-            int nextX = position.X;
-            int nextY = position.Y;
+            Tile tile = World.Map.GetTile(x, y);
 
-            switch (direction & Direction.Up)
-            {
-                case Direction.North:
-                    nextY--;
-
-                    break;
-                case Direction.South:
-                    nextY++;
-
-                    break;
-                case Direction.West:
-                    nextX--;
-
-                    break;
-                case Direction.East:
-                    nextX++;
-
-                    break;
-                case Direction.Right:
-                    nextX++;
-                    nextY--;
-
-                    break;
-                case Direction.Left:
-                    nextX--;
-                    nextY++;
-
-                    break;
-                case Direction.Down:
-                    nextX++;
-                    nextY++;
-
-                    break;
-                case Direction.Up:
-                    nextX--;
-                    nextY--;
-
-                    break;
-            }
-
-            return (nextX, nextY);
-        }
-
-        public static int GetNextZ(Mobile mobile, Position loc, Direction d)
-        {
-            if (CheckMovement(mobile, loc, d, out sbyte newZ, true)) return newZ;
-
-            return loc.Z;
-        }
-
-        public static bool TryGetNextZ(Mobile mobile, Position loc, Direction d, out sbyte z)
-        {
-            return CheckMovement(mobile, loc, d, out z, true);
-        }
-
-        // servuo
-        public static bool CheckMovement(Mobile mobile, Position loc, Direction d, out sbyte newZ, bool forceOK = false)
-        {
-            Facet map = World.Map;
-
-            if (map == null)
-            {
-                newZ = 0;
-
-                return true;
-            }
-
-            int xStart = loc.X;
-            int yStart = loc.Y;
-            int xForward = xStart, yForward = yStart;
-            int xRight = xStart, yRight = yStart;
-            int xLeft = xStart, yLeft = yStart;
-            bool checkDiagonals = ((int) d & 0x1) == 0x1;
-            OffsetXY(d, ref xForward, ref yForward);
-            OffsetXY((Direction) (((int) d - 1) & 0x7), ref xLeft, ref yLeft);
-            OffsetXY((Direction) (((int) d + 1) & 0x7), ref xRight, ref yRight);
-
-            if (xForward < 0 || yForward < 0 || xForward >= IO.Resources.Map.MapsDefaultSize[map.Index][0] || yForward >= IO.Resources.Map.MapsDefaultSize[map.Index][1])
-            {
-                newZ = 0;
-
+            if (tile == null)
                 return false;
+            bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Player.Map.Index == 0);
+            bool isGM = World.Player.Graphic == 0x03DB;
+
+            foreach (GameObject obj in tile.ObjectsOnTiles)
+            {
+                // TODO: custom house gump
+                Graphic graphic = obj.Graphic;
+
+                switch (obj)
+                {
+                    case Tile tile1:
+
+                        if (graphic < 0x01AE && graphic != 2 || graphic > 0x01B5 && graphic != 0x01DB)
+                        {
+                            uint flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
+                            long tileDataFlags = (long) tile1.TileData.Flags;
+
+                            if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
+                            {
+                                if (TileData.IsWet(tileDataFlags))
+                                    flags = (uint) (PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE | PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
+                            }
+                            else
+                            {
+                                if (!TileData.IsImpassable(tileDataFlags))
+                                    flags = (uint) (PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE | PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
+
+                                if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && TileData.IsNoDiagonal(tileDataFlags))
+                                    flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
+                            }
+
+                            int landMinZ = tile.MinZ;
+                            int landAverageZ = tile.AverageZ;
+                            int landHeight = landAverageZ - landMinZ;
+                            list.Add(new PathObject(flags, landMinZ, landAverageZ, landHeight, obj));
+                        }
+
+                        break;
+                    default:
+                        bool canBeAdd = true;
+                        bool dropFlags = false;
+
+                        switch (obj)
+                        {
+                            case Mobile mobile:
+
+                            {
+                                if (!ignoreGameCharacters && !mobile.IsDead && !mobile.IgnoreCharacters) list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Position.Z, mobile.Position.Z + 16, 16, mobile));
+                                canBeAdd = false;
+
+                                break;
+                            }
+                            case Item item when item.IsMulti || TileData.IsInternal((long) item.ItemData.Flags):
+
+                            {
+                                canBeAdd = false;
+
+                                break;
+                            }
+                            case IDynamicItem dyn when stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (TileData.IsDoor((long) dyn.ItemData.Flags) || dyn.ItemData.Weight <= 0x5A /*|| (isGM && !)*/):
+                                dropFlags = true;
+
+                                break;
+                            default:
+                                dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
+
+                                break;
+                        }
+
+                        if (canBeAdd)
+                        {
+                            uint flags = 0;
+
+                            if (obj is IDynamicItem dyn)
+                            {
+                                if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
+                                {
+                                    if (TileData.IsWet((long) dyn.ItemData.Flags))
+                                        flags = (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
+                                }
+                                else
+                                {
+                                    if (TileData.IsImpassable((long) dyn.ItemData.Flags) || TileData.IsSurface((long) dyn.ItemData.Flags))
+                                        flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
+
+                                    if (!TileData.IsImpassable((long) dyn.ItemData.Flags))
+                                    {
+                                        if (TileData.IsSurface((long) dyn.ItemData.Flags))
+                                            flags |= (uint) PATH_OBJECT_FLAGS.POF_SURFACE;
+
+                                        if (TileData.IsBridge((long) dyn.ItemData.Flags))
+                                            flags |= (uint) PATH_OBJECT_FLAGS.POF_BRIDGE;
+                                    }
+
+                                    if (stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM)
+                                    {
+                                        if (graphic <= 0x0846)
+                                        {
+                                            if (!(graphic != 0x0846 && graphic != 0x0692 && (graphic <= 0x06F4 || graphic > 0x06F6)))
+                                                dropFlags = true;
+                                        }
+                                        else if (graphic == 0x0873)
+                                            dropFlags = true;
+                                    }
+
+                                    if (dropFlags)
+                                        flags &= 0xFFFFFFFE;
+
+                                    if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && TileData.IsNoDiagonal((long) dyn.ItemData.Flags))
+                                        flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
+                                }
+
+                                if (flags != 0)
+                                {
+                                    int objZ = obj.Position.Z;
+                                    int staticHeight = dyn.ItemData.Height;
+                                    int staticAverageZ = staticHeight;
+
+                                    if (TileData.IsBridge((long) dyn.ItemData.Flags))
+                                        staticAverageZ /= 2;
+                                    list.Add(new PathObject(flags, objZ, staticAverageZ + objZ, staticHeight, obj));
+                                }
+                            }
+                        }
+
+                        break;
+                }
             }
 
-            List<IDynamicItem> itemsStart = _pool[0];
-            List<IDynamicItem> itemsForward = _pool[1];
-            List<IDynamicItem> itemsLeft = _pool[2];
-            List<IDynamicItem> itemsRight = _pool[3];
-            const long REQ_FLAGS = IMPASSABLE_SURFACE;
+            return list.Count > 0;
+        }
 
-            if (checkDiagonals)
+        private static int CalculateMinMaxZ(ref int minZ, ref int maxZ, int newX, int newY, int currentZ, int newDirection, int stepState)
+        {
+            minZ = -128;
+            maxZ = currentZ;
+            newDirection &= 7;
+            int direction = newDirection ^ 4;
+            newX += _offsetX[direction];
+            newY += _offsetY[direction];
+            List<PathObject> list = new List<PathObject>();
+
+            if (!CreateItemList(ref list, newX, newY, stepState) || list.Count <= 0)
+                return 0;
+
+            foreach (PathObject obj in list)
             {
-                Tile tileStart = map.GetTile(xStart, yStart);
-                Tile tileForward = map.GetTile(xForward, yForward);
-                Tile tileLeft = map.GetTile(xLeft, yLeft);
-                Tile tileRight = map.GetTile(xRight, yRight);
+                GameObject o = obj.Object;
+                int averageZ = obj.AverageZ;
 
-                if (tileForward == null || tileStart == null || tileLeft == null || tileRight == null)
+                if (averageZ <= currentZ && o is Tile tile && tile.IsStretched)
                 {
-                    newZ = loc.Z;
+                    int avgZ = tile.CalculateCurrentAverageZ(newDirection);
 
-                    return false;
+                    if (minZ < avgZ)
+                        minZ = avgZ;
+
+                    if (maxZ < avgZ)
+                        maxZ = avgZ;
                 }
-
-                List<Tile> tiles = _tiles;
-                tiles.Add(tileStart);
-                tiles.Add(tileForward);
-                tiles.Add(tileLeft);
-                tiles.Add(tileRight);
-
-                for (int i = 0; i < tiles.Count; ++i)
+                else
                 {
-                    Tile tile = tiles[i];
+                    if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) != 0 && averageZ <= currentZ && minZ < averageZ)
+                        minZ = averageZ;
 
-                    for (int j = 0; j < tile.ObjectsOnTiles.Count; ++j)
+                    if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) != 0 && currentZ == averageZ)
                     {
-                        GameObject entity = tile.ObjectsOnTiles[j];
+                        int z = obj.Z;
+                        int height = z + obj.Height;
 
-                        // if (ignoreMovableImpassables && item.Movable && item.ItemData.Impassable)
-                        //     continue;
+                        if (maxZ < height)
+                            maxZ = height;
 
-                        if (entity is IDynamicItem item)
-                        {
-                            if (((long) item.ItemData.Flags & REQ_FLAGS) == 0) continue;
+                        if (minZ > z)
+                            minZ = z;
+                    }
+                }
+            }
 
-                            if (tile == tileStart && item.IsAtWorld(xStart, yStart) && item.Graphic < 0x4000)
-                                itemsStart.Add(item);
-                            else if (tile == tileForward && item.IsAtWorld(xForward, yForward) && item.Graphic < 0x4000)
-                                itemsForward.Add(item);
-                            else if (tile == tileLeft && item.IsAtWorld(xLeft, yLeft) && item.Graphic < 0x4000)
-                                itemsLeft.Add(item);
-                            else if (tile == tileRight && item.IsAtWorld(xRight, yRight) && item.Graphic < 0x4000)
-                                itemsRight.Add(item);
-                        }
+            maxZ += 2;
+
+            return maxZ;
+        }
+
+        public static bool CalculateNewZ(int x, int y, ref sbyte z, int direction)
+        {
+            int stepState = (int) PATH_STEP_STATE.PSS_NORMAL;
+
+            if (World.Player.IsDead || World.Player.Graphic == 0x03D8)
+                stepState = (int) PATH_STEP_STATE.PSS_DEAD_OR_GM;
+            else
+            {
+                if (World.Player.IsFlying)
+                    stepState = (int) PATH_STEP_STATE.PSS_FLYING;
+                else
+                {
+                    Item mount = World.Player.Equipment[(int) Layer.Mount];
+
+                    if (mount != null && mount.Graphic == 0x3EB3) // sea horse
+                        stepState = (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE;
+                }
+            }
+
+            int minZ = -128;
+            int maxZ = z;
+            CalculateMinMaxZ(ref minZ, ref maxZ, x, y, z, direction, stepState);
+            List<PathObject> list = new List<PathObject>();
+
+            // TODO: custom house gump
+
+            if (!CreateItemList(ref list, x, y, stepState) || list.Count <= 0)
+                return false;
+
+            list.Sort((a, b) =>
+            {
+                int comparision = a.Z - b.Z;
+
+                if (comparision == 0)
+                    comparision = a.Height - b.Height;
+
+                //if (comparision < 0)
+                //    return 1;
+
+                //if (comparision > 0)
+                //    return -1;
+
+                return comparision;
+            });
+            list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, 128, 128, 128, null));
+            int resultZ = -128;
+
+            if (z < minZ)
+                z = (sbyte) minZ;
+            int currentTempObjZ = 1000000;
+            int currentZ = -128;
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                PathObject obj = list[i];
+
+                if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL) != 0 && stepState == (int) PATH_STEP_STATE.PSS_FLYING)
+                {
+                    int objAverageZ = obj.AverageZ;
+                    int delta = Math.Abs(objAverageZ - z);
+
+                    if (delta <= 25)
+                    {
+                        resultZ = objAverageZ != -128 ? objAverageZ : currentZ;
+
+                        break;
                     }
                 }
 
-                if (_tiles.Count > 0) _tiles.Clear();
-            }
-            else
-            {
-                Tile tileStart = map.GetTile(xStart, yStart);
-                Tile tileForward = map.GetTile(xForward, yForward);
+                const int DEFAULT_BLOCK_HEIGHT = 16;
 
-                if (tileForward == null || tileStart == null)
+                if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) != 0)
                 {
-                    newZ = loc.Z;
+                    int objZ = obj.Z;
 
-                    return false;
+                    if (objZ - minZ >= DEFAULT_BLOCK_HEIGHT)
+                    {
+                        for (int j = i - 1; j >= 0; j--)
+                        {
+                            PathObject tempObj = list[j];
+
+                            if ((tempObj.Flags & (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE)) != 0)
+                            {
+                                int tempAverageZ = tempObj.AverageZ;
+
+                                if (tempAverageZ >= currentZ && objZ - tempAverageZ >= DEFAULT_BLOCK_HEIGHT && (tempAverageZ <= maxZ && (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_SURFACE) != 0 || (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) != 0 && tempObj.Z <= maxZ))
+                                {
+                                    int delta = Math.Abs(z - tempAverageZ);
+
+                                    if (delta < currentTempObjZ)
+                                    {
+                                        currentTempObjZ = delta;
+                                        resultZ = tempAverageZ;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    int averageZ = obj.AverageZ;
+
+                    if (minZ < averageZ)
+                        minZ = averageZ;
+
+                    if (currentZ < averageZ)
+                        currentZ = averageZ;
+                }
+            }
+
+            z = (sbyte) resultZ;
+
+            return resultZ != -128;
+        }
+
+        private static void GetNewXY(byte direction, ref int x, ref int y)
+        {
+            switch (direction & 7)
+            {
+                case 0:
+
+                {
+                    y--;
+
+                    break;
+                }
+                case 1:
+
+                {
+                    x++;
+                    y--;
+
+                    break;
+                }
+                case 2:
+
+                {
+                    x++;
+
+                    break;
+                }
+                case 3:
+
+                {
+                    x++;
+                    y++;
+
+                    break;
+                }
+                case 4:
+
+                {
+                    y++;
+
+                    break;
+                }
+                case 5:
+
+                {
+                    x--;
+                    y++;
+
+                    break;
+                }
+                case 6:
+
+                {
+                    x--;
+
+                    break;
+                }
+                case 7:
+
+                {
+                    x--;
+                    y--;
+
+                    break;
+                }
+            }
+        }
+
+        public static bool CanWalk(ref Direction direction, ref int x, ref int y, ref sbyte z)
+        {
+            int newX = x;
+            int newY = y;
+            sbyte newZ = z;
+            byte newDirection = (byte) direction;
+            GetNewXY((byte) direction, ref newX, ref newY);
+            bool passed = CalculateNewZ(newX, newY, ref newZ, (byte) direction);
+
+            if ((sbyte) direction % 2 != 0)
+            {
+                if (passed)
+                {
+                    for (int i = 0; i < 2 && passed; i++)
+                    {
+                        int testX = x;
+                        int testY = y;
+                        sbyte testZ = z;
+                        byte testDir = (byte) (((byte) direction + _dirOffset[i]) % 8);
+                        GetNewXY(testDir, ref testX, ref testY);
+                        passed = CalculateNewZ(testX, testY, ref testZ, testDir);
+                    }
                 }
 
-                if (tileStart == tileForward)
+                if (!passed)
                 {
-                    for (int i = 0; i < tileStart.ObjectsOnTiles.Count; i++)
+                    for (int i = 0; i < 2 && !passed; i++)
                     {
-                        GameObject entity = tileStart.ObjectsOnTiles[i];
+                        newX = x;
+                        newY = y;
+                        newZ = z;
+                        newDirection = (byte) (((byte) direction + _dirOffset[i]) % 8);
+                        GetNewXY(newDirection, ref newX, ref newY);
+                        passed = CalculateNewZ(newX, newY, ref newZ, newDirection);
+                    }
+                }
+            }
 
-                        // if (ignoreMovableImpassables && item.Movable && item.ItemData.Impassable)
-                        //     continue;
+            if (passed)
+            {
+                x = newX;
+                y = newY;
+                z = newZ;
+                direction = (Direction) newDirection;
+            }
 
-                        if (entity is IDynamicItem item)
+            return passed;
+        }
+
+        private static int GetGoalDistCost(Point point, int cost)
+        {
+            return (Math.Abs(_endPoint.X - point.X) + Math.Abs(_endPoint.Y - point.Y)) * cost;
+        }
+
+        private static bool DoesNotExistOnOpenList(int x, int y, int z)
+        {
+            for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
+            {
+                PathNode node = _openList[i];
+
+                if (node.Used && node.X == x && node.Y == y && node.Z == z) return true;
+            }
+
+            return false;
+        }
+
+        private static bool DoesNotExistOnClosedList(int x, int y, int z)
+        {
+            for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
+            {
+                PathNode node = _closedList[i];
+
+                if (node.Used && node.X == x && node.Y == y && node.Z == z) return true;
+            }
+
+            return false;
+        }
+
+        private static int AddNodeToList(int list, int direction, int x, int y, int z, PathNode parent, int cost)
+        {
+            if (list == 0)
+            {
+                if (!DoesNotExistOnClosedList(x, y, z))
+                {
+                    if (!DoesNotExistOnOpenList(x, y, z))
+                    {
+                        for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
                         {
-                            if (((long) item.ItemData.Flags & REQ_FLAGS) == 0) continue;
+                            PathNode node = _openList[i];
 
-                            if (item.IsAtWorld(xStart, yStart) && item.Graphic < 0x4000)
-                                itemsStart.Add(item);
-                            else if (item.IsAtWorld(xForward, yForward) && item.Graphic < 0x4000)
-                                itemsForward.Add(item);
+                            if (!node.Used)
+                            {
+                                node.Used = true;
+                                node.Direction = direction;
+                                node.X = x;
+                                node.Y = y;
+                                node.Z = z;
+                                Point p = new Point(x, y);
+                                node.DistFromGoalCost = GetGoalDistCost(p, cost);
+                                node.DistFromStartCost = parent.DistFromStartCost + cost;
+                                node.Cost = node.DistFromGoalCost + node.DistFromStartCost;
+                                node.Parent = parent;
+
+                                if (MathHelper.GetDistance(_endPoint, p) <= _pathfindDistance)
+                                {
+                                    _goalFound = true;
+                                    _goalNode = i;
+                                }
+
+                                _activeOpenNodes++;
+
+                                return i;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
+                        {
+                            PathNode node = _openList[i];
+
+                            if (node.Used)
+                            {
+                                if (node.X == x && node.Y == y && node.Z == z)
+                                {
+                                    int startCost = parent.DistFromStartCost + cost;
+
+                                    if (node.DistFromStartCost > startCost)
+                                    {
+                                        node.Parent = parent;
+                                        node.DistFromStartCost = startCost + cost;
+                                        node.Cost = node.DistFromGoalCost + node.DistFromStartCost;
+                                    }
+
+                                    return i;
+                                }
+                            }
                         }
                     }
                 }
                 else
+                    return 0;
+            }
+            else
+            {
+                parent.Used = false;
+
+                for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
                 {
-                    for (int i = 0; i < tileForward.ObjectsOnTiles.Count; i++)
+                    PathNode node = _closedList[i];
+
+                    if (!node.Used)
                     {
-                        GameObject entity = tileForward.ObjectsOnTiles[i];
+                        node.Used = true;
+                        node.DistFromGoalCost = parent.DistFromGoalCost;
+                        node.DistFromStartCost = parent.DistFromStartCost;
+                        node.Cost = node.DistFromGoalCost + node.DistFromStartCost;
+                        node.Direction = parent.Direction;
+                        node.X = parent.X;
+                        node.Y = parent.Y;
+                        node.Z = parent.Z;
+                        node.Parent = parent.Parent;
+                        _activeOpenNodes--;
+                        _activeCloseNodes++;
 
-                        // if (ignoreMovableImpassables && item.Movable && item.ItemData.Impassable)
-                        //     continue;
-
-                        if (entity is IDynamicItem item)
-                        {
-                            if (((long) item.ItemData.Flags & REQ_FLAGS) == 0) continue;
-                            if (item.IsAtWorld(xForward, yForward) && item.Graphic < 0x4000) itemsForward.Add(item);
-                        }
-                    }
-
-                    for (int i = 0; i < tileStart.ObjectsOnTiles.Count; i++)
-                    {
-                        GameObject entity = tileStart.ObjectsOnTiles[i];
-
-                        // if (ignoreMovableImpassables && item.Movable && item.ItemData.Impassable)
-                        //     continue;
-
-                        if (entity is IDynamicItem item)
-                        {
-                            if (((long) item.ItemData.Flags & REQ_FLAGS) == 0) continue;
-                            if (item.IsAtWorld(xStart, yStart) && item.Graphic < 0x4000) itemsStart.Add(item);
-                        }
+                        return i;
                     }
                 }
             }
 
-            GetStartZ(mobile, loc, itemsStart, out sbyte startZ, out sbyte startTop);
-            bool moveIsOk = Check(mobile, itemsForward, xForward, yForward, startTop, startZ, out newZ) || forceOK;
-
-            if (moveIsOk && checkDiagonals)
-                if (!Check(mobile, itemsLeft, xLeft, yLeft, startTop, startZ, out sbyte hold) || !Check(mobile, itemsRight, xRight, yRight, startTop, startZ, out hold))
-                    moveIsOk = false;
-
-            for (int i = 0; i < (checkDiagonals ? 4 : 2); i++)
-                if (_pool[i].Count > 0)
-                    _pool[i].Clear();
-            if (!moveIsOk) newZ = startZ;
-
-            return moveIsOk;
+            return -1;
         }
 
-        private static void OffsetXY(Direction d, ref int x, ref int y)
+        private static bool OpenNodes(PathNode node)
         {
-            switch (d & Direction.Up)
+            bool found = false;
+
+            for (int i = 0; i < 8; i++)
             {
-                case Direction.North:
-                    --y;
+                Direction direction = (Direction) i;
+                int x = node.X;
+                int y = node.Y;
+                sbyte z = (sbyte) node.Z;
+                Direction oldDirection = direction;
 
-                    break;
-                case Direction.South:
-                    ++y;
+                if (CanWalk(ref direction, ref x, ref y, ref z))
+                {
+                    if (direction != oldDirection)
+                        continue;
+                    int diagonal = i % 2;
 
-                    break;
-                case Direction.West:
-                    --x;
+                    if (diagonal != 0)
+                    {
+                        Direction wantDirection = (Direction) i;
+                        int wantX = node.X;
+                        int wantY = node.Y;
+                        GetNewXY((byte) wantDirection, ref wantX, ref wantY);
 
-                    break;
-                case Direction.East:
-                    ++x;
+                        if (x != wantY || y != wantY)
+                            diagonal = -1;
+                    }
 
-                    break;
-                case Direction.Right:
-                    ++x;
-                    --y;
-
-                    break;
-                case Direction.Left:
-                    --x;
-                    ++y;
-
-                    break;
-                case Direction.Down:
-                    ++x;
-                    ++y;
-
-                    break;
-                case Direction.Up:
-                    --x;
-                    --y;
-
-                    break;
+                    if (diagonal >= 0 && AddNodeToList(0, (int) direction, x, y, z, node, 1 + diagonal) != -1)
+                        found = true;
+                }
             }
+
+            return found;
         }
 
-        private static void GetStartZ(GameObject e, Position loc, List<IDynamicItem> itemList, out sbyte zLow, out sbyte zTop)
+        private static int FindCheapestNode()
         {
-            int xCheck = loc.X, yCheck = loc.Y;
-            Tile mapTile = World.Map.GetTile(xCheck, yCheck);
+            int cheapestCost = 9999999;
+            int cheapestNode = -1;
 
-            if (mapTile == null)
+            for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
             {
-                zLow = sbyte.MinValue;
-                zTop = sbyte.MinValue;
-
-                return;
-            }
-
-            bool landBlocks = TileData.IsImpassable((long) mapTile.TileData.Flags);
-            sbyte landLow = 0, landTop = 0;
-            int landCenter = World.Map.GetAverageZ((short) xCheck, (short) yCheck, ref landLow, ref landTop);
-
-            bool considerLand = !mapTile.IsIgnored;
-            int zCenter = 0;
-            zLow = 0;
-            zTop = 0;
-            bool isSet = false;
-
-            if (considerLand && !landBlocks && loc.Z >= landCenter)
-            {
-                zLow = landLow;
-                zCenter = landCenter;
-                if (!isSet || landTop > zTop) zTop = landTop;
-                isSet = true;
-            }
-
-            List<Static> staticTiles = mapTile.GetStatics();
-
-            for (int i = 0; i < staticTiles.Count; i++)
-            {
-                Static tile = staticTiles[i];
-                StaticTiles id = tile.ItemData;
-                int calcTop = tile.Position.Z + ((id.Flags & 0x00000400) != 0 ? id.Height / 2 : id.Height);
-
-                if ((!isSet || calcTop >= zCenter) && (id.Flags & 0x00000200) != 0 && loc.Z >= calcTop)
+                if (_openList[i].Used)
                 {
-                    //  || (m.CanSwim && (id.Flags & TileFlag.Wet) != 0)
-                    // if (m.CantWalk && (id.Flags & TileFlag.Wet) == 0)
-                    //     continue;
-                    zLow = tile.Position.Z;
-                    zCenter = calcTop;
-                    sbyte top = (sbyte) (tile.Position.Z + id.Height);
-                    if (!isSet || top > zTop) zTop = top;
-                    isSet = true;
+                    if (_openList[i].Cost < cheapestCost)
+                    {
+                        cheapestNode = i;
+                        cheapestCost = _openList[i].Cost;
+                    }
                 }
             }
 
-            for (int i = 0; i < itemList.Count; i++)
-            {
-                IDynamicItem item = itemList[i];
-                StaticTiles id = item.ItemData;
-                int calcTop = item.Position.Z + ((id.Flags & 0x00000400) != 0 ? id.Height / 2 : id.Height);
+            int result = -1;
 
-                if ((!isSet || calcTop >= zCenter) && (id.Flags & 0x00000200) != 0 && loc.Z >= calcTop)
-                {
-                    //  || (m.CanSwim && (id.Flags & TileFlag.Wet) != 0)
-                    // if (m.CantWalk && (id.Flags & TileFlag.Wet) == 0)
-                    //     continue;
-                    zLow = item.Position.Z;
-                    zCenter = calcTop;
-                    sbyte top = (sbyte) (item.Position.Z + id.Height);
-                    if (!isSet || top > zTop) zTop = top;
-                    isSet = true;
-                }
-            }
+            if (cheapestNode != -1)
+                result = AddNodeToList(1, 0, 0, 0, 0, _openList[cheapestNode], 2);
 
-            if (!isSet)
-                zLow = zTop = loc.Z;
-            else if (loc.Z > zTop) zTop = loc.Z;
+            return result;
         }
 
-        private static bool IsOK(bool ignoreDoors, int ourZ, int ourTop, List<Static> tiles, List<IDynamicItem> items)
+        private static bool FindPath(int maxNodes)
         {
-            for (int i = 0; i < tiles.Count; ++i)
+            int curNode = 0;
+            _closedList[0].Used = true;
+            _closedList[0].X = _startPoint.X;
+            _closedList[0].Y = _startPoint.Y;
+            _closedList[0].Z = World.Player.Position.Z;
+            _closedList[0].Parent = null;
+            _closedList[0].DistFromGoalCost = GetGoalDistCost(_startPoint, 0);
+            _closedList[0].Cost = _closedList[0].DistFromGoalCost;
+
+            while (AutoWalking)
             {
-                Static item = tiles[i];
+                OpenNodes(_closedList[curNode]);
 
-                if ((item.ItemData.Flags & IMPASSABLE_SURFACE) != 0) // Impassable || Surface
+                if (_goalFound)
                 {
-                    int checkZ = item.Position.Z;
-                    int checkTop = checkZ + ((item.ItemData.Flags & 0x00000400) != 0 ? item.ItemData.Height / 2 : item.ItemData.Height);
+                    int totalNodes = 0;
+                    PathNode goalNode = _openList[_goalNode];
 
-                    if (checkTop > ourZ && ourTop > checkZ) return false;
+                    while (goalNode.Parent != null && goalNode != goalNode.Parent)
+                    {
+                        goalNode = goalNode.Parent;
+                        totalNodes++;
+                    }
+
+                    totalNodes++;
+                    _pathSize = totalNodes;
+                    goalNode = _openList[_goalNode];
+
+                    while (totalNodes != 0)
+                    {
+                        totalNodes--;
+                        _path[totalNodes] = goalNode;
+                        goalNode = goalNode.Parent;
+                    }
+
+                    break;
                 }
-            }
 
-            for (int i = 0; i < items.Count; ++i)
-            {
-                IDynamicItem item = items[i];
-                int itemID = item.Graphic & FileManager.GraphicMask;
-                StaticTiles itemData = TileData.StaticData[itemID];
-                ulong flags = itemData.Flags;
+                curNode = FindCheapestNode();
 
-                if ((flags & IMPASSABLE_SURFACE) != 0) // Impassable || Surface
-                {
-                    if (ignoreDoors && (TileData.IsDoor((long) flags) || itemID == 0x692 || itemID == 0x846 || itemID == 0x873 || itemID >= 0x6F5 && itemID <= 0x6F6)) continue;
-                    int checkZ = item.Position.Z;
-                    int checkTop = checkZ + ((item.ItemData.Flags & 0x00000400) != 0 ? item.ItemData.Height / 2 : item.ItemData.Height);
+                if (curNode == -1)
+                    return false;
 
-                    if (checkTop > ourZ && ourTop > checkZ) return false;
-                }
+                if (_activeCloseNodes >= maxNodes)
+                    return false;
             }
 
             return true;
         }
 
-        private static bool Check(Mobile m, List<IDynamicItem> items, int x, int y, int startTop, sbyte startZ, out sbyte newZ)
+        public static bool WalkTo(int x, int y, int z, int distance)
         {
-            newZ = 0;
-            Tile mapTile = World.Map.GetTile(x, y);
-
-            if (mapTile == null) return false;
-            LandTiles id = mapTile.TileData;
-            List<Static> tiles = mapTile.GetStatics();
-            bool landBlocks = (id.Flags & 0x00000040) != 0;
-            bool considerLand = !mapTile.IsIgnored;
-            sbyte landCenter = 0;
-            sbyte landLow = 0, landTop = 0;
-            landCenter = (sbyte) World.Map.GetAverageZ((short) x, (short) y, ref landLow, ref landTop);
-            bool moveIsOk = false;
-            int stepTop = startTop + STEP_HEIGHT;
-            int checkTop = startZ + PERSON_HEIGHT;
-            bool ignoreDoors = m.IsDead || m.Graphic == 0x3DB;
-
-            for (int i = 0; i < tiles.Count; ++i)
+            for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
             {
-                Static tile = tiles[i];
-
-                if ((tile.ItemData.Flags & IMPASSABLE_SURFACE) == 0x00000200) //  || (canSwim && (flags & TileFlag.Wet) != 0) Surface && !Impassable
-                {
-                    // if (cantWalk && (flags & TileFlag.Wet) == 0)
-                    //     continue;
-                    int itemZ = tile.Position.Z;
-                    int itemTop = itemZ;
-                    sbyte ourZ = (sbyte) (itemZ + ((tile.ItemData.Flags & 0x00000400) != 0 ? tile.ItemData.Height / 2 : tile.ItemData.Height));
-                    int ourTop = ourZ + PERSON_HEIGHT;
-                    int testTop = checkTop;
-
-                    if (moveIsOk)
-                    {
-                        int cmp = Math.Abs(ourZ - m.Position.Z) - Math.Abs(newZ - m.Position.Z);
-
-                        if (cmp > 0 || cmp == 0 && ourZ > newZ) continue;
-                    }
-
-                    if (ourZ + PERSON_HEIGHT > testTop) testTop = ourZ + PERSON_HEIGHT;
-                    if ((tile.ItemData.Flags & 0x00000400) == 0) itemTop += tile.ItemData.Height;
-
-                    if (stepTop >= itemTop)
-                    {
-                        int landCheck = itemZ;
-
-                        if (tile.ItemData.Height >= STEP_HEIGHT)
-                            landCheck += STEP_HEIGHT;
-                        else
-                            landCheck += tile.ItemData.Height;
-
-                        if (considerLand && landCheck < landCenter && landCenter > ourZ && testTop > landLow) continue;
-
-                        if (IsOK(ignoreDoors, ourZ, testTop, tiles, items))
-                        {
-                            newZ = ourZ;
-                            moveIsOk = true;
-                        }
-                    }
-                }
+                if (_openList[i] == null)
+                    _openList[i] = new PathNode();
+                _openList[i].Reset();
             }
 
-            for (int i = 0; i < items.Count; ++i)
+            for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
             {
-                IDynamicItem item = items[i];
-                StaticTiles itemData = item.ItemData;
-                ulong flags = itemData.Flags;
-
-                if ((flags & IMPASSABLE_SURFACE) == 0x00000200) // Surface && !Impassable && !Movable
-                {
-                    //  || (m.CanSwim && (flags & TileFlag.Wet) != 0))
-                    // !item.Movable && 
-                    // if (cantWalk && (flags & TileFlag.Wet) == 0)
-                    //     continue;
-                    int itemZ = item.Position.Z;
-                    int itemTop = itemZ;
-                    sbyte ourZ = (sbyte) (itemZ + ((item.ItemData.Flags & 0x00000400) != 0 ? item.ItemData.Height / 2 : item.ItemData.Height));
-                    int ourTop = ourZ + PERSON_HEIGHT;
-                    int testTop = checkTop;
-
-                    if (moveIsOk)
-                    {
-                        int cmp = Math.Abs(ourZ - m.Position.Z) - Math.Abs(newZ - m.Position.Z);
-
-                        if (cmp > 0 || cmp == 0 && ourZ > newZ) continue;
-                    }
-
-                    if (ourZ + PERSON_HEIGHT > testTop) testTop = ourZ + PERSON_HEIGHT;
-                    if ((itemData.Flags & 0x00000400) == 0) itemTop += itemData.Height;
-
-                    if (stepTop >= itemTop)
-                    {
-                        int landCheck = itemZ;
-
-                        if (itemData.Height >= STEP_HEIGHT)
-                            landCheck += STEP_HEIGHT;
-                        else
-                            landCheck += itemData.Height;
-
-                        if (considerLand && landCheck < landCenter && landCenter > ourZ && testTop > landLow) continue;
-
-                        if (IsOK(ignoreDoors, ourZ, testTop, tiles, items))
-                        {
-                            newZ = ourZ;
-                            moveIsOk = true;
-                        }
-                    }
-                }
+                if (_closedList[i] == null)
+                    _closedList[i] = new PathNode();
+                _closedList[i].Reset();
             }
 
-            if (considerLand && !landBlocks && stepTop >= landLow)
+            int playerX = World.Player.Position.X;
+            int playerY = World.Player.Position.Y;
+            //sbyte playerZ = 0;
+            //Direction playerDir = Direction.NONE;
+
+            //World.Player.GetEndPosition(ref playerX, ref playerY, ref playerZ, ref playerDir);
+            _startPoint.X = playerX;
+            _startPoint.Y = playerY;
+            _endPoint.X = x;
+            _endPoint.Y = y;
+            _goalNode = 0;
+            _goalFound = false;
+            _activeOpenNodes = 0;
+            _activeCloseNodes = 0;
+            _pathfindDistance = distance;
+            _pathSize = 0;
+            PathindingCanBeCancelled = true;
+            StopAutoWalk();
+            AutoWalking = true;
+
+            if (FindPath(PATHFINDER_MAX_NODES))
             {
-                sbyte ourZ = landCenter;
-                int ourTop = ourZ + PERSON_HEIGHT;
-                int testTop = checkTop;
-                if (ourZ + PERSON_HEIGHT > testTop) testTop = ourZ + PERSON_HEIGHT;
-                bool shouldCheck = true;
+                _pointIndex = 1;
+                ProcessAutoWalk();
+            }
+            else
+                AutoWalking = false;
 
-                if (moveIsOk)
-                {
-                    int cmp = Math.Abs(ourZ - m.Position.Z) - Math.Abs(newZ - m.Position.Z);
-                    if (cmp > 0 || cmp == 0 && ourZ > newZ) shouldCheck = false;
-                }
+            return _pathSize != 0;
+        }
 
-                if (shouldCheck && IsOK(ignoreDoors, ourZ, testTop, tiles, items))
+        public static void ProcessAutoWalk()
+        {
+            if (AutoWalking && World.InGame && World.Player.RequestedSteps.Count < 5 && World.Player.LastStepRequestTime <= CoreGame.Ticks)
+            {
+                if (_pointIndex >= 0 && _pointIndex < _pathSize)
                 {
-                    newZ = ourZ;
-                    moveIsOk = true;
+                    PathNode p = _path[_pointIndex];
+                    int x = 0;
+                    int y = 0;
+                    sbyte z = 0;
+                    Direction dir = Direction.NONE;
+                    World.Player.GetEndPosition(ref x, ref y, ref z, ref dir);
+
+                    if (dir == (Direction) p.Direction)
+                        _pointIndex++;
+
+                    if (!World.Player.Walk((Direction) p.Direction, true))
+                        StopAutoWalk();
                 }
+                else
+                    StopAutoWalk();
+            }
+        }
+
+        public static void StopAutoWalk()
+        {
+            AutoWalking = false;
+            _pathSize = 0;
+        }
+
+        private enum PATH_STEP_STATE
+        {
+            PSS_NORMAL = 0,
+            PSS_DEAD_OR_GM,
+            PSS_ON_SEA_HORSE,
+            PSS_FLYING
+        }
+
+        [Flags]
+        private enum PATH_OBJECT_FLAGS : uint
+        {
+            POF_IMPASSABLE_OR_SURFACE = 0x00000001,
+            POF_SURFACE = 0x00000002,
+            POF_BRIDGE = 0x00000004,
+            POF_NO_DIAGONAL = 0x00000008
+        }
+
+        private struct PathPoint
+        {
+            public int X, Y, Direction;
+        }
+
+        private class PathObject //: IComparable, IComparable<PathObject>
+        {
+            public PathObject(uint flags, int z, int avgZ, int h, GameObject obj)
+            {
+                Flags = flags;
+                Z = z;
+                AverageZ = avgZ;
+                Height = h;
+                Object = obj;
             }
 
-            return moveIsOk;
+            public uint Flags { get; }
+
+            public int Z { get; }
+
+            public int AverageZ { get; }
+
+            public int Height { get; }
+
+            public GameObject Object { get; }
+
+            public override string ToString()
+            {
+                return $"Z: {Z}, Height: {Height}";
+            }
+
+            //public int CompareTo(object obj)
+            //{
+            //    return CompareTo((PathObject) obj);
+            //}
+
+            //public int CompareTo(PathObject other)
+            //{
+            //    //if (other == null)
+            //    //    return -1;
+
+            //    //int r = Z.CompareTo(other.Z);
+
+            //    //if (r == 0)
+            //    //{
+            //    //    r = Height.CompareTo(other.Height);
+            //    //}
+
+            //    //return r;
+
+            //    int r = Z - other.Z;
+
+            //    if (r <= 0)
+            //    {
+            //        r = Height - other.Height;
+
+            //        if (r > 0)
+            //            return -1;
+            //        if (r == 0)
+            //            return 0;
+            //        return 1;
+            //    }
+
+            //    return -1;
+            //}
+        }
+
+        private class PathNode
+        {
+            public int X { get; set; }
+
+            public int Y { get; set; }
+
+            public int Z { get; set; }
+
+            public int Direction { get; set; }
+
+            public bool Used { get; set; }
+
+            public int Cost { get; set; }
+
+            public int DistFromStartCost { get; set; }
+
+            public int DistFromGoalCost { get; set; }
+
+            public PathNode Parent { get; set; }
+
+            public void Reset()
+            {
+                Parent = null;
+                Used = false;
+                X = Y = Z = Direction = Cost = DistFromGoalCost = DistFromStartCost = 0;
+            }
         }
     }
 }

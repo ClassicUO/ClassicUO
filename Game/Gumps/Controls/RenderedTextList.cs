@@ -56,6 +56,7 @@ namespace ClassicUO.Game.Gumps.Controls
             int maxheight = _scrollBar.Value + _scrollBar.Height;
 
             for (int i = 0; i < _entries.Count; i++)
+            {
                 if (height + _entries[i].Height <= _scrollBar.Value)
                 {
                     // this entry is above the renderable area.
@@ -88,6 +89,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     // can't fit any more entries - so we break!
                     break;
                 }
+            }
 
             return true;
         }
@@ -129,10 +131,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             RenderedText entry = new RenderedText
             {
-                MaxWidth = Width - 18,
-                IsUnicode = true,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                FontStyle = FontStyle.Indention | FontStyle.BlackBorder
+                MaxWidth = Width - 18, IsUnicode = true, Align = TEXT_ALIGN_TYPE.TS_LEFT, FontStyle = FontStyle.Indention | FontStyle.BlackBorder
             };
             entry.Hue = hue;
             entry.Font = (byte) font;

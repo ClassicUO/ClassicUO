@@ -185,6 +185,16 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
+        public string ReadUnicodeReversed()
+        {
+            EnsureSize(2);
+            StringBuilder sb = new StringBuilder();
+            char c;
+            while ((c = (char) ReadUShortReversed()) != '\0') sb.Append(c);
+
+            return sb.ToString();
+        }
+
         public ushort ReadUShortReversed()
         {
             return (ushort) (ReadByte() | (ReadByte() << 8));

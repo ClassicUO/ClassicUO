@@ -33,7 +33,7 @@ namespace ClassicUO.Network
         {
             short len = PacketsTable.GetPacketLength(id);
             IsDynamic = len < 0;
-            _data = new byte[IsDynamic ? 3 : len];
+            _data = new byte[IsDynamic ? 32 : len];
             _data[0] = id;
             Position = IsDynamic ? 3 : 1;
         }
@@ -48,7 +48,8 @@ namespace ClassicUO.Network
 
         public override byte[] ToArray()
         {
-            if (Length > Position) Array.Resize(ref _data, Position);
+            if (Length != Position)
+                Array.Resize(ref _data, Position);
             WriteSize();
 
             return _data;
@@ -68,8 +69,10 @@ namespace ClassicUO.Network
             if (length < 0) throw new ArgumentOutOfRangeException("length");
 
             if (IsDynamic)
+            {
                 while (Position + length > Length)
-                    Array.Resize(ref _data, Position + length);
+                    Array.Resize(ref _data, Length + length * 2);
+            }
             else if (Position + length > Length) throw new ArgumentOutOfRangeException("length");
         }
     }

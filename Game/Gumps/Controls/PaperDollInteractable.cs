@@ -32,27 +32,7 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private static readonly PaperDollEquipSlots[] s_DrawOrder =
         {
-            PaperDollEquipSlots.Footwear,
-            PaperDollEquipSlots.Legging,
-            PaperDollEquipSlots.Shirt,
-            PaperDollEquipSlots.Sleeves,
-            PaperDollEquipSlots.Gloves,
-            PaperDollEquipSlots.Ring,
-            PaperDollEquipSlots.Talisman,
-            PaperDollEquipSlots.Neck,
-            PaperDollEquipSlots.Belt,
-            PaperDollEquipSlots.Chest,
-            PaperDollEquipSlots.Bracelet,
-            PaperDollEquipSlots.Hair,
-            PaperDollEquipSlots.FacialHair,
-            PaperDollEquipSlots.Head,
-            PaperDollEquipSlots.Sash,
-            PaperDollEquipSlots.Earring,
-            PaperDollEquipSlots.Back,
-            PaperDollEquipSlots.Skirt,
-            PaperDollEquipSlots.Robe,
-            PaperDollEquipSlots.LeftHand,
-            PaperDollEquipSlots.RightHand
+            PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Legging, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Gloves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Talisman, PaperDollEquipSlots.Neck, PaperDollEquipSlots.Belt, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Back, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Robe, PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand
         };
         private bool _isElf;
         private bool _isFemale;

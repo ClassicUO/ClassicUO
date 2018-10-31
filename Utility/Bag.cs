@@ -94,8 +94,10 @@ namespace ClassicUO.Utility
         public bool Contains(T element)
         {
             for (int index = Count - 1; index >= 0; --index)
+            {
                 if (element.Equals(_items[index]))
                     return true;
+            }
 
             return false;
         }
@@ -113,6 +115,7 @@ namespace ClassicUO.Utility
         public bool Remove(T element)
         {
             for (int index = Count - 1; index >= 0; --index)
+            {
                 if (element.Equals(_items[index]))
                 {
                     --Count;
@@ -121,6 +124,7 @@ namespace ClassicUO.Utility
 
                     return true;
                 }
+            }
 
             return false;
         }
@@ -130,8 +134,10 @@ namespace ClassicUO.Utility
             bool isResult = false;
 
             for (int index = bag.Count - 1; index >= 0; --index)
+            {
                 if (Remove(bag[index]))
                     isResult = true;
+            }
 
             return isResult;
         }

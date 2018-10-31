@@ -62,7 +62,11 @@ namespace ClassicUO.IO.Resources
 
                     if (line.Length <= 0 || line[0] == '#')
                         continue;
-                    string[] defs = line.Split(new[] {'\t', ' ', '#'}, StringSplitOptions.RemoveEmptyEntries);
+
+                    string[] defs = line.Split(new[]
+                    {
+                        '\t', ' ', '#'
+                    }, StringSplitOptions.RemoveEmptyEntries);
 
                     if (defs.Length < 2)
                         continue;
@@ -72,7 +76,11 @@ namespace ClassicUO.IO.Resources
                         continue;
                     int first = defs[1].IndexOf("{");
                     int last = defs[1].IndexOf("}");
-                    string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[] {' ', ','}, StringSplitOptions.RemoveEmptyEntries);
+
+                    string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[]
+                    {
+                        ' ', ','
+                    }, StringSplitOptions.RemoveEmptyEntries);
 
                     foreach (string s in newdef)
                     {
@@ -84,15 +92,16 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
-            if (ClassicUO.Game.Map.Tile._Stretchables.Count == 0)
-            {
-                for (int i = TEXTMAP_COUNT - 1; i >= 0; --i)
-                {
-                    (int length, int extra, bool patched) = _file.SeekByEntryIndex(i);
-                    if (length > 0)
-                        ClassicUO.Game.Map.Tile._Stretchables.Add((ushort)i);
-                }
-            }
+
+            //if (ClassicUO.Game.Map.Tile._Stretchables.Count == 0)
+            //{
+            //    for (int i = TEXTMAP_COUNT - 1; i >= 0; --i)
+            //    {
+            //        (int length, int extra, bool patched) = _file.SeekByEntryIndex(i);
+            //        if (length > 0)
+            //            ClassicUO.Game.Map.Tile._Stretchables.Add((ushort)i);
+            //    }
+            //}
         }
 
         public static SpriteTexture GetTextmapTexture(ushort g)
@@ -102,6 +111,9 @@ namespace ClassicUO.IO.Resources
             if (texture == null || texture.IsDisposed)
             {
                 ushort[] pixels = GetTextmapTexture(g, out int size);
+
+                if (pixels == null || pixels.Length == 0)
+                    return null;
                 texture = new SpriteTexture(size, size, false);
                 texture.SetData(pixels);
                 _usedIndex.Add(g);
@@ -119,9 +131,7 @@ namespace ClassicUO.IO.Resources
                 ref SpriteTexture texture = ref _textmapCache[_usedIndex[i]];
 
                 if (texture == null || texture.IsDisposed)
-                {
                     _usedIndex.RemoveAt(i--);
-                }
                 else if (CoreGame.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();

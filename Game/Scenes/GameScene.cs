@@ -26,20 +26,15 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
-using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
-using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -69,7 +64,7 @@ namespace ClassicUO.Game.Scenes
 
         public Texture2D ViewportTexture => _renderTarget;
 
-        public Point MouseOverWorldPosition => new Point(InputManager.MousePosition.X - _viewPortGump.ScreenCoordinateX, InputManager.MousePosition.Y - _viewPortGump.ScreenCoordinateY);
+        public Point MouseOverWorldPosition => new Point(Mouse.Position.X - _viewPortGump.ScreenCoordinateX, Mouse.Position.Y - _viewPortGump.ScreenCoordinateY);
 
         public GameObject SelectedObject
         {
@@ -86,11 +81,24 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                 {
+                    if (_selectedObject != null && _selectedObject.View.IsSelected)
+                        _selectedObject.View.IsSelected = false;
                     _selectedObject = value;
 
                     if (Service.Get<Settings>().HighlightGameObjects)
                         _selectedObject.View.IsSelected = true;
                 }
+            }
+        }
+
+        private void ClearDequeued()
+        {
+            if (_inqueue)
+            {
+                _inqueue = false;
+                _queuedObject = null;
+                _queuedAction = null;
+                _dequeueAt = 0;
             }
         }
 
@@ -106,6 +114,15 @@ namespace ClassicUO.Game.Scenes
             _settings = Service.Get<Settings>();
             Service.Register(_effectManager = new EffectManager());
             GameActions.Initialize(PickupItemBegin);
+            InputManager.LeftMouseButtonDown += OnLeftMouseButtonDown;
+            InputManager.LeftMouseButtonUp += OnLeftMouseButtonUp;
+            InputManager.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
+            InputManager.RightMouseButtonDown += OnRightMouseButtonDown;
+            InputManager.RightMouseButtonUp += OnRightMouseButtonUp;
+            InputManager.RightMouseDoubleClick += OnRightMouseDoubleClick;
+            InputManager.DragBegin += OnMouseDragBegin;
+            InputManager.KeyDown += OnKeyDown;
+            InputManager.KeyUp += OnKeyUp;
         }
 
         public override void Unload()
@@ -116,6 +133,15 @@ namespace ClassicUO.Game.Scenes
             CleaningResources();
             World.Clear();
             Service.Unregister<GameScene>();
+            InputManager.LeftMouseButtonDown -= OnLeftMouseButtonDown;
+            InputManager.LeftMouseButtonUp -= OnLeftMouseButtonUp;
+            InputManager.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
+            InputManager.RightMouseButtonDown -= OnRightMouseButtonDown;
+            InputManager.RightMouseButtonUp -= OnRightMouseButtonUp;
+            InputManager.RightMouseDoubleClick -= OnRightMouseDoubleClick;
+            InputManager.DragBegin -= OnMouseDragBegin;
+            InputManager.KeyDown -= OnKeyDown;
+            InputManager.KeyUp -= OnKeyUp;
             base.Unload();
         }
 
@@ -164,7 +190,9 @@ namespace ClassicUO.Game.Scenes
                         if (x < minX || x > maxX || y < minY || y > maxY)
                             break;
                         Tile tile = World.Map.GetTile(x, y);
-                        if (tile != null) AddTileToRenderList(tile.ObjectsOnTiles, x, y, false, 150);
+
+                        if (tile != null)
+                            AddTileToRenderList(tile.ObjectsOnTiles, x, y, false, 150);
                         x++;
                         y--;
                     }
@@ -175,6 +203,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_renderIndex >= 100)
                 _renderIndex = 1;
+            _updateDrawPosition = false;
 #endif
             CleaningResources();
             base.FixedUpdate(totalMS, frameMS);
@@ -188,59 +217,33 @@ namespace ClassicUO.Game.Scenes
                 _renderTarget = new RenderTarget2D(Device, (int) (_settings.GameWindowWidth / Scale), (int) (_settings.GameWindowHeight / Scale), false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
-            // ============== INPUT ==============      
+            Pathfinder.ProcessAutoWalk();
+            SelectedObject = _mousePicker.MouseOverObject;
 
-            if (TargetSystem.IsTargeting)
+            if (_inqueue)
             {
-                if (InputManager.HandleKeybaordEvent(KeyboardEvent.Press, SDL.SDL_Keycode.SDLK_ESCAPE, false, false, false)) TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+                _dequeueAt -= frameMS;
 
-                switch (TargetSystem.TargetingState)
+                if (_dequeueAt <= 0)
                 {
-                    case TargetType.Position:
-                    case TargetType.Object:
+                    _inqueue = false;
 
-                        if (InputManager.HandleMouseEvent(MouseEvent.Up, MouseButton.Left))
-                        {
-                            InputManager.IgnoreNextMouseEvent(MouseEvent.Click);
-                            InputManager.IgnoreNextMouseEvent(MouseEvent.DoubleClick);
-
-                            if (IsMouseOverUI)
-                            {
-                                GumpControl control = UIManager.MouseOverControl;
-
-                                if (control is ItemGumpling gumpling)
-                                    TargetSystem.MouseTargetingEventObject(gumpling.Item);
-                                //else if (control.RootParent is Mobil)
-                            }
-                            else if (IsMouseOverWorld)
-                            {
-                                TargetSystem.MouseTargetingEventObject(SelectedObject);
-                            }
-                        }
-
-                        break;
-                    case TargetType.Nothing:
-
-                        break;
-                    default:
-                        Log.Message(LogTypes.Warning, "Not implemented.");
-
-                        break;
+                    if (_queuedObject != null && !_queuedObject.IsDisposed)
+                    {
+                        _queuedAction();
+                        _queuedObject = null;
+                        _queuedAction = null;
+                        _dequeueAt = 0;
+                    }
                 }
             }
-
-            HandleMouseActions();
-            MouseHandler(frameMS);
 
             if (IsMouseOverWorld)
             {
                 _mouseOverList.MousePosition = _mousePicker.Position = MouseOverWorldPosition;
                 _mousePicker.PickOnly = PickerType.PickEverything;
             }
-            else if (SelectedObject != null)
-            {
-                SelectedObject = null;
-            }
+            else if (SelectedObject != null) SelectedObject = null;
 
             _mouseOverList.Clear();
 
@@ -273,6 +276,8 @@ namespace ClassicUO.Game.Scenes
 
         private void DrawWorld(SpriteBatch3D sb3D)
         {
+            sb3D.GraphicsDevice.Clear(Color.Black);
+            sb3D.GraphicsDevice.SetRenderTarget(_renderTarget);
             sb3D.Begin();
             sb3D.EnableLight(true);
             sb3D.SetLightIntensity(World.Light.IsometricLevel);
@@ -282,19 +287,13 @@ namespace ClassicUO.Game.Scenes
             for (int i = 0; i < _renderListCount; i++)
             {
                 GameObject obj = _renderList[i];
-
-                if (obj == null)
-                    continue;
-                int x = obj.Position.X;
-                int y = obj.Position.Y;
-                Vector3 isometricPosition = new Vector3((x - y) * 22 - _offset.X - 22, (x + y) * 22 - _offset.Y - 22, 0);
-                obj.View.Draw(sb3D, isometricPosition, _mouseOverList);
+                obj?.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList);
             }
 #else
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
 
             (Point firstTile, Vector2 renderOffset, Point renderDimensions) =
-                GetViewPort(_settings.GameWindowWidth, _settings.GameWindowHeight, Scale);
+                GetViewPort(_settings.GameWindowWidth, _settings.GameWindowHeight, (int)Scale);
 
             ClearDeferredEntities();
 
@@ -354,8 +353,6 @@ namespace ClassicUO.Game.Scenes
 #endif
             // Draw in game overhead text messages
             OverheadManager.Draw(sb3D, _mouseOverList);
-            sb3D.GraphicsDevice.SetRenderTarget(_renderTarget);
-            sb3D.GraphicsDevice.Clear(Color.Black);
             sb3D.End();
             sb3D.EnableLight(false);
             sb3D.GraphicsDevice.SetRenderTarget(null);

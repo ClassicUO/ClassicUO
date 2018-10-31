@@ -75,6 +75,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     int pos = 0;
 
                     for (int y = 0; y < 8; y++)
+                    {
                         for (int x = 0; x < 8; x++)
                         {
                             ref MapCells cell = ref mapBlock.Cells[pos];
@@ -83,6 +84,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                             infoCell.Z = cell.Z;
                             pos++;
                         }
+                    }
 
                     StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
 
@@ -200,8 +202,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                             Point[] table = new Point[2]
                             {
-                                new Point(0, 0),
-                                new Point(0, 1)
+                                new Point(0, 0), new Point(0, 1)
                             };
                             CreatePixels(data, (int) color, gx, gy, Width, Height, table, tableSize);
                         }
@@ -275,9 +276,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             int maxX = src.X + dst.Width;
 
             if (maxX <= Width)
-            {
                 src.Width = dst.Width;
-            }
             else
             {
                 src.Width = Width - src.X;
@@ -287,9 +286,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             int maxY = src.Y + dst.Height;
 
             if (maxY <= Height)
-            {
                 src.Height = dst.Height;
-            }
             else
             {
                 src.Height = Height - src.Y;

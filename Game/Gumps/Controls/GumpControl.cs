@@ -36,6 +36,7 @@ using Microsoft.Xna.Framework.Input;
 using SDL2;
 
 using IUpdateable = ClassicUO.Interfaces.IUpdateable;
+using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
@@ -97,7 +98,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool IsDisposed { get; private set; }
 
-        public bool IsVisible { get; set; }
+        public bool IsVisible { get; set; } = true;
 
         public bool IsEnabled { get; set; }
 
@@ -136,8 +137,10 @@ namespace ClassicUO.Game.Gumps.Controls
                     return true;
 
                 foreach (GumpControl c in _children)
+                {
                     if (c.AcceptKeyboardInput)
                         return true;
+                }
 
                 return false;
             }
@@ -250,8 +253,10 @@ namespace ClassicUO.Game.Gumps.Controls
                     return false;
 
                 foreach (GumpControl c in _children)
+                {
                     if (c.HandlesKeyboardFocus)
                         return true;
+                }
 
                 return false;
             }
@@ -267,20 +272,28 @@ namespace ClassicUO.Game.Gumps.Controls
                 _activePage = value;
 
                 if (_uiManager.KeyboardFocusControl != null)
+                {
                     if (Children.Contains(_uiManager.KeyboardFocusControl))
+                    {
                         if (_uiManager.KeyboardFocusControl.Page != 0)
                             _uiManager.KeyboardFocusControl = null;
+                    }
+                }
 
                 // When ActivePage changes, check to see if there are new text input boxes
                 // that we should redirect text input to.
                 if (_uiManager.KeyboardFocusControl == null)
+                {
                     foreach (GumpControl c in Children)
+                    {
                         if (c.HandlesKeyboardFocus && c.Page == _activePage)
                         {
                             _uiManager.KeyboardFocusControl = c;
 
                             break;
                         }
+                    }
+                }
             }
         }
 
@@ -300,19 +313,27 @@ namespace ClassicUO.Game.Gumps.Controls
                 Texture.Ticks = CoreGame.Ticks;
 
             foreach (GumpControl c in Children)
+            {
                 if (c.Page == 0 || c.Page == ActivePage)
+                {
                     if (c.IsVisible && c.IsInitialized)
                     {
                         Vector3 offset = new Vector3(c.X + position.X, c.Y + position.Y, position.Z);
                         c.Draw(spriteBatch, offset, hue);
                     }
+                }
+            }
 
             if (IsVisible && Debug)
             {
                 if (_debugTexture == null)
                 {
                     _debugTexture = new SpriteTexture(1, 1);
-                    _debugTexture.SetData(new Color[1] {Color.Green});
+
+                    _debugTexture.SetData(new Color[1]
+                    {
+                        Color.Green
+                    });
                 }
 
                 spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
@@ -336,9 +357,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     c.Update(totalMS, frameMS);
 
                     if (c.IsDisposed)
-                    {
                         toremove.Add(c);
-                    }
                     else
                     {
                         if (c.Page == 0 || c.Page == ActivePage)
@@ -378,7 +397,6 @@ namespace ClassicUO.Game.Gumps.Controls
             IsDisposed = false;
             IsEnabled = true;
             IsInitialized = true;
-            IsVisible = true;
             InitializeControls();
             OnInitialize();
         }
@@ -388,6 +406,7 @@ namespace ClassicUO.Game.Gumps.Controls
             bool initializedKeyboardFocusedControl = false;
 
             foreach (GumpControl c in _children)
+            {
                 if (!c.IsInitialized)
                 {
                     c.Initialize();
@@ -398,6 +417,7 @@ namespace ClassicUO.Game.Gumps.Controls
                         initializedKeyboardFocusedControl = true;
                     }
                 }
+            }
         }
 
         //TODO: Future implementation
@@ -451,21 +471,27 @@ namespace ClassicUO.Game.Gumps.Controls
             bool inbouds = Bounds.Contains(position.X - ParentX, position.Y - ParentY);
 
             if (inbouds)
+            {
                 if (Contains(position.X - X - ParentX, position.Y - Y - ParentY))
                 {
                     if (AcceptMouseInput)
                         results.Insert(0, this);
 
                     foreach (GumpControl c in Children)
+                    {
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
                             GumpControl[] cl = c.HitTest(position);
 
                             if (cl != null)
+                            {
                                 for (int i = cl.Length - 1; i >= 0; i--)
                                     results.Insert(0, cl[i]);
+                            }
                         }
+                    }
                 }
+            }
 
             return results.Count == 0 ? null : results.OrderBy(s => s.Priority).ToArray();
         }
@@ -479,8 +505,10 @@ namespace ClassicUO.Game.Gumps.Controls
                 return null;
 
             foreach (GumpControl c in _children)
+            {
                 if (c.AcceptKeyboardInput)
                     return c.GetFirstControlAcceptKeyboardInput();
+            }
 
             return null;
         }
@@ -494,6 +522,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public void RemoveChildren(GumpControl c)
         {
+            if (c == null)
+                return;
             c.Parent = null;
             _children.Remove(c);
             OnChildRemoved();
@@ -549,21 +579,21 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
-            float ms = CoreGame.Ticks;
+            //float ms = CoreGame.Ticks;
             bool doubleClick = false;
 
-            if (_maxTimeForDClick != 0f)
-            {
-                if (ms <= _maxTimeForDClick)
-                {
-                    _maxTimeForDClick = 0;
-                    doubleClick = true;
-                }
-            }
-            else
-            {
-                _maxTimeForDClick = ms + 200;
-            }
+            //if (_maxTimeForDClick != 0f)
+            //{
+            //    if (ms <= _maxTimeForDClick)
+            //    {
+            //        _maxTimeForDClick = 0;
+            //        //doubleClick = true;
+            //    }
+            //}
+            //else
+            //{
+            //    _maxTimeForDClick = ms + InputManager.MOUSE_DOUBLE_CLICK_TIME;
+            //}
 
             if (button == MouseButton.Right)
             {
@@ -586,6 +616,21 @@ namespace ClassicUO.Game.Gumps.Controls
                     MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
                 }
             }
+        }
+
+        public bool InvokeMouseDoubleClick(Point position, MouseButton button)
+        {
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+
+            if (OnMouseDoubleClick(x, y, button))
+            {
+                MouseDoubleClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
+
+                return true;
+            }
+
+            return false;
         }
 
         public void InvokeTextInput(string c)
@@ -651,7 +696,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected virtual void OnMouseEnter(int x, int y)
         {
-            if (_mouseIsDown && !_attempToDrag && UIManager.InputManager.Offset != Point.Zero)
+            if (_mouseIsDown && !_attempToDrag && Mouse.LDropPosition != Point.Zero)
             {
                 InvokeDragBegin(new Point(x, y));
                 _attempToDrag = true;
@@ -668,9 +713,9 @@ namespace ClassicUO.Game.Gumps.Controls
             Parent?.OnMouseClick(x, y, button);
         }
 
-        protected virtual void OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected virtual bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            Parent?.OnMouseDoubleClick(x, y, button);
+            return Parent?.OnMouseDoubleClick(x, y, button) ?? false;
         }
 
         protected virtual void OnDragBegin(int x, int y)
@@ -687,10 +732,12 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected virtual void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
+            Parent?.OnKeyDown(key, mod);
         }
 
         protected virtual void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
+            Parent?.OnKeyUp(key, mod);
         }
 
         protected virtual bool Contains(int x, int y)

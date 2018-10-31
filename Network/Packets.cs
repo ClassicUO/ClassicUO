@@ -308,7 +308,10 @@ namespace ClassicUO.Network
 
         public PClientVersion(string v) : base(0xBD)
         {
-            string[] version = v.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] version = v.Split(new[]
+            {
+                '.'
+            }, StringSplitOptions.RemoveEmptyEntries);
             WriteASCII($"{version[0]}.{version[1]}.{version[2]}.{version[3]}");
         }
     }
@@ -365,9 +368,7 @@ namespace ClassicUO.Network
                 WriteASCII(text);
             }
             else
-            {
                 WriteUnicode(text);
-            }
         }
     }
 
@@ -445,26 +446,22 @@ namespace ClassicUO.Network
             WriteUInt((uint) buttonID);
 
             if (switches == null)
-            {
                 WriteUInt(0);
-            }
             else
             {
                 WriteUInt((uint) switches.Length);
 
-                for (int i = 0; i < switches.Length; i++)
+                for (int i = switches.Length - 1; i >= 0; i--)
                     WriteUInt(switches[i]);
             }
 
             if (entries == null)
-            {
                 WriteUInt(0);
-            }
             else
             {
                 WriteUInt((uint) entries.Length);
 
-                for (int i = 0; i < entries.Length; i++)
+                for (int i = entries.Length - 1; i >= 0; i--)
                 {
                     int length = entries[i].Item2.Length * 2;
                     WriteUShort(entries[i].Item1);
@@ -691,9 +688,7 @@ namespace ClassicUO.Network
                 WriteUInt(serial);
             }
             else
-            {
                 WriteByte(0x04);
-            }
 
             WriteUnicode(text);
         }
@@ -738,7 +733,11 @@ namespace ClassicUO.Network
             WriteUInt(msgserial);
             WriteByte((byte) (subject.Length + 1));
             WriteASCII(subject);
-            string[] lines = message.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
+
+            string[] lines = message.Split(new[]
+            {
+                '\n'
+            }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -769,7 +768,11 @@ namespace ClassicUO.Network
         public PAssistVersion(string v, uint version) : base(0xBE)
         {
             WriteUInt(version);
-            string[] clientversion = v.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
+
+            string[] clientversion = v.Split(new[]
+            {
+                '.'
+            }, StringSplitOptions.RemoveEmptyEntries);
             WriteASCII(string.Format("{0}.{1}.{2}.{3}", clientversion[0], clientversion[1], clientversion[2], clientversion[3]));
         }
     }
@@ -915,7 +918,7 @@ namespace ClassicUO.Network
 
     public sealed class PChangeStatLockStateRequest : PacketWriter
     {
-        public PChangeStatLockStateRequest(byte stat, SkillLock state) : base(0xBF)
+        public PChangeStatLockStateRequest(byte stat, Lock state) : base(0xBF)
         {
             WriteUShort(0x1A);
             WriteByte(stat);

@@ -53,11 +53,7 @@ namespace ClassicUO.Network
         public void AddFreeSegment(byte[] segment)
         {
             if (segment == null) return;
-
-            lock (this)
-            {
-                _freeSegment.Enqueue(segment);
-            }
+            lock (this) _freeSegment.Enqueue(segment);
         }
     }
 }

@@ -74,9 +74,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (_gumpTexture == null || _gumpTexture.IsDisposed || _useLargeMap != _miniMap_LargeFormat || _forceUpdate)
             {
                 _useLargeMap = _miniMap_LargeFormat;
-
-                if (_gumpTexture != null)
-                    _gumpTexture.Dispose();
                 _gumpTexture = IO.Resources.Gumps.GetGumpTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
                 Width = _gumpTexture.Width;
                 Height = _gumpTexture.Height;
@@ -107,7 +104,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if (_playerIndicator == null)
                 {
                     _playerIndicator = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-                    _playerIndicator.SetData(new uint[1] {0xFFFFFFFF});
+
+                    _playerIndicator.SetData(new uint[1]
+                    {
+                        0xFFFFFFFF
+                    });
                 }
 
                 //DRAW DOT OF PLAYER
@@ -120,14 +121,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return base.Draw(spriteBatch, position, hue);
         }
 
-        protected override void OnMouseDoubleClick(int x, int y, MouseButton button)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
             {
                 MiniMap_LargeFormat = !MiniMap_LargeFormat;
                 _miniMap_LargeFormat = MiniMap_LargeFormat;
                 _forceUpdate = true;
+
+                return true;
             }
+
+            return false;
         }
 
         private void CreateMiniMapTexture()
@@ -142,10 +147,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _x = lastX;
                 _y = lastY;
             }
-            else if (!_forceUpdate)
-            {
-                return;
-            }
+            else if (!_forceUpdate) return;
 
             if (_mapTexture != null && !_mapTexture.IsDisposed)
                 _mapTexture.Dispose();
@@ -172,8 +174,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             Point[] table = new Point[2]
             {
-                new Point(0, 0),
-                new Point(0, 1)
+                new Point(0, 0), new Point(0, 1)
             };
 
             for (int i = minBlockX; i <= maxBlockX; i++)
@@ -248,6 +249,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if (data[block] == 0x8421)
                     data[block] = (ushort) color;
             }
+        }
+
+        protected override bool Contains(int x, int y)
+        {
+            return IO.Resources.Gumps.Contains(_useLargeMap ? (ushort) 5011 : (ushort) 5010, x, y);
         }
     }
 }

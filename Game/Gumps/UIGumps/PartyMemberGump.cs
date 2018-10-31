@@ -35,26 +35,69 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _currentHealthBarLength = _maxBarWidth;
             _currentStaminaBarLength = _maxBarWidth;
             _currentManaBarLength = _maxBarWidth;
-            _healthLabel = new Label("0/0", true, 1151, font: 3) {X = 70, Y = 24};
-            _staminaLabel = new Label("0/0", true, 1151, font: 3) {X = 70, Y = 39};
-            _manaLabel = new Label("0/0", true, 1151, font: 3) {X = 70, Y = 54};
+
+            _healthLabel = new Label("0/0", true, 1151, font: 3)
+            {
+                X = 70, Y = 24
+            };
+
+            _staminaLabel = new Label("0/0", true, 1151, font: 3)
+            {
+                X = 70, Y = 39
+            };
+
+            _manaLabel = new Label("0/0", true, 1151, font: 3)
+            {
+                X = 70, Y = 54
+            };
             _healthBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
             _staminaBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
             _manaBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
-            _healthBar.SetData(new[] {Color.DarkRed});
-            _staminaBar.SetData(new[] {Color.Orange});
-            _manaBar.SetData(new[] {Color.DarkBlue});
+
+            _healthBar.SetData(new[]
+            {
+                Color.DarkRed
+            });
+
+            _staminaBar.SetData(new[]
+            {
+                Color.Orange
+            });
+
+            _manaBar.SetData(new[]
+            {
+                Color.DarkBlue
+            });
             CanMove = true;
             AcceptMouseInput = true;
             X = 300;
             Y = 300;
 
             //AddChildren(new GumpPicTiled(0, 0, 150, 100, 0x0A40) { IsTransparent = true });
-            AddChildren(new Label(_partyMember.Name, true, 1153, font: 3) {X = 5, Y = 5});
-            AddChildren(_pinButton = new Button((int) Buttons.Pin, 0x2330, 0x2331, 0x2331) {X = 150, Y = 5, ButtonAction = ButtonAction.Activate});
-            AddChildren(new Button((int) Buttons.Heal, 0x938, 0x2C93, 0x2C94) {X = 5, Y = 30, ButtonAction = ButtonAction.Activate});
-            AddChildren(new Button((int) Buttons.Cure, 0x939, 0x2C89, 0x2C8A) {X = 5, Y = 45, ButtonAction = ButtonAction.Activate});
-            AddChildren(new Button((int) Buttons.Bandage, 0x93A, 0x2C89, 0x2C8A) {X = 5, Y = 60, ButtonAction = ButtonAction.Activate});
+            AddChildren(new Label(_partyMember.Name, true, 1153, font: 3)
+            {
+                X = 5, Y = 5
+            });
+
+            AddChildren(_pinButton = new Button((int) Buttons.Pin, 0x2330, 0x2331, 0x2331)
+            {
+                X = 150, Y = 5, ButtonAction = ButtonAction.Activate
+            });
+
+            AddChildren(new Button((int) Buttons.Heal, 0x938, 0x2C93, 0x2C94)
+            {
+                X = 5, Y = 30, ButtonAction = ButtonAction.Activate
+            });
+
+            AddChildren(new Button((int) Buttons.Cure, 0x939, 0x2C89, 0x2C8A)
+            {
+                X = 5, Y = 45, ButtonAction = ButtonAction.Activate
+            });
+
+            AddChildren(new Button((int) Buttons.Bandage, 0x93A, 0x2C89, 0x2C8A)
+            {
+                X = 5, Y = 60, ButtonAction = ButtonAction.Activate
+            });
             //AddChildren(new GumpPic(65, 30, 0x7582, 0));
             //Bar Borders
             AddChildren(new FrameBorder(22, 26, 124, 18, Color.DarkGray));
@@ -75,8 +118,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private void PartyMemberGump_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.ButtonState == ButtonState.Pressed && e.Button == MouseButton.Left)
+            {
                 foreach (PartyMemberGump partyMemberGump in UIManager.GetByLocalSerial<PartyMemberGump>().Children)
                     Console.WriteLine("gfsdfgdfgd");
+            }
         }
 
         //private void OnHitsChanged(object sender, EventArgs e)
@@ -212,7 +257,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Width = w;
             Height = h;
             _border = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
-            _border.SetData(new[] {color});
+
+            _border.SetData(new[]
+            {
+                color
+            });
         }
 
         public override void Update(double totalMS, double frameMS)

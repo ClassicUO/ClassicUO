@@ -43,11 +43,13 @@ namespace ClassicUO.Game.Gumps.Controls
             if (normalScrollbar)
                 _scrollBar = new ScrollBar(this, Width - 14, 0, Height);
             else
+            {
                 _scrollBar = new ScrollFlag(this)
                 {
-                    X = Width - 14,
-                    Height = h
+                    X = Width - 14, Height = h
                 };
+            }
+
             _scrollBar.MinValue = 0;
             _scrollBar.MaxValue = Height;
             IgnoreParentFill = true;
@@ -82,9 +84,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 GumpControl child = Children[i];
 
                 if (child is IScrollBar)
-                {
                     child.Draw(spriteBatch, new Vector3(position.X + child.X, position.Y + child.Y, 0));
-                }
                 else
                 {
                     child.Y = height - _scrollBar.Value;
@@ -100,9 +100,7 @@ namespace ClassicUO.Game.Gumps.Controls
                             // TODO: Future implementation
                         }
                         else
-                        {
                             child.Draw(spriteBatch, new Vector3(position.X + child.X, position.Y + child.Y, 0));
-                        }
                     }
 
                     height += child.Height;
@@ -154,8 +152,11 @@ namespace ClassicUO.Game.Gumps.Controls
             int height = 0;
 
             for (int i = 0; i < Children.Count; i++)
+            {
                 if (!(Children[i] is IScrollBar))
                     height += Children[i].Height;
+            }
+
             height -= _scrollBar.Height;
 
             if (height > 0)

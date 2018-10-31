@@ -1,8 +1,11 @@
-﻿using ClassicUO.Game.Data;
+﻿using System;
+
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
@@ -10,12 +13,15 @@ using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
+using SDL2;
+
 namespace ClassicUO.Game.Scenes
 {
     partial class GameScene
     {
         private double _dequeueAt;
         private bool _inqueue;
+        private Action _queuedAction;
         private InputMouseEvent _queuedEvent;
         private GameObject _queuedObject;
         private Point _queuedPosition;
@@ -30,48 +36,63 @@ namespace ClassicUO.Game.Scenes
             if (World.InGame)
             {
                 Point center = new Point(_settings.GameWindowX + _settings.GameWindowWidth / 2, _settings.GameWindowY + _settings.GameWindowHeight / 2);
-                Direction direction = DirectionHelper.DirectionFromPoints(center, InputManager.MousePosition);
+                Direction direction = DirectionHelper.DirectionFromPoints(center, Mouse.Position);
                 World.Player.Walk(direction, true);
             }
         }
 
-        private void EnqueueSingleClick(InputMouseEvent e, GameObject obj, Point point)
+        private void OnLeftMouseButtonDown(object sender, EventArgs e)
         {
-            _inqueue = true;
-            _queuedObject = obj;
-            _queuedPosition = point;
-            _dequeueAt = 200f;
-            _queuedEvent = e;
-        }
-
-        private void CheckForQueuedClicks(double frameMS)
-        {
-            if (_inqueue)
+            if (IsMouseOverWorld)
             {
-                _dequeueAt -= frameMS;
-
-                if (_dequeueAt <= 0d)
-                {
-                    DoMouseButton(_queuedEvent, _queuedObject, _queuedPosition);
-                    ClearQueuedClicks();
-                }
+                GameObject obj = _mousePicker.MouseOverObject;
+                Point point = _mousePicker.MouseOverObjectPoint;
+                _dragginObject = obj;
+                _dragOffset = point;
             }
         }
 
-        private void ClearQueuedClicks()
+        private void OnLeftMouseButtonUp(object sender, EventArgs e)
         {
-            _inqueue = false;
-            _queuedEvent = null;
-            _queuedObject = null;
-        }
-
-        private void HandleMouseActions()
-        {
-            SelectedObject = null;
-
-            if (IsHoldingItem)
+            if (TargetSystem.IsTargeting && IsMouseOverWorld)
             {
-                if (IsMouseOverUI && InputManager.HandleMouseEvent(MouseEvent.Up, MouseButton.Left))
+                switch (TargetSystem.TargetingState)
+                {
+                    case TargetType.Position:
+                    case TargetType.Object:
+                        GameObject obj = null;
+
+                        if (IsMouseOverUI)
+                        {
+                            GumpControl control = UIManager.MouseOverControl;
+
+                            if (control is ItemGumpling gumpling)
+                                obj = gumpling.Item;
+                            //else if (control.RootParent is Mobil)
+                        }
+                        else if (IsMouseOverWorld) obj = SelectedObject;
+
+                        if (obj != null)
+                        {
+                            TargetSystem.MouseTargetingEventObject(obj);
+                            Mouse.LastLeftButtonClickTime = 0;
+                        }
+
+                        break;
+                    case TargetType.Nothing:
+
+                        break;
+                    default:
+                        Log.Message(LogTypes.Warning, "Not implemented.");
+
+                        break;
+                }
+            }
+            else if (IsHoldingItem)
+            {
+                SelectedObject = null;
+
+                if (IsMouseOverUI)
                 {
                     GumpControl target = UIManager.MouseOverControl;
 
@@ -81,24 +102,20 @@ namespace ClassicUO.Game.Scenes
                         SelectedObject = item;
 
                         if (TileData.IsContainer((long) item.ItemData.Flags))
-                        {
                             DropHeldItemToContainer(item);
-                        }
                         else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable((long) HeldItem.ItemData.Flags))
-                        {
                             MergeHeldItem(item);
-                        }
                         else
                         {
                             if (item.Container.IsItem)
-                                DropHeldItemToContainer(World.Items.Get(item.Container), (ushort) (target.X + (InputManager.MousePosition.X - target.ScreenCoordinateX) - _heldOffset.X), (ushort) (target.Y + (InputManager.MousePosition.Y - target.ScreenCoordinateY) - _heldOffset.Y));
+                                DropHeldItemToContainer(World.Items.Get(item.Container), (ushort) (target.X + (Mouse.Position.X - target.ScreenCoordinateX) - _heldOffset.X), (ushort) (target.Y + (Mouse.Position.Y - target.ScreenCoordinateY) - _heldOffset.Y));
                         }
                     }
                     else if (target is GumpPicContainer container)
                     {
                         SelectedObject = container.Item;
-                        int x = InputManager.MousePosition.X - _heldOffset.X - (target.X + target.Parent.X);
-                        int y = InputManager.MousePosition.Y - _heldOffset.Y - (target.Y + target.Parent.Y);
+                        int x = Mouse.Position.X - _heldOffset.X - (target.X + target.Parent.X);
+                        int y = Mouse.Position.Y - _heldOffset.Y - (target.Y + target.Parent.Y);
                         DropHeldItemToContainer(container.Item, (ushort) x, (ushort) y);
                     }
                     else if (target is ItemGumplingPaperdoll || target is GumpPic pic && pic.IsPaperdoll || target is EquipmentSlot)
@@ -106,16 +123,14 @@ namespace ClassicUO.Game.Scenes
                         if (TileData.IsWearable((long) HeldItem.ItemData.Flags))
                             WearHeldItem();
                     }
-                    else if (target is GumpPicBackpack backpack)
-                    {
-                        DropHeldItemToContainer(backpack.BackpackItem);
-                    }
+                    else if (target is GumpPicBackpack backpack) DropHeldItemToContainer(backpack.BackpackItem);
                 }
                 else if (IsMouseOverWorld)
                 {
                     GameObject obj = _mousePicker.MouseOverObject;
 
-                    if (obj != null && obj.Distance < 5 && InputManager.HandleMouseEvent(MouseEvent.Up, MouseButton.Left))
+                    if (obj != null && obj.Distance < 5)
+                    {
                         switch (obj)
                         {
                             case Mobile mobile:
@@ -127,9 +142,7 @@ namespace ClassicUO.Game.Scenes
                                 if (dyn is Item item)
                                 {
                                     if (item.IsCorpse)
-                                    {
                                         MergeHeldItem(item);
-                                    }
                                     else
                                     {
                                         SelectedObject = item;
@@ -141,9 +154,7 @@ namespace ClassicUO.Game.Scenes
                                     }
                                 }
                                 else
-                                {
                                     DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
-                                }
 
                                 break;
                             case Tile _:
@@ -155,66 +166,15 @@ namespace ClassicUO.Game.Scenes
 
                                 return;
                         }
+                    }
                 }
             }
-
-            if (SelectedObject == null) SelectedObject = _mousePicker.MouseOverObject;
-        }
-
-        private void MouseHandler(double frameMS)
-        {
-            if (!IsMouseOverWorld)
+            else
             {
-                if (_rightMousePressed)
-                    _rightMousePressed = false;
-
-                return;
-            }
-
-            foreach (InputMouseEvent e in InputManager.GetMouseEvents())
-                switch (e.Button)
+                if (IsMouseOverWorld)
                 {
-                    case MouseButton.Right:
-                        _rightMousePressed = e.EventType == MouseEvent.Down;
-                        e.IsHandled = true;
+                    GameObject obj = _mousePicker.MouseOverObject;
 
-                        break;
-                    case MouseButton.Left:
-
-                        switch (e.EventType)
-                        {
-                            case MouseEvent.Click:
-                                EnqueueSingleClick(e, _mousePicker.MouseOverObject, _mousePicker.MouseOverObjectPoint);
-
-                                continue;
-                            case MouseEvent.DoubleClick:
-                                ClearQueuedClicks();
-
-                                break;
-                        }
-
-                        DoMouseButton(e, _mousePicker.MouseOverObject, _mousePicker.MouseOverObjectPoint);
-
-                        break;
-                }
-            CheckForQueuedClicks(frameMS);
-        }
-
-        private void DoMouseButton(InputMouseEvent e, GameObject obj, Point point)
-        {
-            switch (e.EventType)
-            {
-                case MouseEvent.Down:
-
-                {
-                    _dragginObject = obj;
-                    _dragOffset = point;
-                }
-
-                    break;
-                case MouseEvent.Click:
-
-                {
                     switch (obj)
                     {
                         case Static st:
@@ -228,54 +188,117 @@ namespace ClassicUO.Game.Scenes
                             break;
                         }
                         case Entity entity:
-                            GameActions.SingleClick(entity);
+
+                            if (!_inqueue)
+                            {
+                                _inqueue = true;
+                                _queuedObject = entity;
+                                _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                                _queuedAction = () => GameActions.SingleClick(entity);
+                            }
 
                             break;
                     }
                 }
+            }
+        }
 
-                    break;
-                case MouseEvent.DoubleClick:
+        private bool OnLeftMouseDoubleClick()
+        {
+            bool result = false;
 
+            if (IsMouseOverWorld)
+            {
+                GameObject obj = _mousePicker.MouseOverObject;
+                Point point = _mousePicker.MouseOverObjectPoint;
+
+                switch (obj)
                 {
-                    switch (obj)
-                    {
-                        case Item item:
-                            GameActions.DoubleClick(item);
+                    case Item item:
+                        result = true;
+                        GameActions.DoubleClick(item);
 
-                            break;
-                        //TODO: attack request also
-                        case Mobile mob when World.Player.InWarMode:
+                        break;
+                    //TODO: attack request also
+                    case Mobile mob when World.Player.InWarMode:
+                        result = true;
 
-                            break;
-                        case Mobile mob:
-                            GameActions.DoubleClick(mob);
+                        break;
+                    case Mobile mob:
+                        result = true;
+                        GameActions.DoubleClick(mob);
 
-                            break;
-                    }
+                        break;
                 }
 
-                    break;
-                case MouseEvent.DragBegin:
-
-                {
-                    switch (obj)
-                    {
-                        case Mobile mobile:
-
-                            // get the lifebar
-                            break;
-                        case Item item:
-                            PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
-
-                            break;
-                    }
-                }
-
-                    break;
+                ClearDequeued();
             }
 
-            e.IsHandled = true;
+            return result;
+        }
+
+        private void OnRightMouseButtonDown(object sender, EventArgs e)
+        {
+            if (IsMouseOverWorld && !_rightMousePressed)
+                _rightMousePressed = true;
+        }
+
+        private void OnRightMouseButtonUp(object sender, EventArgs e)
+        {
+            if (_rightMousePressed)
+                _rightMousePressed = false;
+        }
+
+        private bool OnRightMouseDoubleClick()
+        {
+            if (IsMouseOverWorld)
+            {
+                if (_settings.EnablePathfind && !Pathfinder.AutoWalking)
+                {
+                    if (_mousePicker.MouseOverObject is Tile || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long) dyn.ItemData.Flags))
+                    {
+                        GameObject obj = _mousePicker.MouseOverObject;
+
+                        if (Pathfinder.WalkTo(obj.Position.X, obj.Position.Y, obj.Position.Z, 0))
+                        {
+                            World.Player.AddGameText(MessageType.Label, "Pathfinding!", 3, 0, false);
+
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private void OnMouseDragBegin(object sender, EventArgs e)
+        {
+            if (Mouse.LButtonPressed && !IsHoldingItem && IsMouseOverWorld)
+            {
+                GameObject obj = _mousePicker.MouseOverObject;
+
+                switch (obj)
+                {
+                    case Mobile mobile:
+
+                        // get the lifebar
+                        break;
+                    case Item item:
+                        PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
+
+                        break;
+                }
+            }
+        }
+
+        private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
+        {
+            if (TargetSystem.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && e.keysym.mod == SDL.SDL_Keymod.KMOD_NONE) TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+        }
+
+        private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
+        {
         }
     }
 }

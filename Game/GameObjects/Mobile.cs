@@ -92,6 +92,8 @@ namespace ClassicUO.Game.GameObjects
 
         public CharacterSpeedType SpeedMode { get; internal set; } = CharacterSpeedType.Normal;
 
+        public bool IsFemale => (Flags & Flags.Female) != 0;
+
         public RaceType Race
         {
             get => _race;
@@ -230,14 +232,15 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsHidden => ((byte) Flags & 0x80) != 0;
 
+        public bool IgnoreCharacters => ((byte) Flags & 0x10) != 0;
+
         public bool IsDead
         {
             get => MathHelper.InRange(Graphic, 0x0192, 0x0193) || MathHelper.InRange(Graphic, 0x025F, 0x0260) || MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || _isDead;
             set => _isDead = value;
         }
 
-        public bool IsFlying =>
-            FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte) Flags & 0x04) != 0;
+        public bool IsFlying => FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte) Flags & 0x04) != 0;
 
         public virtual bool InWarMode
         {
@@ -534,6 +537,7 @@ namespace ClassicUO.Game.GameObjects
                 Item mount = Equipment[(int) Layer.Mount];
 
                 if (mount != null)
+                {
                     switch (animGroup)
                     {
                         case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
@@ -544,6 +548,8 @@ namespace ClassicUO.Game.GameObjects
 
                             break;
                     }
+                }
+
                 bool mirror = false;
                 Animations.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = (int) CHARACTER_ANIMATION_DELAY;
@@ -585,15 +591,10 @@ namespace ClassicUO.Game.GameObjects
                                             repCount--;
                                             AnimationRepeatMode = repCount;
                                         }
-                                        else if (repCount == 1)
-                                        {
-                                            SetAnimation(0xFF);
-                                        }
+                                        else if (repCount == 1) SetAnimation(0xFF);
                                     }
                                     else
-                                    {
                                         SetAnimation(0xFF);
-                                    }
                                 }
                             }
                             else
@@ -614,15 +615,10 @@ namespace ClassicUO.Game.GameObjects
                                             repCount--;
                                             AnimationRepeatMode = repCount;
                                         }
-                                        else if (repCount == 1)
-                                        {
-                                            SetAnimation(0xFF);
-                                        }
+                                        else if (repCount == 1) SetAnimation(0xFF);
                                     }
                                     else
-                                    {
                                         SetAnimation(0xFF);
-                                    }
                                 }
                             }
                         }

@@ -96,6 +96,7 @@ namespace ClassicUO.Utility
                 if (TotalCount <= Capacity)
                     poolable = CreateObject();
                 else
+                {
                     switch (IsFullPolicy)
                     {
                         case ObjectPoolIsFullPolicy.ReturnNull:
@@ -120,6 +121,7 @@ namespace ClassicUO.Utility
 
                             throw new ArgumentOutOfRangeException();
                     }
+                }
             }
 
             Use(poolable);

@@ -33,11 +33,7 @@ namespace ClassicUO.Utility
             using (MemoryStream ms = new MemoryStream(source, offset, source.Length - offset))
             {
                 ms.Seek(2, SeekOrigin.Begin);
-
-                using (DeflateStream stream = new DeflateStream(ms, CompressionMode.Decompress))
-                {
-                    stream.Read(dest, 0, length);
-                }
+                using (DeflateStream stream = new DeflateStream(ms, CompressionMode.Decompress)) stream.Read(dest, 0, length);
             }
         }
     }

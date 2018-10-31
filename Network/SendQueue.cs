@@ -45,10 +45,7 @@ namespace ClassicUO.Network
 
         public static byte[] AcquireBuffer()
         {
-            lock (_UnusedBuffers)
-            {
-                return _UnusedBuffers.GetFreeSegment();
-            }
+            lock (_UnusedBuffers) return _UnusedBuffers.GetFreeSegment();
         }
 
         public static void ReleaseBuffer(byte[] buffer)

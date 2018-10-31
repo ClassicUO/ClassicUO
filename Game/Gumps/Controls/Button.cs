@@ -67,10 +67,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
                 RenderedText renderedText = new RenderedText
                 {
-                    IsUnicode = isunicode,
-                    Hue = FontHue,
-                    Font = font,
-                    Text = caption
+                    IsUnicode = isunicode, Hue = FontHue, Font = font, Text = caption
                 };
                 _fontTexture[0] = renderedText;
 
@@ -78,10 +75,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 {
                     renderedText = new RenderedText
                     {
-                        IsUnicode = isunicode,
-                        Hue = HueHover,
-                        Font = font,
-                        Text = caption
+                        IsUnicode = isunicode, Hue = HueHover, Font = font, Text = caption
                     };
                     _fontTexture[1] = renderedText;
                 }
@@ -136,15 +130,18 @@ namespace ClassicUO.Game.Gumps.Controls
         public override void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _textures.Length; i++)
+            {
                 if (_textures[i] != null)
                     _textures[i].Ticks = CoreGame.Ticks;
+            }
+
             base.Update(totalMS, frameMS);
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             SpriteTexture texture = GetTextureByState();
-            spriteBatch.Draw2D(texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), Vector3.Zero);
+            spriteBatch.Draw2D(texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), IsTransparent ? RenderExtentions.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 
             if (!string.IsNullOrEmpty(_caption))
             {
@@ -156,9 +153,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     textTexture.Draw(spriteBatch, new Vector3(position.X + (Width - textTexture.Width) / 2, position.Y + yoffset + (Height - textTexture.Height) / 2, position.Z));
                 }
                 else
-                {
                     textTexture.Draw(spriteBatch, position);
-                }
             }
 
             return base.Draw(spriteBatch, position, hue);
@@ -201,6 +196,7 @@ namespace ClassicUO.Game.Gumps.Controls
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
+            {
                 switch (ButtonAction)
                 {
                     case ButtonAction.SwitchPage:
@@ -212,6 +208,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
                         break;
                 }
+            }
         }
 
         protected override bool Contains(int x, int y)

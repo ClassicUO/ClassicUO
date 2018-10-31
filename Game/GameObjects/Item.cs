@@ -187,16 +187,21 @@ namespace ClassicUO.Game.GameObjects
                                 components[i] = component;
                             }
 
-                            Multi = new Multi(this) {MinX = minX, MaxX = maxX, MinY = minY, MaxY = maxY, Components = components};
+                            Multi = new Multi(this)
+                            {
+                                MinX = minX,
+                                MaxX = maxX,
+                                MinY = minY,
+                                MaxY = maxY,
+                                Components = components
+                            };
                             House house = World.GetOrCreateHouse(Serial);
                             house.GenerateOriginal(Multi);
                             World.AddOrUpdateHouse(house);
                         }
                     }
                     else
-                    {
                         Multi = null;
-                    }
                 }
             }
         }
@@ -264,9 +269,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if (IsCorpse)
-            {
                 ProcessAnimation();
-            }
             else if (Effect != null)
             {
                 if (Effect.IsDisposed)
@@ -625,10 +628,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (ItemData.AnimID != 0) graphic = ItemData.AnimID;
             }
-            else if (IsCorpse)
-            {
-                return Amount;
-            }
+            else if (IsCorpse) return Amount;
 
             return graphic;
         }

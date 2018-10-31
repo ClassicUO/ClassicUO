@@ -37,14 +37,19 @@ namespace ClassicUO.Game.Scenes
         {
             CurrentScene?.Dispose();
             CurrentScene = null;
+            GameLoop game = Service.Get<GameLoop>();
 
             switch (type)
             {
                 case ScenesType.Login:
+                    game.WindowWidth = 640;
+                    game.WindowHeight = 480;
                     CurrentScene = new LoginScene();
 
                     break;
                 case ScenesType.Game:
+                    game.WindowWidth = 1000;
+                    game.WindowHeight = 800;
                     CurrentScene = new GameScene();
 
                     break;

@@ -46,9 +46,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(_buttonOK = new Button(0, 0x0907, 0x0908, 0x909)
             {
-                X = 208,
-                Y = 138,
-                ButtonAction = ButtonAction.Activate
+                X = 208, Y = 138, ButtonAction = ButtonAction.Activate
             });
             HSliderBar slider;
             AddChildren(slider = new HSliderBar(39, 142, 145, SLIDER_MIN, SLIDER_MAX, 1, HSliderBarStyle.BlueWidgetNoBar));
@@ -58,8 +56,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(_dyeTybeImage = new StaticPic(0x0FAB, 0)
             {
-                X = 208 - 10,
-                Y = _box.Y + _box.Height / 2 - 10
+                X = 208 - 10, Y = _box.Y + _box.Height / 2 - 10
             });
             _okClicked = okClicked;
         }

@@ -52,7 +52,11 @@ namespace ClassicUO.Game.GameObjects
             foreach (MultiComponent c in multi.Components)
             {
                 Tile tile = World.Map.GetTile(c.Position.X, c.Position.Y);
-                tile.AddGameObject(new Static(c.Graphic, 0, 0) {Position = c.Position});
+
+                tile.AddGameObject(new Static(c.Graphic, 0, 0)
+                {
+                    Position = c.Position
+                });
             }
         }
 

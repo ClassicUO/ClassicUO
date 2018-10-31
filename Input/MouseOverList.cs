@@ -89,8 +89,10 @@ namespace ClassicUO.Input
         {
             // Parse list backwards to find topmost mouse over object.
             foreach (MouseOverItem item in CreateReverseIterator(_items))
+            {
                 if (item.Object.GetType() == typeof(T))
                     return item;
+            }
 
             return null;
         }

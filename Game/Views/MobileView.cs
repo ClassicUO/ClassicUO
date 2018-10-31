@@ -72,12 +72,13 @@ namespace ClassicUO.Game.Views
                 return false;
             int drawCenterY = bodyFrame.CenterY;
             int drawX;
-            int drawY = mountOffset + drawCenterY + (int) (mobile.Offset.Z / 4 + GameObject.Position.Z * 4) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
+            int drawY = mountOffset + drawCenterY + (int) (mobile.Offset.Z / 4) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
 
             if (IsFlipped)
                 drawX = -22 + (int) mobile.Offset.X;
             else
                 drawX = -22 - (int) mobile.Offset.X;
+            Rectangle total = new Rectangle();
 
             for (int i = 0; i < _layerCount; i++)
             {
@@ -86,7 +87,19 @@ namespace ClassicUO.Game.Views
 
                 if (frame.IsDisposed) continue;
                 int x = drawX + frame.CenterX;
-                int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
+                int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY - vl.OffsetY;
+
+                if (total.X > x)
+                    total.X = x;
+
+                if (total.Y > y)
+                    total.Y = y;
+
+                if (total.Width < frame.Width)
+                    total.Width = frame.Width;
+
+                if (total.Height < frame.Height)
+                    total.Height = frame.Height;
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                 HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, 0, false);
@@ -94,66 +107,7 @@ namespace ClassicUO.Game.Views
                 Pick(frame.ID, Bounds, position, objectList);
             }
 
-            //Bounds = bodyFrame.Bounds;
-
-            //int xx = IsFlipped ? (int)position.X + rect.X + 44 : -(int)position.X + rect.X;
-
-            //BoudsStrange = new Rectangle((int) position.X + rect.X, (int) position.Y + rect.Y, rect.Width, rect.Height);
-
-            //spriteBatch.DrawRectangle(_texture, 
-            //    new Rectangle
-            //    (
-            //        (int)position.X + (IsFlipped ? drawX + bodyFrame.CenterX + 44 - bodyFrame.Width : -(drawX + bodyFrame.CenterX)), 
-            //        (int)position.Y - (drawY + (bodyFrame.Height + bodyFrame.CenterY)), 
-            //        bodyFrame.Width, 
-            //        bodyFrame.Height
-            //    ), 
-
-            //    RenderExtentions.GetHueVector(38));
-
-            //int xx = drawX + bodyFrame.CenterX;
-            //int yy = -drawY - (bodyFrame.Height + bodyFrame.CenterY) + drawCenterY;
-
-            //spriteBatch.DrawRectangle(_texture,
-            //    new Rectangle
-            //    (
-            //        (int)position.X - xx,
-            //        (int)position.Y + yy - (GameObject.IsMounted ? 16 : 0),
-            //        bodyFrame.Width,
-            //        bodyFrame.Height + (GameObject.IsMounted ? 16 : 0)
-            //    ),
-
-            //    RenderExtentions.GetHueVector(38));
-
-            //mirror = false;
-            //dir = 0 & 0x7F;
-            //Animations.GetAnimDirection(ref dir, ref mirror);
-
-            //ref var direction = ref Animations.DataIndex[GameObject.Graphic].Groups[0].Direction[0];
-
-            //if (direction.Address > 0 || direction.IsUOP)
-            //{
-            //    if (direction.Frames != null || direction.FrameCount > 0)
-            //    {
-            //        if (Animations.LoadDirectionGroup(ref direction))
-            //        {
-            //            centerY = direction.Frames[0].CenterY;
-            //            height = direction.Frames[0].Height;
-            //        }
-            //        else
-            //        {
-            //            height = mobile.IsMounted ? 100 : 60;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        height = mobile.IsMounted ? 100 : 60;
-            //    }
-            //}
-            //else
-            //{
-            //    height = mobile.IsMounted ? 100 : 60;
-            //}
+            Bounds = total;
 
             if (GameObject.OverHeads.Count > 0)
             {
@@ -161,9 +115,7 @@ namespace ClassicUO.Game.Views
 
                 Vector3 overheadPosition = new Vector3
                 {
-                    X = position.X + mobile.Offset.X,
-                    Y = position.Y - mobile.Position.Z * 4 + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
-                    Z = position.Z
+                    X = position.X + mobile.Offset.X, Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8), Z = position.Z
                 };
                 MessageOverHead(spriteBatch, overheadPosition, mobile.IsMounted ? 0 : -22);
             }
@@ -181,7 +133,7 @@ namespace ClassicUO.Game.Views
             if (frameIndex == 0xFF)
                 frameIndex = (byte) mobile.AnimIndex;
             Animations.GetAnimationDimensions(frameIndex, mobile.Graphic, dir, animGroup, out int x, out centerY, out int w, out height);
-            if (x <= 0 && centerY <= 0 && w <= 0 && height <= 0) height = mobile.IsMounted ? 100 : 60;
+            if (x == 0 && centerY == 0 && w == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
 
         private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
@@ -211,9 +163,7 @@ namespace ClassicUO.Game.Views
                     if (hasOuterTorso && (layer == Layer.Torso || layer == Layer.Tunic)) continue;
 
                     if (layer == Layer.Invalid)
-                    {
                         AddLayer(dir, GameObject.Graphic, GameObject.Hue, ref mobile);
-                    }
                     else
                     {
                         Item item;
@@ -230,7 +180,7 @@ namespace ClassicUO.Game.Views
 
                                     if (mountGraphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                         mountOffset = Animations.DataIndex[mountGraphic].MountedHeightOffset;
-                                    AddLayer(dir, mountGraphic, mount.Hue, ref mobile, true);
+                                    AddLayer(dir, mountGraphic, mount.Hue, ref mobile, true, offsetY: mountOffset);
                                 }
                             }
                             else
@@ -243,11 +193,13 @@ namespace ClassicUO.Game.Views
                                     Hue hue = item.Hue;
 
                                     if (Animations.EquipConversions.TryGetValue(item.Graphic, out Dictionary<ushort, EquipConvData> map))
+                                    {
                                         if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                                         {
                                             convertedItem = data;
                                             graphic = data.Graphic;
                                         }
+                                    }
 
                                     AddLayer(dir, graphic, hue, ref mobile, false, convertedItem, TileData.IsPartialHue((long) item.ItemData.Flags));
                                 }
@@ -257,12 +209,10 @@ namespace ClassicUO.Game.Views
                 }
             }
             else
-            {
                 AddLayer(dir, GameObject.Graphic, mobile.IsDead ? (Hue) 0x0386 : GameObject.Hue, ref mobile);
-            }
         }
 
-        private void AddLayer(byte dir, Graphic graphic, Hue hue, ref Mobile mobile, bool mounted = false, EquipConvData? convertedItem = null, bool ispartial = false)
+        private void AddLayer(byte dir, Graphic graphic, Hue hue, ref Mobile mobile, bool mounted = false, EquipConvData? convertedItem = null, bool ispartial = false, int offsetY = 0)
         {
             byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic);
             sbyte animIndex = GameObject.AnimIndex;
@@ -304,7 +254,7 @@ namespace ClassicUO.Game.Views
                 {
                     if (direction.Address != direction.PatchedAddress)
                         hue = Animations.DataIndex[Animations.AnimID].Color;
-                    if (hue <= 0 && convertedItem.HasValue) hue = convertedItem.Value.Color;
+                    if (hue == 0 && convertedItem.HasValue) hue = convertedItem.Value.Color;
                 }
 
                 _frames[_layerCount++] = new ViewLayer
@@ -312,7 +262,8 @@ namespace ClassicUO.Game.Views
                     Hue = hue,
                     Frame = frame,
                     Graphic = graphic,
-                    IsParital = ispartial
+                    IsParital = ispartial,
+                    OffsetY = offsetY
                 };
             }
         }
@@ -323,6 +274,7 @@ namespace ClassicUO.Game.Views
             public TextureAnimationFrame Frame;
             public Graphic Graphic;
             public bool IsParital;
+            public int OffsetY;
         }
     }
 }

@@ -48,9 +48,7 @@ namespace ClassicUO.Game.GameObjects
                     TimeToLive = 10000.0f;
             }
             else
-            {
                 TimeToLive = timeToLive;
-            }
 
             TimeCreated = CoreGame.Ticks;
         }

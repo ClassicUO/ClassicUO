@@ -41,7 +41,10 @@ namespace ClassicUO.IO.Resources
         public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
         private static readonly UOFileMul[] _files = new UOFileMul[5];
         private static readonly UOFileUopAnimation[] _filesUop = new UOFileUopAnimation[4];
-        private static readonly List<Tuple<ushort, byte>>[] _groupReplaces = new List<Tuple<ushort, byte>>[2] {new List<Tuple<ushort, byte>>(), new List<Tuple<ushort, byte>>()};
+        private static readonly List<Tuple<ushort, byte>>[] _groupReplaces = new List<Tuple<ushort, byte>>[2]
+        {
+            new List<Tuple<ushort, byte>>(), new List<Tuple<ushort, byte>>()
+        };
         private static readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private static byte _animGroupCount = (int) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
         private static readonly DataReader _reader = new DataReader();
@@ -89,7 +92,10 @@ namespace ClassicUO.IO.Resources
 
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
             {
-                string[] typeNames = new string[5] {"monster", "sea_monster", "animal", "human", "equipment"};
+                string[] typeNames = new string[5]
+                {
+                    "monster", "sea_monster", "animal", "human", "equipment"
+                };
 
                 using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "mobtypes.txt"))))
                 {
@@ -99,9 +105,13 @@ namespace ClassicUO.IO.Resources
                     {
                         line = line.Trim();
 
-                        if (line.Length <= 0 || line.Length < 3 || line[0] == '#')
+                        if (line.Length == 0 || line.Length < 3 || line[0] == '#')
                             continue;
-                        string[] parts = line.Split(new[] {'\t', ' '}, StringSplitOptions.RemoveEmptyEntries);
+
+                        string[] parts = line.Split(new[]
+                        {
+                            '\t', ' '
+                        }, StringSplitOptions.RemoveEmptyEntries);
                         int id = int.Parse(parts[0]);
 
                         if (id >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
@@ -116,6 +126,7 @@ namespace ClassicUO.IO.Resources
                         uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
 
                         for (int i = 0; i < 5; i++)
+                        {
                             if (testType == typeNames[i])
                             {
                                 DataIndex[id].Type = (ANIMATION_GROUPS_TYPE) i;
@@ -123,6 +134,7 @@ namespace ClassicUO.IO.Resources
 
                                 break;
                             }
+                        }
                     }
                 }
             }
@@ -198,6 +210,7 @@ namespace ClassicUO.IO.Resources
                     int offset = j * 5;
 
                     for (byte d = 0; d < 5; d++)
+                    {
                         unsafe
                         {
                             AnimIdxBlock* aidx = (AnimIdxBlock*) (address + (offset + d) * animIdxBlockSize);
@@ -213,6 +226,7 @@ namespace ClassicUO.IO.Resources
                                 DataIndex[i].Groups[j].Direction[d].Size = DataIndex[i].Groups[j].Direction[d].BaseSize;
                             }
                         }
+                    }
                 }
             }
 
@@ -226,7 +240,11 @@ namespace ClassicUO.IO.Resources
 
                     if (line.Length <= 0 || line[0] == '#' || !char.IsNumber(line[0]))
                         continue;
-                    string[] parts = line.Split(new[] {'\t', ' ', '#'}, StringSplitOptions.RemoveEmptyEntries);
+
+                    string[] parts = line.Split(new[]
+                    {
+                        '\t', ' ', '#'
+                    }, StringSplitOptions.RemoveEmptyEntries);
 
                     if (parts.Length < 2)
                         continue;
@@ -238,15 +256,8 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Anim1.def"))))
-            {
-                readAnimDef(reader, 0);
-            }
-
-            using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Anim2.def"))))
-            {
-                readAnimDef(reader, 1);
-            }
+            using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Anim1.def")))) readAnimDef(reader, 0);
+            using (StreamReader reader = new StreamReader(File.OpenRead(Path.Combine(FileManager.UoFolderPath, "Anim2.def")))) readAnimDef(reader, 1);
 
             if (FileManager.ClientVersion < ClientVersions.CV_305D)
                 return;
@@ -261,7 +272,11 @@ namespace ClassicUO.IO.Resources
 
                     if (line.Length <= 0 || line[0] == '#' || !char.IsNumber(line[0]))
                         continue;
-                    string[] parts = line.Split(new[] {'\t', ' '}, StringSplitOptions.RemoveEmptyEntries);
+
+                    string[] parts = line.Split(new[]
+                    {
+                        '\t', ' '
+                    }, StringSplitOptions.RemoveEmptyEntries);
 
                     if (parts.Length >= 5)
                     {
@@ -311,7 +326,11 @@ namespace ClassicUO.IO.Resources
 
                     if (line.Length <= 0 || line[0] == '#' || !char.IsNumber(line[0]))
                         continue;
-                    string[] parts = line.Split(new[] {'\t', ' ', '#'}, StringSplitOptions.RemoveEmptyEntries);
+
+                    string[] parts = line.Split(new[]
+                    {
+                        '\t', ' ', '#'
+                    }, StringSplitOptions.RemoveEmptyEntries);
 
                     if (parts.Length >= 2)
                     {
@@ -319,7 +338,11 @@ namespace ClassicUO.IO.Resources
 
                         if (index >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                             continue;
-                        int[] anim = {int.Parse(parts[1]), -1, -1, -1};
+
+                        int[] anim =
+                        {
+                            int.Parse(parts[1]), -1, -1, -1
+                        };
 
                         if (parts.Length >= 3)
                         {
@@ -414,9 +437,7 @@ namespace ClassicUO.IO.Resources
                             mountedHeightOffset = -9;
 
                             if (realAnimID == 34)
-                            {
                                 startAnimID = (realAnimID - 200) * 65 + 22000;
-                            }
                             else if (realAnimID >= 200)
                             {
                                 if (realAnimID >= 400)
@@ -456,14 +477,9 @@ namespace ClassicUO.IO.Resources
                                             DataIndex[index].Type = ANIMATION_GROUPS_TYPE.ANIMAL;
                                     }
                                     else
-                                    {
                                         DataIndex[index].Type = ANIMATION_GROUPS_TYPE.MONSTER;
-                                    }
                                 }
-                                else if (groupType != ANIMATION_GROUPS_TYPE.UNKNOWN)
-                                {
-                                    DataIndex[index].Type = groupType;
-                                }
+                                else if (groupType != ANIMATION_GROUPS_TYPE.UNKNOWN) DataIndex[index].Type = groupType;
 
                                 int count = 0;
 
@@ -494,6 +510,7 @@ namespace ClassicUO.IO.Resources
                                     int offset = j * 5;
 
                                     for (byte d = 0; d < 5; d++)
+                                    {
                                         unsafe
                                         {
                                             AnimIdxBlock* aidx = (AnimIdxBlock*) (address + (offset + d) * animIdxBlockSize);
@@ -508,6 +525,7 @@ namespace ClassicUO.IO.Resources
                                                 DataIndex[index].Groups[j].Direction[d].FileIndex = animFile;
                                             }
                                         }
+                                    }
                                 }
                             }
                         }
@@ -544,7 +562,11 @@ namespace ClassicUO.IO.Resources
                     if (checkIndex >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
                     int count = 0;
-                    int[] ignoreGroups = {-1, -1};
+
+                    int[] ignoreGroups =
+                    {
+                        -1, -1
+                    };
 
                     switch (DataIndex[checkIndex].Type)
                     {
@@ -616,7 +638,11 @@ namespace ClassicUO.IO.Resources
 
                     if (line.Length <= 0 || line[0] == '#' || !char.IsNumber(line[0]))
                         continue;
-                    string[] parts = line.Split(new[] {'\t', ' '}, StringSplitOptions.RemoveEmptyEntries);
+
+                    string[] parts = line.Split(new[]
+                    {
+                        '\t', ' '
+                    }, StringSplitOptions.RemoveEmptyEntries);
                     int first = line.IndexOf("{");
                     int last = line.IndexOf("}");
                     string part0 = line.Substring(0, first);
@@ -634,7 +660,11 @@ namespace ClassicUO.IO.Resources
 
                     if (checkIndex >= MAX_ANIMATIONS_DATA_INDEX_COUNT)
                         continue;
-                    int[] ignoreGroups = {-1, -1};
+
+                    int[] ignoreGroups =
+                    {
+                        -1, -1
+                    };
 
                     switch (DataIndex[checkIndex].Type)
                     {
@@ -661,6 +691,7 @@ namespace ClassicUO.IO.Resources
                         continue;
 
                     for (byte j = 0; j < 2; j++)
+                    {
                         for (byte d = 0; d < 5; d++)
                         {
                             DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseAddress = DataIndex[checkIndex].Groups[ignoreGroups[j]].Direction[d].BaseAddress;
@@ -683,6 +714,7 @@ namespace ClassicUO.IO.Resources
                                 DataIndex[index].Groups[ignoreGroups[j]].Direction[d].Size = DataIndex[index].Groups[ignoreGroups[j]].Direction[d].BaseSize;
                             }
                         }
+                    }
 
                     DataIndex[index].Type = DataIndex[checkIndex].Type;
                     DataIndex[index].Flags = DataIndex[checkIndex].Flags;
@@ -694,6 +726,7 @@ namespace ClassicUO.IO.Resources
             byte maxGroup = 0;
 
             for (int animID = 0; animID < MAX_ANIMATIONS_DATA_INDEX_COUNT; animID++)
+            {
                 for (byte grpID = 0; grpID < 100; grpID++)
                 {
                     string hashstring = $"build/animationlegacyframe/{animID:D6}/{grpID:D2}.bin";
@@ -714,140 +747,144 @@ namespace ClassicUO.IO.Resources
                         }
                     }
                 }
+            }
 
             if (_animGroupCount < maxGroup)
                 _animGroupCount = maxGroup;
 
-            // AnimationSequence.uop
-            // https://github.com/AimedNuu/OrionUO/blob/f27a29806aab9379fa004af953832f3e2ffe248d/OrionUO/Managers/FileManager.cpp#L738
-            UOFileUop animSeq = new UOFileUop(Path.Combine(FileManager.UoFolderPath, "AnimationSequence.uop"), ".bin", MAX_ANIMATIONS_DATA_INDEX_COUNT);
-
-            //LogFile file = new LogFile(Bootstrap.ExeDirectory, "file.txt");
-
-            for (int i = 0; i < animSeq.Entries.Length; i++)
+            if (FileManager.ClientVersion > ClientVersions.CV_60144)
             {
-                UOFileIndex3D entry = animSeq.Entries[i];
+                // AnimationSequence.uop
+                // https://github.com/AimedNuu/OrionUO/blob/f27a29806aab9379fa004af953832f3e2ffe248d/OrionUO/Managers/FileManager.cpp#L738
+                UOFileUop animSeq = new UOFileUop(Path.Combine(FileManager.UoFolderPath, "AnimationSequence.uop"), ".bin", MAX_ANIMATIONS_DATA_INDEX_COUNT);
 
-                if (entry.Length > 0 && entry.Offset > 0)
+                //LogFile file = new LogFile(Bootstrap.ExeDirectory, "file.txt");
+
+                for (int i = 0; i < animSeq.Entries.Length; i++)
                 {
-                    animSeq.Seek(entry.Offset);
-                    byte[] buffer = animSeq.ReadArray<byte>(entry.Length);
-                    int decLen = entry.DecompressedLength;
-                    byte[] decbuffer = new byte[decLen];
-                    ZLib.Decompress(buffer, 0, decbuffer, decbuffer.Length);
+                    UOFileIndex3D entry = animSeq.Entries[i];
 
-                    //ZLib.Unpack(decbuffer, ref decLen, buffer, entry.Length);
-                    _reader.SetData(decbuffer, decbuffer.Length);
-                    uint animID = _reader.ReadUInt();
-                    ref IndexAnimation index = ref DataIndex[animID];
-
-                    if (!index.IsUOP)
-                        continue;
-                    _reader.Skip(48);
-                    int replaces = _reader.ReadInt();
-
-                    if (replaces == 48 || replaces == 68)
-                        continue;
-
-                    //StringBuilder sb = new StringBuilder();
-                    //sb.AppendLine($"- 0x{animID:X4},\ttype: {replaces}");
-
-                    //switch (replaces)
-                    //{
-                    //    case 29:
-                    //        index.Type = ANIMATION_GROUPS_TYPE.MONSTER;
-                    //        break;
-                    //    case 31: // what is this?
-                    //        break;
-                    //    case 32:
-                    //        index.Type = ANIMATION_GROUPS_TYPE.EQUIPMENT;
-                    //        break;
-                    //    case 48:
-                    //    case 68:
-                    //        index.Type = ANIMATION_GROUPS_TYPE.HUMAN;
-                    //        break;
-                    //}
-
-                    for (int k = 0; k < replaces; k++)
+                    if (entry.Length > 0 && entry.Offset > 0)
                     {
-                        int oldIdx = _reader.ReadInt();
-                        uint frameCount = _reader.ReadUInt();
-                        int newIDX = _reader.ReadInt();
+                        animSeq.Seek(entry.Offset);
+                        byte[] buffer = animSeq.ReadArray<byte>(entry.Length);
+                        int decLen = entry.DecompressedLength;
+                        byte[] decbuffer = new byte[decLen];
+                        ZLib.Decompress(buffer, 0, decbuffer, decbuffer.Length);
 
-                        //sb.AppendLine($"\t\told: {oldIdx}\t\tframecount: {frameCount}\t\tnew: {newIDX}");
+                        //ZLib.Unpack(decbuffer, ref decLen, buffer, entry.Length);
+                        _reader.SetData(decbuffer, decbuffer.Length);
+                        uint animID = _reader.ReadUInt();
+                        ref IndexAnimation index = ref DataIndex[animID];
 
-                        if (frameCount == 0)
+                        if (!index.IsUOP)
+                            continue;
+                        _reader.Skip(48);
+                        int replaces = _reader.ReadInt();
+
+                        if (replaces == 48 || replaces == 68)
+                            continue;
+
+                        //StringBuilder sb = new StringBuilder();
+                        //sb.AppendLine($"- 0x{animID:X4},\ttype: {replaces}");
+
+                        //switch (replaces)
+                        //{
+                        //    case 29:
+                        //        index.Type = ANIMATION_GROUPS_TYPE.MONSTER;
+                        //        break;
+                        //    case 31: // what is this?
+                        //        break;
+                        //    case 32:
+                        //        index.Type = ANIMATION_GROUPS_TYPE.EQUIPMENT;
+                        //        break;
+                        //    case 48:
+                        //    case 68:
+                        //        index.Type = ANIMATION_GROUPS_TYPE.HUMAN;
+                        //        break;
+                        //}
+
+                        for (int k = 0; k < replaces; k++)
                         {
-                            index.Groups[oldIdx] = index.Groups[newIDX];
-                        }
-                        else
-                        {
-                            //int offset = 64;
-                            if (animID == 0x02df)
+                            int oldIdx = _reader.ReadInt();
+                            uint frameCount = _reader.ReadUInt();
+                            int newIDX = _reader.ReadInt();
+
+                            //sb.AppendLine($"\t\told: {oldIdx}\t\tframecount: {frameCount}\t\tnew: {newIDX}");
+
+                            if (frameCount == 0)
+                                index.Groups[oldIdx] = index.Groups[newIDX];
+                            else
                             {
+                                //int offset = 64;
+                                if (animID == 0x02df)
+                                {
+                                }
+
+                                //_reader.Skip(40);
+
+                                //byte[] unk = new byte[20];
+
+                                //for (int o = 0; o < 20; o++)
+                                //{
+                                //    unk[o] = _reader.ReadByte();
+                                //}
+
+                                //for (int j = 0; j < 5; j++)
+                                //{
+                                //    index.Groups[oldIdx].Direction[j].FrameCount = (byte) frameCount;
+                                //}
                             }
 
-                            //_reader.Skip(40);
-
-                            //byte[] unk = new byte[20];
-
-                            //for (int o = 0; o < 20; o++)
-                            //{
-                            //    unk[o] = _reader.ReadByte();
-                            //}
-
-                            //for (int j = 0; j < 5; j++)
-                            //{
-                            //    index.Groups[oldIdx].Direction[j].FrameCount = (byte) frameCount;
-                            //}
+                            _reader.Skip(60);
                         }
 
-                        _reader.Skip(60);
+                        int toread = (int) (_reader.Length - _reader.Position);
+                        byte[] data = _reader.ReadArray(toread);
+                        _reader.SetData(data, toread);
+
+                        if (animID == 0x02df)
+                        {
+                            //int len = entry.Length;
+                            //byte[] decc = new byte[len];
+
+                            //ZLib.Compress(decbuffer, ref decc);
+
+                            // ZLib.Pack(decc, ref len, decbuffer, decLen);
+                        }
+
+                        //if (!Directory.Exists("files"))
+                        //    Directory.CreateDirectory("files");
+
+                        //using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine("files", $"file_0x{animID:X4}"))))
+                        //{
+                        //    writer.Write(data);
+                        //}
+                        //sb.AppendLine("Data len: " + toread);
+                        //for (int ii = 0; ii < toread; ii++)
+                        //{
+                        //    sb.AppendLine($"\t\tbyte[{ii}]   {data[ii]}");
+                        //}
+                        uint unk0 = _reader.ReadUInt();
+                        _reader.Skip(1);
+                        uint unk1 = _reader.ReadUInt();
+                        //uint unk2 = _reader.ReadUInt();
+                        //uint unk3 = _reader.ReadUInt();
+                        //file.WriteAsync(sb.ToString());
                     }
-
-                    int toread = (int) (_reader.Length - _reader.Position);
-                    byte[] data = _reader.ReadArray(toread);
-                    _reader.SetData(data, toread);
-
-                    if (animID == 0x02df)
-                    {
-                        //int len = entry.Length;
-                        //byte[] decc = new byte[len];
-
-                        //ZLib.Compress(decbuffer, ref decc);
-
-                        // ZLib.Pack(decc, ref len, decbuffer, decLen);
-                    }
-
-                    //if (!Directory.Exists("files"))
-                    //    Directory.CreateDirectory("files");
-
-                    //using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine("files", $"file_0x{animID:X4}"))))
-                    //{
-                    //    writer.Write(data);
-                    //}
-                    //sb.AppendLine("Data len: " + toread);
-                    //for (int ii = 0; ii < toread; ii++)
-                    //{
-                    //    sb.AppendLine($"\t\tbyte[{ii}]   {data[ii]}");
-                    //}
-                    uint unk0 = _reader.ReadUInt();
-                    _reader.Skip(1);
-                    uint unk1 = _reader.ReadUInt();
-                    //uint unk2 = _reader.ReadUInt();
-                    //uint unk3 = _reader.ReadUInt();
-                    //file.WriteAsync(sb.ToString());
                 }
-            }
 
-            //file.Dispose();
-            animSeq.Unload();
+                //file.Dispose();
+                animSeq.Unload();
+            }
         }
 
         public static void UpdateAnimationTable(uint flags)
         {
             for (int i = 0; i < MAX_ANIMATIONS_DATA_INDEX_COUNT; i++)
+            {
                 for (int g = 0; g < 100; g++)
+                {
                     for (int d = 0; d < 5; d++)
                     {
                         bool replace = DataIndex[i].Groups[g].Direction[d].FileIndex >= 3;
@@ -868,6 +905,8 @@ namespace ClassicUO.IO.Resources
                             DataIndex[i].Groups[g].Direction[d].Size = DataIndex[i].Groups[g].Direction[d].BaseSize;
                         }
                     }
+                }
+            }
         }
 
         public static void GetAnimDirection(ref byte dir, ref bool mirror)
@@ -1039,7 +1078,10 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < frameCount; i++)
             {
-                UOPFrameData data = new UOPFrameData {DataStart = _reader.PositionAddress};
+                UOPFrameData data = new UOPFrameData
+                {
+                    DataStart = _reader.PositionAddress
+                };
                 _reader.Skip(2);
                 data.FrameID = _reader.ReadShort();
                 _reader.Skip(8);
@@ -1047,11 +1089,13 @@ namespace ClassicUO.IO.Resources
                 int vsize = pixelDataOffsets.Count;
 
                 if (vsize + 1 < data.FrameID)
+                {
                     while (vsize + 1 != data.FrameID)
                     {
                         pixelDataOffsets.Add(new UOPFrameData());
                         vsize++;
                     }
+                }
 
                 pixelDataOffsets.Add(data);
             }
@@ -1089,7 +1133,7 @@ namespace ClassicUO.IO.Resources
 
                 //animDirection.Frames[i] = new AnimationFrame() { CenterX = imageCenterX, CenterY = imageCenterY };
 
-                if (imageWidth <= 0 || imageHeight <= 0)
+                if (imageWidth == 0 || imageHeight == 0)
                 {
                     Log.Message(LogTypes.Warning, "frame size is null");
 
@@ -1141,7 +1185,10 @@ namespace ClassicUO.IO.Resources
                 _picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
             }
 
-            _usedTextures.Add(new ToRemoveInfo {AnimID = AnimID, Group = AnimGroup, Direction = Direction});
+            _usedTextures.Add(new ToRemoveInfo
+            {
+                AnimID = AnimID, Group = AnimGroup, Direction = Direction
+            });
 
             return true;
         }
@@ -1167,7 +1214,7 @@ namespace ClassicUO.IO.Resources
                 short imageWidth = _reader.ReadShort();
                 short imageHeight = _reader.ReadShort();
 
-                if (imageWidth <= 0 || imageHeight <= 0) continue;
+                if (imageWidth == 0 || imageHeight == 0) continue;
                 int wantSize = imageWidth * imageHeight;
                 ushort[] pixels = new ushort[wantSize];
                 uint header = _reader.ReadUInt();
@@ -1215,7 +1262,10 @@ namespace ClassicUO.IO.Resources
                 _picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
             }
 
-            _usedTextures.Add(new ToRemoveInfo {AnimID = AnimID, Group = AnimGroup, Direction = Direction});
+            _usedTextures.Add(new ToRemoveInfo
+            {
+                AnimID = AnimID, Group = AnimGroup, Direction = Direction
+            });
         }
 
         public static bool Contains(int g, int x, int y, int extra = 0)
@@ -1343,9 +1393,7 @@ namespace ClassicUO.IO.Resources
                 h = _reader.ReadShort();
             }
             else
-            {
                 x = y = w = h = 0;
-            }
         }
 
         public static void ClearUnusedTextures()
@@ -1360,8 +1408,11 @@ namespace ClassicUO.IO.Resources
                 if (CoreGame.Ticks - dir.LastAccessTime >= 3000)
                 {
                     for (int j = 0; j < dir.FrameCount; j++)
+                    {
                         if (dir.Frames[j] != null)
                             dir.Frames[j].Dispose();
+                    }
+
                     dir.FrameCount = 0;
                     dir.Frames = null;
                     dir.LastAccessTime = 0;

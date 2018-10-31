@@ -45,12 +45,14 @@ namespace ClassicUO.IO.Resources
             if (File.Exists(path))
             {
                 _file = new UOFileUop(path, ".tga", GUMP_COUNT, true);
+                FileManager.UseUOPGumps = true;
             }
             else
             {
                 path = Path.Combine(FileManager.UoFolderPath, "Gumpart.mul");
                 string pathidx = Path.Combine(FileManager.UoFolderPath, "Gumpidx.mul");
                 if (File.Exists(path) && File.Exists(pathidx)) _file = new UOFileMul(path, pathidx, GUMP_COUNT, 12);
+                FileManager.UseUOPGumps = false;
             }
 
             _gumpCache = new SpriteTexture[GUMP_COUNT];
@@ -98,6 +100,12 @@ namespace ClassicUO.IO.Resources
             if (texture == null || texture.IsDisposed)
             {
                 ushort[] pixels = GetGumpPixels(g, out int w, out int h);
+
+                if (pixels == null && g >= 60000)
+                    pixels = GetGumpPixels(g - 10000, out w, out h);
+
+                if (pixels == null || pixels.Length <= 0)
+                    return null;
                 texture = new SpriteTexture(w, h, false);
                 texture.SetData(pixels);
                 _usedIndex.Add(g);
@@ -116,9 +124,7 @@ namespace ClassicUO.IO.Resources
                 ref SpriteTexture texture = ref _gumpCache[_usedIndex[i]];
 
                 if (texture == null || texture.IsDisposed)
-                {
                     _usedIndex.RemoveAt(i--);
-                }
                 else if (CoreGame.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();
@@ -160,7 +166,7 @@ namespace ClassicUO.IO.Resources
             width = (extra >> 16) & 0xFFFF;
             height = extra & 0xFFFF;
 
-            if (width <= 0 || height <= 0)
+            if (width == 0 || height == 0)
                 return null;
 
             //width = PaddedRowWidth(16, width, 4) / 2;
@@ -186,8 +192,10 @@ namespace ClassicUO.IO.Resources
                     int count = gmul[i].Run;
 
                     if (val > 0)
+                    {
                         for (int j = 0; j < count; j++)
                             pixels[pos + x++] = (ushort) (0x8000 | val);
+                    }
                     else
                         x += count;
 

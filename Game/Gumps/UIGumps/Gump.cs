@@ -87,21 +87,22 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (LocalSerial != 0)
             {
                 if (buttonID == 0) // cancel
-                {
-                    GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, null, null);
-                }
+                    GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID);
                 else
                 {
                     List<Serial> switches = new List<Serial>();
                     List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();
 
                     foreach (GumpControl control in Children)
+                    {
                         if (control is Checkbox checkbox && checkbox.IsChecked)
                             switches.Add(control.LocalSerial);
                         else if (control is RadioButton radioButton && radioButton.IsChecked)
                             switches.Add(control.LocalSerial);
                         else if (control is TextBox textBox)
-                            entries.Add(new Tuple<ushort, string>((ushort) LocalSerial, textBox.Text));
+                            entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
+                    }
+
                     GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
                 }
 

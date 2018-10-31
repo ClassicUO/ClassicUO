@@ -64,9 +64,7 @@ namespace ClassicUO.Game.System
                 GameActions.RequestPartyInviteByTarget();
             }
             else if (IsInParty && IsPlayerLeader)
-            {
                 GameActions.RequestPartyInviteByTarget();
-            }
             else if (IsInParty && !IsPlayerLeader)
             {
                 //"You may only add members to the party if you are the leader."

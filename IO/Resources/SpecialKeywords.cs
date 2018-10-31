@@ -88,9 +88,14 @@ namespace ClassicUO.IO.Resources
             int speechTable = 0;
 
             foreach (KeyValuePair<int, List<Regex>> e in _speeches[speechTable])
+            {
                 for (int i = 0; i < e.Value.Count; i++)
+                {
                     if (e.Value[i].IsMatch(text) && !t.Contains(e.Key))
                         t.Add(e.Key);
+                }
+            }
+
             count = t.Count;
             triggers = t.ToArray();
         }

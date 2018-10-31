@@ -38,6 +38,7 @@ namespace ClassicUO.Game.GameObjects
     public abstract class GameObject : IUpdateable, ISmoothMovable
     {
         private readonly List<TextOverhead> _overHeads;
+        private Position _position = Position.Invalid;
         private Tile _tile;
         private View _view;
 
@@ -47,7 +48,25 @@ namespace ClassicUO.Game.GameObjects
             _overHeads = new List<TextOverhead>();
         }
 
-        public virtual Position Position { get; set; } = Position.Invalid;
+        protected Vector3 ScreenPosition { get; private set; }
+
+        public Vector3 RealScreenPosition { get; protected set; }
+
+        public bool IsPositionChanged { get; protected set; }
+
+        public virtual Position Position
+        {
+            get => _position;
+            set
+            {
+                if (_position != value)
+                {
+                    _position = value;
+                    ScreenPosition = new Vector3((_position.X - _position.Y) * 22, (_position.X + _position.Y) * 22 - _position.Z * 4, 0);
+                    IsPositionChanged = true;
+                }
+            }
+        }
 
         public virtual Hue Hue { get; set; }
 
@@ -76,9 +95,7 @@ namespace ClassicUO.Game.GameObjects
                     _tile = value;
 
                     if (_tile != null)
-                    {
                         _tile.AddGameObject(this);
-                    }
                     else
                     {
                         if (this != World.Player && !IsDisposed) Dispose();
@@ -112,9 +129,16 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public void UpdateRealScreenPosition(Point offset)
+        {
+            RealScreenPosition = new Vector3(ScreenPosition.X - offset.X - 22, ScreenPosition.Y - offset.Y - 22, 0);
+            IsPositionChanged = false;
+        }
+
         public int DistanceTo(GameObject entity)
         {
             if (entity is Mobile mob)
+            {
                 if (mob.Steps.Count > 0)
                 {
                     Mobile.Step step = mob.Steps.Back();
@@ -122,6 +146,7 @@ namespace ClassicUO.Game.GameObjects
 
                     return Position.DistanceTo(pos);
                 }
+            }
 
             return Position.DistanceTo(entity.Position);
         }

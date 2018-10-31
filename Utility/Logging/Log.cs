@@ -2,48 +2,46 @@
 {
     internal class Log
     {
-        private static Logger logger;
+        private static Logger _logger;
 
         public static void Start(LogTypes logTypes, LogFile logFile = null)
         {
-            logger = logger ?? new Logger {LogTypes = logTypes};
-            logger?.Start(logFile);
+            _logger = _logger ?? new Logger
+            {
+                LogTypes = logTypes
+            };
+            _logger?.Start(logFile);
         }
 
         public static void Stop()
         {
-            logger?.Stop();
-            logger = null;
+            _logger?.Stop();
+            _logger = null;
         }
 
         public static void Resume(LogTypes logTypes)
         {
-            logger.LogTypes = logTypes;
+            _logger.LogTypes = logTypes;
         }
 
         public static void Pause()
         {
-            logger.LogTypes = LogTypes.None;
+            _logger.LogTypes = LogTypes.None;
         }
 
         public static void Message(LogTypes logType, string text)
         {
-            logger.Message(logType, text);
+            _logger.Message(logType, text);
         }
 
         public static void NewLine()
         {
-            logger.NewLine();
-        }
-
-        public static void WaitForKey()
-        {
-            logger.WaitForKey();
+            _logger.NewLine();
         }
 
         public static void Clear()
         {
-            logger.Clear();
+            _logger.Clear();
         }
     }
 }

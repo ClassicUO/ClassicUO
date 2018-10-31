@@ -63,8 +63,10 @@ namespace ClassicUO.Renderer
                         int x0 = x1 - spanLength;
 
                         for (int range = -extraRange; range <= extraRange; range++)
+                        {
                             if (y + range == y0 && x + extraRange >= x0 && x - extraRange <= x1)
                                 return true;
+                        }
                     }
                 }
 

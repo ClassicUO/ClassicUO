@@ -41,12 +41,10 @@ namespace ClassicUO.Game
         private static readonly ushort[,] _cursorData = new ushort[2, 16]
         {
             {
-                0x206A, 0x206B, 0x206C, 0x206D, 0x206E, 0x206F, 0x2070, 0x2071, 0x2072, 0x2073, 0x2074, 0x2075, 0x2076,
-                0x2077, 0x2078, 0x2079
+                0x206A, 0x206B, 0x206C, 0x206D, 0x206E, 0x206F, 0x2070, 0x2071, 0x2072, 0x2073, 0x2074, 0x2075, 0x2076, 0x2077, 0x2078, 0x2079
             },
             {
-                0x2053, 0x2054, 0x2055, 0x2056, 0x2057, 0x2058, 0x2059, 0x205A, 0x205B, 0x205C, 0x205D, 0x205E, 0x205F,
-                0x2060, 0x2061, 0x2062
+                0x2053, 0x2054, 0x2055, 0x2056, 0x2057, 0x2058, 0x2059, 0x205A, 0x205B, 0x205C, 0x205D, 0x205E, 0x205F, 0x2060, 0x2061, 0x2062
             }
         };
         private readonly int[,] _cursorOffset = new int[2, 16];
@@ -69,6 +67,7 @@ namespace ClassicUO.Game
             _settings = Service.Get<Settings>();
 
             for (int i = 0; i < 2; i++)
+            {
                 for (int j = 0; j < 16; j++)
                 {
                     ushort id = _cursorData[i, j];
@@ -84,13 +83,9 @@ namespace ClassicUO.Game
                             float dh = texture.Height;
 
                             if (id == 0x206A)
-                            {
                                 offX = -4f;
-                            }
                             else if (id == 0x206B)
-                            {
                                 offX = -dw + 3f;
-                            }
                             else if (id == 0x206C)
                             {
                                 offX = -dw + 3f;
@@ -107,17 +102,11 @@ namespace ClassicUO.Game
                                 offY = -dh;
                             }
                             else if (id == 0x206F)
-                            {
                                 offY = -dh + 4f;
-                            }
                             else if (id == 0x2070)
-                            {
                                 offY = -dh + 4f;
-                            }
                             else if (id == 0x2075)
-                            {
                                 offY = -4f;
-                            }
                             else if (id == 0x2076)
                             {
                                 offX = -12f;
@@ -129,13 +118,8 @@ namespace ClassicUO.Game
                                 offY = -(dh / 2f);
                             }
                             else if (id == 0x2078)
-                            {
                                 offY = -(dh * 0.66f);
-                            }
-                            else if (id == 0x2079)
-                            {
-                                offY = -(dh / 2f);
-                            }
+                            else if (id == 0x2079) offY = -(dh / 2f);
 
                             switch (id)
                             {
@@ -196,6 +180,7 @@ namespace ClassicUO.Game
                         }
                     }
                 }
+            }
         }
 
         public Graphic Graphic
@@ -213,7 +198,7 @@ namespace ClassicUO.Game
 
         public SpriteTexture Texture { get; private set; }
 
-        public Point ScreenPosition => _inputManager.MousePosition;
+        //public Point ScreenPosition => _Mouse.Position;
 
         public void SetDraggedItem(Graphic graphic, Hue hue, Point offset)
         {
@@ -262,8 +247,8 @@ namespace ClassicUO.Game
             if (id < 16)
             {
                 if (_draggingItem)
-                    sb.Draw2D(_draggedItemTexture, new Vector3(ScreenPosition.X - _offset.X, ScreenPosition.Y - _offset.Y, 0), _rect, RenderExtentions.GetHueVector(_hue));
-                sb.Draw2D(Texture, new Vector3(ScreenPosition.X + _cursorOffset[0, id], ScreenPosition.Y + _cursorOffset[1, id], 0), Vector3.Zero);
+                    sb.Draw2D(_draggedItemTexture, new Vector3(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y, 0), _rect, RenderExtentions.GetHueVector(_hue));
+                sb.Draw2D(Texture, new Vector3(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id], 0), Vector3.Zero);
             }
         }
 
@@ -280,7 +265,7 @@ namespace ClassicUO.Game
             int windowCenterX = _settings.GameWindowX + _settings.GameWindowWidth / 2;
             int windowCenterY = _settings.GameWindowY + _settings.GameWindowHeight / 2;
 
-            return _cursorData[war, GetMouseDirection(windowCenterX, windowCenterY, ScreenPosition.X, ScreenPosition.Y, 1)];
+            return _cursorData[war, GetMouseDirection(windowCenterX, windowCenterY, Mouse.Position.X, Mouse.Position.Y, 1)];
         }
 
         private static int GetMouseDirection(int x1, int y1, int to_x, int to_y, int current_facing)

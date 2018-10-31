@@ -30,8 +30,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class PaperDollGump : Gump
     {
-        private readonly ushort[] PeaceModeBtnGumps = {0x07e5, 0x07e6, 0x07e7};
-        private readonly ushort[] WarModeBtnGumps = {0x07e8, 0x07e9, 0x07ea};
+        private readonly ushort[] PeaceModeBtnGumps =
+        {
+            0x07e5, 0x07e6, 0x07e7
+        };
+        private readonly ushort[] WarModeBtnGumps =
+        {
+            0x07e8, 0x07e9, 0x07ea
+        };
         private bool _isWarMode;
         private GumpPic _partyManifestPic;
         private GumpPic _specialMovesBookPic;
@@ -83,25 +89,60 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             if (Mobile == World.Player)
             {
-                AddChildren(new GumpPic(0, 0, 0x07d0, 0) {CanMove = true});
+                AddChildren(new GumpPic(0, 0, 0x07d0, 0)
+                {
+                    CanMove = true
+                });
+
                 //HELP BUTTON
-                AddChildren(new Button((int) Buttons.Help, 0x07ef, 0x07f0, 0x07f1) {X = 185, Y = 44 + 27 * 0, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.Help, 0x07ef, 0x07f0, 0x07f1)
+                {
+                    X = 185, Y = 44 + 27 * 0, ButtonAction = ButtonAction.Activate
+                });
+
                 //OPTIONS BUTTON
-                AddChildren(new Button((int) Buttons.Options, 0x07d6, 0x07d7, 0x07d8) {X = 185, Y = 44 + 27 * 1, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.Options, 0x07d6, 0x07d7, 0x07d8)
+                {
+                    X = 185, Y = 44 + 27 * 1, ButtonAction = ButtonAction.Activate
+                });
+
                 // LOG OUT BUTTON
-                AddChildren(new Button((int) Buttons.LogOut, 0x07d9, 0x07da, 0x07db) {X = 185, Y = 44 + 27 * 2, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.LogOut, 0x07d9, 0x07da, 0x07db)
+                {
+                    X = 185, Y = 44 + 27 * 2, ButtonAction = ButtonAction.Activate
+                });
+
                 // QUESTS BUTTON
-                AddChildren(new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6) {X = 185, Y = 44 + 27 * 3, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.Quests, 0x57b5, 0x57b7, 0x57b6)
+                {
+                    X = 185, Y = 44 + 27 * 3, ButtonAction = ButtonAction.Activate
+                });
+
                 // SKILLS BUTTON
-                AddChildren(new Button((int) Buttons.Skills, 0x07df, 0x07e0, 0x07e1) {X = 185, Y = 44 + 27 * 4, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.Skills, 0x07df, 0x07e0, 0x07e1)
+                {
+                    X = 185, Y = 44 + 27 * 4, ButtonAction = ButtonAction.Activate
+                });
+
                 // GUILD BUTTON
-                AddChildren(new Button((int) Buttons.Guild, 0x57b2, 0x57b4, 0x57b3) {X = 185, Y = 44 + 27 * 5, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.Guild, 0x57b2, 0x57b4, 0x57b3)
+                {
+                    X = 185, Y = 44 + 27 * 5, ButtonAction = ButtonAction.Activate
+                });
                 // TOGGLE PEACE/WAR BUTTON
                 _isWarMode = Mobile.InWarMode;
                 ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
-                AddChildren(_warModeBtn = new Button((int) Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2]) {X = 185, Y = 44 + 27 * 6, ButtonAction = ButtonAction.Activate});
+
+                AddChildren(_warModeBtn = new Button((int) Buttons.PeaceWarToggle, btngumps[0], btngumps[1], btngumps[2])
+                {
+                    X = 185, Y = 44 + 27 * 6, ButtonAction = ButtonAction.Activate
+                });
+
                 // STATUS BUTTON
-                AddChildren(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed) {X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.Status, 0x07eb, 0x07ec, 0x07ed)
+                {
+                    X = 185, Y = 44 + 27 * 7, ButtonAction = ButtonAction.Activate
+                });
                 // Virtue menu
                 AddChildren(_virtueMenuPic = new GumpPic(80, 8, 0x0071, 0));
                 _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
@@ -119,9 +160,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 AddChildren(new EquipmentSlot(2, 76 + 22 * 4)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 4, Mobile, EquipLayer.Bracelet));
             }
             else
-            {
                 AddChildren(new GumpPic(0, 0, 0x07d1, 0));
-            }
 
             // Paperdoll control!
             AddChildren(new PaperDollInteractable(8, 21, Mobile));
@@ -138,11 +177,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(titleLabel);
         }
 
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+            return true;
+        }
+
         private void VirtueMenu_MouseDoubleClickEvent(object sender, MouseEventArgs args)
         {
             if (args.Button == MouseButton.Left)
             {
-                GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new Serial[1] {Mobile.Serial});
+                GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new Serial[1]
+                {
+                    Mobile.Serial
+                });
                 Log.Message(LogTypes.Info, "Virtue DoubleClick event!!");
             }
         }
@@ -197,7 +244,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case Buttons.Options:
 
                     if (UIManager.GetByLocalSerial<OptionsGump>() == null)
-                        UIManager.Add(new OptionsGump {X = 80, Y = 80});
+                        UIManager.Add(new OptionsGump
+                        {
+                            X = 80, Y = 80
+                        });
                     else
                         UIManager.Remove<OptionsGump>();
 

@@ -71,6 +71,9 @@ namespace ClassicUO.Game.Map
             int cellX = x / 8;
             int cellY = y / 8;
             int block = GetBlock(cellX, cellY);
+
+            if (block >= Chunks.Length)
+                return null;
             ref MapChunk chuck = ref Chunks[block];
 
             if (chuck == null)
@@ -82,9 +85,7 @@ namespace ClassicUO.Game.Map
                     chuck.Load(Index);
                 }
                 else
-                {
                     return null;
-                }
             }
 
             chuck.LastAccessTime = CoreGame.Ticks;
@@ -141,62 +142,15 @@ namespace ClassicUO.Game.Map
 
         public IndexMap GetIndex(int blockX, int blockY)
         {
-            return IO.Resources.Map.BlockData[Index][GetBlock(blockX, blockY)];
+            int block = GetBlock(blockX, blockY);
+            IndexMap[] list = IO.Resources.Map.BlockData[Index];
+
+            return block >= list.Length ? null : list[block];
         }
 
         private int GetBlock(int blockX, int blockY)
         {
             return blockX * IO.Resources.Map.MapBlocksSize[Index][1] + blockY;
-        }
-
-
-
-        public int GetAverageZ(sbyte top, sbyte left, sbyte right, sbyte bottom, ref sbyte low, ref sbyte high)
-        {
-            high = top;
-            if (left > high) high = left;
-            if (right > high) high = right;
-            if (bottom > high) high = bottom;
-            low = high;
-            if (left < low) low = left;
-            if (right < low) low = right;
-            if (bottom < low) low = bottom;
-
-            if (top < low)
-                low = top;
-            if (right < low)
-                low = right;
-            if (bottom < low)
-                low = bottom;
-
-            if (Math.Abs(high - right) <= Math.Abs(bottom - top))
-                return (high + right) >> 1;
-            else
-                return (bottom + top) >> 1;
-
-            if (Math.Abs(left - right) <= Math.Abs(bottom - top))
-                return (left + right) >> 1;
-            else
-                return (bottom + top) >> 1;
-
-            if (Math.Abs(top - bottom) > Math.Abs(left - right)) return FloorAverage(left, right);
-
-            return FloorAverage(top, bottom);
-        }
-
-        public int GetAverageZ(short x, short y, ref sbyte low, ref sbyte top)
-        {
-            return GetAverageZ(GetTileZ(x, y), GetTileZ(x, (short)(y + 1)), GetTileZ((short)(x + 1), y), GetTileZ((short)(x + 1), (short)(y + 1)), ref low, ref top);
-        }
-
-        private static int FloorAverage(int a, int b)
-        {
-            int v = a + b;
-
-            if (v < 0)
-                --v;
-
-            return v / 2;
         }
 
         public void ClearUnusedBlocks()
@@ -221,47 +175,11 @@ namespace ClassicUO.Game.Map
 
         private void LoadChunks(ushort centerX, ushort centerY)
         {
-            //for (int y = -CHUNKS_NUM; y <= CHUNKS_NUM; y++)
-            //{
-            //    int cellY = centerY / 8 + y;
-            //    if (cellY < 0)
-            //    {
-            //        cellY += IO.Resources.Map.MapBlocksSize[Index][1];
-            //    }
-
-            //    for (int x = -CHUNKS_NUM; x <= CHUNKS_NUM; x++)
-            //    {
-            //        int cellX = centerX / 8 + x;
-            //        if (cellX < 0)
-            //        {
-            //            cellX += IO.Resources.Map.MapBlocksSize[Index][0];
-            //        }
-
-            //        int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
-
-            //        ref var tile = ref Chunks[cellindex];
-
-            //        if (tile == null || tile.X != cellX || tile.Y != cellY)
-            //        {
-            //            if (tile == null)
-            //            {
-            //                tile = new FacetChunk((ushort)cellX, (ushort)cellY);
-            //            }
-            //            else
-            //            {
-            //                tile.Unload();
-            //                tile.SetTo((ushort)cellX, (ushort)cellY);
-            //            }
-
-            //            tile.Load(Index);
-            //        }
-            //    }
-            //}
             const int XY_OFFSET = 30;
             int minBlockX = (centerX - XY_OFFSET) / 8 - 1;
             int minBlockY = (centerY - XY_OFFSET) / 8 - 1;
-            int maxBlockX = (centerX + XY_OFFSET) / 8 + 2;
-            int maxBlockY = (centerY + XY_OFFSET) / 8 + 2;
+            int maxBlockX = (centerX + XY_OFFSET) / 8 + 1;
+            int maxBlockY = (centerY + XY_OFFSET) / 8 + 1;
 
             if (minBlockX < 0)
                 minBlockX = 0;

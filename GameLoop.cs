@@ -82,10 +82,10 @@ namespace ClassicUO
             Stopwatch stopwatch = Stopwatch.StartNew();
             FileManager.LoadFiles();
             uint[] hues = Hues.CreateShaderColors();
-            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, 3000);
-            texture0.SetData(hues, 0, 32 * 3000);
-            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, 3000);
-            texture1.SetData(hues, 32 * 3000, 32 * 3000);
+            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, Hues.HuesCount);
+            texture0.SetData(hues, 0, 32 * Hues.HuesCount);
+            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, Hues.HuesCount);
+            texture1.SetData(hues, 32 * Hues.HuesCount, 32 * Hues.HuesCount);
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
@@ -93,23 +93,21 @@ namespace ClassicUO
 
             //Register Service Stack
             Service.Register(this);
-            Service.Register(new SpriteBatch3D(GraphicsDevice));
-            Service.Register(new SpriteBatchUI(GraphicsDevice));
+            Service.Register(_sb3D = new SpriteBatch3D(GraphicsDevice));
+            Service.Register(_sbUI = new SpriteBatchUI(GraphicsDevice));
             Service.Register(new InputManager());
             Service.Register(_uiManager = new UIManager());
             Service.Register(_sceneManager = new SceneManager());
             Service.Register(_journalManager = new JournalData());
+
             //Register Command Stack
             PartySystem.RegisterCommands();
             _inputManager = Service.Get<InputManager>();
-            _sb3D = Service.Get<SpriteBatch3D>();
-            _sbUI = Service.Get<SpriteBatchUI>();
             Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
             Log.Message(LogTypes.Trace, "Done!");
             MaxFPS = settings.MaxFPS;
-            _sceneManager.ChangeScene(ScenesType.Login);
 
             _infoText = new RenderedText
             {
@@ -122,6 +120,12 @@ namespace ClassicUO
             base.Initialize();
         }
 
+        protected override void LoadContent()
+        {
+            _sceneManager.ChangeScene(ScenesType.Login);
+            base.LoadContent();
+        }
+
         protected override void UnloadContent()
         {
             ConfigurationResolver.Save(Service.Get<Settings>(), "settings.json");
@@ -130,7 +134,7 @@ namespace ClassicUO
 
         protected override void OnInputUpdate(double totalMS, double frameMS)
         {
-            _inputManager.Update(totalMS, frameMS);
+            //_inputManager.Update(totalMS, frameMS);
         }
 
         protected override void OnNetworkUpdate(double totalMS, double frameMS)
@@ -150,20 +154,17 @@ namespace ClassicUO
 
         protected override void OnUpdate(double totalMS, double frameMS)
         {
-            if (World.InGame)
-                _sceneManager.CurrentScene.Update(totalMS, frameMS);
+            _sceneManager.CurrentScene.Update(totalMS, frameMS);
         }
 
         protected override void OnFixedUpdate(double totalMS, double frameMS)
         {
-            if (World.InGame)
-                _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
+            _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
 
         protected override void OnDraw(double frameMS)
         {
-            if (World.InGame)
-                _sceneManager.CurrentScene.Draw(_sb3D, _sbUI);
+            _sceneManager.CurrentScene.Draw(_sb3D, _sbUI);
             _sbUI.GraphicsDevice.Clear(Color.Transparent);
             _sbUI.Begin();
             _uiManager.Draw(_sbUI);

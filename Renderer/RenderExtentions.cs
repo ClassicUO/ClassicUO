@@ -25,9 +25,20 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
 {
+    public enum ShadersEffectType
+    {
+        None = 0,
+        Hued = 1,
+        PartialHued = 2,
+        Land = 6,
+        LandHued = 7,
+        Spectral = 10,
+        Shadow = 12
+    }
+
     public static class RenderExtentions
     {
-        private const float ALPHA = .5f;
+        private const ushort SPECTRAL_COLOR_FLAG = 0x4000;
 
         public static Vector3 SelectedHue { get; } = new Vector3(27, 1, 0);
 
@@ -38,10 +49,35 @@ namespace ClassicUO.Renderer
 
         public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool noLighting)
         {
-            if ((hue & 0x4000) != 0) alpha = ALPHA;
-            if ((hue & 0x8000) != 0) partial = true;
+            ShadersEffectType type;
 
-            return hue == 0 ? new Vector3(0, 0, alpha) : new Vector3(hue & 0x0FFF, (noLighting ? 4 : 0) + (partial ? 2 : 1), alpha);
+            if ((hue & 0x8000) != 0)
+            {
+                partial = true;
+                hue &= 0x7FFF;
+            }
+
+            if (hue == 0)
+                partial = false;
+
+            if ((hue & SPECTRAL_COLOR_FLAG) != 0)
+                type = ShadersEffectType.Spectral;
+            else if (hue != 0)
+            {
+                if (partial)
+                    type = ShadersEffectType.PartialHued;
+                else
+                    type = ShadersEffectType.Hued;
+            }
+            else
+                type = ShadersEffectType.None;
+
+            return new Vector3(hue, (int) type, alpha);
+        }
+
+        public static Vector3 GetHueVector(int hue, ShadersEffectType type)
+        {
+            return new Vector3(hue, (int) type, 0);
         }
     }
 }

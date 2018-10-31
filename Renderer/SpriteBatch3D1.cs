@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -9,27 +10,40 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
+#if SB1
     public class SpriteBatch3D
     {
-        private const int MAX_SPRITES = 0x800 * 40;
+        private const int MAX_SPRITES = 0x800;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;
+        private Matrix _projectionMatrix;
+        private Matrix _matrixTransformMatrix;
+        private Matrix _transformMatrix = Matrix.Identity;
+        private BoundingBox _drawingArea;
         private readonly EffectParameter _viewportEffect;
         private readonly EffectParameter _worldMatrixEffect;
         private readonly EffectParameter _drawLightingEffect;
         private readonly EffectParameter _projectionMatrixEffect;
         private readonly EffectTechnique _huesTechnique, _shadowTechnique, _landTechnique;
         private readonly Effect _effect;
-        private readonly DepthStencilState _dss = new DepthStencilState
-        {
-            DepthBufferEnable = true,
-            DepthBufferWriteEnable = true
-        };
+        //private readonly DepthStencilState _dss = new DepthStencilState
+        //{
+        //    DepthBufferEnable = true,
+        //    DepthBufferWriteEnable = true
+        //};
+        //private readonly DepthStencilState _dssStencil = new DepthStencilState
+        //{
+        //    StencilEnable = true,
+        //    StencilFunction = CompareFunction.Always,
+        //    StencilPass = StencilOperation.Replace,
+        //    DepthBufferEnable = false,
+        //};
         private readonly VertexBuffer _vertexBuffer;
         private readonly IndexBuffer _indexBuffer;
         private readonly DrawInfo[] _textureInfo;
         private readonly SpriteVertex[] _vertexInfo;
         private bool _started;
+        private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
 #if !ORIONSORT
         private float _z;
 #endif
@@ -52,6 +66,10 @@ namespace ClassicUO.Renderer
             _vertexBuffer = new DynamicVertexBuffer(GraphicsDevice, SpriteVertex.VertexDeclaration, MAX_VERTICES, BufferUsage.WriteOnly);
             _indexBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.SixteenBits, MAX_INDICES, BufferUsage.WriteOnly);
             _indexBuffer.SetData(GenerateIndexArray());
+
+            _projectionMatrix = new Matrix(0f, //(float)( 2.0 / (double)viewport.Width ) is the actual value we will use
+                                           0.0f, 0.0f, 0.0f, 0.0f, 0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
+                                           0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
         }
 
         public GraphicsDevice GraphicsDevice { get; }
@@ -92,6 +110,8 @@ namespace ClassicUO.Renderer
 #if !ORIONSORT
             _z = 0;
 #endif
+            _drawingArea.Min = _minVector3;
+            _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
         }
 
         public void End()
@@ -102,9 +122,23 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool DrawSprite(Texture2D texture, SpriteVertex[] vertices, Techniques technique = Techniques.Default)
+        public unsafe bool DrawSprite(Texture2D texture, SpriteVertex[] vertices, Techniques technique = Techniques.Default)
         {
             if (texture == null || texture.IsDisposed)
+                return false;
+            bool draw = false;
+
+            for (byte i = 0; i < 4; i++)
+            {
+                if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
+                {
+                    draw = true;
+
+                    break;
+                }
+            }
+
+            if (!draw)
                 return false;
 
             if (_numSprites >= MAX_SPRITES)
@@ -114,8 +148,18 @@ namespace ClassicUO.Renderer
 #endif
             _textureInfo[_numSprites] = new DrawInfo(texture, technique);
 
-            for (int i = 0; i < 4; i++)
-                _vertexInfo[_numSprites * 4 + i] = vertices[i];
+            fixed (SpriteVertex* p = &_vertexInfo[_numSprites * 4])
+            {
+                fixed (SpriteVertex* t = &vertices[0])
+                {
+                    SpriteVertex* ptr0 = p;
+                    ptr0[0] = t[0];
+                    ptr0[1] = t[1];
+                    ptr0[2] = t[2];
+                    ptr0[3] = t[3];
+                }
+            }
+
             _numSprites++;
 
             return true;
@@ -149,14 +193,14 @@ namespace ClassicUO.Renderer
             _numSprites++;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Conditional("DEBUG")]
         private void EnsureStarted()
         {
             if (!_started)
                 throw new InvalidOperationException();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [Conditional("DEBUG")]
         private void EnsureNotStarted()
         {
             if (_started)
@@ -166,36 +210,40 @@ namespace ClassicUO.Renderer
         private void ApplyStates()
         {
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            //GraphicsDevice.BlendState.ColorBlendFunction = BlendFunction.Add;
-            //GraphicsDevice.BlendState.AlphaSourceBlend = Blend.SourceColor;
+            GraphicsDevice.DepthStencilState = DepthStencilState.None;
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
+            Viewport viewport = GraphicsDevice.Viewport;
+            _projectionMatrix.M11 = (float) (2.0 / viewport.Width);
+            _projectionMatrix.M22 = (float) (-2.0 / viewport.Height);
+            _projectionMatrix.M41 = -1 - 0.5f * _projectionMatrix.M11;
+            _projectionMatrix.M42 = 1 - 0.5f * _projectionMatrix.M22;
+            Matrix.Multiply(ref _transformMatrix, ref _projectionMatrix, out _matrixTransformMatrix);
+            _projectionMatrixEffect.SetValue(_matrixTransformMatrix);
+            _worldMatrixEffect.SetValue(_transformMatrix);
 
-            //GraphicsDevice.SamplerStates[3] = SamplerState.PointClamp;
-            //GraphicsDevice.SamplerStates[4] = SamplerState.PointWrap;
-
-            // set up viewport.
-            _projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
-            _worldMatrixEffect.SetValue(ProjectionMatrixWorld);
+            //_projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
+            //_worldMatrixEffect.SetValue(ProjectionMatrixWorld);
             _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-            GraphicsDevice.DepthStencilState = _dss;
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
             GraphicsDevice.Indices = _indexBuffer;
         }
 
-        private void Flush()
+        private unsafe void Flush()
         {
+            ApplyStates();
+
             if (_numSprites == 0)
                 return;
+            fixed (SpriteVertex* p = &_vertexInfo[0]) _vertexBuffer.SetDataPointerEXT(0, (IntPtr) p, _numSprites * 4 * SpriteVertex.SizeInBytes, SetDataOptions.None);
+            DrawInfo current = _textureInfo[0];
             int offset = 0;
             Techniques last = Techniques.None;
-            ApplyStates();
-            _vertexBuffer.SetData(0, _vertexInfo, 0, _numSprites * 4, SpriteVertex.SizeInBytes);
-            DrawInfo current = _textureInfo[0];
 
             for (int i = 1; i < _numSprites; i++)
+            {
                 if (_textureInfo[i].Texture != current.Texture || _textureInfo[i].Technique != current.Technique)
                 {
                     InternalDraw(current, offset, i - offset, ref last);
@@ -203,9 +251,8 @@ namespace ClassicUO.Renderer
                     offset = i;
                 }
                 else
-                {
                     Merged++;
-                }
+            }
 
             InternalDraw(current, offset, _numSprites - offset, ref last);
             Calls += _numSprites;
@@ -282,4 +329,5 @@ namespace ClassicUO.Renderer
             public readonly Techniques Technique;
         }
     }
+#endif
 }

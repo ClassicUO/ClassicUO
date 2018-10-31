@@ -85,10 +85,9 @@ namespace ClassicUO.Game
 
         public static bool InGame => Player != null && Map != null;
 
-        public static IsometricLight Light { get; } = new IsometricLight()
+        public static IsometricLight Light { get; } = new IsometricLight
         {
-            Overall = 0,
-            Personal = 0
+            Overall = 0, Personal = 0
         };
 
         public static void Update(double totalMS, double frameMS)
@@ -121,9 +120,7 @@ namespace ClassicUO.Game
                             }
                         }
                         else
-                        {
                             RemoveItem(item);
-                        }
                     }
 
                     if (item.IsDisposed)
@@ -261,16 +258,22 @@ namespace ClassicUO.Game
             foreach (Item item in Items)
             {
                 if (noplayer && Player != null && !Player.IsDisposed)
+                {
                     if (item.RootContainer == Player)
                         continue;
+                }
+
                 RemoveItem(item);
             }
 
             foreach (Mobile mob in Mobiles)
             {
                 if (noplayer && Player != null && !Player.IsDisposed)
+                {
                     if (mob == Player)
                         continue;
+                }
+
                 RemoveMobile(mob);
             }
         }

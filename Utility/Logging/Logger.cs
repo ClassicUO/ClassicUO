@@ -9,9 +9,27 @@ namespace ClassicUO.Utility.Logging
     {
         public static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> LogTypeInfo = new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
         {
-            {LogTypes.None, Tuple.Create(ConsoleColor.White, "")}, {LogTypes.Info, Tuple.Create(ConsoleColor.Green, "  Info    ")}, {LogTypes.Debug, Tuple.Create(ConsoleColor.DarkGreen, "  Debug   ")},
-            {LogTypes.Trace, Tuple.Create(ConsoleColor.Green, "  Trace   ")}, {LogTypes.Warning, Tuple.Create(ConsoleColor.Yellow, "  Warning ")}, {LogTypes.Error, Tuple.Create(ConsoleColor.Red, "  Error   ")},
-            {LogTypes.Panic, Tuple.Create(ConsoleColor.Red, "  Panic   ")}
+            {
+                LogTypes.None, Tuple.Create(ConsoleColor.White, "")
+            },
+            {
+                LogTypes.Info, Tuple.Create(ConsoleColor.Green, "  Info    ")
+            },
+            {
+                LogTypes.Debug, Tuple.Create(ConsoleColor.DarkGreen, "  Debug   ")
+            },
+            {
+                LogTypes.Trace, Tuple.Create(ConsoleColor.Green, "  Trace   ")
+            },
+            {
+                LogTypes.Warning, Tuple.Create(ConsoleColor.Yellow, "  Warning ")
+            },
+            {
+                LogTypes.Error, Tuple.Create(ConsoleColor.Red, "  Error   ")
+            },
+            {
+                LogTypes.Panic, Tuple.Create(ConsoleColor.Red, "  Panic   ")
+            }
         };
         private readonly BlockingCollection<Tuple<LogTypes, string, string>> _logQueue = new BlockingCollection<Tuple<LogTypes, string, string>>();
         private bool _isLogging;
@@ -67,7 +85,10 @@ namespace ClassicUO.Utility.Logging
                         }
                     }
                 }
-            }) {IsBackground = true};
+            })
+            {
+                IsBackground = true
+            };
             logThread.Start();
             _isLogging = logThread.ThreadState == ThreadState.Running || logThread.ThreadState == ThreadState.Background;
         }
@@ -84,12 +105,7 @@ namespace ClassicUO.Utility.Logging
 
         public void NewLine()
         {
-            SetLogger(LogTypes.None, "");
-        }
-
-        public void WaitForKey()
-        {
-            Console.ReadKey(true);
+            SetLogger(LogTypes.None, string.Empty);
         }
 
         public void Clear()
@@ -100,7 +116,7 @@ namespace ClassicUO.Utility.Logging
         private void SetLogger(LogTypes type, string text)
         {
             if ((LogTypes & type) == type)
-                _logQueue.Add(type == LogTypes.None ? Tuple.Create(type, "", text) : Tuple.Create(type, DateTime.Now.ToString("T"), text));
+                _logQueue.Add(type == LogTypes.None ? Tuple.Create(type, string.Empty, text) : Tuple.Create(type, DateTime.Now.ToString("T"), text));
         }
     }
 }

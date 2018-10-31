@@ -45,10 +45,7 @@ namespace ClassicUO.Input.TextEntry
 
             RenderCaret = new RenderedText
             {
-                IsUnicode = unicode,
-                Font = font,
-                Hue = hue,
-                Text = "_"
+                IsUnicode = unicode, Font = font, Hue = hue, Text = "_"
             };
             MaxCharCount = maxcharlength;
             Width = width;
@@ -120,10 +117,7 @@ namespace ClassicUO.Input.TextEntry
                     if (int.Parse(s) > MaxCharCount)
                         return;
                 }
-                else if (Text.Length >= MaxCharCount)
-                {
-                    return;
-                }
+                else if (Text.Length >= MaxCharCount) return;
             }
 
             string text = Text.Insert(CaretIndex, c);
@@ -222,13 +216,9 @@ namespace ClassicUO.Input.TextEntry
                     Offset = Width - CaretPosition.X;
             }
             else if (Width + Offset < CaretPosition.X)
-            {
                 Offset = Width - CaretPosition.X;
-            }
             else
-            {
                 Offset = 0;
-            }
 
             if (IsChanged)
                 IsChanged = false;

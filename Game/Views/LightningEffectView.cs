@@ -10,16 +10,7 @@ namespace ClassicUO.Game.Views
     {
         private static readonly Point[] _offsets =
         {
-            new Point(48, 0),
-            new Point(68, 0),
-            new Point(92, 0),
-            new Point(72, 0),
-            new Point(48, 0),
-            new Point(56, 0),
-            new Point(76, 0),
-            new Point(76, 0),
-            new Point(92, 0),
-            new Point(80, 0)
+            new Point(48, 0), new Point(68, 0), new Point(92, 0), new Point(72, 0), new Point(48, 0), new Point(56, 0), new Point(76, 0), new Point(76, 0), new Point(92, 0), new Point(80, 0)
         };
         private Graphic _displayed = Graphic.Invalid;
 
@@ -32,7 +23,7 @@ namespace ClassicUO.Game.Views
 #if !ORIONSORT
             PreDraw(position);
 #endif
-            return base.DrawInternal(spriteBatch, position, list);
+            return DrawInternal(spriteBatch, position, list);
         }
 
         public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
@@ -47,7 +38,7 @@ namespace ClassicUO.Game.Views
                     return false;
                 Texture = IO.Resources.Gumps.GetGumpTexture(_displayed);
                 Point offset = _offsets[_displayed - 20000];
-                Bounds = new Rectangle(offset.X, Texture.Height - 33 + effect.Position.Z * 4 + offset.Y, Texture.Width, Texture.Height);
+                Bounds = new Rectangle(offset.X, Texture.Height - 33 + offset.Y, Texture.Width, Texture.Height);
             }
 
             HueVector = RenderExtentions.GetHueVector(effect.Hue);

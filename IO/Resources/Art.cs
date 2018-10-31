@@ -43,9 +43,7 @@ namespace ClassicUO.IO.Resources
             string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
 
             if (File.Exists(filepath))
-            {
                 _file = new UOFileUop(filepath, ".tga", ART_COUNT);
-            }
             else
             {
                 filepath = Path.Combine(FileManager.UoFolderPath, "art.mul");
@@ -106,9 +104,7 @@ namespace ClassicUO.IO.Resources
                 ref SpriteTexture texture = ref _artCache[_usedIndex[i]];
 
                 if (texture == null || texture.IsDisposed)
-                {
                     _usedIndex.RemoveAt(i--);
-                }
                 else if (CoreGame.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();
@@ -124,12 +120,10 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < _usedIndexLand.Count; i++)
             {
-                ref SpriteTexture texture = ref _artCache[_usedIndexLand[i]];
+                ref SpriteTexture texture = ref _landCache[_usedIndexLand[i]];
 
                 if (texture == null || texture.IsDisposed)
-                {
                     _usedIndexLand.RemoveAt(i--);
-                }
                 else if (CoreGame.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();
@@ -150,7 +144,7 @@ namespace ClassicUO.IO.Resources
             width = _file.ReadShort();
             height = _file.ReadShort();
 
-            if (width <= 0 || height <= 0)
+            if (width == 0 || height == 0)
                 return new ushort[0];
             ushort[] pixels = new ushort[width * height];
             ushort* ptr = (ushort*) _file.PositionAddress;

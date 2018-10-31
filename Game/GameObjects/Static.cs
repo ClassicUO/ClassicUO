@@ -40,8 +40,6 @@ namespace ClassicUO.Game.GameObjects
 
         public string Name => ItemData.Name;
 
-        public override Position Position { get; set; }
-
         public StaticTiles ItemData => TileData.StaticData[Graphic];
 
         public bool IsAtWorld(int x, int y)

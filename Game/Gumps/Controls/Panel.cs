@@ -40,8 +40,11 @@ namespace ClassicUO.Game.Gumps.Controls
         public override void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _frame.Length; i++)
+            {
                 if (_frame[i] != null)
                     _frame[i].Ticks = (long) totalMS;
+            }
+
             base.Update(totalMS, frameMS);
         }
 

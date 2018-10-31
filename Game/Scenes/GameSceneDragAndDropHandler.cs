@@ -75,8 +75,10 @@ namespace ClassicUO.Game.Scenes
             UIManager.Remove<Gump>(item);
 
             if (item.Container.IsValid)
+            {
                 foreach (Item i in item.Items)
                     CloseItemGumps(i);
+            }
         }
 
         private void DropHeldItemToWorld(Position position)
@@ -96,9 +98,7 @@ namespace ClassicUO.Game.Scenes
                 z = 0;
             }
             else
-            {
                 serial = Serial.MinusOne;
-            }
 
             GameActions.DropDown(HeldItem.Serial, x, y, z, serial);
             ClearHolding();
@@ -138,7 +138,7 @@ namespace ClassicUO.Game.Scenes
             ClearHolding();
         }
 
-        private void ClearHolding()
+        public void ClearHolding()
         {
             HeldItem = null;
         }

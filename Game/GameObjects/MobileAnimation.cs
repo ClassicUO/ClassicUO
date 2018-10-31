@@ -35,178 +35,143 @@ namespace ClassicUO.Game.GameObjects
         {
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED
+                (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK, (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED
+                (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK, (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_RUN, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED
+                (byte) LOW_ANIMATION_GROUP.LAG_RUN, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY, (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_UNARMED
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_RUN, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED
+                (byte) LOW_ANIMATION_GROUP.LAG_RUN, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY, (byte) PEOPLE_ANIMATION_GROUP.PAG_RUN_ARMED
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND
+                (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND, (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1
+                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_2, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_2,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2
+                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_2, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK
+                (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND, (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK
+                (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND, (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_TWOHANDED_ATTACK
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_3,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_ONEHANDED
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_3, (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_ONEHANDED
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_1
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_1
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_2
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_2
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_3,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_DOWN
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_3, (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_DOWN
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_WIDE
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_WIDE
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_JAB
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_TWOHANDED_JAB
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE
+                (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK, (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_CAST_DIRECTED
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_CAST_DIRECTED
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_3,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_CAST_AREA
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_3, (byte) PEOPLE_ANIMATION_GROUP.PAG_CAST_AREA
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_BOW
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_BOW
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_CROSSBOW
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_CROSSBOW
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_GET_HIT_1,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_GET_HIT
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_GET_HIT_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_GET_HIT
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_DIE_1, (byte) HIGHT_ANIMATION_GROUP.HAG_DIE_1,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_DIE_1
+                (byte) LOW_ANIMATION_GROUP.LAG_DIE_1, (byte) HIGHT_ANIMATION_GROUP.HAG_DIE_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_DIE_1
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_DIE_2, (byte) HIGHT_ANIMATION_GROUP.HAG_DIE_2,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_DIE_2
+                (byte) LOW_ANIMATION_GROUP.LAG_DIE_2, (byte) HIGHT_ANIMATION_GROUP.HAG_DIE_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_DIE_2
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW
+                (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK, (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_RUN, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST
+                (byte) LOW_ANIMATION_GROUP.LAG_RUN, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY, (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_FAST
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND
+                (byte) LOW_ANIMATION_GROUP.LAG_STAND, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND, (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK_BOW
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK_BOW
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK_CROSSBOW
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_ATTACK_CROSSBOW
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_SLAP_HORSE
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_ATTACK_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_SLAP_HORSE
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_TURN
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND, (byte) PEOPLE_ANIMATION_GROUP.PAG_TURN
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_AND_WALK
+                (byte) LOW_ANIMATION_GROUP.LAG_WALK, (byte) HIGHT_ANIMATION_GROUP.HAG_WALK, (byte) PEOPLE_ANIMATION_GROUP.PAG_ATTACK_UNARMED_AND_WALK
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_EMOTE_BOW
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND, (byte) PEOPLE_ANIMATION_GROUP.PAG_EMOTE_BOW
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_EMOTE_SALUTE
+                (byte) LOW_ANIMATION_GROUP.LAG_EAT, (byte) HIGHT_ANIMATION_GROUP.HAG_STAND, (byte) PEOPLE_ANIMATION_GROUP.PAG_EMOTE_SALUTE
             },
             new[]
             {
-                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1,
-                (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3
+                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3
             }
         };
 
@@ -239,7 +204,7 @@ namespace ClassicUO.Game.GameObjects
 
         public static void GetGroupForAnimation(ANIMATION_GROUPS group, ref byte animation)
         {
-            if ((sbyte) group > 0 && animation < (byte) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT)
+            if ((sbyte) group != 0 && animation < (byte) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT)
                 animation = _animAssociateTable[animation][(sbyte) group - 1];
         }
 
@@ -250,7 +215,7 @@ namespace ClassicUO.Game.GameObjects
             ANIMATION_GROUPS groupIndex = Animations.GetGroupIndex(graphic);
             byte result = mobile.AnimationGroup;
 
-            if (result != 0xFF && (mobile.Serial & 0x80000000) <= 0 && (!mobile.AnimationFromServer || checkGraphic > 0))
+            if (result != 0xFF && (mobile.Serial & 0x80000000) == 0 && (!mobile.AnimationFromServer || checkGraphic > 0))
             {
                 GetGroupForAnimation(groupIndex, ref result);
 
@@ -289,8 +254,10 @@ namespace ClassicUO.Game.GameObjects
                     result = (byte) HIGHT_ANIMATION_GROUP.HAG_WALK;
 
                     if (isRun)
+                    {
                         if (Animations.AnimationExists(graphic, (byte) HIGHT_ANIMATION_GROUP.HAG_FLY))
                             result = (byte) HIGHT_ANIMATION_GROUP.HAG_FLY;
+                    }
                 }
                 else if (mobile.AnimationGroup == 0xFF)
                 {
@@ -319,9 +286,7 @@ namespace ClassicUO.Game.GameObjects
                         if (!mobile.IsHuman && !Animations.AnimationExists(graphic, result))
                         {
                             if (mobile.Equipment[(int) Layer.Mount] != null)
-                            {
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
-                            }
                             else if ((mobile.Equipment[(int) Layer.TwoHanded] != null || mobile.Equipment[(int) Layer.OneHanded] != null) && !mobile.IsDead)
                             {
                                 if (inWar)
@@ -330,21 +295,15 @@ namespace ClassicUO.Game.GameObjects
                                     result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
                             }
                             else if (inWar && !mobile.IsDead)
-                            {
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
-                            }
                             else
-                            {
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
-                            }
                         }
                     }
                     else
                     {
                         if (mobile.Equipment[(int) Layer.Mount] != null)
-                        {
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_RIDE_SLOW;
-                        }
                         else if ((mobile.Equipment[(int) Layer.OneHanded] != null || mobile.Equipment[(int) Layer.TwoHanded] != null) && !mobile.IsDead)
                         {
                             if (inWar)
@@ -353,21 +312,15 @@ namespace ClassicUO.Game.GameObjects
                                 result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_ARMED;
                         }
                         else if (inWar && !mobile.IsDead)
-                        {
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_WARMODE;
-                        }
                         else
-                        {
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_WALK_UNARMED;
-                        }
                     }
                 }
                 else if (mobile.AnimationGroup == 0xFF)
                 {
                     if (mobile.Equipment[(int) Layer.Mount] != null)
-                    {
                         result = (byte) PEOPLE_ANIMATION_GROUP.PAG_ONMOUNT_STAND;
-                    }
                     else if (inWar && !mobile.IsDead)
                     {
                         if (mobile.Equipment[(int) Layer.OneHanded] != null)
@@ -378,14 +331,13 @@ namespace ClassicUO.Game.GameObjects
                             result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND_ONEHANDED_ATTACK;
                     }
                     else
-                    {
                         result = (byte) PEOPLE_ANIMATION_GROUP.PAG_STAND;
-                    }
 
                     mobile.AnimIndex = 0;
                 }
 
                 if (mobile.Race == RaceType.GARGOYLE)
+                {
                     if (mobile.IsFlying)
                     {
                         if (result == 0 || result == 1)
@@ -414,6 +366,7 @@ namespace ClassicUO.Game.GameObjects
                             result = 75;
                         else if (result >= 260 && result <= 270) result = 75;
                     }
+                }
             }
 
             return result;
@@ -499,12 +452,14 @@ namespace ClassicUO.Game.GameObjects
             ushort getReplacedGroup(IReadOnlyList<Tuple<ushort, byte>> list, ushort idx, ushort walkIdx)
             {
                 foreach (Tuple<ushort, byte> item in list)
+                {
                     if (item.Item1 == idx)
                     {
                         if (item.Item2 == 0xFF) return walkIdx;
 
                         return item.Item2;
                     }
+                }
 
                 return idx;
             }
@@ -787,9 +742,7 @@ namespace ClassicUO.Game.GameObjects
                 if (action == 1) return 33;
             }
             else
-            {
                 return 32;
-            }
 
             return 0;
         }

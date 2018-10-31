@@ -44,7 +44,6 @@ namespace ClassicUO.Utility
         //    v.Z = newZ;
         //}
 
-
         public static void Raise(this EventHandler handler, object sender = null)
         {
             handler?.Invoke(sender, EventArgs.Empty);
@@ -98,9 +97,7 @@ namespace ClassicUO.Utility
             int count = list.Count;
 
             if (size < count)
-            {
                 list.RemoveRange(size, count - size);
-            }
             else if (size > count)
             {
                 if (size > list.Capacity) // Optimization
@@ -134,9 +131,7 @@ namespace ClassicUO.Utility
                 if (rect.Y < r.Y) inrect = r.Y < rect.Bottom;
             }
             else
-            {
                 inrect = rect.Y < r.Bottom;
-            }
 
             return inrect;
         }

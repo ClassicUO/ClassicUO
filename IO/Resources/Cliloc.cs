@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -78,6 +79,11 @@ namespace ClassicUO.IO.Resources
             return res;
         }
 
+        public static string Translate(int baseCliloc, string arg = null, bool capitalize = false)
+        {
+            return Translate(GetString(baseCliloc), arg, capitalize);
+        }
+
         public static string Translate(string baseCliloc, string arg = null, bool capitalize = false)
         {
             if (string.IsNullOrEmpty(baseCliloc))
@@ -85,14 +91,20 @@ namespace ClassicUO.IO.Resources
 
             if (arg == null)
                 return capitalize ? StringHelper.CapitalizeFirstCharacter(baseCliloc) : baseCliloc;
-            string[] args = arg.Split('\t');
+
+            string[] args = arg.Split(new[]
+            {
+                '\t'
+            }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < args.Length; i++)
+            {
                 if (args[i].Length > 0 && args[i][0] == '#')
                 {
                     int clilocID = int.Parse(args[i].Substring(1));
                     args[i] = GetString(clilocID);
                 }
+            }
 
             string construct = baseCliloc;
 
