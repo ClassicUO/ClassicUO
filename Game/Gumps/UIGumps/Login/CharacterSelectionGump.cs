@@ -53,7 +53,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             if (loginScene.Characters.Any(o => string.IsNullOrEmpty(o.Name)))
                 AddChildren(new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
                 {
-                    X = 224, Y = 350 + yBonus
+                    X = 224, Y = 350 + yBonus, ButtonAction = ButtonAction.Activate
                 });
 
             AddChildren(new Button((int) Buttons.Delete, 0x159A, 0x159C, 0x159B)
@@ -81,6 +81,9 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
             switch ((Buttons) buttonID)
             {
+                case Buttons.New:
+                    loginScene.StartCharCreation();
+                    break;
                 case Buttons.Next:
                     LoginCharacter(_selectedCharacter);
 

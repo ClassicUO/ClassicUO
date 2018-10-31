@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using ClassicUO.Game;
@@ -123,22 +124,21 @@ namespace ClassicUO.Network
 
     public sealed class PCreateCharacter : PacketWriter
     {
-        public PCreateCharacter(string name) : base(0x00)
+        public PCreateCharacter(PlayerMobile character, uint clientIP, int serverIndex, uint slot) : base(0x00)
         {
             int skillcount = 3;
 
             if (FileManager.ClientVersion >= ClientVersions.CV_70160)
             {
                 skillcount++;
-                this[0] = 0xF8;
-                IsDynamic = PacketsTable.GetPacketLength(this[0]) < 0;
+                SetPacketId(0xF8);
             }
 
             WriteUInt(0xEDEDEDED);
             WriteUShort(0xFFFF);
             WriteUShort(0xFFFF);
             WriteByte(0x00);
-            WriteASCII(name, 30);
+            WriteASCII(character.Name, 30);
             WriteUShort(0x00);
             uint clientflag = 0;
             /*IFOR(i, 0, g_CharacterList.ClientFlag)
@@ -147,7 +147,61 @@ namespace ClassicUO.Network
             WriteUInt(0x01);
             WriteUInt(0x0);
 
-            // to terminate...
+            WriteByte(0x0); // Profession
+            Position += 15;
+
+            byte val;
+            if (FileManager.ClientVersion < ClientVersions.CV_4011D)
+                val = Convert.ToByte(character.Flags.HasFlag(Flags.Female));
+            else
+            {
+                val = (byte)character.Race;
+
+                if (FileManager.ClientVersion < ClientVersions.CV_7000)
+                    val--;
+
+                val = (byte)((val * 2) + Convert.ToByte(character.Flags.HasFlag(Flags.Female)));
+            }
+
+            WriteByte(val);
+            WriteByte((byte)character.Strength);
+            WriteByte((byte)character.Dexterity);
+            WriteByte((byte)character.Intelligence);
+
+            var skills = character.Skills.OrderByDescending(o => o.Value).Take(skillcount).ToList();
+            foreach(var skill in skills)
+            {
+                WriteByte((byte)skill.Index);
+                WriteByte((byte)skill.ValueFixed);
+            }
+
+            WriteUShort(character.Hue);
+            WriteUShort(character.Equipment[(int)Layer.Hair].Graphic);
+            WriteUShort(character.Equipment[(int)Layer.Hair].Hue);
+
+            if (character.Equipment[(int)Layer.Beard] != null)
+            {
+                WriteUShort(character.Equipment[(int)Layer.Beard].Graphic);
+                WriteUShort(character.Equipment[(int)Layer.Beard].Hue);
+            }
+            else
+            {
+                WriteUShort(0x00);
+                WriteUShort(0x00);
+            }
+
+            WriteByte((byte)serverIndex);
+
+            var location = 1;
+            if (FileManager.ClientVersion < ClientVersions.CV_70130)
+                location--;
+
+            WriteByte((byte)location); //location
+            WriteUInt(slot);
+
+            WriteUInt(clientIP);
+            WriteUShort(character.Equipment[(int)Layer.Shirt].Hue);
+            WriteUShort(character.Equipment[(int)Layer.Pants].Hue);
         }
     }
 
