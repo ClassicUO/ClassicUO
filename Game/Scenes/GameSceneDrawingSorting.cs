@@ -98,20 +98,8 @@ namespace ClassicUO.Game.Scenes
                 if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
                     continue;
 
-                //if (/*obj.CurrentRenderIndex != _renderIndex ||*/ obj.IsPositionChanged)
-                //{
-                //    obj.UpdateScreenPosition(_offset);
-                //}
-
-                
                 if ( (_updateDrawPosition && obj.CurrentRenderIndex != _renderIndex) || obj.IsPositionChanged)
-                {
                     obj.UpdateRealScreenPosition(_offset);
-                }
-
-                //int sX = (obj.Position.X - obj.Position.Y) * 22 - _offset.X;
-                //int sY = (obj.Position.X + obj.Position.Y) * 22 - _offset.Y;
-
 
                 obj.UseInRender = 0xFF;
 
@@ -120,8 +108,6 @@ namespace ClassicUO.Game.Scenes
 
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
                     break;
-
-                //obj.ScreenPosition = new Vector3(sX - 22, sY - 22, 0);
 
                 int z = obj.Position.Z;
                 int maxObjectZ = obj.PriorityZ;
@@ -140,11 +126,13 @@ namespace ClassicUO.Game.Scenes
 
                 if (maxObjectZ > maxZ)
                     break;
+
                 obj.CurrentRenderIndex = _renderIndex;
 
-                if (!(obj is Tile) && (z >= _maxZ || obj is IDynamicItem dyn2 && (TileData.IsInternal((long) dyn2.ItemData.Flags) || _maxZ != 255 && TileData.IsRoof((long) dyn2.ItemData.Flags))))
+                if (!(obj is Tile) && (z >= _maxZ || obj is IDynamicItem dyn2 && (TileData.IsInternal((long)dyn2.ItemData.Flags) || _maxZ != 255 && TileData.IsRoof((long)dyn2.ItemData.Flags))))
                     continue;
-                int testMinZ = drawY + z * 4;
+
+                int testMinZ = drawY + (z * 4);
                 int testMaxZ = drawY;
 
                 if (obj is Tile t && t.IsStretched)
@@ -296,6 +284,7 @@ namespace ClassicUO.Game.Scenes
             if (maxBlockY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][1])
                 maxBlockY = IO.Resources.Map.MapsDefaultSize[World.Map.Index][1] - 1;
             int drawOffset = (int) (Scale * 40.0f);
+
             float maxX = winGamePosX + winGameWidth + drawOffset;
             float maxY = winGamePosY + winGameHeight + drawOffset;
             float newMaxX = maxX * Scale;

@@ -47,29 +47,13 @@ namespace ClassicUO.Game.GameObjects
             _overHeads = new List<TextOverhead>();
         }
 
-
-  
-
-        private Vector3 _screenPosition;
-
-        protected Vector3 ScreenPosition
-        {
-            get => _screenPosition;
-            set
-            {
-                if (_screenPosition != value)
-                {
-                    _screenPosition = value;
-                    IsPositionChanged = true;
-                }
-            }
-        }
+        protected Vector3 ScreenPosition { get; private set; }
 
         public Vector3 RealScreenPosition { get; protected set; }
 
         public void UpdateRealScreenPosition(Point offset)
         {
-            RealScreenPosition = new Vector3(_screenPosition.X - offset.X - 22, _screenPosition.Y - offset.Y - 22, 0);
+            RealScreenPosition = new Vector3(ScreenPosition.X - offset.X - 22, ScreenPosition.Y - offset.Y - 22, 0);
             IsPositionChanged = false;
         }
 
@@ -87,7 +71,10 @@ namespace ClassicUO.Game.GameObjects
                 {
                     _position = value;
                     ScreenPosition = new Vector3(
-                                                 (_position.X - _position.Y) * 22, (_position.X + _position.Y) * 22 - (_position.Z * 4), 0);
+                                                 (_position.X - _position.Y) * 22, 
+                                                 (_position.X + _position.Y) * 22 - (_position.Z * 4), 
+                                                 0);
+                    IsPositionChanged = true;
                 }
             }
         }

@@ -47,9 +47,9 @@ namespace ClassicUO.Game.Map
             _objectsOnTile = new List<GameObject>();
         }
 
-        public int MinZ { get; set; }
+        public sbyte MinZ { get; set; }
 
-        public int AverageZ { get; set; }
+        public sbyte AverageZ { get; set; }
 
         public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
 
@@ -226,9 +226,9 @@ namespace ClassicUO.Game.Map
                 int average = AverageZ;
 
                 if (Math.Abs(Position.Z - zRight) <= Math.Abs(zBottom - zTop))
-                    AverageZ = (Position.Z + zRight) >> 1;
+                    AverageZ = (sbyte) ((Position.Z + zRight) >> 1);
                 else
-                    AverageZ = (zBottom + zTop) >> 1;
+                    AverageZ = (sbyte) ((zBottom + zTop) >> 1);
 
                 if (AverageZ != average)
                     ForceSort();
@@ -236,13 +236,13 @@ namespace ClassicUO.Game.Map
                 MinZ = Position.Z;
 
                 if (zTop < MinZ)
-                    MinZ = zTop;
+                    MinZ = (sbyte) zTop;
 
                 if (zRight < MinZ)
-                    MinZ = zRight;
+                    MinZ = (sbyte)zRight;
 
                 if (zBottom < MinZ)
-                    MinZ = zBottom;
+                    MinZ = (sbyte)zBottom;
             }
         }
 

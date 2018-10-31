@@ -145,7 +145,6 @@ namespace ClassicUO.Game.Views
                 tile.IsStretched = false;
                 tile.MinZ = tile.Position.Z;
                 tile.PriorityZ = (short)(tile.Position.Z - 1);
-
             }
             else
             {

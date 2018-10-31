@@ -108,10 +108,7 @@ namespace ClassicUO.Game.Map
             //return tile.Tiles[x % 8][y % 8];
         }
 
-        public Tile GetTile(int x, int y, bool load = true)
-        {
-            return GetTile((short) x, (short) y, load);
-        }
+        public Tile GetTile(int x, int y, bool load = true) => GetTile((short) x, (short) y, load);
 
         public sbyte GetTileZ(int x, int y)
         {
@@ -157,55 +154,6 @@ namespace ClassicUO.Game.Map
         }
 
 
-
-        public int GetAverageZ(sbyte top, sbyte left, sbyte right, sbyte bottom, ref sbyte low, ref sbyte high)
-        {
-            high = top;
-            if (left > high) high = left;
-            if (right > high) high = right;
-            if (bottom > high) high = bottom;
-            low = high;
-            if (left < low) low = left;
-            if (right < low) low = right;
-            if (bottom < low) low = bottom;
-
-            if (top < low)
-                low = top;
-            if (right < low)
-                low = right;
-            if (bottom < low)
-                low = bottom;
-
-            if (Math.Abs(high - right) <= Math.Abs(bottom - top))
-                return (high + right) >> 1;
-            else
-                return (bottom + top) >> 1;
-
-            if (Math.Abs(left - right) <= Math.Abs(bottom - top))
-                return (left + right) >> 1;
-            else
-                return (bottom + top) >> 1;
-
-            if (Math.Abs(top - bottom) > Math.Abs(left - right)) return FloorAverage(left, right);
-
-            return FloorAverage(top, bottom);
-        }
-
-        public int GetAverageZ(short x, short y, ref sbyte low, ref sbyte top)
-        {
-            return GetAverageZ(GetTileZ(x, y), GetTileZ(x, (short)(y + 1)), GetTileZ((short)(x + 1), y), GetTileZ((short)(x + 1), (short)(y + 1)), ref low, ref top);
-        }
-
-        private static int FloorAverage(int a, int b)
-        {
-            int v = a + b;
-
-            if (v < 0)
-                --v;
-
-            return v / 2;
-        }
-
         public void ClearUnusedBlocks()
         {
             int count = 0;
@@ -227,48 +175,13 @@ namespace ClassicUO.Game.Map
         }
 
         private void LoadChunks(ushort centerX, ushort centerY)
-        {
-            //for (int y = -CHUNKS_NUM; y <= CHUNKS_NUM; y++)
-            //{
-            //    int cellY = centerY / 8 + y;
-            //    if (cellY < 0)
-            //    {
-            //        cellY += IO.Resources.Map.MapBlocksSize[Index][1];
-            //    }
-
-            //    for (int x = -CHUNKS_NUM; x <= CHUNKS_NUM; x++)
-            //    {
-            //        int cellX = centerX / 8 + x;
-            //        if (cellX < 0)
-            //        {
-            //            cellX += IO.Resources.Map.MapBlocksSize[Index][0];
-            //        }
-
-            //        int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
-
-            //        ref var tile = ref Chunks[cellindex];
-
-            //        if (tile == null || tile.X != cellX || tile.Y != cellY)
-            //        {
-            //            if (tile == null)
-            //            {
-            //                tile = new FacetChunk((ushort)cellX, (ushort)cellY);
-            //            }
-            //            else
-            //            {
-            //                tile.Unload();
-            //                tile.SetTo((ushort)cellX, (ushort)cellY);
-            //            }
-
-            //            tile.Load(Index);
-            //        }
-            //    }
-            //}
+        {           
             const int XY_OFFSET = 30;
+
             int minBlockX = (centerX - XY_OFFSET) / 8 - 1;
             int minBlockY = (centerY - XY_OFFSET) / 8 - 1;
-            int maxBlockX = (centerX + XY_OFFSET) / 8 + 2;
-            int maxBlockY = (centerY + XY_OFFSET) / 8 + 2;
+            int maxBlockX = (centerX + XY_OFFSET) / 8 + 1;
+            int maxBlockY = (centerY + XY_OFFSET) / 8 + 1;
 
             if (minBlockX < 0)
                 minBlockX = 0;
