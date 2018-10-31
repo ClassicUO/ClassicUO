@@ -144,15 +144,12 @@ namespace ClassicUO.Game.Views
             {
                 tile.IsStretched = false;
                 tile.MinZ = tile.Position.Z;
-                tile.PriorityZ = (short)(tile.Position.Z - 1);
             }
             else
             {
                 tile.IsStretched = true;
 
                 tile.UpdateZ(map.GetTileZ(tile.Position.X, tile.Position.Y + 1), map.GetTileZ(tile.Position.X + 1, tile.Position.Y + 1), map.GetTileZ(tile.Position.X + 1, tile.Position.Y));
-                tile.PriorityZ = (short) (tile.AverageZ - 1);
-
 
                 Vector3[,,] vec = new Vector3[3, 3, 4];
                 int i;

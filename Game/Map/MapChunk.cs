@@ -70,12 +70,16 @@ namespace ClassicUO.Game.Map
                         int pos = y * 8 + x;
                         ushort tileID = (ushort) (block.Cells[pos].TileID & 0x3FFF);
                         sbyte z = block.Cells[pos].Z;
-                        Tiles[x][y].Graphic = tileID;
-                        Tiles[x][y].Position = new Position((ushort) (bx + x), (ushort) (by + y), z);
-                        Tiles[x][y].AverageZ = z;
-                        Tiles[x][y].MinZ = z;
-                        Tiles[x][y].IsStretched = TileData.LandData[tileID].TexID == 0 && TileData.IsWet((long)TileData.LandData[tileID].Flags);
-                        Tiles[x][y].AddGameObject(Tiles[x][y]);
+
+                        ref Tile tile = ref Tiles[x][y];
+
+                        tile.Graphic = tileID;
+                        tile.Position = new Position((ushort) (bx + x), (ushort) (by + y), z);
+                        tile.AverageZ = z;
+                        tile.MinZ = z;
+                        tile.IsStretched = TileData.LandData[tileID].TexID == 0 && TileData.IsWet((long)TileData.LandData[tileID].Flags);
+                        tile.AddGameObject(tile);
+                        tile.Calculate();
                     }
 
                 if (im.StaticAddress != 0)

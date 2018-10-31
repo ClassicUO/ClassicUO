@@ -134,6 +134,11 @@ namespace ClassicUO.Game.Map
             _needSort = true;
         }
 
+        public void Calculate()
+        {
+            CreateView();
+        }
+
         private void RemoveDuplicates()
         {
             int[] toremove = new int[0x100];
