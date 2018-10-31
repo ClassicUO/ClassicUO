@@ -166,7 +166,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void DrawShadow(Texture2D texture, SpriteVertex[] vertices, Vector2 position, bool flip, float z)
+        public unsafe void DrawShadow(Texture2D texture, SpriteVertex[] vertices, Vector2 position, bool flip, float z)
         {
             if (texture == null || texture.IsDisposed)
                 return;
@@ -178,6 +178,7 @@ namespace ClassicUO.Renderer
 #endif
             float skewHorizTop = (vertices[0].Position.Y - position.Y) * .5f;
             float skewHorizBottom = (vertices[3].Position.Y - position.Y) * .5f;
+
             vertices[0].Position.X -= skewHorizTop;
             vertices[0].Position.Y -= skewHorizTop;
             vertices[flip ? 2 : 1].Position.X -= skewHorizTop;
@@ -188,8 +189,18 @@ namespace ClassicUO.Renderer
             vertices[3].Position.Y -= skewHorizBottom;
             _textureInfo[_numSprites] = new DrawInfo(texture, Techniques.ShadowSet);
 
-            for (int i = 0; i < 4; i++)
-                _vertexInfo[_numSprites * 4 + i] = vertices[i];
+            fixed (SpriteVertex* p = &_vertexInfo[_numSprites * 4])
+            {
+                fixed (SpriteVertex* t = &vertices[0])
+                {
+                    SpriteVertex* ptr0 = p;
+                    ptr0[0] = t[0];
+                    ptr0[1] = t[1];
+                    ptr0[2] = t[2];
+                    ptr0[3] = t[3];
+                }
+            }
+
             _numSprites++;
         }
 

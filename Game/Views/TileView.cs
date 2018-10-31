@@ -42,8 +42,7 @@ namespace ClassicUO.Game.Views
 
         public TileView(Tile tile) : base(tile)
         {
-            AllowedToDraw = !tile.IsIgnored;
-            UpdateStreched(World.Map);
+            AllowedToDraw = !tile.IsIgnored;        
         }
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
@@ -125,7 +124,8 @@ namespace ClassicUO.Game.Views
                 list.Add(GameObject, vertex[0].Position);
         }
 
-        private void UpdateStreched(Facet map)
+
+        public void UpdateStreched(Facet map)
         {
             Tile tile = (Tile) GameObject;
 
