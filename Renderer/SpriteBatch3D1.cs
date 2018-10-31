@@ -20,6 +20,7 @@ namespace ClassicUO.Renderer
         private Matrix _matrixTransformMatrix;
         private Matrix _transformMatrix = Matrix.Identity;
 
+        private BoundingBox _drawingArea;
         private readonly EffectParameter _viewportEffect;
         private readonly EffectParameter _worldMatrixEffect;
         private readonly EffectParameter _drawLightingEffect;
@@ -43,6 +44,8 @@ namespace ClassicUO.Renderer
         private readonly DrawInfo[] _textureInfo;
         private readonly SpriteVertex[] _vertexInfo;
         private bool _started;
+        private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
+
 #if !ORIONSORT
         private float _z;
 #endif
@@ -125,6 +128,8 @@ namespace ClassicUO.Renderer
 #if !ORIONSORT
             _z = 0;
 #endif
+            _drawingArea.Min = _minVector3;
+            _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
         }
 
         public void End()
@@ -138,6 +143,20 @@ namespace ClassicUO.Renderer
         public unsafe bool DrawSprite(Texture2D texture, SpriteVertex[] vertices, Techniques technique = Techniques.Default)
         {
             if (texture == null || texture.IsDisposed)
+                return false;
+
+            bool draw = false;
+
+            for (byte i = 0; i < 4; i++)
+            {
+                if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
+                {
+                    draw = true;
+                    break;
+                }
+            }
+
+            if (!draw)
                 return false;
 
             if (_numSprites >= MAX_SPRITES)
@@ -229,6 +248,7 @@ namespace ClassicUO.Renderer
             _projectionMatrixEffect.SetValue(_matrixTransformMatrix);
             _worldMatrixEffect.SetValue(_transformMatrix);
 
+
             //_projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
             //_worldMatrixEffect.SetValue(ProjectionMatrixWorld);
 
@@ -252,7 +272,6 @@ namespace ClassicUO.Renderer
                 _vertexBuffer.SetDataPointerEXT(0, (IntPtr)p, _numSprites * 4 * SpriteVertex.SizeInBytes, SetDataOptions.None);
             }
 
-            //_vertexBuffer.SetData(0, _vertexInfo, 0, _numSprites * 4, SpriteVertex.SizeInBytes);
             DrawInfo current = _textureInfo[0];
             int offset = 0;
             Techniques last = Techniques.None;

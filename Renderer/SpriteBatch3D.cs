@@ -24,6 +24,7 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -47,7 +48,7 @@ namespace ClassicUO.Renderer
         private const int INDEX_COUNT = 6;
         private const int PRIMITIVES_COUNT = 2;
 
-        private const int MAX_SPRITES = 0x800 * 40;
+        private const int MAX_SPRITES = 0x800;
         private const int MAX_VERTICES_PER_DRAW = MAX_SPRITES * 2;
         private const int INITIAL_TEXTURE_COUNT = 0x800;
         private const float MAX_ACCURATE_SINGLE_FLOAT = 65536;
@@ -61,7 +62,6 @@ namespace ClassicUO.Renderer
 
         private readonly Effect _effect;
 
-        private readonly Microsoft.Xna.Framework.Game _game;
         private readonly short[] _geometryIndices = new short[6];
 
         private readonly EffectTechnique _huesTechnique, _shadowTechnique;
@@ -83,7 +83,10 @@ namespace ClassicUO.Renderer
         private bool _isStarted;
 
         private int _vertexCount;
+
+#if !ORIONSORT
         private float _z;
+#endif
 
         public SpriteBatch3D(GraphicsDevice device)
         {
@@ -142,7 +145,9 @@ namespace ClassicUO.Renderer
             _effect.Parameters["lightIntensity"].SetValue(inte);
         }
 
+#if !ORIONSORT
         public float GetZ() => _z++;
+#endif
 
         public void Begin()
         {
@@ -151,10 +156,10 @@ namespace ClassicUO.Renderer
 
             _isStarted = true;
 
-            //Calls = 0;
-            //Merged = 0;
-
+            Merged = 0;
+#if !ORIONSORT
             _z = 0;
+#endif
             _drawingArea.Min = _minVector3;
             _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
         }
@@ -211,7 +216,7 @@ namespace ClassicUO.Renderer
             Build(texture, vertices, Techniques.ShadowSet);
         }
 
-        private void Build(Texture2D texture, SpriteVertex[] vertices, Techniques technique)
+        private unsafe void Build(Texture2D texture, SpriteVertex[] vertices, Techniques technique)
         {
             AddQuadrilateralIndices(_vertexCount);
 
@@ -220,10 +225,42 @@ namespace ClassicUO.Renderer
 
             DrawCallInfo call = new DrawCallInfo(texture, technique, _indicesCount, PRIMITIVES_COUNT, 0);
 
-            Array.Copy(vertices, 0, _vertices, _vertexCount, VERTEX_COUNT);
+            //Array.Copy(vertices, 0, _vertices, _vertexCount, VERTEX_COUNT);
+
+            fixed (SpriteVertex* p = &_vertices[_vertexCount])
+            {
+                fixed (SpriteVertex* t = &vertices[0])
+                {
+                    SpriteVertex* ptr = p;
+                    SpriteVertex* tptr = t;
+
+                    *ptr++ = *tptr++;
+                    *ptr++ = *tptr++;
+                    *ptr++ = *tptr++;
+                    *ptr = *tptr;
+                }
+            }
+
             _vertexCount += VERTEX_COUNT;
 
-            Array.Copy(_geometryIndices, 0, _indices, _indicesCount, INDEX_COUNT);
+            //Array.Copy(_geometryIndices, 0, _indices, _indicesCount, INDEX_COUNT);
+
+            fixed (short* p = &_indices[_indicesCount])
+            {
+                fixed (short* t = &_geometryIndices[0])
+                {
+                    short* ptr = p;
+                    short* tptr = t;
+
+                    *ptr++ = *tptr++;
+                    *ptr++ = *tptr++;
+                    *ptr++ = *tptr++;
+                    *ptr++ = *tptr++;
+                    *ptr++ = *tptr++;
+                    *ptr = *tptr;
+                }
+            }
+
             _indicesCount += INDEX_COUNT;
 
             Enqueue(ref call);
@@ -233,7 +270,7 @@ namespace ClassicUO.Renderer
         {
             if (Calls > 0 && call.TryMerge(ref _drawCalls[Calls - 1]))
             {
-                //Merged++;
+                Merged++;
                 return;
             }
 
@@ -267,9 +304,15 @@ namespace ClassicUO.Renderer
             InternalDraw();
         }
 
-        private void SetupBuffers()
+        private unsafe void SetupBuffers()
         {
-            _vertexBuffer.SetData(_vertices, 0, _vertexCount);
+            //_vertexBuffer.SetData(_vertices, 0, _vertexCount);
+
+            fixed (SpriteVertex* p = &_vertices[0])
+            {
+                _vertexBuffer.SetDataPointerEXT(0, (IntPtr)p, _vertexCount * SpriteVertex.SizeInBytes, SetDataOptions.None);
+            }
+
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
 
             //SortIndicesAndMerge();
@@ -305,7 +348,7 @@ namespace ClassicUO.Renderer
                 sortedIndexCount += drawCallIndexCount;
                 if (currentDrawCall.TryMerge(ref _drawCalls[newDrawCallCount - 1]))
                 {
-                    //Merged++;
+                    Merged++;
                     continue;
                 }
 
@@ -319,16 +362,10 @@ namespace ClassicUO.Renderer
         private void ApplyStates()
         {
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            //GraphicsDevice.BlendState.ColorBlendFunction = BlendFunction.Add;
-            //GraphicsDevice.BlendState.AlphaSourceBlend = Blend.SourceColor;
-
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
-
-            //GraphicsDevice.SamplerStates[3] = SamplerState.PointClamp;
-            //GraphicsDevice.SamplerStates[4] = SamplerState.PointWrap;
 
             // set up viewport.
             _projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
@@ -347,7 +384,6 @@ namespace ClassicUO.Renderer
 
             for (int i = 0; i < Calls; i++)
             {
-
                 ref DrawCallInfo call = ref _drawCalls[i];
 
                 switch (call.Technique)
@@ -384,6 +420,7 @@ namespace ClassicUO.Renderer
             GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, call.StartIndex, call.PrimitiveCount);
         }
 
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct DrawCallInfo : IComparable<DrawCallInfo>
         {
             public unsafe DrawCallInfo(Texture2D texture, Techniques technique, int start, int count, float depth)
@@ -413,8 +450,7 @@ namespace ClassicUO.Renderer
 
             public int CompareTo(DrawCallInfo other)
             {
-
-                var result = TextureKey.CompareTo(other.TextureKey);
+                int result = TextureKey.CompareTo(other.TextureKey);
                 if (result != 0)
                     return result;
                 result = DepthKey.CompareTo(other.DepthKey);
