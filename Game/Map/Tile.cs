@@ -142,10 +142,7 @@ namespace ClassicUO.Game.Map
             _needSort = true;
         }
 
-        public void Calculate()
-        {
-            CreateView();
-        }
+        public void Calculate() => ((TileView)View).UpdateStreched(World.Map);
 
         private void RemoveDuplicates()
         {

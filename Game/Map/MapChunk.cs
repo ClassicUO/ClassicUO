@@ -71,12 +71,13 @@ namespace ClassicUO.Game.Map
                         int pos = y * 8 + x;
                         ushort tileID = (ushort) (block.Cells[pos].TileID & 0x3FFF);
                         sbyte z = block.Cells[pos].Z;
-                        ref Tile tile = ref Tiles[x][y];
+                        Tile tile = Tiles[x][y];
+                        LandTiles info = TileData.LandData[tileID];
                         tile.Graphic = tileID;
                         tile.Position = new Position((ushort) (bx + x), (ushort) (by + y), z);
                         tile.AverageZ = z;
                         tile.MinZ = z;
-                        tile.IsStretched = TileData.LandData[tileID].TexID == 0 && TileData.IsWet((long) TileData.LandData[tileID].Flags);
+                        tile.IsStretched = info.TexID == 0 && TileData.IsWet((long) info.Flags);
                         tile.AddGameObject(tile);
                         tile.Calculate();
                     }
