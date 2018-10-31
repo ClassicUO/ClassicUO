@@ -64,9 +64,7 @@ namespace ClassicUO.Network
             if (Length > 0)
             {
                 if (_head < _tail)
-                {
                     Buffer.BlockCopy(_buffer, _head, newBuffer, 0, Length);
-                }
                 else
                 {
                     Buffer.BlockCopy(_buffer, _head, newBuffer, 0, _buffer.Length - _head);
@@ -94,9 +92,7 @@ namespace ClassicUO.Network
                 int rightLength = _buffer.Length - _tail;
 
                 if (rightLength >= size)
-                {
                     Buffer.BlockCopy(buffer, offset, _buffer, _tail, size);
-                }
                 else
                 {
                     Buffer.BlockCopy(buffer, offset, _buffer, _tail, rightLength);
@@ -104,9 +100,7 @@ namespace ClassicUO.Network
                 }
             }
             else
-            {
                 Buffer.BlockCopy(buffer, offset, _buffer, _tail, size);
-            }
 
             _tail = (_tail + size) % _buffer.Length;
             Length += size;
@@ -126,17 +120,13 @@ namespace ClassicUO.Network
             if (size == 0) return 0;
 
             if (_head < _tail)
-            {
                 Buffer.BlockCopy(_buffer, _head, buffer, offset, size);
-            }
             else
             {
                 int rightLength = _buffer.Length - _head;
 
                 if (rightLength >= size)
-                {
                     Buffer.BlockCopy(_buffer, _head, buffer, offset, size);
-                }
                 else
                 {
                     Buffer.BlockCopy(_buffer, _head, buffer, offset, rightLength);

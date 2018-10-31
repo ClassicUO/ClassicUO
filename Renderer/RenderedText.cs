@@ -101,9 +101,7 @@ namespace ClassicUO.Renderer
                         Texture = null;
                     }
                     else
-                    {
                         Texture = InternalCreateTexture();
-                    }
                 }
             }
         }
@@ -155,9 +153,7 @@ namespace ClassicUO.Renderer
             int maxX = src.X + dst.Width;
 
             if (maxX <= Width)
-            {
                 src.Width = dst.Width;
-            }
             else
             {
                 src.Width = Width - src.X;
@@ -167,9 +163,7 @@ namespace ClassicUO.Renderer
             int maxY = src.Y + dst.Height;
 
             if (maxY <= Height)
-            {
                 src.Height = dst.Height;
-            }
             else
             {
                 src.Height = Height - src.Y;

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ClassicUO.Game.Data
+﻿namespace ClassicUO.Game.Data
 {
     public class BuffIcon
     {
@@ -16,7 +10,9 @@ namespace ClassicUO.Game.Data
         }
 
         public Graphic Graphic { get; }
+
         public long Timer { get; }
+
         public string Text { get; }
     }
 }

@@ -22,14 +22,12 @@
 #endregion
 
 using System;
-using System.IO;
 
 namespace ClassicUO.Network
 {
     public class PacketWriter : PacketBase
     {
         private byte[] _data;
-
 
         public PacketWriter(byte id)
         {
@@ -52,7 +50,6 @@ namespace ClassicUO.Network
         {
             if (Length != Position)
                 Array.Resize(ref _data, Position);
-
             WriteSize();
 
             return _data;
@@ -72,8 +69,10 @@ namespace ClassicUO.Network
             if (length < 0) throw new ArgumentOutOfRangeException("length");
 
             if (IsDynamic)
+            {
                 while (Position + length > Length)
                     Array.Resize(ref _data, Length + length * 2);
+            }
             else if (Position + length > Length) throw new ArgumentOutOfRangeException("length");
         }
     }

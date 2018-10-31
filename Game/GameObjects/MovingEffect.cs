@@ -58,14 +58,10 @@ namespace ClassicUO.Game.GameObjects
                         source.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
                 }
                 else
-                {
                     SetSource(xSource, ySource, zSourceB);
-                }
             }
             else
-            {
                 SetSource(xSource, ySource, zSource);
-            }
 
             Entity target = World.Get(trg);
 
@@ -86,9 +82,7 @@ namespace ClassicUO.Game.GameObjects
                         target.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
                 }
                 else
-                {
                     SetSource(xTarget, yTarget, zTargB);
-                }
             }
         }
 
@@ -111,14 +105,10 @@ namespace ClassicUO.Game.GameObjects
                 _timeUntilHit = (float) Math.Sqrt(Math.Pow(tx - sx, 2) + Math.Pow(ty - sy, 2) + Math.Pow(tz - sz, 2)) * 75f;
             }
             else
-            {
                 _timeActive += (float) frameMS;
-            }
 
             if (_timeActive >= _timeUntilHit)
-            {
                 Dispose();
-            }
             else
             {
                 float x = sx + _timeActive / _timeUntilHit * (tx - sx);

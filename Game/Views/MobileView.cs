@@ -78,7 +78,6 @@ namespace ClassicUO.Game.Views
                 drawX = -22 + (int) mobile.Offset.X;
             else
                 drawX = -22 - (int) mobile.Offset.X;
-
             Rectangle total = new Rectangle();
 
             for (int i = 0; i < _layerCount; i++)
@@ -101,7 +100,6 @@ namespace ClassicUO.Game.Views
 
                 if (total.Height < frame.Height)
                     total.Height = frame.Height;
-
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                 HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, 0, false);
@@ -117,9 +115,7 @@ namespace ClassicUO.Game.Views
 
                 Vector3 overheadPosition = new Vector3
                 {
-                    X = position.X + mobile.Offset.X,
-                    Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
-                    Z = position.Z
+                    X = position.X + mobile.Offset.X, Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8), Z = position.Z
                 };
                 MessageOverHead(spriteBatch, overheadPosition, mobile.IsMounted ? 0 : -22);
             }
@@ -167,9 +163,7 @@ namespace ClassicUO.Game.Views
                     if (hasOuterTorso && (layer == Layer.Torso || layer == Layer.Tunic)) continue;
 
                     if (layer == Layer.Invalid)
-                    {
                         AddLayer(dir, GameObject.Graphic, GameObject.Hue, ref mobile);
-                    }
                     else
                     {
                         Item item;
@@ -199,11 +193,13 @@ namespace ClassicUO.Game.Views
                                     Hue hue = item.Hue;
 
                                     if (Animations.EquipConversions.TryGetValue(item.Graphic, out Dictionary<ushort, EquipConvData> map))
+                                    {
                                         if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                                         {
                                             convertedItem = data;
                                             graphic = data.Graphic;
                                         }
+                                    }
 
                                     AddLayer(dir, graphic, hue, ref mobile, false, convertedItem, TileData.IsPartialHue((long) item.ItemData.Flags));
                                 }
@@ -213,9 +209,7 @@ namespace ClassicUO.Game.Views
                 }
             }
             else
-            {
                 AddLayer(dir, GameObject.Graphic, mobile.IsDead ? (Hue) 0x0386 : GameObject.Hue, ref mobile);
-            }
         }
 
         private void AddLayer(byte dir, Graphic graphic, Hue hue, ref Mobile mobile, bool mounted = false, EquipConvData? convertedItem = null, bool ispartial = false, int offsetY = 0)
@@ -269,7 +263,7 @@ namespace ClassicUO.Game.Views
                     Frame = frame,
                     Graphic = graphic,
                     IsParital = ispartial,
-                    OffsetY = offsetY,
+                    OffsetY = offsetY
                 };
             }
         }

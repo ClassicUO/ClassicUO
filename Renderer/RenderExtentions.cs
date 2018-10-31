@@ -40,14 +40,12 @@ namespace ClassicUO.Renderer
     {
         private const ushort SPECTRAL_COLOR_FLAG = 0x4000;
 
-
         public static Vector3 SelectedHue { get; } = new Vector3(27, 1, 0);
 
         public static Vector3 GetHueVector(int hue)
         {
             return GetHueVector(hue, false, 0, false);
         }
-
 
         public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool noLighting)
         {
@@ -63,9 +61,7 @@ namespace ClassicUO.Renderer
                 partial = false;
 
             if ((hue & SPECTRAL_COLOR_FLAG) != 0)
-            {
                 type = ShadersEffectType.Spectral;
-            }
             else if (hue != 0)
             {
                 if (partial)
@@ -76,7 +72,7 @@ namespace ClassicUO.Renderer
             else
                 type = ShadersEffectType.None;
 
-            return new Vector3(hue, (int)type, alpha);
+            return new Vector3(hue, (int) type, alpha);
         }
 
         public static Vector3 GetHueVector(int hue, ShadersEffectType type)

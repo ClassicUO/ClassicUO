@@ -74,7 +74,6 @@ namespace ClassicUO.Game.Map
 
             if (block >= Chunks.Length)
                 return null;
-
             ref MapChunk chuck = ref Chunks[block];
 
             if (chuck == null)
@@ -86,9 +85,7 @@ namespace ClassicUO.Game.Map
                     chuck.Load(Index);
                 }
                 else
-                {
                     return null;
-                }
             }
 
             chuck.LastAccessTime = CoreGame.Ticks;
@@ -108,7 +105,10 @@ namespace ClassicUO.Game.Map
             //return tile.Tiles[x % 8][y % 8];
         }
 
-        public Tile GetTile(int x, int y, bool load = true) => GetTile((short) x, (short) y, load);
+        public Tile GetTile(int x, int y, bool load = true)
+        {
+            return GetTile((short) x, (short) y, load);
+        }
 
         public sbyte GetTileZ(int x, int y)
         {
@@ -153,7 +153,6 @@ namespace ClassicUO.Game.Map
             return blockX * IO.Resources.Map.MapBlocksSize[Index][1] + blockY;
         }
 
-
         public void ClearUnusedBlocks()
         {
             int count = 0;
@@ -175,9 +174,8 @@ namespace ClassicUO.Game.Map
         }
 
         private void LoadChunks(ushort centerX, ushort centerY)
-        {           
+        {
             const int XY_OFFSET = 30;
-
             int minBlockX = (centerX - XY_OFFSET) / 8 - 1;
             int minBlockY = (centerY - XY_OFFSET) / 8 - 1;
             int maxBlockX = (centerX + XY_OFFSET) / 8 + 1;

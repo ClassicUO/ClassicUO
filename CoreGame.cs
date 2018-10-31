@@ -60,8 +60,6 @@ namespace ClassicUO
             };
             Window.AllowUserResizing = true;
             _fpsCounter = new FpsCounter();
-
-
         }
 
         protected GraphicsDeviceManager GraphicsDeviceManager { get; }
@@ -89,7 +87,6 @@ namespace ClassicUO
 
         public static long Ticks { get; private set; }
 
-
         public bool IsFullScreen
         {
             get => GraphicsDeviceManager.IsFullScreen;
@@ -97,7 +94,7 @@ namespace ClassicUO
             {
                 GraphicsDeviceManager.IsFullScreen = value;
                 GraphicsDeviceManager.ApplyChanges();
-            } 
+            }
         }
 
         public int WindowWidth
@@ -107,7 +104,7 @@ namespace ClassicUO
             {
                 GraphicsDeviceManager.PreferredBackBufferWidth = value;
                 GraphicsDeviceManager.ApplyChanges();
-            } 
+            }
         }
 
         public int WindowHeight
@@ -148,9 +145,7 @@ namespace ClassicUO
                 Profiler.ExitContext("FixedUpdate");
             }
             else
-            {
                 SuppressDraw();
-            }
 
             Profiler.EnterContext("OutOfContext");
         }

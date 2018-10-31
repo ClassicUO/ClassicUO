@@ -10,16 +10,7 @@ namespace ClassicUO.Game.Views
     {
         private static readonly Point[] _offsets =
         {
-            new Point(48, 0),
-            new Point(68, 0),
-            new Point(92, 0),
-            new Point(72, 0),
-            new Point(48, 0),
-            new Point(56, 0),
-            new Point(76, 0),
-            new Point(76, 0),
-            new Point(92, 0),
-            new Point(80, 0)
+            new Point(48, 0), new Point(68, 0), new Point(92, 0), new Point(72, 0), new Point(48, 0), new Point(56, 0), new Point(76, 0), new Point(76, 0), new Point(92, 0), new Point(80, 0)
         };
         private Graphic _displayed = Graphic.Invalid;
 

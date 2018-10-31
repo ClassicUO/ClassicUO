@@ -30,26 +30,46 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 yBonus = 45;
             }
 
-            AddChildren(new ResizePic(0x0A28) {X = 160, Y = 70, Width = 408, Height = 343 + yBonus});
-            AddChildren(new Label(Cliloc.GetString(3000050), false, 0x0386, font: 2) {X = 267, Y = listTitleY});
+            AddChildren(new ResizePic(0x0A28)
+            {
+                X = 160, Y = 70, Width = 408, Height = 343 + yBonus
+            });
+
+            AddChildren(new Label(Cliloc.GetString(3000050), false, 0x0386, font: 2)
+            {
+                X = 267, Y = listTitleY
+            });
             LoginScene loginScene = Service.Get<LoginScene>();
 
             foreach (CharacterListEntry character in loginScene.Characters)
             {
                 AddChildren(new CharacterEntryGump((uint) posInList, character, SelectCharacter, LoginCharacter)
                 {
-                    X = 224,
-                    Y = yOffset + posInList * 40,
-                    Hue = posInList == 0 ? SELECTED_COLOR : NORMAL_COLOR
+                    X = 224, Y = yOffset + posInList * 40, Hue = posInList == 0 ? SELECTED_COLOR : NORMAL_COLOR
                 });
                 posInList++;
             }
 
             if (loginScene.Characters.Any(o => string.IsNullOrEmpty(o.Name)))
-                AddChildren(new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E) {X = 224, Y = 350 + yBonus});
-            AddChildren(new Button((int) Buttons.Delete, 0x159A, 0x159C, 0x159B) {X = 442, Y = 350 + yBonus});
-            AddChildren(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2) {X = 586, Y = 445, ButtonAction = ButtonAction.Activate});
-            AddChildren(new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5) {X = 610, Y = 445, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
+                {
+                    X = 224, Y = 350 + yBonus
+                });
+
+            AddChildren(new Button((int) Buttons.Delete, 0x159A, 0x159C, 0x159B)
+            {
+                X = 442, Y = 350 + yBonus
+            });
+
+            AddChildren(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+            {
+                X = 586, Y = 445, ButtonAction = ButtonAction.Activate
+            });
+
+            AddChildren(new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
+            {
+                X = 610, Y = 445, ButtonAction = ButtonAction.Activate
+            });
 
             if (loginScene.Characters.Length > 0)
                 _selectedCharacter = 0;
@@ -79,10 +99,12 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             _selectedCharacter = index;
 
             foreach (CharacterEntryGump characterGump in GetControls<CharacterEntryGump>())
+            {
                 if (characterGump.CharacterIndex == index)
                     characterGump.Hue = SELECTED_COLOR;
                 else
                     characterGump.Hue = NORMAL_COLOR;
+            }
         }
 
         private void LoginCharacter(uint index)
@@ -114,7 +136,10 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 _loginFn = loginFn;
 
                 // Bg
-                AddChildren(new ResizePic(0x0BB8) {X = 0, Y = 0, Width = 280, Height = 30});
+                AddChildren(new ResizePic(0x0BB8)
+                {
+                    X = 0, Y = 0, Width = 280, Height = 30
+                });
 
                 // Char Name
                 AddChildren(_label = new Label(character.Name, false, NORMAL_COLOR, 270, 5, align: TEXT_ALIGN_TYPE.TS_CENTER)

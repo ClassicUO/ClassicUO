@@ -72,9 +72,7 @@ namespace ClassicUO.IO
                 }
             }
             else
-            {
                 throw new Exception($"{Path} size must has > 0");
-            }
         }
 
         public virtual void Unload()

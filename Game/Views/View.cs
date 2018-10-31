@@ -23,10 +23,8 @@
 
 using System;
 
-using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
-using ClassicUO.Game.Map;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
@@ -160,7 +158,6 @@ namespace ClassicUO.Game.Views
                 return false;
             MousePick(list, vertex);
 
-         
             return true;
         }
 

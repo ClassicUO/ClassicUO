@@ -73,14 +73,10 @@ namespace ClassicUO.Game.GameObjects
                     SetSource(item);
                 }
                 else
-                {
                     SetSource(sourceX, sourceY, sourceZ);
-                }
             }
             else
-            {
                 SetSource(sourceX, sourceY, sourceZ);
-            }
         }
 
         protected override View CreateView()

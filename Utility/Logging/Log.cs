@@ -6,7 +6,10 @@
 
         public static void Start(LogTypes logTypes, LogFile logFile = null)
         {
-            _logger = _logger ?? new Logger {LogTypes = logTypes};
+            _logger = _logger ?? new Logger
+            {
+                LogTypes = logTypes
+            };
             _logger?.Start(logFile);
         }
 

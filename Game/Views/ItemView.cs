@@ -42,9 +42,7 @@ namespace ClassicUO.Game.Views
             //if (TileData.IsWet((long) item.ItemData.Flags)) SortZ++;
 
             if (!item.IsCorpse)
-            {
                 AllowedToDraw = item.Graphic > 2 && item.DisplayedGraphic > 2 && !IsNoDrawable(item.Graphic);
-            }
             else
             {
                 item.AnimIndex = 99;
@@ -55,9 +53,7 @@ namespace ClassicUO.Game.Views
                     item.Direction &= (Direction) 0x7F;
                 }
                 else
-                {
                     item.UsedLayer = false;
-                }
 
                 item.Layer = (Layer) item.Direction;
                 AllowedToDraw = true;
@@ -141,8 +137,11 @@ namespace ClassicUO.Game.Views
                     graphic = itemEquip.ItemData.AnimID;
 
                     if (Animations.EquipConversions.TryGetValue(itemEquip.Graphic, out Dictionary<ushort, EquipConvData> map))
+                    {
                         if (map.TryGetValue(itemEquip.ItemData.AnimID, out EquipConvData data))
                             graphic = data.Graphic;
+                    }
+
                     color = itemEquip.Hue;
                 }
 

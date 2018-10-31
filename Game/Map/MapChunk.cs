@@ -65,22 +65,22 @@ namespace ClassicUO.Game.Map
                 int by = Y * 8;
 
                 for (int x = 0; x < 8; x++)
+                {
                     for (int y = 0; y < 8; y++)
                     {
                         int pos = y * 8 + x;
                         ushort tileID = (ushort) (block.Cells[pos].TileID & 0x3FFF);
                         sbyte z = block.Cells[pos].Z;
-
                         ref Tile tile = ref Tiles[x][y];
-
                         tile.Graphic = tileID;
                         tile.Position = new Position((ushort) (bx + x), (ushort) (by + y), z);
                         tile.AverageZ = z;
                         tile.MinZ = z;
-                        tile.IsStretched = TileData.LandData[tileID].TexID == 0 && TileData.IsWet((long)TileData.LandData[tileID].Flags);
+                        tile.IsStretched = TileData.LandData[tileID].TexID == 0 && TileData.IsWet((long) TileData.LandData[tileID].Flags);
                         tile.AddGameObject(tile);
                         tile.Calculate();
                     }
+                }
 
                 if (im.StaticAddress != 0)
                 {
@@ -91,6 +91,7 @@ namespace ClassicUO.Game.Map
                         int count = (int) im.StaticCount;
 
                         for (int i = 0; i < count; i++, sb++)
+                        {
                             if (sb->Color > 0 && sb->Color != 0xFFFF)
                             {
                                 ushort x = sb->X;
@@ -100,9 +101,14 @@ namespace ClassicUO.Game.Map
                                 if (pos >= 64)
                                     continue;
                                 sbyte z = sb->Z;
-                                Static staticObject = new Static(sb->Color, sb->Hue, pos) {Position = new Position((ushort) (bx + x), (ushort) (by + y), z)};
+
+                                Static staticObject = new Static(sb->Color, sb->Hue, pos)
+                                {
+                                    Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
+                                };
                                 Tiles[x][y].AddGameObject(staticObject);
                             }
+                        }
                     }
                 }
             }
@@ -121,24 +127,30 @@ namespace ClassicUO.Game.Map
         public void Unload()
         {
             for (int i = 0; i < 8; i++)
+            {
                 for (int j = 0; j < 8; j++)
                 {
                     Tiles[i][j].Dispose();
                     Tiles[i][j] = null;
                 }
+            }
         }
 
         public bool HasNoExternalData()
         {
             for (int i = 0; i < 8; i++)
+            {
                 for (int j = 0; j < 8; j++)
                 {
                     ref Tile tile = ref Tiles[i][j];
 
                     foreach (GameObject o in tile.ObjectsOnTiles)
+                    {
                         if (!(o is Tile) && !(o is Static))
                             return false;
+                    }
                 }
+            }
 
             return true;
         }

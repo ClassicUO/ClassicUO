@@ -49,10 +49,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             _text = new RenderedText
             {
-                Font = font,
-                Hue = color,
-                IsUnicode = true,
-                Text = text
+                Font = font, Hue = color, IsUnicode = true, Text = text
             };
             CanMove = false;
             AcceptMouseInput = true;
@@ -86,8 +83,11 @@ namespace ClassicUO.Game.Gumps.Controls
         public override void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _textures.Length; i++)
+            {
                 if (_textures[i] != null)
                     _textures[i].Ticks = (long) totalMS;
+            }
+
             base.Update(totalMS, frameMS);
         }
 

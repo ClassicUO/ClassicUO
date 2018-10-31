@@ -9,9 +9,27 @@ namespace ClassicUO.Utility.Logging
     {
         public static readonly Dictionary<LogTypes, Tuple<ConsoleColor, string>> LogTypeInfo = new Dictionary<LogTypes, Tuple<ConsoleColor, string>>
         {
-            {LogTypes.None, Tuple.Create(ConsoleColor.White, "")}, {LogTypes.Info, Tuple.Create(ConsoleColor.Green, "  Info    ")}, {LogTypes.Debug, Tuple.Create(ConsoleColor.DarkGreen, "  Debug   ")},
-            {LogTypes.Trace, Tuple.Create(ConsoleColor.Green, "  Trace   ")}, {LogTypes.Warning, Tuple.Create(ConsoleColor.Yellow, "  Warning ")}, {LogTypes.Error, Tuple.Create(ConsoleColor.Red, "  Error   ")},
-            {LogTypes.Panic, Tuple.Create(ConsoleColor.Red, "  Panic   ")}
+            {
+                LogTypes.None, Tuple.Create(ConsoleColor.White, "")
+            },
+            {
+                LogTypes.Info, Tuple.Create(ConsoleColor.Green, "  Info    ")
+            },
+            {
+                LogTypes.Debug, Tuple.Create(ConsoleColor.DarkGreen, "  Debug   ")
+            },
+            {
+                LogTypes.Trace, Tuple.Create(ConsoleColor.Green, "  Trace   ")
+            },
+            {
+                LogTypes.Warning, Tuple.Create(ConsoleColor.Yellow, "  Warning ")
+            },
+            {
+                LogTypes.Error, Tuple.Create(ConsoleColor.Red, "  Error   ")
+            },
+            {
+                LogTypes.Panic, Tuple.Create(ConsoleColor.Red, "  Panic   ")
+            }
         };
         private readonly BlockingCollection<Tuple<LogTypes, string, string>> _logQueue = new BlockingCollection<Tuple<LogTypes, string, string>>();
         private bool _isLogging;
@@ -67,7 +85,10 @@ namespace ClassicUO.Utility.Logging
                         }
                     }
                 }
-            }) {IsBackground = true};
+            })
+            {
+                IsBackground = true
+            };
             logThread.Start();
             _isLogging = logThread.ThreadState == ThreadState.Running || logThread.ThreadState == ThreadState.Background;
         }
@@ -86,7 +107,6 @@ namespace ClassicUO.Utility.Logging
         {
             SetLogger(LogTypes.None, string.Empty);
         }
-
 
         public void Clear()
         {

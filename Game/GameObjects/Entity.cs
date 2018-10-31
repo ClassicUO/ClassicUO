@@ -30,8 +30,6 @@ using ClassicUO.Game.Data;
 using ClassicUO.Interfaces;
 using ClassicUO.Utility;
 
-using Microsoft.Xna.Framework;
-
 namespace ClassicUO.Game.GameObjects
 {
     [Flags]
@@ -61,7 +59,7 @@ namespace ClassicUO.Game.GameObjects
         private string _name;
         protected Action<Entity> _OnDisposed;
         protected Action<Entity> _OnUpdated;
-       // private Position _position;
+        // private Position _position;
 
         protected Entity(Serial serial) : base(World.Map)
         {
@@ -103,9 +101,7 @@ namespace ClassicUO.Game.GameObjects
                     fixedColor |= (ushort) (value & 0xC000);
                 }
                 else
-                {
                     fixedColor = (ushort) (value & 0x8000);
-                }
 
                 if (_hue != fixedColor)
                 {

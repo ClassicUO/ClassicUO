@@ -190,8 +190,7 @@ namespace ClassicUO.Network
             EnsureSize(2);
             StringBuilder sb = new StringBuilder();
             char c;
-
-            while ((c = (char)ReadUShortReversed()) != '\0') sb.Append(c);
+            while ((c = (char) ReadUShortReversed()) != '\0') sb.Append(c);
 
             return sb.ToString();
         }

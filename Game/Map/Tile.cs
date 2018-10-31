@@ -41,6 +41,7 @@ namespace ClassicUO.Game.Map
         private readonly List<GameObject> _objectsOnTile;
         private readonly List<Static> _statics = new List<Static>();
         private bool _needSort;
+        public Rectangle Rectangle;
 
         public Tile() : base(World.Map)
         {
@@ -75,16 +76,23 @@ namespace ClassicUO.Game.Map
         public void AddGameObject(GameObject obj)
         {
             if (obj is IDynamicItem dyn)
+            {
                 for (int i = 0; i < _objectsOnTile.Count; i++)
+                {
                     if (_objectsOnTile[i] is IDynamicItem dynComp)
+                    {
                         if (dynComp.Graphic == dyn.Graphic && dynComp.Position.Z == dyn.Position.Z)
                             _objectsOnTile.RemoveAt(i--);
+                    }
+                }
+            }
 #if ORIONSORT
             short priorityZ = obj.Position.Z;
 
             switch (obj)
             {
                 case Tile tile:
+
                     if (tile.IsStretched)
                         priorityZ = (short) (tile.AverageZ - 1);
                     else
@@ -145,22 +153,35 @@ namespace ClassicUO.Game.Map
             int index = 0;
 
             for (int i = 0; i < _objectsOnTile.Count; i++)
+            {
                 if (_objectsOnTile[i] is Static st)
+                {
                     for (int j = i + 1; j < _objectsOnTile.Count; j++)
+                    {
                         if (_objectsOnTile[i].Position.Z == _objectsOnTile[j].Position.Z)
+                        {
                             if (_objectsOnTile[j] is Static stj && st.Graphic == stj.Graphic)
                             {
                                 toremove[index++] = i;
 
                                 break;
                             }
-                            else if (_objectsOnTile[i] is Item item)
+
+                            if (_objectsOnTile[i] is Item item)
                             {
                                 for (int jj = i + 1; jj < _objectsOnTile.Count; jj++)
+                                {
                                     if (_objectsOnTile[i].Position.Z == _objectsOnTile[jj].Position.Z)
+                                    {
                                         if (_objectsOnTile[jj] is Static stj1 && item.ItemData.Name == stj1.ItemData.Name || _objectsOnTile[jj] is Item itemj && item.Serial == itemj.Serial)
                                             toremove[index++] = jj;
+                                    }
+                                }
                             }
+                        }
+                    }
+                }
+            }
 
             for (int i = 0; i < index; i++) _objectsOnTile.RemoveAt(toremove[i] - i);
         }
@@ -171,9 +192,13 @@ namespace ClassicUO.Game.Map
             _itemsAtZ.Clear();
 
             for (int i = 0; i < ObjectsOnTiles.Count; i++)
+            {
                 if (MathHelper.InRange(ObjectsOnTiles[i].Position.Z, z0, z1))
+                {
                     if (ObjectsOnTiles[i] is IDynamicItem)
                         items.Add(ObjectsOnTiles[i]);
+                }
+            }
 
             return items;
         }
@@ -193,13 +218,12 @@ namespace ClassicUO.Game.Map
                     StaticTiles itemdata = dyn.ItemData;
 
                     if (IO.Resources.TileData.IsRoof((long) itemdata.Flags) || IO.Resources.TileData.IsSurface((long) itemdata.Flags) || IO.Resources.TileData.IsWall((long) itemdata.Flags) && IO.Resources.TileData.IsImpassable((long) itemdata.Flags))
+                    {
                         if (entity == null || list[i].Position.Z < entity.Position.Z)
                             entity = list[i];
+                    }
                 }
-                else if (list[i] is Tile tile && tile.AverageZ >= z + 12)
-                {
-                    ground = list[i];
-                }
+                else if (list[i] is Tile tile && tile.AverageZ >= z + 12) ground = list[i];
             }
 
             return entity != null || ground != null;
@@ -211,8 +235,10 @@ namespace ClassicUO.Game.Map
             _statics.Clear();
 
             for (int i = 0; i < _objectsOnTile.Count; i++)
+            {
                 if (_objectsOnTile[i] is Static st)
                     items.Add(st);
+            }
 
             return items;
         }
@@ -225,9 +251,7 @@ namespace ClassicUO.Game.Map
                 int y = zTop * 4;
                 int w = zRight * 4 - x;
                 int h = zBottom * 4 + 1 - y;
-
                 Rectangle = new Rectangle(x, y, w, h);
-
                 int average = AverageZ;
 
                 if (Math.Abs(Position.Z - zRight) <= Math.Abs(zBottom - zTop))
@@ -237,23 +261,22 @@ namespace ClassicUO.Game.Map
 
                 if (AverageZ != average)
                     ForceSort();
-
                 MinZ = Position.Z;
 
                 if (zTop < MinZ)
                     MinZ = (sbyte) zTop;
 
                 if (zRight < MinZ)
-                    MinZ = (sbyte)zRight;
+                    MinZ = (sbyte) zRight;
 
                 if (zBottom < MinZ)
-                    MinZ = (sbyte)zBottom;
+                    MinZ = (sbyte) zBottom;
             }
         }
 
         public int CalculateCurrentAverageZ(int direction)
         {
-            int result = GetDirectionZ(((byte)(direction >> 1) + 1) & 3);
+            int result = GetDirectionZ(((byte) (direction >> 1) + 1) & 3);
 
             if ((direction & 1) > 0)
                 return result;
@@ -272,8 +295,9 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public Rectangle Rectangle;
-
-        protected override View CreateView() => new TileView(this);
+        protected override View CreateView()
+        {
+            return new TileView(this);
+        }
     }
 }

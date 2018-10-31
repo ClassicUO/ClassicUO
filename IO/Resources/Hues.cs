@@ -31,8 +31,7 @@ namespace ClassicUO.IO.Resources
     {
         private static readonly byte[] _table = new byte[32]
         {
-            0x00, 0x08, 0x10, 0x18, 0x20, 0x29, 0x31, 0x39, 0x41, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x73, 0x7B, 0x83, 0x8B,
-            0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBD, 0xC5, 0xCD, 0xD5, 0xDE, 0xE6, 0xEE, 0xF6, 0xFF
+            0x00, 0x08, 0x10, 0x18, 0x20, 0x29, 0x31, 0x39, 0x41, 0x4A, 0x52, 0x5A, 0x62, 0x6A, 0x73, 0x7B, 0x83, 0x8B, 0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBD, 0xC5, 0xCD, 0xD5, 0xDE, 0xE6, 0xEE, 0xF6, 0xFF
         };
 
         public static HuesGroup[] HuesRange { get; private set; }
@@ -74,6 +73,7 @@ namespace ClassicUO.IO.Resources
             int entrycount = HuesCount / 8;
 
             for (int i = 0; i < entrycount; i++)
+            {
                 for (int j = 0; j < 8; j++)
                 {
                     int idx = i * 8 + j;
@@ -88,6 +88,7 @@ namespace ClassicUO.IO.Resources
                         Palette[idx].Palette[idx1 + 2] = (c & 0x1F) / 31.0f;
                     }
                 }
+            }
         }
 
         public static uint[] CreateShaderColors()
@@ -96,12 +97,16 @@ namespace ClassicUO.IO.Resources
             int len = HuesRange.Length;
 
             for (int r = 0; r < len; r++)
+            {
                 for (int y = 0; y < 8; y++)
+                {
                     for (int x = 0; x < 32; x++)
                     {
                         int idx = r * 8 * 32 + y * 32 + x;
                         hues[idx] = Color16To32(HuesRange[r].Entries[y].ColorTable[x]);
                     }
+                }
+            }
 
             return hues;
         }

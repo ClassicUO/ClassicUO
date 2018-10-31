@@ -80,7 +80,6 @@ namespace ClassicUO.Game.Gumps.Controls
                 _sendClickIfNotDClick = false;
             }
 
-
             UpdateLabel();
             base.Update(totalMS, frameMS);
         }
@@ -109,8 +108,10 @@ namespace ClassicUO.Game.Gumps.Controls
                 return true;
 
             if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags))
+            {
                 if (Art.Contains(Item.DisplayedGraphic, x - 5, y - 5))
                     return true;
+            }
 
             return false;
         }
@@ -175,9 +176,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     GameActions.PickUp(Item, bounds.Width / 2, bounds.Height / 2);
                 }
                 else
-                {
                     GameActions.PickUp(Item, _clickedPoint);
-                }
             }
         }
 
@@ -186,6 +185,7 @@ namespace ClassicUO.Game.Gumps.Controls
             if (!isDisposing && Item.OverHeads.Count > 0)
             {
                 if (_labels.Count <= 0)
+                {
                     foreach (TextOverhead overhead in Item.OverHeads)
                     {
                         Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth, style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
@@ -196,6 +196,7 @@ namespace ClassicUO.Game.Gumps.Controls
                         UIManager.Add(label);
                         _labels.Add(label);
                     }
+                }
 
                 int y = 0;
 

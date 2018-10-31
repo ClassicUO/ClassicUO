@@ -61,8 +61,7 @@ namespace ClassicUO.IO.Resources
 
                 value = new SkillEntry
                 {
-                    HasButton = _file.ReadBool(), Name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)),
-                    Index = index
+                    HasButton = _file.ReadBool(), Name = Encoding.UTF8.GetString(_file.ReadArray<byte>(length - 1)), Index = index
                 };
                 _skills[index] = value;
             }

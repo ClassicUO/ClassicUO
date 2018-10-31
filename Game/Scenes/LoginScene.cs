@@ -97,7 +97,11 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Connected += NetClient_Connected;
             NetClient.LoginSocket.Disconnected += NetClient_Disconnected;
             Settings settings = Service.Get<Settings>();
-            string[] parts = settings.ClientVersion.Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries);
+
+            string[] parts = settings.ClientVersion.Split(new[]
+            {
+                '.'
+            }, StringSplitOptions.RemoveEmptyEntries);
 
             _clientVersionBuffer = new[]
             {
@@ -122,7 +126,6 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginStep.Connecting)
                 return;
-
             Account = account;
             Password = password;
             Settings settings = Service.Get<Settings>();
@@ -225,7 +228,11 @@ namespace ClassicUO.Game.Scenes
         {
             p.Seek(0);
             p.MoveToData();
-            byte[] ip = {p.ReadByte(), p.ReadByte(), p.ReadByte(), p.ReadByte()};
+
+            byte[] ip =
+            {
+                p.ReadByte(), p.ReadByte(), p.ReadByte(), p.ReadByte()
+            };
             ushort port = p.ReadUShort();
             uint seed = p.ReadUInt();
             NetClient.Socket.Connect(new IPAddress(ip), port);

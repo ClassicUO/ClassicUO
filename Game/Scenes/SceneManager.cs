@@ -37,16 +37,13 @@ namespace ClassicUO.Game.Scenes
         {
             CurrentScene?.Dispose();
             CurrentScene = null;
-
             GameLoop game = Service.Get<GameLoop>();
 
             switch (type)
             {
                 case ScenesType.Login:
-
                     game.WindowWidth = 640;
                     game.WindowHeight = 480;
-
                     CurrentScene = new LoginScene();
 
                     break;
@@ -61,6 +58,9 @@ namespace ClassicUO.Game.Scenes
             CurrentScene.Load();
         }
 
-        public T GetScene<T>() where T : Scene => CurrentScene?.GetType() == typeof(T) ? (T)CurrentScene : null;
+        public T GetScene<T>() where T : Scene
+        {
+            return CurrentScene?.GetType() == typeof(T) ? (T) CurrentScene : null;
+        }
     }
 }

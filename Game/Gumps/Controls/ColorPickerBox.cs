@@ -87,8 +87,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        public ushort SelectedHue =>
-            SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
+        public ushort SelectedHue => SelectedIndex < 0 || SelectedIndex >= _hues.Length ? (ushort) 0 : _hues[SelectedIndex];
 
         public void SetHue(ushort hue)
         {
@@ -100,7 +99,11 @@ namespace ClassicUO.Game.Gumps.Controls
             if (_colorTable != null && !_colorTable.IsDisposed)
                 _colorTable.Dispose();
             _colorTable = new SpriteTexture(1, 1);
-            uint[] color = new uint[1] {hue};
+
+            uint[] color = new uint[1]
+            {
+                hue
+            };
             _colorTable.SetData(color);
         }
 
@@ -116,7 +119,11 @@ namespace ClassicUO.Game.Gumps.Controls
             if (_pointer == null)
             {
                 _pointer = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-                _pointer.SetData(new Color[1] {Color.White});
+
+                _pointer.SetData(new Color[1]
+                {
+                    Color.White
+                });
                 SelectedIndex = 0;
             }
 
@@ -149,6 +156,7 @@ namespace ClassicUO.Game.Gumps.Controls
             byte* huesData = (byte*) (ptr + (32 + 4));
 
             for (int y = 0; y < _rows; y++)
+            {
                 for (int x = 0; x < _columns; x++)
                 {
                     int colorIndex = (startColor + ((startColor + (startColor << 2)) << 1)) << 3;
@@ -159,6 +167,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     _hues[y * _columns + x] = startColor;
                     startColor += 5;
                 }
+            }
 
             Marshal.FreeHGlobal(ptr);
             _colorTable = new SpriteTexture(_columns, _rows);

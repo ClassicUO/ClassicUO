@@ -21,12 +21,10 @@
 
 #endregion
 
-using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -78,7 +76,6 @@ namespace ClassicUO.Game.Views
                     //{
                     //    alpha = .6f;
                     //}
-
                 }
             }
 

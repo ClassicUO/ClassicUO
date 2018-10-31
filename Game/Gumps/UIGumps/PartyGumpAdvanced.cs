@@ -30,32 +30,92 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             _partyListEntries = new List<PartyListEntry>();
             _line = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
-            _line.SetData(new[] {Color.White});
+
+            _line.SetData(new[]
+            {
+                Color.White
+            });
             X = 100;
             Y = 100;
             CanMove = true;
             AcceptMouseInput = false;
             AddChildren(_gameBorder = new GameBorder(0, 0, 320, 400, 4));
-            AddChildren(_gumpPicTiled = new GumpPicTiled(4, 4, 320 - 8, 400 - 8, 0x0A40) {IsTransparent = true});
+
+            AddChildren(_gumpPicTiled = new GumpPicTiled(4, 4, 320 - 8, 400 - 8, 0x0A40)
+            {
+                IsTransparent = true
+            });
             AddChildren(_gumpPicTiled);
-            _scrollArea = new ScrollArea(20, 60, 295, 190, true) {AcceptMouseInput = true};
+
+            _scrollArea = new ScrollArea(20, 60, 295, 190, true)
+            {
+                AcceptMouseInput = true
+            };
             AddChildren(_scrollArea);
-            AddChildren(new Label("Bar", true, 1153) {X = 30, Y = 25});
-            AddChildren(new Label("Kick", true, 1153) {X = 60, Y = 25});
-            AddChildren(new Label("Player", true, 1153) {X = 100, Y = 25});
-            AddChildren(new Label("Status", true, 1153) {X = 250, Y = 25});
+
+            AddChildren(new Label("Bar", true, 1153)
+            {
+                X = 30, Y = 25
+            });
+
+            AddChildren(new Label("Kick", true, 1153)
+            {
+                X = 60, Y = 25
+            });
+
+            AddChildren(new Label("Player", true, 1153)
+            {
+                X = 100, Y = 25
+            });
+
+            AddChildren(new Label("Status", true, 1153)
+            {
+                X = 250, Y = 25
+            });
+
             //======================================================
-            AddChildren(_messagePartyButton = new Button((int) Buttons.Message, 0xFAB, 0xFAC, 0xFAD) {X = 30, Y = 275, ButtonAction = ButtonAction.Activate, IsVisible = false});
-            AddChildren(_messagePartyLabel = new Label("Message party", true, 1153) {X = 70, Y = 275, IsVisible = false});
+            AddChildren(_messagePartyButton = new Button((int) Buttons.Message, 0xFAB, 0xFAC, 0xFAD)
+            {
+                X = 30, Y = 275, ButtonAction = ButtonAction.Activate, IsVisible = false
+            });
+
+            AddChildren(_messagePartyLabel = new Label("Message party", true, 1153)
+            {
+                X = 70, Y = 275, IsVisible = false
+            });
+
             //======================================================
-            AddChildren(_lootMeButton = new Button((int) Buttons.Loot, 0xFA2, 0xFA3, 0xFA4) {X = 30, Y = 300, ButtonAction = ButtonAction.Activate, IsVisible = false});
-            AddChildren(_lootMeLabel = new Label("Party CANNOT loot me", true, 1153) {X = 70, Y = 300, IsVisible = false});
+            AddChildren(_lootMeButton = new Button((int) Buttons.Loot, 0xFA2, 0xFA3, 0xFA4)
+            {
+                X = 30, Y = 300, ButtonAction = ButtonAction.Activate, IsVisible = false
+            });
+
+            AddChildren(_lootMeLabel = new Label("Party CANNOT loot me", true, 1153)
+            {
+                X = 70, Y = 300, IsVisible = false
+            });
+
             //======================================================
-            AddChildren(_leaveButton = new Button((int) Buttons.Leave, 0xFAE, 0xFAF, 0xFB0) {X = 30, Y = 325, ButtonAction = ButtonAction.Activate, IsVisible = false});
-            AddChildren(_leaveLabel = new Label("Leave party", true, 1153) {X = 70, Y = 325, IsVisible = false});
+            AddChildren(_leaveButton = new Button((int) Buttons.Leave, 0xFAE, 0xFAF, 0xFB0)
+            {
+                X = 30, Y = 325, ButtonAction = ButtonAction.Activate, IsVisible = false
+            });
+
+            AddChildren(_leaveLabel = new Label("Leave party", true, 1153)
+            {
+                X = 70, Y = 325, IsVisible = false
+            });
+
             //======================================================
-            AddChildren(_createAddButton = new Button((int) Buttons.Add, 0xFA8, 0xFA9, 0xFAA) {X = 30, Y = 350, ButtonAction = ButtonAction.Activate});
-            AddChildren(_createAddLabel = new Label("Add party member", true, 1153) {X = 70, Y = 350});
+            AddChildren(_createAddButton = new Button((int) Buttons.Add, 0xFA8, 0xFA9, 0xFAA)
+            {
+                X = 30, Y = 350, ButtonAction = ButtonAction.Activate
+            });
+
+            AddChildren(_createAddLabel = new Label("Add party member", true, 1153)
+            {
+                X = 70, Y = 350
+            });
             //======================================================
             PartySystem.PartyMemberChanged += OnPartyMemberChanged;
         }
@@ -174,10 +234,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             Height = 20;
             Member = member;
+
             //======================================================
             //Name = new Label(member.Name, true, 1153, font:3);
             //Name.X = 80;
-            Name = PartySystem.Leader == member.Serial ? new Label(member.Name + "(L)", true, 1161, font: 3) {X = 80} : new Label(member.Name, true, 1153, font: 3) {X = 80};
+            Name = PartySystem.Leader == member.Serial
+                       ? new Label(member.Name + "(L)", true, 1161, font: 3)
+                       {
+                           X = 80
+                       }
+                       : new Label(member.Name, true, 1153, font: 3)
+                       {
+                           X = 80
+                       };
             AddChildren(Name);
 
             //======================================================
@@ -186,11 +255,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
             else
                 Status = new GumpPic(240, 0, 0x29F6, 0x43);
             AddChildren(Status);
+
             //======================================================
-            PMButton = new Button((int) Buttons.GetBar, 0xFAE, 0xFAF, 0xFB0) {X = 10, ButtonAction = ButtonAction.Activate};
+            PMButton = new Button((int) Buttons.GetBar, 0xFAE, 0xFAF, 0xFB0)
+            {
+                X = 10, ButtonAction = ButtonAction.Activate
+            };
             AddChildren(PMButton);
+
             //======================================================
-            KickButton = new Button((int) Buttons.Kick, 0xFB1, 0xFB2, 0xFB3) {X = 40, ButtonAction = ButtonAction.Activate};
+            KickButton = new Button((int) Buttons.Kick, 0xFB1, 0xFB2, 0xFB3)
+            {
+                X = 40, ButtonAction = ButtonAction.Activate
+            };
             AddChildren(KickButton);
         }
 

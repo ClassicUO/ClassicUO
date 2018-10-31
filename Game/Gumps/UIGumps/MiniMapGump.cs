@@ -104,7 +104,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if (_playerIndicator == null)
                 {
                     _playerIndicator = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-                    _playerIndicator.SetData(new uint[1] {0xFFFFFFFF});
+
+                    _playerIndicator.SetData(new uint[1]
+                    {
+                        0xFFFFFFFF
+                    });
                 }
 
                 //DRAW DOT OF PLAYER
@@ -135,7 +139,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (_gumpTexture == null || _gumpTexture.IsDisposed)
                 return;
-
             ushort lastX = World.Player.Position.X;
             ushort lastY = World.Player.Position.Y;
 
@@ -144,10 +147,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _x = lastX;
                 _y = lastY;
             }
-            else if (!_forceUpdate)
-            {
-                return;
-            }
+            else if (!_forceUpdate) return;
 
             if (_mapTexture != null && !_mapTexture.IsDisposed)
                 _mapTexture.Dispose();
@@ -174,8 +174,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             Point[] table = new Point[2]
             {
-                new Point(0, 0),
-                new Point(0, 1)
+                new Point(0, 0), new Point(0, 1)
             };
 
             for (int i = minBlockX; i <= maxBlockX; i++)

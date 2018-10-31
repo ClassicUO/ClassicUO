@@ -14,20 +14,35 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public LoadingGump() : base(0, 0)
         {
             //if (g_ConnectionScreen.GetType() != CST_CONLOST)
-            AddChildren(new ResizePic(0x0A28) {X = 142, Y = 134, Width = 356, Height = 212});
+            AddChildren(new ResizePic(0x0A28)
+            {
+                X = 142, Y = 134, Width = 356, Height = 212
+            });
             // else
             // AddChildren(new ResizePic(0x0A28) { X = 210, Y = 178, Width = 203, Height = 121 });
             DefineLoadingScreen();
-            AddChildren(new Label(_labelText, false, 0x0386, 326, 2, align: TEXT_ALIGN_TYPE.TS_CENTER) {X = 162, Y = 178});
+
+            AddChildren(new Label(_labelText, false, 0x0386, 326, 2, align: TEXT_ALIGN_TYPE.TS_CENTER)
+            {
+                X = 162, Y = 178
+            });
 
             if (showButtons == Buttons.OK)
-            {
-                AddChildren(new Button((int) Buttons.OK, 0x0481, 0x0483, 0x0482) {X = 306, Y = 304, ButtonAction = ButtonAction.Activate});
-            }
+                AddChildren(new Button((int) Buttons.OK, 0x0481, 0x0483, 0x0482)
+                {
+                    X = 306, Y = 304, ButtonAction = ButtonAction.Activate
+                });
             else if (showButtons == (Buttons.OK | Buttons.Cancel))
             {
-                AddChildren(new Button((int) Buttons.OK, 0x0481, 0x0483, 0x0482) {X = 264, Y = 304, ButtonAction = ButtonAction.Activate});
-                AddChildren(new Button((int) Buttons.Cancel, 0x047E, 0x0480, 0x047F) {X = 348, Y = 304, ButtonAction = ButtonAction.Activate});
+                AddChildren(new Button((int) Buttons.OK, 0x0481, 0x0483, 0x0482)
+                {
+                    X = 264, Y = 304, ButtonAction = ButtonAction.Activate
+                });
+
+                AddChildren(new Button((int) Buttons.Cancel, 0x047E, 0x0480, 0x047F)
+                {
+                    X = 348, Y = 304, ButtonAction = ButtonAction.Activate
+                });
             }
         }
 

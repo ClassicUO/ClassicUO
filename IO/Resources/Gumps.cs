@@ -100,12 +100,12 @@ namespace ClassicUO.IO.Resources
             if (texture == null || texture.IsDisposed)
             {
                 ushort[] pixels = GetGumpPixels(g, out int w, out int h);
-				if(pixels==null && g>=60000)
+
+                if (pixels == null && g >= 60000)
                     pixels = GetGumpPixels(g - 10000, out w, out h);
 
                 if (pixels == null || pixels.Length <= 0)
                     return null;
-
                 texture = new SpriteTexture(w, h, false);
                 texture.SetData(pixels);
                 _usedIndex.Add(g);
@@ -124,9 +124,7 @@ namespace ClassicUO.IO.Resources
                 ref SpriteTexture texture = ref _gumpCache[_usedIndex[i]];
 
                 if (texture == null || texture.IsDisposed)
-                {
                     _usedIndex.RemoveAt(i--);
-                }
                 else if (CoreGame.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();
@@ -194,8 +192,10 @@ namespace ClassicUO.IO.Resources
                     int count = gmul[i].Run;
 
                     if (val > 0)
+                    {
                         for (int j = 0; j < count; j++)
                             pixels[pos + x++] = (ushort) (0x8000 | val);
+                    }
                     else
                         x += count;
 

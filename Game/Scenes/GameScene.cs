@@ -22,26 +22,19 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
-using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
-using ClassicUO.Game.System;
 using ClassicUO.Input;
-using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-
-using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -90,7 +83,6 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (_selectedObject != null && _selectedObject.View.IsSelected)
                         _selectedObject.View.IsSelected = false;
-
                     _selectedObject = value;
 
                     if (Service.Get<Settings>().HighlightGameObjects)
@@ -122,8 +114,6 @@ namespace ClassicUO.Game.Scenes
             _settings = Service.Get<Settings>();
             Service.Register(_effectManager = new EffectManager());
             GameActions.Initialize(PickupItemBegin);
-
-
             InputManager.LeftMouseButtonDown += OnLeftMouseButtonDown;
             InputManager.LeftMouseButtonUp += OnLeftMouseButtonUp;
             InputManager.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
@@ -131,13 +121,9 @@ namespace ClassicUO.Game.Scenes
             InputManager.RightMouseButtonUp += OnRightMouseButtonUp;
             InputManager.RightMouseDoubleClick += OnRightMouseDoubleClick;
             InputManager.DragBegin += OnMouseDragBegin;
-
             InputManager.KeyDown += OnKeyDown;
             InputManager.KeyUp += OnKeyUp;
-
         }
-
-
 
         public override void Unload()
         {
@@ -147,8 +133,6 @@ namespace ClassicUO.Game.Scenes
             CleaningResources();
             World.Clear();
             Service.Unregister<GameScene>();
-
-
             InputManager.LeftMouseButtonDown -= OnLeftMouseButtonDown;
             InputManager.LeftMouseButtonUp -= OnLeftMouseButtonUp;
             InputManager.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
@@ -156,10 +140,8 @@ namespace ClassicUO.Game.Scenes
             InputManager.RightMouseButtonUp -= OnRightMouseButtonUp;
             InputManager.RightMouseDoubleClick -= OnRightMouseDoubleClick;
             InputManager.DragBegin -= OnMouseDragBegin;
-
             InputManager.KeyDown -= OnKeyDown;
             InputManager.KeyUp -= OnKeyUp;
-
             base.Unload();
         }
 
@@ -207,12 +189,10 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (x < minX || x > maxX || y < minY || y > maxY)
                             break;
-
                         Tile tile = World.Map.GetTile(x, y);
 
                         if (tile != null)
                             AddTileToRenderList(tile.ObjectsOnTiles, x, y, false, 150);
-
                         x++;
                         y--;
                     }
@@ -223,7 +203,6 @@ namespace ClassicUO.Game.Scenes
 
             if (_renderIndex >= 100)
                 _renderIndex = 1;
-
             _updateDrawPosition = false;
 #endif
             CleaningResources();
@@ -239,9 +218,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             Pathfinder.ProcessAutoWalk();
-
             SelectedObject = _mousePicker.MouseOverObject;
-
 
             if (_inqueue)
             {
@@ -266,10 +243,7 @@ namespace ClassicUO.Game.Scenes
                 _mouseOverList.MousePosition = _mousePicker.Position = MouseOverWorldPosition;
                 _mousePicker.PickOnly = PickerType.PickEverything;
             }
-            else if (SelectedObject != null)
-            {
-                SelectedObject = null;
-            }
+            else if (SelectedObject != null) SelectedObject = null;
 
             _mouseOverList.Clear();
 
@@ -304,7 +278,6 @@ namespace ClassicUO.Game.Scenes
         {
             sb3D.GraphicsDevice.Clear(Color.Black);
             sb3D.GraphicsDevice.SetRenderTarget(_renderTarget);
-
             sb3D.Begin();
             sb3D.EnableLight(true);
             sb3D.SetLightIntensity(World.Light.IsometricLevel);
@@ -380,7 +353,6 @@ namespace ClassicUO.Game.Scenes
 #endif
             // Draw in game overhead text messages
             OverheadManager.Draw(sb3D, _mouseOverList);
-           
             sb3D.End();
             sb3D.EnableLight(false);
             sb3D.GraphicsDevice.SetRenderTarget(null);

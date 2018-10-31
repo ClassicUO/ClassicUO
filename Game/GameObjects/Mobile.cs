@@ -240,8 +240,7 @@ namespace ClassicUO.Game.GameObjects
             set => _isDead = value;
         }
 
-        public bool IsFlying =>
-            FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte) Flags & 0x04) != 0;
+        public bool IsFlying => FileManager.ClientVersion >= ClientVersions.CV_7000 && ((byte) Flags & 0x04) != 0;
 
         public virtual bool InWarMode
         {
@@ -538,6 +537,7 @@ namespace ClassicUO.Game.GameObjects
                 Item mount = Equipment[(int) Layer.Mount];
 
                 if (mount != null)
+                {
                     switch (animGroup)
                     {
                         case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
@@ -548,6 +548,8 @@ namespace ClassicUO.Game.GameObjects
 
                             break;
                     }
+                }
+
                 bool mirror = false;
                 Animations.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = (int) CHARACTER_ANIMATION_DELAY;
@@ -589,15 +591,10 @@ namespace ClassicUO.Game.GameObjects
                                             repCount--;
                                             AnimationRepeatMode = repCount;
                                         }
-                                        else if (repCount == 1)
-                                        {
-                                            SetAnimation(0xFF);
-                                        }
+                                        else if (repCount == 1) SetAnimation(0xFF);
                                     }
                                     else
-                                    {
                                         SetAnimation(0xFF);
-                                    }
                                 }
                             }
                             else
@@ -618,15 +615,10 @@ namespace ClassicUO.Game.GameObjects
                                             repCount--;
                                             AnimationRepeatMode = repCount;
                                         }
-                                        else if (repCount == 1)
-                                        {
-                                            SetAnimation(0xFF);
-                                        }
+                                        else if (repCount == 1) SetAnimation(0xFF);
                                     }
                                     else
-                                    {
                                         SetAnimation(0xFF);
-                                    }
                                 }
                             }
                         }

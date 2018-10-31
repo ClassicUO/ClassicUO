@@ -82,7 +82,10 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (_isResizable)
             {
-                AddChildren(_gumpExpander = new Button(c_GumplingExpander_ButtonID, 0x082E, 0x82F) {ButtonAction = ButtonAction.Activate, X = 0, Y = 0});
+                AddChildren(_gumpExpander = new Button(c_GumplingExpander_ButtonID, 0x082E, 0x82F)
+                {
+                    ButtonAction = ButtonAction.Activate, X = 0, Y = 0
+                });
                 _gumpExpander.MouseDown += expander_OnMouseDown;
                 _gumpExpander.MouseUp += expander_OnMouseUp;
                 _gumpExpander.MouseEnter += expander_OnMouseOver;
@@ -140,9 +143,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
 
             if (!_gumpTop.IsInitialized)
-            {
                 IsVisible = false;
-            }
             else
             {
                 IsVisible = true;

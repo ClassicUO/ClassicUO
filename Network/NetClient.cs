@@ -73,9 +73,7 @@ namespace ClassicUO.Network
 #pragma warning restore 618
                 }
                 else
-                {
                     address = 0x100007f;
-                }
 
                 return ((address & 0xff) << 0x18) | ((address & 65280) << 8) | ((address >> 8) & 65280) | ((address >> 0x18) & 0xff);
             }
@@ -155,16 +153,16 @@ namespace ClassicUO.Network
             _socket.Close();
 
             if (_recvBuffer != null)
+            {
                 lock (_pool)
-                {
                     _pool.AddFreeSegment(_recvBuffer);
-                }
+            }
 
             if (_incompletePacketBuffer != null)
+            {
                 lock (_pool)
-                {
                     _pool.AddFreeSegment(_incompletePacketBuffer);
-                }
+            }
 
             _incompletePacketBuffer = null;
             _incompletePacketLength = 0;
@@ -269,11 +267,7 @@ namespace ClassicUO.Network
                     lock (_sendLock)
                     {
                         SendQueue.Gram gram;
-
-                        lock (_sendQueue)
-                        {
-                            gram = _sendQueue.Enqueue(data, 0, data.Length);
-                        }
+                        lock (_sendQueue) gram = _sendQueue.Enqueue(data, 0, data.Length);
 
                         if (gram != null && !_sending)
                         {
@@ -289,9 +283,7 @@ namespace ClassicUO.Network
                 }
             }
             else
-            {
                 Disconnect();
-            }
         }
 
         private void IO_Socket(object sender, SocketAsyncEventArgs e)
@@ -322,10 +314,7 @@ namespace ClassicUO.Network
                     }
                     else
                     {
-                        lock (_sendLock)
-                        {
-                            _sending = false;
-                        }
+                        lock (_sendLock) _sending = false;
                     }
 
                     break;
@@ -363,18 +352,11 @@ namespace ClassicUO.Network
             {
                 byte[] buffer = _recvBuffer;
                 if (_isCompressionEnabled) DecompressBuffer(ref buffer, ref bytesLen);
-
-                lock (_circularBuffer)
-                {
-                    _circularBuffer.Enqueue(buffer, 0, bytesLen);
-                }
-
+                lock (_circularBuffer) _circularBuffer.Enqueue(buffer, 0, bytesLen);
                 ExtractPackets();
             }
             else
-            {
                 Disconnect();
-            }
         }
 
         private void DecompressBuffer(ref byte[] buffer, ref int length)
@@ -404,9 +386,7 @@ namespace ClassicUO.Network
             length = offset;
 
             if (processedOffset >= sourcelength)
-            {
                 _pool.AddFreeSegment(source);
-            }
             else
             {
                 int l = sourcelength - processedOffset;
@@ -426,9 +406,7 @@ namespace ClassicUO.Network
             {
             }
             else
-            {
                 Disconnect();
-            }
         }
 
         private void Flush()
@@ -462,6 +440,7 @@ namespace ClassicUO.Network
             if (string.IsNullOrEmpty(addr)) return result;
 
             if (!IPAddress.TryParse(addr, out result))
+            {
                 try
                 {
                     IPHostEntry hostEntry = Dns.GetHostEntry(addr);
@@ -472,6 +451,7 @@ namespace ClassicUO.Network
                 catch
                 {
                 }
+            }
 
             return result;
         }

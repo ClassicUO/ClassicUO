@@ -22,8 +22,10 @@ namespace ClassicUO.Game.GameObjects.Managers
                     _effects.RemoveAt(i--);
 
                     if (effect.Children.Count > 0)
+                    {
                         for (int j = 0; j < effect.Children.Count; j++)
                             _effects.Add(effect.Children[j]);
+                    }
                 }
             }
         }

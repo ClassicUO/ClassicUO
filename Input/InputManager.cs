@@ -22,55 +22,15 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-
-using Microsoft.Xna.Framework;
-
-using SDL2;
 
 using static SDL2.SDL;
-
-using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Input
 {
     public class InputManager : IDisposable
     {
-        //private const int MOUSE_DRAG_BEGIN_DISTANCE = 2;
-        //private const int MOUSE_CLICK_MAX_DELTA = 2;
-        //public const int MOUSE_DOUBLE_CLICK_TIME = 350;
-
-        //private readonly Queue<InputEvent> _events = new Queue<InputEvent>();
-        private readonly SDL_EventFilter _hookDel;
-        //private readonly Queue<InputEvent> _nextEvents = new Queue<InputEvent>();
-        //private SDL_Keycode _lastKey;
-        //private InputMouseEvent _lastMouseDown, _lastMouseClick;
-        //private float _lastMouseDownTime, _lastMouseClickTime;
-        //private bool _leftButtonPressed;
-        //private bool _mouseIsDragging;
-        //private float _time = -1f;
-
-        public InputManager()
-        {
-            _hookDel = HookFunc;
-            SDL_AddEventWatch(_hookDel, IntPtr.Zero);
-        }
-
-        //public Point MousePosition { get; private set; }
-
-        //public Point LeftDragPosition { get; private set; }
-
-        //public Point Offset => _leftButtonPressed ? MousePosition - LeftDragPosition : Point.Zero;
-
-        public void Dispose()
-        {
-            SDL_DelEventWatch(_hookDel, IntPtr.Zero);
-        }
-
         //public void Update(double totalMS, double frameMS)
         //{
         //    _time = (float) totalMS;
@@ -220,28 +180,51 @@ namespace ClassicUO.Input
         //    return Math.Abs(final.X - initial.X) + Math.Abs(final.Y - initial.Y) > distance;
         //}
 
-
-
-
         public delegate bool DoubleClickDelegate();
+
+        private static bool _dragStarted;
+        //private const int MOUSE_DRAG_BEGIN_DISTANCE = 2;
+        //private const int MOUSE_CLICK_MAX_DELTA = 2;
+        //public const int MOUSE_DOUBLE_CLICK_TIME = 350;
+
+        //private readonly Queue<InputEvent> _events = new Queue<InputEvent>();
+        private readonly SDL_EventFilter _hookDel;
+        //private readonly Queue<InputEvent> _nextEvents = new Queue<InputEvent>();
+        //private SDL_Keycode _lastKey;
+        //private InputMouseEvent _lastMouseDown, _lastMouseClick;
+        //private float _lastMouseDownTime, _lastMouseClickTime;
+        //private bool _leftButtonPressed;
+        //private bool _mouseIsDragging;
+        //private float _time = -1f;
+
+        public InputManager()
+        {
+            _hookDel = HookFunc;
+            SDL_AddEventWatch(_hookDel, IntPtr.Zero);
+        }
+
+        //public Point MousePosition { get; private set; }
+
+        //public Point LeftDragPosition { get; private set; }
+
+        //public Point Offset => _leftButtonPressed ? MousePosition - LeftDragPosition : Point.Zero;
+
+        public void Dispose()
+        {
+            SDL_DelEventWatch(_hookDel, IntPtr.Zero);
+        }
 
         public static event DoubleClickDelegate LeftMouseDoubleClick, MidMouseDoubleClick, RightMouseDoubleClick;
 
-        public static event EventHandler LeftMouseButtonDown, LeftMouseButtonUp,
-                                         MidMouseButtonDown, MidMouseButtonUp,
-                                         RightMouseButtonDown, RightMouseButtonUp,
-                                         X1MouseButtonDown, X1MouseButtonUp,
-                                         X2MouseButtonDown, X2MouseButtonUp;
+        public static event EventHandler LeftMouseButtonDown, LeftMouseButtonUp, MidMouseButtonDown, MidMouseButtonUp, RightMouseButtonDown, RightMouseButtonUp, X1MouseButtonDown, X1MouseButtonUp, X2MouseButtonDown, X2MouseButtonUp;
 
         public static event EventHandler<bool> MouseWheel;
 
         public static event EventHandler MouseDragging, DragBegin, DragEnd;
 
         public static event EventHandler<SDL_KeyboardEvent> KeyDown, KeyUp;
+
         public static event EventHandler<string> TextInput;
-
-
-        private static bool _dragStarted;
 
         private unsafe int HookFunc(IntPtr userdata, IntPtr ev)
         {
@@ -251,9 +234,11 @@ namespace ClassicUO.Input
             {
                 case SDL_EventType.SDL_KEYDOWN:
                     KeyDown?.Raise(e->key);
+
                     break;
                 case SDL_EventType.SDL_KEYUP:
                     KeyUp.Raise(e->key);
+
                     break;
                 case SDL_EventType.SDL_TEXTINPUT:
                     string s = StringHelper.ReadUTF8(e->text.text);
@@ -262,34 +247,26 @@ namespace ClassicUO.Input
                         TextInput.Raise(s);
 
                     break;
-
                 case SDL_EventType.SDL_MOUSEMOTION:
                     Mouse.Update();
-
-                    if (Mouse.IsDragging)
-                    {
-                        MouseDragging.Raise();
-                    }
+                    if (Mouse.IsDragging) MouseDragging.Raise();
 
                     if (Mouse.IsDragging && !_dragStarted)
                     {
                         DragBegin.Raise();
                         _dragStarted = true;
                     }
-                   
 
                     break;
                 case SDL_EventType.SDL_MOUSEWHEEL:
                     Mouse.Update();
                     bool isup = e->wheel.y > 0;
                     MouseWheel.Raise(isup);
-                    break;
 
+                    break;
                 case SDL_EventType.SDL_MOUSEBUTTONUP:
                 case SDL_EventType.SDL_MOUSEBUTTONDOWN:
-
                     Mouse.Update();
-
                     bool isDown = e->type == SDL_EventType.SDL_MOUSEBUTTONDOWN;
 
                     if (_dragStarted && !isDown)
@@ -300,7 +277,7 @@ namespace ClassicUO.Input
 
                     SDL_MouseButtonEvent mouse = e->button;
 
-                    switch ((uint)mouse.button)
+                    switch ((uint) mouse.button)
                     {
                         case SDL_BUTTON_LEFT:
                             Mouse.LButtonPressed = isDown;
@@ -310,27 +287,22 @@ namespace ClassicUO.Input
                                 Mouse.Begin();
                                 Mouse.LDropPosition = Mouse.Position;
                                 Mouse.CancelDoubleClick = false;
-
-                                uint ticks = SDL.SDL_GetTicks();
+                                uint ticks = SDL_GetTicks();
 
                                 if (Mouse.LastLeftButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
 
                                     if (LeftMouseDoubleClick != null && !LeftMouseDoubleClick.Invoke())
-                                    {
                                         LeftMouseButtonDown.Raise();
-                                    }
                                     else
-                                    {
                                         Mouse.LastLeftButtonClickTime = 0xFFFF_FFFF;
-                                    }
+
                                     break;
                                 }
 
                                 LeftMouseButtonDown.Raise();
-
-                                Mouse.LastLeftButtonClickTime = Mouse.CancelDoubleClick ? (uint) 0 : ticks;
+                                Mouse.LastLeftButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
                             else
                             {
@@ -338,6 +310,7 @@ namespace ClassicUO.Input
                                     LeftMouseButtonUp.Raise();
                                 Mouse.End();
                             }
+
                             break;
                         case SDL_BUTTON_MIDDLE:
                             Mouse.MButtonPressed = isDown;
@@ -347,27 +320,26 @@ namespace ClassicUO.Input
                                 Mouse.Begin();
                                 Mouse.MDropPosition = Mouse.Position;
                                 Mouse.CancelDoubleClick = false;
-
-                                uint ticks = SDL.SDL_GetTicks();
+                                uint ticks = SDL_GetTicks();
 
                                 if (Mouse.LastMidButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
                                     if (MidMouseDoubleClick != null && !MidMouseDoubleClick.Invoke())
                                         MidMouseButtonDown.Raise();
-
                                     Mouse.LastMidButtonClickTime = 0;
+
                                     break;
                                 }
 
                                 MidMouseButtonDown.Raise();
-
-                                Mouse.LastMidButtonClickTime = Mouse.CancelDoubleClick ? (uint) 0 : ticks;
+                                Mouse.LastMidButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
                             else
                             {
                                 MidMouseButtonUp.Raise();
                                 Mouse.End();
                             }
+
                             break;
                         case SDL_BUTTON_RIGHT:
                             Mouse.RButtonPressed = isDown;
@@ -377,8 +349,7 @@ namespace ClassicUO.Input
                                 Mouse.Begin();
                                 Mouse.RDropPosition = Mouse.Position;
                                 Mouse.CancelDoubleClick = false;
-
-                                uint ticks = SDL.SDL_GetTicks();
+                                uint ticks = SDL_GetTicks();
 
                                 if (Mouse.LastRightButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
                                 {
@@ -387,15 +358,13 @@ namespace ClassicUO.Input
                                     if (RightMouseDoubleClick != null && !RightMouseDoubleClick.Invoke())
                                         RightMouseButtonDown.Raise();
                                     else
-                                    {
                                         Mouse.LastRightButtonClickTime = 0xFFFF_FFFF;
-                                    }
+
                                     break;
                                 }
 
                                 RightMouseButtonDown.Raise();
-
-                                Mouse.LastRightButtonClickTime = Mouse.CancelDoubleClick ? (uint) 0 : ticks;
+                                Mouse.LastRightButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
                             else
                             {
@@ -403,10 +372,13 @@ namespace ClassicUO.Input
                                     RightMouseButtonUp.Raise();
                                 Mouse.End();
                             }
+
                             break;
                         case SDL_BUTTON_X1:
+
                             break;
                         case SDL_BUTTON_X2:
+
                             break;
                     }
 

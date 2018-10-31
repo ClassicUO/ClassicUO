@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -12,14 +13,12 @@ namespace ClassicUO.Renderer
 #if SB1
     public class SpriteBatch3D
     {
-        private const int MAX_SPRITES = 0x800 ;
+        private const int MAX_SPRITES = 0x800;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;
-
         private Matrix _projectionMatrix;
         private Matrix _matrixTransformMatrix;
         private Matrix _transformMatrix = Matrix.Identity;
-
         private BoundingBox _drawingArea;
         private readonly EffectParameter _viewportEffect;
         private readonly EffectParameter _worldMatrixEffect;
@@ -45,7 +44,6 @@ namespace ClassicUO.Renderer
         private readonly SpriteVertex[] _vertexInfo;
         private bool _started;
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
-
 #if !ORIONSORT
         private float _z;
 #endif
@@ -55,7 +53,7 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice = device;
             _effect = new Effect(GraphicsDevice, File.ReadAllBytes(Path.Combine(Bootstrap.ExeDirectory, "shaders/IsometricWorld.fxc")));
-            _effect.Parameters["HuesPerTexture"].SetValue((float)Hues.HuesCount);
+            _effect.Parameters["HuesPerTexture"].SetValue((float) Hues.HuesCount);
             _drawLightingEffect = _effect.Parameters["DrawLighting"];
             _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];
             _worldMatrixEffect = _effect.Parameters["WorldMatrix"];
@@ -69,25 +67,9 @@ namespace ClassicUO.Renderer
             _indexBuffer = new IndexBuffer(GraphicsDevice, IndexElementSize.SixteenBits, MAX_INDICES, BufferUsage.WriteOnly);
             _indexBuffer.SetData(GenerateIndexArray());
 
-
-            _projectionMatrix = new Matrix(
-                                           0f, //(float)( 2.0 / (double)viewport.Width ) is the actual value we will use
-                                           0.0f,
-                                           0.0f,
-                                           0.0f,
-                                           0.0f,
-                                           0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
-                                           0.0f,
-                                           0.0f,
-                                           0.0f,
-                                           0.0f,
-                                           1.0f,
-                                           0.0f,
-                                           -1.0f,
-                                           1.0f,
-                                           0.0f,
-                                           1.0f
-                                          );
+            _projectionMatrix = new Matrix(0f, //(float)( 2.0 / (double)viewport.Width ) is the actual value we will use
+                                           0.0f, 0.0f, 0.0f, 0.0f, 0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
+                                           0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
         }
 
         public GraphicsDevice GraphicsDevice { get; }
@@ -144,7 +126,6 @@ namespace ClassicUO.Renderer
         {
             if (texture == null || texture.IsDisposed)
                 return false;
-
             bool draw = false;
 
             for (byte i = 0; i < 4; i++)
@@ -152,6 +133,7 @@ namespace ClassicUO.Renderer
                 if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
                 {
                     draw = true;
+
                     break;
                 }
             }
@@ -166,7 +148,6 @@ namespace ClassicUO.Renderer
 #endif
             _textureInfo[_numSprites] = new DrawInfo(texture, technique);
 
-
             fixed (SpriteVertex* p = &_vertexInfo[_numSprites * 4])
             {
                 fixed (SpriteVertex* t = &vertices[0])
@@ -177,7 +158,6 @@ namespace ClassicUO.Renderer
                     ptr0[2] = t[2];
                     ptr0[3] = t[3];
                 }
-               
             }
 
             _numSprites++;
@@ -213,15 +193,14 @@ namespace ClassicUO.Renderer
             _numSprites++;
         }
 
-
-        [System.Diagnostics.Conditional("DEBUG")]
+        [Conditional("DEBUG")]
         private void EnsureStarted()
         {
             if (!_started)
                 throw new InvalidOperationException();
         }
 
-        [System.Diagnostics.Conditional("DEBUG")]
+        [Conditional("DEBUG")]
         private void EnsureNotStarted()
         {
             if (_started)
@@ -236,47 +215,35 @@ namespace ClassicUO.Renderer
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
-
-
             Viewport viewport = GraphicsDevice.Viewport;
-            _projectionMatrix.M11 = (float)(2.0 / (double)viewport.Width);
-            _projectionMatrix.M22 = (float)(-2.0 / (double)viewport.Height);
+            _projectionMatrix.M11 = (float) (2.0 / viewport.Width);
+            _projectionMatrix.M22 = (float) (-2.0 / viewport.Height);
             _projectionMatrix.M41 = -1 - 0.5f * _projectionMatrix.M11;
             _projectionMatrix.M42 = 1 - 0.5f * _projectionMatrix.M22;
-
             Matrix.Multiply(ref _transformMatrix, ref _projectionMatrix, out _matrixTransformMatrix);
             _projectionMatrixEffect.SetValue(_matrixTransformMatrix);
             _worldMatrixEffect.SetValue(_transformMatrix);
 
-
             //_projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
             //_worldMatrixEffect.SetValue(ProjectionMatrixWorld);
-
             _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
             GraphicsDevice.Indices = _indexBuffer;
         }
 
         private unsafe void Flush()
-        {       
-           
+        {
             ApplyStates();
 
             if (_numSprites == 0)
                 return;
-
-
-            fixed (SpriteVertex* p = &_vertexInfo[0])
-            {
-                _vertexBuffer.SetDataPointerEXT(0, (IntPtr)p, _numSprites * 4 * SpriteVertex.SizeInBytes, SetDataOptions.None);
-            }
-
+            fixed (SpriteVertex* p = &_vertexInfo[0]) _vertexBuffer.SetDataPointerEXT(0, (IntPtr) p, _numSprites * 4 * SpriteVertex.SizeInBytes, SetDataOptions.None);
             DrawInfo current = _textureInfo[0];
             int offset = 0;
             Techniques last = Techniques.None;
 
             for (int i = 1; i < _numSprites; i++)
+            {
                 if (_textureInfo[i].Texture != current.Texture || _textureInfo[i].Technique != current.Technique)
                 {
                     InternalDraw(current, offset, i - offset, ref last);
@@ -284,9 +251,8 @@ namespace ClassicUO.Renderer
                     offset = i;
                 }
                 else
-                {
                     Merged++;
-                }
+            }
 
             InternalDraw(current, offset, _numSprites - offset, ref last);
             Calls += _numSprites;
@@ -305,7 +271,6 @@ namespace ClassicUO.Renderer
                         _effect.CurrentTechnique = _huesTechnique;
                         last = info.Technique;
                         _effect.CurrentTechnique.Passes[0].Apply();
-
                     }
 
                     break;
@@ -316,7 +281,6 @@ namespace ClassicUO.Renderer
                         _effect.CurrentTechnique = _shadowTechnique;
                         last = info.Technique;
                         _effect.CurrentTechnique.Passes[0].Apply();
-
                     }
 
                     break;
@@ -327,7 +291,6 @@ namespace ClassicUO.Renderer
                         _effect.CurrentTechnique = _landTechnique;
                         last = info.Technique;
                         _effect.CurrentTechnique.Passes[0].Apply();
-
                     }
 
                     break;
@@ -343,12 +306,12 @@ namespace ClassicUO.Renderer
 
             for (int i = 0, j = 0; i < MAX_INDICES; i += 6, j += 4)
             {
-                result[i] = (short)j;
-                result[i + 1] = (short)(j + 1);
-                result[i + 2] = (short)(j + 2);
-                result[i + 3] = (short)(j + 1);
-                result[i + 4] = (short)(j + 3);
-                result[i + 5] = (short)(j + 2);
+                result[i] = (short) j;
+                result[i + 1] = (short) (j + 1);
+                result[i + 2] = (short) (j + 2);
+                result[i + 3] = (short) (j + 1);
+                result[i + 4] = (short) (j + 3);
+                result[i + 5] = (short) (j + 2);
             }
 
             return result;

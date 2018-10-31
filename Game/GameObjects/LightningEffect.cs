@@ -46,9 +46,7 @@ namespace ClassicUO.Game.GameObjects
             if (!IsDisposed)
             {
                 if (AnimIndex >= 10) //TODO: fix time
-                {
                     Dispose();
-                }
                 else
                 {
                     AnimationGraphic = (Graphic) (Graphic + AnimIndex);
@@ -56,7 +54,7 @@ namespace ClassicUO.Game.GameObjects
                     if (LastChangeFrameTime < totalMS)
                     {
                         AnimIndex++;
-                        LastChangeFrameTime = (long)totalMS + Speed;
+                        LastChangeFrameTime = (long) totalMS + Speed;
                     }
 
                     (int x, int y, int z) = GetSource();

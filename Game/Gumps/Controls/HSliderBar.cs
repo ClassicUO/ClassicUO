@@ -60,12 +60,13 @@ namespace ClassicUO.Game.Gumps.Controls
             Y = y;
 
             if (hasText)
+            {
                 _text = new RenderedText
                 {
-                    Font = font,
-                    Hue = color,
-                    IsUnicode = unicode
+                    Font = font, Hue = color, IsUnicode = unicode
                 };
+            }
+
             MinValue = min;
             MaxValue = max;
             BarWidth = w;
@@ -115,9 +116,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
                         _gumpSpliderBackground = new SpriteTexture[3]
                         {
-                            IO.Resources.Gumps.GetGumpTexture(213),
-                            IO.Resources.Gumps.GetGumpTexture(214),
-                            IO.Resources.Gumps.GetGumpTexture(215)
+                            IO.Resources.Gumps.GetGumpTexture(213), IO.Resources.Gumps.GetGumpTexture(214), IO.Resources.Gumps.GetGumpTexture(215)
                         };
                         _gumpWidget = IO.Resources.Gumps.GetGumpTexture(216);
 
@@ -135,8 +134,10 @@ namespace ClassicUO.Game.Gumps.Controls
             }
 
             if (_gumpSpliderBackground != null)
+            {
                 for (int i = 0; i < _gumpSpliderBackground.Length; i++)
                     _gumpSpliderBackground[i].Ticks = (long) totalMS;
+            }
 
             //ModifyPairedValues(_newValue - Value);
             _gumpWidget.Ticks = (long) totalMS;

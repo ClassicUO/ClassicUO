@@ -99,9 +99,7 @@ namespace ClassicUO.Utility
             int count = array.Length;
 
             if (count == 0)
-            {
                 _items = _emptyArray;
-            }
             else
             {
                 _items = new T[count];
@@ -305,9 +303,7 @@ namespace ClassicUO.Utility
             int index;
 
             if (Count <= _items.Length - _frontArrayIndex)
-            {
                 index = Array.IndexOf(_items, item, _frontArrayIndex, Count);
-            }
             else
             {
                 index = Array.IndexOf(_items, item, _frontArrayIndex, _items.Length - _frontArrayIndex);
@@ -372,15 +368,11 @@ namespace ClassicUO.Utility
                 throw new ArgumentOutOfRangeException(nameof(index), index, "Index was equal or greater than TotalCount.");
 
             if (index == 0)
-            {
                 RemoveFromFront();
-            }
             else
             {
                 if (index == Count - 1)
-                {
                     RemoveFromBack();
-                }
                 else
                 {
                     if (index < Count / 2)
@@ -449,9 +441,7 @@ namespace ClassicUO.Utility
                 Array.Clear(_items, 0, _frontArrayIndex + Count - _items.Length);
             }
             else
-            {
                 Array.Clear(_items, _frontArrayIndex, Count);
-            }
 
             Count = 0;
             _frontArrayIndex = 0;
@@ -526,9 +516,7 @@ namespace ClassicUO.Utility
                 bool loopsAround = Count > _items.Length - _frontArrayIndex;
 
                 if (!loopsAround)
-                {
                     Array.Copy(_items, _frontArrayIndex, array, arrayIndex, Count);
-                }
                 else
                 {
                     Array.Copy(_items, _frontArrayIndex, array, arrayIndex, Capacity - _frontArrayIndex);

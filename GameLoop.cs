@@ -23,7 +23,6 @@
 
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -117,14 +116,13 @@ namespace ClassicUO
                 FontStyle = FontStyle.BlackBorder,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 MaxWidth = 150
-            }; 
+            };
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
             _sceneManager.ChangeScene(ScenesType.Login);
-
             base.LoadContent();
         }
 
@@ -167,7 +165,6 @@ namespace ClassicUO
         protected override void OnDraw(double frameMS)
         {
             _sceneManager.CurrentScene.Draw(_sb3D, _sbUI);
-
             _sbUI.GraphicsDevice.Clear(Color.Transparent);
             _sbUI.Begin();
             _uiManager.Draw(_sbUI);

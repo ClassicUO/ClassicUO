@@ -46,10 +46,7 @@ namespace ClassicUO.IO
 
         internal void SetData(byte[] data, long length)
         {
-            fixed (byte* ptr = data)
-            {
-                SetData(ptr, length);
-            }
+            fixed (byte* ptr = data) SetData(ptr, length);
         }
 
         internal void SetData(IntPtr data, long length)

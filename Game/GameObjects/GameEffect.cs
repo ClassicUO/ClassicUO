@@ -94,9 +94,7 @@ namespace ClassicUO.Game.GameObjects
             if (IsEnabled)
             {
                 if (Duration < totalMS && Duration >= 0)
-                {
                     Dispose();
-                }
                 else if (LastChangeFrameTime < totalMS)
                 {
                     if (AnimDataFrame.FrameCount > 0)
@@ -114,10 +112,7 @@ namespace ClassicUO.Game.GameObjects
                     LastChangeFrameTime = (long) totalMS + Speed;
                 }
             }
-            else if (Graphic != AnimationGraphic)
-            {
-                AnimationGraphic = Graphic;
-            }
+            else if (Graphic != AnimationGraphic) AnimationGraphic = Graphic;
         }
 
         public void AddChildEffect(GameEffect effect)

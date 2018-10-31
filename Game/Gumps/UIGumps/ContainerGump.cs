@@ -68,12 +68,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 bool control = false;
 
                 foreach (GumpControl child in Children)
+                {
                     if (child is ItemGumpling ctrl && ctrl.Item == item)
                     {
                         control = true;
 
                         break;
                     }
+                }
 
                 if (!control)
                     AddChildren(new ItemGumpling(item));

@@ -120,8 +120,10 @@ namespace ClassicUO.Game.Gumps.Controls
             _entry.RenderText.Draw(spriteBatch, new Vector3(position.X + _entry.Offset, position.Y, 0));
 
             if (IsEditable)
+            {
                 if (_caratBlink)
                     _entry.RenderCaret.Draw(spriteBatch, new Vector3(position.X + _entry.Offset + _entry.CaretPosition.X, position.Y + _entry.CaretPosition.Y, 0));
+            }
 
             return base.Draw(spriteBatch, position, hue);
         }
@@ -180,6 +182,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
                     break;
             }
+
             base.OnKeyDown(key, mod);
         }
 

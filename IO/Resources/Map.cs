@@ -42,8 +42,30 @@ namespace ClassicUO.IO.Resources
 
         public static int[][] MapsDefaultSize { get; } = new int[MAPS_COUNT][]
         {
-            new int[2] {7168, 4096}, new int[2] {7168, 4096}, new int[2] {2304, 1600}, new int[2] {2560, 2048},
-            new int[2] {1448, 1448}, new int[2] {1280, 4096}
+            new int[2]
+            {
+                7168, 4096
+            },
+            new int[2]
+            {
+                7168, 4096
+            },
+            new int[2]
+            {
+                2304, 1600
+            },
+            new int[2]
+            {
+                2560, 2048
+            },
+            new int[2]
+            {
+                1448, 1448
+            },
+            new int[2]
+            {
+                1280, 4096
+            }
         };
 
         public static void Load()
@@ -85,7 +107,10 @@ namespace ClassicUO.IO.Resources
                 MapsDefaultSize[0][0] = MapsDefaultSize[1][0] = 6144;
 
             for (int i = 0; i < MAPS_COUNT; i++)
-                MapBlocksSize[i] = new int[2] {MapsDefaultSize[i][0] / 8, MapsDefaultSize[i][1] / 8};
+                MapBlocksSize[i] = new int[2]
+                {
+                    MapsDefaultSize[i][0] / 8, MapsDefaultSize[i][1] / 8
+                };
         }
 
         public static void LoadMap(int i)
@@ -180,6 +205,7 @@ namespace ClassicUO.IO.Resources
             mb.Cells = new RadarMapcells[8, 8];
 
             for (int x = 0; x < 8; x++)
+            {
                 for (int y = 0; y < 8; y++)
                 {
                     ref MapCells cell = ref block.Cells[y * 8 + x];
@@ -188,6 +214,7 @@ namespace ClassicUO.IO.Resources
                     outcell.Z = cell.Z;
                     outcell.IsLand = true;
                 }
+            }
 
             StaticsBlock* sb = (StaticsBlock*) indexMap.StaticAddress;
 

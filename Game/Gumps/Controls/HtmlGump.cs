@@ -79,9 +79,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             _gameText = new RenderedText
             {
-                IsUnicode = true,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                Font = 1
+                IsUnicode = true, Align = TEXT_ALIGN_TYPE.TS_LEFT, Font = 1
             };
             CanMove = true;
         }
@@ -126,39 +124,38 @@ namespace ClassicUO.Game.Gumps.Controls
                             htmlColor = 0x010101FF;
                     }
                     else
-                    {
                         htmlColor = 0x010101FF;
-                    }
 
                     _gameText.HTMLColor = htmlColor;
                     _gameText.Hue = color;
                 }
                 else
-                {
                     _gameText.Hue = (ushort) hue;
-                }
 
                 _gameText.HasBackgroundColor = !HasBackground;
                 _gameText.Text = text;
             }
 
             if (HasBackground)
+            {
                 AddChildren(new ResizePic(0x2486)
                 {
-                    Width = Width - (HasScrollbar ? 15 : 0),
-                    Height = Height,
-                    AcceptMouseInput = false
+                    Width = Width - (HasScrollbar ? 15 : 0), Height = Height, AcceptMouseInput = false
                 });
+            }
 
             if (HasScrollbar)
             {
                 if (UseFlagScrollbar)
+                {
                     _scrollBar = new ScrollFlag(this)
                     {
                         Location = new Point(Width - 14, 0)
                     };
+                }
                 else
                     _scrollBar = new ScrollBar(this, Width - 14, 0, Height);
+
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
                 _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
@@ -212,6 +209,7 @@ namespace ClassicUO.Game.Gumps.Controls
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left)
+            {
                 for (int i = 0; i < _gameText.Links.Count; i++)
                 {
                     WebLinkRect link = _gameText.Links[i];
@@ -226,6 +224,7 @@ namespace ClassicUO.Game.Gumps.Controls
                         break;
                     }
                 }
+            }
 
             base.OnMouseClick(x, y, button);
         }

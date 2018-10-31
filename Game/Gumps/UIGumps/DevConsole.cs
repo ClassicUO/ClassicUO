@@ -45,15 +45,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(new GumpPicTiled(BLACK)
             {
-                Width = 400,
-                Height = 400
+                Width = 400, Height = 400
             });
 
             AddChildren(_textbox = new TextBox(2, -1, 350, style: FontStyle.BlackBorder)
             {
-                Width = 400,
-                Height = 400,
-                CanMove = true
+                Width = 400, Height = 400, CanMove = true
             });
         }
 

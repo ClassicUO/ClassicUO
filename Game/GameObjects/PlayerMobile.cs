@@ -72,8 +72,11 @@ namespace ClassicUO.Game.GameObjects
 
     public class PlayerMobile : Mobile
     {
-        private readonly Ability[] _ability = new Ability[2] {Ability.None, Ability.None};
-        private readonly Deque<Step> _requestedSteps = new Deque<Step>();
+        private readonly Ability[] _ability = new Ability[2]
+        {
+            Ability.None, Ability.None
+        };
+        private readonly Dictionary<Graphic, BuffIcon> _buffIcons = new Dictionary<Graphic, BuffIcon>();
         private readonly Skill[] _sklls;
         private ushort _damageIncrease;
         private ushort _damageMax;
@@ -124,8 +127,6 @@ namespace ClassicUO.Game.GameObjects
         private uint _tithingPoints;
         private ushort _weight;
         private ushort _weightMax;
-        private readonly Dictionary<Graphic, BuffIcon> _buffIcons = new Dictionary<Graphic, BuffIcon>();
-
 
         public PlayerMobile(Serial serial) : base(serial)
         {
@@ -144,22 +145,11 @@ namespace ClassicUO.Game.GameObjects
 
         public override bool InWarMode { get; set; }
 
-        public Deque<Step> RequestedSteps => _requestedSteps;
+        public Deque<Step> RequestedSteps { get; } = new Deque<Step>();
 
         public long LastStepRequestTime { get; private set; }
 
         public IReadOnlyDictionary<Graphic, BuffIcon> BuffIcons => _buffIcons;
-
-
-        public void AddBuff(Graphic graphic, uint time, string text)
-        {
-            _buffIcons[graphic] = new BuffIcon(graphic, time, text);
-        }
-
-        public void RemoveBuff(Graphic graphic)
-        {
-            _buffIcons.Remove(graphic);
-        }
 
         public ushort Strength
         {
@@ -799,13 +789,25 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Lock StrLock { get; set; }
+
         public Lock DexLock { get; set; }
+
         public Lock IntLock { get; set; }
 
         //protected override bool NoIterateAnimIndex() => false;
         protected override bool IsWalking => LastStepTime > CoreGame.Ticks - PLAYER_WALKING_DELAY;
 
         public byte SequenceNumber { get; set; }
+
+        public void AddBuff(Graphic graphic, uint time, string text)
+        {
+            _buffIcons[graphic] = new BuffIcon(graphic, time, text);
+        }
+
+        public void RemoveBuff(Graphic graphic)
+        {
+            _buffIcons.Remove(graphic);
+        }
 
         public event EventHandler StatsChanged, SkillsChanged;
 
@@ -840,16 +842,16 @@ namespace ClassicUO.Game.GameObjects
             _ability[1] = Ability.None;
 
             if (right == null && left == null) return;
-            Graphic[] graphics = {0x00, 0x00};
+
+            Graphic[] graphics =
+            {
+                0x00, 0x00
+            };
 
             if (right == null)
-            {
                 graphics[0] = left.Graphic;
-            }
             else if (left == null)
-            {
                 graphics[1] = right.Graphic;
-            }
             else
             {
                 graphics[0] = left.Graphic;
@@ -1649,7 +1651,8 @@ namespace ClassicUO.Game.GameObjects
         {
             if (LastStepRequestTime > CoreGame.Ticks)
                 return false;
-            if (_requestedSteps.Count >= MAX_STEP_COUNT)
+
+            if (RequestedSteps.Count >= MAX_STEP_COUNT)
                 return false;
 
             if (SpeedMode >= CharacterSpeedType.CantRun)
@@ -1659,13 +1662,11 @@ namespace ClassicUO.Game.GameObjects
             sbyte z = 0;
             Direction oldDirection = Direction.NONE;
 
-            if (_requestedSteps.Count <= 0)
-            {
+            if (RequestedSteps.Count <= 0)
                 GetEndPosition(ref x, ref y, ref z, ref oldDirection);
-            }
             else
             {
-                Step step1 = _requestedSteps.Back();
+                Step step1 = RequestedSteps.Back();
                 x = step1.X;
                 y = step1.Y;
                 z = step1.Z;
@@ -1706,7 +1707,6 @@ namespace ClassicUO.Game.GameObjects
                 //    if (oldDirection == newDirection)
                 //        return false;
 
-
                 if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
                 {
                     if ((oldDirection & Direction.Mask) == (newDirection & Direction.Mask))
@@ -1729,18 +1729,27 @@ namespace ClassicUO.Game.GameObjects
             }
 
             //if (run) direction |= Direction.Running;
-            Step step = new Step {X = x, Y = y, Z = z, Direction = (byte) direction, Run = run, Seq = SequenceNumber, Rej = 0};
+            Step step = new Step
+            {
+                X = x,
+                Y = y,
+                Z = z,
+                Direction = (byte) direction,
+                Run = run,
+                Seq = SequenceNumber,
+                Rej = 0
+            };
 
             if (_movementState == PlayerMovementState.ANIMATE_IMMEDIATELY)
             {
-                for (int i = 0; i < _requestedSteps.Count; i++)
+                for (int i = 0; i < RequestedSteps.Count; i++)
                 {
-                    Step s = _requestedSteps[i];
+                    Step s = RequestedSteps[i];
 
                     if (!s.Anim)
                     {
                         s.Anim = true;
-                        _requestedSteps[i] = s;
+                        RequestedSteps[i] = s;
                         EnqueueStep(s.X, s.Y, s.Z, (Direction) s.Direction, s.Run);
                     }
                 }
@@ -1749,7 +1758,7 @@ namespace ClassicUO.Game.GameObjects
                 EnqueueStep(step.X, step.Y, step.Z, (Direction) step.Direction, step.Run);
             }
 
-            _requestedSteps.AddToBack(step);
+            RequestedSteps.AddToBack(step);
             NetClient.Socket.Send(new PWalkRequest(direction, SequenceNumber, run));
 
             if (SequenceNumber == 0xFF)
@@ -1764,14 +1773,14 @@ namespace ClassicUO.Game.GameObjects
 
         public void ConfirmWalk(byte seq)
         {
-            if (_requestedSteps.Count <= 0)
+            if (RequestedSteps.Count <= 0)
             {
                 NetClient.Socket.Send(new PResend());
 
                 return;
             }
 
-            _requestedSteps.RemoveFromFront(out Step step);
+            RequestedSteps.RemoveFromFront(out Step step);
 
             if (step.Seq != seq)
             {
@@ -1788,22 +1797,25 @@ namespace ClassicUO.Game.GameObjects
                 GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
 
                 if (step.Direction == (byte) endDir)
+                {
                     if (_movementState == PlayerMovementState.ANIMATE_ON_CONFIRM)
                         _movementState = PlayerMovementState.ANIMATE_ON_CONFIRM;
+                }
+
                 EnqueueStep(step.X, step.Y, step.Z, (Direction) step.Direction, step.Run);
             }
         }
 
         public void DenyWalk(byte seq, Direction dir, Position position)
         {
-            if (_requestedSteps.Count <= 0)
+            if (RequestedSteps.Count <= 0)
             {
                 NetClient.Socket.Send(new PResend());
 
                 return;
             }
 
-            _requestedSteps.RemoveFromFront(out Step step);
+            RequestedSteps.RemoveFromFront(out Step step);
 
             if (step.Rej == 0)
             {
@@ -1845,11 +1857,11 @@ namespace ClassicUO.Game.GameObjects
 
         public void ResetSteps()
         {
-            for (int i = 0; i < _requestedSteps.Count; i++)
+            for (int i = 0; i < RequestedSteps.Count; i++)
             {
-                Step s = _requestedSteps[i];
+                Step s = RequestedSteps[i];
                 s.Rej = 1;
-                _requestedSteps[i] = s;
+                RequestedSteps[i] = s;
             }
 
             //_requestedSteps.Clear();
@@ -1862,7 +1874,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void ResetRequestedSteps()
         {
-            _requestedSteps.Clear();
+            RequestedSteps.Clear();
         }
 
         private enum PlayerMovementState

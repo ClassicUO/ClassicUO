@@ -61,6 +61,7 @@ namespace ClassicUO.Utility
                     bool added = false;
 
                     for (int j = 0; j < m_AllFrameData.Count; j++)
+                    {
                         if (m_AllFrameData[j].MatchesContext(m_ThisFrameData[i].Item1))
                         {
                             m_AllFrameData[j].AddNewHitLength(m_ThisFrameData[i].Item2);
@@ -68,6 +69,7 @@ namespace ClassicUO.Utility
 
                             break;
                         }
+                    }
 
                     if (!added) m_AllFrameData.Add(new ProfileData(m_ThisFrameData[i].Item1, m_ThisFrameData[i].Item2));
                 }
@@ -113,8 +115,10 @@ namespace ClassicUO.Utility
         public static ProfileData GetContext(string context_name)
         {
             for (int i = 0; i < m_AllFrameData.Count; i++)
+            {
                 if (m_AllFrameData[i].Context[m_AllFrameData[i].Context.Length - 1] == context_name)
                     return m_AllFrameData[i];
+            }
 
             return ProfileData.Empty;
         }
@@ -154,8 +158,10 @@ namespace ClassicUO.Utility
                     return false;
 
                 for (int i = 0; i < Context.Length; i++)
+                {
                     if (Context[i] != context[i])
                         return false;
+                }
 
                 return true;
             }

@@ -235,6 +235,7 @@ namespace ClassicUO.Game.Gumps.Controls
         protected override void OnMouseEnter(int x, int y)
         {
             if (_btSliderClicked)
+            {
                 if (y != _clickPosition.Y)
                 {
                     float sliderY = _sliderPosition + (y - _clickPosition.Y);
@@ -255,6 +256,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     _value = sliderY / scrollableArea * (MaxValue - MinValue) + MinValue;
                     _sliderPosition = sliderY;
                 }
+            }
         }
 
         protected override void OnMouseWheel(MouseEvent delta)

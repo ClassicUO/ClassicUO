@@ -25,8 +25,6 @@ using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 
-using Microsoft.Xna.Framework;
-
 namespace ClassicUO.Game.GameObjects
 {
     public class Static : GameObject, IDynamicItem

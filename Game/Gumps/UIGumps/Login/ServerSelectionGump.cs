@@ -15,37 +15,94 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
     {
         public ServerSelectionGump() : base(0, 0)
         {
-            AddChildren(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2) {X = 586, Y = 445, ButtonAction = ButtonAction.Activate});
-            AddChildren(new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5) {X = 610, Y = 445, ButtonAction = ButtonAction.Activate});
+            AddChildren(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+            {
+                X = 586, Y = 445, ButtonAction = ButtonAction.Activate
+            });
+
+            AddChildren(new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
+            {
+                X = 610, Y = 445, ButtonAction = ButtonAction.Activate
+            });
 
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
             {
                 ushort textColor = 0xFFFF;
-                AddChildren(new Label(Cliloc.GetString(1044579), true, textColor, font: 1) {X = 155, Y = 70}); // "Select which shard to play on:"
-                AddChildren(new Label(Cliloc.GetString(1044577), true, textColor, font: 1) {X = 400, Y = 70}); // "Latency:"
-                AddChildren(new Label(Cliloc.GetString(1044578), true, textColor, font: 1) {X = 470, Y = 70}); // "Packet Loss:"
-                AddChildren(new Label(Cliloc.GetString(1044580), true, textColor, font: 1) {X = 153, Y = 368}); // "Sort by:"
+
+                AddChildren(new Label(Cliloc.GetString(1044579), true, textColor, font: 1)
+                {
+                    X = 155, Y = 70
+                }); // "Select which shard to play on:"
+
+                AddChildren(new Label(Cliloc.GetString(1044577), true, textColor, font: 1)
+                {
+                    X = 400, Y = 70
+                }); // "Latency:"
+
+                AddChildren(new Label(Cliloc.GetString(1044578), true, textColor, font: 1)
+                {
+                    X = 470, Y = 70
+                }); // "Packet Loss:"
+
+                AddChildren(new Label(Cliloc.GetString(1044580), true, textColor, font: 1)
+                {
+                    X = 153, Y = 368
+                }); // "Sort by:"
             }
             else
             {
                 ushort textColor = 0x0481;
-                AddChildren(new Label("Select which shard to play on:", true, textColor, font: 9) {X = 155, Y = 70});
-                AddChildren(new Label("Latency:", true, textColor, font: 9) {X = 400, Y = 70});
-                AddChildren(new Label("Packet Loss:", true, textColor, font: 9) {X = 470, Y = 70});
-                AddChildren(new Label("Sort by:", true, textColor, font: 9) {X = 153, Y = 368});
+
+                AddChildren(new Label("Select which shard to play on:", true, textColor, font: 9)
+                {
+                    X = 155, Y = 70
+                });
+
+                AddChildren(new Label("Latency:", true, textColor, font: 9)
+                {
+                    X = 400, Y = 70
+                });
+
+                AddChildren(new Label("Packet Loss:", true, textColor, font: 9)
+                {
+                    X = 470, Y = 70
+                });
+
+                AddChildren(new Label("Sort by:", true, textColor, font: 9)
+                {
+                    X = 153, Y = 368
+                });
             }
 
-            AddChildren(new Button((int) Buttons.SortTimeZone, 0x093B, 0x093C, 0x093D) {X = 230, Y = 366});
-            AddChildren(new Button((int) Buttons.SortFull, 0x093E, 0x093F, 0x0940) {X = 338, Y = 366});
-            AddChildren(new Button((int) Buttons.SortConnection, 0x0941, 0x0942, 0x0943) {X = 446, Y = 366});
+            AddChildren(new Button((int) Buttons.SortTimeZone, 0x093B, 0x093C, 0x093D)
+            {
+                X = 230, Y = 366
+            });
+
+            AddChildren(new Button((int) Buttons.SortFull, 0x093E, 0x093F, 0x0940)
+            {
+                X = 338, Y = 366
+            });
+
+            AddChildren(new Button((int) Buttons.SortConnection, 0x0941, 0x0942, 0x0943)
+            {
+                X = 446, Y = 366
+            });
 
             // World Pic Bg
             AddChildren(new GumpPic(150, 390, 0x0589, 0));
+
             // Earth
-            AddChildren(new Button((int) Buttons.Earth, 0x15E8, 0x15EA, 0x15E9) {X = 160, Y = 400});
+            AddChildren(new Button((int) Buttons.Earth, 0x15E8, 0x15EA, 0x15E9)
+            {
+                X = 160, Y = 400
+            });
 
             // Sever Scroll Area Bg
-            AddChildren(new ResizePic(0x0DAC) {X = 150, Y = 90, Width = 393 - 14, Height = 271});
+            AddChildren(new ResizePic(0x0DAC)
+            {
+                X = 150, Y = 90, Width = 393 - 14, Height = 271
+            });
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea(150, 90, 393, 271, true);
             LoginScene loginScene = Service.Get<LoginScene>();
@@ -55,9 +112,15 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             if (loginScene.Servers.Count() > 0)
             {
                 if (loginScene.Servers.Last().Index < loginScene.Servers.Count())
-                    AddChildren(new Label(loginScene.Servers.Last().Name, false, 0x0481, font: 9) {X = 243, Y = 420});
+                    AddChildren(new Label(loginScene.Servers.Last().Name, false, 0x0481, font: 9)
+                    {
+                        X = 243, Y = 420
+                    });
                 else
-                    AddChildren(new Label(loginScene.Servers.First().Name, false, 0x0481, font: 9) {X = 243, Y = 420});
+                    AddChildren(new Label(loginScene.Servers.First().Name, false, 0x0481, font: 9)
+                    {
+                        X = 243, Y = 420
+                    });
             }
         }
 
@@ -119,7 +182,11 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 _labelPacketLoss.CreateTexture();
                 AcceptMouseInput = true;
                 Width = 393;
-                Height = new[] {_labelName.Height, _labelPing.Height, _labelPacketLoss.Height}.Max() + 10;
+
+                Height = new[]
+                {
+                    _labelName.Height, _labelPing.Height, _labelPacketLoss.Height
+                }.Max() + 10;
                 X = 0;
                 Y = 0;
             }
