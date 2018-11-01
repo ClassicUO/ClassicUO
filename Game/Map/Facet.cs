@@ -173,6 +173,18 @@ namespace ClassicUO.Game.Map
             }
         }
 
+        public void ClearUsedBlocks()
+        {
+            for (int i = 0; i < _usedIndices.Count; i++)
+            {
+                ref MapChunk block = ref Chunks[_usedIndices[i]];
+                
+                block.Unload();
+                block = null;
+                _usedIndices.RemoveAt(i--);               
+            }
+        }
+
         private void LoadChunks(ushort centerX, ushort centerY)
         {
             const int XY_OFFSET = 30;

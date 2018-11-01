@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Views
             Texture.Ticks = CoreGame.Ticks;
             SpriteVertex[] vertex;
 
-            if (Rotation != 0)
+            if (Rotation != 0.0f)
             {
                 float w = Bounds.Width / 2f;
                 float h = Bounds.Height / 2f;

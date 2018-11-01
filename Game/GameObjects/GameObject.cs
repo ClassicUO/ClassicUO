@@ -35,7 +35,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameObject : IUpdateable, ISmoothMovable
+    public abstract class GameObject : IUpdateable
     {
         private readonly List<TextOverhead> _overHeads;
         private Position _position = Position.Invalid;
@@ -66,6 +66,24 @@ namespace ClassicUO.Game.GameObjects
                     IsPositionChanged = true;
                 }
             }
+        }
+
+        public ushort X
+        {
+            get => Position.X;
+            set => Position = new Position(value, Position.Y, Position.Z);
+        }
+
+        public ushort Y
+        {
+            get => Position.Y;
+            set => Position = new Position(Position.X, value, Position.Z);
+        }
+
+        public sbyte Z
+        {
+            get => Position.Z;
+            set => Position = new Position(Position.X, Position.Y, value);
         }
 
         public virtual Hue Hue { get; set; }
@@ -110,7 +128,7 @@ namespace ClassicUO.Game.GameObjects
 
         public int Distance => DistanceTo(World.Player);
 
-        public Vector3 Offset { get; set; }
+        public Vector3 Offset;
 
         public virtual void Update(double totalMS, double frameMS)
         {

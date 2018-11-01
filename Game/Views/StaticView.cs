@@ -39,50 +39,58 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw || GameObject.IsDisposed) return false;
+            if (!AllowedToDraw || GameObject.IsDisposed)
+                return false;
 
-            if (Texture == null || Texture.IsDisposed)
+            Static st = (Static)GameObject;
+
+            if (st.Effect == null)
             {
-                Texture = Art.GetStaticTexture(GameObject.Graphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
-            }
 
-            Static st = (Static) GameObject;
-            float alpha = 0;
-
-            if (TileData.IsFoliage((long) st.ItemData.Flags))
-            {
-                bool check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y;
-
-                if (!check)
+                if (Texture == null || Texture.IsDisposed)
                 {
-                    check = World.Player.Position.Y <= st.Position.Y && World.Player.Position.X <= st.Position.X + 1;
+                    Texture = Art.GetStaticTexture(GameObject.Graphic);
+                    Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+                }
+
+                float alpha = 0;
+
+                if (TileData.IsFoliage((long) st.ItemData.Flags))
+                {
+                    bool check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y;
 
                     if (!check)
-                        check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y + 1;
+                    {
+                        check = World.Player.Position.Y <= st.Position.Y && World.Player.Position.X <= st.Position.X + 1;
+
+                        if (!check)
+                            check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y + 1;
+                    }
+
+                    if (check)
+                    {
+                        //Rectangle fol = Bounds;
+                        //fol.X = (int) position.X - Bounds.X;
+                        //fol.Y = (int) position.Y - Bounds.Y;
+
+                        //Rectangle prect = World.Player.View.Bounds;
+                        //prect.X += (int) World.Player.DrawX;
+                        //prect.Y += (int) World.Player.DrawY;
+
+                        //if (fol.Contains(prect))
+                        //{
+                        //    alpha = .6f;
+                        //}
+                    }
                 }
 
-                if (check)
-                {
-                    //Rectangle fol = Bounds;
-                    //fol.X = (int) position.X - Bounds.X;
-                    //fol.Y = (int) position.Y - Bounds.Y;
+                HueVector = RenderExtentions.GetHueVector(GameObject.Hue, false, alpha, false);
+                MessageOverHead(spriteBatch, position, Bounds.Y - 22);
 
-                    //Rectangle prect = World.Player.View.Bounds;
-                    //prect.X += (int) World.Player.DrawX;
-                    //prect.Y += (int) World.Player.DrawY;
-
-                    //if (fol.Contains(prect))
-                    //{
-                    //    alpha = .6f;
-                    //}
-                }
+                return base.Draw(spriteBatch, position, objectList);
             }
 
-            HueVector = RenderExtentions.GetHueVector(GameObject.Hue, false, alpha, false);
-            MessageOverHead(spriteBatch, position, Bounds.Y - 22);
-
-            return base.Draw(spriteBatch, position, objectList);
+            return !st.Effect.IsDisposed && st.Effect.View.Draw(spriteBatch, position, objectList);
         }
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)

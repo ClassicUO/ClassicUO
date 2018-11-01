@@ -36,11 +36,11 @@ namespace ClassicUO.Game
             Z = z;
         }
 
-        public ushort X { get; set; }
+        public ushort X;
 
-        public ushort Y { get; set; }
+        public ushort Y;
 
-        public sbyte Z { get; set; }
+        public sbyte Z;
 
         public static bool operator ==(Position p1, Position p2)
         {
@@ -112,7 +112,7 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            return obj is Position && this == (Position) obj;
+            return obj is Position position && this == position;
         }
 
         public override string ToString()

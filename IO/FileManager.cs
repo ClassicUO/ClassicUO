@@ -81,6 +81,7 @@ namespace ClassicUO.IO
             TextmapTextures.Load();
             SpecialKeywords.Load();
             AnimData.Load();
+            Light.Load();
         }
     }
 }
