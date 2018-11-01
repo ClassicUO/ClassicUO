@@ -150,14 +150,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         {
                             GetSpellNames(offs, out string name, out string abbreviature, out string reagents);
 
-                            text = new Label(name, false, 0x0288, font: 9)
+                            text = new HoveredLabel(name, false, 0x0288, 0x33, font: 9)
                             {
                                 X = dataX, Y = 52 + y, LocalSerial = (uint) (dictionaryPagesCount / 2 + offs / 2 + 1), AcceptMouseInput = true
                             };
 
                             text.MouseClick += (sender, e) =>
                             {
-                                Label l = (Label) sender;
+                                HoveredLabel l = (HoveredLabel) sender;
                                 SetActivePage((int) l.LocalSerial.Value);
                             };
                             AddChildren(text, page);

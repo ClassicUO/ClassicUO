@@ -78,8 +78,11 @@ namespace ClassicUO.Game.Gumps.Controls
             get => _gText.Hue;
             set
             {
-                _gText.Hue = value;
-                _gText.CreateTexture();
+                if (_gText.Hue != value)
+                {
+                    _gText.Hue = value;
+                    _gText.CreateTexture();
+                }
             }
         }
 

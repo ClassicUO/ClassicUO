@@ -101,6 +101,7 @@
     <Compile Include="Game\Views\MovingEffectView.cs" />
     <Compile Include="Input\Mouse.cs" />
     <Compile Include="Interfaces\ISmoothMovable.cs" />
+    <Compile Include="Network\NetClient1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Configuration\ConfigurationResolver.cs" />
     <Compile Include="Configuration\Settings.cs" />
