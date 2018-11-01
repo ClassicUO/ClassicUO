@@ -237,8 +237,8 @@ namespace ClassicUO.Game
 
         public void Draw(SpriteBatchUI sb)
         {
-            if (!Mouse.MouseInWindow)
-                return;
+            //if (!Mouse.MouseInWindow)
+            //    return;
 
             ushort id = Graphic;
 

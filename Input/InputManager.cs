@@ -202,6 +202,8 @@ namespace ClassicUO.Input
         {
             _hookDel = HookFunc;
             SDL_AddEventWatch(_hookDel, IntPtr.Zero);
+            SDL_CaptureMouse(SDL_bool.SDL_TRUE);
+            //SDL_SetEventFilter(_hookDel, IntPtr.Zero);
         }
 
         //public Point MousePosition { get; private set; }
@@ -212,6 +214,7 @@ namespace ClassicUO.Input
 
         public void Dispose()
         {
+            SDL_CaptureMouse(SDL_bool.SDL_FALSE);
             SDL_DelEventWatch(_hookDel, IntPtr.Zero);
         }
 
@@ -240,10 +243,12 @@ namespace ClassicUO.Input
                     {
                         case SDL_WindowEventID.SDL_WINDOWEVENT_ENTER:
                             Mouse.Update();
+                            Mouse.Begin();
                             Mouse.MouseInWindow = true;
                             break;
                         case SDL_WindowEventID.SDL_WINDOWEVENT_LEAVE:
                             Mouse.Update();
+                            Mouse.Begin();
                             Mouse.MouseInWindow = false;
                             break;
                     }

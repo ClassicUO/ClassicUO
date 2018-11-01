@@ -45,18 +45,19 @@ namespace ClassicUO.Input
 
         public static void Begin()
         {
-            SDL.SDL_CaptureMouse(SDL.SDL_bool.SDL_TRUE);
+            //SDL.SDL_CaptureMouse(SDL.SDL_bool.SDL_TRUE);
         }
 
         public static void End()
         {
-            if (!(LButtonPressed || RButtonPressed || MButtonPressed))
-                SDL.SDL_CaptureMouse(SDL.SDL_bool.SDL_FALSE);
+            //if (!(LButtonPressed || RButtonPressed || MButtonPressed))
+            //    SDL.SDL_CaptureMouse(SDL.SDL_bool.SDL_FALSE);
         }
 
         public static void Update()
         {
             SDL.SDL_GetMouseState(out _position.X, out _position.Y);
+            //SDL.SDL_GetGlobalMouseState(out _position.X, out _position.Y);
             IsDragging = LButtonPressed || RButtonPressed || MButtonPressed;
             RealPosition = Position;
         }
