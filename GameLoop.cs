@@ -40,6 +40,8 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using SDL2;
+
 namespace ClassicUO
 {
     public class GameLoop : CoreGame
@@ -134,7 +136,7 @@ namespace ClassicUO
 
         protected override void OnInputUpdate(double totalMS, double frameMS)
         {
-            //_inputManager.Update(totalMS, frameMS);
+            Mouse.Update();
         }
 
         protected override void OnNetworkUpdate(double totalMS, double frameMS)

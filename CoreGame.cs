@@ -59,6 +59,7 @@ namespace ClassicUO
                 GraphicsDeviceManager.ApplyChanges();
             };
             Window.AllowUserResizing = true;
+            IsMouseVisible = true;
             _fpsCounter = new FpsCounter();
         }
 
