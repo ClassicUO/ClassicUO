@@ -102,7 +102,7 @@ namespace ClassicUO.Game.Views
                     total.Height = frame.Height;
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-                HueVector = RenderExtentions.GetHueVector(vl.Hue, vl.IsParital, 0, false);
+                HueVector = RenderExtentions.GetHueVector(mobile.IsHidden ? 0x038E : vl.Hue, vl.IsParital, 0, false);
                 base.Draw(spriteBatch, position, objectList);
                 Pick(frame.ID, Bounds, position, objectList);
             }
@@ -154,13 +154,12 @@ namespace ClassicUO.Game.Views
 
             if (mobile.IsHuman)
             {
-                bool hasOuterTorso = mobile.Equipment[(int) Layer.Robe] != null && mobile.Equipment[(int) Layer.Robe].ItemData.AnimID != 0;
-
                 for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
                 {
                     Layer layer = LayerOrder.UsedLayers[dir, i];
 
-                    if (hasOuterTorso && (layer == Layer.Torso || layer == Layer.Tunic)) continue;
+                    if (IsCovered(mobile, layer))
+                        continue;
 
                     if (layer == Layer.Invalid)
                         AddLayer(dir, GameObject.Graphic, GameObject.Hue, ref mobile);
@@ -266,6 +265,106 @@ namespace ClassicUO.Game.Views
                     OffsetY = offsetY
                 };
             }
+        }
+
+        private static bool IsCovered(Mobile mobile, Layer layer)
+        {
+            switch (layer)
+            {
+                case Layer.Shoes:
+
+                    Item pants = mobile.Equipment[(int) Layer.Pants];
+                    Item robe;
+                    if (mobile.Equipment[(int) Layer.Legs] != null || (pants != null && pants.Graphic == 0x1411))
+                        return true;
+                    else
+                    {
+                        robe = mobile.Equipment[(int) Layer.Robe];
+
+                        if ( (pants != null && (pants.Graphic == 0x0513 || pants.Graphic == 0x0514)) || (robe != null && robe.Graphic == 0x0504))
+                            return true;
+                    }
+                    break;
+                case Layer.Pants:
+                    Item skirt;
+                    robe = mobile.Equipment[(int) Layer.Robe];
+                    pants = mobile.Equipment[(int)Layer.Pants];
+
+                    if (mobile.Equipment[(int) Layer.Legs] != null || (robe != null && robe.Graphic == 0x0504))
+                        return true;
+
+                    if (pants != null && (pants.Graphic == 0x01EB || pants.Graphic == 0x03E5 || pants.Graphic == 0x03eB))
+                    {
+                         skirt = mobile.Equipment[(int) Layer.Skirt];
+
+                        if (skirt != null && skirt.Graphic != 0x01C7 && skirt.Graphic != 0x01E4)
+                            return true;
+
+                        if (robe != null && (robe.Graphic != 0x0229 && (robe.Graphic <= 0x04E7 || robe.Graphic > 0x04EB)))
+                            return true;
+                    }
+                    break;
+                case Layer.Tunic:
+                    robe = mobile.Equipment[(int) Layer.Robe];
+                    Item tunic = mobile.Equipment[(int) Layer.Tunic];
+
+                    if (robe != null && robe.Graphic != 0)
+                        return true;
+                    else if (tunic != null && tunic.Graphic == 0x0238)
+                        return robe != null && robe.Graphic != 0x9985 && robe.Graphic != 0x9986;
+
+                    break;
+                case Layer.Torso:
+                    robe = mobile.Equipment[(int)Layer.Robe];
+
+                    if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986)
+                        return true;
+                    else
+                    {
+                        tunic = mobile.Equipment[(int)Layer.Tunic];
+                        Item torso = mobile.Equipment[(int)Layer.Torso];
+
+                        if (tunic != null && tunic.Graphic != 0x1541 && tunic.Graphic != 0x1542)
+                            return true;
+                        if (torso != null && (torso.Graphic == 0x782A || torso.Graphic == 0x782B))
+                            return true;
+                    }
+
+                    break;
+                case Layer.Arms:
+                    robe = mobile.Equipment[(int)Layer.Robe];
+                    return robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986;
+                case Layer.Helmet:
+                case Layer.Hair:
+                    robe = mobile.Equipment[(int)Layer.Robe];
+
+                    if (robe != null)
+                    {
+                        if (robe.Graphic > 0x3173)
+                        {
+                            if (robe.Graphic == 0x4B9D || robe.Graphic == 0x7816)
+                                return true;
+                        }
+                        else
+                        {
+                            if (robe.Graphic <= 0x2687)
+                            {
+                                if (robe.Graphic < 0x2687)
+                                    return robe.Graphic >= 0x204E && robe.Graphic <= 0x204F;
+                                return true;
+                            }
+                            else if (robe.Graphic == 0x2FB9 || robe.Graphic == 0x3173)
+                                return true;
+                        }
+                    }
+                    break;
+                case Layer.Skirt:
+                    skirt = mobile.Equipment[(int)Layer.Skirt];
+
+                    break;
+            }
+
+            return false;
         }
 
         private struct ViewLayer
