@@ -67,19 +67,26 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         continue;
                     int mapY = by * 8;
 
-                    MapBlock info = new MapBlock
-                    {
-                        Cells = new MapCells[64]
-                    };
-                    MapBlock mapBlock = Marshal.PtrToStructure<MapBlock>((IntPtr) indexMap.MapAddress);
+
+                    //MapBlock info = new MapBlock
+                    //{
+                    //    Cells = stackalloc byte[64 *3];
+                    //};
+
+                    MapBlock info = new MapBlock();
+                    MapCells* infoCells = (MapCells*) info.Cells;
+
+                    MapBlock* mapBlock = (MapBlock*)indexMap.MapAddress;
+                    MapCells* cells = (MapCells*)mapBlock->Cells;
+
                     int pos = 0;
 
                     for (int y = 0; y < 8; y++)
                     {
                         for (int x = 0; x < 8; x++)
                         {
-                            ref MapCells cell = ref mapBlock.Cells[pos];
-                            ref MapCells infoCell = ref info.Cells[pos];
+                            ref MapCells cell = ref cells[pos];
+                            ref MapCells infoCell = ref infoCells[pos];
                             infoCell.TileID = cell.TileID;
                             infoCell.Z = cell.Z;
                             pos++;
@@ -99,7 +106,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                             if (staticBlock.Color > 0 && staticBlock.Color != 0xFFFF && !View.IsNoDrawable(staticBlock.Color))
                             {
                                 pos = staticBlock.Y * 8 + staticBlock.X;
-                                ref MapCells cell = ref info.Cells[pos];
+                                ref MapCells cell = ref infoCells[pos];
 
                                 if (cell.Z <= staticBlock.Z)
                                 {
@@ -118,7 +125,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                         for (int x = 0; x < 8; x++)
                         {
-                            ushort color = (ushort) (0x8000 | Hues.GetRadarColorData(info.Cells[pos].TileID));
+                            ushort color = (ushort) (0x8000 | Hues.GetRadarColorData(infoCells[pos].TileID));
                             buffer[block] = color;
 
                             if (y < 7 && x < 7 && block < maxBlock)

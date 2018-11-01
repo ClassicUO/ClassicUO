@@ -111,33 +111,22 @@ namespace ClassicUO.Game.Map
         }
 
         public sbyte GetTileZ(int x, int y)
-        {
-            //Tile tile = GetTile(x, y);
+        {        
+            if (x < 0 || y < 0)
+                return -125;
+            IndexMap blockIndex = GetIndex(x / 8, y / 8);
 
-            //if (tile == null)
+            if (blockIndex == null || blockIndex.MapAddress == 0)
+                return -125;
+            int mx = x % 8;
+            int my = y % 8;
+
+            unsafe
             {
-                //int cellX = x / 8;
-                //int cellY = y / 8;
-
-                //int index = (cellX * AssetsLoader.Map.MapBlocksSize[Index][1]) + cellY;
-
-                //Chunks[index] = new FacetChunk((ushort)cellX, (ushort)cellY);
-                //Chunks[index].Load(Index);
-                //return Chunks[index].Tiles[x % 8][y % 8].Position.Z;
-
-                if (x < 0 || y < 0)
-                    return -125;
-                IndexMap blockIndex = GetIndex(x / 8, y / 8);
-
-                if (blockIndex == null || blockIndex.MapAddress == 0)
-                    return -125;
-                int mx = x % 8;
-                int my = y % 8;
-
-                return Marshal.PtrToStructure<MapBlock>((IntPtr) blockIndex.MapAddress).Cells[my * 8 + mx].Z;
-            }
-
-            //return tile.Position.Z;
+                MapBlock* mp = (MapBlock*) blockIndex.MapAddress;
+                MapCells* cells = (MapCells*) mp->Cells;
+                return cells[my * 8 + mx].Z;
+            }    
         }
 
         public IndexMap GetIndex(int blockX, int blockY)
@@ -205,6 +194,9 @@ namespace ClassicUO.Game.Map
             if (maxBlockY >= IO.Resources.Map.MapBlocksSize[Index][1])
                 maxBlockY = IO.Resources.Map.MapBlocksSize[Index][1] - 1;
 
+            long tick = CoreGame.Ticks;
+            long maxDelay = CoreGame.FrameDelay[1] / 2;
+
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
                 int index = i * IO.Resources.Map.MapBlocksSize[Index][1];
@@ -216,6 +208,9 @@ namespace ClassicUO.Game.Map
 
                     if (tile == null)
                     {
+                        if (CoreGame.Ticks - tick >= maxDelay)
+                            return;
+
                         _usedIndices.Add(cellindex);
                         tile = new MapChunk((ushort) i, (ushort) j);
                         tile.Load(Index);

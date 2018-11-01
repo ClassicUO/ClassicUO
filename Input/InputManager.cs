@@ -231,7 +231,6 @@ namespace ClassicUO.Input
         {
             SDL_Event* e = (SDL_Event*) ev;
 
-            Log.Message(LogTypes.Warning, e->type.ToString());
             switch (e->type)
             {
 
