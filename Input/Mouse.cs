@@ -41,6 +41,8 @@ namespace ClassicUO.Input
 
         public static Point MDroppedOffset => MButtonPressed ? RealPosition - MDropPosition : Point.Zero;
 
+        public static bool MouseInWindow { get; set; }
+
         public static void Begin()
         {
             SDL.SDL_CaptureMouse(SDL.SDL_bool.SDL_TRUE);

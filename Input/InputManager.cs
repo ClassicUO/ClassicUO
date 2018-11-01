@@ -24,6 +24,7 @@
 using System;
 
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 using static SDL2.SDL;
 
@@ -230,8 +231,27 @@ namespace ClassicUO.Input
         {
             SDL_Event* e = (SDL_Event*) ev;
 
+            Log.Message(LogTypes.Warning, e->type.ToString());
             switch (e->type)
             {
+
+                case SDL_EventType.SDL_WINDOWEVENT:
+
+                    switch (e->window.windowEvent)
+                    {
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_ENTER:
+                            Mouse.Update();
+                            Mouse.MouseInWindow = true;
+                            break;
+                        case SDL_WindowEventID.SDL_WINDOWEVENT_LEAVE:
+                            Mouse.Update();
+                            Mouse.MouseInWindow = false;
+                            break;
+                    }
+
+                    break;
+
+
                 case SDL_EventType.SDL_KEYDOWN:
                     KeyDown?.Raise(e->key);
 
