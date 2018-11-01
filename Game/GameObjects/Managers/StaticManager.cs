@@ -37,14 +37,14 @@ namespace ClassicUO.Game.GameObjects.Managers
             {
                 _activeStatics[i].Update(totalMS, frameMS);
 
-                if (_activeStatics[i].IsDisposed || _activeStatics[i].OverHeads.Count <= 0)
+                if (_activeStatics[i].IsDisposed || (_activeStatics[i].OverHeads.Count <= 0 && (_activeStatics[i].Effect == null || _activeStatics[i].Effect.IsDisposed)))
                     _activeStatics.RemoveAt(i);
             }
         }
 
         public void Add(Static stat)
         {
-            if (!stat.IsDisposed && stat.OverHeads.Count > 0)
+            if (!stat.IsDisposed && (stat.OverHeads.Count > 0 || stat.Effect != null))
                 _activeStatics.Add(stat);
         }
     }

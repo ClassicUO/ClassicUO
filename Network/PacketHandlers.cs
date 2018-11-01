@@ -473,18 +473,10 @@ namespace ClassicUO.Network
                         flags |= 0x08;
                     else
                         flags &= 0x08;
-
-                    //if (FileManager.ClientVersion >= ClientVersions.CV_7000)
-                    //    mobile.SetSAPoison(false);
-                    //else
-                    //    flags &= 0x04;
                 }
                 else if (type == 3)
                 {
-                    //if (enabled)
-                    //    flags |= 0x08;
-                    //else
-                    //    flags &= 0x08;
+
                 }
 
                 mobile.Flags = (Flags) flags;
@@ -562,36 +554,6 @@ namespace ClassicUO.Network
                 item.Graphic -= 0x4000;
             }
 
-            //uint serial = p.ReadUInt();
-            //Item item = World.GetOrCreateItem(serial & 0x7FFFFFFF);
-
-            //ushort graphic = (ushort) (p.ReadUShort() & 0x3FFF);
-            //item.Amount = (serial & 0x80000000) != 0 ? p.ReadUShort() : (ushort) 1;
-
-            //if ((graphic & 0x8000) != 0)
-            //    item.Graphic = (ushort) (graphic & (0x7FFF + p.ReadSByte()));
-            //else
-            //    item.Graphic = (ushort) (graphic & 0x7FFF);
-
-            //ushort x = p.ReadUShort();
-            //ushort y = p.ReadUShort();
-
-            //if ((x & 0x8000) != 0)
-            //    item.Direction = (Direction) p.ReadByte(); //wtf???
-
-            ////item.Position.Set((ushort)(x & 0x7FFF), (ushort)(y & 0x3FFF), p.ReadSByte());
-            //item.Position = new Position((ushort) (x & 0x7FFF), (ushort) (y & 0x3FFF), p.ReadSByte());
-
-            //if ((y & 0x8000) != 0)
-            //    item.Hue = p.ReadUShort();
-
-            //if ((y & 0x4000) != 0)
-            //    item.Flags = (Flags) p.ReadByte();
-
-            //item.IsMulti = item.Graphic >= 0x4000;
-
-            //if (item.IsMulti)
-            //    item.Graphic -= 0x4000;
             item.Container = Serial.Invalid;
             item.ProcessDelta();
             if (World.Items.Add(item)) World.Items.ProcessDelta();
@@ -606,12 +568,9 @@ namespace ClassicUO.Network
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
             World.Player.Position = new Position(p.ReadUShort(), p.ReadUShort(), (sbyte) p.ReadUShort());
-            //World.Player.Position.Set(p.ReadUShort(), p.ReadUShort(), (sbyte)p.ReadUShort());
             Direction direction = (Direction) p.ReadByte();
             World.Player.Direction = direction & Direction.Up;
-            World.Player.IsRunning = (direction & Direction.Running) != 0;
-            World.Player.ProcessDelta();
-            World.Mobiles.ProcessDelta();
+            World.Player.IsRunning = (direction & Direction.Running) != 0;           
             Settings settings = Service.Get<Settings>();
             NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
 
@@ -624,6 +583,9 @@ namespace ClassicUO.Network
             GameActions.SingleClick(World.Player);
             NetClient.Socket.Send(new PStatusRequest(World.Player));
             Service.Get<SceneManager>().ChangeScene(ScenesType.Game);
+
+            World.Player.ProcessDelta();
+            World.Mobiles.ProcessDelta();
         }
 
         private static void Talk(Packet p)

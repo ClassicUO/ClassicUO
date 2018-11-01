@@ -70,7 +70,7 @@ namespace ClassicUO.Game.GameObjects
 
         public GraphicEffectBlendMode Blend { get; set; }
 
-        public bool IsItemEffect => Source is Item item && item.OnGround;
+        public bool IsItemEffect => (Source is Item item && item.OnGround) || (Source is Static);
 
         public long Duration { get; set; } = -1;
 
@@ -130,6 +130,9 @@ namespace ClassicUO.Game.GameObjects
         public void SetSource(GameObject source)
         {
             Source = source;
+            Position = source.Position;
+            if (!IsItemEffect)
+                Tile = World.Map.GetTile(Source.X, source.Y);
         }
 
         public void SetSource(int x, int y, int z)
@@ -138,6 +141,11 @@ namespace ClassicUO.Game.GameObjects
             SourceX = x;
             SourceY = y;
             SourceZ = z;
+
+            Position = new Position((ushort)x, (ushort)y , (sbyte)z);
+
+            if (!IsItemEffect)
+                Tile = World.Map.GetTile(x, y);
         }
 
         protected (int x, int y, int z) GetTarget()

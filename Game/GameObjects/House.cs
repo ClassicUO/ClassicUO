@@ -57,6 +57,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Position = c.Position
                 });
+
             }
         }
 

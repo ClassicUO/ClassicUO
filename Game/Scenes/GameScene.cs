@@ -91,6 +91,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+
         private void ClearDequeued()
         {
             if (_inqueue)
@@ -105,14 +106,16 @@ namespace ClassicUO.Game.Scenes
         public override void Load()
         {
             base.Load();
+
+            Service.Register(_effectManager = new EffectManager());
+            Service.Register(_staticManager = new StaticManager());
+
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
-            _staticManager = new StaticManager();
             UIManager.Add(new WorldViewportGump(this));
             UIManager.Add(_topBarGump = new TopBarGump(this));
             _viewPortGump = Service.Get<WorldViewport>();
             _settings = Service.Get<Settings>();
-            Service.Register(_effectManager = new EffectManager());
             GameActions.Initialize(PickupItemBegin);
             InputManager.LeftMouseButtonDown += OnLeftMouseButtonDown;
             InputManager.LeftMouseButtonUp += OnLeftMouseButtonUp;
@@ -132,6 +135,7 @@ namespace ClassicUO.Game.Scenes
             UIManager.Clear();
             CleaningResources();
             World.Clear();
+            Service.Unregister<EffectManager>();
             Service.Unregister<GameScene>();
             InputManager.LeftMouseButtonDown -= OnLeftMouseButtonDown;
             InputManager.LeftMouseButtonUp -= OnLeftMouseButtonUp;
@@ -147,6 +151,9 @@ namespace ClassicUO.Game.Scenes
 
         public override void FixedUpdate(double totalMS, double frameMS)
         {
+            if (!World.InGame)
+                return;
+
 #if ORIONSORT
             (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
@@ -211,6 +218,9 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (!World.InGame)
+                return;
+
             if (_renderTarget == null || _renderTarget.Width != (int) (_settings.GameWindowWidth / Scale) || _renderTarget.Height != (int) (_settings.GameWindowHeight / Scale))
             {
                 _renderTarget?.Dispose();
@@ -268,6 +278,9 @@ namespace ClassicUO.Game.Scenes
 
         public override bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
         {
+            if (!World.InGame)
+                return false;
+
             DrawWorld(sb3D);
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
 

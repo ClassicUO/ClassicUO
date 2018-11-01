@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Game;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Interfaces
@@ -35,5 +36,7 @@ namespace ClassicUO.Interfaces
         Position Position { get; set; }
 
         bool IsAtWorld(int x, int y);
+
+        GameEffect Effect { get; set; }
     }
 }

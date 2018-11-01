@@ -30,7 +30,7 @@ namespace ClassicUO.Game.GameObjects.Managers
             }
         }
 
-        public void Add(GraphicEffectType type, Serial source, Serial target, Graphic graphic, Hue hue, Position srcPos, Position targPos, byte speed, ushort duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
+        public void Add(GraphicEffectType type, Serial source, Serial target, Graphic graphic, Hue hue, Position srcPos, Position targPos, byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
         {
             if (hasparticles) Log.Message(LogTypes.Warning, "Unhandled particles in an effects packet.");
             GameEffect effect = null;
@@ -42,9 +42,13 @@ namespace ClassicUO.Game.GameObjects.Managers
                     if (graphic <= 0)
                         return;
 
+                    if (speed == 0)
+                        speed++;
+
                     effect = new MovingEffect(source, target, srcPos.X, srcPos.Y, srcPos.Z, targPos.X, targPos.Y, targPos.Z, graphic, hue)
                     {
-                        Blend = blendmode
+                        Blend = blendmode,
+                        Speed = 20 / speed
                     };
 
                     if (doesExplode)

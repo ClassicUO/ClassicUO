@@ -59,7 +59,10 @@ namespace ClassicUO.Game
                     if (Map != null)
                     {
                         if (MapIndex >= 0)
+                        {
+                            Map.ClearUsedBlocks();
                             IO.Resources.Map.UnloadMap(MapIndex);
+                        }
                         Position position = Player.Position;
                         Player.Map = null;
                         Map = null;

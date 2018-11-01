@@ -25,7 +25,7 @@ using System.IO;
 
 namespace ClassicUO.IO.Resources
 {
-    public static class Light // is it useful?
+    public static class Light
     {
         public const int LIGHT_COUNT = 100;
         private static UOFileMul _file;

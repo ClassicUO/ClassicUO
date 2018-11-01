@@ -24,7 +24,9 @@
 using System;
 using System.Runtime.InteropServices;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
@@ -107,6 +109,11 @@ namespace ClassicUO.Game.Map
                                 {
                                     Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
                                 };
+
+                                if (TileData.IsAnimated((long)staticObject.ItemData.Flags))
+                                    staticObject.Effect = new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1);
+                                //Service.Get<EffectManager>().Add(GraphicEffectType.FixedXYZ, Serial.Invalid, Serial.Invalid, staticObject.Graphic, staticObject.Hue, staticObject.Position, Position.Invalid, 0, -1, false, false, false, GraphicEffectBlendMode.Normal);
+
                                 Tiles[x][y].AddGameObject(staticObject);
                             }
                         }

@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Views
             }
 
             Bounds.X = Texture.Width / 2 - 22 - (int) effect.Offset.X;
-            Bounds.Y = Texture.Height - 44 + (int) (effect.Offset.Z / 4) - (int) effect.Offset.Y;
+            Bounds.Y = Texture.Height - 44 + (int) (effect.Offset.Z -  effect.Offset.Y);
             HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 
             return base.Draw(spriteBatch, position, objectList);

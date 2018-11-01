@@ -21,6 +21,8 @@
 
 #endregion
 
+using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
@@ -29,11 +31,13 @@ namespace ClassicUO.Game.GameObjects
 {
     public class Static : GameObject, IDynamicItem
     {
+        private GameEffect _effect;
+
         public Static(Graphic tileID, Hue hue, int index) : base(World.Map)
         {
             Graphic = tileID;
             Hue = hue;
-            Index = index;
+            Index = index; 
         }
 
         public int Index { get; }
@@ -42,9 +46,44 @@ namespace ClassicUO.Game.GameObjects
 
         public StaticTiles ItemData => TileData.StaticData[Graphic];
 
+        public GameEffect Effect
+        {
+            get => _effect;
+            set
+            {
+                _effect?.Dispose();
+                _effect = value;
+
+                if (_effect != null)
+                {
+                    Service.Get<StaticManager>().Add(this);
+                }
+            }
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (Effect != null)
+            {
+                if (Effect.IsDisposed)
+                    Effect = null;
+                else
+                    Effect.Update(totalMS, frameMS);
+            }               
+        }
+
         public bool IsAtWorld(int x, int y)
         {
             return Position.X == x && Position.Y == y;
+        }
+
+        public override void Dispose()
+        {
+            Effect?.Dispose();
+            Effect = null;
+            base.Dispose();
         }
 
         protected override View CreateView()

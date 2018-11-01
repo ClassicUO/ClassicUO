@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Views;
@@ -290,6 +291,18 @@ namespace ClassicUO.Game.Map
                 case 3: return Rectangle.Top / 4;
                 default: return Position.Z;
             }
+        }
+
+        public override void Dispose()
+        {
+            for (int i = 0; i < _objectsOnTile.Count; i++)
+            {
+                GameObject t = _objectsOnTile[i];
+                if (t is Static)
+                    t.Dispose();
+            }
+
+            base.Dispose();
         }
 
         protected override View CreateView()
