@@ -30,12 +30,14 @@ namespace ClassicUO.Game.Gumps
 
         public bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
-
             if (_gameObject != null && _hash != _gameObject.PropertiesHash)
             {
                 _hash = _gameObject.PropertiesHash;
                 Text = ReadProperties(_gameObject, out _textHTML);
             }
+
+            if (string.IsNullOrEmpty(Text))
+                return false;
 
             if (_renderedText == null)
             {
@@ -44,7 +46,7 @@ namespace ClassicUO.Game.Gumps
                     Align = TEXT_ALIGN_TYPE.TS_CENTER, Font = 1, IsUnicode = true, IsHTML = true, Cell = 5, FontStyle = FontStyle.BlackBorder,
                 };
             }
-            else if (_renderedText.Text != Text && !string.IsNullOrEmpty(Text))
+            else if (_renderedText.Text != Text)
             {
                 Fonts.RecalculateWidthByInfo = true;
                 int width = Fonts.GetWidthUnicode(1, Text);
@@ -63,7 +65,7 @@ namespace ClassicUO.Game.Gumps
             return true;
         }
 
-        public void Clear() => Text = null;
+        public void Clear() => _textHTML = Text = null;
 
         public void SetGameObject(Entity obj)
         {
@@ -109,6 +111,12 @@ namespace ClassicUO.Game.Gumps
                 
 
                 string text = Cliloc.Translate((int)property.Cliloc, property.Args, true);
+
+                if (string.IsNullOrEmpty(text))
+                {
+                    continue;
+                }
+
                 sb.Append(text);
                 sbHTML.Append(text);
 
@@ -127,14 +135,15 @@ namespace ClassicUO.Game.Gumps
             }
 
             htmltext = sbHTML.ToString();
+            string result= sb.ToString();
 
-            return sb.ToString();
+            return string.IsNullOrEmpty(result) ? null : sb.ToString();
         }
 
         public void SetText(string text)
         {
             _gameObject = null;
-            Text = text;
+            Text = _textHTML = text;
         }
 
     }

@@ -996,7 +996,6 @@ namespace ClassicUO.Network
 
         private static void LoginComplete(Packet p)
         {
-            //Load();
         }
 
         private static void MapData(Packet p)
@@ -1166,18 +1165,6 @@ namespace ClassicUO.Network
                 else
                     graphic &= 0x3FFF;
 
-                //if (FileManager.ClientVersion >= ClientVersions.CV_70331)
-                //{
-                //    item.Hue = p.ReadUShort();
-                //    item.Graphic = graphic;
-                //}
-                //else if (FileManager.ClientVersion >= ClientVersions.CV_7000)
-                //{
-                //    item.Graphic = (ushort) (graphic & 0x7FFF);
-                //    item.Hue = p.ReadUShort();
-                //}
-                //else
-                //    item.Graphic = (ushort) (graphic & 0x3FFF);
                 item.Graphic = graphic;
                 item.Amount = 1;
                 item.Container = mobile;
