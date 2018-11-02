@@ -263,7 +263,6 @@
     <Compile Include="Game\GameCursor.cs" />
     <Compile Include="Game\GameObjects\IsometricLight.cs" />
     <Compile Include="Game\GameObjects\Managers\OverheadManager.cs" />
-    <Compile Include="Renderer\GraphicEngine.cs" />
     <Compile Include="Renderer\PixelPicking.cs" />
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\RenderExtentions.cs" />
