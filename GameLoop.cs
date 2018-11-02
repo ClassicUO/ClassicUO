@@ -144,9 +144,24 @@ namespace ClassicUO
             if (NetClient.LoginSocket.IsDisposed && NetClient.LoginSocket.IsConnected)
                 NetClient.LoginSocket.Disconnect();
             else if (!NetClient.Socket.IsConnected)
+            {
                 NetClient.LoginSocket.Update();
+                UpdateSockeStats(NetClient.LoginSocket, totalMS);
+            }
             else if (!NetClient.Socket.IsDisposed)
+            {
                 NetClient.Socket.Update();
+                UpdateSockeStats(NetClient.Socket, totalMS);
+            }
+        }
+
+        private void UpdateSockeStats(NetClient socket, double totalMS)
+        {
+            if (_statisticsTimer < totalMS)
+            {
+                socket.Statistics.Update();
+                _statisticsTimer = totalMS + 1000;
+            }
         }
 
         protected override void OnUIUpdate(double totalMS, double frameMS)
@@ -164,13 +179,15 @@ namespace ClassicUO
             _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
 
+        private double _statisticsTimer;
+
         protected override void OnDraw(double frameMS)
         {
             _sceneManager.CurrentScene.Draw(_sb3D, _sbUI);
             _sbUI.GraphicsDevice.Clear(Color.Transparent);
             _sbUI.Begin();
             _uiManager.Draw(_sbUI);
-            _infoText.Text = $"FPS: {CurrentFPS}\nObjects: {_sceneManager.CurrentScene.RenderedObjectsCount}\nCalls: {_sb3D.Calls}\nMerged: {_sb3D.Merged}\nPos: {(World.Player == null ? "" : World.Player.Position.ToString())}\nSelected: {(_sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty)}";
+            _infoText.Text = $"FPS: {CurrentFPS}\nObjects: {_sceneManager.CurrentScene.RenderedObjectsCount}\nCalls: {_sb3D.Calls}\nMerged: {_sb3D.Merged}\nPos: {(World.Player == null ? "" : World.Player.Position.ToString())}\nSelected: {(_sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty)}\nStats: {NetClient.Socket.Statistics}";
             _infoText.Draw(_sbUI, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
             _sbUI.End();
         }

@@ -20,6 +20,7 @@ namespace ClassicUO.Network
 
         private NetClient()
         {
+            Statistics = new NetStatistics();
         }
 
         public static NetClient LoginSocket { get; } = new NetClient();
@@ -29,6 +30,8 @@ namespace ClassicUO.Network
         public bool IsConnected => _tcpClient != null && _tcpClient.Connected;
 
         public bool IsDisposed { get; private set; }
+
+        public NetStatistics Statistics { get; }
 
         public uint ClientAddress
         {
@@ -73,16 +76,23 @@ namespace ClassicUO.Network
         {
             _tcpClient = new TcpClient
             {
-                NoDelay = true
+                NoDelay = true,
             };
             _recvBuffer = new byte[BUFF_SIZE];
             _incompletePacketBuffer = new byte[BUFF_SIZE];
             _decompBuffer = new byte[BUFF_SIZE];
             _receivedPacketsQueue = new ConcurrentQueue<Packet>();
+
+            Statistics.Reset();
+
             _tcpClient.Connect(endPoint);
 
             if (IsConnected)
+            {
                 Connected.Raise();
+                Statistics.ConnectedFrom = DateTime.Now;
+                _tcpClient.Client.BeginReceive(_recvBuffer, 0, BUFF_SIZE, SocketFlags.None, OnReceive, null);
+            }
             else
                 Disconnect();
         }
@@ -91,28 +101,41 @@ namespace ClassicUO.Network
         {
             if (!IsConnected)
                 return;
-            GetDataFromSocket();
 
             while (!_receivedPacketsQueue.IsEmpty)
             {
-                if (_receivedPacketsQueue.TryDequeue(out Packet packet)) PacketReceived.Raise(packet);
+                if (_receivedPacketsQueue.TryDequeue(out Packet packet))
+                {
+                    PacketReceived.Raise(packet);
+
+                    Statistics.TotalPacketsReceived++;
+                }
             }
         }
 
-        private void GetDataFromSocket()
+
+        private void OnReceive(IAsyncResult result)
         {
-            int length = _tcpClient.Available;
+            if (!IsConnected)
+                return;
+
+            int length = _tcpClient.Client.EndReceive(result);
 
             if (length > 0)
             {
-                NetworkStream stream = _tcpClient.GetStream();
+                Statistics.TotalBytesReceived += (uint) length;
+
                 byte[] buffer = _recvBuffer;
-                stream.Read(buffer, 0, length);
 
                 if (_isCompressionEnabled)
                     DecompressBuffer(ref buffer, ref length);
+
                 ExtractPackets(buffer, ref length);
-                if (length > 0) Log.Message(LogTypes.Warning, $"Seems there is a incomplete packet. Length: {length}");
+
+                if (length > 0)
+                    Log.Message(LogTypes.Warning, $"Seems there is a incomplete packet. Length: {length}");
+
+                _tcpClient.Client.BeginReceive(_recvBuffer, 0, BUFF_SIZE, SocketFlags.None, OnReceive, null);
             }
         }
 
@@ -134,8 +157,14 @@ namespace ClassicUO.Network
 
             try
             {
-                if (_tcpClient.Client.Send(data) <= 0)
+                int sent = _tcpClient.Client.Send(data);
+                if (sent <= 0)
                     Disconnect();
+                else
+                {
+                    Statistics.TotalBytesSended += (uint) data.Length;
+                    Statistics.TotalPacketsSended++;
+                }
             }
             catch
             {
@@ -169,6 +198,8 @@ namespace ClassicUO.Network
             _recvBuffer = null;
             _isCompressionEnabled = false;
             Disconnected.Raise();
+
+            Statistics.Reset();
         }
 
         public void EnableCompression()
