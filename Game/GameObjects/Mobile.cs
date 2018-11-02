@@ -36,19 +36,6 @@ using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.GameObjects
 {
-    [Flags]
-    public enum Notoriety : byte
-    {
-        Unknown = 0x00,
-        Innocent = 0x01,
-        Ally = 0x02,
-        Gray = 0x03,
-        Criminal = 0x04,
-        Enemy = 0x05,
-        Murderer = 0x06,
-        Invulnerable = 0x07
-    }
-
     public enum RaceType : byte
     {
         HUMAN = 1,
@@ -78,7 +65,7 @@ namespace ClassicUO.Game.GameObjects
         private bool _isSA_Poisoned;
         private ushort _mana;
         private ushort _manaMax;
-        private Notoriety _notoriety;
+        private NotorietyFlag _notorietyFlag;
         private RaceType _race;
         private ushort _stamina;
         private ushort _staminaMax;
@@ -185,14 +172,14 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public Notoriety Notoriety
+        public NotorietyFlag NotorietyFlag
         {
-            get => _notoriety;
+            get => _notorietyFlag;
             set
             {
-                if (_notoriety != value)
+                if (_notorietyFlag != value)
                 {
-                    _notoriety = value;
+                    _notorietyFlag = value;
                     _delta |= Delta.Attributes;
                 }
             }

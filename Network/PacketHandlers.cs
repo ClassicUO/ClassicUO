@@ -707,7 +707,7 @@ namespace ClassicUO.Network
 
             if (noto <= 0 || noto >= 7)
                 noto = 0x01;
-            World.Player.Notoriety = (Notoriety) noto;
+            World.Player.NotorietyFlag = (NotorietyFlag) noto;
             World.Player.ConfirmWalk(seq);
             World.Player.ProcessDelta();
         }
@@ -1106,7 +1106,7 @@ namespace ClassicUO.Network
             Direction direction = (Direction) p.ReadByte();
             mobile.Hue = p.ReadUShort();
             mobile.Flags = (Flags) p.ReadByte();
-            mobile.Notoriety = (Notoriety) p.ReadByte();
+            mobile.NotorietyFlag = (NotorietyFlag) p.ReadByte();
             mobile.ProcessDelta();
 
             if (World.Mobiles.Add(mobile))
@@ -1144,7 +1144,7 @@ namespace ClassicUO.Network
             Direction direction = (Direction) p.ReadByte();
             mobile.Hue = p.ReadUShort();
             mobile.Flags = (Flags) p.ReadByte();
-            mobile.Notoriety = (Notoriety) p.ReadByte();
+            mobile.NotorietyFlag = (NotorietyFlag) p.ReadByte();
 
             if (p.ID != 0x78)
                 p.Skip(6);
@@ -1183,6 +1183,10 @@ namespace ClassicUO.Network
                 item.Container = mobile;
                 mobile.Items.Add(item);
                 mobile.Equipment[(int) item.Layer] = item;
+
+                if (item.PropertiesHash == 0)
+                    NetClient.Socket.Send(new PMegaClilocRequest(item));
+
                 item.ProcessDelta();
                 World.Items.Add(item);
             }
@@ -1503,6 +1507,8 @@ namespace ClassicUO.Network
             else
                 flags = p.ReadUShort();
             Animations.UpdateAnimationTable(flags);
+
+            World.ClientFeatures.SetFlags((FeatureFlags)flags);
         }
 
         private static void DisplayQuestArrow(Packet p)
@@ -1933,7 +1939,8 @@ namespace ClassicUO.Network
             Entity entity = World.Get(p.ReadUInt());
 
             if (entity == null) return;
-            p.Skip(6);
+            p.Skip(2);
+            entity.PropertiesHash = p.ReadUInt();
             entity.UpdateProperties(ReadProperties(p));
             entity.ProcessDelta();
         }
@@ -2096,6 +2103,19 @@ namespace ClassicUO.Network
 
         private static void OPLInfo(Packet p)
         {
+            if (World.ClientFeatures.TooltipsEnabled)
+            {
+                Serial serial = p.ReadUInt();
+                uint revision = p.ReadUInt();
+
+                Entity entity = World.Get(serial);
+
+                if (entity != null && entity.PropertiesHash != revision)
+                {
+                    NetClient.Socket.Send(new PMegaClilocRequest(entity));
+                }
+
+            }
         }
 
         private static void OpenCompressedGump(Packet p)

@@ -42,6 +42,8 @@ namespace ClassicUO.Renderer
 
         public static Vector3 SelectedHue { get; } = new Vector3(27, 1, 0);
 
+        public static Vector3 SelectedItemHue { get; } = new Vector3(0x0035, 1, 0);
+
         public static Vector3 GetHueVector(int hue)
         {
             return GetHueVector(hue, false, 0, false);

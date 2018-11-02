@@ -66,6 +66,7 @@
     <Compile Include="Game\Data\CharacterCreationValues.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
+    <Compile Include="Game\Data\NotorietyFlag.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
     <Compile Include="Game\Data\SpellsChivalry.cs" />
     <Compile Include="Game\Data\SpellsMysticism.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="Game\System\CommandSystem.cs" />
     <Compile Include="Game\System\PartySystem.cs" />
     <Compile Include="Game\System\TargetSystem.cs" />
+    <Compile Include="Game\Gumps\Tooltip.cs" />
     <Compile Include="Game\Views\LightningEffectView.cs" />
     <Compile Include="Game\Views\MovingEffectView.cs" />
     <Compile Include="Input\Mouse.cs" />

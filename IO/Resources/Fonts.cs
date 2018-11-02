@@ -108,7 +108,7 @@ namespace ClassicUO.IO.Resources
 
         public static bool RecalculateWidthByInfo { get; set; } = false;
 
-        public static bool IsUsingHTML { get; private set; }
+        public static bool IsUsingHTML { get; set; }
 
         public static void Load()
         {
@@ -403,7 +403,7 @@ namespace ClassicUO.IO.Resources
                                 break;
                             ushort pic = fcd.Data[y * dw + x];
 
-                            if (pic > 0)
+                            if (pic != 0)
                             {
                                 uint pcl = 0;
 
@@ -615,7 +615,7 @@ namespace ClassicUO.IO.Resources
             ptr.Width += readWidth;
             ptr.CharCount += charCount;
 
-            if (readWidth == 0 && len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
+            if (readWidth == 0 && len != 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
             {
                 ptr.Width = 1;
                 ptr.MaxHeight = 14;
@@ -680,7 +680,7 @@ namespace ClassicUO.IO.Resources
             {
                 uint offset = table['.'];
 
-                if (offset > 0 && offset != 0xFFFFFFFF)
+                if (offset != 0 && offset != 0xFFFFFFFF)
                     width -= *(byte*) ((IntPtr) table + (int) offset + 2) * 3;
             }
 
@@ -692,14 +692,14 @@ namespace ClassicUO.IO.Resources
                 uint offset = table[c];
                 sbyte charWidth = 0;
 
-                if (offset > 0 && offset != 0xFFFFFFFF)
+                if (offset != 0 && offset != 0xFFFFFFFF)
                 {
                     byte* ptr = (byte*) ((IntPtr) table + (int) offset);
                     charWidth = (sbyte) ((sbyte) ptr[0] + (sbyte) ptr[2] + 1);
                 }
                 else if (c == ' ') charWidth = UNICODE_SPACE_WIDTH;
 
-                if (charWidth > 0)
+                if (charWidth != 0)
                 {
                     textLength += charWidth;
 
@@ -727,7 +727,7 @@ namespace ClassicUO.IO.Resources
             {
                 uint offset = table[c];
 
-                if (offset > 0 && offset != 0xFFFFFFFF)
+                if (offset != 0 && offset != 0xFFFFFFFF)
                 {
                     byte* ptr = (byte*) ((IntPtr) table + (int) offset);
                     textLength += (sbyte) ptr[0] + (sbyte) ptr[2] + 1;
@@ -963,7 +963,7 @@ namespace ClassicUO.IO.Resources
             ptr.Width += readWidth;
             ptr.CharCount += charCount;
 
-            if (readWidth == 0 && len > 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
+            if (readWidth == 0 && len != 0 && (str[len - 1] == '\n' || str[len - 1] == '\r'))
             {
                 ptr.Width = 1;
                 ptr.MaxHeight = 14;
@@ -997,7 +997,7 @@ namespace ClassicUO.IO.Resources
             if (info == null)
                 return;
 
-            if (IsUsingHTML && (_leftMargin > 0 || _rightMargin > 0))
+            if (IsUsingHTML && (_leftMargin != 0 || _rightMargin != 0))
             {
                 while (info != null)
                 {
@@ -1108,7 +1108,7 @@ namespace ClassicUO.IO.Resources
                     {
                         oldLink = dataPtr.LinkID;
 
-                        if (oldLink > 0)
+                        if (oldLink != 0)
                         {
                             isLink = true;
                             linkStartX = w;
@@ -1224,7 +1224,7 @@ namespace ClassicUO.IO.Resources
                                     byte cl = (byte) (scanlines[c] & (1 << (7 - j)));
                                     int block = testY * width + nowX;
 
-                                    if (cl > 0)
+                                    if (cl != 0)
                                         pData[block] = charcolor;
                                 }
                             }
@@ -1271,7 +1271,7 @@ namespace ClassicUO.IO.Resources
                                             int nowX = testX + x;
                                             int testBlock = testY * width + nowX;
 
-                                            if (pData[testBlock] > 0 && pData[testBlock] != solidColor)
+                                            if (pData[testBlock] != 0 && pData[testBlock] != solidColor)
                                             {
                                                 pData[block] = solidColor;
 
@@ -1354,7 +1354,7 @@ namespace ClassicUO.IO.Resources
                                             {
                                                 int testBlock = (testY + y) * width + nowX;
 
-                                                if (pData[testBlock] > 0 && pData[testBlock] != blackColor)
+                                                if (pData[testBlock] != 0 && pData[testBlock] != blackColor)
                                                 {
                                                     pData[block] = blackColor;
                                                     passed = true;
@@ -1417,7 +1417,7 @@ namespace ClassicUO.IO.Resources
                 info = null;
             }
 
-            if (IsUsingHTML && _HTMLBackgroundCanBeColored && _backgroundColor > 0)
+            if (IsUsingHTML && _HTMLBackgroundCanBeColored && _backgroundColor != 0)
             {
                 _backgroundColor |= 0xFF;
 
@@ -1455,7 +1455,7 @@ namespace ClassicUO.IO.Resources
             bool isFixed = (flags & UOFONT_FIXED) != 0;
             bool isCropped = (flags & UOFONT_CROPPED) != 0;
 
-            if (len > 0)
+            if (len != 0)
                 ptr.Align = htmlData[0].Align;
 
             for (int i = 0; i < len; i++)
@@ -1663,7 +1663,7 @@ namespace ClassicUO.IO.Resources
                             stack.Clear();
                             newlen = 0;
 
-                            if (newInfo.Color > 0)
+                            if (newInfo.Color != 0)
                                 info.Color = newInfo.Color;
                             stack.Add(info);
                         }
@@ -1691,7 +1691,7 @@ namespace ClassicUO.IO.Resources
                         case HTML_TAG_TYPE.HTT_CENTER:
                         case HTML_TAG_TYPE.HTT_RIGHT:
 
-                            if (newlen > 0)
+                            if (newlen != 0)
                                 endTag = true;
                             goto case HTML_TAG_TYPE.HTT_P;
                         case HTML_TAG_TYPE.HTT_P:
@@ -1714,7 +1714,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                if (si > 0)
+                if (si != 0)
                 {
                     data[newlen].Char = si;
                     data[newlen].Font = currentInfo.Font;
@@ -1962,7 +1962,7 @@ namespace ClassicUO.IO.Resources
                                 cmdLen = i - j;
                                 string content = str.Substring(j, cmdLen);
 
-                                if (content.Length > 0)
+                                if (content.Length != 0)
                                     GetHTMLInfoFromContent(ref info, content);
 
                                 break;
@@ -2400,7 +2400,7 @@ namespace ClassicUO.IO.Resources
                             char ch = info.Data[i].Item;
                             uint offset = table[ch];
 
-                            if (offset > 0 && offset != 0xFFFFFFFF)
+                            if (offset != 0 && offset != 0xFFFFFFFF)
                             {
                                 byte* cptr = (byte*) ((IntPtr) table + (int) offset);
                                 width += (sbyte) cptr[0] + (sbyte) cptr[2] + 1;
@@ -2460,7 +2460,7 @@ namespace ClassicUO.IO.Resources
                         char ch = info.Data[i].Item;
                         uint offset = table[ch];
 
-                        if (offset > 0 && offset != 0xFFFFFFFF)
+                        if (offset != 0 && offset != 0xFFFFFFFF)
                         {
                             byte* cptr = (byte*) ((IntPtr) table + (int) offset);
                             x += (sbyte) cptr[0] + (sbyte) cptr[2] + 1;

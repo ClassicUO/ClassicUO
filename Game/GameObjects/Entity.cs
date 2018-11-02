@@ -198,6 +198,8 @@ namespace ClassicUO.Game.GameObjects
             _delta |= Delta.Properties;
         }
 
+        public uint PropertiesHash { get; set; }
+
         protected virtual void OnProcessDelta(Delta d)
         {
             if (d.HasFlag(Delta.Appearance)) AppearanceChanged.Raise(this);

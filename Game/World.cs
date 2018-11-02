@@ -24,6 +24,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 
@@ -92,6 +93,10 @@ namespace ClassicUO.Game
         {
             Overall = 0, Personal = 0
         };
+
+        public static Features ClientFeatures { get; } = new Features();
+
+
 
         public static void Update(double totalMS, double frameMS)
         {
