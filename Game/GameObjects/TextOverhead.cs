@@ -21,6 +21,8 @@
 
 #endregion
 
+using System;
+
 using ClassicUO.Game.Views;
 using ClassicUO.Renderer;
 
@@ -28,9 +30,9 @@ namespace ClassicUO.Game.GameObjects
 {
     public class TextOverhead : GameObject
     {
-        private const float TIME_FADEOUT = 2000.0f;
+        protected const float TIME_FADEOUT = 1000.0f;
 
-        public TextOverhead(in GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f) : base(parent.Map)
+        public TextOverhead(GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f) : base(parent.Map)
         {
             Text = text;
             Parent = parent;
@@ -39,18 +41,7 @@ namespace ClassicUO.Game.GameObjects
             Font = font;
             IsUnicode = isunicode;
             Style = style;
-
-            if (timeToLive <= 0.0f)
-            {
-                TimeToLive = 2500 + text.Substring(text.IndexOf('>') + 1).Length * 100;
-
-                if (TimeToLive > 10000.0f)
-                    TimeToLive = 10000.0f;
-            }
-            else
-                TimeToLive = timeToLive;
-
-            TimeCreated = CoreGame.Ticks;
+            TimeToLive = timeToLive;
         }
 
         public string Text { get; }
@@ -63,8 +54,6 @@ namespace ClassicUO.Game.GameObjects
 
         public MessageType MessageType { get; set; }
 
-        public float TimeCreated { get; }
-
         public float Alpha { get; private set; }
 
         public bool IsUnicode { get; }
@@ -75,10 +64,9 @@ namespace ClassicUO.Game.GameObjects
 
         public FontStyle Style { get; }
 
-        protected override View CreateView()
-        {
-            return new TextOverheadView(this, MaxWidth, Hue, Font, IsUnicode, Style);
-        }
+        protected override View CreateView() => new TextOverheadView(this, MaxWidth, Hue, Font, IsUnicode, Style);
+
+        internal bool Initialized { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -86,11 +74,45 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsPersistent || IsDisposed)
                 return;
-            float time = (float) totalMS - TimeCreated;
 
-            if (time > TimeToLive)
-                Dispose();
-            else if (time > TimeToLive - TIME_FADEOUT) Alpha = (time - (TimeToLive - TIME_FADEOUT)) / TIME_FADEOUT;
+            if (Initialized)
+            {
+                TimeToLive -= (float) frameMS;
+
+                if (TimeToLive > 0 && TimeToLive <= TIME_FADEOUT)
+                {
+                    // start alpha decreasing
+                    Alpha = 1 - TimeToLive / TIME_FADEOUT;
+                }
+                else if (TimeToLive <= 0.0f)
+                    Dispose();
+            }
         }
+    }
+
+    public class DamageOverhead : TextOverhead
+    {
+
+        public DamageOverhead(GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f) : base(parent, text, maxwidth, hue, font, isunicode, style, timeToLive)
+        {
+
+        }
+
+        public float MovingTime { get; set; }
+        public int OffsetY { get; set; }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (Initialized)
+            {
+                MovingTime += (float) frameMS;                
+            }
+
+        }
+
+        protected override View CreateView() => new DamageOverheadView(this, MaxWidth, Hue, Font, IsUnicode, Style);
+
     }
 }

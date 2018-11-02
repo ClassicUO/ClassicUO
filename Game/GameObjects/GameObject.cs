@@ -178,6 +178,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (string.IsNullOrEmpty(text))
                 return null;
+
             TextOverhead overhead;
 
             for (int i = 0; i < OverHeads.Count; i++)

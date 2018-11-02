@@ -2625,19 +2625,6 @@ namespace ClassicUO.IO.Resources
 
             return count;
         }
-
-        public class FontTexture : SpriteTexture
-        {
-            public FontTexture(int width, int height, int linescount, List<WebLinkRect> links) : base(width, height)
-            {
-                LinesCount = linescount;
-                Links = links;
-            }
-
-            public int LinesCount { get; }
-
-            public List<WebLinkRect> Links { get; }
-        }
     }
 
     [StructLayout(LayoutKind.Sequential)]

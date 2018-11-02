@@ -44,7 +44,9 @@ namespace ClassicUO.Game
         Guild = 13,
         Alliance = 14,
         Command = 15,
-        Encoded = 0xC0
+        Encoded = 0xC0,
+
+        Damage,
     }
 
     public enum MessageFont : ushort

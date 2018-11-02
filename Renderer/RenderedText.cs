@@ -46,11 +46,11 @@ namespace ClassicUO.Renderer
         BQ = 0x80
     }
 
-    public class RenderedText : IDrawableUI
+    public class RenderedText
     {
         private readonly string[] _lines;
         private string _text;
-        private Fonts.FontTexture _texture;
+        private FontTexture _texture;
 
         public RenderedText()
         {
@@ -116,7 +116,7 @@ namespace ClassicUO.Renderer
 
         public int Height { get; private set; }
 
-        public SpriteTexture Texture
+        public FontTexture Texture
         {
             get
             {
@@ -129,7 +129,7 @@ namespace ClassicUO.Renderer
             {
                 if (_texture != null && !_texture.IsDisposed)
                     _texture.Dispose();
-                _texture = (Fonts.FontTexture) value;
+                _texture =  value;
             }
         }
 
@@ -178,11 +178,11 @@ namespace ClassicUO.Renderer
             Texture = InternalCreateTexture();
         }
 
-        private Fonts.FontTexture InternalCreateTexture()
+        private FontTexture InternalCreateTexture()
         {
             if (IsHTML)
                 Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
-            Fonts.FontTexture ftexture;
+            FontTexture ftexture;
 
             if (IsUnicode)
                 Fonts.GenerateUnicode(out ftexture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle);

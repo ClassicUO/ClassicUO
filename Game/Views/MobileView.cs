@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -109,9 +110,13 @@ namespace ClassicUO.Game.Views
 
             Bounds = total;
 
+
+            int height = 0;
+            int centerY = 0;
+
             if (GameObject.OverHeads.Count > 0)
             {
-                GetAnimationDimensions(mobile, 0xFF, out int height, out int centerY);
+                GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
 
                 Vector3 overheadPosition = new Vector3
                 {
@@ -120,7 +125,39 @@ namespace ClassicUO.Game.Views
                 MessageOverHead(spriteBatch, overheadPosition, mobile.IsMounted ? 0 : -22);
             }
 
+            if (mobile.DamageList.Count > 0)
+            {
+                if (height == 0 && centerY == 0)
+                    GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
+
+                Vector3 damagePosition = new Vector3
+                {
+                    X = position.X + mobile.Offset.X,
+                    Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
+                    Z = position.Z
+                };
+
+                DamageOverhead(mobile, spriteBatch, damagePosition, mobile.IsMounted ? 0 : -22);
+            }
+
             return true;
+        }
+
+        private void DamageOverhead(Mobile mobile, SpriteBatch3D spriteBatch, Vector3 position, int offY)
+        {
+            for (int i = 0; i < mobile.DamageList.Count; i++)
+            {
+                DamageOverhead dmg = mobile.DamageList[i];
+                View v = dmg.View;
+
+                v.Bounds.X = v.Texture.Width / 2 - 22;
+                v.Bounds.Y = offY + v.Texture.Height - dmg.OffsetY;
+                v.Bounds.Width = v.Texture.Width;
+                v.Bounds.Height = v.Texture.Height;
+
+                OverheadManager.AddDamage(v, position);
+                offY += v.Texture.Height;
+            }
         }
 
         private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int height, out int centerY)

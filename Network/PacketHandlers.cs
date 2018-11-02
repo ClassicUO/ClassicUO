@@ -329,12 +329,10 @@ namespace ClassicUO.Network
 
         private static void Damage(Packet p)
         {
-            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (World.Player == null)
+                return;
 
-            if (mobile == null) return;
-            ushort damage = p.ReadUShort();
-
-            mobile.AddGameText(MessageType.Label, damage.ToString(), 3, (Hue) (mobile == World.Player ? 0x0034 : 0x0021), false);
+            World.Mobiles.Get(p.ReadUInt())?.AddDamage(p.ReadUShort());
         }
 
         private static void EditTileDataGodClientR(Packet p)
@@ -675,7 +673,7 @@ namespace ClassicUO.Network
             bool isrun = (direction & Direction.Running) != 0;
 
             if (endX != x || endY != y || endZ != z)
-                World.Player.ForcePosition(x, y, z, direction);
+                World.Player.ForcePosition(x, y, z, dir);
             else if (endDir != dir)
                 World.Player.EnqueueStep(x, y, z, dir, isrun);
             else if (World.Player.Tile == null)
@@ -1834,13 +1832,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 case 0x22:
                     p.Skip(1);
-                    Mobile mobile = World.Mobiles.Get(p.ReadUInt());
-
-                    if (mobile != null)
-                    {
-                        int damage = p.ReadByte();
-                    }
-
+                    World.Mobiles.Get(p.ReadUInt())?.AddDamage(p.ReadByte());
                     break;
                 //===========================================================================================
                 //===========================================================================================

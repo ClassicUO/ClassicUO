@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -285,6 +286,31 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Update(totalMS, frameMS);
             ProcessAnimation();
+
+            for (int i = 0; i < _damageTextList.Count; i++)
+            {
+                DamageOverhead damage = _damageTextList[i];
+
+                damage.Update(totalMS, frameMS);
+
+                if (damage.IsDisposed)
+                {
+                    _damageTextList.RemoveAt(i--);
+                }
+            }
+        }
+
+        private readonly List<DamageOverhead> _damageTextList = new List<DamageOverhead>(5);
+
+        public IReadOnlyList<DamageOverhead> DamageList => _damageTextList;
+
+        public void AddDamage(int damage)
+        {
+            DamageOverhead overhead = new DamageOverhead(this, damage.ToString(), hue: (Hue)(this == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500);
+
+            if (_damageTextList.Count >= 5)
+                _damageTextList.RemoveAt(_damageTextList.Count - 1);
+            _damageTextList.Insert(0, overhead);
         }
 
         protected override void OnProcessDelta(Delta d)
