@@ -575,6 +575,14 @@ namespace ClassicUO.Network
         }
     }
 
+    public sealed class PNameRequest : PacketWriter
+    {
+        public PNameRequest(Serial serial) : base(0x98)
+        {
+            WriteUInt(serial);
+        }
+    }
+
     public sealed class PTipRequest : PacketWriter
     {
         public PTipRequest(ushort id, byte flag) : base(0xA7)

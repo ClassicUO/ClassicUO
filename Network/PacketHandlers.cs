@@ -334,7 +334,7 @@ namespace ClassicUO.Network
             if (mobile == null) return;
             ushort damage = p.ReadUShort();
 
-            //mobile.AddGameText(MessageType.Label, damage.ToString(), 3, (Hue)(mobile == World.Player ? 0x0034 : 0x0021), false)
+            mobile.AddGameText(MessageType.Label, damage.ToString(), 3, (Hue) (mobile == World.Player ? 0x0034 : 0x0021), false);
         }
 
         private static void EditTileDataGodClientR(Packet p)
@@ -1223,6 +1223,9 @@ namespace ClassicUO.Network
             if (World.Mobiles.Add(mobile))
                 World.Mobiles.ProcessDelta();
             World.Items.ProcessDelta();
+
+            if (string.IsNullOrEmpty(mobile.Name))
+                NetClient.Socket.Send(new PNameRequest(mobile));
             NetClient.Socket.Send(new PClickRequest(mobile));
         }
 

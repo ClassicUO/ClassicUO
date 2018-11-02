@@ -31,6 +31,7 @@ using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
+using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -308,6 +309,15 @@ namespace ClassicUO.Game
                         _tooltip = new Tooltip();
                     }
                     _tooltip.SetGameObject(backpack.BackpackItem);
+                    _tooltip.Draw(spriteBatch, new Vector3(position.X, position.Y + 24, 0));
+                }
+                else if (gs.SelectedObject is GameEffect effect && effect.Source is Item dynItem)
+                {
+                    if (_tooltip == null)
+                    {
+                        _tooltip = new Tooltip();
+                    }
+                    _tooltip.SetGameObject(dynItem);
                     _tooltip.Draw(spriteBatch, new Vector3(position.X, position.Y + 24, 0));
                 }
             }

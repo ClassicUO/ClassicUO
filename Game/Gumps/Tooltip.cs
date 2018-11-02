@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Gumps
                     Align = TEXT_ALIGN_TYPE.TS_CENTER, Font = 1, IsUnicode = true, IsHTML = true, Cell = 5, FontStyle = FontStyle.BlackBorder,
                 };
             }
-            else if (_renderedText.Text != Text)
+            else if (_renderedText.Text != Text && !string.IsNullOrEmpty(Text))
             {
                 Fonts.RecalculateWidthByInfo = true;
                 int width = Fonts.GetWidthUnicode(1, Text);
@@ -86,7 +86,10 @@ namespace ClassicUO.Game.Gumps
             {
                 Property property = obj.Properties[i];
 
-                if (i == 0 && !string.IsNullOrEmpty(obj.Name))
+                if (property.Cliloc <= 0)
+                    continue;
+
+                if (i == 0 /*&& !string.IsNullOrEmpty(obj.Name)*/)
                 {
                     if (obj.Serial.IsMobile)
                     {
