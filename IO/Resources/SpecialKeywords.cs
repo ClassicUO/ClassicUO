@@ -44,7 +44,7 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path))
                 throw new FileNotFoundException();
-            UOFileMul file = new UOFileMul(path);
+            UOFileMul file = new UOFileMul(path, false);
             Dictionary<int, List<Regex>> table = null;
             int lastIndex = -1;
 

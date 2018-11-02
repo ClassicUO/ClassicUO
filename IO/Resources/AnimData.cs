@@ -34,7 +34,7 @@ namespace ClassicUO.IO.Resources
         public static void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "animdata.mul");
-            if (File.Exists(path)) _file = new UOFileMul(path);
+            if (File.Exists(path)) _file = new UOFileMul(path, false);
         }
 
         public static AnimDataFrame CalculateCurrentGraphic(ushort graphic)

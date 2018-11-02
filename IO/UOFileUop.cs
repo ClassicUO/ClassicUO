@@ -41,9 +41,9 @@ namespace ClassicUO.IO
             Load();
         }
 
-        protected override void Load()
+        protected override void Load(bool loadentries = true)
         {
-            base.Load();
+            base.Load(loadentries);
             Seek(0);
 
             if (ReadUInt() != UOP_MAGIC_NUMBER)

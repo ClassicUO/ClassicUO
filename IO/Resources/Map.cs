@@ -88,15 +88,15 @@ namespace ClassicUO.IO.Resources
 
                     if (File.Exists(path))
                     {
-                        _filesMap[i] = new UOFileMul(path);
+                        _filesMap[i] = new UOFileMul(path, false);
                         foundedOneMap = true;
                     }
                 }
 
                 path = Path.Combine(FileManager.UoFolderPath, $"statics{i}.mul");
-                if (File.Exists(path)) _filesStatics[i] = new UOFileMul(path);
+                if (File.Exists(path)) _filesStatics[i] = new UOFileMul(path, false);
                 path = Path.Combine(FileManager.UoFolderPath, $"staidx{i}.mul");
-                if (File.Exists(path)) _filesIdxStatics[i] = new UOFileMul(path);
+                if (File.Exists(path)) _filesIdxStatics[i] = new UOFileMul(path, false);
             }
 
             if (!foundedOneMap)
