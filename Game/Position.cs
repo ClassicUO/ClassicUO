@@ -97,6 +97,9 @@ namespace ClassicUO.Game
             return Math.Max(Math.Abs(position.X - X), Math.Abs(position.Y - Y));
         }
 
+        public int DistanceTo(int x, int y)
+            => Math.Max(Math.Abs(x - X), Math.Abs(y - Y));
+
         public double DistanceToSqrt(Position position)
         {
             int a = position.X - X;

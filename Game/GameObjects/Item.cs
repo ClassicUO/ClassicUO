@@ -249,6 +249,24 @@ namespace ClassicUO.Game.GameObjects
                 Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
         }
 
+        private Position _containerPosition;
+
+        public override Position Position
+        {
+            get => _containerPosition;
+            set
+            {
+                if (!OnGround)
+                {
+                    _containerPosition = value;
+                }
+                else
+                {
+                    base.Position = _containerPosition = value;
+                }
+            }
+        }
+
         public bool IsAtWorld(int x, int y)
         {
             return Position.X == x && Position.Y == y;

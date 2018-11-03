@@ -196,8 +196,8 @@ namespace ClassicUO.IO.Resources
             if (BlockData[i] != null)
             {
                 Array.Clear(BlockData[i], 0, BlockData[i].Length);
+                BlockData[i] = null;
             }
-            BlockData[i] = null;
         }
 
         public static unsafe RadarMapBlock? GetRadarMapBlock(int map, int blockX, int blockY)
@@ -210,8 +210,10 @@ namespace ClassicUO.IO.Resources
             MapBlock* mp = (MapBlock*)indexMap.MapAddress;
             MapCells* cells = (MapCells*)&mp->Cells;
 
-            RadarMapBlock mb = new RadarMapBlock();
-            mb.Cells = new RadarMapcells[8, 8];
+            RadarMapBlock mb = new RadarMapBlock
+            {
+                Cells = new RadarMapcells[8, 8]
+            };
 
             for (int x = 0; x < 8; x++)
             {

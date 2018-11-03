@@ -160,9 +160,8 @@ namespace ClassicUO.Game.GameObjects
                 if (mob.Steps.Count > 0)
                 {
                     Mobile.Step step = mob.Steps.Back();
-                    Position pos = new Position((ushort) step.X, (ushort) step.Y);
 
-                    return Position.DistanceTo(pos);
+                    return Position.DistanceTo(step.X, step.Y);
                 }
             }
 
