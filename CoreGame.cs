@@ -40,7 +40,7 @@ namespace ClassicUO
 
         protected CoreGame()
         {
-            TargetElapsedTime = TimeSpan.FromSeconds(1.0f / 300.0f);
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0f / 144.0f);
             GraphicsDeviceManager = new GraphicsDeviceManager(this);
             GraphicsDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
@@ -139,6 +139,7 @@ namespace ClassicUO
             OnUIUpdate(totalms, framems);
             OnUpdate(totalms, framems);
             // ###############################
+
             Profiler.ExitContext("Update");
             _time += (float) framems;
 

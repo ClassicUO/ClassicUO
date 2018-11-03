@@ -229,6 +229,10 @@ namespace ClassicUO.Game.Scenes
                         GameActions.DoubleClick(mob);
 
                         break;
+                    case GameEffect effect when effect.Source is Item item:
+                        result = true;
+                        GameActions.DoubleClick(item);
+                        break;
                 }
 
                 ClearDequeued();

@@ -80,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
         {
             AnimDataFrame = AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
-            AnimIndex = (sbyte) AnimDataFrame.FrameStart;
+            AnimIndex = 0;
             Speed = AnimDataFrame.FrameInterval * 45;
         }
 
@@ -101,7 +101,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                         AnimIndex++;
-                        if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte) AnimDataFrame.FrameStart;
+                        if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = 0;
                     }
                     else
                     {

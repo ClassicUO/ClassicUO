@@ -160,7 +160,7 @@ namespace ClassicUO
             if (_statisticsTimer < totalMS)
             {
                 socket.Statistics.Update();
-                _statisticsTimer = totalMS + 1000;
+                _statisticsTimer = totalMS + 500;
             }
         }
 

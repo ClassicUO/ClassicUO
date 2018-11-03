@@ -580,10 +580,11 @@ namespace ClassicUO.Network
 
             GameActions.SingleClick(World.Player);
             NetClient.Socket.Send(new PStatusRequest(World.Player));
-            Service.Get<SceneManager>().ChangeScene(ScenesType.Game);
 
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
+
+            Service.Get<SceneManager>().ChangeScene(ScenesType.Game);
         }
 
         private static void Talk(Packet p)
