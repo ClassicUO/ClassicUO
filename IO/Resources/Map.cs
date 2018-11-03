@@ -88,15 +88,15 @@ namespace ClassicUO.IO.Resources
 
                     if (File.Exists(path))
                     {
-                        _filesMap[i] = new UOFileMul(path);
+                        _filesMap[i] = new UOFileMul(path, false);
                         foundedOneMap = true;
                     }
                 }
 
                 path = Path.Combine(FileManager.UoFolderPath, $"statics{i}.mul");
-                if (File.Exists(path)) _filesStatics[i] = new UOFileMul(path);
+                if (File.Exists(path)) _filesStatics[i] = new UOFileMul(path, false);
                 path = Path.Combine(FileManager.UoFolderPath, $"staidx{i}.mul");
-                if (File.Exists(path)) _filesIdxStatics[i] = new UOFileMul(path);
+                if (File.Exists(path)) _filesIdxStatics[i] = new UOFileMul(path, false);
             }
 
             if (!foundedOneMap)
@@ -200,6 +200,11 @@ namespace ClassicUO.IO.Resources
 
             if (indexMap == null || indexMap.MapAddress == 0)
                 return null;
+
+            MapBlock* mp = (MapBlock*)indexMap.MapAddress;
+            MapCells* cells = (MapCells*)mp->Cells;
+
+
             MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr) indexMap.MapAddress);
             RadarMapBlock mb = new RadarMapBlock();
             mb.Cells = new RadarMapcells[8, 8];
@@ -208,7 +213,8 @@ namespace ClassicUO.IO.Resources
             {
                 for (int y = 0; y < 8; y++)
                 {
-                    ref MapCells cell = ref block.Cells[y * 8 + x];
+
+                    ref MapCells cell = ref cells[y * 8 + x];
                     ref RadarMapcells outcell = ref mb.Cells[x, y];
                     outcell.Graphic = cell.TileID;
                     outcell.Z = cell.Z;
@@ -276,12 +282,19 @@ namespace ClassicUO.IO.Resources
         public sbyte Z;
     }
 
+    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
+    //public struct MapBlock
+    //{
+    //    public readonly uint Header;
+    //    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
+    //    public MapCells[] Cells;
+    //}
+
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct MapBlock
+    public unsafe struct MapBlock
     {
         public readonly uint Header;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
-        public MapCells[] Cells;
+        public fixed byte Cells[64 * 3];
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

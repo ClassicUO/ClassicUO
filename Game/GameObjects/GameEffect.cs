@@ -40,7 +40,7 @@ namespace ClassicUO.Game.GameObjects
 
         public IReadOnlyList<GameEffect> Children => _children;
 
-        protected GameObject Source { get; set; }
+        public GameObject Source { get; set; }
 
         protected GameObject Target { get; set; }
 

@@ -44,15 +44,22 @@ namespace ClassicUO.Game.Views
                 Text = parent.Text
             };
             Texture = text.Texture;
+
+            if (parent.TimeToLive <= 0.0f)
+                parent.TimeToLive = (((4000 * text.Texture.LinesCount) * Service.Get<Settings>().SpeechDelay) / 100);
+
+            parent.Initialized = true;
         }
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
+
             Texture.Ticks = CoreGame.Ticks;
             TextOverhead overhead = (TextOverhead) GameObject;
-            if (!overhead.IsPersistent && overhead.Alpha < 1.0f) HueVector = RenderExtentions.GetHueVector(0, false, overhead.Alpha, true);
+            if (!overhead.IsPersistent && overhead.Alpha < 1.0f)
+                HueVector = RenderExtentions.GetHueVector(0, false, overhead.Alpha, true);
             Settings settings = Service.Get<Settings>();
             int width = Texture.Width - Bounds.X;
             int height = Texture.Height - Bounds.Y;
@@ -72,6 +79,28 @@ namespace ClassicUO.Game.Views
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
+        }
+    }
+
+    public class DamageOverheadView : TextOverheadView
+    {
+        public DamageOverheadView(DamageOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent, maxwidth, hue, font, isunicode, style)
+        {
+
+        }
+
+        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        {
+
+            DamageOverhead dmg = (DamageOverhead) GameObject;
+
+            if (dmg.MovingTime >= 50)
+            {
+                dmg.MovingTime = 0;
+                dmg.OffsetY -= 2;
+            }
+
+            return base.Draw(spriteBatch, position, objectList);
         }
     }
 }

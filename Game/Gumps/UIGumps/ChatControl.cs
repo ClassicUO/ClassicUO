@@ -359,7 +359,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private class ChatLineTime : IUpdateable, IDrawableUI, IDisposable
         {
             private const float TIME_DISPLAY = 10000.0f;
-            private const float TIME_FADEOUT = 2000.0f;
+            private const float TIME_FADEOUT = 1000.0f;
             private readonly float _createdTime;
             private readonly RenderedText _renderedText;
             private int _width;

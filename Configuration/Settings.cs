@@ -58,7 +58,7 @@ namespace ClassicUO.Configuration
         private int _innocentColor;
         private string _ip;
         private string _lastCharName;
-        private int _maxFPS;
+        private int _maxFPS = 144;
         private int _murdererColor;
         private bool _music;
         private int _musicVolume;
@@ -74,7 +74,7 @@ namespace ClassicUO.Configuration
         private bool _sound;
         private int _soundVolume;
         private int _speechColor;
-        private int _speechDelay;
+        private int _speechDelay = 500;
         private bool _statReport;
         private ushort _tooltipsTextColor = 0xFFFF;
         private string _uoDir;

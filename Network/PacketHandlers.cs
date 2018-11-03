@@ -329,12 +329,10 @@ namespace ClassicUO.Network
 
         private static void Damage(Packet p)
         {
-            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+            if (World.Player == null)
+                return;
 
-            if (mobile == null) return;
-            ushort damage = p.ReadUShort();
-
-            //mobile.AddGameText(MessageType.Label, damage.ToString(), 3, (Hue)(mobile == World.Player ? 0x0034 : 0x0021), false)
+            World.Mobiles.Get(p.ReadUInt())?.AddDamage(p.ReadUShort());
         }
 
         private static void EditTileDataGodClientR(Packet p)
@@ -675,7 +673,7 @@ namespace ClassicUO.Network
             bool isrun = (direction & Direction.Running) != 0;
 
             if (endX != x || endY != y || endZ != z)
-                World.Player.ForcePosition(x, y, z, direction);
+                World.Player.ForcePosition(x, y, z, dir);
             else if (endDir != dir)
                 World.Player.EnqueueStep(x, y, z, dir, isrun);
             else if (World.Player.Tile == null)
@@ -707,7 +705,7 @@ namespace ClassicUO.Network
 
             if (noto <= 0 || noto >= 7)
                 noto = 0x01;
-            World.Player.Notoriety = (Notoriety) noto;
+            World.Player.NotorietyFlag = (NotorietyFlag) noto;
             World.Player.ConfirmWalk(seq);
             World.Player.ProcessDelta();
         }
@@ -996,7 +994,6 @@ namespace ClassicUO.Network
 
         private static void LoginComplete(Packet p)
         {
-            //Load();
         }
 
         private static void MapData(Packet p)
@@ -1106,7 +1103,7 @@ namespace ClassicUO.Network
             Direction direction = (Direction) p.ReadByte();
             mobile.Hue = p.ReadUShort();
             mobile.Flags = (Flags) p.ReadByte();
-            mobile.Notoriety = (Notoriety) p.ReadByte();
+            mobile.NotorietyFlag = (NotorietyFlag) p.ReadByte();
             mobile.ProcessDelta();
 
             if (World.Mobiles.Add(mobile))
@@ -1144,7 +1141,7 @@ namespace ClassicUO.Network
             Direction direction = (Direction) p.ReadByte();
             mobile.Hue = p.ReadUShort();
             mobile.Flags = (Flags) p.ReadByte();
-            mobile.Notoriety = (Notoriety) p.ReadByte();
+            mobile.NotorietyFlag = (NotorietyFlag) p.ReadByte();
 
             if (p.ID != 0x78)
                 p.Skip(6);
@@ -1166,23 +1163,15 @@ namespace ClassicUO.Network
                 else
                     graphic &= 0x3FFF;
 
-                //if (FileManager.ClientVersion >= ClientVersions.CV_70331)
-                //{
-                //    item.Hue = p.ReadUShort();
-                //    item.Graphic = graphic;
-                //}
-                //else if (FileManager.ClientVersion >= ClientVersions.CV_7000)
-                //{
-                //    item.Graphic = (ushort) (graphic & 0x7FFF);
-                //    item.Hue = p.ReadUShort();
-                //}
-                //else
-                //    item.Graphic = (ushort) (graphic & 0x3FFF);
                 item.Graphic = graphic;
                 item.Amount = 1;
                 item.Container = mobile;
                 mobile.Items.Add(item);
                 mobile.Equipment[(int) item.Layer] = item;
+
+                if (item.PropertiesHash == 0)
+                    NetClient.Socket.Send(new PMegaClilocRequest(item));
+
                 item.ProcessDelta();
                 World.Items.Add(item);
             }
@@ -1219,6 +1208,9 @@ namespace ClassicUO.Network
             if (World.Mobiles.Add(mobile))
                 World.Mobiles.ProcessDelta();
             World.Items.ProcessDelta();
+
+            if (string.IsNullOrEmpty(mobile.Name))
+                NetClient.Socket.Send(new PNameRequest(mobile));
             NetClient.Socket.Send(new PClickRequest(mobile));
         }
 
@@ -1503,6 +1495,8 @@ namespace ClassicUO.Network
             else
                 flags = p.ReadUShort();
             Animations.UpdateAnimationTable(flags);
+
+            World.ClientFeatures.SetFlags((FeatureFlags)flags);
         }
 
         private static void DisplayQuestArrow(Packet p)
@@ -1838,13 +1832,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 case 0x22:
                     p.Skip(1);
-                    Mobile mobile = World.Mobiles.Get(p.ReadUInt());
-
-                    if (mobile != null)
-                    {
-                        int damage = p.ReadByte();
-                    }
-
+                    World.Mobiles.Get(p.ReadUInt())?.AddDamage(p.ReadByte());
                     break;
                 //===========================================================================================
                 //===========================================================================================
@@ -1933,7 +1921,8 @@ namespace ClassicUO.Network
             Entity entity = World.Get(p.ReadUInt());
 
             if (entity == null) return;
-            p.Skip(6);
+            p.Skip(2);
+            entity.PropertiesHash = p.ReadUInt();
             entity.UpdateProperties(ReadProperties(p));
             entity.ProcessDelta();
         }
@@ -2096,6 +2085,19 @@ namespace ClassicUO.Network
 
         private static void OPLInfo(Packet p)
         {
+            if (World.ClientFeatures.TooltipsEnabled)
+            {
+                Serial serial = p.ReadUInt();
+                uint revision = p.ReadUInt();
+
+                Entity entity = World.Get(serial);
+
+                if (entity != null && entity.PropertiesHash != revision)
+                {
+                    NetClient.Socket.Send(new PMegaClilocRequest(entity));
+                }
+
+            }
         }
 
         private static void OpenCompressedGump(Packet p)

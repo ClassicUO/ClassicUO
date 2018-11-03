@@ -258,11 +258,12 @@ namespace ClassicUO.Game.Scenes
             };
             ushort port = p.ReadUShort();
             uint seed = p.ReadUInt();
+            NetClient.LoginSocket.Disconnect();
             NetClient.Socket.Connect(new IPAddress(ip), port);
             NetClient.Socket.EnableCompression();
             NetClient.Socket.Send(new PSeed(seed, _clientVersionBuffer));
             NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
-            NetClient.LoginSocket.Disconnect();
+           
         }
 
         private void ParseServerList(Packet reader)

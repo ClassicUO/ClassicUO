@@ -37,40 +37,39 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class SkillGumpAdvanced : Gump
     {
-        private readonly Texture2D _line;
+        private const int WIDTH = 500;
+        private const int HEIGHT = 400;
+
         private readonly ScrollArea _scrollArea;
         private readonly List<SkillListEntry> _skillListEntries;
         private double _totalReal, _totalValue;
         private bool _updateSkillsNeeded;
 
+    
         public SkillGumpAdvanced() : base(0, 0)
         {
             _skillListEntries = new List<SkillListEntry>();
-            _line = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
 
-            _line.SetData(new[]
-            {
-                Color.White
-            });
+            
             _totalReal = 0;
             _totalValue = 0;
             X = 100;
             Y = 100;
             CanMove = true;
             AcceptMouseInput = false;
-            AddChildren(new GameBorder(0, 0, 320, 350, 4));
+            AddChildren(new GameBorder(0, 0, WIDTH, HEIGHT, 4));
 
-            AddChildren(new GumpPicTiled(4, 4, 320 - 8, 350 - 8, 0x0A40)
+            AddChildren(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
                 IsTransparent = true
             });
 
-            AddChildren(new GumpPicTiled(4, 4, 320 - 8, 350 - 8, 0x0A40)
+            AddChildren(new GumpPicTiled(4, 4, WIDTH - 8, HEIGHT - 8, 0x0A40)
             {
                 IsTransparent = true
             });
 
-            _scrollArea = new ScrollArea(20, 60, 295, 250, true)
+            _scrollArea = new ScrollArea(20, 60, WIDTH - 40, 250, true)
             {
                 AcceptMouseInput = true
             };
@@ -83,17 +82,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(new Label("Real", true, 1153)
             {
-                X = 165, Y = 25
+                X = 220, Y = 25
             });
 
             AddChildren(new Label("Base", true, 1153)
             {
-                X = 195, Y = 25
+                X = 300, Y = 25
             });
 
             AddChildren(new Label("Cap", true, 1153)
             {
-                X = 250, Y = 25
+                X = 380, Y = 25
             });
 
             //======================================================================================
@@ -131,7 +130,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             for (int i = 0; i < _skillListEntries.Count; i++) _scrollArea.AddChildren(_skillListEntries[i]);
 
-            AddChildren(new Label($"{_totalReal.ToString()} | {_totalValue.ToString()}", true, 1153)
+            AddChildren(new Label($"{_totalReal} | {_totalValue}", true, 1153)
             {
                 X = 170, Y = 315
             });
@@ -140,8 +139,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
         {
             base.Draw(spriteBatch, position, hue);
-            spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 30, (int) position.Y + 50, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));
-            spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 30, (int) position.Y + 310, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));
+            //spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 30, (int) position.Y + 50, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));
+            //spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 30, (int) position.Y + 310, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));
 
             return true;
         }
@@ -159,7 +158,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Dispose()
         {
-            _line.Dispose();
+            //_line.Dispose();
             World.Player.SkillsChanged -= OnSkillChanged;
             base.Dispose();
         }
@@ -172,15 +171,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
     public class SkillListEntry : GumpControl
     {
-        private readonly SpriteTexture[] _textures = new SpriteTexture[3]
-        {
-            IO.Resources.Gumps.GetGumpTexture(0x983), IO.Resources.Gumps.GetGumpTexture(0x985), IO.Resources.Gumps.GetGumpTexture(0x82C)
-        };
+        //private readonly SpriteTexture[] _textures = new SpriteTexture[3]
+        //{
+        //    IO.Resources.Gumps.GetGumpTexture(0x983), IO.Resources.Gumps.GetGumpTexture(0x985), IO.Resources.Gumps.GetGumpTexture(0x82C)
+        //};
         public readonly Skill Skill;
         public readonly Label SkillCap;
         public readonly Label SkillName;
         public readonly Label SkillValue;
         public readonly Label SkillValueBase;
+
+        private readonly GumpPic _loc;
 
         public SkillListEntry(Label skillname, Label skillvaluebase, Label skillvalue, Label skillcap, Skill skill)
         {
@@ -193,53 +194,64 @@ namespace ClassicUO.Game.Gumps.UIGumps
             SkillName.X = 10;
             AddChildren(SkillName);
             //======================
-            SkillValueBase.X = 150;
+            SkillValueBase.X = 200;
             AddChildren(SkillValueBase);
             //======================
-            SkillValue.X = 180;
+            SkillValue.X = 280;
             AddChildren(SkillValue);
             //======================
-            SkillCap.X = 230;
+            SkillCap.X = 360;
             AddChildren(SkillCap);
-        }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            _textures.ForEach(s => s.Ticks = (long) totalMS);
-            base.Update(totalMS, frameMS);
-        }
+            _loc = new GumpPic(425, 4, (Graphic)(skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
+            AddChildren(_loc);
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
-        {
-            base.Draw(spriteBatch, position, hue);
-            spriteBatch.Draw2D(_textures[(int) Skill.Lock], new Vector3(position.X + 210, position.Y + 5, position.Z), Vector3.Zero);
-
-            return true;
-        }
-
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            if (button == MouseButton.Left && x >= 210 && x <= 210 + _textures[(int) Skill.Lock].Width && y >= 0 && y <= _textures[(int) Skill.Lock].Height)
+            _loc.MouseClick += (sender, e) =>
             {
                 switch (Skill.Lock)
                 {
                     case Lock.Up:
-                        Skill.Lock = Lock.Down;
-                        GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) Lock.Down);
-
+                        Skill.Lock = Lock.Down;                    
+                        GameActions.ChangeSkillLockStatus((ushort)Skill.Index, (byte)Lock.Down);
+                        _loc.Graphic = 0x985;
+                        _loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x985);
                         break;
                     case Lock.Down:
                         Skill.Lock = Lock.Locked;
-                        GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) Lock.Locked);
-
+                        GameActions.ChangeSkillLockStatus((ushort)Skill.Index, (byte)Lock.Locked);
+                        _loc.Graphic = 0x82C;
+                        _loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x82C);
                         break;
                     case Lock.Locked:
                         Skill.Lock = Lock.Up;
-                        GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) Lock.Up);
-
+                        GameActions.ChangeSkillLockStatus((ushort)Skill.Index, (byte)Lock.Up);
+                        _loc.Graphic = 0x983;
+                        _loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x983);
                         break;
                 }
-            }
+            };
         }
+
+        //public override void Update(double totalMS, double frameMS)
+        //{
+        //    _textures.ForEach(s => s.Ticks = (long) totalMS);
+        //    base.Update(totalMS, frameMS);
+        //}
+
+        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        {
+            base.Draw(spriteBatch, position, hue);
+            //spriteBatch.Draw2D(_textures[(int) Skill.Lock], new Vector3(position.X + 210, position.Y + 5, position.Z), Vector3.Zero);
+
+            return true;
+        }
+
+        //protected override void OnMouseClick(int x, int y, MouseButton button)
+        //{
+        //    if (button == MouseButton.Left && x >= 210 && x <= 210 + _textures[(int) Skill.Lock].Width && y >= 0 && y <= _textures[(int) Skill.Lock].Height)
+        //    {
+                
+        //    }
+        //}
     }
 }

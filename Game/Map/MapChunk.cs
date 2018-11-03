@@ -62,7 +62,9 @@ namespace ClassicUO.Game.Map
 
             if (im.MapAddress != 0)
             {
-                MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr) im.MapAddress);
+                MapBlock* block = (MapBlock*)im.MapAddress;
+                MapCells* cells = (MapCells*)block->Cells;
+
                 int bx = X * 8;
                 int by = Y * 8;
 
@@ -71,8 +73,8 @@ namespace ClassicUO.Game.Map
                     for (int y = 0; y < 8; y++)
                     {
                         int pos = y * 8 + x;
-                        ushort tileID = (ushort) (block.Cells[pos].TileID & 0x3FFF);
-                        sbyte z = block.Cells[pos].Z;
+                        ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
+                        sbyte z = cells[pos].Z;
                         Tile tile = Tiles[x][y];
                         LandTiles info = TileData.LandData[tileID];
                         tile.Graphic = tileID;

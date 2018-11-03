@@ -138,8 +138,7 @@ namespace ClassicUO.Game.GameObjects
                 _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasButton);
             }
 
-            if (World.InGame)
-                NetClient.Socket.Send(new PSkillsRequest(this));
+            NetClient.Socket.Send(new PSkillsRequest(this));
         }
 
         public IReadOnlyList<Skill> Skills => _sklls;
@@ -1674,8 +1673,6 @@ namespace ClassicUO.Game.GameObjects
                 oldDirection = (Direction) step1.Direction;
             }
 
-            //oldDirection = oldDirection & Direction.Up;
-            //direction = direction & Direction.Up;
             ushort walkTime;
             Direction newDirection = direction;
             int newX = x;
@@ -1684,7 +1681,6 @@ namespace ClassicUO.Game.GameObjects
 
             if ((oldDirection & Direction.Mask) == (newDirection & Direction.Mask))
             {
-                //if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection)) return false;
                 if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
                     return false;
 
@@ -1704,10 +1700,6 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                //if (!Pathfinder.CanWalk(this, ref newX, ref newY, ref newZ, ref newDirection))
-                //    if (oldDirection == newDirection)
-                //        return false;
-
                 if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
                 {
                     if ((oldDirection & Direction.Mask) == (newDirection & Direction.Mask))
@@ -1729,7 +1721,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            //if (run) direction |= Direction.Running;
             Step step = new Step
             {
                 X = x,

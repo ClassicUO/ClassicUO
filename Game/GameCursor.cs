@@ -25,9 +25,13 @@ using System;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
+using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
+using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -59,6 +63,9 @@ namespace ClassicUO.Game
         private bool _needGraphicUpdate;
         private Point _offset;
         private Rectangle _rect;
+        private Tooltip _tooltip;
+
+
 
         public GameCursor(UIManager ui)
         {
@@ -248,7 +255,99 @@ namespace ClassicUO.Game
             {
                 if (_draggingItem)
                     sb.Draw2D(_draggedItemTexture, new Vector3(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y, 0), _rect, RenderExtentions.GetHueVector(_hue));
+
+
+                DrawToolTip(sb, Mouse.Position);
                 sb.Draw2D(Texture, new Vector3(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id], 0), Vector3.Zero);
+            }
+        }
+
+
+
+        private void DrawToolTip(SpriteBatchUI spriteBatch, Point position)
+        {
+            SceneManager sm = Service.Get<SceneManager>();
+
+            if (sm.CurrentScene.SceneType == ScenesType.Game)
+            {
+                GameScene gs = sm.GetScene<GameScene>();
+
+                if (!World.ClientFeatures.TooltipsEnabled || gs.IsHoldingItem)
+                {
+                    if (_tooltip != null)
+                    {
+                        _tooltip.Clear();
+                        _tooltip = null;
+                    }
+                    return;
+                }
+
+
+                if (gs.SelectedObject is Entity item && item.Properties.Count > 0)
+                {
+                    if (_tooltip == null)
+                    {
+                        _tooltip = new Tooltip();
+                    }
+                    _tooltip.SetGameObject(item);
+                    _tooltip.Draw(spriteBatch, new Vector3(position.X, position.Y + 24, 0));
+                }
+                else if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is ItemGumpling gumpling && gumpling.Item.Properties.Count > 0)
+                {
+                    if (_tooltip == null)
+                    {
+                        _tooltip = new Tooltip();
+                    }
+                    _tooltip.SetGameObject(gumpling.Item);
+                    _tooltip.Draw(spriteBatch, new Vector3(position.X, position.Y + 24, 0));
+                }
+                else if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is GumpPicBackpack backpack && backpack.BackpackItem.Properties.Count > 0)
+                {
+
+                    if (_tooltip == null)
+                    {
+                        _tooltip = new Tooltip();
+                    }
+                    _tooltip.SetGameObject(backpack.BackpackItem);
+                    _tooltip.Draw(spriteBatch, new Vector3(position.X, position.Y + 24, 0));
+                }
+                else if (gs.SelectedObject is GameEffect effect && effect.Source is Item dynItem)
+                {
+                    if (_tooltip == null)
+                    {
+                        _tooltip = new Tooltip();
+                    }
+                    _tooltip.SetGameObject(dynItem);
+                    _tooltip.Draw(spriteBatch, new Vector3(position.X, position.Y + 24, 0));
+                }
+            }
+            else
+            {
+                if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl != null && _uiManager.MouseOverControl.HasTooltip)
+                {
+                    if (_tooltip != null && _tooltip.Text != _uiManager.MouseOverControl.Tooltip)
+                    {
+                        _tooltip.Clear();
+                        _tooltip = null;
+                    }
+
+                    if (_tooltip == null)
+                    {
+                        _tooltip = new Tooltip();
+                        _tooltip.SetText(_uiManager.MouseOverControl.Tooltip);
+                    }
+
+                    _tooltip.Draw(spriteBatch, new Vector3(position.X, position.Y + 24, 0));
+
+                }
+                else
+                {
+                    if (_tooltip != null)
+                    {
+                        _tooltip.Clear();
+                        _tooltip = null;
+                    }
+                }
             }
         }
 

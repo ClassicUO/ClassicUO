@@ -33,34 +33,63 @@ namespace ClassicUO.Game.GameObjects.Managers
 {
     public static class OverheadManager
     {
-        private static readonly List<ViewWithDrawInfo> _views = new List<ViewWithDrawInfo>();
+        private static readonly Dictionary<View, Vector3> _overheads = new Dictionary<View, Vector3>();
+        private static readonly Dictionary<View, Vector3> _damages = new Dictionary<View, Vector3>();
+        private static readonly List<View> _toRemove = new List<View>();
 
-        public static void AddView(View view, Vector3 position)
+
+        public static void AddOverhead(View view, Vector3 position)
         {
-            _views.Add(new ViewWithDrawInfo
-            {
-                View = view, DrawPosition = position
-            });
+            _overheads[view] = position;
         }
+
+        public static void AddDamage(View view, Vector3 position)
+        {
+            _damages[view] = position;
+        }
+
 
         public static void Draw(SpriteBatch3D spriteBatch, MouseOverList objectList)
         {
-            if (_views.Count > 0)
+            DrawOverheads(spriteBatch, objectList);
+            DrawDamages(spriteBatch, objectList);
+        }
+
+        private static void DrawOverheads(SpriteBatch3D spriteBatch, MouseOverList objectList)
+        {
+            if (_overheads.Count > 0)
             {
-                for (int i = 0; i < _views.Count; i++)
+                foreach (KeyValuePair<View, Vector3> info in _overheads)
                 {
-                    ViewWithDrawInfo v = _views[i];
-                    v.View.Draw(spriteBatch, v.DrawPosition, objectList);
+                    if (!info.Key.Draw(spriteBatch, info.Value, objectList))
+                        _toRemove.Add(info.Key);
                 }
 
-                _views.Clear();
+                if (_toRemove.Count > 0)
+                {
+                    _toRemove.ForEach(s => _overheads.Remove(s));
+                    _toRemove.Clear();
+                }
             }
         }
 
-        private struct ViewWithDrawInfo
+        private static void DrawDamages(SpriteBatch3D spriteBatch, MouseOverList objectList)
         {
-            public View View;
-            public Vector3 DrawPosition;
+            if (_damages.Count > 0)
+            {
+                foreach (KeyValuePair<View, Vector3> damage in _damages)
+                {
+                    if (!damage.Key.Draw(spriteBatch, damage.Value, objectList))
+                        _toRemove.Add(damage.Key);
+                }
+
+                if (_toRemove.Count > 0)
+                {
+                    _toRemove.ForEach(s => _damages.Remove(s));
+                    _toRemove.Clear();
+                }
+            }
         }
+
     }
 }

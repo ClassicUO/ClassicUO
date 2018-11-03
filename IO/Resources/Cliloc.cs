@@ -89,7 +89,7 @@ namespace ClassicUO.IO.Resources
             if (string.IsNullOrEmpty(baseCliloc))
                 return string.Empty;
 
-            if (arg == null)
+            if (string.IsNullOrEmpty(arg))
                 return capitalize ? StringHelper.CapitalizeFirstCharacter(baseCliloc) : baseCliloc;
 
             string[] args = arg.Split(new[]

@@ -76,7 +76,9 @@ namespace ClassicUO.IO.Resources
                 string pathidx = Path.Combine(FileManager.UoFolderPath, "anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx");
 
                 if (File.Exists(pathmul) && File.Exists(pathidx))
-                    _files[i] = new UOFileMul(pathmul, pathidx, 0, i == 0 ? 6 : 0);
+                {
+                    _files[i] = new UOFileMul(pathmul, pathidx, 0, i == 0 ? 6 : 0, false);
+                }
 
                 if (i > 0 && FileManager.ClientVersion >= ClientVersions.CV_7000)
                 {

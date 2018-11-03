@@ -34,7 +34,7 @@ namespace ClassicUO.Renderer
         {
         }
 
-        public bool Draw2D(Texture2D texture, Vector3 position, Vector3 hue)
+        public bool Draw2D(Texture2D texture, Vector3 position, Vector3 hue, Rectangle? scissorRectangle = null)
         {
             _vertexBufferUI[0].Position.X = position.X;
             _vertexBufferUI[0].Position.Y = position.Y;
@@ -72,10 +72,10 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
 
-            return DrawSprite(texture, _vertexBufferUI);
+            return DrawSprite(texture, _vertexBufferUI, Techniques.Hued, scissorRectangle);
         }
 
-        public bool Draw2D(Texture2D texture, Vector3 position, Rectangle sourceRect, Vector3 hue)
+        public bool Draw2D(Texture2D texture, Vector3 position, Rectangle sourceRect, Vector3 hue, Rectangle? scissorRectangle = null)
         {
             float minX = sourceRect.X / (float) texture.Width;
             float maxX = (sourceRect.X + sourceRect.Width) / (float) texture.Width;
@@ -119,10 +119,10 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
 
-            return DrawSprite(texture, _vertexBufferUI);
+            return DrawSprite(texture, _vertexBufferUI, Techniques.Hued, scissorRectangle);
         }
 
-        public bool Draw2D(Texture2D texture, Rectangle destRect, Rectangle sourceRect, Vector3 hue)
+        public bool Draw2D(Texture2D texture, Rectangle destRect, Rectangle sourceRect, Vector3 hue, Rectangle? scissorRectangle = null)
         {
             float minX = sourceRect.X / (float) texture.Width, maxX = (sourceRect.X + sourceRect.Width) / (float) texture.Width;
             float minY = sourceRect.Y / (float) texture.Height, maxY = (sourceRect.Y + sourceRect.Height) / (float) texture.Height;
@@ -164,10 +164,10 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
 
-            return DrawSprite(texture, _vertexBufferUI);
+            return DrawSprite(texture, _vertexBufferUI, Techniques.Hued, scissorRectangle);
         }
 
-        public bool Draw2D(Texture2D texture, Rectangle destRect, Vector3 hue)
+        public bool Draw2D(Texture2D texture, Rectangle destRect, Vector3 hue, Rectangle? scissorRectangle = null)
         {
             _vertexBufferUI[0].Position.X = destRect.X;
             _vertexBufferUI[0].Position.Y = destRect.Y;
@@ -205,10 +205,10 @@ namespace ClassicUO.Renderer
             _vertexBufferUI[3].TextureCoordinate.Z = 0;
             _vertexBufferUI[0].Hue = _vertexBufferUI[1].Hue = _vertexBufferUI[2].Hue = _vertexBufferUI[3].Hue = hue;
 
-            return DrawSprite(texture, _vertexBufferUI);
+            return DrawSprite(texture, _vertexBufferUI, Techniques.Hued, scissorRectangle);
         }
 
-        public bool Draw2DTiled(Texture2D texture, Rectangle destRect, Vector3 hue)
+        public bool Draw2DTiled(Texture2D texture, Rectangle destRect, Vector3 hue, Rectangle? scissorRectangle = null)
         {
             int y = destRect.Y;
             int h = destRect.Height;
@@ -227,7 +227,7 @@ namespace ClassicUO.Renderer
                 while (w > 0)
                 {
                     if (w < texture.Width) sRect.Width = w;
-                    Draw2D(texture, new Vector3(x, y, 0), sRect, hue);
+                    Draw2D(texture, new Vector3(x, y, 0), sRect, hue, scissorRectangle);
                     w -= texture.Width;
                     x += texture.Width;
                 }

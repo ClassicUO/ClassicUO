@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Security.Policy;
 
 using ClassicUO.IO.Resources;
 
@@ -122,7 +123,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe bool DrawSprite(Texture2D texture, SpriteVertex[] vertices, Techniques technique = Techniques.Default)
+        public unsafe bool DrawSprite(Texture2D texture, SpriteVertex[] vertices, Techniques technique = Techniques.Default, Rectangle? scissorRectangle = null)
         {
             if (texture == null || texture.IsDisposed)
                 return false;
@@ -146,7 +147,7 @@ namespace ClassicUO.Renderer
 #if !ORIONSORT
             vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
 #endif
-            _textureInfo[_numSprites] = new DrawInfo(texture, technique);
+            _textureInfo[_numSprites] = new DrawInfo(texture, technique, scissorRectangle.HasValue, scissorRectangle);
 
             fixed (SpriteVertex* p = &_vertexInfo[_numSprites * 4])
             {
@@ -303,8 +304,14 @@ namespace ClassicUO.Renderer
                         last = info.Technique;
                         _effect.CurrentTechnique.Passes[0].Apply();
                     }
-
                     break;
+            }
+
+            GraphicsDevice.RasterizerState.ScissorTestEnable = info.ScissorEnabled;
+
+            if (info.ScissorEnabled && info.ScissorRectangle.HasValue)
+            {
+                GraphicsDevice.ScissorRectangle = info.ScissorRectangle.Value;
             }
 
             GraphicsDevice.Textures[0] = info.Texture;
@@ -330,14 +337,19 @@ namespace ClassicUO.Renderer
 
         internal struct DrawInfo
         {
-            public DrawInfo(Texture2D texture, Techniques technique)
+            public DrawInfo(Texture2D texture, Techniques technique, bool enableScissor = false, Rectangle? scissorRectangle = null)
             {
                 Texture = texture;
                 Technique = technique;
+                ScissorEnabled = enableScissor;
+                ScissorRectangle = scissorRectangle;
             }
 
             public readonly Texture2D Texture;
             public readonly Techniques Technique;
+
+            public readonly bool ScissorEnabled;
+            public readonly Rectangle? ScissorRectangle;
         }
     }
 #endif

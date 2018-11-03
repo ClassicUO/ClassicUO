@@ -30,26 +30,26 @@ namespace ClassicUO.IO
         private readonly int _count, _patch;
         private readonly UOFileIdxMul _idxFile;
 
-        public UOFileMul(string file, string idxfile, int count, int patch = -1) : base(file)
+        public UOFileMul(string file, string idxfile, int count, int patch = -1, bool load = true) : base(file)
         {
             _idxFile = new UOFileIdxMul(idxfile);
             _count = count;
             _patch = patch;
-            Load();
+            Load(load);
         }
 
-        public UOFileMul(string file) : base(file)
+        public UOFileMul(string file, bool load = true) : base(file)
         {
-            Load();
+            Load(load);
         }
 
         public UOFile IdxFile => _idxFile;
 
-        protected override void Load()
+        protected override void Load(bool loadentries = true)
         {
-            base.Load();
+            base.Load(loadentries);
 
-            if (_idxFile != null)
+            if (loadentries && _idxFile != null)
             {
                 int count = (int) _idxFile.Length / 12;
                 Entries = new UOFileIndex3D[count];

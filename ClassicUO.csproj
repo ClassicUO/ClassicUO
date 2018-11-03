@@ -39,6 +39,9 @@
     <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="FNA, Version=18.10.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -63,6 +66,7 @@
     <Compile Include="Game\Data\CharacterCreationValues.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
+    <Compile Include="Game\Data\NotorietyFlag.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
     <Compile Include="Game\Data\SpellsChivalry.cs" />
     <Compile Include="Game\Data\SpellsMysticism.cs" />
@@ -94,10 +98,13 @@
     <Compile Include="Game\System\CommandSystem.cs" />
     <Compile Include="Game\System\PartySystem.cs" />
     <Compile Include="Game\System\TargetSystem.cs" />
+    <Compile Include="Game\Gumps\Tooltip.cs" />
     <Compile Include="Game\Views\LightningEffectView.cs" />
     <Compile Include="Game\Views\MovingEffectView.cs" />
     <Compile Include="Input\Mouse.cs" />
     <Compile Include="Interfaces\ISmoothMovable.cs" />
+    <Compile Include="Network\NetClient1.cs" />
+    <Compile Include="Network\NetStatistics.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Configuration\ConfigurationResolver.cs" />
     <Compile Include="Configuration\Settings.cs" />
@@ -258,7 +265,6 @@
     <Compile Include="Game\GameCursor.cs" />
     <Compile Include="Game\GameObjects\IsometricLight.cs" />
     <Compile Include="Game\GameObjects\Managers\OverheadManager.cs" />
-    <Compile Include="Renderer\GraphicEngine.cs" />
     <Compile Include="Renderer\PixelPicking.cs" />
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\RenderExtentions.cs" />
@@ -270,7 +276,6 @@
     <Compile Include="Renderer\Techniques.cs" />
     <Compile Include="Service.cs" />
     <Compile Include="Utility\Bag.cs" />
-    <Compile Include="Utility\CoordsHelper.cs" />
     <Compile Include="Utility\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />
     <Compile Include="Utility\IPoolable.cs" />

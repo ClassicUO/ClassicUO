@@ -575,6 +575,14 @@ namespace ClassicUO.Network
         }
     }
 
+    public sealed class PNameRequest : PacketWriter
+    {
+        public PNameRequest(Serial serial) : base(0x98)
+        {
+            WriteUInt(serial);
+        }
+    }
+
     public sealed class PTipRequest : PacketWriter
     {
         public PTipRequest(ushort id, byte flag) : base(0xA7)
@@ -968,6 +976,8 @@ namespace ClassicUO.Network
         {
             for (int i = 0; i < list.Count && i < 50; i++) WriteUInt(list[i]);
         }
+
+        public PMegaClilocRequest(Serial serial) : base(0xD6) => WriteUInt(serial);
     }
 
     public sealed class PChangeStatLockStateRequest : PacketWriter
@@ -1074,7 +1084,7 @@ namespace ClassicUO.Network
         public PResend() : base(0x22)
         {
             WriteByte(World.Player.SequenceNumber);
-            WriteByte((byte) World.Player.Notoriety);
+            WriteByte((byte) World.Player.NotorietyFlag);
         }
     }
 

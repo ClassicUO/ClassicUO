@@ -401,6 +401,13 @@ namespace ClassicUO.Game.Gumps
                             break;
                         case "tooltip":
 
+                            if (World.ClientFeatures.TooltipsEnabled)
+                            {
+                                string cliloc = Cliloc.GetString(int.Parse(gparams[1]));
+
+                                GumpControl last = gump.Children.Count > 0 ? gump.Children.Last() : null;
+                                last?.SetTooltip(cliloc);
+                            }
                             break;
                         case "noresize":
 

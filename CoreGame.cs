@@ -79,6 +79,8 @@ namespace ClassicUO
                         _maxFPS = MIN_FPS;
                     else if (_maxFPS > MAX_FPS)
                         _maxFPS = MAX_FPS;
+
+                    FrameDelay[0] = FrameDelay[1] = (uint)(1000 / _maxFPS);
                 }
             }
         }
@@ -86,6 +88,9 @@ namespace ClassicUO
         public int CurrentFPS => _fpsCounter.FPS;
 
         public static long Ticks { get; private set; }
+
+        public static uint[] FrameDelay { get; } = new uint[2];
+
 
         public bool IsFullScreen
         {

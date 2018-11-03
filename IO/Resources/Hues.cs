@@ -48,7 +48,7 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path))
                 throw new FileNotFoundException();
-            UOFileMul file = new UOFileMul(path);
+            UOFileMul file = new UOFileMul(path, false);
             int groupSize = Marshal.SizeOf<HuesGroup>();
             int entrycount = (int) file.Length / groupSize;
             HuesCount = entrycount * 8;
@@ -61,7 +61,7 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path))
                 throw new FileNotFoundException();
-            UOFileMul radarcol = new UOFileMul(path);
+            UOFileMul radarcol = new UOFileMul(path, false);
             RadarCol = radarcol.ReadArray<ushort>((int) radarcol.Length / 2);
             file.Unload();
             radarcol.Unload();

@@ -21,6 +21,9 @@
 
 #endregion
 
+using System.Collections.Generic;
+
+using ClassicUO.IO.Resources;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
@@ -33,5 +36,18 @@ namespace ClassicUO.Renderer
         }
 
         public long Ticks { get; set; }
+    }
+
+    public class FontTexture : SpriteTexture
+    {
+        public FontTexture(int width, int height, int linescount, List<WebLinkRect> links) : base(width, height)
+        {
+            LinesCount = linescount;
+            Links = links;
+        }
+
+        public int LinesCount { get; }
+
+        public List<WebLinkRect> Links { get; }
     }
 }

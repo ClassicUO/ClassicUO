@@ -44,7 +44,7 @@ namespace ClassicUO.IO
 
         public UOFileIndex3D[] Entries { get; protected set; }
 
-        protected virtual void Load()
+        protected virtual void Load(bool loadentries = true)
         {
             Log.Message(LogTypes.Trace, $"Loading file:\t\t{Path}");
             FileInfo fileInfo = new FileInfo(Path);
