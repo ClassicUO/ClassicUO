@@ -64,9 +64,9 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            return spriteBatch.Draw2D(TransparentTexture, new Rectangle((int) position.X, (int) position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, .5f, false));
+            return spriteBatch.Draw2D(TransparentTexture, new Rectangle(position.X, position.Y, Width, Height), RenderExtentions.GetHueVector(0, false, .5f, false));
         }
     }
 }

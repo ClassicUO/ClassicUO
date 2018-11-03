@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Service.Register(this);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             _rect.X = (int) position.X;
             _rect.Y = (int) position.Y;

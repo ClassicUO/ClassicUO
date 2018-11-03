@@ -254,11 +254,11 @@ namespace ClassicUO.Game
             if (id < 16)
             {
                 if (_draggingItem)
-                    sb.Draw2D(_draggedItemTexture, new Vector3(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y, 0), _rect, RenderExtentions.GetHueVector(_hue));
+                    sb.Draw2D(_draggedItemTexture, new Point(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y), _rect, RenderExtentions.GetHueVector(_hue));
 
 
                 DrawToolTip(sb, Mouse.Position);
-                sb.Draw2D(Texture, new Vector3(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id], 0), Vector3.Zero);
+                sb.Draw2D(Texture, new Point(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id]), Vector3.Zero);
             }
         }
 
@@ -290,7 +290,7 @@ namespace ClassicUO.Game
                         _tooltip = new Tooltip();
                     }
                     _tooltip.SetGameObject(item);
-                    _tooltip.Draw(spriteBatch, new Vector3(position.X, position.Y + 24, 0));
+                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
                 }
                 else if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is ItemGumpling gumpling && gumpling.Item.Properties.Count > 0)
                 {
@@ -299,7 +299,7 @@ namespace ClassicUO.Game
                         _tooltip = new Tooltip();
                     }
                     _tooltip.SetGameObject(gumpling.Item);
-                    _tooltip.Draw(spriteBatch, new Vector3(position.X, position.Y + 24, 0));
+                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
                 }
                 else if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is GumpPicBackpack backpack && backpack.BackpackItem.Properties.Count > 0)
                 {
@@ -309,7 +309,7 @@ namespace ClassicUO.Game
                         _tooltip = new Tooltip();
                     }
                     _tooltip.SetGameObject(backpack.BackpackItem);
-                    _tooltip.Draw(spriteBatch, new Vector3(position.X, position.Y + 24, 0));
+                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
                 }
                 else if (gs.SelectedObject is GameEffect effect && effect.Source is Item dynItem)
                 {
@@ -318,7 +318,7 @@ namespace ClassicUO.Game
                         _tooltip = new Tooltip();
                     }
                     _tooltip.SetGameObject(dynItem);
-                    _tooltip.Draw(spriteBatch, new Vector3(position.X, position.Y + 24, 0));
+                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
                 }
             }
             else
@@ -337,7 +337,7 @@ namespace ClassicUO.Game
                         _tooltip.SetText(_uiManager.MouseOverControl.Tooltip);
                     }
 
-                    _tooltip.Draw(spriteBatch, new Vector3(position.X, position.Y + 24, 0));
+                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
 
                 }
                 else

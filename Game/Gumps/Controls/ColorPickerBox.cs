@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (_pointer == null)
             {
@@ -133,7 +133,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     SelectedIndex = 0;
             }
 
-            spriteBatch.Draw2D(_colorTable, new Rectangle((int) position.X, (int) position.Y, Width, Height), Vector3.Zero);
+            spriteBatch.Draw2D(_colorTable, new Rectangle( position.X, position.Y, Width, Height), Vector3.Zero);
 
             if (_hues.Length > 1)
                 spriteBatch.Draw2D(_pointer, new Rectangle((int) (position.X + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (position.Y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2), Vector3.Zero);

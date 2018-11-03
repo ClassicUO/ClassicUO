@@ -260,7 +260,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             int y = _textBox.Y + (int) position.Y - 6;
 
@@ -269,7 +269,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 y -= _textEntries[i].TextHeight;
 
                 if (y >= (int) position.Y)
-                    _textEntries[i].Draw(spriteBatch, new Vector3(position.X + 2, y, 0));
+                    _textEntries[i].Draw(spriteBatch, new Point(position.X + 2, y));
             }
 
             return base.Draw(spriteBatch, position, hue);
@@ -396,7 +396,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             public SpriteTexture Texture { get; set; }
 
-            public bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+            public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
             {
                 return _renderedText.Draw(spriteBatch, position, RenderExtentions.GetHueVector(0, false, Alpha < 1.0f ? Alpha : 0, true));
             }

@@ -140,7 +140,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             for (int i = 0; i < _partyListEntries.Count; i++) _scrollArea.AddChildren(_partyListEntries[i]);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             base.Draw(spriteBatch, position, hue);
             spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 30, (int) position.Y + 50, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));

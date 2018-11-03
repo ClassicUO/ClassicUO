@@ -167,7 +167,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             // sopra
             spriteBatch.Draw2DTiled(_borders[0], new Rectangle((int) position.X, (int) position.Y, Width, _borderSize), Vector3.Zero);

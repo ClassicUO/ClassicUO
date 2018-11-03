@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
@@ -90,7 +91,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _mapTexture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (_gumpTexture == null || _gumpTexture.IsDisposed)
                 return false;
@@ -112,7 +113,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
 
                 //DRAW DOT OF PLAYER
-                spriteBatch.Draw2D(_playerIndicator, new Vector3(position.X + Width / 2, position.Y + Height / 2, 0), Vector3.Zero);
+                spriteBatch.Draw2D(_playerIndicator, new Point(position.X + Width / 2, position.Y + Height / 2), Vector3.Zero);
             }
 
             if (_timeMS >= ReticleBlinkMS * 2)

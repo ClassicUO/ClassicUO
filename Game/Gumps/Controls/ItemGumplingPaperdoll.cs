@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool IsFemale { get; set; }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (Texture == null || Texture.IsDisposed)
             {

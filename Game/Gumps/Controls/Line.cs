@@ -28,7 +28,7 @@ namespace ClassicUO.Game.Gumps.Controls
             _texture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             return spriteBatch.Draw2D(_texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), Vector3.Zero);
         }

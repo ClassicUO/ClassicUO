@@ -24,6 +24,7 @@
 using System;
 using System.Runtime.InteropServices;
 
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
@@ -241,9 +242,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            spriteBatch.Draw2D(_mapTexture, Bounds, position);
+            //spriteBatch.Draw2D(_mapTexture, Bounds, position);
 
             //spriteBatch.Draw2D(_mapTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), _mapTexture.Bounds, Vector3.Zero);
 

@@ -472,7 +472,7 @@ namespace ClassicUO.Game.Gumps
                 GumpControl g = _gumps[i];
 
                 if (g.IsInitialized)
-                    g.Draw(spriteBatch, new Vector3(g.X, g.Y, 0));
+                    g.Draw(spriteBatch, new Point(g.X, g.Y));
             }
 
             GameCursor.Draw(spriteBatch);

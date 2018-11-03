@@ -321,7 +321,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public SpriteTexture Texture { get; set; }
 
-        public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public virtual bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (IsDisposed) return false;
 
@@ -334,28 +334,64 @@ namespace ClassicUO.Game.Gumps.Controls
                 {
                     if (c.IsVisible && c.IsInitialized)
                     {
-                        Vector3 offset = new Vector3(c.X + position.X, c.Y + position.Y, position.Z);
+                        Point offset = new Point(c.X + position.X, c.Y + position.Y);
                         c.Draw(spriteBatch, offset, hue);
                     }
                 }
             }
 
-            if (IsVisible && Debug)
-            {
-                if (_debugTexture == null)
-                {
-                    _debugTexture = new SpriteTexture(1, 1);
+            //if (IsVisible && Debug)
+            //{
+            //    if (_debugTexture == null)
+            //    {
+            //        _debugTexture = new SpriteTexture(1, 1);
 
-                    _debugTexture.SetData(new Color[1]
-                    {
-                        Color.Green
-                    });
-                }
+            //        _debugTexture.SetData(new Color[1]
+            //        {
+            //            Color.Green
+            //        });
+            //    }
 
-                spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
-            }
+            //    spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
+            //}
 
             return true;
+        }
+
+        //TODO: Future implementation
+
+        public virtual bool Draw1(SpriteBatchUI spriteBatch, SpriteTexture texture, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
+        {
+            Rectangle src = new Rectangle();
+
+            if (offsetX > Width || offsetX < -Width || offsetY > Height || offsetY < -Height)
+                return false;
+
+            X = offsetX;
+            Y = offsetY;
+
+            src.X = offsetX;
+            src.Y = offsetY;
+
+            int maxX = src.X + dst.Width;
+            if (maxX <= Width)
+                src.Width = dst.Width;
+            else
+            {
+                src.Width = Width - src.X;
+                dst.Width = src.Width;
+            }
+
+            int maxY = src.Y + dst.Height;
+            if (maxY <= Height)
+                src.Height = dst.Height;
+            else
+            {
+                src.Height = Height - src.Y;
+                dst.Height = src.Height;
+            }
+
+            return spriteBatch.Draw2D(texture, dst, src, hue ?? Vector3.Zero);
         }
 
         public virtual void Update(double totalMS, double frameMS)
@@ -376,24 +412,32 @@ namespace ClassicUO.Game.Gumps.Controls
                         toremove.Add(c);
                     else
                     {
-                        if (c.Page == 0 || c.Page == ActivePage)
-                        {
-                            if (w < c.Bounds.Right)
-                                w = c.Bounds.Right;
 
-                            if (h < c.Bounds.Bottom)
-                                h = c.Bounds.Bottom;
+                        if (WantUpdateSize)
+                        {
+                            if (c.Page == 0 || c.Page == ActivePage)
+                            {
+                                if (w < c.Bounds.Right)
+                                    w = c.Bounds.Right;
+
+                                if (h < c.Bounds.Bottom)
+                                    h = c.Bounds.Bottom;
+                            }
                         }
+
+                        
                     }
                 }
 
-                if (!IgnoreParentFill)
+                if (WantUpdateSize)
                 {
                     if (w != Width)
                         Width = w;
 
                     if (h != Height)
                         Height = h;
+
+                    WantUpdateSize = false;
                 }
 
                 if (toremove.Count > 0)
@@ -401,7 +445,8 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        //internal event Action<GumpControl, int, int, MouseButton> MouseDoubleClickEvent;
+        public bool WantUpdateSize { get; set; } = true;
+
         public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseEnter, MouseLeft, MouseClick, MouseDoubleClick, DragBegin, DragEnd;
 
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
@@ -436,38 +481,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        //TODO: Future implementation
-
-        //public virtual bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
-        //{
-        //    Rectangle src = new Rectangle();
-
-        //    if (offsetX > Width || offsetX < -Width || offsetY > Height || offsetY < -Height)
-        //        return false;
-
-        //    src.X = offsetX;
-        //    src.Y = offsetY;
-
-        //    int maxX = src.X + dst.Width;
-        //    if (maxX <= Width)
-        //        src.Width = dst.Width;
-        //    else
-        //    {
-        //        src.Width = Width - src.X;
-        //        dst.Width = src.Width;
-        //    }
-
-        //    int maxY = src.Y + dst.Height;
-        //    if (maxY <= Height)
-        //        src.Height = dst.Height;
-        //    else
-        //    {
-        //        src.Height = Height - src.Y;
-        //        dst.Height = src.Height;
-        //    }
-
-        //    return true; /*spriteBatch.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);*/
-        //}
+      
 
         internal void SetFocused()
         {

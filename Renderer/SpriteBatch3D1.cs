@@ -45,6 +45,7 @@ namespace ClassicUO.Renderer
         private readonly SpriteVertex[] _vertexInfo;
         private bool _started;
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
+        private RasterizerState _rasterizerState;
 #if !ORIONSORT
         private float _z;
 #endif
@@ -73,7 +74,11 @@ namespace ClassicUO.Renderer
                                            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
 
             _effect.CurrentTechnique = _huesTechnique;
+            _rasterizerState = RasterizerState.CullNone;
+            
         }
+
+        public Matrix TransformMatrix => _transformMatrix;
 
         public GraphicsDevice GraphicsDevice { get; }
 
@@ -225,7 +230,7 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.DepthStencilState = DepthStencilState.None;
-            GraphicsDevice.RasterizerState = RasterizerState.CullNone;
+            GraphicsDevice.RasterizerState = _rasterizerState;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
@@ -314,15 +319,36 @@ namespace ClassicUO.Renderer
             //        break;
             //}
 
-            GraphicsDevice.RasterizerState.ScissorTestEnable = info.ScissorEnabled;
+            //GraphicsDevice.RasterizerState.ScissorTestEnable = info.ScissorEnabled;
 
-            if (info.ScissorEnabled && info.ScissorRectangle.HasValue)
-            {
-                GraphicsDevice.ScissorRectangle = info.ScissorRectangle.Value;
-            }
+            //if (info.ScissorEnabled && info.ScissorRectangle.HasValue)
+            //    GraphicsDevice.ScissorRectangle = info.ScissorRectangle.Value;
 
             GraphicsDevice.Textures[0] = info.Texture;
             GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite * 4, 0, batchSize * 2);
+
+            //GraphicsDevice.RasterizerState.ScissorTestEnable = info.ScissorEnabled;
+
+            //if (info.ScissorEnabled && info.ScissorRectangle.HasValue)
+            //    GraphicsDevice.ScissorRectangle = Rectangle.Empty;
+        }
+
+        public void EnableScissorTest(bool enable)
+        {
+            if (enable == _rasterizerState.ScissorTestEnable)
+                return;
+
+            Flush();
+
+            _rasterizerState = new RasterizerState()
+            {
+                CullMode = _rasterizerState.CullMode,
+                DepthBias = _rasterizerState.DepthBias,
+                FillMode = _rasterizerState.FillMode,
+                MultiSampleAntiAlias = _rasterizerState.MultiSampleAntiAlias,
+                SlopeScaleDepthBias = _rasterizerState.SlopeScaleDepthBias,
+                ScissorTestEnable = enable
+            };
         }
 
         private static short[] GenerateIndexArray()

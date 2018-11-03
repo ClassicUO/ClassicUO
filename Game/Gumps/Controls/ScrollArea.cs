@@ -52,8 +52,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
             _scrollBar.MinValue = 0;
             _scrollBar.MaxValue = Height;
-            IgnoreParentFill = true;
             AcceptMouseInput = false;
+
+            WantUpdateSize = false;
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -74,20 +75,34 @@ namespace ClassicUO.Game.Gumps.Controls
             base.OnInitialize();
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            int height = 0;
-            int maxheight = _scrollBar.Value + _scrollBar.Height;
 
-            for (int i = 0; i < Children.Count; i++)
+            Children[0].Draw(spriteBatch, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
+
+
+           
+
+
+            Rectangle scissor = ScissorStack.CalculateScissors(spriteBatch.TransformMatrix, Bounds);
+
+            if (ScissorStack.PushScissors(scissor))
             {
-                GumpControl child = Children[i];
+                int height = 0;
+                int maxheight = _scrollBar.Value + _scrollBar.Height;
 
-                if (child is IScrollBar)
-                    child.Draw(spriteBatch, new Vector3(position.X + child.X, position.Y + child.Y, 0));
-                else
+
+                for (int i = 1; i < Children.Count; i++)
                 {
-                    child.Y = height - _scrollBar.Value;
+                    GumpControl child = Children[i];
+
+                    if (!child.IsVisible)
+                        continue;
+
+                    int y = height - _scrollBar.Value;
+
+                    int tempY = child.Y;
+                    child.Y += y;
 
                     if (height + child.Height <= _scrollBar.Value)
                     {
@@ -100,11 +115,17 @@ namespace ClassicUO.Game.Gumps.Controls
                             // TODO: Future implementation
                         }
                         else
-                            child.Draw(spriteBatch, new Vector3(position.X + child.X, position.Y + child.Y, 0));
+                            child.Draw(spriteBatch, new Point(position.X + child.X, position.Y + child.Y));
                     }
 
                     height += child.Height;
+
+
+                    child.Y = tempY;
                 }
+
+
+                ScissorStack.PopScissors();
             }
 
             return true;
@@ -123,6 +144,11 @@ namespace ClassicUO.Game.Gumps.Controls
 
                     break;
             }
+        }
+
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            base.OnMouseClick(x, y, button);
         }
 
         protected override void OnChildAdded()
@@ -151,10 +177,9 @@ namespace ClassicUO.Game.Gumps.Controls
             bool maxValue = _scrollBar.Value == _scrollBar.MaxValue;
             int height = 0;
 
-            for (int i = 0; i < Children.Count; i++)
+            for (int i = 1; i < Children.Count; i++)
             {
-                if (!(Children[i] is IScrollBar))
-                    height += Children[i].Height;
+                height += Children[i].Height;
             }
 
             height -= _scrollBar.Height;

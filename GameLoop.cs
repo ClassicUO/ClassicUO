@@ -188,7 +188,7 @@ namespace ClassicUO
             _sbUI.Begin();
             _uiManager.Draw(_sbUI);
             _infoText.Text = $"FPS: {CurrentFPS}\nObjects: {_sceneManager.CurrentScene.RenderedObjectsCount}\nCalls: {_sb3D.Calls}\nMerged: {_sb3D.Merged}\nPos: {(World.Player == null ? "" : World.Player.Position.ToString())}\nSelected: {(_sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty)}\nStats: {NetClient.Socket.Statistics}";
-            _infoText.Draw(_sbUI, new Vector3(Window.ClientBounds.Width - 150, 20, 0));
+            _infoText.Draw(_sbUI, new Point(Window.ClientBounds.Width - 150, 20));
             _sbUI.End();
         }
     }

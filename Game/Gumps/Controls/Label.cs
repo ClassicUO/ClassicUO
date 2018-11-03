@@ -121,7 +121,7 @@ namespace ClassicUO.Game.Gumps.Controls
             if (FadeOut) _timeCreated = CoreGame.Ticks;
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (FadeOut)
                 hue = RenderExtentions.GetHueVector(hue.HasValue ? (int) hue.Value.X : 0, false, _alpha, false);

@@ -157,7 +157,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (Height <= 0)
                 return false;
@@ -167,9 +167,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (middleHeight > 0)
             {
-                spriteBatch.Draw2D(_textureBackground[0], new Vector3(position.X, position.Y + _textureUpButton[0].Height, 0), Vector3.Zero);
+                spriteBatch.Draw2D(_textureBackground[0], new Point(position.X, position.Y + _textureUpButton[0].Height), Vector3.Zero);
                 spriteBatch.Draw2DTiled(_textureBackground[1], new Rectangle((int) position.X, (int) position.Y + _textureUpButton[0].Height + _textureBackground[0].Height, _textureBackground[0].Width, middleHeight), Vector3.Zero);
-                spriteBatch.Draw2D(_textureBackground[2], new Vector3(position.X, position.Y + Height - _textureDownButton[0].Height - _textureBackground[2].Height, 0), Vector3.Zero);
+                spriteBatch.Draw2D(_textureBackground[2], new Point(position.X, position.Y + Height - _textureDownButton[0].Height - _textureBackground[2].Height), Vector3.Zero);
             }
             else
             {
@@ -178,14 +178,14 @@ namespace ClassicUO.Game.Gumps.Controls
             }
 
             // draw up button
-            spriteBatch.Draw2D(_btUpClicked ? _textureUpButton[1] : _textureUpButton[0], new Vector3(position.X, position.Y, 0), Vector3.Zero);
+            spriteBatch.Draw2D(_btUpClicked ? _textureUpButton[1] : _textureUpButton[0], new Point(position.X, position.Y), Vector3.Zero);
 
             // draw down button
-            spriteBatch.Draw2D(_btDownClicked ? _textureDownButton[1] : _textureDownButton[0], new Vector3(position.X, position.Y + Height - _textureDownButton[0].Height, 0), Vector3.Zero);
+            spriteBatch.Draw2D(_btDownClicked ? _textureDownButton[1] : _textureDownButton[0], new Point(position.X, position.Y + Height - _textureDownButton[0].Height), Vector3.Zero);
 
             // draw slider
             if (MaxValue > MinValue && middleHeight > 0)
-                spriteBatch.Draw2D(_textureSlider, new Vector3(position.X + (_textureBackground[0].Width - _textureSlider.Width) / 2, position.Y + _textureUpButton[0].Height + _sliderPosition, 0), Vector3.Zero);
+                spriteBatch.Draw2D(_textureSlider, new Point(position.X + (_textureBackground[0].Width - _textureSlider.Width) / 2, (int)(position.Y + _textureUpButton[0].Height + _sliderPosition)), Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
         }

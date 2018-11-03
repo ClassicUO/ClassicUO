@@ -204,11 +204,11 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 };
             }
 
-            public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+            public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
             {
-                _labelName.Draw(spriteBatch, position + new Vector3(74, 10, 0));
-                _labelPing.Draw(spriteBatch, position + new Vector3(250, 10, 0));
-                _labelPacketLoss.Draw(spriteBatch, position + new Vector3(310, 10, 0));
+                _labelName.Draw(spriteBatch, position + new Point(74, 10));
+                _labelPing.Draw(spriteBatch, position + new Point(250, 10));
+                _labelPacketLoss.Draw(spriteBatch, position + new Point(310, 10));
 
                 return base.Draw(spriteBatch, position, hue);
             }

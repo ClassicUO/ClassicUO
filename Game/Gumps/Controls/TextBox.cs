@@ -112,14 +112,14 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            _entry.RenderText.Draw(spriteBatch, new Vector3(position.X + _entry.Offset, position.Y, 0));
+            _entry.RenderText.Draw(spriteBatch, new Point(position.X + _entry.Offset, position.Y));
 
             if (IsEditable)
             {
                 if (_caratBlink)
-                    _entry.RenderCaret.Draw(spriteBatch, new Vector3(position.X + _entry.Offset + _entry.CaretPosition.X, position.Y + _entry.CaretPosition.Y, 0));
+                    _entry.RenderCaret.Draw(spriteBatch, new Point(position.X + _entry.Offset + _entry.CaretPosition.X, position.Y + _entry.CaretPosition.Y));
             }
 
             return base.Draw(spriteBatch, position, hue);
