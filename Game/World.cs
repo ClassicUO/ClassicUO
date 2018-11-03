@@ -284,6 +284,7 @@ namespace ClassicUO.Game
 
                 RemoveMobile(mob);
             }
+
         }
     }
 }

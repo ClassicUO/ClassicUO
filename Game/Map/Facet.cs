@@ -116,7 +116,7 @@ namespace ClassicUO.Game.Map
                 return -125;
             IndexMap blockIndex = GetIndex(x / 8, y / 8);
 
-            if (blockIndex == null || blockIndex.MapAddress == 0)
+            if (blockIndex.MapAddress == 0)
                 return -125;
             int mx = x % 8;
             int my = y % 8;
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.Map
             unsafe
             {
                 MapBlock* mp = (MapBlock*) blockIndex.MapAddress;
-                MapCells* cells = (MapCells*) mp->Cells;
+                MapCells* cells = (MapCells*) &mp->Cells;
                 return cells[my * 8 + mx].Z;
             }    
         }
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.Map
             int block = GetBlock(blockX, blockY);
             IndexMap[] list = IO.Resources.Map.BlockData[Index];
 
-            return block >= list.Length ? null : list[block];
+            return block >= list.Length ? IndexMap.Invalid : list[block];
         }
 
         private int GetBlock(int blockX, int blockY)

@@ -63,7 +63,7 @@ namespace ClassicUO.Game.Map
             if (im.MapAddress != 0)
             {
                 MapBlock* block = (MapBlock*)im.MapAddress;
-                MapCells* cells = (MapCells*)block->Cells;
+                MapCells* cells = (MapCells*)&block->Cells;
 
                 int bx = X * 8;
                 int by = Y * 8;

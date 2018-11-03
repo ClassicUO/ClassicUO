@@ -50,4 +50,18 @@ namespace ClassicUO.Renderer
 
         public List<WebLinkRect> Links { get; }
     }
+
+    public class TextureAnimationFrame : SpriteTexture
+    {
+        public TextureAnimationFrame(int id, int width, int height) : base(width, height, false)
+        {
+            ID = id;
+        }
+
+        public short CenterX { get; set; }
+
+        public short CenterY { get; set; }
+
+        public int ID { get; }
+    }
 }

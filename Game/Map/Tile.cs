@@ -298,8 +298,11 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < _objectsOnTile.Count; i++)
             {
                 GameObject t = _objectsOnTile[i];
-                if (t is Static)
+                if (t != this && t != World.Player)
+                {
                     t.Dispose();
+                    t = null;
+                }
             }
 
             base.Dispose();

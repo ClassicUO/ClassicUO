@@ -233,7 +233,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual void OnPositionChanged(object sender, EventArgs e)
         {
-            Tile = World.Map.GetTile((short) Position.X, (short) Position.Y);
+            
         }
 
         public static implicit operator Serial(Entity entity)

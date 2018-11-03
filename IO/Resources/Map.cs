@@ -121,7 +121,9 @@ namespace ClassicUO.IO.Resources
             int width = MapBlocksSize[i][0];
             int height = MapBlocksSize[i][1];
             int maxblockcount = width * height;
+          
             BlockData[i] = new IndexMap[maxblockcount];
+
             UOFile file = _filesMap[i];
             UOFile fileidx = _filesIdxStatics[i];
             UOFile staticfile = _filesStatics[i];
@@ -191,6 +193,10 @@ namespace ClassicUO.IO.Resources
 
         public static void UnloadMap(int i)
         {
+            if (BlockData[i] != null)
+            {
+                Array.Clear(BlockData[i], 0, BlockData[i].Length);
+            }
             BlockData[i] = null;
         }
 
@@ -198,14 +204,12 @@ namespace ClassicUO.IO.Resources
         {
             IndexMap indexMap = GetIndex(map, blockX, blockY);
 
-            if (indexMap == null || indexMap.MapAddress == 0)
+            if (indexMap.MapAddress == 0)
                 return null;
 
             MapBlock* mp = (MapBlock*)indexMap.MapAddress;
-            MapCells* cells = (MapCells*)mp->Cells;
+            MapCells* cells = (MapCells*)&mp->Cells;
 
-
-            MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr) indexMap.MapAddress);
             RadarMapBlock mb = new RadarMapBlock();
             mb.Cells = new RadarMapcells[8, 8];
 
@@ -290,12 +294,19 @@ namespace ClassicUO.IO.Resources
     //    public MapCells[] Cells;
     //}
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct MapBlock
+    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4 + 64 * 3)]
+    public struct MapBlock
     {
         public readonly uint Header;
-        public fixed byte Cells[64 * 3];
+        public unsafe MapCells* Cells;
     }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4 + 64 * 3)]
+    //public struct MapBlock2
+    //{
+    //    public readonly uint Header;
+    //    public IntPtr Cells;
+    //}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RadarMapcells
@@ -312,7 +323,7 @@ namespace ClassicUO.IO.Resources
         public RadarMapcells[,] Cells;
     }
 
-    public class IndexMap
+    public struct IndexMap
     {
         public ulong MapAddress;
         public ulong OriginalMapAddress;
@@ -320,5 +331,7 @@ namespace ClassicUO.IO.Resources
         public uint OriginalStaticCount;
         public ulong StaticAddress;
         public uint StaticCount;
+
+        public static readonly IndexMap Invalid = new IndexMap();
     }
 }

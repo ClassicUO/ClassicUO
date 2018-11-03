@@ -241,6 +241,14 @@ namespace ClassicUO.Game.GameObjects
 
         public StaticTiles ItemData => TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
 
+        protected override void OnPositionChanged(object sender, EventArgs e)
+        {
+            base.OnPositionChanged(sender, e);
+
+            if (OnGround)
+                Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
+        }
+
         public bool IsAtWorld(int x, int y)
         {
             return Position.X == x && Position.Y == y;

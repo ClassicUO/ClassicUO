@@ -63,21 +63,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
                     IndexMap indexMap = World.Map.GetIndex(bx, by);
 
-                    if (indexMap == null || indexMap.MapAddress == 0)
+                    if (indexMap.MapAddress == 0)
                         continue;
                     int mapY = by * 8;
 
-
-                    //MapBlock info = new MapBlock
-                    //{
-                    //    Cells = stackalloc byte[64 *3];
-                    //};
-
                     MapBlock info = new MapBlock();
-                    MapCells* infoCells = (MapCells*) info.Cells;
+                    MapCells* infoCells = (MapCells*)&info.Cells;
 
                     MapBlock* mapBlock = (MapBlock*)indexMap.MapAddress;
-                    MapCells* cells = (MapCells*)mapBlock->Cells;
+                    MapCells* cells = (MapCells*)&mapBlock->Cells;
 
                     int pos = 0;
 

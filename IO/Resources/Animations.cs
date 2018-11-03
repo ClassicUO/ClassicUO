@@ -1412,7 +1412,10 @@ namespace ClassicUO.IO.Resources
                     for (int j = 0; j < dir.FrameCount; j++)
                     {
                         if (dir.Frames[j] != null)
+                        {
                             dir.Frames[j].Dispose();
+                            dir.Frames[j] = null;
+                        }
                     }
 
                     dir.FrameCount = 0;
@@ -1633,29 +1636,6 @@ namespace ClassicUO.IO.Resources
         public bool IsVerdata;
         public long LastAccessTime;
         public TextureAnimationFrame[] Frames;
-    }
-
-    /*public class AnimationFrame
-    {
-        public short CenterX, CenterY;
-        public ushort[] Pixels;
-        public short Width, Height;
-
-        public bool IsValid => Width > 0 && Height > 0 && Pixels != null && Pixels.Length > 0;
-    }*/
-
-    public class TextureAnimationFrame : SpriteTexture
-    {
-        public TextureAnimationFrame(int id, int width, int height) : base(width, height, false)
-        {
-            ID = id;
-        }
-
-        public short CenterX { get; set; }
-
-        public short CenterY { get; set; }
-
-        public int ID { get; }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
