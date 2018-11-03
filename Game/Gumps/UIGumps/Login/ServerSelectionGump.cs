@@ -11,9 +11,9 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps.Login
 {
-    internal class ServerSelectionGump : Gump
+    internal class ServerSelectionGump : GumpControl
     {
-        public ServerSelectionGump() : base(0, 0)
+        public ServerSelectionGump()
         {
             AddChildren(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
             {

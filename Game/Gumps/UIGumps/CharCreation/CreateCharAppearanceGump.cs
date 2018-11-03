@@ -60,34 +60,34 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
         private Combobox _hairCombobox, _facialCombobox;
         private Label _hairLabel, _facialLabel;
         private PaperDollInteractable _paperDoll;
-        TextBox _nameTextBox;
-
+        private TextBox _nameTextBox;
+        
         public CreateCharAppearanceGump()
             : base(0, 0)
         {
-            AddChildren(new ResizePic(0x0E10) { X = 82, Y = 125, Width = 151, Height = 310 });
-            AddChildren(new GumpPic(280, 53, 0x0709, 0));
-            AddChildren(new GumpPic(240, 73, 0x070A, 0));
-            AddChildren(new GumpPicTiled(248, 73, 215, 16, 0x070B));
-            AddChildren(new GumpPic(463, 73, 0x070C, 0));
+            AddChildren(new ResizePic(0x0E10) { X = 82, Y = 125, Width = 151, Height = 310 }, 1);
+            AddChildren(new GumpPic(280, 53, 0x0709, 0), 1);
+            AddChildren(new GumpPic(240, 73, 0x070A, 0), 1);
+            AddChildren(new GumpPicTiled(248, 73, 215, 16, 0x070B), 1);
+            AddChildren(new GumpPic(463, 73, 0x070C, 0), 1);
             
-            AddChildren(new GumpPic(238, 98, 0x0708, 0));
-            AddChildren(new ResizePic(0x0E10) { X = 475, Y = 125, Width = 151, Height = 310 });
+            AddChildren(new GumpPic(238, 98, 0x0708, 0), 1);
+            AddChildren(new ResizePic(0x0E10) { X = 475, Y = 125, Width = 151, Height = 310 }, 1);
             
             // Male/Female Radios
-            AddChildren(_maleRadio = new RadioButton(0, 0x0768, 0x0767) { X = 425, Y = 435 });
+            AddChildren(_maleRadio = new RadioButton(0, 0x0768, 0x0767) { X = 425, Y = 435 }, 1);
             _maleRadio.ValueChanged += genre_ValueChanged;
-            AddChildren(_femaleRadio = new RadioButton(0, 0x0768, 0x0767) { X = 425, Y = 455 });
+            AddChildren(_femaleRadio = new RadioButton(0, 0x0768, 0x0767) { X = 425, Y = 455 }, 1);
             _femaleRadio.ValueChanged += genre_ValueChanged;
 
-            AddChildren(new Button((int)Buttons.MaleButton, 0x0710, 0x0712, 0x0711) { X = 445, Y = 435, ButtonAction = ButtonAction.Activate });
-            AddChildren(new Button((int)Buttons.FemaleButton, 0x070D, 0x070F, 0x070E) { X = 445, Y = 455, ButtonAction = ButtonAction.Activate });
+            AddChildren(new Button((int)Buttons.MaleButton, 0x0710, 0x0712, 0x0711) { X = 445, Y = 435, ButtonAction = ButtonAction.Activate }, 1);
+            AddChildren(new Button((int)Buttons.FemaleButton, 0x070D, 0x070F, 0x070E) { X = 445, Y = 455, ButtonAction = ButtonAction.Activate }, 1);
             
-            AddChildren(_nameTextBox = new TextBox(5, 32, 300, 300, false, hue: 1) { X = 257, Y = 65, Width = 300, Height = 20 });
+            AddChildren(_nameTextBox = new TextBox(5, 32, 300, 300, false, hue: 1) { X = 257, Y = 65, Width = 300, Height = 20 }, 1);
             _nameTextBox.SetText(string.Empty);
 
-            AddChildren(new Button((int)Buttons.Prev, 0x15A1, 0x15A3, over: 0x15A2) { X = 586, Y = 445, ButtonAction = ButtonAction.Activate });
-            AddChildren(new Button((int)Buttons.Next, 0x15A4, 0x15A6, over: 0x15A5) { X = 610, Y = 445, ButtonAction = ButtonAction.Activate });
+            AddChildren(new Button((int)Buttons.Prev, 0x15A1, 0x15A3, over: 0x15A2) { X = 586, Y = 445, ButtonAction = ButtonAction.Activate }, 1);
+            AddChildren(new Button((int)Buttons.Next, 0x15A4, 0x15A6, over: 0x15A5) { X = 610, Y = 445, ButtonAction = ButtonAction.Activate }, 1);
 
             _maleRadio.IsChecked = true;
         }
@@ -169,16 +169,16 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
             // Hair
             content = GENRE_MAPPING[genre][Layer.Hair];
-            AddChildren(_hairLabel = new Label(IO.Resources.Cliloc.GetString(3000121), false, 0x07F4, font: 9) { X = 98, Y = 142 });
-            AddChildren(_hairCombobox = new Combobox(97, 155, 120, content.Labels, CurrentOption[Layer.Hair]));
+            AddChildren(_hairLabel = new Label(IO.Resources.Cliloc.GetString(3000121), false, 0x07F4, font: 9) { X = 98, Y = 142 }, 1);
+            AddChildren(_hairCombobox = new Combobox(97, 155, 120, content.Labels, CurrentOption[Layer.Hair]), 1);
             _hairCombobox.OnOptionSelected += Hair_OnOptionSelected;
 
             // Facial Hair
             if (genre == Genre.Male)
             {
                 content = GENRE_MAPPING[genre][Layer.Beard];
-                AddChildren(_facialLabel = new Label(IO.Resources.Cliloc.GetString(3000122), false, 0x07F4, font: 9) { X = 98, Y = 186 });
-                AddChildren(_facialCombobox = new Combobox(97, 199, 120, content.Labels, CurrentOption[Layer.Beard]));
+                AddChildren(_facialLabel = new Label(IO.Resources.Cliloc.GetString(3000122), false, 0x07F4, font: 9) { X = 98, Y = 186 }, 1);
+                AddChildren(_facialCombobox = new Combobox(97, 199, 120, content.Labels, CurrentOption[Layer.Beard]), 1);
                 _facialCombobox.OnOptionSelected += Facial_OnOptionSelected;
             }
             else
@@ -211,7 +211,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
             _character = CreateCharacter(genre, RaceType.HUMAN);
             UpdateEquipments();
-            AddChildren(_paperDoll = new PaperDollInteractable(262, 135, _character) { AcceptMouseInput = false });
+            AddChildren(_paperDoll = new PaperDollInteractable(262, 135, _character) { AcceptMouseInput = false }, 1);
         }
 
         private void AddCustomColorPicker(int x, int y, ushort[] pallet, Layer layer, int clilocLabel, int rows, int columns)
@@ -221,7 +221,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
             {
                 X = x,
                 Y = y
-            });
+            }, 1);
             if (!CurrentColorOption.ContainsKey(layer))
                 CurrentColorOption[layer] = new Tuple<int, Hue>(0, colorPicker.HueSelected);
             else
@@ -258,6 +258,8 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
+            var charCreationGump = Service.Get<CharCreationGump>();
+
             switch ((Buttons)buttonID)
             {
                 case Buttons.FemaleButton:
@@ -268,11 +270,27 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
                     break;
                 case Buttons.Next:
                     _character.Name = _nameTextBox.Text;
-                    Service.Get<CharCreationGump>().SetCharacter(_character);
+                    if (ValidateCharacter(_character))
+                        charCreationGump.SetCharacter(_character);
+                    break;
+                case Buttons.Prev:
+                    charCreationGump.StepBack();
                     break;
             }
 
             base.OnButtonClick(buttonID);
+        }
+
+        private bool ValidateCharacter(PlayerMobile character)
+        {
+            if (string.IsNullOrEmpty(character.Name))
+            {
+                Service.Get<CharCreationGump>().ShowMessage(IO.Resources.Cliloc.GetString(3000612));
+
+                return false;
+            }
+
+            return true;
         }
         
         private Item CreateItem(int id, Hue hue)

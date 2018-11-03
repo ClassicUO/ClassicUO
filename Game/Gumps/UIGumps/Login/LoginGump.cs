@@ -3,7 +3,7 @@
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps.CharCreation;
 using ClassicUO.Game.Scenes;
-
+using ClassicUO.IO.Resources;
 using static ClassicUO.Game.Scenes.LoginScene;
 
 namespace ClassicUO.Game.Gumps.UIGumps.Login
@@ -61,19 +61,78 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 case LoginStep.VerifyingAccount:
                 case LoginStep.LoginInToServer:
                 case LoginStep.EnteringBritania:
+                    return GetLoadingScreen();
 
-                    return new LoadingGump();
                 case LoginStep.CharacterSelection:
-
                     return new CharacterSelectionGump();
-                case LoginStep.ServerSelection:
 
+                case LoginStep.ServerSelection:
                     return new ServerSelectionGump();
+
                 case LoginStep.CharCreation:
                     return new CharCreationGump();
             }
 
             return null;
+        }
+
+        private LoadingGump GetLoadingScreen()
+        {
+            var labelText = "No Text";
+            var showButtons = LoadingGump.Buttons.None;
+            
+            if (!loginScene.LoginRejectionReason.HasValue)
+            {
+                switch (loginScene.CurrentLoginStep)
+                {
+                    case LoginScene.LoginStep.Connecting:
+                        labelText = Cliloc.GetString(3000002); // "Connecting..."
+                        break;
+                    case LoginScene.LoginStep.VerifyingAccount:
+                        labelText = Cliloc.GetString(3000003); // "Verifying Account..."
+                        break;
+                    case LoginScene.LoginStep.LoginInToServer:
+                        labelText = Cliloc.GetString(3000053); // logging into shard
+                        break;
+                    case LoginScene.LoginStep.EnteringBritania:
+                        labelText = Cliloc.GetString(3000001); // Entering Britania...
+                        break;
+                }
+            }
+            else
+            {
+                switch (loginScene.LoginRejectionReason.Value)
+                {
+                    case LoginScene.LoginRejectionReasons.BadPassword:
+                    case LoginScene.LoginRejectionReasons.InvalidAccountPassword:
+                        labelText = Cliloc.GetString(3000036); // Incorrect username and/or password.
+                        break;
+                    case LoginScene.LoginRejectionReasons.AccountInUse:
+                        labelText = Cliloc.GetString(3000034); // Someone is already using this account.
+                        break;
+                    case LoginScene.LoginRejectionReasons.AccountBlocked:
+                        labelText = Cliloc.GetString(3000035); // Your account has been blocked / banned
+                        break;
+                    case LoginScene.LoginRejectionReasons.IdleExceeded:
+                        labelText = Cliloc.GetString(3000004); // Login idle period exceeded (I use "Connection lost")
+                        break;
+                    case LoginScene.LoginRejectionReasons.BadCommuncation:
+                        labelText = Cliloc.GetString(3000037); // Communication problem.
+                        break;
+                }
+
+                showButtons = LoadingGump.Buttons.OK;
+            }
+
+            return new LoadingGump(labelText, showButtons, OnLoadingGumpButtonClick);
+        }
+
+        private void OnLoadingGumpButtonClick(int buttonId)
+        {
+            if ((LoadingGump.Buttons)buttonId == LoadingGump.Buttons.OK)
+            {
+                loginScene.StepBack();
+            }
         }
     }
 }

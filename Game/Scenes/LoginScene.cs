@@ -194,6 +194,9 @@ namespace ClassicUO.Game.Scenes
                     Connect(Account, Password);
 
                     break;
+                case LoginStep.CharCreation:
+                    CurrentLoginStep = LoginStep.CharacterSelection;
+                    break;
             }
         }
 
