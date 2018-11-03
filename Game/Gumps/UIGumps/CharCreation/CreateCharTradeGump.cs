@@ -19,6 +19,9 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
         {
             _character = character;
 
+            foreach (var skill in _character.Skills)
+                _character.UpdateSkill(skill.Index, 0, 0, Data.Lock.Locked, 0);
+
             AddChildren(new ResizePic(2600) { X = 100, Y = 80, Width = 470, Height = 372 });
 
             // center menu with fancy top
@@ -68,20 +71,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
                 
                 y += 70;
             }
-
-            //// sliders for skills
-            //_skillSliders = new HSliderBar[4];
-            //AddChildren(_skillSliders[0] = new HSliderBar(344, 204, 93, 0, 50, 50, HSliderBarStyle.MetalWidgetRecessedBar, true));
-            //AddChildren(_skillSliders[1] = new HSliderBar(344, 284, 93, 0, 50, 50, HSliderBarStyle.MetalWidgetRecessedBar, true));
-            //AddChildren(_skillSliders[2] = new HSliderBar(344, 364, 93, 0, 50, 0, HSliderBarStyle.MetalWidgetRecessedBar, true));
             
-            //// drop downs for skills
-            //_skills = new Combobox[3];
-            
-            //AddChildren(_skills[0] = new Combobox(344, 172, 182, skillList, -1, 200, false, "Click here"));
-            //AddChildren(_skills[1] = new Combobox(344, 252, 182, skillList, -1, 200, false, "Click here"));
-            //AddChildren(_skills[2] = new Combobox(344, 332, 182, skillList, -1, 200, false, "Click here"));
-
             AddChildren(new Button((int)Buttons.Prev, 0x15A1, 0x15A3, over: 0x15A2) { X = 586, Y = 445, ButtonAction = ButtonAction.Activate });
             AddChildren(new Button((int)Buttons.Next, 0x15A4, 0x15A6, over: 0x15A5) { X = 610, Y = 445, ButtonAction = ButtonAction.Activate });
 
@@ -106,23 +96,42 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            switch((Buttons)buttonID)
+            var charCreationGump = Service.Get<CharCreationGump>();
+
+            switch ((Buttons)buttonID)
             {
                 case Buttons.Prev:
+                    charCreationGump.StepBack();
+                    break;
                 case Buttons.Next:
-                    for(int i = 0; i < _skills.Length; i++)
-                        if (_skills[i].SelectedIndex != -1)
-                            _character.UpdateSkill(_skills[i].SelectedIndex, (ushort)_skillSliders[i].Value, 0, Data.Lock.Locked, 0);
+                    if (ValidateValues())
+                    {
+                        for (int i = 0; i < _skills.Length; i++)
+                            if (_skills[i].SelectedIndex != -1)
+                                _character.UpdateSkill(_skills[i].SelectedIndex, (ushort)_skillSliders[i].Value, 0, Data.Lock.Locked, 0);
 
-                    _character.Strength = (ushort)_attributeSliders[0].Value;
-                    _character.Dexterity = (ushort)_attributeSliders[1].Value;
-                    _character.Intelligence = (ushort)_attributeSliders[2].Value;
+                        _character.Strength = (ushort)_attributeSliders[0].Value;
+                        _character.Dexterity = (ushort)_attributeSliders[1].Value;
+                        _character.Intelligence = (ushort)_attributeSliders[2].Value;
 
-                    Service.Get<CharCreationGump>().CreateCharacter();
+                        charCreationGump.CreateCharacter();
+                    }
                     break;
             }
 
             base.OnButtonClick(buttonID);
+        }
+
+        private bool ValidateValues()
+        {
+            var duplicated = _skills.Where(o => o.SelectedIndex != -1).GroupBy(o => o.SelectedIndex).Where(o => o.Count() > 1).Count();
+            if (duplicated > 0)
+            {
+                Service.Get<CharCreationGump>().ShowMessage(IO.Resources.Cliloc.GetString(1080032));
+                return false;
+            }
+
+            return true;
         }
 
         private enum Buttons
