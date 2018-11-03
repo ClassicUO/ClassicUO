@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Gumps
 
                 if (MouseOverControl == null)
                     return;
-                int btn = (int) MouseButton.Left;
+                const int btn = (int) MouseButton.Left;
                 EndDragControl(Mouse.Position);
 
                 if (MouseOverControl != null)
@@ -109,8 +109,7 @@ namespace ClassicUO.Game.Gumps
                 }
                 else
                 {
-                    if (_mouseDownControls[btn] != null)
-                        _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                    _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
                 }
 
                 _mouseDownControls[btn] = null;
@@ -159,7 +158,7 @@ namespace ClassicUO.Game.Gumps
 
                 if (MouseOverControl == null)
                     return;
-                int btn = (int) MouseButton.Right;
+                const int btn = (int) MouseButton.Right;
                 EndDragControl(Mouse.Position);
 
                 if (MouseOverControl != null)
@@ -173,8 +172,7 @@ namespace ClassicUO.Game.Gumps
                 }
                 else
                 {
-                    if (_mouseDownControls[btn] != null)
-                        _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Right);
+                    _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Right);
                 }
 
                 _mouseDownControls[btn] = null;

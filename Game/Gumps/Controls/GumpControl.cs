@@ -58,7 +58,6 @@ namespace ClassicUO.Game.Gumps.Controls
         private GumpControlInfo _controlInfo;
         private bool _handlesKeyboardFocus;
         private Point _lastClickPosition;
-        private float _maxTimeForDClick;
         private GumpControl _parent;
 
         protected GumpControl(GumpControl parent = null)
@@ -576,8 +575,6 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public void InvokeMouseEnter(Point position)
         {
-            if (Math.Abs(_lastClickPosition.X - position.X) + Math.Abs(_lastClickPosition.Y - position.Y) > 3)
-                _maxTimeForDClick = 0.0f;
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseEnter(x, y);
@@ -596,25 +593,11 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
-            //float ms = CoreGame.Ticks;
-            bool doubleClick = false;
 
-            //if (_maxTimeForDClick != 0f)
-            //{
-            //    if (ms <= _maxTimeForDClick)
-            //    {
-            //        _maxTimeForDClick = 0;
-            //        //doubleClick = true;
-            //    }
-            //}
-            //else
-            //{
-            //    _maxTimeForDClick = ms + InputManager.MOUSE_DOUBLE_CLICK_TIME;
-            //}
+            OnMouseClick(x, y, button);
 
             if (button == MouseButton.Right)
             {
-                OnMouseClick(x, y, button);
                 MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
 
                 if (CanCloseWithRightClick)
@@ -622,17 +605,8 @@ namespace ClassicUO.Game.Gumps.Controls
             }
             else
             {
-                if (doubleClick)
-                {
-                    OnMouseDoubleClick(x, y, button);
-                    MouseDoubleClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
-                }
-                else
-                {
-                    OnMouseClick(x, y, button);
-                    MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
-                }
-            }
+                MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
+            }               
         }
 
         public bool InvokeMouseDoubleClick(Point position, MouseButton button)
@@ -811,20 +785,17 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public virtual void OnButtonClick(int buttonID)
         {
-            if (Parent != null)
-                Parent.OnButtonClick(buttonID);
+            Parent?.OnButtonClick(buttonID);
         }
 
         public virtual void OnKeybaordReturn(int textID, string text)
         {
-            if (Parent != null)
-                Parent.OnKeybaordReturn(textID, text);
+            Parent?.OnKeybaordReturn(textID, text);
         }
 
         public virtual void ChangePage(int pageIndex)
         {
-            if (Parent != null)
-                Parent.ChangePage(pageIndex);
+            Parent?.ChangePage(pageIndex);
         }
 
         public virtual void Dispose()
