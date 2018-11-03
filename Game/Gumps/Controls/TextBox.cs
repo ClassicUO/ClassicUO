@@ -33,7 +33,6 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class TextBox : GumpControl
     {
-        private const float CARAT_BLINK_TIME = 500f;
         private readonly TextEntry _entry;
         private bool _caratBlink;
 
@@ -52,7 +51,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Y = int.Parse(parts[2]);
             Width = int.Parse(parts[3]);
             Height = int.Parse(parts[4]);
-            Graphic = Graphic.Parse(parts[6]);
+            LocalSerial = Serial.Parse(parts[6]);
             SetText(lines[int.Parse(parts[7])]);
         }
 
@@ -61,8 +60,6 @@ namespace ClassicUO.Game.Gumps.Controls
             get => _entry.Hue;
             set => _entry.Hue = value;
         }
-
-        public Graphic Graphic { get; set; }
 
         public int MaxCharCount { get; set; }
 
@@ -150,7 +147,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     //if ((_entry.RenderText.FontStyle & FontStyle.Fixed) == 0)
                     //    _entry.InsertString("\n");
                     //else
-                    Parent.OnKeybaordReturn(Graphic, Text);
+                    Parent.OnKeybaordReturn((int)LocalSerial.Value, Text);
 
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
