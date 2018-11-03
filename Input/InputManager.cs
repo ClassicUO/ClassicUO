@@ -346,8 +346,6 @@ namespace ClassicUO.Input
                         _dragStarted = false;
                     }
 
-                    var xx= Microsoft.Xna.Framework.Input.Mouse.GetState();
-
                     SDL_MouseButtonEvent mouse = e->button;
 
                     switch ((uint) mouse.button)

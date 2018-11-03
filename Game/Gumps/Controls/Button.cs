@@ -173,22 +173,28 @@ namespace ClassicUO.Game.Gumps.Controls
 
         private SpriteTexture GetTextureByState()
         {
-            if (_clicked && _textures[PRESSED] != null)
-                return _textures[PRESSED];
+            if (MouseIsOver)
+            {
+                if (_clicked && _textures[PRESSED] != null)
+                    return _textures[PRESSED];
 
-            if (UIManager.MouseOverControl == this && _textures[OVER] != null)
-                return _textures[OVER];
+                if (_textures[OVER] != null)
+                    return _textures[OVER];
+            }
 
             return _textures[NORMAL];
         }
 
         private Graphic GetGraphicByState()
         {
-            if (_clicked && _textures[PRESSED] != null)
-                return _gumpGraphics[PRESSED];
+            if (MouseIsOver)
+            {
+                if (_clicked && _textures[PRESSED] != null)
+                    return _gumpGraphics[PRESSED];
 
-            if (UIManager.MouseOverControl == this && _textures[OVER] != null)
-                return _gumpGraphics[OVER];
+                if (_textures[OVER] != null)
+                    return _gumpGraphics[OVER];
+            }
 
             return _gumpGraphics[NORMAL];
         }
