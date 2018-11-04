@@ -31,7 +31,7 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class Label : GumpControl
     {
-        private readonly RenderedText _gText;
+        private RenderedText _gText;
         private readonly float _timeToLive;
         private float _alpha;
         private float _timeCreated;
@@ -128,6 +128,14 @@ namespace ClassicUO.Game.Gumps.Controls
             _gText.Draw(spriteBatch, position, hue);
 
             return base.Draw(spriteBatch, position, hue);
+        }
+
+        public override void Dispose()
+        {
+            _gText?.Dispose();
+            _gText = null;
+
+            base.Dispose();
         }
     }
 }

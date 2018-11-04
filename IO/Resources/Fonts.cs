@@ -68,6 +68,13 @@ namespace ClassicUO.IO.Resources
 
     public static class Fonts
     {
+        public struct FontTextureInfo
+        {
+            public uint[] Pixels;
+            public int Width, Height, LinesCount;
+            public List<WebLinkRect> Links;
+        }
+
         private const int UOFONT_SOLID = 0x01;
         private const int UOFONT_ITALIC = 0x02;
         private const int UOFONT_INDENTION = 0x04;
@@ -248,28 +255,28 @@ namespace ClassicUO.IO.Resources
             return textHeight;
         }
 
-        public static bool GenerateASCII(out FontTexture ftexture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        public static FontTextureInfo? GenerateASCII(byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial)
         {
             int linesCount = 0;
+            isPartial = false;
 
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0)
             {
                 linesCount--;
-                ftexture = null;
 
                 if (width == 0 || string.IsNullOrEmpty(str))
-                    return false;
+                    return null;
                 int realWidth = GetWidthASCII(font, str);
 
                 if (realWidth > width)
                 {
                     string newstr = GetTextByWidthASCII(font, str, width, (flags & UOFONT_CROPPED) != 0);
 
-                    return GeneratePixelsASCII(out ftexture, font, newstr, color, width, align, flags);
+                    return GeneratePixelsASCII(font, newstr, color, width, align, flags, out isPartial);
                 }
             }
 
-            return GeneratePixelsASCII(out ftexture, font, str, color, width, align, flags);
+            return GeneratePixelsASCII(font, str, color, width, align, flags, out isPartial);
         }
 
         private static string GetTextByWidthASCII(byte font, string str, int width, bool isCropped)
@@ -298,27 +305,27 @@ namespace ClassicUO.IO.Resources
             return result;
         }
 
-        private static bool GeneratePixelsASCII(out FontTexture ftexture, byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        private static FontTextureInfo? GeneratePixelsASCII(byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial)
         {
-            ftexture = null;
+            isPartial = false;
 
             if (font >= FontCount)
-                return false;
+                return null;
             int len = str.Length;
 
             if (len <= 0)
-                return false;
+                return null;
             FontData fd = _font[font];
 
             if (width <= 0)
                 width = GetWidthASCII(font, str);
 
             if (width <= 0)
-                return false;
+                return null;
             MultilinesFontInfo info = GetInfoASCII(font, str, len, align, flags, width);
 
             if (info == null)
-                return false;
+                return null;
             width += 4;
             int height = GetHeightASCII(info);
 
@@ -334,14 +341,14 @@ namespace ClassicUO.IO.Resources
                     info = null;
                 }
 
-                return false;
+                return null;
             }
 
             int blocksize = height * width;
             uint[] pData = new uint[blocksize];
             int lineOffsY = 0;
             MultilinesFontInfo ptr = info;
-            bool partialHue = font != 5 && font != 8 && !UnusePartialHue;
+            isPartial = font != 5 && font != 8 && !UnusePartialHue;
             int font6OffsetY = font == 6 ? 7 : 0;
             int linesCount = 0; // this value should be added to TextTexture.LinesCount += linesCount
 
@@ -407,7 +414,7 @@ namespace ClassicUO.IO.Resources
                             {
                                 uint pcl = 0;
 
-                                if (partialHue)
+                                if (isPartial)
                                     pcl = Hues.GetPartialHueColor(pic, charColor);
                                 else
                                     pcl = Hues.GetColor(pic, charColor);
@@ -426,10 +433,19 @@ namespace ClassicUO.IO.Resources
                 info = null;
             }
 
-            ftexture = new FontTexture(width, height, linesCount, new List<WebLinkRect>());
-            ftexture.SetData(pData);
+            //FontTexture ftexture = new FontTexture(width, height, linesCount, new List<WebLinkRect>());
+            //ftexture.SetData(pData);
 
-            return partialHue;
+            FontTextureInfo fontTextureInfo = new FontTextureInfo()
+            {
+                Pixels = pData,
+                Width = width,
+                Height = height,
+                LinesCount = linesCount,
+                Links = new List<WebLinkRect>()
+            };
+
+            return fontTextureInfo;
         }
 
         public static int GetFontOffsetY(byte font, byte index)
@@ -645,17 +661,15 @@ namespace ClassicUO.IO.Resources
             _HTMLBackgroundCanBeColored = backgroundCanBeColored;
         }
 
-        public static void GenerateUnicode(out FontTexture ftexture, byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        public static FontTextureInfo? GenerateUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
-            ftexture = null;
-
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0)
             {
                 if (width == 0 || string.IsNullOrEmpty(str))
                 {
                     Log.Message(LogTypes.Error, "You must set a string or width");
 
-                    return;
+                    return null;
                 }
 
                 int realWidth = GetWidthUnicode(font, str);
@@ -663,11 +677,11 @@ namespace ClassicUO.IO.Resources
                 if (realWidth > width)
                 {
                     string newstring = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0);
-                    GeneratePixelsUnicode(out ftexture, font, newstring, color, cell, width, align, flags);
+                    return GeneratePixelsUnicode(font, newstring, color, cell, width, align, flags);
                 }
             }
 
-            GeneratePixelsUnicode(out ftexture, font, str, color, cell, width, align, flags);
+            return GeneratePixelsUnicode(font, str, color, cell, width, align, flags);
         }
 
         private static unsafe string GetTextByWidthUnicode(byte font, string str, int width, bool isCropped)
@@ -972,16 +986,15 @@ namespace ClassicUO.IO.Resources
             return info;
         }
 
-        private static unsafe void GeneratePixelsUnicode(out FontTexture ftexture, byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        private static unsafe FontTextureInfo? GeneratePixelsUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
-            ftexture = null;
 
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
-                return;
+                return null;
             int len = str.Length;
 
             if (len <= 0)
-                return;
+                return null;
             int oldWidth = width;
 
             if (width <= 0)
@@ -989,13 +1002,13 @@ namespace ClassicUO.IO.Resources
                 width = GetWidthUnicode(font, str);
 
                 if (width <= 0)
-                    return;
+                    return null;
             }
 
             MultilinesFontInfo info = GetInfoUnicode(font, str, len, align, flags, width);
 
             if (info == null)
-                return;
+                return null;
 
             if (IsUsingHTML && (_leftMargin != 0 || _rightMargin != 0))
             {
@@ -1014,7 +1027,7 @@ namespace ClassicUO.IO.Resources
                 info = GetInfoUnicode(font, str, len, align, flags, newWidth);
 
                 if (info == null)
-                    return;
+                    return null;
             }
 
             if (oldWidth == 0 && RecalculateWidthByInfo)
@@ -1043,7 +1056,7 @@ namespace ClassicUO.IO.Resources
                     ptr1 = null;
                 }
 
-                return;
+                return null;
             }
 
             height += _topMargin + _bottomMargin + 4;
@@ -1433,9 +1446,25 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            ftexture = new FontTexture(width, height, linesCount, links);
-            fixed (uint* ptrData = pData) ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) ptrData, pData.Length);
+            //FontTexture ftexture = new FontTexture(width, height, linesCount, links);
+            //fixed (uint* ptrData = pData) ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) ptrData, pData.Length);
+
+
+            FontTextureInfo fontTextureInfo = new FontTextureInfo()
+            {
+                Pixels = pData,
+                Width =  width,
+                Height = height,
+                LinesCount = linesCount,
+                Links = links
+            };
+
+
+
+            return fontTextureInfo;
         }
+
+       
 
         private static unsafe MultilinesFontInfo GetInfoHTML(byte font, string str, int len, TEXT_ALIGN_TYPE align, ushort flags, int width)
         {

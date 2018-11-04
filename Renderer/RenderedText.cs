@@ -48,9 +48,7 @@ namespace ClassicUO.Renderer
 
     public class RenderedText
     {
-        private readonly string[] _lines;
         private string _text;
-        private FontTexture _texture;
 
         public RenderedText()
         {
@@ -98,15 +96,17 @@ namespace ClassicUO.Renderer
                         if (IsHTML)
                             Fonts.SetUseHTML(false);
                         Links.Clear();
+
+                        Texture?.Dispose();
                         Texture = null;
                     }
                     else
-                        Texture = InternalCreateTexture();
+                        CreateTexture();
                 }
             }
         }
 
-        public int LinesCount => _texture == null || _texture.IsDisposed ? 0 : _texture.LinesCount;
+        public int LinesCount => Texture == null || Texture.IsDisposed ? 0 : Texture.LinesCount;
 
         public bool IsPartialHue { get; set; }
 
@@ -116,24 +116,7 @@ namespace ClassicUO.Renderer
 
         public int Height { get; private set; }
 
-        public FontTexture Texture
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(_text) && (_texture == null || _texture.IsDisposed))
-                    _texture = InternalCreateTexture();
-
-                return _texture;
-            }
-            set
-            {
-                if (_texture != null && !_texture.IsDisposed)
-                    _texture.Dispose();
-                _texture =  value;
-            }
-        }
-
-        public bool AllowedToDraw { get; set; } = true;
+        public FontTexture Texture { get; private set; }
 
         public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
@@ -175,31 +158,38 @@ namespace ClassicUO.Renderer
 
         public void CreateTexture()
         {
-            Texture = InternalCreateTexture();
-        }
+            if (Texture != null && !Texture.IsDisposed)
+            {
+                Texture.Dispose();
+                Texture = null;
+            }
 
-        private FontTexture InternalCreateTexture()
-        {
             if (IsHTML)
                 Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
-            FontTexture ftexture;
+
+            bool ispartial = false;
+            Fonts.FontTextureInfo? info;
 
             if (IsUnicode)
-                Fonts.GenerateUnicode(out ftexture, Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle);
+                info = Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle);
             else
-                IsPartialHue = Fonts.GenerateASCII(out ftexture, Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle);
+                info = Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial);
 
-            if (ftexture != null)
+            IsPartialHue = ispartial;
+
+            if (info.HasValue)
             {
-                Width = ftexture.Width;
-                Height = ftexture.Height;
-                Links = ftexture.Links;
+                Texture = new FontTexture(info.Value.Width, info.Value.Height, info.Value.LinesCount, info.Value.Links);
+                Texture.SetData(info.Value.Pixels);
+          
+
+                Width = Texture.Width;
+                Height = Texture.Height;
+                Links = Texture.Links;
             }
 
             if (IsHTML)
                 Fonts.SetUseHTML(false);
-
-            return ftexture;
         }
 
         public void Dispose()
@@ -208,8 +198,8 @@ namespace ClassicUO.Renderer
                 return;
             IsDisposed = true;
 
-            if (_texture != null && !_texture.IsDisposed)
-                _texture.Dispose();
+            if (Texture != null && !Texture.IsDisposed)
+                Texture.Dispose();
         }
     }
 }

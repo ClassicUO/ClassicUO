@@ -49,6 +49,13 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 _lastGump = Graphic;
                 Texture = IO.Resources.Gumps.GetGumpTexture(Graphic);
+
+                if (Texture == null)
+                {
+                    Dispose();
+                    return;
+                }
+
                 Width = Texture.Width;
                 Height = Texture.Height;
             }

@@ -228,5 +228,16 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             return IO.Resources.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
         }
+
+        public override void Dispose()
+        {
+            for (int i = 0; i < _fontTexture.Length; i++)
+            {
+                _fontTexture[i]?.Dispose();
+                _fontTexture[i] = null;
+            }
+
+            base.Dispose();
+        }
     }
 }

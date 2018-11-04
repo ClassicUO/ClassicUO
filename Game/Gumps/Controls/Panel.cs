@@ -69,5 +69,10 @@ namespace ClassicUO.Game.Gumps.Controls
 
             return base.Draw(spriteBatch, position, hue);
         }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+        }
     }
 }

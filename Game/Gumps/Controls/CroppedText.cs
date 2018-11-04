@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class CroppedText : GumpControl
     {
-        private readonly RenderedText _gameText;
+        private RenderedText _gameText;
 
         public CroppedText(string text, Hue hue, int maxWidth = 0)
         {
@@ -58,6 +58,13 @@ namespace ClassicUO.Game.Gumps.Controls
             _gameText.Draw(spriteBatch, position);
 
             return base.Draw(spriteBatch, position, hue);
+        }
+
+        public override void Dispose()
+        {
+            _gameText?.Dispose();
+            _gameText = null;
+            base.Dispose();
         }
     }
 }

@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private readonly List<HSliderBar> _pairedSliders = new List<HSliderBar>();
         private readonly HSliderBarStyle _style;
-        private readonly RenderedText _text;
+        private RenderedText _text;
         private bool _clicked;
         private Point _clickPosition;
         private SpriteTexture[] _gumpSpliderBackground;
@@ -306,6 +306,14 @@ namespace ClassicUO.Game.Gumps.Controls
                     sliderIndex = 0;
                 }
             }
+        }
+
+        public override void Dispose()
+        {
+            _text?.Dispose();
+            _text = null;
+
+            base.Dispose();
         }
     }
 }

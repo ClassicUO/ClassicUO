@@ -33,7 +33,7 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class TextBox : GumpControl
     {
-        private readonly TextEntry _entry;
+        private TextEntry _entry;
         private bool _caratBlink;
 
         public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
@@ -187,6 +187,14 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (button == MouseButton.Left)
                 _entry.OnMouseClick(x, y);
+        }
+
+        public override void Dispose()
+        {
+            _entry?.Dispose();
+            _entry = null;
+
+            base.Dispose();
         }
     }
 }

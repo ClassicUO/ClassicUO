@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class HtmlGump : GumpControl
     {
-        private readonly RenderedText _gameText;
+        private RenderedText _gameText;
         private IScrollBar _scrollBar;
 
         public HtmlGump(string[] parts, string[] lines) : this()
@@ -252,5 +252,12 @@ namespace ClassicUO.Game.Gumps.Controls
             base.OnMouseClick(x, y, button);
         }
 
+        public override void Dispose()
+        {
+            _gameText?.Dispose();
+            _gameText = null;
+
+            base.Dispose();
+        }
     }
 }

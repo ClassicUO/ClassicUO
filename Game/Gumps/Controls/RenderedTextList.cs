@@ -131,11 +131,14 @@ namespace ClassicUO.Game.Gumps.Controls
 
             RenderedText entry = new RenderedText
             {
-                MaxWidth = Width - 18, IsUnicode = true, Align = TEXT_ALIGN_TYPE.TS_LEFT, FontStyle = FontStyle.Indention | FontStyle.BlackBorder
+                MaxWidth = Width - 18,
+                IsUnicode = true,
+                Align = TEXT_ALIGN_TYPE.TS_LEFT,
+                FontStyle = FontStyle.Indention | FontStyle.BlackBorder,
+                Hue = hue,
+                Font = (byte) font,
+                Text = text
             };
-            entry.Hue = hue;
-            entry.Font = (byte) font;
-            entry.Text = text;
             _entries.Add(entry);
             _scrollBar.MaxValue += _entries[_entries.Count - 1].Height;
             if (maxScroll) _scrollBar.Value = _scrollBar.MaxValue;
@@ -152,6 +155,17 @@ namespace ClassicUO.Game.Gumps.Controls
 
             _entries[index].Text = text;
             CalculateScrollBarMaxValue();
+        }
+
+        public override void Dispose()
+        {
+            for (int i = 0; i < _entries.Count; i++)
+            {
+                _entries[i]?.Dispose();
+                _entries[i] = null;
+            }
+
+            base.Dispose();
         }
     }
 }

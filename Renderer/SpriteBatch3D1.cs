@@ -75,7 +75,6 @@ namespace ClassicUO.Renderer
 
             _effect.CurrentTechnique = _huesTechnique;
             _rasterizerState = RasterizerState.CullNone;
-            
         }
 
         public Matrix TransformMatrix => _transformMatrix;
@@ -340,15 +339,17 @@ namespace ClassicUO.Renderer
 
             Flush();
 
-            _rasterizerState = new RasterizerState()
-            {
-                CullMode = _rasterizerState.CullMode,
-                DepthBias = _rasterizerState.DepthBias,
-                FillMode = _rasterizerState.FillMode,
-                MultiSampleAntiAlias = _rasterizerState.MultiSampleAntiAlias,
-                SlopeScaleDepthBias = _rasterizerState.SlopeScaleDepthBias,
-                ScissorTestEnable = enable
-            };
+            _rasterizerState.ScissorTestEnable = enable;
+
+            //_rasterizerState = new RasterizerState()
+            //{
+            //    CullMode = _rasterizerState.CullMode,
+            //    DepthBias = _rasterizerState.DepthBias,
+            //    FillMode = _rasterizerState.FillMode,
+            //    MultiSampleAntiAlias = _rasterizerState.MultiSampleAntiAlias,
+            //    SlopeScaleDepthBias = _rasterizerState.SlopeScaleDepthBias,
+            //    ScissorTestEnable = enable
+            //};
         }
 
         private static short[] GenerateIndexArray()

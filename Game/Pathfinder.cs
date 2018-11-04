@@ -822,10 +822,6 @@ namespace ClassicUO.Game
             POF_NO_DIAGONAL = 0x00000008
         }
 
-        private struct PathPoint
-        {
-            public int X, Y, Direction;
-        }
 
         private class PathObject //: IComparable, IComparable<PathObject>
         {
@@ -852,41 +848,6 @@ namespace ClassicUO.Game
             {
                 return $"Z: {Z}, Height: {Height}";
             }
-
-            //public int CompareTo(object obj)
-            //{
-            //    return CompareTo((PathObject) obj);
-            //}
-
-            //public int CompareTo(PathObject other)
-            //{
-            //    //if (other == null)
-            //    //    return -1;
-
-            //    //int r = Z.CompareTo(other.Z);
-
-            //    //if (r == 0)
-            //    //{
-            //    //    r = Height.CompareTo(other.Height);
-            //    //}
-
-            //    //return r;
-
-            //    int r = Z - other.Z;
-
-            //    if (r <= 0)
-            //    {
-            //        r = Height - other.Height;
-
-            //        if (r > 0)
-            //            return -1;
-            //        if (r == 0)
-            //            return 0;
-            //        return 1;
-            //    }
-
-            //    return -1;
-            //}
         }
 
         private class PathNode

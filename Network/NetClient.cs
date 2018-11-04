@@ -35,14 +35,14 @@ namespace ClassicUO.Network
     public sealed class NetClient
     {
         private const int BUFF_SIZE = 0x10000;
-        private static readonly BufferPool _pool = new BufferPool(10, BUFF_SIZE);
+        //private static readonly BufferPool _pool = new BufferPool(10, BUFF_SIZE);
         private readonly object _sendLock = new object();
         private readonly object _sync = new object();
         private CircularBuffer _circularBuffer;
         private int _incompletePacketLength;
         private bool _isCompressionEnabled, _sending;
         private Queue<Packet> _queue = new Queue<Packet>(), _workingQueue = new Queue<Packet>();
-        private byte[] _recvBuffer, _incompletePacketBuffer;
+        private byte[] _recvBuffer, _incompletePacketBuffer, _decompBuffer;
         private SocketAsyncEventArgs _sendEventArgs, _recvEventArgs;
         private SendQueue _sendQueue;
         private Socket _socket;
@@ -105,8 +105,9 @@ namespace ClassicUO.Network
         {
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             _socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, 1);
-            _recvBuffer = _pool.GetFreeSegment();
-            _incompletePacketBuffer = _pool.GetFreeSegment();
+            _recvBuffer = new byte[BUFF_SIZE];
+            _incompletePacketBuffer = new byte[BUFF_SIZE];
+            _decompBuffer = new byte[BUFF_SIZE];
             _sendQueue = new SendQueue();
             _circularBuffer = new CircularBuffer();
             _sendEventArgs = new SocketAsyncEventArgs();
@@ -157,17 +158,17 @@ namespace ClassicUO.Network
 
             _socket.Close();
 
-            if (_recvBuffer != null)
-            {
-                lock (_pool)
-                    _pool.AddFreeSegment(_recvBuffer);
-            }
+            //if (_recvBuffer != null)
+            //{
+            //    lock (_pool)
+            //        _pool.AddFreeSegment(_recvBuffer);
+            //}
 
-            if (_incompletePacketBuffer != null)
-            {
-                lock (_pool)
-                    _pool.AddFreeSegment(_incompletePacketBuffer);
-            }
+            //if (_incompletePacketBuffer != null)
+            //{
+            //    lock (_pool)
+            //        _pool.AddFreeSegment(_incompletePacketBuffer);
+            //}
 
             _incompletePacketBuffer = null;
             _incompletePacketLength = 0;
@@ -362,7 +363,7 @@ namespace ClassicUO.Network
 
         private void DecompressBuffer(ref byte[] buffer, ref int length)
         {
-            byte[] source = _pool.GetFreeSegment();
+            byte[] source = _decompBuffer;
             int incompletelength = _incompletePacketLength;
             int sourcelength = incompletelength + length;
 
@@ -386,9 +387,7 @@ namespace ClassicUO.Network
 
             length = offset;
 
-            if (processedOffset >= sourcelength)
-                _pool.AddFreeSegment(source);
-            else
+            if (processedOffset < sourcelength)
             {
                 int l = sourcelength - processedOffset;
                 Buffer.BlockCopy(source, processedOffset, _incompletePacketBuffer, _incompletePacketLength, l);

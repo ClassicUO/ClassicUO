@@ -283,7 +283,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 0, Y = 61, IsChecked = _settings.SmoothMovement
             };
             scrollArea.AddChildren(_checkboxSmoothMovement);
-            int y = 120;
+            int y = 81;
+
+            ScrollAreaItem areaItem = new ScrollAreaItem();
 
             for (int i = 0; i < 400; i++)
             {
@@ -292,9 +294,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Y = y
                 };
                 ck.ValueChanged += (sender, e) => Console.WriteLine("PRESSED: " + ck.Text);
-                scrollArea.AddChildren(ck);
-                y += 20;
+                areaItem.AddChildren(ck);
+                y += 22;
             }
+
+            scrollArea.AddChildren(areaItem);
 
             y += 20;
 
@@ -302,11 +306,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 Button ck = new Button((int) Buttons.Ok + i + 1, 0x00F9, 0x00F8, 0x00F7)
                 {
-                    X = 34, Y = y, ButtonAction = ButtonAction.Activate
+                    X = 34, Y = 0, ButtonAction = ButtonAction.Activate
                 };
                 ck.MouseClick += (sender, e) => Console.WriteLine("PRESSED: " + ck.ButtonID);
                 scrollArea.AddChildren(ck);
-                y += ck.Height;
             }
         }
 

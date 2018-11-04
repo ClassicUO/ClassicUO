@@ -543,14 +543,14 @@ namespace ClassicUO.Game.Gumps.Controls
             return null;
         }
 
-        public void AddChildren(GumpControl c, int page = 0)
+        public virtual void AddChildren(GumpControl c, int page = 0)
         {
             c.Page = page;
             c.Parent = this;
             OnChildAdded();
         }
 
-        public void RemoveChildren(GumpControl c)
+        public virtual void RemoveChildren(GumpControl c)
         {
             if (c == null)
                 return;

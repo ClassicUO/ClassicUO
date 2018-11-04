@@ -32,6 +32,8 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private readonly IScrollBar _scrollBar;
         private bool _needUpdate = true;
+        private Rectangle _rect;
+
 
         public ScrollArea(int x, int y, int w, int h, bool normalScrollbar)
         {
@@ -59,6 +61,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
             if (_needUpdate)
             {
                 CalculateScrollBarMaxValue();
@@ -66,7 +70,6 @@ namespace ClassicUO.Game.Gumps.Controls
                 _needUpdate = false;
             }
 
-            base.Update(totalMS, frameMS);
         }
 
         protected override void OnInitialize()
@@ -75,22 +78,28 @@ namespace ClassicUO.Game.Gumps.Controls
             base.OnInitialize();
         }
 
+
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-
             Children[0].Draw(spriteBatch, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
 
+         
+            _rect.X = position.X;
+            _rect.Y = position.Y;
+            _rect.Width = Width;
+            _rect.Height = Height;
 
-           
-
-
-            Rectangle scissor = ScissorStack.CalculateScissors(spriteBatch.TransformMatrix, Bounds);
+            Rectangle scissor = ScissorStack.CalculateScissors(spriteBatch.TransformMatrix, _rect);
 
             if (ScissorStack.PushScissors(scissor))
             {
+
+                spriteBatch.EnableScissorTest(true);
+
                 int height = 0;
                 int maxheight = _scrollBar.Value + _scrollBar.Height;
 
+                bool drawOnly1 = true;
 
                 for (int i = 1; i < Children.Count; i++)
                 {
@@ -99,10 +108,8 @@ namespace ClassicUO.Game.Gumps.Controls
                     if (!child.IsVisible)
                         continue;
 
-                    int y = height - _scrollBar.Value;
+                    child.Y = height - _scrollBar.Value;
 
-                    int tempY = child.Y;
-                    child.Y += y;
 
                     if (height + child.Height <= _scrollBar.Value)
                     {
@@ -110,20 +117,22 @@ namespace ClassicUO.Game.Gumps.Controls
                     }
                     else if (height + child.Height <= maxheight)
                     {
-                        if (child.Y < 0)
+                        child.Draw(spriteBatch, new Point(position.X + child.X, position.Y + child.Y));
+                    }
+                    else
+                    {
+                        if (drawOnly1)
                         {
-                            // TODO: Future implementation
-                        }
-                        else
                             child.Draw(spriteBatch, new Point(position.X + child.X, position.Y + child.Y));
+
+                            drawOnly1 = false;
+                        }
                     }
 
                     height += child.Height;
-
-
-                    child.Y = tempY;
                 }
 
+                spriteBatch.EnableScissorTest(false);
 
                 ScissorStack.PopScissors();
             }
@@ -161,14 +170,24 @@ namespace ClassicUO.Game.Gumps.Controls
             _needUpdate = true;
         }
 
+        public override void AddChildren(GumpControl c, int page = 0)
+        {
+            ScrollAreaItem item = new ScrollAreaItem();
+            item.AddChildren(c);
+
+
+            base.AddChildren(item, page);
+        }
+
+        public void AddChildren(ScrollAreaItem c, int page = 0)
+        {
+            base.AddChildren(c, page);
+        }
+
         public override void Clear()
         {
-            foreach (GumpControl child in Children)
-            {
-                if (child is IScrollBar)
-                    continue;
-                child.Dispose();
-            }
+            for (int i = 1; i < Children.Count; i++)
+                Children[i].Dispose();
         }
 
         private void CalculateScrollBarMaxValue()
@@ -196,6 +215,14 @@ namespace ClassicUO.Game.Gumps.Controls
                 _scrollBar.MaxValue = 0;
                 _scrollBar.Value = 0;
             }
+        }
+    }
+
+    class ScrollAreaItem : GumpControl
+    {
+        public ScrollAreaItem( ) : base()
+        {
+
         }
     }
 }

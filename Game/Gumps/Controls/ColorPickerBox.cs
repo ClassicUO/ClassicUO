@@ -182,5 +182,14 @@ namespace ClassicUO.Game.Gumps.Controls
             _colorTable = new SpriteTexture(_columns, _rows);
             _colorTable.SetData(pixels);
         }
+
+        public override void Dispose()
+        {
+            _colorTable?.Dispose();
+            _colorTable = null;
+            _pointer?.Dispose();
+            _pointer = null;
+            base.Dispose();
+        }
     }
 }

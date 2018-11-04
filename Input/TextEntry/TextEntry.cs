@@ -21,6 +21,8 @@
 
 #endregion
 
+using System;
+
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -28,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Input.TextEntry
 {
-    public class TextEntry
+    public class TextEntry : IDisposable
     {
         private string _plainText;
 
@@ -76,9 +78,9 @@ namespace ClassicUO.Input.TextEntry
 
         protected int CaretIndex { get; set; }
 
-        public RenderedText RenderText { get; }
+        public RenderedText RenderText { get; private set; }
 
-        public RenderedText RenderCaret { get; }
+        public RenderedText RenderCaret { get; private set; }
 
         public string Text
         {
@@ -276,6 +278,15 @@ namespace ClassicUO.Input.TextEntry
             Offset = 0;
             CaretPosition = Point.Zero;
             CaretIndex = 0;
+        }
+
+        public void Dispose()
+        {
+            RenderText?.Dispose();
+            RenderText = null;
+
+            RenderCaret?.Dispose();
+            RenderCaret = null;
         }
     }
 }
