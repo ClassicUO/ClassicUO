@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
@@ -35,8 +36,10 @@ namespace ClassicUO.IO.Resources
         private static UOFile _file;
         private static readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
         private static readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
-        private static SpriteTexture[] _textmapCache;
+        //private static SpriteTexture[] _textmapCache;
         private static readonly List<int> _usedIndex = new List<int>();
+
+        private static readonly Dictionary<Graphic, SpriteTexture> _textmapDictionary = new Dictionary<Graphic, SpriteTexture>();
 
         public static void Load()
         {
@@ -46,7 +49,7 @@ namespace ClassicUO.IO.Resources
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
             _file = new UOFileMul(path, pathidx, TEXTMAP_COUNT, 10);
-            _textmapCache = new SpriteTexture[TEXTMAP_COUNT];
+            //_textmapCache = new SpriteTexture[TEXTMAP_COUNT];
             string pathdef = Path.Combine(FileManager.UoFolderPath, "TexTerr.def");
 
             if (!File.Exists(pathdef))
@@ -106,9 +109,7 @@ namespace ClassicUO.IO.Resources
 
         public static SpriteTexture GetTextmapTexture(ushort g)
         {
-            ref SpriteTexture texture = ref _textmapCache[g];
-
-            if (texture == null || texture.IsDisposed)
+            if (!_textmapDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
             {
                 ushort[] pixels = GetTextmapTexture(g, out int size);
 
@@ -117,7 +118,23 @@ namespace ClassicUO.IO.Resources
                 texture = new SpriteTexture(size, size, false);
                 texture.SetData(pixels);
                 _usedIndex.Add(g);
+
+                _textmapDictionary.Add(g, texture);
             }
+
+
+            //ref SpriteTexture texture = ref _textmapCache[g];
+
+            //if (texture == null || texture.IsDisposed)
+            //{
+            //    ushort[] pixels = GetTextmapTexture(g, out int size);
+
+            //    if (pixels == null || pixels.Length == 0)
+            //        return null;
+            //    texture = new SpriteTexture(size, size, false);
+            //    texture.SetData(pixels);
+            //    _usedIndex.Add(g);
+            //}
 
             return texture;
         }
@@ -128,16 +145,18 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                ref SpriteTexture texture = ref _textmapCache[_usedIndex[i]];
+                Graphic g = (Graphic) _usedIndex[i];
+                SpriteTexture texture = _textmapDictionary[g];
+                //ref SpriteTexture texture = ref _textmapCache[_usedIndex[i]];
 
                 if (texture == null || texture.IsDisposed)
                     _usedIndex.RemoveAt(i--);
                 else if (CoreGame.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();
-                    texture = null;
+                   // texture = null;
                     _usedIndex.RemoveAt(i--);
-
+                    _textmapDictionary.Remove(g);
                     if (++count >= 5)
                         break;
                 }

@@ -13,7 +13,7 @@ namespace ClassicUO.Game.GameObjects
 {
     public class Land : GameObject
     {
-        public Land(Graphic graphic) : base(World.Map)
+        public Land(Graphic graphic) 
         {
             Graphic = graphic;
         }

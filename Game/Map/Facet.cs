@@ -90,19 +90,7 @@ namespace ClassicUO.Game.Map
 
             chuck.LastAccessTime = CoreGame.Ticks;
 
-            return chuck.Tiles[x % 8, y % 8];
-
-            //int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
-            //// int cellindex = (cellX * AssetsLoader.Map.MapBlocksSize[Index][1]) + cellY;
-
-            //ref var tile = ref Chunks[cellindex];
-
-            //if (tile == null || tile.X != cellX || tile.Y != cellY)
-            //{
-            //    return null;
-            //}
-
-            //return tile.Tiles[x % 8][y % 8];
+            return chuck.Tiles[x % 8][y % 8];
         }
 
         public Tile GetTile(int x, int y, bool load = true)

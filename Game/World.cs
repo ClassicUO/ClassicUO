@@ -65,10 +65,8 @@ namespace ClassicUO.Game
                             IO.Resources.Map.UnloadMap(MapIndex);
                         }
                         Position position = Player.Position;
-                        Player.Map = null;
                         Map = null;
                         Map = new Facet(value);
-                        Player.Map = Map;
                         Player.Position = position;
                         Player.ClearSteps();
                         Player.ProcessDelta();
@@ -79,7 +77,6 @@ namespace ClassicUO.Game
 
                         if (Player != null)
                         {
-                            Player.Map = Map;
                             Map.Center = new Point(Player.Position.X, Player.Position.Y);
                         }
                     }

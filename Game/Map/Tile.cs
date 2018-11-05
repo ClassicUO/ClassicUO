@@ -109,7 +109,7 @@ namespace ClassicUO.Game.Map
                 {
                     IDynamicItem dyn1 = (IDynamicItem) obj;
 
-                    if (IO.Resources.TileData.IsBackground((long) dyn1.ItemData.Flags))
+                    if (TileData.IsBackground((long) dyn1.ItemData.Flags))
                         priorityZ--;
 
                     if (dyn1.ItemData.Height > 0)

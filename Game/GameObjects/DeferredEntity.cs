@@ -30,7 +30,7 @@ namespace ClassicUO.Game.GameObjects
 {
     public class DeferredEntity : GameObject
     {
-        public DeferredEntity() : base(null)
+        public DeferredEntity()
         {
         }
 
@@ -58,7 +58,6 @@ namespace ClassicUO.Game.GameObjects
         {
             AssociatedTile.RemoveGameObject(this);
             DisposeView();
-            Map = null;
             Entity = null;
             AtPosition = Vector3.Zero;
             Position = Position.Invalid;

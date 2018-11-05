@@ -42,9 +42,8 @@ namespace ClassicUO.Game.GameObjects
         private Tile _tile;
         private View _view;
 
-        protected GameObject(Facet map)
+        protected GameObject()
         {
-            Map = map;
             _overHeads = new List<TextOverhead>();
         }
 
@@ -121,8 +120,6 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
-
-        public Facet Map { get; set; }
 
         public bool IsDisposed { get; private set; }
 
@@ -233,7 +230,7 @@ namespace ClassicUO.Game.GameObjects
             if (IsDisposed)
                 return;
             IsDisposed = true;
-            DisposeView();
+            //DisposeView();
             Tile = null;
             _overHeads.ForEach(s => s.Dispose());
             _overHeads.Clear();

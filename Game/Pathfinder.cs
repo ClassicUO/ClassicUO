@@ -76,7 +76,7 @@ namespace ClassicUO.Game
 
             if (tile == null)
                 return false;
-            bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Player.Map.Index == 0);
+            bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
             bool isGM = World.Player.Graphic == 0x03DB;
 
             foreach (GameObject obj in tile.ObjectsOnTiles)

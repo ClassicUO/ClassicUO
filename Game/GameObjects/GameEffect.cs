@@ -33,7 +33,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly List<GameEffect> _children;
 
-        protected GameEffect() : base(World.Map)
+        protected GameEffect()
         {
             _children = new List<GameEffect>();
         }

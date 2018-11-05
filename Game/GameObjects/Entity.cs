@@ -60,7 +60,7 @@ namespace ClassicUO.Game.GameObjects
         protected Action<Entity> _OnDisposed;
         protected Action<Entity> _OnUpdated;
 
-        protected Entity(Serial serial) : base(World.Map)
+        protected Entity(Serial serial)
         {
             Serial = serial;
             Items = new EntityCollection<Item>();
