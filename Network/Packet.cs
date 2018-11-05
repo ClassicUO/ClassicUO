@@ -23,6 +23,7 @@
 
 using System;
 using System.Text;
+using System.Text.Formatting;
 
 namespace ClassicUO.Network
 {
@@ -108,7 +109,7 @@ namespace ClassicUO.Network
         public string ReadASCII()
         {
             EnsureSize(1);
-            StringBuilder sb = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
             char c;
             while ((c = (char) ReadByte()) != '\0') sb.Append(c);
 
@@ -118,7 +119,7 @@ namespace ClassicUO.Network
         public string ReadASCII(int length, bool exitIfNull = false)
         {
             EnsureSize(length);
-            StringBuilder sb = new StringBuilder(length);
+            StringBuffer sb = new StringBuffer(length);
             char c;
 
             for (int i = 0; i < length; i++)
@@ -137,7 +138,7 @@ namespace ClassicUO.Network
         public string ReadUnicode()
         {
             EnsureSize(2);
-            StringBuilder sb = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
             char c;
             while ((c = (char) ReadUShort()) != '\0') sb.Append(c);
 
@@ -147,7 +148,7 @@ namespace ClassicUO.Network
         public string ReadUnicode(int length)
         {
             EnsureSize(length);
-            StringBuilder sb = new StringBuilder(length);
+            StringBuffer sb = new StringBuffer(length);
             char c;
 
             for (int i = 0; i < length; i++)
@@ -173,7 +174,7 @@ namespace ClassicUO.Network
         {
             EnsureSize(length);
             length /= 2;
-            StringBuilder sb = new StringBuilder(length);
+            StringBuffer sb = new StringBuffer(length);
             char c;
 
             for (int i = 0; i < length; i++)
@@ -188,7 +189,7 @@ namespace ClassicUO.Network
         public string ReadUnicodeReversed()
         {
             EnsureSize(2);
-            StringBuilder sb = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
             char c;
             while ((c = (char) ReadUShortReversed()) != '\0') sb.Append(c);
 
