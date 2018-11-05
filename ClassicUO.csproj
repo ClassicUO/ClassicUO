@@ -82,6 +82,7 @@
     <Compile Include="Game\Data\SpellsNecromancy.cs" />
     <Compile Include="Game\Data\SpellsNinjitsu.cs" />
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
+    <Compile Include="Game\GameObjects\Land.cs" />
     <Compile Include="Game\GameObjects\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />

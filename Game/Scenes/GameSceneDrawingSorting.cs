@@ -118,12 +118,12 @@ namespace ClassicUO.Game.Scenes
                     break;
                 obj.CurrentRenderIndex = _renderIndex;
 
-                if (!(obj is Tile) && (z >= _maxZ || obj is IDynamicItem dyn2 && (TileData.IsInternal((long) dyn2.ItemData.Flags) || _maxZ != 255 && TileData.IsRoof((long) dyn2.ItemData.Flags))))
+                if (!(obj is Land) && (z >= _maxZ || obj is IDynamicItem dyn2 && (TileData.IsInternal((long) dyn2.ItemData.Flags) || _maxZ != 255 && TileData.IsRoof((long) dyn2.ItemData.Flags))))
                     continue;
                 int testMinZ = drawY + z * 4;
                 int testMaxZ = drawY;
 
-                if (obj is Tile t && t.IsStretched)
+                if (obj is Land t && t.IsStretched)
                     testMinZ -= t.MinZ * 4;
                 else
                     testMinZ = testMaxZ;

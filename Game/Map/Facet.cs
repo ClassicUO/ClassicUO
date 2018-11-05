@@ -90,7 +90,7 @@ namespace ClassicUO.Game.Map
 
             chuck.LastAccessTime = CoreGame.Ticks;
 
-            return chuck.Tiles[x % 8][y % 8];
+            return chuck.Tiles[x % 8, y % 8];
 
             //int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
             //// int cellindex = (cellX * AssetsLoader.Map.MapBlocksSize[Index][1]) + cellY;
@@ -204,19 +204,19 @@ namespace ClassicUO.Game.Map
                 for (int j = minBlockY; j <= maxBlockY; j++)
                 {
                     int cellindex = index + j;
-                    ref MapChunk tile = ref Chunks[cellindex];
+                    ref MapChunk chunk = ref Chunks[cellindex];
 
-                    if (tile == null)
+                    if (chunk == null)
                     {
                         if (CoreGame.Ticks - tick >= maxDelay)
                             return;
 
                         _usedIndices.Add(cellindex);
-                        tile = new MapChunk((ushort) i, (ushort) j);
-                        tile.Load(Index);
+                        chunk = new MapChunk((ushort) i, (ushort) j);
+                        chunk.Load(Index);
                     }
 
-                    tile.LastAccessTime = CoreGame.Ticks;
+                    chunk.LastAccessTime = CoreGame.Ticks;
                 }
             }
         }

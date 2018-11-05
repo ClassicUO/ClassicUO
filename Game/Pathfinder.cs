@@ -86,7 +86,7 @@ namespace ClassicUO.Game
 
                 switch (obj)
                 {
-                    case Tile tile1:
+                    case Land tile1:
 
                         if (graphic < 0x01AE && graphic != 2 || graphic > 0x01B5 && graphic != 0x01DB)
                         {
@@ -107,8 +107,8 @@ namespace ClassicUO.Game
                                     flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
                             }
 
-                            int landMinZ = tile.MinZ;
-                            int landAverageZ = tile.AverageZ;
+                            int landMinZ = tile.Land.MinZ;
+                            int landAverageZ = tile.Land.AverageZ;
                             int landHeight = landAverageZ - landMinZ;
                             list.Add(new PathObject(flags, landMinZ, landAverageZ, landHeight, obj));
                         }
@@ -226,7 +226,7 @@ namespace ClassicUO.Game
                 GameObject o = obj.Object;
                 int averageZ = obj.AverageZ;
 
-                if (averageZ <= currentZ && o is Tile tile && tile.IsStretched)
+                if (averageZ <= currentZ && o is Land tile && tile.IsStretched)
                 {
                     int avgZ = tile.CalculateCurrentAverageZ(newDirection);
 

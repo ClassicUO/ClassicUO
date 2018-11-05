@@ -192,10 +192,6 @@ namespace ClassicUO.IO.Resources
                 };
             }
 
-
-            file.UnloadEntries();
-            fileidx.UnloadEntries();
-            staticfile.UnloadEntries();
         }
 
         public static void UnloadMap(int i)

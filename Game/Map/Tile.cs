@@ -36,26 +36,20 @@ using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class Tile : GameObject
+    public sealed class Tile : IDisposable
     {
         private static readonly List<GameObject> _itemsAtZ = new List<GameObject>();
         private readonly List<GameObject> _objectsOnTile;
-        private readonly List<Static> _statics = new List<Static>();
         private bool _needSort;
-        public Rectangle Rectangle;
 
-        public Tile() : base(World.Map)
+        public Tile()
         {
             _objectsOnTile = new List<GameObject>();
         }
 
-        public sbyte MinZ { get; set; }
+        public Land Land { get; private set; }
 
-        public sbyte AverageZ { get; set; }
-
-        public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
-
-        public bool IsStretched { get; set; }
+       
 
         public IReadOnlyList<GameObject> ObjectsOnTiles
         {
@@ -71,8 +65,6 @@ namespace ClassicUO.Game.Map
                 return _objectsOnTile;
             }
         }
-
-        public LandTiles TileData => IO.Resources.TileData.LandData[Graphic];
 
         public void AddGameObject(GameObject obj)
         {
@@ -92,13 +84,13 @@ namespace ClassicUO.Game.Map
 
             switch (obj)
             {
-                case Tile tile:
+                case Land tile:
 
                     if (tile.IsStretched)
                         priorityZ = (short) (tile.AverageZ - 1);
                     else
                         priorityZ--;
-
+                    Land = tile;
                     break;
                 case Mobile _:
                     priorityZ++;
@@ -143,7 +135,6 @@ namespace ClassicUO.Game.Map
             _needSort = true;
         }
 
-        public void Calculate() => ((TileView)View).UpdateStreched(World.Map);
 
         private void RemoveDuplicates()
         {
@@ -221,96 +212,24 @@ namespace ClassicUO.Game.Map
                             entity = list[i];
                     }
                 }
-                else if (list[i] is Tile tile && tile.AverageZ >= z + 12) ground = list[i];
+                else if (list[i] is Land tile && tile.AverageZ >= z + 12) ground = list[i];
             }
 
             return entity != null || ground != null;
         }
+        
 
-        public List<Static> GetStatics()
-        {
-            List<Static> items = _statics;
-            _statics.Clear();
-
-            for (int i = 0; i < _objectsOnTile.Count; i++)
-            {
-                if (_objectsOnTile[i] is Static st)
-                    items.Add(st);
-            }
-
-            return items;
-        }
-
-        public void UpdateZ(int zTop, int zRight, int zBottom)
-        {
-            if (IsStretched)
-            {
-                int x = Position.Z * 4 + 1;
-                int y = zTop * 4;
-                int w = zRight * 4 - x;
-                int h = zBottom * 4 + 1 - y;
-                Rectangle = new Rectangle(x, y, w, h);
-                int average = AverageZ;
-
-                if (Math.Abs(Position.Z - zRight) <= Math.Abs(zBottom - zTop))
-                    AverageZ = (sbyte) ((Position.Z + zRight) >> 1);
-                else
-                    AverageZ = (sbyte) ((zBottom + zTop) >> 1);
-
-                if (AverageZ != average)
-                    ForceSort();
-                MinZ = Position.Z;
-
-                if (zTop < MinZ)
-                    MinZ = (sbyte) zTop;
-
-                if (zRight < MinZ)
-                    MinZ = (sbyte) zRight;
-
-                if (zBottom < MinZ)
-                    MinZ = (sbyte) zBottom;
-            }
-        }
-
-        public int CalculateCurrentAverageZ(int direction)
-        {
-            int result = GetDirectionZ(((byte) (direction >> 1) + 1) & 3);
-
-            if ((direction & 1) > 0)
-                return result;
-
-            return (result + GetDirectionZ(direction >> 1)) >> 1;
-        }
-
-        private int GetDirectionZ(int direction)
-        {
-            switch (direction)
-            {
-                case 1: return Rectangle.Bottom / 4;
-                case 2: return Rectangle.Right / 4;
-                case 3: return Rectangle.Top / 4;
-                default: return Position.Z;
-            }
-        }
-
-        public override void Dispose()
+        public void Dispose()
         {
             for (int i = 0; i < _objectsOnTile.Count; i++)
             {
                 GameObject t = _objectsOnTile[i];
-                if (t != this && t != World.Player)
+                if (t != World.Player)
                 {
                     t.Dispose();
-                    t = null;
                 }
             }
-
-            base.Dispose();
         }
 
-        protected override View CreateView()
-        {
-            return new TileView(this);
-        }
     }
 }
