@@ -79,7 +79,7 @@ namespace ClassicUO.IO
             Multi.Load();
             Skills.Load();
             TextmapTextures.Load();
-            SpecialKeywords.Load();
+            Speeches.Load();
             AnimData.Load();
             Light.Load();
         }

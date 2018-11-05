@@ -79,7 +79,7 @@ namespace ClassicUO.IO.Resources
 
                 if (File.Exists(path))
                 {
-                    _filesMap[i] = new UOFileUop(path, ".dat");
+                    _filesMap[i] = new UOFileUop(path, ".dat", loadentries: false);
                     foundedOneMap = true;
                 }
                 else
@@ -107,13 +107,15 @@ namespace ClassicUO.IO.Resources
                 MapsDefaultSize[0][0] = MapsDefaultSize[1][0] = 6144;
 
             for (int i = 0; i < MAPS_COUNT; i++)
+            {
                 MapBlocksSize[i] = new int[2]
                 {
                     MapsDefaultSize[i][0] / 8, MapsDefaultSize[i][1] / 8
                 };
+            }
         }
 
-        public static void LoadMap(int i)
+        public static unsafe void LoadMap(int i)
         {
             int mapblocksize = Marshal.SizeOf<MapBlock>();
             int staticidxblocksize = Marshal.SizeOf<StaidxBlock>();
@@ -162,17 +164,17 @@ namespace ClassicUO.IO.Resources
                 if (address < endmapaddress)
                     realmapaddress = address;
                 ulong stidxaddress = staticidxaddress + (ulong) (block * staticidxblocksize);
-                StaidxBlock bb = fileidx.ReadStruct<StaidxBlock>(block * staticidxblocksize);
 
-                if (stidxaddress < endstaticidxaddress && bb.Size > 0 && bb.Position != 0xFFFFFFFF)
+                StaidxBlock* bb = (StaidxBlock*) stidxaddress;
+
+                if (stidxaddress < endstaticidxaddress && bb->Size > 0 && bb->Position != 0xFFFFFFFF)
                 {
-                    ulong address1 = staticaddress + bb.Position;
+                    ulong address1 = staticaddress + bb->Position;
 
                     if (address1 < endstaticaddress)
                     {
-                        StaticsBlock sss = staticfile.ReadStruct<StaticsBlock>(bb.Position);
                         realstaticaddress = address1;
-                        realstaticcount = (uint) (bb.Size / staticblocksize);
+                        realstaticcount = (uint) (bb->Size / staticblocksize);
 
                         if (realstaticcount > 1024)
                             realstaticcount = 1024;
@@ -189,6 +191,11 @@ namespace ClassicUO.IO.Resources
                     StaticCount = realstaticcount
                 };
             }
+
+
+            file.UnloadEntries();
+            fileidx.UnloadEntries();
+            staticfile.UnloadEntries();
         }
 
         public static void UnloadMap(int i)

@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 using ClassicUO.Game;
@@ -877,7 +878,7 @@ namespace ClassicUO.IO.Resources
                 }
 
                 //file.Dispose();
-                animSeq.Unload();
+                animSeq.Dispose();
             }
         }
 

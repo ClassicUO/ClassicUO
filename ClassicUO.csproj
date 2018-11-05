@@ -251,7 +251,7 @@
     <Compile Include="IO\Resources\Map.cs" />
     <Compile Include="IO\Resources\Multi.cs" />
     <Compile Include="IO\Resources\Skills.cs" />
-    <Compile Include="IO\Resources\SpecialKeywords.cs" />
+    <Compile Include="IO\Resources\Speeches.cs" />
     <Compile Include="IO\Resources\TexmapTextures.cs" />
     <Compile Include="IO\Resources\TileData.cs" />
     <Compile Include="IO\Resources\Verdata.cs" />

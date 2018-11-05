@@ -73,10 +73,10 @@ namespace ClassicUO.IO
             }
         }
 
-        public override void Unload()
+        public override void Dispose()
         {
-            _idxFile?.Unload();
-            base.Unload();
+            _idxFile?.Dispose();
+            base.Dispose();
         }
 
         private class UOFileIdxMul : UOFile

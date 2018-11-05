@@ -114,7 +114,6 @@ namespace ClassicUO.Game.Map
 
                                 if (TileData.IsAnimated((long)staticObject.ItemData.Flags))
                                     staticObject.Effect = new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1);
-                                //Service.Get<EffectManager>().Add(GraphicEffectType.FixedXYZ, Serial.Invalid, Serial.Invalid, staticObject.Graphic, staticObject.Hue, staticObject.Position, Position.Invalid, 0, -1, false, false, false, GraphicEffectBlendMode.Normal);
 
                                 Tiles[x][y].AddGameObject(staticObject);
                             }

@@ -66,7 +66,7 @@ namespace ClassicUO.IO.Resources
                     LandData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
                     LandData[idx].TexID = tiledata.ReadUShort();
                     tiledata.Fill(bufferString, 20);
-                    LandData[idx].Name = Encoding.UTF8.GetString(bufferString).TrimEnd('\0');
+                    LandData[idx].Name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
                 }
             }
 
@@ -92,12 +92,12 @@ namespace ClassicUO.IO.Resources
                     StaticData[idx].LightIndex = tiledata.ReadUShort();
                     StaticData[idx].Height = tiledata.ReadByte();
                     tiledata.Fill(bufferString, 20);
-                    StaticData[idx].Name = Encoding.UTF8.GetString(bufferString).TrimEnd('\0');
+                    StaticData[idx].Name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
                 }
             }
 
             END_2:
-            tiledata.Unload();
+            tiledata.Dispose();
 
             //string pathdef = Path.Combine(FileManager.UoFolderPath, "art.def");
             //if (!File.Exists(pathdef))

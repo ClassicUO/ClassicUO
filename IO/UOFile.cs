@@ -34,6 +34,7 @@ namespace ClassicUO.IO
     public abstract unsafe class UOFile : DataReader
     {
         private MemoryMappedViewAccessor _accessor;
+        private MemoryMappedFile _file;
 
         protected UOFile(string filepath)
         {
@@ -55,8 +56,8 @@ namespace ClassicUO.IO
 
             if (size > 0)
             {
-                MemoryMappedFile file = MemoryMappedFile.CreateFromFile(fileInfo.FullName, FileMode.Open);
-                _accessor = file.CreateViewAccessor(0, size, MemoryMappedFileAccess.Read);
+                _file = MemoryMappedFile.CreateFromFile(fileInfo.FullName, FileMode.Open);
+                _accessor = _file.CreateViewAccessor(0, size, MemoryMappedFileAccess.Read);
                 byte* ptr = null;
 
                 try
@@ -75,11 +76,24 @@ namespace ClassicUO.IO
                 throw new Exception($"{Path} size must has > 0");
         }
 
-        public virtual void Unload()
+        public virtual void Dispose()
         {
             _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
-            Entries = null;
+            _accessor.Dispose();
+            _file.Dispose();
+
+            UnloadEntries();
+
             Log.Message(LogTypes.Trace, $"Unloaded:\t\t{Path}");
+        }
+
+        public void UnloadEntries()
+        {
+            if (Entries != null)
+            {
+                Array.Clear(Entries, 0, Entries.Length);
+                Entries = null;
+            }
         }
 
         internal void Fill(byte[] buffer, int count)
