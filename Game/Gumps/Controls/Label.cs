@@ -123,6 +123,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
+            if (IsDisposed)
+                return false;
+
             if (FadeOut)
                 hue = RenderExtentions.GetHueVector(hue.HasValue ? (int) hue.Value.X : 0, false, _alpha, false);
             _gText.Draw(spriteBatch, position, hue);
@@ -132,10 +135,11 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Dispose()
         {
-            _gText?.Dispose();
-            _gText = null;
-
             base.Dispose();
+
+            //_gText?.Dispose();
+            //_gText = null;
+
         }
     }
 }

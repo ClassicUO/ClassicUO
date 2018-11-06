@@ -303,7 +303,7 @@ namespace ClassicUO.Game.GameObjects
         protected override void OnPositionChanged(object sender, EventArgs e)
         {
             base.OnPositionChanged(sender, e);
-            Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
+            //Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
         }
 
         private readonly List<DamageOverhead> _damageTextList = new List<DamageOverhead>(5);

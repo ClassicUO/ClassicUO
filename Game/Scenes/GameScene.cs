@@ -196,9 +196,15 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (x < minX || x > maxX || y < minY || y > maxY)
                             break;
-                        Tile tile = World.Map.GetTile(x, y);
 
-                        if (tile != null)
+                        ref Tile tile = ref World.Map.GetTile(x, y);
+
+                        if (World.Player.X == x && World.Player.Y == y)
+                        {
+
+                        }
+
+                        if (tile != Tile.Invalid)
                             AddTileToRenderList(tile.ObjectsOnTiles, x, y, false, 150);
                         x++;
                         y--;

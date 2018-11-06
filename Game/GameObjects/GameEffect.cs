@@ -131,8 +131,8 @@ namespace ClassicUO.Game.GameObjects
         {
             Source = source;
             Position = source.Position;
-            if (!IsItemEffect)
-                Tile = World.Map.GetTile(Source.X, source.Y);
+            //if (!IsItemEffect)
+            //    Tile = World.Map.GetTile(Source.X, source.Y);
         }
 
         public void SetSource(int x, int y, int z)
@@ -144,8 +144,8 @@ namespace ClassicUO.Game.GameObjects
 
             Position = new Position((ushort)x, (ushort)y , (sbyte)z);
 
-            if (!IsItemEffect)
-                Tile = World.Map.GetTile(x, y);
+            //if (!IsItemEffect)
+            //    Tile = World.Map.GetTile(x, y);
         }
 
         protected (int x, int y, int z) GetTarget()

@@ -250,8 +250,10 @@ namespace ClassicUO.Game.GameObjects
         {
             base.OnPositionChanged(sender, e);
 
-            if (OnGround)
-                Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
+
+
+            //if (OnGround)
+            //    Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
         }
 
         private Position _containerPosition;

@@ -17,9 +17,9 @@ namespace ClassicUO.Game.Scenes
             maxItemZ = 255;
             drawTerrain = true;
             underSurface = false;
-            Tile tile = World.Map.GetTile(World.Map.Center.X, World.Map.Center.Y);
+            ref Tile tile = ref World.Map.GetTile(World.Map.Center.X, World.Map.Center.Y);
 
-            if (tile != null && tile.IsZUnderObjectOrGround(World.Player.Position.Z, out GameObject underObject, out GameObject underGround))
+            if (tile != Tile.Invalid && tile.IsZUnderObjectOrGround(World.Player.Position.Z, out GameObject underObject, out GameObject underGround))
             {
                 drawTerrain = underGround == null;
 
@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         bool isRoofSouthEast = true;
 
-                        if ((tile = World.Map.GetTile(World.Map.Center.X + 1, World.Map.Center.Y)) != null)
+                        if (( tile = ref World.Map.GetTile(World.Map.Center.X + 1, World.Map.Center.Y)) != Tile.Invalid)
                         {
                             tile.IsZUnderObjectOrGround(World.Player.Position.Z, out underObject, out underGround);
                             isRoofSouthEast = underObject != null;
@@ -190,9 +190,10 @@ namespace ClassicUO.Game.Scenes
 
                 if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
                     continue;
-                Tile tile = World.Map.GetTile(x, y);
 
-                if (tile == null)
+                ref Tile tile = ref World.Map.GetTile(x, y);
+
+                if (tile == Tile.Invalid)
                     continue;
                 int currentMaxZ = maxZ;
 

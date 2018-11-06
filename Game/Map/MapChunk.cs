@@ -31,8 +31,10 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class MapChunk
+    public struct MapChunk
     {
+        public static readonly MapChunk Invalid = new MapChunk(0, 0);
+
         public MapChunk(ushort x, ushort y)
         {
             X = x;
@@ -45,7 +47,7 @@ namespace ClassicUO.Game.Map
                 Tiles[i] = new Tile[8];
                 for (int j = 0; j < 8; j++)
                 {
-                    Tiles[i][j] = new Tile();
+                    Tiles[i][j] = new Tile( (ushort) (i + x * 8), (ushort)(j + y * 8));
                 }
             }
 
@@ -59,6 +61,25 @@ namespace ClassicUO.Game.Map
         public Tile[][] Tiles { get; }
 
         public long LastAccessTime { get; set; }
+
+        public static bool operator ==(MapChunk p1, MapChunk p2)
+        {
+            return p1.X == p2.X && p1.Y == p2.Y;
+        }
+
+        public static bool operator !=(MapChunk p1, MapChunk p2)
+        {
+            return p1.X != p2.X || p1.Y != p2.Y;
+        }
+        public override int GetHashCode()
+        {
+            return X ^ Y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is MapChunk mapChunk && this == mapChunk;
+        }
 
         public unsafe void Load(int map)
         {
@@ -80,22 +101,19 @@ namespace ClassicUO.Game.Map
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
 
-                        Tile tile = Tiles[x][y];
+                        ref Tile tile = ref Tiles[x][y];
 
                         LandTiles info = TileData.LandData[tileID];
 
-                        Land land = new Land(tileID)
+                        Land land = new Land(ref tile, tileID)
                         {
                             Graphic = tileID,
-                            Position = new Position((ushort) (bx + x), (ushort) (by + y), z),
                             AverageZ = z,
                             MinZ = z,
                             IsStretched = info.TexID == 0 && TileData.IsWet((long) info.Flags),
-                            Tile = tile
+                            Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
                         };
                         land.Calculate();
-                        
-                        tile.AddGameObject(land);
                     }
                 }
 
@@ -152,6 +170,7 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++)
                 {
                     Tiles[i][j].Dispose();
+                    Tiles[i][j] = Tile.Invalid;
                 }
             }
 

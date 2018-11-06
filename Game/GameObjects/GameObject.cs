@@ -53,6 +53,21 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsPositionChanged { get; protected set; }
 
+        public void SetTile(ushort x, ushort y)
+        {
+            if (World.Map != null)
+            {
+                ref Tile tile = ref World.Map.GetTile(X, Y);
+                if (tile != Tile.Invalid)
+                    tile.RemoveGameObject(this);
+                ref Tile newTile = ref World.Map.GetTile(x, y);
+                if (newTile != Tile.Invalid)
+                    newTile.AddGameObject(this);
+
+                _tile = newTile;
+            }
+        }
+
         public virtual Position Position
         {
             get => _position;
@@ -60,9 +75,26 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (_position != value)
                 {
+                    if (World.Map != null)
+                    {
+                        ref Tile tile = ref World.Map.GetTile(X, Y);
+
+                        if (tile != Tile.Invalid)
+                            tile.RemoveGameObject(this);
+                    }
+
                     _position = value;
                     ScreenPosition = new Vector3((_position.X - _position.Y) * 22, (_position.X + _position.Y) * 22 - _position.Z * 4, 0);
                     IsPositionChanged = true;
+
+                    if (World.Map != null)
+                    {
+                        ref Tile newTile = ref World.Map.GetTile(value.X, value.Y);
+                        if (newTile != Tile.Invalid)
+                            newTile.AddGameObject(this);
+
+                        _tile = newTile;
+                    }
                 }
             }
         }
@@ -101,25 +133,29 @@ namespace ClassicUO.Game.GameObjects
 
         public short PriorityZ { get; set; }
 
-        public Tile Tile
-        {
-            get => _tile;
-            set
-            {
-                if (_tile != value)
-                {
-                    _tile?.RemoveGameObject(this);
-                    _tile = value;
+        //public Tile Tile
+        //{
+        //    get => _tile;
+        //    set
+        //    {
+        //        if (_tile != value)
+        //        {
+        //            _tile?.RemoveGameObject(this);
+        //            _tile = value;
 
-                    if (_tile != null)
-                        _tile.AddGameObject(this);
-                    else
-                    {
-                        if (this != World.Player && !IsDisposed) Dispose();
-                    }
-                }
-            }
-        }
+        //            if (_tile != null)
+        //                _tile.AddGameObject(this);
+        //            else
+        //            {
+        //                if (this != World.Player && !IsDisposed) Dispose();
+        //            }
+        //        }
+        //    }
+        //}
+
+
+
+        //public ref Tile Tile { get; }
 
         public bool IsDisposed { get; private set; }
 
@@ -231,7 +267,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             IsDisposed = true;
             //DisposeView();
-            Tile = null;
+            //Tile = null;
             _overHeads.ForEach(s => s.Dispose());
             _overHeads.Clear();
         }

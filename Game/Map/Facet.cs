@@ -65,18 +65,21 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public Tile GetTile(short x, short y, bool load = true)
+        private static Tile _invalid;
+
+        
+        public ref Tile GetTile(short x, short y, bool load = true)
         {
-            if (x < 0 || y < 0) return null;
+            if (x < 0 || y < 0) return ref _invalid;
             int cellX = x / 8;
             int cellY = y / 8;
             int block = GetBlock(cellX, cellY);
 
             if (block >= Chunks.Length)
-                return null;
+                return ref _invalid;
             ref MapChunk chuck = ref Chunks[block];
 
-            if (chuck == null)
+            if (chuck == MapChunk.Invalid)
             {
                 if (load)
                 {
@@ -85,17 +88,17 @@ namespace ClassicUO.Game.Map
                     chuck.Load(Index);
                 }
                 else
-                    return null;
+                    return ref _invalid;
             }
 
             chuck.LastAccessTime = CoreGame.Ticks;
 
-            return chuck.Tiles[x % 8][y % 8];
+            return ref chuck.Tiles[x % 8][y % 8];
         }
 
-        public Tile GetTile(int x, int y, bool load = true)
+        public ref Tile GetTile(int x, int y, bool load = true)
         {
-            return GetTile((short) x, (short) y, load);
+            return ref GetTile((short) x, (short) y, load);
         }
 
         public sbyte GetTileZ(int x, int y)
@@ -141,7 +144,7 @@ namespace ClassicUO.Game.Map
                 if (CoreGame.Ticks - block.LastAccessTime >= 3000 && block.HasNoExternalData())
                 {
                     block.Unload();
-                    block = null;
+                    block = MapChunk.Invalid;
                     _usedIndices.RemoveAt(i--);
 
                     if (++count >= 5)
@@ -157,7 +160,7 @@ namespace ClassicUO.Game.Map
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
                 
                 block.Unload();
-                block = null;
+                block = MapChunk.Invalid;
                 _usedIndices.RemoveAt(i--);               
             }
         }

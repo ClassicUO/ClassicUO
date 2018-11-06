@@ -36,20 +36,47 @@ using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class Tile : IDisposable
+    public struct Tile
     {
+        public static readonly Tile Invalid = new Tile();
+
         private static readonly List<GameObject> _itemsAtZ = new List<GameObject>();
-        private readonly List<GameObject> _objectsOnTile;
+        private List<GameObject> _objectsOnTile;
         private bool _needSort;
 
-        public Tile()
+
+        public Tile(ushort x, ushort y)
         {
+            X = x;
+            Y = y;
+            _needSort = false;
             _objectsOnTile = new List<GameObject>();
+            Land = null;
         }
+
+        public readonly ushort X, Y;
 
         public Land Land { get; private set; }
 
-       
+
+        public static bool operator ==(Tile p1, Tile p2)
+        {
+            return p1.X == p2.X && p1.Y == p2.Y;
+        }
+
+        public static bool operator !=(Tile p1, Tile p2)
+        {
+            return p1.X != p2.X || p1.Y != p2.Y;
+        }
+        public override int GetHashCode()
+        {
+            return X ^ Y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Tile tile && this == tile;
+        }
 
         public IReadOnlyList<GameObject> ObjectsOnTiles
         {
@@ -58,7 +85,7 @@ namespace ClassicUO.Game.Map
                 if (_needSort)
                 {
                     RemoveDuplicates();
-                    TileSorter.Sort(_objectsOnTile);
+                    TileSorter.Sort(ref _objectsOnTile);
                     _needSort = false;
                 }
 
@@ -68,6 +95,18 @@ namespace ClassicUO.Game.Map
 
         public void AddGameObject(GameObject obj)
         {
+
+            if (obj is Land land)
+            {
+                if (Land != null && land != Land)
+                {
+                    Land.Dispose();
+                    RemoveGameObject(Land);
+                }
+
+                Land = land;
+            }
+
             if (obj is IDynamicItem dyn)
             {
                 for (int i = 0; i < _objectsOnTile.Count; i++)
@@ -90,7 +129,6 @@ namespace ClassicUO.Game.Map
                         priorityZ = (short) (tile.AverageZ - 1);
                     else
                         priorityZ--;
-                    Land = tile;
                     break;
                 case Mobile _:
                     priorityZ++;

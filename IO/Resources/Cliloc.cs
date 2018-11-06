@@ -33,9 +33,9 @@ namespace ClassicUO.IO.Resources
 {
     public static class Cliloc
     {
-        private static readonly Dictionary<int, StringEntry> _entries = new Dictionary<int, StringEntry>(50000);
+        private static readonly Dictionary<int, StringEntry> _entries = new Dictionary<int, StringEntry>();
 
-        public static unsafe void Load()
+        public static void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "Cliloc.enu");
 

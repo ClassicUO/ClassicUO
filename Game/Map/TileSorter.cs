@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Map
 {
     public static class TileSorter
     {
-        public static void Sort(List<GameObject> objects)
+        public static void Sort(ref List<GameObject> objects)
         {
             for (int i = 0; i < objects.Count - 1; i++)
             {

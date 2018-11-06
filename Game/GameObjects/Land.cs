@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 
@@ -13,9 +14,12 @@ namespace ClassicUO.Game.GameObjects
 {
     public class Land : GameObject
     {
-        public Land(Graphic graphic) 
+        private Tile _tile;
+
+        public Land(ref Tile tile, Graphic graphic) 
         {
             Graphic = graphic;
+            _tile = tile;
         }
 
         public LandTiles TileData => IO.Resources.TileData.LandData[Graphic];
@@ -55,7 +59,8 @@ namespace ClassicUO.Game.GameObjects
                     AverageZ = (sbyte)((zBottom + zTop) >> 1);
 
                 if (AverageZ != average)
-                    Tile.ForceSort();
+                    _tile.ForceSort();
+
                 MinZ = Position.Z;
 
                 if (zTop < MinZ)
