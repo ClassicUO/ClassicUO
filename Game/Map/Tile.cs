@@ -25,6 +25,9 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using System.Collections.Generic;
+
+using ClassicUO.Utility.Logging;
+
 using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.Map
@@ -180,8 +183,8 @@ namespace ClassicUO.Game.Map
 
         private void RemoveDuplicates()
         {
-            int[] toremove = new int[0x100];
-            int index = 0;
+            //int[] toremove = new int[0x100];
+            //int index = 0;
 
             for (int i = 0; i < _objectsOnTile.Count; i++)
             {
@@ -193,8 +196,9 @@ namespace ClassicUO.Game.Map
                         {
                             if (_objectsOnTile[j] is Static stj && st.Graphic == stj.Graphic)
                             {
-                                toremove[index++] = i;
-
+                                //toremove[index++] = i;
+                                Log.Message(LogTypes.Warning, "Duplicated");
+                                _objectsOnTile.RemoveAt(i--);
                                 break;
                             }
 
@@ -205,7 +209,12 @@ namespace ClassicUO.Game.Map
                                     if (_objectsOnTile[i].Position.Z == _objectsOnTile[jj].Position.Z)
                                     {
                                         if (_objectsOnTile[jj] is Static stj1 && item.ItemData.Name == stj1.ItemData.Name || _objectsOnTile[jj] is Item itemj && item.Serial == itemj.Serial)
-                                            toremove[index++] = jj;
+                                        {
+                                            //toremove[index++] = jj;
+                                            Log.Message(LogTypes.Warning, "Duplicated");
+
+                                            _objectsOnTile.RemoveAt(jj--);
+                                        } 
                                     }
                                 }
                             }
@@ -214,7 +223,8 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            for (int i = 0; i < index; i++) _objectsOnTile.RemoveAt(toremove[i] - i);
+            //for (int i = 0; i < index; i++)
+            //    _objectsOnTile.RemoveAt(toremove[i] - i);
         }
 
         public List<GameObject> GetItemsBetweenZ(int z0, int z1)

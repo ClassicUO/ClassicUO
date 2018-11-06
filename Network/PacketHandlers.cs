@@ -563,6 +563,8 @@ namespace ClassicUO.Network
 
         private static void EnterWorld(Packet p)
         {
+            Service.Get<SceneManager>().ChangeScene(ScenesType.Game);
+
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
@@ -582,10 +584,9 @@ namespace ClassicUO.Network
             GameActions.SingleClick(World.Player);
             NetClient.Socket.Send(new PStatusRequest(World.Player));
 
+
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
-
-            Service.Get<SceneManager>().ChangeScene(ScenesType.Game);
         }
 
         private static void Talk(Packet p)

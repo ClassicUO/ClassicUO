@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -9,6 +10,7 @@ using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -300,6 +302,31 @@ namespace ClassicUO.Game.Scenes
         {
             if (TargetSystem.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && e.keysym.mod == SDL.SDL_Keymod.KMOD_NONE)
                 TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+
+            // TEST PURPOSE
+            //if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
+            //{
+
+            //    bool first = false;
+
+            //    string tobrit = "[go britain";
+            //    string toluna = "[go luna";
+
+            //    Task.Run( async () =>
+            //    {
+
+            //        while (true)
+            //        {
+            //            await Task.Delay(500);
+                        
+            //            NetClient.Socket.Send(new PUnicodeSpeechRequest(first ? tobrit : toluna, MessageType.Regular, MessageFont.Normal, 33, "ENU"));
+
+            //            first = !first;
+
+                        
+            //        }
+            //    });
+            //}
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)

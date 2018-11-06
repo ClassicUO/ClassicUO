@@ -112,6 +112,8 @@ namespace ClassicUO.IO.Resources
                 {
                     MapsDefaultSize[i][0] / 8, MapsDefaultSize[i][1] / 8
                 };
+
+                //LoadMap(i);
             }
         }
 
@@ -181,15 +183,7 @@ namespace ClassicUO.IO.Resources
                     }
                 }
 
-                BlockData[i][block] = new IndexMap
-                {
-                    OriginalMapAddress = realmapaddress,
-                    OriginalStaticAddress = realstaticaddress,
-                    OriginalStaticCount = realstaticcount,
-                    MapAddress = realmapaddress,
-                    StaticAddress = realstaticaddress,
-                    StaticCount = realstaticcount
-                };
+                BlockData[i][block] = new IndexMap(realmapaddress, realstaticaddress, realstaticcount, realmapaddress, realstaticaddress, realstaticcount);
             }
 
         }
@@ -328,14 +322,24 @@ namespace ClassicUO.IO.Resources
         public RadarMapcells[,] Cells;
     }
 
-    public struct IndexMap
+    public readonly struct IndexMap
     {
-        public ulong MapAddress;
-        public ulong OriginalMapAddress;
-        public ulong OriginalStaticAddress;
-        public uint OriginalStaticCount;
-        public ulong StaticAddress;
-        public uint StaticCount;
+        public IndexMap(ulong mapAddress, ulong staticAddress, uint staticCount, ulong originalMapAddress, ulong originalStaticAddress, uint originalStaticCount)
+        {
+            MapAddress = mapAddress;
+            StaticAddress = staticAddress;
+            StaticCount = staticCount;
+            OriginalMapAddress = originalMapAddress;
+            OriginalStaticAddress = originalStaticAddress;
+            OriginalStaticCount = originalStaticCount;
+        }
+
+        public readonly ulong MapAddress;
+        public readonly ulong OriginalMapAddress;
+        public readonly ulong OriginalStaticAddress;
+        public readonly uint OriginalStaticCount;
+        public readonly ulong StaticAddress;
+        public readonly uint StaticCount;
 
         public static readonly IndexMap Invalid = new IndexMap();
     }

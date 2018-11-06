@@ -41,6 +41,7 @@ namespace ClassicUO.Game.Map
         public Facet(int index)
         {
             Index = index;
+            
             IO.Resources.Map.LoadMap(index);
             MapBlockIndex = IO.Resources.Map.MapBlocksSize[Index][0] * IO.Resources.Map.MapBlocksSize[Index][1];
             Chunks = new MapChunk[MapBlockIndex];
@@ -197,7 +198,7 @@ namespace ClassicUO.Game.Map
                     int cellindex = index + j;
                     ref MapChunk chunk = ref Chunks[cellindex];
 
-                    if (chunk == null)
+                    if (chunk == MapChunk.Invalid)
                     {
                         if (CoreGame.Ticks - tick >= maxDelay)
                             return;

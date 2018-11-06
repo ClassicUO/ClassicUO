@@ -93,8 +93,8 @@ namespace ClassicUO.Game.Gumps
                 if (!IsModalControlOpen && ObjectsBlockingInputExists)
                     return;
 
-                if (MouseOverControl == null)
-                    return;
+                //if (MouseOverControl == null)
+                //    return;
                 const int btn = (int) MouseButton.Left;
                 EndDragControl(Mouse.Position);
 
@@ -156,8 +156,8 @@ namespace ClassicUO.Game.Gumps
                 if (!IsModalControlOpen && ObjectsBlockingInputExists)
                     return;
 
-                if (MouseOverControl == null)
-                    return;
+                //if (MouseOverControl == null)
+                //    return;
                 const int btn = (int) MouseButton.Right;
                 EndDragControl(Mouse.Position);
 
