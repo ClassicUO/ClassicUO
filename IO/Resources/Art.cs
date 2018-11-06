@@ -38,8 +38,8 @@ namespace ClassicUO.IO.Resources
         private static readonly List<int> _usedIndex = new List<int>();
         private static readonly List<int> _usedIndexLand = new List<int>();
         private static readonly PixelPicking _picker = new PixelPicking();
-        private static readonly Dictionary<Graphic, SpriteTexture> _artDictionary = new Dictionary<Graphic, SpriteTexture>();
-        private static readonly Dictionary<Graphic, SpriteTexture> _landDictionary = new Dictionary<Graphic, SpriteTexture>();
+        private static readonly Dictionary<int, SpriteTexture> _artDictionary = new Dictionary<int, SpriteTexture>();
+        private static readonly Dictionary<int, SpriteTexture> _landDictionary = new Dictionary<int, SpriteTexture>();
 
         public static void Load()
         {
@@ -127,7 +127,7 @@ namespace ClassicUO.IO.Resources
             for (int i = 0; i < _usedIndex.Count; i++)
             {
                 //ref SpriteTexture texture = ref _artCache[_usedIndex[i]];
-                Graphic g = (Graphic) _usedIndex[i];
+                int g =  _usedIndex[i];
                 SpriteTexture texture = _artDictionary[g];
 
                 if (texture == null || texture.IsDisposed)
@@ -149,7 +149,7 @@ namespace ClassicUO.IO.Resources
             for (int i = 0; i < _usedIndexLand.Count; i++)
             {
                 //ref SpriteTexture texture = ref _landCache[_usedIndexLand[i]];
-                Graphic g = (Graphic)_usedIndexLand[i];
+                int g = _usedIndexLand[i];
                 SpriteTexture texture = _landDictionary[g];
 
                 if (texture == null || texture.IsDisposed)

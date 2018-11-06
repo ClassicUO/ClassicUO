@@ -39,7 +39,7 @@ namespace ClassicUO.IO.Resources
         private static readonly List<int> _usedIndex = new List<int>();
         private static readonly PixelPicking _picker = new PixelPicking();
 
-        private static readonly Dictionary<Graphic, SpriteTexture> _gumpDictionary = new Dictionary<Graphic, SpriteTexture>();
+        private static readonly Dictionary<int, SpriteTexture> _gumpDictionary = new Dictionary<int, SpriteTexture>();
 
         public static void Load()
         {
@@ -140,7 +140,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                Graphic g = (Graphic) _usedIndex[i];
+                int g = _usedIndex[i];
                 SpriteTexture texture = _gumpDictionary[g];
                 //ref SpriteTexture texture = ref _gumpCache[_usedIndex[i]];
 

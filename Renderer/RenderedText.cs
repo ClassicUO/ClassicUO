@@ -168,20 +168,20 @@ namespace ClassicUO.Renderer
                 Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
 
             bool ispartial = false;
-            Fonts.FontTextureInfo? info;
+            //Fonts.FontTextureInfo? info;
 
             if (IsUnicode)
-                info = Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle);
+                Texture = Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle);
             else
-                info = Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial);
+                Texture = Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial);
 
             IsPartialHue = ispartial;
 
-            if (info.HasValue)
+            if (Texture != null)
             {
-                Texture = new FontTexture(info.Value.Width, info.Value.Height, info.Value.LinesCount, info.Value.Links);
-                Texture.SetData(info.Value.Pixels);
-          
+                //Texture = new FontTexture(info.Value.Width, info.Value.Height, info.Value.LinesCount, info.Value.Links);
+                //Texture.SetData(info.Value.Pixels);
+               
 
                 Width = Texture.Width;
                 Height = Texture.Height;

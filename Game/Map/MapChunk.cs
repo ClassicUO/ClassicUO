@@ -190,10 +190,13 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tile tile = Tiles[i][j];
+                    ref Tile tile = ref Tiles[i][j];
 
-                    foreach (GameObject o in tile.ObjectsOnTiles)
+                    var list = tile.ObjectsOnTiles;
+
+                    for (int k = 0; k < list.Count; k++)
                     {
+                        var o = list[k];
                         if (!(o is Land) && !(o is Static))
                             return false;
                     }
