@@ -39,7 +39,6 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly List<TextOverhead> _overHeads;
         private Position _position = Position.Invalid;
-        private Tile _tile;
         private View _view;
 
         protected GameObject()
@@ -53,6 +52,8 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsPositionChanged { get; protected set; }
 
+        public Tile Tile { get; protected set; }
+
         public void SetTile(ushort x, ushort y)
         {
             if (World.Map != null)
@@ -64,7 +65,7 @@ namespace ClassicUO.Game.GameObjects
                 if (newTile != Tile.Invalid)
                     newTile.AddGameObject(this);
 
-                _tile = newTile;
+                Tile = newTile;
             }
         }
 
@@ -93,7 +94,7 @@ namespace ClassicUO.Game.GameObjects
                         if (newTile != Tile.Invalid)
                             newTile.AddGameObject(this);
 
-                        _tile = newTile;
+                        Tile = newTile;
                     }
                 }
             }
@@ -135,16 +136,16 @@ namespace ClassicUO.Game.GameObjects
 
         //public Tile Tile
         //{
-        //    get => _tile;
+        //    get => Tile;
         //    set
         //    {
-        //        if (_tile != value)
+        //        if (Tile != value)
         //        {
-        //            _tile?.RemoveGameObject(this);
-        //            _tile = value;
+        //            Tile?.RemoveGameObject(this);
+        //            Tile = value;
 
-        //            if (_tile != null)
-        //                _tile.AddGameObject(this);
+        //            if (Tile != null)
+        //                Tile.AddGameObject(this);
         //            else
         //            {
         //                if (this != World.Player && !IsDisposed) Dispose();

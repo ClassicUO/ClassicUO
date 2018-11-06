@@ -22,6 +22,7 @@
 #endregion
 
 using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 using ClassicUO.Game.Data;
@@ -33,12 +34,12 @@ namespace ClassicUO.Game.Map
 {
     public struct MapChunk
     {
-        public static readonly MapChunk Invalid = new MapChunk(0, 0);
+        public static readonly MapChunk Invalid = new MapChunk(0xFFFF, 0xFFFF);
 
         public MapChunk(ushort x, ushort y)
         {
-            X = x;
-            Y = y;
+            _x = x;
+            _y = y;
 
             Tiles = new Tile[8][];
 
@@ -54,9 +55,18 @@ namespace ClassicUO.Game.Map
             LastAccessTime = CoreGame.Ticks;
         }
 
-        public ushort X { get; }
+        private ushort? _x, _y;
 
-        public ushort Y { get; }
+        public ushort X
+        {
+            get => _x ?? 0xFFFF;
+            set => _x = value;
+        }
+        public ushort Y
+        {
+            get => _y ?? 0xFFFF;
+            set => _y = value;
+        }
 
         public Tile[][] Tiles { get; }
 
@@ -101,11 +111,9 @@ namespace ClassicUO.Game.Map
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
 
-                        ref Tile tile = ref Tiles[x][y];
-
                         LandTiles info = TileData.LandData[tileID];
 
-                        Land land = new Land(ref tile, tileID)
+                        Land land = new Land(tileID)
                         {
                             Graphic = tileID,
                             AverageZ = z,
@@ -145,7 +153,7 @@ namespace ClassicUO.Game.Map
                                 if (TileData.IsAnimated((long)staticObject.ItemData.Flags))
                                     staticObject.Effect = new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1);
 
-                                Tiles[x][y].AddGameObject(staticObject);
+                                //Tiles[x][y].AddGameObject(staticObject);
                             }
                         }
                     }

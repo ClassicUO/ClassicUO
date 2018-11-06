@@ -21,41 +21,45 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
-
-using Microsoft.Xna.Framework;
-
+using System.Collections.Generic;
 using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.Map
 {
     public struct Tile
     {
-        public static readonly Tile Invalid = new Tile();
+        public static readonly Tile Invalid = new Tile(0xFFFF, 0xFFFF);
 
         private static readonly List<GameObject> _itemsAtZ = new List<GameObject>();
         private List<GameObject> _objectsOnTile;
         private bool _needSort;
 
 
+
         public Tile(ushort x, ushort y)
         {
-            X = x;
-            Y = y;
+            _x = x;
+            _y = y;
             _needSort = false;
             _objectsOnTile = new List<GameObject>();
             Land = null;
         }
 
-        public readonly ushort X, Y;
+        private ushort? _x, _y;
 
+        public ushort X
+        {
+            get => _x ?? 0xFFFF;
+            set => _x = value;
+        }
+        public ushort Y
+        {
+            get => _y ?? 0xFFFF;
+            set => _y = value;
+        }
         public Land Land { get; private set; }
 
 
@@ -265,6 +269,7 @@ namespace ClassicUO.Game.Map
                 if (t != World.Player)
                 {
                     t.Dispose();
+                    _objectsOnTile.RemoveAt(i--);
                 }
             }
         }

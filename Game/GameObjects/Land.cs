@@ -14,12 +14,10 @@ namespace ClassicUO.Game.GameObjects
 {
     public class Land : GameObject
     {
-        private Tile _tile;
 
-        public Land(ref Tile tile, Graphic graphic) 
+        public Land(Graphic graphic) 
         {
             Graphic = graphic;
-            _tile = tile;
         }
 
         public LandTiles TileData => IO.Resources.TileData.LandData[Graphic];
@@ -40,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsStretched { get; set; }
 
-        public void Calculate() => ((TileView)View).UpdateStreched(World.Map);
+        public void Calculate() => ((TileView)View).UpdateStreched();
 
         public void UpdateZ(int zTop, int zRight, int zBottom)
         {
@@ -59,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
                     AverageZ = (sbyte)((zBottom + zTop) >> 1);
 
                 if (AverageZ != average)
-                    _tile.ForceSort();
+                    Tile.ForceSort();
 
                 MinZ = Position.Z;
 

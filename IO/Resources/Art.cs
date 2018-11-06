@@ -67,7 +67,6 @@ namespace ClassicUO.IO.Resources
 
         public static SpriteTexture GetStaticTexture(ushort g)
         {
-
             if (!_artDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
             {
                 ushort[] pixels = ReadStaticArt(g, out short w, out short h);
@@ -239,7 +238,7 @@ namespace ClassicUO.IO.Resources
             return pixels;
         }
 
-        private static unsafe ushort[] ReadLandArt(ushort graphic)
+        private static ushort[] ReadLandArt(ushort graphic)
         {
             graphic &= FileManager.GraphicMask;
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);

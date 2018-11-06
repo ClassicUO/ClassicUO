@@ -126,9 +126,10 @@ namespace ClassicUO.Game.Views
         }
 
 
-        public void UpdateStreched(Facet map)
+        public void UpdateStreched()
         {
             Land tile = (Land) GameObject;
+            Facet map = World.Map;
 
             if (tile.IsStretched || TextmapTextures.GetTextmapTexture(tile.TileData.TexID) == null || !TestStretched(tile.Position.X, tile.Position.Y, tile.Position.Z, true))
             {

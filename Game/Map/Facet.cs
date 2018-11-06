@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        private static Tile _invalid;
+        private static Tile _invalid = Tile.Invalid;
 
         
         public ref Tile GetTile(short x, short y, bool load = true)

@@ -120,11 +120,10 @@ namespace ClassicUO.Network
         {
             EnsureSize(length);
             StringBuffer sb = new StringBuffer(length);
-            char c;
 
             for (int i = 0; i < length; i++)
             {
-                c = (char) ReadByte();
+                char c = (char) ReadByte();
 
                 if (c != '\0')
                     sb.Append(c);
@@ -149,11 +148,10 @@ namespace ClassicUO.Network
         {
             EnsureSize(length);
             StringBuffer sb = new StringBuffer(length);
-            char c;
 
             for (int i = 0; i < length; i++)
             {
-                c = (char) ReadUShort();
+                char c = (char) ReadUShort();
                 if (c != '\0') sb.Append(c);
             }
 
@@ -175,11 +173,10 @@ namespace ClassicUO.Network
             EnsureSize(length);
             length /= 2;
             StringBuffer sb = new StringBuffer(length);
-            char c;
 
             for (int i = 0; i < length; i++)
             {
-                c = (char) ReadUShortReversed();
+                char c = (char) ReadUShortReversed();
                 if (c != '\0') sb.Append(c);
             }
 
