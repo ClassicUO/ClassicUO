@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Scenes
                         int y = Mouse.Position.Y - _heldOffset.Y - (target.Y + target.Parent.Y);
                         DropHeldItemToContainer(container.Item, (ushort) x, (ushort) y);
                     }
-                    else if (target is ItemGumplingPaperdoll || target is GumpPic pic && pic.IsPaperdoll || target is EquipmentSlot)
+                    else if (target is ItemGumplingPaperdoll || (target is GumpPic pic && pic.IsPaperdoll) || target is EquipmentSlot || target?.Parent is PaperDollGump)
                     {
                         if (TileData.IsWearable((long) HeldItem.ItemData.Flags))
                             WearHeldItem();
@@ -305,7 +305,7 @@ namespace ClassicUO.Game.Scenes
                 TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
 
             // TEST PURPOSE
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
+            /*if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
             {
 
                 bool first = false;
@@ -327,7 +327,7 @@ namespace ClassicUO.Game.Scenes
 
                    }
                });
-            }
+            }*/
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)

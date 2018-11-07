@@ -69,7 +69,7 @@ namespace ClassicUO.Game.Map
         private static Tile _invalid = Tile.Invalid;
 
         
-        public ref Tile GetTile(short x, short y, bool load = false)
+        public ref Tile GetTile(short x, short y, bool load = true)
         {
             if (x < 0 || y < 0) return ref _invalid;
             int cellX = x / 8;
@@ -97,7 +97,7 @@ namespace ClassicUO.Game.Map
             return ref chuck.Tiles[x % 8][y % 8];
         }
 
-        public ref Tile GetTile(int x, int y, bool load = false)
+        public ref Tile GetTile(int x, int y, bool load = true)
         {
             return ref GetTile((short) x, (short) y, load);
         }
@@ -142,7 +142,7 @@ namespace ClassicUO.Game.Map
             {
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
 
-                if (CoreGame.Ticks - block.LastAccessTime >= 3000 /*&& block.HasNoExternalData()*/)
+                if (CoreGame.Ticks - block.LastAccessTime >= 3000 && block.HasNoExternalData())
                 {
                     block.Unload();
                     block = MapChunk.Invalid;
