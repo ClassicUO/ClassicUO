@@ -107,8 +107,8 @@ namespace ClassicUO.Game
                                     flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
                             }
 
-                            int landMinZ = tile.Land.MinZ;
-                            int landAverageZ = tile.Land.AverageZ;
+                            int landMinZ = tile1.MinZ;
+                            int landAverageZ = tile1.AverageZ;
                             int landHeight = landAverageZ - landMinZ;
                             list.Add(new PathObject(flags, landMinZ, landAverageZ, landHeight, obj));
                         }

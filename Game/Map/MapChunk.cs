@@ -122,6 +122,7 @@ namespace ClassicUO.Game.Map
                             Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
                         };
                         land.Calculate();
+                        Tiles[x][y].AddGameObject(land);
                     }
                 }
 
@@ -145,7 +146,7 @@ namespace ClassicUO.Game.Map
                                     continue;
                                 sbyte z = sb->Z;
 
-                                Static staticObject = new Static(sb->Color, sb->Hue, i)
+                                Static staticObject = new Static(sb->Color, sb->Hue, pos)
                                 {
                                     Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
                                 };

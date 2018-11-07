@@ -52,20 +52,24 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsPositionChanged { get; protected set; }
 
+
         public Tile Tile { get; protected set; }
 
         public void SetTile(ushort x, ushort y)
         {
             if (World.Map != null)
             {
-                ref Tile tile = ref World.Map.GetTile(X, Y);
-                if (tile != Tile.Invalid)
-                    tile.RemoveGameObject(this);
+                if (Tile != Tile.Invalid)
+                    Tile.RemoveGameObject(this);
                 ref Tile newTile = ref World.Map.GetTile(x, y);
                 if (newTile != Tile.Invalid)
                     newTile.AddGameObject(this);
 
                 Tile = newTile;
+            }
+            else
+            {
+                Dispose();
             }
         }
 
@@ -78,10 +82,8 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (World.Map != null)
                     {
-                        ref Tile tile = ref World.Map.GetTile(X, Y);
-
-                        if (tile != Tile.Invalid)
-                            tile.RemoveGameObject(this);
+                        if (Tile != Tile.Invalid)
+                            Tile.RemoveGameObject(this);
                     }
 
                     _position = value;
@@ -91,11 +93,14 @@ namespace ClassicUO.Game.GameObjects
                     if (World.Map != null)
                     {
                         ref Tile newTile = ref World.Map.GetTile(value.X, value.Y);
+
                         if (newTile != Tile.Invalid)
                             newTile.AddGameObject(this);
 
                         Tile = newTile;
                     }
+                    else if (this != World.Player)
+                        Dispose();
                 }
             }
         }
@@ -154,9 +159,6 @@ namespace ClassicUO.Game.GameObjects
         //    }
         //}
 
-
-
-        //public ref Tile Tile { get; }
 
         public bool IsDisposed { get; private set; }
 
@@ -269,6 +271,7 @@ namespace ClassicUO.Game.GameObjects
             IsDisposed = true;
             //DisposeView();
             //Tile = null;
+            Tile = Tile.Invalid;
             _overHeads.ForEach(s => s.Dispose());
             _overHeads.Clear();
         }
