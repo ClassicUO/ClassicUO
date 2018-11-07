@@ -1,3 +1,7 @@
 version: 1.0.{build}
 build:
+  project: ClassicUO.csproj
+  publish_nuget: true
+  publish_nuget_symbols: true
+  include_nuget_references: true
   verbosity: minimal
