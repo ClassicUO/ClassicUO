@@ -34,8 +34,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Legging, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Gloves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Talisman, PaperDollEquipSlots.Neck, PaperDollEquipSlots.Belt, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Back, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Robe, PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand
         };
-        private bool _isElf;
-        private bool _isFemale;
+        
         private Entity _sourceEntity;
         private GumpPicBackpack m_Backpack;
 
@@ -43,7 +42,6 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             X = x;
             Y = y;
-            _isFemale = (sourceEntity.Flags & Flags.Female) != 0;
             SourceEntity = sourceEntity;
             AcceptMouseInput = false;
         }
@@ -79,26 +77,9 @@ namespace ClassicUO.Game.Gumps.Controls
             if (m_Backpack != null) m_Backpack.MouseDoubleClick -= On_Doubleclick_Backpack;
             base.Dispose();
         }
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            if (_sourceEntity != null)
-            {
-                _isFemale = (((Mobile) _sourceEntity).Flags & Flags.Female) != 0;
-                _isElf = false;
-            }
-
-            base.Update(totalMS, frameMS);
-        }
-
+        
         public void Update()
         {
-            if (_sourceEntity != null)
-            {
-                _isFemale = (((Mobile)_sourceEntity).Flags & Flags.Female) != 0;
-                _isElf = false;
-            }
-
             OnEntityUpdated(_sourceEntity);
         }
 
@@ -106,10 +87,32 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             Clear();
 
+            var isFemale = SourceEntity.Flags.HasFlag(Flags.Female);
+
             // Add the base gump - the semi-naked paper doll.
             if (true)
             {
-                int bodyID = 12 + (_isElf ? 2 : 0) + (_isFemale ? 1 : 0);
+                int bodyID = 0;
+
+                if (SourceEntity is PlayerMobile)
+                {
+                    var playerMobile = (PlayerMobile)SourceEntity;
+                    switch (playerMobile.Race)
+                    {
+                        case RaceType.HUMAN:
+                            bodyID = 0xC + (isFemale ? 1 : 0);
+                            break;
+                        case RaceType.ELF:
+                            bodyID = 0xE + (isFemale ? 1 : 0);
+                            break;
+                        case RaceType.GARGOYLE:
+                            bodyID = 0x29A + (isFemale ? -1 : 0);
+                            break;
+                    }
+                }
+                else
+                    bodyID = 12 + (isFemale ? 1 : 0);
+
                 GumpPic paperdoll;
                 AddChildren(paperdoll = new GumpPic(0, 0, (ushort) bodyID, ((Mobile) _sourceEntity).Hue));
                 paperdoll.AcceptMouseInput = true;
@@ -137,7 +140,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 ItemGumplingPaperdoll itemGumplingPaperdoll;
                 AddChildren(itemGumplingPaperdoll = new ItemGumplingPaperdoll(0, 0, item));
                 itemGumplingPaperdoll.SlotIndex = i;
-                itemGumplingPaperdoll.IsFemale = _isFemale;
+                itemGumplingPaperdoll.IsFemale = isFemale;
                 itemGumplingPaperdoll.CanPickUp = canPickUp;
             }
 

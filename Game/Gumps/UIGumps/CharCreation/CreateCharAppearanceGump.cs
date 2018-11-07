@@ -10,6 +10,8 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ClassicUO.Utility.Logging;
+using ClassicUO.IO;
+using ClassicUO.Game.Data;
 
 namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 {
@@ -29,25 +31,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
                 _ids = ids;
             }
         }
-
-        private static readonly ComboContent MALE_HAIR = new ComboContent(
-            new int[] { 3000340, 3000341, 3000342, 3000343, 3000344, 3000345, 3000346, 3000347, 3000348, 3000349 },
-            new int[] { 0, 8251, 8252, 8253, 8260, 8261, 8266, 8263, 8264, 8265 });
-
-        private static readonly ComboContent FACIAL_HAIR = new ComboContent(
-            new int[] { 3000340, 3000351, 3000352, 3000353, 3000354, 1011060, 1011061, 3000357 },
-            new int[] { 0, 8256, 8254, 8255, 8257, 8267, 8268, 8269 });
-
-        private static readonly ComboContent FEMALE_HAIR = new ComboContent(
-            new int[] { 3000340, 3000341, 3000342, 3000343, 3000344, 3000345, 3000346, 3000347, 3000349, 3000350 },
-            new int[] { 0, 8251, 8252, 8253, 8260, 8261, 8266, 8263, 8265, 8262 });
-
-        private static readonly Dictionary<Genre, Dictionary<Layer, ComboContent>> GENRE_MAPPING = new Dictionary<Genre, Dictionary<Layer, ComboContent>>
-        {
-            { Genre.Male, new Dictionary<Layer, ComboContent> { { Layer.Hair, MALE_HAIR }, { Layer.Beard, FACIAL_HAIR } } },
-            { Genre.Female, new Dictionary<Layer, ComboContent> { { Layer.Hair, FEMALE_HAIR } } }
-        };
-
+        
         private Dictionary<Layer, int> CurrentOption = new Dictionary<Layer, int>()
         {
             { Layer.Hair, 1 }, { Layer.Beard, 1 }
@@ -56,7 +40,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
         private Dictionary<Layer, Tuple<int, Hue>> CurrentColorOption = new Dictionary<Layer, Tuple<int, Hue>>();
         
         private PlayerMobile _character;
-        private RadioButton _maleRadio, _femaleRadio;
+        private RadioButton _maleRadio, _femaleRadio, _humanRadio, _elfRadio, _gargoyleRadio;
         private Combobox _hairCombobox, _facialCombobox;
         private Label _hairLabel, _facialLabel;
         private PaperDollInteractable _paperDoll;
@@ -76,9 +60,9 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
             
             // Male/Female Radios
             AddChildren(_maleRadio = new RadioButton(0, 0x0768, 0x0767) { X = 425, Y = 435 }, 1);
-            _maleRadio.ValueChanged += genre_ValueChanged;
+            _maleRadio.ValueChanged += Genre_ValueChanged;
             AddChildren(_femaleRadio = new RadioButton(0, 0x0768, 0x0767) { X = 425, Y = 455 }, 1);
-            _femaleRadio.ValueChanged += genre_ValueChanged;
+            _femaleRadio.ValueChanged += Genre_ValueChanged;
 
             AddChildren(new Button((int)Buttons.MaleButton, 0x0710, 0x0712, 0x0711) { X = 445, Y = 435, ButtonAction = ButtonAction.Activate }, 1);
             AddChildren(new Button((int)Buttons.FemaleButton, 0x070D, 0x070F, 0x070E) { X = 445, Y = 455, ButtonAction = ButtonAction.Activate }, 1);
@@ -86,21 +70,42 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
             AddChildren(_nameTextBox = new TextBox(5, 32, 300, 300, false, hue: 1) { X = 257, Y = 65, Width = 300, Height = 20 }, 1);
             _nameTextBox.SetText(string.Empty);
 
+
+            // Races
+            AddChildren(_humanRadio = new RadioButton(1, 0x0768, 0x0767) { X = 180, Y = 435 }, 1);
+            AddChildren(new Button((int)Buttons.HumanButton, 0x0702, 0x0704, 0x0703) { X = 200, Y = 435, ButtonAction = ButtonAction.Activate }, 1);
+            _humanRadio.ValueChanged += Race_ValueChanged;
+
+            AddChildren(_elfRadio = new RadioButton(1, 0x0768, 0x0767) { X = 180, Y = 455 }, 1);
+            AddChildren(new Button((int)Buttons.ElfButton, 0x0705, 0x0707, 0x0706) { X = 200, Y = 455, ButtonAction = ButtonAction.Activate }, 1);
+            _elfRadio.ValueChanged += Race_ValueChanged;
+
+            if (FileManager.ClientVersion >= ClientVersions.CV_60144)
+            {
+                AddChildren(_gargoyleRadio = new RadioButton(1, 0x0768, 0x0767) { X = 60, Y = 435 }, 1);
+                AddChildren(new Button((int)Buttons.GargoyleButton, 0x07D3, 0x07D5, 0x07D4) { X = 80, Y = 435, ButtonAction = ButtonAction.Activate }, 1);
+                _gargoyleRadio.ValueChanged += Race_ValueChanged;
+            }
+
+            // Prev/Next
             AddChildren(new Button((int)Buttons.Prev, 0x15A1, 0x15A3, over: 0x15A2) { X = 586, Y = 445, ButtonAction = ButtonAction.Activate }, 1);
             AddChildren(new Button((int)Buttons.Next, 0x15A4, 0x15A6, over: 0x15A5) { X = 610, Y = 445, ButtonAction = ButtonAction.Activate }, 1);
 
             _maleRadio.IsChecked = true;
+            _humanRadio.IsChecked = true;
         }
         
-        private PlayerMobile CreateCharacter(Genre genre, RaceType race)
+        private PlayerMobile CreateCharacter(bool isFemale, RaceType race)
         {
-            var character  = new PlayerMobile(0);
-            if (genre == Genre.Female)
+            var character = new PlayerMobile(0);
+            if (isFemale)
                 character.Flags |= Flags.Female;
 
             character.Race = race;
 
-            if (genre == Genre.Female)
+            if (race == RaceType.GARGOYLE)
+                character.Equipment[(int)Layer.Shirt] = CreateItem(0x4001, CurrentColorOption[Layer.Shirt].Item2);
+            else if (isFemale)
             {
                 character.Equipment[(int)Layer.Shoes] = CreateItem(0x1710, 0x0384);
                 character.Equipment[(int)Layer.Pants] = CreateItem(0x1531, CurrentColorOption[Layer.Pants].Item2);
@@ -118,32 +123,41 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
         private void UpdateEquipments()
         {
-            Genre genre = _maleRadio.IsChecked ? Genre.Male : Genre.Female;
+            bool isFemale = _femaleRadio.IsChecked;
+            var race = GetSelectedRace();
             Layer layer;
-            ComboContent content;
+            CharacterCreationValues.ComboContent content;
 
             _character.Hue = CurrentColorOption[Layer.Invalid].Item2;
 
-            if (genre == Genre.Male)
+            if (!isFemale && race != RaceType.ELF)
             {
                 layer = Layer.Beard;
-                content = GENRE_MAPPING[genre][layer];
+                content = CharacterCreationValues.GetFacialHairComboContent(race);
                 _character.Equipment[(int)layer] = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2);
             }
 
             layer = Layer.Hair;
-            content = GENRE_MAPPING[genre][layer];
+            content = CharacterCreationValues.GetHairComboContent(isFemale, race);
             _character.Equipment[(int)layer] = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2);
         }
-        
-        private void genre_ValueChanged(object sender, EventArgs e)
+
+        private void Race_ValueChanged(object sender, EventArgs e)
+        {
+            CurrentColorOption.Clear();
+            HandleGenreChange();
+        }
+
+        private void Genre_ValueChanged(object sender, EventArgs e)
         {
             HandleGenreChange();
         }
         
         private void HandleGenreChange()
         {
-            Genre genre = _maleRadio.IsChecked ? Genre.Male : Genre.Female;
+            bool isFemale = _femaleRadio.IsChecked;
+            var race = GetSelectedRace();
+
             CurrentOption[Layer.Beard] = 1;
             CurrentOption[Layer.Hair] = 1;
 
@@ -164,20 +178,22 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
             foreach (var customPicker in Children.OfType<CustomColorPicker>().ToList())
                 RemoveChildren(customPicker);
-            
-            ComboContent content;
+
+            CharacterCreationValues.ComboContent content;
 
             // Hair
-            content = GENRE_MAPPING[genre][Layer.Hair];
-            AddChildren(_hairLabel = new Label(IO.Resources.Cliloc.GetString(3000121), false, 0x07F4, font: 9) { X = 98, Y = 142 }, 1);
+            content = CharacterCreationValues.GetHairComboContent(isFemale, race);
+            AddChildren(_hairLabel = new Label(
+                IO.Resources.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0x07F4, font: 9) { X = 98, Y = 142 }, 1);
             AddChildren(_hairCombobox = new Combobox(97, 155, 120, content.Labels, CurrentOption[Layer.Hair]), 1);
             _hairCombobox.OnOptionSelected += Hair_OnOptionSelected;
 
             // Facial Hair
-            if (genre == Genre.Male)
+            if (!isFemale && race != RaceType.ELF)
             {
-                content = GENRE_MAPPING[genre][Layer.Beard];
-                AddChildren(_facialLabel = new Label(IO.Resources.Cliloc.GetString(3000122), false, 0x07F4, font: 9) { X = 98, Y = 186 }, 1);
+                content = CharacterCreationValues.GetFacialHairComboContent(race);
+                AddChildren(_facialLabel = new Label(
+                    IO.Resources.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0x07F4, font: 9) { X = 98, Y = 186 }, 1);
                 AddChildren(_facialCombobox = new Combobox(97, 199, 120, content.Labels, CurrentOption[Layer.Beard]), 1);
                 _facialCombobox.OnOptionSelected += Facial_OnOptionSelected;
             }
@@ -188,7 +204,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
             }
             
             // Skin
-            ushort[] pallet = Data.CharacterCreationValues.HumanSkinTone;
+            ushort[] pallet = CharacterCreationValues.GetSkinPallet(race);
             AddCustomColorPicker(489, 141, pallet, Layer.Invalid, 3000183, 8, pallet.Length / 8);
 
             // Shirt Color
@@ -196,20 +212,21 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
 
             // Pants Color
-            AddCustomColorPicker(489, 225, null, Layer.Pants, 3000441, 10, 20);
-            
+            if (race != RaceType.GARGOYLE)
+                AddCustomColorPicker(489, 225, null, Layer.Pants, 3000441, 10, 20);
+
             // Hair
-            pallet = Data.CharacterCreationValues.HumanHairColor;
-            AddCustomColorPicker(489, 267, pallet, Layer.Hair, 3000184, 8, pallet.Length / 8);
+            pallet = CharacterCreationValues.GetHairPallet(race);
+            AddCustomColorPicker(489, 267, pallet, Layer.Hair, race == RaceType.GARGOYLE ? 1112322 : 3000184, 8, pallet.Length / 8);
             
-            if (genre == Genre.Male)
+            if (!isFemale && race != RaceType.ELF)
             {
                 // Facial
-                pallet = Data.CharacterCreationValues.HumanHairColor;
-                AddCustomColorPicker(489, 309, pallet, Layer.Beard, 3000446, 8, pallet.Length / 8);
+                pallet = CharacterCreationValues.GetHairPallet(race);
+                AddCustomColorPicker(489, 309, pallet, Layer.Beard, race == RaceType.GARGOYLE ? 1112512 : 3000446, 8, pallet.Length / 8);
             }
 
-            _character = CreateCharacter(genre, RaceType.HUMAN);
+            _character = CreateCharacter(isFemale, race);
             UpdateEquipments();
             AddChildren(_paperDoll = new PaperDollInteractable(262, 135, _character) { AcceptMouseInput = false }, 1);
         }
@@ -222,15 +239,16 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
                 X = x,
                 Y = y
             }, 1);
+
             if (!CurrentColorOption.ContainsKey(layer))
                 CurrentColorOption[layer] = new Tuple<int, Hue>(0, colorPicker.HueSelected);
             else
                 colorPicker.SetSelectedIndex(CurrentColorOption[layer].Item1);
 
-            colorPicker.ColorSelected += Teste_ColorSelected;
+            colorPicker.ColorSelected += ColorPicker_ColorSelected;
         }
 
-        private void Teste_ColorSelected(object sender, ColorSelectedEventArgs e)
+        private void ColorPicker_ColorSelected(object sender, ColorSelectedEventArgs e)
         {
             CurrentColorOption[e.Layer] = new Tuple<int, Hue>(e.SelectedIndex, e.SelectedHue);
 
@@ -268,6 +286,15 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
                 case Buttons.MaleButton:
                     _maleRadio.IsChecked = true;
                     break;
+                case Buttons.HumanButton:
+                    _humanRadio.IsChecked = true;
+                    break;
+                case Buttons.ElfButton:
+                    _elfRadio.IsChecked = true;
+                    break;
+                case Buttons.GargoyleButton:
+                    _gargoyleRadio.IsChecked = true;
+                    break;
                 case Buttons.Next:
                     _character.Name = _nameTextBox.Text;
                     if (ValidateCharacter(_character))
@@ -293,6 +320,18 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
             return true;
         }
         
+        private RaceType GetSelectedRace()
+        {
+            if (_humanRadio.IsChecked)
+                return RaceType.HUMAN;
+            else if (_elfRadio.IsChecked)
+                return RaceType.ELF;
+            else if (_gargoyleRadio.IsChecked)
+                return RaceType.GARGOYLE;
+
+            return RaceType.HUMAN;
+        }
+
         private Item CreateItem(int id, Hue hue)
         {
             if (id == 0)
@@ -309,15 +348,13 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
         {
             MaleButton,
             FemaleButton,
+            HumanButton,
+            ElfButton,
+            GargoyleButton,
             Prev,
             Next
         }
-
-        private enum Genre
-        {
-            Male, Female
-        }
-
+        
         private class ColorSelectedEventArgs: EventArgs
         {
             public Layer Layer { get; set; }
