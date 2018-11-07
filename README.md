@@ -18,7 +18,8 @@ The code itself has been written using the following projects as a reference:
 * [UltimaXNA](https://github.com/ZaneDubya/UltimaXNA)
 * [ServUO](https://github.com/servuo/servuo)
 
-# Building
+# Building  
+[![Build status](https://ci.appveyor.com/api/projects/status/qvqctcf8oss5bqh8?svg=true)](https://ci.appveyor.com/project/Pack4Duck/classicuo)
 
 Currently, only Windows is supported for building. The binary produced will work on all supported platforms.
 
