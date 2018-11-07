@@ -61,7 +61,7 @@ namespace ClassicUO.Game.GameObjects.Managers
             {
                 foreach (KeyValuePair<View, Vector3> info in _overheads)
                 {
-                    if (!info.Key.Draw(spriteBatch, info.Value, objectList))
+                    if (!info.Key.Draw(spriteBatch, info.Value, objectList) || info.Key.GameObject.IsDisposed)
                         _toRemove.Add(info.Key);
                 }
 
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.GameObjects.Managers
             {
                 foreach (KeyValuePair<View, Vector3> damage in _damages)
                 {
-                    if (!damage.Key.Draw(spriteBatch, damage.Value, objectList))
+                    if (!damage.Key.Draw(spriteBatch, damage.Value, objectList) || damage.Key.GameObject.IsDisposed)
                         _toRemove.Add(damage.Key);
                 }
 

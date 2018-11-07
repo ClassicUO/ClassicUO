@@ -24,9 +24,7 @@ namespace ClassicUO.Game.Scenes
         private double _dequeueAt;
         private bool _inqueue;
         private Action _queuedAction;
-        private InputMouseEvent _queuedEvent;
         private GameObject _queuedObject;
-        private Point _queuedPosition;
         private bool _rightMousePressed;
 
         public bool IsMouseOverUI => UIManager.IsMouseOverUI && !(UIManager.MouseOverControl is WorldViewport);
@@ -221,14 +219,17 @@ namespace ClassicUO.Game.Scenes
                         GameActions.DoubleClick(item);
 
                         break;
-                    //TODO: attack request also
-                    case Mobile mob when World.Player.InWarMode:
-                        result = true;
-
-                        break;
                     case Mobile mob:
                         result = true;
-                        GameActions.DoubleClick(mob);
+
+                        if (World.Player.InWarMode)
+                        {
+                            //TODO: attack request
+                        }
+                        else
+                        {
+                            GameActions.DoubleClick(mob);
+                        }
 
                         break;
                     case GameEffect effect when effect.Source is Item item:
@@ -304,29 +305,29 @@ namespace ClassicUO.Game.Scenes
                 TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
 
             // TEST PURPOSE
-            //if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
-            //{
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
+            {
 
-            //    bool first = false;
+                bool first = false;
 
-            //    string tobrit = "[go britain";
-            //    string toluna = "[go luna";
+                string tobrit = "[go britain";
+                string toluna = "[go luna";
 
-            //    Task.Run( async () =>
-            //    {
+                Task.Run(async () =>
+               {
 
-            //        while (true)
-            //        {
-            //            await Task.Delay(500);
-                        
-            //            NetClient.Socket.Send(new PUnicodeSpeechRequest(first ? tobrit : toluna, MessageType.Regular, MessageFont.Normal, 33, "ENU"));
+                   while (true)
+                   {
+                       await Task.Delay(500);
 
-            //            first = !first;
+                       NetClient.Socket.Send(new PUnicodeSpeechRequest(first ? tobrit : toluna, MessageType.Regular, MessageFont.Normal, 33, "ENU"));
 
-                        
-            //        }
-            //    });
-            //}
+                       first = !first;
+
+
+                   }
+               });
+            }
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)

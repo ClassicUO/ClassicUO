@@ -1642,7 +1642,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null && World.Map.Index >= 0)
             {
-                World.Map.Center = new Point((short) Position.X, (short) Position.Y);
+                World.Map.Center = new Point(X, Y);
                 base.OnPositionChanged(sender, e);
             }
         }
