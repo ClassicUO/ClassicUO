@@ -11,6 +11,7 @@ using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
+using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -108,14 +109,21 @@ namespace ClassicUO.Game.Scenes
                         else
                         {
                             if (item.Container.IsItem)
-                                DropHeldItemToContainer(World.Items.Get(item.Container), (ushort) (target.X + (Mouse.Position.X - target.ScreenCoordinateX) - _heldOffset.X), (ushort) (target.Y + (Mouse.Position.Y - target.ScreenCoordinateY) - _heldOffset.Y));
+                            {
+                                SpriteTexture texture = Art.GetStaticTexture(item.Graphic);
+
+                                DropHeldItemToContainer(World.Items.Get(item.Container), (ushort) (target.X + (Mouse.Position.X - target.ScreenCoordinateX) - texture.Width / 2), (ushort) (target.Y + (Mouse.Position.Y - target.ScreenCoordinateY) - texture.Height / 2));
+                            }
                         }
                     }
                     else if (target is GumpPicContainer container)
                     {
                         SelectedObject = container.Item;
-                        int x = Mouse.Position.X - _heldOffset.X - (target.X + target.Parent.X);
-                        int y = Mouse.Position.Y - _heldOffset.Y - (target.Y + target.Parent.Y);
+
+                        SpriteTexture texture = Art.GetStaticTexture(container.Item.Graphic);
+
+                        int x = Mouse.Position.X - texture.Width / 2 - (target.X + target.Parent.X);
+                        int y = Mouse.Position.Y - texture.Height / 2 - (target.Y + target.Parent.Y);
                         DropHeldItemToContainer(container.Item, (ushort) x, (ushort) y);
                     }
                     else if (target is ItemGumplingPaperdoll || (target is GumpPic pic && pic.IsPaperdoll) || target is EquipmentSlot || target?.Parent is PaperDollGump)

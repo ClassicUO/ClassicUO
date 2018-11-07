@@ -30,11 +30,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class PaperDollGump : Gump
     {
-        private readonly ushort[] PeaceModeBtnGumps =
+        private static readonly ushort[] PeaceModeBtnGumps =
         {
             0x07e5, 0x07e6, 0x07e7
         };
-        private readonly ushort[] WarModeBtnGumps =
+        private static readonly ushort[] WarModeBtnGumps =
         {
             0x07e8, 0x07e9, 0x07ea
         };
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (args.Button == MouseButton.Left)
             {
-                GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new Serial[1]
+                GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new[]
                 {
                     Mobile.Serial
                 });

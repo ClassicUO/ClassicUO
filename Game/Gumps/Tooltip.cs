@@ -28,6 +28,9 @@ namespace ClassicUO.Game.Gumps
 
         public SpriteTexture Texture { get; set; }
 
+        public bool IsEmpty => Text == null;
+
+        public GameObject Object => _gameObject;
 
         public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {

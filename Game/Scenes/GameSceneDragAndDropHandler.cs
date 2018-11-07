@@ -13,7 +13,7 @@ namespace ClassicUO.Game.Scenes
     partial class GameScene
     {
         private GameObject _dragginObject;
-        private Point _dragOffset, _heldOffset;
+        private Point _dragOffset;
         private Item _heldItem;
 
         public Item HeldItem
@@ -29,7 +29,7 @@ namespace ClassicUO.Game.Scenes
                 else if (value != null && _heldItem == null)
                 {
                     UIManager.AddInputBlocker(this);
-                    UIManager.GameCursor.SetDraggedItem(value.Graphic, value.Hue, _heldOffset);
+                    UIManager.GameCursor.SetDraggedItem(value.Graphic, value.Hue);
                 }
 
                 _heldItem = value;
@@ -66,7 +66,6 @@ namespace ClassicUO.Game.Scenes
             CloseItemGumps(item);
             item.Amount = (ushort) amount;
             HeldItem = item;
-            _heldOffset = new Point(x, y);
             NetClient.Socket.Send(new PPickUpRequest(item, (ushort) amount));
         }
 

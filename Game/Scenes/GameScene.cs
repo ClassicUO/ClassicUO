@@ -265,9 +265,6 @@ namespace ClassicUO.Game.Scenes
 
             if (_rightMousePressed)
                 MoveCharacterByInputs();
-
-            if (IsHoldingItem)
-                UIManager.GameCursor.UpdateDraggedItemOffset(_heldOffset);
             // ===================================
             World.Update(totalMS, frameMS);
             _staticManager.Update(totalMS, frameMS);
