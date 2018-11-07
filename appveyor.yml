@@ -1,7 +1,14 @@
 version: 1.0.{build}
+pull_requests:
+  do_not_increment_build_number: true
+image: Visual Studio 2017
+configuration: Release
+platform: x64
 build:
-  project: ClassicUO.csproj
+  project: ClassicUO.sln
   publish_nuget: true
   publish_nuget_symbols: true
   include_nuget_references: true
+  publish_core_console: true
+  parallel: true
   verbosity: minimal
