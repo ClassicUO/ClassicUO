@@ -21,13 +21,9 @@
 
 #endregion
 
-using System;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
-using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
@@ -40,16 +36,12 @@ namespace ClassicUO.Game.Map
         {
             _x = x;
             _y = y;
-
             Tiles = new Tile[8][];
 
             for (int i = 0; i < 8; i++)
             {
                 Tiles[i] = new Tile[8];
-                for (int j = 0; j < 8; j++)
-                {
-                    Tiles[i][j] = new Tile( (ushort) (i + x * 8), (ushort)(j + y * 8));
-                }
+                for (int j = 0; j < 8; j++) Tiles[i][j] = new Tile((ushort) (i + x * 8), (ushort) (j + y * 8));
             }
 
             LastAccessTime = CoreGame.Ticks;
@@ -62,6 +54,7 @@ namespace ClassicUO.Game.Map
             get => _x ?? 0xFFFF;
             set => _x = value;
         }
+
         public ushort Y
         {
             get => _y ?? 0xFFFF;
@@ -81,6 +74,7 @@ namespace ClassicUO.Game.Map
         {
             return p1.X != p2.X || p1.Y != p2.Y;
         }
+
         public override int GetHashCode()
         {
             return X ^ Y;
@@ -97,9 +91,8 @@ namespace ClassicUO.Game.Map
 
             if (im.MapAddress != 0)
             {
-                MapBlock* block = (MapBlock*)im.MapAddress;
-                MapCells* cells = (MapCells*)&block->Cells;
-
+                MapBlock* block = (MapBlock*) im.MapAddress;
+                MapCells* cells = (MapCells*) &block->Cells;
                 int bx = X * 8;
                 int by = Y * 8;
 
@@ -110,7 +103,6 @@ namespace ClassicUO.Game.Map
                         int pos = y * 8 + x;
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
-
                         LandTiles info = TileData.LandData[tileID];
 
                         Land land = new Land(tileID)
@@ -122,7 +114,6 @@ namespace ClassicUO.Game.Map
                             Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
                         };
                         land.Calculate();
-                        Tiles[x][y].AddGameObject(land);
                     }
                 }
 
@@ -151,10 +142,8 @@ namespace ClassicUO.Game.Map
                                     Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
                                 };
 
-                                if (TileData.IsAnimated((long)staticObject.ItemData.Flags))
+                                if (TileData.IsAnimated((long) staticObject.ItemData.Flags))
                                     staticObject.Effect = new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1);
-
-                                //Tiles[x][y].AddGameObject(staticObject);
                             }
                         }
                     }
@@ -182,7 +171,6 @@ namespace ClassicUO.Game.Map
                     Tiles[i][j] = Tile.Invalid;
                 }
             }
-
         }
 
         public bool HasNoExternalData()
@@ -192,12 +180,12 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++)
                 {
                     ref Tile tile = ref Tiles[i][j];
-
-                    var list = tile.ObjectsOnTiles;
+                    IReadOnlyList<GameObject> list = tile.ObjectsOnTiles;
 
                     for (int k = 0; k < list.Count; k++)
                     {
-                        var o = list[k];
+                        GameObject o = list[k];
+
                         if (!(o is Land) && !(o is Static))
                             return false;
                     }

@@ -21,26 +21,23 @@
 
 #endregion
 
+using System.Collections.Generic;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
-using System.Collections.Generic;
-
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-
-using MathHelper = ClassicUO.Utility.MathHelper;
 
 namespace ClassicUO.Game.Map
 {
     public struct Tile
     {
         public static readonly Tile Invalid = new Tile(0xFFFF, 0xFFFF);
-
         private static readonly List<GameObject> _itemsAtZ = new List<GameObject>();
         private List<GameObject> _objectsOnTile;
         private bool _needSort;
-
-
+        private ushort? _x, _y;
 
         public Tile(ushort x, ushort y)
         {
@@ -51,20 +48,19 @@ namespace ClassicUO.Game.Map
             Land = null;
         }
 
-        private ushort? _x, _y;
-
         public ushort X
         {
             get => _x ?? 0xFFFF;
             set => _x = value;
         }
+
         public ushort Y
         {
             get => _y ?? 0xFFFF;
             set => _y = value;
         }
-        public Land Land { get; private set; }
 
+        public Land Land { get; private set; }
 
         public static bool operator ==(Tile p1, Tile p2)
         {
@@ -75,6 +71,7 @@ namespace ClassicUO.Game.Map
         {
             return p1.X != p2.X || p1.Y != p2.Y;
         }
+
         public override int GetHashCode()
         {
             return X ^ Y;
@@ -102,7 +99,6 @@ namespace ClassicUO.Game.Map
 
         public void AddGameObject(GameObject obj)
         {
-
             if (obj is Land land)
             {
                 if (Land != null && land != Land)
@@ -136,6 +132,7 @@ namespace ClassicUO.Game.Map
                         priorityZ = (short) (tile.AverageZ - 1);
                     else
                         priorityZ--;
+
                     break;
                 case Mobile _:
                     priorityZ++;
@@ -180,7 +177,6 @@ namespace ClassicUO.Game.Map
             _needSort = true;
         }
 
-
         private void RemoveDuplicates()
         {
             //int[] toremove = new int[0x100];
@@ -199,6 +195,7 @@ namespace ClassicUO.Game.Map
                                 //toremove[index++] = i;
                                 Log.Message(LogTypes.Warning, "Duplicated");
                                 _objectsOnTile.RemoveAt(i--);
+
                                 break;
                             }
 
@@ -212,9 +209,8 @@ namespace ClassicUO.Game.Map
                                         {
                                             //toremove[index++] = jj;
                                             Log.Message(LogTypes.Warning, "Duplicated");
-
                                             _objectsOnTile.RemoveAt(jj--);
-                                        } 
+                                        }
                                     }
                                 }
                             }
@@ -258,7 +254,7 @@ namespace ClassicUO.Game.Map
                 {
                     StaticTiles itemdata = dyn.ItemData;
 
-                    if (IO.Resources.TileData.IsRoof((long) itemdata.Flags) || IO.Resources.TileData.IsSurface((long) itemdata.Flags) || IO.Resources.TileData.IsWall((long) itemdata.Flags) && IO.Resources.TileData.IsImpassable((long) itemdata.Flags))
+                    if (TileData.IsRoof((long) itemdata.Flags) || TileData.IsSurface((long) itemdata.Flags) || TileData.IsWall((long) itemdata.Flags) && TileData.IsImpassable((long) itemdata.Flags))
                     {
                         if (entity == null || list[i].Position.Z < entity.Position.Z)
                             entity = list[i];
@@ -269,13 +265,13 @@ namespace ClassicUO.Game.Map
 
             return entity != null || ground != null;
         }
-        
 
         public void Dispose()
         {
             for (int i = 0; i < _objectsOnTile.Count; i++)
             {
                 GameObject t = _objectsOnTile[i];
+
                 if (t != World.Player)
                 {
                     t.Dispose();
@@ -283,6 +279,5 @@ namespace ClassicUO.Game.Map
                 }
             }
         }
-
     }
 }
