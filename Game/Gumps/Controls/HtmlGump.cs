@@ -22,6 +22,7 @@
 #endregion
 
 using System.Diagnostics;
+using System.Linq;
 
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -34,7 +35,7 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class HtmlGump : GumpControl
     {
-        private readonly RenderedText _gameText;
+        private RenderedText _gameText;
         private IScrollBar _scrollBar;
 
         public HtmlGump(string[] parts, string[] lines) : this()
@@ -158,12 +159,14 @@ namespace ClassicUO.Game.Gumps.Controls
 
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
-                _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
+                _scrollBar.MaxValue =/* _gameText.Height*/ Children.Sum( s=> s.Height) - Height + (HasBackground ? 8 : 0);
                 ScrollY = _scrollBar.Value;
             }
 
             //if (Width != _gameText.Width)
             //    Width = _gameText.Width;
+
+            
         }
 
         protected override void OnMouseWheel(MouseEvent delta)
@@ -188,20 +191,40 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (HasScrollbar)
             {
-                _scrollBar.Height = Height;
-                _scrollBar.MinValue = 0;
-                _scrollBar.MaxValue = _gameText.Height - Height + (HasBackground ? 8 : 0);
-                //_scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
+                if (WantUpdateSize)
+                {
+                    _scrollBar.Height = Height;
+                    _scrollBar.MinValue = 0;
+                    _scrollBar.MaxValue = /* _gameText.Height*/ Children.Sum(s => s.Height) - Height + (HasBackground ? 8 : 0);
+                    //_scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
+
+                    WantUpdateSize = false;
+
+                }
+
                 ScrollY = _scrollBar.Value;
+
             }
 
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            base.Draw(spriteBatch, position);
-            _gameText.Draw(spriteBatch, new Rectangle((int) position.X + (HasBackground ? 4 : 0), (int) position.Y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0)), ScrollX, ScrollY);
+            Rectangle scissor = ScissorStack.CalculateScissors(spriteBatch.TransformMatrix, new Rectangle((int)position.X, (int)position.Y, Width, Height));
+
+            if (ScissorStack.PushScissors(scissor))
+            {
+                spriteBatch.EnableScissorTest(true);
+
+                base.Draw(spriteBatch, new Point(position.X - 0, position.Y - 0)); // TODO: set a scrollarea
+
+                _gameText.Draw(spriteBatch, new Rectangle((int) position.X + (HasBackground ? 4 : 0), (int) position.Y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0)), ScrollX, ScrollY);
+
+                spriteBatch.EnableScissorTest(false);
+
+                ScissorStack.PopScissors();
+            }
 
             return true;
         }
@@ -229,9 +252,12 @@ namespace ClassicUO.Game.Gumps.Controls
             base.OnMouseClick(x, y, button);
         }
 
-        public override void OnButtonClick(int buttonID)
+        public override void Dispose()
         {
-            base.OnButtonClick(buttonID);
+            _gameText?.Dispose();
+            _gameText = null;
+
+            base.Dispose();
         }
     }
 }

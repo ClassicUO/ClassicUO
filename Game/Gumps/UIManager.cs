@@ -93,9 +93,9 @@ namespace ClassicUO.Game.Gumps
                 if (!IsModalControlOpen && ObjectsBlockingInputExists)
                     return;
 
-                if (MouseOverControl == null)
-                    return;
-                int btn = (int) MouseButton.Left;
+                //if (MouseOverControl == null)
+                //    return;
+                const int btn = (int) MouseButton.Left;
                 EndDragControl(Mouse.Position);
 
                 if (MouseOverControl != null)
@@ -109,8 +109,7 @@ namespace ClassicUO.Game.Gumps
                 }
                 else
                 {
-                    if (_mouseDownControls[btn] != null)
-                        _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Left);
+                    _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
                 }
 
                 _mouseDownControls[btn] = null;
@@ -157,9 +156,9 @@ namespace ClassicUO.Game.Gumps
                 if (!IsModalControlOpen && ObjectsBlockingInputExists)
                     return;
 
-                if (MouseOverControl == null)
-                    return;
-                int btn = (int) MouseButton.Right;
+                //if (MouseOverControl == null)
+                //    return;
+                const int btn = (int) MouseButton.Right;
                 EndDragControl(Mouse.Position);
 
                 if (MouseOverControl != null)
@@ -173,8 +172,7 @@ namespace ClassicUO.Game.Gumps
                 }
                 else
                 {
-                    if (_mouseDownControls[btn] != null)
-                        _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Right);
+                    _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Right);
                 }
 
                 _mouseDownControls[btn] = null;
@@ -474,7 +472,7 @@ namespace ClassicUO.Game.Gumps
                 GumpControl g = _gumps[i];
 
                 if (g.IsInitialized)
-                    g.Draw(spriteBatch, new Vector3(g.X, g.Y, 0));
+                    g.Draw(spriteBatch, new Point(g.X, g.Y));
             }
 
             GameCursor.Draw(spriteBatch);

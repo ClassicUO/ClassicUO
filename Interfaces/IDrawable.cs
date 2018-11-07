@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 
@@ -43,6 +44,6 @@ namespace ClassicUO.Interfaces
 
         SpriteTexture Texture { get; set; }
 
-        bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null);
+        bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null);
     }
 }

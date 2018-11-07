@@ -48,10 +48,10 @@ namespace ClassicUO.Game.Gumps.Controls
             _entries = new List<RenderedText>();
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             base.Draw(spriteBatch, position, hue);
-            Vector3 p = new Vector3(position.X, position.Y, 0);
+            Point p = new Point(position.X, position.Y);
             int height = 0;
             int maxheight = _scrollBar.Value + _scrollBar.Height;
 
@@ -131,11 +131,14 @@ namespace ClassicUO.Game.Gumps.Controls
 
             RenderedText entry = new RenderedText
             {
-                MaxWidth = Width - 18, IsUnicode = true, Align = TEXT_ALIGN_TYPE.TS_LEFT, FontStyle = FontStyle.Indention | FontStyle.BlackBorder
+                MaxWidth = Width - 18,
+                IsUnicode = true,
+                Align = TEXT_ALIGN_TYPE.TS_LEFT,
+                FontStyle = FontStyle.Indention | FontStyle.BlackBorder,
+                Hue = hue,
+                Font = (byte) font,
+                Text = text
             };
-            entry.Hue = hue;
-            entry.Font = (byte) font;
-            entry.Text = text;
             _entries.Add(entry);
             _scrollBar.MaxValue += _entries[_entries.Count - 1].Height;
             if (maxScroll) _scrollBar.Value = _scrollBar.MaxValue;
@@ -152,6 +155,17 @@ namespace ClassicUO.Game.Gumps.Controls
 
             _entries[index].Text = text;
             CalculateScrollBarMaxValue();
+        }
+
+        public override void Dispose()
+        {
+            for (int i = 0; i < _entries.Count; i++)
+            {
+                _entries[i]?.Dispose();
+                _entries[i] = null;
+            }
+
+            base.Dispose();
         }
     }
 }

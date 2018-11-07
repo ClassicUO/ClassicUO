@@ -60,10 +60,6 @@ namespace ClassicUO.Game.Gumps.Controls
             base.OnMouseClick(x, y, button);
         }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-        }
 
         private class ComboboxContextMenu: GumpControl
         {
@@ -125,10 +121,6 @@ namespace ClassicUO.Game.Gumps.Controls
                 OnOptionSelected?.Invoke(this, (int)((Label)sender).Tag);
             }
 
-            public override void Update(double totalMS, double frameMS)
-            {
-                base.Update(totalMS, frameMS);
-            }
         }
     }
 }

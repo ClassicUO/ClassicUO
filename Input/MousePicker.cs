@@ -51,7 +51,7 @@ namespace ClassicUO.Input
         public void UpdateOverObjects(MouseOverList list, Point position)
         {
             _overObject = list.GetForemostMouseOverItem(position);
-            _overTile = list.GetForemostMouseOverItem<Tile>(position);
+            _overTile = list.GetForemostMouseOverItem<Land>(position);
         }
     }
 }

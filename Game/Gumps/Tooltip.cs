@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Formatting;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -28,7 +29,7 @@ namespace ClassicUO.Game.Gumps
         public SpriteTexture Texture { get; set; }
 
 
-        public bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (_gameObject != null && _hash != _gameObject.PropertiesHash)
             {
@@ -79,8 +80,8 @@ namespace ClassicUO.Game.Gumps
 
         private string ReadProperties(Entity obj, out string htmltext)
         {
-            StringBuilder sb = new StringBuilder();
-            StringBuilder sbHTML = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
+            StringBuffer sbHTML = new StringBuffer();
 
             bool hasStartColor = false;
 

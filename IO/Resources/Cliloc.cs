@@ -33,11 +33,10 @@ namespace ClassicUO.IO.Resources
 {
     public static class Cliloc
     {
-        private static Dictionary<int, StringEntry> _entries;
+        private static readonly Dictionary<int, StringEntry> _entries = new Dictionary<int, StringEntry>();
 
         public static void Load()
         {
-            _entries = new Dictionary<int, StringEntry>();
             string path = Path.Combine(FileManager.UoFolderPath, "Cliloc.enu");
 
             if (!File.Exists(path))
@@ -58,19 +57,13 @@ namespace ClassicUO.IO.Resources
                     if (length > buffer.Length)
                         buffer = new byte[(length + 1023) & ~1023];
                     reader.Read(buffer, 0, length);
-                    string text = Encoding.UTF8.GetString(buffer, 0, length);
-                    StringEntry entry = new StringEntry(number, text);
-                    _entries[number] = entry;
+                    string text = string.Intern(Encoding.UTF8.GetString(buffer, 0, length));
+                    _entries[number] = new StringEntry(number, text);
                 }
             }
         }
 
-        public static string GetString(int number)
-        {
-            StringEntry e = GetEntry(number);
-
-            return e.Text;
-        }
+        public static string GetString(int number) => GetEntry(number).Text;
 
         public static StringEntry GetEntry(int number)
         {
@@ -135,13 +128,14 @@ namespace ClassicUO.IO.Resources
         public readonly string Text;
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal readonly struct ClilocEntry
-    {
-        public readonly int Number;
-        public readonly byte Flag;
-        public readonly ushort Length;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-        public readonly char[] Name;
-    }
+    //[StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4 + 1 + 2 + 20)]
+    //internal unsafe readonly struct ClilocEntry
+    //{
+    //    public readonly int Number;
+    //    public readonly byte Flag;
+    //    public readonly ushort Length;
+    //    //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+    //    //public readonly char[] Name;
+    //    public readonly char* Name;
+    //}
 }

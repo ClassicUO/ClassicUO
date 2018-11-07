@@ -223,7 +223,7 @@ namespace ClassicUO.Game.GameObjects
                 if (Explode)
                 {
                     Position = new Position(Position.X, Position.Y, (sbyte) tz);
-                    Tile = World.Map.GetTile(tx, ty);
+                    //Tile = World.Map.GetTile(tx, ty);
                 }
 
                 Dispose();
@@ -299,7 +299,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     X = (ushort) newX;
                     Y = (ushort) newY;
-                    Tile = World.Map.GetTile(X, Y);
+                    //Tile = World.Map.GetTile(X, Y);
                     wantUpdateInRenderList = true;
                 }
 

@@ -39,12 +39,10 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly List<TextOverhead> _overHeads;
         private Position _position = Position.Invalid;
-        private Tile _tile;
         private View _view;
 
-        protected GameObject(Facet map)
+        protected GameObject()
         {
-            Map = map;
             _overHeads = new List<TextOverhead>();
         }
 
@@ -54,6 +52,27 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsPositionChanged { get; protected set; }
 
+
+        public Tile Tile { get; protected set; }
+
+        public void SetTile(ushort x, ushort y)
+        {
+            if (World.Map != null)
+            {
+                if (Tile != Tile.Invalid)
+                    Tile.RemoveGameObject(this);
+                ref Tile newTile = ref World.Map.GetTile(x, y);
+                if (newTile != Tile.Invalid)
+                    newTile.AddGameObject(this);
+
+                Tile = newTile;
+            }
+            else
+            {
+                Dispose();
+            }
+        }
+
         public virtual Position Position
         {
             get => _position;
@@ -61,9 +80,27 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (_position != value)
                 {
+                    if (World.Map != null)
+                    {
+                        if (Tile != Tile.Invalid)
+                            Tile.RemoveGameObject(this);
+                    }
+
                     _position = value;
                     ScreenPosition = new Vector3((_position.X - _position.Y) * 22, (_position.X + _position.Y) * 22 - _position.Z * 4, 0);
                     IsPositionChanged = true;
+
+                    if (World.Map != null)
+                    {
+                        ref Tile newTile = ref World.Map.GetTile(value.X, value.Y);
+
+                        if (newTile != Tile.Invalid)
+                            newTile.AddGameObject(this);
+
+                        Tile = newTile;
+                    }
+                    else if (this != World.Player)
+                        Dispose();
                 }
             }
         }
@@ -102,27 +139,26 @@ namespace ClassicUO.Game.GameObjects
 
         public short PriorityZ { get; set; }
 
-        public Tile Tile
-        {
-            get => _tile;
-            set
-            {
-                if (_tile != value)
-                {
-                    _tile?.RemoveGameObject(this);
-                    _tile = value;
+        //public Tile Tile
+        //{
+        //    get => Tile;
+        //    set
+        //    {
+        //        if (Tile != value)
+        //        {
+        //            Tile?.RemoveGameObject(this);
+        //            Tile = value;
 
-                    if (_tile != null)
-                        _tile.AddGameObject(this);
-                    else
-                    {
-                        if (this != World.Player && !IsDisposed) Dispose();
-                    }
-                }
-            }
-        }
+        //            if (Tile != null)
+        //                Tile.AddGameObject(this);
+        //            else
+        //            {
+        //                if (this != World.Player && !IsDisposed) Dispose();
+        //            }
+        //        }
+        //    }
+        //}
 
-        public Facet Map { get; set; }
 
         public bool IsDisposed { get; private set; }
 
@@ -160,9 +196,8 @@ namespace ClassicUO.Game.GameObjects
                 if (mob.Steps.Count > 0)
                 {
                     Mobile.Step step = mob.Steps.Back();
-                    Position pos = new Position((ushort) step.X, (ushort) step.Y);
 
-                    return Position.DistanceTo(pos);
+                    return Position.DistanceTo(step.X, step.Y);
                 }
             }
 
@@ -234,8 +269,9 @@ namespace ClassicUO.Game.GameObjects
             if (IsDisposed)
                 return;
             IsDisposed = true;
-            DisposeView();
-            Tile = null;
+            //DisposeView();
+            //Tile = null;
+            Tile = Tile.Invalid;
             _overHeads.ForEach(s => s.Dispose());
             _overHeads.Clear();
         }

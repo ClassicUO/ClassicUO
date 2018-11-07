@@ -31,7 +31,7 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class Label : GumpControl
     {
-        private readonly RenderedText _gText;
+        private RenderedText _gText;
         private readonly float _timeToLive;
         private float _alpha;
         private float _timeCreated;
@@ -121,13 +121,25 @@ namespace ClassicUO.Game.Gumps.Controls
             if (FadeOut) _timeCreated = CoreGame.Ticks;
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
+            if (IsDisposed)
+                return false;
+
             if (FadeOut)
                 hue = RenderExtentions.GetHueVector(hue.HasValue ? (int) hue.Value.X : 0, false, _alpha, false);
             _gText.Draw(spriteBatch, position, hue);
 
             return base.Draw(spriteBatch, position, hue);
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            //_gText?.Dispose();
+            //_gText = null;
+
         }
     }
 }

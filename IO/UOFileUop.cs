@@ -33,12 +33,12 @@ namespace ClassicUO.IO
         private readonly bool _hasExtra;
         private int _count;
 
-        public UOFileUop(string path, string extension, int count = 0, bool hasextra = false) : base(path)
+        public UOFileUop(string path, string extension, int count = 0, bool hasextra = false, bool loadentries = true) : base(path)
         {
             _extension = extension;
             _count = count;
             _hasExtra = hasextra;
-            Load();
+            Load(loadentries);
         }
 
         protected override void Load(bool loadentries = true)
@@ -93,10 +93,11 @@ namespace ClassicUO.IO
                         continue;
 
                     if (hashes.TryGetValue(hash, out int idx))
-                    {
+                    {                        
                         if (idx < 0 || idx > Entries.Length)
                             throw new IndexOutOfRangeException("hashes dictionary and files collection have different count of entries!");
                         Entries[idx] = new UOFileIndex3D(offset + headerLength, length, decompressedLength);
+
 
                         // extra?
                         if (_hasExtra)
@@ -117,22 +118,7 @@ namespace ClassicUO.IO
 
                 Seek(nextBlock);
             } while (nextBlock != 0);
-        }
 
-        internal long GetOffsetFromUOP(long offset)
-        {
-            long pos = 0;
-
-            foreach (UOFileIndex3D t in Entries)
-            {
-                long currpos = pos + t.Length;
-
-                if (offset < currpos)
-                    return t.Offset + (offset - pos);
-                pos = currpos;
-            }
-
-            return Length;
         }
 
         internal static ulong CreateHash(string s)

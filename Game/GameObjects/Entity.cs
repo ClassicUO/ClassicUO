@@ -59,13 +59,11 @@ namespace ClassicUO.Game.GameObjects
         private string _name;
         protected Action<Entity> _OnDisposed;
         protected Action<Entity> _OnUpdated;
-        // private Position _position;
 
-        protected Entity(Serial serial) : base(World.Map)
+        protected Entity(Serial serial)
         {
             Serial = serial;
             Items = new EntityCollection<Item>();
-            //_position = base.Position;
             PositionChanged += OnPositionChanged;
         }
 
@@ -233,7 +231,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual void OnPositionChanged(object sender, EventArgs e)
         {
-            Tile = World.Map.GetTile((short) Position.X, (short) Position.Y);
+            
         }
 
         public static implicit operator Serial(Entity entity)
@@ -268,7 +266,8 @@ namespace ClassicUO.Game.GameObjects
             Stamina = 1 << 6,
             Stats = 1 << 7,
             Skills = 1 << 8,
-            Properties = 1 << 9
+            Properties = 1 << 9,
+            ItemsUpdate = 1 << 10
         }
     }
 }

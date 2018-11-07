@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Map
 {
     public static class TileSorter
     {
-        public static void Sort(List<GameObject> objects)
+        public static void Sort(ref List<GameObject> objects)
         {
             for (int i = 0; i < objects.Count - 1; i++)
             {
@@ -89,7 +89,7 @@ namespace ClassicUO.Game.Map
                 case Mobile mobile:
 
                     return (mobile.Position.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);
-                case Tile tile:
+                case Land tile:
 
                     return (tile.AverageZ, 0, 0, 0);
                 case Static staticitem:

@@ -40,23 +40,29 @@ namespace ClassicUO.Game.GameObjects
 
         public void GenerateCustom()
         {
-            foreach (Static s in Items)
-            {
-                Tile tile = World.Map.GetTile(s.Position.X, s.Position.Y);
-                tile.AddGameObject(s);
-            }
+            //foreach (Static s in Items)
+            //{
+            //    //Tile tile = World.Map.GetTile(s.Position.X, s.Position.Y);
+            //    //tile.AddGameObject(s);
+            //}
         }
 
         public void GenerateOriginal(Multi multi)
         {
             foreach (MultiComponent c in multi.Components)
             {
-                Tile tile = World.Map.GetTile(c.Position.X, c.Position.Y);
+                //ref Tile tile = ref World.Map.GetTile(c.Position.X, c.Position.Y);
+                //tile.AddGameObject();
 
-                tile.AddGameObject(new Static(c.Graphic, 0, 0)
+                new Static(c.Graphic, 0, 0)
                 {
                     Position = c.Position
-                });
+                };
+
+                //tile.AddGameObject(new Static(c.Graphic, 0, 0)
+                //{
+                //    Position = c.Position
+                //});
 
             }
         }

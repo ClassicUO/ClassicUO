@@ -97,8 +97,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     {
                         if (control is Checkbox checkbox && checkbox.IsChecked)
                             switches.Add(control.LocalSerial);
-                        else if (control is RadioButton radioButton && radioButton.IsChecked)
-                            switches.Add(control.LocalSerial);
+                        //else if (control is RadioButton radioButton && radioButton.IsChecked)
+                        //    switches.Add(control.LocalSerial);
                         else if (control is TextBox textBox)
                             entries.Add(new Tuple<ushort, string>((ushort) textBox.LocalSerial, textBox.Text));
                     }

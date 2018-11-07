@@ -64,7 +64,7 @@ namespace ClassicUO.IO
 
                     if (patch.File == _patch && patch.Index >= 0 && patch.Index < Entries.Length)
                     {
-                        UOFileIndex3D entry = Entries[patch.Index];
+                        ref UOFileIndex3D entry = ref Entries[patch.Index];
                         entry.Offset = patch.Offset;
                         entry.Length = patch.Length | (1 << 31);
                         entry.Extra = patch.Extra;
@@ -73,10 +73,10 @@ namespace ClassicUO.IO
             }
         }
 
-        public override void Unload()
+        public override void Dispose()
         {
-            _idxFile?.Unload();
-            base.Unload();
+            _idxFile?.Dispose();
+            base.Dispose();
         }
 
         private class UOFileIdxMul : UOFile

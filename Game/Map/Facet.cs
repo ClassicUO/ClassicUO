@@ -41,6 +41,7 @@ namespace ClassicUO.Game.Map
         public Facet(int index)
         {
             Index = index;
+            
             IO.Resources.Map.LoadMap(index);
             MapBlockIndex = IO.Resources.Map.MapBlocksSize[Index][0] * IO.Resources.Map.MapBlocksSize[Index][1];
             Chunks = new MapChunk[MapBlockIndex];
@@ -65,18 +66,21 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public Tile GetTile(short x, short y, bool load = true)
+        private static Tile _invalid = Tile.Invalid;
+
+        
+        public ref Tile GetTile(short x, short y, bool load = true)
         {
-            if (x < 0 || y < 0) return null;
+            if (x < 0 || y < 0) return ref _invalid;
             int cellX = x / 8;
             int cellY = y / 8;
             int block = GetBlock(cellX, cellY);
 
             if (block >= Chunks.Length)
-                return null;
+                return ref _invalid;
             ref MapChunk chuck = ref Chunks[block];
 
-            if (chuck == null)
+            if (chuck == MapChunk.Invalid)
             {
                 if (load)
                 {
@@ -85,29 +89,17 @@ namespace ClassicUO.Game.Map
                     chuck.Load(Index);
                 }
                 else
-                    return null;
+                    return ref _invalid;
             }
+            else
+                chuck.LastAccessTime = CoreGame.Ticks;
 
-            chuck.LastAccessTime = CoreGame.Ticks;
-
-            return chuck.Tiles[x % 8][y % 8];
-
-            //int cellindex = cellY % MAX_CHUNKS * MAX_CHUNKS + cellX % MAX_CHUNKS;
-            //// int cellindex = (cellX * AssetsLoader.Map.MapBlocksSize[Index][1]) + cellY;
-
-            //ref var tile = ref Chunks[cellindex];
-
-            //if (tile == null || tile.X != cellX || tile.Y != cellY)
-            //{
-            //    return null;
-            //}
-
-            //return tile.Tiles[x % 8][y % 8];
+            return ref chuck.Tiles[x % 8][y % 8];
         }
 
-        public Tile GetTile(int x, int y, bool load = true)
+        public ref Tile GetTile(int x, int y, bool load = true)
         {
-            return GetTile((short) x, (short) y, load);
+            return ref GetTile((short) x, (short) y, load);
         }
 
         public sbyte GetTileZ(int x, int y)
@@ -116,7 +108,7 @@ namespace ClassicUO.Game.Map
                 return -125;
             IndexMap blockIndex = GetIndex(x / 8, y / 8);
 
-            if (blockIndex == null || blockIndex.MapAddress == 0)
+            if (blockIndex.MapAddress == 0)
                 return -125;
             int mx = x % 8;
             int my = y % 8;
@@ -124,7 +116,7 @@ namespace ClassicUO.Game.Map
             unsafe
             {
                 MapBlock* mp = (MapBlock*) blockIndex.MapAddress;
-                MapCells* cells = (MapCells*) mp->Cells;
+                MapCells* cells = (MapCells*) &mp->Cells;
                 return cells[my * 8 + mx].Z;
             }    
         }
@@ -134,7 +126,7 @@ namespace ClassicUO.Game.Map
             int block = GetBlock(blockX, blockY);
             IndexMap[] list = IO.Resources.Map.BlockData[Index];
 
-            return block >= list.Length ? null : list[block];
+            return block >= list.Length ? IndexMap.Invalid : list[block];
         }
 
         private int GetBlock(int blockX, int blockY)
@@ -153,7 +145,7 @@ namespace ClassicUO.Game.Map
                 if (CoreGame.Ticks - block.LastAccessTime >= 3000 && block.HasNoExternalData())
                 {
                     block.Unload();
-                    block = null;
+                    block = MapChunk.Invalid;
                     _usedIndices.RemoveAt(i--);
 
                     if (++count >= 5)
@@ -169,7 +161,7 @@ namespace ClassicUO.Game.Map
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
                 
                 block.Unload();
-                block = null;
+                block = MapChunk.Invalid;
                 _usedIndices.RemoveAt(i--);               
             }
         }
@@ -204,21 +196,23 @@ namespace ClassicUO.Game.Map
                 for (int j = minBlockY; j <= maxBlockY; j++)
                 {
                     int cellindex = index + j;
-                    ref MapChunk tile = ref Chunks[cellindex];
+                    ref MapChunk chunk = ref Chunks[cellindex];
 
-                    if (tile == null)
+                    if (chunk == MapChunk.Invalid)
                     {
                         if (CoreGame.Ticks - tick >= maxDelay)
                             return;
 
                         _usedIndices.Add(cellindex);
-                        tile = new MapChunk((ushort) i, (ushort) j);
-                        tile.Load(Index);
+                        chunk = new MapChunk((ushort) i, (ushort) j);
+                        chunk.Load(Index);
                     }
 
-                    tile.LastAccessTime = CoreGame.Ticks;
+                    chunk.LastAccessTime = CoreGame.Ticks;
                 }
             }
+
+            _usedIndices.Sort();
         }
     }
 }

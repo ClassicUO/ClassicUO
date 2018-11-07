@@ -45,6 +45,7 @@ namespace ClassicUO.Renderer
         private readonly SpriteVertex[] _vertexInfo;
         private bool _started;
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
+        private RasterizerState _rasterizerState;
 #if !ORIONSORT
         private float _z;
 #endif
@@ -71,7 +72,12 @@ namespace ClassicUO.Renderer
             _projectionMatrix = new Matrix(0f, //(float)( 2.0 / (double)viewport.Width ) is the actual value we will use
                                            0.0f, 0.0f, 0.0f, 0.0f, 0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
                                            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
+
+            _effect.CurrentTechnique = _huesTechnique;
+            _rasterizerState = RasterizerState.CullNone;
         }
+
+        public Matrix TransformMatrix => _transformMatrix;
 
         public GraphicsDevice GraphicsDevice { get; }
 
@@ -147,7 +153,7 @@ namespace ClassicUO.Renderer
 #if !ORIONSORT
             vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
 #endif
-            _textureInfo[_numSprites] = new DrawInfo(texture, technique, scissorRectangle.HasValue, scissorRectangle);
+            _textureInfo[_numSprites] = new DrawInfo(texture, scissorRectangle.HasValue, scissorRectangle);
 
             fixed (SpriteVertex* p = &_vertexInfo[_numSprites * 4])
             {
@@ -188,7 +194,7 @@ namespace ClassicUO.Renderer
             vertices[flip ? 1 : 2].Position.Y -= skewHorizBottom;
             vertices[3].Position.X -= skewHorizBottom;
             vertices[3].Position.Y -= skewHorizBottom;
-            _textureInfo[_numSprites] = new DrawInfo(texture, Techniques.ShadowSet);
+            _textureInfo[_numSprites] = new DrawInfo(texture);
 
             fixed (SpriteVertex* p = &_vertexInfo[_numSprites * 4])
             {
@@ -223,7 +229,7 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.DepthStencilState = DepthStencilState.None;
-            GraphicsDevice.RasterizerState = RasterizerState.CullNone;
+            GraphicsDevice.RasterizerState = _rasterizerState;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
@@ -252,13 +258,15 @@ namespace ClassicUO.Renderer
             fixed (SpriteVertex* p = &_vertexInfo[0]) _vertexBuffer.SetDataPointerEXT(0, (IntPtr) p, _numSprites * 4 * SpriteVertex.SizeInBytes, SetDataOptions.None);
             DrawInfo current = _textureInfo[0];
             int offset = 0;
-            Techniques last = Techniques.None;
+            //Techniques last = Techniques.None;
+
+            _effect.CurrentTechnique.Passes[0].Apply();
 
             for (int i = 1; i < _numSprites; i++)
             {
-                if (_textureInfo[i].Texture != current.Texture || _textureInfo[i].Technique != current.Technique)
+                if (_textureInfo[i].Texture != current.Texture)
                 {
-                    InternalDraw(current, offset, i - offset, ref last);
+                    InternalDraw(ref current, offset, i - offset);
                     current = _textureInfo[i];
                     offset = i;
                 }
@@ -266,56 +274,82 @@ namespace ClassicUO.Renderer
                     Merged++;
             }
 
-            InternalDraw(current, offset, _numSprites - offset, ref last);
+            InternalDraw(ref current, offset, _numSprites - offset);
             Calls += _numSprites;
+
+            Array.Clear(_textureInfo, 0, _numSprites);
+
             _numSprites = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void InternalDraw(DrawInfo info, int baseSprite, int batchSize, ref Techniques last)
+        private void InternalDraw(ref DrawInfo info, int baseSprite, int batchSize)
         {
-            switch (info.Technique)
-            {
-                case Techniques.Hued:
+            //switch (info.Technique)
+            //{
+            //    case Techniques.Hued:
 
-                    if (last != info.Technique)
-                    {
-                        _effect.CurrentTechnique = _huesTechnique;
-                        last = info.Technique;
-                        _effect.CurrentTechnique.Passes[0].Apply();
-                    }
+            //        if (last != info.Technique)
+            //        {
+            //            _effect.CurrentTechnique = _huesTechnique;
+            //            last = info.Technique;
+            //            _effect.CurrentTechnique.Passes[0].Apply();
+            //        }
 
-                    break;
-                case Techniques.ShadowSet:
+            //        break;
+            //    case Techniques.ShadowSet:
 
-                    if (last != info.Technique)
-                    {
-                        _effect.CurrentTechnique = _shadowTechnique;
-                        last = info.Technique;
-                        _effect.CurrentTechnique.Passes[0].Apply();
-                    }
+            //        if (last != info.Technique)
+            //        {
+            //            _effect.CurrentTechnique = _shadowTechnique;
+            //            last = info.Technique;
+            //            _effect.CurrentTechnique.Passes[0].Apply();
+            //        }
 
-                    break;
-                case Techniques.Land:
+            //        break;
+            //    case Techniques.Land:
 
-                    if (last != info.Technique)
-                    {
-                        _effect.CurrentTechnique = _landTechnique;
-                        last = info.Technique;
-                        _effect.CurrentTechnique.Passes[0].Apply();
-                    }
-                    break;
-            }
+            //        if (last != info.Technique)
+            //        {
+            //            _effect.CurrentTechnique = _landTechnique;
+            //            last = info.Technique;
+            //            _effect.CurrentTechnique.Passes[0].Apply();
+            //        }
+            //        break;
+            //}
 
-            GraphicsDevice.RasterizerState.ScissorTestEnable = info.ScissorEnabled;
+            //GraphicsDevice.RasterizerState.ScissorTestEnable = info.ScissorEnabled;
 
-            if (info.ScissorEnabled && info.ScissorRectangle.HasValue)
-            {
-                GraphicsDevice.ScissorRectangle = info.ScissorRectangle.Value;
-            }
+            //if (info.ScissorEnabled && info.ScissorRectangle.HasValue)
+            //    GraphicsDevice.ScissorRectangle = info.ScissorRectangle.Value;
 
             GraphicsDevice.Textures[0] = info.Texture;
             GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite * 4, 0, batchSize * 2);
+
+            //GraphicsDevice.RasterizerState.ScissorTestEnable = info.ScissorEnabled;
+
+            //if (info.ScissorEnabled && info.ScissorRectangle.HasValue)
+            //    GraphicsDevice.ScissorRectangle = Rectangle.Empty;
+        }
+
+        public void EnableScissorTest(bool enable)
+        {
+            if (enable == _rasterizerState.ScissorTestEnable)
+                return;
+
+            Flush();
+
+            _rasterizerState.ScissorTestEnable = enable;
+
+            //_rasterizerState = new RasterizerState()
+            //{
+            //    CullMode = _rasterizerState.CullMode,
+            //    DepthBias = _rasterizerState.DepthBias,
+            //    FillMode = _rasterizerState.FillMode,
+            //    MultiSampleAntiAlias = _rasterizerState.MultiSampleAntiAlias,
+            //    SlopeScaleDepthBias = _rasterizerState.SlopeScaleDepthBias,
+            //    ScissorTestEnable = enable
+            //};
         }
 
         private static short[] GenerateIndexArray()
@@ -337,17 +371,14 @@ namespace ClassicUO.Renderer
 
         internal struct DrawInfo
         {
-            public DrawInfo(Texture2D texture, Techniques technique, bool enableScissor = false, Rectangle? scissorRectangle = null)
+            public DrawInfo(Texture2D texture, bool enableScissor = false, Rectangle? scissorRectangle = null)
             {
                 Texture = texture;
-                Technique = technique;
                 ScissorEnabled = enableScissor;
                 ScissorRectangle = scissorRectangle;
             }
 
             public readonly Texture2D Texture;
-            public readonly Techniques Technique;
-
             public readonly bool ScissorEnabled;
             public readonly Rectangle? ScissorRectangle;
         }

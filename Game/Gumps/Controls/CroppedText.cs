@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class CroppedText : GumpControl
     {
-        private readonly RenderedText _gameText;
+        private RenderedText _gameText;
 
         public CroppedText(string text, Hue hue, int maxWidth = 0)
         {
@@ -53,11 +53,18 @@ namespace ClassicUO.Game.Gumps.Controls
             Height = int.Parse(parts[4]);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             _gameText.Draw(spriteBatch, position);
 
             return base.Draw(spriteBatch, position, hue);
+        }
+
+        public override void Dispose()
+        {
+            _gameText?.Dispose();
+            _gameText = null;
+            base.Dispose();
         }
     }
 }

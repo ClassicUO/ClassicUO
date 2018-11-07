@@ -32,9 +32,11 @@ namespace ClassicUO.Game.Views
 {
     public class TextOverheadView : View
     {
+        private RenderedText _text;
+
         public TextOverheadView(TextOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent)
         {
-            RenderedText text = new RenderedText
+            _text = new RenderedText
             {
                 MaxWidth = maxwidth,
                 Hue = hue,
@@ -43,10 +45,10 @@ namespace ClassicUO.Game.Views
                 FontStyle = style,
                 Text = parent.Text
             };
-            Texture = text.Texture;
+            Texture = _text.Texture;
 
             if (parent.TimeToLive <= 0.0f)
-                parent.TimeToLive = (((4000 * text.Texture.LinesCount) * Service.Get<Settings>().SpeechDelay) / 100);
+                parent.TimeToLive = (((4000 * _text.LinesCount) * Service.Get<Settings>().SpeechDelay) / 100);
 
             parent.Initialized = true;
         }
@@ -54,7 +56,11 @@ namespace ClassicUO.Game.Views
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
+            {
+                _text?.Dispose();
+                _text = null;
                 return false;
+            }
 
             Texture.Ticks = CoreGame.Ticks;
             TextOverhead overhead = (TextOverhead) GameObject;

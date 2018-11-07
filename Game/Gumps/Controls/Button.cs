@@ -138,10 +138,17 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             SpriteTexture texture = GetTextureByState();
+
+
             spriteBatch.Draw2D(texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), IsTransparent ? RenderExtentions.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
+
+            //Draw1(spriteBatch, texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), -1, 0, IsTransparent ? RenderExtentions.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
+
+
+
 
             if (!string.IsNullOrEmpty(_caption))
             {
@@ -150,7 +157,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (FontCenter)
                 {
                     int yoffset = _clicked ? 1 : 0;
-                    textTexture.Draw(spriteBatch, new Vector3(position.X + (Width - textTexture.Width) / 2, position.Y + yoffset + (Height - textTexture.Height) / 2, position.Z));
+                    textTexture.Draw(spriteBatch, new Point(position.X + (Width - textTexture.Width) / 2, position.Y + yoffset + (Height - textTexture.Height) / 2));
                 }
                 else
                     textTexture.Draw(spriteBatch, position);
@@ -173,22 +180,28 @@ namespace ClassicUO.Game.Gumps.Controls
 
         private SpriteTexture GetTextureByState()
         {
-            if (_clicked && _textures[PRESSED] != null)
-                return _textures[PRESSED];
+            if (MouseIsOver)
+            {
+                if (_clicked && _textures[PRESSED] != null)
+                    return _textures[PRESSED];
 
-            if (UIManager.MouseOverControl == this && _textures[OVER] != null)
-                return _textures[OVER];
+                if (_textures[OVER] != null)
+                    return _textures[OVER];
+            }
 
             return _textures[NORMAL];
         }
 
         private Graphic GetGraphicByState()
         {
-            if (_clicked && _textures[PRESSED] != null)
-                return _gumpGraphics[PRESSED];
+            if (MouseIsOver)
+            {
+                if (_clicked && _textures[PRESSED] != null)
+                    return _gumpGraphics[PRESSED];
 
-            if (UIManager.MouseOverControl == this && _textures[OVER] != null)
-                return _gumpGraphics[OVER];
+                if (_textures[OVER] != null)
+                    return _gumpGraphics[OVER];
+            }
 
             return _gumpGraphics[NORMAL];
         }
@@ -214,6 +227,17 @@ namespace ClassicUO.Game.Gumps.Controls
         protected override bool Contains(int x, int y)
         {
             return IO.Resources.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
+        }
+
+        public override void Dispose()
+        {
+            for (int i = 0; i < _fontTexture.Length; i++)
+            {
+                _fontTexture[i]?.Dispose();
+                _fontTexture[i] = null;
+            }
+
+            base.Dispose();
         }
     }
 }

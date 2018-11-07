@@ -33,7 +33,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly List<GameEffect> _children;
 
-        protected GameEffect() : base(World.Map)
+        protected GameEffect()
         {
             _children = new List<GameEffect>();
         }
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
         {
             AnimDataFrame = AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
-            AnimIndex = (sbyte) AnimDataFrame.FrameStart;
+            AnimIndex = 0;
             Speed = AnimDataFrame.FrameInterval * 45;
         }
 
@@ -101,7 +101,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                         AnimIndex++;
-                        if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = (sbyte) AnimDataFrame.FrameStart;
+                        if (AnimIndex >= AnimDataFrame.FrameCount) AnimIndex = 0;
                     }
                     else
                     {
@@ -131,8 +131,8 @@ namespace ClassicUO.Game.GameObjects
         {
             Source = source;
             Position = source.Position;
-            if (!IsItemEffect)
-                Tile = World.Map.GetTile(Source.X, source.Y);
+            //if (!IsItemEffect)
+            //    Tile = World.Map.GetTile(Source.X, source.Y);
         }
 
         public void SetSource(int x, int y, int z)
@@ -144,8 +144,8 @@ namespace ClassicUO.Game.GameObjects
 
             Position = new Position((ushort)x, (ushort)y , (sbyte)z);
 
-            if (!IsItemEffect)
-                Tile = World.Map.GetTile(x, y);
+            //if (!IsItemEffect)
+            //    Tile = World.Map.GetTile(x, y);
         }
 
         protected (int x, int y, int z) GetTarget()

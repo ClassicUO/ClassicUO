@@ -58,7 +58,6 @@ namespace ClassicUO.Game.Gumps.Controls
         private GumpControlInfo _controlInfo;
         private bool _handlesKeyboardFocus;
         private Point _lastClickPosition;
-        private float _maxTimeForDClick;
         private GumpControl _parent;
 
         protected GumpControl(GumpControl parent = null)
@@ -322,7 +321,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public SpriteTexture Texture { get; set; }
 
-        public virtual bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public virtual bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (IsDisposed) return false;
 
@@ -335,28 +334,64 @@ namespace ClassicUO.Game.Gumps.Controls
                 {
                     if (c.IsVisible && c.IsInitialized)
                     {
-                        Vector3 offset = new Vector3(c.X + position.X, c.Y + position.Y, position.Z);
+                        Point offset = new Point(c.X + position.X, c.Y + position.Y);
                         c.Draw(spriteBatch, offset, hue);
                     }
                 }
             }
 
-            if (IsVisible && Debug)
-            {
-                if (_debugTexture == null)
-                {
-                    _debugTexture = new SpriteTexture(1, 1);
+            //if (IsVisible && Debug)
+            //{
+            //    if (_debugTexture == null)
+            //    {
+            //        _debugTexture = new SpriteTexture(1, 1);
 
-                    _debugTexture.SetData(new Color[1]
-                    {
-                        Color.Green
-                    });
-                }
+            //        _debugTexture.SetData(new Color[1]
+            //        {
+            //            Color.Green
+            //        });
+            //    }
 
-                spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
-            }
+            //    spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
+            //}
 
             return true;
+        }
+
+        //TODO: Future implementation
+
+        public virtual bool Draw1(SpriteBatchUI spriteBatch, SpriteTexture texture, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
+        {
+            Rectangle src = new Rectangle();
+
+            if (offsetX > Width || offsetX < -Width || offsetY > Height || offsetY < -Height)
+                return false;
+
+            X = offsetX;
+            Y = offsetY;
+
+            src.X = offsetX;
+            src.Y = offsetY;
+
+            int maxX = src.X + dst.Width;
+            if (maxX <= Width)
+                src.Width = dst.Width;
+            else
+            {
+                src.Width = Width - src.X;
+                dst.Width = src.Width;
+            }
+
+            int maxY = src.Y + dst.Height;
+            if (maxY <= Height)
+                src.Height = dst.Height;
+            else
+            {
+                src.Height = Height - src.Y;
+                dst.Height = src.Height;
+            }
+
+            return spriteBatch.Draw2D(texture, dst, src, hue ?? Vector3.Zero);
         }
 
         public virtual void Update(double totalMS, double frameMS)
@@ -377,24 +412,32 @@ namespace ClassicUO.Game.Gumps.Controls
                         toremove.Add(c);
                     else
                     {
-                        if (c.Page == 0 || c.Page == ActivePage)
-                        {
-                            if (w < c.Bounds.Right)
-                                w = c.Bounds.Right;
 
-                            if (h < c.Bounds.Bottom)
-                                h = c.Bounds.Bottom;
+                        if (WantUpdateSize)
+                        {
+                            if (c.Page == 0 || c.Page == ActivePage)
+                            {
+                                if (w < c.Bounds.Right)
+                                    w = c.Bounds.Right;
+
+                                if (h < c.Bounds.Bottom)
+                                    h = c.Bounds.Bottom;
+                            }
                         }
+
+                        
                     }
                 }
 
-                if (!IgnoreParentFill)
+                if (WantUpdateSize)
                 {
                     if (w != Width)
                         Width = w;
 
                     if (h != Height)
                         Height = h;
+
+                    WantUpdateSize = false;
                 }
 
                 if (toremove.Count > 0)
@@ -402,7 +445,8 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        //internal event Action<GumpControl, int, int, MouseButton> MouseDoubleClickEvent;
+        public bool WantUpdateSize { get; set; } = true;
+
         public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseEnter, MouseLeft, MouseClick, MouseDoubleClick, DragBegin, DragEnd;
 
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
@@ -437,38 +481,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        //TODO: Future implementation
-
-        //public virtual bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
-        //{
-        //    Rectangle src = new Rectangle();
-
-        //    if (offsetX > Width || offsetX < -Width || offsetY > Height || offsetY < -Height)
-        //        return false;
-
-        //    src.X = offsetX;
-        //    src.Y = offsetY;
-
-        //    int maxX = src.X + dst.Width;
-        //    if (maxX <= Width)
-        //        src.Width = dst.Width;
-        //    else
-        //    {
-        //        src.Width = Width - src.X;
-        //        dst.Width = src.Width;
-        //    }
-
-        //    int maxY = src.Y + dst.Height;
-        //    if (maxY <= Height)
-        //        src.Height = dst.Height;
-        //    else
-        //    {
-        //        src.Height = Height - src.Y;
-        //        dst.Height = src.Height;
-        //    }
-
-        //    return true; /*spriteBatch.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);*/
-        //}
+      
 
         internal void SetFocused()
         {
@@ -530,14 +543,14 @@ namespace ClassicUO.Game.Gumps.Controls
             return null;
         }
 
-        public void AddChildren(GumpControl c, int page = 0)
+        public virtual void AddChildren(GumpControl c, int page = 0)
         {
             c.Page = page;
             c.Parent = this;
             OnChildAdded();
         }
 
-        public void RemoveChildren(GumpControl c)
+        public virtual void RemoveChildren(GumpControl c)
         {
             if (c == null)
                 return;
@@ -576,8 +589,6 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public void InvokeMouseEnter(Point position)
         {
-            if (Math.Abs(_lastClickPosition.X - position.X) + Math.Abs(_lastClickPosition.Y - position.Y) > 3)
-                _maxTimeForDClick = 0.0f;
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             OnMouseEnter(x, y);
@@ -596,25 +607,11 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
-            //float ms = CoreGame.Ticks;
-            bool doubleClick = false;
 
-            //if (_maxTimeForDClick != 0f)
-            //{
-            //    if (ms <= _maxTimeForDClick)
-            //    {
-            //        _maxTimeForDClick = 0;
-            //        //doubleClick = true;
-            //    }
-            //}
-            //else
-            //{
-            //    _maxTimeForDClick = ms + InputManager.MOUSE_DOUBLE_CLICK_TIME;
-            //}
+            OnMouseClick(x, y, button);
 
             if (button == MouseButton.Right)
             {
-                OnMouseClick(x, y, button);
                 MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
 
                 if (CanCloseWithRightClick)
@@ -622,17 +619,8 @@ namespace ClassicUO.Game.Gumps.Controls
             }
             else
             {
-                if (doubleClick)
-                {
-                    OnMouseDoubleClick(x, y, button);
-                    MouseDoubleClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
-                }
-                else
-                {
-                    OnMouseClick(x, y, button);
-                    MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
-                }
-            }
+                MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
+            }               
         }
 
         public bool InvokeMouseDoubleClick(Point position, MouseButton button)
@@ -811,20 +799,17 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public virtual void OnButtonClick(int buttonID)
         {
-            if (Parent != null)
-                Parent.OnButtonClick(buttonID);
+            Parent?.OnButtonClick(buttonID);
         }
 
         public virtual void OnKeybaordReturn(int textID, string text)
         {
-            if (Parent != null)
-                Parent.OnKeybaordReturn(textID, text);
+            Parent?.OnKeybaordReturn(textID, text);
         }
 
         public virtual void ChangePage(int pageIndex)
         {
-            if (Parent != null)
-                Parent.ChangePage(pageIndex);
+            Parent?.ChangePage(pageIndex);
         }
 
         public virtual void Dispose()

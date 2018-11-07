@@ -72,21 +72,23 @@ namespace ClassicUO.Game
 
         private static bool CreateItemList(ref List<PathObject> list, int x, int y, int stepState)
         {
-            Tile tile = World.Map.GetTile(x, y);
+            ref Tile tile = ref World.Map.GetTile(x, y);
 
-            if (tile == null)
+            if (tile == Tile.Invalid)
                 return false;
-            bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Player.Map.Index == 0);
+            bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
             bool isGM = World.Player.Graphic == 0x03DB;
 
-            foreach (GameObject obj in tile.ObjectsOnTiles)
+            var objects = tile.ObjectsOnTiles;
+            for (int i = 0; i < objects.Count; i++)
             {
+                GameObject obj = objects[i];
                 // TODO: custom house gump
                 Graphic graphic = obj.Graphic;
 
                 switch (obj)
                 {
-                    case Tile tile1:
+                    case Land tile1:
 
                         if (graphic < 0x01AE && graphic != 2 || graphic > 0x01B5 && graphic != 0x01DB)
                         {
@@ -107,8 +109,8 @@ namespace ClassicUO.Game
                                     flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
                             }
 
-                            int landMinZ = tile.MinZ;
-                            int landAverageZ = tile.AverageZ;
+                            int landMinZ = tile1.MinZ;
+                            int landAverageZ = tile1.AverageZ;
                             int landHeight = landAverageZ - landMinZ;
                             list.Add(new PathObject(flags, landMinZ, landAverageZ, landHeight, obj));
                         }
@@ -220,13 +222,14 @@ namespace ClassicUO.Game
 
             if (!CreateItemList(ref list, newX, newY, stepState) || list.Count <= 0)
                 return 0;
-
-            foreach (PathObject obj in list)
+            for (int i = 0; i < list.Count; i++)
             {
+                PathObject obj = list[i];
+
                 GameObject o = obj.Object;
                 int averageZ = obj.AverageZ;
 
-                if (averageZ <= currentZ && o is Tile tile && tile.IsStretched)
+                if (averageZ <= currentZ && o is Land tile && tile.IsStretched)
                 {
                     int avgZ = tile.CalculateCurrentAverageZ(newDirection);
 
@@ -822,10 +825,6 @@ namespace ClassicUO.Game
             POF_NO_DIAGONAL = 0x00000008
         }
 
-        private struct PathPoint
-        {
-            public int X, Y, Direction;
-        }
 
         private class PathObject //: IComparable, IComparable<PathObject>
         {
@@ -852,41 +851,6 @@ namespace ClassicUO.Game
             {
                 return $"Z: {Z}, Height: {Height}";
             }
-
-            //public int CompareTo(object obj)
-            //{
-            //    return CompareTo((PathObject) obj);
-            //}
-
-            //public int CompareTo(PathObject other)
-            //{
-            //    //if (other == null)
-            //    //    return -1;
-
-            //    //int r = Z.CompareTo(other.Z);
-
-            //    //if (r == 0)
-            //    //{
-            //    //    r = Height.CompareTo(other.Height);
-            //    //}
-
-            //    //return r;
-
-            //    int r = Z - other.Z;
-
-            //    if (r <= 0)
-            //    {
-            //        r = Height - other.Height;
-
-            //        if (r > 0)
-            //            return -1;
-            //        if (r == 0)
-            //            return 0;
-            //        return 1;
-            //    }
-
-            //    return -1;
-            //}
         }
 
         private class PathNode

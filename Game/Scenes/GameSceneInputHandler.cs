@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -9,6 +10,7 @@ using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -22,9 +24,7 @@ namespace ClassicUO.Game.Scenes
         private double _dequeueAt;
         private bool _inqueue;
         private Action _queuedAction;
-        private InputMouseEvent _queuedEvent;
         private GameObject _queuedObject;
-        private Point _queuedPosition;
         private bool _rightMousePressed;
 
         public bool IsMouseOverUI => UIManager.IsMouseOverUI && !(UIManager.MouseOverControl is WorldViewport);
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Scenes
                         int y = Mouse.Position.Y - _heldOffset.Y - (target.Y + target.Parent.Y);
                         DropHeldItemToContainer(container.Item, (ushort) x, (ushort) y);
                     }
-                    else if (target is ItemGumplingPaperdoll || target is GumpPic pic && pic.IsPaperdoll || target is EquipmentSlot)
+                    else if (target is ItemGumplingPaperdoll || (target is GumpPic pic && pic.IsPaperdoll) || target is EquipmentSlot || target?.Parent is PaperDollGump)
                     {
                         if (TileData.IsWearable((long) HeldItem.ItemData.Flags))
                             WearHeldItem();
@@ -157,7 +157,7 @@ namespace ClassicUO.Game.Scenes
                                     DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
 
                                 break;
-                            case Tile _:
+                            case Land _:
                                 DropHeldItemToWorld(obj.Position);
 
                                 break;
@@ -219,15 +219,22 @@ namespace ClassicUO.Game.Scenes
                         GameActions.DoubleClick(item);
 
                         break;
-                    //TODO: attack request also
-                    case Mobile mob when World.Player.InWarMode:
-                        result = true;
-
-                        break;
                     case Mobile mob:
                         result = true;
-                        GameActions.DoubleClick(mob);
 
+                        if (World.Player.InWarMode)
+                        {
+                            //TODO: attack request
+                        }
+                        else
+                        {
+                            GameActions.DoubleClick(mob);
+                        }
+
+                        break;
+                    case GameEffect effect when effect.Source is Item item:
+                        result = true;
+                        GameActions.DoubleClick(item);
                         break;
                 }
 
@@ -255,7 +262,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (_settings.EnablePathfind && !Pathfinder.AutoWalking)
                 {
-                    if (_mousePicker.MouseOverObject is Tile || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long) dyn.ItemData.Flags))
+                    if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long) dyn.ItemData.Flags))
                     {
                         GameObject obj = _mousePicker.MouseOverObject;
 
@@ -294,7 +301,33 @@ namespace ClassicUO.Game.Scenes
 
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
-            if (TargetSystem.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && e.keysym.mod == SDL.SDL_Keymod.KMOD_NONE) TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+            if (TargetSystem.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && e.keysym.mod == SDL.SDL_Keymod.KMOD_NONE)
+                TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+
+            // TEST PURPOSE
+            /*if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
+            {
+
+                bool first = false;
+
+                string tobrit = "[go britain";
+                string toluna = "[go luna";
+
+                Task.Run(async () =>
+               {
+
+                   while (true)
+                   {
+                       await Task.Delay(500);
+
+                       NetClient.Socket.Send(new PUnicodeSpeechRequest(first ? tobrit : toluna, MessageType.Regular, MessageFont.Normal, 33, "ENU"));
+
+                       first = !first;
+
+
+                   }
+               });
+            }*/
         }
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)

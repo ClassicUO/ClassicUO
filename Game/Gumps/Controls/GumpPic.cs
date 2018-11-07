@@ -49,6 +49,13 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 _lastGump = Graphic;
                 Texture = IO.Resources.Gumps.GetGumpTexture(Graphic);
+
+                if (Texture == null)
+                {
+                    Dispose();
+                    return;
+                }
+
                 Width = Texture.Width;
                 Height = Texture.Height;
             }
@@ -76,7 +83,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Hue));
 

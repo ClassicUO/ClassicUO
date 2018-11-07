@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private readonly List<HSliderBar> _pairedSliders = new List<HSliderBar>();
         private readonly HSliderBarStyle _style;
-        private readonly RenderedText _text;
+        private RenderedText _text;
         private bool _clicked;
         private Point _clickPosition;
         private SpriteTexture[] _gumpSpliderBackground;
@@ -152,17 +152,17 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (_gumpSpliderBackground != null)
             {
-                spriteBatch.Draw2D(_gumpSpliderBackground[0], new Vector3(position.X, position.Y, 0), Vector3.Zero);
+                spriteBatch.Draw2D(_gumpSpliderBackground[0], position, Vector3.Zero);
                 spriteBatch.Draw2DTiled(_gumpSpliderBackground[1], new Rectangle((int) position.X + _gumpSpliderBackground[0].Width, (int) position.Y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height), Vector3.Zero);
-                spriteBatch.Draw2D(_gumpSpliderBackground[2], new Vector3(position.X + BarWidth - _gumpSpliderBackground[2].Width, position.Y, 0), Vector3.Zero);
+                spriteBatch.Draw2D(_gumpSpliderBackground[2], new Point(position.X + BarWidth - _gumpSpliderBackground[2].Width, position.Y), Vector3.Zero);
             }
 
-            spriteBatch.Draw2D(_gumpWidget, new Vector3(position.X + _sliderX, position.Y, 0), Vector3.Zero);
-            _text?.Draw(spriteBatch, new Vector3(position.X + BarWidth + 2, position.Y + Height / 2 - _text.Height / 2, 0));
+            spriteBatch.Draw2D(_gumpWidget, new Point(position.X + _sliderX, position.Y), Vector3.Zero);
+            _text?.Draw(spriteBatch, new Point(position.X + BarWidth + 2, position.Y + Height / 2 - _text.Height / 2));
 
             return base.Draw(spriteBatch, position, hue);
         }
@@ -306,6 +306,14 @@ namespace ClassicUO.Game.Gumps.Controls
                     sliderIndex = 0;
                 }
             }
+        }
+
+        public override void Dispose()
+        {
+            _text?.Dispose();
+            _text = null;
+
+            base.Dispose();
         }
     }
 }

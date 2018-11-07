@@ -79,7 +79,7 @@ namespace ClassicUO.IO.Resources
 
                 if (File.Exists(path))
                 {
-                    _filesMap[i] = new UOFileUop(path, ".dat");
+                    _filesMap[i] = new UOFileUop(path, ".dat", loadentries: false);
                     foundedOneMap = true;
                 }
                 else
@@ -107,13 +107,17 @@ namespace ClassicUO.IO.Resources
                 MapsDefaultSize[0][0] = MapsDefaultSize[1][0] = 6144;
 
             for (int i = 0; i < MAPS_COUNT; i++)
+            {
                 MapBlocksSize[i] = new int[2]
                 {
                     MapsDefaultSize[i][0] / 8, MapsDefaultSize[i][1] / 8
                 };
+
+                //LoadMap(i);
+            }
         }
 
-        public static void LoadMap(int i)
+        public static unsafe void LoadMap(int i)
         {
             int mapblocksize = Marshal.SizeOf<MapBlock>();
             int staticidxblocksize = Marshal.SizeOf<StaidxBlock>();
@@ -121,7 +125,9 @@ namespace ClassicUO.IO.Resources
             int width = MapBlocksSize[i][0];
             int height = MapBlocksSize[i][1];
             int maxblockcount = width * height;
+          
             BlockData[i] = new IndexMap[maxblockcount];
+
             UOFile file = _filesMap[i];
             UOFile fileidx = _filesIdxStatics[i];
             UOFile staticfile = _filesStatics[i];
@@ -160,54 +166,51 @@ namespace ClassicUO.IO.Resources
                 if (address < endmapaddress)
                     realmapaddress = address;
                 ulong stidxaddress = staticidxaddress + (ulong) (block * staticidxblocksize);
-                StaidxBlock bb = fileidx.ReadStruct<StaidxBlock>(block * staticidxblocksize);
 
-                if (stidxaddress < endstaticidxaddress && bb.Size > 0 && bb.Position != 0xFFFFFFFF)
+                StaidxBlock* bb = (StaidxBlock*) stidxaddress;
+
+                if (stidxaddress < endstaticidxaddress && bb->Size > 0 && bb->Position != 0xFFFFFFFF)
                 {
-                    ulong address1 = staticaddress + bb.Position;
+                    ulong address1 = staticaddress + bb->Position;
 
                     if (address1 < endstaticaddress)
                     {
-                        StaticsBlock sss = staticfile.ReadStruct<StaticsBlock>(bb.Position);
                         realstaticaddress = address1;
-                        realstaticcount = (uint) (bb.Size / staticblocksize);
+                        realstaticcount = (uint) (bb->Size / staticblocksize);
 
                         if (realstaticcount > 1024)
                             realstaticcount = 1024;
                     }
                 }
 
-                BlockData[i][block] = new IndexMap
-                {
-                    OriginalMapAddress = realmapaddress,
-                    OriginalStaticAddress = realstaticaddress,
-                    OriginalStaticCount = realstaticcount,
-                    MapAddress = realmapaddress,
-                    StaticAddress = realstaticaddress,
-                    StaticCount = realstaticcount
-                };
+                BlockData[i][block] = new IndexMap(realmapaddress, realstaticaddress, realstaticcount, realmapaddress, realstaticaddress, realstaticcount);
             }
+
         }
 
         public static void UnloadMap(int i)
         {
-            BlockData[i] = null;
+            if (BlockData[i] != null)
+            {
+                Array.Clear(BlockData[i], 0, BlockData[i].Length);
+                BlockData[i] = null;
+            }
         }
 
         public static unsafe RadarMapBlock? GetRadarMapBlock(int map, int blockX, int blockY)
         {
             IndexMap indexMap = GetIndex(map, blockX, blockY);
 
-            if (indexMap == null || indexMap.MapAddress == 0)
+            if (indexMap.MapAddress == 0)
                 return null;
 
             MapBlock* mp = (MapBlock*)indexMap.MapAddress;
-            MapCells* cells = (MapCells*)mp->Cells;
+            MapCells* cells = (MapCells*)&mp->Cells;
 
-
-            MapBlock block = Marshal.PtrToStructure<MapBlock>((IntPtr) indexMap.MapAddress);
-            RadarMapBlock mb = new RadarMapBlock();
-            mb.Cells = new RadarMapcells[8, 8];
+            RadarMapBlock mb = new RadarMapBlock
+            {
+                Cells = new RadarMapcells[8, 8]
+            };
 
             for (int x = 0; x < 8; x++)
             {
@@ -290,12 +293,19 @@ namespace ClassicUO.IO.Resources
     //    public MapCells[] Cells;
     //}
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public unsafe struct MapBlock
+    [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4 + 64 * 3)]
+    public struct MapBlock
     {
         public readonly uint Header;
-        public fixed byte Cells[64 * 3];
+        public unsafe MapCells* Cells;
     }
+
+    //[StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4 + 64 * 3)]
+    //public struct MapBlock2
+    //{
+    //    public readonly uint Header;
+    //    public IntPtr Cells;
+    //}
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct RadarMapcells
@@ -312,13 +322,25 @@ namespace ClassicUO.IO.Resources
         public RadarMapcells[,] Cells;
     }
 
-    public class IndexMap
+    public readonly struct IndexMap
     {
-        public ulong MapAddress;
-        public ulong OriginalMapAddress;
-        public ulong OriginalStaticAddress;
-        public uint OriginalStaticCount;
-        public ulong StaticAddress;
-        public uint StaticCount;
+        public IndexMap(ulong mapAddress, ulong staticAddress, uint staticCount, ulong originalMapAddress, ulong originalStaticAddress, uint originalStaticCount)
+        {
+            MapAddress = mapAddress;
+            StaticAddress = staticAddress;
+            StaticCount = staticCount;
+            OriginalMapAddress = originalMapAddress;
+            OriginalStaticAddress = originalStaticAddress;
+            OriginalStaticCount = originalStaticCount;
+        }
+
+        public readonly ulong MapAddress;
+        public readonly ulong OriginalMapAddress;
+        public readonly ulong OriginalStaticAddress;
+        public readonly uint OriginalStaticCount;
+        public readonly ulong StaticAddress;
+        public readonly uint StaticCount;
+
+        public static readonly IndexMap Invalid = new IndexMap();
     }
 }

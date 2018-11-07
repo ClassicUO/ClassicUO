@@ -33,8 +33,7 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class TextBox : GumpControl
     {
-        private const float CARAT_BLINK_TIME = 500f;
-        private readonly TextEntry _entry;
+        private TextEntry _entry;
         private bool _caratBlink;
 
         public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
@@ -52,7 +51,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Y = int.Parse(parts[2]);
             Width = int.Parse(parts[3]);
             Height = int.Parse(parts[4]);
-            Graphic = Graphic.Parse(parts[6]);
+            LocalSerial = Serial.Parse(parts[6]);
             SetText(lines[int.Parse(parts[7])]);
         }
 
@@ -61,8 +60,6 @@ namespace ClassicUO.Game.Gumps.Controls
             get => _entry.Hue;
             set => _entry.Hue = value;
         }
-
-        public Graphic Graphic { get; set; }
 
         public int MaxCharCount { get; set; }
 
@@ -115,14 +112,14 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            _entry.RenderText.Draw(spriteBatch, new Vector3(position.X + _entry.Offset, position.Y, 0));
+            _entry.RenderText.Draw(spriteBatch, new Point(position.X + _entry.Offset, position.Y));
 
             if (IsEditable)
             {
                 if (_caratBlink)
-                    _entry.RenderCaret.Draw(spriteBatch, new Vector3(position.X + _entry.Offset + _entry.CaretPosition.X, position.Y + _entry.CaretPosition.Y, 0));
+                    _entry.RenderCaret.Draw(spriteBatch, new Point(position.X + _entry.Offset + _entry.CaretPosition.X, position.Y + _entry.CaretPosition.Y));
             }
 
             return base.Draw(spriteBatch, position, hue);
@@ -150,7 +147,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     //if ((_entry.RenderText.FontStyle & FontStyle.Fixed) == 0)
                     //    _entry.InsertString("\n");
                     //else
-                    Parent.OnKeybaordReturn(Graphic, Text);
+                    Parent.OnKeybaordReturn((int)LocalSerial.Value, Text);
 
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
@@ -190,6 +187,14 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (button == MouseButton.Left)
                 _entry.OnMouseClick(x, y);
+        }
+
+        public override void Dispose()
+        {
+            _entry?.Dispose();
+            _entry = null;
+
+            base.Dispose();
         }
     }
 }

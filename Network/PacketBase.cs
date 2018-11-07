@@ -84,19 +84,33 @@ namespace ClassicUO.Network
             WriteByte((byte) v);
         }
 
-        public void WriteASCII(string value)
+        public unsafe void WriteASCII(string value)
         {
             EnsureSize(value.Length + 1);
-            foreach (char c in value) WriteByte((byte) c);
+
+            fixed (char* ptr = value)
+            {
+                char* buff = ptr;
+
+                while (*buff != 0)
+                    WriteByte((byte) *buff++);
+            }
             WriteByte(0);
         }
 
-        public void WriteASCII(string value, int length)
+        public unsafe void WriteASCII(string value, int length)
         {
             EnsureSize(length);
 
             if (value.Length > length) throw new ArgumentOutOfRangeException();
-            for (int i = 0; i < value.Length; i++) WriteByte((byte) value[i]);
+
+            fixed (char* ptr = value)
+            {
+                char* buff = ptr;
+                byte* end = (byte*) ptr + length;
+                while (*buff != 0 && &buff != &end)
+                    WriteByte((byte)*buff++);
+            }
 
             if (value.Length < length)
             {
@@ -105,29 +119,33 @@ namespace ClassicUO.Network
             }
         }
 
-        public void WriteUnicode(string value)
+        public unsafe void WriteUnicode(string value)
         {
             EnsureSize((value.Length + 1) * 2);
 
-            foreach (char c in value)
+            fixed (char* ptr = value)
             {
-                WriteByte((byte) (c >> 8));
-                WriteByte((byte) c);
+                short* buff = (short*) ptr;
+
+                while (*buff != 0)
+                    WriteUShort((ushort)*buff++);
             }
 
             WriteUShort(0);
         }
 
-        public void WriteUnicode(string value, int length)
+        public unsafe void WriteUnicode(string value, int length)
         {
             EnsureSize(length);
 
             if (value.Length > length) throw new ArgumentOutOfRangeException();
 
-            for (int i = 0; i < value.Length; i++)
+            fixed (char* ptr = value)
             {
-                WriteByte((byte) (value[i] >> 8));
-                WriteByte((byte) value[i]);
+                short* buff = (short*)ptr;
+
+                while (*buff != 0)
+                    WriteUShort((ushort) *buff++);
             }
 
             if (value.Length < length)

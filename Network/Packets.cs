@@ -388,35 +388,35 @@ namespace ClassicUO.Network
     {
         public PUnicodeSpeechRequest(string text, MessageType type, MessageFont font, Hue hue, string lang) : base(0xAD)
         {
-            SpecialKeywords.GetSpeechTriggers(text, lang, out int triggerCount, out int[] triggers);
+            SpeechEntry[] entries = Speeches.GetKeywords(text);
 
-            if (triggerCount > 0)
+            if (entries.Length > 0)
                 type |= MessageType.Encoded;
             WriteByte((byte) type);
             WriteUShort(hue);
             WriteUShort((ushort) font);
             WriteASCII(lang, 4);
 
-            if (triggerCount > 0)
+            if (entries.Length > 0)
             {
-                byte[] t = new byte[(int) Math.Ceiling((triggerCount + 1) * 1.5f)];
+                byte[] t = new byte[(int) Math.Ceiling((entries.Length + 1) * 1.5f)];
                 // write 12 bits at a time. first write count: byte then half byte.
-                t[0] = (byte) ((triggerCount & 0x0FF0) >> 4);
-                t[1] = (byte) ((triggerCount & 0x000F) << 4);
+                t[0] = (byte) ((entries.Length & 0x0FF0) >> 4);
+                t[1] = (byte) ((entries.Length & 0x000F) << 4);
 
-                for (int i = 0; i < triggerCount; i++)
+                for (int i = 0; i < entries.Length; i++)
                 {
                     int index = (int) ((i + 1) * 1.5f);
 
                     if (i % 2 == 0) // write half byte and then byte
                     {
-                        t[index + 0] |= (byte) ((triggers[i] & 0x0F00) >> 8);
-                        t[index + 1] = (byte) (triggers[i] & 0x00FF);
+                        t[index + 0] |= (byte) ((entries[i].KeywordID & 0x0F00) >> 8);
+                        t[index + 1] = (byte) (entries[i].KeywordID & 0x00FF);
                     }
                     else // write byte and then half byte
                     {
-                        t[index] = (byte) ((triggers[i] & 0x0FF0) >> 4);
-                        t[index + 1] = (byte) ((triggers[i] & 0x000F) << 4);
+                        t[index] = (byte) ((entries[i].KeywordID & 0x0FF0) >> 4);
+                        t[index + 1] = (byte) ((entries[i].KeywordID & 0x000F) << 4);
                     }
                 }
 
@@ -508,7 +508,7 @@ namespace ClassicUO.Network
             {
                 WriteUInt((uint) switches.Length);
 
-                for (int i = switches.Length - 1; i >= 0; i--)
+                for (int i = 0; i < switches.Length; i++)
                     WriteUInt(switches[i]);
             }
 
@@ -518,7 +518,7 @@ namespace ClassicUO.Network
             {
                 WriteUInt((uint) entries.Length);
 
-                for (int i = entries.Length - 1; i >= 0; i--)
+                for (int i = 0; i < entries.Length; i++)
                 {
                     int length = entries[i].Item2.Length * 2;
                     WriteUShort(entries[i].Item1);

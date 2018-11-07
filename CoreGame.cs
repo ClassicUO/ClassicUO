@@ -139,6 +139,7 @@ namespace ClassicUO
             OnUIUpdate(totalms, framems);
             OnUpdate(totalms, framems);
             // ###############################
+
             Profiler.ExitContext("Update");
             _time += (float) framems;
 

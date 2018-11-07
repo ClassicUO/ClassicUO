@@ -29,7 +29,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ExpandableScroll : Gump
+    internal class ExpandableScroll : GumpControl
     {
         private const int c_ExpandableScrollHeight_Min = 274;
         private const int c_ExpandableScrollHeight_Max = 1000;
@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private bool _isExpanding;
         private int _isExpanding_InitialX, _isExpanding_InitialY, _isExpanding_InitialHeight;
 
-        public ExpandableScroll(int x, int y, int height, bool isResizable = true) : base(0, 0)
+        public ExpandableScroll(int x, int y, int height, bool isResizable = true)
         {
             X = x;
             Y = y;
@@ -175,7 +175,7 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             return base.Draw(spriteBatch, position, hue);
         }

@@ -21,6 +21,7 @@
 
 #endregion
 
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -40,7 +41,7 @@ namespace ClassicUO.Game.Views
         private Vector3 _storedHue;
         private Vector3 _vertex0_yOffset, _vertex1_yOffset, _vertex2_yOffset, _vertex3_yOffset;
 
-        public TileView(Tile tile) : base(tile)
+        public TileView(Land tile) : base(tile)
         {
             AllowedToDraw = !tile.IsIgnored;        
         }
@@ -49,7 +50,7 @@ namespace ClassicUO.Game.Views
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
-            Tile tile = (Tile) GameObject;
+            Land tile = (Land) GameObject;
 
             if (Texture == null || Texture.IsDisposed)
             {
@@ -125,19 +126,24 @@ namespace ClassicUO.Game.Views
         }
 
 
-        public void UpdateStreched(Facet map)
+        public void UpdateStreched()
         {
-            Tile tile = (Tile) GameObject;
+            Land tile = (Land) GameObject;
+            Facet map = World.Map;
 
             if (tile.IsStretched || TextmapTextures.GetTextmapTexture(tile.TileData.TexID) == null || !TestStretched(tile.Position.X, tile.Position.Y, tile.Position.Z, true))
             {
                 tile.IsStretched = false;
                 tile.MinZ = tile.Position.Z;
+                //tile.PriorityZ = (sbyte) (tile.Position.Z - 1);
             }
             else
             {
                 tile.IsStretched = true;
                 tile.UpdateZ(map.GetTileZ(tile.Position.X, tile.Position.Y + 1), map.GetTileZ(tile.Position.X + 1, tile.Position.Y + 1), map.GetTileZ(tile.Position.X + 1, tile.Position.Y));
+
+                //tile.PriorityZ = (sbyte) (tile.AverageZ - 1);
+
                 Vector3[,,] vec = new Vector3[3, 3, 4];
                 int i;
                 int j;

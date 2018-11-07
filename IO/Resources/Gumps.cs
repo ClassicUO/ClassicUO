@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
+using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
@@ -34,9 +35,11 @@ namespace ClassicUO.IO.Resources
     {
         public const int GUMP_COUNT = 0x10000;
         private static UOFile _file;
-        private static SpriteTexture[] _gumpCache;
+        //private static SpriteTexture[] _gumpCache;
         private static readonly List<int> _usedIndex = new List<int>();
         private static readonly PixelPicking _picker = new PixelPicking();
+
+        private static readonly Dictionary<int, SpriteTexture> _gumpDictionary = new Dictionary<int, SpriteTexture>();
 
         public static void Load()
         {
@@ -55,7 +58,7 @@ namespace ClassicUO.IO.Resources
                 FileManager.UseUOPGumps = false;
             }
 
-            _gumpCache = new SpriteTexture[GUMP_COUNT];
+            //_gumpCache = new SpriteTexture[GUMP_COUNT];
             string pathdef = Path.Combine(FileManager.UoFolderPath, "gump.def");
 
             if (!File.Exists(pathdef))
@@ -95,9 +98,7 @@ namespace ClassicUO.IO.Resources
 
         public static SpriteTexture GetGumpTexture(ushort g)
         {
-            ref SpriteTexture texture = ref _gumpCache[g];
-
-            if (texture == null || texture.IsDisposed)
+            if (!_gumpDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
             {
                 ushort[] pixels = GetGumpPixels(g, out int w, out int h);
 
@@ -110,7 +111,25 @@ namespace ClassicUO.IO.Resources
                 texture.SetData(pixels);
                 _usedIndex.Add(g);
                 _picker.Set(g, w, h, pixels);
+                _gumpDictionary.Add(g, texture);
             }
+
+            //ref SpriteTexture texture = ref _gumpCache[g];
+
+            //if (texture == null || texture.IsDisposed)
+            //{
+            //    ushort[] pixels = GetGumpPixels(g, out int w, out int h);
+
+            //    if (pixels == null && g >= 60000)
+            //        pixels = GetGumpPixels(g - 10000, out w, out h);
+
+            //    if (pixels == null || pixels.Length <= 0)
+            //        return null;
+            //    texture = new SpriteTexture(w, h, false);
+            //    texture.SetData(pixels);
+            //    _usedIndex.Add(g);
+            //    _picker.Set(g, w, h, pixels);
+            //}
 
             return texture;
         }
@@ -121,16 +140,18 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                ref SpriteTexture texture = ref _gumpCache[_usedIndex[i]];
+                int g = _usedIndex[i];
+                SpriteTexture texture = _gumpDictionary[g];
+                //ref SpriteTexture texture = ref _gumpCache[_usedIndex[i]];
 
                 if (texture == null || texture.IsDisposed)
                     _usedIndex.RemoveAt(i--);
                 else if (CoreGame.Ticks - texture.Ticks >= 3000)
                 {
                     texture.Dispose();
-                    texture = null;
+                    //texture = null;
                     _usedIndex.RemoveAt(i--);
-
+                    _gumpDictionary.Remove(g);
                     if (++count >= 5)
                         break;
                 }

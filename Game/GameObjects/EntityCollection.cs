@@ -36,6 +36,7 @@ namespace ClassicUO.Game.GameObjects
         private readonly List<T> _added = new List<T>(), _removed = new List<T>();
         private readonly ConcurrentDictionary<Serial, T> _entities = new ConcurrentDictionary<Serial, T>();
 
+
         public int Count => _entities.Count;
 
         IEnumerator IEnumerable.GetEnumerator()

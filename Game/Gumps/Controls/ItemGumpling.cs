@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (Texture == null)
             {
@@ -96,7 +96,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Vector3 huev = RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver ? GameScene.MouseOverItemHue : Item.Hue, TileData.IsPartialHue((long) Item.ItemData.Flags), 0, false);
 
             if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
-                spriteBatch.Draw2D(Texture, new Vector3(position.X - 5, position.Y - 5, 0), huev);
+                spriteBatch.Draw2D(Texture, new Point(position.X - 5, position.Y - 5), huev);
             spriteBatch.Draw2D(Texture, position, huev);
 
             return base.Draw(spriteBatch, position, hue);

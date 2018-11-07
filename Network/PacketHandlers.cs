@@ -33,6 +33,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.IO;
@@ -562,6 +563,8 @@ namespace ClassicUO.Network
 
         private static void EnterWorld(Packet p)
         {
+            Service.Get<SceneManager>().ChangeScene(ScenesType.Game);
+
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
@@ -580,7 +583,7 @@ namespace ClassicUO.Network
 
             GameActions.SingleClick(World.Player);
             NetClient.Socket.Send(new PStatusRequest(World.Player));
-            Service.Get<SceneManager>().ChangeScene(ScenesType.Game);
+
 
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
@@ -676,8 +679,15 @@ namespace ClassicUO.Network
                 World.Player.ForcePosition(x, y, z, dir);
             else if (endDir != dir)
                 World.Player.EnqueueStep(x, y, z, dir, isrun);
-            else if (World.Player.Tile == null)
-                World.Player.Tile = World.Map.GetTile(x, y);
+            else
+            {
+                //ref Tile tile = ref World.Map.GetTile(x, y);
+                //World.Player.Position = new Position(x, y, z);
+
+                World.Player.SetTile(x, y);
+            }
+            //else if (World.Player.Tile == Tile.Invalid)
+            //    World.Player.Tile = World.Map.GetTile(x, y);
             World.Player.ProcessDelta();
         }
 
@@ -2271,9 +2281,11 @@ namespace ClassicUO.Network
             Item item = World.GetOrCreateItem(p.ReadUInt());
             item.Graphic = (ushort) (p.ReadUShort() + p.ReadSByte());
             item.Amount = Math.Max(p.ReadUShort(), (ushort) 1);
-            item.Position = new Position(p.ReadUShort(), p.ReadUShort());
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
             if (FileManager.ClientVersion >= ClientVersions.CV_6017) p.ReadByte(); //gridnumber - useless?
             item.Container = p.ReadUInt();
+            item.Position = new Position(x, y);
             item.Hue = p.ReadUShort();
             items.Add(item);
             Entity entity = World.Get(item.Container);

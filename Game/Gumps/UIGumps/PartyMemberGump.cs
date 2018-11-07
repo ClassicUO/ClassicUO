@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             spriteBatch.Draw2D(_healthBar, new Rectangle(X + 25, Y + 30, (int) _currentHealthBarLength, 10), RenderExtentions.GetHueVector(0, true, 0.4f, true));
             spriteBatch.Draw2D(_staminaBar, new Rectangle(X + 25, Y + 46, (int) _currentStaminaBarLength, 10), RenderExtentions.GetHueVector(0, true, 0.4f, true));
@@ -269,7 +269,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Vector3 position, Vector3? hue = null)
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             spriteBatch.Draw2D(_border, new Rectangle((int) position.X, (int) position.Y + _border.Height, Width, _border.Height), Vector3.Zero);
             spriteBatch.Draw2D(_border, new Rectangle((int) position.X, (int) position.Y + Height - _border.Height * 2 + 1, Width + 1, _border.Height), Vector3.Zero);

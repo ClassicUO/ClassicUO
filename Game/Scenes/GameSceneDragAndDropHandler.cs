@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Scenes
                 Entity entity = World.Get(item.Container);
                 item.Position = entity.Position;
                 entity.Items.Remove(item);
-                item.Container = Serial.Invalid;
+                //item.Container = Serial.Invalid;
             }
 
             CloseItemGumps(item);

@@ -21,41 +21,66 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
-
-using Microsoft.Xna.Framework;
-
-using MathHelper = ClassicUO.Utility.MathHelper;
+using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class Tile : GameObject
+    public struct Tile
     {
+        public static readonly Tile Invalid = new Tile(0xFFFF, 0xFFFF);
         private static readonly List<GameObject> _itemsAtZ = new List<GameObject>();
-        private readonly List<GameObject> _objectsOnTile;
-        private readonly List<Static> _statics = new List<Static>();
+        private List<GameObject> _objectsOnTile;
         private bool _needSort;
-        public Rectangle Rectangle;
+        private ushort? _x, _y;
 
-        public Tile() : base(World.Map)
+        public Tile(ushort x, ushort y)
         {
+            _x = x;
+            _y = y;
+            _needSort = false;
             _objectsOnTile = new List<GameObject>();
+            Land = null;
         }
 
-        public sbyte MinZ { get; set; }
+        public ushort X
+        {
+            get => _x ?? 0xFFFF;
+            set => _x = value;
+        }
 
-        public sbyte AverageZ { get; set; }
+        public ushort Y
+        {
+            get => _y ?? 0xFFFF;
+            set => _y = value;
+        }
 
-        public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
+        public Land Land { get; private set; }
 
-        public bool IsStretched { get; set; }
+        public static bool operator ==(Tile p1, Tile p2)
+        {
+            return p1.X == p2.X && p1.Y == p2.Y;
+        }
+
+        public static bool operator !=(Tile p1, Tile p2)
+        {
+            return p1.X != p2.X || p1.Y != p2.Y;
+        }
+
+        public override int GetHashCode()
+        {
+            return X ^ Y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Tile tile && this == tile;
+        }
 
         public IReadOnlyList<GameObject> ObjectsOnTiles
         {
@@ -64,7 +89,7 @@ namespace ClassicUO.Game.Map
                 if (_needSort)
                 {
                     RemoveDuplicates();
-                    TileSorter.Sort(_objectsOnTile);
+                    TileSorter.Sort(ref _objectsOnTile);
                     _needSort = false;
                 }
 
@@ -72,10 +97,19 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public LandTiles TileData => IO.Resources.TileData.LandData[Graphic];
-
         public void AddGameObject(GameObject obj)
         {
+            if (obj is Land land)
+            {
+                if (Land != null && land != Land)
+                {
+                    Land.Dispose();
+                    RemoveGameObject(Land);
+                }
+
+                Land = land;
+            }
+
             if (obj is IDynamicItem dyn)
             {
                 for (int i = 0; i < _objectsOnTile.Count; i++)
@@ -92,7 +126,7 @@ namespace ClassicUO.Game.Map
 
             switch (obj)
             {
-                case Tile tile:
+                case Land tile:
 
                     if (tile.IsStretched)
                         priorityZ = (short) (tile.AverageZ - 1);
@@ -117,7 +151,7 @@ namespace ClassicUO.Game.Map
                 {
                     IDynamicItem dyn1 = (IDynamicItem) obj;
 
-                    if (IO.Resources.TileData.IsBackground((long) dyn1.ItemData.Flags))
+                    if (TileData.IsBackground((long) dyn1.ItemData.Flags))
                         priorityZ--;
 
                     if (dyn1.ItemData.Height > 0)
@@ -143,12 +177,10 @@ namespace ClassicUO.Game.Map
             _needSort = true;
         }
 
-        public void Calculate() => ((TileView)View).UpdateStreched(World.Map);
-
         private void RemoveDuplicates()
         {
-            int[] toremove = new int[0x100];
-            int index = 0;
+            //int[] toremove = new int[0x100];
+            //int index = 0;
 
             for (int i = 0; i < _objectsOnTile.Count; i++)
             {
@@ -160,7 +192,9 @@ namespace ClassicUO.Game.Map
                         {
                             if (_objectsOnTile[j] is Static stj && st.Graphic == stj.Graphic)
                             {
-                                toremove[index++] = i;
+                                //toremove[index++] = i;
+                                Log.Message(LogTypes.Warning, "Duplicated");
+                                _objectsOnTile.RemoveAt(i--);
 
                                 break;
                             }
@@ -172,7 +206,11 @@ namespace ClassicUO.Game.Map
                                     if (_objectsOnTile[i].Position.Z == _objectsOnTile[jj].Position.Z)
                                     {
                                         if (_objectsOnTile[jj] is Static stj1 && item.ItemData.Name == stj1.ItemData.Name || _objectsOnTile[jj] is Item itemj && item.Serial == itemj.Serial)
-                                            toremove[index++] = jj;
+                                        {
+                                            //toremove[index++] = jj;
+                                            Log.Message(LogTypes.Warning, "Duplicated");
+                                            _objectsOnTile.RemoveAt(jj--);
+                                        }
                                     }
                                 }
                             }
@@ -181,7 +219,8 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            for (int i = 0; i < index; i++) _objectsOnTile.RemoveAt(toremove[i] - i);
+            //for (int i = 0; i < index; i++)
+            //    _objectsOnTile.RemoveAt(toremove[i] - i);
         }
 
         public List<GameObject> GetItemsBetweenZ(int z0, int z1)
@@ -215,99 +254,30 @@ namespace ClassicUO.Game.Map
                 {
                     StaticTiles itemdata = dyn.ItemData;
 
-                    if (IO.Resources.TileData.IsRoof((long) itemdata.Flags) || IO.Resources.TileData.IsSurface((long) itemdata.Flags) || IO.Resources.TileData.IsWall((long) itemdata.Flags) && IO.Resources.TileData.IsImpassable((long) itemdata.Flags))
+                    if (TileData.IsRoof((long) itemdata.Flags) || TileData.IsSurface((long) itemdata.Flags) || TileData.IsWall((long) itemdata.Flags) && TileData.IsImpassable((long) itemdata.Flags))
                     {
                         if (entity == null || list[i].Position.Z < entity.Position.Z)
                             entity = list[i];
                     }
                 }
-                else if (list[i] is Tile tile && tile.AverageZ >= z + 12) ground = list[i];
+                else if (list[i] is Land tile && tile.AverageZ >= z + 12) ground = list[i];
             }
 
             return entity != null || ground != null;
         }
 
-        public List<Static> GetStatics()
-        {
-            List<Static> items = _statics;
-            _statics.Clear();
-
-            for (int i = 0; i < _objectsOnTile.Count; i++)
-            {
-                if (_objectsOnTile[i] is Static st)
-                    items.Add(st);
-            }
-
-            return items;
-        }
-
-        public void UpdateZ(int zTop, int zRight, int zBottom)
-        {
-            if (IsStretched)
-            {
-                int x = Position.Z * 4 + 1;
-                int y = zTop * 4;
-                int w = zRight * 4 - x;
-                int h = zBottom * 4 + 1 - y;
-                Rectangle = new Rectangle(x, y, w, h);
-                int average = AverageZ;
-
-                if (Math.Abs(Position.Z - zRight) <= Math.Abs(zBottom - zTop))
-                    AverageZ = (sbyte) ((Position.Z + zRight) >> 1);
-                else
-                    AverageZ = (sbyte) ((zBottom + zTop) >> 1);
-
-                if (AverageZ != average)
-                    ForceSort();
-                MinZ = Position.Z;
-
-                if (zTop < MinZ)
-                    MinZ = (sbyte) zTop;
-
-                if (zRight < MinZ)
-                    MinZ = (sbyte) zRight;
-
-                if (zBottom < MinZ)
-                    MinZ = (sbyte) zBottom;
-            }
-        }
-
-        public int CalculateCurrentAverageZ(int direction)
-        {
-            int result = GetDirectionZ(((byte) (direction >> 1) + 1) & 3);
-
-            if ((direction & 1) > 0)
-                return result;
-
-            return (result + GetDirectionZ(direction >> 1)) >> 1;
-        }
-
-        private int GetDirectionZ(int direction)
-        {
-            switch (direction)
-            {
-                case 1: return Rectangle.Bottom / 4;
-                case 2: return Rectangle.Right / 4;
-                case 3: return Rectangle.Top / 4;
-                default: return Position.Z;
-            }
-        }
-
-        public override void Dispose()
+        public void Dispose()
         {
             for (int i = 0; i < _objectsOnTile.Count; i++)
             {
                 GameObject t = _objectsOnTile[i];
-                if (t is Static)
+
+                if (t != World.Player)
+                {
                     t.Dispose();
+                    _objectsOnTile.RemoveAt(i--);
+                }
             }
-
-            base.Dispose();
-        }
-
-        protected override View CreateView()
-        {
-            return new TileView(this);
         }
     }
 }

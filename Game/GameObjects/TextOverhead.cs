@@ -32,7 +32,7 @@ namespace ClassicUO.Game.GameObjects
     {
         protected const float TIME_FADEOUT = 1000.0f;
 
-        public TextOverhead(GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f) : base(parent.Map)
+        public TextOverhead(GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f)
         {
             Text = text;
             Parent = parent;

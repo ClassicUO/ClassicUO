@@ -63,8 +63,8 @@ namespace ClassicUO.IO.Resources
                 throw new FileNotFoundException();
             UOFileMul radarcol = new UOFileMul(path, false);
             RadarCol = radarcol.ReadArray<ushort>((int) radarcol.Length / 2);
-            file.Unload();
-            radarcol.Unload();
+            file.Dispose();
+            radarcol.Dispose();
         }
 
         public static void CreateHuesPalette()

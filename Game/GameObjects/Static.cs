@@ -33,7 +33,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private GameEffect _effect;
 
-        public Static(Graphic tileID, Hue hue, int index) : base(World.Map)
+        public Static(Graphic tileID, Hue hue, int index)
         {
             Graphic = tileID;
             Hue = hue;
