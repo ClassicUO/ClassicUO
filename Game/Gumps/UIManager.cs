@@ -214,8 +214,10 @@ namespace ClassicUO.Game.Gumps
             {
                 if (_keyboardFocusControl == null)
                 {
-                    foreach (GumpControl c in _gumps)
+                    for (int i = 0; i < _gumps.Count; i++)
                     {
+                        GumpControl c = _gumps[i];
+
                         if (!c.IsDisposed && c.IsVisible && c.IsEnabled && c.AcceptKeyboardInput)
                         {
                             _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
