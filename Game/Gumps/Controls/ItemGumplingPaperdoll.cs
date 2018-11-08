@@ -73,16 +73,16 @@ namespace ClassicUO.Game.Gumps.Controls
             return base.Draw(spriteBatch, position, hue);
         }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
+        //public override void Update(double totalMS, double frameMS)
+        //{
+        //    base.Update(totalMS, frameMS);
 
-            if (Item.IsDisposed)
-                return;
+        //    if (Item.IsDisposed)
+        //        return;
 
 
 
-        }
+        //}
 
 
         protected override bool Contains(int x, int y)

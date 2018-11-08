@@ -25,6 +25,7 @@ using System;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.Views;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
@@ -36,7 +37,6 @@ namespace ClassicUO.Game.Gumps.Controls
         };
 
         private bool _isElf;
-        private bool _isFemale;
         private Mobile _sourceEntity;
         private GumpPicBackpack _backpackGump;
 
@@ -44,7 +44,6 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             X = x;
             Y = y;
-            _isFemale = sourceEntity.IsFemale;
             SourceEntity = sourceEntity;
             AcceptMouseInput = false;
         }
@@ -57,20 +56,10 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 if (value != _sourceEntity)
                 {
-                    if (_sourceEntity != null)
-                    {
-                        _sourceEntity.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);
-                        _sourceEntity = null;
-                    }
-
-                    //if (value is Mobile)
-                    {
-                        _sourceEntity = value;
-                        // update the gump
-                        OnEntityUpdated(_sourceEntity);
-                        // if the entity changes in the future, update the gump again
-                        _sourceEntity.SetCallbacks(OnEntityUpdated, OnEntityDisposed);
-                    }
+                    _sourceEntity?.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);   
+                    _sourceEntity = value;
+                    OnEntityUpdated(_sourceEntity);
+                    _sourceEntity.SetCallbacks(OnEntityUpdated, OnEntityDisposed);                 
                 }
             }
         }
@@ -86,7 +75,6 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (_sourceEntity != null)
             {
-                _isFemale = _sourceEntity.IsFemale;
                 _isElf = false;
             }
 
@@ -97,7 +85,6 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (_sourceEntity != null)
             {
-                _isFemale = _sourceEntity.IsFemale;
                 _isElf = false;
             }
 
@@ -109,22 +96,24 @@ namespace ClassicUO.Game.Gumps.Controls
             Clear();
 
             // Add the base gump - the semi-naked paper doll.
-            if (true)
+            
+            int bodyID = 12 + (_isElf ? 2 : 0) + (_sourceEntity.IsFemale ? 1 : 0);
+            AddChildren(new GumpPic(0, 0, (ushort) bodyID, _sourceEntity.Hue)
             {
-                int bodyID = 12 + (_isElf ? 2 : 0) + (_isFemale ? 1 : 0);
-                GumpPic paperdoll;
-                AddChildren(paperdoll = new GumpPic(0, 0, (ushort) bodyID, ((Mobile) _sourceEntity).Hue));
-                paperdoll.AcceptMouseInput = true;
-                paperdoll.IsPaperdoll = true;
-            }
+                AcceptMouseInput = true,
+                IsPaperdoll = true
+            });
+            
 
             // Loop through the items on the mobile and create the gump pics.
             for (int i = 0; i < _layerOrder.Length; i++)
             {
-                Item item = _sourceEntity.Equipment[(int) _layerOrder[i]];
+                int layerIndex = (int) _layerOrder[i];
+                Item item = _sourceEntity.Equipment[layerIndex];
 
-                if (item == null)
+                if (item == null || MobileView.IsCovered(_sourceEntity, (Layer)layerIndex))
                     continue;
+
                 bool canPickUp = true;
 
                 switch (_layerOrder[i])
@@ -136,19 +125,23 @@ namespace ClassicUO.Game.Gumps.Controls
                         break;
                 }
 
-                ItemGumplingPaperdoll itemGumplingPaperdoll;
-                AddChildren(itemGumplingPaperdoll = new ItemGumplingPaperdoll(0, 0, item));
-                itemGumplingPaperdoll.SlotIndex = i;
-                itemGumplingPaperdoll.IsFemale = _isFemale;
-                itemGumplingPaperdoll.CanPickUp = canPickUp;
+
+                AddChildren(new ItemGumplingPaperdoll(0, 0, item)
+                {
+                    SlotIndex = i,
+                    IsFemale = _sourceEntity.IsFemale,
+                    CanPickUp = canPickUp
+                });
             }
 
             // If this object has a backpack, add it last.
             if (_sourceEntity.Equipment[(int) PaperDollEquipSlots.Backpack] != null)
             {
                 Item backpack = _sourceEntity.Equipment[(int) PaperDollEquipSlots.Backpack];
-                AddChildren(_backpackGump = new GumpPicBackpack(-7, 0, backpack));
-                _backpackGump.AcceptMouseInput = true;
+                AddChildren(_backpackGump = new GumpPicBackpack(-7, 0, backpack)
+                {
+                    AcceptMouseInput = true
+                });
                 _backpackGump.MouseDoubleClick += OnDoubleclickBackpackGump;
             }
         }
