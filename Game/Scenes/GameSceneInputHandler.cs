@@ -27,6 +27,7 @@ namespace ClassicUO.Game.Scenes
         private Action _queuedAction;
         private GameObject _queuedObject;
         private bool _rightMousePressed;
+        private PaperDollInteractable _lastFakeParedoll;
 
         public bool IsMouseOverUI => UIManager.IsMouseOverUI && !(UIManager.MouseOverControl is WorldViewport);
 
@@ -319,63 +320,18 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private PaperDollInteractable _lastFakeParedoll;
 
         private void OnMouseDragging(object sender, EventArgs e)
         {
             if (Mouse.LButtonPressed)
             {
-                if (IsMouseOverUI)
-                {
-                    if (IsHoldingItem)
-                    {
-                        GumpControl target = UIManager.MouseOverControl;
-
-                        if (target != null && TileData.IsWearable((long)HeldItem.ItemData.Flags))
-                        {
-
-                            PaperDollInteractable gumpling = null;
-
-                            if (target is ItemGumplingPaperdoll)
-                                gumpling = (PaperDollInteractable) target.Parent;
-                            else if (target is GumpPic pic && pic.IsPaperdoll)
-                            {
-                                gumpling = (PaperDollInteractable) target.Parent;
-                            }
-                            else if (target is EquipmentSlot || target is PaperDollGump || target.Parent is PaperDollGump)
-                            {
-                                gumpling = target.Parent.GetControls<PaperDollInteractable>()[0];
-                            }
-
-
-                            if (gumpling != null)
-                            {
-                                if (_lastFakeParedoll != gumpling)
-                                {
-                                    _lastFakeParedoll = gumpling;
-
-                                    gumpling.AddFakeDress(new Item(Serial.Invalid)
-                                    {
-                                        Amount = 1, Graphic = HeldItem.Graphic, Hue = HeldItem.Hue
-                                    });
-                                    gumpling.Update();
-                                }
-
-                                return;
-                            }
-
-
-                        }
-                    }
-                }
-
-                if (_lastFakeParedoll != null)
-                {
-                    _lastFakeParedoll.AddFakeDress(null);
-                    _lastFakeParedoll.Update();
-                    _lastFakeParedoll = null;
-                }
+                HandleMouseFakeItem();
             }
+        }
+
+        private void OnMouseMoving(object sender, EventArgs e)
+        {
+            HandleMouseFakeItem();
         }
 
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
@@ -411,6 +367,63 @@ namespace ClassicUO.Game.Scenes
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
         {
+        }
+
+
+        private void HandleMouseFakeItem()
+        {
+            if (IsMouseOverUI)
+            {
+                if (IsHoldingItem)
+                {
+                    GumpControl target = UIManager.MouseOverControl;
+
+                    if (target != null && TileData.IsWearable((long)HeldItem.ItemData.Flags))
+                    {
+
+                        PaperDollInteractable gumpling = null;
+
+                        if (target is ItemGumplingPaperdoll)
+                            gumpling = (PaperDollInteractable)target.Parent;
+                        else if (target is GumpPic pic && pic.IsPaperdoll)
+                        {
+                            gumpling = (PaperDollInteractable)target.Parent;
+                        }
+                        else if (target is EquipmentSlot || target is PaperDollGump || target.Parent is PaperDollGump)
+                        {
+                            gumpling = target.Parent.GetControls<PaperDollInteractable>()[0];
+                        }
+
+
+                        if (gumpling != null)
+                        {
+                            if (_lastFakeParedoll != gumpling)
+                            {
+                                _lastFakeParedoll = gumpling;
+
+                                gumpling.AddFakeDress(new Item(Serial.Invalid)
+                                {
+                                    Amount = 1,
+                                    Graphic = HeldItem.Graphic,
+                                    Hue = HeldItem.Hue
+                                });
+                                gumpling.Update();
+                            }
+
+                            return;
+                        }
+
+
+                    }
+                }
+            }
+
+            if (_lastFakeParedoll != null)
+            {
+                _lastFakeParedoll.AddFakeDress(null);
+                _lastFakeParedoll.Update();
+                _lastFakeParedoll = null;
+            }
         }
     }
 }

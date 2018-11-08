@@ -125,6 +125,7 @@ namespace ClassicUO.Game.Scenes
             InputManager.RightMouseDoubleClick += OnRightMouseDoubleClick;
             InputManager.DragBegin += OnMouseDragBegin;
             InputManager.MouseDragging += OnMouseDragging;
+            InputManager.MouseMoving += OnMouseMoving;
             InputManager.KeyDown += OnKeyDown;
             InputManager.KeyUp += OnKeyUp;
         }
@@ -146,6 +147,7 @@ namespace ClassicUO.Game.Scenes
             InputManager.RightMouseDoubleClick -= OnRightMouseDoubleClick;
             InputManager.DragBegin -= OnMouseDragBegin;
             InputManager.MouseDragging -= OnMouseDragging;
+            InputManager.MouseMoving -= OnMouseMoving;
             InputManager.KeyDown -= OnKeyDown;
             InputManager.KeyUp -= OnKeyUp;
             base.Unload();

@@ -55,6 +55,7 @@ namespace ClassicUO.Game.Gumps
             _sbUI = Service.Get<SpriteBatchUI>();
             InputManager = Service.Get<InputManager>();
 
+
             InputManager.MouseDragging += (sender, e) =>
             {
                 if (_isDraggingControl)
