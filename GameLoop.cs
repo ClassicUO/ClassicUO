@@ -204,5 +204,10 @@ namespace ClassicUO
             _infoText.Draw(_sbUI, new Point(Window.ClientBounds.Width - 150, 20));
             _sbUI.End();
         }
+
+        public void Quit()
+        {
+            Exit();
+        }
     }
 }
