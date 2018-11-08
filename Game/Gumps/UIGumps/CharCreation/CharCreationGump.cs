@@ -9,22 +9,26 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 {
-    class CharCreationGump: GumpControl
+    class CharCreationGump: Gump
     {
         public enum CharCreationStep
         {
-            Appearence, ChooseTrade
+            Appearence = 0, ChooseTrade = 1
         }
-        
-        private LoginScene loginScene;
-        PlayerMobile _character;
-        CharCreationStep _currentStep;
 
-        public CharCreationGump()
+        private CharCreationStep _currentStep;
+        private LoginScene loginScene;
+        private PlayerMobile _character;
+        private LoadingGump _loadingGump;
+
+        public CharCreationGump(): base(0, 0)
         {
             loginScene = Service.Get<LoginScene>();
-            SetStep(CharCreationStep.Appearence);
 
+            AddChildren(new CreateCharAppearanceGump(), 1);
+
+            SetStep(CharCreationStep.Appearence);
+            
             CanCloseWithRightClick = false;
             Service.Register(this);
         }
@@ -38,29 +42,51 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
         public void CreateCharacter()
         {
             loginScene.CreateCharacter(_character);
-            // SetStep(CharCreationStep.ChooseTrade);
+            Service.Unregister<CharCreationGump>();
+        }
+
+        public void StepBack()
+        {
+            if (_currentStep == CharCreationStep.Appearence)
+            {
+                Service.Unregister<CharCreationGump>();
+                loginScene.StepBack();
+            }
+            else
+                SetStep(_currentStep - 1);
+        }
+
+        public void ShowMessage(string message)
+        {
+            var currentPage = ActivePage;
+
+            if (_loadingGump != null)
+                RemoveChildren(_loadingGump);
+
+            AddChildren(_loadingGump =
+                    new LoadingGump(message, LoadingGump.Buttons.OK, (a) => ChangePage(currentPage)), 4);
+
+            ChangePage(4);
         }
 
         private void SetStep(CharCreationStep step)
         {
             _currentStep = step;
-            if (Children.Count() > 0)
-                RemoveChildren(Children.First());
 
-            AddChildren(GetGumpForStep(step));
-        }
-
-        private GumpControl GetGumpForStep(CharCreationStep step)
-        {
             switch (step)
             {
                 case CharCreationStep.Appearence:
-                    return new CreateCharAppearanceGump();
+                    ChangePage(1);
+                    break;
                 case CharCreationStep.ChooseTrade:
-                    return new CreateCharTradeGump(_character);
-            }
+                    var existent = Children.Where(o => o.Page == 2).FirstOrDefault();
+                    if (existent != null)
+                        RemoveChildren(existent);
 
-            return null;
+                    AddChildren(new CreateCharTradeGump(_character), 2);
+                    ChangePage(2);
+                    break;
+            }
         }
     }
 }

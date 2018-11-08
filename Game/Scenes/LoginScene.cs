@@ -60,11 +60,7 @@ namespace ClassicUO.Game.Scenes
         private byte[] _clientVersionBuffer;
         private LoginRejectionReasons? _loginRejectionReason;
         private LoginStep _loginStep = LoginStep.Main;
-
-        public LoginScene() : base(ScenesType.Login)
-        {
-        }
-
+        
         public bool UpdateScreen { get; set; }
 
         public LoginStep CurrentLoginStep
@@ -86,6 +82,11 @@ namespace ClassicUO.Game.Scenes
         public byte ServerIndex { get; private set; }
         public string Account { get; private set; }
         public string Password { get; private set; }
+
+        public LoginScene() : base(ScenesType.Login)
+        {
+
+        }
 
         public override void Load()
         {
@@ -172,6 +173,14 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Send(new PCreateCharacter(character, NetClient.Socket.ClientAddress, ServerIndex, (uint)i));
         }
 
+        public void DeleteCharacter(uint index)
+        {
+            if (CurrentLoginStep == LoginStep.CharacterSelection)
+            {
+                NetClient.Socket.Send(new PDeleteCharacter((byte)index, NetClient.Socket.ClientAddress));
+            }
+        }
+
         public void StepBack()
         {
             _loginRejectionReason = null;
@@ -193,6 +202,9 @@ namespace ClassicUO.Game.Scenes
                     Servers = null;
                     Connect(Account, Password);
 
+                    break;
+                case LoginStep.CharCreation:
+                    CurrentLoginStep = LoginStep.CharacterSelection;
                     break;
             }
         }
@@ -227,6 +239,7 @@ namespace ClassicUO.Game.Scenes
                     HandleRelayServerPacket(e);
 
                     break;
+                case 0x86: // UpdateCharacterList
                 case 0xA9: // ReceiveCharacterList
                     ParseCharacterList(e);
                     CurrentLoginStep = LoginStep.CharacterSelection;
@@ -276,6 +289,7 @@ namespace ClassicUO.Game.Scenes
 
         private void ParseCharacterList(Packet reader)
         {
+            reader.MoveToData();
             int count = reader.ReadByte();
             Characters = new CharacterListEntry[count];
             for (ushort i = 0; i < count; i++) Characters[i] = new CharacterListEntry(reader);

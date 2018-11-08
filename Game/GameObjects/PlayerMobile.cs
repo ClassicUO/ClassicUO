@@ -138,7 +138,8 @@ namespace ClassicUO.Game.GameObjects
                 _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasButton);
             }
 
-            NetClient.Socket.Send(new PSkillsRequest(this));
+            if (World.InGame)
+                NetClient.Socket.Send(new PSkillsRequest(this));
         }
 
         public IReadOnlyList<Skill> Skills => _sklls;

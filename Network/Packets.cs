@@ -201,7 +201,10 @@ namespace ClassicUO.Network
 
             WriteUInt(clientIP);
             WriteUShort(character.Equipment[(int)Layer.Shirt].Hue);
-            WriteUShort(character.Equipment[(int)Layer.Pants].Hue);
+            if (character.Equipment[(int)Layer.Pants] != null)
+                WriteUShort(character.Equipment[(int)Layer.Pants].Hue);
+            else
+                WriteUShort(0x00);
         }
     }
 

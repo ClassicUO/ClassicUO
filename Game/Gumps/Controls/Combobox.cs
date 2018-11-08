@@ -49,6 +49,11 @@ namespace ClassicUO.Game.Gumps.Controls
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             var contextMenu = new ComboboxContextMenu(_items, Width, _maxHeight) { X = ScreenCoordinateX, Y = ScreenCoordinateY };
+            if (contextMenu.Height + ScreenCoordinateY > UIManager.Height)
+            {
+                contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - UIManager.Height;
+            }
+
             contextMenu.OnOptionSelected += _contextMenu_OnOptionSelected;
             UIManager.Add(contextMenu);
 
@@ -103,7 +108,9 @@ namespace ClassicUO.Game.Gumps.Controls
                 }
 
                 _background.Width = maxWidth;
-                
+
+                Height = _background.Height;
+
                 ControlInfo.IsModal = true;
                 ControlInfo.Layer = UILayer.Over;
                 ControlInfo.ModalClickOutsideAreaClosesThisControl = true;
