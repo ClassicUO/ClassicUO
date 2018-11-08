@@ -97,6 +97,13 @@ namespace ClassicUO.Game.Scenes
                 {
                     GumpControl target = UIManager.MouseOverControl;
 
+                    if (_lastFakeParedoll != null)
+                    {
+                        _lastFakeParedoll.AddFakeDress(null);
+                        _lastFakeParedoll.Update();
+                        _lastFakeParedoll = null;
+                    }
+
                     if (target is ItemGumpling gumpling && !(target is ItemGumplingPaperdoll))
                     {
                         Item item = gumpling.Item;
@@ -129,7 +136,9 @@ namespace ClassicUO.Game.Scenes
                     else if (target is ItemGumplingPaperdoll || (target is GumpPic pic && pic.IsPaperdoll) || target is EquipmentSlot || target?.Parent is PaperDollGump)
                     {
                         if (TileData.IsWearable((long) HeldItem.ItemData.Flags))
+                        {
                             WearHeldItem();
+                        }
                     }
                     else if (target is GumpPicBackpack backpack) DropHeldItemToContainer(backpack.BackpackItem);
                 }
@@ -289,20 +298,82 @@ namespace ClassicUO.Game.Scenes
 
         private void OnMouseDragBegin(object sender, EventArgs e)
         {
-            if (Mouse.LButtonPressed && !IsHoldingItem && IsMouseOverWorld)
+            if (Mouse.LButtonPressed)
             {
-                GameObject obj = _mousePicker.MouseOverObject;
-
-                switch (obj)
+                if (!IsHoldingItem && IsMouseOverWorld)
                 {
-                    case Mobile mobile:
+                    GameObject obj = _mousePicker.MouseOverObject;
 
-                        // get the lifebar
-                        break;
-                    case Item item:
-                        PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
+                    switch (obj)
+                    {
+                        case Mobile mobile:
 
-                        break;
+                            // get the lifebar
+                            break;
+                        case Item item:
+                            PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
+
+                            break;
+                    }
+                }
+            }
+        }
+
+        private PaperDollInteractable _lastFakeParedoll;
+
+        private void OnMouseDragging(object sender, EventArgs e)
+        {
+            if (Mouse.LButtonPressed)
+            {
+                if (IsMouseOverUI)
+                {
+                    if (IsHoldingItem)
+                    {
+                        GumpControl target = UIManager.MouseOverControl;
+
+                        if (target != null && TileData.IsWearable((long)HeldItem.ItemData.Flags))
+                        {
+
+                            PaperDollInteractable gumpling = null;
+
+                            if (target is ItemGumplingPaperdoll)
+                                gumpling = (PaperDollInteractable) target.Parent;
+                            else if (target is GumpPic pic && pic.IsPaperdoll)
+                            {
+                                gumpling = (PaperDollInteractable) target.Parent;
+                            }
+                            else if (target is EquipmentSlot || target is PaperDollGump || target.Parent is PaperDollGump)
+                            {
+                                gumpling = target.Parent.GetControls<PaperDollInteractable>()[0];
+                            }
+
+
+                            if (gumpling != null)
+                            {
+                                if (_lastFakeParedoll != gumpling)
+                                {
+                                    _lastFakeParedoll = gumpling;
+
+                                    gumpling.AddFakeDress(new Item(Serial.Invalid)
+                                    {
+                                        Amount = 1, Graphic = HeldItem.Graphic, Hue = HeldItem.Hue
+                                    });
+                                    gumpling.Update();
+                                }
+
+                                return;
+                            }
+
+
+                        }
+                    }
+                }
+
+                if (_lastFakeParedoll != null)
+                {
+                    _lastFakeParedoll.AddFakeDress(null);
+                    _lastFakeParedoll.Update();
+                    _lastFakeParedoll = null;
                 }
             }
         }

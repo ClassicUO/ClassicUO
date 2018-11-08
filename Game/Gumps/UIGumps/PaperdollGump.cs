@@ -162,7 +162,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             // Equipment slots for hat/earrings/neck/ring/bracelet
             AddChildren(new EquipmentSlot(2, 76, Mobile, Layer.Helmet));
-            AddChildren(new EquipmentSlot(2, 76 + 22 * 1, Mobile, Layer.Earrings));
+            AddChildren(new EquipmentSlot(2, 76 + 22, Mobile, Layer.Earrings));
             AddChildren(new EquipmentSlot(2, 76 + 22 * 2, Mobile, Layer.Necklace));
             AddChildren(new EquipmentSlot(2, 76 + 22 * 3, Mobile, Layer.Ring));
             AddChildren(new EquipmentSlot(2, 76 + 22 * 4, Mobile, Layer.Bracelet));

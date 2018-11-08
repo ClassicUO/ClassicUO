@@ -466,8 +466,10 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             bool initializedKeyboardFocusedControl = false;
 
-            foreach (GumpControl c in _children)
+            for (int i = 0; i < _children.Count; i++)
             {
+                GumpControl c = _children[i];
+
                 if (!c.IsInitialized)
                 {
                     c.Initialize();

@@ -32,14 +32,14 @@ namespace ClassicUO.Game.Gumps.Controls
     internal class ItemGumplingPaperdoll : ItemGumpling
     {
         private readonly ushort _gumpIndex;
+        private readonly bool _isTransparent;
 
-        public ItemGumplingPaperdoll(int x, int y, Item item) : base(item)
+        public ItemGumplingPaperdoll(int x, int y, Item item, bool transparent = false) : base(item)
         {
             X = x;
             Y = y;
             HighlightOnMouseOver = false;
-
-
+            _isTransparent = transparent;
             _gumpIndex = (ushort) (Item.ItemData.AnimID + (IsFemale ? 60000 : 50000));
 
             //if (Animations.EquipConversions.TryGetValue(_gumpIndex, out var dict))
@@ -56,6 +56,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool IsFemale { get; set; }
 
+
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (Item.IsDisposed)
@@ -68,21 +69,10 @@ namespace ClassicUO.Game.Gumps.Controls
                 Height = Texture.Height;
             }
 
-            spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue((long) Item.ItemData.Flags), 0, false));
+            Texture.Ticks = CoreGame.Ticks;
 
-            return base.Draw(spriteBatch, position, hue);
+            return spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue((long)Item.ItemData.Flags), _isTransparent ? .5f : 0, false));
         }
-
-        //public override void Update(double totalMS, double frameMS)
-        //{
-        //    base.Update(totalMS, frameMS);
-
-        //    if (Item.IsDisposed)
-        //        return;
-
-
-
-        //}
 
 
         protected override bool Contains(int x, int y)

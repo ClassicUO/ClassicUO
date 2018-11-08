@@ -26,6 +26,7 @@ using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Views;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
@@ -39,6 +40,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private bool _isElf;
         private Mobile _sourceEntity;
         private GumpPicBackpack _backpackGump;
+        private Item _fakeItem;
 
         public PaperDollInteractable(int x, int y, Mobile sourceEntity) : base(0, 0)
         {
@@ -78,6 +80,11 @@ namespace ClassicUO.Game.Gumps.Controls
                 _isElf = false;
             }
 
+            if (_fakeItem != null)
+            {
+
+            }
+
             base.Update(totalMS, frameMS);
         }
 
@@ -90,6 +97,21 @@ namespace ClassicUO.Game.Gumps.Controls
 
             OnEntityUpdated(_sourceEntity);
         }
+
+        public void AddFakeDress(Item item)
+        {
+            if (item == null && _fakeItem != null)
+            {
+                _fakeItem.Dispose();
+                _fakeItem = null;
+            }
+            else if (_sourceEntity != null && item != null && _sourceEntity.Equipment[item.ItemData.Layer] == null)
+            {
+                _fakeItem = item;
+            }
+        }
+
+
 
         private void OnEntityUpdated(Entity entity)
         {
@@ -104,6 +126,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 IsPaperdoll = true
             });
             
+            
 
             // Loop through the items on the mobile and create the gump pics.
             for (int i = 0; i < _layerOrder.Length; i++)
@@ -111,10 +134,16 @@ namespace ClassicUO.Game.Gumps.Controls
                 int layerIndex = (int) _layerOrder[i];
                 Item item = _sourceEntity.Equipment[layerIndex];
 
-                if (item == null || MobileView.IsCovered(_sourceEntity, (Layer)layerIndex))
-                    continue;
-
+                bool isfake = false;
                 bool canPickUp = true;
+
+                if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
+                {
+                    isfake = true;
+                    canPickUp = false;                   
+                }
+                else if (item == null || MobileView.IsCovered(_sourceEntity, (Layer)layerIndex))
+                    continue;
 
                 switch (_layerOrder[i])
                 {
@@ -125,13 +154,13 @@ namespace ClassicUO.Game.Gumps.Controls
                         break;
                 }
 
-
-                AddChildren(new ItemGumplingPaperdoll(0, 0, item)
+                AddChildren(new ItemGumplingPaperdoll(0, 0, isfake ? _fakeItem : item, isfake)
                 {
                     SlotIndex = i,
                     IsFemale = _sourceEntity.IsFemale,
                     CanPickUp = canPickUp
                 });
+
             }
 
             // If this object has a backpack, add it last.
