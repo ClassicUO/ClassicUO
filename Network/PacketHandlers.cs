@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Formatting;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -1645,14 +1646,26 @@ namespace ClassicUO.Network
                     ushort crafterNameLen = 0;
                     uint next = p.ReadUInt();
 
+                    StringBuffer strBuffer = new StringBuffer();
+
                     if (next == 0xFFFFFFFD)
                     {
                         crafterNameLen = p.ReadUShort();
-                        if (crafterNameLen > 0) str = "Crafted by " + p.ReadASCII(crafterNameLen);
+
+                        if (crafterNameLen > 0)
+                        {
+                            strBuffer.Append("Crafted by ");
+                            strBuffer.Append(p.ReadASCII(crafterNameLen));
+                        }
                     }
 
                     if (crafterNameLen != 0) next = p.ReadUInt();
-                    if (next == 0xFFFFFFFC) str += "[Unidentified";
+
+                    if (next == 0xFFFFFFFC)
+                    {
+                        strBuffer.Append("[Unidentified");
+                    }
+
                     byte count = 0;
 
                     while (p.Position < p.Length - 4)
@@ -1665,22 +1678,22 @@ namespace ClassicUO.Network
                         {
                             if (count > 0)
                             {
-                                str += "/";
-                                str += attr;
+                                strBuffer.Append("/");
+                                strBuffer.Append(attr);
                             }
                             else
                             {
-                                str += " [";
-                                str += attr;
+                                strBuffer.Append(" [");
+                                strBuffer.Append(attr);
                             }
                         }
                         else
                         {
-                            str += "\n[";
-                            str += attr;
-                            str += " : ";
-                            str += charges.ToString();
-                            str += "]";
+                            strBuffer.Append("\n[");
+                            strBuffer.Append(attr);
+                            strBuffer.Append(" : ");
+                            strBuffer.Append(charges, StringView.Empty);
+                            strBuffer.Append("]");
                             count += 20;
                         }
 
