@@ -507,8 +507,10 @@ namespace ClassicUO.Game.Gumps.Controls
                     if (AcceptMouseInput)
                         results.Insert(0, this);
 
-                    foreach (GumpControl c in Children)
+                    for (int j = 0; j < Children.Count; j++)
                     {
+                        GumpControl c = Children[j];
+
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
                             GumpControl[] cl = c.HitTest(position);

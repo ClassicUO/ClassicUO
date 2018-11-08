@@ -21,8 +21,12 @@
 
 #endregion
 
+using System;
+
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -36,6 +40,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private readonly Layer _layer;
         private bool _canDrag, _sendClickIfNotDClick;
         private float _pickupTime, _singleClickTime;
+        private Point _clickPoint;
 
         public EquipmentSlot(int x, int y, Mobile mobile, Layer layer)
         {
@@ -43,17 +48,19 @@ namespace ClassicUO.Game.Gumps.Controls
             Y = y;
             _mobile = mobile;
             _layer = layer;
-            AddChildren(new GumpPicTiled(0, 0, 19, 20, 0x243A));
-            AddChildren(new GumpPic(0, 0, 0x2344, 0));
+            AddChildren(new GumpPicTiled(0, 0, 19, 20, 0x243A)
+            {
+                AcceptMouseInput = false
+            });
+            AddChildren(new GumpPic(0, 0, 0x2344, 0)
+            {
+                AcceptMouseInput = false
+            });
 
             AcceptMouseInput = true;
         }
 
-        public Item Item
-        {
-            get => _item;
-            set => _item = value;
-        }
+        public Item Item => _item;
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -75,7 +82,11 @@ namespace ClassicUO.Game.Gumps.Controls
                 _item = _mobile.Equipment[(int) _layer];
 
                 if (_item != null)
-                    AddChildren( _itemGump = new StaticPic(_item.Graphic, _item.Hue));
+                    AddChildren( _itemGump = new StaticPic(_item.Graphic, _item.Hue)
+                    {
+                        X = -14,
+                        AcceptMouseInput = false
+                    });
             }
 
             if (_item != null)
@@ -94,11 +105,56 @@ namespace ClassicUO.Game.Gumps.Controls
             }
 
             base.Update(totalMS, frameMS);
+        }
 
-            if (_itemGump != null)
+        protected override void OnMouseDown(int x, int y, MouseButton button)
+        {
+            if (_item == null)
+                return;
+
+            _canDrag = true;
+            float totalMS = CoreGame.Ticks;
+            _pickupTime = totalMS + 800;
+            _clickPoint.X = x;
+            _clickPoint.Y = y;
+        }
+
+        protected override void OnMouseEnter(int x, int y)
+        {
+            if (_item == null)
+                return;
+
+            if (_canDrag && Math.Abs(_clickPoint.X - x) + Math.Abs(_clickPoint.Y - y) > 3)
             {
-                _itemGump.Location = new Point(-14, 0);
+                _canDrag = false;
+                AttempPickUp();
             }
+        }
+
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            if (_item == null)
+                return;
+
+            if (_canDrag)
+            {
+                _canDrag = false;
+                _sendClickIfNotDClick = true;
+                float totalMS = CoreGame.Ticks;
+                _singleClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+            }
+        }
+
+
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+            if (_item == null)
+                return false;
+
+            GameActions.DoubleClick(_item);
+            _sendClickIfNotDClick = false;
+
+            return true;
         }
 
         private void AttempPickUp()
@@ -106,5 +162,6 @@ namespace ClassicUO.Game.Gumps.Controls
             Rectangle bounds = Art.GetStaticTexture(Item.DisplayedGraphic).Bounds;
             GameActions.PickUp(Item, bounds.Width / 2, bounds.Height / 2);
         }
+
     }
 }

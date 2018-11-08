@@ -65,6 +65,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public string Title { get; }
 
+
         public override void Dispose()
         {
             if (Mobile == World.Player)
