@@ -80,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
 
         public CharacterSpeedType SpeedMode { get; internal set; } = CharacterSpeedType.Normal;
 
-        public bool IsFemale => (Flags & Flags.Female) != 0;
+        public bool IsFemale => (Flags & Flags.Female) != 0 || Graphic == 0x0191 || Graphic == 0x0193;
 
         public RaceType Race
         {

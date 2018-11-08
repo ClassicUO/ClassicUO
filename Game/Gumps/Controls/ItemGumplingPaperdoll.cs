@@ -31,13 +31,25 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     internal class ItemGumplingPaperdoll : ItemGumpling
     {
-        private ushort _gumpIndex;
+        private readonly ushort _gumpIndex;
 
         public ItemGumplingPaperdoll(int x, int y, Item item) : base(item)
         {
             X = x;
             Y = y;
             HighlightOnMouseOver = false;
+
+
+            _gumpIndex = (ushort) (Item.ItemData.AnimID + (IsFemale ? 60000 : 50000));
+
+            //if (Animations.EquipConversions.TryGetValue(_gumpIndex, out var dict))
+            //{
+            //    if (dict.TryGetValue(Item.ItemData.AnimID, out EquipConvData data))
+            //    {
+            //        _gumpIndex = data.Gump;
+            //    }
+            //}
+
         }
 
         public int SlotIndex { get; set; }
@@ -46,18 +58,32 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
+            if (Item.IsDisposed)
+                return false;
+
             if (Texture == null || Texture.IsDisposed)
             {
-                _gumpIndex = (ushort) (Item.ItemData.AnimID + (IsFemale ? 60000 : 50000));
                 Texture = IO.Resources.Gumps.GetGumpTexture(_gumpIndex);
                 Width = Texture.Width;
                 Height = Texture.Height;
             }
 
-            spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue, TileData.IsPartialHue((long) Item.ItemData.Flags), 0, false));
+            spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue((long) Item.ItemData.Flags), 0, false));
 
             return base.Draw(spriteBatch, position, hue);
         }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (Item.IsDisposed)
+                return;
+
+
+
+        }
+
 
         protected override bool Contains(int x, int y)
         {

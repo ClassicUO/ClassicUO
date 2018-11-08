@@ -76,10 +76,19 @@ namespace ClassicUO.IO.Resources
                         continue;
                     string[] defs = line.Replace('\t', ' ').Split(' ');
 
-                    if (defs.Length != 3)
+                    if (defs.Length < 3)
                         continue;
+
                     int ingump = int.Parse(defs[0]);
+
+                    if (ingump < 0 || ingump >= GUMP_COUNT || _file.Entries[ingump].DecompressedLength != 0)
+                        continue;
+
+
                     int outgump = int.Parse(defs[1].Replace("{", string.Empty).Replace("}", string.Empty));
+                    if (outgump < 0 || outgump >= GUMP_COUNT || _file.Entries[outgump].DecompressedLength == 0)
+                        continue;
+
                     int outhue = int.Parse(defs[2]);
 
                     //if (ingump > 60000)
@@ -161,15 +170,6 @@ namespace ClassicUO.IO.Resources
         public static bool Contains(ushort g, int x, int y, int extra = 0)
         {
             return _picker.Get(g, x, y, extra);
-        }
-
-        private static int PaddedRowWidth(int bitsPerPixel, int w, int padToNBytes)
-        {
-            if (padToNBytes == 0)
-                throw new ArgumentOutOfRangeException("padToNBytes", "pad value must be greater than 0.");
-            int padBits = 8 * padToNBytes;
-
-            return (w * bitsPerPixel + (padBits - 1)) / padBits * padToNBytes;
         }
 
         public static unsafe ushort[] GetGumpPixels(int index, out int width, out int height)
