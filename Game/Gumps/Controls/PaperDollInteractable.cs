@@ -73,28 +73,9 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Dispose();
         }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            if (_sourceEntity != null)
-            {
-                _isElf = false;
-            }
-
-            if (_fakeItem != null)
-            {
-
-            }
-
-            base.Update(totalMS, frameMS);
-        }
 
         public void Update()
         {
-            if (_sourceEntity != null)
-            {
-                _isElf = false;
-            }
-
             OnEntityUpdated(_sourceEntity);
         }
 
@@ -118,9 +99,31 @@ namespace ClassicUO.Game.Gumps.Controls
             Clear();
 
             // Add the base gump - the semi-naked paper doll.
-            
-            int bodyID = 12 + (_isElf ? 2 : 0) + (_sourceEntity.IsFemale ? 1 : 0);
-            AddChildren(new GumpPic(0, 0, (ushort) bodyID, _sourceEntity.Hue)
+
+            Graphic body = 0;
+
+            if (_sourceEntity == World.Player)
+            {
+                switch (_sourceEntity.Race)
+                {
+                    case RaceType.HUMAN:
+                        body = (Graphic) (0xC + (_sourceEntity.IsFemale ? 1 : 0));
+
+                        break;
+                    case RaceType.ELF:
+                        body = (Graphic) (0xE + (_sourceEntity.IsFemale ? 1 : 0));
+
+                        break;
+                    case RaceType.GARGOYLE:
+                        body = (Graphic) (0x29A + (_sourceEntity.IsFemale ? 1 : 0));
+
+                        break;
+                }
+            }
+            else
+                body = (Graphic) (12 + (_sourceEntity.IsFemale ? 1 : 0));
+ 
+            AddChildren(new GumpPic(0, 0, body, _sourceEntity.Hue)
             {
                 AcceptMouseInput = true,
                 IsPaperdoll = true
