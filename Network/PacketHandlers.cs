@@ -774,6 +774,7 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
             Item item = World.Items.Get(p.ReadUInt());
+            //item.EnableCallBackForItemsUpdate(true);
             Graphic graphic = p.ReadUShort();
             UIManager ui = Service.Get<UIManager>();
 
@@ -2296,6 +2297,7 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
+                //entity.EnableCallBackForItemsUpdate(true);
                 entity.Items.Add(item);
 
                 foreach (Item i in World.ToAdd.Where(i => i.Container == item))

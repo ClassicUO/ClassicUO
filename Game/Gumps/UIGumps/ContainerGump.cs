@@ -47,11 +47,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             foreach (Item item in _item.Items)
                 AddChildren(new ItemGumpling(item));
+            _item.EnableCallBackForItemsUpdate(true);
             _item.SetCallbacks(OnItemUpdated, OnItemDisposed);
         }
 
         public override void Dispose()
         {
+            _item.EnableCallBackForItemsUpdate(false);
             _item.ClearCallBacks(OnItemUpdated, OnItemDisposed);
             base.Dispose();
         }

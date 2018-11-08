@@ -68,6 +68,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Dispose()
         {
+            Mobile.EnableCallBackForItemsUpdate(false);
             if (Mobile == World.Player)
             {
                 _virtueMenuPic.MouseDoubleClick -= VirtueMenu_MouseDoubleClickEvent;
@@ -87,6 +88,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Y = 100;
             //SaveOnWorldStop = true;
             LocalSerial = Mobile.Serial;
+
+            Mobile.EnableCallBackForItemsUpdate(true);
 
             if (Mobile == World.Player)
             {
