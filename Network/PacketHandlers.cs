@@ -437,7 +437,11 @@ namespace ClassicUO.Network
 
         private static void NewHealthbarUpdate(Packet p)
         {
-            if (p.ID == 0x16 && FileManager.ClientVersion < ClientVersions.CV_500A) return;
+            if (World.Player == null)
+                return;
+
+            if (p.ID == 0x16 && FileManager.ClientVersion < ClientVersions.CV_500A)
+                return;
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
 
             if (mobile == null) return;

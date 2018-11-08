@@ -21,16 +21,90 @@
 
 #endregion
 
+using ClassicUO.Game.GameObjects;
+using ClassicUO.IO.Resources;
+
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.Gumps.Controls
 {
     internal class EquipmentSlot : GumpControl
     {
-        public EquipmentSlot(int x, int y)
+        private StaticPic _itemGump;
+        private Item _item;
+        private readonly Mobile _mobile;
+        private readonly Layer _layer;
+        private bool _canDrag, _sendClickIfNotDClick;
+        private float _pickupTime, _singleClickTime;
+
+        public EquipmentSlot(int x, int y, Mobile mobile, Layer layer)
         {
             X = x;
             Y = y;
+            _mobile = mobile;
+            _layer = layer;
             AddChildren(new GumpPicTiled(0, 0, 19, 20, 0x243A));
             AddChildren(new GumpPic(0, 0, 0x2344, 0));
+
+            AcceptMouseInput = true;
+        }
+
+        public Item Item
+        {
+            get => _item;
+            set => _item = value;
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            if (_item != null && _item.IsDisposed)
+            {
+                _item = null;
+                _itemGump.Dispose();
+                _itemGump = null;
+            }
+
+            if (_item != _mobile.Equipment[(int) _layer])
+            {
+                if (_itemGump != null)
+                {
+                    _itemGump.Dispose();
+                    _itemGump = null;
+                }
+
+                _item = _mobile.Equipment[(int) _layer];
+
+                if (_item != null)
+                    AddChildren( _itemGump = new StaticPic(_item.Graphic, _item.Hue));
+            }
+
+            if (_item != null)
+            {
+                if (_canDrag && totalMS >= _pickupTime)
+                {
+                    _canDrag = false;
+                    AttempPickUp();
+                }
+
+                if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
+                {
+                    _sendClickIfNotDClick = false;
+                    GameActions.SingleClick(_item);
+                }
+            }
+
+            base.Update(totalMS, frameMS);
+
+            if (_itemGump != null)
+            {
+                _itemGump.Location = new Point(-14, 0);
+            }
+        }
+
+        private void AttempPickUp()
+        {
+            Rectangle bounds = Art.GetStaticTexture(Item.DisplayedGraphic).Bounds;
+            GameActions.PickUp(Item, bounds.Width / 2, bounds.Height / 2);
         }
     }
 }
