@@ -77,14 +77,10 @@ namespace ClassicUO.Game.GameObjects
 
         public Item(Serial serial) : base(serial)
         {
-            Items.Added += ItemsOnUpdated;
-            Items.Removed += ItemsOnUpdated;
+           
         }
 
-        private void ItemsOnUpdated(object sender, CollectionChangedEventArgs<Item> e)
-        {
-            _OnUpdated?.Invoke(this);
-        }
+        
 
 
         public GameEffect Effect
@@ -695,8 +691,7 @@ namespace ClassicUO.Game.GameObjects
 
             Effect?.Dispose();
             Effect = null;
-            Items.Added -= ItemsOnUpdated;
-            Items.Removed -= ItemsOnUpdated;
+         
             base.Dispose();
         }
 

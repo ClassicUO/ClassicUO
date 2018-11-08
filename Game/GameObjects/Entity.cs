@@ -65,6 +65,13 @@ namespace ClassicUO.Game.GameObjects
             Serial = serial;
             Items = new EntityCollection<Item>();
             PositionChanged += OnPositionChanged;
+            Items.Added += ItemsOnUpdated;
+            Items.Removed += ItemsOnUpdated;
+        }
+
+        private void ItemsOnUpdated(object sender, CollectionChangedEventArgs<Item> e)
+        {
+            _OnUpdated?.Invoke(this);
         }
 
         public EntityCollection<Item> Items { get; }
@@ -224,6 +231,8 @@ namespace ClassicUO.Game.GameObjects
 
             _properties.Clear();
             _OnDisposed?.Invoke(this);
+            Items.Added -= ItemsOnUpdated;
+            Items.Removed -= ItemsOnUpdated;
             _OnUpdated = null;
             _OnDisposed = null;
             base.Dispose();
