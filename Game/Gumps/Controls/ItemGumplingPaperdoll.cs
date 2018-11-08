@@ -42,13 +42,13 @@ namespace ClassicUO.Game.Gumps.Controls
             _isTransparent = transparent;
             _gumpIndex = (ushort) (Item.ItemData.AnimID + (IsFemale ? 60000 : 50000));
 
-            //if (Animations.EquipConversions.TryGetValue(_gumpIndex, out var dict))
-            //{
-            //    if (dict.TryGetValue(Item.ItemData.AnimID, out EquipConvData data))
-            //    {
-            //        _gumpIndex = data.Gump;
-            //    }
-            //}
+            if (Animations.EquipConversions.TryGetValue(Item.Graphic, out var dict))
+            {
+                if (dict.TryGetValue(Item.ItemData.AnimID, out EquipConvData data))
+                {
+                    _gumpIndex = data.Gump;
+                }
+            }
 
         }
 
