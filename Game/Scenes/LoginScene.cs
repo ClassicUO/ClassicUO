@@ -152,6 +152,10 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginStep.CharacterSelection)
             {
+                Settings settings = Service.Get<Settings>();
+                settings.LastCharacterName = Characters[index].Name;
+                settings.Save();
+
                 CurrentLoginStep = LoginStep.EnteringBritania;
                 NetClient.Socket.Send(new PSelectCharacter(index, Characters[index].Name, NetClient.Socket.ClientAddress));
             }
@@ -225,10 +229,18 @@ namespace ClassicUO.Game.Scenes
 
         private void NetClient_PacketReceived(object sender, Packet e)
         {
+            Settings settings = Service.Get<Settings>();
+
             switch (e.ID)
             {
                 case 0xA8: // ServerListReceived
                     ParseServerList(e);
+
+                    // Save credentials to config file
+                    settings.Username = Account;
+                    settings.Password = Password;
+                    settings.Save();
+
                     CurrentLoginStep = LoginStep.ServerSelection;
 
                     break;
@@ -246,7 +258,6 @@ namespace ClassicUO.Game.Scenes
 
                     break;
                 case 0xBD: // ReceiveVersionRequest
-                    Settings settings = Service.Get<Settings>();
                     NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
 
                     break;

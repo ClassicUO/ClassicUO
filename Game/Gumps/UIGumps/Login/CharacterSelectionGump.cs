@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-
+using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
@@ -30,6 +30,15 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 yBonus = 45;
             }
 
+            LoginScene loginScene = Service.Get<LoginScene>();
+
+            var lastSelected = loginScene.Characters.FirstOrDefault(o => o.Name == Service.Get<Settings>().LastCharacterName);
+
+            if (lastSelected != null)
+                _selectedCharacter = (uint)Array.IndexOf(loginScene.Characters, lastSelected);
+            else if (loginScene.Characters.Length > 0)
+                _selectedCharacter = 0;
+
             AddChildren(new ResizePic(0x0A28)
             {
                 X = 160, Y = 70, Width = 408, Height = 343 + yBonus
@@ -39,13 +48,12 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             {
                 X = 267, Y = listTitleY
             }, 1);
-            LoginScene loginScene = Service.Get<LoginScene>();
-
+            
             foreach (CharacterListEntry character in loginScene.Characters)
             {
                 AddChildren(new CharacterEntryGump((uint) posInList, character, SelectCharacter, LoginCharacter)
                 {
-                    X = 224, Y = yOffset + posInList * 40, Hue = posInList == 0 ? SELECTED_COLOR : NORMAL_COLOR
+                    X = 224, Y = yOffset + posInList * 40, Hue = posInList == _selectedCharacter ? SELECTED_COLOR : NORMAL_COLOR
                 }, 1);
                 posInList++;
             }
@@ -71,9 +79,6 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 X = 610, Y = 445, ButtonAction = ButtonAction.Activate
             }, 1);
             
-            if (loginScene.Characters.Length > 0)
-                _selectedCharacter = 0;
-
             ChangePage(1);
         }
 

@@ -436,6 +436,11 @@ namespace ClassicUO.Configuration
             get => _smoothMovement;
             set => SetProperty(ref _smoothMovement, value);
         }
+
+        public void Save()
+        {
+            ConfigurationResolver.Save(this, "settings.json");
+        }
     }
 
     public abstract class NotifyPropertyChange
