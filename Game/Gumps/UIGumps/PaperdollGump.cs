@@ -24,11 +24,12 @@
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
+using ClassicUO.Interfaces;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    internal class PaperDollGump : Gump
+    internal class PaperDollGump : Gump, IMobilePaperdollOwner
     {
         private static readonly ushort[] PeaceModeBtnGumps =
         {
@@ -61,7 +62,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        public Mobile Mobile { get; private set; }
+        public Mobile Mobile { get; set; }
 
         public string Title { get; }
 
@@ -95,7 +96,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 AddChildren(new GumpPic(0, 0, 0x07d0, 0)
                 {
-                    CanMove = true
+                    CanMove = true,
                 });
 
                 //HELP BUTTON

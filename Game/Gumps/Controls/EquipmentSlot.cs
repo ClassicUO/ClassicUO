@@ -25,6 +25,7 @@ using System;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility.Logging;
 
@@ -32,7 +33,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class EquipmentSlot : GumpControl
+    internal class EquipmentSlot : GumpControl, IMobilePaperdollOwner
     {
         private StaticPic _itemGump;
         private Item _item;
@@ -61,6 +62,12 @@ namespace ClassicUO.Game.Gumps.Controls
         }
 
         public Item Item => _item;
+
+        public Mobile Mobile
+        {
+            get => _mobile;
+            set { }
+        }
 
         public override void Update(double totalMS, double frameMS)
         {

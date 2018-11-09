@@ -38,6 +38,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public ContainerGump(Item item, Graphic gumpid) : base(item.Serial, 0)
         {
             _item = item;
+            item.EnableCallBackForItemsUpdate(true);
             _data = ContainerManager.Get(gumpid);
             CanMove = true;
             AddChildren(new GumpPicContainer(0, 0, _data.Graphic, 0, item));
@@ -47,7 +48,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             foreach (Item item in _item.Items)
                 AddChildren(new ItemGumpling(item));
-            _item.EnableCallBackForItemsUpdate(true);
             _item.SetCallbacks(OnItemUpdated, OnItemDisposed);
         }
 

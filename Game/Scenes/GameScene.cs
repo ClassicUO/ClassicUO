@@ -26,6 +26,7 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
@@ -128,6 +129,9 @@ namespace ClassicUO.Game.Scenes
             InputManager.MouseMoving += OnMouseMoving;
             InputManager.KeyDown += OnKeyDown;
             InputManager.KeyUp += OnKeyUp;
+
+            UIManager.Add(new OptionsGump1());
+
         }
 
         public override void Unload()

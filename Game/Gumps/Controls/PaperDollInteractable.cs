@@ -26,11 +26,12 @@ using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Views;
+using ClassicUO.Interfaces;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class PaperDollInteractable : Gump
+    internal class PaperDollInteractable : Gump, IMobilePaperdollOwner
     {
         private static readonly PaperDollEquipSlots[] _layerOrder =
         {
@@ -38,37 +39,37 @@ namespace ClassicUO.Game.Gumps.Controls
         };
 
         private bool _isElf;
-        private Mobile _sourceEntity;
+        private Mobile _mobile;
         private GumpPicBackpack _backpackGump;
         private Item _fakeItem;
 
-        public PaperDollInteractable(int x, int y, Mobile sourceEntity) : base(0, 0)
+        public PaperDollInteractable(int x, int y, Mobile mobile) : base(0, 0)
         {
             X = x;
             Y = y;
-            SourceEntity = sourceEntity;
+            Mobile = mobile;
             AcceptMouseInput = false;
         }
 
-        public Mobile SourceEntity
+        public Mobile Mobile
         {
-            get => _sourceEntity;
+            get => _mobile;
 
             set
             {
-                if (value != _sourceEntity)
+                if (value != _mobile)
                 {
-                    _sourceEntity?.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);   
-                    _sourceEntity = value;
-                    OnEntityUpdated(_sourceEntity);
-                    _sourceEntity.SetCallbacks(OnEntityUpdated, OnEntityDisposed);                 
+                    _mobile?.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);   
+                    _mobile = value;
+                    OnEntityUpdated(_mobile);
+                    _mobile.SetCallbacks(OnEntityUpdated, OnEntityDisposed);                 
                 }
             }
         }
 
         public override void Dispose()
         {
-            _sourceEntity.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);
+            _mobile.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);
             if (_backpackGump != null) _backpackGump.MouseDoubleClick -= OnDoubleclickBackpackGump;
             base.Dispose();
         }
@@ -76,7 +77,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public void Update()
         {
-            OnEntityUpdated(_sourceEntity);
+            OnEntityUpdated(_mobile);
         }
 
         public void AddFakeDress(Item item)
@@ -86,7 +87,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 _fakeItem.Dispose();
                 _fakeItem = null;
             }
-            else if (_sourceEntity != null && item != null && _sourceEntity.Equipment[item.ItemData.Layer] == null)
+            else if (_mobile != null && item != null && _mobile.Equipment[item.ItemData.Layer] == null)
             {
                 _fakeItem = item;
             }
@@ -102,28 +103,28 @@ namespace ClassicUO.Game.Gumps.Controls
 
             Graphic body = 0;
 
-            if (_sourceEntity == World.Player)
+            if (_mobile == World.Player)
             {
-                switch (_sourceEntity.Race)
+                switch (_mobile.Race)
                 {
                     case RaceType.HUMAN:
-                        body = (Graphic) (0xC + (_sourceEntity.IsFemale ? 1 : 0));
+                        body = (Graphic) (0xC + (_mobile.IsFemale ? 1 : 0));
 
                         break;
                     case RaceType.ELF:
-                        body = (Graphic) (0xE + (_sourceEntity.IsFemale ? 1 : 0));
+                        body = (Graphic) (0xE + (_mobile.IsFemale ? 1 : 0));
 
                         break;
                     case RaceType.GARGOYLE:
-                        body = (Graphic) (0x29A + (_sourceEntity.IsFemale ? 1 : 0));
+                        body = (Graphic) (0x29A + (_mobile.IsFemale ? 1 : 0));
 
                         break;
                 }
             }
             else
-                body = (Graphic) (12 + (_sourceEntity.IsFemale ? 1 : 0));
+                body = (Graphic) (12 + (_mobile.IsFemale ? 1 : 0));
  
-            AddChildren(new GumpPic(0, 0, body, _sourceEntity.Hue)
+            AddChildren(new GumpPic(0, 0, body, _mobile.Hue)
             {
                 AcceptMouseInput = true,
                 IsPaperdoll = true
@@ -135,7 +136,7 @@ namespace ClassicUO.Game.Gumps.Controls
             for (int i = 0; i < _layerOrder.Length; i++)
             {
                 int layerIndex = (int) _layerOrder[i];
-                Item item = _sourceEntity.Equipment[layerIndex];
+                Item item = _mobile.Equipment[layerIndex];
 
                 bool isfake = false;
                 bool canPickUp = true;
@@ -145,7 +146,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     isfake = true;
                     canPickUp = false;                   
                 }
-                else if (item == null || MobileView.IsCovered(_sourceEntity, (Layer)layerIndex))
+                else if (item == null || MobileView.IsCovered(_mobile, (Layer)layerIndex))
                     continue;
 
                 switch (_layerOrder[i])
@@ -157,19 +158,19 @@ namespace ClassicUO.Game.Gumps.Controls
                         break;
                 }
 
-                AddChildren(new ItemGumplingPaperdoll(0, 0, isfake ? _fakeItem : item, isfake)
+                AddChildren(new ItemGumplingPaperdoll(0, 0, isfake ? _fakeItem : item, Mobile, isfake)
                 {
                     SlotIndex = i,
-                    IsFemale = _sourceEntity.IsFemale,
+                    IsFemale = _mobile.IsFemale,
                     CanPickUp = canPickUp
                 });
 
             }
 
             // If this object has a backpack, add it last.
-            if (_sourceEntity.Equipment[(int) PaperDollEquipSlots.Backpack] != null)
+            if (_mobile.Equipment[(int) PaperDollEquipSlots.Backpack] != null)
             {
-                Item backpack = _sourceEntity.Equipment[(int) PaperDollEquipSlots.Backpack];
+                Item backpack = _mobile.Equipment[(int) PaperDollEquipSlots.Backpack];
                 AddChildren(_backpackGump = new GumpPicBackpack(-7, 0, backpack)
                 {
                     AcceptMouseInput = true
@@ -185,7 +186,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         private void OnDoubleclickBackpackGump(object sender, EventArgs args)
         {
-            Item backpack = _sourceEntity.Equipment[(int) PaperDollEquipSlots.Backpack];
+            Item backpack = _mobile.Equipment[(int) PaperDollEquipSlots.Backpack];
             GameActions.DoubleClick(backpack);
         }
 

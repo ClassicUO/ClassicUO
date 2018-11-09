@@ -131,9 +131,9 @@ namespace ClassicUO.Game.Scenes
             ClearHolding();
         }
 
-        private void WearHeldItem()
+        private void WearHeldItem(Mobile target)
         {
-            GameActions.Equip(HeldItem, Layer.Invalid);
+            GameActions.Equip(HeldItem, Layer.Invalid, target);
             ClearHolding();
         }
 

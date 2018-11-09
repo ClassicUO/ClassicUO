@@ -65,13 +65,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void UpdateElements()
         {
-            BuffControlEntry[] list = GetControls<BuffControlEntry>();
+            var list = FindControls<BuffControlEntry>();
             int offset = 0;
 
-            for (int i = 0; i < list.Length; i++)
+            foreach (BuffControlEntry e in list)
             {
-                BuffControlEntry e = list[i];
-
                 switch (_direction)
                 {
                     case GumpDirection.LEFT_VERTICAL:

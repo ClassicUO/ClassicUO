@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -29,15 +30,17 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ItemGumplingPaperdoll : ItemGumpling
+    internal class ItemGumplingPaperdoll : ItemGumpling, IMobilePaperdollOwner
     {
         private readonly ushort _gumpIndex;
         private readonly bool _isTransparent;
 
-        public ItemGumplingPaperdoll(int x, int y, Item item, bool transparent = false) : base(item)
+        public ItemGumplingPaperdoll(int x, int y, Item item, Mobile owner, bool transparent = false) : base(item)
         {
             X = x;
             Y = y;
+
+            Mobile = owner;
             HighlightOnMouseOver = false;
             _isTransparent = transparent;
             _gumpIndex = (ushort) (Item.ItemData.AnimID + (IsFemale ? 60000 : 50000));
@@ -55,6 +58,8 @@ namespace ClassicUO.Game.Gumps.Controls
         public int SlotIndex { get; set; }
 
         public bool IsFemale { get; set; }
+
+        public Mobile Mobile { get; set; }
 
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)

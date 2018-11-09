@@ -108,9 +108,9 @@ namespace ClassicUO.Game
             DropDown(serial, position.X, position.Y, position.Z, container);
         }
 
-        public static void Equip(Serial serial, Layer layer)
+        public static void Equip(Serial serial, Layer layer, Mobile target)
         {
-            Socket.Send(new PEquipRequest(serial, layer, World.Player));
+            Socket.Send(new PEquipRequest(serial, layer, target));
         }
 
         public static void ReplyGump(Serial local, Serial server, int button, Serial[] switches = null, Tuple<ushort, string>[] entries = null)

@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.System;
@@ -161,7 +162,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _textBox.Y = Height - height - 3;
                 _textBox.Width = Width;
                 _textBox.Height = height - 3;
-                CheckerTrans trans = GetControls<CheckerTrans>()[0];
+                CheckerTrans trans = FindControls<CheckerTrans>().FirstOrDefault();
                 trans.Location = new Point(_textBox.X, _textBox.Y);
                 trans.Width = Width;
                 trans.Height = height + 5;

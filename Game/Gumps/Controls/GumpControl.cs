@@ -573,6 +573,9 @@ namespace ClassicUO.Game.Gumps.Controls
             return Children.OfType<T>().ToArray();
         }
 
+        public IEnumerable<T> FindControls<T>() where T : GumpControl => Children.OfType<T>();
+        
+
         public void InvokeMouseDown(Point position, MouseButton button)
         {
             _lastClickPosition = position;

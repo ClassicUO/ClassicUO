@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 using ClassicUO.Game.Data;
@@ -134,14 +135,22 @@ namespace ClassicUO.Game.Scenes
                         int y = Mouse.Position.Y - texture.Height / 2 - (target.Y + target.Parent.Y);
                         DropHeldItemToContainer(container.Item, (ushort) x, (ushort) y);
                     }
-                    else if (target is ItemGumplingPaperdoll || (target is GumpPic pic && pic.IsPaperdoll) || target is EquipmentSlot || target?.Parent is PaperDollGump)
+                    else if (target is GumpPicBackpack backpack)
+                        DropHeldItemToContainer(backpack.BackpackItem);
+                    else if (target is IMobilePaperdollOwner paperdollOwner)
                     {
                         if (TileData.IsWearable((long) HeldItem.ItemData.Flags))
                         {
-                            WearHeldItem();
+                            WearHeldItem(paperdollOwner.Mobile);
                         }
                     }
-                    else if (target is GumpPicBackpack backpack) DropHeldItemToContainer(backpack.BackpackItem);
+                    else if (target.Parent is IMobilePaperdollOwner paperdollOwner1)
+                    {
+                        if (TileData.IsWearable((long)HeldItem.ItemData.Flags))
+                        {
+                            WearHeldItem(paperdollOwner1.Mobile);
+                        }
+                    }
                 }
                 else if (IsMouseOverWorld)
                 {
@@ -391,9 +400,8 @@ namespace ClassicUO.Game.Scenes
                         }
                         else if (target is EquipmentSlot || target is PaperDollGump || target.Parent is PaperDollGump)
                         {
-                            gumpling = target.Parent.GetControls<PaperDollInteractable>()[0];
+                            gumpling = target.Parent.FindControls<PaperDollInteractable>().FirstOrDefault();
                         }
-
 
                         if (gumpling != null)
                         {
