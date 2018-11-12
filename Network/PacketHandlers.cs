@@ -959,7 +959,12 @@ namespace ClassicUO.Network
                 if (container != null && container.IsSpellBook && SpellbookData.GetTypeByGraphic(container.Graphic) != SpellBookType.Unknown)
                 {
                     SpellbookData.GetData(container, out ulong field, out SpellBookType type);
-                    container.FillSpellbook(type, field);
+
+                    if (container.FillSpellbook(type, field))
+                    {
+                        SpellbookGump gump = Service.Get<UIManager>().GetByLocalSerial<SpellbookGump>(container);
+                        gump?.Update();
+                    }
                 }
             }
 
@@ -1815,7 +1820,11 @@ namespace ClassicUO.Network
                             break;
                     }
 
-                    spellbook.FillSpellbook(sbtype, filed);
+                    if (spellbook.FillSpellbook(sbtype, filed))
+                    {
+                        SpellbookGump gump = Service.Get<UIManager>().GetByLocalSerial<SpellbookGump>(spellbook);
+                        gump?.Update();
+                    }
 
                     break;
                 //===========================================================================================

@@ -127,8 +127,8 @@ namespace ClassicUO.Game.Gumps
 
             InputManager.RightMouseButtonDown += (sender, e) =>
             {
-                if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                    return;
+                //if (!IsModalControlOpen && ObjectsBlockingInputExists)
+                //    return;
 
                 if (MouseOverControl != null)
                 {
@@ -154,8 +154,8 @@ namespace ClassicUO.Game.Gumps
 
             InputManager.RightMouseButtonUp += (sender, e) =>
             {
-                if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                    return;
+                //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
+                //    return;
 
                 //if (MouseOverControl == null)
                 //    return;

@@ -563,7 +563,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public virtual void Clear()
         {
-            _children.ForEach(s => s.Dispose());
+            for (int i = 0; i < Children.Count; i++)
+                Children[i].Dispose();
         }
 
         public T[] GetControls<T>() where T : GumpControl

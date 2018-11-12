@@ -22,6 +22,8 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps;
@@ -31,25 +33,30 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class PaperDollInteractable : Gump, IMobilePaperdollOwner
+    internal class PaperDollInteractable : GumpControl, IMobilePaperdollOwner
     {
         private static readonly PaperDollEquipSlots[] _layerOrder =
         {
             PaperDollEquipSlots.Legging, PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Gloves,   PaperDollEquipSlots.Neck, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Back, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Robe, PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand , PaperDollEquipSlots.Belt, PaperDollEquipSlots.Talisman
         };
 
-        private bool _isElf;
         private Mobile _mobile;
         private GumpPicBackpack _backpackGump;
         private Item _fakeItem;
 
-        public PaperDollInteractable(int x, int y, Mobile mobile) : base(0, 0)
+        public PaperDollInteractable(int x, int y, Mobile mobile)
         {
             X = x;
             Y = y;
             Mobile = mobile;
             AcceptMouseInput = false;
+
+            mobile.Items.Added += ItemsOnAdded;
+            mobile.Items.Removed += ItemsOnRemoved;
+            mobile.Disposed += MobileOnDisposed;
         }
+
+       
 
         public Mobile Mobile
         {
@@ -59,21 +66,54 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 if (value != _mobile)
                 {
-                    _mobile?.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);   
+                    //_mobile?.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);   
                     _mobile = value;
                     OnEntityUpdated(_mobile);
-                    _mobile.SetCallbacks(OnEntityUpdated, OnEntityDisposed);                 
+                    //_mobile.SetCallbacks(OnEntityUpdated, OnEntityDisposed);                 
                 }
             }
         }
 
         public override void Dispose()
         {
-            _mobile.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);
+            Mobile.Items.Added -= ItemsOnAdded;
+            Mobile.Items.Removed -= ItemsOnRemoved;
+            Mobile.Disposed -= MobileOnDisposed;
+            //_mobile.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);
             if (_backpackGump != null) _backpackGump.MouseDoubleClick -= OnDoubleclickBackpackGump;
             base.Dispose();
         }
 
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
+        {
+            OnEntityUpdated(Mobile);
+        }
+
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
+        {
+            foreach (Item item in e)
+            {
+                AddChildren(new ItemGumplingPaperdoll(0, 0, item, Mobile));
+            }
+
+
+            for (int i = 0; i < _layerOrder.Length; i++)
+            {
+                int layerIndex = (int) _layerOrder[i];
+                Item item = _mobile.Equipment[layerIndex];
+
+                if (item == null || MobileView.IsCovered(_mobile, (Layer) layerIndex))
+                {
+                    ItemGumplingPaperdoll c = Children.OfType<ItemGumplingPaperdoll>().FirstOrDefault(s => s.Item.ItemData.Layer == layerIndex);
+                    RemoveChildren(c);
+                }
+            }
+        }
+
+        private void MobileOnDisposed(object sender, EventArgs e)
+        {
+            Dispose();
+        }
 
         public void Update()
         {
@@ -92,7 +132,6 @@ namespace ClassicUO.Game.Gumps.Controls
                 _fakeItem = item;
             }
         }
-
 
 
         private void OnEntityUpdated(Entity entity)

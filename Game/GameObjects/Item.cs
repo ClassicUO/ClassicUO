@@ -659,10 +659,10 @@ namespace ClassicUO.Game.GameObjects
             return (_spellsBitFiled & flag) == flag;
         }
 
-        public void FillSpellbook(SpellBookType type, ulong field)
+        public bool FillSpellbook(SpellBookType type, ulong field)
         {
             if (!IsSpellBook)
-                return;
+                return false;
             bool needUpdate = false;
 
             if (BookType != type)
@@ -677,8 +677,10 @@ namespace ClassicUO.Game.GameObjects
                 needUpdate = true;
             }
 
-            if (needUpdate)
-                _OnUpdated?.Invoke(this);
+            //if (needUpdate)
+            //    _OnUpdated?.Invoke(this);
+
+            return needUpdate;
         }
 
         public override void Dispose()
