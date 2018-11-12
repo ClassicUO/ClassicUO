@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -56,6 +57,13 @@ namespace ClassicUO.Game.Gumps.Controls
             _textures[PRESSED] = IO.Resources.Gumps.GetGumpTexture(pressed);
             if (over > 0) _textures[OVER] = IO.Resources.Gumps.GetGumpTexture(over);
             ref SpriteTexture t = ref _textures[NORMAL];
+
+            if (t == null)
+            {
+                Dispose();
+                return;
+            }
+
             Width = t.Width;
             Height = t.Height;
             FontHue = normalHue == ushort.MaxValue ? (ushort) 0 : normalHue;
@@ -143,7 +151,7 @@ namespace ClassicUO.Game.Gumps.Controls
             SpriteTexture texture = GetTextureByState();
 
 
-            spriteBatch.Draw2D(texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), IsTransparent ? RenderExtentions.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
+            spriteBatch.Draw2D(texture, new Rectangle(position.X, position.Y, Width, Height), IsTransparent ? RenderExtentions.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 
             //Draw1(spriteBatch, texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), -1, 0, IsTransparent ? RenderExtentions.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 
@@ -234,7 +242,6 @@ namespace ClassicUO.Game.Gumps.Controls
             for (int i = 0; i < _fontTexture.Length; i++)
             {
                 _fontTexture[i]?.Dispose();
-                _fontTexture[i] = null;
             }
 
             base.Dispose();

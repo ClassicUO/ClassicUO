@@ -161,7 +161,7 @@ namespace ClassicUO.Game.Views
                     if (frame == null || frame.IsDisposed) return false;
                     int drawCenterY = frame.CenterY;
                     const int drawX = -22;
-                    int drawY = drawCenterY + GameObject.Position.Z * 4 - 22 - 3;
+                    int drawY = drawCenterY - 22 - 3;
                     int x = drawX + frame.CenterX;
                     int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
                     Texture = frame;

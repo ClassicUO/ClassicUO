@@ -66,7 +66,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected override View CreateView() => new TextOverheadView(this, MaxWidth, Hue, Font, IsUnicode, Style);
 
-        internal bool Initialized { get; set; }
+        public bool Initialized { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {

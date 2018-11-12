@@ -168,7 +168,7 @@ namespace ClassicUO.IO.Resources
 
         private static unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height)
         {
-            graphic &= FileManager.GraphicMask;
+            //graphic &= FileManager.GraphicMask;
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
             _file.Skip(4);
             width = _file.ReadShort();

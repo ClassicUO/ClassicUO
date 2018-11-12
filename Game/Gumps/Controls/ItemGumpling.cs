@@ -188,6 +188,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 {
                     foreach (TextOverhead overhead in Item.OverHeads)
                     {
+                        overhead.Initialized = true;
+                        overhead.TimeToLive = 4000;
                         Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth, style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
                         {
                             FadeOut = true

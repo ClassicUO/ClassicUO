@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.System;
@@ -161,7 +162,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _textBox.Y = Height - height - 3;
                 _textBox.Width = Width;
                 _textBox.Height = height - 3;
-                CheckerTrans trans = GetControls<CheckerTrans>()[0];
+                CheckerTrans trans = FindControls<CheckerTrans>().FirstOrDefault();
                 trans.Location = new Point(_textBox.X, _textBox.Y);
                 trans.Width = Width;
                 trans.Height = height + 5;
@@ -262,13 +263,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            int y = _textBox.Y + (int) position.Y - 6;
+            int y = _textBox.Y + position.Y - 6;
 
             for (int i = _textEntries.Count - 1; i >= 0; i--)
             {
                 y -= _textEntries[i].TextHeight;
 
-                if (y >= (int) position.Y)
+                if (y >= position.Y)
                     _textEntries[i].Draw(spriteBatch, new Point(position.X + 2, y));
             }
 

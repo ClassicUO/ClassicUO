@@ -37,7 +37,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
 {
-    public class UIManager
+    public sealed class UIManager
     {
         private readonly List<GumpControl> _gumps = new List<GumpControl>();
         private readonly List<object> _inputBlockingObjects = new List<object>();
@@ -54,6 +54,7 @@ namespace ClassicUO.Game.Gumps
             GameCursor = new GameCursor(this);
             _sbUI = Service.Get<SpriteBatchUI>();
             InputManager = Service.Get<InputManager>();
+
 
             InputManager.MouseDragging += (sender, e) =>
             {
@@ -126,8 +127,8 @@ namespace ClassicUO.Game.Gumps
 
             InputManager.RightMouseButtonDown += (sender, e) =>
             {
-                if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                    return;
+                //if (!IsModalControlOpen && ObjectsBlockingInputExists)
+                //    return;
 
                 if (MouseOverControl != null)
                 {
@@ -153,8 +154,8 @@ namespace ClassicUO.Game.Gumps
 
             InputManager.RightMouseButtonUp += (sender, e) =>
             {
-                if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                    return;
+                //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
+                //    return;
 
                 //if (MouseOverControl == null)
                 //    return;
@@ -213,8 +214,10 @@ namespace ClassicUO.Game.Gumps
             {
                 if (_keyboardFocusControl == null)
                 {
-                    foreach (GumpControl c in _gumps)
+                    for (int i = 0; i < _gumps.Count; i++)
                     {
+                        GumpControl c = _gumps[i];
+
                         if (!c.IsDisposed && c.IsVisible && c.IsEnabled && c.AcceptKeyboardInput)
                         {
                             _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
@@ -246,8 +249,25 @@ namespace ClassicUO.Game.Gumps
                 _inputBlockingObjects.Remove(obj);
         }
 
+        private readonly Dictionary<Serial, Point> _gumpPositionCache = new Dictionary<Serial, Point>();
+
+
+        public void SavePosition(Serial serverSerial, Point point)
+        {
+            _gumpPositionCache[serverSerial] = point;
+        }
+
         public GumpControl Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
         {
+            if (_gumpPositionCache.TryGetValue(gumpID, out Point pos))
+            {
+                x = pos.X;
+                y = pos.Y;
+            }
+            else 
+                SavePosition(gumpID, new Point(x ,y));
+
+
             Gump gump = new Gump(sender, gumpID)
             {
                 X = x,
@@ -256,6 +276,7 @@ namespace ClassicUO.Game.Gumps
                 CanCloseWithRightClick = true,
                 CanCloseWithEsc = true
             };
+
             int group = 0;
             int page = 0;
             int index = 0;
@@ -454,8 +475,12 @@ namespace ClassicUO.Game.Gumps
 
             for (int i = 0; i < _gumps.Count; i++)
             {
-                if (_gumps[i].IsDisposed)
+                GumpControl g = _gumps[i];
+
+                if (g.IsDisposed)
+                {
                     _gumps.RemoveAt(i--);
+                }
             }
 
             GameCursor.Update(totalMS, frameMS);

@@ -21,6 +21,7 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.Map;
@@ -28,6 +29,7 @@ using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -40,6 +42,9 @@ namespace ClassicUO.Game.GameObjects
         private readonly List<TextOverhead> _overHeads;
         private Position _position = Position.Invalid;
         private View _view;
+
+
+        public event EventHandler Disposed; 
 
         protected GameObject()
         {
@@ -274,6 +279,8 @@ namespace ClassicUO.Game.GameObjects
             Tile = Tile.Invalid;
             _overHeads.ForEach(s => s.Dispose());
             _overHeads.Clear();
+
+            Disposed.Raise();
         }
     }
 }

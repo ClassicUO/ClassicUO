@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -29,35 +30,55 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ItemGumplingPaperdoll : ItemGumpling
+    internal class ItemGumplingPaperdoll : ItemGumpling, IMobilePaperdollOwner
     {
-        private ushort _gumpIndex;
+        private readonly ushort _gumpIndex;
+        private readonly bool _isTransparent;
 
-        public ItemGumplingPaperdoll(int x, int y, Item item) : base(item)
+        public ItemGumplingPaperdoll(int x, int y, Item item, Mobile owner, bool transparent = false) : base(item)
         {
             X = x;
             Y = y;
+
+            Mobile = owner;
             HighlightOnMouseOver = false;
+            _isTransparent = transparent;
+            _gumpIndex = (ushort) (Item.ItemData.AnimID + (IsFemale ? 60000 : 50000));
+
+            if (Animations.EquipConversions.TryGetValue(Item.Graphic, out var dict))
+            {
+                if (dict.TryGetValue(Item.ItemData.AnimID, out EquipConvData data))
+                {
+                    _gumpIndex = data.Gump;
+                }
+            }
+
         }
 
         public int SlotIndex { get; set; }
 
         public bool IsFemale { get; set; }
 
+        public Mobile Mobile { get; set; }
+
+
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
+            if (Item.IsDisposed)
+                return false;
+
             if (Texture == null || Texture.IsDisposed)
             {
-                _gumpIndex = (ushort) (Item.ItemData.AnimID + (IsFemale ? 60000 : 50000));
                 Texture = IO.Resources.Gumps.GetGumpTexture(_gumpIndex);
                 Width = Texture.Width;
                 Height = Texture.Height;
             }
 
-            spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue, TileData.IsPartialHue((long) Item.ItemData.Flags), 0, false));
+            Texture.Ticks = CoreGame.Ticks;
 
-            return base.Draw(spriteBatch, position, hue);
+            return spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue((long)Item.ItemData.Flags), _isTransparent ? .5f : 0, false));
         }
+
 
         protected override bool Contains(int x, int y)
         {

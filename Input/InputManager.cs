@@ -256,7 +256,7 @@ namespace ClassicUO.Input
 
         public static event EventHandler<bool> MouseWheel;
 
-        public static event EventHandler MouseDragging, DragBegin, DragEnd;
+        public static event EventHandler MouseMoving, MouseDragging, DragBegin, DragEnd;
 
         public static event EventHandler<SDL_KeyboardEvent> KeyDown, KeyUp;
 
@@ -320,6 +320,7 @@ namespace ClassicUO.Input
                     break;
                 case SDL_EventType.SDL_MOUSEMOTION:
                     Mouse.Update();
+                    MouseMoving.Raise();
                     if (Mouse.IsDragging) MouseDragging.Raise();
 
                     if (Mouse.IsDragging && !_dragStarted)

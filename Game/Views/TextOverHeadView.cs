@@ -47,8 +47,13 @@ namespace ClassicUO.Game.Views
             };
             Texture = _text.Texture;
 
+            int delay = Service.Get<Settings>().SpeechDelay;
+
+            if (delay < 10)
+                delay = 10;
+
             if (parent.TimeToLive <= 0.0f)
-                parent.TimeToLive = (((4000 * _text.LinesCount) * Service.Get<Settings>().SpeechDelay) / 100);
+                parent.TimeToLive = ((4000 * _text.LinesCount * delay) / 100.0f);
 
             parent.Initialized = true;
         }
@@ -58,7 +63,6 @@ namespace ClassicUO.Game.Views
             if (!AllowedToDraw || GameObject.IsDisposed)
             {
                 _text?.Dispose();
-                _text = null;
                 return false;
             }
 

@@ -73,6 +73,134 @@ namespace ClassicUO.Game.Scenes
         }
 #endif
 #if ORIONSORT
+
+        private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
+        private sbyte _maxGroundZ;
+        private bool _noDrawRoofs;
+
+        private void UpdateMaxDrawZ()
+        {
+            int playerX = World.Player.X;
+            int playerY = World.Player.Y;
+            int playerZ = World.Player.Z;
+
+            if (playerX == _oldPlayerX && playerY == _oldPlayerY && playerZ == _oldPlayerZ)
+                return;
+
+            _oldPlayerX = playerX;
+            _oldPlayerY = playerY;
+            _oldPlayerZ = playerZ;
+
+            //int maxZ1 = _maxGroundZ;
+            //int maxZ2 = _maxZ;
+
+            sbyte maxGroundZ = 127;
+            _maxGroundZ = 127;
+            _maxZ = 127;
+            _noDrawRoofs = false;
+
+            int bx = playerX;
+            int by = playerY;
+
+            ref Tile tile = ref World.Map.GetTile(bx, by);
+
+            if (tile != Tile.Invalid)
+            {
+                int pz14 = playerZ + 14;
+                int pz16 = playerZ + 16;
+
+                var objects = tile.ObjectsOnTiles;
+
+                for (int i = 0; i < objects.Count; i++)
+                {
+                    GameObject obj = objects[i];
+
+                    sbyte tileZ = obj.Z;
+
+                    if (obj is Land)
+                    {
+                        if (pz16 <= tileZ)
+                        {
+                            maxGroundZ = (sbyte)pz16;
+                            _maxGroundZ = (sbyte)pz16;
+                            _maxZ = _maxGroundZ;
+                            break;
+                        }
+                        continue;
+                    }
+                    else if (obj is Mobile)
+                        continue;
+                    else if (!(obj is Static) && obj is Item item && !item.IsMulti)
+                        continue;
+        
+
+                    if (tileZ > pz14 && _maxZ > tileZ)
+                    {
+                        if (obj is IDynamicItem st && (st.ItemData.Flags & 0x20004) == 0 && (!TileData.IsRoof((long)st.ItemData.Flags) || TileData.IsSurface((long)st.ItemData.Flags)))
+                        {
+                            _maxZ = tileZ;
+                            _noDrawRoofs = true;
+                        }
+                    }
+                }
+
+                int tempZ = _maxZ;
+                _maxGroundZ = (sbyte)_maxZ;
+
+
+                playerX++;
+                playerY++;
+
+                bx = playerX;
+                by = playerY;
+
+                tile = ref World.Map.GetTile(bx, by);
+
+                if (tile != Tile.Invalid)
+                {
+                    objects = tile.ObjectsOnTiles;
+
+                    for (int i = 0; i < objects.Count; i++)
+                    {
+                        GameObject obj = objects[i];
+
+                        if (!(obj is Static) && obj is Item it && !it.IsMulti)
+                            continue;
+                        if (obj is Mobile)
+                            continue;
+
+                        sbyte tileZ = obj.Z;
+
+                        if (tileZ > pz14 && _maxZ > tileZ)
+                        {
+                            if (obj is IDynamicItem dyn2 && (dyn2.ItemData.Flags & 0x204) == 0 && TileData.IsRoof((long)dyn2.ItemData.Flags))
+                            {
+                                _maxZ = tileZ;
+                                World.Map.ClearBockAccess();
+                                _maxGroundZ = World.Map.CalculateNearZ(tileZ, playerX, playerY, tileZ);
+                                _noDrawRoofs = true;
+                            }
+                        }
+                    }
+
+                    tempZ = _maxGroundZ;
+                }
+
+                _maxZ = _maxGroundZ;
+
+                if (tempZ < pz16)
+                {
+                    _maxZ = pz16;
+                    _maxGroundZ = (sbyte) pz16;
+                }
+
+                _maxGroundZ = maxGroundZ;
+
+
+            }
+        }
+
+
         private int _renderIndex = 1;
         private int _renderListCount;
         private GameObject[] _renderList = new GameObject[2000];
@@ -99,7 +227,8 @@ namespace ClassicUO.Game.Scenes
 
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
                     break;
-                int z = obj.Position.Z;
+
+                int z = obj.Z;
                 int maxObjectZ = obj.PriorityZ;
 
                 switch (obj)
@@ -109,6 +238,12 @@ namespace ClassicUO.Game.Scenes
 
                         break;
                     case IDynamicItem dyn:
+
+                        if (_noDrawRoofs && TileData.IsRoof((long)dyn.ItemData.Flags))
+                        {
+                            continue;
+                        }
+
                         maxObjectZ += dyn.ItemData.Height;
 
                         break;
@@ -116,10 +251,35 @@ namespace ClassicUO.Game.Scenes
 
                 if (maxObjectZ > maxZ)
                     break;
+
                 obj.CurrentRenderIndex = _renderIndex;
 
-                if (!(obj is Land) && (z >= _maxZ || obj is IDynamicItem dyn2 && (TileData.IsInternal((long) dyn2.ItemData.Flags) || _maxZ != 255 && TileData.IsRoof((long) dyn2.ItemData.Flags))))
+                if (obj.Graphic != 0x2006 && obj is IDynamicItem dyn2 && TileData.IsInternal((long)dyn2.ItemData.Flags))
                     continue;
+
+                if (!(obj is Land) && z >= _maxZ)
+                    continue;
+
+
+                //if (!_drawTerrain && (obj is Land || obj.Z > obj.Tile.Land.Z))
+                //{
+                //    continue;
+                //}
+
+                //if ((obj.Z >= _maxZ  || (_maxZ != 255 && obj is IDynamicItem dyn2 && TileData.IsRoof((long)dyn2.ItemData.Flags))) && !(obj is Land))
+                //    continue;
+
+
+
+
+                //if (!(obj is Land) && (z >= _maxZ || 
+                //                       obj is IDynamicItem dyn2 && (TileData.IsInternal((long)dyn2.ItemData.Flags) && dyn2.Graphic != 0x2006 || 
+                //                                                    maxZ != 255 && TileData.IsRoof((long)dyn2.ItemData.Flags))))
+                //    continue;
+
+
+                //if (!(obj is Land) && z >= _maxZ || _maxZ != 255 && )
+
                 int testMinZ = drawY + z * 4;
                 int testMaxZ = drawY;
 

@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Formatting;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -430,14 +431,13 @@ namespace ClassicUO.Network
             Serial isfollowing = p.ReadUInt();
         }
 
-        /* private static void NewHealthBarStatusUpdateSA(Packet p)
-        {
-
-        }*/
-
         private static void NewHealthbarUpdate(Packet p)
         {
-            if (p.ID == 0x16 && FileManager.ClientVersion < ClientVersions.CV_500A) return;
+            if (World.Player == null)
+                return;
+
+            if (p.ID == 0x16 && FileManager.ClientVersion < ClientVersions.CV_500A)
+                return;
             Mobile mobile = World.Mobiles.Get(p.ReadUInt());
 
             if (mobile == null) return;
@@ -463,7 +463,7 @@ namespace ClassicUO.Network
                         if (FileManager.ClientVersion >= ClientVersions.CV_7000)
                             mobile.SetSAPoison(false);
                         else
-                            flags &= 0x04;
+                            flags = (byte) (flags & ~0x04);
                     }
                 }
                 else if (type == 2)
@@ -471,7 +471,7 @@ namespace ClassicUO.Network
                     if (enabled)
                         flags |= 0x08;
                     else
-                        flags &= 0x08;
+                        flags &= (byte) (flags & ~0x08);
                 }
                 else if (type == 3)
                 {
@@ -658,6 +658,7 @@ namespace ClassicUO.Network
             World.Player.Graphic = (ushort) (p.ReadUShort() + p.ReadSByte());
             World.Player.Hue = p.ReadUShort();
             World.Player.Flags = (Flags) p.ReadByte();
+
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             p.Skip(2);
@@ -770,6 +771,7 @@ namespace ClassicUO.Network
             if (World.Player == null)
                 return;
             Item item = World.Items.Get(p.ReadUInt());
+            //item.EnableCallBackForItemsUpdate(true);
             Graphic graphic = p.ReadUShort();
             UIManager ui = Service.Get<UIManager>();
 
@@ -792,17 +794,11 @@ namespace ClassicUO.Network
             }
             else
             {
-                if (item.IsCorpse)
+                ContainerGump container = new ContainerGump(item, graphic)
                 {
-                }
-                else
-                {
-                    ContainerGump container = new ContainerGump(item, graphic)
-                    {
-                        X = 64, Y = 64
-                    };
-                    ui.Add(container);
-                }
+                    X = 64, Y = 64
+                };
+                ui.Add(container);
             }
         }
 
@@ -953,7 +949,12 @@ namespace ClassicUO.Network
                 if (container != null && container.IsSpellBook && SpellbookData.GetTypeByGraphic(container.Graphic) != SpellBookType.Unknown)
                 {
                     SpellbookData.GetData(container, out ulong field, out SpellBookType type);
-                    container.FillSpellbook(type, field);
+
+                    if (container.FillSpellbook(type, field))
+                    {
+                        SpellbookGump gump = Service.Get<UIManager>().GetByLocalSerial<SpellbookGump>(container);
+                        gump?.Update();
+                    }
                 }
             }
 
@@ -1121,6 +1122,7 @@ namespace ClassicUO.Network
 
             if (mobile == World.Player)
                 return;
+
             Direction dir = direction & Direction.Up;
             bool isrun = (direction & Direction.Running) != 0;
 
@@ -1144,14 +1146,23 @@ namespace ClassicUO.Network
         {
             if (World.Player == null) return;
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
-            mobile.Graphic = p.ReadUShort();
+            Graphic graphic = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             sbyte z = p.ReadSByte();
             Direction direction = (Direction) p.ReadByte();
-            mobile.Hue = p.ReadUShort();
-            mobile.Flags = (Flags) p.ReadByte();
-            mobile.NotorietyFlag = (NotorietyFlag) p.ReadByte();
+
+            Hue hue = p.ReadUShort();
+            Flags flags = (Flags) p.ReadByte();
+            NotorietyFlag notoriety = (NotorietyFlag) p.ReadByte();
+
+            
+            mobile.Graphic = graphic;
+            mobile.Hue = hue;
+            mobile.Flags = flags;
+            mobile.NotorietyFlag = notoriety;
+        
+
 
             if (p.ID != 0x78)
                 p.Skip(6);
@@ -1160,20 +1171,20 @@ namespace ClassicUO.Network
             while ((itemSerial = p.ReadUInt()) != 0)
             {
                 Item item = World.GetOrCreateItem(itemSerial);
-                Graphic graphic = p.ReadUShort();
+                Graphic itemGraphic = p.ReadUShort();
                 item.Layer = (Layer) p.ReadByte();
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_70331)
                     item.Hue = p.ReadUShort();
-                else if ((graphic & 0x8000) != 0)
+                else if ((itemGraphic & 0x8000) != 0)
                 {
-                    graphic &= 0x7FFF;
+                    itemGraphic &= 0x7FFF;
                     item.Hue = p.ReadUShort();
                 }
                 else
-                    graphic &= 0x3FFF;
+                    itemGraphic &= 0x3FFF;
 
-                item.Graphic = graphic;
+                item.Graphic = itemGraphic;
                 item.Amount = 1;
                 item.Container = mobile;
                 mobile.Items.Add(item);
@@ -1640,14 +1651,26 @@ namespace ClassicUO.Network
                     ushort crafterNameLen = 0;
                     uint next = p.ReadUInt();
 
+                    StringBuffer strBuffer = new StringBuffer();
+
                     if (next == 0xFFFFFFFD)
                     {
                         crafterNameLen = p.ReadUShort();
-                        if (crafterNameLen > 0) str = "Crafted by " + p.ReadASCII(crafterNameLen);
+
+                        if (crafterNameLen > 0)
+                        {
+                            strBuffer.Append("Crafted by ");
+                            strBuffer.Append(p.ReadASCII(crafterNameLen));
+                        }
                     }
 
                     if (crafterNameLen != 0) next = p.ReadUInt();
-                    if (next == 0xFFFFFFFC) str += "[Unidentified";
+
+                    if (next == 0xFFFFFFFC)
+                    {
+                        strBuffer.Append("[Unidentified");
+                    }
+
                     byte count = 0;
 
                     while (p.Position < p.Length - 4)
@@ -1660,22 +1683,22 @@ namespace ClassicUO.Network
                         {
                             if (count > 0)
                             {
-                                str += "/";
-                                str += attr;
+                                strBuffer.Append("/");
+                                strBuffer.Append(attr);
                             }
                             else
                             {
-                                str += " [";
-                                str += attr;
+                                strBuffer.Append(" [");
+                                strBuffer.Append(attr);
                             }
                         }
                         else
                         {
-                            str += "\n[";
-                            str += attr;
-                            str += " : ";
-                            str += charges.ToString();
-                            str += "]";
+                            strBuffer.Append("\n[");
+                            strBuffer.Append(attr);
+                            strBuffer.Append(" : ");
+                            strBuffer.Append(charges, StringView.Empty);
+                            strBuffer.Append("]");
                             count += 20;
                         }
 
@@ -1797,7 +1820,11 @@ namespace ClassicUO.Network
                             break;
                     }
 
-                    spellbook.FillSpellbook(sbtype, filed);
+                    if (spellbook.FillSpellbook(sbtype, filed))
+                    {
+                        SpellbookGump gump = Service.Get<UIManager>().GetByLocalSerial<SpellbookGump>(spellbook);
+                        gump?.Update();
+                    }
 
                     break;
                 //===========================================================================================
@@ -2292,6 +2319,7 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
+                //entity.EnableCallBackForItemsUpdate(true);
                 entity.Items.Add(item);
 
                 foreach (Item i in World.ToAdd.Where(i => i.Container == item))

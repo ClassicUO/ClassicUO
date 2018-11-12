@@ -157,7 +157,7 @@ namespace ClassicUO.Game.Gumps.Controls
             if (_gumpSpliderBackground != null)
             {
                 spriteBatch.Draw2D(_gumpSpliderBackground[0], position, Vector3.Zero);
-                spriteBatch.Draw2DTiled(_gumpSpliderBackground[1], new Rectangle((int) position.X + _gumpSpliderBackground[0].Width, (int) position.Y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height), Vector3.Zero);
+                spriteBatch.Draw2DTiled(_gumpSpliderBackground[1], new Rectangle(position.X + _gumpSpliderBackground[0].Width, position.Y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height), Vector3.Zero);
                 spriteBatch.Draw2D(_gumpSpliderBackground[2], new Point(position.X + BarWidth - _gumpSpliderBackground[2].Width, position.Y), Vector3.Zero);
             }
 
@@ -311,7 +311,6 @@ namespace ClassicUO.Game.Gumps.Controls
         public override void Dispose()
         {
             _text?.Dispose();
-            _text = null;
 
             base.Dispose();
         }

@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Formatting;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
@@ -28,6 +29,9 @@ namespace ClassicUO.Game.Gumps
 
         public SpriteTexture Texture { get; set; }
 
+        public bool IsEmpty => Text == null;
+
+        public GameObject Object => _gameObject;
 
         public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
@@ -60,10 +64,21 @@ namespace ClassicUO.Game.Gumps
                 Fonts.RecalculateWidthByInfo = false;
             }
 
-            spriteBatch.Draw2D(CheckerTrans.TransparentTexture, new Rectangle((int) position.X - 4, (int) position.Y - 4, _renderedText.Width + 8, _renderedText.Height + 8), RenderExtentions.GetHueVector(0, false, 0.5f, false));
+            GameLoop window = Service.Get<GameLoop>();
 
-            _renderedText.Draw(spriteBatch, position);
-            return true;
+            if (position.X < 0)
+                position.X = 0;
+            else if (position.X > window.WindowWidth - (_renderedText.Width + 8))
+                position.X = window.WindowWidth - (_renderedText.Width + 8);
+
+            if (position.Y < 0)
+                position.Y = 0;
+            else if (position.Y > window.WindowHeight - (_renderedText.Height + 8))
+                position.Y = window.WindowHeight - (_renderedText.Height + 8);
+
+            spriteBatch.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X - 4, position.Y - 4, _renderedText.Width + 6, _renderedText.Height + 8), RenderExtentions.GetHueVector(0, false, 0.3f, false));
+
+            return _renderedText.Draw(spriteBatch, position);
         }
 
         public void Clear() => _textHTML = Text = null;

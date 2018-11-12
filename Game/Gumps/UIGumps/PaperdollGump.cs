@@ -24,17 +24,18 @@
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
+using ClassicUO.Interfaces;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    internal class PaperDollGump : Gump
+    internal class PaperDollGump : Gump, IMobilePaperdollOwner
     {
-        private readonly ushort[] PeaceModeBtnGumps =
+        private static readonly ushort[] PeaceModeBtnGumps =
         {
             0x07e5, 0x07e6, 0x07e7
         };
-        private readonly ushort[] WarModeBtnGumps =
+        private static readonly ushort[] WarModeBtnGumps =
         {
             0x07e8, 0x07e9, 0x07ea
         };
@@ -61,12 +62,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        public Mobile Mobile { get; private set; }
+        public Mobile Mobile { get; set; }
 
         public string Title { get; }
 
+
         public override void Dispose()
         {
+            //Mobile.EnableCallBackForItemsUpdate(false);
             if (Mobile == World.Player)
             {
                 _virtueMenuPic.MouseDoubleClick -= VirtueMenu_MouseDoubleClickEvent;
@@ -87,11 +90,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //SaveOnWorldStop = true;
             LocalSerial = Mobile.Serial;
 
+            //Mobile.EnableCallBackForItemsUpdate(true);
+
             if (Mobile == World.Player)
             {
                 AddChildren(new GumpPic(0, 0, 0x07d0, 0)
                 {
-                    CanMove = true
+                    CanMove = true,
                 });
 
                 //HELP BUTTON
@@ -151,16 +156,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 //_specialMovesBookPic.MouseDoubleClick += SpecialMoves_MouseDoubleClickEvent;
                 // Party manifest caller
                 AddChildren(_partyManifestPic = new GumpPic(44, 195, 2002, 0));
-                _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;
-                // Equipment slots for hat/earrings/neck/ring/bracelet
-                AddChildren(new EquipmentSlot(2, 76)); //AddControl(new EquipmentSlot(this, 2, 76, Mobile, EquipLayer.Helmet));
-                AddChildren(new EquipmentSlot(2, 76 + 22 * 1)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 1, Mobile, EquipLayer.Earrings));
-                AddChildren(new EquipmentSlot(2, 76 + 22 * 2)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 2, Mobile, EquipLayer.Necklace));
-                AddChildren(new EquipmentSlot(2, 76 + 22 * 3)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 3, Mobile, EquipLayer.Ring));
-                AddChildren(new EquipmentSlot(2, 76 + 22 * 4)); //AddControl(new EquipmentSlot(this, 2, 76 + 22 * 4, Mobile, EquipLayer.Bracelet));
+                _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;               
             }
             else
                 AddChildren(new GumpPic(0, 0, 0x07d1, 0));
+
+            // Equipment slots for hat/earrings/neck/ring/bracelet
+            AddChildren(new EquipmentSlot(2, 76, Mobile, Layer.Helmet));
+            AddChildren(new EquipmentSlot(2, 76 + 22, Mobile, Layer.Earrings));
+            AddChildren(new EquipmentSlot(2, 76 + 22 * 2, Mobile, Layer.Necklace));
+            AddChildren(new EquipmentSlot(2, 76 + 22 * 3, Mobile, Layer.Ring));
+            AddChildren(new EquipmentSlot(2, 76 + 22 * 4, Mobile, Layer.Bracelet));
+            AddChildren(new EquipmentSlot(2, 76 + 22 * 5, Mobile, Layer.Tunic));
 
             // Paperdoll control!
             AddChildren(new PaperDollInteractable(8, 21, Mobile));
@@ -186,7 +193,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (args.Button == MouseButton.Left)
             {
-                GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new Serial[1]
+                GameActions.ReplyGump(World.Player, 0x000001CD, 0x00000001, new[]
                 {
                     Mobile.Serial
                 });

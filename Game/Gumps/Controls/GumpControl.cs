@@ -117,8 +117,6 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool IsTransparent { get; set; }
 
-        public bool IgnoreParentFill { get; set; }
-
         public IReadOnlyList<GumpControl> Children => _children;
 
         public UIManager UIManager { get; }
@@ -402,14 +400,20 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 InitializeControls();
                 int w = 0, h = 0;
-                List<GumpControl> toremove = new List<GumpControl>();
+                //List<GumpControl> toremove = new List<GumpControl>();
 
-                foreach (GumpControl c in Children)
+                for (int i = 0; i < _children.Count; i++)
                 {
+                    GumpControl c = _children[i];
+
                     c.Update(totalMS, frameMS);
 
                     if (c.IsDisposed)
-                        toremove.Add(c);
+                    {
+                        //toremove.Add(c);
+
+                        _children.RemoveAt(i--);
+                    }
                     else
                     {
 
@@ -440,8 +444,8 @@ namespace ClassicUO.Game.Gumps.Controls
                     WantUpdateSize = false;
                 }
 
-                if (toremove.Count > 0)
-                    toremove.ForEach(s => _children.Remove(s));
+                //if (toremove.Count > 0)
+                //    toremove.ForEach(s => _children.Remove(s));
             }
         }
 
@@ -466,8 +470,10 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             bool initializedKeyboardFocusedControl = false;
 
-            foreach (GumpControl c in _children)
+            for (int i = 0; i < _children.Count; i++)
             {
+                GumpControl c = _children[i];
+
                 if (!c.IsInitialized)
                 {
                     c.Initialize();
@@ -507,8 +513,10 @@ namespace ClassicUO.Game.Gumps.Controls
                     if (AcceptMouseInput)
                         results.Insert(0, this);
 
-                    foreach (GumpControl c in Children)
+                    for (int j = 0; j < Children.Count; j++)
                     {
+                        GumpControl c = Children[j];
+
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
                             GumpControl[] cl = c.HitTest(position);
@@ -561,13 +569,17 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public virtual void Clear()
         {
-            _children.ForEach(s => s.Dispose());
+            for (int i = 0; i < Children.Count; i++)
+                Children[i].Dispose();
         }
 
         public T[] GetControls<T>() where T : GumpControl
         {
             return Children.OfType<T>().ToArray();
         }
+
+        public IEnumerable<T> FindControls<T>() where T : GumpControl => Children.OfType<T>();
+        
 
         public void InvokeMouseDown(Point position, MouseButton button)
         {

@@ -18,15 +18,39 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public SpellbookGump(Item item) : base(item.Serial, 0)
         {
             _spellBook = item;
-            _spellBook.SetCallbacks(OnEntityUpdate, OnEntityDispose);
+            //_spellBook.SetCallbacks(OnEntityUpdate, OnEntityDispose);
+            _spellBook.Items.Added += ItemsOnAdded;
+            _spellBook.Items.Removed += ItemsOnRemoved;
+            _spellBook.Disposed += SpellBookOnDisposed;
             CanMove = true;
             AcceptMouseInput = false;
             OnEntityUpdate(item);
         }
 
+        private void SpellBookOnDisposed(object sender, EventArgs e)
+        {
+            _spellBook.Items.Added -= ItemsOnAdded;
+            _spellBook.Items.Removed -= ItemsOnRemoved;
+            _spellBook.Disposed -= SpellBookOnDisposed;
+            Dispose();
+        }
+
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
+        {
+            OnEntityUpdate(_spellBook);
+        }
+
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
+        {
+            OnEntityUpdate(_spellBook);
+        }
+
         private void CreateBook()
         {
             Clear();
+
+            _pageCornerLeft = _pageCornerRight = null;
+
             GetBookInfo(_spellBookType, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellIndexOffset, out int spellsOnPage, out int dictionaryPagesCount);
             AddChildren(new GumpPic(0, 0, bookGraphic, 0));
             AddChildren(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
@@ -615,10 +639,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CreateBook();
         }
 
-        private void OnEntityDispose(Entity entity)
-        {
-            Dispose();
-        }
+        public void Update() => OnEntityUpdate(_spellBook);
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {

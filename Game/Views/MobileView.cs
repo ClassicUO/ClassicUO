@@ -304,7 +304,7 @@ namespace ClassicUO.Game.Views
             }
         }
 
-        private static bool IsCovered(Mobile mobile, Layer layer)
+        public static bool IsCovered(Mobile mobile, Layer layer)
         {
             switch (layer)
             {
@@ -386,11 +386,11 @@ namespace ClassicUO.Game.Views
                         {
                             if (robe.Graphic <= 0x2687)
                             {
-                                if (robe.Graphic < 0x2687)
+                                if (robe.Graphic < 0x2683)
                                     return robe.Graphic >= 0x204E && robe.Graphic <= 0x204F;
                                 return true;
                             }
-                            else if (robe.Graphic == 0x2FB9 || robe.Graphic == 0x3173)
+                            if (robe.Graphic == 0x2FB9 || robe.Graphic == 0x3173)
                                 return true;
                         }
                     }

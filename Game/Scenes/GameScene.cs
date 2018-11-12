@@ -26,6 +26,7 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
@@ -41,7 +42,7 @@ namespace ClassicUO.Game.Scenes
     public partial class GameScene : Scene
     {
         private RenderTarget2D _renderTarget;
-        private DateTime _timePing;
+        private long _timePing;
 #if !ORIONSORT
         private readonly List<DeferredEntity> _deferredToRemove = new List<DeferredEntity>();
 #endif
@@ -124,8 +125,13 @@ namespace ClassicUO.Game.Scenes
             InputManager.RightMouseButtonUp += OnRightMouseButtonUp;
             InputManager.RightMouseDoubleClick += OnRightMouseDoubleClick;
             InputManager.DragBegin += OnMouseDragBegin;
+            InputManager.MouseDragging += OnMouseDragging;
+            InputManager.MouseMoving += OnMouseMoving;
             InputManager.KeyDown += OnKeyDown;
             InputManager.KeyUp += OnKeyUp;
+
+            UIManager.Add(new OptionsGump1());
+
         }
 
         public override void Unload()
@@ -144,6 +150,8 @@ namespace ClassicUO.Game.Scenes
             InputManager.RightMouseButtonUp -= OnRightMouseButtonUp;
             InputManager.RightMouseDoubleClick -= OnRightMouseDoubleClick;
             InputManager.DragBegin -= OnMouseDragBegin;
+            InputManager.MouseDragging -= OnMouseDragging;
+            InputManager.MouseMoving -= OnMouseMoving;
             InputManager.KeyDown -= OnKeyDown;
             InputManager.KeyUp -= OnKeyUp;
             base.Unload();
@@ -156,9 +164,12 @@ namespace ClassicUO.Game.Scenes
 
 #if ORIONSORT
             (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
-            CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
-            _maxZ = maxItemZ;
-            _drawTerrain = drawTerrain;
+            //CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
+            //_maxZ = maxItemZ;
+            //_drawTerrain = drawTerrain;
+
+            UpdateMaxDrawZ();
+
             _renderListCount = 0;
             int minX = minTile.X;
             int minY = minTile.Y;
@@ -198,11 +209,6 @@ namespace ClassicUO.Game.Scenes
                             break;
 
                         ref Tile tile = ref World.Map.GetTile(x, y);
-
-                        if (World.Player.X == x && World.Player.Y == y)
-                        {
-
-                        }
 
                         if (tile != Tile.Invalid)
                             AddTileToRenderList(tile.ObjectsOnTiles, x, y, false, 150);
@@ -265,18 +271,15 @@ namespace ClassicUO.Game.Scenes
 
             if (_rightMousePressed)
                 MoveCharacterByInputs();
-
-            if (IsHoldingItem)
-                UIManager.GameCursor.UpdateDraggedItemOffset(_heldOffset);
             // ===================================
             World.Update(totalMS, frameMS);
             _staticManager.Update(totalMS, frameMS);
             _effectManager.Update(totalMS, frameMS);
 
-            if (DateTime.UtcNow > _timePing)
+            if (totalMS > _timePing)
             {
                 NetClient.Socket.Send(new PPing());
-                _timePing = DateTime.UtcNow.AddSeconds(10);
+                _timePing = (long) totalMS + 10000;
             }
 
             base.Update(totalMS, frameMS);
@@ -306,7 +309,8 @@ namespace ClassicUO.Game.Scenes
             for (int i = 0; i < _renderListCount; i++)
             {
                 GameObject obj = _renderList[i];
-                obj?.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList);
+                if (obj.Z <= _maxGroundZ)
+                    obj?.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList);
             }
 #else
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);

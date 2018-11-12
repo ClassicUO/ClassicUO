@@ -52,10 +52,8 @@ namespace ClassicUO.Game
             }
         };
         private readonly int[,] _cursorOffset = new int[2, 16];
-        private readonly InputManager _inputManager;
         private readonly Settings _settings;
         private readonly UIManager _uiManager;
-        private Texture2D _blackTexture;
         private SpriteTexture _draggedItemTexture;
         private bool _draggingItem;
         private Graphic _graphic = 0x2073;
@@ -63,15 +61,16 @@ namespace ClassicUO.Game
         private bool _needGraphicUpdate;
         private Point _offset;
         private Rectangle _rect;
-        private Tooltip _tooltip;
+        private readonly Tooltip _tooltip;
 
 
 
         public GameCursor(UIManager ui)
         {
-            _inputManager = Service.Get<InputManager>();
             _uiManager = ui;
             _settings = Service.Get<Settings>();
+
+            _tooltip = new Tooltip();
 
             for (int i = 0; i < 2; i++)
             {
@@ -205,20 +204,13 @@ namespace ClassicUO.Game
 
         public SpriteTexture Texture { get; private set; }
 
-        //public Point ScreenPosition => _Mouse.Position;
-
-        public void SetDraggedItem(Graphic graphic, Hue hue, Point offset)
+        public void SetDraggedItem(Graphic graphic, Hue hue)
         {
             _draggedItemTexture = Art.GetStaticTexture(graphic);
             _hue = hue;
-            _offset = offset;
+            _offset = new Point(_draggedItemTexture.Width / 2, _draggedItemTexture.Height / 2);
             _rect = new Rectangle(0, 0, _draggedItemTexture.Width, _draggedItemTexture.Height);
             _draggingItem = true;
-        }
-
-        public void UpdateDraggedItemOffset(Point offset)
-        {
-            _offset = offset;
         }
 
         public void ClearDraggedItem()
@@ -274,80 +266,62 @@ namespace ClassicUO.Game
 
                 if (!World.ClientFeatures.TooltipsEnabled || gs.IsHoldingItem)
                 {
-                    if (_tooltip != null)
-                    {
+                    if (!_tooltip.IsEmpty)
                         _tooltip.Clear();
-                        _tooltip = null;
-                    }
-                    return;
-                }
-
-
-                if (gs.SelectedObject is Entity item && item.Properties.Count > 0)
-                {
-                    if (_tooltip == null)
-                    {
-                        _tooltip = new Tooltip();
-                    }
-                    _tooltip.SetGameObject(item);
-                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
-                }
-                else if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is ItemGumpling gumpling && gumpling.Item.Properties.Count > 0)
-                {
-                    if (_tooltip == null)
-                    {
-                        _tooltip = new Tooltip();
-                    }
-                    _tooltip.SetGameObject(gumpling.Item);
-                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
-                }
-                else if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is GumpPicBackpack backpack && backpack.BackpackItem.Properties.Count > 0)
-                {
-
-                    if (_tooltip == null)
-                    {
-                        _tooltip = new Tooltip();
-                    }
-                    _tooltip.SetGameObject(backpack.BackpackItem);
-                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
-                }
-                else if (gs.SelectedObject is GameEffect effect && effect.Source is Item dynItem)
-                {
-                    if (_tooltip == null)
-                    {
-                        _tooltip = new Tooltip();
-                    }
-                    _tooltip.SetGameObject(dynItem);
-                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
-                }
-            }
-            else
-            {
-                if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl != null && _uiManager.MouseOverControl.HasTooltip)
-                {
-                    if (_tooltip != null && _tooltip.Text != _uiManager.MouseOverControl.Tooltip)
-                    {
-                        _tooltip.Clear();
-                        _tooltip = null;
-                    }
-
-                    if (_tooltip == null)
-                    {
-                        _tooltip = new Tooltip();
-                        _tooltip.SetText(_uiManager.MouseOverControl.Tooltip);
-                    }
-
-                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
-
                 }
                 else
                 {
-                    if (_tooltip != null)
+                    if (gs.SelectedObject is Entity item && item.Properties.Count > 0)
                     {
-                        _tooltip.Clear();
-                        _tooltip = null;
+                        if (_tooltip.IsEmpty || item != _tooltip.Object)
+                            _tooltip.SetGameObject(item);
+                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+
+                        return;
+                    }
+
+                    if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is ItemGumpling gumpling && gumpling.Item.Properties.Count > 0)
+                    {
+                        if (_tooltip.IsEmpty || gumpling.Item != _tooltip.Object)
+                            _tooltip.SetGameObject(gumpling.Item);
+                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+
+                        return;
+                    }
+
+                    if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is GumpPicBackpack backpack && backpack.BackpackItem.Properties.Count > 0)
+                    {
+                        if (_tooltip.IsEmpty || backpack.BackpackItem != _tooltip.Object)
+                            _tooltip.SetGameObject(backpack.BackpackItem);
+                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+
+                        return;
+                    }
+
+                    if (gs.SelectedObject is GameEffect effect && effect.Source is Item dynItem)
+                    {
+                        if (_tooltip.IsEmpty || dynItem != _tooltip.Object)
+                            _tooltip.SetGameObject(dynItem);
+                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+
+                        return;
                     }
                 }
+            }
+
+            if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl != null && _uiManager.MouseOverControl.HasTooltip)
+            {
+                if (_tooltip.Text != _uiManager.MouseOverControl.Tooltip)
+                {
+                    _tooltip.Clear();
+                }
+
+                if (_tooltip.IsEmpty)
+                    _tooltip.SetText(_uiManager.MouseOverControl.Tooltip);
+
+
+                _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+
             }
         }
 
@@ -385,9 +359,9 @@ namespace ClassicUO.Game
                 else
                     hashf = hashf + 2;
             }
-            else if (shiftX <= 0)
+            else if (shiftX == 0)
             {
-                if (shiftY <= 0)
+                if (shiftY == 0)
                     return current_facing;
             }
 
@@ -416,7 +390,7 @@ namespace ClassicUO.Game
                     return (int) Direction.South; // S
                 case 210:
 
-                    return (int) Direction.Right; // N
+                    return (int) Direction.North; // N
                 case 230:
 
                     return (int) Direction.South; // S

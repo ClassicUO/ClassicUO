@@ -28,6 +28,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 
+
 namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class ContainerGump : Gump
@@ -35,24 +36,88 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private readonly ContainerData _data;
         private readonly Item _item;
 
+        private long _corpseEyeTicks;
+        private readonly bool _isCorspeContainer;
+        private int _eyeCorspeOffset;
+
+        private GumpPic _eyeGumpPic;
+
         public ContainerGump(Item item, Graphic gumpid) : base(item.Serial, 0)
         {
             _item = item;
+            _isCorspeContainer = gumpid == 0x0009;
+            //item.EnableCallBackForItemsUpdate(true);
+            _item.Items.Added += ItemsOnAdded;
+            _item.Items.Removed += ItemsOnRemoved;
             _data = ContainerManager.Get(gumpid);
             CanMove = true;
             AddChildren(new GumpPicContainer(0, 0, _data.Graphic, 0, item));
+
+            if (_isCorspeContainer)
+            {
+                AddChildren(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
+            }
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+
+            if (_isCorspeContainer && _corpseEyeTicks <  totalMS)
+            {
+                _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
+                _corpseEyeTicks = (long) totalMS + 750;
+
+                _eyeGumpPic.Graphic = (Graphic)(0x0045 + _eyeCorspeOffset);
+                _eyeGumpPic.Texture = IO.Resources.Gumps.GetGumpTexture(_eyeGumpPic.Graphic);
+            }
+        }
+
+        private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
+        {
+            //IEnumerable<Item> items = Children
+            //                         .OfType<ItemGumpling>()
+            //                         .Select(s => s.Item)
+            //                         .Except(e);
+
+            //var toremove = Children.OfType<ItemGumpling>()/*.Where(s => e.Contains(s.Item))*/.ToList();
+
+            //foreach (ItemGumpling itemGumpling in toremove)
+            //{
+            //    foreach (Item item in e)
+            //    {
+            //        if (item == itemGumpling.Item)
+            //        {
+
+            //        }
+            //    }
+            //}
+
+        }
+
+        private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
+        {
+            List<ItemGumpling> toremove = Children.OfType<ItemGumpling>().Where(s => e.Contains(s.Item)).ToList();
+
+            toremove.ForEach(RemoveChildren);
+
+            foreach (Item item in e)
+                AddChildren(new ItemGumpling(item));            
         }
 
         protected override void OnInitialize()
         {
             foreach (Item item in _item.Items)
                 AddChildren(new ItemGumpling(item));
-            _item.SetCallbacks(OnItemUpdated, OnItemDisposed);
+            //_item.SetCallbacks(OnItemUpdated, OnItemDisposed);
         }
 
         public override void Dispose()
         {
-            _item.ClearCallBacks(OnItemUpdated, OnItemDisposed);
+            _item.Items.Added -= ItemsOnAdded;
+            _item.Items.Removed -= ItemsOnRemoved;
+            //_item.EnableCallBackForItemsUpdate(false);
+            //_item.ClearCallBacks(OnItemUpdated, OnItemDisposed);
             base.Dispose();
         }
 

@@ -77,14 +77,10 @@ namespace ClassicUO.Game.GameObjects
 
         public Item(Serial serial) : base(serial)
         {
-            Items.Added += ItemsOnUpdated;
-            Items.Removed += ItemsOnUpdated;
+           
         }
 
-        private void ItemsOnUpdated(object sender, CollectionChangedEventArgs<Item> e)
-        {
-            _OnUpdated?.Invoke(this);
-        }
+        
 
 
         public GameEffect Effect
@@ -250,7 +246,10 @@ namespace ClassicUO.Game.GameObjects
         {
             base.OnPositionChanged(sender, e);
 
+            if (IsCorpse)
+            {
 
+            }
 
             //if (OnGround)
             //    Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
@@ -263,6 +262,11 @@ namespace ClassicUO.Game.GameObjects
             get => _containerPosition;
             set
             {
+                if (IsCorpse)
+                {
+
+                }
+
                 if (!OnGround)
                 {
                     _containerPosition = value;
@@ -650,7 +654,8 @@ namespace ClassicUO.Game.GameObjects
 
                 if (ItemData.AnimID != 0) graphic = ItemData.AnimID;
             }
-            else if (IsCorpse) return Amount;
+            else if (IsCorpse)
+                return Amount;
 
             return graphic;
         }
@@ -663,10 +668,10 @@ namespace ClassicUO.Game.GameObjects
             return (_spellsBitFiled & flag) == flag;
         }
 
-        public void FillSpellbook(SpellBookType type, ulong field)
+        public bool FillSpellbook(SpellBookType type, ulong field)
         {
             if (!IsSpellBook)
-                return;
+                return false;
             bool needUpdate = false;
 
             if (BookType != type)
@@ -681,8 +686,10 @@ namespace ClassicUO.Game.GameObjects
                 needUpdate = true;
             }
 
-            if (needUpdate)
-                _OnUpdated?.Invoke(this);
+            //if (needUpdate)
+            //    _OnUpdated?.Invoke(this);
+
+            return needUpdate;
         }
 
         public override void Dispose()
@@ -695,8 +702,7 @@ namespace ClassicUO.Game.GameObjects
 
             Effect?.Dispose();
             Effect = null;
-            Items.Added -= ItemsOnUpdated;
-            Items.Removed -= ItemsOnUpdated;
+         
             base.Dispose();
         }
 

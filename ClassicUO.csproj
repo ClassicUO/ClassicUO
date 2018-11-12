@@ -99,6 +99,7 @@
     <Compile Include="Game\Gumps\UIGumps\Login\MainLoginGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\Login\ServerSelectionGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\LogoutGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\OptionsGump1.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyMemberGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\UseSpellButtonGump.cs" />
@@ -112,6 +113,7 @@
     <Compile Include="Game\Views\LightningEffectView.cs" />
     <Compile Include="Game\Views\MovingEffectView.cs" />
     <Compile Include="Input\Mouse.cs" />
+    <Compile Include="Interfaces\IMobilePaperdollOwner.cs" />
     <Compile Include="Interfaces\ISmoothMovable.cs" />
     <Compile Include="Network\NetClient1.cs" />
     <Compile Include="Network\NetStatistics.cs" />

@@ -35,6 +35,7 @@ namespace ClassicUO.Game.GameObjects
     [Flags]
     public enum Flags : byte
     {
+        None,
         Frozen = 0x01,
         Female = 0x02,
         Poisoned = 0x04,
@@ -57,15 +58,20 @@ namespace ClassicUO.Game.GameObjects
         private Hue _hue;
         protected long _lastAnimationChangeTime;
         private string _name;
-        protected Action<Entity> _OnDisposed;
-        protected Action<Entity> _OnUpdated;
+        //protected Action<Entity> _OnDisposed;
+        //protected Action<Entity> _OnUpdated;
 
         protected Entity(Serial serial)
         {
             Serial = serial;
             Items = new EntityCollection<Item>();
-            PositionChanged += OnPositionChanged;
+            PositionChanged += OnPositionChanged;       
         }
+
+        //private void ItemsOnUpdated(object sender, CollectionChangedEventArgs<Item> e)
+        //{
+        //    _OnUpdated?.Invoke(this);
+        //}
 
         public EntityCollection<Item> Items { get; }
 
@@ -165,26 +171,26 @@ namespace ClassicUO.Game.GameObjects
 
         public DeferredEntity DeferredObject { get; set; }
 
-        public void SetCallbacks(Action<Entity> onUpdate, Action<Entity> onDispose)
-        {
-            if (onUpdate != null)
-                _OnUpdated += onUpdate;
+        //public void SetCallbacks(Action<Entity> onUpdate, Action<Entity> onDispose)
+        //{
+        //    if (onUpdate != null)
+        //        _OnUpdated += onUpdate;
 
-            if (onDispose != null)
-                _OnDisposed += onDispose;
-        }
+        //    if (onDispose != null)
+        //        _OnDisposed += onDispose;
+        //}
 
-        public void ClearCallBacks(Action<Entity> onUpdate, Action<Entity> onDispose)
-        {
-            if (_OnUpdated == null && _OnDisposed == null)
-                return;
+        //public void ClearCallBacks(Action<Entity> onUpdate, Action<Entity> onDispose)
+        //{
+        //    if (_OnUpdated == null && _OnDisposed == null)
+        //        return;
 
-            if (_OnUpdated.GetInvocationList().Contains(onUpdate))
-                _OnUpdated -= onUpdate;
+        //    if (_OnUpdated.GetInvocationList().Contains(onUpdate))
+        //        _OnUpdated -= onUpdate;
 
-            if (_OnDisposed.GetInvocationList().Contains(onDispose))
-                _OnDisposed -= onDispose;
-        }
+        //    if (_OnDisposed.GetInvocationList().Contains(onDispose))
+        //        _OnDisposed -= onDispose;
+        //}
 
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
 
@@ -223,11 +229,31 @@ namespace ClassicUO.Game.GameObjects
             }
 
             _properties.Clear();
-            _OnDisposed?.Invoke(this);
-            _OnUpdated = null;
-            _OnDisposed = null;
+            //_OnDisposed?.Invoke(this);
+            //EnableCallBackForItemsUpdate(false);
+            //_OnUpdated = null;
+            //_OnDisposed = null;
             base.Dispose();
         }
+
+        //private bool _enabled;
+
+        //public void EnableCallBackForItemsUpdate(bool enable)
+        //{
+        //    if (enable && !_enabled)
+        //    {
+        //        _enabled = enable;
+        //        Items.Added += ItemsOnUpdated;
+        //        Items.Removed += ItemsOnUpdated;
+        //    }
+        //    else if (!enable && _enabled)
+        //    {
+        //        _enabled = enable;
+        //        Items.Added -= ItemsOnUpdated;
+        //        Items.Removed -= ItemsOnUpdated;
+        //    }         
+        //}
+
 
         protected virtual void OnPositionChanged(object sender, EventArgs e)
         {
