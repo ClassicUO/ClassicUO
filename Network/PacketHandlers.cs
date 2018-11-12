@@ -431,11 +431,6 @@ namespace ClassicUO.Network
             Serial isfollowing = p.ReadUInt();
         }
 
-        /* private static void NewHealthBarStatusUpdateSA(Packet p)
-        {
-
-        }*/
-
         private static void NewHealthbarUpdate(Packet p)
         {
             if (World.Player == null)
@@ -468,7 +463,7 @@ namespace ClassicUO.Network
                         if (FileManager.ClientVersion >= ClientVersions.CV_7000)
                             mobile.SetSAPoison(false);
                         else
-                            flags &= 0x04;
+                            flags = (byte) (flags & ~0x04);
                     }
                 }
                 else if (type == 2)
@@ -476,7 +471,7 @@ namespace ClassicUO.Network
                     if (enabled)
                         flags |= 0x08;
                     else
-                        flags &= 0x08;
+                        flags &= (byte) (flags & ~0x08);
                 }
                 else if (type == 3)
                 {
@@ -663,6 +658,7 @@ namespace ClassicUO.Network
             World.Player.Graphic = (ushort) (p.ReadUShort() + p.ReadSByte());
             World.Player.Hue = p.ReadUShort();
             World.Player.Flags = (Flags) p.ReadByte();
+
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             p.Skip(2);
@@ -1126,6 +1122,7 @@ namespace ClassicUO.Network
 
             if (mobile == World.Player)
                 return;
+
             Direction dir = direction & Direction.Up;
             bool isrun = (direction & Direction.Running) != 0;
 
@@ -1149,14 +1146,23 @@ namespace ClassicUO.Network
         {
             if (World.Player == null) return;
             Mobile mobile = World.GetOrCreateMobile(p.ReadUInt());
-            mobile.Graphic = p.ReadUShort();
+            Graphic graphic = p.ReadUShort();
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             sbyte z = p.ReadSByte();
             Direction direction = (Direction) p.ReadByte();
-            mobile.Hue = p.ReadUShort();
-            mobile.Flags = (Flags) p.ReadByte();
-            mobile.NotorietyFlag = (NotorietyFlag) p.ReadByte();
+
+            Hue hue = p.ReadUShort();
+            Flags flags = (Flags) p.ReadByte();
+            NotorietyFlag notoriety = (NotorietyFlag) p.ReadByte();
+
+            
+            mobile.Graphic = graphic;
+            mobile.Hue = hue;
+            mobile.Flags = flags;
+            mobile.NotorietyFlag = notoriety;
+        
+
 
             if (p.ID != 0x78)
                 p.Skip(6);
@@ -1165,20 +1171,20 @@ namespace ClassicUO.Network
             while ((itemSerial = p.ReadUInt()) != 0)
             {
                 Item item = World.GetOrCreateItem(itemSerial);
-                Graphic graphic = p.ReadUShort();
+                Graphic itemGraphic = p.ReadUShort();
                 item.Layer = (Layer) p.ReadByte();
 
                 if (FileManager.ClientVersion >= ClientVersions.CV_70331)
                     item.Hue = p.ReadUShort();
-                else if ((graphic & 0x8000) != 0)
+                else if ((itemGraphic & 0x8000) != 0)
                 {
-                    graphic &= 0x7FFF;
+                    itemGraphic &= 0x7FFF;
                     item.Hue = p.ReadUShort();
                 }
                 else
-                    graphic &= 0x3FFF;
+                    itemGraphic &= 0x3FFF;
 
-                item.Graphic = graphic;
+                item.Graphic = itemGraphic;
                 item.Amount = 1;
                 item.Container = mobile;
                 mobile.Items.Add(item);

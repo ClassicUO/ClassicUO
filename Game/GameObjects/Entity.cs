@@ -35,6 +35,7 @@ namespace ClassicUO.Game.GameObjects
     [Flags]
     public enum Flags : byte
     {
+        None,
         Frozen = 0x01,
         Female = 0x02,
         Poisoned = 0x04,

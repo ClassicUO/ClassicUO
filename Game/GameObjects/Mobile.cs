@@ -233,7 +233,7 @@ namespace ClassicUO.Game.GameObjects
         public virtual bool InWarMode
         {
             get => ((byte) Flags & 0x40) != 0;
-            set => throw new Exception();
+            set { }
         }
 
         public bool IsHuman => MathHelper.InRange(Graphic, 0x0190, 0x0193) || MathHelper.InRange(Graphic, 0x00B7, 0x00BA) || MathHelper.InRange(Graphic, 0x025D, 0x0260) || MathHelper.InRange(Graphic, 0x029A, 0x029B) || MathHelper.InRange(Graphic, 0x02B6, 0x02B7) || Graphic == 0x03DB || Graphic == 0x03DF || Graphic == 0x03E2 || Graphic == 0x02E8 || Graphic == 0x02E9; // Vampiric
