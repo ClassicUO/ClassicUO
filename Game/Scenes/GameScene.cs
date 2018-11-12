@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Scenes
     public partial class GameScene : Scene
     {
         private RenderTarget2D _renderTarget;
-        private DateTime _timePing;
+        private long _timePing;
 #if !ORIONSORT
         private readonly List<DeferredEntity> _deferredToRemove = new List<DeferredEntity>();
 #endif
@@ -276,10 +276,10 @@ namespace ClassicUO.Game.Scenes
             _staticManager.Update(totalMS, frameMS);
             _effectManager.Update(totalMS, frameMS);
 
-            if (DateTime.UtcNow > _timePing)
+            if (totalMS > _timePing)
             {
                 NetClient.Socket.Send(new PPing());
-                _timePing = DateTime.UtcNow.AddSeconds(10);
+                _timePing = (long) totalMS + 10000;
             }
 
             base.Update(totalMS, frameMS);

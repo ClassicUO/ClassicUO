@@ -57,6 +57,13 @@ namespace ClassicUO.Game.Gumps.Controls
             _textures[PRESSED] = IO.Resources.Gumps.GetGumpTexture(pressed);
             if (over > 0) _textures[OVER] = IO.Resources.Gumps.GetGumpTexture(over);
             ref SpriteTexture t = ref _textures[NORMAL];
+
+            if (t == null)
+            {
+                Dispose();
+                return;
+            }
+
             Width = t.Width;
             Height = t.Height;
             FontHue = normalHue == ushort.MaxValue ? (ushort) 0 : normalHue;
