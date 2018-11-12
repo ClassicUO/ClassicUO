@@ -117,8 +117,6 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool IsTransparent { get; set; }
 
-        public bool IgnoreParentFill { get; set; }
-
         public IReadOnlyList<GumpControl> Children => _children;
 
         public UIManager UIManager { get; }

@@ -44,9 +44,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Y = 100;
             CanMove = true;
             AcceptMouseInput = true;
-            AddChildren(_background = new ExpandableScroll(0, 0, 300));
-            _background.TitleGumpID = 0x82A;
-            AddChildren(_scrollBar = new ScrollFlag(this, 0, 0, Height));
+            AddChildren(_background = new ExpandableScroll(0, 0, 300)
+            {
+                TitleGumpID = 0x82A
+            });
+
+            _scrollBar = new ScrollFlag(this, 0, 0, Height);
             AddChildren(_journalEntries = new RenderedTextList(30, 36, 242, 200, _scrollBar));
         }
 
@@ -79,6 +82,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Update(double totalMS, double frameMS)
         {
+            WantUpdateSize = true;
             _journalEntries.Height = Height - 98;
             base.Update(totalMS, frameMS);
         }
@@ -132,12 +136,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             while (JournalEntries.Count > 99)
                 JournalEntries.RemoveAt(0);
-            JournalEntries.Add(new JournalEntry(text, font, hue, speakerName));
+            JournalEntries.Add(new JournalEntry(text, font, hue, speakerName, false));
             OnJournalEntryAdded?.Invoke(JournalEntries[JournalEntries.Count - 1]);
         }
     }
 
-    public class JournalEntry
+    public struct JournalEntry
     {
         public readonly bool AsUnicode;
         public readonly int Font;
@@ -145,12 +149,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public readonly string SpeakerName;
         public readonly string Text;
 
-        public JournalEntry(string text, int font, ushort hue, string speakerName)
+        public JournalEntry(string text, int font, ushort hue, string speakerName, bool unicode)
         {
             Text = text;
             Font = font;
             Hue = hue;
             SpeakerName = speakerName;
+            AsUnicode = unicode;
         }
     }
 }

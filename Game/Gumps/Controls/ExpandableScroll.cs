@@ -90,6 +90,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 _gumpExpander.MouseUp += expander_OnMouseUp;
                 _gumpExpander.MouseEnter += expander_OnMouseOver;
             }
+
+            WantUpdateSize = true;
         }
 
         public override void Dispose()
@@ -146,30 +148,38 @@ namespace ClassicUO.Game.Gumps.Controls
                 IsVisible = false;
             else
             {
-                IsVisible = true;
+                if (!IsVisible)
+                    IsVisible = true;
                 //TOP
                 _gumpTop.X = 0;
                 _gumpTop.Y = 0;
+                _gumpTop.WantUpdateSize = true;
                 //MIDDLE
                 _gumpMiddle.X = 17;
                 _gumpMiddle.Y = _gumplingMidY;
                 _gumpMiddle.Width = 263;
                 _gumpMiddle.Height = _gumplingMidHeight;
+                _gumpMiddle.WantUpdateSize = true;
                 //BOTTOM
                 _gumpBottom.X = 17;
                 _gumpBottom.Y = _gumplingBottomY;
+                _gumpBottom.WantUpdateSize = true;
 
                 if (_isResizable)
                 {
                     _gumpExpander.X = _gumplingExpanderX;
                     _gumpExpander.Y = _gumplingExpanderY;
+                    _gumpExpander.WantUpdateSize = true;
                 }
 
                 if (_gumplingTitle != null && _gumplingTitle.IsInitialized)
                 {
                     _gumplingTitle.X = (_gumpTop.Width - _gumplingTitle.Width) / 2;
                     _gumplingTitle.Y = (_gumpTop.Height - _gumplingTitle.Height) / 2;
+                    _gumplingTitle.WantUpdateSize = true;
                 }
+
+                WantUpdateSize = true;
             }
 
             base.Update(totalMS, frameMS);
