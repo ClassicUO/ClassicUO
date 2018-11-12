@@ -25,6 +25,8 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 
 using Microsoft.Xna.Framework;
@@ -37,6 +39,7 @@ namespace ClassicUO.Game.Map
         //private const int MAX_CHUNKS = CHUNKS_NUM * 2 + 1;
         private readonly List<int> _usedIndices = new List<int>();
         private Point _center;
+        private readonly bool[] _blockAccessList = new bool[0x1000];
 
         public Facet(int index)
         {
@@ -119,6 +122,69 @@ namespace ClassicUO.Game.Map
                 MapCells* cells = (MapCells*) &mp->Cells;
                 return cells[my * 8 + mx].Z;
             }    
+        }
+
+        public void ClearBockAccess()
+        {
+            unsafe
+            {
+                fixed (bool* ptr = _blockAccessList)
+                {
+                    byte* start = (byte*) ptr;
+                    byte* end = start + _blockAccessList.Length;
+
+                    while (&start[0] != &end[0])
+                    {
+                        *start++ = 0;
+                    }
+                }
+            }
+        }
+
+        public sbyte CalculateNearZ(sbyte defaultZ, int x, int y, int z)
+        {
+            ref bool access = ref _blockAccessList[(x & 0x3F) + ((y & 0x3F) << 6)];
+
+            if (access)
+                return defaultZ;
+
+            access = true;
+
+            ref Tile tile = ref GetTile(x, y);
+
+            if (tile != Tile.Invalid)
+            {
+                var objects = tile.ObjectsOnTiles;
+                GameObject obj = null;
+                for (int i = 0; i < objects.Count; i++)
+                {
+                    obj = objects[i];
+
+                    if ( !(obj is Static) && obj is Item item && !item.IsMulti)
+                        continue;
+                    if (obj is Mobile)
+                        continue;
+
+                    if (obj is IDynamicItem dyn && (!TileData.IsRoof((long)dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6 ))
+                        continue;
+                    break;
+                }
+
+                if (obj == null)
+                    return defaultZ;
+
+                sbyte tileZ = obj.Z;
+
+                if (tileZ < defaultZ)
+                    defaultZ = tileZ;
+
+                defaultZ = CalculateNearZ(defaultZ, x - 1, y, tileZ);
+                defaultZ = CalculateNearZ(defaultZ, x + 1, y, tileZ);
+                defaultZ = CalculateNearZ(defaultZ, x, y - 1, tileZ);
+                defaultZ = CalculateNearZ(defaultZ, x, y + 1, tileZ);
+            }
+
+            return defaultZ;
         }
 
         public IndexMap GetIndex(int blockX, int blockY)

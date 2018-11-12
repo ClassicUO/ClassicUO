@@ -164,9 +164,12 @@ namespace ClassicUO.Game.Scenes
 
 #if ORIONSORT
             (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
-            CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
-            _maxZ = maxItemZ;
-            _drawTerrain = drawTerrain;
+            //CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
+            //_maxZ = maxItemZ;
+            //_drawTerrain = drawTerrain;
+
+            UpdateMaxDrawZ();
+
             _renderListCount = 0;
             int minX = minTile.X;
             int minY = minTile.Y;
@@ -206,11 +209,6 @@ namespace ClassicUO.Game.Scenes
                             break;
 
                         ref Tile tile = ref World.Map.GetTile(x, y);
-
-                        if (World.Player.X == x && World.Player.Y == y)
-                        {
-
-                        }
 
                         if (tile != Tile.Invalid)
                             AddTileToRenderList(tile.ObjectsOnTiles, x, y, false, 150);
@@ -311,7 +309,8 @@ namespace ClassicUO.Game.Scenes
             for (int i = 0; i < _renderListCount; i++)
             {
                 GameObject obj = _renderList[i];
-                obj?.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList);
+                if (obj.Z <= _maxGroundZ)
+                    obj?.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList);
             }
 #else
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
