@@ -271,10 +271,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            spriteBatch.Draw2D(_border, new Rectangle((int) position.X, (int) position.Y + _border.Height, Width, _border.Height), Vector3.Zero);
-            spriteBatch.Draw2D(_border, new Rectangle((int) position.X, (int) position.Y + Height - _border.Height * 2 + 1, Width + 1, _border.Height), Vector3.Zero);
-            spriteBatch.Draw2D(_border, new Rectangle((int) position.X - _border.Width + 1, (int) position.Y + _border.Height, _border.Width, Height - _border.Height * 2), Vector3.Zero);
-            spriteBatch.Draw2D(_border, new Rectangle((int) position.X + Width - _border.Width + 1, (int) position.Y + 2, _border.Width, Height - _border.Height * 2), Vector3.Zero);
+            spriteBatch.Draw2D(_border, new Rectangle(position.X, position.Y + _border.Height, Width, _border.Height), Vector3.Zero);
+            spriteBatch.Draw2D(_border, new Rectangle(position.X, position.Y + Height - _border.Height * 2 + 1, Width + 1, _border.Height), Vector3.Zero);
+            spriteBatch.Draw2D(_border, new Rectangle(position.X - _border.Width + 1, position.Y + _border.Height, _border.Width, Height - _border.Height * 2), Vector3.Zero);
+            spriteBatch.Draw2D(_border, new Rectangle(position.X + Width - _border.Width + 1, position.Y + 2, _border.Width, Height - _border.Height * 2), Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
         }

@@ -81,6 +81,10 @@ namespace ClassicUO.Configuration
         private bool _useOldStatus;
         private string _username;
         private bool _useTooltips;
+        private bool _preloadMaps;
+        private bool _showHPMobiles;
+        private int _showHPMobilesMode = 0; // 0 = %, 1 = line, 2 = both
+        private bool _highlightMobilesByFlags;
 
         [JsonConstructor]
         public Settings()
@@ -435,6 +439,34 @@ namespace ClassicUO.Configuration
         {
             get => _smoothMovement;
             set => SetProperty(ref _smoothMovement, value);
+        }
+
+        [JsonProperty(PropertyName = "preload_maps")]
+        public bool PreloadMaps
+        {
+            get => _preloadMaps;
+            set => SetProperty(ref _preloadMaps, value);
+        }
+
+        [JsonProperty(PropertyName = "show_mobiles_hp")]
+        public bool ShowMobilesHP
+        {
+            get => _showHPMobiles;
+            set => SetProperty(ref _showHPMobiles, value);
+        }
+
+        [JsonProperty(PropertyName = "show_mobiles_hp_mode")]
+        public int ShowMobilesHPMode
+        {
+            get => _showHPMobilesMode;
+            set => SetProperty(ref _showHPMobilesMode, value);
+        }
+
+        [JsonProperty(PropertyName = "highlight_mobiles_by_flags")]
+        public bool HighlightMobilesByFlags
+        {
+            get => _highlightMobilesByFlags;
+            set => SetProperty(ref _highlightMobilesByFlags, value);
         }
     }
 

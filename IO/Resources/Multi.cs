@@ -50,7 +50,7 @@ namespace ClassicUO.IO.Resources
 
         public static int GetCount(int graphic)
         {
-            graphic &= FileManager.GraphicMask;
+            //graphic &= FileManager.GraphicMask;
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
             int count = length / _itemOffset;
 

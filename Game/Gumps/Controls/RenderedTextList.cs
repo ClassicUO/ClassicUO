@@ -69,7 +69,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     if (y < 0)
                     {
                         // this entry starts above the renderable area, but exists partially within it.
-                        _entries[i].Draw(spriteBatch, new Rectangle((int) p.X, (int) position.Y, _entries[i].Width, _entries[i].Height + y), 0, -y);
+                        _entries[i].Draw(spriteBatch, new Rectangle(p.X, position.Y, _entries[i].Width, _entries[i].Height + y), 0, -y);
                         p.Y += _entries[i].Height + y;
                     }
                     else
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 else
                 {
                     int y = maxheight - height;
-                    _entries[i].Draw(spriteBatch, new Rectangle((int) p.X, (int) position.Y + _scrollBar.Height - y, _entries[i].Width, y), 0, 0);
+                    _entries[i].Draw(spriteBatch, new Rectangle(p.X, position.Y + _scrollBar.Height - y, _entries[i].Width, y), 0, 0);
 
                     // can't fit any more entries - so we break!
                     break;

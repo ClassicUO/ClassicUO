@@ -268,56 +268,60 @@ namespace ClassicUO.Game
                 {
                     if (!_tooltip.IsEmpty)
                         _tooltip.Clear();
-                    return;
-                }
-
-
-                if (gs.SelectedObject is Entity item && item.Properties.Count > 0)
-                {
-                    if (_tooltip.IsEmpty || item != _tooltip.Object)
-                        _tooltip.SetGameObject(item);
-                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
-                }
-                else if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is ItemGumpling gumpling && gumpling.Item.Properties.Count > 0)
-                {
-                    if (_tooltip.IsEmpty || gumpling.Item != _tooltip.Object)
-                        _tooltip.SetGameObject(gumpling.Item);
-                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
-                }
-                else if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is GumpPicBackpack backpack && backpack.BackpackItem.Properties.Count > 0)
-                {
-                    if (_tooltip.IsEmpty || backpack.BackpackItem != _tooltip.Object)
-                        _tooltip.SetGameObject(backpack.BackpackItem);
-                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
-                }
-                else if (gs.SelectedObject is GameEffect effect && effect.Source is Item dynItem)
-                {
-                    if (_tooltip.IsEmpty || dynItem != _tooltip.Object)
-                        _tooltip.SetGameObject(dynItem);
-                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
-                }
-            }
-            else
-            {
-                if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl != null && _uiManager.MouseOverControl.HasTooltip)
-                {
-                    if (_tooltip.Text != _uiManager.MouseOverControl.Tooltip)
-                    {
-                        _tooltip.Clear();
-                    }
-
-                    if (_tooltip.IsEmpty)
-                        _tooltip.SetText(_uiManager.MouseOverControl.Tooltip);
-
-
-                    _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
-
                 }
                 else
                 {
-                    if (!_tooltip.IsEmpty)
-                        _tooltip.Clear();
+                    if (gs.SelectedObject is Entity item && item.Properties.Count > 0)
+                    {
+                        if (_tooltip.IsEmpty || item != _tooltip.Object)
+                            _tooltip.SetGameObject(item);
+                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+
+                        return;
+                    }
+
+                    if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is ItemGumpling gumpling && gumpling.Item.Properties.Count > 0)
+                    {
+                        if (_tooltip.IsEmpty || gumpling.Item != _tooltip.Object)
+                            _tooltip.SetGameObject(gumpling.Item);
+                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+
+                        return;
+                    }
+
+                    if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is GumpPicBackpack backpack && backpack.BackpackItem.Properties.Count > 0)
+                    {
+                        if (_tooltip.IsEmpty || backpack.BackpackItem != _tooltip.Object)
+                            _tooltip.SetGameObject(backpack.BackpackItem);
+                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+
+                        return;
+                    }
+
+                    if (gs.SelectedObject is GameEffect effect && effect.Source is Item dynItem)
+                    {
+                        if (_tooltip.IsEmpty || dynItem != _tooltip.Object)
+                            _tooltip.SetGameObject(dynItem);
+                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+
+                        return;
+                    }
                 }
+            }
+
+            if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl != null && _uiManager.MouseOverControl.HasTooltip)
+            {
+                if (_tooltip.Text != _uiManager.MouseOverControl.Tooltip)
+                {
+                    _tooltip.Clear();
+                }
+
+                if (_tooltip.IsEmpty)
+                    _tooltip.SetText(_uiManager.MouseOverControl.Tooltip);
+
+
+                _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+
             }
         }
 
@@ -355,9 +359,9 @@ namespace ClassicUO.Game
                 else
                     hashf = hashf + 2;
             }
-            else if (shiftX <= 0)
+            else if (shiftX == 0)
             {
-                if (shiftY <= 0)
+                if (shiftY == 0)
                     return current_facing;
             }
 
@@ -386,7 +390,7 @@ namespace ClassicUO.Game
                     return (int) Direction.South; // S
                 case 210:
 
-                    return (int) Direction.Right; // N
+                    return (int) Direction.North; // N
                 case 230:
 
                     return (int) Direction.South; // S

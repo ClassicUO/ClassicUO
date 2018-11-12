@@ -107,6 +107,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 switch (_mobile.Race)
                 {
+                    default:
                     case RaceType.HUMAN:
                         body = (Graphic) (0xC + (_mobile.IsFemale ? 1 : 0));
 

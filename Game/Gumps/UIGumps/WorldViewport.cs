@@ -48,8 +48,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            _rect.X = (int) position.X;
-            _rect.Y = (int) position.Y;
+            _rect.X = position.X;
+            _rect.Y = position.Y;
             _rect.Width = Width;
             _rect.Height = Height;
             spriteBatch.Draw2D(_scene.ViewportTexture, _rect, Vector3.Zero);

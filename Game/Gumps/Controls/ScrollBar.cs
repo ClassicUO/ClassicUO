@@ -168,13 +168,13 @@ namespace ClassicUO.Game.Gumps.Controls
             if (middleHeight > 0)
             {
                 spriteBatch.Draw2D(_textureBackground[0], new Point(position.X, position.Y + _textureUpButton[0].Height), Vector3.Zero);
-                spriteBatch.Draw2DTiled(_textureBackground[1], new Rectangle((int) position.X, (int) position.Y + _textureUpButton[0].Height + _textureBackground[0].Height, _textureBackground[0].Width, middleHeight), Vector3.Zero);
+                spriteBatch.Draw2DTiled(_textureBackground[1], new Rectangle(position.X, position.Y + _textureUpButton[0].Height + _textureBackground[0].Height, _textureBackground[0].Width, middleHeight), Vector3.Zero);
                 spriteBatch.Draw2D(_textureBackground[2], new Point(position.X, position.Y + Height - _textureDownButton[0].Height - _textureBackground[2].Height), Vector3.Zero);
             }
             else
             {
                 middleHeight = Height - _textureUpButton[0].Height - _textureDownButton[0].Height;
-                spriteBatch.Draw2DTiled(_textureBackground[1], new Rectangle((int) position.X, (int) position.Y + _textureUpButton[0].Height, _textureBackground[0].Width, middleHeight), Vector3.Zero);
+                spriteBatch.Draw2DTiled(_textureBackground[1], new Rectangle(position.X, position.Y + _textureUpButton[0].Height, _textureBackground[0].Width, middleHeight), Vector3.Zero);
             }
 
             // draw up button

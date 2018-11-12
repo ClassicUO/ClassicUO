@@ -211,7 +211,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            Rectangle scissor = ScissorStack.CalculateScissors(spriteBatch.TransformMatrix, new Rectangle((int)position.X, (int)position.Y, Width, Height));
+            Rectangle scissor = ScissorStack.CalculateScissors(spriteBatch.TransformMatrix, new Rectangle(position.X, position.Y, Width, Height));
 
             if (ScissorStack.PushScissors(scissor))
             {
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
                 base.Draw(spriteBatch, new Point(position.X - 0, position.Y - 0)); // TODO: set a scrollarea
 
-                _gameText.Draw(spriteBatch, new Rectangle((int) position.X + (HasBackground ? 4 : 0), (int) position.Y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0)), ScrollX, ScrollY);
+                _gameText.Draw(spriteBatch, new Rectangle(position.X + (HasBackground ? 4 : 0), position.Y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0)), ScrollX, ScrollY);
 
                 spriteBatch.EnableScissorTest(false);
 
