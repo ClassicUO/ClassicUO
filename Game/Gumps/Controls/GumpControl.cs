@@ -400,14 +400,20 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 InitializeControls();
                 int w = 0, h = 0;
-                List<GumpControl> toremove = new List<GumpControl>();
+                //List<GumpControl> toremove = new List<GumpControl>();
 
-                foreach (GumpControl c in Children)
+                for (int i = 0; i < _children.Count; i++)
                 {
+                    GumpControl c = _children[i];
+
                     c.Update(totalMS, frameMS);
 
                     if (c.IsDisposed)
-                        toremove.Add(c);
+                    {
+                        //toremove.Add(c);
+
+                        _children.RemoveAt(i--);
+                    }
                     else
                     {
 
@@ -438,8 +444,8 @@ namespace ClassicUO.Game.Gumps.Controls
                     WantUpdateSize = false;
                 }
 
-                if (toremove.Count > 0)
-                    toremove.ForEach(s => _children.Remove(s));
+                //if (toremove.Count > 0)
+                //    toremove.ForEach(s => _children.Remove(s));
             }
         }
 

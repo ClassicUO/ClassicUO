@@ -211,6 +211,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
+            if (IsDisposed)
+                return false;
+
             Rectangle scissor = ScissorStack.CalculateScissors(spriteBatch.TransformMatrix, new Rectangle(position.X, position.Y, Width, Height));
 
             if (ScissorStack.PushScissors(scissor))

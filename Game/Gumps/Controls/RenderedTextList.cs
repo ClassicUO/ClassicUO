@@ -162,7 +162,6 @@ namespace ClassicUO.Game.Gumps.Controls
             for (int i = 0; i < _entries.Count; i++)
             {
                 _entries[i]?.Dispose();
-                _entries[i] = null;
             }
 
             base.Dispose();

@@ -91,23 +91,25 @@ namespace ClassicUO.Game.Gumps.Controls
 
         private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
         {
-            foreach (Item item in e)
-            {
-                AddChildren(new ItemGumplingPaperdoll(0, 0, item, Mobile));
-            }
+            //foreach (Item item in e)
+            //{
+            //    AddChildren(new ItemGumplingPaperdoll(0, 0, item, Mobile));
+            //}
 
 
-            for (int i = 0; i < _layerOrder.Length; i++)
-            {
-                int layerIndex = (int) _layerOrder[i];
-                Item item = _mobile.Equipment[layerIndex];
+            //for (int i = 0; i < _layerOrder.Length; i++)
+            //{
+            //    int layerIndex = (int) _layerOrder[i];
+            //    Item item = _mobile.Equipment[layerIndex];
 
-                if (item == null || MobileView.IsCovered(_mobile, (Layer) layerIndex))
-                {
-                    ItemGumplingPaperdoll c = Children.OfType<ItemGumplingPaperdoll>().FirstOrDefault(s => s.Item.ItemData.Layer == layerIndex);
-                    RemoveChildren(c);
-                }
-            }
+            //    if (item == null || MobileView.IsCovered(_mobile, (Layer) layerIndex))
+            //    {
+            //        ItemGumplingPaperdoll c = Children.OfType<ItemGumplingPaperdoll>().FirstOrDefault(s => s.Item.ItemData.Layer == layerIndex);
+            //        RemoveChildren(c);
+            //    }
+            //}
+
+            OnEntityUpdated(_mobile);
         }
 
         private void MobileOnDisposed(object sender, EventArgs e)

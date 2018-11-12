@@ -63,7 +63,6 @@ namespace ClassicUO.Game.Views
             if (!AllowedToDraw || GameObject.IsDisposed)
             {
                 _text?.Dispose();
-                _text = null;
                 return false;
             }
 

@@ -93,6 +93,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
+            if (IsDisposed)
+                return false;
+
             bool ok = base.Draw(spriteBatch, position);
             spriteBatch.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
             _text.Draw(spriteBatch, new Point(position.X + _textures[ACTIVE].Width + 2, position.Y));
@@ -103,6 +106,12 @@ namespace ClassicUO.Game.Gumps.Controls
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             IsChecked = !IsChecked;
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _text.Dispose();
         }
     }
 }

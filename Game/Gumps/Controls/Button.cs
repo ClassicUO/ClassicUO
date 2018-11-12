@@ -235,7 +235,6 @@ namespace ClassicUO.Game.Gumps.Controls
             for (int i = 0; i < _fontTexture.Length; i++)
             {
                 _fontTexture[i]?.Dispose();
-                _fontTexture[i] = null;
             }
 
             base.Dispose();
