@@ -246,7 +246,10 @@ namespace ClassicUO.Game.GameObjects
         {
             base.OnPositionChanged(sender, e);
 
+            if (IsCorpse)
+            {
 
+            }
 
             //if (OnGround)
             //    Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
@@ -259,6 +262,11 @@ namespace ClassicUO.Game.GameObjects
             get => _containerPosition;
             set
             {
+                if (IsCorpse)
+                {
+
+                }
+
                 if (!OnGround)
                 {
                     _containerPosition = value;
@@ -646,7 +654,8 @@ namespace ClassicUO.Game.GameObjects
 
                 if (ItemData.AnimID != 0) graphic = ItemData.AnimID;
             }
-            else if (IsCorpse) return Amount;
+            else if (IsCorpse)
+                return Amount;
 
             return graphic;
         }

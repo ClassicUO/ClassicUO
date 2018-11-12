@@ -798,17 +798,11 @@ namespace ClassicUO.Network
             }
             else
             {
-                if (item.IsCorpse)
+                ContainerGump container = new ContainerGump(item, graphic)
                 {
-                }
-                else
-                {
-                    ContainerGump container = new ContainerGump(item, graphic)
-                    {
-                        X = 64, Y = 64
-                    };
-                    ui.Add(container);
-                }
+                    X = 64, Y = 64
+                };
+                ui.Add(container);
             }
         }
 

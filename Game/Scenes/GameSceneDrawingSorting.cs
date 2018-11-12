@@ -88,6 +88,11 @@ namespace ClassicUO.Game.Scenes
             {
                 GameObject obj = objList[i];
 
+                if (obj.Graphic == 0x2006)
+                {
+
+                }
+
                 if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
                     continue;
 
@@ -118,8 +123,11 @@ namespace ClassicUO.Game.Scenes
                     break;
                 obj.CurrentRenderIndex = _renderIndex;
 
-                if (!(obj is Land) && (z >= _maxZ || obj is IDynamicItem dyn2 && (TileData.IsInternal((long) dyn2.ItemData.Flags) || _maxZ != 255 && TileData.IsRoof((long) dyn2.ItemData.Flags))))
+                if (obj is Static dyn2 && TileData.IsInternal((long)dyn2.ItemData.Flags))
                     continue;
+                 if (obj is Item it && !it.IsCorpse && TileData.IsInternal((long)it.ItemData.Flags))
+                    continue;
+
                 int testMinZ = drawY + z * 4;
                 int testMaxZ = drawY;
 
