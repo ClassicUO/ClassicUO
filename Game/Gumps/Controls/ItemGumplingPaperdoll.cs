@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Mobile = owner;
             HighlightOnMouseOver = false;
             _isTransparent = transparent;
-            _gumpIndex = (ushort) (Item.ItemData.AnimID + (IsFemale ? 60000 : 50000));
+            _gumpIndex = (ushort) (Item.ItemData.AnimID + (owner.IsFemale ? 60000 : 50000));
 
             if (Animations.EquipConversions.TryGetValue(Item.Graphic, out var dict))
             {
@@ -56,8 +56,6 @@ namespace ClassicUO.Game.Gumps.Controls
         }
 
         public int SlotIndex { get; set; }
-
-        public bool IsFemale { get; set; }
 
         public Mobile Mobile { get; set; }
 

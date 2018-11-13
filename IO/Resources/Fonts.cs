@@ -522,11 +522,12 @@ namespace ClassicUO.IO.Resources
                         ptr.CharCount += charCount;
                         lastSpace = i;
 
-                        if (ptr.Width <= 0)
+                        if (ptr.Width == 0)
                             ptr.Width = 1;
 
-                        if (ptr.MaxHeight <= 0)
+                        if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14;
+
                         ptr.Data.Resize(ptr.CharCount); // = new List<MultilinesFontData>(ptr.CharCount);
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
@@ -547,11 +548,12 @@ namespace ClassicUO.IO.Resources
                         ptr.Width += readWidth;
                         ptr.CharCount += charCount;
 
-                        if (ptr.Width <= 0)
+                        if (ptr.Width == 0)
                             ptr.Width = 1;
 
-                        if (ptr.MaxHeight <= 0)
+                        if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14;
+
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
@@ -591,10 +593,10 @@ namespace ClassicUO.IO.Resources
                         i = lastSpace + 1;
                         si = str[i];
 
-                        if (ptr.Width <= 0)
+                        if (ptr.Width == 0)
                             ptr.Width = 1;
 
-                        if (ptr.MaxHeight <= 0)
+                        if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14;
                         ptr.Data.Resize(ptr.CharCount);
                         charCount = 0;
@@ -2407,7 +2409,7 @@ namespace ClassicUO.IO.Resources
             if (x < 0 || y < 0 || font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
                 return 0;
 
-            if (width <= 0)
+            if (width == 0)
                 width = GetWidthUnicode(font, str);
 
             if (x >= width)
@@ -2472,7 +2474,7 @@ namespace ClassicUO.IO.Resources
             if (pos < 1 || font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero || string.IsNullOrEmpty(str))
                 return (0, 0);
 
-            if (width <= 0)
+            if (width == 0)
                 width = GetWidthUnicode(font, str);
             MultilinesFontInfo info = GetInfoUnicode(font, str, str.Length, align, flags, width);
 
@@ -2490,7 +2492,7 @@ namespace ClassicUO.IO.Resources
                 if (info.CharStart == pos)
                     return (x, y);
 
-                if (pos <= info.CharStart + len)
+                if (pos <= info.CharStart + len && info.Data.Count >= len)
                 {
                     for (int i = 0; i < len; i++)
                     {
@@ -2536,26 +2538,24 @@ namespace ClassicUO.IO.Resources
             if (info == null)
                 return 0;
             int height = GetHeightASCII(info);
-            MultilinesFontInfo ptr = info;
             height = 0;
             int pos = 0;
             bool found = false;
 
-            while (ptr != null)
+            while (info != null)
             {
-                info = ptr;
-                height += ptr.MaxHeight;
+                height += info.MaxHeight;
                 width = 0;
 
                 if (!found)
                 {
                     if (y < height)
                     {
-                        int len = ptr.CharCount;
+                        int len = info.CharCount;
 
                         for (int i = 0; i < len; i++)
                         {
-                            byte index = _fontIndex[ptr.Data[i].Item];
+                            byte index = _fontIndex[info.Data[i].Item];
                             width += fd.Chars[index].Width;
 
                             if (width > x)
@@ -2566,13 +2566,18 @@ namespace ClassicUO.IO.Resources
                         found = true;
                     }
                     else
-                        pos += ptr.CharCount;
+                        pos += info.CharCount;
                 }
 
-                ptr = ptr.Next;
-                info.Data.Clear();
-                info = null;
+                var ptr = info;
+
+                info = info.Next;
+                ptr.Data.Clear();
+                ptr = null;
             }
+
+            if (pos > str.Length)
+                pos = str.Length;
 
             return pos;
         }
@@ -2583,14 +2588,14 @@ namespace ClassicUO.IO.Resources
                 return (0, 0);
             FontData fd = _font[font];
 
-            if (width <= 0)
+            if (width == 0)
                 width = GetWidthASCII(font, str);
             MultilinesFontInfo info = GetInfoASCII(font, str, str.Length, align, flags, width);
 
             if (info == null)
                 return (0, 0);
             int height = 0;
-            MultilinesFontInfo ptr = info;
+            //MultilinesFontInfo ptr = info;
             int x = 0;
             int y = 0;
 
@@ -2602,11 +2607,11 @@ namespace ClassicUO.IO.Resources
                 if (info.CharStart == pos)
                     return (x, y);
 
-                if (pos <= info.CharStart + len)
+                if (pos <= info.CharStart + len && info.Data.Count >= len)
                 {
                     for (int i = 0; i < len; i++)
                     {
-                        byte index = _fontIndex[ptr.Data[i].Item];
+                        byte index = _fontIndex[info.Data[i].Item];
                         x += fd.Chars[index].Width;
 
                         if (info.CharStart + i + 1 == pos)
@@ -2627,7 +2632,7 @@ namespace ClassicUO.IO.Resources
 
         public static int GetLinesCountASCII(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width)
         {
-            if (width <= 0)
+            if (width == 0)
                 width = GetWidthASCII(font, str);
             MultilinesFontInfo info = GetInfoASCII(font, str, str.Length, align, flags, width);
 
@@ -2646,7 +2651,7 @@ namespace ClassicUO.IO.Resources
 
         public static int GetLinesCountUnicode(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width)
         {
-            if (width <= 0)
+            if (width == 0)
                 width = GetWidthUnicode(font, str);
             MultilinesFontInfo info = GetInfoUnicode(font, str, str.Length, align, flags, width);
 

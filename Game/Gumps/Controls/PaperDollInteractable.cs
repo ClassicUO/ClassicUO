@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private static readonly PaperDollEquipSlots[] _layerOrder =
         {
-            PaperDollEquipSlots.Legging, PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Gloves,   PaperDollEquipSlots.Neck, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Back, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Robe, PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand , PaperDollEquipSlots.Belt, PaperDollEquipSlots.Talisman
+            PaperDollEquipSlots.Legging, PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Gloves,   PaperDollEquipSlots.Neck, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Robe, PaperDollEquipSlots.Cloak,  PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand , PaperDollEquipSlots.Belt, PaperDollEquipSlots.Talisman
         };
 
         private Mobile _mobile;
@@ -203,7 +203,6 @@ namespace ClassicUO.Game.Gumps.Controls
                 AddChildren(new ItemGumplingPaperdoll(0, 0, isfake ? _fakeItem : item, Mobile, isfake)
                 {
                     SlotIndex = i,
-                    IsFemale = _mobile.IsFemale,
                     CanPickUp = canPickUp
                 });
 
@@ -254,7 +253,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Sash = 17,
             Earring = 18,
             Sleeves = 19,
-            Back = 20,
+            Cloak = 20,
             Backpack = 21,
             Robe = 22,
             Skirt = 23
