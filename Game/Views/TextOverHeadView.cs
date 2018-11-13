@@ -23,6 +23,7 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 
@@ -70,19 +71,23 @@ namespace ClassicUO.Game.Views
             TextOverhead overhead = (TextOverhead) GameObject;
             if (!overhead.IsPersistent && overhead.Alpha < 1.0f)
                 HueVector = RenderExtentions.GetHueVector(0, false, overhead.Alpha, true);
+
             Settings settings = Service.Get<Settings>();
+            GameScene gs = Service.Get<SceneManager>().GetScene<GameScene>();
+
             int width = Texture.Width - Bounds.X;
             int height = Texture.Height - Bounds.Y;
 
+
             if (position.X < Bounds.X)
                 position.X = Bounds.X;
-            else if (position.X > settings.GameWindowWidth - width)
-                position.X = settings.GameWindowWidth - width;
+            else if (position.X > settings.GameWindowWidth * gs.Scale - width)
+                position.X = settings.GameWindowWidth * gs.Scale - width;
 
             if (position.Y - Bounds.Y < 0)
                 position.Y = Bounds.Y;
-            else if (position.Y > settings.GameWindowHeight - height)
-                position.Y = settings.GameWindowHeight - height;
+            else if (position.Y > settings.GameWindowHeight * gs.Scale - height)
+                position.Y = settings.GameWindowHeight * gs.Scale - height;
 
             return base.Draw(spriteBatch, position, objectList);
         }

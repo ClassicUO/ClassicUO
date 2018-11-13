@@ -21,11 +21,14 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -36,6 +39,8 @@ namespace ClassicUO.Game.GameObjects.Managers
         private static readonly Dictionary<View, Vector3> _overheads = new Dictionary<View, Vector3>();
         private static readonly Dictionary<View, Vector3> _damages = new Dictionary<View, Vector3>();
         private static readonly List<View> _toRemove = new List<View>();
+
+        private static readonly List<Tuple<View,Vector3>> _overheadsList = new List<Tuple<View, Vector3>>();
 
 
         public static void AddOverhead(View view, Vector3 position)
@@ -59,6 +64,20 @@ namespace ClassicUO.Game.GameObjects.Managers
         {
             if (_overheads.Count > 0)
             {
+
+                //for (int i = 0; i < _overheadsList.Count; i++)
+                //{
+                //    var t = _overheadsList[i];
+
+                //    View v = t.Item1;
+
+                //    v.Draw(spriteBatch, t.Item2, objectList);
+                //}
+
+                //_overheadsList.Clear();
+
+               // GameScene gs = Service.Get<SceneManager>().GetScene<GameScene>();
+
                 foreach (KeyValuePair<View, Vector3> info in _overheads)
                 {
                     if (!info.Key.Draw(spriteBatch, info.Value, objectList) || info.Key.GameObject.IsDisposed)

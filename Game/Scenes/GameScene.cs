@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-        public float Scale { get; set; } = 1f;
+        public float Scale { get; set; } = 1;
 
         public Texture2D ViewportTexture => _renderTarget;
 
@@ -129,6 +129,26 @@ namespace ClassicUO.Game.Scenes
             InputManager.MouseMoving += OnMouseMoving;
             InputManager.KeyDown += OnKeyDown;
             InputManager.KeyUp += OnKeyUp;
+
+            InputManager.MouseWheel += (sender, e) =>
+            {
+                if (IsMouseOverWorld)
+                {
+                    if (!e)
+                    {
+                        Scale += 0.1f;
+                    }
+                    else
+                    {
+                        Scale -= 0.1f;
+                    }
+
+                    if (Scale < 0.7f)
+                        Scale = 0.7f;
+                    else if (Scale > 2.3f)
+                        Scale = 2.3f;
+                }
+            };
 
             UIManager.Add(new OptionsGump1());
 
@@ -233,10 +253,10 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return;
 
-            if (_renderTarget == null || _renderTarget.Width != (int) (_settings.GameWindowWidth / Scale) || _renderTarget.Height != (int) (_settings.GameWindowHeight / Scale))
+            if (_renderTarget == null || _renderTarget.Width != (int) (_settings.GameWindowWidth * Scale) || _renderTarget.Height != (int) (_settings.GameWindowHeight * Scale))
             {
                 _renderTarget?.Dispose();
-                _renderTarget = new RenderTarget2D(Device, (int) (_settings.GameWindowWidth / Scale), (int) (_settings.GameWindowHeight / Scale), false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                _renderTarget = new RenderTarget2D(Device, (int) (_settings.GameWindowWidth * Scale), (int) (_settings.GameWindowHeight * Scale), false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
             Pathfinder.ProcessAutoWalk();
@@ -310,7 +330,7 @@ namespace ClassicUO.Game.Scenes
             {
                 GameObject obj = _renderList[i];
                 if (obj.Z <= _maxGroundZ)
-                    obj?.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList);
+                    obj.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList);
             }
 #else
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
