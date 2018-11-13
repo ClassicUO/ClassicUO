@@ -574,7 +574,7 @@ namespace ClassicUO.Network
         public PRenameRequest(Serial serial, string name) : base(0x75)
         {
             WriteUInt(serial);
-            WriteASCII(name);
+            WriteASCII(name, 30);
         }
     }
 
