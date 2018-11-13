@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Scenes
 
         public Texture2D ViewportTexture => _renderTarget;
 
-        public Point MouseOverWorldPosition => new Point(Mouse.Position.X - _viewPortGump.ScreenCoordinateX, Mouse.Position.Y - _viewPortGump.ScreenCoordinateY);
+        public Point MouseOverWorldPosition => new Point((int)((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale), (int)((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY)* Scale));
 
         public GameObject SelectedObject
         {
