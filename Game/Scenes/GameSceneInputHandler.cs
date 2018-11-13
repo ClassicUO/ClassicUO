@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -307,6 +308,10 @@ namespace ClassicUO.Game.Scenes
             return false;
         }
 
+
+        public Dictionary<Mobile, Serial> MobileGumpStack = new Dictionary<Mobile, Serial>();
+
+
         private void OnMouseDragBegin(object sender, EventArgs e)
         {
             if (Mouse.LButtonPressed)
@@ -320,12 +325,19 @@ namespace ClassicUO.Game.Scenes
                         case Mobile mobile:
                             GameActions.RequestMobileStatus(mobile);
                             //Health Bar
-                            if (Mobile.MobileGumpStack.ContainsKey(mobile))
+
+                            if (MobileGumpStack.ContainsKey(mobile))
                             {
                                 UIManager.Remove<MobileHealthGump>(mobile);
                             }
+                            else if (mobile == World.Player)
+                            {
+                                StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
+                                status?.Dispose();
+                            }
+
                             MobileHealthGump currentMobileHealthGump;
-                            Mobile.MobileGumpStack.Add(mobile, mobile);
+                            MobileGumpStack.Add(mobile, mobile);
                             UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, _mousePicker.Position.X, _mousePicker.Position.Y));
 
                             Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;

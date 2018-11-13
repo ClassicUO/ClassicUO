@@ -27,6 +27,8 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -39,9 +41,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
     {
         private readonly Label[] _labels = new Label[(int) MobileStats.Max];
         private readonly GumpPic[] _lockers = new GumpPic[3];
-        private readonly PlayerMobile _mobile = World.Player;
         private readonly bool _useUOPGumps;
         private double _refreshTime;
+
+        private Point _point;
 
         public StatusGump() : base(0, 0)
         {
@@ -599,6 +602,58 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     }
                 }
             }
+
+
+            if (!_useUOPGumps)
+            {
+               
+            }
+            else
+            {
+                p.X = 540;
+                p.Y = 180;
+            }
+
+
+            _point = p;
+        }
+
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
+            {
+                if (_useUOPGumps)
+                {
+                    if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
+                    {
+                        var dict = Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack;
+                        MobileHealthGump currentMobileHealthGump;
+                        dict.Add(World.Player, World.Player);
+                        UIManager.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
+
+                        //if (dict.ContainsKey(World.Player))
+                        //{
+                        //    UIManager.Remove<MobileHealthGump>(World.Player);
+                        //}
+
+                        Dispose();
+
+                    }
+                }
+                else
+                {
+                    if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
+                    {
+                        var dict = Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack;
+                        MobileHealthGump currentMobileHealthGump;
+                        dict.Add(World.Player, World.Player);
+                        UIManager.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
+
+
+                        Dispose();
+                    }
+                }
+            }
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
@@ -726,17 +781,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        private string ConcatCurrentMax(int min, int max)
-        {
-            return $"{min}/{max}";
-        }
-
         private enum ButtonType
         {
             BuffIcon,
-            LockerStr,
-            LockerDex,
-            LockerInt
+            MininizeMaximize
         }
 
         private enum MobileStats

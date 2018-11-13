@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using SDL2;
 
@@ -270,6 +271,34 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return true;
         }
 
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
+            {
+                if (_mobile == World.Player)
+                {
+                    UIManager.Add(new StatusGump()
+                    {
+                        X = ScreenCoordinateX, Y = ScreenCoordinateY
+                    });
+                    Dispose();
+                }
+                else
+                {
+                    if (World.Player.InWarMode)
+                    {
+                        //attack
+                    }
+                    else
+                        GameActions.DoubleClick(_mobile);
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Disposes all events and removes the current gump from stack
         /// </summary>
@@ -287,7 +316,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _manaBar.Dispose();
             _staminaBar.Dispose();
 
-            Mobile.MobileGumpStack.Remove(_mobile);
+            Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack.Remove(_mobile);
             base.Dispose();
         }
     }
