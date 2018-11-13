@@ -141,7 +141,7 @@ namespace ClassicUO.Input.TextEntry
 
                 }
                 else if (text.Length >= MaxCharCount)
-                    text.Remove(MaxCharCount - 1);
+                    text = text.Remove(MaxCharCount - 1);
             }
             else if (RenderText.MaxWidth > 0)
             {

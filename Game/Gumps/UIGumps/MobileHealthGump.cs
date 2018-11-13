@@ -87,7 +87,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _mobile.HitsChanged += MobileOnHitsChanged;
             _mobile.ManaChanged += MobileOnManaChanged;
             _mobile.StaminaChanged += MobileOnStaminaChanged;
-          
+
+
+            _textboxName.AcceptMouseInput = false;
+
         }
 
         private void TextboxNameOnMouseClick(object sender, MouseEventArgs e)
@@ -149,15 +152,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
         /// <param name="frameMS"></param>
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDisposed)
+                return;
+
             if (_mobile.IsRenamable && !_renameEventActive)
             {
+                _textboxName.AcceptMouseInput = true;
                 _renameEventActive = true;
+                _textboxName.MouseClick -= TextboxNameOnMouseClick;
                 _textboxName.MouseClick += TextboxNameOnMouseClick;
             }
             ///
             /// Checks if entity is player
             /// 
-            if (_mobile == World.Player && (_mobile.Flags & Flags.WarMode) != 0)
+            if (_mobile == World.Player && _mobile.InWarMode)
             {
                 _background.Graphic = 0x0807;
             }
@@ -235,6 +243,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
         /// <returns></returns>
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
+            if (IsDisposed)
+                return false;
+
             base.Draw(spriteBatch, position);
             if (_mobile == World.Player)
             {
@@ -267,7 +278,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _mobile.HitsChanged -= MobileOnHitsChanged;
             _mobile.ManaChanged -= MobileOnManaChanged;
             _mobile.StaminaChanged -= MobileOnStaminaChanged;
-            _textboxName.MouseClick -= TextboxNameOnMouseClick;
+
+            if (_textboxName != null)
+                _textboxName.MouseClick -= TextboxNameOnMouseClick;
+
+            _backgroundBar.Dispose();
+            _healthBar.Dispose();
+            _manaBar.Dispose();
+            _staminaBar.Dispose();
+
             Mobile.MobileGumpStack.Remove(_mobile);
             base.Dispose();
         }
