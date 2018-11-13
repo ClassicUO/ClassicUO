@@ -32,6 +32,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private GumpPic _background;
         private Label _text;
         private TextBox _textboxName;
+        private bool _renameEventActive;
 
 
         public MobileHealthGump(Mobile mobile, int x, int y)
@@ -78,10 +79,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _textboxName.SetText(_mobile.Name);
                 _textboxName.IsEditable = false;
                 UIManager.KeyboardFocusControl = null;
-                if (_mobile.IsRenamable)
-                {
-                   _textboxName.MouseClick += TextboxNameOnMouseClick;
-                }
                 AddChildren(new FrameBorder(37, 38, 101, 10, Color.DarkGray));
             }
             ///
@@ -152,6 +149,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
         /// <param name="frameMS"></param>
         public override void Update(double totalMS, double frameMS)
         {
+            if (_mobile.IsRenamable && !_renameEventActive)
+            {
+                _renameEventActive = true;
+                _textboxName.MouseClick += TextboxNameOnMouseClick;
+            }
             ///
             /// Checks if entity is player
             /// 
@@ -265,6 +267,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _mobile.HitsChanged -= MobileOnHitsChanged;
             _mobile.ManaChanged -= MobileOnManaChanged;
             _mobile.StaminaChanged -= MobileOnStaminaChanged;
+            _textboxName.MouseClick -= TextboxNameOnMouseClick;
             Mobile.MobileGumpStack.Remove(_mobile);
             base.Dispose();
         }
