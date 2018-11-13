@@ -88,7 +88,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _mobile.ManaChanged += MobileOnManaChanged;
             _mobile.StaminaChanged += MobileOnStaminaChanged;
 
-
             _textboxName.AcceptMouseInput = false;
 
         }

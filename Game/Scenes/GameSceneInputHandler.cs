@@ -327,7 +327,10 @@ namespace ClassicUO.Game.Scenes
                             MobileHealthGump currentMobileHealthGump;
                             Mobile.MobileGumpStack.Add(mobile, mobile);
                             UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, _mousePicker.Position.X, _mousePicker.Position.Y));
-                            UIManager.AttemptDragControl(currentMobileHealthGump, new Point(_mousePicker.Position.X + 50, _mousePicker.Position.Y + 10), true);
+
+                            Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
+
+                            UIManager.AttemptDragControl(currentMobileHealthGump, new Point(_mousePicker.Position.X + rect.Width / 2, _mousePicker.Position.Y + rect.Height / 2), true);
                             break;
                         case Item item:
                             PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
