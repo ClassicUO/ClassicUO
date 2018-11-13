@@ -47,7 +47,11 @@ namespace ClassicUO.Input.TextEntry
 
             RenderCaret = new RenderedText
             {
-                IsUnicode = unicode, Font = font, Hue = hue, Text = "_"
+                IsUnicode = unicode,
+                Font = font,
+                Hue = hue,
+                FontStyle = (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None,
+                Text = "_"
             };
             MaxCharCount = maxcharlength;
             Width = width;
@@ -129,7 +133,17 @@ namespace ClassicUO.Input.TextEntry
 
         public void SetText(string text)
         {
-            if (RenderText.MaxWidth > 0)
+
+            if (MaxCharCount > 0)
+            {
+                if (NumericOnly)
+                {
+
+                }
+                else if (text.Length >= MaxCharCount)
+                    text = text.Remove(MaxCharCount - 1);
+            }
+            else if (RenderText.MaxWidth > 0)
             {
                 int width = RenderText.IsUnicode ? Fonts.GetWidthUnicode(RenderText.Font, text) : Fonts.GetWidthASCII(RenderText.Font, text);
                 int len = text.Length;

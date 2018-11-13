@@ -39,7 +39,6 @@ namespace ClassicUO.Game.Gumps.Controls
         public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
         {
             _entry = new TextEntry(font, maxcharlength, maxWidth, width, isunicode, style, hue);
-            Hue = hue;
             base.AcceptKeyboardInput = true;
             base.AcceptMouseInput = true;
             IsEditable = true;
@@ -78,7 +77,6 @@ namespace ClassicUO.Game.Gumps.Controls
         public int LinesCount => _entry.GetLinesCount();
 
         //public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
-        public override bool AcceptMouseInput => base.AcceptMouseInput;
 
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 

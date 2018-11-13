@@ -52,6 +52,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _rect.Y = position.Y;
             _rect.Width = Width;
             _rect.Height = Height;
+
             spriteBatch.Draw2D(_scene.ViewportTexture, _rect, Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
