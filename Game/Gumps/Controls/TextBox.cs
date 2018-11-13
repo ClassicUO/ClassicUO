@@ -77,7 +77,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public int LinesCount => _entry.GetLinesCount();
 
-        public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
+        //public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
+        public override bool AcceptMouseInput => base.AcceptMouseInput;
 
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
 

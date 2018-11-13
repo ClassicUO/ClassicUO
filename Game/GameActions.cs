@@ -172,5 +172,10 @@ namespace ClassicUO.Game
         {
             Socket.Send(new PChangeStatLockStateRequest(stat, state));
         }
+
+        public static void Rename(Serial serial, string name)
+        {
+            Socket.Send(new PRenameRequest(serial, name));
+        }
     }
 }

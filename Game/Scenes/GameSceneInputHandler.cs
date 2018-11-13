@@ -23,6 +23,7 @@ namespace ClassicUO.Game.Scenes
 {
     partial class GameScene
     {
+
         private double _dequeueAt;
         private bool _inqueue;
         private Action _queuedAction;
@@ -111,9 +112,9 @@ namespace ClassicUO.Game.Scenes
                         Item item = gumpling.Item;
                         SelectedObject = item;
 
-                        if (TileData.IsContainer((long) item.ItemData.Flags))
+                        if (TileData.IsContainer((long)item.ItemData.Flags))
                             DropHeldItemToContainer(item);
-                        else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable((long) HeldItem.ItemData.Flags))
+                        else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable((long)HeldItem.ItemData.Flags))
                             MergeHeldItem(item);
                         else
                         {
@@ -121,7 +122,7 @@ namespace ClassicUO.Game.Scenes
                             {
                                 SpriteTexture texture = Art.GetStaticTexture(item.Graphic);
 
-                                DropHeldItemToContainer(World.Items.Get(item.Container), (ushort) (target.X + (Mouse.Position.X - target.ScreenCoordinateX) - texture.Width / 2), (ushort) (target.Y + (Mouse.Position.Y - target.ScreenCoordinateY) - texture.Height / 2));
+                                DropHeldItemToContainer(World.Items.Get(item.Container), (ushort)(target.X + (Mouse.Position.X - target.ScreenCoordinateX) - texture.Width / 2), (ushort)(target.Y + (Mouse.Position.Y - target.ScreenCoordinateY) - texture.Height / 2));
                             }
                         }
                     }
@@ -133,13 +134,13 @@ namespace ClassicUO.Game.Scenes
 
                         int x = Mouse.Position.X - texture.Width / 2 - (target.X + target.Parent.X);
                         int y = Mouse.Position.Y - texture.Height / 2 - (target.Y + target.Parent.Y);
-                        DropHeldItemToContainer(container.Item, (ushort) x, (ushort) y);
+                        DropHeldItemToContainer(container.Item, (ushort)x, (ushort)y);
                     }
                     else if (target is GumpPicBackpack backpack)
                         DropHeldItemToContainer(backpack.BackpackItem);
                     else if (target is IMobilePaperdollOwner paperdollOwner)
                     {
-                        if (TileData.IsWearable((long) HeldItem.ItemData.Flags))
+                        if (TileData.IsWearable((long)HeldItem.ItemData.Flags))
                         {
                             WearHeldItem(paperdollOwner.Mobile);
                         }
@@ -174,14 +175,14 @@ namespace ClassicUO.Game.Scenes
                                     {
                                         SelectedObject = item;
 
-                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && TileData.IsStackable((long) dyn1.ItemData.Flags))
+                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && TileData.IsStackable((long)dyn1.ItemData.Flags))
                                             MergeHeldItem(item);
                                         else
-                                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
+                                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + dyn.ItemData.Height));
                                     }
                                 }
                                 else
-                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
+                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + dyn.ItemData.Height));
 
                                 break;
                             case Land _:
@@ -206,14 +207,14 @@ namespace ClassicUO.Game.Scenes
                     {
                         case Static st:
 
-                        {
-                            if (string.IsNullOrEmpty(st.Name))
-                                TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
-                            obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
-                            _staticManager.Add(st);
+                            {
+                                if (string.IsNullOrEmpty(st.Name))
+                                    TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
+                                obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
+                                _staticManager.Add(st);
 
-                            break;
-                        }
+                                break;
+                            }
                         case Entity entity:
 
                             if (!_inqueue)
@@ -289,7 +290,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (_settings.EnablePathfind && !Pathfinder.AutoWalking)
                 {
-                    if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long) dyn.ItemData.Flags))
+                    if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long)dyn.ItemData.Flags))
                     {
                         GameObject obj = _mousePicker.MouseOverObject;
 
@@ -317,8 +318,16 @@ namespace ClassicUO.Game.Scenes
                     switch (obj)
                     {
                         case Mobile mobile:
-
-                            // get the lifebar
+                            GameActions.RequestMobileStatus(mobile);
+                            //Health Bar
+                            if (Mobile.MobileGumpStack.ContainsKey(mobile))
+                            {
+                                UIManager.Remove<MobileHealthGump>(mobile);
+                            }
+                            MobileHealthGump currentMobileHealthGump;
+                            Mobile.MobileGumpStack.Add(mobile, mobile);
+                            UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, _mousePicker.Position.X, _mousePicker.Position.Y));
+                            UIManager.AttemptDragControl(currentMobileHealthGump, new Point(_mousePicker.Position.X + 50, _mousePicker.Position.Y + 10), true);
                             break;
                         case Item item:
                             PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
