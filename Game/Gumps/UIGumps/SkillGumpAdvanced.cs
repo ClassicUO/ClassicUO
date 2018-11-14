@@ -26,6 +26,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -214,6 +215,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Y = 4,
                     ButtonAction = ButtonAction.Activate
                 });
+               
             }
             AddChildren(SkillName);
             //======================
@@ -255,6 +257,25 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
 
 
+
+        }
+
+        protected override void OnDragBegin(int x, int y)
+        {
+            if (Skill.IsClickable && Mouse.LButtonPressed)
+            {
+                GameScene currentGameScene = Service.Get<SceneManager>().GetScene<GameScene>();
+                if (currentGameScene.SkillButtonGumpStack.Contains(Skill))
+                {
+                    UIManager.Remove<SkillButtonGump>(World.Player);
+                }
+                SkillButtonGump skillButtonGump = new SkillButtonGump(Skill, Mouse.Position.X, Mouse.Position.Y);
+                UIManager.Add(skillButtonGump);
+                currentGameScene.SkillButtonGumpStack.Add(Skill);
+                Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x24B8).Bounds;
+                UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + rect.Width / 2, Mouse.Position.Y + rect.Height / 2), true);
+
+            }
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -283,6 +304,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             ActiveSkillUse = 1
         }
 
+        public override void Dispose()
+        {
+            
+            base.Dispose();
+        }
 
     }
 }

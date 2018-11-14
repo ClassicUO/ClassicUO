@@ -103,6 +103,7 @@
     <Compile Include="Game\Gumps\UIGumps\OptionsGump1.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyMemberGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\SkillButtonGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\UseSpellButtonGump.cs" />
     <Compile Include="Game\Scenes\GameSceneDragAndDropHandler.cs" />
     <Compile Include="Game\Scenes\GameSceneDrawingSorting.cs" />
