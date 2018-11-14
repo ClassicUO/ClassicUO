@@ -11,8 +11,7 @@ namespace ClassicUO.Game.System
     internal class PartySystem
     {
         private static bool _allowPartyLoot;
-        public static Dictionary<PartyMember, PartyMemberGump> PartyMemberGumpStack = new Dictionary<PartyMember, PartyMemberGump>();
-
+        
         public static bool IsInParty => Members.Count > 1;
 
         public static bool IsPlayerLeader => IsInParty && Leader == World.Player;

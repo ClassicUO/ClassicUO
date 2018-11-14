@@ -177,5 +177,10 @@ namespace ClassicUO.Game
         {
             Socket.Send(new PRenameRequest(serial, name));
         }
+
+        public static void UseSkill(int index)
+        {
+            Socket.Send(new PUseSkill(index));
+        }
     }
 }
