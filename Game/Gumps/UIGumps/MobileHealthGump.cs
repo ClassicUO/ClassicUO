@@ -63,9 +63,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (_mobile == World.Player)
             {
                 AddChildren(_background = new GumpPic(0, 0, 0x0803, 0));
-                AddChildren(new FrameBorder(37, 12, 101, 10, Color.DarkGray));
-                AddChildren(new FrameBorder(37, 25, 101, 10, Color.DarkGray));
-                AddChildren(new FrameBorder(37, 38, 101, 10, Color.DarkGray));
+                AddChildren(new FrameBorder(38, 14, 100, 7, Color.DarkGray));
+                AddChildren(new FrameBorder(38, 27, 100, 7, Color.DarkGray));
+                AddChildren(new FrameBorder(38, 40, 100, 7, Color.DarkGray));
 
             }
             ///
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _textboxName.SetText(_mobile.Name);
                 _textboxName.IsEditable = false;
                 UIManager.KeyboardFocusControl = null;
-                AddChildren(new FrameBorder(37, 38, 101, 10, Color.DarkGray));
+                AddChildren(new FrameBorder(38, 40, 100, 7, Color.DarkGray));
             }
             ///
             /// Register events
@@ -92,7 +92,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (_textboxName != null)
                 _textboxName.AcceptMouseInput = false;
 
+            MobileOnHitsChanged(null, EventArgs.Empty);
+            MobileOnManaChanged(null, EventArgs.Empty);
+            MobileOnStaminaChanged(null, EventArgs.Empty);
         }
+
+        public Mobile Mobile => _mobile;
 
         private void TextboxNameOnMouseClick(object sender, MouseEventArgs e)
         {
@@ -217,23 +222,34 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
 
 
-                    if (_mobile.IsYellowHits)
+                    if (_mobile.IsYellowHits && !_isYellowHits)
                     {
                         _healthBar.SetData(new[] { Color.Gold });
+                        _isYellowHits = true;
+                        _isNormal = false;
                     }
-                    else if (_mobile.IsPoisoned)
+                    else if (_mobile.IsPoisoned && !_isPoisoned)
                     {
                         _healthBar.SetData(new[] { Color.Green });
+                        _isPoisoned = true;
+                        _isNormal = false;
                     }
-                    else if (!_mobile.IsPoisoned)
+                    else if (!_mobile.IsPoisoned && !_mobile.IsYellowHits && !_isNormal)
                     {
                         _healthBar.SetData(new[] { Color.SteelBlue });
+                        _isNormal = true;
+                        _isYellowHits = false;
+                        _isPoisoned = false;
                     }
+
+                    
                 }
             }
 
             base.Update(totalMS, frameMS);
         }
+
+        private bool _isYellowHits, _isPoisoned, _isNormal;
 
         /// <summary>
         /// Methode draws all the needed bars 
