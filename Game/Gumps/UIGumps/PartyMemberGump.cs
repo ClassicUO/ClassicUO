@@ -57,9 +57,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new Button((int)Buttons.Bandage, 0x93A, 0x2C89, 0x2C8A) { X = 5, Y = 60, ButtonAction = ButtonAction.Activate });
             //AddChildren(new GumpPic(65, 30, 0x7582, 0));
             //Bar Borders
-            AddChildren(new FrameBorder(22, 26, 124, 18, Color.DarkGray));
-            AddChildren(new FrameBorder(22, 41, 124, 18, Color.DarkGray));
-            AddChildren(new FrameBorder(22, 56, 124, 18, Color.DarkGray));
+            AddChildren(new FrameBorder(25, 30, 120, 10, Color.DarkGray));
+            AddChildren(new FrameBorder(22, 46, 120, 10, Color.DarkGray));
+            AddChildren(new FrameBorder(22, 61, 120, 10, Color.DarkGray));
             //Bar letters
             AddChildren(_healthLabel);
             AddChildren(_staminaLabel);
@@ -206,19 +206,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
             });
         }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-        }
-
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            spriteBatch.Draw2D(_border, new Rectangle(position.X, position.Y + _border.Height, Width, _border.Height), Vector3.Zero);
-            spriteBatch.Draw2D(_border, new Rectangle(position.X, position.Y + Height - _border.Height * 2 + 1, Width + 1, _border.Height), Vector3.Zero);
-            spriteBatch.Draw2D(_border, new Rectangle(position.X - _border.Width + 1, position.Y + _border.Height, _border.Width, Height - _border.Height * 2), Vector3.Zero);
-            spriteBatch.Draw2D(_border, new Rectangle(position.X + Width - _border.Width + 1, position.Y + 2, _border.Width, Height - _border.Height * 2), Vector3.Zero);
+            return spriteBatch.Draw2D(_border, new Rectangle(position.X - 1, position.Y - 1, Width+ 2, Height + 2), Vector3.Zero);
+        }
 
-            return base.Draw(spriteBatch, position, hue);
+        public override void Dispose()
+        {
+            _border.Dispose();
+            base.Dispose();
         }
     }
 }
