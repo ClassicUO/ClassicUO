@@ -91,6 +91,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDisposed)
+                return;
+
             if (_partyMember.Mobile != null)
             {
                 //Sets correct label location
@@ -129,11 +132,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch ((Buttons)buttonID)
             {
                 case Buttons.Heal:
-
+                    GameActions.CastSpell(29);
+                    TargetSystem.MouseTargetingEventObject(_partyMember.Mobile);
                     //
                     break;
                 case Buttons.Cure:
-
+                    GameActions.CastSpell(11);
                     //
                     break;
                 case Buttons.Bandage:

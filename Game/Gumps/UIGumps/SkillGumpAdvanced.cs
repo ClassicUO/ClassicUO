@@ -45,12 +45,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private double _totalReal, _totalValue;
         private bool _updateSkillsNeeded;
 
-    
+
         public SkillGumpAdvanced() : base(0, 0)
         {
             _skillListEntries = new List<SkillListEntry>();
 
-            
+
             _totalReal = 0;
             _totalValue = 0;
             X = 100;
@@ -77,28 +77,40 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(new Label("Skill", true, 1153)
             {
-                X = 30, Y = 25
+                X = 20,
+                Y = 25
             });
 
             AddChildren(new Label("Real", true, 1153)
             {
-                X = 220, Y = 25
+                X = 220,
+                Y = 25
             });
 
             AddChildren(new Label("Base", true, 1153)
             {
-                X = 300, Y = 25
+                X = 300,
+                Y = 25
             });
 
             AddChildren(new Label("Cap", true, 1153)
             {
-                X = 380, Y = 25
+                X = 380,
+                Y = 25
             });
 
             //======================================================================================
-            AddChildren(new Label("Total", true, 1153)
+            AddChildren(new Line(20, 60, 435, 1, 0xFFFFFFFF));
+            AddChildren(new Line(20, 310, 435, 1, 0xFFFFFFFF));
+            AddChildren(new Label("Total Skill(Real): ", true, 1153)
             {
-                X = 30, Y = 315
+                X = 30,
+                Y = 320
+            });
+            AddChildren(new Label("Total Skill(Base): ", true, 1153)
+            {
+                X = 30,
+                Y = 345
             });
             World.Player.SkillsChanged += OnSkillChanged;
         }
@@ -130,19 +142,24 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             for (int i = 0; i < _skillListEntries.Count; i++) _scrollArea.AddChildren(_skillListEntries[i]);
 
-            AddChildren(new Label($"{_totalReal} | {_totalValue}", true, 1153)
+            AddChildren(new Label(_totalReal.ToString(), true, 1153)
             {
-                X = 170, Y = 315
+                X = 170,
+                Y = 320
             });
+            AddChildren(new Label(_totalValue.ToString(), true, 1153)
+            {
+                X = 170,
+                Y = 345
+            });
+
+            
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            base.Draw(spriteBatch, position, hue);
-            //spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 30, (int) position.Y + 50, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));
-            //spriteBatch.Draw2D(_line, new Rectangle((int) position.X + 30, (int) position.Y + 310, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));
-
-            return true;
+            return base.Draw(spriteBatch, position, hue);
+            
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -171,10 +188,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
     public class SkillListEntry : GumpControl
     {
-        //private readonly SpriteTexture[] _textures = new SpriteTexture[3]
-        //{
-        //    IO.Resources.Gumps.GetGumpTexture(0x983), IO.Resources.Gumps.GetGumpTexture(0x985), IO.Resources.Gumps.GetGumpTexture(0x82C)
-        //};
         public readonly Skill Skill;
         public readonly Label SkillCap;
         public readonly Label SkillName;
@@ -182,6 +195,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public readonly Label SkillValueBase;
 
         private readonly GumpPic _loc;
+        private readonly Button _activeUse;
 
         public SkillListEntry(Label skillname, Label skillvaluebase, Label skillvalue, Label skillcap, Skill skill)
         {
@@ -191,7 +205,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
             SkillValue = skillvalue;
             SkillCap = skillcap;
             Skill = skill;
-            SkillName.X = 10;
+            SkillName.X = 20;
+            if (skill.IsClickable)
+            {
+                AddChildren(_activeUse = new Button((int)Buttons.ActiveSkillUse, 0x837, 0x838)
+                {
+                    X = 0,
+                    Y = 4,
+                    ButtonAction = ButtonAction.Activate
+                });
+            }
             AddChildren(SkillName);
             //======================
             SkillValueBase.X = 200;
@@ -211,7 +234,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 switch (Skill.Lock)
                 {
                     case Lock.Up:
-                        Skill.Lock = Lock.Down;                    
+                        Skill.Lock = Lock.Down;
                         GameActions.ChangeSkillLockStatus((ushort)Skill.Index, (byte)Lock.Down);
                         _loc.Graphic = 0x985;
                         _loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x985);
@@ -230,28 +253,36 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         break;
                 }
             };
+
+
         }
 
-        //public override void Update(double totalMS, double frameMS)
-        //{
-        //    _textures.ForEach(s => s.Ticks = (long) totalMS);
-        //    base.Update(totalMS, frameMS);
-        //}
+        public override void Update(double totalMS, double frameMS)
+        {
+            base.Update(totalMS, frameMS);
+        }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             base.Draw(spriteBatch, position, hue);
-            //spriteBatch.Draw2D(_textures[(int) Skill.Lock], new Vector3(position.X + 210, position.Y + 5, position.Z), Vector3.Zero);
-
             return true;
         }
+        public override void OnButtonClick(int buttonID)
+        {
+            switch ((Buttons)buttonID)
+            {
+                case Buttons.ActiveSkillUse:
+                    GameActions.UseSkill(Skill.Index);
+                    break;
 
-        //protected override void OnMouseClick(int x, int y, MouseButton button)
-        //{
-        //    if (button == MouseButton.Left && x >= 210 && x <= 210 + _textures[(int) Skill.Lock].Width && y >= 0 && y <= _textures[(int) Skill.Lock].Height)
-        //    {
-                
-        //    }
-        //}
+            }
+        }
+
+        private enum Buttons
+        {
+            ActiveSkillUse = 1
+        }
+
+
     }
 }
