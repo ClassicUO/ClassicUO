@@ -28,26 +28,18 @@ namespace ClassicUO.Game.Views
         {
             if (GameObject.IsDisposed)
                 return false;
+
             MovingEffect effect = (MovingEffect) GameObject;
-
-            //position.X += effect.Offset.X;
-            //position.Y += effect.Offset.Y + effect.Offset.Z;
-
-
 
             if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _displayedGraphic = effect.AnimationGraphic;
                 Texture = Art.GetStaticTexture(effect.AnimationGraphic);
-                Bounds = new Rectangle(0,0 ,Texture.Width, Texture.Height);
-                //Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+                Bounds = new Rectangle(0, 0, Texture.Width, Texture.Height);
             }
 
             Bounds.X = (int)-effect.Offset.X;
-            Bounds.Y = (int)(effect.Offset.Z - effect.Offset.Y);
-
-            //Bounds.X = -(int) ((effect.Offset.X - effect.Offset.Y) * 22);
-            //Bounds.Y = (int) ((effect.Offset.Z * 4 /*- effect.Position.Z * 4*/ ) ) - (int) ((effect.Offset.X + effect.Offset.Y) * 22);
+            Bounds.Y = (int)(effect.Offset.Z - effect.Offset.Y);        
             Rotation = effect.AngleToTarget;
             HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
 

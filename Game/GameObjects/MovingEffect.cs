@@ -9,6 +9,8 @@ namespace ClassicUO.Game.GameObjects
 {
     internal class MovingEffect : GameEffect
     {
+        private uint _lastMoveTime;
+
         public MovingEffect(Graphic graphic, Hue hue)
         {
             Hue = hue;
@@ -91,31 +93,31 @@ namespace ClassicUO.Game.GameObjects
                 SetTarget(xTarget, yTarget, zTargB);
         }
 
+
+
         public float AngleToTarget { get; set; }
-
-        protected override View CreateView()
-        {
-            return new MovingEffectView(this);
-        }
-
-        private uint _lastMoveTime;
 
         public bool Explode { get; set; }
 
         public byte MovingDelay { get; set; } = 20;
+
+
+
+        protected override View CreateView() => new MovingEffectView(this);
 
         public override void Update(double totalMS, double frameMS)
         {
             if (_lastMoveTime > totalMS)
                 return;
 
-            _lastMoveTime = (uint) (totalMS + MovingDelay);
+
+            _lastMoveTime = (uint)(totalMS + MovingDelay);
+
 
             base.Update(totalMS, frameMS);
 
             (int sx, int sy, int sz) = GetSource();
             (int tx, int ty, int tz) = GetTarget();
-
 
             Settings settings = Service.Get<Settings>();
 
@@ -177,6 +179,7 @@ namespace ClassicUO.Game.GameObjects
                     stepXY -= deltaXY[0];
                 }
             }
+
             if (realDrawX < drawDestX)
             {
                 realDrawX += tempXY[x];
@@ -212,6 +215,7 @@ namespace ClassicUO.Game.GameObjects
 
             int newCoordX = 0;
             int newCoordY = 0;
+
 
             TileOffsetOnMonitorToXY(ref newOffsetX, ref newOffsetY, ref newCoordX, ref newCoordY);
 
