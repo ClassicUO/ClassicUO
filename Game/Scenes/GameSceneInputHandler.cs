@@ -309,7 +309,8 @@ namespace ClassicUO.Game.Scenes
         }
 
 
-        public Dictionary<Mobile, Serial> MobileGumpStack = new Dictionary<Mobile, Serial>();
+        public List<Mobile> MobileGumpStack = new List<Mobile>();
+        public List<Mobile> PartyMemberGumpStack = new List<Mobile>();
 
 
         private void OnMouseDragBegin(object sender, EventArgs e)
@@ -326,23 +327,48 @@ namespace ClassicUO.Game.Scenes
                             GameActions.RequestMobileStatus(mobile);
                             //Health Bar
 
-                            if (MobileGumpStack.ContainsKey(mobile))
+                            // Check if dragged mobile is in party for doing the party part ;)
+                            PartyMember member = new PartyMember(mobile);
+                            if (PartySystem.Members.Exists(x => x.Serial == member.Serial ))
                             {
-                                UIManager.Remove<MobileHealthGump>(mobile);
+                                //Checks if party member gump is already on sceen
+                                if (PartyMemberGumpStack.Contains(mobile))
+                                {
+                                    UIManager.Remove<PartyMemberGump>(mobile);
+                                }
+                                else if (mobile == World.Player)
+                                {
+                                    StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
+                                    status?.Dispose();
+                                }
+
+                                PartyMemberGump partymemberGump = new PartyMemberGump(member, _mousePicker.Position.X, _mousePicker.Position.Y);
+                                UIManager.Add(partymemberGump);
+                                PartyMemberGumpStack.Add(mobile);
+                                Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
+                                UIManager.AttemptDragControl(partymemberGump, new Point(_mousePicker.Position.X + rect.Width / 2, _mousePicker.Position.Y + rect.Height / 2), true);
                             }
-                            else if (mobile == World.Player)
+                            else
                             {
-                                StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
-                                status?.Dispose();
+                                if (MobileGumpStack.Contains(mobile))
+                                {
+                                    UIManager.Remove<MobileHealthGump>(mobile);
+                                }
+                                else if (mobile == World.Player)
+                                {
+                                    StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
+                                    status?.Dispose();
+                                }
+
+                                MobileHealthGump currentMobileHealthGump;
+                                MobileGumpStack.Add(mobile);
+                                UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, _mousePicker.Position.X, _mousePicker.Position.Y));
+
+                                Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
+
+                                UIManager.AttemptDragControl(currentMobileHealthGump, new Point(_mousePicker.Position.X + rect.Width / 2, _mousePicker.Position.Y + rect.Height / 2), true);
+
                             }
-
-                            MobileHealthGump currentMobileHealthGump;
-                            MobileGumpStack.Add(mobile, mobile);
-                            UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, _mousePicker.Position.X, _mousePicker.Position.Y));
-
-                            Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
-
-                            UIManager.AttemptDragControl(currentMobileHealthGump, new Point(_mousePicker.Position.X + rect.Width / 2, _mousePicker.Position.Y + rect.Height / 2), true);
                             break;
                         case Item item:
                             PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);

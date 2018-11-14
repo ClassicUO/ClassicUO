@@ -626,9 +626,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
                     if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                     {
-                        var dict = Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack;
+                        var list = Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack;
                         MobileHealthGump currentMobileHealthGump;
-                        dict.Add(World.Player, World.Player);
+                        list.Add(World.Player);
                         UIManager.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
 
                         //if (dict.ContainsKey(World.Player))
@@ -644,9 +644,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
                     if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                     {
-                        var dict = Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack;
+                        var list = Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack;
                         MobileHealthGump currentMobileHealthGump;
-                        dict.Add(World.Player, World.Player);
+                        list.Add(World.Player);
                         UIManager.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
 
 

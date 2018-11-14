@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.Renderer;
 
@@ -281,14 +282,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     break;
                 case Buttons.GetBar:
-
-                    if (!PartySystem.PartyMemberGumpStack.ContainsKey(Member))
+                    GameScene currentGameScene = Service.Get<SceneManager>().GetScene<GameScene>();
+                    if (currentGameScene.PartyMemberGumpStack.Contains(Member.Mobile))
                     {
-                        PartyMemberGump partymemberGump = new PartyMemberGump(Member);
-                        UIManager.Add(partymemberGump);
-                        PartySystem.PartyMemberGumpStack.Add(Member, partymemberGump);
+                        UIManager.Remove<PartyMemberGump>(Member.Mobile);
                     }
-
+                    else if (Member.Mobile == World.Player)
+                    {
+                        StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
+                        status?.Dispose();
+                    }
+                    PartyMemberGump partymemberGump = new PartyMemberGump(Member, 300, 300);
+                    UIManager.Add(partymemberGump);
+                    currentGameScene.PartyMemberGumpStack.Add(Member.Mobile);
                     break;
             }
         }
