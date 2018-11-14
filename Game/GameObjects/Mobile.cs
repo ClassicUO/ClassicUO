@@ -75,7 +75,6 @@ namespace ClassicUO.Game.GameObjects
         {
             _lastAnimationChangeTime = CoreGame.Ticks;
         }
-        public static Dictionary<Mobile, Serial> MobileGumpStack = new Dictionary<Mobile, Serial>();
 
         public Deque<Step> Steps { get; } = new Deque<Step>();
 
