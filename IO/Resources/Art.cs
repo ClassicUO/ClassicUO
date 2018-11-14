@@ -124,6 +124,8 @@ namespace ClassicUO.IO.Resources
         {
             int count = 0;
 
+            long ticks = CoreGame.Ticks - 3000;
+
             for (int i = 0; i < _usedIndex.Count; i++)
             {
                 //ref SpriteTexture texture = ref _artCache[_usedIndex[i]];
@@ -132,14 +134,14 @@ namespace ClassicUO.IO.Resources
 
                 if (texture == null || texture.IsDisposed)
                     _usedIndex.RemoveAt(i--);
-                else if (CoreGame.Ticks - texture.Ticks >= 3000)
+                else if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
                     //texture = null;
                     _usedIndex.RemoveAt(i--);
                     _artDictionary.Remove(g);
 
-                    if (++count >= 5)
+                    if (++count >= 20)
                         break;
                 }
             }
@@ -154,13 +156,13 @@ namespace ClassicUO.IO.Resources
 
                 if (texture == null || texture.IsDisposed)
                     _usedIndexLand.RemoveAt(i--);
-                else if (CoreGame.Ticks - texture.Ticks >= 3000)
+                else if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
                   //  texture = null;
                     _usedIndexLand.RemoveAt(i--);
                     _landDictionary.Remove(g);
-                    if (++count >= 5)
+                    if (++count >= 20)
                         break;
                 }
             }

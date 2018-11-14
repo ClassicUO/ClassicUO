@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++) Tiles[i][j] = new Tile((ushort) (i + x * 8), (ushort) (j + y * 8));
             }
 
-            LastAccessTime = CoreGame.Ticks;
+            LastAccessTime = CoreGame.Ticks + 15000;
         }
 
         private ushort? _x, _y;
@@ -185,6 +185,11 @@ namespace ClassicUO.Game.Map
                     for (int k = 0; k < list.Count; k++)
                     {
                         GameObject o = list[k];
+
+                        if (o is Static st && st.Effect != null)
+                        {
+                            st.Effect = null;
+                        }
 
                         if (!(o is Land) && !(o is Static))
                             return false;

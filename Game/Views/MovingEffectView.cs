@@ -30,8 +30,8 @@ namespace ClassicUO.Game.Views
                 return false;
             MovingEffect effect = (MovingEffect) GameObject;
 
-            position.X += effect.Offset.X;
-            position.Y += effect.Offset.Y + effect.Offset.Z;
+            //position.X += effect.Offset.X;
+            //position.Y += effect.Offset.Y + effect.Offset.Z;
 
 
 
@@ -43,8 +43,8 @@ namespace ClassicUO.Game.Views
                 //Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
-            //Bounds.X = (int)-effect.Offset.X;
-            //Bounds.Y = (int)(effect.Offset.Z - effect.Offset.Y);
+            Bounds.X = (int)-effect.Offset.X;
+            Bounds.Y = (int)(effect.Offset.Z - effect.Offset.Y);
 
             //Bounds.X = -(int) ((effect.Offset.X - effect.Offset.Y) * 22);
             //Bounds.Y = (int) ((effect.Offset.Z * 4 /*- effect.Position.Z * 4*/ ) ) - (int) ((effect.Offset.X + effect.Offset.Y) * 22);
