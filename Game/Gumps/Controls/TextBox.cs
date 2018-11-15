@@ -22,7 +22,6 @@
 #endregion
 
 using ClassicUO.Input;
-using ClassicUO.Input.TextEntry;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -34,9 +33,9 @@ namespace ClassicUO.Game.Gumps.Controls
     public class TextBox : GumpControl
     {
         private TextEntry _entry;
-        private bool _caratBlink;
+        private bool _showCaret;
 
-        public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
+        public TextBox(byte font, int maxcharlength = 0, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
         {
             _entry = new TextEntry(font, maxcharlength, maxWidth, width, isunicode, style, hue);
             base.AcceptKeyboardInput = true;
@@ -90,20 +89,20 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (Service.Get<UIManager>().KeyboardFocusControl == this)
+            if (UIManager.KeyboardFocusControl == this)
             {
                 if (!IsFocused)
                 {
                     SetFocused();
-                    _caratBlink = true;
+                    _showCaret = true;
                 }
 
-                _caratBlink = true;
+                _showCaret = true;
             }
             else if (IsFocused)
             {
                 RemoveFocus();
-                _caratBlink = false;
+                _showCaret = false;
             }
 
             if (_entry.IsChanged)
@@ -117,16 +116,11 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (IsEditable)
             {
-                if (_caratBlink)
+                if (_showCaret)
                     _entry.RenderCaret.Draw(spriteBatch, new Point(position.X + _entry.Offset + _entry.CaretPosition.X, position.Y + _entry.CaretPosition.Y));
             }
 
             return base.Draw(spriteBatch, position, hue);
-        }
-
-        public void RemoveLineAt(int index)
-        {
-            _entry.RemoveLineAt(index);
         }
 
         protected override void OnTextInput(string c)

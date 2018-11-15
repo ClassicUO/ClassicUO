@@ -28,13 +28,13 @@ using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Input.TextEntry
+namespace ClassicUO.Game.Gumps
 {
     public class TextEntry : IDisposable
     {
         private string _plainText;
 
-        public TextEntry(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool unicode = true, FontStyle style = FontStyle.None, ushort hue = 0xFFFF)
+        public TextEntry(byte font, int maxcharlength = 0, int maxWidth = 0, int width = 0, bool unicode = true, FontStyle style = FontStyle.None, ushort hue = 0xFFFF)
         {
             RenderText = new RenderedText
             {
@@ -53,7 +53,7 @@ namespace ClassicUO.Input.TextEntry
                 FontStyle = (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None,
                 Text = "_"
             };
-            MaxCharCount = maxcharlength;
+            MaxCharCount = maxcharlength <= 0 ? 200 : maxcharlength;
             Width = width;
             MaxWidth = maxWidth;
         }
@@ -74,7 +74,7 @@ namespace ClassicUO.Input.TextEntry
             set => RenderText.Hue = value;
         }
 
-        public bool IsChanged { get; set; }
+        public bool IsChanged { get; private set; }
 
         public int Offset { get; set; }
 
@@ -98,10 +98,6 @@ namespace ClassicUO.Input.TextEntry
         }
 
         protected virtual void OnTextChanged()
-        {
-        }
-
-        protected virtual void OnCaretPositionChanged()
         {
         }
 
@@ -143,12 +139,13 @@ namespace ClassicUO.Input.TextEntry
                 else if (text.Length >= MaxCharCount)
                     text = text.Remove(MaxCharCount - 1);
             }
-            else if (RenderText.MaxWidth > 0)
+
+            if (MaxWidth > 0)
             {
                 int width = RenderText.IsUnicode ? Fonts.GetWidthUnicode(RenderText.Font, text) : Fonts.GetWidthASCII(RenderText.Font, text);
                 int len = text.Length;
 
-                while (RenderText.MaxWidth < width && len > 0)
+                while (MaxWidth < width && len > 0)
                 {
                     if (CaretIndex > 0)
                     {
@@ -258,33 +255,7 @@ namespace ClassicUO.Input.TextEntry
             return RenderText.IsUnicode ? Fonts.GetLinesCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width) : Fonts.GetLinesCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width);
         }
 
-        public void RemoveLineAt(int index)
-        {
-            int count = GetLinesCount();
 
-            if (count <= index)
-                return;
-            int current = 0;
-            int foundedIndex = 0;
-
-            while (index != count)
-            {
-                int first = Text.IndexOf('\n', foundedIndex);
-
-                if (first == -1)
-                    break;
-
-                if (index == current)
-                {
-                    Text = Text.Remove(foundedIndex, first - foundedIndex + 1);
-
-                    break;
-                }
-
-                foundedIndex = first + 1;
-                current++;
-            }
-        }
 
         public void Clear()
         {
