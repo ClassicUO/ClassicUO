@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Scenes
         public void CreateCharacter(PlayerMobile character)
         {
             int i = 0;
-            for (i = 0; i < Characters.Length; i++)
+            for (; i < Characters.Length; i++)
                 if (string.IsNullOrEmpty(Characters[i].Name))
                     break;
 
@@ -275,8 +275,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Connect(new IPAddress(ip), port);
             NetClient.Socket.EnableCompression();
             NetClient.Socket.Send(new PSeed(seed, _clientVersionBuffer));
-            NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
-           
+            NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));          
         }
 
         private void ParseServerList(Packet reader)
