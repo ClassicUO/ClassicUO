@@ -1402,13 +1402,14 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
+            long ticks = CoreGame.Ticks - 3000;
 
             for (int i = 0; i < _usedTextures.Count; i++)
             {
                 ToRemoveInfo info = _usedTextures[i];
                 ref AnimationDirection dir = ref DataIndex[info.AnimID].Groups[info.Group].Direction[info.Direction];
 
-                if (CoreGame.Ticks - dir.LastAccessTime >= 3000)
+                if (dir.LastAccessTime < ticks)
                 {
                     for (int j = 0; j < dir.FrameCount; j++)
                     {

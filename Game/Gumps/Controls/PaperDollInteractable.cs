@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private static readonly PaperDollEquipSlots[] _layerOrder =
         {
-            PaperDollEquipSlots.Legging, PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Gloves,   PaperDollEquipSlots.Neck, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Robe, PaperDollEquipSlots.Cloak,  PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand , PaperDollEquipSlots.Belt, PaperDollEquipSlots.Talisman
+            PaperDollEquipSlots.Legging, PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Gloves,   PaperDollEquipSlots.Neck, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Cloak, PaperDollEquipSlots.Robe,  PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand , PaperDollEquipSlots.Belt, PaperDollEquipSlots.Talisman
         };
 
         private Mobile _mobile;
@@ -218,11 +218,6 @@ namespace ClassicUO.Game.Gumps.Controls
                 });
                 _backpackGump.MouseDoubleClick += OnDoubleclickBackpackGump;
             }
-        }
-
-        private void OnEntityDisposed(Entity entity)
-        {
-            Dispose();
         }
 
         private void OnDoubleclickBackpackGump(object sender, EventArgs args)

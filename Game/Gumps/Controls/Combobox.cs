@@ -93,8 +93,12 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (maxHeight != 0 && totalHeight > maxHeight)
                 {
                     var scrollArea = new ScrollArea(0, 0, maxWidth + 15, maxHeight, true);
+
                     foreach (var label in labels)
+                    {
+                        label.Y = 0;
                         scrollArea.AddChildren(label);
+                    }
 
                     AddChildren(scrollArea);
                     _background.Height = maxHeight;

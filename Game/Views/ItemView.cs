@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Views
                 }
 
                 bool ok = base.Draw(spriteBatch, position, objectList);
-                MessageOverHead(spriteBatch, position, Bounds.Y - 22);
+                MessageOverHead(spriteBatch, position, Bounds.Y);
 
                 return ok;
             }

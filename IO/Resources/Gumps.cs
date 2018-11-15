@@ -137,6 +137,7 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
+            long ticks = CoreGame.Ticks - 3000;
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
@@ -146,13 +147,13 @@ namespace ClassicUO.IO.Resources
 
                 if (texture == null || texture.IsDisposed)
                     _usedIndex.RemoveAt(i--);
-                else if (CoreGame.Ticks - texture.Ticks >= 3000)
+                else if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
                     //texture = null;
                     _usedIndex.RemoveAt(i--);
                     _gumpDictionary.Remove(g);
-                    if (++count >= 5)
+                    if (++count >= 20)
                         break;
                 }
             }

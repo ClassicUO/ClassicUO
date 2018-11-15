@@ -181,10 +181,7 @@ namespace ClassicUO.Game.GameObjects
                 gt.Update(totalMS, frameMS);
 
                 if (gt.IsDisposed)
-                {
-                    _overHeads.RemoveAt(i);
-                    i--;
-                }
+                    _overHeads.RemoveAt(i--);
             }
         }
 

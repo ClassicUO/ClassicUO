@@ -80,13 +80,18 @@ namespace ClassicUO.Game.Views
             return hue != 0 ? new Vector3(hue, stretched ? (int) ShadersEffectType.LandHued : (int) ShadersEffectType.Hued, 0) : new Vector3(hue, stretched ? (int) ShadersEffectType.Land : (int) ShadersEffectType.None, 0);
         }
 
-        private bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        private unsafe bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             Texture.Ticks = CoreGame.Ticks;
-            _vertex[0].Position = position + _vertex0_yOffset;
-            _vertex[1].Position = position + _vertex1_yOffset;
-            _vertex[2].Position = position + _vertex2_yOffset;
-            _vertex[3].Position = position + _vertex3_yOffset;
+
+            fixed (SpriteVertex* ptr = _vertex)
+            {
+                ptr[0].Position = position + _vertex0_yOffset;
+                ptr[1].Position = position + _vertex1_yOffset;
+                ptr[2].Position = position + _vertex2_yOffset;
+                ptr[3].Position = position + _vertex3_yOffset;
+            }
+
             int z = GameObject.Position.Z * 4;
 
             for (int i = 0; i < 4; i++)

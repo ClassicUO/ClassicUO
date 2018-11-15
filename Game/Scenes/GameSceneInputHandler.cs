@@ -59,7 +59,7 @@ namespace ClassicUO.Game.Scenes
 
         private void OnLeftMouseButtonUp(object sender, EventArgs e)
         {
-            if (TargetSystem.IsTargeting && IsMouseOverWorld)
+            if (TargetSystem.IsTargeting)
             {
                 switch (TargetSystem.TargetingState)
                 {
@@ -73,7 +73,8 @@ namespace ClassicUO.Game.Scenes
 
                             if (control is ItemGumpling gumpling)
                                 obj = gumpling.Item;
-                            //else if (control.RootParent is Mobil)
+                            else if (control.Parent is MobileHealthGump healthGump)
+                                obj = healthGump.Mobile;
                         }
                         else if (IsMouseOverWorld) obj = SelectedObject;
 
@@ -108,49 +109,68 @@ namespace ClassicUO.Game.Scenes
                         _lastFakeParedoll = null;
                     }
 
-                    if (target is ItemGumpling gumpling && !(target is ItemGumplingPaperdoll))
+                    switch (target)
                     {
-                        Item item = gumpling.Item;
-                        SelectedObject = item;
+                        case ItemGumpling gumpling when !(target is ItemGumplingPaperdoll):
 
-                        if (TileData.IsContainer((long)item.ItemData.Flags))
-                            DropHeldItemToContainer(item);
-                        else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable((long)HeldItem.ItemData.Flags))
-                            MergeHeldItem(item);
-                        else
                         {
-                            if (item.Container.IsItem)
+                            Item item = gumpling.Item;
+                            SelectedObject = item;
+
+                            if (TileData.IsContainer((long)item.ItemData.Flags))
+                                DropHeldItemToContainer(item);
+                            else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable((long)HeldItem.ItemData.Flags))
+                                MergeHeldItem(item);
+                            else
                             {
-                                SpriteTexture texture = Art.GetStaticTexture(item.Graphic);
+                                if (item.Container.IsItem)
+                                {
+                                    SpriteTexture texture = Art.GetStaticTexture(item.Graphic);
 
-                                DropHeldItemToContainer(World.Items.Get(item.Container), (ushort)(target.X + (Mouse.Position.X - target.ScreenCoordinateX) - texture.Width / 2), (ushort)(target.Y + (Mouse.Position.Y - target.ScreenCoordinateY) - texture.Height / 2));
+                                    DropHeldItemToContainer(World.Items.Get(item.Container), (ushort)(target.X + (Mouse.Position.X - target.ScreenCoordinateX) - texture.Width / 2), (ushort)(target.Y + (Mouse.Position.Y - target.ScreenCoordinateY) - texture.Height / 2));
+                                }
                             }
-                        }
-                    }
-                    else if (target is GumpPicContainer container)
-                    {
-                        SelectedObject = container.Item;
 
-                        SpriteTexture texture = Art.GetStaticTexture(container.Item.Graphic);
-
-                        int x = Mouse.Position.X - texture.Width / 2 - (target.X + target.Parent.X);
-                        int y = Mouse.Position.Y - texture.Height / 2 - (target.Y + target.Parent.Y);
-                        DropHeldItemToContainer(container.Item, (ushort)x, (ushort)y);
-                    }
-                    else if (target is GumpPicBackpack backpack)
-                        DropHeldItemToContainer(backpack.BackpackItem);
-                    else if (target is IMobilePaperdollOwner paperdollOwner)
-                    {
-                        if (TileData.IsWearable((long)HeldItem.ItemData.Flags))
-                        {
-                            WearHeldItem(paperdollOwner.Mobile);
+                            break;
                         }
-                    }
-                    else if (target.Parent is IMobilePaperdollOwner paperdollOwner1)
-                    {
-                        if (TileData.IsWearable((long)HeldItem.ItemData.Flags))
+                        case GumpPicContainer container:
+
                         {
-                            WearHeldItem(paperdollOwner1.Mobile);
+                            SelectedObject = container.Item;
+
+                            SpriteTexture texture = Art.GetStaticTexture(container.Item.Graphic);
+
+                            int x = Mouse.Position.X - texture.Width / 2 - (target.X + target.Parent.X);
+                            int y = Mouse.Position.Y - texture.Height / 2 - (target.Y + target.Parent.Y);
+                            DropHeldItemToContainer(container.Item, (ushort)x, (ushort)y);
+
+                            break;
+                        }
+                        case GumpPicBackpack backpack: DropHeldItemToContainer(backpack.BackpackItem);
+
+                            break;
+                        case IMobilePaperdollOwner paperdollOwner:
+
+                        {
+                            if (TileData.IsWearable((long)HeldItem.ItemData.Flags))
+                            {
+                                WearHeldItem(paperdollOwner.Mobile);
+                            }
+
+                            break;
+                        }
+                        default:
+
+                        {
+                            if (target.Parent is IMobilePaperdollOwner paperdollOwner1)
+                            {
+                                if (TileData.IsWearable((long)HeldItem.ItemData.Flags))
+                                {
+                                    WearHeldItem(paperdollOwner1.Mobile);
+                                }
+                            }
+
+                            break;
                         }
                     }
                 }

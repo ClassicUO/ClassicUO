@@ -159,7 +159,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            if (Height <= 0)
+            if (Height <= 0 || !IsVisible)
                 return false;
 
             // draw scrollbar background

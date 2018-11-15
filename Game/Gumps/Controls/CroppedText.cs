@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class CroppedText : GumpControl
     {
-        private RenderedText _gameText;
+        private readonly RenderedText _gameText;
 
         public CroppedText(string text, Hue hue, int maxWidth = 0)
         {
@@ -43,6 +43,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 MaxWidth = maxWidth,
                 Text = text
             };
+
+            AcceptMouseInput = false;
         }
 
         public CroppedText(string[] parts, string[] lines) : this(lines[int.Parse(parts[6])], (Hue) (Hue.Parse(parts[5]) + 1), int.Parse(parts[3]))

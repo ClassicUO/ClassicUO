@@ -204,17 +204,19 @@ namespace ClassicUO.Game.Map
         {
             int count = 0;
 
+            long ticks = CoreGame.Ticks - 3000;
+
             for (int i = 0; i < _usedIndices.Count; i++)
             {
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
 
-                if (CoreGame.Ticks - block.LastAccessTime >= 3000 && block.HasNoExternalData())
+                if (block.LastAccessTime < ticks /*&& block.HasNoExternalData()*/)
                 {
                     block.Unload();
                     block = MapChunk.Invalid;
                     _usedIndices.RemoveAt(i--);
 
-                    if (++count >= 5)
+                    if (++count >= 50)
                         break;
                 }
             }

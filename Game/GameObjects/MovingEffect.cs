@@ -9,7 +9,7 @@ namespace ClassicUO.Game.GameObjects
 {
     internal class MovingEffect : GameEffect
     {
-        private float _timeActive, _timeUntilHit;
+        private uint _lastMoveTime;
 
         public MovingEffect(Graphic graphic, Hue hue)
         {
@@ -40,10 +40,12 @@ namespace ClassicUO.Game.GameObjects
         {
             sbyte zSourceB = (sbyte) zSource;
             sbyte zTargB = (sbyte) zTarget;
-            Entity source = World.Get(src);
+            
 
-            if (source != null)
+            if (src.IsValid)
             {
+                Entity source = World.Get(src);
+
                 if (source is Mobile mobile)
                 {
                     SetSource(mobile.Position.X, mobile.Position.Y, mobile.Position.Z);
@@ -64,10 +66,12 @@ namespace ClassicUO.Game.GameObjects
             else
                 SetSource(xSource, ySource, zSource);
 
-            Entity target = World.Get(trg);
+            
 
-            if (target != null)
+            if (trg.IsValid)
             {
+                Entity target = World.Get(trg);
+
                 if (target is Mobile mobile)
                 {
                     SetTarget(target);
@@ -77,56 +81,54 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if (target is Item)
                 {
-                    SetSource(target);
+                    SetTarget(target);
 
                     if ((xTarget | yTarget | zTarget) != 0)
                         target.Position = new Position((ushort) xTarget, (ushort) yTarget, zTargB);
                 }
                 else
-                    SetSource(xTarget, yTarget, zTargB);
+                    SetTarget(xTarget, yTarget, zTargB);
             }
+            else
+                SetTarget(xTarget, yTarget, zTargB);
         }
+
+
 
         public float AngleToTarget { get; set; }
 
-        protected override View CreateView()
-        {
-            return new MovingEffectView(this);
-        }
-
-        private uint _lastMoveTime;
-
         public bool Explode { get; set; }
+
+        public byte MovingDelay { get; set; } = 20;
+
+
+
+        protected override View CreateView() => new MovingEffectView(this);
 
         public override void Update(double totalMS, double frameMS)
         {
-            base.Update(totalMS, frameMS);
-
             if (_lastMoveTime > totalMS)
                 return;
 
-            _lastMoveTime = (uint) (totalMS + Speed);
+
+            _lastMoveTime = (uint)(totalMS + MovingDelay);
+
+
+            base.Update(totalMS, frameMS);
 
             (int sx, int sy, int sz) = GetSource();
             (int tx, int ty, int tz) = GetTarget();
-
-            if (Position == Position.Invalid)
-            {
-                X = (ushort) sx;
-                Y = (ushort) sy;
-                Z = (sbyte) sz;
-            }
 
             Settings settings = Service.Get<Settings>();
 
             int screenCenterX = settings.GameWindowX + settings.GameWindowWidth / 2;
             int screenCenterY = settings.GameWindowY + settings.GameWindowHeight / 2;
 
-            int playerX = World.Player.Position.X;
-            int playerY = World.Player.Position.Y;
+            int playerX = World.Player.X;
+            int playerY = World.Player.Y;
 
-            int offsetX = Position.X - playerX;
-            int offsetY = Position.Y - playerY;
+            int offsetX = sx - playerX;
+            int offsetY = sy - playerY;
 
             int drawX = screenCenterX + (offsetX - offsetY) * 22;
             int drawY = screenCenterY + (offsetX + offsetY) * 22;
@@ -177,6 +179,7 @@ namespace ClassicUO.Game.GameObjects
                     stepXY -= deltaXY[0];
                 }
             }
+
             if (realDrawX < drawDestX)
             {
                 realDrawX += tempXY[x];
@@ -213,16 +216,17 @@ namespace ClassicUO.Game.GameObjects
             int newCoordX = 0;
             int newCoordY = 0;
 
+
             TileOffsetOnMonitorToXY(ref newOffsetX, ref newOffsetY, ref newCoordX, ref newCoordY);
 
             int newX = playerX + newCoordX;
             int newY = playerY + newCoordY;
 
-            if (newX == tx && newY == ty && Position.Z == tz)
+            if (newX == tx && newY == ty && sz == tz)
             {
                 if (Explode)
                 {
-                    Position = new Position(Position.X, Position.Y, (sbyte) tz);
+                    //Position = new Position(Position.X, Position.Y, (sbyte) tz);
                     //Tile = World.Map.GetTile(tx, ty);
                 }
 
@@ -243,7 +247,7 @@ namespace ClassicUO.Game.GameObjects
                 int countX = drawDestX - (newDrawX + (int) Offset.X);
                 int countY = drawDestY - (newDrawY + (int) Offset.Y);
 
-                if (Position.Z != tz)
+                if (sz != tz)
                 {
                     int stepsCountX = countX / (tempXY[x] + 1);
                     int stepsCountY = countY / (tempXY[(x + 1) % 2] + 1);
@@ -256,12 +260,12 @@ namespace ClassicUO.Game.GameObjects
 
                     int totalOffsetZ = 0;
 
-                    bool incZ = Position.Z < tz;
+                    bool incZ = sz < tz;
 
                     if (incZ)
-                        totalOffsetZ = (tz - Position.Z) * 4;
+                        totalOffsetZ = (tz - sz) * 4;
                     else
-                        totalOffsetZ = (Position.Z - tz) * 4;
+                        totalOffsetZ = (sz - tz) * 4;
 
                     totalOffsetZ /= stepsCountX;
 
@@ -272,15 +276,15 @@ namespace ClassicUO.Game.GameObjects
 
                     if (Offset.Z >= 4)
                     {
-                        int countZ = 1;
+                        const int COUNT_Z = 1;
 
                         if (incZ)
-                            Z += (sbyte) countZ;
+                            sz += COUNT_Z;
                         else
-                            Z -= (sbyte) countZ;
+                            sz -= COUNT_Z;
 
 
-                        if (Z == tz)
+                        if (sz == tz)
                             Offset.Z = 0;
                         else
                             Offset.Z %= 8;
@@ -289,23 +293,26 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                countY -= (int) Offset.Z + (tz - Z) * 4;
+                countY -= (int) Offset.Z + (tz - sz) * 4;
 
                 float angle = /*180.0f +*/ (float) (Math.Atan2(countY, countX) * 57.295780);  //-((float)Math.Atan2(ty - sy, tx - sx) + (float)Math.PI * (1f / 4f));
 
                 AngleToTarget = -(float)(angle * Math.PI) / 180.0f;
 
-                if (X != newX || Y != newY)
+                if (sx != newX || sy != newY)
                 {
-                    X = (ushort) newX;
-                    Y = (ushort) newY;
+                    sx = newX;
+                    sy = newY;
+                    
+                    //X = (ushort) newX;
+                    //Y = (ushort) newY;
                     //Tile = World.Map.GetTile(X, Y);
                     wantUpdateInRenderList = true;
                 }
 
                 if (wantUpdateInRenderList)
                 {
-                    SetSource(X, Y, Z);
+                    SetSource(sx, sy, sz);
                 }
             }
 

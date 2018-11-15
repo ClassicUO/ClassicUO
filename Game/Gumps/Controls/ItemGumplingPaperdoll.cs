@@ -53,27 +53,32 @@ namespace ClassicUO.Game.Gumps.Controls
                 }
             }
 
+
+            Texture = IO.Resources.Gumps.GetGumpTexture(_gumpIndex);
+            Width = Texture.Width;
+            Height = Texture.Height;
+            
         }
 
         public int SlotIndex { get; set; }
 
         public Mobile Mobile { get; set; }
 
+        public override void Update(double totalMS, double frameMS)
+        {
+            if (Item.IsDisposed || IsDisposed)
+                return;
+
+            base.Update(totalMS, frameMS);
+
+            Texture.Ticks = (long)totalMS;
+
+        }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            if (Item.IsDisposed)
+            if (Item.IsDisposed || IsDisposed)
                 return false;
-
-            if (Texture == null || Texture.IsDisposed)
-            {
-                Texture = IO.Resources.Gumps.GetGumpTexture(_gumpIndex);
-                Width = Texture.Width;
-                Height = Texture.Height;
-            }
-
-            Texture.Ticks = CoreGame.Ticks;
-
             return spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue((long)Item.ItemData.Flags), _isTransparent ? .5f : 0, false));
         }
 

@@ -272,15 +272,9 @@ namespace ClassicUO.Game.GameObjects
 
         public event EventHandler StaminaChanged;
 
-        protected override View CreateView()
-        {
-            return new MobileView(this);
-        }
+        protected override View CreateView() => new MobileView(this);
 
-        public void SetSAPoison(bool value)
-        {
-            _isSA_Poisoned = value;
-        }
+        public void SetSAPoison(bool value) => _isSA_Poisoned = value;
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -300,11 +294,11 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected override void OnPositionChanged(object sender, EventArgs e)
-        {
-            base.OnPositionChanged(sender, e);
-            //Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
-        }
+        //protected override void OnPositionChanged(object sender, EventArgs e)
+        //{
+        //    base.OnPositionChanged(sender, e);
+        //    //Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
+        //}
 
         private readonly List<DamageOverhead> _damageTextList = new List<DamageOverhead>(5);
 
@@ -331,25 +325,6 @@ namespace ClassicUO.Game.GameObjects
         {
             Steps.Clear();
             Offset = Vector3.Zero;
-        }
-
-        public void GetLastStep(out int x, out int y, out sbyte z, out Direction dir)
-        {
-            if (Steps.Count > 0)
-            {
-                Step step = Steps.Back();
-                dir = (Direction) step.Direction;
-                x = step.X;
-                y = step.Y;
-                z = step.Z;
-
-                return;
-            }
-
-            dir = Direction;
-            x = Position.X;
-            y = Position.Y;
-            z = Position.Z;
         }
 
         public bool EnqueueStep(int x, int y, sbyte z, Direction direction, bool run)
@@ -662,19 +637,20 @@ namespace ClassicUO.Game.GameObjects
                 Equipment[i] = null;
         }
 
+
         public struct Step
         {
-            public Step(int x, int y, sbyte z, byte dir, bool anim, bool run, byte rej, byte seq)
-            {
-                X = x;
-                Y = y;
-                Z = z;
-                Direction = dir;
-                Anim = anim;
-                Run = run;
-                Rej = rej;
-                Seq = seq;
-            }
+            //public Step(int x, int y, sbyte z, byte dir, bool anim, bool run, byte rej, byte seq)
+            //{
+            //    X = x;
+            //    Y = y;
+            //    Z = z;
+            //    Direction = dir;
+            //    Anim = anim;
+            //    Run = run;
+            //    Rej = rej;
+            //    Seq = seq;
+            //}
 
             public int X, Y;
             public sbyte Z;

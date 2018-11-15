@@ -1,7 +1,9 @@
 ClassicUO - an open source implementation of the Ultima Online Classic Client.
 
-# Introduction
+# Contacts
+Join [Discord channel](https://discord.gg/VdyCpjQ)
 
+# Introduction
 ClassicUO is an open source implementation of the Ultima Online Classic Client. This client is intended to emulate client versions 7.0.59.8 and older and is primarily tested against Ultima Online free shards based on RunUO and [ServUO](https://github.com/servuo/servuo). This client will not work on the official game shards.
 
 The client is currently under heavy development but is functional. The code is based on the [FNA-XNA](https://fna-xna.github.io/) framework. C# is chosen because there is a large community of developers working on Ultima Online server emulators in C#, because FNA-XNA exists and seems reasonably suitable for creating this type of game, and because the game is inexpensive enough to run that performance is not a major concern.

@@ -188,7 +188,6 @@
     <Compile Include="Game\Gumps\UIGumps\ChatControl.cs" />
     <Compile Include="Game\Gumps\UIGumps\ColorPickerGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\ContainerGump.cs" />
-    <Compile Include="Game\Gumps\UIGumps\DevConsole.cs" />
     <Compile Include="Game\Gumps\UIGumps\Gump.cs" />
     <Compile Include="Game\Gumps\UIGumps\JournalGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\MapGump.cs" />
@@ -235,7 +234,7 @@
     <Compile Include="Input\MouseOverList.cs" />
     <Compile Include="Input\MousePicker.cs" />
     <Compile Include="Input\PickerType.cs" />
-    <Compile Include="Input\TextEntry\TextEntry.cs" />
+    <Compile Include="Game\Gumps\TextEntry.cs" />
     <Compile Include="Interfaces\IColorable.cs" />
     <Compile Include="Interfaces\IDebuggable.cs" />
     <Compile Include="Interfaces\IDeferreable.cs" />
