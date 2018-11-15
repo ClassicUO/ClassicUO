@@ -288,7 +288,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         UIManager.Remove<PartyMemberGump>(Member.Mobile);
                     else if (Member.Mobile == World.Player)
                     {
-                        StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
+                        StatusGumpBase status = UIManager.GetByLocalSerial<StatusGumpBase>();
                         status?.Dispose();
                     }
 

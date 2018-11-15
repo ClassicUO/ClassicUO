@@ -109,6 +109,10 @@
     <Compile Include="Game\Gumps\UIGumps\PartyMemberGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\PopupMenuGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\SkillButtonGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\StatusGumpBase.cs" />
+    <Compile Include="Game\Gumps\UIGumps\StatusGumpClassic.cs" />
+    <Compile Include="Game\Gumps\UIGumps\StatusGumpModern.cs" />
+    <Compile Include="Game\Gumps\UIGumps\StatusGumpOutlands.cs" />
     <Compile Include="Game\Gumps\UIGumps\UseSpellButtonGump.cs" />
     <Compile Include="Game\Scenes\GameSceneDragAndDropHandler.cs" />
     <Compile Include="Game\Scenes\GameSceneDrawingSorting.cs" />
@@ -201,7 +205,6 @@
     <Compile Include="Game\Gumps\UIGumps\PaperdollGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\SkillGumpAdvanced.cs" />
     <Compile Include="Game\Gumps\UIGumps\SpellbookGump.cs" />
-    <Compile Include="Game\Gumps\UIGumps\StatusGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\TopBarGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\WorldViewport.cs" />
     <Compile Include="Game\Gumps\UIGumps\WorldViewportGump.cs" />

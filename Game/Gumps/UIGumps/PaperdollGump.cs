@@ -21,11 +21,14 @@
 
 #endregion
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Utility.Logging;
+
+using System;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
@@ -287,10 +290,28 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.Status:
 
-                    if (UIManager.GetByLocalSerial<StatusGump>() == null)
-                        UIManager.Add(new StatusGump());
+                    if (UIManager.GetByLocalSerial<StatusGumpBase>() == null)
+                    {
+                        // TODO: verify client version
+                        switch (Service.Get<Settings>().StatusGumpStyle.ToLower())
+                        {
+                            case "classic":
+                                UIManager.Add(new StatusGumpClassic());
+                                break;
+                            case "modern":
+                                UIManager.Add(new StatusGumpModern());
+                                break;
+                            case "outlands":
+                                UIManager.Add(new StatusGumpOutlands());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                     else
-                        UIManager.Remove<StatusGump>();
+                    {
+                        UIManager.Remove<StatusGumpBase>();
+                    }
 
                     break;
             }
