@@ -45,7 +45,7 @@ namespace ClassicUO.Renderer
         private readonly SpriteVertex[] _vertexInfo;
         private bool _started;
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
-        private RasterizerState _rasterizerState;
+        private readonly RasterizerState _rasterizerState;
 #if !ORIONSORT
         private float _z;
 #endif
@@ -133,20 +133,20 @@ namespace ClassicUO.Renderer
         {
             if (texture == null || texture.IsDisposed)
                 return false;
-            bool draw = false;
+            //bool draw = false;
 
-            for (byte i = 0; i < 4; i++)
-            {
-                if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
-                {
-                    draw = true;
+            //for (byte i = 0; i < 4; i++)
+            //{
+            //    if (_drawingArea.Contains(vertices[i].Position) == ContainmentType.Contains)
+            //    {
+            //        draw = true;
 
-                    break;
-                }
-            }
+            //        break;
+            //    }
+            //}
 
-            if (!draw)
-                return false;
+            //if (!draw)
+            //    return false;
 
             if (_numSprites >= MAX_SPRITES)
                 Flush();
@@ -266,7 +266,7 @@ namespace ClassicUO.Renderer
             {
                 if (_textureInfo[i] != current)
                 {
-                    InternalDraw(ref current, offset, i - offset);
+                    InternalDraw(current, offset, i - offset);
                     current = _textureInfo[i];
                     offset = i;
                 }
@@ -274,7 +274,7 @@ namespace ClassicUO.Renderer
                     Merged++;
             }
 
-            InternalDraw(ref current, offset, _numSprites - offset);
+            InternalDraw(current, offset, _numSprites - offset);
             Calls += _numSprites;
 
             Array.Clear(_textureInfo, 0, _numSprites);
@@ -283,7 +283,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void InternalDraw(ref Texture2D texture, int baseSprite, int batchSize)
+        private void InternalDraw(Texture2D texture, int baseSprite, int batchSize)
         {
             //switch (texture.Technique)
             //{
