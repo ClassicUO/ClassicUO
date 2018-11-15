@@ -21,12 +21,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
     class MobileHealthGump : Gump
     {
-        private Mobile _mobile;
+        private const float MAX_BAR_WIDTH = 100.0f;
         private readonly Texture2D _backgroundBar;
         private readonly Texture2D _healthBar;
         private readonly Texture2D _staminaBar;
         private readonly Texture2D _manaBar;
-        private readonly float _maxBarWidth;
         private float _currentHealthBarLength;
         private float _currentManaBarLength;
         private float _currentStaminaBarLength;
@@ -43,11 +42,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             X = x;
             Y = y;
             CanMove = true;
-            _mobile = mobile;
-            _maxBarWidth = 100.00f;
-            _currentHealthBarLength = _maxBarWidth;
-            _currentStaminaBarLength = _maxBarWidth;
-            _currentManaBarLength = _maxBarWidth;
+            Mobile = mobile;
+            _currentHealthBarLength = MAX_BAR_WIDTH;
+            _currentStaminaBarLength = MAX_BAR_WIDTH;
+            _currentManaBarLength = MAX_BAR_WIDTH;
             _backgroundBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
             _healthBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
             _manaBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
@@ -60,7 +58,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             ///
             /// Render the gump for player
             /// 
-            if (_mobile == World.Player)
+            if (Mobile == World.Player)
             {
                 AddChildren(_background = new GumpPic(0, 0, 0x0803, 0));
                 AddChildren(new FrameBorder(38, 14, 100, 7, Color.DarkGray));
@@ -77,7 +75,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 AddChildren(_background = new GumpPic(0, 0, 0x0804, 0));
                 AddChildren(_textboxName = new TextBox(1, 17, 190, 190, false, FontStyle.None, 0x0386) { X = 17, Y = 16, Width = 190, Height = 25 });
-                _textboxName.SetText(_mobile.Name);
+                _textboxName.SetText(Mobile.Name);
                 _textboxName.IsEditable = false;
                 UIManager.KeyboardFocusControl = null;
                 AddChildren(new FrameBorder(38, 40, 100, 7, Color.DarkGray));
@@ -85,9 +83,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             ///
             /// Register events
             /// 
-            _mobile.HitsChanged += MobileOnHitsChanged;
-            _mobile.ManaChanged += MobileOnManaChanged;
-            _mobile.StaminaChanged += MobileOnStaminaChanged;
+            Mobile.HitsChanged += MobileOnHitsChanged;
+            Mobile.ManaChanged += MobileOnManaChanged;
+            Mobile.StaminaChanged += MobileOnStaminaChanged;
 
             if (_textboxName != null)
                 _textboxName.AcceptMouseInput = false;
@@ -97,7 +95,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             MobileOnStaminaChanged(null, EventArgs.Empty);
         }
 
-        public Mobile Mobile => _mobile;
+        public Mobile Mobile { get; }
 
         private void TextboxNameOnMouseClick(object sender, MouseEventArgs e)
         {
@@ -114,11 +112,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (key == SDL.SDL_Keycode.SDLK_RETURN && _textboxName.IsEditable)
             {
-                GameActions.Rename(_mobile, _textboxName.Text);
+                GameActions.Rename(Mobile, _textboxName.Text);
                 _textboxName.IsEditable = false;
                 UIManager.KeyboardFocusControl = null;
-
-
             }
             base.OnKeyDown(key, mod);
         }
@@ -130,7 +126,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         /// <param name="e"></param>
         private void MobileOnHitsChanged(object sender, EventArgs e)
         {
-            _currentHealthBarLength = _mobile.Hits * _maxBarWidth / _mobile.HitsMax;
+            _currentHealthBarLength = Mobile.Hits * MAX_BAR_WIDTH / (Mobile.HitsMax == 0 ? 1 : Mobile.HitsMax);
         }
         /// <summary>
         /// Eventhandler for changing mana points
@@ -139,7 +135,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         /// <param name="e"></param>
         private void MobileOnManaChanged(object sender, EventArgs e)
         {
-            _currentManaBarLength = _mobile.Mana * _maxBarWidth / _mobile.ManaMax;
+            _currentManaBarLength = Mobile.Mana * MAX_BAR_WIDTH / (Mobile.ManaMax == 0 ? 1 : Mobile.ManaMax);
         }
         /// <summary>
         /// Eventhandler for changing stamina points
@@ -148,7 +144,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         /// <param name="e"></param>
         private void MobileOnStaminaChanged(object sender, EventArgs e)
         {
-            _currentStaminaBarLength = _mobile.Stamina * _maxBarWidth / _mobile.StaminaMax;
+            _currentStaminaBarLength = Mobile.Stamina * MAX_BAR_WIDTH / (Mobile.StaminaMax == 0 ? 1 : Mobile.StaminaMax);
         }
 
         /// <summary>
@@ -161,7 +157,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (IsDisposed)
                 return;
 
-            if (_mobile.IsRenamable && !_renameEventActive)
+            if (Mobile.IsRenamable && !_renameEventActive)
             {
                 _textboxName.AcceptMouseInput = true;
                 _renameEventActive = true;
@@ -171,7 +167,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             ///
             /// Checks if entity is player
             /// 
-            if (_mobile == World.Player && _mobile.InWarMode)
+            if (Mobile == World.Player && Mobile.InWarMode)
             {
                 _background.Graphic = 0x0807;
             }
@@ -183,13 +179,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
             ///
             /// Check if entity is mobile
             /// 
-            if (_mobile != World.Player)
+            if (Mobile != World.Player)
             {
                 _background.Graphic = 0x0804;
 
 
                 ///Checks if mobile is in range and sets its gump grey if not
-                if (_mobile.Distance > World.ViewRange)
+                if (Mobile.Distance > World.ViewRange)
                 {
                     _background.Hue = 0x038E;
                     _healthBar.SetData(new[] { Color.DarkGray });
@@ -200,7 +196,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
 
                     //Check mobile's flag and set the bar's color
-                    switch (_mobile.NotorietyFlag)
+                    switch (Mobile.NotorietyFlag)
                     {
                         case NotorietyFlag.Invulnerable:
                             _background.Hue = 50; //default 50 : yellow
@@ -222,19 +218,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
 
 
-                    if (_mobile.IsYellowHits && !_isYellowHits)
+                    if (Mobile.IsYellowHits && !_isYellowHits)
                     {
                         _healthBar.SetData(new[] { Color.Gold });
                         _isYellowHits = true;
                         _isNormal = false;
                     }
-                    else if (_mobile.IsPoisoned && !_isPoisoned)
+                    else if (Mobile.IsPoisoned && !_isPoisoned)
                     {
                         _healthBar.SetData(new[] { Color.Green });
                         _isPoisoned = true;
                         _isNormal = false;
                     }
-                    else if (!_mobile.IsPoisoned && !_mobile.IsYellowHits && !_isNormal)
+                    else if (!Mobile.IsPoisoned && !Mobile.IsYellowHits && !_isNormal)
                     {
                         _healthBar.SetData(new[] { Color.SteelBlue });
                         _isNormal = true;
@@ -264,12 +260,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 return false;
 
             base.Draw(spriteBatch, position);
-            if (_mobile == World.Player)
+            if (Mobile == World.Player)
             {
                 ///Draw background bars
-                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 14, (int)_maxBarWidth, 7), RenderExtentions.GetHueVector(0, true, 0.4f, true));
-                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 27, (int)_maxBarWidth, 7), RenderExtentions.GetHueVector(0, true, 0.4f, true));
-                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 40, (int)_maxBarWidth, 7), RenderExtentions.GetHueVector(0, true, 0.4f, true));
+                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 14, (int)MAX_BAR_WIDTH, 7), RenderExtentions.GetHueVector(0, true, 0.4f, true));
+                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 27, (int)MAX_BAR_WIDTH, 7), RenderExtentions.GetHueVector(0, true, 0.4f, true));
+                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 40, (int)MAX_BAR_WIDTH, 7), RenderExtentions.GetHueVector(0, true, 0.4f, true));
                 ///Draw stat bars
                 spriteBatch.Draw2D(_healthBar, new Rectangle(X + 38, Y + 14, (int)_currentHealthBarLength, 7), RenderExtentions.GetHueVector(0, true, 0.1f, true));
                 spriteBatch.Draw2D(_manaBar, new Rectangle(X + 38, Y + 27, (int)_currentManaBarLength, 7), RenderExtentions.GetHueVector(0, true, 0.1f, true));
@@ -279,7 +275,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             else
             {
                 ///Draw background bars
-                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 40, (int)_maxBarWidth, 7), RenderExtentions.GetHueVector(0, true, 0.4f, true));
+                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 40, (int)MAX_BAR_WIDTH, 7), RenderExtentions.GetHueVector(0, true, 0.4f, true));
                 ///Draw stat bars
                 spriteBatch.Draw2D(_healthBar, new Rectangle(X + 38, Y + 40, (int)_currentHealthBarLength, 7), RenderExtentions.GetHueVector(0, true, 0.1f, true));
 
@@ -291,7 +287,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (button == MouseButton.Left)
             {
-                if (_mobile == World.Player)
+                if (Mobile == World.Player)
                 {
                     UIManager.Add(new StatusGump()
                     {
@@ -306,7 +302,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         //attack
                     }
                     else
-                        GameActions.DoubleClick(_mobile);
+                        GameActions.DoubleClick(Mobile);
                 }
 
                 return true;
@@ -320,9 +316,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
         /// </summary>
         public override void Dispose()
         {
-            _mobile.HitsChanged -= MobileOnHitsChanged;
-            _mobile.ManaChanged -= MobileOnManaChanged;
-            _mobile.StaminaChanged -= MobileOnStaminaChanged;
+            Mobile.HitsChanged -= MobileOnHitsChanged;
+            Mobile.ManaChanged -= MobileOnManaChanged;
+            Mobile.StaminaChanged -= MobileOnStaminaChanged;
 
             if (_textboxName != null)
                 _textboxName.MouseClick -= TextboxNameOnMouseClick;
@@ -332,7 +328,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _manaBar.Dispose();
             _staminaBar.Dispose();
 
-            Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack.Remove(_mobile);
+            Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack.Remove(Mobile);
             base.Dispose();
         }
     }
