@@ -78,13 +78,13 @@ namespace ClassicUO.Configuration
         private bool _statReport;
         private ushort _tooltipsTextColor = 0xFFFF;
         private string _uoDir;
-        private bool _useOldStatus;
         private string _username;
         private bool _useTooltips;
         private bool _preloadMaps;
         private bool _showHPMobiles;
         private int _showHPMobilesMode = 0; // 0 = %, 1 = line, 2 = both
         private bool _highlightMobilesByFlags;
+        private string _statusGumpStyle;
 
         [JsonConstructor]
         public Settings()
@@ -399,13 +399,6 @@ namespace ClassicUO.Configuration
             set => SetProperty(ref _skillReport, value);
         }
 
-        [JsonProperty(PropertyName = "use_old_status")]
-        public bool UseOldStatus
-        {
-            get => _useOldStatus;
-            set => SetProperty(ref _useOldStatus, value);
-        }
-
         [JsonProperty(PropertyName = "use_tooltips")]
         public bool UseTooltips
         {
@@ -467,6 +460,13 @@ namespace ClassicUO.Configuration
         {
             get => _highlightMobilesByFlags;
             set => SetProperty(ref _highlightMobilesByFlags, value);
+        }
+
+        [JsonProperty(PropertyName = "status_gump_style")]
+        public string StatusGumpStyle
+        {
+            get => _statusGumpStyle;
+            set => SetProperty(ref _statusGumpStyle, value);
         }
     }
 
