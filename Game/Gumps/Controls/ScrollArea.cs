@@ -23,6 +23,7 @@
 
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using System.Linq;
 
 using Microsoft.Xna.Framework;
 
@@ -168,6 +169,20 @@ namespace ClassicUO.Game.Gumps.Controls
         protected override void OnChildRemoved()
         {
             _needUpdate = true;
+        }
+
+        public override void RemoveChildren(GumpControl c)
+        {
+            if (c is ScrollAreaItem)
+                base.RemoveChildren(c);
+            else
+            {
+                // Try to find the wrapped control
+                var wrapper = Children.OfType<ScrollAreaItem>()
+                    .FirstOrDefault(o => o.Children.Contains(c));
+
+                base.RemoveChildren(wrapper);
+            }
         }
 
         public override void AddChildren(GumpControl c, int page = 0)

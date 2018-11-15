@@ -1,5 +1,7 @@
 ﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Input;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;
@@ -14,9 +16,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
     class ShopGump: Gump
     {
         private ScrollArea _shopScrollArea;
-
+        private ScrollArea _transactionScrollArea;
+        private Label _totalLabel;
+        private Label _playerGoldLabel;
+        private bool updateTotal;
+        private Dictionary<Item, TransactionItem> _transactionItems;
+        private Dictionary<Item, ShopItem> _shopItems;
+        
         public ShopGump(Mobile shopMobile, bool isBuyGump, int x, int y) : base(shopMobile.Serial, 0)
         {
+            _transactionItems = new Dictionary<Item, TransactionItem>();
+            _shopItems = new Dictionary<Item, ShopItem>();
+            updateTotal = false;
+
             X = x;
             Y = y;
 
@@ -24,31 +36,23 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 AddChildren(new GumpPic(0, 0, 0x0870, 0));
             else
                 AddChildren(new GumpPic(0, 0, 0x0872, 0));
-
-            // AddChildren(new CGUIShader(&g_ColorizerShader, true));
-            //m_ItemList[0] =
-            //    (CGUIHTMLGump*)AddChildren(new CGUIHTMLGump(ID_GB_SHOP_LIST, 0, 30, 60, 215, 176, false, true));
-            //AddChildren(new CGUIShader(&g_ColorizerShader, false));
-
+            
             if (isBuyGump)
                 AddChildren(new GumpPic(170, 214, 0x0871, 0));
             else
                 AddChildren(new GumpPic(170, 214, 0x0873, 0));
-
-            //m_ItemList[1] =
-            //    (CGUIHTMLGump*)AddChildren(new CGUIHTMLGump(ID_GB_SHOP_RESULT, 0, 200, 280, 215, 92, false, true));
-
+            
             AddChildren(new HitBox((int)Buttons.Accept, 200, 406, 34, 30));
             AddChildren(new HitBox((int)Buttons.Clear, 372, 410, 24, 24));
 
             if (isBuyGump)
             {
-                AddChildren(new Label("0", false, 0x0386, font: 9) { X = 240, Y = 385 });
-                AddChildren(new Label(World.Player.Gold.ToString(), false, 0x0386, font: 9) { X = 358, Y = 385 });
+                AddChildren(_totalLabel = new Label("0", false, 0x0386, font: 9) { X = 240, Y = 385 });
+                AddChildren(_playerGoldLabel = new Label(World.Player.Gold.ToString(), false, 0x0386, font: 9) { X = 358, Y = 385 });
             }
             else
             {
-                AddChildren(new Label("0", false, 0x0386, font: 9) { X = 358, Y = 386 });
+                AddChildren(_totalLabel = new Label("0", false, 0x0386, font: 9) { X = 358, Y = 386 });
             }
 
             AddChildren(new Label(World.Player.Name, false, 0x0386, font: 5) { X = 242, Y = 408 });
@@ -56,28 +60,107 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AcceptMouseInput = true;
             CanMove = true;
 
-            _shopScrollArea = new ScrollArea(20, 60, 240, 150, false);
-            
-            foreach (var layerItems in shopMobile.Items.Where(o => o.Layer == Layer.ShopResale || o.Layer == Layer.ShopBuy))
+            _shopScrollArea = new ScrollArea(20, 60, 235, 150, false);
+
+            var itemsToShow = shopMobile.Items
+                .Where(o => o.Layer == Layer.ShopResale || o.Layer == Layer.ShopBuy)
+                .SelectMany(o => o.Items)
+                .OrderBy(o => o.Serial.Value);
+
+            foreach (var item in itemsToShow)
             {
-                foreach(var item in layerItems.Items)
-                {
-                    ShopItem shopItem;
-                    _shopScrollArea.AddChildren(shopItem = new ShopItem(item) { X = 5, Y = 5 });
-                    _shopScrollArea.AddChildren(new ResizePicLine(0x39) { X = 10, Width = 210 });
+                ShopItem shopItem;
+                _shopScrollArea.AddChildren(shopItem = new ShopItem(item) { X = 5, Y = 5 });
+                _shopScrollArea.AddChildren(new ResizePicLine(0x39) { X = 10, Width = 210 });
 
-                    shopItem.MouseClick += ShopItem_MouseClick;
-                    shopItem.MouseDoubleClick += ShopItem_MouseDoubleClick;
-                }
+                shopItem.MouseClick += ShopItem_MouseClick;
+                shopItem.MouseDoubleClick += ShopItem_MouseDoubleClick;
+
+                _shopItems.Add(item, shopItem);
             }
-            // 0x34
-
+            
             AddChildren(_shopScrollArea);
+            AddChildren(_transactionScrollArea = new ScrollArea(200, 280, 225, 80, false));
+        }
+
+        public override void Update(double totalMS, double frameMS)
+        {
+            if (updateTotal)
+            {
+                _totalLabel.Text = _transactionItems.Sum(o => o.Value.Amount * o.Key.Price).ToString();
+                updateTotal = false;
+            }
+
+            _playerGoldLabel.Text = World.Player.Gold.ToString();
+
+            base.Update(totalMS, frameMS);
         }
 
         private void ShopItem_MouseDoubleClick(object sender, Input.MouseEventArgs e)
         {
-            
+            var shopItem = (ShopItem)sender;
+            TransactionItem transactionItem;
+
+            if (shopItem.Amount <= 0)
+                return;
+
+            if (_transactionItems.TryGetValue(shopItem.Item, out transactionItem))
+                transactionItem.Amount++;
+            else
+            {
+                transactionItem = new TransactionItem(shopItem.Item);
+                transactionItem.OnIncreaseButtomClicked += TransactionItem_OnIncreaseButtomClicked;
+                transactionItem.OnDecreaseButtomClicked += TransactionItem_OnDecreaseButtomClicked;
+
+                _transactionScrollArea.AddChildren(transactionItem);
+                _transactionItems.Add(shopItem.Item, transactionItem);
+            }
+
+            shopItem.Amount--;
+            updateTotal = true;
+        }
+
+        private void TransactionItem_OnDecreaseButtomClicked(object sender, EventArgs e)
+        {
+            var transactionItem = (TransactionItem)sender;
+
+            if (transactionItem.Amount > 0)
+            {
+                _shopItems[transactionItem.Item].Amount++;
+                transactionItem.Amount--;
+            }
+
+            if (transactionItem.Amount <= 0)
+            {
+                RemoveTransactionItem(transactionItem);
+            }
+
+            updateTotal = true;
+        }
+
+        private void RemoveTransactionItem(TransactionItem transactionItem)
+        {
+            _shopItems[transactionItem.Item].Amount += transactionItem.Amount;
+
+            transactionItem.OnIncreaseButtomClicked -= TransactionItem_OnIncreaseButtomClicked;
+            transactionItem.OnDecreaseButtomClicked -= TransactionItem_OnDecreaseButtomClicked;
+            _transactionItems.Remove(transactionItem.Item);
+            _transactionScrollArea.RemoveChildren(transactionItem);
+
+            updateTotal = true;
+        }
+
+        private void TransactionItem_OnIncreaseButtomClicked(object sender, EventArgs e)
+        {
+            var transactionItem = (TransactionItem)sender;
+
+            if (_shopItems[transactionItem.Item].Amount > 0)
+            {
+                _shopItems[transactionItem.Item].Amount--;
+                transactionItem.Amount++;
+            }
+
+            updateTotal = true;
         }
 
         private void ShopItem_MouseClick(object sender, Input.MouseEventArgs e)
@@ -85,6 +168,25 @@ namespace ClassicUO.Game.Gumps.UIGumps
             foreach (var shopItem in _shopScrollArea.Children.SelectMany(o => o.Children).OfType<ShopItem>())
             {
                 shopItem.IsSelected = shopItem == sender;
+            }
+        }
+
+        public override void OnButtonClick(int buttonID)
+        {
+            switch((Buttons)buttonID)
+            {
+                case Buttons.Accept:
+                    var items = _transactionItems
+                        .Select(t => new Tuple<uint, ushort>(t.Key.Serial, (ushort)t.Value.Amount))
+                        .ToArray();
+
+                    NetClient.Socket.Send(new PBuyRequest(LocalSerial, items));
+                    Dispose();
+                    break;
+                case Buttons.Clear:
+                    foreach (var t in _transactionItems.Values.ToList())
+                        RemoveTransactionItem(t);
+                    break;
             }
         }
 
@@ -96,7 +198,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private class ShopItem : GumpControl
         {
             private readonly Item _item;
+            private Label _amountLabel;
 
+            public Item Item => _item;
+            public int Amount
+            {
+                get => int.Parse(_amountLabel.Text);
+                set => _amountLabel.Text = value.ToString();
+            }
+            
             public bool IsSelected
             {
                 set
@@ -109,13 +219,60 @@ namespace ClassicUO.Game.Gumps.UIGumps
             public ShopItem(Item item)
             {
                 _item = item;
-                var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.ItemData.Name);
+                var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Name);
                 AddChildren(new ItemGumpling(item) { X = 5, Y = 5, Height = 50, AcceptMouseInput = false });
                 AddChildren(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9) { Y = 5, X = 65 });
-                AddChildren(new Label(item.Amount.ToString(), false, 0x021F, font: 9) { X = 180, Y = 20 });
+                AddChildren(_amountLabel = new Label(item.Amount.ToString(), false, 0x021F, font: 9) { X = 180, Y = 20 });
 
                 Width = 220;
                 Height = 30;
+            }
+
+            protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
+            {
+                return true;
+            }
+        }
+
+        private class TransactionItem : GumpControl
+        {
+            private readonly Item _item;
+            private Label _amountLabel;
+
+            public Item Item => _item;
+            public int Amount
+            {
+                get => int.Parse(_amountLabel.Text);
+                set => _amountLabel.Text = value.ToString();
+            }
+
+            public event EventHandler OnIncreaseButtomClicked;
+            public event EventHandler OnDecreaseButtomClicked;
+
+            public TransactionItem(Item item)
+            {
+                _item = item;
+                var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.ItemData.Name);
+                AddChildren(_amountLabel = new Label("1", false, 0x021F, font: 9) { X = 5, Y = 5 });
+                AddChildren(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 150, 9) { X = 30, Y = 5 });
+                AddChildren(new Button(0, 0x37, 0x37) { X = 170, Y = 5, ButtonAction = ButtonAction.Activate }); // Plus
+                AddChildren(new Button(1, 0x38, 0x38) { X = 190, Y = 5, ButtonAction = ButtonAction.Activate }); // Minus
+
+                Width = 220;
+                Height = 30;
+            }
+
+            public override void OnButtonClick(int buttonID)
+            {
+                switch(buttonID)
+                {
+                    case 0:
+                        OnIncreaseButtomClicked?.Invoke(this, new EventArgs());
+                        break;
+                    case 1:
+                        OnDecreaseButtomClicked?.Invoke(this, new EventArgs());
+                        break;
+                }
             }
         }
 

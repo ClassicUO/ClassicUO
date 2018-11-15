@@ -1012,18 +1012,32 @@ namespace ClassicUO.Network
         }
     }
 
-    /*public sealed class PBuyRequest : PacketWriter
+    public sealed class PBuyRequest : PacketWriter
     {
-        public PBuyRequest() : base()
+        public PBuyRequest(Serial vendorSerial, Tuple<uint, ushort>[] items) : base(0x3B)
         {
+            WriteUInt(vendorSerial);
 
+            if (items.Length > 0)
+            {
+                WriteByte(0x02); // flag
+
+                for (int i = 0; i < items.Length; i++)
+                {
+                    WriteByte(0x1A); // layer?
+                    WriteUInt(items[i].Item1);
+                    WriteUShort(items[i].Item2);
+                }
+            }
+            else
+                WriteByte(0x00);
         }
     }
 
-    public sealed class PSellRequest : PacketWriter
-    {
+    //public sealed class PSellRequest : PacketWriter
+    //{
 
-    }*/
+    //}
 
     public sealed class PUseCombatAbility : PacketWriter
     {

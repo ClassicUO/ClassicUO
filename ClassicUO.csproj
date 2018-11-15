@@ -86,10 +86,12 @@
     <Compile Include="Game\GameObjects\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
+    <Compile Include="Game\Gumps\Controls\HitBox.cs" />
     <Compile Include="Game\Gumps\Controls\Line.cs" />
     <Compile Include="Game\Gumps\UIGumps\BuffGump.cs" />
     <Compile Include="Game\Gumps\Controls\Combobox.cs" />
     <Compile Include="Game\Gumps\Controls\HoveredLabel.cs" />
+    <Compile Include="Game\Gumps\UIGumps\ShopGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\CharCreation\CharCreationGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\CharCreation\CreateCharTradeGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\Login\CharacterSelectionGump.cs" />
