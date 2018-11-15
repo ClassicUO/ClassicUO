@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -185,9 +186,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             highlightByFlagsItem.AddChildren(highlightEnabled);
             rightArea.AddChildren(highlightByFlagsItem);
-
-
-
 
             AddChildren(rightArea, PAGE);
         }

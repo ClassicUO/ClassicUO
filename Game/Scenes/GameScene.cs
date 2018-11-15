@@ -55,8 +55,6 @@ namespace ClassicUO.Game.Scenes
         private Settings _settings;
         private static GameObject _selectedObject;
 
-        public static Hue MouseOverItemHue => 0x038;
-
         public GameScene() : base(ScenesType.Game)
         {
         }

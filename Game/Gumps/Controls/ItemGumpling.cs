@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private float _sClickTime;
         private bool _sendClickIfNotDClick;
 
-        public ItemGumpling(Item item)
+        public ItemGumpling(Item item) : base()
         {
             AcceptMouseInput = true;
             Item = item;
@@ -51,6 +51,13 @@ namespace ClassicUO.Game.Gumps.Controls
             Y = item.Position.Y;
             HighlightOnMouseOver = true;
             CanPickUp = true;
+
+
+            
+            Texture = Art.GetStaticTexture(item.DisplayedGraphic);
+            Width = Texture.Width;
+            Height = Texture.Height;
+            
         }
 
         public Item Item { get; }
@@ -67,6 +74,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
                 return;
             }
+
+            Texture.Ticks = (long) totalMS;
 
             if (_clickedCanDrag && totalMS >= _picUpTime)
             {
@@ -86,20 +95,11 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            if (Texture == null)
-            {
-                Texture = Art.GetStaticTexture(Item.DisplayedGraphic);
-                Width = Texture.Width;
-                Height = Texture.Height;
-            }
-
-            Vector3 huev = RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver ? GameScene.MouseOverItemHue : Item.Hue, TileData.IsPartialHue((long) Item.ItemData.Flags), 0, false);
+            Vector3 huev = RenderExtentions.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, TileData.IsPartialHue((long) Item.ItemData.Flags), 0, false);
 
             if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
                 spriteBatch.Draw2D(Texture, new Point(position.X - 5, position.Y - 5), huev);
-            spriteBatch.Draw2D(Texture, position, huev);
-
-            return base.Draw(spriteBatch, position, hue);
+            return spriteBatch.Draw2D(Texture, position, huev);
         }
 
         protected override bool Contains(int x, int y)
@@ -107,7 +107,7 @@ namespace ClassicUO.Game.Gumps.Controls
             if (Art.Contains(Item.DisplayedGraphic, x, y))
                 return true;
 
-            if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags))
+            if (Item.Amount > 1 && TileData.IsStackable((long)Item.ItemData.Flags))
             {
                 if (Art.Contains(Item.DisplayedGraphic, x - 5, y - 5))
                     return true;
