@@ -289,10 +289,21 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 if (Mobile == World.Player)
                 {
-                    UIManager.Add(new StatusGump()
+                    switch (Service.Get<Configuration.Settings>().StatusGumpStyle.ToLower())
                     {
-                        X = ScreenCoordinateX, Y = ScreenCoordinateY
-                    });
+                        case "classic":
+                            UIManager.Add(new StatusGumpClassic() { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            break;
+                        case "modern":
+                            UIManager.Add(new StatusGumpModern() { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            break;
+                        case "outlands":
+                            UIManager.Add(new StatusGumpOutlands() { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            break;
+                        default:
+                            break;
+                    }
+
                     Dispose();
                 }
                 else

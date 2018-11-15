@@ -289,7 +289,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     }
                     else if (Member.Mobile == World.Player)
                     {
-                        StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
+                        StatusGumpBase status = UIManager.GetByLocalSerial<StatusGumpBase>();
                         status?.Dispose();
                     }
                     PartyMemberGump partymemberGump = new PartyMemberGump(Member, 300, 300);

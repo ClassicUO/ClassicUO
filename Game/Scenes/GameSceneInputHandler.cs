@@ -359,7 +359,7 @@ namespace ClassicUO.Game.Scenes
                                 }
                                 else if (mobile == World.Player)
                                 {
-                                    StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
+                                    StatusGumpBase status = UIManager.GetByLocalSerial<StatusGumpBase>();
                                     status?.Dispose();
                                 }
 
@@ -377,7 +377,7 @@ namespace ClassicUO.Game.Scenes
                                 }
                                 else if (mobile == World.Player)
                                 {
-                                    StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
+                                    StatusGumpBase status = UIManager.GetByLocalSerial<StatusGumpBase>();
                                     status?.Dispose();
                                 }
 
