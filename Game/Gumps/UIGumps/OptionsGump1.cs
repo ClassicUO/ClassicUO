@@ -41,8 +41,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Video", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 3 });
             leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Commands", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 4 });
             leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Tooltip", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 5 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "General5", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 6 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "General6", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 7 });
+            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Fonts", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 6 });
+            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Speech", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 7 });
 
             AddChildren(leftArea);
 
@@ -57,7 +57,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 154 + offsetX,
                 Y = 405 + offsetY,
                 ButtonAction = ButtonAction.Activate,
-                ToPage = 0
             });
 
             AddChildren(new Button((int)Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
@@ -65,7 +64,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 248 + offsetX,
                 Y = 405 + offsetY,
                 ButtonAction = ButtonAction.Activate,
-                ToPage = 0
             });
 
             AddChildren(new Button((int)Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
@@ -73,7 +71,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 346 + offsetX,
                 Y = 405 + offsetY,
                 ButtonAction = ButtonAction.Activate,
-                ToPage = 0
             });
 
             AddChildren(new Button((int)Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
@@ -81,7 +78,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 443 + offsetX,
                 Y = 405 + offsetY,
                 ButtonAction = ButtonAction.Activate,
-                ToPage = 0
             });
 
             AcceptMouseInput = false;
@@ -92,16 +88,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             BuildSounds();
             BuildVideo();
             BuildCommands();
+            BuildFonts();
+            BuildSpeech();
 
             ChangePage(1);
         }
-
-        public override void Update(double totalMS, double frameMS)
-        {
-
-            base.Update(totalMS, frameMS);
-        }
-
 
 
 
@@ -138,6 +129,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             rightArea.AddChildren(smoothMovement);
 
+            Checkbox enablePathfind = new Checkbox(0x00D2, 0x00D3, "Enable pathfinding", 1)
+            {
+                IsChecked = _settings.EnablePathfind
+            };
+            rightArea.AddChildren(enablePathfind);
+
+
+            Checkbox alwaysRun = new Checkbox(0x00D2, 0x00D3, "Always run", 1)
+            {
+                IsChecked = _settings.EnablePathfind
+            };
+            rightArea.AddChildren(alwaysRun);
 
             // preload maps
             Checkbox preloadMaps = new Checkbox(0x00D2, 0x00D3, "Preload maps (it increases the RAM usage)", 1)
@@ -274,32 +277,112 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         }
 
-
-
-
-
-
-
-        public override void Dispose()
+        private void BuildFonts()
         {
-            base.Dispose();
+            const int PAGE = 6;
+
+
         }
 
-        class LeftButton : GumpControl
+        private void BuildSpeech()
         {
-            public LeftButton()
+            const int PAGE = 7;
+            ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
+
+            ScrollAreaItem item = new ScrollAreaItem();           
+            Checkbox scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, "Scale speech delay by length", 1)
             {
-                CanMove = false;
-                CanCloseWithRightClick = false;
-                AcceptMouseInput = true;
+                IsChecked = _settings.ScaleSpeechDelay
+            };
+            item.AddChildren(scaleSpeechDelay);
+            rightArea.AddChildren(item);
 
-                //ResizePic background = new ResizePic(0x23F0);
-                GumpPicTiled background = new GumpPicTiled(0x462);
-                background.AddChildren(new HoveredLabel("General", true, 0xFF, 23, 100, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER));
-                AddChildren(background);
 
-            }
+            item = new ScrollAreaItem();
+            Label text = new Label("- Speech delay:", true, 1);
+            item.AddChildren(text);
+            HSliderBar sliderSpeechDelay = new HSliderBar(100, 5, 150, 1, 1000, _settings.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
+            item.AddChildren(sliderSpeechDelay);
+            rightArea.AddChildren(item);
+
+
+            item = new ScrollAreaItem();
+            Button buttonSpeechColor = new Button((int)Buttons.SpeechColor, 0x00D4, 0x00D4)
+            {
+                ButtonAction = ButtonAction.Activate,
+                Y = 30,
+            };
+            item.AddChildren(buttonSpeechColor);
+
+            uint color = 0xFF7F7F7F;
+            if (_settings.SpeechColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.SpeechColor) << 8) | 0xFF);
+            ColorPickerBox speechColorPickerBox = new ColorPickerBox(3, 3, 1, 1, 13, 14)
+            {
+                Y = 33
+            };
+            speechColorPickerBox.SetHue(color);
+            buttonSpeechColor.MouseClick += (sender, e) =>
+            {
+                // TODO: fix multi opening
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => speechColorPickerBox.SetHue(s));              
+                UIManager.Add(pickerGump);
+            };
+            item.AddChildren(speechColorPickerBox);
+
+            text = new Label("Speech color", true, 1)
+            {
+                X = 20,
+                Y = 30
+            };
+            item.AddChildren(text);
+            rightArea.AddChildren(item);
+
+
+            item = new ScrollAreaItem();
+            Button buttonEmoteColor = new Button((int)Buttons.EmoteColor, 0x00D4, 0x00D4)
+            {
+                ButtonAction = ButtonAction.Activate,
+            };
+            item.AddChildren(buttonEmoteColor);
+            color = 0xFF7F7F7F;
+            if (_settings.EmoteColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.EmoteColor) << 8) | 0xFF);
+            ColorPickerBox emoteColorPickerBox = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            emoteColorPickerBox.SetHue(color);
+            buttonEmoteColor.MouseClick += (sender, e) =>
+            {
+                // TODO: fix multi opening
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => emoteColorPickerBox.SetHue(s));
+                UIManager.Add(pickerGump);
+            };
+            item.AddChildren(emoteColorPickerBox);
+            text = new Label("Emote color", true, 1)
+            {
+                X = 20
+            };
+            item.AddChildren(text);
+            rightArea.AddChildren(item);
+
+            AddChildren(rightArea, PAGE);
         }
+
+
+        //class LeftButton : GumpControl
+        //{
+        //    public LeftButton()
+        //    {
+        //        CanMove = false;
+        //        CanCloseWithRightClick = false;
+        //        AcceptMouseInput = true;
+
+        //        //ResizePic background = new ResizePic(0x23F0);
+        //        GumpPicTiled background = new GumpPicTiled(0x462);
+        //        background.AddChildren(new HoveredLabel("General", true, 0xFF, 23, 100, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER));
+        //        AddChildren(background);
+
+        //    }
+        //}
 
 
         enum Buttons
@@ -307,7 +390,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Cancel,
             Apply,
             Default,
-            Ok
+            Ok,
+
+            SpeechColor,
+            EmoteColor,
         }
 
     }
