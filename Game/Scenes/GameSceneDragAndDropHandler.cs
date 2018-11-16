@@ -61,6 +61,8 @@ namespace ClassicUO.Game.Scenes
                 item.Position = entity.Position;
                 entity.Items.Remove(item);
                 //item.Container = Serial.Invalid;
+
+                entity.Items.ProcessDelta();
             }
 
             CloseItemGumps(item);
