@@ -202,7 +202,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public SpriteTexture Texture { get; private set; }
+        public ArtTexture Texture { get; private set; }
 
         public void SetDraggedItem(Graphic graphic, Hue hue)
         {
@@ -280,7 +280,16 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is ItemGumpling gumpling && gumpling.Item.Properties.Count > 0)
+                    if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is EquipmentSlot slot && slot.Item != null && slot.Item.Properties.Count > 0)
+                    {
+                        if (_tooltip.IsEmpty || slot.Item != _tooltip.Object)
+                            _tooltip.SetGameObject(slot.Item);
+                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+
+                        return;
+                    }
+
+                    if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is ItemGump gumpling && gumpling.Item.Properties.Count > 0)
                     {
                         if (_tooltip.IsEmpty || gumpling.Item != _tooltip.Object)
                             _tooltip.SetGameObject(gumpling.Item);

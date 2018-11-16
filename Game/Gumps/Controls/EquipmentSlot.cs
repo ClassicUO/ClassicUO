@@ -27,6 +27,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -35,8 +36,7 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     internal class EquipmentSlot : GumpControl, IMobilePaperdollOwner
     {
-        private StaticPic _itemGump;
-        private Item _item;
+        private ItemGump _itemGump;
         private readonly Mobile _mobile;
         private readonly Layer _layer;
         private bool _canDrag, _sendClickIfNotDClick;
@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Gumps.Controls
             AcceptMouseInput = true;
         }
 
-        public Item Item => _item;
+        public Item Item { get; private set; }
 
         public Mobile Mobile
         {
@@ -71,14 +71,14 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_item != null && _item.IsDisposed)
+            if (Item != null && Item.IsDisposed)
             {
-                _item = null;
+                Item = null;
                 _itemGump.Dispose();
                 _itemGump = null;
             }
 
-            if (_item != _mobile.Equipment[(int) _layer])
+            if (Item != _mobile.Equipment[(int) _layer])
             {
                 if (_itemGump != null)
                 {
@@ -86,17 +86,33 @@ namespace ClassicUO.Game.Gumps.Controls
                     _itemGump = null;
                 }
 
-                _item = _mobile.Equipment[(int) _layer];
+                Item = _mobile.Equipment[(int) _layer];
 
-                if (_item != null)
-                    AddChildren( _itemGump = new StaticPic(_item.Graphic, _item.Hue)
+                if (Item != null)
+                {
+                    AddChildren(_itemGump = new ItemGump(Item)
                     {
-                        X = -14,
-                        AcceptMouseInput = false
+                        HighlightOnMouseOver = false
                     });
+
+
+                    ArtTexture texture = (ArtTexture) _itemGump.Texture;
+
+                    int offsetX = (13 - texture.ImageRectangle.Width) / 2;
+                    int offsetY = (14 - texture.ImageRectangle.Height) / 2;
+
+                    int tileX = 2;
+                    int tileY = 3;
+
+                    tileX -= texture.ImageRectangle.X - offsetX;
+                    tileY -= texture.ImageRectangle.Y - offsetY;
+
+                    _itemGump.X = tileX;
+                    _itemGump.Y = tileY;
+                }
             }
 
-            if (_item != null)
+            if (Item != null)
             {
                 if (_canDrag && totalMS >= _pickupTime)
                 {
@@ -104,11 +120,11 @@ namespace ClassicUO.Game.Gumps.Controls
                     AttempPickUp();
                 }
 
-                if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
-                {
-                    _sendClickIfNotDClick = false;
-                    GameActions.SingleClick(_item);
-                }
+                //if (_sendClickIfNotDClick && totalMS >= _singleClickTime)
+                //{
+                //    _sendClickIfNotDClick = false;
+                //    GameActions.SingleClick(Item);
+                //}
             }
 
             base.Update(totalMS, frameMS);
@@ -116,7 +132,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
-            if (_item == null)
+            if (Item == null)
                 return;
 
             _canDrag = true;
@@ -128,7 +144,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected override void OnMouseEnter(int x, int y)
         {
-            if (_item == null)
+            if (Item == null)
                 return;
 
             if (_canDrag && Math.Abs(_clickPoint.X - x) + Math.Abs(_clickPoint.Y - y) > 3)
@@ -140,7 +156,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (_item == null)
+            if (Item == null)
                 return;
 
             if (_canDrag)
@@ -155,10 +171,10 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
-            if (_item == null)
+            if (Item == null)
                 return false;
 
-            GameActions.DoubleClick(_item);
+            GameActions.DoubleClick(Item);
             _sendClickIfNotDClick = false;
 
             return true;

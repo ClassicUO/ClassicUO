@@ -21,11 +21,16 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework;
+
+using Math = System.Math;
 
 namespace ClassicUO.IO.Resources
 {
@@ -38,7 +43,7 @@ namespace ClassicUO.IO.Resources
         private static readonly List<int> _usedIndex = new List<int>();
         private static readonly List<int> _usedIndexLand = new List<int>();
         private static readonly PixelPicking _picker = new PixelPicking();
-        private static readonly Dictionary<int, SpriteTexture> _artDictionary = new Dictionary<int, SpriteTexture>();
+        private static readonly Dictionary<int, ArtTexture> _artDictionary = new Dictionary<int, ArtTexture>();
         private static readonly Dictionary<int, SpriteTexture> _landDictionary = new Dictionary<int, SpriteTexture>();
 
         public static void Load()
@@ -65,12 +70,13 @@ namespace ClassicUO.IO.Resources
             return _picker.Get(g, x, y, extra);
         }
 
-        public static SpriteTexture GetStaticTexture(ushort g)
+        public static ArtTexture GetStaticTexture(ushort g)
         {
-            if (!_artDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
+            if (!_artDictionary.TryGetValue(g, out ArtTexture texture) || texture.IsDisposed)
             {
-                ushort[] pixels = ReadStaticArt(g, out short w, out short h);
-                texture = new SpriteTexture(w, h, false);
+                ushort[] pixels = ReadStaticArt(g, out short w, out short h, out Rectangle imageRectangle);
+
+                texture = new ArtTexture(imageRectangle, w, h);
                 texture.SetData(pixels);
                 _usedIndex.Add(g);
                 _picker.Set(g, w, h, pixels);
@@ -168,14 +174,15 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private static unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height)
+        private static unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
         {
             //graphic &= FileManager.GraphicMask;
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
             _file.Skip(4);
             width = _file.ReadShort();
             height = _file.ReadShort();
-
+            imageRectangle = Rectangle.Empty;
+            
             if (width == 0 || height == 0)
                 return new ushort[0];
             ushort[] pixels = new ushort[width * height];
@@ -185,6 +192,8 @@ namespace ClassicUO.IO.Resources
             int x = 0;
             int y = 0;
             ptr = (ushort*) (datastart + lineoffsets[0] * 2);
+
+            int minX = width, minY = height, maxX = 0, maxY = 0;
 
             while (y < height)
             {
@@ -209,7 +218,16 @@ namespace ClassicUO.IO.Resources
 
                         if (val > 0)
                             val = (ushort) (0x8000 | val);
+
                         pixels[pos++] = val;
+
+                        if (val != 0)
+                        {
+                            minX = Math.Min(minX, x);
+                            maxX = Math.Max(maxX, x);
+                            minY = Math.Min(minY, y);
+                            maxY = Math.Max(maxY, y);
+                        }
                     }
 
                     x += run;
@@ -236,6 +254,30 @@ namespace ClassicUO.IO.Resources
                     pixels[i * width + width - 1] = 0;
                 }
             }
+
+            //int pos1 = 0;
+
+            //for (y = 0; y < height; y++)
+            //    for (x = 0; x < width; x++)
+            //    {
+            //        if (pixels[pos1++] != 0)
+            //        {
+            //            minX = Math.Min(minX, x);
+            //            maxX = Math.Max(maxX, x);
+            //            minY = Math.Min(minY, y);
+            //            maxY = Math.Max(maxY, y);
+            //        }
+            //    }
+
+
+
+            //width = (short) (maxX - minX);
+            //height = (short)(maxY - minY);
+
+            imageRectangle.X = minX;
+            imageRectangle.Y = minY;
+            imageRectangle.Width = maxX - minX;
+            imageRectangle.Height = maxY - minY;
 
             return pixels;
         }

@@ -156,7 +156,7 @@ namespace ClassicUO.Game.Views
 
                 if (animIndex < direction.FrameCount)
                 {
-                    TextureAnimationFrame frame = direction.Frames[animIndex];
+                    AnimationFrameTexture frame = direction.Frames[animIndex];
 
                     if (frame == null || frame.IsDisposed) return false;
                     int drawCenterY = frame.CenterY;

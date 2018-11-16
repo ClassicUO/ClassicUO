@@ -93,7 +93,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             //foreach (Item item in e)
             //{
-            //    AddChildren(new ItemGumplingPaperdoll(0, 0, item, Mobile));
+            //    AddChildren(new ItemGumpPaperdoll(0, 0, item, Mobile));
             //}
 
 
@@ -104,7 +104,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             //    if (item == null || MobileView.IsCovered(_mobile, (Layer) layerIndex))
             //    {
-            //        ItemGumplingPaperdoll c = Children.OfType<ItemGumplingPaperdoll>().FirstOrDefault(s => s.Item.ItemData.Layer == layerIndex);
+            //        ItemGumpPaperdoll c = Children.OfType<ItemGumpPaperdoll>().FirstOrDefault(s => s.Item.ItemData.Layer == layerIndex);
             //        RemoveChildren(c);
             //    }
             //}
@@ -200,7 +200,7 @@ namespace ClassicUO.Game.Gumps.Controls
                         break;
                 }
 
-                AddChildren(new ItemGumplingPaperdoll(0, 0, isfake ? _fakeItem : item, Mobile, isfake)
+                AddChildren(new ItemGumpPaperdoll(0, 0, isfake ? _fakeItem : item, Mobile, isfake)
                 {
                     SlotIndex = i,
                     CanPickUp = canPickUp

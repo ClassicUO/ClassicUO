@@ -34,7 +34,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ItemGumpling : GumpControl
+    internal class ItemGump : GumpControl
     {
         private readonly List<Label> _labels = new List<Label>();
         private bool _clickedCanDrag;
@@ -43,7 +43,8 @@ namespace ClassicUO.Game.Gumps.Controls
         private float _sClickTime;
         private bool _sendClickIfNotDClick;
 
-        public ItemGumpling(Item item) : base()
+
+        public ItemGump(Item item) : base()
         {
             AcceptMouseInput = true;
             Item = item;
@@ -53,11 +54,11 @@ namespace ClassicUO.Game.Gumps.Controls
             CanPickUp = true;
 
 
-            
-            Texture = Art.GetStaticTexture(item.DisplayedGraphic);
-            Width = Texture.Width;
-            Height = Texture.Height;
-            
+            var texture = Art.GetStaticTexture(item.DisplayedGraphic);
+
+            Texture = texture;
+            Width = texture.Width;
+            Height = texture.Height;
         }
 
         public Item Item { get; }
@@ -99,6 +100,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
                 spriteBatch.Draw2D(Texture, new Point(position.X - 5, position.Y - 5), huev);
+
             return spriteBatch.Draw2D(Texture, position, huev);
         }
 
@@ -170,7 +172,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (CanPickUp)
             {
-                if (this is ItemGumplingPaperdoll)
+                if (this is ItemGumpPaperdoll)
                 {
                     Rectangle bounds = Art.GetStaticTexture(Item.DisplayedGraphic).Bounds;
                     GameActions.PickUp(Item, bounds.Width / 2, bounds.Height / 2);

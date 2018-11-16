@@ -338,20 +338,20 @@ namespace ClassicUO.Game.Gumps.Controls
                 }
             }
 
-            //if (IsVisible && Debug)
-            //{
-            //    if (_debugTexture == null)
-            //    {
-            //        _debugTexture = new SpriteTexture(1, 1);
+            if (IsVisible && Debug)
+            {
+                if (_debugTexture == null)
+                {
+                    _debugTexture = new SpriteTexture(1, 1);
 
-            //        _debugTexture.SetData(new Color[1]
-            //        {
-            //            Color.Green
-            //        });
-            //    }
+                    _debugTexture.SetData(new Color[1]
+                    {
+                        Color.Green
+                    });
+                }
 
-            //    spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
-            //}
+                spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
+            }
 
             return true;
         }

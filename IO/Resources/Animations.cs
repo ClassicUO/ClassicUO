@@ -1116,7 +1116,7 @@ namespace ClassicUO.IO.Resources
             int dirFrameStartIdx = animDirection.FrameCount * Direction;
 
             if (animDirection.Frames == null)
-                animDirection.Frames = new TextureAnimationFrame[animDirection.FrameCount];
+                animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
 
             for (int i = 0; i < animDirection.FrameCount; i++)
             {
@@ -1178,10 +1178,10 @@ namespace ClassicUO.IO.Resources
 
                 int uniqueAnimationIndex = ((AnimID & 0xfff) << 20) + ((AnimGroup & 0x3f) << 12) + ((Direction & 0x0f) << 8);
                 uniqueAnimationIndex += i & 0xFF;
-                ref TextureAnimationFrame f = ref animDirection.Frames[i];
+                ref AnimationFrameTexture f = ref animDirection.Frames[i];
 
                 if (f == null)
-                    f = new TextureAnimationFrame(uniqueAnimationIndex, imageWidth, imageHeight);
+                    f = new AnimationFrameTexture(uniqueAnimationIndex, imageWidth, imageHeight);
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
                 f.SetData(pixels);
@@ -1205,7 +1205,7 @@ namespace ClassicUO.IO.Resources
             uint frameCount = _reader.ReadUInt();
             animDir.FrameCount = (byte) frameCount;
             uint* frameOffset = (uint*) _reader.PositionAddress;
-            animDir.Frames = new TextureAnimationFrame[frameCount];
+            animDir.Frames = new AnimationFrameTexture[frameCount];
 
             for (int i = 0; i < frameCount; i++)
             {
@@ -1255,10 +1255,10 @@ namespace ClassicUO.IO.Resources
 
                 int uniqueAnimationIndex = ((AnimID & 0xfff) << 20) + ((AnimGroup & 0x3f) << 12) + ((Direction & 0x0f) << 8);
                 uniqueAnimationIndex += i & 0xFF;
-                ref TextureAnimationFrame f = ref animDir.Frames[i];
+                ref AnimationFrameTexture f = ref animDir.Frames[i];
 
                 if (f == null)
-                    f = new TextureAnimationFrame(uniqueAnimationIndex, imageWidth, imageHeight);
+                    f = new AnimationFrameTexture(uniqueAnimationIndex, imageWidth, imageHeight);
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
                 f.SetData(pixels);
@@ -1301,11 +1301,11 @@ namespace ClassicUO.IO.Resources
 
                         if (direction.Frames != null)
                         {
-                            ref TextureAnimationFrame texture = ref direction.Frames[frameIndex];
-                            x = texture.CenterX;
-                            y = texture.CenterY;
-                            w = texture.Width;
-                            h = texture.Height;
+                            ref AnimationFrameTexture animationFrameTexture = ref direction.Frames[frameIndex];
+                            x = animationFrameTexture.CenterX;
+                            y = animationFrameTexture.CenterY;
+                            w = animationFrameTexture.Width;
+                            h = animationFrameTexture.Height;
                             _animDimensionCache.Add(id, new Rectangle(x, y, w, h));
 
                             return;
@@ -1637,7 +1637,7 @@ namespace ClassicUO.IO.Resources
         public bool IsUOP;
         public bool IsVerdata;
         public long LastAccessTime;
-        public TextureAnimationFrame[] Frames;
+        public AnimationFrameTexture[] Frames;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

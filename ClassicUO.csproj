@@ -172,8 +172,8 @@
     <Compile Include="Game\Gumps\Controls\HSliderBar.cs" />
     <Compile Include="Game\Gumps\Controls\HtmlGump.cs" />
     <Compile Include="Game\Gumps\Controls\IScrollBar.cs" />
-    <Compile Include="Game\Gumps\Controls\ItemGumpling.cs" />
-    <Compile Include="Game\Gumps\Controls\ItemGumplingPaperdoll.cs" />
+    <Compile Include="Game\Gumps\Controls\ItemGump.cs" />
+    <Compile Include="Game\Gumps\Controls\ItemGumpPaperdoll.cs" />
     <Compile Include="Game\Gumps\Controls\Label.cs" />
     <Compile Include="Game\Gumps\Controls\Panel.cs" />
     <Compile Include="Game\Gumps\Controls\PaperDollInteractable.cs" />

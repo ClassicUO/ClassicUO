@@ -30,12 +30,12 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ItemGumplingPaperdoll : ItemGumpling, IMobilePaperdollOwner
+    internal class ItemGumpPaperdoll : ItemGump, IMobilePaperdollOwner
     {
         private readonly ushort _gumpIndex;
         private readonly bool _isTransparent;
 
-        public ItemGumplingPaperdoll(int x, int y, Item item, Mobile owner, bool transparent = false) : base(item)
+        public ItemGumpPaperdoll(int x, int y, Item item, Mobile owner, bool transparent = false) : base(item)
         {
             X = x;
             Y = y;

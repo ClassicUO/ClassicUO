@@ -73,7 +73,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
         {
             Children
-               .OfType<ItemGumpling>()
+               .OfType<ItemGump>()
                .Where(s => e.Contains(s.Item))
                .ToList()
                .ForEach(RemoveChildren);
@@ -82,19 +82,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
         {
             Children
-               .OfType<ItemGumpling>()
+               .OfType<ItemGump>()
                .Where(s => e.Contains(s.Item))
                .ToList()
                .ForEach(RemoveChildren);
 
             foreach (Item item in e)
-                AddChildren(new ItemGumpling(item));            
+                AddChildren(new ItemGump(item));            
         }
 
         protected override void OnInitialize()
         {
             foreach (Item item in _item.Items)
-                AddChildren(new ItemGumpling(item));
+                AddChildren(new ItemGump(item));
         }
 
         public override void Dispose()
