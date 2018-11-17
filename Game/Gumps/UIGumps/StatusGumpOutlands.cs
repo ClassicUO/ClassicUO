@@ -35,6 +35,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
     {
         public StatusGumpOutlands() : base()
         {
+            Label text;
             Point pos = Point.Zero;
             _labels = new Label[(int)MobileStats.Max];
 
@@ -45,23 +46,23 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             Graphic gumpIdHp = 0x0806;
 
-            if (_mobile.IsPoisoned)
+            if (World.Player.IsPoisoned)
             {
                 gumpIdHp = 0x0808;
             }
-            else if (_mobile.IsYellowHits)
+            else if (World.Player.IsYellowHits)
             {
                 gumpIdHp = 0x0809;
             }
 
-            FillStatusBar(34, 12, _mobile.Hits, _mobile.HitsMax, gumpIdHp);
-            FillStatusBar(34, 25, _mobile.Mana, _mobile.ManaMax, 0x0806);
-            FillStatusBar(34, 38, _mobile.Stamina, _mobile.StaminaMax, 0x0806);
+            FillStatusBar(34, 12, World.Player.Hits, World.Player.HitsMax, gumpIdHp);
+            FillStatusBar(34, 25, World.Player.Mana, World.Player.ManaMax, 0x0806);
+            FillStatusBar(34, 38, World.Player.Stamina, World.Player.StaminaMax, 0x0806);
 
             // Name
             if (!string.IsNullOrEmpty(World.Player.Name))
             {
-                Label text = new Label(World.Player.Name, false, 0x0386, 320, 1, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                text = new Label(World.Player.Name, false, 320, 1, align: TEXT_ALIGN_TYPE.TS_CENTER)
                 {
                     X = 100,
                     Y = 10
@@ -72,51 +73,80 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
             // Stat locks
-            AddChildren(_lockers[(int)StatType.Str] = new GumpPic(LOCKER_COLUMN_X, ROW_1_Y + ROW_HEIGHT - ROW_PADDING, GetStatLockGumpId(_mobile.StrLock), 0));
-            AddChildren(_lockers[(int)StatType.Dex] = new GumpPic(LOCKER_COLUMN_X, ROW_2_Y + ROW_HEIGHT - ROW_PADDING, GetStatLockGumpId(_mobile.DexLock), 0));
-            AddChildren(_lockers[(int)StatType.Int] = new GumpPic(LOCKER_COLUMN_X, ROW_3_Y + ROW_HEIGHT - ROW_PADDING, GetStatLockGumpId(_mobile.IntLock), 0));
+            AddChildren(_lockers[(int)StatType.Str] = new GumpPic(LOCKER_COLUMN_X, ROW_1_Y + ROW_HEIGHT - ROW_PADDING, GetStatLockGumpId(World.Player.StrLock), 0));
+            AddChildren(_lockers[(int)StatType.Dex] = new GumpPic(LOCKER_COLUMN_X, ROW_2_Y + ROW_HEIGHT - ROW_PADDING, GetStatLockGumpId(World.Player.DexLock), 0));
+            AddChildren(_lockers[(int)StatType.Int] = new GumpPic(LOCKER_COLUMN_X, ROW_3_Y + ROW_HEIGHT - ROW_PADDING, GetStatLockGumpId(World.Player.IntLock), 0));
 
             _lockers[0].MouseClick += (sender, e) =>
             {
-                _mobile.StrLock = (Lock)(((byte)_mobile.StrLock + 1) % 3);
-                GameActions.ChangeStatLock((byte)StatType.Str, _mobile.StrLock);
-                _lockers[(int)StatType.Str].Graphic = GetStatLockGumpId(_mobile.StrLock);
-                _lockers[(int)StatType.Str].Texture = IO.Resources.Gumps.GetGumpTexture(GetStatLockGumpId(_mobile.StrLock));
+                World.Player.StrLock = (Lock)(((byte)World.Player.StrLock + 1) % 3);
+                GameActions.ChangeStatLock((byte)StatType.Str, World.Player.StrLock);
+                _lockers[(int)StatType.Str].Graphic = GetStatLockGumpId(World.Player.StrLock);
+                _lockers[(int)StatType.Str].Texture = IO.Resources.Gumps.GetGumpTexture(GetStatLockGumpId(World.Player.StrLock));
             };
 
             _lockers[1].MouseClick += (sender, e) =>
             {
-                _mobile.DexLock = (Lock)(((byte)_mobile.DexLock + 1) % 3);
-                GameActions.ChangeStatLock((byte)StatType.Dex, _mobile.DexLock);
-                _lockers[(int)StatType.Dex].Graphic = GetStatLockGumpId(_mobile.DexLock);
-                _lockers[(int)StatType.Dex].Texture = IO.Resources.Gumps.GetGumpTexture(GetStatLockGumpId(_mobile.DexLock));
+                World.Player.DexLock = (Lock)(((byte)World.Player.DexLock + 1) % 3);
+                GameActions.ChangeStatLock((byte)StatType.Dex, World.Player.DexLock);
+                _lockers[(int)StatType.Dex].Graphic = GetStatLockGumpId(World.Player.DexLock);
+                _lockers[(int)StatType.Dex].Texture = IO.Resources.Gumps.GetGumpTexture(GetStatLockGumpId(World.Player.DexLock));
             };
 
             _lockers[2].MouseClick += (sender, e) =>
             {
-                _mobile.IntLock = (Lock)(((byte)_mobile.IntLock + 1) % 3);
-                GameActions.ChangeStatLock((byte)StatType.Int, _mobile.IntLock);
-                _lockers[(int)StatType.Int].Graphic = GetStatLockGumpId(_mobile.IntLock);
-                _lockers[(int)StatType.Int].Texture = IO.Resources.Gumps.GetGumpTexture(GetStatLockGumpId(_mobile.IntLock));
+                World.Player.IntLock = (Lock)(((byte)World.Player.IntLock + 1) % 3);
+                GameActions.ChangeStatLock((byte)StatType.Int, World.Player.IntLock);
+                _lockers[(int)StatType.Int].Graphic = GetStatLockGumpId(World.Player.IntLock);
+                _lockers[(int)StatType.Int].Texture = IO.Resources.Gumps.GetGumpTexture(GetStatLockGumpId(World.Player.IntLock));
             };
 
-            // [1] Str/dex/int
-            // [1] Str/stam/mana
-            // [2] Hits / max hits
-            // [2] Stam / max stam
-            // [2] Mana / max mana
-            // [3] Followers / max followers
-            // [3] Armor
-            // [3] Weight / max weight
-            // [4] Hunger satisfaction minutes remaining
-            // [4] Murder count
-            // [4] Min damange - max damage
-            // [4] Gold
-            // [5] Criminal timer seconds remaining
-            // [5] Murder count decay hours remaining
-            // [5] PvP cooldown seconds remaining
-            // [5] Bandage timer seconds remaining
-            // [5] Minimize hitbox
+            // Str/dex/int text labels
+            int xOffset = COLUMN_1_X + COLUMN_1_ICON_WIDTH;
+            AddStatTextLabel(World.Player.Strength.ToString(), MobileStats.Strength, xOffset, ROW_1_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+            AddStatTextLabel(World.Player.Dexterity.ToString(), MobileStats.Dexterity, xOffset, ROW_2_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+            AddStatTextLabel(World.Player.Intelligence.ToString(), MobileStats.Intelligence, xOffset, ROW_3_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+
+            // Hits/stam/mana
+            xOffset = COLUMN_2_X + COLUMN_2_ICON_WIDTH;
+            AddStatTextLabel(World.Player.Hits.ToString(), MobileStats.HealthCurrent, xOffset, ROW_1_Y + (ROW_HEIGHT / 2) - ROW_PADDING, maxWidth: 40, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
+            AddStatTextLabel(World.Player.HitsMax.ToString(), MobileStats.HealthMax, xOffset, ROW_1_Y + ROW_HEIGHT - ROW_PADDING, maxWidth: 40, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
+            AddStatTextLabel(World.Player.Stamina.ToString(), MobileStats.StaminaCurrent, xOffset, ROW_2_Y + (ROW_HEIGHT / 2) - ROW_PADDING, maxWidth: 40, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
+            AddStatTextLabel(World.Player.StaminaMax.ToString(), MobileStats.StaminaMax, xOffset, ROW_2_Y + ROW_HEIGHT - ROW_PADDING, maxWidth: 40, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
+            AddStatTextLabel(World.Player.Mana.ToString(), MobileStats.ManaCurrent, xOffset, ROW_3_Y + (ROW_HEIGHT / 2) - ROW_PADDING, maxWidth: 40, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
+            AddStatTextLabel(World.Player.ManaMax.ToString(), MobileStats.ManaMax, xOffset, ROW_3_Y + ROW_HEIGHT - ROW_PADDING, maxWidth: 40, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
+
+            // Current over max lines
+            AddChildren(new Line(xOffset, ROW_1_Y + 22, 30, 1, 0xFF383838));
+            AddChildren(new Line(xOffset, ROW_2_Y + 22, 30, 1, 0xFF383838));
+            AddChildren(new Line(xOffset, ROW_3_Y + 22, 30, 1, 0xFF383838));
+
+            // Followers / max followers
+            xOffset = COLUMN_3_X + COLUMN_3_ICON_WIDTH;
+            AddStatTextLabel(World.Player.Followers.ToString(), MobileStats.Followers, xOffset, ROW_1_Y + (ROW_HEIGHT / 2) - ROW_PADDING, maxWidth: 40, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
+            AddStatTextLabel(World.Player.FollowersMax.ToString(), MobileStats.FollowerMax, xOffset, ROW_1_Y + ROW_HEIGHT - ROW_PADDING, maxWidth: 40, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
+            AddChildren(new Line(xOffset, ROW_1_Y + 22, 30, 1, 0xFF383838));
+
+            // Armor, weight / max weight
+            AddStatTextLabel(World.Player.DefenseChanceInc.ToString(), MobileStats.DefenseChanceInc, xOffset, ROW_2_Y + ROW_HEIGHT - (3 * ROW_PADDING), alignment: TEXT_ALIGN_TYPE.TS_CENTER);
+            AddStatTextLabel(World.Player.Weight.ToString(), MobileStats.WeightCurrent, xOffset, ROW_3_Y + (ROW_HEIGHT / 2) - ROW_PADDING, maxWidth: 40, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
+            AddStatTextLabel(World.Player.WeightMax.ToString(), MobileStats.WeightMax, xOffset, ROW_3_Y + ROW_HEIGHT - ROW_PADDING, maxWidth: 40, alignment: TEXT_ALIGN_TYPE.TS_CENTER);
+            AddChildren(new Line(xOffset, ROW_3_Y + 22, 30, 1, 0xFF383838));
+
+            // Damage, gold
+            xOffset = COLUMN_4_X + COLUMN_4_ICON_WIDTH;
+            AddStatTextLabel(String.Format("{0}-{1}", World.Player.DamageMin, World.Player.DamageMax), MobileStats.Damage, xOffset, ROW_2_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+            AddStatTextLabel(World.Player.Gold.ToString(), MobileStats.Gold, xOffset, ROW_3_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+
+            // TODO: Murder count
+            // TODO: Hunger satisfaction minutes remaining
+
+            xOffset = COLUMN_5_X + COLUMN_5_ICON_WIDTH;
+            // TODO: Criminal timer seconds remaining
+            // TODO: Murder count decay hours remaining
+            // TODO: PvP cooldown seconds remaining
+            // TODO: Bandage timer seconds remaining
+            // TODO: Minimize hitbox
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -143,6 +173,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
+        // TODO: move to base class?
         private Graphic GetStatLockGumpId(Lock lockStatus)
         {
             switch (lockStatus)
@@ -156,6 +187,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 default:
                     return Graphic.Invalid;
             }
+        }
+
+        // TODO: move to base class?
+        private void AddStatTextLabel(string text, MobileStats stat, int x, int y, int maxWidth = 0, ushort hue = 0x0386, TEXT_ALIGN_TYPE alignment = TEXT_ALIGN_TYPE.TS_LEFT)
+        {
+            Label label = new Label(text, false, hue, maxwidth: maxWidth, align: alignment, font: 1)
+            {
+                X = x,
+                Y = y
+            };
+
+            _labels[(int)stat] = label;
+            AddChildren(label);
         }
 
         private enum MobileStats
@@ -172,6 +216,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             ManaMax,
             WeightMax,
             Followers,
+            FollowerMax,
             WeightCurrent,
             LowerReagentCost,
             SpellDamageInc,

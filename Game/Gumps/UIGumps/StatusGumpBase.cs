@@ -110,6 +110,5 @@ namespace ClassicUO.Game.Gumps.UIGumps
         protected Point _point;
         protected readonly bool _useUOPGumps = FileManager.UseUOPGumps;
         protected readonly GumpPic[] _lockers = new GumpPic[3];
-        protected readonly PlayerMobile _mobile = World.Player;
     }
 }
