@@ -51,18 +51,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case ButtonType.BuffIcon:
                     BuffGump.Toggle();
                     break;
-                //case ButtonType.LockerStr:
-                //    World.Player.StrLock = (Lock)(((byte)World.Player.StrLock + 1) % 3);
-                //    GameActions.ChangeStatLock(0, World.Player.StrLock);
-                //    break;
-                //case ButtonType.LockerDex:
-                //    World.Player.DexLock = (Lock)(((byte)World.Player.DexLock + 1) % 3);
-                //    GameActions.ChangeStatLock(1, World.Player.DexLock);
-                //    break;
-                //case ButtonType.LockerInt:
-                //    World.Player.IntLock = (Lock)(((byte)World.Player.IntLock + 1) % 3);
-                //    GameActions.ChangeStatLock(2, World.Player.IntLock);
-                //    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(buttonID), buttonID, null);
             }

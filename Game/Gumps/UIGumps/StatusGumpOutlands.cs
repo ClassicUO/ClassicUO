@@ -23,9 +23,13 @@
 
 using System;
 
+<<<<<<< HEAD
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.IO.Resources;
+=======
+using ClassicUO.Game.Gumps.Controls;
+>>>>>>> f7efc4b7791106650e9eb44210997702c265b782
 
 using Microsoft.Xna.Framework;
 
@@ -101,6 +105,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
 
             // [1] Str/dex/int
+            // [1] Str/stam/mana
             // [2] Hits / max hits
             // [2] Stam / max stam
             // [2] Mana / max mana
