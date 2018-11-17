@@ -70,47 +70,51 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left)
-            {
-                if (_useUOPGumps)
-                {
-                    if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
-                    {
-                        var list = Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack;
-                        MobileHealthGump currentMobileHealthGump;
-                        list.Add(World.Player);
-                        UIManager.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
+            //if (button == MouseButton.Left)
+            //{
+            //    if (_useUOPGumps)
+            //    {
+            //        if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
+            //        {
+            //            var list = Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack;
+            //            MobileHealthGump currentMobileHealthGump;
+            //            list.Add(World.Player);
+            //            UIManager.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
 
-                        //if (dict.ContainsKey(World.Player))
-                        //{
-                        //    UIManager.Remove<MobileHealthGump>(World.Player);
-                        //}
+            //            //if (dict.ContainsKey(World.Player))
+            //            //{
+            //            //    UIManager.Remove<MobileHealthGump>(World.Player);
+            //            //}
 
-                        Dispose();
-                    }
-                }
-                else
-                {
-                    if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
-                    {
-                        var list = Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack;
-                        MobileHealthGump currentMobileHealthGump;
-                        list.Add(World.Player);
-                        UIManager.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
+            //            Dispose();
+            //        }
+            //    }
+            //    else
+            //    {
+            //        if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
+            //        {
+            //            var list = Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack;
+            //            MobileHealthGump currentMobileHealthGump;
+            //            list.Add(World.Player);
+            //            UIManager.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
 
-                        Dispose();
-                    }
-                }
-            }
+            //            Dispose();
+            //        }
+            //    }
+            //}
         }
 
         protected enum ButtonType
         {
             BuffIcon,
-            LockerStr,
-            LockerDex,
-            LockerInt,
             MinimizeMaximize
+        }
+
+        protected enum StatType
+        {
+            Str,
+            Dex,
+            Int
         }
 
         protected Label[] _labels;
