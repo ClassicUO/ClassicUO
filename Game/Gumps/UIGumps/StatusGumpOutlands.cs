@@ -59,6 +59,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _fillBars[(int)FillStats.Mana] = new GumpPicTiled(34, 25, 0, 10, 0x0806);
             _fillBars[(int)FillStats.Stam] = new GumpPicTiled(34, 38, 0, 10, 0x0806);
 
+            AddChildren(_fillBars[(int)FillStats.Hits]);
+            AddChildren(_fillBars[(int)FillStats.Mana]);
+            AddChildren(_fillBars[(int)FillStats.Stam]);
+
             UpdateStatusBar(FillStats.Hits, World.Player.Hits, World.Player.HitsMax);
             UpdateStatusBar(FillStats.Mana, World.Player.Mana, World.Player.ManaMax);
             UpdateStatusBar(FillStats.Stam, World.Player.Stamina, World.Player.StaminaMax);
@@ -66,7 +70,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             // Name
             if (!string.IsNullOrEmpty(World.Player.Name))
             {
-                text = new Label(World.Player.Name, false, 320, 1, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                text = new Label(World.Player.Name, false, 0x0386, 320, 1, align: TEXT_ALIGN_TYPE.TS_CENTER)
                 {
                     X = 100,
                     Y = 10
@@ -258,12 +262,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _labels[(int)MobileStats.Gold].Text = World.Player.Gold.ToString();
 
                 // TODO:
-                // Hunger satisfaction timer
-                // Murder count
-                // Criminal timer
-                // Murder count decay
-                // PvP cooldown timer
-                // Bandage timer
+                //  Hunger satisfaction timer
+                //  Murder count
+                //  Criminal timer
+                //  Murder count decay
+                //  PvP cooldown timer
+                //  Bandage timer
             }
 
             base.Update(totalMS, frameMS);
@@ -285,12 +289,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
             }
 
-            // TODO: max 109?
-            int percent = (current * 100) / max;
-            percent = (int)Math.Ceiling(100.0);
-
-            if (percent > 0)
+            if (max > 0)
             {
+                int percent = (current * 100) / max;
+                percent = (int)Math.Ceiling(100.0);
+
+                if (percent > 1)
+                {
+                    // Adjust to actual width of fill bar (109)
+                    percent = (109 * percent) / 100;
+                }
+
                 _fillBars[(int)id].Width = percent;
                 _fillBars[(int)id].Texture = IO.Resources.Gumps.GetGumpTexture(gumpId);
             }
