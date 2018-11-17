@@ -23,13 +23,9 @@
 
 using System;
 
-<<<<<<< HEAD
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.IO.Resources;
-=======
-using ClassicUO.Game.Gumps.Controls;
->>>>>>> f7efc4b7791106650e9eb44210997702c265b782
 
 using Microsoft.Xna.Framework;
 
