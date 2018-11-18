@@ -34,7 +34,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private readonly ColorPickerBox _box;
         private readonly StaticPic _dyeTybeImage;
         private readonly Action<ushort> _okClicked;
-        private Button _buttonOK;
 
         public ColorPickerGump(int x, int y, Action<ushort> okClicked) : base(0, 0)
         {
@@ -44,7 +43,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Y = y;
             AddChildren(new GumpPic(0, 0, 0x0906, 0));
 
-            AddChildren(_buttonOK = new Button(0, 0x0907, 0x0908, 0x909)
+            AddChildren(new Button(0, 0x0907, 0x0908, 0x909)
             {
                 X = 208, Y = 138, ButtonAction = ButtonAction.Activate
             });

@@ -29,9 +29,21 @@ using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
 {
-    public class Settings : NotifyPropertyChange
+    public sealed class Settings : NotifyPropertyChange
     {
-        private ushort _allyMessageColor = 0xFFFF;
+        private ushort _emoteColor = 0x0021;
+        private ushort _allyMessageColor = 0x0057;
+        private ushort _guildMessageColor = 0x0044;
+        private ushort _partyMessageColor = 0x0044;
+        private ushort _speechColor = 0x02B2;
+        private ushort _tooltipsTextColor = 0xFFFF;
+
+        private ushort _criminalColor = 0x03B2;
+        private ushort _murdererColor = 0x0023;
+        private ushort _innocentColor = 0x005A;
+        private ushort _enemyColor = 0x0031;
+        private ushort _friendColor = 0x0044;
+
         private bool _alwaysRun;
         private bool _backgroundSound;
         private int _backpackStyle;
@@ -41,28 +53,20 @@ namespace ClassicUO.Configuration
         private int _containerDefaultX;
         private int _containerDefaultY;
         private bool _criminalActionQuery;
-        private ushort _criminalColor = 0xFFFF;
         private bool _debug;
         private int _delayAppearTooltips;
-        private ushort _emoteColor = 0xFFFF;
         private bool _enablePathfind;
-        private ushort _enemyColor = 0xFFFF;
         private bool _footstepsSound;
-        private ushort _friendColor = 0xFFFF;
         private int _gameWindowHeight = 600;
         private int _gameWindowWidth = 800;
         private int _gameWindowX = 32;
         private int _gameWindowY = 32;
-        private ushort _guildMessageColor = 0xFFFF;
         private bool _highlightGameObjects = true;
-        private ushort _innocentColor = 0xFFFF;
         private string _ip;
         private string _lastCharName;
         private int _maxFPS = 144;
-        private ushort _murdererColor = 0xFFFF;
         private bool _music;
         private int _musicVolume;
-        private ushort _partyMessageColor = 0xFFFF;
         private string _password;
         private ushort _port;
         private bool _profiler;
@@ -73,10 +77,8 @@ namespace ClassicUO.Configuration
         private bool _smoothMovement = true;
         private bool _sound;
         private int _soundVolume;
-        private ushort _speechColor = 0xFFFF;
         private int _speechDelay = 500;
         private bool _statReport;
-        private ushort _tooltipsTextColor = 0xFFFF;
         private string _uoDir;
         private bool _useOldStatus;
         private string _username;
