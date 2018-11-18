@@ -82,12 +82,12 @@ First, create a file in the same directory as ClassicUO.exe named 'settings.json
   "show_incoming_names": false,
   "stat_report": false,
   "skill_report": false,
-  "use_old_status": false,
   "use_tooltips": false,
   "delay_appear_tooltips": 2857,
   "tooltips_text_color": 65535,
   "highlight_gameobjects": true,
-  "smooth_movement": true
+  "smooth_movement": true,
+  "status_gump_style": "modern"
 }
 ~~~
 
