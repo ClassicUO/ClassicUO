@@ -292,25 +292,40 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     if (UIManager.GetByLocalSerial<StatusGumpBase>() == null)
                     {
+                        var miniStatusGump = UIManager.GetByLocalSerial<MobileHealthGump>();
+                        if (miniStatusGump != null)
+                        {
+                            // Close mini status gump if it is already open
+                            miniStatusGump.Dispose();
+                        }
+
                         // TODO: verify client version
                         switch (Service.Get<Settings>().StatusGumpStyle.ToLower())
                         {
                             case "classic":
-                                UIManager.Add(new StatusGumpClassic());
+                                UIManager.Add(new StatusGumpClassic()
+                                {
+                                    X = Mouse.Position.X,
+                                    Y = Mouse.Position.Y
+                                });
                                 break;
                             case "modern":
-                                UIManager.Add(new StatusGumpModern());
+                                UIManager.Add(new StatusGumpModern()
+                                {
+                                    X = Mouse.Position.X,
+                                    Y = Mouse.Position.Y
+                                });
                                 break;
                             case "outlands":
-                                UIManager.Add(new StatusGumpOutlands());
+                                UIManager.Add(new StatusGumpOutlands()
+                                {
+                                    X = Mouse.Position.X,
+                                    Y = Mouse.Position.Y
+                                });
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
-                    }
-                    else
-                    {
-                        UIManager.Remove<StatusGumpBase>();
                     }
 
                     break;
