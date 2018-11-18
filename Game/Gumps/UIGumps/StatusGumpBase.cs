@@ -23,6 +23,7 @@
 
 using System;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.IO;
 
@@ -46,6 +47,21 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(buttonID), buttonID, null);
+            }
+        }
+
+        protected Graphic GetStatLockGumpId(Lock lockStatus)
+        {
+            switch (lockStatus)
+            {
+                case Lock.Up:
+                    return 0x0984;
+                case Lock.Down:
+                    return 0x0986;
+                case Lock.Locked:
+                    return 0x082C;
+                default:
+                    return Graphic.Invalid;
             }
         }
 

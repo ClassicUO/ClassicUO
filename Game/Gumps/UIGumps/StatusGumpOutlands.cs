@@ -63,9 +63,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(_fillBars[(int)FillStats.Mana]);
             AddChildren(_fillBars[(int)FillStats.Stam]);
 
-            UpdateStatusBar(FillStats.Hits, World.Player.Hits, World.Player.HitsMax);
-            UpdateStatusBar(FillStats.Mana, World.Player.Mana, World.Player.ManaMax);
-            UpdateStatusBar(FillStats.Stam, World.Player.Stamina, World.Player.StaminaMax);
+            UpdateStatusFillBar(FillStats.Hits, World.Player.Hits, World.Player.HitsMax);
+            UpdateStatusFillBar(FillStats.Mana, World.Player.Mana, World.Player.ManaMax);
+            UpdateStatusFillBar(FillStats.Stam, World.Player.Stamina, World.Player.StaminaMax);
 
             // Name
             if (!string.IsNullOrEmpty(World.Player.Name))
@@ -222,6 +222,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 xOffset,
                 ROW_3_Y + ROW_HEIGHT - (3 * ROW_PADDING));
 
+            // FIXME: the rest of the fields are not retrieved yet in the Character Status packet handler
             // TODO: Murder count
             // TODO: Hunger satisfaction minutes remaining
 
@@ -239,9 +240,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 _refreshTime = totalMS + 250;
 
-                UpdateStatusBar(FillStats.Hits, World.Player.Hits, World.Player.HitsMax);
-                UpdateStatusBar(FillStats.Mana, World.Player.Mana, World.Player.ManaMax);
-                UpdateStatusBar(FillStats.Stam, World.Player.Stamina, World.Player.StaminaMax);
+                UpdateStatusFillBar(FillStats.Hits, World.Player.Hits, World.Player.HitsMax);
+                UpdateStatusFillBar(FillStats.Mana, World.Player.Mana, World.Player.ManaMax);
+                UpdateStatusFillBar(FillStats.Stam, World.Player.Stamina, World.Player.StaminaMax);
 
                 _labels[(int)MobileStats.Name].Text = World.Player.Name;
                 _labels[(int)MobileStats.Strength].Text = World.Player.Strength.ToString();
@@ -273,7 +274,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        private void UpdateStatusBar(FillStats id, int current, int max)
+        private void UpdateStatusFillBar(FillStats id, int current, int max)
         {
             Graphic gumpId = 0x0806;
 
@@ -302,22 +303,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 _fillBars[(int)id].Width = percent;
                 _fillBars[(int)id].Texture = IO.Resources.Gumps.GetGumpTexture(gumpId);
-            }
-        }
-
-        // TODO: move to base class?
-        private Graphic GetStatLockGumpId(Lock lockStatus)
-        {
-            switch (lockStatus)
-            {
-                case Lock.Up:
-                    return 0x0984;
-                case Lock.Down:
-                    return 0x0986;
-                case Lock.Locked:
-                    return 0x082C;
-                default:
-                    return Graphic.Invalid;
             }
         }
 

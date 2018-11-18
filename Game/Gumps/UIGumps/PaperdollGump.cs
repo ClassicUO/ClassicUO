@@ -304,7 +304,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                                 UIManager.Add(new StatusGumpOutlands());
                                 break;
                             default:
-                                break;
+                                throw new ArgumentOutOfRangeException();
                         }
                     }
                     else
