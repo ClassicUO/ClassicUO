@@ -25,6 +25,8 @@ using System;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 
 using Microsoft.Xna.Framework;
@@ -272,6 +274,22 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
             base.Update(totalMS, frameMS);
+        }
+
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
+            {
+                Point p = new Point(x, y);
+                Rectangle rect = new Rectangle(Bounds.Width - 42, Bounds.Height - 25, Bounds.Width, Bounds.Height);
+
+                if (rect.Contains(p))
+                {
+                    Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack.Add(World.Player);
+                    UIManager.Add(new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
+                    Dispose();
+                }
+            }
         }
 
         private void UpdateStatusFillBar(FillStats id, int current, int max)
