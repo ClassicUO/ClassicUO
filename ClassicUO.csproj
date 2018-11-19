@@ -76,6 +76,8 @@
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
+    <Compile Include="Game\Data\PopupMenuData.cs" />
+    <Compile Include="Game\Data\PopupMenuItem.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
     <Compile Include="Game\Data\SpellsChivalry.cs" />
     <Compile Include="Game\Data\SpellsMysticism.cs" />
@@ -86,6 +88,7 @@
     <Compile Include="Game\GameObjects\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
+    <Compile Include="Game\Gumps\Controls\HitBox.cs" />
     <Compile Include="Game\Gumps\Controls\Line.cs" />
     <Compile Include="Game\Gumps\UIGumps\BuffGump.cs" />
     <Compile Include="Game\Gumps\Controls\Combobox.cs" />
@@ -103,6 +106,7 @@
     <Compile Include="Game\Gumps\UIGumps\OptionsGump1.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyMemberGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\PopupMenuGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\SkillButtonGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\UseSpellButtonGump.cs" />
     <Compile Include="Game\Scenes\GameSceneDragAndDropHandler.cs" />

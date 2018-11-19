@@ -66,7 +66,7 @@ namespace ClassicUO.Game.Gumps.Controls
             int centerHeight = Height - _gumpTexture[0].Height - _gumpTexture[6].Height;
             int line2Y = position.Y + _gumpTexture[0].Height;
             int line3Y = position.Y + Height - _gumpTexture[6].Height;
-            Vector3 color = IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero;
+            Vector3 color = IsTransparent ? RenderExtentions.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
 
             // top row
             spriteBatch.Draw2D(_gumpTexture[0], new Point(position.X, position.Y), color);

@@ -248,7 +248,12 @@ namespace ClassicUO.Game.Scenes
                                 _inqueue = true;
                                 _queuedObject = entity;
                                 _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                                _queuedAction = () => GameActions.SingleClick(entity);
+                                _queuedAction = () =>
+                                {
+                                    if (!World.ClientFeatures.TooltipsEnabled)
+                                        GameActions.SingleClick(entity);
+                                    GameActions.OpenPopupMenu(entity);
+                                };
                             }
 
                             break;
