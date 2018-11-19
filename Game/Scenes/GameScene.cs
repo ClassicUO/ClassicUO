@@ -296,7 +296,7 @@ namespace ClassicUO.Game.Scenes
 
             if (totalMS > _timePing)
             {
-                NetClient.Socket.Send(new PPing());
+                NetClient.Socket.Send(PPing.Instance.Value);
                 _timePing = (long) totalMS + 10000;
             }
 
@@ -327,8 +327,10 @@ namespace ClassicUO.Game.Scenes
             for (int i = 0; i < _renderListCount; i++)
             {
                 GameObject obj = _renderList[i];
-                if (obj.Z <= _maxGroundZ)
-                    obj.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList);
+
+                if (obj.Z <= _maxGroundZ && obj.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList))
+                    RenderedObjectsCount++;
+
             }
 #else
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);

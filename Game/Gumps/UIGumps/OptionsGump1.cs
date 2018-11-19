@@ -36,15 +36,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             ScrollArea leftArea = new ScrollArea(10, 10, 160, 480, true);
 
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "General", 1, true, 14, 24)  {  FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 1});
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Sounds", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 2 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Video", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 3 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Commands", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 4 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Tooltip", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 5 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Fonts", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 6 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Speech", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 7 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Combat", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 8 });
+            ScrollAreaItem item = new ScrollAreaItem();
 
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "General", 1, true, 14, 24)  { Y = 30, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 1});
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Sounds", 1, true, 14, 24) { Y = 30 * 2, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 2 });
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Video", 1, true, 14, 24) { Y = 30 * 3, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 3 });
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Commands", 1, true, 14, 24) { Y = 30 * 4, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 4 });
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Tooltip", 1, true, 14, 24) { Y = 30 * 5, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 5 });
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Fonts", 1, true, 14, 24) { Y = 30 * 6, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 6 });
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Speech", 1, true, 14, 24) { Y = 30 * 7, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 7 });
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Combat", 1, true, 14, 24) { Y = 30 * 8, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 8 });
+
+            leftArea.AddChildren(item);
             AddChildren(leftArea);
 
 
@@ -544,12 +547,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Button buttonCriminalColor = new Button((int)Buttons.CriminalColor, 0x00D4, 0x00D4)
             {
                 ButtonAction = ButtonAction.Activate,
+                Y = buttonFriendColor.Bounds.Bottom
             };
             item.AddChildren(buttonCriminalColor);
             color = 0xFF7F7F7F;
             if (_settings.CriminalColor != 0xFFFF)
                 color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.CriminalColor) << 8) | 0xFF);
-            ColorPickerBox criminalColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            ColorPickerBox criminalColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
+            {
+                Y = buttonFriendColor.Bounds.Bottom + 3
+            };
 
             criminalColor.SetHue(color);
             buttonCriminalColor.MouseClick += (sender, e) =>
@@ -562,6 +569,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             text = new Label("Criminal color", true, 1)
             {
                 X = 20,
+                Y = buttonFriendColor.Bounds.Bottom,
             };
             item.AddChildren(text);
 
@@ -569,12 +577,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Button buttonEnemyColor = new Button((int)Buttons.EnemyColor, 0x00D4, 0x00D4)
             {
                 ButtonAction = ButtonAction.Activate,
+                X = 150,
             };
             item.AddChildren(buttonEnemyColor);
             color = 0xFF7F7F7F;
             if (_settings.EnemyColor != 0xFFFF)
                 color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.EnemyColor) << 8) | 0xFF);
-            ColorPickerBox enemyColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            ColorPickerBox enemyColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
+            {
+                X = 150 + 3
+            };
 
             enemyColor.SetHue(color);
             buttonEnemyColor.MouseClick += (sender, e) =>
@@ -586,7 +598,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item.AddChildren(enemyColor);
             text = new Label("Enemy color", true, 1)
             {
-                X = 20,
+                X = 150 + 20,
             };
             item.AddChildren(text);
 
@@ -594,12 +606,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Button buttonMurdererColor = new Button((int)Buttons.MurdererColor, 0x00D4, 0x00D4)
             {
                 ButtonAction = ButtonAction.Activate,
+                X = 150,
+                Y = buttonEnemyColor.Bounds.Bottom
             };
             item.AddChildren(buttonMurdererColor);
             color = 0xFF7F7F7F;
             if (_settings.MurdererColor != 0xFFFF)
                 color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.MurdererColor) << 8) | 0xFF);
-            ColorPickerBox murdererColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            ColorPickerBox murdererColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
+            {
+                X = 150 + 3,
+                Y = buttonEnemyColor.Bounds.Bottom + 3
+            };
 
             murdererColor.SetHue(color);
             buttonMurdererColor.MouseClick += (sender, e) =>
@@ -611,16 +629,23 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item.AddChildren(murdererColor);
             text = new Label("Murderer color", true, 1)
             {
-                X = 20,
+                X = 150 + 20,
+                Y = buttonEnemyColor.Bounds.Bottom
             };
             item.AddChildren(text);
-
-
 
             rightArea.AddChildren(item);
 
 
-          
+            item = new ScrollAreaItem();
+            Checkbox queryBeforeAttact = new Checkbox(0x00D2, 0x00D3, "Query before attack", 1)
+            {
+                Y = 50,
+                IsChecked = _settings.CriminalActionQuery
+            };
+            item.AddChildren(queryBeforeAttact);
+            rightArea.AddChildren(item);
+
 
             AddChildren(rightArea, PAGE);
         }
