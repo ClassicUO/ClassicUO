@@ -75,7 +75,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Clear()
         {
-            //Items.ForEach(s => s.Dispose());
+            Items.ForEach(s => s.Dispose());
             Items.Clear();
         }
     }

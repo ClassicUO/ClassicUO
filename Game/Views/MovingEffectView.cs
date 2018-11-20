@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Views
             Bounds.X = (int)-effect.Offset.X;
             Bounds.Y = (int)(effect.Offset.Z - effect.Offset.Y);        
             Rotation = effect.AngleToTarget;
-            HueVector = RenderExtentions.GetHueVector(GameObject.Hue);
+            HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue);
 
             return base.Draw(spriteBatch, position, objectList);
         }

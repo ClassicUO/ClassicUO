@@ -117,6 +117,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool IsTransparent { get; set; }
 
+        public float Alpha { get; set; } = .5f;
+
         public IReadOnlyList<GumpControl> Children => _children;
 
         public UIManager UIManager { get; }
@@ -338,58 +340,22 @@ namespace ClassicUO.Game.Gumps.Controls
                 }
             }
 
-            //if (IsVisible && Debug)
-            //{
-            //    if (_debugTexture == null)
-            //    {
-            //        _debugTexture = new SpriteTexture(1, 1);
+            if (IsVisible && Debug)
+            {
+                if (_debugTexture == null)
+                {
+                    _debugTexture = new SpriteTexture(1, 1);
 
-            //        _debugTexture.SetData(new Color[1]
-            //        {
-            //            Color.Green
-            //        });
-            //    }
+                    _debugTexture.SetData(new Color[1]
+                    {
+                        Color.Green
+                    });
+                }
 
-            //    spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
-            //}
+                spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
+            }
 
             return true;
-        }
-
-        //TODO: Future implementation
-
-        public virtual bool Draw1(SpriteBatchUI spriteBatch, SpriteTexture texture, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
-        {
-            Rectangle src = new Rectangle();
-
-            if (offsetX > Width || offsetX < -Width || offsetY > Height || offsetY < -Height)
-                return false;
-
-            X = offsetX;
-            Y = offsetY;
-
-            src.X = offsetX;
-            src.Y = offsetY;
-
-            int maxX = src.X + dst.Width;
-            if (maxX <= Width)
-                src.Width = dst.Width;
-            else
-            {
-                src.Width = Width - src.X;
-                dst.Width = src.Width;
-            }
-
-            int maxY = src.Y + dst.Height;
-            if (maxY <= Height)
-                src.Height = dst.Height;
-            else
-            {
-                src.Height = Height - src.Y;
-                dst.Height = src.Height;
-            }
-
-            return spriteBatch.Draw2D(texture, dst, src, hue ?? Vector3.Zero);
         }
 
         public virtual void Update(double totalMS, double frameMS)

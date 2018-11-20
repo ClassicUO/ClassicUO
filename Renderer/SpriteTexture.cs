@@ -24,6 +24,8 @@
 using System.Collections.Generic;
 
 using ClassicUO.IO.Resources;
+
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
@@ -51,9 +53,9 @@ namespace ClassicUO.Renderer
         public List<WebLinkRect> Links { get; }
     }
 
-    public class TextureAnimationFrame : SpriteTexture
+    public class AnimationFrameTexture : SpriteTexture
     {
-        public TextureAnimationFrame(int id, int width, int height) : base(width, height, false)
+        public AnimationFrameTexture(int id, int width, int height) : base(width, height, false)
         {
             ID = id;
         }
@@ -63,5 +65,20 @@ namespace ClassicUO.Renderer
         public short CenterY { get; set; }
 
         public int ID { get; }
+    }
+
+    public class ArtTexture : SpriteTexture
+    {
+        public ArtTexture(int offsetX, int offsetY, int offsetW, int offsetH, int width, int height) : base(width, height, false)
+        {
+            ImageRectangle = new Rectangle(offsetX, offsetY, offsetW, offsetH);
+        }
+
+        public ArtTexture(Rectangle rect, int width, int height) : base(width, height, false)
+        {
+            ImageRectangle = rect;
+        }
+
+        public Rectangle ImageRectangle { get; }
     }
 }

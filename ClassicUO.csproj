@@ -76,6 +76,8 @@
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
+    <Compile Include="Game\Data\PopupMenuData.cs" />
+    <Compile Include="Game\Data\PopupMenuItem.cs" />
     <Compile Include="Game\Data\SpellsBushido.cs" />
     <Compile Include="Game\Data\SpellsChivalry.cs" />
     <Compile Include="Game\Data\SpellsMysticism.cs" />
@@ -105,6 +107,7 @@
     <Compile Include="Game\Gumps\UIGumps\OptionsGump1.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyMemberGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\PopupMenuGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\SkillButtonGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\UseSpellButtonGump.cs" />
     <Compile Include="Game\Scenes\GameSceneDragAndDropHandler.cs" />
@@ -174,8 +177,8 @@
     <Compile Include="Game\Gumps\Controls\HSliderBar.cs" />
     <Compile Include="Game\Gumps\Controls\HtmlGump.cs" />
     <Compile Include="Game\Gumps\Controls\IScrollBar.cs" />
-    <Compile Include="Game\Gumps\Controls\ItemGumpling.cs" />
-    <Compile Include="Game\Gumps\Controls\ItemGumplingPaperdoll.cs" />
+    <Compile Include="Game\Gumps\Controls\ItemGump.cs" />
+    <Compile Include="Game\Gumps\Controls\ItemGumpPaperdoll.cs" />
     <Compile Include="Game\Gumps\Controls\Label.cs" />
     <Compile Include="Game\Gumps\Controls\Panel.cs" />
     <Compile Include="Game\Gumps\Controls\PaperDollInteractable.cs" />
@@ -282,7 +285,7 @@
     <Compile Include="Game\GameObjects\Managers\OverheadManager.cs" />
     <Compile Include="Renderer\PixelPicking.cs" />
     <Compile Include="Renderer\RenderedText.cs" />
-    <Compile Include="Renderer\RenderExtentions.cs" />
+    <Compile Include="Renderer\ShaderHuesTraslator.cs" />
     <Compile Include="Renderer\ScissorStack.cs" />
     <Compile Include="Renderer\SpriteBatch3D.cs" />
     <Compile Include="Renderer\SpriteBatch3D1.cs" />

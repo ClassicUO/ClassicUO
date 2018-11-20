@@ -36,21 +36,18 @@ namespace ClassicUO.Game.GameObjects.Managers
 {
     public static class OverheadManager
     {
-        private static readonly Dictionary<View, Vector3> _overheads = new Dictionary<View, Vector3>();
-        private static readonly Dictionary<View, Vector3> _damages = new Dictionary<View, Vector3>();
-        private static readonly List<View> _toRemove = new List<View>();
-
         private static readonly List<Tuple<View,Vector3>> _overheadsList = new List<Tuple<View, Vector3>>();
+        private static readonly List<Tuple<View, Vector3>> _damagesList = new List<Tuple<View, Vector3>>();
 
 
         public static void AddOverhead(View view, Vector3 position)
         {
-            _overheads[view] = position;
+            _overheadsList.Add(Tuple.Create(view, position));
         }
 
         public static void AddDamage(View view, Vector3 position)
         {
-            _damages[view] = position;
+            _damagesList.Add(Tuple.Create(view, position));
         }
 
 
@@ -62,51 +59,30 @@ namespace ClassicUO.Game.GameObjects.Managers
 
         private static void DrawOverheads(SpriteBatch3D spriteBatch, MouseOverList objectList)
         {
-            if (_overheads.Count > 0)
+            if (_overheadsList.Count > 0)
             {
 
-                //for (int i = 0; i < _overheadsList.Count; i++)
-                //{
-                //    var t = _overheadsList[i];
-
-                //    View v = t.Item1;
-
-                //    v.Draw(spriteBatch, t.Item2, objectList);
-                //}
-
-                //_overheadsList.Clear();
-
-               // GameScene gs = Service.Get<SceneManager>().GetScene<GameScene>();
-
-                foreach (KeyValuePair<View, Vector3> info in _overheads)
+                for (int i = 0; i < _overheadsList.Count; i++)
                 {
-                    if (!info.Key.Draw(spriteBatch, info.Value, objectList) || info.Key.GameObject.IsDisposed)
-                        _toRemove.Add(info.Key);
+                    var t = _overheadsList[i];
+                    t.Item1.Draw(spriteBatch, t.Item2, objectList);
                 }
 
-                if (_toRemove.Count > 0)
-                {
-                    _toRemove.ForEach(s => _overheads.Remove(s));
-                    _toRemove.Clear();
-                }
+                _overheadsList.Clear();
             }
         }
 
         private static void DrawDamages(SpriteBatch3D spriteBatch, MouseOverList objectList)
         {
-            if (_damages.Count > 0)
+            if (_damagesList.Count > 0)
             {
-                foreach (KeyValuePair<View, Vector3> damage in _damages)
+                for (int i = 0; i < _damagesList.Count; i++)
                 {
-                    if (!damage.Key.Draw(spriteBatch, damage.Value, objectList) || damage.Key.GameObject.IsDisposed)
-                        _toRemove.Add(damage.Key);
+                    var t = _damagesList[i];
+                    t.Item1.Draw(spriteBatch, t.Item2, objectList);
                 }
 
-                if (_toRemove.Count > 0)
-                {
-                    _toRemove.ForEach(s => _damages.Remove(s));
-                    _toRemove.Clear();
-                }
+                _damagesList.Clear();
             }
         }
 

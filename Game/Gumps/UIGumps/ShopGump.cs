@@ -42,8 +42,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
             else
                 AddChildren(new GumpPic(170, 214, 0x0873, 0));
             
-            AddChildren(new HitBox((int)Buttons.Accept, 200, 406, 34, 30));
-            AddChildren(new HitBox((int)Buttons.Clear, 372, 410, 24, 24));
+            HitBox boxAccept = new HitBox(200, 406, 34, 30){ Alpha = 1};
+            HitBox boxClear = new HitBox(372, 410, 24, 24) { Alpha = 1 };
+
+            boxAccept.MouseClick += (sender, e) =>
+            {
+                OnButtonClick((int)Buttons.Accept);
+            };
+            boxClear.MouseClick += (sender, e) =>
+            {
+                OnButtonClick((int)Buttons.Clear);
+            };
+
+            AddChildren(boxAccept);
+            AddChildren(boxClear);
 
             if (isBuyGump)
             {
@@ -220,7 +232,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 _item = item;
                 var itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.Name);
-                AddChildren(new ItemGumpling(item) { X = 5, Y = 5, Height = 50, AcceptMouseInput = false });
+                AddChildren(new ItemGump(item) { X = 5, Y = 5, Height = 50, AcceptMouseInput = false });
                 AddChildren(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 110, 9) { Y = 5, X = 65 });
                 AddChildren(_amountLabel = new Label(item.Amount.ToString(), false, 0x021F, font: 9) { X = 180, Y = 20 });
 
@@ -305,7 +317,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
             {
-                Vector3 color = IsTransparent ? RenderExtentions.GetHueVector(0, false, .5f, true) : Vector3.Zero;
+                Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, .5f, true) : Vector3.Zero;
 
                 int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
 

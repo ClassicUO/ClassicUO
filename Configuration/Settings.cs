@@ -29,9 +29,21 @@ using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
 {
-    public class Settings : NotifyPropertyChange
+    public sealed class Settings : NotifyPropertyChange
     {
-        private int _allyMessageColor;
+        private ushort _emoteColor = 0x0021;
+        private ushort _allyMessageColor = 0x0057;
+        private ushort _guildMessageColor = 0x0044;
+        private ushort _partyMessageColor = 0x0044;
+        private ushort _speechColor = 0x02B2;
+        private ushort _tooltipsTextColor = 0xFFFF;
+
+        private ushort _criminalColor = 0x03B2;
+        private ushort _murdererColor = 0x0023;
+        private ushort _innocentColor = 0x005A;
+        private ushort _enemyColor = 0x0031;
+        private ushort _friendColor = 0x0044;
+
         private bool _alwaysRun;
         private bool _backgroundSound;
         private int _backpackStyle;
@@ -41,28 +53,20 @@ namespace ClassicUO.Configuration
         private int _containerDefaultX;
         private int _containerDefaultY;
         private bool _criminalActionQuery;
-        private int _criminalColor;
         private bool _debug;
         private int _delayAppearTooltips;
-        private int _emoteColor;
         private bool _enablePathfind;
-        private int _enemyColor;
         private bool _footstepsSound;
-        private int _friendColor;
         private int _gameWindowHeight = 600;
         private int _gameWindowWidth = 800;
         private int _gameWindowX = 32;
         private int _gameWindowY = 32;
-        private int _guildMessageColor;
         private bool _highlightGameObjects = true;
-        private int _innocentColor;
         private string _ip;
         private string _lastCharName;
         private int _maxFPS = 144;
-        private int _murdererColor;
         private bool _music;
         private int _musicVolume;
-        private int _partyMessageColor;
         private string _password;
         private ushort _port;
         private bool _profiler;
@@ -73,10 +77,8 @@ namespace ClassicUO.Configuration
         private bool _smoothMovement = true;
         private bool _sound;
         private int _soundVolume;
-        private int _speechColor;
         private int _speechDelay = 500;
         private bool _statReport;
-        private ushort _tooltipsTextColor = 0xFFFF;
         private string _uoDir;
         private bool _useOldStatus;
         private string _username;
@@ -302,70 +304,70 @@ namespace ClassicUO.Configuration
         }
 
         [JsonProperty(PropertyName = "speech_color")]
-        public int SpeechColor
+        public ushort SpeechColor
         {
             get => _speechColor;
             set => SetProperty(ref _speechColor, value);
         }
 
         [JsonProperty(PropertyName = "emote_color")]
-        public int EmoteColor
+        public ushort EmoteColor
         {
             get => _emoteColor;
             set => SetProperty(ref _emoteColor, value);
         }
 
         [JsonProperty(PropertyName = "party_message_color")]
-        public int PartyMessageColor
+        public ushort PartyMessageColor
         {
             get => _partyMessageColor;
             set => SetProperty(ref _partyMessageColor, value);
         }
 
         [JsonProperty(PropertyName = "guild_message_color")]
-        public int GuildMessageColor
+        public ushort GuildMessageColor
         {
             get => _guildMessageColor;
             set => SetProperty(ref _guildMessageColor, value);
         }
 
         [JsonProperty(PropertyName = "ally_message_color")]
-        public int AllyMessageColor
+        public ushort AllyMessageColor
         {
             get => _allyMessageColor;
             set => SetProperty(ref _allyMessageColor, value);
         }
 
         [JsonProperty(PropertyName = "innocent_color")]
-        public int InnocentColor
+        public ushort InnocentColor
         {
             get => _innocentColor;
             set => SetProperty(ref _innocentColor, value);
         }
 
         [JsonProperty(PropertyName = "friend_color")]
-        public int FriendColor
+        public ushort FriendColor
         {
             get => _friendColor;
             set => SetProperty(ref _friendColor, value);
         }
 
         [JsonProperty(PropertyName = "criminal_color")]
-        public int CriminalColor
+        public ushort CriminalColor
         {
             get => _criminalColor;
             set => SetProperty(ref _criminalColor, value);
         }
 
         [JsonProperty(PropertyName = "enemy_color")]
-        public int EnemyColor
+        public ushort EnemyColor
         {
             get => _enemyColor;
             set => SetProperty(ref _enemyColor, value);
         }
 
         [JsonProperty(PropertyName = "murderer_color")]
-        public int MurdererColor
+        public ushort MurdererColor
         {
             get => _murdererColor;
             set => SetProperty(ref _murdererColor, value);

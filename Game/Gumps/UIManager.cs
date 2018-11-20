@@ -113,6 +113,8 @@ namespace ClassicUO.Game.Gumps
                     _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
                 }
 
+                CloseIfClickOutGumps();
+
                 _mouseDownControls[btn] = null;
             };
 
@@ -150,6 +152,8 @@ namespace ClassicUO.Game.Gumps
                         });
                     }
                 }
+
+                CloseIfClickOutGumps();
             };
 
             InputManager.RightMouseButtonUp += (sender, e) =>
@@ -175,6 +179,8 @@ namespace ClassicUO.Game.Gumps
                 {
                     _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Right);
                 }
+
+                CloseIfClickOutGumps();
 
                 _mouseDownControls[btn] = null;
             };
@@ -251,6 +257,13 @@ namespace ClassicUO.Game.Gumps
 
         private readonly Dictionary<Serial, Point> _gumpPositionCache = new Dictionary<Serial, Point>();
 
+        private void CloseIfClickOutGumps()
+        {
+            foreach (Gump gump in _gumps.OfType<Gump>().Where(s => s.CloseIfClickOutside))
+            {
+                gump.Dispose();
+            }
+        }
 
         public void SavePosition(Serial serverSerial, Point point)
         {

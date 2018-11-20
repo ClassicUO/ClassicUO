@@ -36,14 +36,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             ScrollArea leftArea = new ScrollArea(10, 10, 160, 480, true);
 
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "General", 1, true, 14, 24)  {  FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 1});
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Sounds", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 2 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Video", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 3 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Commands", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 4 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Tooltip", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 5 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "General5", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 6 });
-            leftArea.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "General6", 1, true, 14, 24) { FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 7 });
+            ScrollAreaItem item = new ScrollAreaItem();
 
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "General", 1, true, 14, 24)  { Y = 30, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 1});
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Sounds", 1, true, 14, 24) { Y = 30 * 2, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 2 });
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Video", 1, true, 14, 24) { Y = 30 * 3, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 3 });
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Commands", 1, true, 14, 24) { Y = 30 * 4, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 4 });
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Tooltip", 1, true, 14, 24) { Y = 30 * 5, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 5 });
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Fonts", 1, true, 14, 24) { Y = 30 * 6, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 6 });
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Speech", 1, true, 14, 24) { Y = 30 * 7, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 7 });
+            item.AddChildren(new Button(0, 0x9C5, 0x9C5, 0x9C5, "Combat", 1, true, 14, 24) { Y = 30 * 8, FontCenter = true, ButtonAction = ButtonAction.SwitchPage, ToPage = 8 });
+
+            leftArea.AddChildren(item);
             AddChildren(leftArea);
 
 
@@ -57,7 +61,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 154 + offsetX,
                 Y = 405 + offsetY,
                 ButtonAction = ButtonAction.Activate,
-                ToPage = 0
             });
 
             AddChildren(new Button((int)Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
@@ -65,7 +68,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 248 + offsetX,
                 Y = 405 + offsetY,
                 ButtonAction = ButtonAction.Activate,
-                ToPage = 0
             });
 
             AddChildren(new Button((int)Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
@@ -73,7 +75,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 346 + offsetX,
                 Y = 405 + offsetY,
                 ButtonAction = ButtonAction.Activate,
-                ToPage = 0
             });
 
             AddChildren(new Button((int)Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
@@ -81,7 +82,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 X = 443 + offsetX,
                 Y = 405 + offsetY,
                 ButtonAction = ButtonAction.Activate,
-                ToPage = 0
             });
 
             AcceptMouseInput = false;
@@ -92,16 +92,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             BuildSounds();
             BuildVideo();
             BuildCommands();
+            BuildFonts();
+            BuildSpeech();
+            BuildCombat();
 
             ChangePage(1);
         }
-
-        public override void Update(double totalMS, double frameMS)
-        {
-
-            base.Update(totalMS, frameMS);
-        }
-
 
 
 
@@ -137,6 +133,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 IsChecked = _settings.SmoothMovement
             };
             rightArea.AddChildren(smoothMovement);
+
+            Checkbox enablePathfind = new Checkbox(0x00D2, 0x00D3, "Enable pathfinding", 1)
+            {
+                IsChecked = _settings.EnablePathfind
+            };
+            rightArea.AddChildren(enablePathfind);
+
+
+            Checkbox alwaysRun = new Checkbox(0x00D2, 0x00D3, "Always run", 1)
+            {
+                IsChecked = _settings.EnablePathfind
+            };
+            rightArea.AddChildren(alwaysRun);
+
 
 
             // preload maps
@@ -186,6 +196,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             highlightByFlagsItem.AddChildren(highlightEnabled);
             rightArea.AddChildren(highlightByFlagsItem);
+
+
+
 
             AddChildren(rightArea, PAGE);
         }
@@ -259,55 +272,459 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private void BuildVideo()
         {
             const int PAGE = 3;
+            ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
+            ScrollAreaItem item = new ScrollAreaItem();
 
+
+
+            AddChildren(rightArea, PAGE);
         }
 
         private void BuildCommands()
         {
             const int PAGE = 4;
+            ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
+            ScrollAreaItem item = new ScrollAreaItem();
 
+
+
+            AddChildren(rightArea, PAGE);
         }
 
         private void BuildTooltip()
         {
             const int PAGE = 5;
+            ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
+            ScrollAreaItem item = new ScrollAreaItem();
 
+
+
+            AddChildren(rightArea, PAGE);
         }
 
-
-
-
-
-
-
-        public override void Dispose()
+        private void BuildFonts()
         {
-            base.Dispose();
+            const int PAGE = 6;
+
+            ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
+            ScrollAreaItem item = new ScrollAreaItem();
+
+
+
+            AddChildren(rightArea, PAGE);
         }
 
-        class LeftButton : GumpControl
+        private void BuildSpeech()
         {
-            public LeftButton()
+            const int PAGE = 7;
+            ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
+
+            ScrollAreaItem item = new ScrollAreaItem();           
+            Checkbox scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, "Scale speech delay by length", 1)
             {
-                CanMove = false;
-                CanCloseWithRightClick = false;
-                AcceptMouseInput = true;
+                IsChecked = _settings.ScaleSpeechDelay
+            };
+            item.AddChildren(scaleSpeechDelay);
+            rightArea.AddChildren(item);
 
-                //ResizePic background = new ResizePic(0x23F0);
-                GumpPicTiled background = new GumpPicTiled(0x462);
-                background.AddChildren(new HoveredLabel("General", true, 0xFF, 23, 100, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER));
-                AddChildren(background);
 
+            item = new ScrollAreaItem();
+            Label text = new Label("- Speech delay:", true, 1);
+            item.AddChildren(text);
+            HSliderBar sliderSpeechDelay = new HSliderBar(100, 5, 150, 1, 1000, _settings.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
+            item.AddChildren(sliderSpeechDelay);
+            rightArea.AddChildren(item);
+
+
+            item = new ScrollAreaItem();
+            Button buttonSpeechColor = new Button((int)Buttons.SpeechColor, 0x00D4, 0x00D4)
+            {
+                ButtonAction = ButtonAction.Activate,
+                Y = 30,
+            };
+            item.AddChildren(buttonSpeechColor);
+
+            uint color = 0xFF7F7F7F;
+            if (_settings.SpeechColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.SpeechColor) << 8) | 0xFF);
+            ColorPickerBox speechColorPickerBox = new ColorPickerBox(3, 3, 1, 1, 13, 14)
+            {
+                Y = 33
+            };
+            speechColorPickerBox.SetHue(color);
+            buttonSpeechColor.MouseClick += (sender, e) =>
+            {
+                // TODO: fix multi opening
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => speechColorPickerBox.SetHue(s));              
+                UIManager.Add(pickerGump);
+            };
+            item.AddChildren(speechColorPickerBox);
+
+            text = new Label("Speech color", true, 1)
+            {
+                X = 20,
+                Y = 30
+            };
+            item.AddChildren(text);
+            rightArea.AddChildren(item);
+
+
+            item = new ScrollAreaItem();
+            Button buttonEmoteColor = new Button((int)Buttons.EmoteColor, 0x00D4, 0x00D4)
+            {
+                ButtonAction = ButtonAction.Activate,
+            };
+            item.AddChildren(buttonEmoteColor);
+            color = 0xFF7F7F7F;
+            if (_settings.EmoteColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.EmoteColor) << 8) | 0xFF);
+            ColorPickerBox emoteColorPickerBox = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            emoteColorPickerBox.SetHue(color);
+            buttonEmoteColor.MouseClick += (sender, e) =>
+            {
+                // TODO: fix multi opening
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => emoteColorPickerBox.SetHue(s));
+                UIManager.Add(pickerGump);
+            };
+            item.AddChildren(emoteColorPickerBox);
+            text = new Label("Emote color", true, 1)
+            {
+                X = 20
+            };
+            item.AddChildren(text);
+            rightArea.AddChildren(item);
+
+
+            item = new ScrollAreaItem();
+            Button butttonPartyMessageColor = new Button((int)Buttons.PartyMessageColor, 0x00D4, 0x00D4)
+            {
+                ButtonAction = ButtonAction.Activate,
+            };
+            item.AddChildren(butttonPartyMessageColor);
+            color = 0xFF7F7F7F;
+            if (_settings.PartyMessageColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.PartyMessageColor) << 8) | 0xFF);
+            ColorPickerBox partyMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            partyMessageColor.SetHue(color);
+            butttonPartyMessageColor.MouseClick += (sender, e) =>
+            {
+                // TODO: fix multi opening
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => partyMessageColor.SetHue(s));
+                UIManager.Add(pickerGump);
+            };
+            item.AddChildren(partyMessageColor);
+            text = new Label("Party message color", true, 1)
+            {
+                X = 20
+            };
+            item.AddChildren(text);
+            rightArea.AddChildren(item);
+
+
+            item = new ScrollAreaItem();
+            Button buttonGuildMessageColor = new Button((int)Buttons.GuildMessageColor, 0x00D4, 0x00D4)
+            {
+                ButtonAction = ButtonAction.Activate,
+            };
+            item.AddChildren(buttonGuildMessageColor);
+            color = 0xFF7F7F7F;
+            if (_settings.GuildMessageColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.GuildMessageColor) << 8) | 0xFF);
+            ColorPickerBox guildMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            guildMessageColor.SetHue(color);
+            buttonGuildMessageColor.MouseClick += (sender, e) =>
+            {
+                // TODO: fix multi opening
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => guildMessageColor.SetHue(s));
+                UIManager.Add(pickerGump);
+            };
+            item.AddChildren(guildMessageColor);
+            text = new Label("Guild message color", true, 1)
+            {
+                X = 20
+            };
+            item.AddChildren(text);
+            rightArea.AddChildren(item);
+
+
+            item = new ScrollAreaItem();
+            Button buttonAllyMessageColor = new Button((int)Buttons.AllyMessageColor, 0x00D4, 0x00D4)
+            {
+                ButtonAction = ButtonAction.Activate,
+            };
+            item.AddChildren(buttonAllyMessageColor);
+            color = 0xFF7F7F7F;
+            if (_settings.AllyMessageColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.AllyMessageColor) << 8) | 0xFF);
+            ColorPickerBox allyMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            allyMessageColor.SetHue(color);
+            buttonAllyMessageColor.MouseClick += (sender, e) =>
+            {
+                // TODO: fix multi opening
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => allyMessageColor.SetHue(s));
+                UIManager.Add(pickerGump);
+            };
+            item.AddChildren(allyMessageColor);
+            text = new Label("Ally message color", true, 1)
+            {
+                X = 20
+            };
+            item.AddChildren(text);
+            rightArea.AddChildren(item);
+
+
+
+          
+
+
+
+            AddChildren(rightArea, PAGE);
+        }
+
+
+        private void BuildCombat()
+        {
+            const int PAGE = 8;
+
+            ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
+
+
+            ScrollAreaItem item = new ScrollAreaItem();
+            Button buttonInnocentColor = new Button((int)Buttons.InnocentColor, 0x00D4, 0x00D4)
+            {
+                ButtonAction = ButtonAction.Activate,
+            };
+            item.AddChildren(buttonInnocentColor);
+            uint color = 0xFF7F7F7F;
+            if (_settings.InnocentColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.InnocentColor) << 8) | 0xFF);
+            ColorPickerBox innocentColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+
+            innocentColor.SetHue(color);
+            buttonInnocentColor.MouseClick += (sender, e) =>
+            {
+                // TODO: fix multi opening
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => innocentColor.SetHue(s));
+                UIManager.Add(pickerGump);
+            };
+            item.AddChildren(innocentColor);
+            Label text = new Label("Innocent color", true, 1)
+            {
+                X = 20,
+            };
+            item.AddChildren(text);
+
+            Button buttonFriendColor = new Button((int)Buttons.FriendColor, 0x00D4, 0x00D4)
+            {
+                ButtonAction = ButtonAction.Activate,
+                Y = buttonInnocentColor.Height,
+            };
+            item.AddChildren(buttonFriendColor);
+            color = 0xFF7F7F7F;
+            if (_settings.FriendColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.FriendColor) << 8) | 0xFF);
+            ColorPickerBox friendColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
+            {
+                Y = buttonInnocentColor.Height + 3,
+            };
+
+            friendColor.SetHue(color);
+            buttonFriendColor.MouseClick += (sender, e) =>
+            {
+                // TODO: fix multi opening
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => friendColor.SetHue(s));
+                UIManager.Add(pickerGump);
+            };
+            item.AddChildren(friendColor);
+            text = new Label("Friend color", true, 1)
+            {
+                X = 20,
+                Y = buttonInnocentColor.Height,
+            };
+            item.AddChildren(text);
+
+
+            Button buttonCriminalColor = new Button((int)Buttons.CriminalColor, 0x00D4, 0x00D4)
+            {
+                ButtonAction = ButtonAction.Activate,
+                Y = buttonFriendColor.Bounds.Bottom
+            };
+            item.AddChildren(buttonCriminalColor);
+            color = 0xFF7F7F7F;
+            if (_settings.CriminalColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.CriminalColor) << 8) | 0xFF);
+            ColorPickerBox criminalColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
+            {
+                Y = buttonFriendColor.Bounds.Bottom + 3
+            };
+
+            criminalColor.SetHue(color);
+            buttonCriminalColor.MouseClick += (sender, e) =>
+            {
+                // TODO: fix multi opening
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => criminalColor.SetHue(s));
+                UIManager.Add(pickerGump);
+            };
+            item.AddChildren(criminalColor);
+            text = new Label("Criminal color", true, 1)
+            {
+                X = 20,
+                Y = buttonFriendColor.Bounds.Bottom,
+            };
+            item.AddChildren(text);
+
+
+            Button buttonEnemyColor = new Button((int)Buttons.EnemyColor, 0x00D4, 0x00D4)
+            {
+                ButtonAction = ButtonAction.Activate,
+                X = 150,
+            };
+            item.AddChildren(buttonEnemyColor);
+            color = 0xFF7F7F7F;
+            if (_settings.EnemyColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.EnemyColor) << 8) | 0xFF);
+            ColorPickerBox enemyColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
+            {
+                X = 150 + 3
+            };
+
+            enemyColor.SetHue(color);
+            buttonEnemyColor.MouseClick += (sender, e) =>
+            {
+                // TODO: fix multi opening
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => enemyColor.SetHue(s));
+                UIManager.Add(pickerGump);
+            };
+            item.AddChildren(enemyColor);
+            text = new Label("Enemy color", true, 1)
+            {
+                X = 150 + 20,
+            };
+            item.AddChildren(text);
+
+
+            Button buttonMurdererColor = new Button((int)Buttons.MurdererColor, 0x00D4, 0x00D4)
+            {
+                ButtonAction = ButtonAction.Activate,
+                X = 150,
+                Y = buttonEnemyColor.Bounds.Bottom
+            };
+            item.AddChildren(buttonMurdererColor);
+            color = 0xFF7F7F7F;
+            if (_settings.MurdererColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.MurdererColor) << 8) | 0xFF);
+            ColorPickerBox murdererColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
+            {
+                X = 150 + 3,
+                Y = buttonEnemyColor.Bounds.Bottom + 3
+            };
+
+            murdererColor.SetHue(color);
+            buttonMurdererColor.MouseClick += (sender, e) =>
+            {
+                // TODO: fix multi opening
+                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => murdererColor.SetHue(s));
+                UIManager.Add(pickerGump);
+            };
+            item.AddChildren(murdererColor);
+            text = new Label("Murderer color", true, 1)
+            {
+                X = 150 + 20,
+                Y = buttonEnemyColor.Bounds.Bottom
+            };
+            item.AddChildren(text);
+
+            rightArea.AddChildren(item);
+
+
+            item = new ScrollAreaItem();
+            Checkbox queryBeforeAttact = new Checkbox(0x00D2, 0x00D3, "Query before attack", 1)
+            {
+                Y = 30,
+                IsChecked = _settings.CriminalActionQuery
+            };
+            item.AddChildren(queryBeforeAttact);
+            rightArea.AddChildren(item);
+
+
+            AddChildren(rightArea, PAGE);
+        }
+
+        //class LeftButton : GumpControl
+        //{
+        //    public LeftButton()
+        //    {
+        //        CanMove = false;
+        //        CanCloseWithRightClick = false;
+        //        AcceptMouseInput = true;
+
+        //        //ResizePic background = new ResizePic(0x23F0);
+        //        GumpPicTiled background = new GumpPicTiled(0x462);
+        //        background.AddChildren(new HoveredLabel("General", true, 0xFF, 23, 100, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER));
+        //        AddChildren(background);
+
+        //    }
+        //}
+        public override void OnButtonClick(int buttonID)
+        {
+            switch ((Buttons)buttonID)
+            {
+                case Buttons.Cancel:
+                    Dispose();
+                    break;
+                case Buttons.Apply:
+                    Apply();
+                    break;
+                case Buttons.Default:
+                    SetDefault();
+                    break;
+                case Buttons.Ok:
+                    Apply();
+                    Dispose();
+                    break;
+
+                //case Buttons.SpeechColor: break;
+                //case Buttons.EmoteColor: break;
+                //case Buttons.PartyMessageColor: break;
+                //case Buttons.GuildMessageColor: break;
+                //case Buttons.AllyMessageColor: break;
+                //case Buttons.InnocentColor: break;
+                //case Buttons.FriendColor: break;
+                //case Buttons.CriminalColor: break;
+                //case Buttons.EnemyColor: break;
+                //case Buttons.MurdererColor: break;
             }
         }
 
+        private void SetDefault()
+        {
 
-        enum Buttons
+        }
+
+        private void Apply()
+        {
+
+        }
+
+        private enum Buttons
         {
             Cancel,
             Apply,
             Default,
-            Ok
+            Ok,
+
+            SpeechColor,
+            EmoteColor,
+            PartyMessageColor,
+            GuildMessageColor,
+            AllyMessageColor,
+
+            InnocentColor,
+            FriendColor,
+            CriminalColor,
+            EnemyColor,
+            MurdererColor,
+
         }
 
     }

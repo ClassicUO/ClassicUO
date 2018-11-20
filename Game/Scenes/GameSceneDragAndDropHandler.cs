@@ -1,6 +1,7 @@
 ﻿using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
@@ -42,6 +43,7 @@ namespace ClassicUO.Game.Scenes
         {
             GameActions.DropDown(HeldItem, Position.Invalid, entity.Serial);
             ClearHolding();
+            Mouse.CancelDoubleClick = true;
         }
 
         private void PickupItemBegin(Item item, int x, int y, int? amount = null)
@@ -61,6 +63,8 @@ namespace ClassicUO.Game.Scenes
                 item.Position = entity.Position;
                 entity.Items.Remove(item);
                 //item.Container = Serial.Invalid;
+
+                entity.Items.ProcessDelta();
             }
 
             CloseItemGumps(item);
@@ -85,7 +89,7 @@ namespace ClassicUO.Game.Scenes
             DropHeldItemToWorld(position.X, position.Y, position.Z);
         }
 
-        private void DropHeldItemToWorld(ushort x, ushort y, sbyte z)
+        private void DropHeldItemToWorld(int x, int y, sbyte z)
         {
             GameObject obj = SelectedObject;
             Serial serial;
@@ -101,40 +105,50 @@ namespace ClassicUO.Game.Scenes
 
             GameActions.DropDown(HeldItem.Serial, x, y, z, serial);
             ClearHolding();
+            Mouse.CancelDoubleClick = true;
         }
 
         private void DropHeldItemToContainer(Item container)
         {
             Rectangle bounds = ContainerManager.Get(container.Graphic).Bounds;
-            ushort x = (ushort) RandomHelper.GetValue(bounds.Left, bounds.Right);
-            ushort y = (ushort) RandomHelper.GetValue(bounds.Top, bounds.Bottom);
+            int x = RandomHelper.GetValue(bounds.Left, bounds.Right);
+            int y = RandomHelper.GetValue(bounds.Top, bounds.Bottom);
             DropHeldItemToContainer(container, x, y);
         }
 
-        private void DropHeldItemToContainer(Item container, ushort x, ushort y)
+        private void DropHeldItemToContainer(Item container, int x, int y)
         {
             Rectangle bounds = ContainerManager.Get(container.Graphic).Bounds;
-            SpriteTexture texture = Art.GetStaticTexture(HeldItem.DisplayedGraphic);
+            ArtTexture texture = Art.GetStaticTexture(HeldItem.DisplayedGraphic);
+
+            if (texture != null && !texture.IsDisposed)
+            {
+                x -= texture.Width / 2;
+                y -= texture.Height / 2;
+
+                if (x + texture.Width > bounds.Width)
+                    x = bounds.Width - texture.Width;
+
+                if (y + texture.Height > bounds.Height)
+                    y = bounds.Height - texture.Height;
+            }
 
             if (x < bounds.X)
-                x = (ushort) bounds.X;
-
-            if (x > bounds.Width - texture.Width)
-                x = (ushort) (bounds.Width - texture.Width);
+                x = bounds.X;
 
             if (y < bounds.Y)
-                y = (ushort) bounds.Y;
+                y = bounds.Y;
 
-            if (y > bounds.Height - texture.Height)
-                y = (ushort) (bounds.Height - texture.Height);
             GameActions.DropDown(HeldItem.Serial, x, y, 0, container);
             ClearHolding();
+            Mouse.CancelDoubleClick = true;
         }
 
         private void WearHeldItem(Mobile target)
         {
             GameActions.Equip(HeldItem, Layer.Invalid, target);
             ClearHolding();
+            Mouse.CancelDoubleClick = true;
         }
 
         public void ClearHolding()

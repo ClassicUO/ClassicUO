@@ -37,6 +37,7 @@ using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
@@ -1730,7 +1731,12 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 0x14: // display popup/context menu
-
+                    PopupMenuData data = PopupMenuData.Parse(p);
+                    Service.Get<UIManager>().Add(new PopupMenuGump(data)
+                    {
+                        X = Mouse.Position.X,
+                        Y = Mouse.Position.Y
+                    });
                     break;
                 //===========================================================================================
                 //===========================================================================================

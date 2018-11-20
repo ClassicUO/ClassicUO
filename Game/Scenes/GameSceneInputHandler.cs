@@ -71,7 +71,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             GumpControl control = UIManager.MouseOverControl;
 
-                            if (control is ItemGumpling gumpling)
+                            if (control is ItemGump gumpling)
                                 obj = gumpling.Item;
                             else if (control.Parent is MobileHealthGump healthGump)
                                 obj = healthGump.Mobile;
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.Scenes
 
                     switch (target)
                     {
-                        case ItemGumpling gumpling when !(target is ItemGumplingPaperdoll):
+                        case ItemGump gumpling when !(target is ItemGumpPaperdoll):
 
                         {
                             Item item = gumpling.Item;
@@ -125,9 +125,7 @@ namespace ClassicUO.Game.Scenes
                             {
                                 if (item.Container.IsItem)
                                 {
-                                    SpriteTexture texture = Art.GetStaticTexture(item.Graphic);
-
-                                    DropHeldItemToContainer(World.Items.Get(item.Container), (ushort)(target.X + (Mouse.Position.X - target.ScreenCoordinateX) - texture.Width / 2), (ushort)(target.Y + (Mouse.Position.Y - target.ScreenCoordinateY) - texture.Height / 2));
+                                    DropHeldItemToContainer(World.Items.Get(item.Container), (target.X + (Mouse.Position.X - target.ScreenCoordinateX)), (target.Y + (Mouse.Position.Y - target.ScreenCoordinateY)));
                                 }
                             }
 
@@ -136,13 +134,20 @@ namespace ClassicUO.Game.Scenes
                         case GumpPicContainer container:
 
                         {
-                            SelectedObject = container.Item;
+                                SelectedObject = container.Item;
 
-                            SpriteTexture texture = Art.GetStaticTexture(container.Item.Graphic);
+                                //ArtTexture texture = Art.GetStaticTexture(container.Item.DisplayedGraphic);
 
-                            int x = Mouse.Position.X - texture.Width / 2 - (target.X + target.Parent.X);
-                            int y = Mouse.Position.Y - texture.Height / 2 - (target.Y + target.Parent.Y);
-                            DropHeldItemToContainer(container.Item, (ushort)x, (ushort)y);
+                                //int x = Mouse.Position.X - texture.Width / 2 - target.ScreenCoordinateX;
+                                //int y = Mouse.Position.Y - texture.Height / 2 - target.ScreenCoordinateY;
+
+                                int x = Mouse.Position.X - target.ScreenCoordinateX;
+                                int y = Mouse.Position.Y - target.ScreenCoordinateY;
+
+                                //x -= texture.Width / 2;
+                                //y -= texture.Height / 2;
+
+                                DropHeldItemToContainer(container.Item, x, y);
 
                             break;
                         }
@@ -243,7 +248,12 @@ namespace ClassicUO.Game.Scenes
                                 _inqueue = true;
                                 _queuedObject = entity;
                                 _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
-                                _queuedAction = () => GameActions.SingleClick(entity);
+                                _queuedAction = () =>
+                                {
+                                    if (!World.ClientFeatures.TooltipsEnabled)
+                                        GameActions.SingleClick(entity);
+                                    GameActions.OpenPopupMenu(entity);
+                                };
                             }
 
                             break;
@@ -381,13 +391,13 @@ namespace ClassicUO.Game.Scenes
                                     status?.Dispose();
                                 }
 
-                                MobileHealthGump currentMobileHealthGump;
+                               
                                 MobileGumpStack.Add(mobile);
-                                UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, _mousePicker.Position.X, _mousePicker.Position.Y));
 
                                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
-
-                                UIManager.AttemptDragControl(currentMobileHealthGump, new Point(_mousePicker.Position.X + rect.Width / 2, _mousePicker.Position.Y + rect.Height / 2), true);
+                                MobileHealthGump currentMobileHealthGump;
+                                UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, Mouse.Position.X - rect.Width / 2, Mouse.Position.Y - rect.Height / 2));
+                                UIManager.AttemptDragControl(currentMobileHealthGump, Mouse.Position, true);
 
                             }
                             break;
@@ -463,7 +473,7 @@ namespace ClassicUO.Game.Scenes
 
                         PaperDollInteractable gumpling = null;
 
-                        if (target is ItemGumplingPaperdoll)
+                        if (target is ItemGumpPaperdoll)
                             gumpling = (PaperDollInteractable)target.Parent;
                         else if (target is GumpPic pic && pic.IsPaperdoll)
                         {

@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Views
                     Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
                 }
 
-                HueVector = RenderExtentions.GetHueVector(GameObject.Hue, TileData.IsPartialHue((long) item.ItemData.Flags), TileData.IsTranslucent((long) item.ItemData.Flags) ? .5f : 0, false);
+                HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, TileData.IsPartialHue((long) item.ItemData.Flags), TileData.IsTranslucent((long) item.ItemData.Flags) ? .5f : 0, false);
 
                 if (item.Amount > 1 && TileData.IsStackable((long) item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
                 {
@@ -156,7 +156,7 @@ namespace ClassicUO.Game.Views
 
                 if (animIndex < direction.FrameCount)
                 {
-                    TextureAnimationFrame frame = direction.Frames[animIndex];
+                    AnimationFrameTexture frame = direction.Frames[animIndex];
 
                     if (frame == null || frame.IsDisposed) return false;
                     int drawCenterY = frame.CenterY;
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Views
                     int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY;
                     Texture = frame;
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-                    HueVector = RenderExtentions.GetHueVector(color);
+                    HueVector = ShaderHuesTraslator.GetHueVector(color);
                     base.Draw(spriteBatch, position, objectList);
                     Pick(frame.ID, Bounds, position, objectList);
                 }

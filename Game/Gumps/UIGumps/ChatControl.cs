@@ -399,7 +399,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
             {
-                return _renderedText.Draw(spriteBatch, position, RenderExtentions.GetHueVector(0, false, Alpha < 1.0f ? Alpha : 0, true));
+                return _renderedText.Draw(spriteBatch, position, ShaderHuesTraslator.GetHueVector(0, false, Alpha < 1.0f ? Alpha : 0, true));
             }
 
             public void Update(double totalMS, double frameMS)

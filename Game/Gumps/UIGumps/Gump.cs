@@ -42,6 +42,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
 
         public bool BlockMovement { get; set; }
+        public bool CloseIfClickOutside { get; set; }
 
         public override bool CanMove
         {
@@ -49,10 +50,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             set => base.CanMove = value;
         }
 
-        public override void Dispose()
-        {
-            base.Dispose();
-        }
 
         public override void Update(double totalMS, double frameMS)
         {

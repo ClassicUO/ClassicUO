@@ -1297,10 +1297,12 @@ namespace ClassicUO.Network
 
     public sealed class PPing : PacketWriter
     {
-        public PPing() : base(0x73)
+        private PPing() : base(0x73)
         {
             WriteByte(0);
         }
+
+        public static Lazy<PPing> Instance { get; } = new Lazy<PPing>( () => new PPing() );
     }
 
     public sealed class PClientViewRange : PacketWriter

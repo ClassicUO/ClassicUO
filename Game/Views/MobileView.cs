@@ -67,7 +67,7 @@ namespace ClassicUO.Game.Views
             IsFlipped = mirror;
             int mountOffset = 0;
             SetupLayers(dir, ref mobile, ref mountOffset);
-            ref TextureAnimationFrame bodyFrame = ref _frames[0].Frame;
+            ref AnimationFrameTexture bodyFrame = ref _frames[0].Frame;
 
             if (bodyFrame == null)
                 return false;
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Views
             for (int i = 0; i < _layerCount; i++)
             {
                 ViewLayer vl = _frames[i];
-                TextureAnimationFrame frame = vl.Frame;
+                AnimationFrameTexture frame = vl.Frame;
 
                 if (frame.IsDisposed) continue;
                 int x = drawX + frame.CenterX;
@@ -103,7 +103,7 @@ namespace ClassicUO.Game.Views
                     total.Height = frame.Height;
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-                HueVector = RenderExtentions.GetHueVector(mobile.IsHidden ? 0x038E : vl.Hue, vl.IsParital, 0, false);
+                HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : vl.Hue, vl.IsParital, 0, false);
                 base.Draw(spriteBatch, position, objectList);
                 Pick(frame.ID, Bounds, position, objectList);
             }
@@ -265,7 +265,7 @@ namespace ClassicUO.Game.Views
 
             if (animIndex < direction.FrameCount)
             {
-                ref TextureAnimationFrame frame = ref direction.Frames[animIndex];
+                ref AnimationFrameTexture frame = ref direction.Frames[animIndex];
 
                 if (frame == null || frame.IsDisposed)
                 {
@@ -407,7 +407,7 @@ namespace ClassicUO.Game.Views
         private struct ViewLayer
         {
             public Hue Hue;
-            public TextureAnimationFrame Frame;
+            public AnimationFrameTexture Frame;
             public Graphic Graphic;
             public bool IsParital;
             public int OffsetY;

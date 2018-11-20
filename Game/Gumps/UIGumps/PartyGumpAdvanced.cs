@@ -144,10 +144,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             base.Draw(spriteBatch, position, hue);
-            spriteBatch.Draw2D(_line, new Rectangle(position.X + 30, position.Y + 50, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));
-            spriteBatch.Draw2D(_line, new Rectangle(position.X + 95, position.Y + 50, 1, 200), RenderExtentions.GetHueVector(0, false, .5f, false));
-            spriteBatch.Draw2D(_line, new Rectangle(position.X + 245, position.Y + 50, 1, 200), RenderExtentions.GetHueVector(0, false, .5f, false));
-            spriteBatch.Draw2D(_line, new Rectangle(position.X + 30, position.Y + 250, 260, 1), RenderExtentions.GetHueVector(0, false, .5f, false));
+            spriteBatch.Draw2D(_line, new Rectangle(position.X + 30, position.Y + 50, 260, 1), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            spriteBatch.Draw2D(_line, new Rectangle(position.X + 95, position.Y + 50, 1, 200), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            spriteBatch.Draw2D(_line, new Rectangle(position.X + 245, position.Y + 50, 1, 200), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            spriteBatch.Draw2D(_line, new Rectangle(position.X + 30, position.Y + 250, 260, 1), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
 
             return true;
         }

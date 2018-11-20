@@ -358,7 +358,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             AddChildren(button, 3);
             uint color = 0xFF7F7F7F;
-            if (_settings.TooltipsTextColor != 0xFFFF) color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.TooltipsTextColor) << 8) | 0xFF);
+            if (_settings.TooltipsTextColor != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.TooltipsTextColor) << 8) | 0xFF);
             _colorPickerTooltipText = new ColorPickerBox(67, 154, 1, 1, 13, 14);
             _colorPickerTooltipText.SetHue(color);
             AddChildren(_colorPickerTooltipText, 3);

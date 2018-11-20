@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            return spriteBatch.Draw2D(_texture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
+            return spriteBatch.Draw2D(_texture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
         }
 
         public override void Dispose()

@@ -30,12 +30,12 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ItemGumplingPaperdoll : ItemGumpling, IMobilePaperdollOwner
+    internal class ItemGumpPaperdoll : ItemGump, IMobilePaperdollOwner
     {
         private readonly ushort _gumpIndex;
         private readonly bool _isTransparent;
 
-        public ItemGumplingPaperdoll(int x, int y, Item item, Mobile owner, bool transparent = false) : base(item)
+        public ItemGumpPaperdoll(int x, int y, Item item, Mobile owner, bool transparent = false) : base(item)
         {
             X = x;
             Y = y;
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (Item.IsDisposed || IsDisposed)
                 return false;
-            return spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue((long)Item.ItemData.Flags), _isTransparent ? .5f : 0, false));
+            return spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue((long)Item.ItemData.Flags), _isTransparent ? .5f : 0, false));
         }
 
 

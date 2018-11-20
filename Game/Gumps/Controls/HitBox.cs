@@ -3,30 +3,62 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ClassicUO.Input;
+
+using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    class HitBox: GumpControl
+    class HitBox : GumpControl
     {
-        int _buttonId;
+        private readonly SpriteTexture _texture;
 
-        public HitBox(int buttonId, int x, int y, int width, int height)
+        public HitBox(int x, int y, int w, int h) : base()
         {
-            _buttonId = buttonId;
+            CanMove = false;
+            AcceptMouseInput = true;
+            Alpha = 0.75f;
+            IsTransparent = true;
+            _texture = new SpriteTexture(1, 1);
+
+            _texture.SetData(new uint[1]
+            {
+                0xFFFF_FFFF
+            });
+
             X = x;
             Y = y;
-            Width = width;
-            Height = height;
-
-            AcceptMouseInput = true;
+            Width = w;
+            Height = h;
+            WantUpdateSize = false;
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        public override void Update(double totalMS, double frameMS)
         {
-            OnButtonClick(_buttonId);
+            if (IsDisposed)
+                return;
 
-            base.OnMouseClick(x, y, button);
+            base.Update(totalMS, frameMS);
+
+            _texture.Ticks = (long) totalMS;
+        }
+
+        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        {
+            if (IsDisposed)
+                return false;
+
+            if (MouseIsOver)
+                return spriteBatch.Draw2D(_texture, position, new Rectangle(0, 0, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
+
+            return true;
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _texture?.Dispose();
         }
     }
 }

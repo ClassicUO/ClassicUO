@@ -128,7 +128,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
 
             if (FadeOut)
-                hue = RenderExtentions.GetHueVector(hue.HasValue ? (int) hue.Value.X : 0, false, _alpha, false);
+                hue = ShaderHuesTraslator.GetHueVector(hue.HasValue ? (int) hue.Value.X : 0, false, _alpha, false);
             _gText.Draw(spriteBatch, position, hue);
 
             return base.Draw(spriteBatch, position, hue);
