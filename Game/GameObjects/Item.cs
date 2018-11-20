@@ -74,6 +74,7 @@ namespace ClassicUO.Game.GameObjects
         private bool _isMulti;
         private Layer _layer;
         private ulong _spellsBitFiled;
+        private uint _price;
 
         public Item(Serial serial) : base(serial)
         {
@@ -82,6 +83,18 @@ namespace ClassicUO.Game.GameObjects
 
         
 
+        public uint Price
+        {
+            get => _price;
+            set
+            {
+                if (_price != value)
+                {
+                    _price = value;
+                    _delta |= Delta.Attributes;
+                }
+            }
+        }
 
         public GameEffect Effect
         {
