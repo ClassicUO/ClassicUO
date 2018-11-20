@@ -53,6 +53,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (Texture == null)
                 {
                     Dispose();
+
                     return;
                 }
 

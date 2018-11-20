@@ -21,12 +21,9 @@
 
 #endregion
 
-using System;
-
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
-using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
@@ -63,7 +60,7 @@ namespace ClassicUO.Game.Scenes
 
         public Texture2D ViewportTexture => _renderTarget;
 
-        public Point MouseOverWorldPosition => new Point((int)((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale), (int)((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY)* Scale));
+        public Point MouseOverWorldPosition => new Point((int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale), (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale));
 
         public GameObject SelectedObject
         {
@@ -90,7 +87,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
         private void ClearDequeued()
         {
             if (_inqueue)
@@ -105,10 +101,8 @@ namespace ClassicUO.Game.Scenes
         public override void Load()
         {
             base.Load();
-
             Service.Register(_effectManager = new EffectManager());
             Service.Register(_staticManager = new StaticManager());
-
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
             UIManager.Add(new WorldViewportGump(this));
@@ -133,13 +127,9 @@ namespace ClassicUO.Game.Scenes
                 if (IsMouseOverWorld)
                 {
                     if (!e)
-                    {
                         Scale += 0.1f;
-                    }
                     else
-                    {
                         Scale -= 0.1f;
-                    }
 
                     if (Scale < 0.7f)
                         Scale = 0.7f;
@@ -147,9 +137,7 @@ namespace ClassicUO.Game.Scenes
                         Scale = 2.3f;
                 }
             };
-
             UIManager.Add(new OptionsGump1());
-
         }
 
         public override void Unload()
@@ -179,15 +167,12 @@ namespace ClassicUO.Game.Scenes
         {
             if (!World.InGame)
                 return;
-
 #if ORIONSORT
             (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
             //CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
             //_maxZ = maxItemZ;
             //_drawTerrain = drawTerrain;
-
             UpdateMaxDrawZ();
-
             _renderListCount = 0;
             int minX = minTile.X;
             int minY = minTile.Y;
@@ -225,7 +210,6 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (x < minX || x > maxX || y < minY || y > maxY)
                             break;
-
                         ref Tile tile = ref World.Map.GetTile(x, y);
 
                         if (tile != Tile.Invalid)
@@ -307,7 +291,6 @@ namespace ClassicUO.Game.Scenes
         {
             if (!World.InGame)
                 return false;
-
             DrawWorld(sb3D);
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
 
@@ -330,7 +313,6 @@ namespace ClassicUO.Game.Scenes
 
                 if (obj.Z <= _maxGroundZ && obj.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList))
                     RenderedObjectsCount++;
-
             }
 #else
             CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);

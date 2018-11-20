@@ -39,6 +39,7 @@ namespace ClassicUO.Game.Gumps
 {
     public sealed class UIManager
     {
+        private readonly Dictionary<Serial, Point> _gumpPositionCache = new Dictionary<Serial, Point>();
         private readonly List<GumpControl> _gumps = new List<GumpControl>();
         private readonly List<object> _inputBlockingObjects = new List<object>();
         private readonly GumpControl[] _mouseDownControls = new GumpControl[5];
@@ -54,7 +55,6 @@ namespace ClassicUO.Game.Gumps
             GameCursor = new GameCursor(this);
             _sbUI = Service.Get<SpriteBatchUI>();
             InputManager = Service.Get<InputManager>();
-
 
             InputManager.MouseDragging += (sender, e) =>
             {
@@ -109,12 +109,9 @@ namespace ClassicUO.Game.Gumps
                         _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Left);
                 }
                 else
-                {
                     _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
-                }
 
                 CloseIfClickOutGumps();
-
                 _mouseDownControls[btn] = null;
             };
 
@@ -176,12 +173,9 @@ namespace ClassicUO.Game.Gumps
                         _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Right);
                 }
                 else
-                {
                     _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Right);
-                }
 
                 CloseIfClickOutGumps();
-
                 _mouseDownControls[btn] = null;
             };
 
@@ -255,14 +249,9 @@ namespace ClassicUO.Game.Gumps
                 _inputBlockingObjects.Remove(obj);
         }
 
-        private readonly Dictionary<Serial, Point> _gumpPositionCache = new Dictionary<Serial, Point>();
-
         private void CloseIfClickOutGumps()
         {
-            foreach (Gump gump in _gumps.OfType<Gump>().Where(s => s.CloseIfClickOutside))
-            {
-                gump.Dispose();
-            }
+            foreach (Gump gump in _gumps.OfType<Gump>().Where(s => s.CloseIfClickOutside)) gump.Dispose();
         }
 
         public void SavePosition(Serial serverSerial, Point point)
@@ -277,9 +266,8 @@ namespace ClassicUO.Game.Gumps
                 x = pos.X;
                 y = pos.Y;
             }
-            else 
-                SavePosition(gumpID, new Point(x ,y));
-
+            else
+                SavePosition(gumpID, new Point(x, y));
 
             Gump gump = new Gump(sender, gumpID)
             {
@@ -289,7 +277,6 @@ namespace ClassicUO.Game.Gumps
                 CanCloseWithRightClick = true,
                 CanCloseWithEsc = true
             };
-
             int group = 0;
             int page = 0;
             int index = 0;
@@ -436,10 +423,10 @@ namespace ClassicUO.Game.Gumps
                             if (World.ClientFeatures.TooltipsEnabled)
                             {
                                 string cliloc = Cliloc.GetString(int.Parse(gparams[1]));
-
                                 GumpControl last = gump.Children.Count > 0 ? gump.Children.Last() : null;
                                 last?.SetTooltip(cliloc);
                             }
+
                             break;
                         case "noresize":
 
@@ -489,11 +476,7 @@ namespace ClassicUO.Game.Gumps
             for (int i = 0; i < _gumps.Count; i++)
             {
                 GumpControl g = _gumps[i];
-
-                if (g.IsDisposed)
-                {
-                    _gumps.RemoveAt(i--);
-                }
+                if (g.IsDisposed) _gumps.RemoveAt(i--);
             }
 
             GameCursor.Update(totalMS, frameMS);

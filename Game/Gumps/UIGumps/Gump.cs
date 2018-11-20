@@ -42,6 +42,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
 
         public bool BlockMovement { get; set; }
+
         public bool CloseIfClickOutside { get; set; }
 
         public override bool CanMove
@@ -49,7 +50,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             get => !BlockMovement && base.CanMove;
             set => base.CanMove = value;
         }
-
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -104,7 +104,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
 
                 UIManager.SavePosition(ServerSerial, new Point(X, Y));
-
                 Dispose();
             }
         }

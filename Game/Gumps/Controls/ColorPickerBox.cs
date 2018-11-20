@@ -42,11 +42,10 @@ namespace ClassicUO.Game.Gumps.Controls
         private int _cellWidth;
         private SpriteTexture _colorTable;
         private int _graduation, _selectedIndex;
-        private ushort[] _hues, _customPallete;
+        private ushort[] _hues;
+        private readonly ushort[] _customPallete;
         private Texture2D _pointer;
         public EventHandler ColorSelectedIndex;
-        public ushort[] GeneratedHues { get { CreateTexture(); return _hues; } }
-
 
         public ColorPickerBox(int x, int y, int rows = 10, int columns = 20, int cellW = 8, int cellH = 8, ushort[] customPallete = null)
         {
@@ -59,9 +58,18 @@ namespace ClassicUO.Game.Gumps.Controls
             _cellWidth = cellW;
             _cellHeight = cellH;
             _customPallete = customPallete;
-
             Graduation = 1;
             AcceptMouseInput = true;
+        }
+
+        public ushort[] GeneratedHues
+        {
+            get
+            {
+                CreateTexture();
+
+                return _hues;
+            }
         }
 
         public int Graduation
@@ -133,7 +141,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     SelectedIndex = 0;
             }
 
-            spriteBatch.Draw2D(_colorTable, new Rectangle( position.X, position.Y, Width, Height), Vector3.Zero);
+            spriteBatch.Draw2D(_colorTable, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
 
             if (_hues.Length > 1)
                 spriteBatch.Draw2D(_pointer, new Rectangle((int) (position.X + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (position.Y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2), Vector3.Zero);
@@ -167,7 +175,6 @@ namespace ClassicUO.Game.Gumps.Controls
                 {
                     if (_customPallete != null)
                         startColor = _customPallete[y * _columns + x];
-
                     int colorIndex = (startColor + ((startColor + (startColor << 2)) << 1)) << 3;
                     colorIndex += (colorIndex / offset) << 2;
                     ushort color = *(ushort*) ((IntPtr) huesData + colorIndex);

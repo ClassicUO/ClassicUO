@@ -124,7 +124,7 @@ namespace ClassicUO.Game.Gumps.Controls
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (MaxValue != MinValue)
-                spriteBatch.Draw2D(_texture, new Point(position.X - 5, (int)(position.Y + _sliderPosition)), Vector3.Zero);
+                spriteBatch.Draw2D(_texture, new Point(position.X - 5, (int) (position.Y + _sliderPosition)), Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
         }

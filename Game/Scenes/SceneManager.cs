@@ -39,10 +39,8 @@ namespace ClassicUO.Game.Scenes
         {
             CurrentScene?.Dispose();
             CurrentScene = null;
-
             GC.Collect();
             GC.WaitForPendingFinalizers();
-
             GameLoop game = Service.Get<GameLoop>();
 
             switch (type)

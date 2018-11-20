@@ -116,7 +116,6 @@
 //                PacketReceived.Raise(_queue.Dequeue());
 //        }
 
-
 //        private void OnReceive(IAsyncResult result)
 //        {
 //            if (!IsConnected)

@@ -34,6 +34,14 @@ namespace ClassicUO.Network
             SetPacketId(id);
         }
 
+        protected override byte this[int index]
+        {
+            get => _data[index];
+            set => _data[index] = value;
+        }
+
+        public override int Length => _data.Length;
+
         protected void SetPacketId(byte id)
         {
             short len = PacketsTable.GetPacketLength(id);
@@ -42,14 +50,6 @@ namespace ClassicUO.Network
             _data[0] = id;
             Position = IsDynamic ? 3 : 1;
         }
-
-        protected override byte this[int index]
-        {
-            get => _data[index];
-            set => _data[index] = value;
-        }
-
-        public override int Length => _data.Length;
 
         public override byte[] ToArray()
         {

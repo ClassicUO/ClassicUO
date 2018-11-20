@@ -11,7 +11,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
         private readonly TextBox _textboxPassword;
         private Checkbox _checkboxSaveAccount;
 
-        public MainLoginGump(): base(0, 0)
+        public MainLoginGump() : base(0, 0)
         {
             Settings settings = Service.Get<Settings>();
 

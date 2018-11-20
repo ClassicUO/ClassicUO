@@ -63,7 +63,6 @@ namespace ClassicUO.Game.Scenes
                 item.Position = entity.Position;
                 entity.Items.Remove(item);
                 //item.Container = Serial.Invalid;
-
                 entity.Items.ProcessDelta();
             }
 
@@ -138,7 +137,6 @@ namespace ClassicUO.Game.Scenes
 
             if (y < bounds.Y)
                 y = bounds.Y;
-
             GameActions.DropDown(HeldItem.Serial, x, y, 0, container);
             ClearHolding();
             Mouse.CancelDoubleClick = true;

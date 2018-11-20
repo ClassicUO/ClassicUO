@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.System
@@ -11,7 +10,7 @@ namespace ClassicUO.Game.System
     internal class PartySystem
     {
         private static bool _allowPartyLoot;
-        
+
         public static bool IsInParty => Members.Count > 1;
 
         public static bool IsPlayerLeader => IsInParty && Leader == World.Player;

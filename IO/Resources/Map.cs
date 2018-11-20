@@ -125,9 +125,7 @@ namespace ClassicUO.IO.Resources
             int width = MapBlocksSize[i][0];
             int height = MapBlocksSize[i][1];
             int maxblockcount = width * height;
-          
             BlockData[i] = new IndexMap[maxblockcount];
-
             UOFile file = _filesMap[i];
             UOFile fileidx = _filesIdxStatics[i];
             UOFile staticfile = _filesStatics[i];
@@ -166,7 +164,6 @@ namespace ClassicUO.IO.Resources
                 if (address < endmapaddress)
                     realmapaddress = address;
                 ulong stidxaddress = staticidxaddress + (ulong) (block * staticidxblocksize);
-
                 StaidxBlock* bb = (StaidxBlock*) stidxaddress;
 
                 if (stidxaddress < endstaticidxaddress && bb->Size > 0 && bb->Position != 0xFFFFFFFF)
@@ -185,7 +182,6 @@ namespace ClassicUO.IO.Resources
 
                 BlockData[i][block] = new IndexMap(realmapaddress, realstaticaddress, realstaticcount, realmapaddress, realstaticaddress, realstaticcount);
             }
-
         }
 
         public static void UnloadMap(int i)
@@ -203,9 +199,8 @@ namespace ClassicUO.IO.Resources
 
             if (indexMap.MapAddress == 0)
                 return null;
-
-            MapBlock* mp = (MapBlock*)indexMap.MapAddress;
-            MapCells* cells = (MapCells*)&mp->Cells;
+            MapBlock* mp = (MapBlock*) indexMap.MapAddress;
+            MapCells* cells = (MapCells*) &mp->Cells;
 
             RadarMapBlock mb = new RadarMapBlock
             {
@@ -216,7 +211,6 @@ namespace ClassicUO.IO.Resources
             {
                 for (int y = 0; y < 8; y++)
                 {
-
                     ref MapCells cell = ref cells[y * 8 + x];
                     ref RadarMapcells outcell = ref mb.Cells[x, y];
                     outcell.Graphic = cell.TileID;
@@ -340,7 +334,6 @@ namespace ClassicUO.IO.Resources
         public readonly uint OriginalStaticCount;
         public readonly ulong StaticAddress;
         public readonly uint StaticCount;
-
         public static readonly IndexMap Invalid = new IndexMap();
     }
 }

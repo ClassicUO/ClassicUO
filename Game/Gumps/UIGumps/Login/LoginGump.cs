@@ -1,9 +1,8 @@
-
-﻿using ClassicUO.Configuration;
-using ClassicUO.Game.Gumps.Controls;
+﻿using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps.CharCreation;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
+
 using static ClassicUO.Game.Scenes.LoginScene;
 
 namespace ClassicUO.Game.Gumps.UIGumps.Login
@@ -11,7 +10,6 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
     internal class LoginGump : Gump
     {
         private readonly LoginScene loginScene;
-        
         private LoginStep currentStep;
         private GumpControl currentStepGump;
 
@@ -67,15 +65,16 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 case LoginStep.VerifyingAccount:
                 case LoginStep.LoginInToServer:
                 case LoginStep.EnteringBritania:
+
                     return GetLoadingScreen();
-
                 case LoginStep.CharacterSelection:
+
                     return new CharacterSelectionGump();
-
                 case LoginStep.ServerSelection:
-                    return new ServerSelectionGump();
 
+                    return new ServerSelectionGump();
                 case LoginStep.CharCreation:
+
                     return new CharCreationGump();
             }
 
@@ -86,22 +85,26 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
         {
             var labelText = "No Text";
             var showButtons = LoadingGump.Buttons.None;
-            
+
             if (!loginScene.LoginRejectionReason.HasValue)
             {
                 switch (loginScene.CurrentLoginStep)
                 {
-                    case LoginScene.LoginStep.Connecting:
+                    case LoginStep.Connecting:
                         labelText = Cliloc.GetString(3000002); // "Connecting..."
+
                         break;
-                    case LoginScene.LoginStep.VerifyingAccount:
+                    case LoginStep.VerifyingAccount:
                         labelText = Cliloc.GetString(3000003); // "Verifying Account..."
+
                         break;
-                    case LoginScene.LoginStep.LoginInToServer:
+                    case LoginStep.LoginInToServer:
                         labelText = Cliloc.GetString(3000053); // logging into shard
+
                         break;
-                    case LoginScene.LoginStep.EnteringBritania:
+                    case LoginStep.EnteringBritania:
                         labelText = Cliloc.GetString(3000001); // Entering Britania...
+
                         break;
                 }
             }
@@ -109,21 +112,26 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             {
                 switch (loginScene.LoginRejectionReason.Value)
                 {
-                    case LoginScene.LoginRejectionReasons.BadPassword:
-                    case LoginScene.LoginRejectionReasons.InvalidAccountPassword:
+                    case LoginRejectionReasons.BadPassword:
+                    case LoginRejectionReasons.InvalidAccountPassword:
                         labelText = Cliloc.GetString(3000036); // Incorrect username and/or password.
+
                         break;
-                    case LoginScene.LoginRejectionReasons.AccountInUse:
+                    case LoginRejectionReasons.AccountInUse:
                         labelText = Cliloc.GetString(3000034); // Someone is already using this account.
+
                         break;
-                    case LoginScene.LoginRejectionReasons.AccountBlocked:
+                    case LoginRejectionReasons.AccountBlocked:
                         labelText = Cliloc.GetString(3000035); // Your account has been blocked / banned
+
                         break;
-                    case LoginScene.LoginRejectionReasons.IdleExceeded:
+                    case LoginRejectionReasons.IdleExceeded:
                         labelText = Cliloc.GetString(3000004); // Login idle period exceeded (I use "Connection lost")
+
                         break;
-                    case LoginScene.LoginRejectionReasons.BadCommuncation:
+                    case LoginRejectionReasons.BadCommuncation:
                         labelText = Cliloc.GetString(3000037); // Communication problem.
+
                         break;
                 }
 
@@ -135,10 +143,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
         private void OnLoadingGumpButtonClick(int buttonId)
         {
-            if ((LoadingGump.Buttons)buttonId == LoadingGump.Buttons.OK)
-            {
-                loginScene.StepBack();
-            }
+            if ((LoadingGump.Buttons) buttonId == LoadingGump.Buttons.OK) loginScene.StepBack();
         }
     }
 }

@@ -25,7 +25,6 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -43,8 +42,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private float _sClickTime;
         private bool _sendClickIfNotDClick;
 
-
-        public ItemGump(Item item) : base()
+        public ItemGump(Item item)
         {
             AcceptMouseInput = true;
             Item = item;
@@ -52,10 +50,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Y = item.Position.Y;
             HighlightOnMouseOver = true;
             CanPickUp = true;
-
-
             var texture = Art.GetStaticTexture(item.DisplayedGraphic);
-
             Texture = texture;
             Width = texture.Width;
             Height = texture.Height;
@@ -109,7 +104,7 @@ namespace ClassicUO.Game.Gumps.Controls
             if (Art.Contains(Item.DisplayedGraphic, x, y))
                 return true;
 
-            if (Item.Amount > 1 && TileData.IsStackable((long)Item.ItemData.Flags))
+            if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags))
             {
                 if (Art.Contains(Item.DisplayedGraphic, x - 5, y - 5))
                     return true;
@@ -192,6 +187,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     {
                         overhead.Initialized = true;
                         overhead.TimeToLive = 4000;
+
                         Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth, style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
                         {
                             FadeOut = true

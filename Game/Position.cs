@@ -37,9 +37,7 @@ namespace ClassicUO.Game
         }
 
         public ushort X;
-
         public ushort Y;
-
         public sbyte Z;
 
         public static bool operator ==(Position p1, Position p2)
@@ -98,7 +96,9 @@ namespace ClassicUO.Game
         }
 
         public int DistanceTo(int x, int y)
-            => Math.Max(Math.Abs(x - X), Math.Abs(y - Y));
+        {
+            return Math.Max(Math.Abs(x - X), Math.Abs(y - Y));
+        }
 
         public double DistanceToSqrt(Position position)
         {

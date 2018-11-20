@@ -159,11 +159,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Dispose()
         {
-            for (int i = 0; i < _entries.Count; i++)
-            {
-                _entries[i]?.Dispose();
-            }
-
+            for (int i = 0; i < _entries.Count; i++) _entries[i]?.Dispose();
             base.Dispose();
         }
     }

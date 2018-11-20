@@ -31,19 +31,7 @@ namespace ClassicUO.Configuration
 {
     public sealed class Settings : NotifyPropertyChange
     {
-        private ushort _emoteColor = 0x0021;
         private ushort _allyMessageColor = 0x0057;
-        private ushort _guildMessageColor = 0x0044;
-        private ushort _partyMessageColor = 0x0044;
-        private ushort _speechColor = 0x02B2;
-        private ushort _tooltipsTextColor = 0xFFFF;
-
-        private ushort _criminalColor = 0x03B2;
-        private ushort _murdererColor = 0x0023;
-        private ushort _innocentColor = 0x005A;
-        private ushort _enemyColor = 0x0031;
-        private ushort _friendColor = 0x0044;
-
         private bool _alwaysRun;
         private bool _backgroundSound;
         private int _backpackStyle;
@@ -53,40 +41,50 @@ namespace ClassicUO.Configuration
         private int _containerDefaultX;
         private int _containerDefaultY;
         private bool _criminalActionQuery;
+        private ushort _criminalColor = 0x03B2;
         private bool _debug;
         private int _delayAppearTooltips;
+        private ushort _emoteColor = 0x0021;
         private bool _enablePathfind;
+        private ushort _enemyColor = 0x0031;
         private bool _footstepsSound;
+        private ushort _friendColor = 0x0044;
         private int _gameWindowHeight = 600;
         private int _gameWindowWidth = 800;
         private int _gameWindowX = 32;
         private int _gameWindowY = 32;
+        private ushort _guildMessageColor = 0x0044;
         private bool _highlightGameObjects = true;
+        private bool _highlightMobilesByFlags;
+        private ushort _innocentColor = 0x005A;
         private string _ip;
         private string _lastCharName;
         private int _maxFPS = 144;
+        private ushort _murdererColor = 0x0023;
         private bool _music;
         private int _musicVolume;
+        private ushort _partyMessageColor = 0x0044;
         private string _password;
         private ushort _port;
+        private bool _preloadMaps;
         private bool _profiler;
         private bool _reduceFpsInactiveWindow;
         private bool _scaleSpeechDelay;
+        private bool _showHPMobiles;
+        private int _showHPMobilesMode; // 0 = %, 1 = line, 2 = both
         private bool _showIncomingNames;
         private bool _skillReport;
         private bool _smoothMovement = true;
         private bool _sound;
         private int _soundVolume;
+        private ushort _speechColor = 0x02B2;
         private int _speechDelay = 500;
         private bool _statReport;
+        private ushort _tooltipsTextColor = 0xFFFF;
         private string _uoDir;
         private bool _useOldStatus;
         private string _username;
         private bool _useTooltips;
-        private bool _preloadMaps;
-        private bool _showHPMobiles;
-        private int _showHPMobilesMode = 0; // 0 = %, 1 = line, 2 = both
-        private bool _highlightMobilesByFlags;
 
         [JsonConstructor]
         public Settings()

@@ -22,7 +22,6 @@
 #endregion
 
 using System;
-using System.Text;
 using System.Text.Formatting;
 
 namespace ClassicUO.Network

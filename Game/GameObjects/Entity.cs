@@ -24,7 +24,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Interfaces;
@@ -65,7 +64,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Serial = serial;
             Items = new EntityCollection<Item>();
-            PositionChanged += OnPositionChanged;       
+            PositionChanged += OnPositionChanged;
         }
 
         //private void ItemsOnUpdated(object sender, CollectionChangedEventArgs<Item> e)
@@ -169,6 +168,8 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual bool Exists => World.Contains(Serial);
 
+        public uint PropertiesHash { get; set; }
+
         public DeferredEntity DeferredObject { get; set; }
 
         //public void SetCallbacks(Action<Entity> onUpdate, Action<Entity> onDispose)
@@ -201,8 +202,6 @@ namespace ClassicUO.Game.GameObjects
             foreach (Property p in props) _properties.TryAdd(temp++, p);
             _delta |= Delta.Properties;
         }
-
-        public uint PropertiesHash { get; set; }
 
         protected virtual void OnProcessDelta(Delta d)
         {
@@ -254,10 +253,8 @@ namespace ClassicUO.Game.GameObjects
         //    }         
         //}
 
-
         protected virtual void OnPositionChanged(object sender, EventArgs e)
         {
-            
         }
 
         public static implicit operator Serial(Entity entity)

@@ -72,7 +72,7 @@ namespace ClassicUO.Network
                 if (localEntry.AddressList.Length > 0)
                 {
 #pragma warning disable 618
-                    address = (uint)localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
+                    address = (uint) localEntry.AddressList.FirstOrDefault(s => s.AddressFamily == AddressFamily.InterNetwork).Address;
 #pragma warning restore 618
                 }
                 else
@@ -169,7 +169,6 @@ namespace ClassicUO.Network
             //    lock (_pool)
             //        _pool.AddFreeSegment(_incompletePacketBuffer);
             //}
-
             _incompletePacketBuffer = null;
             _incompletePacketLength = 0;
             _recvBuffer = null;
@@ -186,7 +185,6 @@ namespace ClassicUO.Network
 
             _circularBuffer = null;
             Disconnected.Raise();
-
             Statistics.Reset();
         }
 
@@ -239,7 +237,6 @@ namespace ClassicUO.Network
 
                     if (length < packetlength)
                         break;
-
                     byte[] data = new byte[packetlength];
                     packetlength = _circularBuffer.Dequeue(data, 0, packetlength);
 
@@ -314,9 +311,8 @@ namespace ClassicUO.Network
                         StartSend();
                     }
                     else
-                    {
-                        lock (_sendLock) _sending = false;
-                    }
+                        lock (_sendLock)
+                            _sending = false;
 
                     break;
                 default:
@@ -351,7 +347,7 @@ namespace ClassicUO.Network
 
             if (bytesLen > 0 && e.SocketError == SocketError.Success)
             {
-                Statistics.TotalBytesReceived += (uint)bytesLen;
+                Statistics.TotalBytesReceived += (uint) bytesLen;
                 byte[] buffer = _recvBuffer;
                 if (_isCompressionEnabled) DecompressBuffer(ref buffer, ref bytesLen);
                 lock (_circularBuffer) _circularBuffer.Enqueue(buffer, 0, bytesLen);
@@ -404,7 +400,7 @@ namespace ClassicUO.Network
         {
             if (e.BytesTransferred > 0 && e.SocketError == SocketError.Success)
             {
-                Statistics.TotalBytesSended += (uint)e.BytesTransferred;
+                Statistics.TotalBytesSended += (uint) e.BytesTransferred;
                 Statistics.TotalPacketsSended++;
             }
             else

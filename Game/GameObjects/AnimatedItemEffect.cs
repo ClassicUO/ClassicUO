@@ -97,7 +97,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (Position.X != x || Position.Y != y || Position.Z != z)
                 {
-                    Position = new Position((ushort)x, (ushort)y, (sbyte)z);
+                    Position = new Position((ushort) x, (ushort) y, (sbyte) z);
                     //if (!IsItemEffect)
                     //    Tile = World.Map.GetTile(x, y);
                 }

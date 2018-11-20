@@ -28,7 +28,6 @@ using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
-using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -36,12 +35,12 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     internal class EquipmentSlot : GumpControl, IMobilePaperdollOwner
     {
-        private ItemGump _itemGump;
-        private readonly Mobile _mobile;
         private readonly Layer _layer;
+        private readonly Mobile _mobile;
         private bool _canDrag, _sendClickIfNotDClick;
-        private float _pickupTime, _singleClickTime;
         private Point _clickPoint;
+        private ItemGump _itemGump;
+        private float _pickupTime, _singleClickTime;
 
         public EquipmentSlot(int x, int y, Mobile mobile, Layer layer)
         {
@@ -49,15 +48,16 @@ namespace ClassicUO.Game.Gumps.Controls
             Y = y;
             _mobile = mobile;
             _layer = layer;
+
             AddChildren(new GumpPicTiled(0, 0, 19, 20, 0x243A)
             {
                 AcceptMouseInput = false
             });
+
             AddChildren(new GumpPic(0, 0, 0x2344, 0)
             {
                 AcceptMouseInput = false
             });
-
             AcceptMouseInput = true;
         }
 
@@ -94,19 +94,13 @@ namespace ClassicUO.Game.Gumps.Controls
                     {
                         HighlightOnMouseOver = false
                     });
-
-
                     ArtTexture texture = (ArtTexture) _itemGump.Texture;
-
                     int offsetX = (13 - texture.ImageRectangle.Width) / 2;
                     int offsetY = (14 - texture.ImageRectangle.Height) / 2;
-
                     int tileX = 2;
                     int tileY = 3;
-
                     tileX -= texture.ImageRectangle.X - offsetX;
                     tileY -= texture.ImageRectangle.Y - offsetY;
-
                     _itemGump.X = tileX;
                     _itemGump.Y = tileY;
                 }
@@ -134,7 +128,6 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (Item == null)
                 return;
-
             _canDrag = true;
             float totalMS = CoreGame.Ticks;
             _pickupTime = totalMS + 800;
@@ -168,12 +161,10 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
         {
             if (Item == null)
                 return false;
-
             GameActions.DoubleClick(Item);
             _sendClickIfNotDClick = false;
 
@@ -185,6 +176,5 @@ namespace ClassicUO.Game.Gumps.Controls
             Rectangle bounds = Art.GetStaticTexture(Item.DisplayedGraphic).Bounds;
             GameActions.PickUp(Item, bounds.Width / 2, bounds.Height / 2);
         }
-
     }
 }

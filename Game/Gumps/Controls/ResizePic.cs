@@ -21,8 +21,6 @@
 
 #endregion
 
-using System;
-
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -45,6 +43,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (t == null)
                 {
                     Dispose();
+
                     return;
                 }
 
@@ -53,9 +52,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 else if (i > 4)
                     _gumpTexture[i - 1] = t;
                 else _gumpTexture[i] = t;
-
             }
-
         }
 
         public ResizePic(string[] parts) : this(Graphic.Parse(parts[3]))
@@ -75,18 +72,15 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-
             //int offsetTop = Math.Max(_gumpTexture[0].Height, _gumpTexture[2].Height) - _gumpTexture[1].Height;
             //int offsetBottom = Math.Max(_gumpTexture[5].Height, _gumpTexture[7].Height) - _gumpTexture[6].Height;
             //int offsetLeft = Math.Max(_gumpTexture[0].Width, _gumpTexture[5].Width) - _gumpTexture[3].Width;
             //int offsetRight = Math.Max(_gumpTexture[2].Width, _gumpTexture[7].Width) - _gumpTexture[4].Width;
-
             Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
 
             for (int i = 0; i < 9; i++)
             {
                 SpriteTexture t = _gumpTexture[i];
-
                 int drawWidth = t.Width;
                 int drawHeight = t.Height;
                 int drawX = position.X;
@@ -96,20 +90,24 @@ namespace ClassicUO.Game.Gumps.Controls
                 {
                     case 0:
                         spriteBatch.Draw2D(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+
                         break;
                     case 1:
                         drawX += _gumpTexture[0].Width;
                         drawWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
                         spriteBatch.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+
                         break;
                     case 2:
                         drawX += Width - drawWidth;
                         spriteBatch.Draw2D(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+
                         break;
                     case 3:
                         drawY += _gumpTexture[0].Height;
                         drawHeight = Height - _gumpTexture[0].Height - _gumpTexture[5].Height;
                         spriteBatch.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+
                         break;
                     case 4:
                         drawX += Width - drawWidth /*- offsetRight*/;
@@ -139,17 +137,13 @@ namespace ClassicUO.Game.Gumps.Controls
                     case 8:
                         drawX += _gumpTexture[0].Width;
                         drawY += _gumpTexture[0].Height;
-
                         drawWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
                         drawHeight = Height - _gumpTexture[2].Height - _gumpTexture[7].Height;
                         spriteBatch.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
 
                         break;
-                        
                 }
             }
-
-
 
             //int centerWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
             //int centerHeight = Height - _gumpTexture[0].Height - _gumpTexture[6].Height;
@@ -174,6 +168,5 @@ namespace ClassicUO.Game.Gumps.Controls
 
             return base.Draw(spriteBatch, position, hue);
         }
-
     }
 }

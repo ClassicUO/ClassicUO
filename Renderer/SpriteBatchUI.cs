@@ -222,7 +222,7 @@ namespace ClassicUO.Renderer
             return DrawSprite(texture, _vertexBufferUI, Techniques.Hued);
         }
 
-        public unsafe bool Draw2DTiled(Texture2D texture, Rectangle destRect, Vector3 hue)
+        public bool Draw2DTiled(Texture2D texture, Rectangle destRect, Vector3 hue)
         {
             /* float drawCountX = destRect.Width / (float)texture.Width;
             float drawCountY = destRect.Height / (float)texture.Height;
@@ -270,7 +270,6 @@ namespace ClassicUO.Renderer
             }
 
             return DrawSprite(texture, _vertexBufferUI); */
-
             int y = destRect.Y;
             int h = destRect.Height;
 
@@ -278,14 +277,12 @@ namespace ClassicUO.Renderer
             {
                 int x = destRect.X;
                 int w = destRect.Width;
-
                 Rectangle sRect = new Rectangle(0, 0, texture.Width, h < texture.Height ? h : texture.Height);
 
                 while (w > 0)
                 {
                     if (w < texture.Width)
                         sRect.Width = w;
-
                     Draw2D(texture, new Point(x, y), sRect, hue);
                     w -= texture.Width;
                     x += texture.Width;

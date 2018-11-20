@@ -154,9 +154,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private class BuffControlEntry : GumpPic
         {
+            private readonly uint _timer;
             private byte _alpha;
             private bool _decreaseAlpha;
-            private readonly uint _timer;
 
             public BuffControlEntry(BuffIcon icon) : base(0, 0, icon.Graphic, 0)
             {

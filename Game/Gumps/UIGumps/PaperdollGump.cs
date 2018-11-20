@@ -62,10 +62,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        public Mobile Mobile { get; set; }
-
         public string Title { get; }
 
+        public Mobile Mobile { get; set; }
 
         public override void Dispose()
         {
@@ -96,7 +95,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 AddChildren(new GumpPic(0, 0, 0x07d0, 0)
                 {
-                    CanMove = true,
+                    CanMove = true
                 });
 
                 //HELP BUTTON
@@ -156,7 +155,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 //_specialMovesBookPic.MouseDoubleClick += SpecialMoves_MouseDoubleClickEvent;
                 // Party manifest caller
                 AddChildren(_partyManifestPic = new GumpPic(44, 195, 2002, 0));
-                _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;               
+                _partyManifestPic.MouseDoubleClick += PartyManifest_MouseDoubleClickEvent;
             }
             else
                 AddChildren(new GumpPic(0, 0, 0x07d1, 0));
@@ -251,10 +250,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case Buttons.Options:
 
                     if (UIManager.GetByLocalSerial<OptionsGump>() == null)
+                    {
                         UIManager.Add(new OptionsGump
                         {
                             X = 80, Y = 80
                         });
+                    }
                     else
                         UIManager.Remove<OptionsGump>();
 

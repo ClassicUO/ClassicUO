@@ -140,7 +140,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     //if ((_entry.RenderText.FontStyle & FontStyle.Fixed) == 0)
                     //    _entry.InsertString("\n");
                     //else
-                    Parent.OnKeybaordReturn((int)LocalSerial.Value, Text);
+                    Parent.OnKeybaordReturn((int) LocalSerial.Value, Text);
 
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
@@ -186,7 +186,6 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             _entry?.Dispose();
             _entry = null;
-
             base.Dispose();
         }
     }

@@ -1,6 +1,6 @@
 ﻿namespace ClassicUO.Game.Data
 {
-    public class BuffIcon
+    public struct BuffIcon
     {
         public BuffIcon(Graphic graphic, long timer, string text)
         {

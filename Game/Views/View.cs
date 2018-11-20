@@ -259,12 +259,10 @@ namespace ClassicUO.Game.Views
             for (int i = 0; i < GameObject.OverHeads.Count; i++)
             {
                 View v = GameObject.OverHeads[i].View;
-
                 v.Bounds.X = v.Texture.Width / 2 - 22;
                 v.Bounds.Y = offY + v.Texture.Height;
                 v.Bounds.Width = v.Texture.Width;
                 v.Bounds.Height = v.Texture.Height;
-
                 OverheadManager.AddOverhead(v, position);
                 offY += v.Texture.Height;
             }

@@ -22,8 +22,8 @@
 #endregion
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -146,43 +146,41 @@ namespace ClassicUO.Network
             WriteUInt(clientflag);
             WriteUInt(0x01);
             WriteUInt(0x0);
-
             WriteByte(0x0); // Profession
             Position += 15;
-
             byte val;
+
             if (FileManager.ClientVersion < ClientVersions.CV_4011D)
                 val = Convert.ToByte(character.Flags.HasFlag(Flags.Female));
             else
             {
-                val = (byte)character.Race;
+                val = (byte) character.Race;
 
                 if (FileManager.ClientVersion < ClientVersions.CV_7000)
                     val--;
-
-                val = (byte)((val * 2) + Convert.ToByte(character.Flags.HasFlag(Flags.Female)));
+                val = (byte) (val * 2 + Convert.ToByte(character.Flags.HasFlag(Flags.Female)));
             }
 
             WriteByte(val);
-            WriteByte((byte)character.Strength);
-            WriteByte((byte)character.Dexterity);
-            WriteByte((byte)character.Intelligence);
-
+            WriteByte((byte) character.Strength);
+            WriteByte((byte) character.Dexterity);
+            WriteByte((byte) character.Intelligence);
             var skills = character.Skills.OrderByDescending(o => o.Value).Take(skillcount).ToList();
-            foreach(var skill in skills)
+
+            foreach (var skill in skills)
             {
-                WriteByte((byte)skill.Index);
-                WriteByte((byte)skill.ValueFixed);
+                WriteByte((byte) skill.Index);
+                WriteByte((byte) skill.ValueFixed);
             }
 
             WriteUShort(character.Hue);
-            WriteUShort(character.Equipment[(int)Layer.Hair].Graphic);
-            WriteUShort(character.Equipment[(int)Layer.Hair].Hue);
+            WriteUShort(character.Equipment[(int) Layer.Hair].Graphic);
+            WriteUShort(character.Equipment[(int) Layer.Hair].Hue);
 
-            if (character.Equipment[(int)Layer.Beard] != null)
+            if (character.Equipment[(int) Layer.Beard] != null)
             {
-                WriteUShort(character.Equipment[(int)Layer.Beard].Graphic);
-                WriteUShort(character.Equipment[(int)Layer.Beard].Hue);
+                WriteUShort(character.Equipment[(int) Layer.Beard].Graphic);
+                WriteUShort(character.Equipment[(int) Layer.Beard].Hue);
             }
             else
             {
@@ -190,19 +188,18 @@ namespace ClassicUO.Network
                 WriteUShort(0x00);
             }
 
-            WriteByte((byte)serverIndex);
-
+            WriteByte((byte) serverIndex);
             var location = 1;
+
             if (FileManager.ClientVersion < ClientVersions.CV_70130)
                 location--;
-
-            WriteByte((byte)location); //location
+            WriteByte((byte) location); //location
             WriteUInt(slot);
-
             WriteUInt(clientIP);
-            WriteUShort(character.Equipment[(int)Layer.Shirt].Hue);
-            if (character.Equipment[(int)Layer.Pants] != null)
-                WriteUShort(character.Equipment[(int)Layer.Pants].Hue);
+            WriteUShort(character.Equipment[(int) Layer.Shirt].Hue);
+
+            if (character.Equipment[(int) Layer.Pants] != null)
+                WriteUShort(character.Equipment[(int) Layer.Pants].Hue);
             else
                 WriteUShort(0x00);
         }
@@ -980,7 +977,10 @@ namespace ClassicUO.Network
             for (int i = 0; i < list.Count && i < 50; i++) WriteUInt(list[i]);
         }
 
-        public PMegaClilocRequest(Serial serial) : base(0xD6) => WriteUInt(serial);
+        public PMegaClilocRequest(Serial serial) : base(0xD6)
+        {
+            WriteUInt(serial);
+        }
     }
 
     public sealed class PChangeStatLockStateRequest : PacketWriter
@@ -1302,7 +1302,7 @@ namespace ClassicUO.Network
             WriteByte(0);
         }
 
-        public static Lazy<PPing> Instance { get; } = new Lazy<PPing>( () => new PPing() );
+        public static Lazy<PPing> Instance { get; } = new Lazy<PPing>(() => new PPing());
     }
 
     public sealed class PClientViewRange : PacketWriter

@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 
@@ -14,21 +9,14 @@ namespace ClassicUO.Game.GameObjects
 {
     public class Land : GameObject
     {
+        public Rectangle Rectangle;
 
-        public Land(Graphic graphic) 
+        public Land(Graphic graphic)
         {
             Graphic = graphic;
         }
 
         public LandTiles TileData => IO.Resources.TileData.LandData[Graphic];
-
-
-        protected override View CreateView()
-        {
-            return new TileView(this);
-        }
-
-        public Rectangle Rectangle;
 
         public sbyte MinZ { get; set; }
 
@@ -38,7 +26,15 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsStretched { get; set; }
 
-        public void Calculate() => ((TileView)View).UpdateStreched();
+        protected override View CreateView()
+        {
+            return new TileView(this);
+        }
+
+        public void Calculate()
+        {
+            ((TileView) View).UpdateStreched();
+        }
 
         public void UpdateZ(int zTop, int zRight, int zBottom)
         {
@@ -52,29 +48,28 @@ namespace ClassicUO.Game.GameObjects
                 int average = AverageZ;
 
                 if (Math.Abs(Position.Z - zRight) <= Math.Abs(zBottom - zTop))
-                    AverageZ = (sbyte)((Position.Z + zRight) >> 1);
+                    AverageZ = (sbyte) ((Position.Z + zRight) >> 1);
                 else
-                    AverageZ = (sbyte)((zBottom + zTop) >> 1);
+                    AverageZ = (sbyte) ((zBottom + zTop) >> 1);
 
                 if (AverageZ != average)
                     Tile.ForceSort();
-
                 MinZ = Position.Z;
 
                 if (zTop < MinZ)
-                    MinZ = (sbyte)zTop;
+                    MinZ = (sbyte) zTop;
 
                 if (zRight < MinZ)
-                    MinZ = (sbyte)zRight;
+                    MinZ = (sbyte) zRight;
 
                 if (zBottom < MinZ)
-                    MinZ = (sbyte)zBottom;
+                    MinZ = (sbyte) zBottom;
             }
         }
 
         public int CalculateCurrentAverageZ(int direction)
         {
-            int result = GetDirectionZ(((byte)(direction >> 1) + 1) & 3);
+            int result = GetDirectionZ(((byte) (direction >> 1) + 1) & 3);
 
             if ((direction & 1) > 0)
                 return result;
@@ -92,7 +87,5 @@ namespace ClassicUO.Game.GameObjects
                 default: return Position.Z;
             }
         }
-
-
     }
 }

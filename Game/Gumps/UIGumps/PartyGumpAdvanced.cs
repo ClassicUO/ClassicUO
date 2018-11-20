@@ -283,18 +283,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.GetBar:
                     GameScene currentGameScene = Service.Get<SceneManager>().GetScene<GameScene>();
+
                     if (currentGameScene.PartyMemberGumpStack.Contains(Member.Mobile))
-                    {
                         UIManager.Remove<PartyMemberGump>(Member.Mobile);
-                    }
                     else if (Member.Mobile == World.Player)
                     {
                         StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
                         status?.Dispose();
                     }
+
                     PartyMemberGump partymemberGump = new PartyMemberGump(Member, 300, 300);
                     UIManager.Add(partymemberGump);
                     currentGameScene.PartyMemberGumpStack.Add(Member.Mobile);
+
                     break;
             }
         }

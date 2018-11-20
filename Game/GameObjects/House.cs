@@ -23,8 +23,6 @@
 
 using System.Collections.Generic;
 
-using ClassicUO.Game.Map;
-
 namespace ClassicUO.Game.GameObjects
 {
     public class House : Item
@@ -63,7 +61,6 @@ namespace ClassicUO.Game.GameObjects
                 //{
                 //    Position = c.Position
                 //});
-
             }
         }
 

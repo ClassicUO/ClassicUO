@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Game.Data;
+﻿using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    class PopupMenuGump : Gump
+    internal class PopupMenuGump : Gump
     {
         private readonly PopupMenuData _data;
 
@@ -25,63 +19,52 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             ResizePic pic = new ResizePic(0x0A3C)
             {
-                IsTransparent = true,
-                Alpha = 0.25f,
+                IsTransparent = true, Alpha = 0.25f
             };
             AddChildren(pic);
-
             int offsetY = 10;
             bool arrowAdded = false;
-
             int width = 0, height = 20;
 
             foreach (PopupMenuItem item in data.Items)
             {
                 string text = Cliloc.GetString(item.Cliloc);
 
-               
-
                 Label label = new Label(text, true, item.Hue, font: 1)
                 {
-                    X = 10,
-                    Y = offsetY,
+                    X = 10, Y = offsetY
                 };
-
 
                 HitBox box = new HitBox(10, offsetY, label.Width, label.Height)
                 {
-                    IsTransparent = true,
-                    Tag = item.Index
+                    IsTransparent = true, Tag = item.Index
                 };
 
                 box.MouseClick += (sender, e) =>
                 {
                     if (e.Button == MouseButton.Left)
                     {
-                        HitBox l = (HitBox)sender;
-                        GameActions.ResponsePopupMenu(_data.Serial, (ushort)l.Tag);
+                        HitBox l = (HitBox) sender;
+                        GameActions.ResponsePopupMenu(_data.Serial, (ushort) l.Tag);
                         Dispose();
                     }
                 };
                 AddChildren(box);
-
                 AddChildren(label);
 
                 if ((item.Flags & 0x02) != 0 && !arrowAdded)
                 {
                     arrowAdded = true;
+
                     // TODO: wat?
                     AddChildren(new Button(0, 0x15E6, 0x15E2, 0x15E2)
                     {
                         X = 20, Y = offsetY
                     });
-
                     height += 20;
                 }
 
-
                 offsetY += label.Height;
-
 
                 if (!arrowAdded)
                 {
@@ -94,19 +77,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             width += 20;
 
-
             if (height <= 10 || width <= 20)
                 Dispose();
             else
             {
                 pic.Width = width;
                 pic.Height = height;
-
-                foreach (HitBox box in FindControls<HitBox>())
-                {
-                    box.Width = width - 20;
-                }
-
+                foreach (HitBox box in FindControls<HitBox>()) box.Width = width - 20;
             }
         }
     }

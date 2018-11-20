@@ -194,7 +194,10 @@ namespace ClassicUO.Game.GameObjects
             return g;
         }
 
-        public Direction GetDirectionForAnimation() => Steps.Count > 0 ? (Direction) Steps.Front().Direction : Direction;
+        public Direction GetDirectionForAnimation()
+        {
+            return Steps.Count > 0 ? (Direction) Steps.Front().Direction : Direction;
+        }
 
         public static void GetGroupForAnimation(ANIMATION_GROUPS group, ref byte animation)
         {

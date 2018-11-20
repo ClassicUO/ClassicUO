@@ -109,8 +109,6 @@ namespace ClassicUO.Game.Views
             }
 
             Bounds = total;
-
-
             int height = 0;
             int centerY = 0;
 
@@ -132,11 +130,8 @@ namespace ClassicUO.Game.Views
 
                 Vector3 damagePosition = new Vector3
                 {
-                    X = position.X + mobile.Offset.X,
-                    Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
-                    Z = position.Z
+                    X = position.X + mobile.Offset.X, Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8), Z = position.Z
                 };
-
                 DamageOverhead(mobile, spriteBatch, damagePosition, mobile.IsMounted ? 0 : -22);
             }
 
@@ -149,12 +144,10 @@ namespace ClassicUO.Game.Views
             {
                 DamageOverhead dmg = mobile.DamageList[i];
                 View v = dmg.View;
-
                 v.Bounds.X = v.Texture.Width / 2 - 22;
                 v.Bounds.Y = offY + v.Texture.Height - dmg.OffsetY;
                 v.Bounds.Width = v.Texture.Width;
                 v.Bounds.Height = v.Texture.Height;
-
                 OverheadManager.AddDamage(v, position);
                 offY += v.Texture.Height;
             }
@@ -309,37 +302,39 @@ namespace ClassicUO.Game.Views
             switch (layer)
             {
                 case Layer.Shoes:
-
                     Item pants = mobile.Equipment[(int) Layer.Pants];
                     Item robe;
-                    if (mobile.Equipment[(int) Layer.Legs] != null || (pants != null && pants.Graphic == 0x1411))
+
+                    if (mobile.Equipment[(int) Layer.Legs] != null || pants != null && pants.Graphic == 0x1411)
                         return true;
                     else
                     {
                         robe = mobile.Equipment[(int) Layer.Robe];
 
-                        if ( (pants != null && (pants.Graphic == 0x0513 || pants.Graphic == 0x0514)) || (robe != null && robe.Graphic == 0x0504))
+                        if (pants != null && (pants.Graphic == 0x0513 || pants.Graphic == 0x0514) || robe != null && robe.Graphic == 0x0504)
                             return true;
                     }
+
                     break;
                 case Layer.Pants:
                     Item skirt;
                     robe = mobile.Equipment[(int) Layer.Robe];
-                    pants = mobile.Equipment[(int)Layer.Pants];
+                    pants = mobile.Equipment[(int) Layer.Pants];
 
-                    if (mobile.Equipment[(int) Layer.Legs] != null || (robe != null && robe.Graphic == 0x0504))
+                    if (mobile.Equipment[(int) Layer.Legs] != null || robe != null && robe.Graphic == 0x0504)
                         return true;
 
                     if (pants != null && (pants.Graphic == 0x01EB || pants.Graphic == 0x03E5 || pants.Graphic == 0x03eB))
                     {
-                         skirt = mobile.Equipment[(int) Layer.Skirt];
+                        skirt = mobile.Equipment[(int) Layer.Skirt];
 
                         if (skirt != null && skirt.Graphic != 0x01C7 && skirt.Graphic != 0x01E4)
                             return true;
 
-                        if (robe != null && (robe.Graphic != 0x0229 && (robe.Graphic <= 0x04E7 || robe.Graphic > 0x04EB)))
+                        if (robe != null && robe.Graphic != 0x0229 && (robe.Graphic <= 0x04E7 || robe.Graphic > 0x04EB))
                             return true;
                     }
+
                     break;
                 case Layer.Tunic:
                     robe = mobile.Equipment[(int) Layer.Robe];
@@ -352,28 +347,30 @@ namespace ClassicUO.Game.Views
 
                     break;
                 case Layer.Torso:
-                    robe = mobile.Equipment[(int)Layer.Robe];
+                    robe = mobile.Equipment[(int) Layer.Robe];
 
                     if (robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986)
                         return true;
                     else
                     {
-                        tunic = mobile.Equipment[(int)Layer.Tunic];
-                        Item torso = mobile.Equipment[(int)Layer.Torso];
+                        tunic = mobile.Equipment[(int) Layer.Tunic];
+                        Item torso = mobile.Equipment[(int) Layer.Torso];
 
                         if (tunic != null && tunic.Graphic != 0x1541 && tunic.Graphic != 0x1542)
                             return true;
+
                         if (torso != null && (torso.Graphic == 0x782A || torso.Graphic == 0x782B))
                             return true;
                     }
 
                     break;
                 case Layer.Arms:
-                    robe = mobile.Equipment[(int)Layer.Robe];
+                    robe = mobile.Equipment[(int) Layer.Robe];
+
                     return robe != null && robe.Graphic != 0 && robe.Graphic != 0x9985 && robe.Graphic != 0x9986;
                 case Layer.Helmet:
                 case Layer.Hair:
-                    robe = mobile.Equipment[(int)Layer.Robe];
+                    robe = mobile.Equipment[(int) Layer.Robe];
 
                     if (robe != null)
                     {
@@ -388,15 +385,18 @@ namespace ClassicUO.Game.Views
                             {
                                 if (robe.Graphic < 0x2683)
                                     return robe.Graphic >= 0x204E && robe.Graphic <= 0x204F;
+
                                 return true;
                             }
+
                             if (robe.Graphic == 0x2FB9 || robe.Graphic == 0x3173)
                                 return true;
                         }
                     }
+
                     break;
                 case Layer.Skirt:
-                    skirt = mobile.Equipment[(int)Layer.Skirt];
+                    skirt = mobile.Equipment[(int) Layer.Skirt];
 
                     break;
             }

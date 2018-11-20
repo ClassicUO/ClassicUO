@@ -185,7 +185,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             // draw slider
             if (MaxValue > MinValue && middleHeight > 0)
-                spriteBatch.Draw2D(_textureSlider, new Point(position.X + (_textureBackground[0].Width - _textureSlider.Width) / 2, (int)(position.Y + _textureUpButton[0].Height + _sliderPosition)), Vector3.Zero);
+                spriteBatch.Draw2D(_textureSlider, new Point(position.X + (_textureBackground[0].Width - _textureSlider.Width) / 2, (int) (position.Y + _textureUpButton[0].Height + _sliderPosition)), Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
         }

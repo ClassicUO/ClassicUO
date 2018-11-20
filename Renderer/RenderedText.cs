@@ -25,7 +25,6 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game;
-using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 
 using Microsoft.Xna.Framework;
@@ -96,7 +95,6 @@ namespace ClassicUO.Renderer
                         if (IsHTML)
                             Fonts.SetUseHTML(false);
                         Links.Clear();
-
                         Texture?.Dispose();
                         Texture = null;
                     }
@@ -166,23 +164,19 @@ namespace ClassicUO.Renderer
 
             if (IsHTML)
                 Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
-
             bool ispartial = false;
             //Fonts.FontTextureInfo? info;
 
             if (IsUnicode)
-                Texture = Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort)FontStyle);
+                Texture = Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle);
             else
-                Texture = Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort)FontStyle, out ispartial);
-
+                Texture = Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, out ispartial);
             IsPartialHue = ispartial;
 
             if (Texture != null)
             {
                 //Texture = new FontTexture(info.Value.Width, info.Value.Height, info.Value.LinesCount, info.Value.Links);
                 //Texture.SetData(info.Value.Pixels);
-               
-
                 Width = Texture.Width;
                 Height = Texture.Height;
                 Links = Texture.Links;

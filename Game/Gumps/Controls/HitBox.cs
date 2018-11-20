@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Renderer;
+﻿using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    class HitBox : GumpControl
+    internal class HitBox : GumpControl
     {
         private readonly SpriteTexture _texture;
 
-        public HitBox(int x, int y, int w, int h) : base()
+        public HitBox(int x, int y, int w, int h)
         {
             CanMove = false;
             AcceptMouseInput = true;
@@ -26,7 +20,6 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 0xFFFF_FFFF
             });
-
             X = x;
             Y = y;
             Width = w;
@@ -38,9 +31,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (IsDisposed)
                 return;
-
             base.Update(totalMS, frameMS);
-
             _texture.Ticks = (long) totalMS;
         }
 

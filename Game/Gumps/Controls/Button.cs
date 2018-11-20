@@ -22,7 +22,6 @@
 #endregion
 
 using ClassicUO.Input;
-using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -61,6 +60,7 @@ namespace ClassicUO.Game.Gumps.Controls
             if (t == null)
             {
                 Dispose();
+
                 return;
             }
 
@@ -149,14 +149,9 @@ namespace ClassicUO.Game.Gumps.Controls
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             SpriteTexture texture = GetTextureByState();
-
-
             spriteBatch.Draw2D(texture, new Rectangle(position.X, position.Y, Width, Height), IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 
             //Draw1(spriteBatch, texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), -1, 0, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
-
-
-
 
             if (!string.IsNullOrEmpty(_caption))
             {
@@ -239,11 +234,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Dispose()
         {
-            for (int i = 0; i < _fontTexture.Length; i++)
-            {
-                _fontTexture[i]?.Dispose();
-            }
-
+            for (int i = 0; i < _fontTexture.Length; i++) _fontTexture[i]?.Dispose();
             base.Dispose();
         }
     }

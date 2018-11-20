@@ -26,7 +26,6 @@ using System.Net;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Gumps.UIGumps.Login;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
@@ -54,13 +53,17 @@ namespace ClassicUO.Game.Scenes
             LoginInToServer,
             CharacterSelection,
             EnteringBritania,
-            CharCreation,
+            CharCreation
         }
 
         private byte[] _clientVersionBuffer;
         private LoginRejectionReasons? _loginRejectionReason;
         private LoginStep _loginStep = LoginStep.Main;
-        
+
+        public LoginScene() : base(ScenesType.Login)
+        {
+        }
+
         public bool UpdateScreen { get; set; }
 
         public LoginStep CurrentLoginStep
@@ -80,13 +83,10 @@ namespace ClassicUO.Game.Scenes
         public CharacterListEntry[] Characters { get; private set; }
 
         public byte ServerIndex { get; private set; }
+
         public string Account { get; private set; }
+
         public string Password { get; private set; }
-
-        public LoginScene() : base(ScenesType.Login)
-        {
-
-        }
 
         public override void Load()
         {
@@ -155,7 +155,6 @@ namespace ClassicUO.Game.Scenes
                 Settings settings = Service.Get<Settings>();
                 settings.LastCharacterName = Characters[index].Name;
                 settings.Save();
-
                 CurrentLoginStep = LoginStep.EnteringBritania;
                 NetClient.Socket.Send(new PSelectCharacter(index, Characters[index].Name, NetClient.Socket.ClientAddress));
             }
@@ -170,19 +169,19 @@ namespace ClassicUO.Game.Scenes
         public void CreateCharacter(PlayerMobile character)
         {
             int i = 0;
+
             for (; i < Characters.Length; i++)
+            {
                 if (string.IsNullOrEmpty(Characters[i].Name))
                     break;
+            }
 
-            NetClient.Socket.Send(new PCreateCharacter(character, NetClient.Socket.ClientAddress, ServerIndex, (uint)i));
+            NetClient.Socket.Send(new PCreateCharacter(character, NetClient.Socket.ClientAddress, ServerIndex, (uint) i));
         }
 
         public void DeleteCharacter(uint index)
         {
-            if (CurrentLoginStep == LoginStep.CharacterSelection)
-            {
-                NetClient.Socket.Send(new PDeleteCharacter((byte)index, NetClient.Socket.ClientAddress));
-            }
+            if (CurrentLoginStep == LoginStep.CharacterSelection) NetClient.Socket.Send(new PDeleteCharacter((byte) index, NetClient.Socket.ClientAddress));
         }
 
         public void StepBack()
@@ -209,6 +208,7 @@ namespace ClassicUO.Game.Scenes
                     break;
                 case LoginStep.CharCreation:
                     CurrentLoginStep = LoginStep.CharacterSelection;
+
                     break;
             }
         }
@@ -240,7 +240,6 @@ namespace ClassicUO.Game.Scenes
                     settings.Username = Account;
                     settings.Password = Password;
                     settings.Save();
-
                     CurrentLoginStep = LoginStep.ServerSelection;
 
                     break;
@@ -267,6 +266,7 @@ namespace ClassicUO.Game.Scenes
                     break;
                 default:
                     Log.Message(LogTypes.Debug, e.ID.ToString());
+
                     break;
             }
         }
@@ -286,7 +286,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Connect(new IPAddress(ip), port);
             NetClient.Socket.EnableCompression();
             NetClient.Socket.Send(new PSeed(seed, _clientVersionBuffer));
-            NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));          
+            NetClient.Socket.Send(new PSecondLogin(Account, Password, seed));
         }
 
         private void ParseServerList(Packet reader)

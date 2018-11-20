@@ -24,39 +24,32 @@
 using System;
 using System.Linq;
 
-using ClassicUO.Input;
-
 namespace ClassicUO.Game.Gumps.Controls
 {
     public class RadioButton : Checkbox
     {
-        public int GroupIndex { get; set; }
-
         public RadioButton(int group, string[] parts, string[] lines) : base(parts, lines)
         {
             GroupIndex = group;
             ValueChanged += RadioButton_ValueChanged;
         }
 
-        public RadioButton(int group, ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0)
-            : base(inactive, active, text, font, color)
+        public RadioButton(int group, ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0) : base(inactive, active, text, font, color)
         {
             GroupIndex = group;
             ValueChanged += RadioButton_ValueChanged;
         }
 
+        public int GroupIndex { get; set; }
+
         private void RadioButton_ValueChanged(object sender, EventArgs e)
         {
             if (Parent != null && IsChecked) HandleClick();
         }
-        
+
         private void HandleClick()
         {
-            Parent?.GetControls<RadioButton>()
-                .Where(s => s.GroupIndex == GroupIndex)
-                .Where(s => s != this)
-                .ToList()
-                .ForEach(s => s.IsChecked = false);
+            Parent?.GetControls<RadioButton>().Where(s => s.GroupIndex == GroupIndex).Where(s => s != this).ToList().ForEach(s => s.IsChecked = false);
         }
     }
 }

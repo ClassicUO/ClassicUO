@@ -44,11 +44,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Y = 100;
             CanMove = true;
             AcceptMouseInput = true;
+
             AddChildren(_background = new ExpandableScroll(0, 0, 300)
             {
                 TitleGumpID = 0x82A
             });
-
             _scrollBar = new ScrollFlag(this, 0, 0, Height);
             AddChildren(_journalEntries = new RenderedTextList(30, 36, 242, 200, _scrollBar));
         }
