@@ -48,6 +48,12 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             base.Update(totalMS, frameMS);
         }
 
+        public override void OnButtonClick(int buttonID)
+        {
+            Service.Get<GameLoop>().Quit();
+            base.OnButtonClick(buttonID);
+        }
+
         private GumpControl GetGumpForStep(LoginStep step)
         {
             currentStep = step;

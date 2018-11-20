@@ -771,35 +771,42 @@ namespace ClassicUO.Network
         {
             if (World.Player == null)
                 return;
-            Item item = World.Items.Get(p.ReadUInt());
+
             //item.EnableCallBackForItemsUpdate(true);
+            var serial = p.ReadUInt();
+
             Graphic graphic = p.ReadUShort();
             UIManager ui = Service.Get<UIManager>();
 
-            if (ui.GetByLocalSerial(item.Serial) != null)
-                return;
-
             if (graphic == 0x30) // vendor
             {
-            }
-            else if (graphic == 0xFFFF) // spellbook
-            {
-                if (item.IsSpellBook)
-                {
-                    SpellbookGump spellbookGump = new SpellbookGump(item)
-                    {
-                        X = 100, Y = 100
-                    };
-                    ui.Add(spellbookGump);
-                }
+                var mobile = World.Mobiles.Get(serial);
+                ui.Add(new ShopGump(mobile, true, 100, 100));
             }
             else
             {
-                ContainerGump container = new ContainerGump(item, graphic)
+                Item item = World.Items.Get(serial);
+                if (graphic == 0xFFFF) // spellbook
                 {
-                    X = 64, Y = 64
-                };
-                ui.Add(container);
+                    if (item.IsSpellBook)
+                    {
+                        SpellbookGump spellbookGump = new SpellbookGump(item)
+                        {
+                            X = 100,
+                            Y = 100
+                        };
+                        ui.Add(spellbookGump);
+                    }
+                }
+                else
+                {
+                    ContainerGump container = new ContainerGump(item, graphic)
+                    {
+                        X = 64,
+                        Y = 64
+                    };
+                    ui.Add(container);
+                }
             }
         }
 
@@ -1096,7 +1103,21 @@ namespace ClassicUO.Network
 
             if (vendor == null) return;
 
-            // to finish
+            var count = p.ReadByte();
+
+            //Server sends items ordered by serial
+            foreach(var item in container.Items.OrderBy(o => o.Serial.Value))
+            {
+                item.Price = p.ReadUInt();
+                var nameLen = p.ReadByte();
+                var name = p.ReadASCII(nameLen);
+                int cliloc = 0;
+
+                if (int.TryParse(name, out cliloc))
+                    item.Name = Cliloc.GetString(cliloc);
+                else
+                    item.Name = name;
+            }
         }
 
         private static void NewSubServer(Packet p)

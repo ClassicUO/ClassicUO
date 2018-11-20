@@ -470,6 +470,11 @@ namespace ClassicUO.Configuration
             get => _highlightMobilesByFlags;
             set => SetProperty(ref _highlightMobilesByFlags, value);
         }
+
+        public void Save()
+        {
+            ConfigurationResolver.Save(this, "settings.json");
+        }
     }
 
     public abstract class NotifyPropertyChange
