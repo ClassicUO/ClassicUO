@@ -640,7 +640,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item = new ScrollAreaItem();
             Checkbox queryBeforeAttact = new Checkbox(0x00D2, 0x00D3, "Query before attack", 1)
             {
-                Y = 50,
+                Y = 30,
                 IsChecked = _settings.CriminalActionQuery
             };
             item.AddChildren(queryBeforeAttact);

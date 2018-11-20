@@ -391,13 +391,13 @@ namespace ClassicUO.Game.Scenes
                                     status?.Dispose();
                                 }
 
-                                MobileHealthGump currentMobileHealthGump;
+                               
                                 MobileGumpStack.Add(mobile);
-                                UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, _mousePicker.Position.X, _mousePicker.Position.Y));
 
                                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
-
-                                UIManager.AttemptDragControl(currentMobileHealthGump, new Point(_mousePicker.Position.X + rect.Width / 2, _mousePicker.Position.Y + rect.Height / 2), true);
+                                MobileHealthGump currentMobileHealthGump;
+                                UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, Mouse.Position.X - rect.Width / 2, Mouse.Position.Y - rect.Height / 2));
+                                UIManager.AttemptDragControl(currentMobileHealthGump, Mouse.Position, true);
 
                             }
                             break;
