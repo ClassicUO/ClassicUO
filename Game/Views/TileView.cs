@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Views
 
         public TileView(Land tile) : base(tile)
         {
-            AllowedToDraw = !tile.IsIgnored;        
+            AllowedToDraw = !tile.IsIgnored;
         }
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
@@ -130,7 +130,6 @@ namespace ClassicUO.Game.Views
                 list.Add(GameObject, vertex[0].Position);
         }
 
-
         public void UpdateStreched()
         {
             Land tile = (Land) GameObject;
@@ -148,7 +147,6 @@ namespace ClassicUO.Game.Views
                 tile.UpdateZ(map.GetTileZ(tile.Position.X, tile.Position.Y + 1), map.GetTileZ(tile.Position.X + 1, tile.Position.Y + 1), map.GetTileZ(tile.Position.X + 1, tile.Position.Y));
 
                 //tile.PriorityZ = (sbyte) (tile.AverageZ - 1);
-
                 Vector3[,,] vec = new Vector3[3, 3, 4];
                 int i;
                 int j;

@@ -129,19 +129,6 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool HasTooltip => World.ClientFeatures.TooltipsEnabled && !string.IsNullOrEmpty(Tooltip);
 
-        public void SetTooltip(string c)
-        {
-            if (string.IsNullOrEmpty(c))
-                ClearTooltip();
-            else
-            {
-                Tooltip = c;
-            }
-
-        }
-
-        public void ClearTooltip() => Tooltip = null;
-
         public virtual bool AcceptKeyboardInput
         {
             get
@@ -313,6 +300,8 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
+        public bool WantUpdateSize { get; set; } = true;
+
         public Vector3 HueVector { get; set; }
 
         public bool Debug { get; set; }
@@ -371,18 +360,15 @@ namespace ClassicUO.Game.Gumps.Controls
                 for (int i = 0; i < _children.Count; i++)
                 {
                     GumpControl c = _children[i];
-
                     c.Update(totalMS, frameMS);
 
                     if (c.IsDisposed)
                     {
                         //toremove.Add(c);
-
                         _children.RemoveAt(i--);
                     }
                     else
                     {
-
                         if (WantUpdateSize)
                         {
                             if (c.Page == 0 || c.Page == ActivePage)
@@ -394,8 +380,6 @@ namespace ClassicUO.Game.Gumps.Controls
                                     h = c.Bounds.Bottom;
                             }
                         }
-
-                        
                     }
                 }
 
@@ -406,7 +390,6 @@ namespace ClassicUO.Game.Gumps.Controls
 
                     if (h != Height)
                         Height = h;
-
                     WantUpdateSize = false;
                 }
 
@@ -415,7 +398,18 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        public bool WantUpdateSize { get; set; } = true;
+        public void SetTooltip(string c)
+        {
+            if (string.IsNullOrEmpty(c))
+                ClearTooltip();
+            else
+                Tooltip = c;
+        }
+
+        public void ClearTooltip()
+        {
+            Tooltip = null;
+        }
 
         public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseEnter, MouseLeft, MouseClick, MouseDoubleClick, DragBegin, DragEnd;
 
@@ -452,8 +446,6 @@ namespace ClassicUO.Game.Gumps.Controls
                 }
             }
         }
-
-      
 
         internal void SetFocused()
         {
@@ -544,8 +536,10 @@ namespace ClassicUO.Game.Gumps.Controls
             return Children.OfType<T>().ToArray();
         }
 
-        public IEnumerable<T> FindControls<T>() where T : GumpControl => Children.OfType<T>();
-        
+        public IEnumerable<T> FindControls<T>() where T : GumpControl
+        {
+            return Children.OfType<T>();
+        }
 
         public void InvokeMouseDown(Point position, MouseButton button)
         {
@@ -585,7 +579,6 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
-
             OnMouseClick(x, y, button);
 
             if (button == MouseButton.Right)
@@ -596,9 +589,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     CloseWithRightClick();
             }
             else
-            {
                 MouseClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
-            }               
         }
 
         public bool InvokeMouseDoubleClick(Point position, MouseButton button)

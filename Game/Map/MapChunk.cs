@@ -185,11 +185,7 @@ namespace ClassicUO.Game.Map
                     for (int k = 0; k < list.Count; k++)
                     {
                         GameObject o = list[k];
-
-                        if (o is Static st && st.Effect != null)
-                        {
-                            st.Effect = null;
-                        }
+                        if (o is Static st && st.Effect != null) st.Effect = null;
 
                         if (!(o is Land) && !(o is Static))
                             return false;

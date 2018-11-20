@@ -25,7 +25,6 @@ using System;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
@@ -42,9 +41,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private readonly Label[] _labels = new Label[(int) MobileStats.Max];
         private readonly GumpPic[] _lockers = new GumpPic[3];
         private readonly bool _useUOPGumps;
+        private readonly Point _point;
         private double _refreshTime;
-
-        private Point _point;
 
         public StatusGump() : base(0, 0)
         {
@@ -603,17 +601,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
             }
 
-
             if (!_useUOPGumps)
             {
-               
             }
             else
             {
                 p.X = 540;
                 p.Y = 180;
             }
-
 
             _point = p;
         }
@@ -635,9 +630,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         //{
                         //    UIManager.Remove<MobileHealthGump>(World.Player);
                         //}
-
                         Dispose();
-
                     }
                 }
                 else
@@ -648,8 +641,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         MobileHealthGump currentMobileHealthGump;
                         list.Add(World.Player);
                         UIManager.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
-
-
                         Dispose();
                     }
                 }

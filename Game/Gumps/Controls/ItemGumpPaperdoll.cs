@@ -39,7 +39,6 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             X = x;
             Y = y;
-
             Mobile = owner;
             HighlightOnMouseOver = false;
             _isTransparent = transparent;
@@ -47,17 +46,12 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (Animations.EquipConversions.TryGetValue(Item.Graphic, out var dict))
             {
-                if (dict.TryGetValue(Item.ItemData.AnimID, out EquipConvData data))
-                {
-                    _gumpIndex = data.Gump;
-                }
+                if (dict.TryGetValue(Item.ItemData.AnimID, out EquipConvData data)) _gumpIndex = data.Gump;
             }
-
 
             Texture = IO.Resources.Gumps.GetGumpTexture(_gumpIndex);
             Width = Texture.Width;
             Height = Texture.Height;
-            
         }
 
         public int SlotIndex { get; set; }
@@ -68,20 +62,17 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (Item.IsDisposed || IsDisposed)
                 return;
-
             base.Update(totalMS, frameMS);
-
-            Texture.Ticks = (long)totalMS;
-
+            Texture.Ticks = (long) totalMS;
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
             if (Item.IsDisposed || IsDisposed)
                 return false;
-            return spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue((long)Item.ItemData.Flags), _isTransparent ? .5f : 0, false));
-        }
 
+            return spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue((long) Item.ItemData.Flags), _isTransparent ? .5f : 0, false));
+        }
 
         protected override bool Contains(int x, int y)
         {

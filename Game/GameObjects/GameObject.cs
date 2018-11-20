@@ -26,7 +26,6 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
-using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -42,9 +41,7 @@ namespace ClassicUO.Game.GameObjects
         private readonly List<TextOverhead> _overHeads;
         private Position _position = Position.Invalid;
         private View _view;
-
-
-        public event EventHandler Disposed; 
+        public Vector3 Offset;
 
         protected GameObject()
         {
@@ -57,26 +54,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsPositionChanged { get; protected set; }
 
-
         public Tile Tile { get; protected set; }
-
-        public void SetTile(ushort x, ushort y)
-        {
-            if (World.Map != null)
-            {
-                if (Tile != Tile.Invalid)
-                    Tile.RemoveGameObject(this);
-                ref Tile newTile = ref World.Map.GetTile(x, y);
-                if (newTile != Tile.Invalid)
-                    newTile.AddGameObject(this);
-
-                Tile = newTile;
-            }
-            else
-            {
-                Dispose();
-            }
-        }
 
         public virtual Position Position
         {
@@ -101,7 +79,6 @@ namespace ClassicUO.Game.GameObjects
 
                         if (newTile != Tile.Invalid)
                             newTile.AddGameObject(this);
-
                         Tile = newTile;
                     }
                     else if (this != World.Player)
@@ -164,12 +141,9 @@ namespace ClassicUO.Game.GameObjects
         //    }
         //}
 
-
         public bool IsDisposed { get; private set; }
 
         public int Distance => DistanceTo(World.Player);
-
-        public Vector3 Offset;
 
         public virtual void Update(double totalMS, double frameMS)
         {
@@ -183,6 +157,24 @@ namespace ClassicUO.Game.GameObjects
                 if (gt.IsDisposed)
                     _overHeads.RemoveAt(i--);
             }
+        }
+
+        public event EventHandler Disposed;
+
+        public void SetTile(ushort x, ushort y)
+        {
+            if (World.Map != null)
+            {
+                if (Tile != Tile.Invalid)
+                    Tile.RemoveGameObject(this);
+                ref Tile newTile = ref World.Map.GetTile(x, y);
+
+                if (newTile != Tile.Invalid)
+                    newTile.AddGameObject(this);
+                Tile = newTile;
+            }
+            else
+                Dispose();
         }
 
         public void UpdateRealScreenPosition(Point offset)
@@ -215,7 +207,6 @@ namespace ClassicUO.Game.GameObjects
         {
             if (string.IsNullOrEmpty(text))
                 return null;
-
             TextOverhead overhead;
 
             for (int i = 0; i < OverHeads.Count; i++)
@@ -276,7 +267,6 @@ namespace ClassicUO.Game.GameObjects
             Tile = Tile.Invalid;
             _overHeads.ForEach(s => s.Dispose());
             _overHeads.Clear();
-
             Disposed.Raise();
         }
     }

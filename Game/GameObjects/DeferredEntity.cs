@@ -30,10 +30,6 @@ namespace ClassicUO.Game.GameObjects
 {
     public class DeferredEntity : GameObject
     {
-        public DeferredEntity()
-        {
-        }
-
         public GameObject Entity { get; set; }
 
         public Vector3 AtPosition { get; set; }

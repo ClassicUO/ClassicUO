@@ -31,9 +31,9 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class Label : GumpControl
     {
-        private RenderedText _gText;
-        private float _timeToLive;
         private float _alpha;
+        private readonly RenderedText _gText;
+        private float _timeToLive;
 
         public Label(string text, bool isunicode, ushort hue, int maxwidth = 0, byte font = 0xFF, FontStyle style = FontStyle.None, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, float timeToLive = 0.0f)
         {
@@ -105,27 +105,20 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (FadeOut)
             {
-
                 _timeToLive -= (float) frameMS;
 
                 if (_timeToLive <= 0.0f)
                     Dispose();
                 else
-                {
                     _alpha = 1 - _timeToLive / 1000.0f;
-                }
             }
 
             base.Update(totalMS, frameMS);
         }
 
-
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            if (IsDisposed)
-            {
-                return false;
-            }
+            if (IsDisposed) return false;
 
             if (FadeOut)
                 hue = ShaderHuesTraslator.GetHueVector(hue.HasValue ? (int) hue.Value.X : 0, false, _alpha, false);

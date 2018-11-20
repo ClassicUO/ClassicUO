@@ -59,6 +59,13 @@ namespace ClassicUO.Game.GameObjects
         protected const int WALKING_DELAY = 750;
         protected const int PLAYER_WALKING_DELAY = 150;
         protected const int DEFAULT_CHARACTER_HEIGHT = 16;
+
+        //protected override void OnPositionChanged(object sender, EventArgs e)
+        //{
+        //    base.OnPositionChanged(sender, e);
+        //    //Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
+        //}
+        private readonly List<DamageOverhead> _damageTextList = new List<DamageOverhead>(5);
         private ushort _hits;
         private ushort _hitsMax;
         private bool _isDead;
@@ -73,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Mobile(Serial serial) : base(serial)
         {
-            _lastAnimationChangeTime = CoreGame.Ticks;           
+            _lastAnimationChangeTime = CoreGame.Ticks;
         }
 
         public Deque<Step> Steps { get; } = new Deque<Step>();
@@ -266,15 +273,23 @@ namespace ClassicUO.Game.GameObjects
 
         internal bool IsMoving => Steps.Count > 0;
 
+        public IReadOnlyList<DamageOverhead> DamageList => _damageTextList;
+
         public event EventHandler HitsChanged;
 
         public event EventHandler ManaChanged;
 
         public event EventHandler StaminaChanged;
 
-        protected override View CreateView() => new MobileView(this);
+        protected override View CreateView()
+        {
+            return new MobileView(this);
+        }
 
-        public void SetSAPoison(bool value) => _isSA_Poisoned = value;
+        public void SetSAPoison(bool value)
+        {
+            _isSA_Poisoned = value;
+        }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -284,29 +299,14 @@ namespace ClassicUO.Game.GameObjects
             for (int i = 0; i < _damageTextList.Count; i++)
             {
                 DamageOverhead damage = _damageTextList[i];
-
                 damage.Update(totalMS, frameMS);
-
-                if (damage.IsDisposed)
-                {
-                    _damageTextList.RemoveAt(i--);
-                }
+                if (damage.IsDisposed) _damageTextList.RemoveAt(i--);
             }
         }
 
-        //protected override void OnPositionChanged(object sender, EventArgs e)
-        //{
-        //    base.OnPositionChanged(sender, e);
-        //    //Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
-        //}
-
-        private readonly List<DamageOverhead> _damageTextList = new List<DamageOverhead>(5);
-
-        public IReadOnlyList<DamageOverhead> DamageList => _damageTextList;
-
         public void AddDamage(int damage)
         {
-            DamageOverhead overhead = new DamageOverhead(this, damage.ToString(), hue: (Hue)(this == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500);
+            DamageOverhead overhead = new DamageOverhead(this, damage.ToString(), hue: (Hue) (this == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500);
 
             if (_damageTextList.Count >= 5)
                 _damageTextList.RemoveAt(_damageTextList.Count - 1);
@@ -637,7 +637,6 @@ namespace ClassicUO.Game.GameObjects
                 Equipment[i] = null;
         }
 
-
         public struct Step
         {
             //public Step(int x, int y, sbyte z, byte dir, bool anim, bool run, byte rej, byte seq)
@@ -651,7 +650,6 @@ namespace ClassicUO.Game.GameObjects
             //    Rej = rej;
             //    Seq = seq;
             //}
-
             public int X, Y;
             public sbyte Z;
             public byte Direction;

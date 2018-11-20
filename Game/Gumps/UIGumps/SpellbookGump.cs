@@ -48,9 +48,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private void CreateBook()
         {
             Clear();
-
             _pageCornerLeft = _pageCornerRight = null;
-
             GetBookInfo(_spellBookType, out Graphic bookGraphic, out Graphic minimizedGraphic, out Graphic iconStartGraphic, out int maxSpellsCount, out int spellIndexOffset, out int spellsOnPage, out int dictionaryPagesCount);
             AddChildren(new GumpPic(0, 0, bookGraphic, 0));
             AddChildren(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
@@ -543,10 +541,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private void CreateSpellDetailsPage(int page, bool isright, int circle, SpellDefinition spell)
         {
             if (_spellBookType == SpellBookType.Magery)
+            {
                 AddChildren(new Label(SpellsMagery.CircleNames[circle], false, 0x0288, font: 6)
                 {
                     X = isright ? 64 + 162 : 85, Y = 10
                 }, page);
+            }
 
             GumpPic spellImage = new GumpPic(isright ? 225 : 62, 40, (Graphic) (spell.GumpIconID - 0x1298), 0)
             {
@@ -639,7 +639,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CreateBook();
         }
 
-        public void Update() => OnEntityUpdate(_spellBook);
+        public void Update()
+        {
+            OnEntityUpdate(_spellBook);
+        }
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {

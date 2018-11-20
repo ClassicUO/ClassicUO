@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
@@ -14,7 +15,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
         private const ushort SELECTED_COLOR = 0x0021;
         private const ushort NORMAL_COLOR = 0x034F;
         private uint _selectedCharacter;
-        
+
         public CharacterSelectionGump() : base(0, 0)
         {
             bool testField = FileManager.ClientVersion >= ClientVersions.CV_305D;
@@ -31,11 +32,10 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             }
 
             LoginScene loginScene = Service.Get<LoginScene>();
-
             var lastSelected = loginScene.Characters.FirstOrDefault(o => o.Name == Service.Get<Settings>().LastCharacterName);
 
             if (lastSelected != null)
-                _selectedCharacter = (uint)Array.IndexOf(loginScene.Characters, lastSelected);
+                _selectedCharacter = (uint) Array.IndexOf(loginScene.Characters, lastSelected);
             else if (loginScene.Characters.Length > 0)
                 _selectedCharacter = 0;
 
@@ -48,7 +48,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             {
                 X = 267, Y = listTitleY
             }, 1);
-            
+
             foreach (CharacterListEntry character in loginScene.Characters)
             {
                 AddChildren(new CharacterEntryGump((uint) posInList, character, SelectCharacter, LoginCharacter)
@@ -59,10 +59,12 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             }
 
             if (loginScene.Characters.Any(o => string.IsNullOrEmpty(o.Name)))
+            {
                 AddChildren(new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
                 {
                     X = 224, Y = 350 + yBonus, ButtonAction = ButtonAction.Activate
                 }, 1);
+            }
 
             AddChildren(new Button((int) Buttons.Delete, 0x159A, 0x159C, 0x159B)
             {
@@ -78,7 +80,6 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             {
                 X = 610, Y = 445, ButtonAction = ButtonAction.Activate
             }, 1);
-            
             ChangePage(1);
         }
 
@@ -90,15 +91,19 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             {
                 case Buttons.Delete:
                     DeleteCharacter(loginScene);
+
                     break;
                 case Buttons.New:
                     loginScene.StartCharCreation();
+
                     break;
                 case Buttons.Next:
                     LoginCharacter(_selectedCharacter);
+
                     break;
                 case Buttons.Prev:
                     loginScene.StepBack();
+
                     break;
             }
 
@@ -108,21 +113,22 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
         private void DeleteCharacter(LoginScene loginScene)
         {
             var charName = loginScene.Characters[_selectedCharacter].Name;
+
             if (!string.IsNullOrEmpty(charName))
             {
                 var existing = Children.OfType<LoadingGump>().FirstOrDefault();
+
                 if (existing != null)
                     RemoveChildren(existing);
-
                 var text = Cliloc.GetString(1080033).Replace("~1_NAME~", charName);
-                AddChildren(new LoadingGump(text, LoadingGump.Buttons.OK | LoadingGump.Buttons.Cancel, (buttonID) =>
+
+                AddChildren(new LoadingGump(text, LoadingGump.Buttons.OK | LoadingGump.Buttons.Cancel, buttonID =>
                 {
-                    if (buttonID == (int)LoadingGump.Buttons.OK)
+                    if (buttonID == (int) LoadingGump.Buttons.OK)
                         loginScene.DeleteCharacter(_selectedCharacter);
                     else
                         ChangePage(1);
                 }), 2);
-
                 ChangePage(2);
             }
         }

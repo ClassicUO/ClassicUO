@@ -24,7 +24,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 
 using ClassicUO.Utility;
@@ -63,7 +62,10 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public static string GetString(int number) => GetEntry(number).Text;
+        public static string GetString(int number)
+        {
+            return GetEntry(number).Text;
+        }
 
         public static StringEntry GetEntry(int number)
         {

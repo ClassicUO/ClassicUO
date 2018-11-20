@@ -159,14 +159,12 @@ namespace ClassicUO.Game.Gumps.Controls
 
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
-                _scrollBar.MaxValue =/* _gameText.Height*/ Children.Sum( s=> s.Height) - Height + (HasBackground ? 8 : 0);
+                _scrollBar.MaxValue = /* _gameText.Height*/ Children.Sum(s => s.Height) - Height + (HasBackground ? 8 : 0);
                 ScrollY = _scrollBar.Value;
             }
 
             //if (Width != _gameText.Width)
             //    Width = _gameText.Width;
-
-            
         }
 
         protected override void OnMouseWheel(MouseEvent delta)
@@ -197,13 +195,10 @@ namespace ClassicUO.Game.Gumps.Controls
                     _scrollBar.MinValue = 0;
                     _scrollBar.MaxValue = /* _gameText.Height*/ Children.Sum(s => s.Height) - Height + (HasBackground ? 8 : 0);
                     //_scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
-
                     WantUpdateSize = false;
-
                 }
 
                 ScrollY = _scrollBar.Value;
-
             }
 
             base.Update(totalMS, frameMS);
@@ -213,19 +208,14 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (IsDisposed)
                 return false;
-
             Rectangle scissor = ScissorStack.CalculateScissors(spriteBatch.TransformMatrix, new Rectangle(position.X, position.Y, Width, Height));
 
             if (ScissorStack.PushScissors(scissor))
             {
                 spriteBatch.EnableScissorTest(true);
-
                 base.Draw(spriteBatch, new Point(position.X - 0, position.Y - 0)); // TODO: set a scrollarea
-
                 _gameText.Draw(spriteBatch, new Rectangle(position.X + (HasBackground ? 4 : 0), position.Y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0)), ScrollX, ScrollY);
-
                 spriteBatch.EnableScissorTest(false);
-
                 ScissorStack.PopScissors();
             }
 
@@ -259,7 +249,6 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             _gameText?.Dispose();
             _gameText = null;
-
             base.Dispose();
         }
     }

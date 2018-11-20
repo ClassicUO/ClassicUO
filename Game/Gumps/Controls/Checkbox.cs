@@ -95,7 +95,6 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (IsDisposed)
                 return false;
-
             bool ok = base.Draw(spriteBatch, position);
             spriteBatch.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
             _text.Draw(spriteBatch, new Point(position.X + _textures[ACTIVE].Width + 2, position.Y));

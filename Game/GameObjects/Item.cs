@@ -69,19 +69,17 @@ namespace ClassicUO.Game.GameObjects
     {
         private ushort _amount;
         private Serial _container;
+        private Position _containerPosition;
         private Graphic? _displayedGraphic;
         private GameEffect _effect;
         private bool _isMulti;
         private Layer _layer;
-        private ulong _spellsBitFiled;
         private uint _price;
+        private ulong _spellsBitFiled;
 
         public Item(Serial serial) : base(serial)
         {
-           
         }
-
-        
 
         public uint Price
         {
@@ -93,16 +91,6 @@ namespace ClassicUO.Game.GameObjects
                     _price = value;
                     _delta |= Delta.Attributes;
                 }
-            }
-        }
-
-        public GameEffect Effect
-        {
-            get => _effect;
-            set
-            {
-                _effect?.Dispose();
-                _effect = value;
             }
         }
 
@@ -243,6 +231,16 @@ namespace ClassicUO.Game.GameObjects
 
         public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
 
+        public GameEffect Effect
+        {
+            get => _effect;
+            set
+            {
+                _effect?.Dispose();
+                _effect = value;
+            }
+        }
+
         public override Graphic Graphic
         {
             get => base.Graphic;
@@ -255,21 +253,6 @@ namespace ClassicUO.Game.GameObjects
 
         public StaticTiles ItemData => TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
 
-        protected override void OnPositionChanged(object sender, EventArgs e)
-        {
-            base.OnPositionChanged(sender, e);
-
-            if (IsCorpse)
-            {
-
-            }
-
-            //if (OnGround)
-            //    Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
-        }
-
-        private Position _containerPosition;
-
         public override Position Position
         {
             get => _containerPosition;
@@ -277,23 +260,30 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (IsCorpse)
                 {
-
                 }
 
                 if (!OnGround)
-                {
                     _containerPosition = value;
-                }
                 else
-                {
                     base.Position = _containerPosition = value;
-                }
             }
         }
 
         public bool IsAtWorld(int x, int y)
         {
             return Position.X == x && Position.Y == y;
+        }
+
+        protected override void OnPositionChanged(object sender, EventArgs e)
+        {
+            base.OnPositionChanged(sender, e);
+
+            if (IsCorpse)
+            {
+            }
+
+            //if (OnGround)
+            //    Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
         }
 
         public event EventHandler OwnerChanged;
@@ -715,7 +705,6 @@ namespace ClassicUO.Game.GameObjects
 
             Effect?.Dispose();
             Effect = null;
-         
             base.Dispose();
         }
 

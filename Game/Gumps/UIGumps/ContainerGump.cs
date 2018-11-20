@@ -21,25 +21,21 @@
 
 #endregion
 
-using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 
-
 namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class ContainerGump : Gump
     {
-        private readonly Item _item;
-
-        private long _corpseEyeTicks;
-        private readonly bool _isCorspeContainer;
-        private int _eyeCorspeOffset;
-
         private readonly GumpPic _eyeGumpPic;
+        private readonly bool _isCorspeContainer;
+        private readonly Item _item;
+        private long _corpseEyeTicks;
+        private int _eyeCorspeOffset;
 
         public ContainerGump(Item item, Graphic gumpid) : base(item.Serial, 0)
         {
@@ -49,46 +45,33 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _item.Items.Removed += ItemsOnRemoved;
             CanMove = true;
             AddChildren(new GumpPicContainer(0, 0, ContainerManager.Get(gumpid).Graphic, 0, item));
-
-            if (_isCorspeContainer)
-            {
-                AddChildren(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
-            }
+            if (_isCorspeContainer) AddChildren(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
         }
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
 
-            if (_isCorspeContainer && _corpseEyeTicks <  totalMS)
+            if (_isCorspeContainer && _corpseEyeTicks < totalMS)
             {
                 _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
                 _corpseEyeTicks = (long) totalMS + 750;
-
-                _eyeGumpPic.Graphic = (Graphic)(0x0045 + _eyeCorspeOffset);
+                _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
                 _eyeGumpPic.Texture = IO.Resources.Gumps.GetGumpTexture(_eyeGumpPic.Graphic);
             }
         }
 
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
         {
-            Children
-               .OfType<ItemGump>()
-               .Where(s => e.Contains(s.Item))
-               .ToList()
-               .ForEach(RemoveChildren);
+            Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)).ToList().ForEach(RemoveChildren);
         }
 
         private void ItemsOnAdded(object sender, CollectionChangedEventArgs<Item> e)
         {
-            Children
-               .OfType<ItemGump>()
-               .Where(s => e.Contains(s.Item))
-               .ToList()
-               .ForEach(RemoveChildren);
+            Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)).ToList().ForEach(RemoveChildren);
 
             foreach (Item item in e)
-                AddChildren(new ItemGump(item));            
+                AddChildren(new ItemGump(item));
         }
 
         protected override void OnInitialize()

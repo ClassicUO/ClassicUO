@@ -93,11 +93,10 @@ namespace ClassicUO.IO
                         continue;
 
                     if (hashes.TryGetValue(hash, out int idx))
-                    {                        
+                    {
                         if (idx < 0 || idx > Entries.Length)
                             throw new IndexOutOfRangeException("hashes dictionary and files collection have different count of entries!");
                         Entries[idx] = new UOFileIndex3D(offset + headerLength, length, decompressedLength);
-
 
                         // extra?
                         if (_hasExtra)
@@ -118,7 +117,6 @@ namespace ClassicUO.IO
 
                 Seek(nextBlock);
             } while (nextBlock != 0);
-
         }
 
         internal static ulong CreateHash(string s)

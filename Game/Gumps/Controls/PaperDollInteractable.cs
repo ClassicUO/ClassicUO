@@ -22,14 +22,10 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
@@ -37,12 +33,11 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private static readonly PaperDollEquipSlots[] _layerOrder =
         {
-            PaperDollEquipSlots.Legging, PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Gloves,   PaperDollEquipSlots.Neck, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Cloak, PaperDollEquipSlots.Robe,  PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand , PaperDollEquipSlots.Belt, PaperDollEquipSlots.Talisman
+            PaperDollEquipSlots.Legging, PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Gloves, PaperDollEquipSlots.Neck, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Cloak, PaperDollEquipSlots.Robe, PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand, PaperDollEquipSlots.Belt, PaperDollEquipSlots.Talisman
         };
-
-        private Mobile _mobile;
         private GumpPicBackpack _backpackGump;
         private Item _fakeItem;
+        private Mobile _mobile;
 
         public PaperDollInteractable(int x, int y, Mobile mobile)
         {
@@ -50,18 +45,14 @@ namespace ClassicUO.Game.Gumps.Controls
             Y = y;
             Mobile = mobile;
             AcceptMouseInput = false;
-
             mobile.Items.Added += ItemsOnAdded;
             mobile.Items.Removed += ItemsOnRemoved;
             mobile.Disposed += MobileOnDisposed;
         }
 
-       
-
         public Mobile Mobile
         {
             get => _mobile;
-
             set
             {
                 if (value != _mobile)
@@ -96,7 +87,6 @@ namespace ClassicUO.Game.Gumps.Controls
             //    AddChildren(new ItemGumpPaperdoll(0, 0, item, Mobile));
             //}
 
-
             //for (int i = 0; i < _layerOrder.Length; i++)
             //{
             //    int layerIndex = (int) _layerOrder[i];
@@ -108,7 +98,6 @@ namespace ClassicUO.Game.Gumps.Controls
             //        RemoveChildren(c);
             //    }
             //}
-
             OnEntityUpdated(_mobile);
         }
 
@@ -129,19 +118,14 @@ namespace ClassicUO.Game.Gumps.Controls
                 _fakeItem.Dispose();
                 _fakeItem = null;
             }
-            else if (_mobile != null && item != null && _mobile.Equipment[item.ItemData.Layer] == null)
-            {
-                _fakeItem = item;
-            }
+            else if (_mobile != null && item != null && _mobile.Equipment[item.ItemData.Layer] == null) _fakeItem = item;
         }
-
 
         private void OnEntityUpdated(Entity entity)
         {
             Clear();
 
             // Add the base gump - the semi-naked paper doll.
-
             Graphic body = 0;
 
             if (_mobile == World.Player)
@@ -165,30 +149,26 @@ namespace ClassicUO.Game.Gumps.Controls
             }
             else
                 body = (Graphic) (12 + (_mobile.IsFemale ? 1 : 0));
- 
+
             AddChildren(new GumpPic(0, 0, body, _mobile.Hue)
             {
-                AcceptMouseInput = true,
-                IsPaperdoll = true
+                AcceptMouseInput = true, IsPaperdoll = true
             });
-            
-            
 
             // Loop through the items on the mobile and create the gump pics.
             for (int i = 0; i < _layerOrder.Length; i++)
             {
                 int layerIndex = (int) _layerOrder[i];
                 Item item = _mobile.Equipment[layerIndex];
-
                 bool isfake = false;
                 bool canPickUp = true;
 
                 if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
                 {
                     isfake = true;
-                    canPickUp = false;                   
+                    canPickUp = false;
                 }
-                else if (item == null || MobileView.IsCovered(_mobile, (Layer)layerIndex))
+                else if (item == null || MobileView.IsCovered(_mobile, (Layer) layerIndex))
                     continue;
 
                 switch (_layerOrder[i])
@@ -202,16 +182,15 @@ namespace ClassicUO.Game.Gumps.Controls
 
                 AddChildren(new ItemGumpPaperdoll(0, 0, isfake ? _fakeItem : item, Mobile, isfake)
                 {
-                    SlotIndex = i,
-                    CanPickUp = canPickUp
+                    SlotIndex = i, CanPickUp = canPickUp
                 });
-
             }
 
             // If this object has a backpack, add it last.
             if (_mobile.Equipment[(int) PaperDollEquipSlots.Backpack] != null)
             {
                 Item backpack = _mobile.Equipment[(int) PaperDollEquipSlots.Backpack];
+
                 AddChildren(_backpackGump = new GumpPicBackpack(-7, 0, backpack)
                 {
                     AcceptMouseInput = true

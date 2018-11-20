@@ -95,6 +95,7 @@ namespace ClassicUO.Network
                 while (*buff != 0)
                     WriteByte((byte) *buff++);
             }
+
             WriteByte(0);
         }
 
@@ -108,8 +109,9 @@ namespace ClassicUO.Network
             {
                 char* buff = ptr;
                 byte* end = (byte*) ptr + length;
+
                 while (*buff != 0 && &buff != &end)
-                    WriteByte((byte)*buff++);
+                    WriteByte((byte) *buff++);
             }
 
             if (value.Length < length)
@@ -128,7 +130,7 @@ namespace ClassicUO.Network
                 short* buff = (short*) ptr;
 
                 while (*buff != 0)
-                    WriteUShort((ushort)*buff++);
+                    WriteUShort((ushort) *buff++);
             }
 
             WriteUShort(0);
@@ -142,7 +144,7 @@ namespace ClassicUO.Network
 
             fixed (char* ptr = value)
             {
-                short* buff = (short*)ptr;
+                short* buff = (short*) ptr;
 
                 while (*buff != 0)
                     WriteUShort((ushort) *buff++);

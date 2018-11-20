@@ -82,7 +82,5 @@ namespace ClassicUO.Utility
 
             return string.Empty;
         }
-
-
     }
 }

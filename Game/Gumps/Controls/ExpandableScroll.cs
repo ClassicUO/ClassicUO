@@ -21,7 +21,6 @@
 
 #endregion
 
-using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 

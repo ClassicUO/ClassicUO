@@ -25,12 +25,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
-
-using Math = System.Math;
 
 namespace ClassicUO.IO.Resources
 {
@@ -75,7 +72,6 @@ namespace ClassicUO.IO.Resources
             if (!_artDictionary.TryGetValue(g, out ArtTexture texture) || texture.IsDisposed)
             {
                 ushort[] pixels = ReadStaticArt(g, out short w, out short h, out Rectangle imageRectangle);
-
                 texture = new ArtTexture(imageRectangle, w, h);
                 texture.SetData(pixels);
                 _usedIndex.Add(g);
@@ -107,7 +103,6 @@ namespace ClassicUO.IO.Resources
                 texture.SetData(pixels);
                 _usedIndexLand.Add(g);
                 _picker.Set(g, SIZE, SIZE, pixels);
-
                 _landDictionary.Add(g, texture);
             }
 
@@ -129,13 +124,12 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
-
             long ticks = CoreGame.Ticks - 3000;
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
                 //ref SpriteTexture texture = ref _artCache[_usedIndex[i]];
-                int g =  _usedIndex[i];
+                int g = _usedIndex[i];
                 SpriteTexture texture = _artDictionary[g];
 
                 if (texture == null || texture.IsDisposed)
@@ -165,9 +159,10 @@ namespace ClassicUO.IO.Resources
                 else if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
-                  //  texture = null;
+                    //  texture = null;
                     _usedIndexLand.RemoveAt(i--);
                     _landDictionary.Remove(g);
+
                     if (++count >= 20)
                         break;
                 }
@@ -182,7 +177,7 @@ namespace ClassicUO.IO.Resources
             width = _file.ReadShort();
             height = _file.ReadShort();
             imageRectangle = Rectangle.Empty;
-            
+
             if (width == 0 || height == 0)
                 return new ushort[0];
             ushort[] pixels = new ushort[width * height];
@@ -192,7 +187,6 @@ namespace ClassicUO.IO.Resources
             int x = 0;
             int y = 0;
             ptr = (ushort*) (datastart + lineoffsets[0] * 2);
-
             int minX = width, minY = height, maxX = 0, maxY = 0;
 
             while (y < height)
@@ -218,7 +212,6 @@ namespace ClassicUO.IO.Resources
 
                         if (val > 0)
                             val = (ushort) (0x8000 | val);
-
                         pixels[pos++] = val;
 
                         if (val != 0)
@@ -269,11 +262,8 @@ namespace ClassicUO.IO.Resources
             //        }
             //    }
 
-
-
             //width = (short) (maxX - minX);
             //height = (short)(maxY - minY);
-
             imageRectangle.X = minX;
             imageRectangle.Y = minY;
             imageRectangle.Width = maxX - minX;
@@ -286,7 +276,6 @@ namespace ClassicUO.IO.Resources
         {
             graphic &= FileManager.GraphicMask;
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
-
             ushort[] pixels = new ushort[44 * 44];
 
             for (int i = 0; i < 22; i++)

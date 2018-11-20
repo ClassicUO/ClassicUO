@@ -68,13 +68,6 @@ namespace ClassicUO.IO.Resources
 
     public static class Fonts
     {
-        public struct FontTextureInfo
-        {
-            public unsafe uint* Pixels;
-            public int Width, Height, LinesCount;
-            public List<WebLinkRect> Links;
-        }
-
         private const int UOFONT_SOLID = 0x01;
         private const int UOFONT_ITALIC = 0x02;
         private const int UOFONT_INDENTION = 0x04;
@@ -346,9 +339,7 @@ namespace ClassicUO.IO.Resources
 
             int blocksize = height * width;
             //uint[] pData = new uint[blocksize];
-
             uint* pData = stackalloc uint[blocksize];
-
             int lineOffsY = 0;
             MultilinesFontInfo ptr = info;
             isPartial = font != 5 && font != 8 && !UnusePartialHue;
@@ -437,7 +428,7 @@ namespace ClassicUO.IO.Resources
             }
 
             FontTexture ftexture = new FontTexture(width, height, linesCount, new List<WebLinkRect>());
-            ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr)pData, blocksize);
+            ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) pData, blocksize);
 
             //FontTextureInfo fontTextureInfo = new FontTextureInfo()
             //{
@@ -527,7 +518,6 @@ namespace ClassicUO.IO.Resources
 
                         if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14;
-
                         ptr.Data.Resize(ptr.CharCount); // = new List<MultilinesFontData>(ptr.CharCount);
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
@@ -553,7 +543,6 @@ namespace ClassicUO.IO.Resources
 
                         if (ptr.MaxHeight == 0)
                             ptr.MaxHeight = 14;
-
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
@@ -682,6 +671,7 @@ namespace ClassicUO.IO.Resources
                 if (realWidth > width)
                 {
                     string newstring = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0);
+
                     return GeneratePixelsUnicode(font, newstring, color, cell, width, align, flags);
                 }
             }
@@ -993,7 +983,6 @@ namespace ClassicUO.IO.Resources
 
         private static unsafe FontTexture GeneratePixelsUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags)
         {
-
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
                 return null;
             int len = str.Length;
@@ -1067,9 +1056,7 @@ namespace ClassicUO.IO.Resources
             height += _topMargin + _bottomMargin + 4;
             int blocksize = height * width;
             //uint[] pData = new uint[blocksize];
-
             uint* pData = stackalloc uint[blocksize];
-
             uint* table = (uint*) _unicodeFontAddress[font];
             int lineOffsY = 1 + _topMargin;
             MultilinesFontInfo ptr = info;
@@ -1455,10 +1442,7 @@ namespace ClassicUO.IO.Resources
             }
 
             FontTexture ftexture = new FontTexture(width, height, linesCount, links);
-
-            ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr)pData, blocksize);
-
-
+            ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) pData, blocksize);
 
             //FontTextureInfo fontTextureInfo = new FontTextureInfo()
             //{
@@ -1469,12 +1453,8 @@ namespace ClassicUO.IO.Resources
             //    Links = links
             //};
 
-
-
             return ftexture;
         }
-
-       
 
         private static unsafe MultilinesFontInfo GetInfoHTML(byte font, string str, int len, TEXT_ALIGN_TYPE align, ushort flags, int width)
         {
@@ -2570,7 +2550,6 @@ namespace ClassicUO.IO.Resources
                 }
 
                 var ptr = info;
-
                 info = info.Next;
                 ptr.Data.Clear();
                 ptr = null;
@@ -2666,6 +2645,13 @@ namespace ClassicUO.IO.Resources
             }
 
             return count;
+        }
+
+        public struct FontTextureInfo
+        {
+            public unsafe uint* Pixels;
+            public int Width, Height, LinesCount;
+            public List<WebLinkRect> Links;
         }
     }
 

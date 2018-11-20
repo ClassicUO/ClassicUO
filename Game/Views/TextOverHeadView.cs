@@ -33,7 +33,7 @@ namespace ClassicUO.Game.Views
 {
     public class TextOverheadView : View
     {
-        private RenderedText _text;
+        private readonly RenderedText _text;
 
         public TextOverheadView(TextOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent)
         {
@@ -47,15 +47,13 @@ namespace ClassicUO.Game.Views
                 Text = parent.Text
             };
             Texture = _text.Texture;
-
             int delay = Service.Get<Settings>().SpeechDelay;
 
             if (delay < 10)
                 delay = 10;
 
             if (parent.TimeToLive <= 0.0f)
-                parent.TimeToLive = ((4000 * _text.LinesCount * delay) / 100.0f);
-
+                parent.TimeToLive = 4000 * _text.LinesCount * delay / 100.0f;
             parent.Initialized = true;
         }
 
@@ -64,20 +62,19 @@ namespace ClassicUO.Game.Views
             if (!AllowedToDraw || GameObject.IsDisposed)
             {
                 _text?.Dispose();
+
                 return false;
             }
 
             Texture.Ticks = CoreGame.Ticks;
             TextOverhead overhead = (TextOverhead) GameObject;
+
             if (!overhead.IsPersistent && overhead.Alpha < 1.0f)
                 HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
-
             Settings settings = Service.Get<Settings>();
             GameScene gs = Service.Get<SceneManager>().GetScene<GameScene>();
-
             int width = Texture.Width - Bounds.X;
             int height = Texture.Height - Bounds.Y;
-
 
             if (position.X < Bounds.X)
                 position.X = Bounds.X;
@@ -101,12 +98,10 @@ namespace ClassicUO.Game.Views
     {
         public DamageOverheadView(DamageOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent, maxwidth, hue, font, isunicode, style)
         {
-
         }
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-
             DamageOverhead dmg = (DamageOverhead) GameObject;
 
             if (dmg.MovingTime >= 50)

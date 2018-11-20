@@ -70,7 +70,7 @@ namespace ClassicUO.Game.GameObjects
 
         public GraphicEffectBlendMode Blend { get; set; }
 
-        public bool IsItemEffect => (Source is Item item && item.OnGround) || (Source is Static);
+        public bool IsItemEffect => Source is Item item && item.OnGround || Source is Static;
 
         public long Duration { get; set; } = -1;
 
@@ -81,7 +81,7 @@ namespace ClassicUO.Game.GameObjects
             AnimDataFrame = AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
-            Speed = (byte)(AnimDataFrame.FrameInterval * 45);
+            Speed = (byte) (AnimDataFrame.FrameInterval * 45);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -101,6 +101,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                         AnimIndex++;
+
                         if (AnimIndex >= AnimDataFrame.FrameCount)
                             AnimIndex = 0;
                     }
@@ -143,8 +144,7 @@ namespace ClassicUO.Game.GameObjects
             SourceX = x;
             SourceY = y;
             SourceZ = z;
-
-            Position = new Position((ushort)x, (ushort)y , (sbyte)z);
+            Position = new Position((ushort) x, (ushort) y, (sbyte) z);
 
             //if (!IsItemEffect)
             //    Tile = World.Map.GetTile(x, y);

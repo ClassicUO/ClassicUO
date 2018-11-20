@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Security.Policy;
 
 using ClassicUO.IO.Resources;
 
@@ -72,7 +71,6 @@ namespace ClassicUO.Renderer
             _projectionMatrix = new Matrix(0f, //(float)( 2.0 / (double)viewport.Width ) is the actual value we will use
                                            0.0f, 0.0f, 0.0f, 0.0f, 0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
                                            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
-
             _effect.CurrentTechnique = _huesTechnique;
             _rasterizerState = RasterizerState.CullNone;
         }
@@ -185,7 +183,6 @@ namespace ClassicUO.Renderer
 #endif
             float skewHorizTop = (vertices[0].Position.Y - position.Y) * .5f;
             float skewHorizBottom = (vertices[3].Position.Y - position.Y) * .5f;
-
             vertices[0].Position.X -= skewHorizTop;
             vertices[0].Position.Y -= skewHorizTop;
             vertices[flip ? 2 : 1].Position.X -= skewHorizTop;
@@ -259,7 +256,6 @@ namespace ClassicUO.Renderer
             Texture2D current = _textureInfo[0];
             int offset = 0;
             //Techniques last = Techniques.None;
-
             _effect.CurrentTechnique.Passes[0].Apply();
 
             for (int i = 1; i < _numSprites; i++)
@@ -276,9 +272,7 @@ namespace ClassicUO.Renderer
 
             InternalDraw(current, offset, _numSprites - offset);
             Calls += _numSprites;
-
             Array.Clear(_textureInfo, 0, _numSprites);
-
             _numSprites = 0;
         }
 
@@ -322,7 +316,6 @@ namespace ClassicUO.Renderer
 
             //if (texture.ScissorEnabled && texture.ScissorRectangle.HasValue)
             //    GraphicsDevice.ScissorRectangle = texture.ScissorRectangle.Value;
-
             GraphicsDevice.Textures[0] = texture;
             GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite * 4, 0, batchSize * 2);
 
@@ -336,9 +329,7 @@ namespace ClassicUO.Renderer
         {
             if (enable == _rasterizerState.ScissorTestEnable)
                 return;
-
             Flush();
-
             _rasterizerState.ScissorTestEnable = enable;
 
             //_rasterizerState = new RasterizerState()
@@ -368,7 +359,6 @@ namespace ClassicUO.Renderer
 
             return result;
         }
-
     }
 #endif
 }

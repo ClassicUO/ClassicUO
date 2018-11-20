@@ -24,9 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace ClassicUO.IO.Resources
 {
@@ -40,9 +38,7 @@ namespace ClassicUO.IO.Resources
 
             if (!File.Exists(path))
                 throw new FileNotFoundException();
-
             UOFileMul file = new UOFileMul(path, false);
-
             List<SpeechEntry> entries = new List<SpeechEntry>();
 
             while (file.Position < file.Length)
@@ -52,8 +48,7 @@ namespace ClassicUO.IO.Resources
 
                 if (length > 0)
                 {
-                    entries.Add(new SpeechEntry(id, string.Intern(Encoding.UTF8.GetString((byte*)file.PositionAddress, length))));
-
+                    entries.Add(new SpeechEntry(id, string.Intern(Encoding.UTF8.GetString((byte*) file.PositionAddress, length))));
                     file.Skip(length);
                 }
             }
@@ -87,7 +82,6 @@ namespace ClassicUO.IO.Resources
         public static SpeechEntry[] GetKeywords(string text)
         {
             text = text.ToLower();
-
             List<SpeechEntry> list = new List<SpeechEntry>();
 
             for (int i = 0; i < _speech.Length; i++)
@@ -109,18 +103,17 @@ public struct SpeechEntry : IComparable<SpeechEntry>
 {
     public SpeechEntry(int id, string keyword)
     {
-        KeywordID = (short)id;
+        KeywordID = (short) id;
 
         Keywords = keyword.Split(new[]
         {
-                '*'
-            }, StringSplitOptions.RemoveEmptyEntries);
+            '*'
+        }, StringSplitOptions.RemoveEmptyEntries);
     }
 
     public string[] Keywords { get; }
 
     public short KeywordID { get; }
-
 
     public int CompareTo(SpeechEntry obj)
     {

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Configuration;
 
@@ -21,7 +17,7 @@ namespace ClassicUO.Game.Data
         Invulnerable = 0x07
     }
 
-    static class Notoriety
+    internal static class Notoriety
     {
         public static Hue GetHue(NotorietyFlag flag)
         {
@@ -30,19 +26,26 @@ namespace ClassicUO.Game.Data
             switch (flag)
             {
                 case NotorietyFlag.Innocent:
+
                     return settings.InnocentColor;
                 case NotorietyFlag.Ally:
+
                     return settings.FriendColor;
                 case NotorietyFlag.Criminal:
                 case NotorietyFlag.Gray:
+
                     return settings.CriminalColor;
                 case NotorietyFlag.Enemy:
+
                     return settings.EnemyColor;
                 case NotorietyFlag.Murderer:
+
                     return settings.MurdererColor;
                 case NotorietyFlag.Invulnerable:
+
                     return 0x0034;
                 default:
+
                     return 0;
             }
         }
@@ -52,23 +55,28 @@ namespace ClassicUO.Game.Data
             switch (flag)
             {
                 case NotorietyFlag.Innocent:
+
                     return "<basefont color=\"cyan\">";
                 case NotorietyFlag.Ally:
+
                     return "<basefont color=\"lime\">";
                 case NotorietyFlag.Criminal:
                 case NotorietyFlag.Gray:
+
                     return "<basefont color=\"gray\">";
                 case NotorietyFlag.Enemy:
+
                     return "<basefont color=\"orange\">";
                 case NotorietyFlag.Murderer:
+
                     return "<basefont color=\"red\">";
                 case NotorietyFlag.Invulnerable:
+
                     return "<basefont color=\"yellow\">";
                 default:
+
                     return string.Empty;
             }
         }
-
     }
-
 }

@@ -41,12 +41,10 @@ namespace ClassicUO.Game.Views
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
-
-            Static st = (Static)GameObject;
+            Static st = (Static) GameObject;
 
             if (st.Effect == null)
             {
-
                 if (Texture == null || Texture.IsDisposed)
                 {
                     Texture = Art.GetStaticTexture(GameObject.Graphic);

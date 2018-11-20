@@ -28,7 +28,6 @@ namespace ClassicUO.Game.Views
         {
             if (GameObject.IsDisposed)
                 return false;
-
             MovingEffect effect = (MovingEffect) GameObject;
 
             if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
@@ -38,8 +37,8 @@ namespace ClassicUO.Game.Views
                 Bounds = new Rectangle(0, 0, Texture.Width, Texture.Height);
             }
 
-            Bounds.X = (int)-effect.Offset.X;
-            Bounds.Y = (int)(effect.Offset.Z - effect.Offset.Y);        
+            Bounds.X = (int) -effect.Offset.X;
+            Bounds.Y = (int) (effect.Offset.Z - effect.Offset.Y);
             Rotation = effect.AngleToTarget;
             HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue);
 

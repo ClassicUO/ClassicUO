@@ -154,6 +154,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.Chat:
                     Log.Message(LogTypes.Warning, "Chat button pushed! Not implemented yet!");
+
                     break;
                 case Buttons.Help:
                     GameActions.RequestHelp();

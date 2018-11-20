@@ -37,7 +37,7 @@ namespace ClassicUO.Game.GameObjects.Managers
             {
                 _activeStatics[i].Update(totalMS, frameMS);
 
-                if (_activeStatics[i].IsDisposed || (_activeStatics[i].OverHeads.Count <= 0 && (_activeStatics[i].Effect == null || _activeStatics[i].Effect.IsDisposed)))
+                if (_activeStatics[i].IsDisposed || _activeStatics[i].OverHeads.Count <= 0 && (_activeStatics[i].Effect == null || _activeStatics[i].Effect.IsDisposed))
                     _activeStatics.RemoveAt(i);
             }
         }

@@ -112,15 +112,19 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             if (loginScene.Servers.Count() > 0)
             {
                 if (loginScene.Servers.Last().Index < loginScene.Servers.Count())
+                {
                     AddChildren(new Label(loginScene.Servers.Last().Name, false, 0x0481, font: 9)
                     {
                         X = 243, Y = 420
                     });
+                }
                 else
+                {
                     AddChildren(new Label(loginScene.Servers.First().Name, false, 0x0481, font: 9)
                     {
                         X = 243, Y = 420
                     });
+                }
             }
         }
 
@@ -208,7 +212,6 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             {
                 if (IsDisposed)
                     return false;
-
                 _labelName.Draw(spriteBatch, position + new Point(74, 10));
                 _labelPing.Draw(spriteBatch, position + new Point(250, 10));
                 _labelPacketLoss.Draw(spriteBatch, position + new Point(310, 10));

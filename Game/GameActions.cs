@@ -183,10 +183,14 @@ namespace ClassicUO.Game
             Socket.Send(new PUseSkill(index));
         }
 
-        public static void OpenPopupMenu(Serial serial) 
-            => Socket.Send(new PRequestPopupMenu(serial));
+        public static void OpenPopupMenu(Serial serial)
+        {
+            Socket.Send(new PRequestPopupMenu(serial));
+        }
 
         public static void ResponsePopupMenu(Serial serial, ushort index)
-            => Socket.Send(new PPopupMenuSelection(serial, index));
+        {
+            Socket.Send(new PPopupMenuSelection(serial, index));
+        }
     }
 }

@@ -22,7 +22,6 @@
 #endregion
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Map;
 
 using Microsoft.Xna.Framework;
 

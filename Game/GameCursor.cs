@@ -31,7 +31,6 @@ using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
-using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -53,6 +52,7 @@ namespace ClassicUO.Game
         };
         private readonly int[,] _cursorOffset = new int[2, 16];
         private readonly Settings _settings;
+        private readonly Tooltip _tooltip;
         private readonly UIManager _uiManager;
         private SpriteTexture _draggedItemTexture;
         private bool _draggingItem;
@@ -61,15 +61,11 @@ namespace ClassicUO.Game
         private bool _needGraphicUpdate;
         private Point _offset;
         private Rectangle _rect;
-        private readonly Tooltip _tooltip;
-
-
 
         public GameCursor(UIManager ui)
         {
             _uiManager = ui;
             _settings = Service.Get<Settings>();
-
             _tooltip = new Tooltip();
 
             for (int i = 0; i < 2; i++)
@@ -247,14 +243,10 @@ namespace ClassicUO.Game
             {
                 if (_draggingItem)
                     sb.Draw2D(_draggedItemTexture, new Point(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y), _rect, ShaderHuesTraslator.GetHueVector(_hue));
-
-
                 DrawToolTip(sb, Mouse.Position);
                 sb.Draw2D(Texture, new Point(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id]), Vector3.Zero);
             }
         }
-
-
 
         private void DrawToolTip(SpriteBatchUI spriteBatch, Point position)
         {
@@ -320,17 +312,11 @@ namespace ClassicUO.Game
 
             if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl != null && _uiManager.MouseOverControl.HasTooltip)
             {
-                if (_tooltip.Text != _uiManager.MouseOverControl.Tooltip)
-                {
-                    _tooltip.Clear();
-                }
+                if (_tooltip.Text != _uiManager.MouseOverControl.Tooltip) _tooltip.Clear();
 
                 if (_tooltip.IsEmpty)
                     _tooltip.SetText(_uiManager.MouseOverControl.Tooltip);
-
-
                 _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
-
             }
         }
 

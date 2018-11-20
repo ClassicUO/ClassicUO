@@ -22,13 +22,8 @@
 #endregion
 
 using System;
-using System.IO;
-using System.Runtime.InteropServices;
 
 using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-
-using Microsoft.Xna.Framework;
 
 using static SDL2.SDL;
 
@@ -188,13 +183,32 @@ namespace ClassicUO.Input
         public delegate bool DoubleClickDelegate();
 
         private static bool _dragStarted;
+
+        //private unsafe SDL_HitTestResult Callback(IntPtr win, IntPtr area, IntPtr data)
+        //{
+
+        //    SDL_Point* point = (SDL_Point*) area;
+
+        //    //SDL_GetWindowPosition(Microsoft.Xna.Framework.Input.Mouse.WindowHandle, out int x, out int y);
+        //    //SDL_GetWindowSize(Microsoft.Xna.Framework.Input.Mouse.WindowHandle, out int width, out int height);
+
+        //    //if (point->x < x || point->y < y || point->x > width || point->y > height)
+
+        //    if (point->x <= 0 || point->y <= 0)
+        //    {
+        //        //SDL_SetCursor(IntPtr.Zero);
+        //    }
+
+        //    return SDL_HitTestResult.SDL_HITTEST_DRAGGABLE;
+        //}
+        private static IntPtr _cursorPtr;
+        private readonly SDL_HitTest _hitTestDel;
         //private const int MOUSE_DRAG_BEGIN_DISTANCE = 2;
         //private const int MOUSE_CLICK_MAX_DELTA = 2;
         //public const int MOUSE_DOUBLE_CLICK_TIME = 350;
 
         //private readonly Queue<InputEvent> _events = new Queue<InputEvent>();
         private readonly SDL_EventFilter _hookDel;
-        private readonly SDL_HitTest _hitTestDel;
         //private readonly Queue<InputEvent> _nextEvents = new Queue<InputEvent>();
         //private SDL_Keycode _lastKey;
         //private InputMouseEvent _lastMouseDown, _lastMouseClick;
@@ -214,30 +228,9 @@ namespace ClassicUO.Input
 
             //_hitTestDel = Callback;
             //SDL_SetWindowHitTest(Microsoft.Xna.Framework.Input.Mouse.WindowHandle, _hitTestDel, IntPtr.Zero);
-
             SDL_AddEventWatch(_hookDel, IntPtr.Zero);
             //SDL_SetEventFilter(_hookDel, IntPtr.Zero);
         }
-
-        //private unsafe SDL_HitTestResult Callback(IntPtr win, IntPtr area, IntPtr data)
-        //{
-
-        //    SDL_Point* point = (SDL_Point*) area;
-
-        //    //SDL_GetWindowPosition(Microsoft.Xna.Framework.Input.Mouse.WindowHandle, out int x, out int y);
-        //    //SDL_GetWindowSize(Microsoft.Xna.Framework.Input.Mouse.WindowHandle, out int width, out int height);
-
-        //    //if (point->x < x || point->y < y || point->x > width || point->y > height)
-
-        //    if (point->x <= 0 || point->y <= 0)
-        //    {
-        //        //SDL_SetCursor(IntPtr.Zero);
-        //    }
-
-        //    return SDL_HitTestResult.SDL_HITTEST_DRAGGABLE;
-        //}
-
-        private static IntPtr _cursorPtr;
 
         //public Point MousePosition { get; private set; }
 
@@ -268,19 +261,21 @@ namespace ClassicUO.Input
 
             switch (e->type)
             {
-
                 case SDL_EventType.SDL_WINDOWEVENT:
+
                     switch (e->window.windowEvent)
                     {
                         case SDL_WindowEventID.SDL_WINDOWEVENT_ENTER:
                             Mouse.MouseInWindow = true;
+
                             break;
                         case SDL_WindowEventID.SDL_WINDOWEVENT_LEAVE:
                             Mouse.MouseInWindow = false;
-                            break;
 
+                            break;
                         case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
-                           // SDL_CaptureMouse(SDL_bool.SDL_TRUE);
+
+                            // SDL_CaptureMouse(SDL_bool.SDL_TRUE);
                             //Log.Message(LogTypes.Debug, "FOCUS");
                             break;
                         case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
@@ -288,20 +283,18 @@ namespace ClassicUO.Input
                             //SDL_CaptureMouse(SDL_bool.SDL_FALSE);
 
                             break;
-
                         case SDL_WindowEventID.SDL_WINDOWEVENT_TAKE_FOCUS:
+
                             //Log.Message(LogTypes.Debug, "TAKE FOCUS");
                             break;
-
                         case SDL_WindowEventID.SDL_WINDOWEVENT_HIT_TEST:
 
                             break;
-                        
                     }
 
                     break;
-
                 case SDL_EventType.SDL_SYSWMEVENT:
+
                     break;
                 case SDL_EventType.SDL_KEYDOWN:
                     KeyDown?.Raise(e->key);

@@ -26,7 +26,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
-using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
@@ -38,7 +37,6 @@ namespace ClassicUO.IO.Resources
         //private static SpriteTexture[] _gumpCache;
         private static readonly List<int> _usedIndex = new List<int>();
         private static readonly PixelPicking _picker = new PixelPicking();
-
         private static readonly Dictionary<int, SpriteTexture> _gumpDictionary = new Dictionary<int, SpriteTexture>();
 
         public static void Load()
@@ -78,19 +76,15 @@ namespace ClassicUO.IO.Resources
 
                     if (defs.Length < 3)
                         continue;
-
                     int ingump = int.Parse(defs[0]);
 
                     if (ingump < 0 || ingump >= GUMP_COUNT || _file.Entries[ingump].DecompressedLength != 0)
                         continue;
-
-
                     int outgump = int.Parse(defs[1].Replace("{", string.Empty).Replace("}", string.Empty));
+
                     if (outgump < 0 || outgump >= GUMP_COUNT || _file.Entries[outgump].DecompressedLength == 0)
                         continue;
-
                     int outhue = int.Parse(defs[2]);
-
                     _file.Entries[ingump] = _file.Entries[outgump];
                 }
             }
@@ -153,6 +147,7 @@ namespace ClassicUO.IO.Resources
                     //texture = null;
                     _usedIndex.RemoveAt(i--);
                     _gumpDictionary.Remove(g);
+
                     if (++count >= 20)
                         break;
                 }

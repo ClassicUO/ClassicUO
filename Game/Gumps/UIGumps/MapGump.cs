@@ -22,9 +22,7 @@
 #endregion
 
 using System;
-using System.Runtime.InteropServices;
 
-using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
@@ -67,13 +65,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     if (indexMap.MapAddress == 0)
                         continue;
                     int mapY = by * 8;
-
                     MapBlock info = new MapBlock();
-                    MapCells* infoCells = (MapCells*)&info.Cells;
-
-                    MapBlock* mapBlock = (MapBlock*)indexMap.MapAddress;
-                    MapCells* cells = (MapCells*)&mapBlock->Cells;
-
+                    MapCells* infoCells = (MapCells*) &info.Cells;
+                    MapBlock* mapBlock = (MapBlock*) indexMap.MapAddress;
+                    MapCells* cells = (MapCells*) &mapBlock->Cells;
                     int pos = 0;
 
                     for (int y = 0; y < 8; y++)

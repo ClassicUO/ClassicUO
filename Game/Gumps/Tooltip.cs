@@ -1,7 +1,5 @@
-﻿using System.Text;
-using System.Text.Formatting;
+﻿using System.Text.Formatting;
 
-using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
@@ -11,27 +9,24 @@ using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
-
 namespace ClassicUO.Game.Gumps
 {
     public class Tooltip : IDrawableUI
     {
-        private RenderedText _renderedText;
         private Entity _gameObject;
         private uint _hash;
-
+        private RenderedText _renderedText;
         private string _textHTML;
 
-
         public string Text { get; protected set; }
-
-        public bool AllowedToDraw { get; set; } = true;
-
-        public SpriteTexture Texture { get; set; }
 
         public bool IsEmpty => Text == null;
 
         public GameObject Object => _gameObject;
+
+        public bool AllowedToDraw { get; set; } = true;
+
+        public SpriteTexture Texture { get; set; }
 
         public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
@@ -46,9 +41,14 @@ namespace ClassicUO.Game.Gumps
 
             if (_renderedText == null)
             {
-                _renderedText = new RenderedText()
+                _renderedText = new RenderedText
                 {
-                    Align = TEXT_ALIGN_TYPE.TS_CENTER, Font = 1, IsUnicode = true, IsHTML = true, Cell = 5, FontStyle = FontStyle.BlackBorder,
+                    Align = TEXT_ALIGN_TYPE.TS_CENTER,
+                    Font = 1,
+                    IsUnicode = true,
+                    IsHTML = true,
+                    Cell = 5,
+                    FontStyle = FontStyle.BlackBorder
                 };
             }
             else if (_renderedText.Text != Text)
@@ -58,7 +58,6 @@ namespace ClassicUO.Game.Gumps
 
                 if (width > 600)
                     width = 600;
-
                 _renderedText.MaxWidth = width;
                 _renderedText.Text = _textHTML;
                 Fonts.RecalculateWidthByInfo = false;
@@ -75,13 +74,15 @@ namespace ClassicUO.Game.Gumps
                 position.Y = 0;
             else if (position.Y > window.WindowHeight - (_renderedText.Height + 8))
                 position.Y = window.WindowHeight - (_renderedText.Height + 8);
-
             spriteBatch.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X - 4, position.Y - 4, _renderedText.Width + 6, _renderedText.Height + 8), ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
 
             return _renderedText.Draw(spriteBatch, position);
         }
 
-        public void Clear() => _textHTML = Text = null;
+        public void Clear()
+        {
+            _textHTML = Text = null;
+        }
 
         public void SetGameObject(Entity obj)
         {
@@ -97,7 +98,6 @@ namespace ClassicUO.Game.Gumps
         {
             StringBuffer sb = new StringBuffer();
             StringBuffer sbHTML = new StringBuffer();
-
             bool hasStartColor = false;
 
             for (int i = 0; i < obj.Properties.Count; i++)
@@ -111,28 +111,19 @@ namespace ClassicUO.Game.Gumps
                 {
                     if (obj.Serial.IsMobile)
                     {
-                        Mobile mobile = (Mobile)obj;
+                        Mobile mobile = (Mobile) obj;
                         //ushort hue = Notoriety.GetHue(mobile.NotorietyFlag);
-
                         sbHTML.Append(Notoriety.GetHTMLHue(mobile.NotorietyFlag));
                     }
                     else
-                    {
                         sbHTML.Append("<basefont color=\"yellow\">");
-                    }
 
                     hasStartColor = true;
                 }
 
-                
+                string text = Cliloc.Translate((int) property.Cliloc, property.Args, true);
 
-                string text = Cliloc.Translate((int)property.Cliloc, property.Args, true);
-
-                if (string.IsNullOrEmpty(text))
-                {
-                    continue;
-                }
-
+                if (string.IsNullOrEmpty(text)) continue;
                 sb.Append(text);
                 sbHTML.Append(text);
 
@@ -142,7 +133,6 @@ namespace ClassicUO.Game.Gumps
                     hasStartColor = false;
                 }
 
-
                 if (i < obj.Properties.Count - 1)
                 {
                     sb.Append("\n");
@@ -151,7 +141,7 @@ namespace ClassicUO.Game.Gumps
             }
 
             htmltext = sbHTML.ToString();
-            string result= sb.ToString();
+            string result = sb.ToString();
 
             return string.IsNullOrEmpty(result) ? null : sb.ToString();
         }
@@ -161,6 +151,5 @@ namespace ClassicUO.Game.Gumps
             _gameObject = null;
             Text = _textHTML = text;
         }
-
     }
 }

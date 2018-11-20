@@ -24,11 +24,9 @@
 using System;
 using System.Collections.Generic;
 
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -36,9 +34,8 @@ namespace ClassicUO.Game.GameObjects.Managers
 {
     public static class OverheadManager
     {
-        private static readonly List<Tuple<View,Vector3>> _overheadsList = new List<Tuple<View, Vector3>>();
+        private static readonly List<Tuple<View, Vector3>> _overheadsList = new List<Tuple<View, Vector3>>();
         private static readonly List<Tuple<View, Vector3>> _damagesList = new List<Tuple<View, Vector3>>();
-
 
         public static void AddOverhead(View view, Vector3 position)
         {
@@ -50,7 +47,6 @@ namespace ClassicUO.Game.GameObjects.Managers
             _damagesList.Add(Tuple.Create(view, position));
         }
 
-
         public static void Draw(SpriteBatch3D spriteBatch, MouseOverList objectList)
         {
             DrawOverheads(spriteBatch, objectList);
@@ -61,7 +57,6 @@ namespace ClassicUO.Game.GameObjects.Managers
         {
             if (_overheadsList.Count > 0)
             {
-
                 for (int i = 0; i < _overheadsList.Count; i++)
                 {
                     var t = _overheadsList[i];
@@ -85,6 +80,5 @@ namespace ClassicUO.Game.GameObjects.Managers
                 _damagesList.Clear();
             }
         }
-
     }
 }

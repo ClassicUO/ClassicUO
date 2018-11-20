@@ -1,6 +1,4 @@
-﻿using ClassicUO.Utility.Logging;
-
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 
 using SDL2;
 
@@ -45,10 +43,9 @@ namespace ClassicUO.Input
 
         public static bool MouseInWindow { get; set; }
 
-
         public static void Begin()
         {
-            SDL.SDL_CaptureMouse(SDL.SDL_bool.SDL_TRUE);         
+            SDL.SDL_CaptureMouse(SDL.SDL_bool.SDL_TRUE);
         }
 
         public static void End()
@@ -63,14 +60,11 @@ namespace ClassicUO.Input
             {
                 SDL.SDL_GetGlobalMouseState(out int x, out int y);
                 SDL.SDL_GetWindowPosition(Microsoft.Xna.Framework.Input.Mouse.WindowHandle, out int winX, out int winY);
-
                 _position.X = x - winX;
                 _position.Y = y - winY;
             }
             else
-            {
                 SDL.SDL_GetMouseState(out _position.X, out _position.Y);
-            }
 
             IsDragging = LButtonPressed || RButtonPressed || MButtonPressed;
             RealPosition = Position;

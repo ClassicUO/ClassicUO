@@ -78,8 +78,8 @@ namespace ClassicUO.Game
                 return false;
             bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
             bool isGM = World.Player.Graphic == 0x03DB;
-
             var objects = tile.ObjectsOnTiles;
+
             for (int i = 0; i < objects.Count; i++)
             {
                 GameObject obj = objects[i];
@@ -222,10 +222,10 @@ namespace ClassicUO.Game
 
             if (!CreateItemList(ref list, newX, newY, stepState) || list.Count <= 0)
                 return 0;
+
             for (int i = 0; i < list.Count; i++)
             {
                 PathObject obj = list[i];
-
                 GameObject o = obj.Object;
                 int averageZ = obj.AverageZ;
 
@@ -824,7 +824,6 @@ namespace ClassicUO.Game
             POF_BRIDGE = 0x00000004,
             POF_NO_DIAGONAL = 0x00000008
         }
-
 
         private class PathObject //: IComparable, IComparable<PathObject>
         {

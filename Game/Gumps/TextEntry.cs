@@ -97,6 +97,14 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        public void Dispose()
+        {
+            RenderText?.Dispose();
+            RenderText = null;
+            RenderCaret?.Dispose();
+            RenderCaret = null;
+        }
+
         protected virtual void OnTextChanged()
         {
         }
@@ -129,12 +137,10 @@ namespace ClassicUO.Game.Gumps
 
         public void SetText(string text)
         {
-
             if (MaxCharCount > 0)
             {
                 if (NumericOnly)
                 {
-
                 }
                 else if (text.Length >= MaxCharCount)
                     text = text.Remove(MaxCharCount - 1);
@@ -255,23 +261,12 @@ namespace ClassicUO.Game.Gumps
             return RenderText.IsUnicode ? Fonts.GetLinesCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width) : Fonts.GetLinesCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width);
         }
 
-
-
         public void Clear()
         {
             Text = string.Empty;
             Offset = 0;
             CaretPosition = Point.Zero;
             CaretIndex = 0;
-        }
-
-        public void Dispose()
-        {
-            RenderText?.Dispose();
-            RenderText = null;
-
-            RenderCaret?.Dispose();
-            RenderCaret = null;
         }
     }
 }

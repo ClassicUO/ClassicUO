@@ -43,7 +43,6 @@ namespace ClassicUO.Game.Gumps.Controls
                 MaxWidth = maxWidth,
                 Text = text
             };
-
             AcceptMouseInput = false;
         }
 

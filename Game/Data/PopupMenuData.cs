@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Network;
+﻿using ClassicUO.Network;
 
 namespace ClassicUO.Game.Data
 {
-    class PopupMenuData
+    internal class PopupMenuData
     {
         public PopupMenuData(Serial serial, PopupMenuItem[] items)
         {
@@ -17,9 +11,10 @@ namespace ClassicUO.Game.Data
         }
 
         public PopupMenuItem[] Items { get; }
-        public Serial Serial { get; }
-        public PopupMenuItem this[int i] => Items[i];
 
+        public Serial Serial { get; }
+
+        public PopupMenuItem this[int i] => Items[i];
 
         public static PopupMenuData Parse(Packet p)
         {
@@ -27,7 +22,6 @@ namespace ClassicUO.Game.Data
             bool isNewCliloc = mode >= 2;
             Serial serial = p.ReadUInt();
             byte count = p.ReadByte();
-
             PopupMenuItem[] items = new PopupMenuItem[count];
 
             for (int i = 0; i < count; i++)
@@ -49,18 +43,20 @@ namespace ClassicUO.Game.Data
 
                     if ((item.Flags & 0x84) != 0)
                         p.Skip(2);
+
                     if ((item.Flags & 0x40) != 0)
                         p.Skip(2);
 
                     if ((item.Flags & 0x20) != 0)
-                        item.ReplacedHue = (Hue)(p.ReadUShort() & 0x3FFF);
+                        item.ReplacedHue = (Hue) (p.ReadUShort() & 0x3FFF);
                 }
 
                 if ((item.Flags & 0x01) != 0)
                     item.Hue = 0x0386;
             }
 
-            return new PopupMenuData(serial, items); ;
+            return new PopupMenuData(serial, items);
+            ;
         }
     }
 }

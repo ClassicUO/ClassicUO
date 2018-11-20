@@ -24,7 +24,6 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Runtime;
 using System.Runtime.InteropServices;
 
 using ClassicUO.Utility.Logging;

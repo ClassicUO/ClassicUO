@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
-using ClassicUO.Game.Map;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
-using ClassicUO.Network;
-using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -24,13 +20,15 @@ namespace ClassicUO.Game.Scenes
 {
     partial class GameScene
     {
-
         private double _dequeueAt;
         private bool _inqueue;
+        private PaperDollInteractable _lastFakeParedoll;
         private Action _queuedAction;
         private GameObject _queuedObject;
         private bool _rightMousePressed;
-        private PaperDollInteractable _lastFakeParedoll;
+        public List<Mobile> MobileGumpStack = new List<Mobile>();
+        public List<Mobile> PartyMemberGumpStack = new List<Mobile>();
+        public List<Skill> SkillButtonGumpStack = new List<Skill>();
 
         public bool IsMouseOverUI => UIManager.IsMouseOverUI && !(UIManager.MouseOverControl is WorldViewport);
 
@@ -117,16 +115,13 @@ namespace ClassicUO.Game.Scenes
                             Item item = gumpling.Item;
                             SelectedObject = item;
 
-                            if (TileData.IsContainer((long)item.ItemData.Flags))
+                            if (TileData.IsContainer((long) item.ItemData.Flags))
                                 DropHeldItemToContainer(item);
-                            else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable((long)HeldItem.ItemData.Flags))
+                            else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable((long) HeldItem.ItemData.Flags))
                                 MergeHeldItem(item);
                             else
                             {
-                                if (item.Container.IsItem)
-                                {
-                                    DropHeldItemToContainer(World.Items.Get(item.Container), (target.X + (Mouse.Position.X - target.ScreenCoordinateX)), (target.Y + (Mouse.Position.Y - target.ScreenCoordinateY)));
-                                }
+                                if (item.Container.IsItem) DropHeldItemToContainer(World.Items.Get(item.Container), target.X + (Mouse.Position.X - target.ScreenCoordinateX), target.Y + (Mouse.Position.Y - target.ScreenCoordinateY));
                             }
 
                             break;
@@ -134,33 +129,29 @@ namespace ClassicUO.Game.Scenes
                         case GumpPicContainer container:
 
                         {
-                                SelectedObject = container.Item;
+                            SelectedObject = container.Item;
 
-                                //ArtTexture texture = Art.GetStaticTexture(container.Item.DisplayedGraphic);
+                            //ArtTexture texture = Art.GetStaticTexture(container.Item.DisplayedGraphic);
 
-                                //int x = Mouse.Position.X - texture.Width / 2 - target.ScreenCoordinateX;
-                                //int y = Mouse.Position.Y - texture.Height / 2 - target.ScreenCoordinateY;
+                            //int x = Mouse.Position.X - texture.Width / 2 - target.ScreenCoordinateX;
+                            //int y = Mouse.Position.Y - texture.Height / 2 - target.ScreenCoordinateY;
+                            int x = Mouse.Position.X - target.ScreenCoordinateX;
+                            int y = Mouse.Position.Y - target.ScreenCoordinateY;
 
-                                int x = Mouse.Position.X - target.ScreenCoordinateX;
-                                int y = Mouse.Position.Y - target.ScreenCoordinateY;
-
-                                //x -= texture.Width / 2;
-                                //y -= texture.Height / 2;
-
-                                DropHeldItemToContainer(container.Item, x, y);
+                            //x -= texture.Width / 2;
+                            //y -= texture.Height / 2;
+                            DropHeldItemToContainer(container.Item, x, y);
 
                             break;
                         }
-                        case GumpPicBackpack backpack: DropHeldItemToContainer(backpack.BackpackItem);
+                        case GumpPicBackpack backpack:
+                            DropHeldItemToContainer(backpack.BackpackItem);
 
                             break;
                         case IMobilePaperdollOwner paperdollOwner:
 
                         {
-                            if (TileData.IsWearable((long)HeldItem.ItemData.Flags))
-                            {
-                                WearHeldItem(paperdollOwner.Mobile);
-                            }
+                            if (TileData.IsWearable((long) HeldItem.ItemData.Flags)) WearHeldItem(paperdollOwner.Mobile);
 
                             break;
                         }
@@ -168,12 +159,8 @@ namespace ClassicUO.Game.Scenes
 
                         {
                             if (target.Parent is IMobilePaperdollOwner paperdollOwner1)
-                            {
-                                if (TileData.IsWearable((long)HeldItem.ItemData.Flags))
-                                {
+                                if (TileData.IsWearable((long) HeldItem.ItemData.Flags))
                                     WearHeldItem(paperdollOwner1.Mobile);
-                                }
-                            }
 
                             break;
                         }
@@ -201,14 +188,14 @@ namespace ClassicUO.Game.Scenes
                                     {
                                         SelectedObject = item;
 
-                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && TileData.IsStackable((long)dyn1.ItemData.Flags))
+                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && TileData.IsStackable((long) dyn1.ItemData.Flags))
                                             MergeHeldItem(item);
                                         else
-                                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + dyn.ItemData.Height));
+                                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
                                     }
                                 }
                                 else
-                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + dyn.ItemData.Height));
+                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
 
                                 break;
                             case Land _:
@@ -233,14 +220,14 @@ namespace ClassicUO.Game.Scenes
                     {
                         case Static st:
 
-                            {
-                                if (string.IsNullOrEmpty(st.Name))
-                                    TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
-                                obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
-                                _staticManager.Add(st);
+                        {
+                            if (string.IsNullOrEmpty(st.Name))
+                                TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
+                            obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
+                            _staticManager.Add(st);
 
-                                break;
-                            }
+                            break;
+                        }
                         case Entity entity:
 
                             if (!_inqueue)
@@ -248,6 +235,7 @@ namespace ClassicUO.Game.Scenes
                                 _inqueue = true;
                                 _queuedObject = entity;
                                 _dequeueAt = Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+
                                 _queuedAction = () =>
                                 {
                                     if (!World.ClientFeatures.TooltipsEnabled)
@@ -286,14 +274,13 @@ namespace ClassicUO.Game.Scenes
                             //TODO: attack request
                         }
                         else
-                        {
                             GameActions.DoubleClick(mob);
-                        }
 
                         break;
                     case GameEffect effect when effect.Source is Item item:
                         result = true;
                         GameActions.DoubleClick(item);
+
                         break;
                 }
 
@@ -321,7 +308,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (_settings.EnablePathfind && !Pathfinder.AutoWalking)
                 {
-                    if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long)dyn.ItemData.Flags))
+                    if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long) dyn.ItemData.Flags))
                     {
                         GameObject obj = _mousePicker.MouseOverObject;
 
@@ -337,12 +324,6 @@ namespace ClassicUO.Game.Scenes
 
             return false;
         }
-
-
-        public List<Mobile> MobileGumpStack = new List<Mobile>();
-        public List<Mobile> PartyMemberGumpStack = new List<Mobile>();
-        public List<Skill> SkillButtonGumpStack = new List<Skill>();
-
 
         private void OnMouseDragBegin(object sender, EventArgs e)
         {
@@ -360,13 +341,12 @@ namespace ClassicUO.Game.Scenes
 
                             // Check if dragged mobile is in party for doing the party part ;)
                             PartyMember member = new PartyMember(mobile);
-                            if (PartySystem.Members.Exists(x => x.Serial == member.Serial ))
+
+                            if (PartySystem.Members.Exists(x => x.Serial == member.Serial))
                             {
                                 //Checks if party member gump is already on sceen
                                 if (PartyMemberGumpStack.Contains(mobile))
-                                {
                                     UIManager.Remove<PartyMemberGump>(mobile);
-                                }
                                 else if (mobile == World.Player)
                                 {
                                     StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
@@ -382,24 +362,20 @@ namespace ClassicUO.Game.Scenes
                             else
                             {
                                 if (MobileGumpStack.Contains(mobile))
-                                {
                                     UIManager.Remove<MobileHealthGump>(mobile);
-                                }
                                 else if (mobile == World.Player)
                                 {
                                     StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
                                     status?.Dispose();
                                 }
 
-                               
                                 MobileGumpStack.Add(mobile);
-
                                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
                                 MobileHealthGump currentMobileHealthGump;
                                 UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, Mouse.Position.X - rect.Width / 2, Mouse.Position.Y - rect.Height / 2));
                                 UIManager.AttemptDragControl(currentMobileHealthGump, Mouse.Position, true);
-
                             }
+
                             break;
                         case Item item:
                             PickupItemBegin(item, _dragOffset.X, _dragOffset.Y);
@@ -410,13 +386,9 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-
         private void OnMouseDragging(object sender, EventArgs e)
         {
-            if (Mouse.LButtonPressed)
-            {
-                HandleMouseFakeItem();
-            }
+            if (Mouse.LButtonPressed) HandleMouseFakeItem();
         }
 
         private void OnMouseMoving(object sender, EventArgs e)
@@ -459,7 +431,6 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-
         private void HandleMouseFakeItem()
         {
             if (IsMouseOverUI)
@@ -468,21 +439,15 @@ namespace ClassicUO.Game.Scenes
                 {
                     GumpControl target = UIManager.MouseOverControl;
 
-                    if (target != null && TileData.IsWearable((long)HeldItem.ItemData.Flags))
+                    if (target != null && TileData.IsWearable((long) HeldItem.ItemData.Flags))
                     {
-
                         PaperDollInteractable gumpling = null;
 
                         if (target is ItemGumpPaperdoll)
-                            gumpling = (PaperDollInteractable)target.Parent;
+                            gumpling = (PaperDollInteractable) target.Parent;
                         else if (target is GumpPic pic && pic.IsPaperdoll)
-                        {
-                            gumpling = (PaperDollInteractable)target.Parent;
-                        }
-                        else if (target is EquipmentSlot || target is PaperDollGump || target.Parent is PaperDollGump)
-                        {
-                            gumpling = target.Parent.FindControls<PaperDollInteractable>().FirstOrDefault();
-                        }
+                            gumpling = (PaperDollInteractable) target.Parent;
+                        else if (target is EquipmentSlot || target is PaperDollGump || target.Parent is PaperDollGump) gumpling = target.Parent.FindControls<PaperDollInteractable>().FirstOrDefault();
 
                         if (gumpling != null)
                         {
@@ -492,17 +457,13 @@ namespace ClassicUO.Game.Scenes
 
                                 gumpling.AddFakeDress(new Item(Serial.Invalid)
                                 {
-                                    Amount = 1,
-                                    Graphic = HeldItem.Graphic,
-                                    Hue = HeldItem.Hue
+                                    Amount = 1, Graphic = HeldItem.Graphic, Hue = HeldItem.Hue
                                 });
                                 gumpling.Update();
                             }
 
                             return;
                         }
-
-
                     }
                 }
             }

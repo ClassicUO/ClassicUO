@@ -64,6 +64,7 @@ namespace ClassicUO.Game
                             Map.ClearUsedBlocks();
                             IO.Resources.Map.UnloadMap(MapIndex);
                         }
+
                         Position position = Player.Position;
                         Map = null;
                         Map = new Facet(value);
@@ -74,11 +75,7 @@ namespace ClassicUO.Game
                     else
                     {
                         Map = new Facet(value);
-
-                        if (Player != null)
-                        {
-                            Map.Center = new Point(Player.Position.X, Player.Position.Y);
-                        }
+                        if (Player != null) Map.Center = new Point(Player.Position.X, Player.Position.Y);
                     }
                 }
             }
@@ -92,8 +89,6 @@ namespace ClassicUO.Game
         };
 
         public static Features ClientFeatures { get; } = new Features();
-
-
 
         public static void Update(double totalMS, double frameMS)
         {
@@ -282,7 +277,6 @@ namespace ClassicUO.Game
 
                 RemoveMobile(mob);
             }
-
         }
     }
 }

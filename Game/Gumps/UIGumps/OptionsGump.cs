@@ -46,125 +46,80 @@ namespace ClassicUO.Game.Gumps.UIGumps
             // base
             AddChildren(new ResizePic(0x0A28)
             {
-                X = 40,
-                Y = 0,
-                Width = 550,
-                Height = 450
+                X = 40, Y = 0, Width = 550, Height = 450
             });
 
             // left
-            AddChildren(new Button((int)Buttons.SoundAndMusic, 0x00DA, 0x00DA)
+            AddChildren(new Button((int) Buttons.SoundAndMusic, 0x00DA, 0x00DA)
             {
-                X = 0,
-                Y = 45,
-                ButtonAction = ButtonAction.SwitchPage,
-                ToPage = 1
+                X = 0, Y = 45, ButtonAction = ButtonAction.SwitchPage, ToPage = 1
             });
 
-            AddChildren(new Button((int)Buttons.Configuration, 0x00DC, 0x00DC)
+            AddChildren(new Button((int) Buttons.Configuration, 0x00DC, 0x00DC)
             {
-                X = 0,
-                Y = 111,
-                ButtonAction = ButtonAction.SwitchPage,
-                ToPage = 2
+                X = 0, Y = 111, ButtonAction = ButtonAction.SwitchPage, ToPage = 2
             });
 
-            AddChildren(new Button((int)Buttons.Language, 0x00DE, 0x00DE)
+            AddChildren(new Button((int) Buttons.Language, 0x00DE, 0x00DE)
             {
-                X = 0,
-                Y = 177,
-                ButtonAction = ButtonAction.SwitchPage,
-                ToPage = 3
+                X = 0, Y = 177, ButtonAction = ButtonAction.SwitchPage, ToPage = 3
             });
 
-            AddChildren(new Button((int)Buttons.Chat, 0x00E0, 0x00E0)
+            AddChildren(new Button((int) Buttons.Chat, 0x00E0, 0x00E0)
             {
-                X = 0,
-                Y = 243,
-                ButtonAction = ButtonAction.SwitchPage,
-                ToPage = 4
+                X = 0, Y = 243, ButtonAction = ButtonAction.SwitchPage, ToPage = 4
             });
 
-            AddChildren(new Button((int)Buttons.Macro, 0x00ED, 0x00ED)
+            AddChildren(new Button((int) Buttons.Macro, 0x00ED, 0x00ED)
             {
-                X = 0,
-                Y = 309,
-                ButtonAction = ButtonAction.SwitchPage,
-                ToPage = 5
+                X = 0, Y = 309, ButtonAction = ButtonAction.SwitchPage, ToPage = 5
             });
 
             // right
-            AddChildren(new Button((int)Buttons.Interface, 0x00E2, 0x00E2)
+            AddChildren(new Button((int) Buttons.Interface, 0x00E2, 0x00E2)
             {
-                X = 576,
-                Y = 45,
-                ButtonAction = ButtonAction.SwitchPage,
-                ToPage = 6
+                X = 576, Y = 45, ButtonAction = ButtonAction.SwitchPage, ToPage = 6
             });
 
-            AddChildren(new Button((int)Buttons.Display, 0x00E4, 0x00E4)
+            AddChildren(new Button((int) Buttons.Display, 0x00E4, 0x00E4)
             {
-                X = 576,
-                Y = 111,
-                ButtonAction = ButtonAction.SwitchPage,
-                ToPage = 7
+                X = 576, Y = 111, ButtonAction = ButtonAction.SwitchPage, ToPage = 7
             });
 
-            AddChildren(new Button((int)Buttons.Reputation, 0x00E6, 0x00E6)
+            AddChildren(new Button((int) Buttons.Reputation, 0x00E6, 0x00E6)
             {
-                X = 576,
-                Y = 177,
-                ButtonAction = ButtonAction.SwitchPage,
-                ToPage = 8
+                X = 576, Y = 177, ButtonAction = ButtonAction.SwitchPage, ToPage = 8
             });
 
-            AddChildren(new Button((int)Buttons.Misc, 0x00E8, 0x00E8)
+            AddChildren(new Button((int) Buttons.Misc, 0x00E8, 0x00E8)
             {
-                X = 576,
-                Y = 243,
-                ButtonAction = ButtonAction.SwitchPage,
-                ToPage = 9
+                X = 576, Y = 243, ButtonAction = ButtonAction.SwitchPage, ToPage = 9
             });
 
-            AddChildren(new Button((int)Buttons.FilterOptions, 0x00EB, 0x00EB)
+            AddChildren(new Button((int) Buttons.FilterOptions, 0x00EB, 0x00EB)
             {
-                X = 576,
-                Y = 309,
-                ButtonAction = ButtonAction.SwitchPage,
-                ToPage = 10
+                X = 576, Y = 309, ButtonAction = ButtonAction.SwitchPage, ToPage = 10
             });
 
             // bottom
-            AddChildren(new Button((int)Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
+            AddChildren(new Button((int) Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
             {
-                X = 154,
-                Y = 405,
-                ButtonAction = ButtonAction.Activate,
-                ToPage = 0
+                X = 154, Y = 405, ButtonAction = ButtonAction.Activate, ToPage = 0
             });
 
-            AddChildren(new Button((int)Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
+            AddChildren(new Button((int) Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
             {
-                X = 248,
-                Y = 405,
-                ButtonAction = ButtonAction.Activate,
-                ToPage = 0
+                X = 248, Y = 405, ButtonAction = ButtonAction.Activate, ToPage = 0
             });
 
-            AddChildren(new Button((int)Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
+            AddChildren(new Button((int) Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
             {
-                X = 346,
-                Y = 405,
-                ButtonAction = ButtonAction.Activate,
-                ToPage = 0
+                X = 346, Y = 405, ButtonAction = ButtonAction.Activate, ToPage = 0
             });
 
-            AddChildren(new Button((int)Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
+            AddChildren(new Button((int) Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
             {
-                X = 443,
-                Y = 405,
-                ButtonAction = ButtonAction.Activate,
-                ToPage = 0
+                X = 443, Y = 405, ButtonAction = ButtonAction.Activate, ToPage = 0
             });
             BuildPage1();
             BuildPage2();
@@ -258,9 +213,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             AddChildren(label, 2);
 
-           // HtmlGump scrollArea = new HtmlGump(64, 90, 500, 300, false, true);
-
-
+            // HtmlGump scrollArea = new HtmlGump(64, 90, 500, 300, false, true);
             ScrollArea scrollArea = new ScrollArea(64, 90, 500, 300, true);
             AddChildren(scrollArea, 2);
 
@@ -284,7 +237,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             scrollArea.AddChildren(_checkboxSmoothMovement);
             int y = 81;
-
             ScrollAreaItem areaItem = new ScrollAreaItem();
 
             for (int i = 0; i < 400; i++)
@@ -299,7 +251,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
             scrollArea.AddChildren(areaItem);
-
             y += 20;
 
             for (int i = 0; i < 40; i++)
@@ -358,6 +309,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             AddChildren(button, 3);
             uint color = 0xFF7F7F7F;
+
             if (_settings.TooltipsTextColor != 0xFFFF)
                 color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.TooltipsTextColor) << 8) | 0xFF);
             _colorPickerTooltipText = new ColorPickerBox(67, 154, 1, 1, 13, 14);
@@ -553,23 +505,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Ok
         }
 
-
         private class LeftColum : GumpControl
         {
-            public LeftColum() : base()
+            public LeftColum()
             {
                 CanMove = false;
                 CanCloseWithRightClick = false;
                 AcceptMouseInput = false;
-
-
-
             }
-
-
-
         }
-
-
     }
 }

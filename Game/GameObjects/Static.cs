@@ -21,7 +21,6 @@
 
 #endregion
 
-using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
@@ -37,7 +36,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Graphic = tileID;
             Hue = hue;
-            Index = index; 
+            Index = index;
         }
 
         public int Index { get; }
@@ -53,12 +52,13 @@ namespace ClassicUO.Game.GameObjects
             {
                 _effect?.Dispose();
                 _effect = value;
-
-                if (_effect != null)
-                {
-                    Service.Get<StaticManager>().Add(this);
-                }
+                if (_effect != null) Service.Get<StaticManager>().Add(this);
             }
+        }
+
+        public bool IsAtWorld(int x, int y)
+        {
+            return Position.X == x && Position.Y == y;
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -71,12 +71,7 @@ namespace ClassicUO.Game.GameObjects
                     Effect = null;
                 else
                     Effect.Update(totalMS, frameMS);
-            }               
-        }
-
-        public bool IsAtWorld(int x, int y)
-        {
-            return Position.X == x && Position.Y == y;
+            }
         }
 
         public override void Dispose()
