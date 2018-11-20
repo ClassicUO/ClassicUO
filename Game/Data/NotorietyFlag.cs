@@ -30,16 +30,16 @@ namespace ClassicUO.Game.Data
             switch (flag)
             {
                 case NotorietyFlag.Innocent:
-                    return (ushort)settings.InnocentColor;
+                    return settings.InnocentColor;
                 case NotorietyFlag.Ally:
-                    return (ushort)settings.FriendColor;
+                    return settings.FriendColor;
                 case NotorietyFlag.Criminal:
                 case NotorietyFlag.Gray:
-                    return (ushort)settings.CriminalColor;
+                    return settings.CriminalColor;
                 case NotorietyFlag.Enemy:
-                    return (ushort)settings.EnemyColor;
+                    return settings.EnemyColor;
                 case NotorietyFlag.Murderer:
-                    return (ushort)settings.MurdererColor;
+                    return settings.MurdererColor;
                 case NotorietyFlag.Invulnerable:
                     return 0x0034;
                 default:

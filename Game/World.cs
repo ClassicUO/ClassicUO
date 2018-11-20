@@ -200,6 +200,7 @@ namespace ClassicUO.Game
             {
                 Mobiles.Remove(serial);
                 mob = new Mobile(serial);
+                GameActions.RequestMobileStatus(mob);
             }
 
             return mob;

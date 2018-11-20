@@ -147,6 +147,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _currentStaminaBarLength = Mobile.Stamina * MAX_BAR_WIDTH / (Mobile.StaminaMax == 0 ? 1 : Mobile.StaminaMax);
         }
 
+        private bool _isOutRange;
+
         /// <summary>
         /// Methode updates graphics
         /// </summary>
@@ -187,36 +189,42 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 ///Checks if mobile is in range and sets its gump grey if not
                 if (Mobile.Distance > World.ViewRange)
                 {
-                    _background.Hue = 0x038E;
-                    _healthBar.SetData(new[] { Color.DarkGray });
-                    _manaBar.SetData(new[] { Color.DarkGray });
-                    _staminaBar.SetData(new[] { Color.DarkGray });
+                    if (!_isOutRange)
+                    {
+                        _background.Hue = 0x038E;
+
+                        _healthBar.SetData(new[]
+                        {
+                            Color.DarkGray
+                        });
+
+                        _manaBar.SetData(new[]
+                        {
+                            Color.DarkGray
+                        });
+
+                        _staminaBar.SetData(new[]
+                        {
+                            Color.DarkGray
+                        });
+
+                        _isOutRange = true;
+                    }
                 }
                 else
                 {
 
-                    //Check mobile's flag and set the bar's color
-                    switch (Mobile.NotorietyFlag)
+                    if (_isOutRange)
                     {
-                        case NotorietyFlag.Invulnerable:
-                            _background.Hue = 50; //default 50 : yellow
-                            break;
-                        case NotorietyFlag.Innocent:
-                            _background.Hue = 190; //default 190 : blue
-                            break;
-                        case NotorietyFlag.Ally:
-                            _background.Hue = 64; //default 64 : blue
-                            break;
-                        case NotorietyFlag.Murderer:
-                            _background.Hue = 35; //default 190 : red
-                            break;
-                        default: //gray,enemy,criminal,unknown 
-                            _background.Hue = 0;
-                            break;
+                        _isOutRange = false;
+                        MobileOnHitsChanged(null, EventArgs.Empty);
+                        MobileOnManaChanged(null, EventArgs.Empty);
+                        MobileOnStaminaChanged(null, EventArgs.Empty);
 
+                        _healthBar.SetData(new[] { Color.SteelBlue });
                     }
 
-
+                    _background.Hue = Notoriety.GetHue(Mobile.NotorietyFlag);
 
                     if (Mobile.IsYellowHits && !_isYellowHits)
                     {

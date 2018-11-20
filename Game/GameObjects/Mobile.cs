@@ -73,7 +73,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Mobile(Serial serial) : base(serial)
         {
-            _lastAnimationChangeTime = CoreGame.Ticks;
+            _lastAnimationChangeTime = CoreGame.Ticks;           
         }
 
         public Deque<Step> Steps { get; } = new Deque<Step>();
