@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Views
                     }
                 }
 
-                HueVector = RenderExtentions.GetHueVector(GameObject.Hue, false, alpha, false);
+                HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, false, alpha, false);
                 MessageOverHead(spriteBatch, position, Bounds.Y - 22);
 
                 return base.Draw(spriteBatch, position, objectList);

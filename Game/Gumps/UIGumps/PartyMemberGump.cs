@@ -107,9 +107,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            spriteBatch.Draw2D(_healthBar, new Rectangle(X + 25, Y + 30, (int)_currentHealthBarLength, 10), RenderExtentions.GetHueVector(0, true, 0.4f, true));
-            spriteBatch.Draw2D(_staminaBar, new Rectangle(X + 25, Y + 46, (int)_currentStaminaBarLength, 10), RenderExtentions.GetHueVector(0, true, 0.4f, true));
-            spriteBatch.Draw2D(_manaBar, new Rectangle(X + 25, Y + 61, (int)_currentManaBarLength, 10), RenderExtentions.GetHueVector(0, true, 0.2f, true));
+            spriteBatch.Draw2D(_healthBar, new Rectangle(X + 25, Y + 30, (int)_currentHealthBarLength, 10), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
+            spriteBatch.Draw2D(_staminaBar, new Rectangle(X + 25, Y + 46, (int)_currentStaminaBarLength, 10), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
+            spriteBatch.Draw2D(_manaBar, new Rectangle(X + 25, Y + 61, (int)_currentManaBarLength, 10), ShaderHuesTraslator.GetHueVector(0, true, 0.2f, true));
 
             return base.Draw(spriteBatch, position);
         }

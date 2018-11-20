@@ -358,42 +358,6 @@ namespace ClassicUO.Game.Gumps.Controls
             return true;
         }
 
-        //TODO: Future implementation
-
-        public virtual bool Draw1(SpriteBatchUI spriteBatch, SpriteTexture texture, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
-        {
-            Rectangle src = new Rectangle();
-
-            if (offsetX > Width || offsetX < -Width || offsetY > Height || offsetY < -Height)
-                return false;
-
-            X = offsetX;
-            Y = offsetY;
-
-            src.X = offsetX;
-            src.Y = offsetY;
-
-            int maxX = src.X + dst.Width;
-            if (maxX <= Width)
-                src.Width = dst.Width;
-            else
-            {
-                src.Width = Width - src.X;
-                dst.Width = src.Width;
-            }
-
-            int maxY = src.Y + dst.Height;
-            if (maxY <= Height)
-                src.Height = dst.Height;
-            else
-            {
-                src.Height = Height - src.Y;
-                dst.Height = src.Height;
-            }
-
-            return spriteBatch.Draw2D(texture, dst, src, hue ?? Vector3.Zero);
-        }
-
         public virtual void Update(double totalMS, double frameMS)
         {
             if (IsDisposed || !IsInitialized) return;

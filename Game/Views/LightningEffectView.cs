@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Views
                 Bounds = new Rectangle(offset.X, Texture.Height - 33 + offset.Y, Texture.Width, Texture.Height);
             }
 
-            HueVector = RenderExtentions.GetHueVector(effect.Hue);
+            HueVector = ShaderHuesTraslator.GetHueVector(effect.Hue);
 
             return base.Draw(spriteBatch, position, objectList);
         }

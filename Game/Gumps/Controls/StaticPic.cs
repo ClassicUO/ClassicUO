@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            spriteBatch.Draw2D(Texture, position, RenderExtentions.GetHueVector(Hue, _isPartial, 0, true));
+            spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, _isPartial, 0, true));
 
             return base.Draw(spriteBatch, position, hue);
         }

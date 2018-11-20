@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Views
             Texture.Ticks = CoreGame.Ticks;
             TextOverhead overhead = (TextOverhead) GameObject;
             if (!overhead.IsPersistent && overhead.Alpha < 1.0f)
-                HueVector = RenderExtentions.GetHueVector(0, false, overhead.Alpha, true);
+                HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
 
             Settings settings = Service.Get<Settings>();
             GameScene gs = Service.Get<SceneManager>().GetScene<GameScene>();

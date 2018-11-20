@@ -263,21 +263,21 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (Mobile == World.Player)
             {
                 ///Draw background bars
-                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 14, (int)MAX_BAR_WIDTH, 7), RenderExtentions.GetHueVector(0, true, 0.4f, true));
-                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 27, (int)MAX_BAR_WIDTH, 7), RenderExtentions.GetHueVector(0, true, 0.4f, true));
-                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 40, (int)MAX_BAR_WIDTH, 7), RenderExtentions.GetHueVector(0, true, 0.4f, true));
+                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 14, (int)MAX_BAR_WIDTH, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
+                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 27, (int)MAX_BAR_WIDTH, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
+                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 40, (int)MAX_BAR_WIDTH, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
                 ///Draw stat bars
-                spriteBatch.Draw2D(_healthBar, new Rectangle(X + 38, Y + 14, (int)_currentHealthBarLength, 7), RenderExtentions.GetHueVector(0, true, 0.1f, true));
-                spriteBatch.Draw2D(_manaBar, new Rectangle(X + 38, Y + 27, (int)_currentManaBarLength, 7), RenderExtentions.GetHueVector(0, true, 0.1f, true));
-                spriteBatch.Draw2D(_staminaBar, new Rectangle(X + 38, Y + 40, (int)_currentStaminaBarLength, 7), RenderExtentions.GetHueVector(0, true, 0.1f, true));
+                spriteBatch.Draw2D(_healthBar, new Rectangle(X + 38, Y + 14, (int)_currentHealthBarLength, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.1f, true));
+                spriteBatch.Draw2D(_manaBar, new Rectangle(X + 38, Y + 27, (int)_currentManaBarLength, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.1f, true));
+                spriteBatch.Draw2D(_staminaBar, new Rectangle(X + 38, Y + 40, (int)_currentStaminaBarLength, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.1f, true));
 
             }
             else
             {
                 ///Draw background bars
-                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 40, (int)MAX_BAR_WIDTH, 7), RenderExtentions.GetHueVector(0, true, 0.4f, true));
+                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 40, (int)MAX_BAR_WIDTH, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
                 ///Draw stat bars
-                spriteBatch.Draw2D(_healthBar, new Rectangle(X + 38, Y + 40, (int)_currentHealthBarLength, 7), RenderExtentions.GetHueVector(0, true, 0.1f, true));
+                spriteBatch.Draw2D(_healthBar, new Rectangle(X + 38, Y + 40, (int)_currentHealthBarLength, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.1f, true));
 
             }
             return true;

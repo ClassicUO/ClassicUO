@@ -284,7 +284,7 @@
     <Compile Include="Game\GameObjects\Managers\OverheadManager.cs" />
     <Compile Include="Renderer\PixelPicking.cs" />
     <Compile Include="Renderer\RenderedText.cs" />
-    <Compile Include="Renderer\RenderExtentions.cs" />
+    <Compile Include="Renderer\ShaderHuesTraslator.cs" />
     <Compile Include="Renderer\ScissorStack.cs" />
     <Compile Include="Renderer\SpriteBatch3D.cs" />
     <Compile Include="Renderer\SpriteBatch3D1.cs" />

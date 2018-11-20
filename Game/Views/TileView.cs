@@ -101,7 +101,7 @@ namespace ClassicUO.Game.Views
             {
                 if (_storedHue == Vector3.Zero)
                     _storedHue = HueVector;
-                HueVector = RenderExtentions.SelectedHue;
+                HueVector = ShaderHuesTraslator.SelectedHue;
             }
             else if (_storedHue != Vector3.Zero)
             {
@@ -210,7 +210,7 @@ namespace ClassicUO.Game.Views
                 _vertex3_yOffset = new Vector3(22, 44 - tile.Rectangle.Right, 0);
             }
 
-            Vector3 hue = RenderExtentions.GetHueVector(GameObject.Hue);
+            Vector3 hue = ShaderHuesTraslator.GetHueVector(GameObject.Hue);
 
             if (_vertex[0].Hue != hue)
                 _vertex[0].Hue = _vertex[1].Hue = _vertex[2].Hue = _vertex[3].Hue = hue;

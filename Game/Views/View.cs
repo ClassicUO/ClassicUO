@@ -142,7 +142,7 @@ namespace ClassicUO.Game.Views
             {
                 if (_storedHue == Vector3.Zero)
                     _storedHue = HueVector;
-                HueVector = RenderExtentions.SelectedHue;
+                HueVector = ShaderHuesTraslator.SelectedHue;
             }
             else if (_storedHue != Vector3.Zero)
             {

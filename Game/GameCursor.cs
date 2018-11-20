@@ -246,7 +246,7 @@ namespace ClassicUO.Game
             if (id < 16)
             {
                 if (_draggingItem)
-                    sb.Draw2D(_draggedItemTexture, new Point(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y), _rect, RenderExtentions.GetHueVector(_hue));
+                    sb.Draw2D(_draggedItemTexture, new Point(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y), _rect, ShaderHuesTraslator.GetHueVector(_hue));
 
 
                 DrawToolTip(sb, Mouse.Position);

@@ -50,9 +50,9 @@ namespace ClassicUO.Game.Gumps.Controls
                 return false;
 
             if (MouseIsOver)
-                return spriteBatch.Draw2D(_texture, position, new Rectangle(0 ,0 , Width, Height), RenderExtentions.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
+                return spriteBatch.Draw2D(_texture, position, new Rectangle(0, 0, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
 
-            return base.Draw(spriteBatch, position, hue);
+            return true;
         }
 
         public override void Dispose()
