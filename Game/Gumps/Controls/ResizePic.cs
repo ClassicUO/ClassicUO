@@ -76,10 +76,10 @@ namespace ClassicUO.Game.Gumps.Controls
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
 
-            int offsetTop = Math.Max(_gumpTexture[0].Height, _gumpTexture[2].Height) - _gumpTexture[1].Height;
-            int offsetBottom = Math.Max(_gumpTexture[5].Height, _gumpTexture[7].Height) - _gumpTexture[6].Height;
-            int offsetLeft = Math.Max(_gumpTexture[0].Width, _gumpTexture[5].Width) - _gumpTexture[3].Width;
-            int offsetRight = Math.Max(_gumpTexture[2].Width, _gumpTexture[7].Width) - _gumpTexture[4].Width;
+            //int offsetTop = Math.Max(_gumpTexture[0].Height, _gumpTexture[2].Height) - _gumpTexture[1].Height;
+            //int offsetBottom = Math.Max(_gumpTexture[5].Height, _gumpTexture[7].Height) - _gumpTexture[6].Height;
+            //int offsetLeft = Math.Max(_gumpTexture[0].Width, _gumpTexture[5].Width) - _gumpTexture[3].Width;
+            //int offsetRight = Math.Max(_gumpTexture[2].Width, _gumpTexture[7].Width) - _gumpTexture[4].Width;
 
             Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, Alpha, true) : Vector3.Zero;
 
@@ -112,7 +112,7 @@ namespace ClassicUO.Game.Gumps.Controls
                         spriteBatch.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
                         break;
                     case 4:
-                        drawX += Width - drawWidth - offsetRight;
+                        drawX += Width - drawWidth /*- offsetRight*/;
                         drawY += _gumpTexture[2].Height;
                         drawHeight = Height - _gumpTexture[2].Height - _gumpTexture[7].Height;
                         spriteBatch.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
@@ -125,7 +125,7 @@ namespace ClassicUO.Game.Gumps.Controls
                         break;
                     case 6:
                         drawX += _gumpTexture[5].Width;
-                        drawY += Height - drawHeight - offsetBottom;
+                        drawY += Height - drawHeight /*- offsetBottom*/;
                         drawWidth = Width - _gumpTexture[5].Width - _gumpTexture[7].Width;
                         spriteBatch.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
 
