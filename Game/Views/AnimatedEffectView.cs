@@ -21,12 +21,14 @@
 
 #endregion
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Views
 {
@@ -63,9 +65,49 @@ namespace ClassicUO.Game.Views
 
             Bounds.X = Texture.Width / 2 - 22 - (int) effect.Offset.X;
             Bounds.Y = Texture.Height - 44 + (int) (effect.Offset.Z - effect.Offset.Y);
-            HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue);
 
-            return base.Draw(spriteBatch, position, objectList);
+            var flags = TileData.StaticData[_displayedGraphic].Flags;
+
+
+            bool isPartial = TileData.IsPartialHue((long)flags);
+            bool isTransparent = TileData.IsTransparent((long) flags);
+            HueVector = ShaderHuesTraslator.GetHueVector(effect.Hue, isPartial, isTransparent ? .5f : 0, false);
+
+            switch (effect.Blend)
+            {
+                case GraphicEffectBlendMode.Multiply:
+                    spriteBatch.SetBlendMode(Blend.Zero, Blend.SourceColor);
+                    base.Draw(spriteBatch, position, objectList);
+                    spriteBatch.SetBlendMode(Blend.One, Blend.InverseSourceAlpha);
+                    break;
+                case GraphicEffectBlendMode.Screen:
+                case GraphicEffectBlendMode.ScreenMore:
+                    spriteBatch.SetBlendMode(Blend.One, Blend.One);
+                    base.Draw(spriteBatch, position, objectList);
+                    spriteBatch.SetBlendMode(Blend.One, Blend.InverseSourceAlpha);
+                    break;
+                case GraphicEffectBlendMode.ScreenLess:
+                    spriteBatch.SetBlendMode(Blend.DestinationColor, Blend.InverseSourceAlpha);
+                    base.Draw(spriteBatch, position, objectList);
+                    spriteBatch.SetBlendMode(Blend.One, Blend.InverseSourceAlpha);
+                    break;
+                case GraphicEffectBlendMode.NormalHalfTransparent:
+                    spriteBatch.SetBlendMode(Blend.DestinationColor, Blend.SourceColor);
+                    base.Draw(spriteBatch, position, objectList);
+                    spriteBatch.SetBlendMode(Blend.One, Blend.InverseSourceAlpha);
+                    break;
+                case GraphicEffectBlendMode.ShadowBlue:
+                    spriteBatch.SetBlendMode(Blend.SourceColor, Blend.InverseSourceColor, BlendFunction.ReverseSubtract);
+                    base.Draw(spriteBatch, position, objectList);
+                    spriteBatch.SetBlendMode(Blend.One, Blend.InverseSourceAlpha);
+                    break;
+                default:
+                    base.Draw(spriteBatch, position, objectList);
+                    break;
+            }
+
+         
+            return true;
         }
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)

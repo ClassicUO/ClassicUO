@@ -78,7 +78,6 @@ namespace ClassicUO.Game.GameObjects.Managers
                     {
                         Blend = blendmode
                     };
-
                     break;
                 case GraphicEffectType.ScreenFade:
                     Log.Message(LogTypes.Warning, "Unhandled 'Screen Fade' effect.");
