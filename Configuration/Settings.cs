@@ -468,11 +468,14 @@ namespace ClassicUO.Configuration
             get => _statusGumpStyle;
             set => SetProperty(ref _statusGumpStyle, value);
         }
+<<<<<<< HEAD
         
         public void Save()
         {
             ConfigurationResolver.Save(this, "settings.json");
         }
+=======
+>>>>>>> 57d2c5243dc1231619ac81ecb9aca5a01834321a
     }
 
     public abstract class NotifyPropertyChange
