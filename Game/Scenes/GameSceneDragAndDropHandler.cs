@@ -62,6 +62,12 @@ namespace ClassicUO.Game.Scenes
                 Entity entity = World.Get(item.Container);
                 item.Position = entity.Position;
                 entity.Items.Remove(item);
+
+                if (item.Container.IsMobile)
+                {
+                    World.Mobiles.Get(item.Container).Equipment[item.ItemData.Layer] = null;
+                }
+
                 //item.Container = Serial.Invalid;
                 entity.Items.ProcessDelta();
             }
