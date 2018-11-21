@@ -211,8 +211,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 alignment: TEXT_ALIGN_TYPE.TS_CENTER);
             AddChildren(new Line(xOffset, ROW_3_Y + 22, 30, 1, 0xFF383838));
 
-            // Damage, gold
+            // Hunger satisfaction, murder count, damage, gold
             xOffset = COLUMN_4_X + COLUMN_4_ICON_WIDTH;
+            AddStatTextLabel(
+                World.Player.Luck.ToString(),       // FIXME: packet handling
+                MobileStats.HungerSatisfactionMinutes,
+                xOffset + 20,
+                ROW_0_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+            AddStatTextLabel(
+                World.Player.StatsCap.ToString(),   // FIXME: packet handling
+                MobileStats.MurderCount,
+                xOffset,
+                ROW_1_Y + ROW_HEIGHT - (3 * ROW_PADDING));
             AddStatTextLabel(
                 String.Format("{0}-{1}", World.Player.DamageMin, World.Player.DamageMax),
                 MobileStats.Damage,
@@ -224,16 +234,28 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 xOffset,
                 ROW_3_Y + ROW_HEIGHT - (3 * ROW_PADDING));
 
-            // FIXME: the rest of the fields are not retrieved yet in the Character Status packet handler
-            // TODO: Murder count
-            // TODO: Hunger satisfaction minutes remaining
-
+            // Timers
             xOffset = COLUMN_5_X + COLUMN_5_ICON_WIDTH;
-            // TODO: Criminal timer seconds remaining
-            // TODO: Murder count decay hours remaining
-            // TODO: PvP cooldown seconds remaining
-            // TODO: Bandage timer seconds remaining
-            // TODO: Minimize hitbox
+            AddStatTextLabel(
+                World.Player.ResistCold.ToString(),     // FIXME: packet handling
+                MobileStats.CriminalTimerSeconds,
+                xOffset,
+                ROW_0_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+            AddStatTextLabel(
+                World.Player.ResistFire.ToString(),     // FIXME: packet handling
+                MobileStats.MurderCountDecayHours,
+                xOffset,
+                ROW_1_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+            AddStatTextLabel(
+                World.Player.ResistPoison.ToString(),   // FIXME: packet handling
+                MobileStats.PvpCooldownSeconds,
+                xOffset,
+                ROW_2_Y + ROW_HEIGHT - (3 * ROW_PADDING));
+            AddStatTextLabel(
+                World.Player.ResistEnergy.ToString(),   // FIXME: packet handling
+                MobileStats.BandageTimerSeconds,
+                xOffset,
+                ROW_3_Y + ROW_HEIGHT - (3 * ROW_PADDING));
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -263,14 +285,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _labels[(int)MobileStats.WeightMax].Text = World.Player.WeightMax.ToString();
                 _labels[(int)MobileStats.Damage].Text = String.Format("{0}-{1}", World.Player.DamageMin, World.Player.DamageMax);
                 _labels[(int)MobileStats.Gold].Text = World.Player.Gold.ToString();
-
-                // TODO:
-                //  Hunger satisfaction timer
-                //  Murder count
-                //  Criminal timer
-                //  Murder count decay
-                //  PvP cooldown timer
-                //  Bandage timer
+                _labels[(int)MobileStats.HungerSatisfactionMinutes].Text = World.Player.Luck.ToString();        // FIXME: packet handling
+                _labels[(int)MobileStats.MurderCount].Text = World.Player.StatsCap.ToString();                  // FIXME: packet handling
+                _labels[(int)MobileStats.MurderCountDecayHours].Text = World.Player.ResistFire.ToString();      // FIXME: packet handling
+                _labels[(int)MobileStats.CriminalTimerSeconds].Text = World.Player.ResistCold.ToString();       // FIXME: packet handling
+                _labels[(int)MobileStats.PvpCooldownSeconds].Text = World.Player.ResistPoison.ToString();       // FIXME: packet handling
+                _labels[(int)MobileStats.BandageTimerSeconds].Text = World.Player.ResistEnergy.ToString();      // FIXME: packet handling
             }
 
             base.Update(totalMS, frameMS);
@@ -356,6 +376,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Gold,
             AR,
             Damage,
+            HungerSatisfactionMinutes,
+            MurderCount,
+            MurderCountDecayHours,
+            CriminalTimerSeconds,
+            PvpCooldownSeconds,
+            BandageTimerSeconds,
             Max
         }
 
