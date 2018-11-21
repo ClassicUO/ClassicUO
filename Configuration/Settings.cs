@@ -84,10 +84,6 @@ namespace ClassicUO.Configuration
         private string _uoDir;
         private string _username;
         private bool _useTooltips;
-        private bool _preloadMaps;
-        private bool _showHPMobiles;
-        private int _showHPMobilesMode = 0; // 0 = %, 1 = line, 2 = both
-        private bool _highlightMobilesByFlags;
         private string _statusGumpStyle;
 
         [JsonConstructor]
