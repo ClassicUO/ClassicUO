@@ -116,7 +116,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        private void ShopItem_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void ShopItem_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
             var shopItem = (ShopItem) sender;
             TransactionItem transactionItem;

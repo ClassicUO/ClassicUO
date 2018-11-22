@@ -512,6 +512,21 @@ namespace ClassicUO.Configuration
             return false;
         }
 
+        public bool GetGumpValue<T>(Type type, string name, out T obj)
+        {
+            if (_gumpsDictionary.TryGetValue(type.ToString(), out var data))
+            {
+                if (data != null && data.TryGetValue(name, out object o))
+                {
+                    obj = JsonConvert.DeserializeObject<T>(o.ToString());
+                    return true;
+                }
+            }
+
+            obj = default;
+            return false;
+        }
+
         public void ClearGumps() => _gumpsDictionary.Clear();
 
         public void Save()

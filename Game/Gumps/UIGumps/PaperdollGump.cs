@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
@@ -197,7 +198,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return true;
         }
 
-        private void VirtueMenu_MouseDoubleClickEvent(object sender, MouseEventArgs args)
+        private void VirtueMenu_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
         {
             if (args.Button == MouseButton.Left)
             {
@@ -209,7 +210,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        private void PartyManifest_MouseDoubleClickEvent(object sender, MouseEventArgs args)
+        private void PartyManifest_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
         {
             //CALLS PARTYGUMP
             if (args.Button == MouseButton.Left)
@@ -261,16 +262,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override bool Restore(Dictionary<string, object> data)
         {
-            if (base.Restore(data) && data.TryGetValue("serial", out object s))
+            if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(PaperDollGump), "serial", out uint serial))
             {
-                uint serial = Convert.ToUInt32(s);
-
                 Mobile mobile = World.Mobiles.Get(serial);
 
                 if (mobile != null && World.Player == mobile)
                 {
-                    //Mobile = mobile;
-                    //BuildGump();
                     GameActions.DoubleClick((Serial)(World.Player.Serial | int.MinValue));
                     Dispose();
                     return true;

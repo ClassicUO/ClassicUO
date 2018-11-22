@@ -21,6 +21,7 @@
 
 #endregion
 
+using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.Data;
@@ -31,20 +32,34 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class ContainerGump : Gump
     {
-        private readonly GumpPic _eyeGumpPic;
-        private readonly bool _isCorspeContainer;
-        private readonly Item _item;
+        private GumpPic _eyeGumpPic;
+        private bool _isCorspeContainer;
+        private Graphic _gumpID;
+        private Item _item;
         private long _corpseEyeTicks;
         private int _eyeCorspeOffset;
 
-        public ContainerGump(Item item, Graphic gumpid) : base(item.Serial, 0)
+        public ContainerGump() : base(0, 0)
+        {
+            CanMove = true;
+            CanBeSaved = true;
+        }
+
+        public ContainerGump(Item item, Graphic gumpid) : this()
         {
             _item = item;
-            _isCorspeContainer = gumpid == 0x0009;
+            _gumpID = gumpid;
+
+            BuildGump();
+        }
+
+        private void BuildGump()
+        {
+            LocalSerial = _item.Serial;
+            _isCorspeContainer = _gumpID == 0x0009;
             _item.Items.Added += ItemsOnAdded;
             _item.Items.Removed += ItemsOnRemoved;
-            CanMove = true;
-            AddChildren(new GumpPicContainer(0, 0, ContainerManager.Get(gumpid).Graphic, 0, item));
+            AddChildren(new GumpPicContainer(0, 0, ContainerManager.Get(_gumpID).Graphic, 0, _item));
             if (_isCorspeContainer) AddChildren(_eyeGumpPic = new GumpPic(45, 30, 0x0045, 0));
         }
 
@@ -59,6 +74,47 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
                 _eyeGumpPic.Texture = IO.Resources.Gumps.GetGumpTexture(_eyeGumpPic.Graphic);
             }
+        }
+
+        public override bool Save(out Dictionary<string, object> data)
+        {
+            if (base.Save(out data))
+            {
+                data["serial"] = _item.Serial.Value;
+                data["graphic"] = (ushort)_gumpID;
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool Restore(Dictionary<string, object> data)
+        {
+            if (base.Restore(data))
+            {
+
+                if (data.TryGetValue("serial", out object s))
+                {
+                    Item item = World.Items.Get(Serial.Parse(s.ToString()));
+
+                    if (item != null)
+                    {
+                        _item = item;
+
+                        if (data.TryGetValue("graphic", out object g))
+                        {
+                            _gumpID = Graphic.Parse(g.ToString());
+                            
+                            BuildGump();
+
+                            return true;
+                        }
+                    }
+                }
+             
+            }
+
+            return false;
         }
 
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)
