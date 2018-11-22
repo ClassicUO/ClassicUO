@@ -42,6 +42,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private float _sClickTime;
         private bool _sendClickIfNotDClick;
 
+
         public ItemGump(Item item)
         {
             AcceptMouseInput = true;

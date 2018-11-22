@@ -24,7 +24,7 @@ namespace ClassicUO.Game.Scenes
         private bool _inqueue;
         private PaperDollInteractable _lastFakeParedoll;
         private Action _queuedAction;
-        private GameObject _queuedObject;
+        private Entity _queuedObject;
         private bool _rightMousePressed;
         public List<Mobile> MobileGumpStack = new List<Mobile>();
         public List<Mobile> PartyMemberGumpStack = new List<Mobile>();
@@ -170,7 +170,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     GameObject obj = _mousePicker.MouseOverObject;
 
-                    if (obj != null && obj.Distance < 5)
+                    if (obj != null && obj.Distance < 3)
                     {
                         switch (obj)
                         {
@@ -239,8 +239,8 @@ namespace ClassicUO.Game.Scenes
                                 _queuedAction = () =>
                                 {
                                     if (!World.ClientFeatures.TooltipsEnabled)
-                                        GameActions.SingleClick(entity);
-                                    GameActions.OpenPopupMenu(entity);
+                                        GameActions.SingleClick(_queuedObject);
+                                    GameActions.OpenPopupMenu(_queuedObject);
                                 };
                             }
 
@@ -250,10 +250,8 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private bool OnLeftMouseDoubleClick()
+        private void OnLeftMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            bool result = false;
-
             if (IsMouseOverWorld)
             {
                 GameObject obj = _mousePicker.MouseOverObject;
@@ -262,12 +260,12 @@ namespace ClassicUO.Game.Scenes
                 switch (obj)
                 {
                     case Item item:
-                        result = true;
+                        e.Result = true;
                         GameActions.DoubleClick(item);
 
                         break;
                     case Mobile mob:
-                        result = true;
+                        e.Result = true;
 
                         if (World.Player.InWarMode)
                         {
@@ -278,7 +276,7 @@ namespace ClassicUO.Game.Scenes
 
                         break;
                     case GameEffect effect when effect.Source is Item item:
-                        result = true;
+                        e.Result = true;
                         GameActions.DoubleClick(item);
 
                         break;
@@ -286,8 +284,6 @@ namespace ClassicUO.Game.Scenes
 
                 ClearDequeued();
             }
-
-            return result;
         }
 
         private void OnRightMouseButtonDown(object sender, EventArgs e)
@@ -302,7 +298,7 @@ namespace ClassicUO.Game.Scenes
                 _rightMousePressed = false;
         }
 
-        private bool OnRightMouseDoubleClick()
+        private void OnRightMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
             if (IsMouseOverWorld)
             {
@@ -316,13 +312,11 @@ namespace ClassicUO.Game.Scenes
                         {
                             World.Player.AddGameText(MessageType.Label, "Pathfinding!", 3, 0, false);
 
-                            return true;
+                            e.Result = true;
                         }
                     }
                 }
             }
-
-            return false;
         }
 
         private void OnMouseDragBegin(object sender, EventArgs e)

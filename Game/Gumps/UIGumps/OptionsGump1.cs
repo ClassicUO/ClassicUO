@@ -99,6 +99,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             BuildFonts();
             BuildSpeech();
             BuildCombat();
+            BuildTooltip();
             ChangePage(1);
         }
 

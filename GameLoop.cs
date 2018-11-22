@@ -45,7 +45,7 @@ namespace ClassicUO
 {
     public class GameLoop : CoreGame
     {
-        private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nPos: {4}\nSelected: {5}\nStats: {6}";
+        private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
         private readonly StringBuffer _buffer = new StringBuffer();
         private RenderedText _infoText;
         private InputManager _inputManager;
@@ -188,7 +188,7 @@ namespace ClassicUO
             _sbUI.Begin();
             _uiManager.Draw(_sbUI);
             _buffer.Clear();
-            _buffer.AppendFormat(FORMATTED_STRING, CurrentFPS, _sceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged, World.Player == null ? string.Empty : World.Player.Position.ToString(), _sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty);
+            _buffer.AppendFormat(FORMATTED_STRING, CurrentFPS, _sceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged, World.Player == null ? string.Empty : World.Player.Position.ToString(), _sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty, _sb3D.FlushCount + _sbUI.FlushCount);
             _infoText.Text = _buffer.ToString();
             _infoText.Draw(_sbUI, new Point(Window.ClientBounds.Width - 150, 20));
             _sbUI.End();

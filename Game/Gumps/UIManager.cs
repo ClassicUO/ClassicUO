@@ -115,13 +115,11 @@ namespace ClassicUO.Game.Gumps
                 _mouseDownControls[btn] = null;
             };
 
-            InputManager.LeftMouseDoubleClick += () =>
+            InputManager.LeftMouseDoubleClick += (sender, e) =>
             {
                 if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                    return false;
-                if (MouseOverControl != null && IsMouseOverUI) return MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
-
-                return false;
+                    e.Result = false;
+                if (MouseOverControl != null && IsMouseOverUI) e.Result |= MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
             };
 
             InputManager.RightMouseButtonDown += (sender, e) =>

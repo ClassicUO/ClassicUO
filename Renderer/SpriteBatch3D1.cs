@@ -44,7 +44,7 @@ namespace ClassicUO.Renderer
         private readonly SpriteVertex[] _vertexInfo;
         private bool _started;
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
-        private readonly RasterizerState _rasterizerState;
+        private RasterizerState _rasterizerState;
         private BlendState _blendState;
 
 #if !ORIONSORT
@@ -90,6 +90,8 @@ namespace ClassicUO.Renderer
 
         public int Merged { get; set; }
 
+        public int FlushCount { get; set; }
+
         public void SetLightDirection(Vector3 dir)
         {
             _effect.Parameters["lightDirection"].SetValue(dir);
@@ -115,6 +117,7 @@ namespace ClassicUO.Renderer
             _started = true;
             Calls = 0;
             Merged = 0;
+            FlushCount = 0;
 #if !ORIONSORT
             _z = 0;
 #endif
@@ -255,6 +258,9 @@ namespace ClassicUO.Renderer
 
             if (_numSprites == 0)
                 return;
+
+            FlushCount++;
+
             fixed (SpriteVertex* p = &_vertexInfo[0]) _vertexBuffer.SetDataPointerEXT(0, (IntPtr) p, _numSprites * 4 * SpriteVertex.SizeInBytes, SetDataOptions.None);
             Texture2D current = _textureInfo[0];
             int offset = 0;
@@ -293,7 +299,9 @@ namespace ClassicUO.Renderer
 
             Flush();
 
-            _rasterizerState.ScissorTestEnable = enable;
+            _rasterizerState?.Dispose();
+
+            _rasterizerState = new RasterizerState() { ScissorTestEnable = enable };
         }
 
 

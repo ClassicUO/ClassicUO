@@ -79,12 +79,11 @@ namespace ClassicUO.Game
             Graphic = Graphic.Invariant, Name = "System"
         };
 
-        //public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
-        //public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PUnicodeSpeechRequest(entity.Serial, entity.Graphic, type, hue, font, _language, entity.Name ?? string.Empty, message).SendToClient();
-        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal)
-        {
-            GameActions.Say(message, hue, type, font);
-        }
+
+        public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
+        public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => OnMessage(entity, new UOMessageEventArgs(message, hue, type, font, true, "ENU"));
+
+        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
 
         public static event EventHandler<UOMessageEventArgs> Message;
 
@@ -155,10 +154,12 @@ namespace ClassicUO.Game
 
                     break;
                 case MessageType.Guild:
-
+                    Service.Get<ChatControl>().AddLine($"[Guild] [{entity.Name}]: {args.Text}", (byte)args.Font, args.Hue, args.IsUnicode);
+                    Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "Party");
                     break;
                 case MessageType.Alliance:
-
+                    Service.Get<ChatControl>().AddLine($"[Alliance] [{entity.Name}]: {args.Text}", (byte)args.Font, args.Hue, args.IsUnicode);
+                    Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "Party");
                     break;
                 case MessageType.Command:
 
