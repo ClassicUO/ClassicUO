@@ -21,10 +21,14 @@
 
 #endregion
 
+using System;
+using System.Collections.Generic;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
+using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -59,6 +63,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 Mobile = mobile;
                 Title = mobileTitle;
                 BuildGump();
+                CanBeSaved = Mobile == World.Player;
+                SetNameAndPositionForSaving("paperdoll");
             }
         }
 
@@ -68,6 +74,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Dispose()
         {
+
+            UIManager.SavePosition(LocalSerial, Location);
+
             //Mobile.EnableCallBackForItemsUpdate(false);
             if (Mobile == World.Player)
             {
@@ -238,6 +247,40 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             base.Update(totalMS, frameMS);
         }
+
+        public override bool Save(out Dictionary<string, object> data)
+        {
+            if (base.Save(out data))
+            {
+                data["serial"] = Mobile.Serial.Value;
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool Restore(Dictionary<string, object> data)
+        {
+            if (base.Restore(data) && data.TryGetValue("serial", out object s))
+            {
+                uint serial = Convert.ToUInt32(s);
+
+                Mobile mobile = World.Mobiles.Get(serial);
+
+                if (mobile != null && World.Player == mobile)
+                {
+                    //Mobile = mobile;
+                    //BuildGump();
+                    GameActions.DoubleClick((Serial)(World.Player.Serial | int.MinValue));
+                    Dispose();
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+      
 
         public override void OnButtonClick(int buttonID)
         {

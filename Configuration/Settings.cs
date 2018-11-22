@@ -22,8 +22,11 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 using ClassicUO.Utility;
+
+using Microsoft.Xna.Framework;
 
 using Newtonsoft.Json;
 
@@ -85,6 +88,7 @@ namespace ClassicUO.Configuration
         private bool _useOldStatus;
         private string _username;
         private bool _useTooltips;
+        private Dictionary<string, Dictionary<string, object>> _gumpsDictionary = new Dictionary<string, Dictionary<string, object>>();
 
         [JsonConstructor]
         public Settings()
@@ -468,6 +472,47 @@ namespace ClassicUO.Configuration
             get => _highlightMobilesByFlags;
             set => SetProperty(ref _highlightMobilesByFlags, value);
         }
+
+        [JsonProperty(PropertyName = "gumps_data")]
+        public IReadOnlyDictionary<string, Dictionary<string, object>> GumpsData => _gumpsDictionary;
+
+
+        public void AddGump(string gump, string name, object value)
+        {
+            if (!_gumpsDictionary.TryGetValue(gump, out var data))
+            {
+                data = new Dictionary<string, object>();
+            }
+
+            data[name] = value;
+        }
+
+        public void AddGump(string gump, Dictionary<string, object> data)
+        {
+            _gumpsDictionary[gump] = data;
+            //if (!_gumpsDictionary.TryGetValue(gump, out var data))
+            //{
+            //    data = new Dictionary<string, object>();
+            //}
+
+            //data[name] = value;
+        }
+
+        public bool GetGumpValue(Type type, string name, out object obj)
+        {
+            if (_gumpsDictionary.TryGetValue(type.ToString(), out var data))
+            {
+                if (data != null && data.TryGetValue(name, out obj))
+                {
+                    return true;
+                }
+            }
+
+            obj = null;
+            return false;
+        }
+
+        public void ClearGumps() => _gumpsDictionary.Clear();
 
         public void Save()
         {

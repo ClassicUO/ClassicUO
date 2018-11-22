@@ -70,6 +70,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\GumpProperties.cs" />
     <Compile Include="Game\Data\BuffIcon.cs" />
     <Compile Include="Game\Data\BuffTable.cs" />
     <Compile Include="Game\Data\CharacterCreationValues.cs" />

@@ -132,7 +132,8 @@ namespace ClassicUO
 
         protected override void UnloadContent()
         {
-            ConfigurationResolver.Save(Service.Get<Settings>(), "settings.json");
+            Service.Get<SceneManager>().CurrentScene?.Unload();
+            Service.Get<Settings>().Save();
             base.UnloadContent();
         }
 
