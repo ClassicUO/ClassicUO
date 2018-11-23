@@ -79,6 +79,8 @@ namespace ClassicUO.Game.Gumps.Controls
             Y = y;
             Graphic = graphic;
             Hue = hue;
+
+            Texture = IO.Resources.Gumps.GetGumpTexture(Graphic);
         }
 
         public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) : (Hue) 0)

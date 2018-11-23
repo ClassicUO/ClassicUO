@@ -112,6 +112,7 @@
     <Compile Include="Game\Gumps\UIGumps\PartyMemberGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\PopupMenuGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\SkillButtonGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\SplitMenuGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\UseSpellButtonGump.cs" />
     <Compile Include="Game\Scenes\GameSceneDragAndDropHandler.cs" />
     <Compile Include="Game\Scenes\GameSceneDrawingSorting.cs" />

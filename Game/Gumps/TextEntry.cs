@@ -34,7 +34,7 @@ namespace ClassicUO.Game.Gumps
     {
         private string _plainText;
 
-        public TextEntry(byte font, int maxcharlength = 0, int maxWidth = 0, int width = 0, bool unicode = true, FontStyle style = FontStyle.None, ushort hue = 0xFFFF)
+        public TextEntry(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool unicode = true, FontStyle style = FontStyle.None, ushort hue = 0xFFFF)
         {
             RenderText = new RenderedText
             {
@@ -45,6 +45,9 @@ namespace ClassicUO.Game.Gumps
                 Hue = hue
             };
 
+            if (maxWidth > 0)
+                RenderText.FontStyle |= FontStyle.Cropped;
+
             RenderCaret = new RenderedText
             {
                 IsUnicode = unicode,
@@ -53,7 +56,7 @@ namespace ClassicUO.Game.Gumps
                 FontStyle = (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None,
                 Text = "_"
             };
-            MaxCharCount = maxcharlength <= 0 ? 200 : maxcharlength;
+            MaxCharCount =/* maxcharlength <= 0 ? 200 :*/ maxcharlength;
             Width = width;
             MaxWidth = maxWidth;
         }
@@ -124,7 +127,7 @@ namespace ClassicUO.Game.Gumps
                     string s = Text;
                     s = s.Insert(CaretIndex, c);
 
-                    if (int.Parse(s) > MaxCharCount)
+                    if (!int.TryParse(s, out int value) || value >= MaxCharCount)
                         return;
                 }
                 else if (Text.Length >= MaxCharCount) return;
@@ -141,6 +144,17 @@ namespace ClassicUO.Game.Gumps
             {
                 if (NumericOnly)
                 {
+                    string str = text;
+
+                    while (true)
+                    {
+                        int len = str.Length;
+
+                        if (int.TryParse(str, out int result) && result >= MaxCharCount && len > 0)
+                            str = str.Substring(len - 1);
+                        else 
+                            break;
+                    }
                 }
                 else if (text.Length >= MaxCharCount)
                     text = text.Remove(MaxCharCount - 1);

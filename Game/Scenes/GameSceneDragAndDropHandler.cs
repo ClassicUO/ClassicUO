@@ -48,8 +48,23 @@ namespace ClassicUO.Game.Scenes
 
         private void PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
-            // TODO: AMOUNT CHECK
-            PickupItemDirectly(item, x, y, amount ?? item.Amount);
+            if (!amount.HasValue && !item.IsCorpse && item.Amount > 1)
+            {
+                if (UIManager.GetByLocalSerial<SplitMenuGump>(item) != null)
+                    return;
+
+                SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
+                {
+                    X = Mouse.Position.X - 80,
+                    Y = Mouse.Position.Y - 40,
+                };
+                UIManager.Add(gump);
+                UIManager.AttemptDragControl(gump, Mouse.Position, true);
+            }
+            else
+            {
+                PickupItemDirectly(item, x, y, amount ?? item.Amount);
+            }
         }
 
         private void PickupItemDirectly(Item item, int x, int y, int amount)

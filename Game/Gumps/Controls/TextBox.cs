@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private TextEntry _entry;
         private bool _showCaret;
 
-        public TextBox(byte font, int maxcharlength = 0, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
+        public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
         {
             _entry = new TextEntry(font, maxcharlength, maxWidth, width, isunicode, style, hue);
             base.AcceptKeyboardInput = true;
@@ -67,7 +67,11 @@ namespace ClassicUO.Game.Gumps.Controls
             set => _entry.IsPassword = value;
         }
 
-        public bool NumericOnly { get; set; }
+        public bool NumericOnly
+        {
+            get => _entry.NumericOnly;
+            set => _entry.NumericOnly = value;
+        }
 
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
 

@@ -104,7 +104,11 @@ namespace ClassicUO.Game.Gumps.Controls
                         _text.Text = Value.ToString();
 
                     if (_value != oldValue)
+                    {
                         ModifyPairedValues(_value - oldValue);
+                        if (IsInitialized)
+                            CalculateOffset();
+                    }
                     ValueChanged.Raise();
                 }
             }
