@@ -341,7 +341,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     });
                 }
 
-                spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
+                spriteBatch.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
             }
 
             return true;

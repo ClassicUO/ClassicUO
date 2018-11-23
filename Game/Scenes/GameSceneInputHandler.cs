@@ -78,7 +78,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (obj != null)
                         {
-                            TargetSystem.MouseTargetingEventObject(obj);
+                            TargetSystem.TargetGameObject(obj);
                             Mouse.LastLeftButtonClickTime = 0;
                         }
 

@@ -262,17 +262,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override bool Restore(Dictionary<string, object> data)
         {
-            if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(PaperDollGump), "serial", out uint serial))
-            {
-                Mobile mobile = World.Mobiles.Get(serial);
+            //if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(PaperDollGump), "serial", out uint serial))
+            //{
+            //    Mobile mobile = World.Mobiles.Get(serial);
 
-                if (mobile != null && World.Player == mobile)
-                {
-                    GameActions.DoubleClick((Serial)(World.Player.Serial | int.MinValue));
-                    Dispose();
-                    return true;
-                }
-            }
+            //    if (mobile != null && World.Player == mobile)
+            //    {
+            //        GameActions.DoubleClick((Serial)(World.Player.Serial | int.MinValue));
+            //        Dispose();
+            //        return true;
+            //    }
+            //}
 
             return false;
         }

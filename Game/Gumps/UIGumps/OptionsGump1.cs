@@ -318,6 +318,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 Y = 33
             };
+            speechColorPickerBox.MouseClick += (sender, e) => buttonSpeechColor.InvokeMouseClick(e.Location, e.Button);
             speechColorPickerBox.SetHue(color);
 
             buttonSpeechColor.MouseClick += (sender, e) =>
@@ -346,6 +347,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (_settings.EmoteColor != 0xFFFF)
                 color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.EmoteColor) << 8) | 0xFF);
             ColorPickerBox emoteColorPickerBox = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            emoteColorPickerBox.MouseClick += (sender, e) => buttonEmoteColor.InvokeMouseClick(e.Location, e.Button);
             emoteColorPickerBox.SetHue(color);
 
             buttonEmoteColor.MouseClick += (sender, e) =>
@@ -374,6 +376,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (_settings.PartyMessageColor != 0xFFFF)
                 color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.PartyMessageColor) << 8) | 0xFF);
             ColorPickerBox partyMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            partyMessageColor.MouseClick += (sender, e) => butttonPartyMessageColor.InvokeMouseClick(e.Location, e.Button);
             partyMessageColor.SetHue(color);
 
             butttonPartyMessageColor.MouseClick += (sender, e) =>
@@ -402,6 +405,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (_settings.GuildMessageColor != 0xFFFF)
                 color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.GuildMessageColor) << 8) | 0xFF);
             ColorPickerBox guildMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            guildMessageColor.MouseClick += (sender, e) => buttonGuildMessageColor.InvokeMouseClick(e.Location, e.Button);
             guildMessageColor.SetHue(color);
 
             buttonGuildMessageColor.MouseClick += (sender, e) =>
@@ -430,6 +434,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (_settings.AllyMessageColor != 0xFFFF)
                 color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.AllyMessageColor) << 8) | 0xFF);
             ColorPickerBox allyMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            allyMessageColor.MouseClick += (sender, e) => buttonAllyMessageColor.InvokeMouseClick(e.Location, e.Button);
             allyMessageColor.SetHue(color);
 
             buttonAllyMessageColor.MouseClick += (sender, e) =>
@@ -465,6 +470,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (_settings.InnocentColor != 0xFFFF)
                 color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.InnocentColor) << 8) | 0xFF);
             ColorPickerBox innocentColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
+            innocentColor.MouseClick += (sender, e) => buttonInnocentColor.InvokeMouseClick(e.Location, e.Button);
             innocentColor.SetHue(color);
 
             buttonInnocentColor.MouseClick += (sender, e) =>
@@ -495,6 +501,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 Y = buttonInnocentColor.Height + 3
             };
+            friendColor.MouseClick += (sender, e) => buttonFriendColor.InvokeMouseClick(e.Location, e.Button);
             friendColor.SetHue(color);
 
             buttonFriendColor.MouseClick += (sender, e) =>
@@ -525,6 +532,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 Y = buttonFriendColor.Bounds.Bottom + 3
             };
+            criminalColor.MouseClick += (sender, e) => buttonCriminalColor.InvokeMouseClick(e.Location, e.Button);
             criminalColor.SetHue(color);
 
             buttonCriminalColor.MouseClick += (sender, e) =>
@@ -555,6 +563,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 X = 150 + 3
             };
+            enemyColor.MouseClick += (sender, e) => buttonEnemyColor.InvokeMouseClick(e.Location, e.Button);
             enemyColor.SetHue(color);
 
             buttonEnemyColor.MouseClick += (sender, e) =>
@@ -585,6 +594,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 X = 150 + 3, Y = buttonEnemyColor.Bounds.Bottom + 3
             };
+            murdererColor.MouseClick += (sender, e) => buttonMurdererColor.InvokeMouseClick(e.Location, e.Button);
             murdererColor.SetHue(color);
 
             buttonMurdererColor.MouseClick += (sender, e) =>

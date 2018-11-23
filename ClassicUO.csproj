@@ -71,6 +71,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Configuration\GumpProperties.cs" />
+    <Compile Include="Configuration\Profile.cs" />
+    <Compile Include="Configuration\ProfileManager.cs" />
     <Compile Include="Game\Data\BuffIcon.cs" />
     <Compile Include="Game\Data\BuffTable.cs" />
     <Compile Include="Game\Data\CharacterCreationValues.cs" />
@@ -309,6 +311,7 @@
     <Compile Include="Utility\Profiler.cs" />
     <Compile Include="Utility\RandomHelper.cs" />
     <Compile Include="Utility\StringHelper.cs" />
+    <Compile Include="Utility\UnsafeMemoryManager.cs" />
     <Compile Include="Utility\ZLib.cs" />
   </ItemGroup>
   <ItemGroup>

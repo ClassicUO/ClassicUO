@@ -66,12 +66,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override bool Restore(Dictionary<string, object> data)
         {
-            if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(UseSpellButtonGump), "spell", out _spell))
-            {
-                BuildGump();
+            //if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(UseSpellButtonGump), "spell", out _spell))
+            //{
+            //    BuildGump();
 
-                return true;
-            }
+            //    return true;
+            //}
 
             return false;
         }

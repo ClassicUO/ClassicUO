@@ -21,9 +21,13 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
+using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -32,12 +36,75 @@ namespace ClassicUO.Renderer
 {
     public class SpriteTexture : Texture2D
     {
+        private bool[] _hitMap;
+        private readonly bool _is32Bit;
+
         public SpriteTexture(int width, int height, bool is32bit = true) : base(Service.Get<SpriteBatch3D>().GraphicsDevice, width, height, false, is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551)
         {
             Ticks = CoreGame.Ticks + 3000;
+            _is32Bit = is32bit;
         }
 
         public long Ticks { get; set; }
+
+
+        public void SetDataHitMap16(ushort[] data)
+        {
+            int size = Width * Height;
+            _hitMap = new bool[size];
+
+            int pos = 0;
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    _hitMap[pos] = data[pos] != 0;
+                    pos++;
+                }
+            }
+
+            SetData(data);
+        }
+
+        public void SetDataHitMap32(uint[] data)
+        {
+            int size = Width * Height;
+            _hitMap = new bool[size];
+
+            int pos = 0;
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    _hitMap[pos] = data[pos] != 0;
+                    pos++;
+                }
+            }
+
+            SetData(data);
+        }
+
+        public bool Contains(int x, int y, bool pixelCheck = true)
+        {
+            if (x >= 0 && y >= 0 && x < Width && y < Height)
+            {
+                if (!pixelCheck)
+                    return true;
+
+                int pos = (y * Width) + x;
+
+                if (pos < _hitMap.Length)
+                    return _hitMap[pos];
+            }
+            return false;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (_hitMap != null)
+                Array.Clear(_hitMap, 0, _hitMap.Length);
+        }
     }
 
     public class FontTexture : SpriteTexture

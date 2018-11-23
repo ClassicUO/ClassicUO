@@ -775,6 +775,8 @@ namespace ClassicUO.Network
             Graphic graphic = p.ReadUShort();
             UIManager ui = Service.Get<UIManager>();
 
+            ui.GetByLocalSerial(serial)?.Dispose();
+
             if (graphic == 0x30) // vendor
             {
                 var mobile = World.Mobiles.Get(serial);
@@ -1289,17 +1291,17 @@ namespace ClassicUO.Network
             {
                 if (!ui.GetGumpCachePosition(mobile, out Point location))
                 {
-                    if (Service.Get<Settings>().GetGumpValue(typeof(PaperDollGump), "location", out object point))
-                    {
-                        string[] s = point.ToString().Split(new[]
-                        {
-                            ','
-                        }, StringSplitOptions.RemoveEmptyEntries);
+                    //if (Service.Get<Settings>().GetGumpValue(typeof(PaperDollGump), "location", out object point))
+                    //{
+                    //    string[] s = point.ToString().Split(new[]
+                    //    {
+                    //        ','
+                    //    }, StringSplitOptions.RemoveEmptyEntries);
 
-                        location.X = Convert.ToInt32(s[0]);
-                        location.Y = Convert.ToInt32(s[1]);
-                    }
-                    else
+                    //    location.X = Convert.ToInt32(s[0]);
+                    //    location.Y = Convert.ToInt32(s[1]);
+                    //}
+                    //else
                     {
                         location = new Point(100 ,100);
                     }

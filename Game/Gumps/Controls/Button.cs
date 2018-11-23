@@ -229,7 +229,11 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected override bool Contains(int x, int y)
         {
-            return IO.Resources.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
+            SpriteTexture texture = GetTextureByState();
+
+            return texture.Contains(x, y);
+            //return (Texture != null && Texture.Contains(x, y)) /*|| Bounds.Contains(X + x, Y + y)*/;
+            //return IO.Resources.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
         }
 
         public override void Dispose()

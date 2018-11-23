@@ -542,7 +542,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (gump.Save(out Dictionary<string, object> data))
                 {
-                    settings.AddGump(gump.GetType().ToString(), data);
+                    settings.AddGump(gump.GetType(), data);
                 }
             }
         }
@@ -552,17 +552,17 @@ namespace ClassicUO.Game.Gumps
             var settings = Service.Get<Settings>();
             var dict = settings.GumpsData;
 
-            foreach (KeyValuePair<string, Dictionary<string, object>> k in dict)
-            {
-                Type type = Type.GetType(k.Key);
-                object gump = Activator.CreateInstance(type);
+            //foreach (KeyValuePair<string, Dictionary<string, object>> k in dict)
+            //{
+            //    Type type = Type.GetType(k.Key);
+            //    object gump = Activator.CreateInstance(type);
 
-                if (gump is Gump g)
-                {
-                    if (g.Restore(k.Value))
-                        Add(g);
-                }
-            }
+            //    if (gump is Gump g)
+            //    {
+            //        if (g.Restore(k.Value))
+            //            Add(g);
+            //    }
+            //}
         }
 
         private void HandleKeyboardInput()

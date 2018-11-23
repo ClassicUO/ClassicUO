@@ -71,11 +71,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public override bool Restore(Dictionary<string, object> data)
         {
             var settings = Service.Get<Settings>();
-            if (base.Restore(data) && settings.GetGumpValue(typeof(BuffGump), "graphic", out _graphic) && settings.GetGumpValue(typeof(BuffGump), "direction", out _direction))
-            {
-                BuildGump();
-                return true;
-            }
+            //if (base.Restore(data) && settings.GetGumpValue(typeof(BuffGump), "graphic", out _graphic) && settings.GetGumpValue(typeof(BuffGump), "direction", out _direction))
+            //{
+            //    BuildGump();
+            //    _gump = this;
+            //    return true;
+            //}
 
             return false;
         }

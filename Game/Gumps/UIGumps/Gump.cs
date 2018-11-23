@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 string[] s = point.ToString().Split(new[]
                 {
-                    ','
+                    ',', ' '
                 }, StringSplitOptions.RemoveEmptyEntries);
 
 

@@ -43,12 +43,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override bool Restore(Dictionary<string, object> data)
         {
-            if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(SpellbookGump), "serial", out uint serial))
-            {
-                GameActions.DoubleClick(serial);
-                Dispose();
-                return true;
-            }
+            //if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(SpellbookGump), "serial", out uint serial))
+            //{
+            //    GameActions.DoubleClick(serial);
+            //    Dispose();
+            //    return true;
+            //}
 
             return false;
         }

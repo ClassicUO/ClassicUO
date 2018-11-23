@@ -66,7 +66,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected override bool Contains(int x, int y)
         {
-            return IO.Resources.Gumps.Contains(Graphic, x, y);
+            return Texture.Contains(x, y);
+            //return IO.Resources.Gumps.Contains(Graphic, x, y);
         }
     }
 

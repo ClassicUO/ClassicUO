@@ -96,7 +96,16 @@ namespace ClassicUO.IO
 
         internal void Fill(byte[] buffer, int count)
         {
-            for (int i = 0; i < count; i++) buffer[i] = ReadByte();
+            //for (int i = 0; i < count; i++) buffer[i] = ReadByte();
+            fixed (byte* ptr = buffer)
+            {
+                byte* start = ptr;
+                byte* end = &ptr[0] + count;
+                while (start != end)
+                {
+                    *start++ = ReadByte();
+                }
+            }
         }
 
         internal T[] ReadArray<T>(int count) where T : struct

@@ -95,21 +95,25 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 if (data.TryGetValue("serial", out object s))
                 {
-                    Item item = World.Items.Get(Serial.Parse(s.ToString()));
+                    //Item item = World.Items.Get(Serial.Parse(s.ToString()));
 
-                    if (item != null)
-                    {
-                        _item = item;
+                    //if (item != null)
+                    //{
+                    //    _item = item;
 
-                        if (data.TryGetValue("graphic", out object g))
-                        {
-                            _gumpID = Graphic.Parse(g.ToString());
+                    //    if (data.TryGetValue("graphic", out object g))
+                    //    {
+                    //        _gumpID = Graphic.Parse(g.ToString());
                             
-                            BuildGump();
+                    //        BuildGump();
 
-                            return true;
-                        }
-                    }
+                    //        return true;
+                    //    }
+                    //}
+
+                    GameActions.DoubleClick(Serial.Parse(s.ToString()));
+                    Dispose();
+                    return true;
                 }
              
             }
@@ -138,8 +142,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Dispose()
         {
-            _item.Items.Added -= ItemsOnAdded;
-            _item.Items.Removed -= ItemsOnRemoved;
+            if (_item != null)
+            {
+                _item.Items.Added -= ItemsOnAdded;
+                _item.Items.Removed -= ItemsOnRemoved;
+            }
+
             base.Dispose();
         }
     }
