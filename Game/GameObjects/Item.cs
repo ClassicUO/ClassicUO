@@ -93,7 +93,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
         }
-
+        
         public ushort Amount
         {
             get => _amount;
