@@ -170,6 +170,7 @@ namespace ClassicUO.Network
             ToClient.Add(0x3C, UpdateContainedItems);
             ToClient.Add(0x3E, VersionGodClient);
             ToClient.Add(0x3F, UltimaLive.OnUltimaLivePacket);
+            ToClient.Add(0x40, UltimaLive.OnUpdateTerrainPacket);
             /*ToServer.Add(0x45, VersionOK);
             ToServer.Add(0x46, NewArtwork);
             ToServer.Add(0x47, NewTerrain);

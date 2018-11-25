@@ -10,6 +10,7 @@ namespace ClassicUO.IO
     class UltimaLive
     {
         private const int CRCLength = 25;
+        private const int LandBlockLenght = 192;
         public static UInt16[][] MapCRCs = new UInt16[256][];//caching, to avoid excessive cpu & memory use
         public static void OnUltimaLivePacket(Packet p)
         {
@@ -59,7 +60,7 @@ namespace ClassicUO.IO
                                 }
 
                                 Int32 blocknum = (xBlockItr * mapHeightInBlocks) + yBlockItr;
-                                if (blocknum >= 0 && blocknum <= (mapHeightInBlocks * mapWidthInBlocks))
+                                if (blocknum >= 0 && blocknum < blocks)
                                 {
                                     UInt16 crc = MapCRCs[mapID][blocknum];
                                     if (crc == UInt16.MaxValue)
@@ -84,11 +85,52 @@ namespace ClassicUO.IO
                         NetClient.Socket.Send(new UltimaLiveHashResponse((uint)block, (byte)mapID, tosendCRCs));
                         break;
                     }
+                case 0x00://statics update
+                    {
+                        if (p.Length < 15)
+                            return;
+                        p.Seek(3);
+                        int block = (int)p.ReadUInt();
+                        int length = (int)p.ReadUInt();
+                        p.Seek(14);
+                        int mapID = p.ReadByte();
+                        byte[] staticsData = new byte[length * 7];
+                        for(int i=0; i<length; i++)
+                        {
+                            staticsData[i] = p.ReadByte();
+                        }
+                        //TODO: write staticdata changes directly to disk, use packets only if server sent out where we should save files (see Live Login Confirmation)
+                        break;
+                    }
+                case 0x02://Live login confirmation
+                    {
+                        if (p.Length < 43)//fixed size
+                            return;
+                        //from byte 0x03 to 0x14 data is unused
+                        p.Seek(15);
+                        string shardName = p.ReadASCII();
+                        //TODO: create shard directory, copy map and statics to that directory, use that files instead of the original ones
+                        break;
+                    }
             }
         }
+
+        public static void OnUpdateTerrainPacket(Packet p)
+        {
+            int blocknum = (int)p.ReadUInt();
+            byte[] landData = new byte[LandBlockLenght];
+            for(int i=0; i<LandBlockLenght; i++)
+            {
+                landData[i] = p.ReadByte();
+            }
+            p.Seek(200);
+            byte mapID = p.ReadByte();
+            //TODO: write landdata changes directly to disk, use packets only if server sent out where we should save files (see Live Login Confirmation)
+        }
+
         public static UInt16 GetBlockCrc(int block, int mapID)
         {
-            byte[] landdata = new byte[64 * 3];
+            byte[] landdata = new byte[LandBlockLenght];
             int stcount = 0;
             int blockByteIdx = 0;
             for (int i = 0; i < 8; i++)
