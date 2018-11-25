@@ -773,7 +773,13 @@ namespace ClassicUO.Network
             if (graphic == 0x30) // vendor
             {
                 var mobile = World.Mobiles.Get(serial);
-                ui.Add(new ShopGump(mobile, true, 100, 100));
+                var itemList = mobile.Items
+                    .Where(o => o.Layer == Layer.ShopResale || o.Layer == Layer.ShopBuy)
+                    .SelectMany(o => o.Items)
+                    .OrderBy(o => o.Serial.Value)
+                    .ToArray();
+
+                ui.Add(new ShopGump(mobile.Serial, itemList, true, 100, 100));
             }
             else
             {
@@ -1373,16 +1379,27 @@ namespace ClassicUO.Network
 
             if (countItems <= 0) return;
 
+            List<Item> itemList = new List<Item>(countItems);
+
             for (int i = 0; i < countItems; i++)
             {
                 Item item = World.GetOrCreateItem(p.ReadUInt());
-                Graphic graphic = p.ReadUShort();
-                Hue hue = p.ReadUShort();
-                ushort count = p.ReadUShort();
-                ushort price = p.ReadUShort();
-                string name = p.ReadASCII(p.ReadByte());
-                if (int.TryParse(name, out int clilocnum)) name = Cliloc.GetString(clilocnum);
+                item.Graphic = p.ReadUShort();
+                item.Hue = p.ReadUShort();
+                item.Amount = p.ReadUShort();
+                item.Price = p.ReadUShort();
+                
+                string name = p.ReadASCII(p.ReadUShort());
+                if (int.TryParse(name, out int clilocnum))
+                    name = Cliloc.GetString(clilocnum);
+
+                item.Name = name;
+
+                itemList.Add(item);
             }
+
+            UIManager ui = Service.Get<UIManager>();
+            ui.Add(new ShopGump(vendor.Serial, itemList.ToArray(), false, 100, 100));
         }
 
         private static void UpdateHitpoints(Packet p)

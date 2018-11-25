@@ -1034,10 +1034,20 @@ namespace ClassicUO.Network
         }
     }
 
-    //public sealed class PSellRequest : PacketWriter
-    //{
+    public sealed class PSellRequest : PacketWriter
+    {
+        public PSellRequest(Serial vendorSerial, Tuple<uint, ushort>[] items) : base(0x9F)
+        {
+            WriteUInt(vendorSerial);
+            WriteUShort((ushort)items.Length);
 
-    //}
+            for (int i = 0; i < items.Length; i++)
+            {
+                WriteUInt(items[i].Item1);
+                WriteUShort(items[i].Item2);
+            }
+        }
+    }
 
     public sealed class PUseCombatAbility : PacketWriter
     {
