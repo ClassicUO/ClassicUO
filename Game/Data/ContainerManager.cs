@@ -159,7 +159,7 @@ namespace ClassicUO.Game.Data
         }
     }
 
-    public class ContainerData
+    public struct ContainerData
     {
         public ContainerData(Graphic graphic, ushort sound, ushort closed, int x, int y, int w, int h)
         {

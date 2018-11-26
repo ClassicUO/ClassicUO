@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Scenes
                 else if (value != null && _heldItem == null)
                 {
                     UIManager.AddInputBlocker(this);
-                    UIManager.GameCursor.SetDraggedItem(value.Graphic, value.Hue);
+                    UIManager.GameCursor.SetDraggedItem(value.Graphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && TileData.IsStackable((long) value.ItemData.Flags) );
                 }
 
                 _heldItem = value;
@@ -48,8 +48,23 @@ namespace ClassicUO.Game.Scenes
 
         private void PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
-            // TODO: AMOUNT CHECK
-            PickupItemDirectly(item, x, y, amount ?? item.Amount);
+            if (!amount.HasValue && !item.IsCorpse && item.Amount > 1)
+            {
+                if (UIManager.GetByLocalSerial<SplitMenuGump>(item) != null)
+                    return;
+
+                SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
+                {
+                    X = Mouse.Position.X - 80,
+                    Y = Mouse.Position.Y - 40,
+                };
+                UIManager.Add(gump);
+                UIManager.AttemptDragControl(gump, Mouse.Position, true);
+            }
+            else
+            {
+                PickupItemDirectly(item, x, y, amount ?? item.Amount);
+            }
         }
 
         private void PickupItemDirectly(Item item, int x, int y, int amount)
@@ -62,6 +77,12 @@ namespace ClassicUO.Game.Scenes
                 Entity entity = World.Get(item.Container);
                 item.Position = entity.Position;
                 entity.Items.Remove(item);
+
+                if (item.Container.IsMobile)
+                {
+                    World.Mobiles.Get(item.Container).Equipment[item.ItemData.Layer] = null;
+                }
+
                 //item.Container = Serial.Invalid;
                 entity.Items.ProcessDelta();
             }

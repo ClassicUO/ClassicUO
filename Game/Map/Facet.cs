@@ -201,7 +201,7 @@ namespace ClassicUO.Game.Map
             {
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
 
-                if (block.LastAccessTime < ticks /*&& block.HasNoExternalData()*/)
+                if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
                     block.Unload();
                     block = MapChunk.Invalid;

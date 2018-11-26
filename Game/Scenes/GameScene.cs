@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Scenes
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
             UIManager.Add(new WorldViewportGump(this));
-            UIManager.Add(_topBarGump = new TopBarGump(this));
+            UIManager.Add(_topBarGump = new TopBarGump(this));           
             _viewPortGump = Service.Get<WorldViewport>();
             _settings = Service.Get<Settings>();
             GameActions.Initialize(PickupItemBegin);
@@ -143,7 +143,8 @@ namespace ClassicUO.Game.Scenes
         public override void Unload()
         {
             NetClient.Socket.Disconnect();
-            _renderTarget?.Dispose();
+            _renderTarget?.Dispose();            
+            UIManager.SaveGumps();
             UIManager.Clear();
             CleaningResources();
             World.Clear();

@@ -22,8 +22,11 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 
 using ClassicUO.Utility;
+
+using Microsoft.Xna.Framework;
 
 using Newtonsoft.Json;
 
@@ -85,6 +88,7 @@ namespace ClassicUO.Configuration
         private bool _useOldStatus;
         private string _username = ""; //important default otherwise TextBox.SetText crashes from null input on Main menu
         private bool _useTooltips;
+        private List<GumpProperties> _gumpsDictionary = new List<GumpProperties>();
 
         [JsonConstructor]
         public Settings()
@@ -468,6 +472,56 @@ namespace ClassicUO.Configuration
             get => _highlightMobilesByFlags;
             set => SetProperty(ref _highlightMobilesByFlags, value);
         }
+
+        [JsonProperty(PropertyName = "gumps_data")]
+        public IReadOnlyList<GumpProperties> GumpsData => _gumpsDictionary;
+
+
+        //public void AddGump(string gump, string name, object value)
+        //{
+        //    if (!_gumpsDictionary.TryGetValue(gump, out var data))
+        //    {
+        //        data = new Dictionary<string, object>();
+        //    }
+
+        //    data[name] = value;
+        //}
+
+        public void AddGump(Type type, Dictionary<string, object> data)
+        {
+            _gumpsDictionary.Add(new GumpProperties(type, data));
+        }
+
+        //public bool GetGumpValue(Type type, string name, out object obj)
+        //{
+        //    if (_gumpsDictionary.TryGetValue(type.ToString(), out var data))
+        //    {
+        //        if (data != null && data.TryGetValue(name, out obj))
+        //        {
+        //            return true;
+        //        }
+        //    }
+
+        //    obj = null;
+        //    return false;
+        //}
+
+        //public bool GetGumpValue<T>(Type type, string name, out T obj)
+        //{
+        //    if (_gumpsDictionary.TryGetValue(type.ToString(), out var data))
+        //    {
+        //        if (data != null && data.TryGetValue(name, out object o))
+        //        {
+        //            obj = JsonConvert.DeserializeObject<T>(o.ToString());
+        //            return true;
+        //        }
+        //    }
+
+        //    obj = default;
+        //    return false;
+        //}
+
+        public void ClearGumps() => _gumpsDictionary.Clear();
 
         public void Save()
         {

@@ -89,15 +89,14 @@ namespace ClassicUO.IO.Resources
 
             string[] args = arg.Split(new[]
             {
-                '\t'
+               '\t'
             }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < args.Length; i++)
             {
                 if (args[i].Length > 0 && args[i][0] == '#')
                 {
-                    int clilocID = int.Parse(args[i].Substring(1));
-                    args[i] = GetString(clilocID);
+                    args[i] = GetString(int.Parse(args[i].Substring(1)));
                 }
             }
 
@@ -113,6 +112,8 @@ namespace ClassicUO.IO.Resources
                 else
                     construct = baseCliloc;
             }
+
+            construct = construct.Trim(' ');
 
             return capitalize ? StringHelper.CapitalizeFirstCharacter(construct) : construct;
         }

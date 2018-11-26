@@ -197,5 +197,13 @@ namespace ClassicUO.Game
         {
             Socket.Send(new PPopupMenuSelection(serial, index));
         }
+
+        public static void SystemMessage(string message) => Chat.Print(message);
+
+        public static void SystemMessage(string message, ushort hue) => Chat.Print(message, hue);
+
+        public static void MessageOverhead(string message, Entity entity) => entity.Print(message);
+
+        public static void MessageOverhead(string message, ushort hue, Entity entity) => entity.Print(message, hue);
     }
 }

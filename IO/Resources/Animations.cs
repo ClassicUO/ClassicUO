@@ -48,7 +48,7 @@ namespace ClassicUO.IO.Resources
         private static readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private static byte _animGroupCount = (int) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
         private static readonly DataReader _reader = new DataReader();
-        private static readonly PixelPicking _picker = new PixelPicking();
+        //private static readonly PixelPicking _picker = new PixelPicking();
         private static readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>();
         private static readonly Dictionary<Graphic, Rectangle> _animDimensionCache = new Dictionary<Graphic, Rectangle>();
 
@@ -1179,8 +1179,9 @@ namespace ClassicUO.IO.Resources
                     f = new AnimationFrameTexture(uniqueAnimationIndex, imageWidth, imageHeight);
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
-                f.SetData(pixels);
-                _picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
+                f.SetDataHitMap16(pixels);
+                //f.SetData(pixels);
+                //_picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
             }
 
             _usedTextures.Add(new ToRemoveInfo
@@ -1256,8 +1257,8 @@ namespace ClassicUO.IO.Resources
                     f = new AnimationFrameTexture(uniqueAnimationIndex, imageWidth, imageHeight);
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
-                f.SetData(pixels);
-                _picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
+                f.SetDataHitMap16(pixels);
+                //_picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
             }
 
             _usedTextures.Add(new ToRemoveInfo
@@ -1266,10 +1267,10 @@ namespace ClassicUO.IO.Resources
             });
         }
 
-        public static bool Contains(int g, int x, int y, int extra = 0)
-        {
-            return _picker.Get(g, x, y, extra);
-        }
+        //public static bool Contains(int g, int x, int y, int extra = 0)
+        //{
+        //    return _picker.Get(g, x, y, extra);
+        //}
 
         public static void GetAnimationDimensions(byte frameIndex, Graphic id, byte dir, byte animGroup, out int x, out int y, out int w, out int h)
         {

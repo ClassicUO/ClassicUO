@@ -21,6 +21,7 @@
 
 #endregion
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Formatting;
@@ -31,6 +32,7 @@ using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
+using ClassicUO.Game.Views;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -45,7 +47,7 @@ namespace ClassicUO
 {
     public class GameLoop : CoreGame
     {
-        private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nPos: {4}\nSelected: {5}\nStats: {6}";
+        private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
         private readonly StringBuffer _buffer = new StringBuffer();
         private RenderedText _infoText;
         private InputManager _inputManager;
@@ -135,7 +137,8 @@ namespace ClassicUO
 
         protected override void UnloadContent()
         {
-            ConfigurationResolver.Save(Service.Get<Settings>(), "settings.json");
+            Service.Get<SceneManager>().CurrentScene?.Unload();
+            Service.Get<Settings>().Save();
             base.UnloadContent();
         }
 
@@ -184,14 +187,16 @@ namespace ClassicUO
             _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
 
+
         protected override void OnDraw(double frameMS)
-        {
+        {      
             _sceneManager.CurrentScene.Draw(_sb3D, _sbUI);
             _sbUI.GraphicsDevice.Clear(Color.Transparent);
-            _sbUI.Begin();
+            _sbUI.Begin();        
             _uiManager.Draw(_sbUI);
+            
             _buffer.Clear();
-            _buffer.AppendFormat(FORMATTED_STRING, CurrentFPS, _sceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged, World.Player == null ? string.Empty : World.Player.Position.ToString(), _sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty);
+            _buffer.AppendFormat(FORMATTED_STRING, CurrentFPS, _sceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged, World.Player == null ? string.Empty : World.Player.Position.ToString(), _sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty, _sb3D.FlushCount + _sbUI.FlushCount);
             _infoText.Text = _buffer.ToString();
             _infoText.Draw(_sbUI, new Point(Window.ClientBounds.Width - 150, 20));
             _sbUI.End();

@@ -42,6 +42,8 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
+using Microsoft.Xna.Framework;
+
 using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Network
@@ -167,7 +169,8 @@ namespace ClassicUO.Network
             //ToServer.Add(0x3B, BuyItems);
             ToClient.Add(0x3C, UpdateContainedItems);
             ToClient.Add(0x3E, VersionGodClient);
-            ToClient.Add(0x3F, UpdateStaticsGodClient);
+            ToClient.Add(0x3F, UltimaLive.OnUltimaLivePacket);
+            ToClient.Add(0x40, UltimaLive.OnUpdateTerrainPacket);
             /*ToServer.Add(0x45, VersionOK);
             ToServer.Add(0x46, NewArtwork);
             ToServer.Add(0x47, NewTerrain);
@@ -582,6 +585,9 @@ namespace ClassicUO.Network
             NetClient.Socket.Send(new PStatusRequest(World.Player));
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
+
+
+            Service.Get<UIManager>().RestoreGumps();
         }
 
         private static void Talk(Packet p)
@@ -769,6 +775,8 @@ namespace ClassicUO.Network
             var serial = p.ReadUInt();
             Graphic graphic = p.ReadUShort();
             UIManager ui = Service.Get<UIManager>();
+
+            ui.GetByLocalSerial(serial)?.Dispose();
 
             if (graphic == 0x30) // vendor
             {
@@ -1288,10 +1296,27 @@ namespace ClassicUO.Network
 
             if (ui.GetByLocalSerial<PaperDollGump>(mobile) == null)
             {
-                ui.Add(new PaperDollGump(mobile, text)
+                if (!ui.GetGumpCachePosition(mobile, out Point location))
                 {
-                    X = 100, Y = 100
-                });
+                    //if (Service.Get<Settings>().GetGumpValue(typeof(PaperDollGump), "location", out object point))
+                    //{
+                    //    string[] s = point.ToString().Split(new[]
+                    //    {
+                    //        ','
+                    //    }, StringSplitOptions.RemoveEmptyEntries);
+
+                    //    location.X = Convert.ToInt32(s[0]);
+                    //    location.Y = Convert.ToInt32(s[1]);
+                    //}
+                    //else
+                    {
+                        location = new Point(100 ,100);
+                    }
+                }
+
+
+
+                ui.Add(new PaperDollGump(mobile, text) { Location = location});
             }
         }
 

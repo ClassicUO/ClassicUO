@@ -57,8 +57,7 @@ namespace ClassicUO.Game.GameObjects
         private Hue _hue;
         protected long _lastAnimationChangeTime;
         private string _name;
-        //protected Action<Entity> _OnDisposed;
-        //protected Action<Entity> _OnUpdated;
+
 
         protected Entity(Serial serial)
         {
@@ -66,11 +65,6 @@ namespace ClassicUO.Game.GameObjects
             Items = new EntityCollection<Item>();
             PositionChanged += OnPositionChanged;
         }
-
-        //private void ItemsOnUpdated(object sender, CollectionChangedEventArgs<Item> e)
-        //{
-        //    _OnUpdated?.Invoke(this);
-        //}
 
         public EntityCollection<Item> Items { get; }
 
@@ -172,27 +166,6 @@ namespace ClassicUO.Game.GameObjects
 
         public DeferredEntity DeferredObject { get; set; }
 
-        //public void SetCallbacks(Action<Entity> onUpdate, Action<Entity> onDispose)
-        //{
-        //    if (onUpdate != null)
-        //        _OnUpdated += onUpdate;
-
-        //    if (onDispose != null)
-        //        _OnDisposed += onDispose;
-        //}
-
-        //public void ClearCallBacks(Action<Entity> onUpdate, Action<Entity> onDispose)
-        //{
-        //    if (_OnUpdated == null && _OnDisposed == null)
-        //        return;
-
-        //    if (_OnUpdated.GetInvocationList().Contains(onUpdate))
-        //        _OnUpdated -= onUpdate;
-
-        //    if (_OnDisposed.GetInvocationList().Contains(onDispose))
-        //        _OnDisposed -= onDispose;
-        //}
-
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
 
         public void UpdateProperties(IEnumerable<Property> props)
@@ -228,30 +201,8 @@ namespace ClassicUO.Game.GameObjects
             }
 
             _properties.Clear();
-            //_OnDisposed?.Invoke(this);
-            //EnableCallBackForItemsUpdate(false);
-            //_OnUpdated = null;
-            //_OnDisposed = null;
             base.Dispose();
         }
-
-        //private bool _enabled;
-
-        //public void EnableCallBackForItemsUpdate(bool enable)
-        //{
-        //    if (enable && !_enabled)
-        //    {
-        //        _enabled = enable;
-        //        Items.Added += ItemsOnUpdated;
-        //        Items.Removed += ItemsOnUpdated;
-        //    }
-        //    else if (!enable && _enabled)
-        //    {
-        //        _enabled = enable;
-        //        Items.Added -= ItemsOnUpdated;
-        //        Items.Removed -= ItemsOnUpdated;
-        //    }         
-        //}
 
         protected virtual void OnPositionChanged(object sender, EventArgs e)
         {

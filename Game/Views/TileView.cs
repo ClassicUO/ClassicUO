@@ -123,10 +123,20 @@ namespace ClassicUO.Game.Views
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
-            int x = list.MousePosition.X - (int) vertex[0].Position.X;
-            int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
+            int x = list.MousePosition.X - (int)vertex[0].Position.X;
+            int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
 
-            if (Art.Contains(GameObject.Graphic, x, y))
+            //if (Art.Contains(GameObject.Graphic, x, y))
+            //Land tile = (Land)GameObject;
+
+            //if (!tile.IsStretched)
+            //{
+            //    if (Texture.Contains(x, y))
+            //        list.Add(GameObject, vertex[0].Position);
+            //}
+
+
+            if (Texture.Contains(x, y))
                 list.Add(GameObject, vertex[0].Position);
         }
 

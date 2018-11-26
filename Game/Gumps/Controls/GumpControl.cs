@@ -341,7 +341,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     });
                 }
 
-                spriteBatch.DrawRectangle(_debugTexture, new Rectangle(ScreenCoordinateX, ScreenCoordinateY, Width, Height), Vector3.Zero);
+                spriteBatch.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
             }
 
             return true;
@@ -411,11 +411,13 @@ namespace ClassicUO.Game.Gumps.Controls
             Tooltip = null;
         }
 
-        public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseEnter, MouseLeft, MouseClick, MouseDoubleClick, DragBegin, DragEnd;
+        public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseEnter, MouseLeft, MouseClick, DragBegin, DragEnd;
 
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
 
         public event EventHandler<KeyboardEventArgs> Keyboard;
+
+        public event EventHandler<MouseDoubleClickEventArgs> MouseDoubleClick;
 
         public void Initialize()
         {
@@ -596,15 +598,13 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
+            bool result = OnMouseDoubleClick(x, y, button);
 
-            if (OnMouseDoubleClick(x, y, button))
-            {
-                MouseDoubleClick.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
+            var arg = new MouseDoubleClickEventArgs(x, y, button);
+            MouseDoubleClick.Raise(arg, this);
+            result |= arg.Result;
 
-                return true;
-            }
-
-            return false;
+            return result;
         }
 
         public void InvokeTextInput(string c)

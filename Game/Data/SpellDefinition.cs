@@ -5,15 +5,16 @@ namespace ClassicUO.Game.Data
     public struct SpellDefinition
     {
         public static SpellDefinition EmptySpell = new SpellDefinition();
-        public readonly string Name;
-        public readonly int ID;
-        public readonly int GumpIconID;
-        public readonly int GumpIconSmallID;
-        public readonly Reagents[] Regs;
-        public readonly string PowerWords;
-        public readonly int ManaCost;
-        public readonly int MinSkill;
-        public readonly int TithingCost;
+        public string Name;
+        public int ID;
+        public int GumpIconID;
+        public int GumpIconSmallID;
+        public Reagents[] Regs;
+        public string PowerWords;
+        public int ManaCost;
+        public int MinSkill;
+        public int TithingCost;
+
 
         public SpellDefinition(string name, int index, int gumpIconID, string powerwords, int manacost, int minkill, int tithingcost, params Reagents[] regs)
         {

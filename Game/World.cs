@@ -242,7 +242,10 @@ namespace ClassicUO.Game
         {
             Items.Clear();
             Mobiles.Clear();
+            _houses.Clear();
+            Player.Dispose();
             Player = null;
+            Map.ClearUsedBlocks();
             Map = null;
             ToAdd.Clear();
         }
@@ -251,6 +254,7 @@ namespace ClassicUO.Game
         {
             if (!noplayer)
             {
+                Map.ClearUsedBlocks();
                 Map = null;
                 Player.Dispose();
                 Player = null;

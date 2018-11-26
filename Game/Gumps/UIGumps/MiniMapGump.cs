@@ -253,7 +253,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override bool Contains(int x, int y)
         {
-            return IO.Resources.Gumps.Contains(_useLargeMap ? (ushort) 5011 : (ushort) 5010, x, y);
+            return _mapTexture.Contains(x, y);
+            //return IO.Resources.Gumps.Contains(_useLargeMap ? (ushort) 5011 : (ushort) 5010, x, y);
         }
     }
 }

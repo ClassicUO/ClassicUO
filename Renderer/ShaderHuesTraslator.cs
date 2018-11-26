@@ -21,6 +21,8 @@
 
 #endregion
 
+using System.Runtime.CompilerServices;
+
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Renderer
@@ -49,6 +51,7 @@ namespace ClassicUO.Renderer
             return GetHueVector(hue, false, 0, false);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool noLighting)
         {
             ShadersEffectType type;
@@ -77,6 +80,7 @@ namespace ClassicUO.Renderer
             return new Vector3(hue, (int) type, alpha);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 GetHueVector(int hue, ShadersEffectType type)
         {
             return new Vector3(hue, (int) type, 0);

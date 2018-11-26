@@ -98,7 +98,7 @@ namespace ClassicUO.Game.Gumps.Controls
             //        RemoveChildren(c);
             //    }
             //}
-            OnEntityUpdated(_mobile);
+            OnEntityUpdated(Mobile);
         }
 
         private void MobileOnDisposed(object sender, EventArgs e)
@@ -108,7 +108,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public void Update()
         {
-            OnEntityUpdated(_mobile);
+            OnEntityUpdated(Mobile);
         }
 
         public void AddFakeDress(Item item)
@@ -118,7 +118,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 _fakeItem.Dispose();
                 _fakeItem = null;
             }
-            else if (_mobile != null && item != null && _mobile.Equipment[item.ItemData.Layer] == null) _fakeItem = item;
+            else if (_mobile != null && item != null && _mobile.Equipment[item.ItemData.Layer] == null)
+                _fakeItem = item;
         }
 
         private void OnEntityUpdated(Entity entity)

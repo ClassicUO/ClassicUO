@@ -46,7 +46,7 @@ namespace ClassicUO.Game.System
             _multiModel = model;
         }
 
-        private static void MouseTargetingEventXYZ(GameObject selectedEntity)
+        private static void TargetXYZ(GameObject selectedEntity)
         {
             Graphic modelNumber = 0;
             short z = selectedEntity.Position.Z;
@@ -61,7 +61,7 @@ namespace ClassicUO.Game.System
             ClearTargetingWithoutTargetCancelPacket();
         }
 
-        public static void MouseTargetingEventObject(GameObject selectedEntity)
+        public static void TargetGameObject(GameObject selectedEntity)
         {
             if (selectedEntity == null)
                 return;

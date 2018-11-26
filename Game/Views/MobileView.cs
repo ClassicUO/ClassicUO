@@ -21,8 +21,10 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Input;
@@ -79,8 +81,9 @@ namespace ClassicUO.Game.Views
                 drawX = -22 + (int) mobile.Offset.X;
             else
                 drawX = -22 - (int) mobile.Offset.X;
-            Rectangle total = new Rectangle();
 
+            FrameInfo = FrameInfo.Empty;
+          
             for (int i = 0; i < _layerCount; i++)
             {
                 ViewLayer vl = _frames[i];
@@ -90,25 +93,37 @@ namespace ClassicUO.Game.Views
                 int x = drawX + frame.CenterX;
                 int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY - vl.OffsetY;
 
-                if (total.X > x)
-                    total.X = x;
+                int yy = -(frame.Height + frame.CenterY + 3);
+                int xx = -frame.CenterX;
 
-                if (total.Y > y)
-                    total.Y = y;
+                if (mirror)
+                    xx = -(frame.Width - frame.CenterX);
 
-                if (total.Width < frame.Width)
-                    total.Width = frame.Width;
+                if (xx < FrameInfo.X)
+                    FrameInfo.X = xx;
 
-                if (total.Height < frame.Height)
-                    total.Height = frame.Height;
+                if (yy < FrameInfo.Y)
+                    FrameInfo.Y = yy;
+
+                if (FrameInfo.EndX < xx + frame.Width)
+                    FrameInfo.EndX = xx + frame.Width;
+
+                if (FrameInfo.EndY < yy + frame.Height)
+                    FrameInfo.EndY = yy + frame.Height;
+
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                 HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : vl.Hue, vl.IsParital, 0, false);
                 base.Draw(spriteBatch, position, objectList);
-                Pick(frame.ID, Bounds, position, objectList);
+                Pick(frame, Bounds, position, objectList);             
             }
 
-            Bounds = total;
+            FrameInfo.OffsetX = Math.Abs(FrameInfo.X);
+            FrameInfo.OffsetY = Math.Abs(FrameInfo.Y);
+            FrameInfo.Width = FrameInfo.OffsetX + FrameInfo.EndX;
+            FrameInfo.Height = FrameInfo.OffsetY + FrameInfo.EndY;
+
+
             int height = 0;
             int centerY = 0;
 
@@ -166,7 +181,7 @@ namespace ClassicUO.Game.Views
             if (x == 0 && centerY == 0 && w == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
 
-        private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
+        private void Pick(SpriteTexture texture, Rectangle area, Vector3 drawPosition, MouseOverList list)
         {
             int x;
 
@@ -175,7 +190,8 @@ namespace ClassicUO.Game.Views
             else
                 x = list.MousePosition.X - (int) drawPosition.X + area.X;
             int y = list.MousePosition.Y - ((int) drawPosition.Y - area.Y);
-            if (Animations.Contains(id, x, y)) list.Add(GameObject, drawPosition);
+            if (texture.Contains(x, y)) list.Add(GameObject, drawPosition);
+            //if (Animations.Contains(id, x, y)) list.Add(GameObject, drawPosition);
         }
 
         private void SetupLayers(byte dir, ref Mobile mobile, ref int mountOffset)

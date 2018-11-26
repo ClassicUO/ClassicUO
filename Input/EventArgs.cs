@@ -50,6 +50,25 @@ namespace ClassicUO.Input
         public ButtonState ButtonState { get; }
     }
 
+    public sealed class MouseDoubleClickEventArgs : EventArgs
+    {
+        public MouseDoubleClickEventArgs(int x, int y, MouseButton button)
+        {
+            Location = new Point(x, y);
+            Button = button;
+        }
+
+        public Point Location { get; }
+
+        public int X => Location.X;
+
+        public int Y => Location.Y;
+
+        public MouseButton Button { get; }
+
+        public bool Result { get; set; }
+    }
+
     public sealed class MouseWheelEventArgs : EventArgs
     {
         public MouseWheelEventArgs(MouseEvent direction)

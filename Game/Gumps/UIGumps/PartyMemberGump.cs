@@ -172,7 +172,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 case Buttons.Heal:
                     GameActions.CastSpell(29);
-                    TargetSystem.MouseTargetingEventObject(_partyMember.Mobile);
+                    TargetSystem.TargetGameObject(_partyMember.Mobile);
 
                     //
                     break;

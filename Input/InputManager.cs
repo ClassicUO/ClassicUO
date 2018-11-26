@@ -201,8 +201,8 @@ namespace ClassicUO.Input
 
         //    return SDL_HitTestResult.SDL_HITTEST_DRAGGABLE;
         //}
-        private static IntPtr _cursorPtr;
-        private readonly SDL_HitTest _hitTestDel;
+        //private static IntPtr _cursorPtr;
+        //private readonly SDL_HitTest _hitTestDel;
         //private const int MOUSE_DRAG_BEGIN_DISTANCE = 2;
         //private const int MOUSE_CLICK_MAX_DELTA = 2;
         //public const int MOUSE_DOUBLE_CLICK_TIME = 350;
@@ -243,7 +243,7 @@ namespace ClassicUO.Input
             SDL_DelEventWatch(_hookDel, IntPtr.Zero);
         }
 
-        public static event DoubleClickDelegate LeftMouseDoubleClick, MidMouseDoubleClick, RightMouseDoubleClick;
+        public static event EventHandler<MouseDoubleClickEventArgs> LeftMouseDoubleClick, MidMouseDoubleClick, RightMouseDoubleClick;
 
         public static event EventHandler LeftMouseButtonDown, LeftMouseButtonUp, MidMouseButtonDown, MidMouseButtonUp, RightMouseButtonDown, RightMouseButtonUp, X1MouseButtonDown, X1MouseButtonUp, X2MouseButtonDown, X2MouseButtonUp;
 
@@ -358,7 +358,11 @@ namespace ClassicUO.Input
                                 {
                                     Mouse.LastLeftButtonClickTime = 0;
 
-                                    if (LeftMouseDoubleClick != null && !LeftMouseDoubleClick.Invoke())
+                                    MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Left);
+
+                                    LeftMouseDoubleClick.Raise(arg);
+
+                                    if (!arg.Result)
                                         LeftMouseButtonDown.Raise();
                                     else
                                         Mouse.LastLeftButtonClickTime = 0xFFFF_FFFF;
@@ -388,8 +392,12 @@ namespace ClassicUO.Input
                                 uint ticks = SDL_GetTicks();
 
                                 if (Mouse.LastMidButtonClickTime + Mouse.MOUSE_DELAY_DOUBLE_CLICK >= ticks)
-                                {
-                                    if (MidMouseDoubleClick != null && !MidMouseDoubleClick.Invoke())
+                                {                                  
+                                    MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Middle);
+
+                                    MidMouseDoubleClick.Raise(arg);
+
+                                    if (!arg.Result)
                                         MidMouseButtonDown.Raise();
                                     Mouse.LastMidButtonClickTime = 0;
 
@@ -420,7 +428,11 @@ namespace ClassicUO.Input
                                 {
                                     Mouse.LastRightButtonClickTime = 0;
 
-                                    if (RightMouseDoubleClick != null && !RightMouseDoubleClick.Invoke())
+                                    MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Middle);
+
+                                    MidMouseDoubleClick.Raise(arg);
+
+                                    if (!arg.Result)
                                         RightMouseButtonDown.Raise();
                                     else
                                         Mouse.LastRightButtonClickTime = 0xFFFF_FFFF;

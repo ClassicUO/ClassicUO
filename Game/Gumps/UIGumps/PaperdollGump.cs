@@ -21,10 +21,15 @@
 
 #endregion
 
+using System;
+using System.Collections.Generic;
+
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
+using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -59,6 +64,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 Mobile = mobile;
                 Title = mobileTitle;
                 BuildGump();
+                CanBeSaved = Mobile == World.Player;
+                SetNameAndPositionForSaving("paperdoll");
             }
         }
 
@@ -68,6 +75,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Dispose()
         {
+
+            UIManager.SavePosition(LocalSerial, Location);
+
             //Mobile.EnableCallBackForItemsUpdate(false);
             if (Mobile == World.Player)
             {
@@ -188,7 +198,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return true;
         }
 
-        private void VirtueMenu_MouseDoubleClickEvent(object sender, MouseEventArgs args)
+        private void VirtueMenu_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
         {
             if (args.Button == MouseButton.Left)
             {
@@ -200,7 +210,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        private void PartyManifest_MouseDoubleClickEvent(object sender, MouseEventArgs args)
+        private void PartyManifest_MouseDoubleClickEvent(object sender, MouseDoubleClickEventArgs args)
         {
             //CALLS PARTYGUMP
             if (args.Button == MouseButton.Left)
@@ -238,6 +248,36 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             base.Update(totalMS, frameMS);
         }
+
+        public override bool Save(out Dictionary<string, object> data)
+        {
+            if (base.Save(out data))
+            {
+                data["serial"] = Mobile.Serial.Value;
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool Restore(Dictionary<string, object> data)
+        {
+            //if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(PaperDollGump), "serial", out uint serial))
+            //{
+            //    Mobile mobile = World.Mobiles.Get(serial);
+
+            //    if (mobile != null && World.Player == mobile)
+            //    {
+            //        GameActions.DoubleClick((Serial)(World.Player.Serial | int.MinValue));
+            //        Dispose();
+            //        return true;
+            //    }
+            //}
+
+            return false;
+        }
+
+      
 
         public override void OnButtonClick(int buttonID)
         {

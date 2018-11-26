@@ -168,14 +168,14 @@ namespace ClassicUO.Game.Views
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                     HueVector = ShaderHuesTraslator.GetHueVector(color);
                     base.Draw(spriteBatch, position, objectList);
-                    Pick(frame.ID, Bounds, position, objectList);
+                    Pick(frame, Bounds, position, objectList);
                 }
             }
 
             return true;
         }
 
-        private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
+        private void Pick(SpriteTexture texture, Rectangle area, Vector3 drawPosition, MouseOverList list)
         {
             int x;
 
@@ -184,7 +184,9 @@ namespace ClassicUO.Game.Views
             else
                 x = list.MousePosition.X - (int) drawPosition.X + area.X;
             int y = list.MousePosition.Y - ((int) drawPosition.Y - area.Y);
-            if (Animations.Contains(id, x, y)) list.Add(GameObject, drawPosition);
+            //if (Animations.Contains(id, x, y))
+            if (texture.Contains(x, y))
+                list.Add(GameObject, drawPosition);
         }
 
         protected override void MousePick(MouseOverList objectList, SpriteVertex[] vertex)
@@ -197,7 +199,8 @@ namespace ClassicUO.Game.Views
             //    objectList.Add(GameObject, vertex[0].Position);
             //}
 
-            if (Art.Contains(GameObject.Graphic, x, y, 0))
+            //if (Art.Contains(((Item)GameObject).DisplayedGraphic, x, y))
+            if (Texture.Contains(x, y))
                 objectList.Add(GameObject, vertex[0].Position);
         }
     }
