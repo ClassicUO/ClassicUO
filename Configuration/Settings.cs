@@ -36,7 +36,7 @@ namespace ClassicUO.Configuration
         private bool _backgroundSound;
         private int _backpackStyle;
         private byte _chatFont;
-        private string _clientVersion;
+        private string _clientVersion = "7.0.59.8";
         private bool _combatMusic;
         private int _containerDefaultX;
         private int _containerDefaultY;
@@ -57,15 +57,15 @@ namespace ClassicUO.Configuration
         private bool _highlightGameObjects = true;
         private bool _highlightMobilesByFlags;
         private ushort _innocentColor = 0x005A;
-        private string _ip;
-        private string _lastCharName;
+        private string _ip = "YOUR.SERVER.IP.ADDRESS";
+        private string _lastCharName = "";
         private int _maxFPS = 144;
         private ushort _murdererColor = 0x0023;
         private bool _music;
         private int _musicVolume;
         private ushort _partyMessageColor = 0x0044;
-        private string _password;
-        private ushort _port;
+        private string _password = ""; //important default otherwise TextBox.SetText crashes from null input on Main menu
+        private ushort _port = 2593;
         private bool _preloadMaps;
         private bool _profiler;
         private bool _reduceFpsInactiveWindow;
@@ -81,9 +81,9 @@ namespace ClassicUO.Configuration
         private int _speechDelay = 500;
         private bool _statReport;
         private ushort _tooltipsTextColor = 0xFFFF;
-        private string _uoDir;
+        private string _uoDir = "YOUR\\PATH\\TO\\ULTIMAONLINE";
         private bool _useOldStatus;
-        private string _username;
+        private string _username = ""; //important default otherwise TextBox.SetText crashes from null input on Main menu
         private bool _useTooltips;
 
         [JsonConstructor]
