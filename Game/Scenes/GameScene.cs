@@ -149,7 +149,7 @@ namespace ClassicUO.Game.Scenes
             CleaningResources();
             World.Clear();
             Service.Unregister<EffectManager>();
-            Service.Unregister<GameScene>();
+            Service.Unregister<StaticManager>();
             InputManager.LeftMouseButtonDown -= OnLeftMouseButtonDown;
             InputManager.LeftMouseButtonUp -= OnLeftMouseButtonUp;
             InputManager.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;

@@ -224,7 +224,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
             _mapTexture = new SpriteTexture(Width, Height, false);
-            _mapTexture.SetData(data);
+            _mapTexture.SetDataHitMap16(data);
         }
 
         private void CreatePixels(ushort[] data, int color, int x, int y, int w, int h, Point[] table, int count)

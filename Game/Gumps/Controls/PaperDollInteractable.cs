@@ -33,7 +33,7 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private static readonly PaperDollEquipSlots[] _layerOrder =
         {
-            PaperDollEquipSlots.Legging, PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Gloves, PaperDollEquipSlots.Neck, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Cloak, PaperDollEquipSlots.Robe, PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand, PaperDollEquipSlots.Belt, PaperDollEquipSlots.Talisman
+            PaperDollEquipSlots.Legging, PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Gloves, PaperDollEquipSlots.Neck, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Cloak, PaperDollEquipSlots.Robe, PaperDollEquipSlots.Belt, PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand, PaperDollEquipSlots.Talisman
         };
         private GumpPicBackpack _backpackGump;
         private Item _fakeItem;
@@ -57,10 +57,8 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 if (value != _mobile)
                 {
-                    //_mobile?.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);   
                     _mobile = value;
                     OnEntityUpdated(_mobile);
-                    //_mobile.SetCallbacks(OnEntityUpdated, OnEntityDisposed);                 
                 }
             }
         }
@@ -70,7 +68,6 @@ namespace ClassicUO.Game.Gumps.Controls
             Mobile.Items.Added -= ItemsOnAdded;
             Mobile.Items.Removed -= ItemsOnRemoved;
             Mobile.Disposed -= MobileOnDisposed;
-            //_mobile.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);
             if (_backpackGump != null) _backpackGump.MouseDoubleClick -= OnDoubleclickBackpackGump;
             base.Dispose();
         }
