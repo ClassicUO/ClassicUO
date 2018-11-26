@@ -109,7 +109,6 @@ namespace ClassicUO
             Service.Register(_journalManager = new JournalData());
 
             //Register Command Stack
-            PartySystem.RegisterCommands();
             _inputManager = Service.Get<InputManager>();
             Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();
