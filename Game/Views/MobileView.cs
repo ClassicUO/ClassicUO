@@ -21,8 +21,10 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Input;
@@ -79,8 +81,9 @@ namespace ClassicUO.Game.Views
                 drawX = -22 + (int) mobile.Offset.X;
             else
                 drawX = -22 - (int) mobile.Offset.X;
-            Rectangle total = new Rectangle();
 
+            FrameInfo = FrameInfo.Empty;
+          
             for (int i = 0; i < _layerCount; i++)
             {
                 ViewLayer vl = _frames[i];
@@ -90,25 +93,37 @@ namespace ClassicUO.Game.Views
                 int x = drawX + frame.CenterX;
                 int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY - vl.OffsetY;
 
-                if (total.X > x)
-                    total.X = x;
+                int yy = -(frame.Height + frame.CenterY + 3);
+                int xx = -frame.CenterX;
 
-                if (total.Y > y)
-                    total.Y = y;
+                if (mirror)
+                    xx = -(frame.Width - frame.CenterX);
 
-                if (total.Width < frame.Width)
-                    total.Width = frame.Width;
+                if (xx < FrameInfo.X)
+                    FrameInfo.X = xx;
 
-                if (total.Height < frame.Height)
-                    total.Height = frame.Height;
+                if (yy < FrameInfo.Y)
+                    FrameInfo.Y = yy;
+
+                if (FrameInfo.EndX < xx + frame.Width)
+                    FrameInfo.EndX = xx + frame.Width;
+
+                if (FrameInfo.EndY < yy + frame.Height)
+                    FrameInfo.EndY = yy + frame.Height;
+
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                 HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : vl.Hue, vl.IsParital, 0, false);
                 base.Draw(spriteBatch, position, objectList);
-                Pick(frame, Bounds, position, objectList);
+                Pick(frame, Bounds, position, objectList);             
             }
 
-            Bounds = total;
+            FrameInfo.OffsetX = Math.Abs(FrameInfo.X);
+            FrameInfo.OffsetY = Math.Abs(FrameInfo.Y);
+            FrameInfo.Width = FrameInfo.OffsetX + FrameInfo.EndX;
+            FrameInfo.Height = FrameInfo.OffsetY + FrameInfo.EndY;
+
+
             int height = 0;
             int centerY = 0;
 

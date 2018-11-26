@@ -23,6 +23,7 @@
 
 using System;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Input;
@@ -36,11 +37,19 @@ using IDrawable = ClassicUO.Interfaces.IDrawable;
 
 namespace ClassicUO.Game.Views
 {
+    public struct FrameInfo
+    {
+        public int X, Y, OffsetX, OffsetY, EndX, EndY, Width, Height;
+
+        public static readonly FrameInfo Empty = new FrameInfo();
+    }
+
     public abstract class View : IDrawable, IColorable
     {
         protected static float PI = (float) Math.PI;
         private Vector3 _storedHue;
         public Rectangle Bounds;
+        public FrameInfo FrameInfo;
 
         protected View(GameObject parent)
         {
@@ -65,6 +74,18 @@ namespace ClassicUO.Game.Views
         public bool AllowedToDraw { get; set; }
 
         public SpriteTexture Texture { get; set; }
+
+        public Rectangle GetOnScreenRectangle()
+        {
+            Rectangle prect = Rectangle.Empty;
+            Settings set = Service.Get<Settings>();
+            prect.X = (int)((set.GameWindowX + set.GameWindowWidth / 2) - FrameInfo.OffsetX + GameObject.Offset.X);
+            prect.Y = (int)((set.GameWindowY + set.GameWindowHeight / 2) + GameObject.Offset.Y - FrameInfo.OffsetY);
+            prect.Width = FrameInfo.Width;
+            prect.Height = FrameInfo.Height;
+
+            return prect;
+        }
 
         public virtual unsafe bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
         {

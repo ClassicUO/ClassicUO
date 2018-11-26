@@ -117,10 +117,15 @@ namespace ClassicUO.Utility
 
             if (inrect)
             {
-                if (rect.Y < r.Y) inrect = r.Y < rect.Bottom;
+                if (rect.Y < r.Y)
+                {
+                    inrect = r.Y < rect.Bottom;
+                }
+                else
+                {
+                    inrect = rect.Y < r.Bottom;
+                }
             }
-            else
-                inrect = rect.Y < r.Bottom;
 
             return inrect;
         }

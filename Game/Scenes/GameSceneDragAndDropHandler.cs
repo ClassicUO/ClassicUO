@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Scenes
                 else if (value != null && _heldItem == null)
                 {
                     UIManager.AddInputBlocker(this);
-                    UIManager.GameCursor.SetDraggedItem(value.Graphic, value.Hue);
+                    UIManager.GameCursor.SetDraggedItem(value.Graphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && TileData.IsStackable((long) value.ItemData.Flags) );
                 }
 
                 _heldItem = value;

@@ -200,10 +200,12 @@ namespace ClassicUO.Game
 
         public ArtTexture Texture { get; private set; }
 
-        public void SetDraggedItem(Graphic graphic, Hue hue)
+        private bool _isDouble;
+        public void SetDraggedItem(Graphic graphic, Hue hue, bool isDouble)
         {
             _draggedItemTexture = Art.GetStaticTexture(graphic);
             _hue = hue;
+            _isDouble = isDouble;
             _offset = new Point(_draggedItemTexture.Width / 2, _draggedItemTexture.Height / 2);
             _rect = new Rectangle(0, 0, _draggedItemTexture.Width, _draggedItemTexture.Height);
             _draggingItem = true;
@@ -242,7 +244,18 @@ namespace ClassicUO.Game
             if (id < 16)
             {
                 if (_draggingItem)
-                    sb.Draw2D(_draggedItemTexture, new Point(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y), _rect, ShaderHuesTraslator.GetHueVector(_hue));
+                {
+                    Point p = new Point(Mouse.Position.X - _offset.X, Mouse.Position.Y - _offset.Y);
+                    Vector3 hue = ShaderHuesTraslator.GetHueVector(_hue);
+                    sb.Draw2D(_draggedItemTexture, p, _rect, hue);
+
+                    if (_isDouble)
+                    {
+                        p.X += 5;
+                        p.Y += 5;
+                        sb.Draw2D(_draggedItemTexture, p, _rect, hue);
+                    }
+                }
                 DrawToolTip(sb, Mouse.Position);
                 sb.Draw2D(Texture, new Point(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id]), Vector3.Zero);
             }
