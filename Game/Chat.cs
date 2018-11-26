@@ -35,7 +35,7 @@ namespace ClassicUO.Game
         Regular = 0,
         System = 1,
         Emote = 2,
-        Party = 0x10,
+        Party = 3,
         Label = 6,
         Focus = 7,
         Whisper = 8,
@@ -150,7 +150,7 @@ namespace ClassicUO.Game
 
                     break;
                 case MessageType.Party:
-                    Service.Get<ChatControl>().AddLine($"[Party] [{entity.Name}]: {args.Text}", (byte) args.Font, args.Hue, args.IsUnicode);
+                    Service.Get<ChatControl>().AddLine(args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
                     Service.Get<JournalData>().AddEntry(args.Text, (byte) args.Font, args.Hue, "Party");
 
                     break;

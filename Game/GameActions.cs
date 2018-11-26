@@ -68,12 +68,17 @@ namespace ClassicUO.Game
             Socket.Send(new PPartyMessage(message, 0));
         }
 
+        public static void RequestPartyAccept(Serial serial)
+        {
+            Socket.Send(new PPartyAccept(serial));
+        }
+
         public static void RequestPartyRemoveMember(Serial serial)
         {
             Socket.Send(new PPartyRemoveRequest(serial));
         }
 
-        public static void RequestPartyLeave()
+        public static void RequestPartyQuit()
         {
             Socket.Send(new PPartyRemoveRequest(World.Player));
         }

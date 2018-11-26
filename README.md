@@ -70,7 +70,7 @@ First, create a file in the same directory as ClassicUO.exe named 'settings.json
   "scale_speech_delay": false,
   "speech_color": 0,
   "emote_color": 0,
-  "party_message_color": 0,
+  "party_message_color": 0x0044,
   "guild_message_color": 0,
   "ally_message_color": 0,
   "innocent_color": 0,

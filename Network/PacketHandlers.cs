@@ -1601,44 +1601,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 6: //party
-                    const byte CommandPartyList = 0x01;
-                    const byte CommandRemoveMember = 0x02;
-                    const byte CommandPrivateMessage = 0x03;
-                    const byte CommandPublicMessage = 0x04;
-                    const byte CommandInvitation = 0x07;
-                    byte SubCommand = p.ReadByte();
-
-                    switch (SubCommand)
-                    {
-                        case CommandPartyList:
-                            int Count = p.ReadByte();
-                            Serial[] Serials = new Serial[Count];
-                            for (int i = 0; i < Serials.Length; i++) Serials[i] = p.ReadUInt();
-                            PartySystem.ReceivePartyMemberList(Serials);
-
-                            break;
-                        case CommandRemoveMember:
-                            Count = p.ReadByte();
-                            p.ReadUInt();
-                            Serials = new Serial[Count];
-                            for (int i = 0; i < Serials.Length; i++) Serials[i] = p.ReadUInt();
-                            PartySystem.ReceiveRemovePartyMember(Serials);
-
-                            break;
-                        case CommandPrivateMessage:
-
-                            //Info = new PartyMessageInfo(reader, true);
-                            break;
-                        case CommandPublicMessage:
-
-                            //Info = new PartyMessageInfo(reader, false);
-                            break;
-                        case CommandInvitation: //PARTY INVITE PROGRESS
-
-                            //Info = new PartyInvitationInfo(reader);
-                            break;
-                    }
-
+                    PartySystem.HandlePartyPacket(p);
                     break;
                 //===========================================================================================
                 //===========================================================================================
