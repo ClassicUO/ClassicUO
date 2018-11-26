@@ -60,14 +60,18 @@ namespace ClassicUO
 
         protected override void Initialize()
         {
-            //uncomment it and fill it to save your first settings
-            //Settings settings1 = new Settings()
-            //{
-
-            //};
-
-            //ConfigurationResolver.Save(settings1, "settings.json");
             Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine(Bootstrap.ExeDirectory, "settings.json"));
+
+            if (settings == null)
+            {
+                Log.Message(LogTypes.Trace, "settings.json file was not found creating default");
+                settings = new Settings();
+                ConfigurationResolver.Save(settings, "settings.json");
+                Process.Start("notepad.exe", "settings.json");
+                Exit();
+                return;
+            }
+
             Service.Register(settings);
             Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
 
@@ -107,7 +111,6 @@ namespace ClassicUO
             Service.Register(_journalManager = new JournalData());
 
             //Register Command Stack
-            PartySystem.RegisterCommands();
             _inputManager = Service.Get<InputManager>();
             Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();

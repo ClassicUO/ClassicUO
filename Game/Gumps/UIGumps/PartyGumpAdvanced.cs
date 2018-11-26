@@ -200,7 +200,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     break;
                 case Buttons.Leave:
-                    PartySystem.LeaveParty();
+                    PartySystem.QuitParty();
 
                     break;
                 case Buttons.Loot:

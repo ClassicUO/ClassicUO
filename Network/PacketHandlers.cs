@@ -781,7 +781,13 @@ namespace ClassicUO.Network
             if (graphic == 0x30) // vendor
             {
                 var mobile = World.Mobiles.Get(serial);
-                ui.Add(new ShopGump(mobile, true, 100, 100));
+                var itemList = mobile.Items
+                    .Where(o => o.Layer == Layer.ShopResale || o.Layer == Layer.ShopBuy)
+                    .SelectMany(o => o.Items)
+                    .OrderBy(o => o.Serial.Value)
+                    .ToArray();
+
+                ui.Add(new ShopGump(mobile.Serial, itemList, true, 100, 100));
             }
             else
             {
@@ -1398,16 +1404,27 @@ namespace ClassicUO.Network
 
             if (countItems <= 0) return;
 
+            List<Item> itemList = new List<Item>(countItems);
+
             for (int i = 0; i < countItems; i++)
             {
                 Item item = World.GetOrCreateItem(p.ReadUInt());
-                Graphic graphic = p.ReadUShort();
-                Hue hue = p.ReadUShort();
-                ushort count = p.ReadUShort();
-                ushort price = p.ReadUShort();
-                string name = p.ReadASCII(p.ReadByte());
-                if (int.TryParse(name, out int clilocnum)) name = Cliloc.GetString(clilocnum);
+                item.Graphic = p.ReadUShort();
+                item.Hue = p.ReadUShort();
+                item.Amount = p.ReadUShort();
+                item.Price = p.ReadUShort();
+                
+                string name = p.ReadASCII(p.ReadUShort());
+                if (int.TryParse(name, out int clilocnum))
+                    name = Cliloc.GetString(clilocnum);
+
+                item.Name = name;
+
+                itemList.Add(item);
             }
+
+            UIManager ui = Service.Get<UIManager>();
+            ui.Add(new ShopGump(vendor.Serial, itemList.ToArray(), false, 100, 100));
         }
 
         private static void UpdateHitpoints(Packet p)
@@ -1609,44 +1626,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 6: //party
-                    const byte CommandPartyList = 0x01;
-                    const byte CommandRemoveMember = 0x02;
-                    const byte CommandPrivateMessage = 0x03;
-                    const byte CommandPublicMessage = 0x04;
-                    const byte CommandInvitation = 0x07;
-                    byte SubCommand = p.ReadByte();
-
-                    switch (SubCommand)
-                    {
-                        case CommandPartyList:
-                            int Count = p.ReadByte();
-                            Serial[] Serials = new Serial[Count];
-                            for (int i = 0; i < Serials.Length; i++) Serials[i] = p.ReadUInt();
-                            PartySystem.ReceivePartyMemberList(Serials);
-
-                            break;
-                        case CommandRemoveMember:
-                            Count = p.ReadByte();
-                            p.ReadUInt();
-                            Serials = new Serial[Count];
-                            for (int i = 0; i < Serials.Length; i++) Serials[i] = p.ReadUInt();
-                            PartySystem.ReceiveRemovePartyMember(Serials);
-
-                            break;
-                        case CommandPrivateMessage:
-
-                            //Info = new PartyMessageInfo(reader, true);
-                            break;
-                        case CommandPublicMessage:
-
-                            //Info = new PartyMessageInfo(reader, false);
-                            break;
-                        case CommandInvitation: //PARTY INVITE PROGRESS
-
-                            //Info = new PartyInvitationInfo(reader);
-                            break;
-                    }
-
+                    PartySystem.HandlePartyPacket(p);
                     break;
                 //===========================================================================================
                 //===========================================================================================

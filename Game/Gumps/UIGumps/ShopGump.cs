@@ -21,12 +21,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private readonly Label _totalLabel;
         private readonly Dictionary<Item, TransactionItem> _transactionItems;
         private readonly ScrollArea _transactionScrollArea;
+        private readonly bool _isBuyGump;
         private bool updateTotal;
-
-        public ShopGump(Mobile shopMobile, bool isBuyGump, int x, int y) : base(shopMobile.Serial, 0)
+        
+        public ShopGump(Serial serial, Item[] itemList, bool isBuyGump, int x, int y) : base(serial, 0)
         {
             _transactionItems = new Dictionary<Item, TransactionItem>();
             _shopItems = new Dictionary<Item, ShopItem>();
+            _isBuyGump = isBuyGump;
             updateTotal = false;
             X = x;
             Y = y;
@@ -50,6 +52,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 Alpha = 1
             };
+
             boxAccept.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Accept); };
             boxClear.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Clear); };
             AddChildren(boxAccept);
@@ -77,12 +80,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 X = 242, Y = 408
             });
-            AcceptMouseInput = true;
-            CanMove = true;
+            
             _shopScrollArea = new ScrollArea(20, 60, 235, 150, false);
-            var itemsToShow = shopMobile.Items.Where(o => o.Layer == Layer.ShopResale || o.Layer == Layer.ShopBuy).SelectMany(o => o.Items).OrderBy(o => o.Serial.Value);
-
-            foreach (var item in itemsToShow)
+            
+            foreach (var item in itemList)
             {
                 ShopItem shopItem;
 
@@ -102,6 +103,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(_shopScrollArea);
             AddChildren(_transactionScrollArea = new ScrollArea(200, 280, 225, 80, false));
+
+            AcceptMouseInput = true;
+            CanMove = true;
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -112,7 +116,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 updateTotal = false;
             }
 
-            _playerGoldLabel.Text = World.Player.Gold.ToString();
+            if (_playerGoldLabel != null)
+                _playerGoldLabel.Text = World.Player.Gold.ToString();
+
             base.Update(totalMS, frameMS);
         }
 
@@ -187,7 +193,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 case Buttons.Accept:
                     var items = _transactionItems.Select(t => new Tuple<uint, ushort>(t.Key.Serial, (ushort) t.Value.Amount)).ToArray();
-                    NetClient.Socket.Send(new PBuyRequest(LocalSerial, items));
+                    if (_isBuyGump)
+                        NetClient.Socket.Send(new PBuyRequest(LocalSerial, items));
+                    else
+                        NetClient.Socket.Send(new PSellRequest(LocalSerial, items));
+
                     Dispose();
 
                     break;
@@ -270,7 +280,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     X = 5, Y = 5
                 });
 
-                AddChildren(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 150, 9)
+                AddChildren(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 140, 9)
                 {
                     X = 30, Y = 5
                 });
