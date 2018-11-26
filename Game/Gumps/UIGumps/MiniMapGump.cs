@@ -40,18 +40,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private SpriteTexture _gumpTexture, _mapTexture;
         private bool _miniMap_LargeFormat, _forceUpdate;
         private Texture2D _playerIndicator;
-        private GameScene _scene;
         private float _timeMS;
         private bool _useLargeMap;
         private ushort _x, _y;
 
-        public MiniMapGump(GameScene scene) : base(0, 0)
+        public MiniMapGump() : base(0, 0)
         {
             CanMove = true;
             AcceptMouseInput = true;
             X = 600;
             Y = 50;
-            _scene = scene;
             _useLargeMap = _miniMap_LargeFormat;
         }
 
@@ -62,7 +60,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             UIManager ui = Service.Get<UIManager>();
 
             if (ui.GetByLocalSerial<MiniMapGump>() == null)
-                ui.Add(_self = new MiniMapGump(scene));
+                ui.Add(_self = new MiniMapGump());
             else
                 _self.Dispose();
         }
@@ -255,6 +253,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             return _mapTexture.Contains(x, y);
             //return IO.Resources.Gumps.Contains(_useLargeMap ? (ushort) 5011 : (ushort) 5010, x, y);
+        }
+
+        public override void Dispose()
+        {
+            _playerIndicator?.Dispose();
+            _mapTexture?.Dispose();
+            base.Dispose();
         }
     }
 }
