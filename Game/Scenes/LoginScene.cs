@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Scenes
             AccountBlocked = 0x02,
             BadPassword = 0x03,
             IdleExceeded = 0xFE,
-            BadCommuncation = 0xFF
+            BadCommuncation = 0xFF,
         }
 
         public enum LoginStep
@@ -53,7 +53,8 @@ namespace ClassicUO.Game.Scenes
             LoginInToServer,
             CharacterSelection,
             EnteringBritania,
-            CharCreation
+            CharCreation,
+            PopUpMessage,
         }
 
         private byte[] _clientVersionBuffer;
@@ -81,6 +82,8 @@ namespace ClassicUO.Game.Scenes
         public ServerListEntry[] Servers { get; private set; }
 
         public CharacterListEntry[] Characters { get; private set; }
+
+        public String PopupMessage { get; private set; }
 
         public byte ServerIndex { get; private set; }
 
@@ -176,17 +179,18 @@ namespace ClassicUO.Game.Scenes
                     break;
             }
 
-            NetClient.Socket.Send(new PCreateCharacter(character, NetClient.Socket.ClientAddress, ServerIndex, (uint) i));
+            NetClient.Socket.Send(new PCreateCharacter(character, NetClient.Socket.ClientAddress, ServerIndex, (uint)i));
         }
 
         public void DeleteCharacter(uint index)
         {
-            if (CurrentLoginStep == LoginStep.CharacterSelection) NetClient.Socket.Send(new PDeleteCharacter((byte) index, NetClient.Socket.ClientAddress));
+            if (CurrentLoginStep == LoginStep.CharacterSelection) NetClient.Socket.Send(new PDeleteCharacter((byte)index, NetClient.Socket.ClientAddress));
         }
 
         public void StepBack()
         {
             _loginRejectionReason = null;
+            PopupMessage = null;
 
             switch (CurrentLoginStep)
             {
@@ -208,6 +212,14 @@ namespace ClassicUO.Game.Scenes
                     break;
                 case LoginStep.CharCreation:
                     CurrentLoginStep = LoginStep.CharacterSelection;
+
+                    break;
+                case LoginStep.PopUpMessage:
+                    NetClient.LoginSocket.Disconnect();
+                    NetClient.Socket.Disconnect();
+                    Characters = null;
+                    Servers = null;
+                    CurrentLoginStep = LoginStep.Main;
 
                     break;
             }
@@ -264,6 +276,10 @@ namespace ClassicUO.Game.Scenes
                     HandleLoginRejection(e);
 
                     break;
+                case 0x53: // Error Code
+                    HandleErrorCode(e);
+
+                    break;
                 default:
                     Log.Message(LogTypes.Debug, e.ID.ToString());
 
@@ -305,11 +321,30 @@ namespace ClassicUO.Game.Scenes
             for (ushort i = 0; i < count; i++) Characters[i] = new CharacterListEntry(reader);
         }
 
+        private void HandleErrorCode(Packet reader)
+        {
+            string[] messages = {
+                "Incorrect password",
+                "This character does not exist any more!",
+                "This character already exists.",
+                "Could not attach to game server.",
+                "Could not attach to game server.",
+                "A character is already logged in.",
+                "Synchronization Error.",
+                "You have been idle for to long.",
+                "Could not attach to game server.",
+                "Character transfer in progress."
+            };
+            
+            PopupMessage = messages[reader.ReadByte()];
+            CurrentLoginStep = LoginStep.PopUpMessage;
+        }
+
         private void HandleLoginRejection(Packet reader)
         {
             reader.MoveToData();
             byte reasonId = reader.ReadByte();
-            LoginRejectionReason = (LoginRejectionReasons) reasonId;
+            LoginRejectionReason = (LoginRejectionReasons)reasonId;
         }
 
         private void SetProperty<T>(ref T storage, T value)

@@ -65,6 +65,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 case LoginStep.VerifyingAccount:
                 case LoginStep.LoginInToServer:
                 case LoginStep.EnteringBritania:
+                case LoginStep.PopUpMessage:
 
                     return GetLoadingScreen();
                 case LoginStep.CharacterSelection:
@@ -86,29 +87,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             var labelText = "No Text";
             var showButtons = LoadingGump.Buttons.None;
 
-            if (!loginScene.LoginRejectionReason.HasValue)
-            {
-                switch (loginScene.CurrentLoginStep)
-                {
-                    case LoginStep.Connecting:
-                        labelText = Cliloc.GetString(3000002); // "Connecting..."
-
-                        break;
-                    case LoginStep.VerifyingAccount:
-                        labelText = Cliloc.GetString(3000003); // "Verifying Account..."
-
-                        break;
-                    case LoginStep.LoginInToServer:
-                        labelText = Cliloc.GetString(3000053); // logging into shard
-
-                        break;
-                    case LoginStep.EnteringBritania:
-                        labelText = Cliloc.GetString(3000001); // Entering Britania...
-
-                        break;
-                }
-            }
-            else
+            if (loginScene.LoginRejectionReason.HasValue)
             {
                 switch (loginScene.LoginRejectionReason.Value)
                 {
@@ -136,6 +115,31 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 }
 
                 showButtons = LoadingGump.Buttons.OK;
+            }
+            else if (!string.IsNullOrEmpty(loginScene.PopupMessage))
+            {
+                labelText = loginScene.PopupMessage;
+                showButtons = LoadingGump.Buttons.OK;
+            } else {
+                switch (loginScene.CurrentLoginStep)
+                {
+                    case LoginStep.Connecting:
+                        labelText = Cliloc.GetString(3000002); // "Connecting..."
+
+                        break;
+                    case LoginStep.VerifyingAccount:
+                        labelText = Cliloc.GetString(3000003); // "Verifying Account..."
+
+                        break;
+                    case LoginStep.LoginInToServer:
+                        labelText = Cliloc.GetString(3000053); // logging into shard
+
+                        break;
+                    case LoginStep.EnteringBritania:
+                        labelText = Cliloc.GetString(3000001); // Entering Britania...
+
+                        break;
+                }
             }
 
             return new LoadingGump(labelText, showButtons, OnLoadingGumpButtonClick);
