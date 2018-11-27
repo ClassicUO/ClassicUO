@@ -255,7 +255,7 @@ namespace ClassicUO.Game.Map
 
         public bool IsZUnderObjectOrGround(sbyte z, out GameObject entity, out GameObject ground)
         {
-            List<GameObject> list = (List<GameObject>) ObjectsOnTiles;
+            var list = ObjectsOnTiles;
             entity = null;
             ground = null;
 

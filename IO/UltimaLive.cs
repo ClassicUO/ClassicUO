@@ -92,14 +92,66 @@ namespace ClassicUO.IO
                         p.Seek(3);
                         int block = (int)p.ReadUInt();
                         int length = (int)p.ReadUInt();
+                        int totallen = length * 7;
+                        if (p.Length < totallen + 15)
+                            return;
                         p.Seek(14);
                         int mapID = p.ReadByte();
-                        byte[] staticsData = new byte[length * 7];
-                        for(int i=0; i<length; i++)
+                        byte[] staticsData = new byte[totallen];
+                        for(int i = 0; i < totallen; i++)
                         {
                             staticsData[i] = p.ReadByte();
                         }
+                        if (World.Map == null || mapID != World.Map.Index)
+                            return;
+                        int index = 0;
+                        if (block >= 0 && block < (IO.Resources.Map.MapBlocksSize[mapID][0] * IO.Resources.Map.MapBlocksSize[mapID][1]))
+                        {
+                            var chunk = World.Map.Chunks[block];
+                            for (int i = 0; i < 8; i++)
+                            {
+                                for (int j = 0; j < 8; j++)
+                                {
+                                    var list = chunk.Tiles[i][j].ObjectsOnTiles;
+                                    for (int k = list.Count - 1; k >= 0; --k)
+                                    {
+                                        if (list[k] is Static)
+                                            chunk.Tiles[i][j].RemoveGameObject(list[k]);
+                                    }
+                                }
+                            }
+                            for (int k = 0; k < length; k++)
+                            {
+                                Tile t = chunk.Tiles[staticsData[index + 2]][staticsData[index + 3]];
+                                new Static((ushort)(staticsData[index] | (staticsData[index + 1] << 8)), (ushort)(staticsData[index + 5] | (staticsData[index + 6] << 8)), k)
+                                {
+                                    Position = new Position(t.X, t.Y, (sbyte)staticsData[index + 4])
+                                };
+                                index += 7;
+                            }
+                            MapCRCs[mapID][block] = GetBlockCrc(block, mapID);
+                        }
                         //TODO: write staticdata changes directly to disk, use packets only if server sent out where we should save files (see Live Login Confirmation)
+                        break;
+                    }
+                case 0x01://map definition update
+                    {
+                        if (p.Length < 15)
+                            return;
+                        p.Seek(7);
+                        uint count = p.ReadUInt();
+                        uint maps = count / 7;
+                        if (p.Length < count)
+                            return;
+                        p.Seek(15);//byte 15 to end of packet, the map definitions
+                        for(int i=0; i<maps; i++)
+                        {
+                            byte mapnum = p.ReadByte();
+                            ushort dimX = p.ReadUShort();
+                            ushort dimY = p.ReadUShort();
+                            ushort wrapdimX = p.ReadUShort();
+                            ushort wrapdimY = p.ReadUShort();
+                        }
                         break;
                     }
                 case 0x02://Live login confirmation
@@ -112,12 +164,16 @@ namespace ClassicUO.IO
                         //TODO: create shard directory, copy map and statics to that directory, use that files instead of the original ones
                         break;
                     }
+                /*case 0x03://Refresh client VIEW - after an update the server will usually send this packet to refresh the client view, this packet has been discontinued after ultimalive 0.96 and isn't necessary anymore
+                    {
+                        break;
+                    }*/
             }
         }
 
         public static void OnUpdateTerrainPacket(Packet p)
         {
-            int blocknum = (int)p.ReadUInt();
+            int block = (int)p.ReadUInt();
             byte[] landData = new byte[LandBlockLenght];
             for(int i=0; i<LandBlockLenght; i++)
             {
@@ -125,7 +181,28 @@ namespace ClassicUO.IO
             }
             p.Seek(200);
             byte mapID = p.ReadByte();
-            //TODO: write landdata changes directly to disk, use packets only if server sent out where we should save files (see Live Login Confirmation)
+            if (World.Map == null || mapID != World.Map.Index)
+                return;
+            int index = 0;
+            if (block >= 0 && block < (IO.Resources.Map.MapBlocksSize[mapID][0] * IO.Resources.Map.MapBlocksSize[mapID][1]))
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        var list = World.Map.Chunks[block].Tiles[j][i].ObjectsOnTiles;
+                        for (int k = list.Count - 1; k >= 0; --k)
+                        {
+                            if (list[k] is Land ln)
+                            {
+                                ln.Graphic = (ushort)(landData[index++] | (landData[index++] << 8));
+                                ln.Z = (sbyte)landData[index++];
+                            }
+                        }
+                    }
+                }
+                MapCRCs[mapID][block] = GetBlockCrc(block, mapID);
+            }
         }
 
         public static UInt16 GetBlockCrc(int block, int mapID)
@@ -137,7 +214,7 @@ namespace ClassicUO.IO
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    IReadOnlyList<GameObject> list = World.Map.Chunks[block].Tiles[j][i].ObjectsOnTiles;
+                    var list = World.Map.Chunks[block].Tiles[j][i].ObjectsOnTiles;
                     for (int k = 0; k < list.Count; k++)
                     {
                         GameObject o = list[k];
@@ -161,7 +238,7 @@ namespace ClassicUO.IO
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    IReadOnlyList<GameObject> list = World.Map.Chunks[block].Tiles[i][j].ObjectsOnTiles;
+                    var list = World.Map.Chunks[block].Tiles[i][j].ObjectsOnTiles;
                     for (int k = 0; k < list.Count; k++)
                     {
                         GameObject o = list[k];
@@ -213,5 +290,7 @@ namespace ClassicUO.IO
                     WriteUShort(crcs[i]);
             }
         }
+
+
     }
 }
