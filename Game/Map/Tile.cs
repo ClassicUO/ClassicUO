@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Map
             _y = y;
             _needSort = false;
             _objectsOnTile = new List<GameObject>();
-            Land = null;
+            //Land = null;
         }
 
         public ushort X
@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Map
             set => _y = value;
         }
 
-        public Land Land { get; private set; }
+        //public Land Land { get; private set; }
 
         public static bool operator ==(Tile p1, Tile p2)
         {
@@ -99,15 +99,28 @@ namespace ClassicUO.Game.Map
 
         public void AddGameObject(GameObject obj)
         {
-            if (obj is Land land)
-            {
-                if (Land != null && land != Land)
-                {
-                    Land.Dispose();
-                    RemoveGameObject(Land);
-                }
+            //if (obj is Land land)
+            //{
+            //    if (Land != null && land != Land)
+            //    {
+            //        Land.Dispose();
+            //        RemoveGameObject(Land);
+            //    }
 
-                Land = land;
+            //    Land = land;
+            //}
+
+            if (obj is Land)
+            {
+                for (int i = 0; i < _objectsOnTile.Count; i++)
+                {
+                    if (_objectsOnTile[i] == obj)
+                    {
+                        _objectsOnTile[i].Dispose();
+                        RemoveGameObject(_objectsOnTile[i]);
+                        i--;
+                    }
+                }
             }
 
             if (obj is IDynamicItem dyn)
