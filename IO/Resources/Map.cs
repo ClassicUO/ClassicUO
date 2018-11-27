@@ -26,6 +26,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 
 using ClassicUO.Game.Views;
+using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
@@ -101,7 +102,7 @@ namespace ClassicUO.IO.Resources
 
             if (!foundedOneMap)
                 throw new FileNotFoundException("No maps founded.");
-            int mapblocksize = Marshal.SizeOf<MapBlock>();
+            int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
 
             if (_filesMap[0].Length / mapblocksize == 393216 || FileManager.ClientVersion < ClientVersions.CV_4011D)
                 MapsDefaultSize[0][0] = MapsDefaultSize[1][0] = 6144;
@@ -119,9 +120,9 @@ namespace ClassicUO.IO.Resources
 
         public static unsafe void LoadMap(int i)
         {
-            int mapblocksize = Marshal.SizeOf<MapBlock>();
-            int staticidxblocksize = Marshal.SizeOf<StaidxBlock>();
-            int staticblocksize = Marshal.SizeOf<StaticsBlock>();
+            int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
+            int staticidxblocksize = UnsafeMemoryManager.SizeOf<StaidxBlock>();
+            int staticblocksize = UnsafeMemoryManager.SizeOf<StaticsBlock>();
             int width = MapBlocksSize[i][0];
             int height = MapBlocksSize[i][1];
             int maxblockcount = width * height;

@@ -29,23 +29,30 @@ namespace ClassicUO.Game.GameObjects.Managers
 {
     public class StaticManager : IUpdateable
     {
-        private readonly List<Static> _activeStatics = new List<Static>();
+        private readonly Dictionary<Position, Static> _activeStatics = new Dictionary<Position, Static>();
+        private readonly List<Static> _toRemove = new List<Static>();
 
         public void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _activeStatics.Count; i++)
+            foreach (KeyValuePair<Position, Static> k in _activeStatics)
             {
-                _activeStatics[i].Update(totalMS, frameMS);
+                k.Value.Update(totalMS, frameMS);
 
-                if (_activeStatics[i].IsDisposed || _activeStatics[i].OverHeads.Count <= 0 && (_activeStatics[i].Effect == null || _activeStatics[i].Effect.IsDisposed))
-                    _activeStatics.RemoveAt(i);
+                if (k.Value.IsDisposed || k.Value.OverHeads.Count <= 0 && (k.Value.Effect == null || k.Value.Effect.IsDisposed))
+                    _toRemove.Add(k.Value);
+            }
+
+            if (_toRemove.Count > 0)
+            {
+                _toRemove.ForEach( s => s.Dispose());
+                _toRemove.Clear();
             }
         }
 
         public void Add(Static stat)
         {
             if (!stat.IsDisposed && (stat.OverHeads.Count > 0 || stat.Effect != null))
-                _activeStatics.Add(stat);
+                _activeStatics[stat.Position] = stat;
         }
     }
 }

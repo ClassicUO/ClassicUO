@@ -98,7 +98,7 @@ namespace ClassicUO.Game.GameObjects
                 else if (LastChangeFrameTime < totalMS)
                 {
                     if (AnimDataFrame.FrameCount > 0)
-                    {
+                    { 
                         AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                         AnimIndex++;
 

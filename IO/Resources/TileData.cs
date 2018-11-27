@@ -26,6 +26,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
+using ClassicUO.Utility;
+
 namespace ClassicUO.IO.Resources
 {
     public static class TileData
@@ -45,7 +47,7 @@ namespace ClassicUO.IO.Resources
                 throw new FileNotFoundException();
             UOFileMul tiledata = new UOFileMul(path, false);
             bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
-            int staticscount = !isold ? (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupNew>()) / Marshal.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupOld>()) / Marshal.SizeOf<StaticGroupOld>();
+            int staticscount = !isold ? (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
 
             if (staticscount > 2048)
                 staticscount = 2048;
