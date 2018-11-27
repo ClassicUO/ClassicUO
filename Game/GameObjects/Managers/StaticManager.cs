@@ -29,30 +29,30 @@ namespace ClassicUO.Game.GameObjects.Managers
 {
     public class StaticManager : IUpdateable
     {
-        private readonly Dictionary<Position, Static> _activeStatics = new Dictionary<Position, Static>();
         private readonly List<Static> _toRemove = new List<Static>();
+        private readonly HashSet<Static> _activeStatics = new HashSet<Static>();
 
         public void Update(double totalMS, double frameMS)
         {
-            foreach (KeyValuePair<Position, Static> k in _activeStatics)
+            foreach (Static k in _activeStatics)
             {
-                k.Value.Update(totalMS, frameMS);
+                k.Update(totalMS, frameMS);
 
-                if (k.Value.IsDisposed || k.Value.OverHeads.Count <= 0 && (k.Value.Effect == null || k.Value.Effect.IsDisposed))
-                    _toRemove.Add(k.Value);
+                if (k.IsDisposed || k.OverHeads.Count <= 0 && (k.Effect == null || k.Effect.IsDisposed))
+                    _toRemove.Add(k);
             }
 
             if (_toRemove.Count > 0)
             {
-                _toRemove.ForEach( s => s.Dispose());
+                _toRemove.ForEach( s => _activeStatics.Remove(s));
                 _toRemove.Clear();
             }
         }
 
         public void Add(Static stat)
         {
-            if (!stat.IsDisposed && (stat.OverHeads.Count > 0 || stat.Effect != null))
-                _activeStatics[stat.Position] = stat;
+            if (!stat.IsDisposed && (stat.OverHeads.Count > 0 || stat.Effect != null) && !_activeStatics.Contains(stat))
+                _activeStatics.Add(stat);
         }
     }
 }

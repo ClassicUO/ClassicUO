@@ -207,6 +207,7 @@ namespace ClassicUO.Network
             ToClient.Add(0x66, BookData); //ToServer.Add(0x66, BookPagesS);
             //ToServer.Add(0x69, ChangeText);
             ToClient.Add(0x6C, TargetCursor);
+            ToClient.Add(0x6F, SecureTrading);
             ToClient.Add(0x6E, CharacterAnimation);
             ToClient.Add(0x70, GraphicEffect);
             ToClient.Add(0x71, BulletinBoardData); //ToServer.Add(0x71, BulletinBoardMessagesS);
@@ -311,6 +312,30 @@ namespace ClassicUO.Network
         private static void TargetCursor(Packet p)
         {
             TargetSystem.SetTargeting((TargetType) p.ReadByte(), p.ReadUInt(), p.ReadByte());
+        }
+
+        private static void SecureTrading(Packet p)
+        {
+            if (!World.InGame)
+                return;
+
+            byte type = p.ReadByte();
+            Serial serial = p.ReadUInt();
+
+            if (type == 0)
+            {
+                Serial id1 = p.ReadUInt();
+                Serial id2 = p.ReadUInt();
+
+            }
+            else if (type == 1)
+            {
+                //Service.Get<UIManager>().GetByServerSerial()
+            }
+            else if (type == 2)
+            {
+
+            }
         }
 
         private static void ClientTalk(Packet p)
@@ -1541,7 +1566,32 @@ namespace ClassicUO.Network
 
         private static void OpenGump(Packet p)
         {
-            if (World.Player == null) return;
+            if (World.Player == null)
+                return;
+
+            Log.Message(LogTypes.Warning, "OpenGump 0xB0 not handled.");
+            return;
+            Serial sender = p.ReadUInt();
+            Serial gumpID = p.ReadUInt();
+            uint x = p.ReadUInt();
+            uint y = p.ReadUInt();
+
+            ushort cmdLen = p.ReadUShort();
+            string cmd = p.ReadASCII(cmdLen);
+
+            ushort textLinesCount = p.ReadUShort();
+
+            string[] lines = new string[textLinesCount];
+
+            for (int i = 0; i < textLinesCount; i++)
+            {
+                ushort lineLen = p.ReadUShort();
+                //byte[] text = new byte[lineLen * 2];
+                //Buffer.BlockCopy();
+                string text = p.ReadUnicode(lineLen);
+
+                lines[i] = text;
+            }
         }
 
         private static void ChatMessage(Packet p)
@@ -2154,7 +2204,6 @@ namespace ClassicUO.Network
             byte[] data = p.ReadArray((int) clen);
             byte[] decData = new byte[dlen];
             ZLib.Decompress(data, 0, decData, dlen);
-            //ZLib.Unpack(decData, ref dlen, data, (int)clen);
             string layout = Encoding.UTF8.GetString(decData);
             uint linesNum = p.ReadUInt();
             string[] lines = new string[0];
@@ -2169,7 +2218,6 @@ namespace ClassicUO.Network
                     data[i] = p.ReadByte();
                 decData = new byte[dlen];
                 ZLib.Decompress(data, 0, decData, dlen);
-                //ZLib.Unpack(decData, ref dlen, data, data.Length);
                 lines = new string[linesNum];
 
                 for (int i = 0, index = 0; i < linesNum; i++)
