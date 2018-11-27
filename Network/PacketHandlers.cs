@@ -326,7 +326,17 @@ namespace ClassicUO.Network
             {
                 Serial id1 = p.ReadUInt();
                 Serial id2 = p.ReadUInt();
+                bool hasName = p.ReadBool();
 
+                Mobile mob1 = World.Mobiles.Get(id1);
+                Mobile mob2 = World.Mobiles.Get(id2);
+
+                string name = string.Empty;
+
+                if (hasName && p.Position < p.Length)
+                    name = p.ReadASCII();
+
+                Service.Get<UIManager>().Add(new TradingGump(serial, name));
             }
             else if (type == 1)
             {
@@ -334,6 +344,8 @@ namespace ClassicUO.Network
             }
             else if (type == 2)
             {
+                Serial id1 = p.ReadUInt();
+                Serial id2 = p.ReadUInt();
 
             }
         }
