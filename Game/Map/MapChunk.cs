@@ -180,7 +180,7 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++)
                 {
                     ref Tile tile = ref Tiles[i][j];
-                    IReadOnlyList<GameObject> list = tile.ObjectsOnTiles;
+                    var list = tile.ObjectsOnTiles;
 
                     for (int k = 0; k < list.Count; k++)
                     {
