@@ -28,14 +28,14 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
-    public struct MapChunk
+    public class MapChunk
     {
         public static readonly MapChunk Invalid = new MapChunk(0xFFFF, 0xFFFF);
 
         public MapChunk(ushort x, ushort y)
         {
-            _x = x;
-            _y = y;
+            X = x;
+            Y = y;
             Tiles = new Tile[8][];
 
             for (int i = 0; i < 8; i++)
@@ -47,43 +47,46 @@ namespace ClassicUO.Game.Map
             LastAccessTime = CoreGame.Ticks + 15000;
         }
 
-        private ushort? _x, _y;
+        //private ushort? _x, _y;
 
-        public ushort X
-        {
-            get => _x ?? 0xFFFF;
-            set => _x = value;
-        }
+        public ushort X { get; }
+        public ushort Y { get; }
 
-        public ushort Y
-        {
-            get => _y ?? 0xFFFF;
-            set => _y = value;
-        }
+        //public ushort X
+        //{
+        //    get => _x ?? 0xFFFF;
+        //    set => _x = value;
+        //}
 
-        public Tile[][] Tiles { get; }
+        //public ushort Y
+        //{
+        //    get => _y ?? 0xFFFF;
+        //    set => _y = value;
+        //}
+
+        public Tile[][] Tiles { get; private set; }
 
         public long LastAccessTime { get; set; }
 
-        public static bool operator ==(MapChunk p1, MapChunk p2)
-        {
-            return p1.X == p2.X && p1.Y == p2.Y;
-        }
+        //public static bool operator ==(MapChunk p1, MapChunk p2)
+        //{
+        //    return p1.X == p2.X && p1.Y == p2.Y;
+        //}
 
-        public static bool operator !=(MapChunk p1, MapChunk p2)
-        {
-            return p1.X != p2.X || p1.Y != p2.Y;
-        }
+        //public static bool operator !=(MapChunk p1, MapChunk p2)
+        //{
+        //    return p1.X != p2.X || p1.Y != p2.Y;
+        //}
 
-        public override int GetHashCode()
-        {
-            return X ^ Y;
-        }
+        //public override int GetHashCode()
+        //{
+        //    return X ^ Y;
+        //}
 
-        public override bool Equals(object obj)
-        {
-            return obj is MapChunk mapChunk && this == mapChunk;
-        }
+        //public override bool Equals(object obj)
+        //{
+        //    return obj is MapChunk mapChunk && this == mapChunk;
+        //}
 
         public unsafe void Load(int map)
         {
@@ -151,15 +154,9 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        private IndexMap GetIndex(int map)
-        {
-            return GetIndex(map, X, Y);
-        }
+        private IndexMap GetIndex(int map) => GetIndex(map, X, Y);
 
-        private static IndexMap GetIndex(int map, int x, int y)
-        {
-            return IO.Resources.Map.GetIndex(map, x, y);
-        }
+        private static IndexMap GetIndex(int map, int x, int y) => IO.Resources.Map.GetIndex(map, x, y);
 
         public void Unload()
         {
@@ -168,9 +165,11 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++)
                 {
                     Tiles[i][j].Dispose();
-                    Tiles[i][j] = Tile.Invalid;
+                    Tiles[i][j] = null;// Tile.Invalid;
                 }
             }
+
+            Tiles = null;
         }
 
         public bool HasNoExternalData()

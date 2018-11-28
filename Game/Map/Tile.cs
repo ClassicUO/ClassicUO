@@ -31,61 +31,65 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Map
 {
-    public struct Tile
+    public class Tile
     {
-        public static readonly Tile Invalid = new Tile(0xFFFF, 0xFFFF);
+        //public static readonly Tile Invalid = new Tile(0xFFFF, 0xFFFF);
         private static readonly List<GameObject> _itemsAtZ = new List<GameObject>();
         private List<GameObject> _objectsOnTile;
         private bool _needSort;
-        private ushort? _x, _y;
+        //private ushort? _x, _y;
 
         public Tile(ushort x, ushort y)
         {
-            _x = x;
-            _y = y;
+            X = x;
+            Y = y;
             _needSort = false;
-            _objectsOnTile = new List<GameObject>();
+            //_objectsOnTile = new List<GameObject>();
             //Land = null;
         }
+        public ushort X { get; }
+        public ushort Y { get; }
+        //public ushort X
+        //{
+        //    get => _x ?? 0xFFFF;
+        //    set => _x = value;
+        //}
 
-        public ushort X
-        {
-            get => _x ?? 0xFFFF;
-            set => _x = value;
-        }
-
-        public ushort Y
-        {
-            get => _y ?? 0xFFFF;
-            set => _y = value;
-        }
+        //public ushort Y
+        //{
+        //    get => _y ?? 0xFFFF;
+        //    set => _y = value;
+        //}
 
         //public Land Land { get; private set; }
 
-        public static bool operator ==(Tile p1, Tile p2)
-        {
-            return p1.X == p2.X && p1.Y == p2.Y;
-        }
+        //public static bool operator ==(Tile p1, Tile p2)
+        //{
+        //    return p1.X == p2.X && p1.Y == p2.Y;
+        //}
 
-        public static bool operator !=(Tile p1, Tile p2)
-        {
-            return p1.X != p2.X || p1.Y != p2.Y;
-        }
+        //public static bool operator !=(Tile p1, Tile p2)
+        //{
+        //    return p1.X != p2.X || p1.Y != p2.Y;
+        //}
 
-        public override int GetHashCode()
-        {
-            return X ^ Y;
-        }
+        //public override int GetHashCode()
+        //{
+        //    return X ^ Y;
+        //}
 
-        public override bool Equals(object obj)
-        {
-            return obj is Tile tile && this == tile;
-        }
+        //public override bool Equals(object obj)
+        //{
+        //    return obj is Tile tile && this == tile;
+        //}
 
-        public IReadOnlyList<GameObject> ObjectsOnTiles
+        public List<GameObject> ObjectsOnTiles
         {
             get
             {
+                if (_objectsOnTile == null)
+                    _objectsOnTile = new List<GameObject>();
+
                 if (_needSort)
                 {
                     RemoveDuplicates();
@@ -110,6 +114,9 @@ namespace ClassicUO.Game.Map
             //    Land = land;
             //}
 
+            if (_objectsOnTile == null)
+                _objectsOnTile = new List<GameObject>();
+
             if (obj is Land)
             {
                 for (int i = 0; i < _objectsOnTile.Count; i++)
@@ -117,7 +124,7 @@ namespace ClassicUO.Game.Map
                     if (_objectsOnTile[i] == obj)
                     {
                         _objectsOnTile[i].Dispose();
-                        RemoveGameObject(_objectsOnTile[i]);
+                        _objectsOnTile.RemoveAt(i);
                         i--;
                     }
                 }
@@ -281,6 +288,9 @@ namespace ClassicUO.Game.Map
 
         public void Dispose()
         {
+            if (_objectsOnTile == null)
+                return;
+
             for (int i = 0; i < _objectsOnTile.Count; i++)
             {
                 GameObject t = _objectsOnTile[i];

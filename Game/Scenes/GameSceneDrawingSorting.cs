@@ -17,9 +17,9 @@ namespace ClassicUO.Game.Scenes
             maxItemZ = 255;
             drawTerrain = true;
             underSurface = false;
-            ref Tile tile = ref World.Map.GetTile(World.Map.Center.X, World.Map.Center.Y);
+             Tile tile =  World.Map.GetTile(World.Map.Center.X, World.Map.Center.Y);
 
-            if (tile != Tile.Invalid && tile.IsZUnderObjectOrGround(World.Player.Position.Z, out GameObject underObject, out GameObject underGround))
+            if (tile != null && tile.IsZUnderObjectOrGround(World.Player.Position.Z, out GameObject underObject, out GameObject underGround))
             {
                 drawTerrain = underGround == null;
 
@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         bool isRoofSouthEast = true;
 
-                        if ((tile = ref World.Map.GetTile(World.Map.Center.X + 1, World.Map.Center.Y)) != Tile.Invalid)
+                        if ((tile =  World.Map.GetTile(World.Map.Center.X + 1, World.Map.Center.Y)) != null)
                         {
                             tile.IsZUnderObjectOrGround(World.Player.Position.Z, out underObject, out underGround);
                             isRoofSouthEast = underObject != null;
@@ -97,9 +97,9 @@ namespace ClassicUO.Game.Scenes
             _noDrawRoofs = false;
             int bx = playerX;
             int by = playerY;
-            ref Tile tile = ref World.Map.GetTile(bx, by);
+            Tile tile = World.Map.GetTile(bx, by);
 
-            if (tile != Tile.Invalid)
+            if (tile != null)
             {
                 int pz14 = playerZ + 14;
                 int pz16 = playerZ + 16;
@@ -146,9 +146,9 @@ namespace ClassicUO.Game.Scenes
                 playerY++;
                 bx = playerX;
                 by = playerY;
-                tile = ref World.Map.GetTile(bx, by);
+                tile = World.Map.GetTile(bx, by);
 
-                if (tile != Tile.Invalid)
+                if (tile !=null)
                 {
                     objects = tile.ObjectsOnTiles;
 
@@ -199,7 +199,7 @@ namespace ClassicUO.Game.Scenes
         private bool _drawTerrain;
         private bool _updateDrawPosition;
 
-        private void AddTileToRenderList(IReadOnlyList<GameObject> objList, int worldX, int worldY, bool useObjectHandles, int maxZ)
+        private void AddTileToRenderList(List<GameObject> objList, int worldX, int worldY, bool useObjectHandles, int maxZ)
         {
             for (int i = 0; i < objList.Count; i++)
             {
@@ -279,8 +279,8 @@ namespace ClassicUO.Game.Scenes
 
         private void AddOffsetCharacterTileToRenderList(Entity entity, bool useObjectHandles)
         {
-            int charX = entity.Position.X;
-            int charY = entity.Position.Y;
+            int charX = entity.X;
+            int charY = entity.Y;
             Mobile mob = World.Mobiles.Get(entity);
             int dropMaxZIndex = -1;
 
@@ -312,9 +312,9 @@ namespace ClassicUO.Game.Scenes
 
                 if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
                     continue;
-                ref Tile tile = ref World.Map.GetTile(x, y);
+                 Tile tile =  World.Map.GetTile(x, y);
 
-                if (tile == Tile.Invalid)
+                if (tile == null)
                     continue;
                 int currentMaxZ = maxZ;
 

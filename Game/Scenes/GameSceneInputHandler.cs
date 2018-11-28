@@ -131,16 +131,9 @@ namespace ClassicUO.Game.Scenes
 
                         {
                             SelectedObject = container.Item;
-
-                            //ArtTexture texture = Art.GetStaticTexture(container.Item.DisplayedGraphic);
-
-                            //int x = Mouse.Position.X - texture.Width / 2 - target.ScreenCoordinateX;
-                            //int y = Mouse.Position.Y - texture.Height / 2 - target.ScreenCoordinateY;
                             int x = Mouse.Position.X - target.ScreenCoordinateX;
                             int y = Mouse.Position.Y - target.ScreenCoordinateY;
 
-                            //x -= texture.Width / 2;
-                            //y -= texture.Height / 2;
                             DropHeldItemToContainer(container.Item, x, y);
 
                             break;
@@ -306,6 +299,7 @@ namespace ClassicUO.Game.Scenes
                         if (World.Player.InWarMode)
                         {
                             //TODO: attack request
+                            
                         }
                         else
                             GameActions.DoubleClick(mob);

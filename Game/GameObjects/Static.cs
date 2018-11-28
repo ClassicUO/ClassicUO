@@ -43,7 +43,17 @@ namespace ClassicUO.Game.GameObjects
 
         public string Name => ItemData.Name;
 
-        public StaticTiles ItemData => TileData.StaticData[Graphic];
+        private StaticTiles? _itemData;
+
+        public StaticTiles ItemData
+        {
+            get
+            {
+                if (!_itemData.HasValue)
+                    _itemData = TileData.StaticData[Graphic];
+                return _itemData.Value;
+            }
+        }
 
         public GameEffect Effect
         {
