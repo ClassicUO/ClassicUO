@@ -159,8 +159,16 @@ namespace ClassicUO.Game.Scenes
 
                         {
                             if (target.Parent is IMobilePaperdollOwner paperdollOwner1)
+                            {
                                 if (TileData.IsWearable((long) HeldItem.ItemData.Flags))
                                     WearHeldItem(paperdollOwner1.Mobile);
+                            }
+                            else if (target.RootParent is TradingGump tradingGump)
+                            {
+                                GameActions.DropDown(HeldItem, 0, 0, 0, tradingGump.LocalSerial);
+                                ClearHolding();
+                                Mouse.CancelDoubleClick = true;
+                            }
 
                             break;
                         }

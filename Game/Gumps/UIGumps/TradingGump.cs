@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -17,12 +18,21 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private bool _imAccepting, _heIsAccepting;
 
-        public TradingGump(Serial local, string name) : base(local, 0)
+        private Entity _entity1, _entity2;
+
+        public TradingGump(Serial local, string name, Serial id1, Serial id2) : base(local, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = true;
+            AcceptMouseInput = true;
 
             AddChildren(new GumpPic(0,0, 0x0866, 0));
+
+            if (FileManager.ClientVersion < ClientVersions.CV_500A)
+            {
+
+            }
+
             AddChildren(new Label(World.Player.Name, false, 0x0386, font: 1)
                             { X = 84, Y = 40 });
 
@@ -30,8 +40,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(new Label(name, false, 0x0386, font: 1)
             {X = fontWidth, Y = 170 });
+
+            _entity1 = World.Get(id1);
+            _entity2 = World.Get(id2);
+
+            _entity1.Items.Added += ItemsOnAdded1;
+            _entity2.Items.Added += ItemsOnAdded2;
         }
 
+      
         public bool ImAccepting
         {
             get => _imAccepting;
@@ -58,9 +75,32 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        public List<Item> Items { get; } = new List<Item>();
+        //public List<Item> Items { get; } = new List<Item>();
 
- 
+
+        private void ItemsOnAdded1(object sender, CollectionChangedEventArgs<Item> e)
+        {
+            foreach (Item item in e)
+            {
+                AddChildren(new ItemGump(item)
+                {
+                    HighlightOnMouseOver = true,
+
+                });
+            }
+        }
+
+        private void ItemsOnAdded2(object sender, CollectionChangedEventArgs<Item> e)
+        {
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            _entity1.Items.Added -= ItemsOnAdded1;
+            _entity2.Items.Added -= ItemsOnAdded2;
+        }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -68,6 +108,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
 
         }
+
 
         private void UpdateState()
         {
@@ -105,5 +146,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(_hisPic);
         }
+
     }
 }
