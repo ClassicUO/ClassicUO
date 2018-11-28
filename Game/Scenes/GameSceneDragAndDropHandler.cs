@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Scenes
                 else if (value != null && _heldItem == null)
                 {
                     UIManager.AddInputBlocker(this);
-                    UIManager.GameCursor.SetDraggedItem(value.Graphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && TileData.IsStackable((long) value.ItemData.Flags) );
+                    UIManager.GameCursor.SetDraggedItem(value.DisplayedGraphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && TileData.IsStackable((long) value.ItemData.Flags) );
                 }
 
                 _heldItem = value;
@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Scenes
 
         private void MergeHeldItem(Entity entity)
         {
-            GameActions.DropDown(HeldItem, Position.Invalid, entity.Serial);
+            GameActions.DropItem(HeldItem, Position.Invalid, entity.Serial);
             ClearHolding();
             Mouse.CancelDoubleClick = true;
         }
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.Scenes
             else
                 serial = Serial.MinusOne;
 
-            GameActions.DropDown(HeldItem.Serial, x, y, z, serial);
+            GameActions.DropItem(HeldItem.Serial, x, y, z, serial);
             ClearHolding();
             Mouse.CancelDoubleClick = true;
         }
@@ -158,7 +158,7 @@ namespace ClassicUO.Game.Scenes
 
             if (y < bounds.Y)
                 y = bounds.Y;
-            GameActions.DropDown(HeldItem.Serial, x, y, 0, container);
+            GameActions.DropItem(HeldItem.Serial, x, y, 0, container);
             ClearHolding();
             Mouse.CancelDoubleClick = true;
         }

@@ -10,6 +10,7 @@ using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -148,6 +149,39 @@ namespace ClassicUO.Game.Scenes
                             DropHeldItemToContainer(backpack.BackpackItem);
 
                             break;
+                        case DataBox dataBox:
+                        {
+                            if (dataBox.RootParent is TradingGump tradingGump)
+                            {
+                                int x = Mouse.Position.X - dataBox.ScreenCoordinateX;
+                                int y = Mouse.Position.Y - dataBox.ScreenCoordinateY;
+
+                                ArtTexture texture = Art.GetStaticTexture(HeldItem.DisplayedGraphic);
+
+                                if (texture != null)
+                                {
+                                    x -= (texture.Width / 2);
+                                    y -= texture.Height / 2;
+
+                                    if (x + texture.Width > 110)
+                                        x = 110 - texture.Width;
+
+                                    if (y + texture.Height > 80)
+                                        y = 80 - texture.Height;
+                                }
+
+                                if (x < 0)
+                                    x = 0;
+
+                                if (y < 0)
+                                    y = 0;
+
+                                GameActions.DropItem(HeldItem, x, y, 0, tradingGump.ID1);
+                                ClearHolding();
+                                Mouse.CancelDoubleClick = true;
+                            }
+                                break;
+                        }
                         case IMobilePaperdollOwner paperdollOwner:
 
                         {
@@ -162,12 +196,6 @@ namespace ClassicUO.Game.Scenes
                             {
                                 if (TileData.IsWearable((long) HeldItem.ItemData.Flags))
                                     WearHeldItem(paperdollOwner1.Mobile);
-                            }
-                            else if (target.RootParent is TradingGump tradingGump)
-                            {
-                                GameActions.DropDown(HeldItem, 0, 0, 0, tradingGump.LocalSerial);
-                                ClearHolding();
-                                Mouse.CancelDoubleClick = true;
                             }
 
                             break;

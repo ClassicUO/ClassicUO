@@ -327,10 +327,6 @@ namespace ClassicUO.Network
                 Serial id1 = p.ReadUInt();
                 Serial id2 = p.ReadUInt();
                 bool hasName = p.ReadBool();
-
-                //Mobile mob1 = World.Mobiles.Get(id1);
-                //Mobile mob2 = World.Mobiles.Get(id2);
-
                 string name = string.Empty;
 
                 if (hasName && p.Position < p.Length)
@@ -340,13 +336,20 @@ namespace ClassicUO.Network
             }
             else if (type == 1)
             {
-                //Service.Get<UIManager>().GetByServerSerial()
+                Service.Get<UIManager>().Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial)?.Dispose();
             }
             else if (type == 2)
             {
                 Serial id1 = p.ReadUInt();
                 Serial id2 = p.ReadUInt();
 
+                TradingGump trading = Service.Get<UIManager>().Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial);
+
+                if (trading != null)
+                {
+                    trading.ImAccepting = id1 != 0;
+                    trading.HeIsAccepting = id2 != 0;
+                }
             }
         }
 
@@ -2385,7 +2388,6 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
-                //entity.EnableCallBackForItemsUpdate(true);
                 entity.Items.Add(item);
 
                 foreach (Item i in World.ToAdd.Where(i => i.Container == item))

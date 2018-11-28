@@ -552,9 +552,19 @@ namespace ClassicUO.Network
 
     public sealed class PTradeResponse : PacketWriter
     {
-        public PTradeResponse() : base(0x6F)
+        public PTradeResponse(Serial serial, int code, bool state) : base(0x6F)
         {
-            throw new NotImplementedException();
+            if (code == 1) // cancel
+            {
+                WriteByte(0x01);
+                WriteUInt(serial);
+            }
+            else if (code == 2) // update
+            {
+                WriteByte(0x02);
+                WriteUInt(serial);
+                WriteUInt( (uint) (state ? 1 : 0));
+            }
         }
     }
 

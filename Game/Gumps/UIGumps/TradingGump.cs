@@ -9,6 +9,8 @@ using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.Gumps.UIGumps
 {
     class TradingGump : Gump
@@ -18,7 +20,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private bool _imAccepting, _heIsAccepting;
 
-        private Entity _entity1, _entity2;
+        private readonly Entity _entity1, _entity2;
+
+        private DataBox _myBox, _hisBox;
+        private readonly string _name;
 
         public TradingGump(Serial local, string name, Serial id1, Serial id2) : base(local, 0)
         {
@@ -26,28 +31,22 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanCloseWithRightClick = true;
             AcceptMouseInput = true;
 
-            AddChildren(new GumpPic(0,0, 0x0866, 0));
+            _name = name;
 
-            if (FileManager.ClientVersion < ClientVersions.CV_500A)
-            {
-
-            }
-
-            AddChildren(new Label(World.Player.Name, false, 0x0386, font: 1)
-                            { X = 84, Y = 40 });
-
-            int fontWidth = Fonts.GetWidthASCII(1, name);
-
-            AddChildren(new Label(name, false, 0x0386, font: 1)
-            {X = fontWidth, Y = 170 });
+            ID1 = id1;
+            ID2 = id2;
 
             _entity1 = World.Get(id1);
             _entity2 = World.Get(id2);
 
             _entity1.Items.Added += ItemsOnAdded1;
             _entity2.Items.Added += ItemsOnAdded2;
+
+            BuildGump();
         }
 
+        public Serial ID1 { get; }
+        public Serial ID2 { get; }
       
         public bool ImAccepting
         {
@@ -57,7 +56,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if (_imAccepting != value)
                 {
                     _imAccepting = value;
-                    UpdateState();
+                    BuildGump();
                 }
             }
         }
@@ -70,28 +69,50 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if (_heIsAccepting != value)
                 {
                     _heIsAccepting = value;
-                    UpdateState();
+                    BuildGump();
                 }
             }
         }
-
-        //public List<Item> Items { get; } = new List<Item>();
 
 
         private void ItemsOnAdded1(object sender, CollectionChangedEventArgs<Item> e)
         {
             foreach (Item item in e)
             {
-                AddChildren(new ItemGump(item)
+                ItemGump g = new ItemGump(item)
                 {
                     HighlightOnMouseOver = true,
+                };
 
-                });
+
+                //if (g.X >= 155)
+                //    g.X = 125;
+
+                //if (g.Y >= 150)
+                //    g.Y = 120;
+
+                _myBox.AddChildren(g);
             }
         }
 
         private void ItemsOnAdded2(object sender, CollectionChangedEventArgs<Item> e)
         {
+            foreach (Item item in e)
+            {
+                ItemGump g = new ItemGump(item)
+                {
+                    HighlightOnMouseOver = true,
+                };
+
+
+                //if (g.X >= 155)
+                //    g.X = 125;
+
+                //if (g.Y >= 150)
+                //    g.Y = 120;
+
+                _hisBox.AddChildren(g);
+            }
         }
 
         public override void Dispose()
@@ -100,18 +121,33 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             _entity1.Items.Added -= ItemsOnAdded1;
             _entity2.Items.Added -= ItemsOnAdded2;
-        }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-
-
+            GameActions.CancelTrade(ID1);
         }
 
 
-        private void UpdateState()
+        private void BuildGump()
         {
+            Clear();
+
+            AddChildren(new GumpPic(0, 0, 0x0866, 0));
+
+            if (FileManager.ClientVersion < ClientVersions.CV_500A)
+            {
+                // TODO: implement
+            }
+
+            AddChildren(new Label(World.Player.Name, false, 0x0386, font: 1)
+                            { X = 84, Y = 40 });
+
+            int fontWidth = 260 - Fonts.GetWidthASCII(1, _name);
+
+            AddChildren(new Label(_name, false, 0x0386, font: 1)
+                            { X = fontWidth, Y = 170 });
+
+            AddChildren(_myBox = new DataBox(45, 70, 110, 80));
+            AddChildren(_hisBox = new DataBox(192, 70, 110, 80));
+
             _myCheckbox?.Dispose();
             _hisPic?.Dispose();
 
@@ -131,8 +167,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Y = 29
                 };
             }
-            AddChildren(_myCheckbox);
 
+            _myCheckbox.ValueChanged -= MyCheckboxOnValueChanged;
+            _myCheckbox.ValueChanged += MyCheckboxOnValueChanged;
+
+            AddChildren(_myCheckbox);
 
 
             if (HeIsAccepting)
@@ -145,7 +184,24 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
 
             AddChildren(_hisPic);
+
+
+
+            foreach (Item item in _entity1.Items)
+            {
+                _myBox.AddChildren(new ItemGump(item));
+            }
+
+            foreach (Item item in _entity2.Items)
+            {
+                _hisBox.AddChildren(new ItemGump(item));
+            }
         }
 
+        private void MyCheckboxOnValueChanged(object sender, EventArgs e)
+        {
+            ImAccepting = !ImAccepting;
+            GameActions.AcceptTrade(ID1, ImAccepting);
+        }
     }
 }
