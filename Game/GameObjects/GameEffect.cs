@@ -29,7 +29,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameEffect : GameObject, IDeferreable
+    public abstract class GameEffect : GameObject
     {
         private readonly List<GameEffect> _children;
 
@@ -73,8 +73,6 @@ namespace ClassicUO.Game.GameObjects
         public bool IsItemEffect => Source is Item item && item.OnGround || Source is Static;
 
         public long Duration { get; set; } = -1;
-
-        public DeferredEntity DeferredObject { get; set; }
 
         public void Load()
         {

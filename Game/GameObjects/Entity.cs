@@ -46,7 +46,7 @@ namespace ClassicUO.Game.GameObjects
         Hidden = 0x80
     }
 
-    public abstract class Entity : GameObject, IDeferreable
+    public abstract class Entity : GameObject
     {
         protected const float CHARACTER_ANIMATION_DELAY = 80;
         private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
@@ -164,8 +164,6 @@ namespace ClassicUO.Game.GameObjects
 
         public uint PropertiesHash { get; set; }
 
-        public DeferredEntity DeferredObject { get; set; }
-
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
 
         public void UpdateProperties(IEnumerable<Property> props)
@@ -194,12 +192,6 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Dispose()
         {
-            if (DeferredObject != null)
-            {
-                DeferredObject.Reset();
-                DeferredObject = null;
-            }
-
             _properties.Clear();
             base.Dispose();
         }

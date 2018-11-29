@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ORIONSORT,SB1</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SB1</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -154,7 +154,6 @@
     <Compile Include="Game\Data\SpellsMagery.cs" />
     <Compile Include="Game\GameActions.cs" />
     <Compile Include="Game\GameObjects\AnimatedItemEffect.cs" />
-    <Compile Include="Game\GameObjects\DeferredEntity.cs" />
     <Compile Include="Game\GameObjects\Entity.cs" />
     <Compile Include="Game\GameObjects\EntityCollection.cs" />
     <Compile Include="Game\GameObjects\GameEffect.cs" />
@@ -227,7 +226,6 @@
     <Compile Include="Game\Scenes\SceneManager.cs" />
     <Compile Include="Game\Serial.cs" />
     <Compile Include="Game\Views\AnimatedEffectView.cs" />
-    <Compile Include="Game\Views\DeferredView.cs" />
     <Compile Include="Game\Views\ItemView.cs" />
     <Compile Include="Game\Views\LayerOrder.cs" />
     <Compile Include="Game\Views\MobileView.cs" />
@@ -250,7 +248,6 @@
     <Compile Include="Game\Gumps\TextEntry.cs" />
     <Compile Include="Interfaces\IColorable.cs" />
     <Compile Include="Interfaces\IDebuggable.cs" />
-    <Compile Include="Interfaces\IDeferreable.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />
     <Compile Include="Interfaces\IDynamicItem.cs" />
     <Compile Include="Interfaces\IUpdateable.cs" />

@@ -42,19 +42,9 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-#if !ORIONSORT
-            if (!((AnimatedItemEffect) GameObject).IsItemEffect)
-                PreDraw(position);
-#endif
-
-            return DrawInternal(spriteBatch, position, objectList);
-        }
-
-        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
-        {
             if (GameObject.IsDisposed)
                 return false;
-            AnimatedItemEffect effect = (AnimatedItemEffect) GameObject;
+            AnimatedItemEffect effect = (AnimatedItemEffect)GameObject;
 
             if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
@@ -63,14 +53,14 @@ namespace ClassicUO.Game.Views
                 Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
-            Bounds.X = Texture.Width / 2 - 22 - (int) effect.Offset.X;
-            Bounds.Y = Texture.Height - 44 + (int) (effect.Offset.Z - effect.Offset.Y);
+            Bounds.X = Texture.Width / 2 - 22 - (int)effect.Offset.X;
+            Bounds.Y = Texture.Height - 44 + (int)(effect.Offset.Z - effect.Offset.Y);
 
             var flags = TileData.StaticData[_displayedGraphic].Flags;
 
 
             bool isPartial = TileData.IsPartialHue(flags);
-            bool isTransparent = TileData.IsTransparent( flags);
+            bool isTransparent = TileData.IsTransparent(flags);
             HueVector = ShaderHuesTraslator.GetHueVector(effect.Hue, isPartial, isTransparent ? .5f : 0, false);
 
             switch (effect.Blend)
@@ -106,7 +96,7 @@ namespace ClassicUO.Game.Views
                     break;
             }
 
-         
+
             return true;
         }
 
