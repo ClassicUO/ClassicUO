@@ -626,7 +626,6 @@ namespace ClassicUO.Network
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
 
-
             Service.Get<UIManager>().RestoreGumps();
         }
 

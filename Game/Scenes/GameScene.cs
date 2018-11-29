@@ -21,6 +21,8 @@
 
 #endregion
 
+using System;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
@@ -138,10 +140,15 @@ namespace ClassicUO.Game.Scenes
                 }
             };
             UIManager.Add(new OptionsGump1());
+
+            NetClient.Socket.Disconnected += SocketOnDisconnected;
         }
+
+        
 
         public override void Unload()
         {
+            NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
             _renderTarget?.Dispose();            
             UIManager.SaveGumps();
@@ -161,7 +168,17 @@ namespace ClassicUO.Game.Scenes
             InputManager.MouseMoving -= OnMouseMoving;
             InputManager.KeyDown -= OnKeyDown;
             InputManager.KeyUp -= OnKeyUp;
+
             base.Unload();
+        }
+
+        private void SocketOnDisconnected(object sender, EventArgs e)
+        {
+            UIManager.Add(new MessageBoxGump(_settings.GameWindowX + _settings.GameWindowWidth / 2 - 100, _settings.GameWindowY + _settings.GameWindowHeight / 2 - 125 / 2, 200, 125, "Connection lost", (s) =>
+            {
+                s.Dispose();
+                Service.Get<SceneManager>().ChangeScene(ScenesType.Login);
+            }));
         }
 
         public override void FixedUpdate(double totalMS, double frameMS)
