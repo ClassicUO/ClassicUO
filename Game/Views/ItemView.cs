@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Views
             Item item = (Item) GameObject;
 
             if (item.IsCorpse)
-                return DrawInternal(spriteBatch, position, objectList);
+                return DrawCorpse(spriteBatch, position, objectList);
 
             if (item.Effect == null)
             {
@@ -93,18 +93,12 @@ namespace ClassicUO.Game.Views
             return !item.Effect.IsDisposed && item.Effect.View.Draw(spriteBatch, position, objectList);
         }
 
-        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public bool DrawCorpse(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-#if !ORIONSORT
-            PreDraw(position);
-#endif
-
             if (GameObject.IsDisposed)
                 return false;
             Item item = (Item) GameObject;
-#if !ORIONSORT
-            spriteBatch.GetZ();
-#endif
+
             byte dir = (byte) ((byte) item.Layer & 0x7F & 7);
             bool mirror = false;
             Animations.GetAnimDirection(ref dir, ref mirror);

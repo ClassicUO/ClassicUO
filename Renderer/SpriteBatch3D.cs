@@ -79,9 +79,6 @@ namespace ClassicUO.Renderer
 
         private int _vertexCount;
 
-#if !ORIONSORT
-        private float _z;
-#endif
 
         public SpriteBatch3D(GraphicsDevice device)
         {
@@ -160,9 +157,6 @@ namespace ClassicUO.Renderer
             _effect.Parameters["lightIntensity"].SetValue(inte);
         }
 
-#if !ORIONSORT
-        public float GetZ() => _z++;
-#endif
 
         public void Begin()
         {
@@ -172,9 +166,7 @@ namespace ClassicUO.Renderer
             _isStarted = true;
 
             Merged = 0;
-#if !ORIONSORT
-            _z = 0;
-#endif
+
             _drawingArea.Min = _minVector3;
             _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
         }
@@ -200,9 +192,6 @@ namespace ClassicUO.Renderer
             if (!draw)
                 return false;
 
-#if !ORIONSORT
-            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
-#endif
             Push(texture, vertices, technique);
 
             return true;

@@ -32,67 +32,6 @@ namespace ClassicUO.Game.Scenes
 {
     partial class GameScene
     {
-        private static void CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface)
-        {
-            maxItemZ = 255;
-            drawTerrain = true;
-            underSurface = false;
-             Tile tile =  World.Map.GetTile(World.Map.Center.X, World.Map.Center.Y);
-
-            if (tile != null && tile.IsZUnderObjectOrGround(World.Player.Position.Z, out GameObject underObject, out GameObject underGround))
-            {
-                drawTerrain = underGround == null;
-
-                if (underObject != null)
-                {
-                    if (underObject is IDynamicItem item)
-                    {
-                        if (TileData.IsRoof( item.ItemData.Flags))
-                            maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
-                        else if (TileData.IsSurface( item.ItemData.Flags) || TileData.IsWall( item.ItemData.Flags) && !TileData.IsDoor( item.ItemData.Flags))
-                            maxItemZ = item.Position.Z;
-                        else
-                        {
-                            int z = World.Player.Position.Z + (item.ItemData.Height > 20 ? item.ItemData.Height : 20);
-                            maxItemZ = z;
-                        }
-                    }
-
-                    if (underObject is IDynamicItem sta && TileData.IsRoof( sta.ItemData.Flags))
-                    {
-                        bool isRoofSouthEast = true;
-
-                        if ((tile =  World.Map.GetTile(World.Map.Center.X + 1, World.Map.Center.Y)) != null)
-                        {
-                            tile.IsZUnderObjectOrGround(World.Player.Position.Z, out underObject, out underGround);
-                            isRoofSouthEast = underObject != null;
-                        }
-
-                        if (!isRoofSouthEast)
-                            maxItemZ = 255;
-                    }
-
-                    underSurface = maxItemZ != 255;
-                }
-            }
-        }
-
-#if !ORIONSORT
-        private void ClearDeferredEntities()
-        {
-            if (_deferredToRemove.Count > 0)
-            {
-                foreach (DeferredEntity def in _deferredToRemove)
-                {
-                    def.Reset();
-                    def.AssociatedTile.RemoveGameObject(def);
-                }
-
-                _deferredToRemove.Clear();
-            }
-        }
-#endif
-#if ORIONSORT
         private int _oldPlayerX, _oldPlayerY, _oldPlayerZ;
         private sbyte _maxGroundZ;
         private bool _noDrawRoofs;
@@ -109,8 +48,6 @@ namespace ClassicUO.Game.Scenes
             _oldPlayerY = playerY;
             _oldPlayerZ = playerZ;
 
-            //int maxZ1 = _maxGroundZ;
-            //int maxZ2 = _maxZ;
             sbyte maxGroundZ = 127;
             _maxGroundZ = 127;
             _maxZ = 127;
@@ -216,7 +153,6 @@ namespace ClassicUO.Game.Scenes
         private Point _offset, _maxTile, _minTile;
         private Vector2 _minPixel, _maxPixel;
         private int _maxZ;
-        private bool _drawTerrain;
         private bool _updateDrawPosition;
 
         private void AddTileToRenderList(List<GameObject> objList, int worldX, int worldY, bool useObjectHandles, int maxZ)
@@ -434,64 +370,5 @@ namespace ClassicUO.Game.Scenes
 
             return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY), new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY), new Point(winDrawOffsetX, winDrawOffsetY), new Point(winGameCenterX, winGameCenterY), new Point(realMinRangeX + width - 1, realMinRangeY - 1), Math.Max(width, height));
         }
-#else
-        private static (Point firstTile, Vector2 renderOffset, Point renderDimensions) GetViewPort(int width, int height, int scale)
-        {
-            int off = Math.Abs(width / 44 - height / 44) % 3;
-
-
-            Point renderDimensions = new Point
-            {
-                X = width / scale / 44 + 3,
-                Y = height / scale / 44 + 6
-            };
-
-            int renderDimensionDiff = Math.Abs(renderDimensions.X - renderDimensions.Y);
-            renderDimensionDiff -= renderDimensionDiff % 2;
-
-            int firstZOffset = World.Player.Position.Z > 0
-                ? (int) Math.Abs((World.Player.Position.Z + World.Player.Offset.Z / 4) / 11)
-                : 0;
-
-            Point firstTile = new Point
-            {
-                X = World.Player.Position.X - firstZOffset,
-                Y = World.Player.Position.Y - renderDimensions.Y - firstZOffset
-            };
-
-            if (renderDimensions.Y > renderDimensions.X)
-            {
-                firstTile.X -= renderDimensionDiff / 2;
-                firstTile.Y -= renderDimensionDiff / 2;
-            }
-            else
-            {
-                firstTile.X += renderDimensionDiff / 2;
-                firstTile.Y -= renderDimensionDiff / 2;
-            }
-
-            //Vector2 renderOffset = new Vector2
-            //{
-            //    X = (_graphics.PreferredBackBufferWidth / scale + renderDimensions.Y * 44) / 2 - 22f - (int)World.Player.Offset.X - (firstTile.X - firstTile.Y) * 22f + renderDimensionDiff * 22f,
-            //    Y = _graphics.PreferredBackBufferHeight / scale / 2 - renderDimensions.Y * 44 / 2 + (World.Player.Position.Z + World.Player.Offset.Z / 4) * 4 - (int)World.Player.Offset.Y - (firstTile.X + firstTile.Y) * 22f - 22f - firstZOffset * 44f };
-
-            Vector2 renderOffset = new Vector2();
-
-            renderOffset.X = (width / scale + renderDimensions.Y * 44) / 2 - 22f;
-            renderOffset.X -= (int) World.Player.Offset.X;
-            renderOffset.X -= (firstTile.X - firstTile.Y) * 22f;
-            renderOffset.X += renderDimensionDiff * 22f;
-
-            renderOffset.Y = height / scale / 2 - renderDimensions.Y * 44 / 2;
-            renderOffset.Y += (World.Player.Position.Z + World.Player.Offset.Z / 4) * 4;
-            renderOffset.Y -= (int) World.Player.Offset.Y;
-            renderOffset.Y -= (firstTile.X + firstTile.Y) * 22f;
-            renderOffset.Y -= 22f;
-            renderOffset.Y -= firstZOffset * 44f;
-
-            return (firstTile, renderOffset, renderDimensions);
-        }
-
-#endif
     }
 }

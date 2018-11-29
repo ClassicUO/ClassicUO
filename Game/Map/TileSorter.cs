@@ -65,10 +65,8 @@ namespace ClassicUO.Game.Map
 
             if (comparison == 0)
                 comparison = xTierbreaker - yTierbreaker;
-#if ORIONSORT
             if (comparison == 0)
                 comparison = x.PriorityZ - y.PriorityZ;
-#endif
 
             return comparison;
         }
@@ -80,9 +78,7 @@ namespace ClassicUO.Game.Map
                 case GameEffect effect:
 
                     return (effect.Position.Z, effect.IsItemEffect ? 2 : 4, 2, 0);
-                case DeferredEntity def:
 
-                    return (def.Position.Z, 2, 1, 0);
                 case Mobile mobile:
 
                     return (mobile.Position.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);

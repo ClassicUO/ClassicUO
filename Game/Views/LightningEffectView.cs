@@ -40,15 +40,7 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
         {
-#if !ORIONSORT
-            PreDraw(position);
-#endif
-            return DrawInternal(spriteBatch, position, list);
-        }
-
-        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
-        {
-            LightningEffect effect = (LightningEffect) GameObject;
+            LightningEffect effect = (LightningEffect)GameObject;
 
             if (effect.AnimationGraphic != _displayed || Texture == null || Texture.IsDisposed)
             {
@@ -63,7 +55,7 @@ namespace ClassicUO.Game.Views
 
             HueVector = ShaderHuesTraslator.GetHueVector(effect.Hue);
 
-            return base.Draw(spriteBatch, position, objectList);
+            return base.Draw(spriteBatch, position, list);
         }
     }
 }

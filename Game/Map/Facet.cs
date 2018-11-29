@@ -29,7 +29,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class Facet
+    public sealed class Facet : IDisposable
     {
        // private static Tile _invalid = Tile.Invalid;
         private readonly bool[] _blockAccessList = new bool[0x1000];
@@ -48,7 +48,7 @@ namespace ClassicUO.Game.Map
 
         public int Index { get; }
 
-        public MapChunk[] Chunks { get; }
+        public MapChunk[] Chunks { get; private set; }
 
         public int MapBlockIndex { get; set; }
 
@@ -210,7 +210,7 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public void ClearUsedBlocks()
+        public void Dispose()
         {
             for (int i = 0; i < _usedIndices.Count; i++)
             {
@@ -221,6 +221,7 @@ namespace ClassicUO.Game.Map
             }
 
             IO.Resources.Map.UnloadMap(Index);
+            Chunks = null;
         }
 
         private void LoadChunks(ushort centerX, ushort centerY)

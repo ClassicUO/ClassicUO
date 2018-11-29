@@ -37,18 +37,9 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
         {
-#if !ORIONSORT
-            PreDraw(position);
-#endif
-
-            return DrawInternal(spriteBatch, position, list);
-        }
-
-        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
-        {
             if (GameObject.IsDisposed)
                 return false;
-            MovingEffect effect = (MovingEffect) GameObject;
+            MovingEffect effect = (MovingEffect)GameObject;
 
             if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
@@ -57,12 +48,12 @@ namespace ClassicUO.Game.Views
                 Bounds = new Rectangle(0, 0, Texture.Width, Texture.Height);
             }
 
-            Bounds.X = (int) -effect.Offset.X;
-            Bounds.Y = (int) (effect.Offset.Z - effect.Offset.Y);
+            Bounds.X = (int)-effect.Offset.X;
+            Bounds.Y = (int)(effect.Offset.Z - effect.Offset.Y);
             Rotation = effect.AngleToTarget;
             HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue);
 
-            return base.Draw(spriteBatch, position, objectList);
+            return base.Draw(spriteBatch, position, list);
         }
     }
 }

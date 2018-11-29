@@ -46,22 +46,12 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-#if !ORIONSORT
-            PreDraw(position);
-#endif
-            return DrawInternal(spriteBatch, position, objectList);
-        }
-
-        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
-        {
             if (GameObject.IsDisposed)
                 return false;
-#if !ORIONSORT
-            ShadowZDepth = spriteBatch.GetZ();
-#endif
-            Mobile mobile = (Mobile) GameObject;
+
+            Mobile mobile = (Mobile)GameObject;
             bool mirror = false;
-            byte dir = (byte) mobile.GetDirectionForAnimation();
+            byte dir = (byte)mobile.GetDirectionForAnimation();
             Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
             int mountOffset = 0;
@@ -72,15 +62,15 @@ namespace ClassicUO.Game.Views
                 return false;
             int drawCenterY = bodyFrame.CenterY;
             int drawX;
-            int drawY = mountOffset + drawCenterY + (int) (mobile.Offset.Z / 4) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
+            int drawY = mountOffset + drawCenterY + (int)(mobile.Offset.Z / 4) - 22 - (int)(mobile.Offset.Y - mobile.Offset.Z - 3);
 
             if (IsFlipped)
-                drawX = -22 + (int) mobile.Offset.X;
+                drawX = -22 + (int)mobile.Offset.X;
             else
-                drawX = -22 - (int) mobile.Offset.X;
+                drawX = -22 - (int)mobile.Offset.X;
 
             FrameInfo = FrameInfo.Empty;
-          
+
             for (int i = 0; i < _layerCount; i++)
             {
                 ViewLayer vl = _frames[i];
@@ -112,7 +102,7 @@ namespace ClassicUO.Game.Views
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                 HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : vl.Hue, vl.IsParital, 0, false);
                 base.Draw(spriteBatch, position, objectList);
-                Pick(frame, Bounds, position, objectList);             
+                Pick(frame, Bounds, position, objectList);
             }
 
             FrameInfo.OffsetX = Math.Abs(FrameInfo.X);
@@ -130,7 +120,9 @@ namespace ClassicUO.Game.Views
 
                 Vector3 overheadPosition = new Vector3
                 {
-                    X = position.X + mobile.Offset.X, Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8), Z = position.Z
+                    X = position.X + mobile.Offset.X,
+                    Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
+                    Z = position.Z
                 };
                 MessageOverHead(spriteBatch, overheadPosition, mobile.IsMounted ? 0 : -22);
             }
@@ -142,7 +134,9 @@ namespace ClassicUO.Game.Views
 
                 Vector3 damagePosition = new Vector3
                 {
-                    X = position.X + mobile.Offset.X, Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8), Z = position.Z
+                    X = position.X + mobile.Offset.X,
+                    Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
+                    Z = position.Z
                 };
                 DamageOverhead(mobile, spriteBatch, damagePosition, mobile.IsMounted ? 0 : -22);
             }
