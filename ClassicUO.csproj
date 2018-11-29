@@ -325,6 +325,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="ClassicUO.licenseheader" />
     <None Include="libs\FNA\FNA.dll" />
     <None Include="libs\FNA\FNA.dll.config" />
     <None Include="shaders\compile_shaders.bat" />
