@@ -33,7 +33,10 @@ namespace ClassicUO.Game.GameObjects
         {
             if (atype == null) return new Dictionary<string, object>();
             Type t = atype.GetType();
-            PropertyInfo[] props = t.GetProperties();
+            PropertyInfo[] props = t.GetProperties(
+              BindingFlags.Public | BindingFlags.NonPublic // Get public and non-public
+            | BindingFlags.Static | BindingFlags.Instance  // Get instance + static
+            | BindingFlags.FlattenHierarchy); // Search up the hierarchy
             Dictionary<string, object> dict = new Dictionary<string, object>();
             foreach (PropertyInfo prp in props)
             {
