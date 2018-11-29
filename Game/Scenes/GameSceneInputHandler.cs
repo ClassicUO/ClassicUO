@@ -30,7 +30,7 @@ namespace ClassicUO.Game.Scenes
         public List<Mobile> MobileGumpStack = new List<Mobile>();
         public List<Mobile> PartyMemberGumpStack = new List<Mobile>();
         public List<Skill> SkillButtonGumpStack = new List<Skill>();
-
+        
         public bool IsMouseOverUI => UIManager.IsMouseOverUI && !(UIManager.MouseOverControl is WorldViewport);
 
         public bool IsMouseOverWorld => UIManager.IsMouseOverUI && UIManager.MouseOverControl is WorldViewport;
@@ -94,7 +94,8 @@ namespace ClassicUO.Game.Scenes
                         {
                             TargetSystem.TargetGameObject(obj);
                             Mouse.LastLeftButtonClickTime = 0;
-                                                      
+                            UIManager.Add(new InfoGump(obj));
+
                         }
                         break;
                     default:

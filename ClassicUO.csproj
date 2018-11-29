@@ -98,6 +98,7 @@
     <Compile Include="Game\Gumps\UIGumps\BuffGump.cs" />
     <Compile Include="Game\Gumps\Controls\Combobox.cs" />
     <Compile Include="Game\Gumps\Controls\HoveredLabel.cs" />
+    <Compile Include="Game\Gumps\UIGumps\InfoGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\MessageBoxGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\ShopGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\CharCreation\CharCreationGump.cs" />
