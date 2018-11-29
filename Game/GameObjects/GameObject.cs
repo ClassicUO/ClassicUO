@@ -38,14 +38,14 @@ namespace ClassicUO.Game.GameObjects
 {
     public abstract class GameObject : IUpdateable
     {
-        private readonly List<TextOverhead> _overHeads;
+        private List<TextOverhead> _overHeads;
         private Position _position = Position.Invalid;
         private View _view;
         public Vector3 Offset;
 
         protected GameObject()
         {
-            _overHeads = new List<TextOverhead>();
+            
         }
 
         protected Vector3 ScreenPosition { get; private set; }
@@ -65,7 +65,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (World.Map != null)
                     {
-                        if (Tile != Tile.Invalid)
+                        if (Tile != null/* Tile.Invalid*/)
                             Tile.RemoveGameObject(this);
                     }
 
@@ -75,9 +75,9 @@ namespace ClassicUO.Game.GameObjects
 
                     if (World.Map != null)
                     {
-                        ref Tile newTile = ref World.Map.GetTile(value.X, value.Y);
+                         Tile newTile =  World.Map.GetTile(value.X, value.Y);
 
-                        if (newTile != Tile.Invalid)
+                        if (newTile != null)
                             newTile.AddGameObject(this);
                         Tile = newTile;
                     }
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.GameObjects
 
         public sbyte AnimIndex { get; set; }
 
-        public IReadOnlyList<TextOverhead> OverHeads => _overHeads;
+        public IReadOnlyList<TextOverhead> OverHeads => _overHeads ?? (_overHeads = new List<TextOverhead>());
 
         public int CurrentRenderIndex { get; set; }
 
@@ -149,13 +149,16 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsDisposed) return;
 
-            for (int i = 0; i < OverHeads.Count; i++)
+            if (_overHeads != null)
             {
-                TextOverhead gt = OverHeads[i];
-                gt.Update(totalMS, frameMS);
+                for (int i = 0; i < _overHeads.Count; i++)
+                {
+                    TextOverhead gt = _overHeads[i];
+                    gt.Update(totalMS, frameMS);
 
-                if (gt.IsDisposed)
-                    _overHeads.RemoveAt(i--);
+                    if (gt.IsDisposed)
+                        _overHeads.RemoveAt(i--);
+                }
             }
         }
 
@@ -165,11 +168,11 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null)
             {
-                if (Tile != Tile.Invalid)
+                if (Tile != null /*Tile.Invalid*/)
                     Tile.RemoveGameObject(this);
-                ref Tile newTile = ref World.Map.GetTile(x, y);
+                 Tile newTile =  World.Map.GetTile(x, y);
 
-                if (newTile != Tile.Invalid)
+                if (newTile != null)
                     newTile.AddGameObject(this);
                 Tile = newTile;
             }
@@ -207,11 +210,15 @@ namespace ClassicUO.Game.GameObjects
         {
             if (string.IsNullOrEmpty(text))
                 return null;
+
+            if (_overHeads == null)
+                _overHeads = new List<TextOverhead>();
+
             TextOverhead overhead;
 
-            for (int i = 0; i < OverHeads.Count; i++)
+            for (int i = 0; i < _overHeads.Count; i++)
             {
-                overhead = OverHeads[i];
+                overhead = _overHeads[i];
 
                 if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
                 {
@@ -248,7 +255,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void InsertGameText(TextOverhead gameText)
         {
-            _overHeads.Insert(OverHeads.Count == 0 || OverHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
+            _overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
         protected void DisposeView()
@@ -262,12 +269,18 @@ namespace ClassicUO.Game.GameObjects
             if (IsDisposed)
                 return;
             IsDisposed = true;
-            //DisposeView();
-            //Tile = null;
-            Tile = Tile.Invalid;
-            _overHeads.ForEach(s => s.Dispose());
-            _overHeads.Clear();
+
             Disposed.Raise();
+
+            DisposeView();
+            Tile = null;
+
+            if (_overHeads != null)
+            {
+                _overHeads.ForEach(s => s.Dispose());
+                _overHeads.Clear();
+                _overHeads = null;
+            }
         }
     }
 }

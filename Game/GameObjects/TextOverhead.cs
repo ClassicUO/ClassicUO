@@ -71,7 +71,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
-            base.Update(totalMS, frameMS);
+            //base.Update(totalMS, frameMS);
 
             if (IsPersistent || IsDisposed)
                 return;
@@ -83,7 +83,7 @@ namespace ClassicUO.Game.GameObjects
                 if (TimeToLive > 0 && TimeToLive <= TIME_FADEOUT)
                 {
                     // start alpha decreasing
-                    Alpha = 1 - TimeToLive / TIME_FADEOUT;
+                    Alpha = 1 - (TimeToLive / TIME_FADEOUT);
                 }
                 else if (TimeToLive <= 0.0f)
                     Dispose();

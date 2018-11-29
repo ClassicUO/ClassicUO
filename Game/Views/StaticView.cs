@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Views
 
         public StaticView(Static st) : base(st)
         {
-            _isFoliage = TileData.IsFoliage((long) st.ItemData.Flags);
+            _isFoliage = TileData.IsFoliage( st.ItemData.Flags);
             AllowedToDraw = !IsNoDrawable(st.Graphic) && !(_isFoliage && World.MapIndex == 0);
         }
 

@@ -69,8 +69,8 @@ namespace ClassicUO.Game.Views
             var flags = TileData.StaticData[_displayedGraphic].Flags;
 
 
-            bool isPartial = TileData.IsPartialHue((long)flags);
-            bool isTransparent = TileData.IsTransparent((long) flags);
+            bool isPartial = TileData.IsPartialHue(flags);
+            bool isTransparent = TileData.IsTransparent( flags);
             HueVector = ShaderHuesTraslator.GetHueVector(effect.Hue, isPartial, isTransparent ? .5f : 0, false);
 
             switch (effect.Blend)

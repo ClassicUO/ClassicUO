@@ -16,7 +16,19 @@ namespace ClassicUO.Game.GameObjects
             Graphic = graphic;
         }
 
-        public LandTiles TileData => IO.Resources.TileData.LandData[Graphic];
+        private LandTiles? _tileData;
+
+
+        public LandTiles TileData
+        {
+            get
+            {
+                if (!_tileData.HasValue)
+                    _tileData = IO.Resources.TileData.LandData[Graphic];
+
+                return _tileData.Value;
+            }
+        }
 
         public sbyte MinZ { get; set; }
 

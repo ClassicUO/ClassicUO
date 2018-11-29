@@ -21,6 +21,8 @@
 
 #endregion
 
+using System;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
@@ -138,10 +140,15 @@ namespace ClassicUO.Game.Scenes
                 }
             };
             UIManager.Add(new OptionsGump1());
+
+            NetClient.Socket.Disconnected += SocketOnDisconnected;
         }
+
+        
 
         public override void Unload()
         {
+            NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
             _renderTarget?.Dispose();            
             UIManager.SaveGumps();
@@ -149,7 +156,7 @@ namespace ClassicUO.Game.Scenes
             CleaningResources();
             World.Clear();
             Service.Unregister<EffectManager>();
-            Service.Unregister<GameScene>();
+            Service.Unregister<StaticManager>();
             InputManager.LeftMouseButtonDown -= OnLeftMouseButtonDown;
             InputManager.LeftMouseButtonUp -= OnLeftMouseButtonUp;
             InputManager.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
@@ -161,7 +168,17 @@ namespace ClassicUO.Game.Scenes
             InputManager.MouseMoving -= OnMouseMoving;
             InputManager.KeyDown -= OnKeyDown;
             InputManager.KeyUp -= OnKeyUp;
+
             base.Unload();
+        }
+
+        private void SocketOnDisconnected(object sender, EventArgs e)
+        {
+            UIManager.Add(new MessageBoxGump(_settings.GameWindowX + _settings.GameWindowWidth / 2 - 100, _settings.GameWindowY + _settings.GameWindowHeight / 2 - 125 / 2, 200, 125, "Connection lost", (s) =>
+            {
+                s.Dispose();
+                Service.Get<SceneManager>().ChangeScene(ScenesType.Login);
+            }));
         }
 
         public override void FixedUpdate(double totalMS, double frameMS)
@@ -211,10 +228,12 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (x < minX || x > maxX || y < minY || y > maxY)
                             break;
-                        ref Tile tile = ref World.Map.GetTile(x, y);
+                         Tile tile =  World.Map.GetTile(x, y);
 
-                        if (tile != Tile.Invalid)
+                        if (tile != null)
+                        {
                             AddTileToRenderList(tile.ObjectsOnTiles, x, y, false, 150);
+                        }
                         x++;
                         y--;
                     }

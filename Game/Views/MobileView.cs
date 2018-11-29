@@ -246,7 +246,7 @@ namespace ClassicUO.Game.Views
                                         }
                                     }
 
-                                    AddLayer(dir, graphic, hue, ref mobile, false, convertedItem, TileData.IsPartialHue((long) item.ItemData.Flags));
+                                    AddLayer(dir, graphic, hue, ref mobile, false, convertedItem, TileData.IsPartialHue( item.ItemData.Flags));
                                 }
                             }
                         }

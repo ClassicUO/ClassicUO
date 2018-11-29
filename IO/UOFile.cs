@@ -27,6 +27,7 @@ using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
@@ -111,7 +112,7 @@ namespace ClassicUO.IO
         internal T[] ReadArray<T>(int count) where T : struct
         {
             T[] t = ReadArray<T>(Position, count);
-            Position += Marshal.SizeOf<T>() * count;
+            Position += UnsafeMemoryManager.SizeOf<T>() * count;
 
             return t;
         }

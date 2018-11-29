@@ -127,7 +127,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            int fontHeaderSize = Marshal.SizeOf<FontHeader>();
+            int fontHeaderSize = UnsafeMemoryManager.SizeOf<FontHeader>();
             FontCount = 0;
 
             while (fonts.Position < fonts.Length)

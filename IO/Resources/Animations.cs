@@ -137,7 +137,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            int animIdxBlockSize = Marshal.SizeOf<AnimIdxBlock>();
+            int animIdxBlockSize = UnsafeMemoryManager.SizeOf<AnimIdxBlock>();
             UOFile idxfile0 = _files[0]?.IdxFile;
             long? maxAddress0 = (long?) idxfile0?.StartAddress + idxfile0?.Length;
             UOFile idxfile2 = _files[1]?.IdxFile;

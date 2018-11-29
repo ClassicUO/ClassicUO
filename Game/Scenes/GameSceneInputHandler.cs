@@ -10,6 +10,7 @@ using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -115,9 +116,9 @@ namespace ClassicUO.Game.Scenes
                             Item item = gumpling.Item;
                             SelectedObject = item;
 
-                            if (TileData.IsContainer((long) item.ItemData.Flags))
+                            if (TileData.IsContainer(item.ItemData.Flags))
                                 DropHeldItemToContainer(item);
-                            else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable((long) HeldItem.ItemData.Flags))
+                            else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable(HeldItem.ItemData.Flags))
                                 MergeHeldItem(item);
                             else
                             {
@@ -130,16 +131,9 @@ namespace ClassicUO.Game.Scenes
 
                         {
                             SelectedObject = container.Item;
-
-                            //ArtTexture texture = Art.GetStaticTexture(container.Item.DisplayedGraphic);
-
-                            //int x = Mouse.Position.X - texture.Width / 2 - target.ScreenCoordinateX;
-                            //int y = Mouse.Position.Y - texture.Height / 2 - target.ScreenCoordinateY;
                             int x = Mouse.Position.X - target.ScreenCoordinateX;
                             int y = Mouse.Position.Y - target.ScreenCoordinateY;
 
-                            //x -= texture.Width / 2;
-                            //y -= texture.Height / 2;
                             DropHeldItemToContainer(container.Item, x, y);
 
                             break;
@@ -148,10 +142,43 @@ namespace ClassicUO.Game.Scenes
                             DropHeldItemToContainer(backpack.BackpackItem);
 
                             break;
+                        case DataBox dataBox:
+                        {
+                            if (dataBox.RootParent is TradingGump tradingGump)
+                            {
+                                int x = Mouse.Position.X - dataBox.ScreenCoordinateX;
+                                int y = Mouse.Position.Y - dataBox.ScreenCoordinateY;
+
+                                ArtTexture texture = Art.GetStaticTexture(HeldItem.DisplayedGraphic);
+
+                                if (texture != null)
+                                {
+                                    x -= (texture.Width / 2);
+                                    y -= texture.Height / 2;
+
+                                    if (x + texture.Width > 110)
+                                        x = 110 - texture.Width;
+
+                                    if (y + texture.Height > 80)
+                                        y = 80 - texture.Height;
+                                }
+
+                                if (x < 0)
+                                    x = 0;
+
+                                if (y < 0)
+                                    y = 0;
+
+                                GameActions.DropItem(HeldItem, x, y, 0, tradingGump.ID1);
+                                ClearHolding();
+                                Mouse.CancelDoubleClick = true;
+                            }
+                                break;
+                        }
                         case IMobilePaperdollOwner paperdollOwner:
 
                         {
-                            if (TileData.IsWearable((long) HeldItem.ItemData.Flags)) WearHeldItem(paperdollOwner.Mobile);
+                            if (TileData.IsWearable(HeldItem.ItemData.Flags)) WearHeldItem(paperdollOwner.Mobile);
 
                             break;
                         }
@@ -159,8 +186,10 @@ namespace ClassicUO.Game.Scenes
 
                         {
                             if (target.Parent is IMobilePaperdollOwner paperdollOwner1)
-                                if (TileData.IsWearable((long) HeldItem.ItemData.Flags))
+                            {
+                                if (TileData.IsWearable(HeldItem.ItemData.Flags))
                                     WearHeldItem(paperdollOwner1.Mobile);
+                            }
 
                             break;
                         }
@@ -188,7 +217,7 @@ namespace ClassicUO.Game.Scenes
                                     {
                                         SelectedObject = item;
 
-                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && TileData.IsStackable((long) dyn1.ItemData.Flags))
+                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && TileData.IsStackable(dyn1.ItemData.Flags))
                                             MergeHeldItem(item);
                                         else
                                             DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
@@ -270,6 +299,7 @@ namespace ClassicUO.Game.Scenes
                         if (World.Player.InWarMode)
                         {
                             //TODO: attack request
+                            
                         }
                         else
                             GameActions.DoubleClick(mob);
@@ -304,7 +334,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (_settings.EnablePathfind && !Pathfinder.AutoWalking)
                 {
-                    if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long) dyn.ItemData.Flags))
+                    if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface( dyn.ItemData.Flags))
                     {
                         GameObject obj = _mousePicker.MouseOverObject;
 
@@ -433,7 +463,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     GumpControl target = UIManager.MouseOverControl;
 
-                    if (target != null && TileData.IsWearable((long) HeldItem.ItemData.Flags))
+                    if (target != null && TileData.IsWearable(HeldItem.ItemData.Flags))
                     {
                         PaperDollInteractable gumpling = null;
 

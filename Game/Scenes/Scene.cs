@@ -37,7 +37,6 @@ namespace ClassicUO.Game.Scenes
     {
         protected Scene(ScenesType type)
         {
-            ChainActions = new List<Func<bool>>();
             SceneType = type;
             Game = Service.Get<GameLoop>();
             Device = Game.GraphicsDevice;
@@ -45,7 +44,6 @@ namespace ClassicUO.Game.Scenes
             InputManager = Service.Get<InputManager>();
         }
 
-        public IReadOnlyList<Func<bool>> ChainActions { get; }
 
         protected GraphicsDevice Device { get; }
 

@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Views;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -34,17 +35,18 @@ namespace ClassicUO.Game.GameObjects.Managers
 {
     public static class OverheadManager
     {
-        private static readonly List<Tuple<View, Vector3>> _overheadsList = new List<Tuple<View, Vector3>>();
-        private static readonly List<Tuple<View, Vector3>> _damagesList = new List<Tuple<View, Vector3>>();
+        private static readonly List<OverHeadInfo> _overheadsList = new List<OverHeadInfo>();
+        private static readonly List<OverHeadInfo> _damagesList = new List<OverHeadInfo>();
 
+      
         public static void AddOverhead(View view, Vector3 position)
         {
-            _overheadsList.Add(Tuple.Create(view, position));
+            _overheadsList.Add(new OverHeadInfo(view, position));
         }
 
         public static void AddDamage(View view, Vector3 position)
         {
-            _damagesList.Add(Tuple.Create(view, position));
+            _damagesList.Add(new OverHeadInfo(view, position));
         }
 
         public static void Draw(SpriteBatch3D spriteBatch, MouseOverList objectList)
@@ -60,7 +62,7 @@ namespace ClassicUO.Game.GameObjects.Managers
                 for (int i = 0; i < _overheadsList.Count; i++)
                 {
                     var t = _overheadsList[i];
-                    t.Item1.Draw(spriteBatch, t.Item2, objectList);
+                    t.View.Draw(spriteBatch, t.Position, objectList);
                 }
 
                 _overheadsList.Clear();
@@ -74,11 +76,25 @@ namespace ClassicUO.Game.GameObjects.Managers
                 for (int i = 0; i < _damagesList.Count; i++)
                 {
                     var t = _damagesList[i];
-                    t.Item1.Draw(spriteBatch, t.Item2, objectList);
+                    t.View.Draw(spriteBatch, t.Position, objectList);
                 }
 
                 _damagesList.Clear();
             }
         }
+
+
+        private struct OverHeadInfo
+        {
+            public OverHeadInfo(View view, Vector3 pos)
+            {
+                View = view;
+                Position = pos;
+            }
+
+            public readonly View View;
+            public readonly Vector3 Position;
+        }
+
     }
 }

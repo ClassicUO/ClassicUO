@@ -207,6 +207,7 @@ namespace ClassicUO.Network
             ToClient.Add(0x66, BookData); //ToServer.Add(0x66, BookPagesS);
             //ToServer.Add(0x69, ChangeText);
             ToClient.Add(0x6C, TargetCursor);
+            ToClient.Add(0x6F, SecureTrading);
             ToClient.Add(0x6E, CharacterAnimation);
             ToClient.Add(0x70, GraphicEffect);
             ToClient.Add(0x71, BulletinBoardData); //ToServer.Add(0x71, BulletinBoardMessagesS);
@@ -311,6 +312,45 @@ namespace ClassicUO.Network
         private static void TargetCursor(Packet p)
         {
             TargetSystem.SetTargeting((TargetType) p.ReadByte(), p.ReadUInt(), p.ReadByte());
+        }
+
+        private static void SecureTrading(Packet p)
+        {
+            if (!World.InGame)
+                return;
+
+            byte type = p.ReadByte();
+            Serial serial = p.ReadUInt();
+
+            if (type == 0)
+            {
+                Serial id1 = p.ReadUInt();
+                Serial id2 = p.ReadUInt();
+                bool hasName = p.ReadBool();
+                string name = string.Empty;
+
+                if (hasName && p.Position < p.Length)
+                    name = p.ReadASCII();
+
+                Service.Get<UIManager>().Add(new TradingGump(serial, name, id1, id2));
+            }
+            else if (type == 1)
+            {
+                Service.Get<UIManager>().Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial)?.Dispose();
+            }
+            else if (type == 2)
+            {
+                Serial id1 = p.ReadUInt();
+                Serial id2 = p.ReadUInt();
+
+                TradingGump trading = Service.Get<UIManager>().Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial);
+
+                if (trading != null)
+                {
+                    trading.ImAccepting = id1 != 0;
+                    trading.HeIsAccepting = id2 != 0;
+                }
+            }
         }
 
         private static void ClientTalk(Packet p)
@@ -558,7 +598,7 @@ namespace ClassicUO.Network
             item.ProcessDelta();
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
-            if (TileData.IsAnimated((long) item.ItemData.Flags))
+            if (TileData.IsAnimated(item.ItemData.Flags))
                 item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
         }
 
@@ -585,7 +625,6 @@ namespace ClassicUO.Network
             NetClient.Socket.Send(new PStatusRequest(World.Player));
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
-
 
             Service.Get<UIManager>().RestoreGumps();
         }
@@ -1541,7 +1580,32 @@ namespace ClassicUO.Network
 
         private static void OpenGump(Packet p)
         {
-            if (World.Player == null) return;
+            if (World.Player == null)
+                return;
+
+            Log.Message(LogTypes.Warning, "OpenGump 0xB0 not handled.");
+            return;
+            Serial sender = p.ReadUInt();
+            Serial gumpID = p.ReadUInt();
+            uint x = p.ReadUInt();
+            uint y = p.ReadUInt();
+
+            ushort cmdLen = p.ReadUShort();
+            string cmd = p.ReadASCII(cmdLen);
+
+            ushort textLinesCount = p.ReadUShort();
+
+            string[] lines = new string[textLinesCount];
+
+            for (int i = 0; i < textLinesCount; i++)
+            {
+                ushort lineLen = p.ReadUShort();
+                //byte[] text = new byte[lineLen * 2];
+                //Buffer.BlockCopy();
+                string text = p.ReadUnicode(lineLen);
+
+                lines[i] = text;
+            }
         }
 
         private static void ChatMessage(Packet p)
@@ -2154,7 +2218,6 @@ namespace ClassicUO.Network
             byte[] data = p.ReadArray((int) clen);
             byte[] decData = new byte[dlen];
             ZLib.Decompress(data, 0, decData, dlen);
-            //ZLib.Unpack(decData, ref dlen, data, (int)clen);
             string layout = Encoding.UTF8.GetString(decData);
             uint linesNum = p.ReadUInt();
             string[] lines = new string[0];
@@ -2169,7 +2232,6 @@ namespace ClassicUO.Network
                     data[i] = p.ReadByte();
                 decData = new byte[dlen];
                 ZLib.Decompress(data, 0, decData, dlen);
-                //ZLib.Unpack(decData, ref dlen, data, data.Length);
                 lines = new string[linesNum];
 
                 for (int i = 0, index = 0; i < linesNum; i++)
@@ -2299,7 +2361,7 @@ namespace ClassicUO.Network
             item.ProcessDelta();
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
-            if (TileData.IsAnimated((long) item.ItemData.Flags))
+            if (TileData.IsAnimated(item.ItemData.Flags))
                 item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
         }
 
@@ -2325,7 +2387,6 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
-                //entity.EnableCallBackForItemsUpdate(true);
                 entity.Items.Add(item);
 
                 foreach (Item i in World.ToAdd.Where(i => i.Container == item))

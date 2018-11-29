@@ -26,6 +26,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -54,12 +55,18 @@ namespace ClassicUO.Game.Views
 
             if (parent.TimeToLive <= 0.0f)
                 parent.TimeToLive = 4000 * _text.LinesCount * delay / 100.0f;
+
             parent.Initialized = true;
         }
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw || GameObject.IsDisposed)
+            if (!AllowedToDraw)
+            {
+                return false;
+            }
+
+            if (GameObject.IsDisposed)
             {
                 _text?.Dispose();
 
@@ -92,6 +99,7 @@ namespace ClassicUO.Game.Views
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
         }
+
     }
 
     public class DamageOverheadView : TextOverheadView

@@ -91,11 +91,13 @@
     <Compile Include="Game\GameObjects\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
+    <Compile Include="Game\Gumps\Controls\DataBox.cs" />
     <Compile Include="Game\Gumps\Controls\HitBox.cs" />
     <Compile Include="Game\Gumps\Controls\Line.cs" />
     <Compile Include="Game\Gumps\UIGumps\BuffGump.cs" />
     <Compile Include="Game\Gumps\Controls\Combobox.cs" />
     <Compile Include="Game\Gumps\Controls\HoveredLabel.cs" />
+    <Compile Include="Game\Gumps\UIGumps\MessageBoxGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\ShopGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\CharCreation\CharCreationGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\CharCreation\CreateCharTradeGump.cs" />
@@ -113,6 +115,7 @@
     <Compile Include="Game\Gumps\UIGumps\PopupMenuGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\SkillButtonGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\SplitMenuGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\TradingGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\UseSpellButtonGump.cs" />
     <Compile Include="Game\Scenes\GameSceneDragAndDropHandler.cs" />
     <Compile Include="Game\Scenes\GameSceneDrawingSorting.cs" />

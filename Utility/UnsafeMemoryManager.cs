@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace ClassicUO.Utility
@@ -14,6 +15,19 @@ namespace ClassicUO.Utility
             IntPtr ptrToT1 = *(IntPtr*) &tRef1;
 
             return (int) ((byte*) ptrToT1 - (byte*) ptrToT0);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe TOut Reinterpret<TIn, TOut>(TIn curValue, int sizeBytes) where TIn : struct where TOut : struct
+        {
+            TOut result = default;
+            TypedReference resultRef = __makeref(result);
+            byte* resultPtr = (byte*) *(IntPtr*) &resultRef;
+            TypedReference curValueRef = __makeref(curValue);
+            byte* curValuePtr = (byte*) *(IntPtr*) &curValueRef;
+            for (int i = 0; i < sizeBytes; ++i) resultPtr[i] = curValuePtr[i];
+
+            return result;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

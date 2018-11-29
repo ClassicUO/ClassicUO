@@ -92,9 +92,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, TileData.IsPartialHue((long) Item.ItemData.Flags), 0, false);
+            Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, TileData.IsPartialHue(Item.ItemData.Flags), 0, false);
             spriteBatch.Draw2D(Texture, position, huev);
-            if (Item.Amount > 1 && TileData.IsStackable((long) Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
+            if (Item.Amount > 1 && TileData.IsStackable(Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
                 spriteBatch.Draw2D(Texture, new Point(position.X + 5, position.Y + 5), huev);
             return base.Draw(spriteBatch, position, huev);
         }
@@ -104,7 +104,7 @@ namespace ClassicUO.Game.Gumps.Controls
             if (Texture.Contains(x, y))
                 return true;
 
-            if (Item.Amount > 1 && TileData.IsStackable((long)Item.ItemData.Flags))
+            if (Item.Amount > 1 && TileData.IsStackable(Item.ItemData.Flags))
             {
                 if (Texture.Contains(x - 5, y - 5))
                     return true;

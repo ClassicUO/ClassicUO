@@ -24,6 +24,8 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
+using ClassicUO.Utility;
+
 namespace ClassicUO.IO.Resources
 {
     public static class Multi
@@ -40,7 +42,7 @@ namespace ClassicUO.IO.Resources
                 _file = new UOFileMul(path, pathidx, 0x2000, 14);
             else
                 throw new FileNotFoundException();
-            _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? Marshal.SizeOf<MultiBlockNew>() : Marshal.SizeOf<MultiBlock>();
+            _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? UnsafeMemoryManager.SizeOf<MultiBlockNew>() : UnsafeMemoryManager.SizeOf<MultiBlock>();
         }
 
         public static unsafe MultiBlock GetMulti(int index)

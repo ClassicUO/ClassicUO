@@ -120,7 +120,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.Map:
-                    Log.Message(LogTypes.Warning, "Map button pushed! Not implemented yet!");
                     MiniMapGump.Toggle(_scene);
 
                     break;
