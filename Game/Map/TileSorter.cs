@@ -68,10 +68,8 @@ namespace ClassicUO.Game.Map
 
             if (comparison == 0)
                 comparison = xTierbreaker - yTierbreaker;
-#if ORIONSORT
             if (comparison == 0)
                 comparison = x.PriorityZ - y.PriorityZ;
-#endif
 
             return comparison;
         }

@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Map
 
         public int Index { get; }
 
-        public MapChunk[] Chunks { get; }
+        public MapChunk[] Chunks { get; private set; }
 
         public int MapBlockIndex { get; set; }
 
@@ -224,6 +224,7 @@ namespace ClassicUO.Game.Map
             }
 
             IO.Resources.Map.UnloadMap(Index);
+            Chunks = null;
         }
 
         private void LoadChunks(ushort centerX, ushort centerY)

@@ -182,7 +182,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (!World.InGame)
                 return;
-#if ORIONSORT
+
             (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
             //CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
             //_maxZ = maxItemZ;
@@ -242,7 +242,7 @@ namespace ClassicUO.Game.Scenes
             if (_renderIndex >= 100)
                 _renderIndex = 1;
             _updateDrawPosition = false;
-#endif
+
             CleaningResources();
             base.FixedUpdate(totalMS, frameMS);
         }

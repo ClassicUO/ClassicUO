@@ -47,9 +47,6 @@ namespace ClassicUO.Renderer
         private RasterizerState _rasterizerState;
         private BlendState _blendState;
 
-#if !ORIONSORT
-        private float _z;
-#endif
         private int _numSprites;
 
         public SpriteBatch3D(GraphicsDevice device)
@@ -107,10 +104,6 @@ namespace ClassicUO.Renderer
             _drawLightingEffect.SetValue(value);
         }
 
-#if !ORIONSORT
-        public float GetZ() => _z++;
-#endif
-
         public void Begin()
         {
             EnsureNotStarted();
@@ -118,9 +111,7 @@ namespace ClassicUO.Renderer
             Calls = 0;
             Merged = 0;
             FlushCount = 0;
-#if !ORIONSORT
-            _z = 0;
-#endif
+
             _drawingArea.Min = _minVector3;
             _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
         }
@@ -154,9 +145,7 @@ namespace ClassicUO.Renderer
 
             if (_numSprites >= MAX_SPRITES)
                 Flush();
-#if !ORIONSORT
-            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
-#endif
+
             _textureInfo[_numSprites] = texture;
 
             fixed (SpriteVertex* p = &_vertexInfo[_numSprites * 4])
@@ -184,9 +173,7 @@ namespace ClassicUO.Renderer
 
             if (_numSprites >= MAX_SPRITES)
                 Flush();
-#if !ORIONSORT
-            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = z;
-#endif
+
             float skewHorizTop = (vertices[0].Position.Y - position.Y) * .5f;
             float skewHorizBottom = (vertices[3].Position.Y - position.Y) * .5f;
             vertices[0].Position.X -= skewHorizTop;
