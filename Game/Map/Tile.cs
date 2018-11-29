@@ -33,7 +33,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Map
 {
-    public class Tile
+    public sealed class Tile
     {
         //public static readonly Tile Invalid = new Tile(0xFFFF, 0xFFFF);
         private static readonly List<GameObject> _itemsAtZ = new List<GameObject>();

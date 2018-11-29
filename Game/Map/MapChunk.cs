@@ -28,7 +28,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
-    public class MapChunk
+    public sealed class MapChunk
     {
         public static readonly MapChunk Invalid = new MapChunk(0xFFFF, 0xFFFF);
 

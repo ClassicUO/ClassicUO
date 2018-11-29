@@ -36,7 +36,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameObject : IUpdateable
+    public abstract class GameObject : IUpdateable, IDisposable
     {
         private List<TextOverhead> _overHeads;
         private Position _position = Position.Invalid;
