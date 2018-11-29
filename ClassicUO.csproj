@@ -120,6 +120,8 @@
     <Compile Include="Game\Scenes\GameSceneDragAndDropHandler.cs" />
     <Compile Include="Game\Scenes\GameSceneDrawingSorting.cs" />
     <Compile Include="Game\Scenes\GameSceneInputHandler.cs" />
+    <Compile Include="Game\System\CommandHandlers.cs" />
+    <Compile Include="Game\System\Commands.cs" />
     <Compile Include="Game\System\CommandSystem.cs" />
     <Compile Include="Game\System\PartySystem.cs" />
     <Compile Include="Game\System\TargetSystem.cs" />

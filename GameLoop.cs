@@ -111,6 +111,7 @@ namespace ClassicUO
             Service.Register(_journalManager = new JournalData());
 
             //Register Command Stack
+            Commands.Initialize();
             _inputManager = Service.Get<InputManager>();
             Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();

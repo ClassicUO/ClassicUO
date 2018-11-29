@@ -9,7 +9,9 @@ namespace ClassicUO.Game.System
         Nothing = -1,
         Object = 0,
         Position = 1,
-        MultiPlacement = 2
+        MultiPlacement = 2,
+        SetTargetClientSide = 3
+
     }
 
     internal static class TargetSystem

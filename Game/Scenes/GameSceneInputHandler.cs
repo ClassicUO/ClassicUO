@@ -87,6 +87,16 @@ namespace ClassicUO.Game.Scenes
                     case TargetType.Nothing:
 
                         break;
+                    case TargetType.SetTargetClientSide:
+                        obj = null;
+                        if (IsMouseOverWorld) obj = SelectedObject;
+                        if (obj != null)
+                        {
+                            TargetSystem.TargetGameObject(obj);
+                            Mouse.LastLeftButtonClickTime = 0;
+                          
+                        }
+                        break;
                     default:
                         Log.Message(LogTypes.Warning, "Not implemented.");
 
