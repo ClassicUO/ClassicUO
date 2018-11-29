@@ -58,7 +58,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected AnimDataFrame AnimDataFrame { get; set; }
 
-        public byte Speed { get; set; }
+        public int Speed { get; set; }
 
         public long LastChangeFrameTime { get; set; }
 
@@ -81,7 +81,7 @@ namespace ClassicUO.Game.GameObjects
             AnimDataFrame = AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
-            Speed = (byte) (AnimDataFrame.FrameInterval * 45);
+            Speed = (AnimDataFrame.FrameInterval > 0 ?  AnimDataFrame.FrameInterval * 45 : 45);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -123,12 +123,7 @@ namespace ClassicUO.Game.GameObjects
             _children.Add(effect);
         }
 
-        protected (int x, int y, int z) GetSource()
-        {
-            if (Source == null) return (SourceX, SourceY, SourceZ);
-
-            return (Source.Position.X, Source.Position.Y, Source.Position.Z);
-        }
+        protected (int x, int y, int z) GetSource() => Source == null ? (SourceX, SourceY, SourceZ) : (Source.X, Source.Y, Source.Z);
 
         public void SetSource(GameObject source)
         {

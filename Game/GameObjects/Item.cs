@@ -248,9 +248,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (base.Graphic != value)
                 {
-                    Name = ItemData.Name;
                     base.Graphic = value;
                     _itemData = null;
+                    Name = ItemData.Name;
                 }
             }
         }
