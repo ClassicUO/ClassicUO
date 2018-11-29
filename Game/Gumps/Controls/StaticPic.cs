@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             _graphic = graphic;
             Hue = hue;
-            _isPartial = TileData.IsPartialHue((long) TileData.StaticData[_graphic].Flags);
+            _isPartial = TileData.IsPartialHue(TileData.StaticData[_graphic].Flags);
             CanMove = true;
         }
 

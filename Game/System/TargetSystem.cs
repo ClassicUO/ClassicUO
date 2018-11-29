@@ -81,7 +81,7 @@ namespace ClassicUO.Game.System
                 {
                     modelNumber = selectedEntity.Graphic;
 
-                    if (TileData.IsSurface((long) st.ItemData.Flags))
+                    if (TileData.IsSurface( st.ItemData.Flags))
                         z += st.ItemData.Height;
                 }
 

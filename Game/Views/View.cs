@@ -306,7 +306,7 @@ namespace ClassicUO.Game.Views
             if (g != 0x63D3)
             {
                 if (g >= 0x2198 && g <= 0x21A4) return true;
-                long flags = (long) TileData.StaticData[g].Flags;
+                ulong flags = TileData.StaticData[g].Flags;
 
                 if (!TileData.IsNoDiagonal(flags) || TileData.IsAnimated(flags) && World.Player != null && World.Player.Race == RaceType.GARGOYLE) return false;
             }

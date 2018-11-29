@@ -79,9 +79,9 @@ namespace ClassicUO.Game.Views
                     Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
                 }
 
-                HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, TileData.IsPartialHue((long) item.ItemData.Flags), TileData.IsTranslucent((long) item.ItemData.Flags) ? .5f : 0, false);
+                HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, TileData.IsPartialHue( item.ItemData.Flags), TileData.IsTranslucent( item.ItemData.Flags) ? .5f : 0, false);
 
-                if (item.Amount > 1 && TileData.IsStackable((long) item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
+                if (item.Amount > 1 && TileData.IsStackable(item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
                 {
                     Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
                     base.Draw(spriteBatch, offsetDrawPosition, objectList);

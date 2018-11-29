@@ -158,7 +158,7 @@ namespace ClassicUO.Game.Map
                     if (obj is Mobile)
                         continue;
 
-                    if (obj is IDynamicItem dyn && (!TileData.IsRoof((long) dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6))
+                    if (obj is IDynamicItem dyn && (!TileData.IsRoof(dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6))
                         continue;
 
                     break;
@@ -182,7 +182,7 @@ namespace ClassicUO.Game.Map
         public IndexMap GetIndex(int blockX, int blockY)
         {
             int block = GetBlock(blockX, blockY);
-            IndexMap[] list = IO.Resources.Map.BlockData[Index];
+            ref IndexMap[] list = ref IO.Resources.Map.BlockData[Index];
 
             return block >= list.Length ? IndexMap.Invalid : list[block];
         }
@@ -269,8 +269,6 @@ namespace ClassicUO.Game.Map
                     chunk.LastAccessTime = CoreGame.Ticks;
                 }
             }
-
-            _usedIndices.Sort();
         }
     }
 }

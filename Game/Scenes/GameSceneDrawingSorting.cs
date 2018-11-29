@@ -27,9 +27,9 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (underObject is IDynamicItem item)
                     {
-                        if (TileData.IsRoof((long) item.ItemData.Flags))
+                        if (TileData.IsRoof( item.ItemData.Flags))
                             maxItemZ = World.Player.Position.Z - World.Player.Position.Z % 20 + 20;
-                        else if (TileData.IsSurface((long) item.ItemData.Flags) || TileData.IsWall((long) item.ItemData.Flags) && !TileData.IsDoor((long) item.ItemData.Flags))
+                        else if (TileData.IsSurface( item.ItemData.Flags) || TileData.IsWall( item.ItemData.Flags) && !TileData.IsDoor( item.ItemData.Flags))
                             maxItemZ = item.Position.Z;
                         else
                         {
@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Scenes
                         }
                     }
 
-                    if (underObject is IDynamicItem sta && TileData.IsRoof((long) sta.ItemData.Flags))
+                    if (underObject is IDynamicItem sta && TileData.IsRoof( sta.ItemData.Flags))
                     {
                         bool isRoofSouthEast = true;
 
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
-                        if (obj is IDynamicItem st && (st.ItemData.Flags & 0x20004) == 0 && (!TileData.IsRoof((long) st.ItemData.Flags) || TileData.IsSurface((long) st.ItemData.Flags)))
+                        if (obj is IDynamicItem st && (st.ItemData.Flags & 0x20004) == 0 && (!TileData.IsRoof(st.ItemData.Flags) || TileData.IsSurface( st.ItemData.Flags)))
                         {
                             _maxZ = tileZ;
                             _noDrawRoofs = true;
@@ -165,7 +165,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (tileZ > pz14 && _maxZ > tileZ)
                         {
-                            if (obj is IDynamicItem dyn2 && (dyn2.ItemData.Flags & 0x204) == 0 && TileData.IsRoof((long) dyn2.ItemData.Flags))
+                            if (obj is IDynamicItem dyn2 && (dyn2.ItemData.Flags & 0x204) == 0 && TileData.IsRoof( dyn2.ItemData.Flags))
                             {
                                 _maxZ = tileZ;
                                 World.Map.ClearBockAccess();
@@ -227,7 +227,7 @@ namespace ClassicUO.Game.Scenes
                         break;
                     case IDynamicItem dyn:
 
-                        if (_noDrawRoofs && TileData.IsRoof((long) dyn.ItemData.Flags)) continue;
+                        if (_noDrawRoofs && TileData.IsRoof( dyn.ItemData.Flags)) continue;
                         maxObjectZ += dyn.ItemData.Height;
 
                         break;
@@ -237,7 +237,7 @@ namespace ClassicUO.Game.Scenes
                     break;
                 obj.CurrentRenderIndex = _renderIndex;
 
-                if (obj.Graphic != 0x2006 && obj is IDynamicItem dyn2 && TileData.IsInternal((long) dyn2.ItemData.Flags))
+                if (obj.Graphic != 0x2006 && obj is IDynamicItem dyn2 && TileData.IsInternal( dyn2.ItemData.Flags))
                     continue;
 
                 if (!(obj is Land) && z >= _maxZ)

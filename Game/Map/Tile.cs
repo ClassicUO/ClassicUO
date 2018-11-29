@@ -47,6 +47,7 @@ namespace ClassicUO.Game.Map
             //_objectsOnTile = new List<GameObject>();
             //Land = null;
         }
+
         public ushort X { get; }
         public ushort Y { get; }
         //public ushort X
@@ -171,7 +172,7 @@ namespace ClassicUO.Game.Map
                 {
                     IDynamicItem dyn1 = (IDynamicItem) obj;
 
-                    if (TileData.IsBackground((long) dyn1.ItemData.Flags))
+                    if (TileData.IsBackground(dyn1.ItemData.Flags))
                         priorityZ--;
 
                     if (dyn1.ItemData.Height > 0)
@@ -274,7 +275,7 @@ namespace ClassicUO.Game.Map
                 {
                     StaticTiles itemdata = dyn.ItemData;
 
-                    if (TileData.IsRoof((long) itemdata.Flags) || TileData.IsSurface((long) itemdata.Flags) || TileData.IsWall((long) itemdata.Flags) && TileData.IsImpassable((long) itemdata.Flags))
+                    if (TileData.IsRoof(itemdata.Flags) || TileData.IsSurface(itemdata.Flags) || TileData.IsWall(itemdata.Flags) && TileData.IsImpassable(itemdata.Flags))
                     {
                         if (entity == null || list[i].Position.Z < entity.Position.Z)
                             entity = list[i];

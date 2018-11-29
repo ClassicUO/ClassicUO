@@ -113,7 +113,7 @@ namespace ClassicUO.Game.Map
                             Graphic = tileID,
                             AverageZ = z,
                             MinZ = z,
-                            IsStretched = info.TexID == 0 && TileData.IsWet((long) info.Flags),
+                            IsStretched = info.TexID == 0 && TileData.IsWet(info.Flags),
                             Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
                         };
                         land.Calculate();
@@ -145,7 +145,7 @@ namespace ClassicUO.Game.Map
                                     Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
                                 };
 
-                                if (TileData.IsAnimated((long) staticObject.ItemData.Flags))
+                                if (TileData.IsAnimated(staticObject.ItemData.Flags))
                                     staticObject.Effect = new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1);
                             }
                         }

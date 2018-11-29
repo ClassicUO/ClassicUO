@@ -598,7 +598,7 @@ namespace ClassicUO.Network
             item.ProcessDelta();
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
-            if (TileData.IsAnimated((long) item.ItemData.Flags))
+            if (TileData.IsAnimated(item.ItemData.Flags))
                 item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
         }
 
@@ -2362,7 +2362,7 @@ namespace ClassicUO.Network
             item.ProcessDelta();
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
-            if (TileData.IsAnimated((long) item.ItemData.Flags))
+            if (TileData.IsAnimated( item.ItemData.Flags))
                 item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
         }
 
