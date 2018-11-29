@@ -1,6 +1,9 @@
 ﻿using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace ClassicUO.Game.System
 {
@@ -20,6 +23,7 @@ namespace ClassicUO.Game.System
         private static byte _targetCursorType;
         private static int _multiModel;
 
+        
         public static TargetType TargetingState { get; private set; } = TargetType.Nothing;
 
         public static GameObject LastGameObject { get; private set; }

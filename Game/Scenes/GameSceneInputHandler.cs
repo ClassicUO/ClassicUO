@@ -94,7 +94,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             TargetSystem.TargetGameObject(obj);
                             Mouse.LastLeftButtonClickTime = 0;
-                          
+                                                      
                         }
                         break;
                     default:
