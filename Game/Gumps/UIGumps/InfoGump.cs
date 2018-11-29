@@ -61,7 +61,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             foreach (var item in ReflectionHolder.GameObjectDictionary(obj))
             {
-                if (item.Value != "")
+                if (item.Value.ToString() != "")
                 {
                    
                     _scrollArea.AddChildren(new Label(item.Key + " : " + item.Value, true, 1153, font: 3, maxwidth: WIDTH - 65));
