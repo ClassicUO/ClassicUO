@@ -114,9 +114,11 @@ namespace ClassicUO.Game.Map
                             AverageZ = z,
                             MinZ = z,
                             IsStretched = info.TexID == 0 && TileData.IsWet(info.Flags),
-                            Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
                         };
-                        land.Calculate();
+                        ushort tileX = (ushort) (bx + x);
+                        ushort tileY = (ushort) (by + y);
+                        land.Calculate(tileX, tileY, z);
+                        land.Position = new Position(tileX, tileY, z);
                     }
                 }
 
@@ -178,8 +180,8 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    ref Tile tile = ref Tiles[i][j];
-                    var list = tile.ObjectsOnTiles;
+                    Tile tile = Tiles[i][j];
+                    List<GameObject> list = tile.ObjectsOnTiles;
 
                     for (int k = 0; k < list.Count; k++)
                     {

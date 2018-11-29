@@ -21,7 +21,9 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
@@ -131,7 +133,6 @@ namespace ClassicUO.Game.Map
                     }
                 }
             }
-#if ORIONSORT
             short priorityZ = obj.Position.Z;
 
             switch (obj)
@@ -172,9 +173,9 @@ namespace ClassicUO.Game.Map
             }
 
             obj.PriorityZ = priorityZ;
-#endif
+
             _objectsOnTile.Add(obj);
-            _needSort = true;
+            _needSort = _objectsOnTile.Count > 1;
         }
 
         public void RemoveGameObject(GameObject obj)
@@ -182,10 +183,10 @@ namespace ClassicUO.Game.Map
             _objectsOnTile.Remove(obj);
         }
 
-        public void ForceSort()
-        {
-            _needSort = true;
-        }
+        //public void ForceSort()
+        //{
+        //    _needSort = true;
+        //}
 
         private void RemoveDuplicates()
         {
@@ -246,9 +247,9 @@ namespace ClassicUO.Game.Map
                 if (t != World.Player)
                 {
                     t.Dispose();
-                    _objectsOnTile.RemoveAt(i--);
                 }
             }
+
         }
     }
 }

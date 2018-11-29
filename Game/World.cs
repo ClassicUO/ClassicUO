@@ -61,7 +61,7 @@ namespace ClassicUO.Game
                     {
                         if (MapIndex >= 0)
                         {
-                            Map.ClearUsedBlocks();                        
+                            Map.Dispose();                       
                         }
 
                         Position position = Player.Position;
@@ -244,7 +244,7 @@ namespace ClassicUO.Game
             _houses.Clear();
             Player.Dispose();
             Player = null;
-            Map.ClearUsedBlocks();
+            Map.Dispose();
             Map = null;
             ToAdd.Clear();
         }
@@ -253,7 +253,7 @@ namespace ClassicUO.Game
         {
             if (!noplayer)
             {
-                Map.ClearUsedBlocks();
+                Map.Dispose();
                 Map = null;
                 Player.Dispose();
                 Player = null;

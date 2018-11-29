@@ -32,7 +32,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class Facet
+    public sealed class Facet : IDisposable
     {
        // private static Tile _invalid = Tile.Invalid;
         private readonly bool[] _blockAccessList = new bool[0x1000];
@@ -213,7 +213,7 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public void ClearUsedBlocks()
+        public void Dispose()
         {
             for (int i = 0; i < _usedIndices.Count; i++)
             {

@@ -43,30 +43,30 @@ namespace ClassicUO.Game.GameObjects
             return new TileView(this);
         }
 
-        public void Calculate()
+        public void Calculate(int x, int y, sbyte z)
         {
-            ((TileView) View).UpdateStreched();
+            ((TileView) View).UpdateStreched(x, y ,z);
         }
 
-        public void UpdateZ(int zTop, int zRight, int zBottom)
+        public void UpdateZ(int zTop, int zRight, int zBottom, sbyte currentZ)
         {
             if (IsStretched)
             {
-                int x = Position.Z * 4 + 1;
+                int x = currentZ * 4 + 1;
                 int y = zTop * 4;
                 int w = zRight * 4 - x;
                 int h = zBottom * 4 + 1 - y;
                 Rectangle = new Rectangle(x, y, w, h);
-                int average = AverageZ;
+                //int average = AverageZ;
 
-                if (Math.Abs(Position.Z - zRight) <= Math.Abs(zBottom - zTop))
-                    AverageZ = (sbyte) ((Position.Z + zRight) >> 1);
+                if (Math.Abs(currentZ - zRight) <= Math.Abs(zBottom - zTop))
+                    AverageZ = (sbyte) ((currentZ + zRight) >> 1);
                 else
                     AverageZ = (sbyte) ((zBottom + zTop) >> 1);
 
-                if (AverageZ != average)
-                    Tile.ForceSort();
-                MinZ = Position.Z;
+                //if (AverageZ != average)
+                //    Tile.ForceSort();
+                MinZ = currentZ;
 
                 if (zTop < MinZ)
                     MinZ = (sbyte) zTop;

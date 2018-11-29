@@ -723,7 +723,9 @@ namespace ClassicUO.Network
             {
                 //ref Tile tile = ref World.Map.GetTile(x, y);
                 //World.Player.Position = new Position(x, y, z);
-                World.Player.SetTile(x, y);
+                //World.Player.SetTile(x, y);
+
+                World.Player.Tile = World.Map.GetTile(x, y);
             }
 
             //else if (World.Player.Tile == Tile.Invalid)
