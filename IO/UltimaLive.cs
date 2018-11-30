@@ -186,18 +186,15 @@ namespace ClassicUO.IO
                         }
 
                         p.Seek(7);
-                        uint count = p.ReadUInt();
-                        uint maps = count / 7;
+                        uint maps = (p.ReadUInt() * 7) / 9;
+                        if (p.Length < (maps * 9 + 15))//the packet has padding inside, so it's usually larger or equal than what we expect
+                        {
+                            return;
+                        }
                         if(MapCRCs == null || MapCRCs.Length < maps)
                         {
                             MapCRCs = new UInt16[maps][];
                         }
-                        IsUltimaLiveActive = true;//after receiving the shardname and map defs, we can consider the system as fully active
-                        if (p.Length < count)
-                        {
-                            return;
-                        }
-
                         p.Seek(15);//byte 15 to end of packet, the map definitions
                         for(int i=0; i<maps; i++)
                         {
@@ -207,6 +204,7 @@ namespace ClassicUO.IO
                             ushort wrapdimX = p.ReadUShort();
                             ushort wrapdimY = p.ReadUShort();
                         }
+                        IsUltimaLiveActive = true;//after receiving the shardname and map defs, we can consider the system as fully active
                         break;
                     }
                 case 0x02://Live login confirmation
