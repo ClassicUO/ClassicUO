@@ -120,8 +120,9 @@ namespace ClassicUO.Game.Gumps
 
         private string ReadProperties(Entity obj, out string htmltext)
         {
-            _sb = new StringBuilder();
-            _sbHTML = new StringBuilder();
+            _sb.Clear();
+            _sbHTML.Clear();
+
             bool hasStartColor = false;
 
             for (int i = 0; i < obj.Properties.Count; i++)
