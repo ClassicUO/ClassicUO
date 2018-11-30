@@ -348,7 +348,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _healthBar.Dispose();
             _manaBar.Dispose();
             _staminaBar.Dispose();
-            Service.Get<SceneManager>().GetScene<GameScene>().MobileGumpStack.Remove(Mobile);
+            SceneManager.GetScene<GameScene>().MobileGumpStack.Remove(Mobile);
             base.Dispose();
         }
     }

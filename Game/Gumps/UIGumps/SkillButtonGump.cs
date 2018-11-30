@@ -41,13 +41,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
             });
         }
 
-        protected override void OnMouseEnter(int x, int y)
+        protected override void OnMouseOver(int x, int y)
         {
             _buttonBackgroundNormal.IsVisible = false;
             _buttonBackgroundOver.IsVisible = true;
         }
 
-        protected override void OnMouseLeft(int x, int y)
+        protected override void OnMouseExit(int x, int y)
         {
             _buttonBackgroundNormal.IsVisible = true;
             _buttonBackgroundOver.IsVisible = false;

@@ -22,6 +22,7 @@
 #endregion
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 
 namespace ClassicUO.Game.Gumps.Controls
@@ -30,15 +31,22 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         public GumpPicBackpack(int x, int y, Item backpack) : base(x, y, 0xC4F6, 0)
         {
-            BackpackItem = backpack;
+            Backpack = backpack;
             AcceptMouseInput = false;
         }
 
-        public Item BackpackItem { get; protected set; }
+        public Item Backpack { get; protected set; }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
+        protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            base.OnMouseClick(x, y, button);
+            if (button == MouseButton.Left)
+            {
+                GameScene gs = SceneManager.GetScene<GameScene>();
+                if (gs.IsHoldingItem && gs.IsMouseOverUI)
+                    gs.DropHeldItemToContainer(Backpack);
+            }
         }
+
+
     }
 }

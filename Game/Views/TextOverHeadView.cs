@@ -79,7 +79,7 @@ namespace ClassicUO.Game.Views
             if (!overhead.IsPersistent && overhead.Alpha < 1.0f)
                 HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
             Settings settings = Service.Get<Settings>();
-            GameScene gs = Service.Get<SceneManager>().GetScene<GameScene>();
+            GameScene gs = SceneManager.GetScene<GameScene>();
             int width = Texture.Width - Bounds.X;
             int height = Texture.Height - Bounds.Y;
 

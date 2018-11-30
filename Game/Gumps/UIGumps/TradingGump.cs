@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
@@ -56,7 +59,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if (_imAccepting != value)
                 {
                     _imAccepting = value;
-                    BuildGump();
+                    SetCheckboxes();
+                    //BuildGump();
                 }
             }
         }
@@ -69,7 +73,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if (_heIsAccepting != value)
                 {
                     _heIsAccepting = value;
-                    BuildGump();
+                    SetCheckboxes();
+                    //BuildGump();
                 }
             }
         }
@@ -125,29 +130,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             GameActions.CancelTrade(ID1);
         }
 
-
-        private void BuildGump()
+        private void SetCheckboxes()
         {
-            Clear();
-
-            AddChildren(new GumpPic(0, 0, 0x0866, 0));
-
-            if (FileManager.ClientVersion < ClientVersions.CV_500A)
-            {
-                // TODO: implement
-            }
-
-            AddChildren(new Label(World.Player.Name, false, 0x0386, font: 1)
-                            { X = 84, Y = 40 });
-
-            int fontWidth = 260 - Fonts.GetWidthASCII(1, _name);
-
-            AddChildren(new Label(_name, false, 0x0386, font: 1)
-                            { X = fontWidth, Y = 170 });
-
-            AddChildren(_myBox = new DataBox(45, 70, 110, 80));
-            AddChildren(_hisBox = new DataBox(192, 70, 110, 80));
-
             _myCheckbox?.Dispose();
             _hisPic?.Dispose();
 
@@ -186,6 +170,32 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(_hisPic);
 
 
+        }
+
+
+        private void BuildGump()
+        {
+            //Clear();
+
+            AddChildren(new GumpPic(0, 0, 0x0866, 0));
+
+            if (FileManager.ClientVersion < ClientVersions.CV_500A)
+            {
+                // TODO: implement
+            }
+
+            AddChildren(new Label(World.Player.Name, false, 0x0386, font: 1)
+                            { X = 84, Y = 40 });
+
+            int fontWidth = 260 - Fonts.GetWidthASCII(1, _name);
+
+            AddChildren(new Label(_name, false, 0x0386, font: 1)
+                            { X = fontWidth, Y = 170 });
+
+            AddChildren(_myBox = new DataBox(45, 70, 110, 80));
+            AddChildren(_hisBox = new DataBox(192, 70, 110, 80));
+
+            SetCheckboxes();
 
             foreach (Item item in _entity1.Items)
             {
@@ -196,6 +206,44 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 _hisBox.AddChildren(new ItemGump(item));
             }
+
+            _myBox.MouseUp += (sender, e) =>
+            {
+                if (e.Button == MouseButton.Left)
+                {
+                    GameScene gs = SceneManager.GetScene<GameScene>();
+
+                    if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                        return;
+
+                    ArtTexture texture = Art.GetStaticTexture(gs.HeldItem.DisplayedGraphic);
+
+                    int x = e.X;
+                    int y = e.Y;
+
+                    if (texture != null)
+                    {
+                        x -= (texture.Width / 2);
+                        y -= texture.Height / 2;
+
+                        if (x + texture.Width > 110)
+                            x = 110 - texture.Width;
+
+                        if (y + texture.Height > 80)
+                            y = 80 - texture.Height;
+                    }
+
+                    if (x < 0)
+                        x = 0;
+
+                    if (y < 0)
+                        y = 0;
+
+                    GameActions.DropItem(gs.HeldItem, x, y, 0, ID1);
+                    gs.ClearHolding();
+                    Mouse.CancelDoubleClick = true;
+                }
+            };
         }
 
         private void MyCheckboxOnValueChanged(object sender, EventArgs e)

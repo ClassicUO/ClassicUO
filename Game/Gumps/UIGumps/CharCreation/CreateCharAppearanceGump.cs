@@ -466,7 +466,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
                 AddChildren(_colorPicker = new ColorPickerBox(1, 15, 1, 1, 121, 23, pallet));
                 _colorPicker.MouseClick += ColorPicker_MouseClick;
                 _colorPickerBox = new ColorPickerBox(489, 141, rows, columns, _cellW, _cellH, pallet);
-                _colorPickerBox.MouseEnter += _colorPicker_MouseMove;
+                _colorPickerBox.MouseOver += _colorPicker_MouseMove;
             }
 
             public Hue HueSelected => (ushort) (_colorPickerBox.SelectedHue + 1);

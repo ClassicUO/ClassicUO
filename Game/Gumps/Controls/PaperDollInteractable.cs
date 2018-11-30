@@ -24,8 +24,10 @@
 using System;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
@@ -38,6 +40,8 @@ namespace ClassicUO.Game.Gumps.Controls
         private GumpPicBackpack _backpackGump;
         private Item _fakeItem;
         private Mobile _mobile;
+
+        private bool _needUpdate;
 
         public PaperDollInteractable(int x, int y, Mobile mobile)
         {
@@ -95,6 +99,19 @@ namespace ClassicUO.Game.Gumps.Controls
             //        RemoveChildren(c);
             //    }
             //}
+
+            if (_fakeItem != null)
+            {
+                foreach (Item item in e)
+                {
+                    if (item.Serial == _fakeItem.Serial)
+                    {
+                        _fakeItem = null;
+                        break;
+                    }
+                }
+            }
+
             OnEntityUpdated(Mobile);
         }
 
@@ -108,15 +125,21 @@ namespace ClassicUO.Game.Gumps.Controls
             OnEntityUpdated(Mobile);
         }
 
+
         public void AddFakeDress(Item item)
         {
             if (item == null && _fakeItem != null)
             {
-                _fakeItem.Dispose();
                 _fakeItem = null;
+                _needUpdate = true;
+                OnEntityUpdated(Mobile);
             }
-            else if (_mobile != null && item != null && _mobile.Equipment[item.ItemData.Layer] == null)
+            else if (item != null && _mobile.Equipment[item.ItemData.Layer] == null)
+            {
                 _fakeItem = item;
+                _needUpdate = true;
+                OnEntityUpdated(Mobile);
+            }
         }
 
         private void OnEntityUpdated(Entity entity)
@@ -150,10 +173,13 @@ namespace ClassicUO.Game.Gumps.Controls
 
             AddChildren(new GumpPic(0, 0, body, _mobile.Hue)
             {
-                AcceptMouseInput = true, IsPaperdoll = true
+                AcceptMouseInput = true, IsPaperdoll = true, IsPartialHue = true
             });
 
             // Loop through the items on the mobile and create the gump pics.
+
+            //GameScene gs = SceneManager.GetScene<GameScene>();
+
             for (int i = 0; i < _layerOrder.Length; i++)
             {
                 int layerIndex = (int) _layerOrder[i];
@@ -161,12 +187,23 @@ namespace ClassicUO.Game.Gumps.Controls
                 bool isfake = false;
                 bool canPickUp = true;
 
+
+                //if (item == null && gs.IsHoldingItem && gs.HeldItem.ItemData.Layer == layerIndex)
+                //{
+                //    _fakeItem = gs.HeldItem;
+                //    isfake = true;
+                //    canPickUp = false;
+                //}
+                //else if (item == null || MobileView.IsCovered(_mobile, (Layer)layerIndex))
+                //    continue;
+
                 if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
                 {
+                    item = _fakeItem;
                     isfake = true;
                     canPickUp = false;
                 }
-                else if (item == null || MobileView.IsCovered(_mobile, (Layer) layerIndex))
+                else if (item == null || MobileView.IsCovered(_mobile, (Layer)layerIndex))
                     continue;
 
                 switch (_layerOrder[i])
@@ -178,7 +215,7 @@ namespace ClassicUO.Game.Gumps.Controls
                         break;
                 }
 
-                AddChildren(new ItemGumpPaperdoll(0, 0, isfake ? _fakeItem : item, Mobile, isfake)
+                AddChildren(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
                 {
                     SlotIndex = i, CanPickUp = canPickUp
                 });

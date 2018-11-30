@@ -263,11 +263,9 @@ namespace ClassicUO.Game
 
         private void DrawToolTip(SpriteBatchUI spriteBatch, Point position)
         {
-            SceneManager sm = Service.Get<SceneManager>();
-
-            if (sm.CurrentScene.SceneType == ScenesType.Game)
+            if (SceneManager.CurrentScene.SceneType == ScenesType.Game)
             {
-                GameScene gs = sm.GetScene<GameScene>();
+                GameScene gs = SceneManager.GetScene<GameScene>();
 
                 if (!World.ClientFeatures.TooltipsEnabled || gs.IsHoldingItem)
                 {
@@ -303,10 +301,10 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is GumpPicBackpack backpack && backpack.BackpackItem.Properties.Count > 0)
+                    if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is GumpPicBackpack backpack && backpack.Backpack.Properties.Count > 0)
                     {
-                        if (_tooltip.IsEmpty || backpack.BackpackItem != _tooltip.Object)
-                            _tooltip.SetGameObject(backpack.BackpackItem);
+                        if (_tooltip.IsEmpty || backpack.Backpack != _tooltip.Object)
+                            _tooltip.SetGameObject(backpack.Backpack);
                         _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
 
                         return;

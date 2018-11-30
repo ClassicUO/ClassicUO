@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -124,9 +125,29 @@ namespace ClassicUO.Game.Gumps.Controls
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
             _clickedCanDrag = false;
+
+            if (button == MouseButton.Left)
+            {
+                GameScene gs = SceneManager.GetScene<GameScene>();
+
+                if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                    return;
+
+                gs.SelectedObject = Item;
+
+                if (TileData.IsContainer(Item.ItemData.Flags))
+                    gs.DropHeldItemToContainer(Item);
+                else if (gs.HeldItem.Graphic == Item.Graphic && TileData.IsStackable(gs.HeldItem.ItemData.Flags))
+                    gs.MergeHeldItem(Item);
+                else
+                {
+                    if (Item.Container.IsItem)
+                        gs.DropHeldItemToContainer(World.Items.Get(Item.Container), X + (Mouse.Position.X - ScreenCoordinateX), Y + (Mouse.Position.Y - ScreenCoordinateY));
+                }
+            }
         }
 
-        protected override void OnMouseEnter(int x, int y)
+        protected override void OnMouseOver(int x, int y)
         {
             if (_clickedCanDrag && Math.Abs(_clickedPoint.X - x) + Math.Abs(_clickedPoint.Y - y) > 3)
             {

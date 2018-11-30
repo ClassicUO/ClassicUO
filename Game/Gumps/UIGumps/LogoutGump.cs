@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     break;
                 case 1:
-                    Service.Get<SceneManager>().ChangeScene(ScenesType.Login);
+                    SceneManager.ChangeScene(ScenesType.Login);
                     Dispose();
 
                     break;

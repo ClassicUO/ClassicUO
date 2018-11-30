@@ -87,7 +87,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 });
                 _gumpExpander.MouseDown += expander_OnMouseDown;
                 _gumpExpander.MouseUp += expander_OnMouseUp;
-                _gumpExpander.MouseEnter += expander_OnMouseOver;
+                _gumpExpander.MouseOver += expander_OnMouseOver;
             }
 
             WantUpdateSize = true;
@@ -99,7 +99,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 _gumpExpander.MouseDown -= expander_OnMouseDown;
                 _gumpExpander.MouseUp -= expander_OnMouseUp;
-                _gumpExpander.MouseEnter -= expander_OnMouseOver;
+                _gumpExpander.MouseOver -= expander_OnMouseOver;
                 _gumpExpander.Dispose();
                 _gumpExpander = null;
             }

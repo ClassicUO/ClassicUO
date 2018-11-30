@@ -21,7 +21,11 @@
 
 #endregion
 
+using System.Linq;
+
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -78,6 +82,21 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             return Texture.Contains(x, y);
             //return IO.Resources.Gumps.Contains(_gumpIndex, x, y);
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
+            {
+                GameScene gs = SceneManager.GetScene<GameScene>();
+                if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                    return;
+
+                if (TileData.IsWearable(gs.HeldItem.ItemData.Flags))
+                {
+                    gs.WearHeldItem(Mobile);                   
+                }       
+            }
         }
     }
 }

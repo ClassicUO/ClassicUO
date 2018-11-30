@@ -213,7 +213,7 @@ namespace ClassicUO.Game.Gumps.Controls
             CalculateOffset();
         }
 
-        protected override void OnMouseEnter(int x, int y)
+        protected override void OnMouseOver(int x, int y)
         {
             if (_clicked) CalculateNew(x);
         }

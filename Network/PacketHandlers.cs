@@ -604,7 +604,7 @@ namespace ClassicUO.Network
 
         private static void EnterWorld(Packet p)
         {
-            Service.Get<SceneManager>().ChangeScene(ScenesType.Game);
+            SceneManager.ChangeScene(ScenesType.Game);
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
@@ -872,7 +872,7 @@ namespace ClassicUO.Network
         {
             if (!World.InGame)
                 return;
-            GameScene scene = Service.Get<SceneManager>().GetScene<GameScene>();
+            GameScene scene = SceneManager.GetScene<GameScene>();
 
             if (scene == null)
                 throw new Exception("Where is my fucking GameScene?");

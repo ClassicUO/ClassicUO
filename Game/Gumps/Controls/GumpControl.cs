@@ -29,6 +29,7 @@ using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -411,7 +412,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Tooltip = null;
         }
 
-        public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseEnter, MouseLeft, MouseClick, DragBegin, DragEnd;
+        public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseOver, MouseEnter, MouseExit, MouseClick, DragBegin, DragEnd;
 
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
 
@@ -561,6 +562,14 @@ namespace ClassicUO.Game.Gumps.Controls
             MouseUp.Raise(new MouseEventArgs(x, y, button, ButtonState.Released), this);
         }
 
+        public void InvokeMouseOver(Point position)
+        {
+            int x = position.X - X - ParentX;
+            int y = position.Y - Y - ParentY;
+            OnMouseOver(x, y);
+            MouseOver.Raise(new MouseEventArgs(x, y), this);
+        }
+
         public void InvokeMouseEnter(Point position)
         {
             int x = position.X - X - ParentX;
@@ -569,12 +578,12 @@ namespace ClassicUO.Game.Gumps.Controls
             MouseEnter.Raise(new MouseEventArgs(x, y), this);
         }
 
-        public void InvokeMouseLeft(Point position)
+        public void InvokeMouseExit(Point position)
         {
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
-            OnMouseLeft(x, y);
-            MouseLeft.Raise(new MouseEventArgs(x, y), this);
+            OnMouseExit(x, y);
+            MouseExit.Raise(new MouseEventArgs(x, y), this);
         }
 
         public void InvokeMouseClick(Point position, MouseButton button)
@@ -668,7 +677,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Parent?.OnMouseWheel(delta);
         }
 
-        protected virtual void OnMouseEnter(int x, int y)
+        protected virtual void OnMouseOver(int x, int y)
         {
             if (_mouseIsDown && !_attempToDrag && Mouse.LDropPosition != Point.Zero)
             {
@@ -677,7 +686,12 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        protected virtual void OnMouseLeft(int x, int y)
+        protected virtual void OnMouseEnter(int x, int y)
+        {
+
+        }
+
+        protected virtual void OnMouseExit(int x, int y)
         {
             _attempToDrag = false;
         }

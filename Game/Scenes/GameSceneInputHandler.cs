@@ -95,105 +95,105 @@ namespace ClassicUO.Game.Scenes
             }
             else if (IsHoldingItem)
             {
-                SelectedObject = null;
+                //SelectedObject = null;
 
                 if (IsMouseOverUI)
                 {
-                    GumpControl target = UIManager.MouseOverControl;
+                    //GumpControl target = UIManager.MouseOverControl;
 
-                    if (_lastFakeParedoll != null)
-                    {
-                        _lastFakeParedoll.AddFakeDress(null);
-                        _lastFakeParedoll.Update();
-                        _lastFakeParedoll = null;
-                    }
+                    //if (_lastFakeParedoll != null)
+                    //{
+                    //    _lastFakeParedoll.AddFakeDress(null);
+                    //    _lastFakeParedoll.Update();
+                    //    _lastFakeParedoll = null;
+                    //}
 
-                    switch (target)
-                    {
-                        case ItemGump gumpling when !(target is ItemGumpPaperdoll):
+                    //switch (target)
+                    //{
+                    //    //case ItemGump gumpling when !(target is ItemGumpPaperdoll):
 
-                        {
-                            Item item = gumpling.Item;
-                            SelectedObject = item;
+                    //    //{
+                    //    //    Item item = gumpling.Item;
+                    //    //    SelectedObject = item;
 
-                            if (TileData.IsContainer(item.ItemData.Flags))
-                                DropHeldItemToContainer(item);
-                            else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable(HeldItem.ItemData.Flags))
-                                MergeHeldItem(item);
-                            else
-                            {
-                                if (item.Container.IsItem) DropHeldItemToContainer(World.Items.Get(item.Container), target.X + (Mouse.Position.X - target.ScreenCoordinateX), target.Y + (Mouse.Position.Y - target.ScreenCoordinateY));
-                            }
+                    //    //    if (TileData.IsContainer(item.ItemData.Flags))
+                    //    //        DropHeldItemToContainer(item);
+                    //    //    else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable(HeldItem.ItemData.Flags))
+                    //    //        MergeHeldItem(item);
+                    //    //    else
+                    //    //    {
+                    //    //        if (item.Container.IsItem) DropHeldItemToContainer(World.Items.Get(item.Container), target.X + (Mouse.Position.X - target.ScreenCoordinateX), target.Y + (Mouse.Position.Y - target.ScreenCoordinateY));
+                    //    //    }
 
-                            break;
-                        }
-                        case GumpPicContainer container:
+                    //    //    break;
+                    //    //}
+                    //    //case GumpPicContainer container:
 
-                        {
-                            SelectedObject = container.Item;
-                            int x = Mouse.Position.X - target.ScreenCoordinateX;
-                            int y = Mouse.Position.Y - target.ScreenCoordinateY;
+                    //    //{
+                    //    //    SelectedObject = container.Item;
+                    //    //    int x = Mouse.Position.X - target.ScreenCoordinateX;
+                    //    //    int y = Mouse.Position.Y - target.ScreenCoordinateY;
 
-                            DropHeldItemToContainer(container.Item, x, y);
+                    //    //    DropHeldItemToContainer(container.Item, x, y);
 
-                            break;
-                        }
-                        case GumpPicBackpack backpack:
-                            DropHeldItemToContainer(backpack.BackpackItem);
+                    //    //    break;
+                    //    //}
+                    //    //case GumpPicBackpack backpack:
+                    //    //    DropHeldItemToContainer(backpack.Backpack);
 
-                            break;
-                        case DataBox dataBox:
-                        {
-                            if (dataBox.RootParent is TradingGump tradingGump)
-                            {
-                                int x = Mouse.Position.X - dataBox.ScreenCoordinateX;
-                                int y = Mouse.Position.Y - dataBox.ScreenCoordinateY;
+                    //    //    break;
+                    //    //case DataBox dataBox:
+                    //    //{
+                    //    //    if (dataBox.RootParent is TradingGump tradingGump)
+                    //    //    {
+                    //    //        int x = Mouse.Position.X - dataBox.ScreenCoordinateX;
+                    //    //        int y = Mouse.Position.Y - dataBox.ScreenCoordinateY;
 
-                                ArtTexture texture = Art.GetStaticTexture(HeldItem.DisplayedGraphic);
+                    //    //        ArtTexture texture = Art.GetStaticTexture(HeldItem.DisplayedGraphic);
 
-                                if (texture != null)
-                                {
-                                    x -= (texture.Width / 2);
-                                    y -= texture.Height / 2;
+                    //    //        if (texture != null)
+                    //    //        {
+                    //    //            x -= (texture.Width / 2);
+                    //    //            y -= texture.Height / 2;
 
-                                    if (x + texture.Width > 110)
-                                        x = 110 - texture.Width;
+                    //    //            if (x + texture.Width > 110)
+                    //    //                x = 110 - texture.Width;
 
-                                    if (y + texture.Height > 80)
-                                        y = 80 - texture.Height;
-                                }
+                    //    //            if (y + texture.Height > 80)
+                    //    //                y = 80 - texture.Height;
+                    //    //        }
 
-                                if (x < 0)
-                                    x = 0;
+                    //    //        if (x < 0)
+                    //    //            x = 0;
 
-                                if (y < 0)
-                                    y = 0;
+                    //    //        if (y < 0)
+                    //    //            y = 0;
 
-                                GameActions.DropItem(HeldItem, x, y, 0, tradingGump.ID1);
-                                ClearHolding();
-                                Mouse.CancelDoubleClick = true;
-                            }
-                                break;
-                        }
-                        case IMobilePaperdollOwner paperdollOwner:
+                    //    //        GameActions.DropItem(HeldItem, x, y, 0, tradingGump.ID1);
+                    //    //        ClearHolding();
+                    //    //        Mouse.CancelDoubleClick = true;
+                    //    //    }
+                    //    //        break;
+                    //    //}
+                    //    //case IMobilePaperdollOwner paperdollOwner:
 
-                        {
-                            if (TileData.IsWearable(HeldItem.ItemData.Flags)) WearHeldItem(paperdollOwner.Mobile);
+                    //    //{
+                    //    //    if (TileData.IsWearable(HeldItem.ItemData.Flags)) WearHeldItem(paperdollOwner.Mobile);
 
-                            break;
-                        }
-                        default:
+                    //    //    break;
+                    //    //}
+                    //    default:
 
-                        {
-                            if (target.Parent is IMobilePaperdollOwner paperdollOwner1)
-                            {
-                                if (TileData.IsWearable(HeldItem.ItemData.Flags))
-                                    WearHeldItem(paperdollOwner1.Mobile);
-                            }
+                    //    {
+                    //        //if (target.Parent is IMobilePaperdollOwner paperdollOwner1)
+                    //        //{
+                    //        //    if (TileData.IsWearable(HeldItem.ItemData.Flags))
+                    //        //        WearHeldItem(paperdollOwner1.Mobile);
+                    //        //}
 
-                            break;
-                        }
-                    }
+                    //        break;
+                    //    }
+                    //}
                 }
                 else if (IsMouseOverWorld)
                 {
@@ -462,6 +462,8 @@ namespace ClassicUO.Game.Scenes
 
         private void HandleMouseFakeItem()
         {
+            return;
+
             if (IsMouseOverUI)
             {
                 if (IsHoldingItem)

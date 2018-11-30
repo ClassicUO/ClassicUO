@@ -31,11 +31,11 @@ namespace ClassicUO.Game.Scenes
         Game
     }
 
-    public class SceneManager
+    public static class SceneManager
     {
-        public Scene CurrentScene { get; private set; }
+        public static Scene CurrentScene { get; private set; }
 
-        public void ChangeScene(ScenesType type)
+        public static void ChangeScene(ScenesType type)
         {
             CurrentScene?.Dispose();
             CurrentScene = null;
@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Scenes
             CurrentScene.Load();
         }
 
-        public T GetScene<T>() where T : Scene
+        public static T GetScene<T>() where T : Scene
         {
             return CurrentScene?.GetType() == typeof(T) ? (T) CurrentScene : null;
         }

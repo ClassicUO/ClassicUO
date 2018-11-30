@@ -24,12 +24,12 @@ namespace ClassicUO.Game.Scenes
             {
                 if (value == null && _heldItem != null)
                 {
-                    UIManager.RemoveInputBlocker(this);
+                    //UIManager.RemoveInputBlocker(this);
                     UIManager.GameCursor.ClearDraggedItem();
                 }
                 else if (value != null && _heldItem == null)
                 {
-                    UIManager.AddInputBlocker(this);
+                    //UIManager.AddInputBlocker(this);
                     UIManager.GameCursor.SetDraggedItem(value.DisplayedGraphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && TileData.IsStackable( value.ItemData.Flags) );
                 }
 
@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Scenes
 
         public bool IsHoldingItem => HeldItem != null;
 
-        private void MergeHeldItem(Entity entity)
+        public void MergeHeldItem(Entity entity)
         {
             GameActions.DropItem(HeldItem, Position.Invalid, entity.Serial);
             ClearHolding();
@@ -104,12 +104,12 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private void DropHeldItemToWorld(Position position)
+        public void DropHeldItemToWorld(Position position)
         {
             DropHeldItemToWorld(position.X, position.Y, position.Z);
         }
 
-        private void DropHeldItemToWorld(int x, int y, sbyte z)
+        public void DropHeldItemToWorld(int x, int y, sbyte z)
         {
             GameObject obj = SelectedObject;
             Serial serial;
@@ -128,7 +128,7 @@ namespace ClassicUO.Game.Scenes
             Mouse.CancelDoubleClick = true;
         }
 
-        private void DropHeldItemToContainer(Item container)
+        public void DropHeldItemToContainer(Item container)
         {
             Rectangle bounds = ContainerManager.Get(container.Graphic).Bounds;
             int x = RandomHelper.GetValue(bounds.Left, bounds.Right);
@@ -136,7 +136,7 @@ namespace ClassicUO.Game.Scenes
             DropHeldItemToContainer(container, x, y);
         }
 
-        private void DropHeldItemToContainer(Item container, int x, int y)
+        public void DropHeldItemToContainer(Item container, int x, int y)
         {
             Rectangle bounds = ContainerManager.Get(container.Graphic).Bounds;
             ArtTexture texture = Art.GetStaticTexture(HeldItem.DisplayedGraphic);
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.Scenes
             Mouse.CancelDoubleClick = true;
         }
 
-        private void WearHeldItem(Mobile target)
+        public void WearHeldItem(Mobile target)
         {
             GameActions.Equip(HeldItem, Layer.Invalid, target);
             ClearHolding();
