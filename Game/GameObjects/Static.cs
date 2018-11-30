@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
@@ -43,7 +40,17 @@ namespace ClassicUO.Game.GameObjects
 
         public string Name => ItemData.Name;
 
-        public StaticTiles ItemData => TileData.StaticData[Graphic];
+        private StaticTiles? _itemData;
+
+        public StaticTiles ItemData
+        {
+            get
+            {
+                if (!_itemData.HasValue)
+                    _itemData = TileData.StaticData[Graphic];
+                return _itemData.Value;
+            }
+        }
 
         public GameEffect Effect
         {

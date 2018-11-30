@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,12 +17,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Renderer;
 
@@ -45,6 +43,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public bool CloseIfClickOutside { get; set; }
 
+        public bool CanBeSaved { get; protected set; }
+
         public override bool CanMove
         {
             get => !BlockMovement && base.CanMove;
@@ -57,6 +57,60 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 ActivePage = 1;
             base.Update(totalMS, frameMS);
         }
+
+        public virtual bool Save(out Dictionary<string, object> data)
+        {
+            //if (CanBeSaved && _save && !string.IsNullOrEmpty(_saveName))
+            //{
+            //    Service.Get<Settings>().AddGump(_saveName, Location);
+            //}
+
+            if (CanBeSaved)
+            {
+                data = new Dictionary<string, object>()
+                {
+                    { "location", Location }
+                };
+
+                return true;
+            }
+            data = null;
+            return false;
+        }
+
+        public virtual bool Restore(Dictionary<string, object> data)
+        {
+            if (data.TryGetValue("location", out object point))
+            {
+
+                string[] s = point.ToString().Split(new[]
+                {
+                    ',', ' '
+                }, StringSplitOptions.RemoveEmptyEntries);
+
+
+                X = Convert.ToInt32(s[0]);
+                Y = Convert.ToInt32(s[1]);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool _save;
+        private string _saveName;
+        
+
+        protected void SetNameAndPositionForSaving(string name)
+        {
+            if (!string.IsNullOrEmpty(name))
+            {
+                _save = true;
+                _saveName = name;
+            }
+        }
+
 
         protected override void OnMove()
         {
@@ -103,7 +157,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
                 }
 
-                UIManager.SavePosition(ServerSerial, new Point(X, Y));
+                UIManager.SavePosition(ServerSerial, Location);
                 Dispose();
             }
         }

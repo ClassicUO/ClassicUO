@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -89,15 +86,14 @@ namespace ClassicUO.IO.Resources
 
             string[] args = arg.Split(new[]
             {
-                '\t'
+               '\t'
             }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < args.Length; i++)
             {
                 if (args[i].Length > 0 && args[i][0] == '#')
                 {
-                    int clilocID = int.Parse(args[i].Substring(1));
-                    args[i] = GetString(clilocID);
+                    args[i] = GetString(int.Parse(args[i].Substring(1)));
                 }
             }
 
@@ -113,6 +109,8 @@ namespace ClassicUO.IO.Resources
                 else
                     construct = baseCliloc;
             }
+
+            construct = construct.Trim(' ');
 
             return capitalize ? StringHelper.CapitalizeFirstCharacter(construct) : construct;
         }

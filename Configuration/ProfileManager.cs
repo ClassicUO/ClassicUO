@@ -1,5 +1,4 @@
-#region license
-
+﻿#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,40 +17,44 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Input;
-using ClassicUO.Renderer;
-
-using Microsoft.Xna.Framework;
-
-namespace ClassicUO.Game.Views
+namespace ClassicUO.Configuration
 {
-    public class DeferredView : View
+    internal static class ProfileManager
     {
-        private readonly View _baseView;
-        private readonly Vector3 _position;
+        private static readonly string _path = Path.Combine(Bootstrap.ExeDirectory, "Data");
 
-        public DeferredView(DeferredEntity deferred, View baseView, Vector3 position) : base(deferred)
+
+        public static Profile Current { get; set; }
+
+
+        public static void Load(string name)
         {
-            _baseView = baseView;
-            _position = position;
+            string ext = Path.GetExtension(name);
+
+            if (string.IsNullOrEmpty(ext))
+                name = name + ".json";
+
+            if (File.Exists(name))
+            {
+                Current = ConfigurationResolver.Load<Profile>(name);
+            }
+
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public static void Save()
         {
-            //if (_baseView.GameObject is Mobile mobile)
-            //{
-            //    if (mobile.IsDead || mobile.IsDisposed || mobile.Graphic == 0)
-            //    {
-            //        GameObject.Dispose();
-            //        return false;
-            //    }
-            //}
+            if (!Directory.Exists(_path))
+                Directory.CreateDirectory(_path);
 
-            return _baseView.DrawInternal(spriteBatch, _position, objectList);
+            ConfigurationResolver.Save(Current, Current.Path);
         }
     }
 }

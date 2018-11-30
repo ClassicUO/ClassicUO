@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -552,9 +549,19 @@ namespace ClassicUO.Network
 
     public sealed class PTradeResponse : PacketWriter
     {
-        public PTradeResponse() : base(0x6F)
+        public PTradeResponse(Serial serial, int code, bool state) : base(0x6F)
         {
-            throw new NotImplementedException();
+            if (code == 1) // cancel
+            {
+                WriteByte(0x01);
+                WriteUInt(serial);
+            }
+            else if (code == 2) // update
+            {
+                WriteByte(0x02);
+                WriteUInt(serial);
+                WriteUInt( (uint) (state ? 1 : 0));
+            }
         }
     }
 
@@ -1034,10 +1041,20 @@ namespace ClassicUO.Network
         }
     }
 
-    //public sealed class PSellRequest : PacketWriter
-    //{
+    public sealed class PSellRequest : PacketWriter
+    {
+        public PSellRequest(Serial vendorSerial, Tuple<uint, ushort>[] items) : base(0x9F)
+        {
+            WriteUInt(vendorSerial);
+            WriteUShort((ushort)items.Length);
 
-    //}
+            for (int i = 0; i < items.Length; i++)
+            {
+                WriteUInt(items[i].Item1);
+                WriteUShort(items[i].Item2);
+            }
+        }
+    }
 
     public sealed class PUseCombatAbility : PacketWriter
     {

@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 
 using ClassicUO.Game.GameObjects;
@@ -35,7 +32,7 @@ namespace ClassicUO.Game
         Regular = 0,
         System = 1,
         Emote = 2,
-        Party = 0x10,
+        Party = 3,
         Label = 6,
         Focus = 7,
         Whisper = 8,
@@ -79,12 +76,11 @@ namespace ClassicUO.Game
             Graphic = Graphic.Invariant, Name = "System"
         };
 
-        //public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
-        //public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => new PUnicodeSpeechRequest(entity.Serial, entity.Graphic, type, hue, font, _language, entity.Name ?? string.Empty, message).SendToClient();
-        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal)
-        {
-            GameActions.Say(message, hue, type, font);
-        }
+
+        public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
+        public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => OnMessage(entity, new UOMessageEventArgs(message, hue, type, font, true, "ENU"));
+
+        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
 
         public static event EventHandler<UOMessageEventArgs> Message;
 
@@ -150,15 +146,17 @@ namespace ClassicUO.Game
 
                     break;
                 case MessageType.Party:
-                    Service.Get<ChatControl>().AddLine($"[Party] [{entity.Name}]: {args.Text}", (byte) args.Font, args.Hue, args.IsUnicode);
+                    Service.Get<ChatControl>().AddLine(args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
                     Service.Get<JournalData>().AddEntry(args.Text, (byte) args.Font, args.Hue, "Party");
 
                     break;
                 case MessageType.Guild:
-
+                    Service.Get<ChatControl>().AddLine($"[Guild] [{entity.Name}]: {args.Text}", (byte)args.Font, args.Hue, args.IsUnicode);
+                    Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "Party");
                     break;
                 case MessageType.Alliance:
-
+                    Service.Get<ChatControl>().AddLine($"[Alliance] [{entity.Name}]: {args.Text}", (byte)args.Font, args.Hue, args.IsUnicode);
+                    Service.Get<JournalData>().AddEntry(args.Text, (byte)args.Font, args.Hue, "Party");
                     break;
                 case MessageType.Command:
 

@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 
 using ClassicUO.Game.GameObjects;
@@ -33,7 +30,7 @@ namespace ClassicUO.Game.Gumps.Controls
     {
         private static readonly PaperDollEquipSlots[] _layerOrder =
         {
-            PaperDollEquipSlots.Legging, PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Gloves, PaperDollEquipSlots.Neck, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Cloak, PaperDollEquipSlots.Robe, PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand, PaperDollEquipSlots.Belt, PaperDollEquipSlots.Talisman
+            PaperDollEquipSlots.Legging, PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Gloves, PaperDollEquipSlots.Neck, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Cloak, PaperDollEquipSlots.Robe, PaperDollEquipSlots.Belt, PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand, PaperDollEquipSlots.Talisman
         };
         private GumpPicBackpack _backpackGump;
         private Item _fakeItem;
@@ -57,10 +54,8 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 if (value != _mobile)
                 {
-                    //_mobile?.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);   
                     _mobile = value;
                     OnEntityUpdated(_mobile);
-                    //_mobile.SetCallbacks(OnEntityUpdated, OnEntityDisposed);                 
                 }
             }
         }
@@ -70,7 +65,6 @@ namespace ClassicUO.Game.Gumps.Controls
             Mobile.Items.Added -= ItemsOnAdded;
             Mobile.Items.Removed -= ItemsOnRemoved;
             Mobile.Disposed -= MobileOnDisposed;
-            //_mobile.ClearCallBacks(OnEntityUpdated, OnEntityDisposed);
             if (_backpackGump != null) _backpackGump.MouseDoubleClick -= OnDoubleclickBackpackGump;
             base.Dispose();
         }
@@ -98,7 +92,7 @@ namespace ClassicUO.Game.Gumps.Controls
             //        RemoveChildren(c);
             //    }
             //}
-            OnEntityUpdated(_mobile);
+            OnEntityUpdated(Mobile);
         }
 
         private void MobileOnDisposed(object sender, EventArgs e)
@@ -108,7 +102,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public void Update()
         {
-            OnEntityUpdated(_mobile);
+            OnEntityUpdated(Mobile);
         }
 
         public void AddFakeDress(Item item)
@@ -118,7 +112,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 _fakeItem.Dispose();
                 _fakeItem = null;
             }
-            else if (_mobile != null && item != null && _mobile.Equipment[item.ItemData.Layer] == null) _fakeItem = item;
+            else if (_mobile != null && item != null && _mobile.Equipment[item.ItemData.Layer] == null)
+                _fakeItem = item;
         }
 
         private void OnEntityUpdated(Entity entity)

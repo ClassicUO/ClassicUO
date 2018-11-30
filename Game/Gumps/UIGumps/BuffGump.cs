@@ -1,6 +1,27 @@
-﻿using System.Collections.Generic;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using System.Collections.Generic;
 using System.Linq;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Renderer;
@@ -12,19 +33,31 @@ namespace ClassicUO.Game.Gumps.UIGumps
     internal class BuffGump : Gump
     {
         private static BuffGump _gump;
-        private readonly GumpPic _background;
-        private readonly Button _button;
+        private GumpPic _background;
+        private Button _button;
         private GumpDirection _direction;
         private ushort _graphic;
 
+
         public BuffGump() : base(0, 0)
         {
-            X = 100;
-            Y = 100;
             CanMove = true;
             CanCloseWithRightClick = true;
-            _graphic = 0x7580;
+            AcceptMouseInput = true;
+            CanBeSaved = true;
+        }
 
+        public BuffGump(int x, int y) : this()
+        {
+            X = x;
+            Y = y;
+          
+            _graphic = 0x7580;
+            BuildGump();
+        }
+
+        private void BuildGump()
+        {
             AddChildren(_background = new GumpPic(0, 0, _graphic, 0)
             {
                 LocalSerial = 1
@@ -32,7 +65,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(_button = new Button(0, 0x7585, 0x7589, 0x7589)
             {
-                X = -2, Y = 36, ButtonAction = ButtonAction.Activate
+                X = -2,
+                Y = 36,
+                ButtonAction = ButtonAction.Activate
             });
             _direction = GumpDirection.LEFT_HORIZONTAL;
 
@@ -41,12 +76,42 @@ namespace ClassicUO.Game.Gumps.UIGumps
             UpdateElements();
         }
 
+        public override bool Save(out Dictionary<string, object> data)
+        {
+            if (base.Save(out data))
+            {
+                data["graphic"] = _graphic;
+                data["direction"] = _direction;
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool Restore(Dictionary<string, object> data)
+        {
+            var settings = Service.Get<Settings>();
+            //if (base.Restore(data) && settings.GetGumpValue(typeof(BuffGump), "graphic", out _graphic) && settings.GetGumpValue(typeof(BuffGump), "direction", out _direction))
+            //{
+            //    BuildGump();
+            //    _gump = this;
+            //    return true;
+            //}
+
+            return false;
+        }
+
+        protected override bool Contains(int x, int y)
+        {
+            return Bounds.Contains(X + x, Y + y);
+        }
+
         public static void Toggle()
         {
             UIManager ui = Service.Get<UIManager>();
 
             if (ui.GetByLocalSerial<BuffGump>() == null)
-                ui.Add(_gump = new BuffGump());
+                ui.Add(_gump = new BuffGump(100, 100));
             else
                 _gump.Dispose();
         }
@@ -140,6 +205,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 _background.Graphic = _graphic;
                 _background.Texture = IO.Resources.Gumps.GetGumpTexture(_graphic);
+                Width = _background.Texture.Width;
+                Height = _background.Texture.Height;
+
                 UpdateElements();
             }
         }
@@ -167,6 +235,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _alpha = 0xFF;
                 _decreaseAlpha = true;
                 _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : CoreGame.Ticks + icon.Timer * 1000);
+
+                SetTooltip(icon.Text);
             }
 
             public BuffIcon Icon { get; }

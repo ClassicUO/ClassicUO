@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
@@ -29,7 +26,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameEffect : GameObject, IDeferreable
+    public abstract class GameEffect : GameObject
     {
         private readonly List<GameEffect> _children;
 
@@ -58,7 +55,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected AnimDataFrame AnimDataFrame { get; set; }
 
-        public byte Speed { get; set; }
+        public int Speed { get; set; }
 
         public long LastChangeFrameTime { get; set; }
 
@@ -74,14 +71,12 @@ namespace ClassicUO.Game.GameObjects
 
         public long Duration { get; set; } = -1;
 
-        public DeferredEntity DeferredObject { get; set; }
-
         public void Load()
         {
             AnimDataFrame = AnimData.CalculateCurrentGraphic(Graphic);
             IsEnabled = true;
             AnimIndex = 0;
-            Speed = (byte) (AnimDataFrame.FrameInterval * 45);
+            Speed = (AnimDataFrame.FrameInterval > 0 ?  AnimDataFrame.FrameInterval * 45 : 45);
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -98,7 +93,7 @@ namespace ClassicUO.Game.GameObjects
                 else if (LastChangeFrameTime < totalMS)
                 {
                     if (AnimDataFrame.FrameCount > 0)
-                    {
+                    { 
                         AnimationGraphic = (Graphic) (Graphic + AnimDataFrame.FrameData[AnimIndex]);
                         AnimIndex++;
 
@@ -123,12 +118,7 @@ namespace ClassicUO.Game.GameObjects
             _children.Add(effect);
         }
 
-        protected (int x, int y, int z) GetSource()
-        {
-            if (Source == null) return (SourceX, SourceY, SourceZ);
-
-            return (Source.Position.X, Source.Position.Y, Source.Position.Z);
-        }
+        protected (int x, int y, int z) GetSource() => Source == null ? (SourceX, SourceY, SourceZ) : (Source.X, Source.Y, Source.Z);
 
         public void SetSource(GameObject source)
         {

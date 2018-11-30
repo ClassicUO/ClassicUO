@@ -1,4 +1,24 @@
-﻿using System;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,6 +30,7 @@ using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -24,12 +45,12 @@ namespace ClassicUO.Game.Scenes
         private bool _inqueue;
         private PaperDollInteractable _lastFakeParedoll;
         private Action _queuedAction;
-        private GameObject _queuedObject;
+        private Entity _queuedObject;
         private bool _rightMousePressed;
         public List<Mobile> MobileGumpStack = new List<Mobile>();
         public List<Mobile> PartyMemberGumpStack = new List<Mobile>();
         public List<Skill> SkillButtonGumpStack = new List<Skill>();
-
+        
         public bool IsMouseOverUI => UIManager.IsMouseOverUI && !(UIManager.MouseOverControl is WorldViewport);
 
         public bool IsMouseOverWorld => UIManager.IsMouseOverUI && UIManager.MouseOverControl is WorldViewport;
@@ -78,13 +99,24 @@ namespace ClassicUO.Game.Scenes
 
                         if (obj != null)
                         {
-                            TargetSystem.MouseTargetingEventObject(obj);
+                            TargetSystem.TargetGameObject(obj);
                             Mouse.LastLeftButtonClickTime = 0;
                         }
 
                         break;
                     case TargetType.Nothing:
 
+                        break;
+                    case TargetType.SetTargetClientSide:
+                        obj = null;
+                        if (IsMouseOverWorld) obj = SelectedObject;
+                        if (obj != null)
+                        {
+                            TargetSystem.TargetGameObject(obj);
+                            Mouse.LastLeftButtonClickTime = 0;
+                            UIManager.Add(new InfoGump(obj));
+
+                        }
                         break;
                     default:
                         Log.Message(LogTypes.Warning, "Not implemented.");
@@ -115,9 +147,9 @@ namespace ClassicUO.Game.Scenes
                             Item item = gumpling.Item;
                             SelectedObject = item;
 
-                            if (TileData.IsContainer((long) item.ItemData.Flags))
+                            if (TileData.IsContainer(item.ItemData.Flags))
                                 DropHeldItemToContainer(item);
-                            else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable((long) HeldItem.ItemData.Flags))
+                            else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable(HeldItem.ItemData.Flags))
                                 MergeHeldItem(item);
                             else
                             {
@@ -130,16 +162,9 @@ namespace ClassicUO.Game.Scenes
 
                         {
                             SelectedObject = container.Item;
-
-                            //ArtTexture texture = Art.GetStaticTexture(container.Item.DisplayedGraphic);
-
-                            //int x = Mouse.Position.X - texture.Width / 2 - target.ScreenCoordinateX;
-                            //int y = Mouse.Position.Y - texture.Height / 2 - target.ScreenCoordinateY;
                             int x = Mouse.Position.X - target.ScreenCoordinateX;
                             int y = Mouse.Position.Y - target.ScreenCoordinateY;
 
-                            //x -= texture.Width / 2;
-                            //y -= texture.Height / 2;
                             DropHeldItemToContainer(container.Item, x, y);
 
                             break;
@@ -148,10 +173,43 @@ namespace ClassicUO.Game.Scenes
                             DropHeldItemToContainer(backpack.BackpackItem);
 
                             break;
+                        case DataBox dataBox:
+                        {
+                            if (dataBox.RootParent is TradingGump tradingGump)
+                            {
+                                int x = Mouse.Position.X - dataBox.ScreenCoordinateX;
+                                int y = Mouse.Position.Y - dataBox.ScreenCoordinateY;
+
+                                ArtTexture texture = Art.GetStaticTexture(HeldItem.DisplayedGraphic);
+
+                                if (texture != null)
+                                {
+                                    x -= (texture.Width / 2);
+                                    y -= texture.Height / 2;
+
+                                    if (x + texture.Width > 110)
+                                        x = 110 - texture.Width;
+
+                                    if (y + texture.Height > 80)
+                                        y = 80 - texture.Height;
+                                }
+
+                                if (x < 0)
+                                    x = 0;
+
+                                if (y < 0)
+                                    y = 0;
+
+                                GameActions.DropItem(HeldItem, x, y, 0, tradingGump.ID1);
+                                ClearHolding();
+                                Mouse.CancelDoubleClick = true;
+                            }
+                                break;
+                        }
                         case IMobilePaperdollOwner paperdollOwner:
 
                         {
-                            if (TileData.IsWearable((long) HeldItem.ItemData.Flags)) WearHeldItem(paperdollOwner.Mobile);
+                            if (TileData.IsWearable(HeldItem.ItemData.Flags)) WearHeldItem(paperdollOwner.Mobile);
 
                             break;
                         }
@@ -159,8 +217,10 @@ namespace ClassicUO.Game.Scenes
 
                         {
                             if (target.Parent is IMobilePaperdollOwner paperdollOwner1)
-                                if (TileData.IsWearable((long) HeldItem.ItemData.Flags))
+                            {
+                                if (TileData.IsWearable(HeldItem.ItemData.Flags))
                                     WearHeldItem(paperdollOwner1.Mobile);
+                            }
 
                             break;
                         }
@@ -170,7 +230,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     GameObject obj = _mousePicker.MouseOverObject;
 
-                    if (obj != null && obj.Distance < 5)
+                    if (obj != null && obj.Distance < 3)
                     {
                         switch (obj)
                         {
@@ -188,7 +248,7 @@ namespace ClassicUO.Game.Scenes
                                     {
                                         SelectedObject = item;
 
-                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && TileData.IsStackable((long) dyn1.ItemData.Flags))
+                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && TileData.IsStackable(dyn1.ItemData.Flags))
                                             MergeHeldItem(item);
                                         else
                                             DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
@@ -239,8 +299,8 @@ namespace ClassicUO.Game.Scenes
                                 _queuedAction = () =>
                                 {
                                     if (!World.ClientFeatures.TooltipsEnabled)
-                                        GameActions.SingleClick(entity);
-                                    GameActions.OpenPopupMenu(entity);
+                                        GameActions.SingleClick(_queuedObject);
+                                    GameActions.OpenPopupMenu(_queuedObject);
                                 };
                             }
 
@@ -250,10 +310,8 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        private bool OnLeftMouseDoubleClick()
+        private void OnLeftMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            bool result = false;
-
             if (IsMouseOverWorld)
             {
                 GameObject obj = _mousePicker.MouseOverObject;
@@ -262,23 +320,24 @@ namespace ClassicUO.Game.Scenes
                 switch (obj)
                 {
                     case Item item:
-                        result = true;
+                        e.Result = true;
                         GameActions.DoubleClick(item);
 
                         break;
                     case Mobile mob:
-                        result = true;
+                        e.Result = true;
 
                         if (World.Player.InWarMode)
                         {
                             //TODO: attack request
+                            
                         }
                         else
                             GameActions.DoubleClick(mob);
 
                         break;
                     case GameEffect effect when effect.Source is Item item:
-                        result = true;
+                        e.Result = true;
                         GameActions.DoubleClick(item);
 
                         break;
@@ -286,8 +345,6 @@ namespace ClassicUO.Game.Scenes
 
                 ClearDequeued();
             }
-
-            return result;
         }
 
         private void OnRightMouseButtonDown(object sender, EventArgs e)
@@ -302,13 +359,13 @@ namespace ClassicUO.Game.Scenes
                 _rightMousePressed = false;
         }
 
-        private bool OnRightMouseDoubleClick()
+        private void OnRightMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
             if (IsMouseOverWorld)
             {
                 if (_settings.EnablePathfind && !Pathfinder.AutoWalking)
                 {
-                    if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface((long) dyn.ItemData.Flags))
+                    if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface( dyn.ItemData.Flags))
                     {
                         GameObject obj = _mousePicker.MouseOverObject;
 
@@ -316,13 +373,11 @@ namespace ClassicUO.Game.Scenes
                         {
                             World.Player.AddGameText(MessageType.Label, "Pathfinding!", 3, 0, false);
 
-                            return true;
+                            e.Result = true;
                         }
                     }
                 }
             }
-
-            return false;
         }
 
         private void OnMouseDragBegin(object sender, EventArgs e)
@@ -401,6 +456,11 @@ namespace ClassicUO.Game.Scenes
             if (TargetSystem.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && e.keysym.mod == SDL.SDL_Keymod.KMOD_NONE)
                 TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
 
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
+            {
+                TargetSystem.SetTargeting(TargetType.Object, 6983686, 0);
+            }
+
             // TEST PURPOSE
             /*if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
             {
@@ -439,7 +499,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     GumpControl target = UIManager.MouseOverControl;
 
-                    if (target != null && TileData.IsWearable((long) HeldItem.ItemData.Flags))
+                    if (target != null && TileData.IsWearable(HeldItem.ItemData.Flags))
                     {
                         PaperDollInteractable gumpling = null;
 

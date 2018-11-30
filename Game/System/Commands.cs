@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,15 +17,21 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-using ClassicUO.Game.GameObjects;
-
-namespace ClassicUO.Interfaces
+namespace ClassicUO.Game.System
 {
-    public interface IDeferreable
+    public static class Commands
     {
-        DeferredEntity DeferredObject { get; set; }
+
+        public static void Initialize()
+        {
+            CommandSystem.Register("info", (sender, args) => CommandHandlers.RequestItemInfo());
+        }
     }
 }

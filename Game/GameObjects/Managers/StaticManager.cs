@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System.Collections.Generic;
 
 using ClassicUO.Interfaces;
@@ -29,22 +26,29 @@ namespace ClassicUO.Game.GameObjects.Managers
 {
     public class StaticManager : IUpdateable
     {
-        private readonly List<Static> _activeStatics = new List<Static>();
+        private readonly HashSet<Static> _activeStatics = new HashSet<Static>();
+        private readonly List<Static> _toRemove = new List<Static>();
 
         public void Update(double totalMS, double frameMS)
         {
-            for (int i = 0; i < _activeStatics.Count; i++)
+            foreach (Static k in _activeStatics)
             {
-                _activeStatics[i].Update(totalMS, frameMS);
+                k.Update(totalMS, frameMS);
 
-                if (_activeStatics[i].IsDisposed || _activeStatics[i].OverHeads.Count <= 0 && (_activeStatics[i].Effect == null || _activeStatics[i].Effect.IsDisposed))
-                    _activeStatics.RemoveAt(i);
+                if (k.IsDisposed || k.OverHeads.Count <= 0 && (k.Effect == null || k.Effect.IsDisposed))
+                    _toRemove.Add(k);
+            }
+
+            if (_toRemove.Count > 0)
+            {
+                _toRemove.ForEach( s => s.Dispose());
+                _toRemove.Clear();
             }
         }
 
         public void Add(Static stat)
         {
-            if (!stat.IsDisposed && (stat.OverHeads.Count > 0 || stat.Effect != null))
+            if (!stat.IsDisposed && (stat.OverHeads.Count > 0 || stat.Effect != null) && !_activeStatics.Contains(stat))
                 _activeStatics.Add(stat);
         }
     }

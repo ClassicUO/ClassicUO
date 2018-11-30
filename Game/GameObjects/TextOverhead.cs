@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using ClassicUO.Game.Views;
 using ClassicUO.Renderer;
 
@@ -71,7 +68,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
-            base.Update(totalMS, frameMS);
+            //base.Update(totalMS, frameMS);
 
             if (IsPersistent || IsDisposed)
                 return;
@@ -83,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
                 if (TimeToLive > 0 && TimeToLive <= TIME_FADEOUT)
                 {
                     // start alpha decreasing
-                    Alpha = 1 - TimeToLive / TIME_FADEOUT;
+                    Alpha = 1 - (TimeToLive / TIME_FADEOUT);
                 }
                 else if (TimeToLive <= 0.0f)
                     Dispose();

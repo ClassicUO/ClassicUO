@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,13 +17,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+
+using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
@@ -45,7 +44,7 @@ namespace ClassicUO.IO.Resources
                 throw new FileNotFoundException();
             UOFileMul tiledata = new UOFileMul(path, false);
             bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
-            int staticscount = !isold ? (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupNew>()) / Marshal.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * Marshal.SizeOf<LandGroupOld>()) / Marshal.SizeOf<StaticGroupOld>();
+            int staticscount = !isold ? (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
 
             if (staticscount > 2048)
                 staticscount = 2048;
@@ -159,162 +158,162 @@ namespace ClassicUO.IO.Resources
             //}
         }
 
-        public static bool IsBackground(long flags)
+        public static bool IsBackground(ulong flags)
         {
             return (flags & 0x00000001) != 0;
         }
 
-        public static bool IsWeapon(long flags)
+        public static bool IsWeapon(ulong flags)
         {
             return (flags & 0x00000002) != 0;
         }
 
-        public static bool IsTransparent(long flags)
+        public static bool IsTransparent(ulong flags)
         {
             return (flags & 0x00000004) != 0;
         }
 
-        public static bool IsTranslucent(long flags)
+        public static bool IsTranslucent(ulong flags)
         {
             return (flags & 0x00000008) != 0;
         }
 
-        public static bool IsWall(long flags)
+        public static bool IsWall(ulong flags)
         {
             return (flags & 0x00000010) != 0;
         }
 
-        public static bool IsDamaging(long flags)
+        public static bool IsDamaging(ulong flags)
         {
             return (flags & 0x00000020) != 0;
         }
 
-        public static bool IsImpassable(long flags)
+        public static bool IsImpassable(ulong flags)
         {
             return (flags & 0x00000040) != 0;
         }
 
-        public static bool IsWet(long flags)
+        public static bool IsWet(ulong flags)
         {
             return (flags & 0x00000080) != 0;
         }
 
-        public static bool IsUnknown(long flags)
+        public static bool IsUnknown(ulong flags)
         {
             return (flags & 0x00000100) != 0;
         }
 
-        public static bool IsSurface(long flags)
+        public static bool IsSurface(ulong flags)
         {
             return (flags & 0x00000200) != 0;
         }
 
-        public static bool IsBridge(long flags)
+        public static bool IsBridge(ulong flags)
         {
             return (flags & 0x00000400) != 0;
         }
 
-        public static bool IsStackable(long flags)
+        public static bool IsStackable(ulong flags)
         {
             return (flags & 0x00000800) != 0;
         }
 
-        public static bool IsWindow(long flags)
+        public static bool IsWindow(ulong flags)
         {
             return (flags & 0x00001000) != 0;
         }
 
-        public static bool IsNoShoot(long flags)
+        public static bool IsNoShoot(ulong flags)
         {
             return (flags & 0x00002000) != 0;
         }
 
-        public static bool IsPrefixA(long flags)
+        public static bool IsPrefixA(ulong flags)
         {
             return (flags & 0x00004000) != 0;
         }
 
-        public static bool IsPrefixAn(long flags)
+        public static bool IsPrefixAn(ulong flags)
         {
             return (flags & 0x00008000) != 0;
         }
 
-        public static bool IsInternal(long flags)
+        public static bool IsInternal(ulong flags)
         {
             return (flags & 0x00010000) != 0;
         }
 
-        public static bool IsFoliage(long flags)
+        public static bool IsFoliage(ulong flags)
         {
             return (flags & 0x00020000) != 0;
         }
 
-        public static bool IsPartialHue(long flags)
+        public static bool IsPartialHue(ulong flags)
         {
             return (flags & 0x00040000) != 0;
         }
 
-        public static bool IsUnknown1(long flags)
+        public static bool IsUnknown1(ulong flags)
         {
             return (flags & 0x00080000) != 0;
         }
 
-        public static bool IsMap(long flags)
+        public static bool IsMap(ulong flags)
         {
             return (flags & 0x00100000) != 0;
         }
 
-        public static bool IsContainer(long flags)
+        public static bool IsContainer(ulong flags)
         {
             return (flags & 0x00200000) != 0;
         }
 
-        public static bool IsWearable(long flags)
+        public static bool IsWearable(ulong flags)
         {
             return (flags & 0x00400000) != 0;
         }
 
-        public static bool IsLightSource(long flags)
+        public static bool IsLightSource(ulong flags)
         {
             return (flags & 0x00800000) != 0;
         }
 
-        public static bool IsAnimated(long flags)
+        public static bool IsAnimated(ulong flags)
         {
             return (flags & 0x01000000) != 0;
         }
 
-        public static bool IsNoDiagonal(long flags)
+        public static bool IsNoDiagonal(ulong flags)
         {
             return (flags & 0x02000000) != 0;
         }
 
-        public static bool IsUnknown2(long flags)
+        public static bool IsUnknown2(ulong flags)
         {
             return (flags & 0x04000000) != 0;
         }
 
-        public static bool IsArmor(long flags)
+        public static bool IsArmor(ulong flags)
         {
             return (flags & 0x08000000) != 0;
         }
 
-        public static bool IsRoof(long flags)
+        public static bool IsRoof(ulong flags)
         {
             return (flags & 0x10000000) != 0;
         }
 
-        public static bool IsDoor(long flags)
+        public static bool IsDoor(ulong flags)
         {
             return (flags & 0x20000000) != 0;
         }
 
-        public static bool IsStairBack(long flags)
+        public static bool IsStairBack(ulong flags)
         {
             return (flags & 0x40000000) != 0;
         }
 
-        public static bool IsStairRight(long flags)
+        public static bool IsStairRight(ulong flags)
         {
             return (flags & 0x80000000) != 0;
         }

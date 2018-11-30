@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 
@@ -32,9 +29,9 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class Facet
+    public sealed class Facet : IDisposable
     {
-        private static Tile _invalid = Tile.Invalid;
+       // private static Tile _invalid = Tile.Invalid;
         private readonly bool[] _blockAccessList = new bool[0x1000];
         //private const int CHUNKS_NUM = 5;
         //private const int MAX_CHUNKS = CHUNKS_NUM * 2 + 1;
@@ -51,7 +48,7 @@ namespace ClassicUO.Game.Map
 
         public int Index { get; }
 
-        public MapChunk[] Chunks { get; }
+        public MapChunk[] Chunks { get; private set; }
 
         public int MapBlockIndex { get; set; }
 
@@ -68,18 +65,18 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public ref Tile GetTile(short x, short y, bool load = true)
+        public  Tile GetTile(short x, short y, bool load = true)
         {
-            if (x < 0 || y < 0) return ref _invalid;
+            if (x < 0 || y < 0) return null;
             int cellX = x / 8;
             int cellY = y / 8;
             int block = GetBlock(cellX, cellY);
 
             if (block >= Chunks.Length)
-                return ref _invalid;
+                return null;
             ref MapChunk chuck = ref Chunks[block];
 
-            if (chuck == MapChunk.Invalid)
+            if (chuck == null /*MapChunk.Invalid*/)
             {
                 if (load)
                 {
@@ -88,17 +85,17 @@ namespace ClassicUO.Game.Map
                     chuck.Load(Index);
                 }
                 else
-                    return ref _invalid;
+                    return null;
             }
             else
                 chuck.LastAccessTime = CoreGame.Ticks;
 
-            return ref chuck.Tiles[x % 8][y % 8];
+            return chuck.Tiles[x % 8][y % 8];
         }
 
-        public ref Tile GetTile(int x, int y, bool load = true)
+        public  Tile GetTile(int x, int y, bool load = true)
         {
-            return ref GetTile((short) x, (short) y, load);
+            return  GetTile((short) x, (short) y, load);
         }
 
         public sbyte GetTileZ(int x, int y)
@@ -141,9 +138,9 @@ namespace ClassicUO.Game.Map
             if (access)
                 return defaultZ;
             access = true;
-            ref Tile tile = ref GetTile(x, y);
+             Tile tile =  GetTile(x, y);
 
-            if (tile != Tile.Invalid)
+            if (tile != null)
             {
                 var objects = tile.ObjectsOnTiles;
                 GameObject obj = null;
@@ -158,7 +155,7 @@ namespace ClassicUO.Game.Map
                     if (obj is Mobile)
                         continue;
 
-                    if (obj is IDynamicItem dyn && (!TileData.IsRoof((long) dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6))
+                    if (obj is IDynamicItem dyn && (!TileData.IsRoof(dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6))
                         continue;
 
                     break;
@@ -182,7 +179,7 @@ namespace ClassicUO.Game.Map
         public IndexMap GetIndex(int blockX, int blockY)
         {
             int block = GetBlock(blockX, blockY);
-            IndexMap[] list = IO.Resources.Map.BlockData[Index];
+            ref IndexMap[] list = ref IO.Resources.Map.BlockData[Index];
 
             return block >= list.Length ? IndexMap.Invalid : list[block];
         }
@@ -201,10 +198,10 @@ namespace ClassicUO.Game.Map
             {
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
 
-                if (block.LastAccessTime < ticks /*&& block.HasNoExternalData()*/)
+                if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
                     block.Unload();
-                    block = MapChunk.Invalid;
+                    block = null; // MapChunk.Invalid;
                     _usedIndices.RemoveAt(i--);
 
                     if (++count >= 50)
@@ -213,15 +210,18 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public void ClearUsedBlocks()
+        public void Dispose()
         {
             for (int i = 0; i < _usedIndices.Count; i++)
             {
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
                 block.Unload();
-                block = MapChunk.Invalid;
+                block = null;// MapChunk.Invalid;
                 _usedIndices.RemoveAt(i--);
             }
+
+            IO.Resources.Map.UnloadMap(Index);
+            Chunks = null;
         }
 
         private void LoadChunks(ushort centerX, ushort centerY)
@@ -255,7 +255,7 @@ namespace ClassicUO.Game.Map
                     int cellindex = index + j;
                     ref MapChunk chunk = ref Chunks[cellindex];
 
-                    if (chunk == MapChunk.Invalid)
+                    if (chunk == null /*MapChunk.Invalid*/)
                     {
                         if (CoreGame.Ticks - tick >= maxDelay)
                             return;
@@ -267,8 +267,6 @@ namespace ClassicUO.Game.Map
                     chunk.LastAccessTime = CoreGame.Ticks;
                 }
             }
-
-            _usedIndices.Sort();
         }
     }
 }

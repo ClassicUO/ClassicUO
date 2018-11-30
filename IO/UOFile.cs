@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,15 +17,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
@@ -96,13 +94,22 @@ namespace ClassicUO.IO
 
         internal void Fill(byte[] buffer, int count)
         {
-            for (int i = 0; i < count; i++) buffer[i] = ReadByte();
+            //for (int i = 0; i < count; i++) buffer[i] = ReadByte();
+            fixed (byte* ptr = buffer)
+            {
+                byte* start = ptr;
+                byte* end = &ptr[0] + count;
+                while (start != end)
+                {
+                    *start++ = ReadByte();
+                }
+            }
         }
 
         internal T[] ReadArray<T>(int count) where T : struct
         {
             T[] t = ReadArray<T>(Position, count);
-            Position += Marshal.SizeOf<T>() * count;
+            Position += UnsafeMemoryManager.SizeOf<T>() * count;
 
             return t;
         }

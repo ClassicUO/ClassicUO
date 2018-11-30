@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -36,7 +33,7 @@ namespace ClassicUO.IO.Resources
         private static UOFile _file;
         //private static SpriteTexture[] _gumpCache;
         private static readonly List<int> _usedIndex = new List<int>();
-        private static readonly PixelPicking _picker = new PixelPicking();
+        //private static readonly PixelPicking _picker = new PixelPicking();
         private static readonly Dictionary<int, SpriteTexture> _gumpDictionary = new Dictionary<int, SpriteTexture>();
 
         public static void Load()
@@ -102,9 +99,9 @@ namespace ClassicUO.IO.Resources
                 if (pixels == null || pixels.Length <= 0)
                     return null;
                 texture = new SpriteTexture(w, h, false);
-                texture.SetData(pixels);
+                texture.SetDataHitMap16(pixels);
                 _usedIndex.Add(g);
-                _picker.Set(g, w, h, pixels);
+                //_picker.Set(g, w, h, pixels);
                 _gumpDictionary.Add(g, texture);
             }
 
@@ -154,10 +151,10 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public static bool Contains(ushort g, int x, int y, int extra = 0)
-        {
-            return _picker.Get(g, x, y, extra);
-        }
+        //public static bool Contains(ushort g, int x, int y, int extra = 0)
+        //{
+        //    return _picker.Get(g, x, y, extra);
+        //}
 
         public static unsafe ushort[] GetGumpPixels(int index, out int width, out int height)
         {

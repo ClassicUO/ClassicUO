@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -297,41 +294,12 @@ namespace ClassicUO.Renderer
 
         public bool DrawRectangle(Texture2D texture, Rectangle rectangle, Vector3 hue)
         {
-            DrawLine(texture, new Vector2(rectangle.X, rectangle.Y), new Vector2(rectangle.Right, rectangle.Y), hue);
-            DrawLine(texture, new Vector2(rectangle.Right, rectangle.Y), new Vector2(rectangle.Right, rectangle.Bottom), hue);
-            DrawLine(texture, new Vector2(rectangle.Right, rectangle.Bottom), new Vector2(rectangle.X, rectangle.Bottom), hue);
-            DrawLine(texture, new Vector2(rectangle.X, rectangle.Bottom), new Vector2(rectangle.X, rectangle.Y), hue);
-
+            Draw2D(texture, new Rectangle(rectangle.X, rectangle.Y, rectangle.Width, 1), hue);
+            Draw2D(texture, new Rectangle(rectangle.Right, rectangle.Y, 1, rectangle.Height), hue);
+            Draw2D(texture, new Rectangle(rectangle.X, rectangle.Bottom, rectangle.Width, 1), hue);
+            Draw2D(texture, new Rectangle(rectangle.X, rectangle.Y, 1, rectangle.Height), hue);
             return true;
         }
 
-        public unsafe bool DrawLine(Texture2D texture, Vector2 start, Vector2 end, Vector3 hue)
-        {
-            int offX = start.X == end.X ? 1 : 0;
-            int offY = start.Y == end.Y ? 1 : 0;
-
-            fixed (SpriteVertex* ptr = _vertexBufferUI)
-            {
-                ptr[0].Position.X = start.X;
-                ptr[0].Position.Y = start.Y;
-                ptr[0].Normal = new Vector3(0, 0, 1);
-                ptr[0].TextureCoordinate = new Vector3(0, 0, 0);
-                ptr[1].Position.X = end.X + offX;
-                ptr[1].Position.Y = start.Y + offY;
-                ptr[1].Normal = new Vector3(0, 0, 1);
-                ptr[1].TextureCoordinate = new Vector3(1, 0, 0);
-                ptr[2].Position.X = start.X + offX;
-                ptr[2].Position.Y = end.Y + offY;
-                ptr[2].Normal = new Vector3(0, 0, 1);
-                ptr[2].TextureCoordinate = new Vector3(0, 1, 0);
-                ptr[3].Position.X = end.X;
-                ptr[3].Position.Y = end.Y;
-                ptr[3].Normal = new Vector3(0, 0, 1);
-                ptr[3].TextureCoordinate = new Vector3(1, 1, 0);
-                ptr[0].Hue = ptr[1].Hue = ptr[2].Hue = ptr[3].Hue = hue;
-            }
-
-            return DrawSprite(texture, _vertexBufferUI);
-        }
     }
 }

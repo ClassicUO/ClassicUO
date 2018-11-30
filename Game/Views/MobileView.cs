@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,11 +17,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
+using System;
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Input;
@@ -47,22 +46,12 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-#if !ORIONSORT
-            PreDraw(position);
-#endif
-            return DrawInternal(spriteBatch, position, objectList);
-        }
-
-        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
-        {
             if (GameObject.IsDisposed)
                 return false;
-#if !ORIONSORT
-            ShadowZDepth = spriteBatch.GetZ();
-#endif
-            Mobile mobile = (Mobile) GameObject;
+
+            Mobile mobile = (Mobile)GameObject;
             bool mirror = false;
-            byte dir = (byte) mobile.GetDirectionForAnimation();
+            byte dir = (byte)mobile.GetDirectionForAnimation();
             Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
             int mountOffset = 0;
@@ -73,13 +62,14 @@ namespace ClassicUO.Game.Views
                 return false;
             int drawCenterY = bodyFrame.CenterY;
             int drawX;
-            int drawY = mountOffset + drawCenterY + (int) (mobile.Offset.Z / 4) - 22 - (int) (mobile.Offset.Y - mobile.Offset.Z - 3);
+            int drawY = mountOffset + drawCenterY + (int)(mobile.Offset.Z / 4) - 22 - (int)(mobile.Offset.Y - mobile.Offset.Z - 3);
 
             if (IsFlipped)
-                drawX = -22 + (int) mobile.Offset.X;
+                drawX = -22 + (int)mobile.Offset.X;
             else
-                drawX = -22 - (int) mobile.Offset.X;
-            Rectangle total = new Rectangle();
+                drawX = -22 - (int)mobile.Offset.X;
+
+            FrameInfo = FrameInfo.Empty;
 
             for (int i = 0; i < _layerCount; i++)
             {
@@ -90,25 +80,37 @@ namespace ClassicUO.Game.Views
                 int x = drawX + frame.CenterX;
                 int y = -drawY - (frame.Height + frame.CenterY) + drawCenterY - vl.OffsetY;
 
-                if (total.X > x)
-                    total.X = x;
+                int yy = -(frame.Height + frame.CenterY + 3);
+                int xx = -frame.CenterX;
 
-                if (total.Y > y)
-                    total.Y = y;
+                if (mirror)
+                    xx = -(frame.Width - frame.CenterX);
 
-                if (total.Width < frame.Width)
-                    total.Width = frame.Width;
+                if (xx < FrameInfo.X)
+                    FrameInfo.X = xx;
 
-                if (total.Height < frame.Height)
-                    total.Height = frame.Height;
+                if (yy < FrameInfo.Y)
+                    FrameInfo.Y = yy;
+
+                if (FrameInfo.EndX < xx + frame.Width)
+                    FrameInfo.EndX = xx + frame.Width;
+
+                if (FrameInfo.EndY < yy + frame.Height)
+                    FrameInfo.EndY = yy + frame.Height;
+
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                 HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : vl.Hue, vl.IsParital, 0, false);
                 base.Draw(spriteBatch, position, objectList);
-                Pick(frame.ID, Bounds, position, objectList);
+                Pick(frame, Bounds, position, objectList);
             }
 
-            Bounds = total;
+            FrameInfo.OffsetX = Math.Abs(FrameInfo.X);
+            FrameInfo.OffsetY = Math.Abs(FrameInfo.Y);
+            FrameInfo.Width = FrameInfo.OffsetX + FrameInfo.EndX;
+            FrameInfo.Height = FrameInfo.OffsetY + FrameInfo.EndY;
+
+
             int height = 0;
             int centerY = 0;
 
@@ -118,7 +120,9 @@ namespace ClassicUO.Game.Views
 
                 Vector3 overheadPosition = new Vector3
                 {
-                    X = position.X + mobile.Offset.X, Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8), Z = position.Z
+                    X = position.X + mobile.Offset.X,
+                    Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
+                    Z = position.Z
                 };
                 MessageOverHead(spriteBatch, overheadPosition, mobile.IsMounted ? 0 : -22);
             }
@@ -130,7 +134,9 @@ namespace ClassicUO.Game.Views
 
                 Vector3 damagePosition = new Vector3
                 {
-                    X = position.X + mobile.Offset.X, Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8), Z = position.Z
+                    X = position.X + mobile.Offset.X,
+                    Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
+                    Z = position.Z
                 };
                 DamageOverhead(mobile, spriteBatch, damagePosition, mobile.IsMounted ? 0 : -22);
             }
@@ -166,7 +172,7 @@ namespace ClassicUO.Game.Views
             if (x == 0 && centerY == 0 && w == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
 
-        private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
+        private void Pick(SpriteTexture texture, Rectangle area, Vector3 drawPosition, MouseOverList list)
         {
             int x;
 
@@ -175,7 +181,8 @@ namespace ClassicUO.Game.Views
             else
                 x = list.MousePosition.X - (int) drawPosition.X + area.X;
             int y = list.MousePosition.Y - ((int) drawPosition.Y - area.Y);
-            if (Animations.Contains(id, x, y)) list.Add(GameObject, drawPosition);
+            if (texture.Contains(x, y)) list.Add(GameObject, drawPosition);
+            //if (Animations.Contains(id, x, y)) list.Add(GameObject, drawPosition);
         }
 
         private void SetupLayers(byte dir, ref Mobile mobile, ref int mountOffset)
@@ -230,7 +237,7 @@ namespace ClassicUO.Game.Views
                                         }
                                     }
 
-                                    AddLayer(dir, graphic, hue, ref mobile, false, convertedItem, TileData.IsPartialHue((long) item.ItemData.Flags));
+                                    AddLayer(dir, graphic, hue, ref mobile, false, convertedItem, TileData.IsPartialHue( item.ItemData.Flags));
                                 }
                             }
                         }

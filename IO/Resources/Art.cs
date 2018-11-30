@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,7 +36,7 @@ namespace ClassicUO.IO.Resources
         //private static SpriteTexture[] _landCache;
         private static readonly List<int> _usedIndex = new List<int>();
         private static readonly List<int> _usedIndexLand = new List<int>();
-        private static readonly PixelPicking _picker = new PixelPicking();
+        //private static readonly PixelPicking _picker = new PixelPicking();
         private static readonly Dictionary<int, ArtTexture> _artDictionary = new Dictionary<int, ArtTexture>();
         private static readonly Dictionary<int, SpriteTexture> _landDictionary = new Dictionary<int, SpriteTexture>();
 
@@ -62,10 +59,10 @@ namespace ClassicUO.IO.Resources
             //_landCache = new SpriteTexture[ART_COUNT];
         }
 
-        public static bool Contains(ushort g, int x, int y, int extra = 0)
-        {
-            return _picker.Get(g, x, y, extra);
-        }
+        //public static bool Contains(ushort g, int x, int y, int extra = 0)
+        //{
+        //    return _picker.Get(g, x, y, extra);
+        //}
 
         public static ArtTexture GetStaticTexture(ushort g)
         {
@@ -73,9 +70,10 @@ namespace ClassicUO.IO.Resources
             {
                 ushort[] pixels = ReadStaticArt(g, out short w, out short h, out Rectangle imageRectangle);
                 texture = new ArtTexture(imageRectangle, w, h);
-                texture.SetData(pixels);
+                //texture.SetData(pixels);
+                texture.SetDataHitMap16(pixels);
                 _usedIndex.Add(g);
-                _picker.Set(g, w, h, pixels);
+                //_picker.Set(g, w, h, pixels);
                 _artDictionary.Add(g, texture);
             }
 
@@ -100,9 +98,9 @@ namespace ClassicUO.IO.Resources
                 const int SIZE = 44;
                 ushort[] pixels = ReadLandArt(g);
                 texture = new SpriteTexture(SIZE, SIZE, false);
-                texture.SetData(pixels);
+                texture.SetDataHitMap16(pixels);
                 _usedIndexLand.Add(g);
-                _picker.Set(g, SIZE, SIZE, pixels);
+                //_picker.Set(g, SIZE, SIZE, pixels);
                 _landDictionary.Add(g, texture);
             }
 

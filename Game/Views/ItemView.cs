@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
@@ -68,7 +65,7 @@ namespace ClassicUO.Game.Views
             Item item = (Item) GameObject;
 
             if (item.IsCorpse)
-                return DrawInternal(spriteBatch, position, objectList);
+                return DrawCorpse(spriteBatch, position, objectList);
 
             if (item.Effect == null)
             {
@@ -79,9 +76,9 @@ namespace ClassicUO.Game.Views
                     Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
                 }
 
-                HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, TileData.IsPartialHue((long) item.ItemData.Flags), TileData.IsTranslucent((long) item.ItemData.Flags) ? .5f : 0, false);
+                HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, TileData.IsPartialHue( item.ItemData.Flags), TileData.IsTranslucent( item.ItemData.Flags) ? .5f : 0, false);
 
-                if (item.Amount > 1 && TileData.IsStackable((long) item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
+                if (item.Amount > 1 && TileData.IsStackable(item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
                 {
                     Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
                     base.Draw(spriteBatch, offsetDrawPosition, objectList);
@@ -96,18 +93,12 @@ namespace ClassicUO.Game.Views
             return !item.Effect.IsDisposed && item.Effect.View.Draw(spriteBatch, position, objectList);
         }
 
-        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public bool DrawCorpse(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-#if !ORIONSORT
-            PreDraw(position);
-#endif
-
             if (GameObject.IsDisposed)
                 return false;
             Item item = (Item) GameObject;
-#if !ORIONSORT
-            spriteBatch.GetZ();
-#endif
+
             byte dir = (byte) ((byte) item.Layer & 0x7F & 7);
             bool mirror = false;
             Animations.GetAnimDirection(ref dir, ref mirror);
@@ -168,14 +159,14 @@ namespace ClassicUO.Game.Views
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                     HueVector = ShaderHuesTraslator.GetHueVector(color);
                     base.Draw(spriteBatch, position, objectList);
-                    Pick(frame.ID, Bounds, position, objectList);
+                    Pick(frame, Bounds, position, objectList);
                 }
             }
 
             return true;
         }
 
-        private void Pick(int id, Rectangle area, Vector3 drawPosition, MouseOverList list)
+        private void Pick(SpriteTexture texture, Rectangle area, Vector3 drawPosition, MouseOverList list)
         {
             int x;
 
@@ -184,7 +175,9 @@ namespace ClassicUO.Game.Views
             else
                 x = list.MousePosition.X - (int) drawPosition.X + area.X;
             int y = list.MousePosition.Y - ((int) drawPosition.Y - area.Y);
-            if (Animations.Contains(id, x, y)) list.Add(GameObject, drawPosition);
+            //if (Animations.Contains(id, x, y))
+            if (texture.Contains(x, y))
+                list.Add(GameObject, drawPosition);
         }
 
         protected override void MousePick(MouseOverList objectList, SpriteVertex[] vertex)
@@ -197,7 +190,8 @@ namespace ClassicUO.Game.Views
             //    objectList.Add(GameObject, vertex[0].Position);
             //}
 
-            if (Art.Contains(GameObject.Graphic, x, y, 0))
+            //if (Art.Contains(((Item)GameObject).DisplayedGraphic, x, y))
+            if (Texture.Contains(x, y))
                 objectList.Add(GameObject, vertex[0].Position);
         }
     }

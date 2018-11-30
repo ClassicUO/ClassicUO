@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 
 using Microsoft.Xna.Framework;
@@ -48,6 +45,25 @@ namespace ClassicUO.Input
         public MouseButton Button { get; }
 
         public ButtonState ButtonState { get; }
+    }
+
+    public sealed class MouseDoubleClickEventArgs : EventArgs
+    {
+        public MouseDoubleClickEventArgs(int x, int y, MouseButton button)
+        {
+            Location = new Point(x, y);
+            Button = button;
+        }
+
+        public Point Location { get; }
+
+        public int X => Location.X;
+
+        public int Y => Location.Y;
+
+        public MouseButton Button { get; }
+
+        public bool Result { get; set; }
     }
 
     public sealed class MouseWheelEventArgs : EventArgs

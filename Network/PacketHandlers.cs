@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,6 +38,8 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+
+using Microsoft.Xna.Framework;
 
 using Multi = ClassicUO.Game.GameObjects.Multi;
 
@@ -167,7 +166,8 @@ namespace ClassicUO.Network
             //ToServer.Add(0x3B, BuyItems);
             ToClient.Add(0x3C, UpdateContainedItems);
             ToClient.Add(0x3E, VersionGodClient);
-            ToClient.Add(0x3F, UpdateStaticsGodClient);
+            ToClient.Add(0x3F, UltimaLive.OnUltimaLivePacket);
+            ToClient.Add(0x40, UltimaLive.OnUpdateTerrainPacket);
             /*ToServer.Add(0x45, VersionOK);
             ToServer.Add(0x46, NewArtwork);
             ToServer.Add(0x47, NewTerrain);
@@ -204,6 +204,7 @@ namespace ClassicUO.Network
             ToClient.Add(0x66, BookData); //ToServer.Add(0x66, BookPagesS);
             //ToServer.Add(0x69, ChangeText);
             ToClient.Add(0x6C, TargetCursor);
+            ToClient.Add(0x6F, SecureTrading);
             ToClient.Add(0x6E, CharacterAnimation);
             ToClient.Add(0x70, GraphicEffect);
             ToClient.Add(0x71, BulletinBoardData); //ToServer.Add(0x71, BulletinBoardMessagesS);
@@ -308,6 +309,45 @@ namespace ClassicUO.Network
         private static void TargetCursor(Packet p)
         {
             TargetSystem.SetTargeting((TargetType) p.ReadByte(), p.ReadUInt(), p.ReadByte());
+        }
+
+        private static void SecureTrading(Packet p)
+        {
+            if (!World.InGame)
+                return;
+
+            byte type = p.ReadByte();
+            Serial serial = p.ReadUInt();
+
+            if (type == 0)
+            {
+                Serial id1 = p.ReadUInt();
+                Serial id2 = p.ReadUInt();
+                bool hasName = p.ReadBool();
+                string name = string.Empty;
+
+                if (hasName && p.Position < p.Length)
+                    name = p.ReadASCII();
+
+                Service.Get<UIManager>().Add(new TradingGump(serial, name, id1, id2));
+            }
+            else if (type == 1)
+            {
+                Service.Get<UIManager>().Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial)?.Dispose();
+            }
+            else if (type == 2)
+            {
+                Serial id1 = p.ReadUInt();
+                Serial id2 = p.ReadUInt();
+
+                TradingGump trading = Service.Get<UIManager>().Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial);
+
+                if (trading != null)
+                {
+                    trading.ImAccepting = id1 != 0;
+                    trading.HeIsAccepting = id2 != 0;
+                }
+            }
         }
 
         private static void ClientTalk(Packet p)
@@ -555,7 +595,7 @@ namespace ClassicUO.Network
             item.ProcessDelta();
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
-            if (TileData.IsAnimated((long) item.ItemData.Flags))
+            if (TileData.IsAnimated(item.ItemData.Flags))
                 item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
         }
 
@@ -582,6 +622,8 @@ namespace ClassicUO.Network
             NetClient.Socket.Send(new PStatusRequest(World.Player));
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
+
+            Service.Get<UIManager>().RestoreGumps();
         }
 
         private static void Talk(Packet p)
@@ -678,7 +720,9 @@ namespace ClassicUO.Network
             {
                 //ref Tile tile = ref World.Map.GetTile(x, y);
                 //World.Player.Position = new Position(x, y, z);
-                World.Player.SetTile(x, y);
+                //World.Player.SetTile(x, y);
+
+                World.Player.Tile = World.Map.GetTile(x, y);
             }
 
             //else if (World.Player.Tile == Tile.Invalid)
@@ -770,10 +814,18 @@ namespace ClassicUO.Network
             Graphic graphic = p.ReadUShort();
             UIManager ui = Service.Get<UIManager>();
 
+            ui.GetByLocalSerial(serial)?.Dispose();
+
             if (graphic == 0x30) // vendor
             {
                 var mobile = World.Mobiles.Get(serial);
-                ui.Add(new ShopGump(mobile, true, 100, 100));
+                var itemList = mobile.Items
+                    .Where(o => o.Layer == Layer.ShopResale || o.Layer == Layer.ShopBuy)
+                    .SelectMany(o => o.Items)
+                    .OrderBy(o => o.Serial.Value)
+                    .ToArray();
+
+                ui.Add(new ShopGump(mobile.Serial, itemList, true, 100, 100));
             }
             else
             {
@@ -1282,10 +1334,27 @@ namespace ClassicUO.Network
 
             if (ui.GetByLocalSerial<PaperDollGump>(mobile) == null)
             {
-                ui.Add(new PaperDollGump(mobile, text)
+                if (!ui.GetGumpCachePosition(mobile, out Point location))
                 {
-                    X = 100, Y = 100
-                });
+                    //if (Service.Get<Settings>().GetGumpValue(typeof(PaperDollGump), "location", out object point))
+                    //{
+                    //    string[] s = point.ToString().Split(new[]
+                    //    {
+                    //        ','
+                    //    }, StringSplitOptions.RemoveEmptyEntries);
+
+                    //    location.X = Convert.ToInt32(s[0]);
+                    //    location.Y = Convert.ToInt32(s[1]);
+                    //}
+                    //else
+                    {
+                        location = new Point(100 ,100);
+                    }
+                }
+
+
+
+                ui.Add(new PaperDollGump(mobile, text) { Location = location});
             }
         }
 
@@ -1373,16 +1442,27 @@ namespace ClassicUO.Network
 
             if (countItems <= 0) return;
 
+            List<Item> itemList = new List<Item>(countItems);
+
             for (int i = 0; i < countItems; i++)
             {
                 Item item = World.GetOrCreateItem(p.ReadUInt());
-                Graphic graphic = p.ReadUShort();
-                Hue hue = p.ReadUShort();
-                ushort count = p.ReadUShort();
-                ushort price = p.ReadUShort();
-                string name = p.ReadASCII(p.ReadByte());
-                if (int.TryParse(name, out int clilocnum)) name = Cliloc.GetString(clilocnum);
+                item.Graphic = p.ReadUShort();
+                item.Hue = p.ReadUShort();
+                item.Amount = p.ReadUShort();
+                item.Price = p.ReadUShort();
+                
+                string name = p.ReadASCII(p.ReadUShort());
+                if (int.TryParse(name, out int clilocnum))
+                    name = Cliloc.GetString(clilocnum);
+
+                item.Name = name;
+
+                itemList.Add(item);
             }
+
+            UIManager ui = Service.Get<UIManager>();
+            ui.Add(new ShopGump(vendor.Serial, itemList.ToArray(), false, 100, 100));
         }
 
         private static void UpdateHitpoints(Packet p)
@@ -1499,7 +1579,32 @@ namespace ClassicUO.Network
 
         private static void OpenGump(Packet p)
         {
-            if (World.Player == null) return;
+            if (World.Player == null)
+                return;
+
+            Log.Message(LogTypes.Warning, "OpenGump 0xB0 not handled.");
+            return;
+            Serial sender = p.ReadUInt();
+            Serial gumpID = p.ReadUInt();
+            uint x = p.ReadUInt();
+            uint y = p.ReadUInt();
+
+            ushort cmdLen = p.ReadUShort();
+            string cmd = p.ReadASCII(cmdLen);
+
+            ushort textLinesCount = p.ReadUShort();
+
+            string[] lines = new string[textLinesCount];
+
+            for (int i = 0; i < textLinesCount; i++)
+            {
+                ushort lineLen = p.ReadUShort();
+                //byte[] text = new byte[lineLen * 2];
+                //Buffer.BlockCopy();
+                string text = p.ReadUnicode(lineLen);
+
+                lines[i] = text;
+            }
         }
 
         private static void ChatMessage(Packet p)
@@ -1584,44 +1689,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 6: //party
-                    const byte CommandPartyList = 0x01;
-                    const byte CommandRemoveMember = 0x02;
-                    const byte CommandPrivateMessage = 0x03;
-                    const byte CommandPublicMessage = 0x04;
-                    const byte CommandInvitation = 0x07;
-                    byte SubCommand = p.ReadByte();
-
-                    switch (SubCommand)
-                    {
-                        case CommandPartyList:
-                            int Count = p.ReadByte();
-                            Serial[] Serials = new Serial[Count];
-                            for (int i = 0; i < Serials.Length; i++) Serials[i] = p.ReadUInt();
-                            PartySystem.ReceivePartyMemberList(Serials);
-
-                            break;
-                        case CommandRemoveMember:
-                            Count = p.ReadByte();
-                            p.ReadUInt();
-                            Serials = new Serial[Count];
-                            for (int i = 0; i < Serials.Length; i++) Serials[i] = p.ReadUInt();
-                            PartySystem.ReceiveRemovePartyMember(Serials);
-
-                            break;
-                        case CommandPrivateMessage:
-
-                            //Info = new PartyMessageInfo(reader, true);
-                            break;
-                        case CommandPublicMessage:
-
-                            //Info = new PartyMessageInfo(reader, false);
-                            break;
-                        case CommandInvitation: //PARTY INVITE PROGRESS
-
-                            //Info = new PartyInvitationInfo(reader);
-                            break;
-                    }
-
+                    PartySystem.HandlePartyPacket(p);
                     break;
                 //===========================================================================================
                 //===========================================================================================
@@ -2149,7 +2217,6 @@ namespace ClassicUO.Network
             byte[] data = p.ReadArray((int) clen);
             byte[] decData = new byte[dlen];
             ZLib.Decompress(data, 0, decData, dlen);
-            //ZLib.Unpack(decData, ref dlen, data, (int)clen);
             string layout = Encoding.UTF8.GetString(decData);
             uint linesNum = p.ReadUInt();
             string[] lines = new string[0];
@@ -2164,7 +2231,6 @@ namespace ClassicUO.Network
                     data[i] = p.ReadByte();
                 decData = new byte[dlen];
                 ZLib.Decompress(data, 0, decData, dlen);
-                //ZLib.Unpack(decData, ref dlen, data, data.Length);
                 lines = new string[linesNum];
 
                 for (int i = 0, index = 0; i < linesNum; i++)
@@ -2294,7 +2360,7 @@ namespace ClassicUO.Network
             item.ProcessDelta();
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
-            if (TileData.IsAnimated((long) item.ItemData.Flags))
+            if (TileData.IsAnimated(item.ItemData.Flags))
                 item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
         }
 
@@ -2320,7 +2386,6 @@ namespace ClassicUO.Network
 
             if (entity != null)
             {
-                //entity.EnableCallBackForItemsUpdate(true);
                 entity.Items.Add(item);
 
                 foreach (Item i in World.ToAdd.Where(i => i.Container == item))

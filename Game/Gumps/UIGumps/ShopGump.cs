@@ -1,4 +1,24 @@
-﻿using System;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -21,12 +41,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private readonly Label _totalLabel;
         private readonly Dictionary<Item, TransactionItem> _transactionItems;
         private readonly ScrollArea _transactionScrollArea;
+        private readonly bool _isBuyGump;
         private bool updateTotal;
-
-        public ShopGump(Mobile shopMobile, bool isBuyGump, int x, int y) : base(shopMobile.Serial, 0)
+        
+        public ShopGump(Serial serial, Item[] itemList, bool isBuyGump, int x, int y) : base(serial, 0)
         {
             _transactionItems = new Dictionary<Item, TransactionItem>();
             _shopItems = new Dictionary<Item, ShopItem>();
+            _isBuyGump = isBuyGump;
             updateTotal = false;
             X = x;
             Y = y;
@@ -50,6 +72,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 Alpha = 1
             };
+
             boxAccept.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Accept); };
             boxClear.MouseClick += (sender, e) => { OnButtonClick((int) Buttons.Clear); };
             AddChildren(boxAccept);
@@ -77,12 +100,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 X = 242, Y = 408
             });
-            AcceptMouseInput = true;
-            CanMove = true;
+            
             _shopScrollArea = new ScrollArea(20, 60, 235, 150, false);
-            var itemsToShow = shopMobile.Items.Where(o => o.Layer == Layer.ShopResale || o.Layer == Layer.ShopBuy).SelectMany(o => o.Items).OrderBy(o => o.Serial.Value);
-
-            foreach (var item in itemsToShow)
+            
+            foreach (var item in itemList)
             {
                 ShopItem shopItem;
 
@@ -102,6 +123,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(_shopScrollArea);
             AddChildren(_transactionScrollArea = new ScrollArea(200, 280, 225, 80, false));
+
+            AcceptMouseInput = true;
+            CanMove = true;
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -112,11 +136,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 updateTotal = false;
             }
 
-            _playerGoldLabel.Text = World.Player.Gold.ToString();
+            if (_playerGoldLabel != null)
+                _playerGoldLabel.Text = World.Player.Gold.ToString();
+
             base.Update(totalMS, frameMS);
         }
 
-        private void ShopItem_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void ShopItem_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
             var shopItem = (ShopItem) sender;
             TransactionItem transactionItem;
@@ -187,7 +213,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 case Buttons.Accept:
                     var items = _transactionItems.Select(t => new Tuple<uint, ushort>(t.Key.Serial, (ushort) t.Value.Amount)).ToArray();
-                    NetClient.Socket.Send(new PBuyRequest(LocalSerial, items));
+                    if (_isBuyGump)
+                        NetClient.Socket.Send(new PBuyRequest(LocalSerial, items));
+                    else
+                        NetClient.Socket.Send(new PSellRequest(LocalSerial, items));
+
                     Dispose();
 
                     break;
@@ -270,7 +300,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     X = 5, Y = 5
                 });
 
-                AddChildren(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 150, 9)
+                AddChildren(new Label($"{itemName} at {item.Price}gp", false, 0x021F, 140, 9)
                 {
                     X = 30, Y = 5
                 });

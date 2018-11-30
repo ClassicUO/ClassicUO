@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 
@@ -37,7 +34,6 @@ namespace ClassicUO.Game.Scenes
     {
         protected Scene(ScenesType type)
         {
-            ChainActions = new List<Func<bool>>();
             SceneType = type;
             Game = Service.Get<GameLoop>();
             Device = Game.GraphicsDevice;
@@ -45,7 +41,6 @@ namespace ClassicUO.Game.Scenes
             InputManager = Service.Get<InputManager>();
         }
 
-        public IReadOnlyList<Func<bool>> ChainActions { get; }
 
         protected GraphicsDevice Device { get; }
 

@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 
@@ -72,9 +69,9 @@ namespace ClassicUO.Game
 
         private static bool CreateItemList(ref List<PathObject> list, int x, int y, int stepState)
         {
-            ref Tile tile = ref World.Map.GetTile(x, y);
+             Tile tile =  World.Map.GetTile(x, y);
 
-            if (tile == Tile.Invalid)
+            if (tile == null)
                 return false;
             bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
             bool isGM = World.Player.Graphic == 0x03DB;
@@ -93,7 +90,7 @@ namespace ClassicUO.Game
                         if (graphic < 0x01AE && graphic != 2 || graphic > 0x01B5 && graphic != 0x01DB)
                         {
                             uint flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
-                            long tileDataFlags = (long) tile1.TileData.Flags;
+                            ulong tileDataFlags = tile1.TileData.Flags;
 
                             if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                             {
@@ -130,14 +127,14 @@ namespace ClassicUO.Game
 
                                 break;
                             }
-                            case Item item when item.IsMulti || TileData.IsInternal((long) item.ItemData.Flags):
+                            case Item item when item.IsMulti || TileData.IsInternal( item.ItemData.Flags):
 
                             {
                                 canBeAdd = false;
 
                                 break;
                             }
-                            case IDynamicItem dyn when stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (TileData.IsDoor((long) dyn.ItemData.Flags) || dyn.ItemData.Weight <= 0x5A /*|| (isGM && !)*/):
+                            case IDynamicItem dyn when stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (TileData.IsDoor( dyn.ItemData.Flags) || dyn.ItemData.Weight <= 0x5A /*|| (isGM && !)*/):
                                 dropFlags = true;
 
                                 break;
@@ -155,20 +152,20 @@ namespace ClassicUO.Game
                             {
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {
-                                    if (TileData.IsWet((long) dyn.ItemData.Flags))
+                                    if (TileData.IsWet( dyn.ItemData.Flags))
                                         flags = (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
                                 }
                                 else
                                 {
-                                    if (TileData.IsImpassable((long) dyn.ItemData.Flags) || TileData.IsSurface((long) dyn.ItemData.Flags))
+                                    if (TileData.IsImpassable( dyn.ItemData.Flags) || TileData.IsSurface( dyn.ItemData.Flags))
                                         flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
 
-                                    if (!TileData.IsImpassable((long) dyn.ItemData.Flags))
+                                    if (!TileData.IsImpassable( dyn.ItemData.Flags))
                                     {
-                                        if (TileData.IsSurface((long) dyn.ItemData.Flags))
+                                        if (TileData.IsSurface( dyn.ItemData.Flags))
                                             flags |= (uint) PATH_OBJECT_FLAGS.POF_SURFACE;
 
-                                        if (TileData.IsBridge((long) dyn.ItemData.Flags))
+                                        if (TileData.IsBridge( dyn.ItemData.Flags))
                                             flags |= (uint) PATH_OBJECT_FLAGS.POF_BRIDGE;
                                     }
 
@@ -186,7 +183,7 @@ namespace ClassicUO.Game
                                     if (dropFlags)
                                         flags &= 0xFFFFFFFE;
 
-                                    if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && TileData.IsNoDiagonal((long) dyn.ItemData.Flags))
+                                    if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && TileData.IsNoDiagonal( dyn.ItemData.Flags))
                                         flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
                                 }
 
@@ -196,7 +193,7 @@ namespace ClassicUO.Game
                                     int staticHeight = dyn.ItemData.Height;
                                     int staticAverageZ = staticHeight;
 
-                                    if (TileData.IsBridge((long) dyn.ItemData.Flags))
+                                    if (TileData.IsBridge( dyn.ItemData.Flags))
                                         staticAverageZ /= 2;
                                     list.Add(new PathObject(flags, objZ, staticAverageZ + objZ, staticHeight, obj));
                                 }

@@ -1,5 +1,27 @@
-﻿using System;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using System;
+using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
@@ -15,16 +37,50 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private GumpPic _pageCornerLeft, _pageCornerRight;
         private SpellBookType _spellBookType;
 
-        public SpellbookGump(Item item) : base(item.Serial, 0)
+        public SpellbookGump(Item item) : this()
         {
             _spellBook = item;
-            //_spellBook.SetCallbacks(OnEntityUpdate, OnEntityDispose);
+            BuildGump();
+        }
+
+        public SpellbookGump() : base(0, 0)
+        {
+            CanMove = true;
+            AcceptMouseInput = false;
+            CanBeSaved = true;
+        }
+
+        public override bool Save(out Dictionary<string, object> data)
+        {
+            if (base.Save(out data))
+            {
+                data["serial"] = _spellBook.Serial.Value;
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool Restore(Dictionary<string, object> data)
+        {
+            //if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(SpellbookGump), "serial", out uint serial))
+            //{
+            //    GameActions.DoubleClick(serial);
+            //    Dispose();
+            //    return true;
+            //}
+
+            return false;
+        }
+
+        private void BuildGump()
+        {          
+            LocalSerial = _spellBook.Serial;
             _spellBook.Items.Added += ItemsOnAdded;
             _spellBook.Items.Removed += ItemsOnRemoved;
             _spellBook.Disposed += SpellBookOnDisposed;
-            CanMove = true;
-            AcceptMouseInput = false;
-            OnEntityUpdate(item);
+
+            OnEntityUpdate(_spellBook);
         }
 
         private void SpellBookOnDisposed(object sender, EventArgs e)
@@ -191,7 +247,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
             }
 
-            int page1 = dictionaryPagesCount / 2;
+            int page1 = dictionaryPagesCount / 2 + 1;
             int topTextY = _spellBookType == SpellBookType.Magery ? 10 : 6;
             bool haveReagents = _spellBookType <= SpellBookType.Necromancy;
             bool haveAbbreviature = _spellBookType != SpellBookType.Bushido && _spellBookType != SpellBookType.Ninjitsu;
@@ -200,20 +256,27 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 if (_spells[i] <= 0)
                     continue;
+
                 int iconX = 62;
                 int topTextX = 87;
                 int iconTextX = 112;
                 uint iconSerial = 100 + (uint) i;
 
-                if (i % 2 != 0)
+
+                if (i > 0)
                 {
-                    iconX = 225;
-                    topTextX = 244 - 20;
-                    iconTextX = 275;
-                    iconSerial = 1000 + (uint) i;
+                    if (i % 2 != 0)
+                    {
+                        iconX = 225;
+                        topTextX = 244 - 20;
+                        iconTextX = 275;
+                        iconSerial = 1000 + (uint) (i);  
+                    }
+                    else
+                    {
+                        page1++;
+                    }                       
                 }
-                else
-                    page1++;
 
                 GetSpellNames(i, out string name, out string abbreviature, out string reagents);
 
@@ -649,7 +712,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (e.Button == MouseButton.Left && sender is GumpControl ctrl) SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
         }
 
-        private void PageCornerOnMouseDoubleClick(object sender, MouseEventArgs e)
+        private void PageCornerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
             if (e.Button == MouseButton.Left && sender is GumpControl ctrl) SetActivePage(ctrl.LocalSerial == 0 ? 1 : _maxPage);
         }

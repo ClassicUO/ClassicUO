@@ -1,4 +1,24 @@
-﻿using System;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -44,10 +64,9 @@ namespace ClassicUO.Renderer
         private readonly SpriteVertex[] _vertexInfo;
         private bool _started;
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
-        private readonly RasterizerState _rasterizerState;
-#if !ORIONSORT
-        private float _z;
-#endif
+        private RasterizerState _rasterizerState;
+        private BlendState _blendState;
+
         private int _numSprites;
 
         public SpriteBatch3D(GraphicsDevice device)
@@ -73,6 +92,7 @@ namespace ClassicUO.Renderer
                                            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
             _effect.CurrentTechnique = _huesTechnique;
             _rasterizerState = RasterizerState.CullNone;
+            _blendState = BlendState.AlphaBlend;
         }
 
         public Matrix TransformMatrix => _transformMatrix;
@@ -86,6 +106,8 @@ namespace ClassicUO.Renderer
         public int Calls { get; set; }
 
         public int Merged { get; set; }
+
+        public int FlushCount { get; set; }
 
         public void SetLightDirection(Vector3 dir)
         {
@@ -102,19 +124,14 @@ namespace ClassicUO.Renderer
             _drawLightingEffect.SetValue(value);
         }
 
-#if !ORIONSORT
-        public float GetZ() => _z++;
-#endif
-
         public void Begin()
         {
             EnsureNotStarted();
             _started = true;
             Calls = 0;
             Merged = 0;
-#if !ORIONSORT
-            _z = 0;
-#endif
+            FlushCount = 0;
+
             _drawingArea.Min = _minVector3;
             _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
         }
@@ -148,9 +165,7 @@ namespace ClassicUO.Renderer
 
             if (_numSprites >= MAX_SPRITES)
                 Flush();
-#if !ORIONSORT
-            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
-#endif
+
             _textureInfo[_numSprites] = texture;
 
             fixed (SpriteVertex* p = &_vertexInfo[_numSprites * 4])
@@ -178,9 +193,7 @@ namespace ClassicUO.Renderer
 
             if (_numSprites >= MAX_SPRITES)
                 Flush();
-#if !ORIONSORT
-            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = z;
-#endif
+
             float skewHorizTop = (vertices[0].Position.Y - position.Y) * .5f;
             float skewHorizBottom = (vertices[3].Position.Y - position.Y) * .5f;
             vertices[0].Position.X -= skewHorizTop;
@@ -224,7 +237,7 @@ namespace ClassicUO.Renderer
 
         private void ApplyStates()
         {
-            GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            GraphicsDevice.BlendState = _blendState;
             GraphicsDevice.DepthStencilState = DepthStencilState.None;
             GraphicsDevice.RasterizerState = _rasterizerState;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
@@ -252,6 +265,9 @@ namespace ClassicUO.Renderer
 
             if (_numSprites == 0)
                 return;
+
+            FlushCount++;
+
             fixed (SpriteVertex* p = &_vertexInfo[0]) _vertexBuffer.SetDataPointerEXT(0, (IntPtr) p, _numSprites * 4 * SpriteVertex.SizeInBytes, SetDataOptions.None);
             Texture2D current = _textureInfo[0];
             int offset = 0;
@@ -279,68 +295,38 @@ namespace ClassicUO.Renderer
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void InternalDraw(Texture2D texture, int baseSprite, int batchSize)
         {
-            //switch (texture.Technique)
-            //{
-            //    case Techniques.Hued:
-
-            //        if (last != texture.Technique)
-            //        {
-            //            _effect.CurrentTechnique = _huesTechnique;
-            //            last = texture.Technique;
-            //            _effect.CurrentTechnique.Passes[0].Apply();
-            //        }
-
-            //        break;
-            //    case Techniques.ShadowSet:
-
-            //        if (last != texture.Technique)
-            //        {
-            //            _effect.CurrentTechnique = _shadowTechnique;
-            //            last = texture.Technique;
-            //            _effect.CurrentTechnique.Passes[0].Apply();
-            //        }
-
-            //        break;
-            //    case Techniques.Land:
-
-            //        if (last != texture.Technique)
-            //        {
-            //            _effect.CurrentTechnique = _landTechnique;
-            //            last = texture.Technique;
-            //            _effect.CurrentTechnique.Passes[0].Apply();
-            //        }
-            //        break;
-            //}
-
-            //GraphicsDevice.RasterizerState.ScissorTestEnable = texture.ScissorEnabled;
-
-            //if (texture.ScissorEnabled && texture.ScissorRectangle.HasValue)
-            //    GraphicsDevice.ScissorRectangle = texture.ScissorRectangle.Value;
             GraphicsDevice.Textures[0] = texture;
             GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, baseSprite * 4, 0, batchSize * 2);
-
-            //GraphicsDevice.RasterizerState.ScissorTestEnable = texture.ScissorEnabled;
-
-            //if (texture.ScissorEnabled && texture.ScissorRectangle.HasValue)
-            //    GraphicsDevice.ScissorRectangle = Rectangle.Empty;
         }
 
         public void EnableScissorTest(bool enable)
         {
             if (enable == _rasterizerState.ScissorTestEnable)
                 return;
-            Flush();
-            _rasterizerState.ScissorTestEnable = enable;
 
-            //_rasterizerState = new RasterizerState()
-            //{
-            //    CullMode = _rasterizerState.CullMode,
-            //    DepthBias = _rasterizerState.DepthBias,
-            //    FillMode = _rasterizerState.FillMode,
-            //    MultiSampleAntiAlias = _rasterizerState.MultiSampleAntiAlias,
-            //    SlopeScaleDepthBias = _rasterizerState.SlopeScaleDepthBias,
-            //    ScissorTestEnable = enable
-            //};
+            Flush();
+
+            _rasterizerState?.Dispose();
+
+            _rasterizerState = new RasterizerState() { ScissorTestEnable = enable };
+        }
+
+
+        public void SetBlendMode(Blend src, Blend dst, BlendFunction function = BlendFunction.Add)
+        {
+            if (_blendState.AlphaSourceBlend == src && _blendState.AlphaDestinationBlend == dst)
+                return;
+
+            Flush();
+
+            _blendState?.Dispose();
+
+            _blendState = new BlendState
+            {
+                AlphaSourceBlend = src, AlphaDestinationBlend = dst, ColorSourceBlend = src, ColorDestinationBlend = dst,
+                AlphaBlendFunction =  function, ColorBlendFunction = function
+            };
+
         }
 
         private static short[] GenerateIndexArray()

@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
@@ -71,12 +68,13 @@ namespace ClassicUO.Game.Gumps.Controls
             if (Item.IsDisposed || IsDisposed)
                 return false;
 
-            return spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue((long) Item.ItemData.Flags), _isTransparent ? .5f : 0, false));
+            return spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue(Item.ItemData.Flags), _isTransparent ? .5f : 0, false));
         }
 
         protected override bool Contains(int x, int y)
         {
-            return IO.Resources.Gumps.Contains(_gumpIndex, x, y);
+            return Texture.Contains(x, y);
+            //return IO.Resources.Gumps.Contains(_gumpIndex, x, y);
         }
     }
 }

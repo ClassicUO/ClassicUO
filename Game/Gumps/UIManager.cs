@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,15 +17,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Input;
@@ -115,13 +113,11 @@ namespace ClassicUO.Game.Gumps
                 _mouseDownControls[btn] = null;
             };
 
-            InputManager.LeftMouseDoubleClick += () =>
+            InputManager.LeftMouseDoubleClick += (sender, e) =>
             {
                 if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                    return false;
-                if (MouseOverControl != null && IsMouseOverUI) return MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
-
-                return false;
+                    e.Result = false;
+                if (MouseOverControl != null && IsMouseOverUI) e.Result |= MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
             };
 
             InputManager.RightMouseButtonDown += (sender, e) =>
@@ -259,9 +255,14 @@ namespace ClassicUO.Game.Gumps
             _gumpPositionCache[serverSerial] = point;
         }
 
+        public bool GetGumpCachePosition(Serial id, out Point pos)
+        {
+            return _gumpPositionCache.TryGetValue(id, out pos);
+        }
+
         public GumpControl Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
         {
-            if (_gumpPositionCache.TryGetValue(gumpID, out Point pos))
+            if (GetGumpCachePosition(gumpID, out Point pos))
             {
                 x = pos.X;
                 y = pos.Y;
@@ -527,6 +528,38 @@ namespace ClassicUO.Game.Gumps
         {
             GameCursor?.ClearDraggedItem();
             _gumps.ForEach(s => s.Dispose());
+        }
+
+        public void SaveGumps()
+        {
+            var gumps = _gumps.OfType<Gump>().Where(s => s.CanBeSaved);
+            var settings = Service.Get<Settings>();
+            settings.ClearGumps();
+            foreach (Gump gump in gumps)
+            {
+                if (gump.Save(out Dictionary<string, object> data))
+                {
+                    settings.AddGump(gump.GetType(), data);
+                }
+            }
+        }
+
+        public void RestoreGumps()
+        {
+            var settings = Service.Get<Settings>();
+            var dict = settings.GumpsData;
+
+            //foreach (KeyValuePair<string, Dictionary<string, object>> k in dict)
+            //{
+            //    Type type = Type.GetType(k.Key);
+            //    object gump = Activator.CreateInstance(type);
+
+            //    if (gump is Gump g)
+            //    {
+            //        if (g.Restore(k.Value))
+            //            Add(g);
+            //    }
+            //}
         }
 
         private void HandleKeyboardInput()

@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System.Collections.Generic;
 
 using ClassicUO.Game.GameObjects;
@@ -28,14 +25,14 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
-    public struct MapChunk
+    public sealed class MapChunk
     {
         public static readonly MapChunk Invalid = new MapChunk(0xFFFF, 0xFFFF);
 
         public MapChunk(ushort x, ushort y)
         {
-            _x = x;
-            _y = y;
+            X = x;
+            Y = y;
             Tiles = new Tile[8][];
 
             for (int i = 0; i < 8; i++)
@@ -44,46 +41,49 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++) Tiles[i][j] = new Tile((ushort) (i + x * 8), (ushort) (j + y * 8));
             }
 
-            LastAccessTime = CoreGame.Ticks + 15000;
+            LastAccessTime = CoreGame.Ticks + 5000;
         }
 
-        private ushort? _x, _y;
+        //private ushort? _x, _y;
 
-        public ushort X
-        {
-            get => _x ?? 0xFFFF;
-            set => _x = value;
-        }
+        public ushort X { get; }
+        public ushort Y { get; }
 
-        public ushort Y
-        {
-            get => _y ?? 0xFFFF;
-            set => _y = value;
-        }
+        //public ushort X
+        //{
+        //    get => _x ?? 0xFFFF;
+        //    set => _x = value;
+        //}
 
-        public Tile[][] Tiles { get; }
+        //public ushort Y
+        //{
+        //    get => _y ?? 0xFFFF;
+        //    set => _y = value;
+        //}
+
+        public Tile[][] Tiles { get; private set; }
 
         public long LastAccessTime { get; set; }
 
-        public static bool operator ==(MapChunk p1, MapChunk p2)
-        {
-            return p1.X == p2.X && p1.Y == p2.Y;
-        }
+        //public static bool operator ==(MapChunk p1, MapChunk p2)
+        //{
+        //    return p1.X == p2.X && p1.Y == p2.Y;
+        //}
 
-        public static bool operator !=(MapChunk p1, MapChunk p2)
-        {
-            return p1.X != p2.X || p1.Y != p2.Y;
-        }
+        //public static bool operator !=(MapChunk p1, MapChunk p2)
+        //{
+        //    return p1.X != p2.X || p1.Y != p2.Y;
+        //}
 
-        public override int GetHashCode()
-        {
-            return X ^ Y;
-        }
+        //public override int GetHashCode()
+        //{
+        //    return X ^ Y;
+        //}
 
-        public override bool Equals(object obj)
-        {
-            return obj is MapChunk mapChunk && this == mapChunk;
-        }
+        //public override bool Equals(object obj)
+        //{
+        //    return obj is MapChunk mapChunk && this == mapChunk;
+        //}
 
         public unsafe void Load(int map)
         {
@@ -110,10 +110,12 @@ namespace ClassicUO.Game.Map
                             Graphic = tileID,
                             AverageZ = z,
                             MinZ = z,
-                            IsStretched = info.TexID == 0 && TileData.IsWet((long) info.Flags),
-                            Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
+                            IsStretched = info.TexID == 0 && TileData.IsWet(info.Flags),
                         };
-                        land.Calculate();
+                        ushort tileX = (ushort) (bx + x);
+                        ushort tileY = (ushort) (by + y);
+                        land.Calculate(tileX, tileY, z);
+                        land.Position = new Position(tileX, tileY, z);
                     }
                 }
 
@@ -142,7 +144,7 @@ namespace ClassicUO.Game.Map
                                     Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
                                 };
 
-                                if (TileData.IsAnimated((long) staticObject.ItemData.Flags))
+                                if (TileData.IsAnimated(staticObject.ItemData.Flags))
                                     staticObject.Effect = new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1);
                             }
                         }
@@ -151,15 +153,9 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        private IndexMap GetIndex(int map)
-        {
-            return GetIndex(map, X, Y);
-        }
+        private IndexMap GetIndex(int map) => GetIndex(map, X, Y);
 
-        private static IndexMap GetIndex(int map, int x, int y)
-        {
-            return IO.Resources.Map.GetIndex(map, x, y);
-        }
+        private static IndexMap GetIndex(int map, int x, int y) => IO.Resources.Map.GetIndex(map, x, y);
 
         public void Unload()
         {
@@ -168,9 +164,11 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++)
                 {
                     Tiles[i][j].Dispose();
-                    Tiles[i][j] = Tile.Invalid;
+                    Tiles[i][j] = null;// Tile.Invalid;
                 }
             }
+
+            Tiles = null;
         }
 
         public bool HasNoExternalData()
@@ -179,8 +177,8 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    ref Tile tile = ref Tiles[i][j];
-                    IReadOnlyList<GameObject> list = tile.ObjectsOnTiles;
+                    Tile tile = Tiles[i][j];
+                    List<GameObject> list = tile.ObjectsOnTiles;
 
                     for (int k = 0; k < list.Count; k++)
                     {

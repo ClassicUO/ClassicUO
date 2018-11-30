@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,8 +17,8 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
+using System.Runtime.CompilerServices;
 
 using Microsoft.Xna.Framework;
 
@@ -49,6 +48,7 @@ namespace ClassicUO.Renderer
             return GetHueVector(hue, false, 0, false);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool noLighting)
         {
             ShadersEffectType type;
@@ -77,6 +77,7 @@ namespace ClassicUO.Renderer
             return new Vector3(hue, (int) type, alpha);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 GetHueVector(int hue, ShadersEffectType type)
         {
             return new Vector3(hue, (int) type, 0);

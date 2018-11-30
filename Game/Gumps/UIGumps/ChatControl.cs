@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -103,7 +100,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                         break;
                     case ChatMode.Party:
-                        AppendChatModePrefix("[Party]: ", 68);
+                        AppendChatModePrefix("[Party]: ", 0xFFFF);
 
                         break;
                     case ChatMode.PartyPrivate:
@@ -334,7 +331,60 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     break;
                 case ChatMode.Party:
-                    PartySystem.PartyMessage(text);
+
+                    if (text.Equals("add"))
+                    {
+                        PartySystem.TriggerAddPartyMember();
+                        break;
+                    }
+
+                    if (PartySystem.IsInParty)
+                    {
+                        if (text.Equals("loot"))
+                        {
+                            PartySystem.AllowPartyLoot = !PartySystem.AllowPartyLoot ? true : false;
+                            break;
+                        }
+
+                        if (text.Equals("quit"))
+                        {
+                            PartySystem.QuitParty();
+                            break;
+                        }
+
+                        PartySystem.PartyMessage(text);
+                    }
+                    else
+                    {
+                        if (text.Equals("accept"))
+                        {
+                            PartySystem.AcceptPartyInvite();
+                        }
+                        else if (text.Equals("decline"))
+                        {
+                            PartySystem.DeclinePartyInvite();
+                        }
+                        else if (text.Equals("quit"))
+                        {
+                            string notInPartyMessage = "You are not in a party.";
+                            Hue notInPartyHue = 0x03B2; //white
+                            MessageType type = MessageType.Regular;
+                            MessageFont notInPartyFont = MessageFont.Normal;
+                            bool isUnicode = true;
+
+                            Chat.OnMessage(null, new UOMessageEventArgs(notInPartyMessage, notInPartyHue, type, notInPartyFont, isUnicode));
+                        }
+                        else
+                        {
+                            Hue noteToSelfHue = 0x7FFF; //grey
+                            MessageFont noteToSelfFont = MessageFont.Normal;
+                            string NoteToSelf = "Note to self: " + text;
+
+                            //we write directly to the journal to avoid 'System:' prefix
+                            Service.Get<ChatControl>().AddLine(NoteToSelf, (byte)noteToSelfFont, noteToSelfHue, false);
+                            Service.Get<JournalData>().AddEntry(NoteToSelf, (byte)noteToSelfFont, noteToSelfHue, "");
+                        }
+                    }
 
                     break;
                 case ChatMode.PartyPrivate:

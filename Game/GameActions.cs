@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 
 using ClassicUO.Game.Data;
@@ -68,12 +65,17 @@ namespace ClassicUO.Game
             Socket.Send(new PPartyMessage(message, 0));
         }
 
+        public static void RequestPartyAccept(Serial serial)
+        {
+            Socket.Send(new PPartyAccept(serial));
+        }
+
         public static void RequestPartyRemoveMember(Serial serial)
         {
             Socket.Send(new PPartyRemoveRequest(serial));
         }
 
-        public static void RequestPartyLeave()
+        public static void RequestPartyQuit()
         {
             Socket.Send(new PPartyRemoveRequest(World.Player));
         }
@@ -98,14 +100,14 @@ namespace ClassicUO.Game
             _pickUpAction(item, x, y, amount);
         }
 
-        public static void DropDown(Serial serial, int x, int y, int z, Serial container)
+        public static void DropItem(Serial serial, int x, int y, int z, Serial container)
         {
             Socket.Send(new PDropRequestNew(serial, (ushort) x, (ushort) y, (sbyte) z, 0, container));
         }
 
-        public static void DropDown(Serial serial, Position position, Serial container)
+        public static void DropItem(Serial serial, Position position, Serial container)
         {
-            DropDown(serial, position.X, position.Y, position.Z, container);
+            DropItem(serial, position.X, position.Y, position.Z, container);
         }
 
         public static void Equip(Serial serial, Layer layer, Mobile target)
@@ -192,5 +194,19 @@ namespace ClassicUO.Game
         {
             Socket.Send(new PPopupMenuSelection(serial, index));
         }
+
+        public static void SystemMessage(string message) => Chat.Print(message);
+
+        public static void SystemMessage(string message, ushort hue) => Chat.Print(message, hue);
+
+        public static void MessageOverhead(string message, Entity entity) => entity.Print(message);
+
+        public static void MessageOverhead(string message, ushort hue, Entity entity) => entity.Print(message, hue);
+
+        public static void AcceptTrade(Serial serial, bool accepted)
+            => Socket.Send(new PTradeResponse(serial, 2, accepted));
+
+        public static void CancelTrade(Serial serial)
+            => Socket.Send(new PTradeResponse(serial, 1, false));
     }
 }

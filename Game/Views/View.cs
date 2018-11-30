@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,11 +17,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Input;
@@ -36,11 +34,19 @@ using IDrawable = ClassicUO.Interfaces.IDrawable;
 
 namespace ClassicUO.Game.Views
 {
+    public struct FrameInfo
+    {
+        public int X, Y, OffsetX, OffsetY, EndX, EndY, Width, Height;
+
+        public static readonly FrameInfo Empty = new FrameInfo();
+    }
+
     public abstract class View : IDrawable, IColorable
     {
         protected static float PI = (float) Math.PI;
         private Vector3 _storedHue;
         public Rectangle Bounds;
+        public FrameInfo FrameInfo;
 
         protected View(GameObject parent)
         {
@@ -65,6 +71,18 @@ namespace ClassicUO.Game.Views
         public bool AllowedToDraw { get; set; }
 
         public SpriteTexture Texture { get; set; }
+
+        public Rectangle GetOnScreenRectangle()
+        {
+            Rectangle prect = Rectangle.Empty;
+            Settings set = Service.Get<Settings>();
+            prect.X = (int)((set.GameWindowX + set.GameWindowWidth / 2) - FrameInfo.OffsetX + GameObject.Offset.X);
+            prect.Y = (int)((set.GameWindowY + set.GameWindowHeight / 2) + GameObject.Offset.Y - FrameInfo.OffsetY);
+            prect.Width = FrameInfo.Width;
+            prect.Height = FrameInfo.Height;
+
+            return prect;
+        }
 
         public virtual unsafe bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
         {
@@ -173,83 +191,6 @@ namespace ClassicUO.Game.Views
             return true;
         }
 
-        protected bool PreDraw(Vector3 position)
-        {
-#if !ORIONSORT
-            if (GameObject is IDeferreable deferreable)
-            {
-                Tile tile;
-                Direction check;
-
-                if (GameObject is Mobile mobile && mobile.IsMoving)
-                {
-                    Direction dir = mobile.Direction;
-
-                    if ((dir & Direction.Up) == Direction.Left || (dir & Direction.Up) == Direction.South ||
-                        (dir & Direction.Up) == Direction.East)
-                    {
-                        tile = World.Map.GetTile(GameObject.Position.X, GameObject.Position.Y + 1);
-                        check = dir & Direction.Up;
-                    }
-                    else if ((dir & Direction.Up) == Direction.Down)
-                    {
-                        tile = World.Map.GetTile(GameObject.Position.X + 1, GameObject.Position.Y + 1);
-                        check = Direction.Down;
-                    }
-                    else
-                    {
-                        tile = World.Map.GetTile(GameObject.Position.X + 1, GameObject.Position.Y);
-                        check = Direction.East;
-                    }
-                }
-                else
-                {
-                    tile = World.Map.GetTile(GameObject.Position.X, GameObject.Position.Y + 1);
-                    check = Direction.South;
-                }
-
-                if (tile != null)
-                {
-                    if (deferreable.DeferredObject == null)
-                        deferreable.DeferredObject = new DeferredEntity();
-                    else
-                        deferreable.DeferredObject.Reset();
-
-                    deferreable.DeferredObject.AtPosition = position;
-                    deferreable.DeferredObject.Entity = GameObject;
-                    deferreable.DeferredObject.AssociatedTile = tile;
-                    deferreable.DeferredObject.Map = World.Map;
-
-                    if (GameObject is Mobile mob)
-                    {
-                        sbyte z = 0;
-
-                        if (!Pathfinder.CalculateNewZ(mob.Position.X, mob.Position.Y, ref z, (int)check))
-                            return false;
-
-                        deferreable.DeferredObject.Z = z;
-                        deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, z);
-                    }
-                    else
-                    {
-                        deferreable.DeferredObject.Z = GameObject.Position.Z;
-                        deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, GameObject.Position.Z);
-                    }
-
-                    tile.AddGameObject(deferreable.DeferredObject);
-
-                    return true;
-                }
-            }
-#endif
-            return false;
-        }
-
-        public virtual bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
-        {
-            return false;
-        }
-
         protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
         }
@@ -285,7 +226,7 @@ namespace ClassicUO.Game.Views
             if (g != 0x63D3)
             {
                 if (g >= 0x2198 && g <= 0x21A4) return true;
-                long flags = (long) TileData.StaticData[g].Flags;
+                ulong flags = TileData.StaticData[g].Flags;
 
                 if (!TileData.IsNoDiagonal(flags) || TileData.IsAnimated(flags) && World.Player != null && World.Player.Race == RaceType.GARGOYLE) return false;
             }

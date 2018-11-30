@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
@@ -123,28 +120,38 @@ namespace ClassicUO.Game.Views
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
-            int x = list.MousePosition.X - (int) vertex[0].Position.X;
-            int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
+            int x = list.MousePosition.X - (int)vertex[0].Position.X;
+            int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
 
-            if (Art.Contains(GameObject.Graphic, x, y))
+            //if (Art.Contains(GameObject.Graphic, x, y))
+            //Land tile = (Land)GameObject;
+
+            //if (!tile.IsStretched)
+            //{
+            //    if (Texture.Contains(x, y))
+            //        list.Add(GameObject, vertex[0].Position);
+            //}
+
+
+            if (Texture.Contains(x, y))
                 list.Add(GameObject, vertex[0].Position);
         }
 
-        public void UpdateStreched()
+        public void UpdateStreched(int x, int y, sbyte z)
         {
             Land tile = (Land) GameObject;
             Facet map = World.Map;
 
-            if (tile.IsStretched || TextmapTextures.GetTextmapTexture(tile.TileData.TexID) == null || !TestStretched(tile.Position.X, tile.Position.Y, tile.Position.Z, true))
+            if (tile.IsStretched || TextmapTextures.GetTextmapTexture(tile.TileData.TexID) == null || !TestStretched(x, y, z, true))
             {
                 tile.IsStretched = false;
-                tile.MinZ = tile.Position.Z;
+                tile.MinZ = z;
                 //tile.PriorityZ = (sbyte) (tile.Position.Z - 1);
             }
             else
             {
                 tile.IsStretched = true;
-                tile.UpdateZ(map.GetTileZ(tile.Position.X, tile.Position.Y + 1), map.GetTileZ(tile.Position.X + 1, tile.Position.Y + 1), map.GetTileZ(tile.Position.X + 1, tile.Position.Y));
+                tile.UpdateZ(map.GetTileZ(x, y + 1), map.GetTileZ(x + 1, y + 1), map.GetTileZ(x + 1, y), z);
 
                 //tile.PriorityZ = (sbyte) (tile.AverageZ - 1);
                 Vector3[,,] vec = new Vector3[3, 3, 4];
@@ -153,12 +160,12 @@ namespace ClassicUO.Game.Views
 
                 for (i = -1; i < 2; i++)
                 {
-                    int curX = GameObject.Position.X + i;
+                    int curX = x + i;
                     int curI = i + 1;
 
                     for (j = -1; j < 2; j++)
                     {
-                        int curY = GameObject.Position.Y + j;
+                        int curY = y + j;
                         int curJ = j + 1;
                         sbyte currentZ = map.GetTileZ(curX, curY);
                         sbyte leftZ = map.GetTileZ(curX, curY + 1);

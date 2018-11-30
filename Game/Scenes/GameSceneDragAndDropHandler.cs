@@ -1,4 +1,24 @@
-﻿using ClassicUO.Game.Data;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Input;
@@ -30,7 +50,7 @@ namespace ClassicUO.Game.Scenes
                 else if (value != null && _heldItem == null)
                 {
                     UIManager.AddInputBlocker(this);
-                    UIManager.GameCursor.SetDraggedItem(value.Graphic, value.Hue);
+                    UIManager.GameCursor.SetDraggedItem(value.DisplayedGraphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && TileData.IsStackable( value.ItemData.Flags) );
                 }
 
                 _heldItem = value;
@@ -41,15 +61,30 @@ namespace ClassicUO.Game.Scenes
 
         private void MergeHeldItem(Entity entity)
         {
-            GameActions.DropDown(HeldItem, Position.Invalid, entity.Serial);
+            GameActions.DropItem(HeldItem, Position.Invalid, entity.Serial);
             ClearHolding();
             Mouse.CancelDoubleClick = true;
         }
 
         private void PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
-            // TODO: AMOUNT CHECK
-            PickupItemDirectly(item, x, y, amount ?? item.Amount);
+            if (!amount.HasValue && !item.IsCorpse && item.Amount > 1)
+            {
+                if (UIManager.GetByLocalSerial<SplitMenuGump>(item) != null)
+                    return;
+
+                SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
+                {
+                    X = Mouse.Position.X - 80,
+                    Y = Mouse.Position.Y - 40,
+                };
+                UIManager.Add(gump);
+                UIManager.AttemptDragControl(gump, Mouse.Position, true);
+            }
+            else
+            {
+                PickupItemDirectly(item, x, y, amount ?? item.Amount);
+            }
         }
 
         private void PickupItemDirectly(Item item, int x, int y, int amount)
@@ -62,6 +97,12 @@ namespace ClassicUO.Game.Scenes
                 Entity entity = World.Get(item.Container);
                 item.Position = entity.Position;
                 entity.Items.Remove(item);
+
+                if (item.Container.IsMobile)
+                {
+                    World.Mobiles.Get(item.Container).Equipment[item.ItemData.Layer] = null;
+                }
+
                 //item.Container = Serial.Invalid;
                 entity.Items.ProcessDelta();
             }
@@ -93,7 +134,7 @@ namespace ClassicUO.Game.Scenes
             GameObject obj = SelectedObject;
             Serial serial;
 
-            if (obj is Item item && TileData.IsContainer((long) item.ItemData.Flags))
+            if (obj is Item item && TileData.IsContainer( item.ItemData.Flags))
             {
                 serial = item;
                 x = y = 0xFFFF;
@@ -102,7 +143,7 @@ namespace ClassicUO.Game.Scenes
             else
                 serial = Serial.MinusOne;
 
-            GameActions.DropDown(HeldItem.Serial, x, y, z, serial);
+            GameActions.DropItem(HeldItem.Serial, x, y, z, serial);
             ClearHolding();
             Mouse.CancelDoubleClick = true;
         }
@@ -137,7 +178,7 @@ namespace ClassicUO.Game.Scenes
 
             if (y < bounds.Y)
                 y = bounds.Y;
-            GameActions.DropDown(HeldItem.Serial, x, y, 0, container);
+            GameActions.DropItem(HeldItem.Serial, x, y, 0, container);
             ClearHolding();
             Mouse.CancelDoubleClick = true;
         }

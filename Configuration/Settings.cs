@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,12 +17,13 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
+using System.Collections.Generic;
 
 using ClassicUO.Utility;
+
+using Microsoft.Xna.Framework;
 
 using Newtonsoft.Json;
 
@@ -36,18 +36,18 @@ namespace ClassicUO.Configuration
         private bool _backgroundSound;
         private int _backpackStyle;
         private byte _chatFont;
-        private string _clientVersion;
-        private bool _combatMusic;
+        private string _clientVersion = "7.0.59.8";
+        private bool _combatMusic = true;
         private int _containerDefaultX;
         private int _containerDefaultY;
         private bool _criminalActionQuery;
         private ushort _criminalColor = 0x03B2;
-        private bool _debug;
+        private bool _debug = true;
         private int _delayAppearTooltips;
         private ushort _emoteColor = 0x0021;
-        private bool _enablePathfind;
+        private bool _enablePathfind = true;
         private ushort _enemyColor = 0x0031;
-        private bool _footstepsSound;
+        private bool _footstepsSound = true;
         private ushort _friendColor = 0x0044;
         private int _gameWindowHeight = 600;
         private int _gameWindowWidth = 800;
@@ -57,17 +57,17 @@ namespace ClassicUO.Configuration
         private bool _highlightGameObjects = true;
         private bool _highlightMobilesByFlags;
         private ushort _innocentColor = 0x005A;
-        private string _ip;
-        private string _lastCharName;
+        private string _ip = "YOUR.SERVER.IP.ADDRESS";
+        private string _lastCharName = "";
         private int _maxFPS = 144;
         private ushort _murdererColor = 0x0023;
-        private bool _music;
-        private int _musicVolume;
+        private bool _music = true;
+        private int _musicVolume = 255;
         private ushort _partyMessageColor = 0x0044;
-        private string _password;
-        private ushort _port;
+        private string _password = ""; //important default otherwise TextBox.SetText crashes from null input on Main menu
+        private ushort _port = 2593;
         private bool _preloadMaps;
-        private bool _profiler;
+        private bool _profiler = true;
         private bool _reduceFpsInactiveWindow;
         private bool _scaleSpeechDelay;
         private bool _showHPMobiles;
@@ -75,16 +75,18 @@ namespace ClassicUO.Configuration
         private bool _showIncomingNames;
         private bool _skillReport;
         private bool _smoothMovement = true;
-        private bool _sound;
-        private int _soundVolume;
+        private bool _sound = true;
+        private int _soundVolume = 255;
         private ushort _speechColor = 0x02B2;
         private int _speechDelay = 500;
         private bool _statReport;
         private ushort _tooltipsTextColor = 0xFFFF;
-        private string _uoDir;
-        private string _username;
+        private string _uoDir = "YOUR\\PATH\\TO\\ULTIMAONLINE";
+        private bool _useOldStatus;
+        private string _username = ""; //important default otherwise TextBox.SetText crashes from null input on Main menu
         private bool _useTooltips;
         private string _statusGumpStyle;
+        private List<GumpProperties> _gumpsDictionary = new List<GumpProperties>();
 
         [JsonConstructor]
         public Settings()
@@ -468,7 +470,57 @@ namespace ClassicUO.Configuration
             get => _statusGumpStyle;
             set => SetProperty(ref _statusGumpStyle, value);
         }
-        
+
+        [JsonProperty(PropertyName = "gumps_data")]
+        public IReadOnlyList<GumpProperties> GumpsData => _gumpsDictionary;
+
+
+        //public void AddGump(string gump, string name, object value)
+        //{
+        //    if (!_gumpsDictionary.TryGetValue(gump, out var data))
+        //    {
+        //        data = new Dictionary<string, object>();
+        //    }
+
+        //    data[name] = value;
+        //}
+
+        public void AddGump(Type type, Dictionary<string, object> data)
+        {
+            _gumpsDictionary.Add(new GumpProperties(type, data));
+        }
+
+        //public bool GetGumpValue(Type type, string name, out object obj)
+        //{
+        //    if (_gumpsDictionary.TryGetValue(type.ToString(), out var data))
+        //    {
+        //        if (data != null && data.TryGetValue(name, out obj))
+        //        {
+        //            return true;
+        //        }
+        //    }
+
+        //    obj = null;
+        //    return false;
+        //}
+
+        //public bool GetGumpValue<T>(Type type, string name, out T obj)
+        //{
+        //    if (_gumpsDictionary.TryGetValue(type.ToString(), out var data))
+        //    {
+        //        if (data != null && data.TryGetValue(name, out object o))
+        //        {
+        //            obj = JsonConvert.DeserializeObject<T>(o.ToString());
+        //            return true;
+        //        }
+        //    }
+
+        //    obj = default;
+        //    return false;
+        //}
+
+        public void ClearGumps() => _gumpsDictionary.Clear();
+
         public void Save()
         {
             ConfigurationResolver.Save(this, "settings.json");

@@ -1,4 +1,24 @@
-﻿using ClassicUO.Game.Gumps.Controls;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps.CharCreation;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO.Resources;
@@ -65,6 +85,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 case LoginStep.VerifyingAccount:
                 case LoginStep.LoginInToServer:
                 case LoginStep.EnteringBritania:
+                case LoginStep.PopUpMessage:
 
                     return GetLoadingScreen();
                 case LoginStep.CharacterSelection:
@@ -86,29 +107,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             var labelText = "No Text";
             var showButtons = LoadingGump.Buttons.None;
 
-            if (!loginScene.LoginRejectionReason.HasValue)
-            {
-                switch (loginScene.CurrentLoginStep)
-                {
-                    case LoginStep.Connecting:
-                        labelText = Cliloc.GetString(3000002); // "Connecting..."
-
-                        break;
-                    case LoginStep.VerifyingAccount:
-                        labelText = Cliloc.GetString(3000003); // "Verifying Account..."
-
-                        break;
-                    case LoginStep.LoginInToServer:
-                        labelText = Cliloc.GetString(3000053); // logging into shard
-
-                        break;
-                    case LoginStep.EnteringBritania:
-                        labelText = Cliloc.GetString(3000001); // Entering Britania...
-
-                        break;
-                }
-            }
-            else
+            if (loginScene.LoginRejectionReason.HasValue)
             {
                 switch (loginScene.LoginRejectionReason.Value)
                 {
@@ -136,6 +135,31 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 }
 
                 showButtons = LoadingGump.Buttons.OK;
+            }
+            else if (!string.IsNullOrEmpty(loginScene.PopupMessage))
+            {
+                labelText = loginScene.PopupMessage;
+                showButtons = LoadingGump.Buttons.OK;
+            } else {
+                switch (loginScene.CurrentLoginStep)
+                {
+                    case LoginStep.Connecting:
+                        labelText = Cliloc.GetString(3000002); // "Connecting..."
+
+                        break;
+                    case LoginStep.VerifyingAccount:
+                        labelText = Cliloc.GetString(3000003); // "Verifying Account..."
+
+                        break;
+                    case LoginStep.LoginInToServer:
+                        labelText = Cliloc.GetString(3000053); // logging into shard
+
+                        break;
+                    case LoginStep.EnteringBritania:
+                        labelText = Cliloc.GetString(3000001); // Entering Britania...
+
+                        break;
+                }
             }
 
             return new LoadingGump(labelText, showButtons, OnLoadingGumpButtonClick);

@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -66,7 +63,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected override bool Contains(int x, int y)
         {
-            return IO.Resources.Gumps.Contains(Graphic, x, y);
+            return Texture.Contains(x, y);
+            //return IO.Resources.Gumps.Contains(Graphic, x, y);
         }
     }
 
@@ -78,6 +76,8 @@ namespace ClassicUO.Game.Gumps.Controls
             Y = y;
             Graphic = graphic;
             Hue = hue;
+
+            Texture = IO.Resources.Gumps.GetGumpTexture(Graphic);
         }
 
         public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) : (Hue) 0)

@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -61,8 +58,7 @@ namespace ClassicUO.Game
                     {
                         if (MapIndex >= 0)
                         {
-                            Map.ClearUsedBlocks();
-                            IO.Resources.Map.UnloadMap(MapIndex);
+                            Map.Dispose();                       
                         }
 
                         Position position = Player.Position;
@@ -242,7 +238,10 @@ namespace ClassicUO.Game
         {
             Items.Clear();
             Mobiles.Clear();
+            _houses.Clear();
+            Player.Dispose();
             Player = null;
+            Map.Dispose();
             Map = null;
             ToAdd.Clear();
         }
@@ -251,6 +250,7 @@ namespace ClassicUO.Game
         {
             if (!noplayer)
             {
+                Map.Dispose();
                 Map = null;
                 Player.Dispose();
                 Player = null;

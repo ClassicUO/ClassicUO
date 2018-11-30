@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,12 +17,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
-
+using System.Reflection;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
@@ -36,25 +33,26 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameObject : IUpdateable
+    public abstract class GameObject : IUpdateable, IDisposable
     {
-        private readonly List<TextOverhead> _overHeads;
+        private List<TextOverhead> _overHeads;
         private Position _position = Position.Invalid;
         private View _view;
         public Vector3 Offset;
-
+        
         protected GameObject()
         {
-            _overHeads = new List<TextOverhead>();
+            
         }
 
+       
         protected Vector3 ScreenPosition { get; private set; }
-
+        
         public Vector3 RealScreenPosition { get; protected set; }
 
         public bool IsPositionChanged { get; protected set; }
 
-        public Tile Tile { get; protected set; }
+        //public Tile Tile { get; protected set; }
 
         public virtual Position Position
         {
@@ -63,24 +61,29 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (_position != value)
                 {
-                    if (World.Map != null)
-                    {
-                        if (Tile != Tile.Invalid)
-                            Tile.RemoveGameObject(this);
-                    }
+                    //if (World.Map != null)
+                    //{
+                    //    if (Tile != null/* Tile.Invalid*/)
+                    //        Tile.RemoveGameObject(this);
+                    //}
 
                     _position = value;
                     ScreenPosition = new Vector3((_position.X - _position.Y) * 22, (_position.X + _position.Y) * 22 - _position.Z * 4, 0);
                     IsPositionChanged = true;
 
-                    if (World.Map != null)
-                    {
-                        ref Tile newTile = ref World.Map.GetTile(value.X, value.Y);
+                    //if (World.Map != null)
+                    //{
+                    //     Tile newTile =  World.Map.GetTile(value.X, value.Y);
 
-                        if (newTile != Tile.Invalid)
-                            newTile.AddGameObject(this);
-                        Tile = newTile;
-                    }
+                    //    if (newTile != null)
+                    //        newTile.AddGameObject(this);
+                    //    Tile = newTile;
+                    //}
+                    //else if (this != World.Player)
+                    //    Dispose();
+
+                    if (World.Map != null)
+                        Tile = World.Map.GetTile(value.X, value.Y);
                     else if (this != World.Player)
                         Dispose();
                 }
@@ -113,7 +116,7 @@ namespace ClassicUO.Game.GameObjects
 
         public sbyte AnimIndex { get; set; }
 
-        public IReadOnlyList<TextOverhead> OverHeads => _overHeads;
+        public IReadOnlyList<TextOverhead> OverHeads => _overHeads ?? (_overHeads = new List<TextOverhead>());
 
         public int CurrentRenderIndex { get; set; }
 
@@ -121,25 +124,28 @@ namespace ClassicUO.Game.GameObjects
 
         public short PriorityZ { get; set; }
 
-        //public Tile Tile
-        //{
-        //    get => Tile;
-        //    set
-        //    {
-        //        if (Tile != value)
-        //        {
-        //            Tile?.RemoveGameObject(this);
-        //            Tile = value;
+        private Tile _tile;
 
-        //            if (Tile != null)
-        //                Tile.AddGameObject(this);
-        //            else
-        //            {
-        //                if (this != World.Player && !IsDisposed) Dispose();
-        //            }
-        //        }
-        //    }
-        //}
+        public Tile Tile
+        {
+            get => _tile;
+            set
+            {
+                if (_tile != value)
+                {
+                    _tile?.RemoveGameObject(this);
+                    _tile = value;
+
+                    if (_tile != null)
+                        _tile.AddGameObject(this);
+                    else
+                    {
+                        if (this != World.Player && !IsDisposed) Dispose();
+                    }
+                }
+            }
+        }
+
 
         public bool IsDisposed { get; private set; }
 
@@ -149,33 +155,36 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsDisposed) return;
 
-            for (int i = 0; i < OverHeads.Count; i++)
+            if (_overHeads != null)
             {
-                TextOverhead gt = OverHeads[i];
-                gt.Update(totalMS, frameMS);
+                for (int i = 0; i < _overHeads.Count; i++)
+                {
+                    TextOverhead gt = _overHeads[i];
+                    gt.Update(totalMS, frameMS);
 
-                if (gt.IsDisposed)
-                    _overHeads.RemoveAt(i--);
+                    if (gt.IsDisposed)
+                        _overHeads.RemoveAt(i--);
+                }
             }
         }
 
         public event EventHandler Disposed;
 
-        public void SetTile(ushort x, ushort y)
-        {
-            if (World.Map != null)
-            {
-                if (Tile != Tile.Invalid)
-                    Tile.RemoveGameObject(this);
-                ref Tile newTile = ref World.Map.GetTile(x, y);
+        //public void SetTile(ushort x, ushort y)
+        //{
+        //    if (World.Map != null)
+        //    {
+        //        if (Tile != null /*Tile.Invalid*/)
+        //            Tile.RemoveGameObject(this);
+        //         Tile newTile =  World.Map.GetTile(x, y);
 
-                if (newTile != Tile.Invalid)
-                    newTile.AddGameObject(this);
-                Tile = newTile;
-            }
-            else
-                Dispose();
-        }
+        //        if (newTile != null)
+        //            newTile.AddGameObject(this);
+        //        Tile = newTile;
+        //    }
+        //    else
+        //        Dispose();
+        //}
 
         public void UpdateRealScreenPosition(Point offset)
         {
@@ -207,11 +216,15 @@ namespace ClassicUO.Game.GameObjects
         {
             if (string.IsNullOrEmpty(text))
                 return null;
+
+            if (_overHeads == null)
+                _overHeads = new List<TextOverhead>();
+
             TextOverhead overhead;
 
-            for (int i = 0; i < OverHeads.Count; i++)
+            for (int i = 0; i < _overHeads.Count; i++)
             {
-                overhead = OverHeads[i];
+                overhead = _overHeads[i];
 
                 if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
                 {
@@ -248,7 +261,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void InsertGameText(TextOverhead gameText)
         {
-            _overHeads.Insert(OverHeads.Count == 0 || OverHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
+            _overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
         protected void DisposeView()
@@ -262,12 +275,18 @@ namespace ClassicUO.Game.GameObjects
             if (IsDisposed)
                 return;
             IsDisposed = true;
-            //DisposeView();
-            //Tile = null;
-            Tile = Tile.Invalid;
-            _overHeads.ForEach(s => s.Dispose());
-            _overHeads.Clear();
+
             Disposed.Raise();
+
+            DisposeView();
+            _tile = null;
+
+            if (_overHeads != null)
+            {
+                _overHeads.ForEach(s => s.Dispose());
+                _overHeads.Clear();
+                _overHeads = null;
+            }
         }
     }
 }

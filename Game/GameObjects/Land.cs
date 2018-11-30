@@ -1,4 +1,24 @@
-﻿using System;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using System;
 
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
@@ -16,7 +36,19 @@ namespace ClassicUO.Game.GameObjects
             Graphic = graphic;
         }
 
-        public LandTiles TileData => IO.Resources.TileData.LandData[Graphic];
+        private LandTiles? _tileData;
+
+
+        public LandTiles TileData
+        {
+            get
+            {
+                if (!_tileData.HasValue)
+                    _tileData = IO.Resources.TileData.LandData[Graphic];
+
+                return _tileData.Value;
+            }
+        }
 
         public sbyte MinZ { get; set; }
 
@@ -31,30 +63,30 @@ namespace ClassicUO.Game.GameObjects
             return new TileView(this);
         }
 
-        public void Calculate()
+        public void Calculate(int x, int y, sbyte z)
         {
-            ((TileView) View).UpdateStreched();
+            ((TileView) View).UpdateStreched(x, y ,z);
         }
 
-        public void UpdateZ(int zTop, int zRight, int zBottom)
+        public void UpdateZ(int zTop, int zRight, int zBottom, sbyte currentZ)
         {
             if (IsStretched)
             {
-                int x = Position.Z * 4 + 1;
+                int x = currentZ * 4 + 1;
                 int y = zTop * 4;
                 int w = zRight * 4 - x;
                 int h = zBottom * 4 + 1 - y;
                 Rectangle = new Rectangle(x, y, w, h);
-                int average = AverageZ;
+                //int average = AverageZ;
 
-                if (Math.Abs(Position.Z - zRight) <= Math.Abs(zBottom - zTop))
-                    AverageZ = (sbyte) ((Position.Z + zRight) >> 1);
+                if (Math.Abs(currentZ - zRight) <= Math.Abs(zBottom - zTop))
+                    AverageZ = (sbyte) ((currentZ + zRight) >> 1);
                 else
                     AverageZ = (sbyte) ((zBottom + zTop) >> 1);
 
-                if (AverageZ != average)
-                    Tile.ForceSort();
-                MinZ = Position.Z;
+                //if (AverageZ != average)
+                //    Tile.ForceSort();
+                MinZ = currentZ;
 
                 if (zTop < MinZ)
                     MinZ = (sbyte) zTop;

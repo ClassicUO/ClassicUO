@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 
@@ -104,7 +101,11 @@ namespace ClassicUO.Game.Gumps.Controls
                         _text.Text = Value.ToString();
 
                     if (_value != oldValue)
+                    {
                         ModifyPairedValues(_value - oldValue);
+                        if (IsInitialized)
+                            CalculateOffset();
+                    }
                     ValueChanged.Raise();
                 }
             }
