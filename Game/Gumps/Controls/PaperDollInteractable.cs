@@ -30,10 +30,13 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     internal class PaperDollInteractable : GumpControl, IMobilePaperdollOwner
     {
-        private static readonly PaperDollEquipSlots[] _layerOrder =
+        private static readonly Layer[] _layerOrder =
         {
-            PaperDollEquipSlots.Legging, PaperDollEquipSlots.Footwear, PaperDollEquipSlots.Shirt, PaperDollEquipSlots.Sleeves, PaperDollEquipSlots.Ring, PaperDollEquipSlots.Bracelet, PaperDollEquipSlots.Gloves, PaperDollEquipSlots.Neck, PaperDollEquipSlots.Chest, PaperDollEquipSlots.Hair, PaperDollEquipSlots.FacialHair, PaperDollEquipSlots.Head, PaperDollEquipSlots.Sash, PaperDollEquipSlots.Earring, PaperDollEquipSlots.Skirt, PaperDollEquipSlots.Cloak, PaperDollEquipSlots.Robe, PaperDollEquipSlots.Belt, PaperDollEquipSlots.LeftHand, PaperDollEquipSlots.RightHand, PaperDollEquipSlots.Talisman
+            Layer.Cloak, Layer.Ring, Layer.Shirt, Layer.Arms, Layer.Pants, Layer.Shoes, Layer.Legs,
+            Layer.Torso, Layer.Bracelet, Layer.Face, Layer.Gloves, Layer.Tunic, Layer.Skirt, Layer.Necklace,
+            Layer.Hair, Layer.Robe, Layer.Earrings, Layer.Beard, Layer.Helmet, Layer.Waist, Layer.OneHanded, Layer.TwoHanded, Layer.Talisman
         };
+
         private GumpPicBackpack _backpackGump;
         private Item _fakeItem;
         private Mobile _mobile;
@@ -200,13 +203,13 @@ namespace ClassicUO.Game.Gumps.Controls
                     isfake = true;
                     canPickUp = false;
                 }
-                else if (item == null || MobileView.IsCovered(_mobile, (Layer)layerIndex))
+                else if (item == null /*|| MobileView.IsCovered(_mobile, (Layer)layerIndex)*/)
                     continue;
 
                 switch (_layerOrder[i])
                 {
-                    case PaperDollEquipSlots.FacialHair:
-                    case PaperDollEquipSlots.Hair:
+                    case Layer.Beard:
+                    case Layer.Hair:
                         canPickUp = false;
 
                         break;
@@ -219,9 +222,9 @@ namespace ClassicUO.Game.Gumps.Controls
             }
 
             // If this object has a backpack, add it last.
-            if (_mobile.Equipment[(int) PaperDollEquipSlots.Backpack] != null)
+            if (_mobile.Equipment[(int) Layer.Backpack] != null)
             {
-                Item backpack = _mobile.Equipment[(int) PaperDollEquipSlots.Backpack];
+                Item backpack = _mobile.Equipment[(int)Layer.Backpack];
 
                 AddChildren(_backpackGump = new GumpPicBackpack(-7, 0, backpack)
                 {
@@ -233,36 +236,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
         private void OnDoubleclickBackpackGump(object sender, EventArgs args)
         {
-            Item backpack = _mobile.Equipment[(int) PaperDollEquipSlots.Backpack];
+            Item backpack = _mobile.Equipment[(int)Layer.Backpack];
             GameActions.DoubleClick(backpack);
         }
 
-        private enum PaperDollEquipSlots
-        {
-            Body = 0,
-            RightHand = 1,
-            LeftHand = 2,
-            Footwear = 3,
-            Legging = 4,
-            Shirt = 5,
-            Head = 6,
-            Gloves = 7,
-            Ring = 8,
-            Talisman = 9,
-            Neck = 10,
-            Hair = 11,
-            Belt = 12,
-            Chest = 13,
-            Bracelet = 14,
-            Unused = 15,
-            FacialHair = 16,
-            Sash = 17,
-            Earring = 18,
-            Sleeves = 19,
-            Cloak = 20,
-            Backpack = 21,
-            Robe = 22,
-            Skirt = 23
-        }
     }
 }
