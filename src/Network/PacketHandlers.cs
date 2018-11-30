@@ -22,7 +22,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.Formatting;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -1724,7 +1723,7 @@ namespace ClassicUO.Network
                     str = string.Empty;
                     ushort crafterNameLen = 0;
                     uint next = p.ReadUInt();
-                    StringBuffer strBuffer = new StringBuffer();
+                    StringBuilder strBuffer = new StringBuilder();
 
                     if (next == 0xFFFFFFFD)
                     {
@@ -1765,7 +1764,7 @@ namespace ClassicUO.Network
                             strBuffer.Append("\n[");
                             strBuffer.Append(attr);
                             strBuffer.Append(" : ");
-                            strBuffer.Append(charges, StringView.Empty);
+                            strBuffer.Append(charges);
                             strBuffer.Append("]");
                             count += 20;
                         }

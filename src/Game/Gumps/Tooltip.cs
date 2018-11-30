@@ -18,7 +18,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using System.Text.Formatting;
+
+using System.Text;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -114,10 +115,14 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        private StringBuilder _sb = new StringBuilder();
+        private StringBuilder _sbHTML = new StringBuilder();
+
         private string ReadProperties(Entity obj, out string htmltext)
         {
-            StringBuffer sb = new StringBuffer();
-            StringBuffer sbHTML = new StringBuffer();
+            _sb.Clear();
+            _sbHTML.Clear();
+
             bool hasStartColor = false;
 
             for (int i = 0; i < obj.Properties.Count; i++)
@@ -133,10 +138,10 @@ namespace ClassicUO.Game.Gumps
                     {
                         Mobile mobile = (Mobile) obj;
                         //ushort hue = Notoriety.GetHue(mobile.NotorietyFlag);
-                        sbHTML.Append(Notoriety.GetHTMLHue(mobile.NotorietyFlag));
+                        _sbHTML.Append(Notoriety.GetHTMLHue(mobile.NotorietyFlag));
                     }
                     else
-                        sbHTML.Append("<basefont color=\"yellow\">");
+                        _sbHTML.Append("<basefont color=\"yellow\">");
 
                     hasStartColor = true;
                 }
@@ -144,26 +149,26 @@ namespace ClassicUO.Game.Gumps
                 string text = Cliloc.Translate((int) property.Cliloc, property.Args, true);
 
                 if (string.IsNullOrEmpty(text)) continue;
-                sb.Append(text);
-                sbHTML.Append(text);
+                _sb.Append(text);
+                _sbHTML.Append(text);
 
                 if (hasStartColor)
                 {
-                    sbHTML.Append("<basefont color=\"#FFFFFFFF\">");
+                    _sbHTML.Append("<basefont color=\"#FFFFFFFF\">");
                     hasStartColor = false;
                 }
 
                 if (i < obj.Properties.Count - 1)
                 {
-                    sb.Append("\n");
-                    sbHTML.Append("\n");
+                    _sb.Append("\n");
+                    _sbHTML.Append("\n");
                 }
             }
 
-            htmltext = sbHTML.ToString();
-            string result = sb.ToString();
+            htmltext = _sbHTML.ToString();
+            string result = _sb.ToString();
 
-            return string.IsNullOrEmpty(result) ? null : sb.ToString();
+            return string.IsNullOrEmpty(result) ? null : result;
         }
 
         public void SetText(string text)
