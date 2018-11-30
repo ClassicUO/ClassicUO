@@ -1,5 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using System;
+using System.IO;
 using ClassicUO.Game;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.GameObjects;
@@ -9,9 +29,11 @@ namespace ClassicUO.IO
 {
     class UltimaLive
     {
+        public static bool IsUltimaLiveActive = false;
+        public static string ShardName = null;
         private const int CRCLength = 25;
         private const int LandBlockLenght = 192;
-        public static UInt16[][] MapCRCs = new UInt16[256][];//caching, to avoid excessive cpu & memory use
+        public static UInt16[][] MapCRCs;//caching, to avoid excessive cpu & memory use
         public static void OnUltimaLivePacket(Packet p)
         {
             p.Seek(13);
@@ -20,14 +42,20 @@ namespace ClassicUO.IO
             {
                 case 0xFF://hash query, for the blocks around us
                     {
-                        if (p.Length < 15)
+                        if (!IsUltimaLiveActive || p.Length < 15)
+                        {
                             return;
+                        }
+
                         p.Seek(3);
                         int block = (int)p.ReadUInt();
                         p.Seek(14);
                         int mapID = p.ReadByte();
                         if (World.Map==null || mapID != World.Map.Index)
+                        {
                             return;
+                        }
+
                         MapChunk chunk = World.Map.Chunks[block];
                         int mapWidthInBlocks = IO.Resources.Map.MapBlocksSize[mapID][0];
                         int mapHeightInBlocks = IO.Resources.Map.MapBlocksSize[mapID][1];
@@ -36,10 +64,15 @@ namespace ClassicUO.IO
                         {
                             MapCRCs[mapID] = new UInt16[blocks];
                             for (int j = 0; j < blocks; j++)
+                            {
                                 MapCRCs[mapID][j] = UInt16.MaxValue;
+                            }
                         }
                         if (block < 0 || block >= blocks)
+                        {
                             return;
+                        }
+
                         int blockX = block / mapHeightInBlocks;
                         int blockY = block % mapHeightInBlocks;
                         ushort[] tosendCRCs = new ushort[CRCLength];     //byte 015 through 64   -  25 block CRCs
@@ -87,23 +120,32 @@ namespace ClassicUO.IO
                     }
                 case 0x00://statics update
                     {
-                        if (p.Length < 15)
+                        if (!IsUltimaLiveActive || p.Length < 15)
+                        {
                             return;
+                        }
+
                         p.Seek(3);
                         int block = (int)p.ReadUInt();
                         int length = (int)p.ReadUInt();
                         int totallen = length * 7;
                         if (p.Length < totallen + 15)
+                        {
                             return;
+                        }
+
                         p.Seek(14);
                         int mapID = p.ReadByte();
+                        if (World.Map == null || mapID != World.Map.Index)
+                        {
+                            return;
+                        }
+
                         byte[] staticsData = new byte[totallen];
                         for(int i = 0; i < totallen; i++)
                         {
                             staticsData[i] = p.ReadByte();
                         }
-                        if (World.Map == null || mapID != World.Map.Index)
-                            return;
                         int index = 0;
                         if (block >= 0 && block < (IO.Resources.Map.MapBlocksSize[mapID][0] * IO.Resources.Map.MapBlocksSize[mapID][1]))
                         {
@@ -129,20 +171,33 @@ namespace ClassicUO.IO
                                 };
                                 index += 7;
                             }
-                            MapCRCs[mapID][block] = GetBlockCrc(block, mapID);
+                            //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
+                            MapCRCs[mapID][block] = UInt16.MaxValue;
                         }
                         //TODO: write staticdata changes directly to disk, use packets only if server sent out where we should save files (see Live Login Confirmation)
                         break;
                     }
                 case 0x01://map definition update
                     {
-                        if (p.Length < 15)
+                        if (string.IsNullOrEmpty(ShardName) || p.Length < 15)
+                        {
+                            //we cannot validate the pathfolder or packet is not correct
                             return;
+                        }
+
                         p.Seek(7);
                         uint count = p.ReadUInt();
                         uint maps = count / 7;
+                        if(MapCRCs == null || MapCRCs.Length < maps)
+                        {
+                            MapCRCs = new UInt16[maps][];
+                        }
+                        IsUltimaLiveActive = true;//after receiving the shardname and map defs, we can consider the system as fully active
                         if (p.Length < count)
+                        {
                             return;
+                        }
+
                         p.Seek(15);//byte 15 to end of packet, the map definitions
                         for(int i=0; i<maps; i++)
                         {
@@ -157,10 +212,13 @@ namespace ClassicUO.IO
                 case 0x02://Live login confirmation
                     {
                         if (p.Length < 43)//fixed size
+                        {
                             return;
+                        }
+
                         //from byte 0x03 to 0x14 data is unused
                         p.Seek(15);
-                        string shardName = p.ReadASCII();
+                        ShardName = ValidatePath(p.ReadASCII());
                         //TODO: create shard directory, copy map and statics to that directory, use that files instead of the original ones
                         break;
                     }
@@ -201,7 +259,8 @@ namespace ClassicUO.IO
                         }
                     }
                 }
-                MapCRCs[mapID][block] = GetBlockCrc(block, mapID);
+                //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
+                MapCRCs[mapID][block] = UInt16.MaxValue;
             }
         }
 
@@ -291,6 +350,21 @@ namespace ClassicUO.IO
             }
         }
 
+        private static string ValidatePath(string shardname)
+        {
+            try
+            {
+                string fullPath = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "UltimaLive", shardname));
 
+                if (shardname.IndexOfAny(new char[] { '/', '\\' }) == -1 && !string.IsNullOrEmpty(fullPath))//we cannot allow directory separator inside our name
+                    return fullPath;
+            }
+            catch
+            {
+            }
+            //if invalid 'path', we get an exception, if uncorrectly formatted, we'll be here also, maybe wrong characters are sent?
+            //since we are using only ascii (8bit) charset, send only normal letters! in this case we return null and invalidate ultimalive request
+            return null;
+        }
     }
 }

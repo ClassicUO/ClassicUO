@@ -18,15 +18,20 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-namespace ClassicUO.Input
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ClassicUO.Game.System
 {
-    public enum MouseButton
+    public static class Commands
     {
-        Left = 0,
-        Right = 1,
-        Middle = 2,
-        XButton1 = 3,
-        XButton2 = 4,
-        None = 0x7f
+
+        public static void Initialize()
+        {
+            CommandSystem.Register("info", (sender, args) => CommandHandlers.RequestItemInfo());
+        }
     }
 }

@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -109,6 +106,7 @@ namespace ClassicUO
             Service.Register(_journalManager = new JournalData());
 
             //Register Command Stack
+            Commands.Initialize();
             _inputManager = Service.Get<InputManager>();
             Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();

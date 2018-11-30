@@ -18,34 +18,32 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
-using System.IO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
 
-using ClassicUO.Utility.Logging;
-
-using Newtonsoft.Json;
-
-namespace ClassicUO.Configuration
+namespace ClassicUO.Game.GameObjects
 {
-    public static class ConfigurationResolver
+    class ReflectionHolder
     {
-        public static T Load<T>(string file) where T : class
+        public static Dictionary<string, object> GameObjectDictionary(object atype)
         {
-            if (!File.Exists(file))
+            if (atype == null) return new Dictionary<string, object>();
+            Type t = atype.GetType();
+            PropertyInfo[] props = t.GetProperties(
+              BindingFlags.Public | BindingFlags.NonPublic // Get public and non-public
+            | BindingFlags.Static | BindingFlags.Instance  // Get instance + static
+            | BindingFlags.FlattenHierarchy); // Search up the hierarchy
+            Dictionary<string, object> dict = new Dictionary<string, object>();
+            foreach (PropertyInfo prp in props)
             {
-                Log.Message(LogTypes.Warning, file + " not found.");
-
-                return null;
+                object value = prp.GetValue(atype, new object[] { });
+                dict.Add(prp.Name, value);
             }
-
-            T settings = JsonConvert.DeserializeObject<T>(File.ReadAllText(file));
-
-            return settings;
-        }
-
-        public static void Save<T>(T obj, string file) where T : class
-        {
-            string t = JsonConvert.SerializeObject(obj, Formatting.Indented);
-            File.WriteAllText(file, t);
+            return dict;
         }
     }
 }

@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,12 +17,10 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
-
+using System.Reflection;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
@@ -42,14 +39,15 @@ namespace ClassicUO.Game.GameObjects
         private Position _position = Position.Invalid;
         private View _view;
         public Vector3 Offset;
-
+        
         protected GameObject()
         {
             
         }
 
+       
         protected Vector3 ScreenPosition { get; private set; }
-
+        
         public Vector3 RealScreenPosition { get; protected set; }
 
         public bool IsPositionChanged { get; protected set; }
