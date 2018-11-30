@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System.Collections.Generic;
 
 using ClassicUO.Game.GameObjects;
@@ -28,7 +25,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
-    public class MapChunk
+    public sealed class MapChunk
     {
         public static readonly MapChunk Invalid = new MapChunk(0xFFFF, 0xFFFF);
 
@@ -44,7 +41,7 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++) Tiles[i][j] = new Tile((ushort) (i + x * 8), (ushort) (j + y * 8));
             }
 
-            LastAccessTime = CoreGame.Ticks + 15000;
+            LastAccessTime = CoreGame.Ticks + 5000;
         }
 
         //private ushort? _x, _y;
@@ -114,9 +111,11 @@ namespace ClassicUO.Game.Map
                             AverageZ = z,
                             MinZ = z,
                             IsStretched = info.TexID == 0 && TileData.IsWet(info.Flags),
-                            Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
                         };
-                        land.Calculate();
+                        ushort tileX = (ushort) (bx + x);
+                        ushort tileY = (ushort) (by + y);
+                        land.Calculate(tileX, tileY, z);
+                        land.Position = new Position(tileX, tileY, z);
                     }
                 }
 
@@ -178,8 +177,8 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    ref Tile tile = ref Tiles[i][j];
-                    var list = tile.ObjectsOnTiles;
+                    Tile tile = Tiles[i][j];
+                    List<GameObject> list = tile.ObjectsOnTiles;
 
                     for (int k = 0; k < list.Count; k++)
                     {

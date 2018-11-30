@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
@@ -68,7 +65,7 @@ namespace ClassicUO.Game.Views
             Item item = (Item) GameObject;
 
             if (item.IsCorpse)
-                return DrawInternal(spriteBatch, position, objectList);
+                return DrawCorpse(spriteBatch, position, objectList);
 
             if (item.Effect == null)
             {
@@ -96,18 +93,12 @@ namespace ClassicUO.Game.Views
             return !item.Effect.IsDisposed && item.Effect.View.Draw(spriteBatch, position, objectList);
         }
 
-        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public bool DrawCorpse(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-#if !ORIONSORT
-            PreDraw(position);
-#endif
-
             if (GameObject.IsDisposed)
                 return false;
             Item item = (Item) GameObject;
-#if !ORIONSORT
-            spriteBatch.GetZ();
-#endif
+
             byte dir = (byte) ((byte) item.Layer & 0x7F & 7);
             bool mirror = false;
             Animations.GetAnimDirection(ref dir, ref mirror);

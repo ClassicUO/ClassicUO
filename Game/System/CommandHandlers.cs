@@ -1,5 +1,4 @@
-#region license
-
+﻿#region license
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,40 +17,29 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
-using ClassicUO.Renderer;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-using Microsoft.Xna.Framework;
-
-namespace ClassicUO.Game.Views
+namespace ClassicUO.Game.System
 {
-    public class DeferredView : View
+    class CommandHandlers
     {
-        private readonly View _baseView;
-        private readonly Vector3 _position;
-
-        public DeferredView(DeferredEntity deferred, View baseView, Vector3 position) : base(deferred)
+        public static void RequestItemInfo()
         {
-            _baseView = baseView;
-            _position = position;
-        }
-
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
-        {
-            //if (_baseView.GameObject is Mobile mobile)
-            //{
-            //    if (mobile.IsDead || mobile.IsDisposed || mobile.Graphic == 0)
-            //    {
-            //        GameObject.Dispose();
-            //        return false;
-            //    }
-            //}
-
-            return _baseView.DrawInternal(spriteBatch, _position, objectList);
+            if (!TargetSystem.IsTargeting)
+            {
+                TargetSystem.SetTargeting(TargetType.SetTargetClientSide, 6983686, 0);
+                
+            }
+            else
+            {
+                TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+            }
         }
     }
 }

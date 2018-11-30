@@ -1,4 +1,24 @@
-﻿using ClassicUO.Game.GameObjects;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 
@@ -20,15 +40,7 @@ namespace ClassicUO.Game.Views
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
         {
-#if !ORIONSORT
-            PreDraw(position);
-#endif
-            return DrawInternal(spriteBatch, position, list);
-        }
-
-        public override bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
-        {
-            LightningEffect effect = (LightningEffect) GameObject;
+            LightningEffect effect = (LightningEffect)GameObject;
 
             if (effect.AnimationGraphic != _displayed || Texture == null || Texture.IsDisposed)
             {
@@ -43,7 +55,7 @@ namespace ClassicUO.Game.Views
 
             HueVector = ShaderHuesTraslator.GetHueVector(effect.Hue);
 
-            return base.Draw(spriteBatch, position, objectList);
+            return base.Draw(spriteBatch, position, list);
         }
     }
 }

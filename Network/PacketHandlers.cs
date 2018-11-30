@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -723,7 +720,9 @@ namespace ClassicUO.Network
             {
                 //ref Tile tile = ref World.Map.GetTile(x, y);
                 //World.Player.Position = new Position(x, y, z);
-                World.Player.SetTile(x, y);
+                //World.Player.SetTile(x, y);
+
+                World.Player.Tile = World.Map.GetTile(x, y);
             }
 
             //else if (World.Player.Tile == Tile.Invalid)

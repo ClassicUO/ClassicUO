@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;ORIONSORT,SB1</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;SB1</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -91,12 +91,14 @@
     <Compile Include="Game\GameObjects\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
+    <Compile Include="Game\GameObjects\ReflectionHolder.cs" />
     <Compile Include="Game\Gumps\Controls\DataBox.cs" />
     <Compile Include="Game\Gumps\Controls\HitBox.cs" />
     <Compile Include="Game\Gumps\Controls\Line.cs" />
     <Compile Include="Game\Gumps\UIGumps\BuffGump.cs" />
     <Compile Include="Game\Gumps\Controls\Combobox.cs" />
     <Compile Include="Game\Gumps\Controls\HoveredLabel.cs" />
+    <Compile Include="Game\Gumps\UIGumps\InfoGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\MessageBoxGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\ShopGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\CharCreation\CharCreationGump.cs" />
@@ -120,6 +122,8 @@
     <Compile Include="Game\Scenes\GameSceneDragAndDropHandler.cs" />
     <Compile Include="Game\Scenes\GameSceneDrawingSorting.cs" />
     <Compile Include="Game\Scenes\GameSceneInputHandler.cs" />
+    <Compile Include="Game\System\CommandHandlers.cs" />
+    <Compile Include="Game\System\Commands.cs" />
     <Compile Include="Game\System\CommandSystem.cs" />
     <Compile Include="Game\System\PartySystem.cs" />
     <Compile Include="Game\System\TargetSystem.cs" />
@@ -154,7 +158,6 @@
     <Compile Include="Game\Data\SpellsMagery.cs" />
     <Compile Include="Game\GameActions.cs" />
     <Compile Include="Game\GameObjects\AnimatedItemEffect.cs" />
-    <Compile Include="Game\GameObjects\DeferredEntity.cs" />
     <Compile Include="Game\GameObjects\Entity.cs" />
     <Compile Include="Game\GameObjects\EntityCollection.cs" />
     <Compile Include="Game\GameObjects\GameEffect.cs" />
@@ -227,7 +230,6 @@
     <Compile Include="Game\Scenes\SceneManager.cs" />
     <Compile Include="Game\Serial.cs" />
     <Compile Include="Game\Views\AnimatedEffectView.cs" />
-    <Compile Include="Game\Views\DeferredView.cs" />
     <Compile Include="Game\Views\ItemView.cs" />
     <Compile Include="Game\Views\LayerOrder.cs" />
     <Compile Include="Game\Views\MobileView.cs" />
@@ -250,7 +252,6 @@
     <Compile Include="Game\Gumps\TextEntry.cs" />
     <Compile Include="Interfaces\IColorable.cs" />
     <Compile Include="Interfaces\IDebuggable.cs" />
-    <Compile Include="Interfaces\IDeferreable.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />
     <Compile Include="Interfaces\IDynamicItem.cs" />
     <Compile Include="Interfaces\IUpdateable.cs" />
@@ -321,6 +322,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="ClassicUO.licenseheader" />
     <None Include="libs\FNA\FNA.dll" />
     <None Include="libs\FNA\FNA.dll.config" />
     <None Include="shaders\compile_shaders.bat" />

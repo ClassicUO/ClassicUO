@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Globalization;
 
@@ -28,7 +25,7 @@ namespace ClassicUO.Game
 {
     public struct Hue : IComparable, IComparable<ushort>
     {
-        public const ushort Invariant = ushort.MaxValue;
+        public const ushort Invalid = 0xFFFF;
         public static Hue SystemCol = new Hue(0x3B2);
         public static Hue Good = new Hue(68);
         public static Hue Error = new Hue(37);
@@ -39,8 +36,6 @@ namespace ClassicUO.Game
         {
             _value = hue;
         }
-
-        public bool IsInvariant => _value == Invariant;
 
         public static implicit operator Hue(ushort value)
         {

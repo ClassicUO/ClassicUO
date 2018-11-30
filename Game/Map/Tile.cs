@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,10 +17,11 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
@@ -31,7 +31,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Map
 {
-    public class Tile
+    public sealed class Tile
     {
         //public static readonly Tile Invalid = new Tile(0xFFFF, 0xFFFF);
         private static readonly List<GameObject> _itemsAtZ = new List<GameObject>();
@@ -104,17 +104,6 @@ namespace ClassicUO.Game.Map
 
         public void AddGameObject(GameObject obj)
         {
-            //if (obj is Land land)
-            //{
-            //    if (Land != null && land != Land)
-            //    {
-            //        Land.Dispose();
-            //        RemoveGameObject(Land);
-            //    }
-
-            //    Land = land;
-            //}
-
             if (_objectsOnTile == null)
                 _objectsOnTile = new List<GameObject>();
 
@@ -142,7 +131,6 @@ namespace ClassicUO.Game.Map
                     }
                 }
             }
-#if ORIONSORT
             short priorityZ = obj.Position.Z;
 
             switch (obj)
@@ -183,9 +171,9 @@ namespace ClassicUO.Game.Map
             }
 
             obj.PriorityZ = priorityZ;
-#endif
+
             _objectsOnTile.Add(obj);
-            _needSort = true;
+            _needSort = _objectsOnTile.Count > 1;
         }
 
         public void RemoveGameObject(GameObject obj)
@@ -193,10 +181,10 @@ namespace ClassicUO.Game.Map
             _objectsOnTile.Remove(obj);
         }
 
-        public void ForceSort()
-        {
-            _needSort = true;
-        }
+        //public void ForceSort()
+        //{
+        //    _needSort = true;
+        //}
 
         private void RemoveDuplicates()
         {
@@ -244,48 +232,6 @@ namespace ClassicUO.Game.Map
             //    _objectsOnTile.RemoveAt(toremove[i] - i);
         }
 
-        public List<GameObject> GetItemsBetweenZ(int z0, int z1)
-        {
-            List<GameObject> items = _itemsAtZ;
-            _itemsAtZ.Clear();
-
-            for (int i = 0; i < ObjectsOnTiles.Count; i++)
-            {
-                if (MathHelper.InRange(ObjectsOnTiles[i].Position.Z, z0, z1))
-                {
-                    if (ObjectsOnTiles[i] is IDynamicItem)
-                        items.Add(ObjectsOnTiles[i]);
-                }
-            }
-
-            return items;
-        }
-
-        public bool IsZUnderObjectOrGround(sbyte z, out GameObject entity, out GameObject ground)
-        {
-            var list = ObjectsOnTiles;
-            entity = null;
-            ground = null;
-
-            for (int i = list.Count - 1; i >= 0; i--)
-            {
-                if (list[i].Position.Z <= z) continue;
-
-                if (list[i] is IDynamicItem dyn)
-                {
-                    StaticTiles itemdata = dyn.ItemData;
-
-                    if (TileData.IsRoof(itemdata.Flags) || TileData.IsSurface(itemdata.Flags) || TileData.IsWall(itemdata.Flags) && TileData.IsImpassable(itemdata.Flags))
-                    {
-                        if (entity == null || list[i].Position.Z < entity.Position.Z)
-                            entity = list[i];
-                    }
-                }
-                else if (list[i] is Land tile && tile.AverageZ >= z + 12) ground = list[i];
-            }
-
-            return entity != null || ground != null;
-        }
 
         public void Dispose()
         {
@@ -299,9 +245,9 @@ namespace ClassicUO.Game.Map
                 if (t != World.Player)
                 {
                     t.Dispose();
-                    _objectsOnTile.RemoveAt(i--);
                 }
             }
+
         }
     }
 }

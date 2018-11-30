@@ -1,5 +1,4 @@
 ﻿#region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 
 using ClassicUO.Configuration;
@@ -42,9 +39,6 @@ namespace ClassicUO.Game.Scenes
     {
         private RenderTarget2D _renderTarget;
         private long _timePing;
-#if !ORIONSORT
-        private readonly List<DeferredEntity> _deferredToRemove = new List<DeferredEntity>();
-#endif
         private MousePicker _mousePicker;
         private MouseOverList _mouseOverList;
         private WorldViewport _viewPortGump;
@@ -185,7 +179,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (!World.InGame)
                 return;
-#if ORIONSORT
+
             (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
             //CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
             //_maxZ = maxItemZ;
@@ -245,7 +239,7 @@ namespace ClassicUO.Game.Scenes
             if (_renderIndex >= 100)
                 _renderIndex = 1;
             _updateDrawPosition = false;
-#endif
+
             CleaningResources();
             base.FixedUpdate(totalMS, frameMS);
         }
@@ -326,7 +320,7 @@ namespace ClassicUO.Game.Scenes
             sb3D.SetLightIntensity(World.Light.IsometricLevel);
             sb3D.SetLightDirection(World.Light.IsometricDirection);
             RenderedObjectsCount = 0;
-#if ORIONSORT
+
             for (int i = 0; i < _renderListCount; i++)
             {
                 GameObject obj = _renderList[i];
@@ -334,68 +328,7 @@ namespace ClassicUO.Game.Scenes
                 if (obj.Z <= _maxGroundZ && obj.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList))
                     RenderedObjectsCount++;
             }
-#else
-            CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
 
-            (Point firstTile, Vector2 renderOffset, Point renderDimensions) =
-                GetViewPort(_settings.GameWindowWidth, _settings.GameWindowHeight, (int)Scale);
-
-            ClearDeferredEntities();
-
-            for (int y = 0; y < renderDimensions.Y * 2 + 11; y++)
-            {
-                Vector3 dp = new Vector3
-                {
-                    X = (firstTile.X - firstTile.Y + y % 2) * 22f + renderOffset.X,
-                    Y = (firstTile.X + firstTile.Y + y) * 22f + renderOffset.Y
-                };
-
-
-                Point firstTileInRow = new Point(firstTile.X + (y + 1) / 2, firstTile.Y + y / 2);
-
-                for (int x = 0; x < renderDimensions.X + 1; x++)
-                {
-                    int tileX = firstTileInRow.X - x;
-                    int tileY = firstTileInRow.Y + x;
-
-                    Tile tile = World.Map.GetTile(tileX, tileY);
-                    if (tile != null)
-                    {
-                        IReadOnlyList<GameObject> objects = tile.ObjectsOnTiles;
-
-                        bool draw = true;
-
-                        for (int k = 0; k < objects.Count; k++)
-                        {
-                            GameObject obj = objects[k];
-
-                            if (obj is DeferredEntity d)
-                                _deferredToRemove.Add(d);
-
-                            if (!drawTerrain)
-                            {
-                                if (obj is Tile || obj.Position.Z > tile.Position.Z)
-                                    draw = false;
-                            }
-
-                            if ((obj.Position.Z >= maxItemZ
-                                 || maxItemZ != 255 && obj is IDynamicItem dyn &&
-                                 TileData.IsRoof((long) dyn.ItemData.Flags))
-                                && !(obj is Tile))
-                            {
-                                continue;
-                            }
-
-                            if (draw && obj.View.Draw(sb3D, dp, _mouseOverList))
-                                RenderedObjectsCount++;
-                        }
-                    }
-
-                    ClearDeferredEntities();
-                    dp.X -= 44f;
-                }
-            }
-#endif
             // Draw in game overhead text messages
             OverheadManager.Draw(sb3D, _mouseOverList);
             sb3D.End();

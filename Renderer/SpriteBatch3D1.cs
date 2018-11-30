@@ -1,4 +1,24 @@
-﻿using System;
+﻿#region license
+//  Copyright (C) 2018 ClassicUO Development Community on Github
+//
+//	This project is an alternative client for the game Ultima Online.
+//	The goal of this is to develop a lightweight client considering 
+//	new technologies.  
+//      
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#endregion
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -47,9 +67,6 @@ namespace ClassicUO.Renderer
         private RasterizerState _rasterizerState;
         private BlendState _blendState;
 
-#if !ORIONSORT
-        private float _z;
-#endif
         private int _numSprites;
 
         public SpriteBatch3D(GraphicsDevice device)
@@ -107,10 +124,6 @@ namespace ClassicUO.Renderer
             _drawLightingEffect.SetValue(value);
         }
 
-#if !ORIONSORT
-        public float GetZ() => _z++;
-#endif
-
         public void Begin()
         {
             EnsureNotStarted();
@@ -118,9 +131,7 @@ namespace ClassicUO.Renderer
             Calls = 0;
             Merged = 0;
             FlushCount = 0;
-#if !ORIONSORT
-            _z = 0;
-#endif
+
             _drawingArea.Min = _minVector3;
             _drawingArea.Max = new Vector3(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, int.MaxValue);
         }
@@ -154,9 +165,7 @@ namespace ClassicUO.Renderer
 
             if (_numSprites >= MAX_SPRITES)
                 Flush();
-#if !ORIONSORT
-            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = GetZ();
-#endif
+
             _textureInfo[_numSprites] = texture;
 
             fixed (SpriteVertex* p = &_vertexInfo[_numSprites * 4])
@@ -184,9 +193,7 @@ namespace ClassicUO.Renderer
 
             if (_numSprites >= MAX_SPRITES)
                 Flush();
-#if !ORIONSORT
-            vertices[0].Position.Z = vertices[1].Position.Z = vertices[2].Position.Z = vertices[3].Position.Z = z;
-#endif
+
             float skewHorizTop = (vertices[0].Position.Y - position.Y) * .5f;
             float skewHorizBottom = (vertices[3].Position.Y - position.Y) * .5f;
             vertices[0].Position.X -= skewHorizTop;

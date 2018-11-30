@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 
 using ClassicUO.Configuration;
@@ -192,83 +189,6 @@ namespace ClassicUO.Game.Views
             MousePick(list, vertex);
 
             return true;
-        }
-
-        protected bool PreDraw(Vector3 position)
-        {
-#if !ORIONSORT
-            if (GameObject is IDeferreable deferreable)
-            {
-                Tile tile;
-                Direction check;
-
-                if (GameObject is Mobile mobile && mobile.IsMoving)
-                {
-                    Direction dir = mobile.Direction;
-
-                    if ((dir & Direction.Up) == Direction.Left || (dir & Direction.Up) == Direction.South ||
-                        (dir & Direction.Up) == Direction.East)
-                    {
-                        tile = World.Map.GetTile(GameObject.Position.X, GameObject.Position.Y + 1);
-                        check = dir & Direction.Up;
-                    }
-                    else if ((dir & Direction.Up) == Direction.Down)
-                    {
-                        tile = World.Map.GetTile(GameObject.Position.X + 1, GameObject.Position.Y + 1);
-                        check = Direction.Down;
-                    }
-                    else
-                    {
-                        tile = World.Map.GetTile(GameObject.Position.X + 1, GameObject.Position.Y);
-                        check = Direction.East;
-                    }
-                }
-                else
-                {
-                    tile = World.Map.GetTile(GameObject.Position.X, GameObject.Position.Y + 1);
-                    check = Direction.South;
-                }
-
-                if (tile != null)
-                {
-                    if (deferreable.DeferredObject == null)
-                        deferreable.DeferredObject = new DeferredEntity();
-                    else
-                        deferreable.DeferredObject.Reset();
-
-                    deferreable.DeferredObject.AtPosition = position;
-                    deferreable.DeferredObject.Entity = GameObject;
-                    deferreable.DeferredObject.AssociatedTile = tile;
-                    deferreable.DeferredObject.Map = World.Map;
-
-                    if (GameObject is Mobile mob)
-                    {
-                        sbyte z = 0;
-
-                        if (!Pathfinder.CalculateNewZ(mob.Position.X, mob.Position.Y, ref z, (int)check))
-                            return false;
-
-                        deferreable.DeferredObject.Z = z;
-                        deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, z);
-                    }
-                    else
-                    {
-                        deferreable.DeferredObject.Z = GameObject.Position.Z;
-                        deferreable.DeferredObject.Position = new Position(0xFFFF, 0xFFFF, GameObject.Position.Z);
-                    }
-
-                    tile.AddGameObject(deferreable.DeferredObject);
-
-                    return true;
-                }
-            }
-#endif
-            return false;
-        }
-
-        public virtual bool DrawInternal(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
-        {
-            return false;
         }
 
         protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex)

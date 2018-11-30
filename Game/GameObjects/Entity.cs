@@ -1,5 +1,4 @@
 #region license
-
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -18,9 +17,7 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 #endregion
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -46,7 +43,7 @@ namespace ClassicUO.Game.GameObjects
         Hidden = 0x80
     }
 
-    public abstract class Entity : GameObject, IDeferreable
+    public abstract class Entity : GameObject
     {
         protected const float CHARACTER_ANIMATION_DELAY = 80;
         private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
@@ -164,8 +161,6 @@ namespace ClassicUO.Game.GameObjects
 
         public uint PropertiesHash { get; set; }
 
-        public DeferredEntity DeferredObject { get; set; }
-
         public event EventHandler AppearanceChanged, PositionChanged, AttributesChanged, PropertiesChanged;
 
         public void UpdateProperties(IEnumerable<Property> props)
@@ -194,12 +189,6 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Dispose()
         {
-            if (DeferredObject != null)
-            {
-                DeferredObject.Reset();
-                DeferredObject = null;
-            }
-
             _properties.Clear();
             base.Dispose();
         }
