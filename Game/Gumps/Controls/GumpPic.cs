@@ -80,13 +80,15 @@ namespace ClassicUO.Game.Gumps.Controls
             Texture = IO.Resources.Gumps.GetGumpTexture(Graphic);
         }
 
+        public bool IsPartialHue { get; set; }
+
         public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) : (Hue) 0)
         {
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue));
+            spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, IsPartialHue, 0, false));
 
             return base.Draw(spriteBatch, position, hue);
         }

@@ -239,7 +239,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 return base.Draw(spriteBatch, position, hue);
             }
 
-            protected override void OnMouseEnter(int x, int y)
+            protected override void OnMouseOver(int x, int y)
             {
                 _labelName.Hue = _hoverColor;
                 _labelPing.Hue = _hoverColor;
@@ -247,10 +247,10 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 _labelName.CreateTexture();
                 _labelPing.CreateTexture();
                 _labelPacketLoss.CreateTexture();
-                base.OnMouseEnter(x, y);
+                base.OnMouseOver(x, y);
             }
 
-            protected override void OnMouseLeft(int x, int y)
+            protected override void OnMouseExit(int x, int y)
             {
                 _labelName.Hue = _normalColor;
                 _labelPing.Hue = _normalColor;
@@ -258,7 +258,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 _labelName.CreateTexture();
                 _labelPing.CreateTexture();
                 _labelPacketLoss.CreateTexture();
-                base.OnMouseLeft(x, y);
+                base.OnMouseExit(x, y);
             }
 
             protected override void OnMouseClick(int x, int y, MouseButton button)

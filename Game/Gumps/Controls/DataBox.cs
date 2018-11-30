@@ -24,6 +24,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.Scenes;
+using ClassicUO.Input;
+
 namespace ClassicUO.Game.Gumps.Controls
 {
     class DataBox : GumpControl

@@ -51,7 +51,6 @@ namespace ClassicUO
         private JournalData _journalManager;
         private SpriteBatch3D _sb3D;
         private SpriteBatchUI _sbUI;
-        private SceneManager _sceneManager;
         private double _statisticsTimer;
         private UIManager _uiManager;
 
@@ -104,7 +103,6 @@ namespace ClassicUO
             Service.Register(_sbUI = new SpriteBatchUI(GraphicsDevice));
             Service.Register(new InputManager());
             Service.Register(_uiManager = new UIManager());
-            Service.Register(_sceneManager = new SceneManager());
             Service.Register(_journalManager = new JournalData());
 
             //Register Command Stack
@@ -129,13 +127,13 @@ namespace ClassicUO
 
         protected override void LoadContent()
         {
-            _sceneManager.ChangeScene(ScenesType.Login);
+            SceneManager.ChangeScene(ScenesType.Login);
             base.LoadContent();
         }
 
         protected override void UnloadContent()
         {
-            Service.Get<SceneManager>().CurrentScene?.Unload();
+            SceneManager.CurrentScene?.Unload();
             Service.Get<Settings>().Save();
             base.UnloadContent();
         }
@@ -177,24 +175,24 @@ namespace ClassicUO
 
         protected override void OnUpdate(double totalMS, double frameMS)
         {
-            _sceneManager.CurrentScene.Update(totalMS, frameMS);
+            SceneManager.CurrentScene.Update(totalMS, frameMS);
         }
 
         protected override void OnFixedUpdate(double totalMS, double frameMS)
         {
-            _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
+            SceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
 
 
         protected override void OnDraw(double frameMS)
-        {      
-            _sceneManager.CurrentScene.Draw(_sb3D, _sbUI);
+        {
+            SceneManager.CurrentScene.Draw(_sb3D, _sbUI);
             _sbUI.GraphicsDevice.Clear(Color.Transparent);
             _sbUI.Begin();        
             _uiManager.Draw(_sbUI);
             
             _buffer.Clear();
-            _buffer.AppendFormat(FORMATTED_STRING, CurrentFPS, _sceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged, World.Player == null ? string.Empty : World.Player.Position.ToString(), _sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty, _sb3D.FlushCount + _sbUI.FlushCount);
+            _buffer.AppendFormat(FORMATTED_STRING, CurrentFPS, SceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged, World.Player == null ? string.Empty : World.Player.Position.ToString(), SceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty, _sb3D.FlushCount + _sbUI.FlushCount);
             _infoText.Text = _buffer.ToString();
             _infoText.Draw(_sbUI, new Point(Window.ClientBounds.Width - 150, 20));
             _sbUI.End();

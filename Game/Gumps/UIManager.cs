@@ -62,8 +62,8 @@ namespace ClassicUO.Game.Gumps
 
             InputManager.LeftMouseButtonDown += (sender, e) =>
             {
-                if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                    return;
+                //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
+                //    return;
 
                 if (MouseOverControl != null)
                 {
@@ -89,8 +89,8 @@ namespace ClassicUO.Game.Gumps
 
             InputManager.LeftMouseButtonUp += (sender, e) =>
             {
-                if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                    return;
+                //if (!IsModalControlOpen && ObjectsBlockingInputExists)
+                //    return;
 
                 //if (MouseOverControl == null)
                 //    return;
@@ -115,8 +115,8 @@ namespace ClassicUO.Game.Gumps
 
             InputManager.LeftMouseDoubleClick += (sender, e) =>
             {
-                if (!IsModalControlOpen && ObjectsBlockingInputExists)
-                    e.Result = false;
+                //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
+                //    e.Result = false;
                 if (MouseOverControl != null && IsMouseOverUI) e.Result |= MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
             };
 
@@ -177,7 +177,7 @@ namespace ClassicUO.Game.Gumps
 
             InputManager.MouseWheel += (sender, isup) =>
             {
-                if (!IsModalControlOpen && ObjectsBlockingInputExists)
+                if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
                     return;
 
                 if (MouseOverControl != null && MouseOverControl.AcceptMouseInput)
@@ -231,7 +231,7 @@ namespace ClassicUO.Game.Gumps
 
         public bool IsModalControlOpen => _gumps.Any(s => s.ControlInfo.IsModal);
 
-        private bool ObjectsBlockingInputExists => _inputBlockingObjects.Count > 0;
+        //private bool ObjectsBlockingInputExists => _inputBlockingObjects.Count > 0;
 
         public void AddInputBlocker(object obj)
         {
@@ -574,19 +574,32 @@ namespace ClassicUO.Game.Gumps
 
             if (MouseOverControl != null && gump != MouseOverControl)
             {
-                MouseOverControl.InvokeMouseLeft(position);
+                MouseOverControl.InvokeMouseExit(position);
 
                 if (MouseOverControl.RootParent != null)
                 {
                     if (gump == null || gump.RootParent != MouseOverControl.RootParent)
-                        MouseOverControl.RootParent.InvokeMouseLeft(position);
+                        MouseOverControl.RootParent.InvokeMouseExit(position);
                 }
             }
 
             if (gump != null)
             {
-                gump.InvokeMouseEnter(position);
 
+                if (gump != MouseOverControl)
+                {
+                    gump.InvokeMouseEnter(position);
+
+                    if (gump?.RootParent != null)
+                    {
+                        if (MouseOverControl== null || gump.RootParent != MouseOverControl.RootParent)
+                            gump.RootParent.InvokeMouseEnter(position);
+                    }
+                }
+
+                gump.InvokeMouseOver(position);
+
+               
                 if (_mouseDownControls[0] == gump)
                     AttemptDragControl(gump, position);
 
@@ -599,7 +612,7 @@ namespace ClassicUO.Game.Gumps
             for (int i = 0; i < 5; i++)
             {
                 if (_mouseDownControls[i] != null && _mouseDownControls[i] != gump)
-                    _mouseDownControls[i].InvokeMouseEnter(position);
+                    _mouseDownControls[i].InvokeMouseOver(position);
             }
         }
 
