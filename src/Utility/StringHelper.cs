@@ -59,25 +59,13 @@ namespace ClassicUO.Utility
 
         public static unsafe string ReadUTF8(byte* data)
         {
-            byte* endPtr = data;
+            byte* ptr = data;
 
-            if (*endPtr != 0)
-            {
-                int bytes = 0;
+            while (*ptr != 0)
+                ptr++;
 
-                while (*endPtr != 0)
-                {
-                    endPtr++;
-                    bytes++;
-                }
-
-                char* buffer = stackalloc char[bytes];
-                int chars = Encoding.UTF8.GetChars(data, bytes, buffer, bytes);
-
-                return new string(buffer, 0, chars);
-            }
-
-            return string.Empty;
+            return Encoding.UTF8.GetString(data, (int)(ptr - data));
         }
+
     }
 }

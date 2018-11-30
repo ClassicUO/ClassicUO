@@ -21,7 +21,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text.Formatting;
+using System.Text;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -35,6 +35,7 @@ using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -45,7 +46,7 @@ namespace ClassicUO
     public class GameLoop : CoreGame
     {
         private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
-        private readonly StringBuffer _buffer = new StringBuffer();
+       // private readonly StringBuffer _buffer = new StringBuffer();
         private RenderedText _infoText;
         private InputManager _inputManager;
         private JournalData _journalManager;
@@ -184,16 +185,26 @@ namespace ClassicUO
         }
 
 
+        StringBuilder _sb = new StringBuilder();
+        //private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
+        private const string FORMAT_1 = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\n";
+        private const string FORMAT_2 = "Flush: {0}\nPos: {1}\nSelected: {2}\nStats: {3}";
+
         protected override void OnDraw(double frameMS)
         {
             SceneManager.CurrentScene.Draw(_sb3D, _sbUI);
             _sbUI.GraphicsDevice.Clear(Color.Transparent);
             _sbUI.Begin();        
             _uiManager.Draw(_sbUI);
-            
-            _buffer.Clear();
-            _buffer.AppendFormat(FORMATTED_STRING, CurrentFPS, SceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged, World.Player == null ? string.Empty : World.Player.Position.ToString(), SceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty, _sb3D.FlushCount + _sbUI.FlushCount);
-            _infoText.Text = _buffer.ToString();
+
+            _sb.Clear();
+            //_buffer.Clear();
+
+            _sb.ConcatFormat(FORMAT_1, CurrentFPS, SceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged);
+            _sb.ConcatFormat(FORMAT_2, World.Player == null ? string.Empty : World.Player.Position.ToString(), SceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty, _sb3D.FlushCount + _sbUI.FlushCount);
+
+            //_sb.ConcatFormat(FORMATTED_STRING, CurrentFPS, SceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged, World.Player == null ? string.Empty : World.Player.Position.ToString(), SceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty, _sb3D.FlushCount + _sbUI.FlushCount);
+            _infoText.Text = _sb.ToString();
             _infoText.Draw(_sbUI, new Point(Window.ClientBounds.Width - 150, 20));
             _sbUI.End();
         }
