@@ -41,8 +41,6 @@ namespace ClassicUO.Game.Gumps.Controls
         private Item _fakeItem;
         private Mobile _mobile;
 
-        private bool _needUpdate;
-
         public PaperDollInteractable(int x, int y, Mobile mobile)
         {
             X = x;
@@ -131,13 +129,11 @@ namespace ClassicUO.Game.Gumps.Controls
             if (item == null && _fakeItem != null)
             {
                 _fakeItem = null;
-                _needUpdate = true;
                 OnEntityUpdated(Mobile);
             }
             else if (item != null && _mobile.Equipment[item.ItemData.Layer] == null)
             {
                 _fakeItem = item;
-                _needUpdate = true;
                 OnEntityUpdated(Mobile);
             }
         }
