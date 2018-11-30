@@ -244,6 +244,8 @@ namespace ClassicUO.Game
             Map.Dispose();
             Map = null;
             ToAdd.Clear();
+            IO.UltimaLive.IsUltimaLiveActive = false;
+            IO.UltimaLive.ShardName = null;
         }
 
         private static void InternalMapChangeClear(bool noplayer)

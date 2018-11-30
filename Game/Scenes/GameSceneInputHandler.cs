@@ -43,7 +43,6 @@ namespace ClassicUO.Game.Scenes
     {
         private double _dequeueAt;
         private bool _inqueue;
-        private PaperDollInteractable _lastFakeParedoll;
         private Action _queuedAction;
         private Entity _queuedObject;
         private bool _rightMousePressed;
@@ -128,105 +127,7 @@ namespace ClassicUO.Game.Scenes
             {
                 SelectedObject = null;
 
-                if (IsMouseOverUI)
-                {
-                    GumpControl target = UIManager.MouseOverControl;
-
-                    if (_lastFakeParedoll != null)
-                    {
-                        _lastFakeParedoll.AddFakeDress(null);
-                        _lastFakeParedoll.Update();
-                        _lastFakeParedoll = null;
-                    }
-
-                    switch (target)
-                    {
-                        case ItemGump gumpling when !(target is ItemGumpPaperdoll):
-
-                        {
-                            Item item = gumpling.Item;
-                            SelectedObject = item;
-
-                            if (TileData.IsContainer(item.ItemData.Flags))
-                                DropHeldItemToContainer(item);
-                            else if (HeldItem.Graphic == item.Graphic && TileData.IsStackable(HeldItem.ItemData.Flags))
-                                MergeHeldItem(item);
-                            else
-                            {
-                                if (item.Container.IsItem) DropHeldItemToContainer(World.Items.Get(item.Container), target.X + (Mouse.Position.X - target.ScreenCoordinateX), target.Y + (Mouse.Position.Y - target.ScreenCoordinateY));
-                            }
-
-                            break;
-                        }
-                        case GumpPicContainer container:
-
-                        {
-                            SelectedObject = container.Item;
-                            int x = Mouse.Position.X - target.ScreenCoordinateX;
-                            int y = Mouse.Position.Y - target.ScreenCoordinateY;
-
-                            DropHeldItemToContainer(container.Item, x, y);
-
-                            break;
-                        }
-                        case GumpPicBackpack backpack:
-                            DropHeldItemToContainer(backpack.BackpackItem);
-
-                            break;
-                        case DataBox dataBox:
-                        {
-                            if (dataBox.RootParent is TradingGump tradingGump)
-                            {
-                                int x = Mouse.Position.X - dataBox.ScreenCoordinateX;
-                                int y = Mouse.Position.Y - dataBox.ScreenCoordinateY;
-
-                                ArtTexture texture = Art.GetStaticTexture(HeldItem.DisplayedGraphic);
-
-                                if (texture != null)
-                                {
-                                    x -= (texture.Width / 2);
-                                    y -= texture.Height / 2;
-
-                                    if (x + texture.Width > 110)
-                                        x = 110 - texture.Width;
-
-                                    if (y + texture.Height > 80)
-                                        y = 80 - texture.Height;
-                                }
-
-                                if (x < 0)
-                                    x = 0;
-
-                                if (y < 0)
-                                    y = 0;
-
-                                GameActions.DropItem(HeldItem, x, y, 0, tradingGump.ID1);
-                                ClearHolding();
-                                Mouse.CancelDoubleClick = true;
-                            }
-                                break;
-                        }
-                        case IMobilePaperdollOwner paperdollOwner:
-
-                        {
-                            if (TileData.IsWearable(HeldItem.ItemData.Flags)) WearHeldItem(paperdollOwner.Mobile);
-
-                            break;
-                        }
-                        default:
-
-                        {
-                            if (target.Parent is IMobilePaperdollOwner paperdollOwner1)
-                            {
-                                if (TileData.IsWearable(HeldItem.ItemData.Flags))
-                                    WearHeldItem(paperdollOwner1.Mobile);
-                            }
-
-                            break;
-                        }
-                    }
-                }
-                else if (IsMouseOverWorld)
+                if (IsMouseOverWorld)
                 {
                     GameObject obj = _mousePicker.MouseOverObject;
 
@@ -443,12 +344,10 @@ namespace ClassicUO.Game.Scenes
 
         private void OnMouseDragging(object sender, EventArgs e)
         {
-            if (Mouse.LButtonPressed) HandleMouseFakeItem();
         }
 
         private void OnMouseMoving(object sender, EventArgs e)
         {
-            HandleMouseFakeItem();
         }
 
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
@@ -456,11 +355,7 @@ namespace ClassicUO.Game.Scenes
             if (TargetSystem.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && e.keysym.mod == SDL.SDL_Keymod.KMOD_NONE)
                 TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
-            {
-                TargetSystem.SetTargeting(TargetType.Object, 6983686, 0);
-            }
-
+          
             // TEST PURPOSE
             /*if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
             {
@@ -489,51 +384,6 @@ namespace ClassicUO.Game.Scenes
 
         private void OnKeyUp(object sender, SDL.SDL_KeyboardEvent e)
         {
-        }
-
-        private void HandleMouseFakeItem()
-        {
-            if (IsMouseOverUI)
-            {
-                if (IsHoldingItem)
-                {
-                    GumpControl target = UIManager.MouseOverControl;
-
-                    if (target != null && TileData.IsWearable(HeldItem.ItemData.Flags))
-                    {
-                        PaperDollInteractable gumpling = null;
-
-                        if (target is ItemGumpPaperdoll)
-                            gumpling = (PaperDollInteractable) target.Parent;
-                        else if (target is GumpPic pic && pic.IsPaperdoll)
-                            gumpling = (PaperDollInteractable) target.Parent;
-                        else if (target is EquipmentSlot || target is PaperDollGump || target.Parent is PaperDollGump) gumpling = target.Parent.FindControls<PaperDollInteractable>().FirstOrDefault();
-
-                        if (gumpling != null)
-                        {
-                            if (_lastFakeParedoll != gumpling)
-                            {
-                                _lastFakeParedoll = gumpling;
-
-                                gumpling.AddFakeDress(new Item(Serial.Invalid)
-                                {
-                                    Amount = 1, Graphic = HeldItem.Graphic, Hue = HeldItem.Hue
-                                });
-                                gumpling.Update();
-                            }
-
-                            return;
-                        }
-                    }
-                }
-            }
-
-            if (_lastFakeParedoll != null)
-            {
-                _lastFakeParedoll.AddFakeDress(null);
-                _lastFakeParedoll.Update();
-                _lastFakeParedoll = null;
-            }
         }
     }
 }

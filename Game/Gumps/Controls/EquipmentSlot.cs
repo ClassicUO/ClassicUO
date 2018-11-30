@@ -132,7 +132,7 @@ namespace ClassicUO.Game.Gumps.Controls
             _clickPoint.Y = y;
         }
 
-        protected override void OnMouseEnter(int x, int y)
+        protected override void OnMouseOver(int x, int y)
         {
             if (Item == null)
                 return;

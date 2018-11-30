@@ -229,7 +229,7 @@ namespace ClassicUO.Game.Gumps.Controls
             _btSliderClicked = false;
         }
 
-        protected override void OnMouseEnter(int x, int y)
+        protected override void OnMouseOver(int x, int y)
         {
             if (_btSliderClicked)
             {

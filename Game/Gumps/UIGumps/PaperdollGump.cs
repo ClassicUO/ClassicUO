@@ -24,8 +24,10 @@ using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
@@ -46,6 +48,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private GumpPic _specialMovesBookPic;
         private GumpPic _virtueMenuPic;
         private Button _warModeBtn;
+        private PaperDollInteractable _paperDollInteractable;
 
         public PaperDollGump() : base(0, 0)
         {
@@ -72,10 +75,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Dispose()
         {
-
             UIManager.SavePosition(LocalSerial, Location);
 
-            //Mobile.EnableCallBackForItemsUpdate(false);
             if (Mobile == World.Player)
             {
                 _virtueMenuPic.MouseDoubleClick -= VirtueMenu_MouseDoubleClickEvent;
@@ -84,6 +85,25 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             Clear();
             base.Dispose();
+        }
+
+        protected override void OnMouseExit(int x, int y)
+        {
+            _paperDollInteractable.AddFakeDress(null);
+        }
+
+        protected override void OnMouseEnter(int x, int y)
+        {
+            GameScene gs = SceneManager.GetScene<GameScene>();
+
+            if (gs.IsHoldingItem)
+            {
+                _paperDollInteractable.AddFakeDress(new Item(gs.HeldItem.Serial)
+                {
+                    Graphic = gs.HeldItem.Graphic,
+                    Hue = gs.HeldItem.Hue
+                });
+            }
         }
 
         private void BuildGump()
@@ -96,14 +116,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //SaveOnWorldStop = true;
             LocalSerial = Mobile.Serial;
 
-            //Mobile.EnableCallBackForItemsUpdate(true);
-
             if (Mobile == World.Player)
             {
-                AddChildren(new GumpPic(0, 0, 0x07d0, 0)
-                {
-                    CanMove = true
-                });
+                AddChildren(new GumpPic(0, 0, 0x07d0, 0));
 
                 //HELP BUTTON
                 AddChildren(new Button((int) Buttons.Help, 0x07ef, 0x07f0, 0x07f1)
@@ -176,18 +191,32 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new EquipmentSlot(2, 76 + 22 * 5, Mobile, Layer.Tunic));
 
             // Paperdoll control!
-            AddChildren(new PaperDollInteractable(8, 21, Mobile));
+            _paperDollInteractable = new PaperDollInteractable(8, 21, Mobile);
+            //_paperDollInteractable.MouseOver += (sender, e) =>
+            //{
+            //    OnMouseOver(e.X, e.Y);
+            //};
+            AddChildren(_paperDollInteractable);
 
             // Name and title
-            //AddChildren(new HtmlGump(35, 260, 180, 42, string.Format("<span color=#222 style='font-family:uni0;'>{0}", Title), 0, 0, 0, true));
-
-            //AddChildren(new HtmlGump(39, 262, 185, 42, Title, 0, 0, 0x0386, false, 1, false, maxWidth: 185));
-
             Label titleLabel = new Label(Title, false, 0x0386, 185)
             {
                 X = 39, Y = 262
             };
             AddChildren(titleLabel);
+        }
+
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            GameScene gs = SceneManager.GetScene<GameScene>();
+            if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                return;
+
+            if (TileData.IsWearable(gs.HeldItem.ItemData.Flags))
+            {
+                gs.WearHeldItem(Mobile);
+            }
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
@@ -274,7 +303,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return false;
         }
 
-      
 
         public override void OnButtonClick(int buttonID)
         {

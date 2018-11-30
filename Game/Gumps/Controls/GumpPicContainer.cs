@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,8 +18,17 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Input;
+using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
@@ -30,5 +40,20 @@ namespace ClassicUO.Game.Gumps.Controls
         }
 
         public Item Item { get; }
+
+        protected override void OnMouseUp(int x, int y, MouseButton button)
+        {
+            if (button == MouseButton.Left)
+            {
+                GameScene gs = SceneManager.GetScene<GameScene>();
+
+                if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
+                    return;
+
+                gs.SelectedObject = Item;
+                gs.DropHeldItemToContainer(Item, x, y);
+                
+            }
+        }
     }
 }
