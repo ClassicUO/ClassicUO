@@ -200,7 +200,7 @@ namespace ClassicUO.Game.Map
 
                 if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
-                    block.Unload();
+                    block.Dispose();
                     block = null; // MapChunk.Invalid;
                     _usedIndices.RemoveAt(i--);
 
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.Map
             for (int i = 0; i < _usedIndices.Count; i++)
             {
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
-                block.Unload();
+                block.Dispose();
                 block = null;// MapChunk.Invalid;
                 _usedIndices.RemoveAt(i--);
             }

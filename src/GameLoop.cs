@@ -201,7 +201,7 @@ namespace ClassicUO
             //_buffer.Clear();
 
             _sb.ConcatFormat(FORMAT_1, CurrentFPS, SceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged);
-            _sb.ConcatFormat(FORMAT_2, World.Player == null ? string.Empty : World.Player.Position.ToString(), SceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty, _sb3D.FlushCount + _sbUI.FlushCount);
+            _sb.ConcatFormat(FORMAT_2, _sb3D.FlushCount + _sbUI.FlushCount, World.Player == null ? string.Empty : World.Player.Position.ToString(), SceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty);
 
             //_sb.ConcatFormat(FORMATTED_STRING, CurrentFPS, SceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged, World.Player == null ? string.Empty : World.Player.Position.ToString(), SceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty, _sb3D.FlushCount + _sbUI.FlushCount);
             _infoText.Text = _sb.ToString();

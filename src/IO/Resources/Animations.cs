@@ -1174,6 +1174,10 @@ namespace ClassicUO.IO.Resources
 
                 if (f == null)
                     f = new AnimationFrameTexture(uniqueAnimationIndex, imageWidth, imageHeight);
+                else
+                {
+                    Log.Message(LogTypes.Warning, "TEXTURE EXISTS");
+                }
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
                 f.SetDataHitMap16(pixels);
@@ -1198,6 +1202,7 @@ namespace ClassicUO.IO.Resources
             uint frameCount = _reader.ReadUInt();
             animDir.FrameCount = (byte) frameCount;
             uint* frameOffset = (uint*) _reader.PositionAddress;
+
             animDir.Frames = new AnimationFrameTexture[frameCount];
 
             for (int i = 0; i < frameCount; i++)
@@ -1252,6 +1257,10 @@ namespace ClassicUO.IO.Resources
 
                 if (f == null)
                     f = new AnimationFrameTexture(uniqueAnimationIndex, imageWidth, imageHeight);
+                else
+                {
+                    Log.Message(LogTypes.Warning, "TEXTURE EXISTS");
+                }
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
                 f.SetDataHitMap16(pixels);
@@ -1409,7 +1418,6 @@ namespace ClassicUO.IO.Resources
                         if (dir.Frames[j] != null)
                         {
                             dir.Frames[j].Dispose();
-                            dir.Frames[j] = null;
                         }
                     }
 

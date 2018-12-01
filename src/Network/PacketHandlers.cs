@@ -1071,6 +1071,32 @@ namespace ClassicUO.Network
 
         private static void BookData(Packet p)
         {
+            UIManager ui = Service.Get<UIManager>();
+            var serial = p.ReadUInt();
+            var pageCnt = p.ReadUShort();
+            var pages = new Dictionary<int,List<string>>();
+            var gump = ui.GetByLocalSerial<BookGump>( serial );
+            if(gump == null )
+            {
+                //throw?
+                return;
+            }
+            for (int i = 0; i< pageCnt;i++ )
+            {
+                var pageNum = p.ReadUShort();
+                var lineCnt = p.ReadUShort();
+                var lines = new List<string>();
+                for(int x = 0; x < lineCnt;x++ )
+                {
+                    if ( BookGump.IsNewBookD4 )
+                        lines.Add( p.ReadUTF8String().TrimEnd('\n') );
+                    else
+                        lines.Add( p.ReadASCII().TrimEnd('\n') );
+                }
+                pages.Add( pageNum, lines );
+               
+            }
+            gump.BookPages = pages;
         }
 
         private static void CharacterAnimation(Packet p)
@@ -1401,6 +1427,22 @@ namespace ClassicUO.Network
             ushort pages = p.ReadUShort();
             string title = p.ReadASCII(60);
             string author = p.ReadASCII(30);
+
+            UIManager ui = Service.Get<UIManager>();
+
+            if ( ui.GetByLocalSerial<BookGump>( book.Serial ) == null )
+            {
+                ui.Add( new BookGump( book )
+                {
+                    X = 100,
+                    Y = 100,
+                    BookPageCount = pages,
+                    Title = title,
+                    Author = author,
+                    IsBookEditable = flags == 0 ? false : true
+                } );
+            }
+
         }
 
         private static void DyeData(Packet p)
@@ -2024,6 +2066,30 @@ namespace ClassicUO.Network
 
         private static void OpenBookNew(Packet p)
         {
+            Item book = World.Items.Get( p.ReadUInt() );
+            byte flags = p.ReadByte();
+            p.Skip( 1 );
+            ushort pages = p.ReadUShort();
+            var len = p.ReadUShort();
+            
+            string title = p.ReadUTF8String();
+            len = p.ReadUShort();
+            string author = p.ReadUTF8String();
+
+            UIManager ui = Service.Get<UIManager>();
+
+            if ( ui.GetByLocalSerial<BookGump>( book.Serial ) == null )
+            {
+                ui.Add( new BookGump( book )
+                {
+                    X = 100,
+                    Y = 100,
+                    BookPageCount = pages,
+                    Title = title,
+                    Author = author,
+                    IsBookEditable = flags == 0 ? false : true
+                } );
+            }
         }
 
         private static void MegaCliloc(Packet p)

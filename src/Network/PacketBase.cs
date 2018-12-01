@@ -55,6 +55,13 @@ namespace ClassicUO.Network
             this[Position++] = v;
         }
 
+        public void WriteBytes( byte[] buffer, int v, int length )
+        {
+            EnsureSize(length);
+            for ( int i = v; i < length; i++ )
+                this[Position++] = buffer[i];
+        }
+
         public void WriteSByte(sbyte v)
         {
             WriteByte((byte) v);

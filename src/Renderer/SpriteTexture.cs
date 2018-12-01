@@ -99,8 +99,8 @@ namespace ClassicUO.Renderer
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            if (_hitMap != null)
-                Array.Clear(_hitMap, 0, _hitMap.Length);
+
+            _hitMap = null;
         }
     }
 
