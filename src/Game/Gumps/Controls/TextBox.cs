@@ -103,7 +103,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            Height = _entry.Height;
+            //multiline input is fixed height, unmodifiable
+            if(!MultiLineInputAllowed)
+                Height = _entry.Height;
             if (UIManager.KeyboardFocusControl == this)
             {
                 if (!IsFocused)

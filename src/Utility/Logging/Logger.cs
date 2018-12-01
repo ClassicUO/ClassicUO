@@ -136,7 +136,9 @@ namespace ClassicUO.Utility.Logging
         private void SetLogger(LogTypes type, string text)
         {
             if ((LogTypes & type) == type)
-                _logQueue.Add(type == LogTypes.None ? Tuple.Create(type, string.Empty, text) : Tuple.Create(type, DateTime.Now.ToString("T"), text));
+            {
+                _logQueue.TryAdd(type == LogTypes.None ? Tuple.Create(type, string.Empty, text) : Tuple.Create(type, DateTime.Now.ToString("T"), text));
+            }
         }
     }
 }

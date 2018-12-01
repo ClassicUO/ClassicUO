@@ -32,7 +32,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-            
         }
 
         private Button m_Forward, m_Backward;
@@ -70,10 +69,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (!IsNewBookD4)
                 font = 4;
             //title allows only 47  dots (. + \0) so 47 is the right number
-            AddChildren( m_Title = new TextBox(new TextEntry(font, 47, 0, 150, IsNewBookD4, FontStyle.None, 0), this.IsBookEditable) { X = 40, Y = 40, Height = 25, Width = 155, IsEditable = this.IsBookEditable, Text = Title ?? "" }, 1);
+            AddChildren( m_Title = new TextBox(new TextEntry(font, 47, 150, 150, IsNewBookD4, FontStyle.None, 0), this.IsBookEditable) { X = 40, Y = 40, Height = 25, Width = 155, IsEditable = this.IsBookEditable, Text = Title ?? "", Debug = true }, 1);
             AddChildren( new Label( "by", true, 1 ) { X = 45, Y = 110 },1);
             //as the old booktitle supports only 30 characters in AUTHOR and since the new clients only allow 29 dots (. + \0 character at end), we use 29 as a limitation
-            AddChildren( m_Author = new TextBox(new TextEntry(font, 29, 0, 150, IsNewBookD4, FontStyle.None, 0), this.IsBookEditable) { X = 45, Y = 130, Height = 25, Width = 155, IsEditable = this.IsBookEditable, Text = Author ?? "" } ,1);
+            AddChildren( m_Author = new TextBox(new TextEntry(font, 29, 150, 150, IsNewBookD4, FontStyle.None, 0), this.IsBookEditable) { X = 45, Y = 130, Height = 25, Width = 155, IsEditable = this.IsBookEditable, Text = Author ?? "", Debug = true } ,1);
 
             for ( int k = 1; k <= BookPageCount; k++ )
             {
@@ -92,7 +91,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     page += 1;
                 page /= 2;
                 TextBox tbox;
-                AddChildren( tbox = new TextBox(new TextEntry(font, 53, 0, 156, IsNewBookD4, FontStyle.None, 2), this.IsBookEditable) { X = x, Y = y, Height = 170, Width = 155, IsEditable = this.IsBookEditable, Text = "", MultiLineInputAllowed = true , MaxLines = 8}, page );
+                AddChildren( tbox = new TextBox(new TextEntry(font, 53, 156, 156, IsNewBookD4, FontStyle.None, 2), this.IsBookEditable) { X = x, Y = y, Height = 170, Width = 155, IsEditable = this.IsBookEditable, Text = "", MultiLineInputAllowed = true , MaxLines = 8, Debug = true }, page );
 
                 for ( int i = 0; i < 8; i++ )
                 {
@@ -150,6 +149,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
             base.OnButtonClick( buttonID );
         }
+
         protected override void OnInitialize()
         {
             

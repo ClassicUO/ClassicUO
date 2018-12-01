@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Gumps
         public int MaxCharCount { get; }
 
         public int Width { get; }
-        public int Height => RenderText.Height;
+        public int Height => RenderText.Height < 20 ? 20 : RenderText.Height;
 
         public int MaxWidth { get; }
 
