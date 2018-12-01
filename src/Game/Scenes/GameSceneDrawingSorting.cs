@@ -331,16 +331,16 @@ namespace ClassicUO.Game.Scenes
                 realMinRangeX = 0;
             int realMaxRangeX = World.Player.Position.X + width;
 
-            if (realMaxRangeX >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][0])
-                realMaxRangeX = IO.Resources.Map.MapsDefaultSize[World.Map.Index][0];
+            //if (realMaxRangeX >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][0])
+            //    realMaxRangeX = IO.Resources.Map.MapsDefaultSize[World.Map.Index][0];
             int realMinRangeY = World.Player.Position.Y - height;
 
             if (realMinRangeY < 0)
                 realMinRangeY = 0;
             int realMaxRangeY = World.Player.Position.Y + height;
 
-            if (realMaxRangeY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][1])
-                realMaxRangeY = IO.Resources.Map.MapsDefaultSize[World.Map.Index][1];
+            //if (realMaxRangeY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][1])
+            //    realMaxRangeY = IO.Resources.Map.MapsDefaultSize[World.Map.Index][1];
             int minBlockX = realMinRangeX / 8 - 1;
             int minBlockY = realMinRangeY / 8 - 1;
             int maxBlockX = realMaxRangeX / 8 + 1;

@@ -67,7 +67,8 @@ namespace ClassicUO.Game.Map
 
         public  Tile GetTile(short x, short y, bool load = true)
         {
-            if (x < 0 || y < 0) return null;
+            if (x < 0 || y < 0)
+                return null;
             int cellX = x / 8;
             int cellY = y / 8;
             int block = GetBlock(cellX, cellY);

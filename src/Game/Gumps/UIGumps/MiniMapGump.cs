@@ -40,6 +40,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private float _timeMS;
         private bool _useLargeMap;
         private ushort _x, _y;
+        private int _lastMap = -1;
 
         public MiniMapGump() : base(0, 0)
         {
@@ -137,12 +138,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
             ushort lastX = World.Player.Position.X;
             ushort lastY = World.Player.Position.Y;
 
+            if (_lastMap != World.MapIndex)
+            {
+                _forceUpdate = true;
+                _lastMap = World.MapIndex;
+            }
+
             if (_x != lastX || _y != lastY)
             {
                 _x = lastX;
                 _y = lastY;
             }
-            else if (!_forceUpdate) return;
+            else if (!_forceUpdate)
+                return;
 
             if (_mapTexture != null && !_mapTexture.IsDisposed)
                 _mapTexture.Dispose();

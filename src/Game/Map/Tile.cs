@@ -233,21 +233,21 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public void Dispose()
-        {
-            if (_objectsOnTile == null)
-                return;
+        //public void Dispose()
+        //{
+        //    if (_objectsOnTile == null)
+        //        return;
 
-            for (int i = 0; i < _objectsOnTile.Count; i++)
-            {
-                GameObject t = _objectsOnTile[i];
+        //    for (int i = 0; i < _objectsOnTile.Count; i++)
+        //    {
+        //        GameObject t = _objectsOnTile[i];
 
-                if (t != World.Player)
-                {
-                    t.Dispose();
-                }
-            }
+        //        if (t != World.Player)
+        //        {
+        //            t.Dispose();
+        //        }
+        //    }
 
-        }
+        //}
     }
 }
