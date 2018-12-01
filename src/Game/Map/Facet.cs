@@ -31,7 +31,7 @@ namespace ClassicUO.Game.Map
 {
     public sealed class Facet : IDisposable
     {
-       // private static Tile _invalid = Tile.Invalid;
+        // private static Tile _invalid = Tile.Invalid;
         private readonly bool[] _blockAccessList = new bool[0x1000];
         //private const int CHUNKS_NUM = 5;
         //private const int MAX_CHUNKS = CHUNKS_NUM * 2 + 1;
@@ -60,12 +60,24 @@ namespace ClassicUO.Game.Map
                 if (_center != value)
                 {
                     _center = value;
-                    LoadChunks((ushort) _center.X, (ushort) _center.Y);
+                    LoadChunks((ushort)_center.X, (ushort)_center.Y);
                 }
             }
         }
 
-        public  Tile GetTile(short x, short y, bool load = true)
+        public MapChunk GetMapChunk(int rblock, int blockX, int blockY)
+        {
+            ref MapChunk chunk = ref Chunks[rblock];
+            if (chunk == null)
+            {
+                _usedIndices.Add(rblock);
+                chunk = new MapChunk((ushort)blockX, (ushort)blockY);
+                chunk.Load(Index);
+            }
+            return chunk;
+        }
+
+        public Tile GetTile(short x, short y, bool load = true)
         {
             if (x < 0 || y < 0)
                 return null;
@@ -82,7 +94,7 @@ namespace ClassicUO.Game.Map
                 if (load)
                 {
                     _usedIndices.Add(block);
-                    chuck = new MapChunk((ushort) cellX, (ushort) cellY);
+                    chuck = new MapChunk((ushort)cellX, (ushort)cellY);
                     chuck.Load(Index);
                 }
                 else
@@ -94,9 +106,9 @@ namespace ClassicUO.Game.Map
             return chuck.Tiles[x % 8][y % 8];
         }
 
-        public  Tile GetTile(int x, int y, bool load = true)
+        public Tile GetTile(int x, int y, bool load = true)
         {
-            return  GetTile((short) x, (short) y, load);
+            return GetTile((short)x, (short)y, load);
         }
 
         public sbyte GetTileZ(int x, int y)
@@ -112,8 +124,8 @@ namespace ClassicUO.Game.Map
 
             unsafe
             {
-                MapBlock* mp = (MapBlock*) blockIndex.MapAddress;
-                MapCells* cells = (MapCells*) &mp->Cells;
+                MapBlock* mp = (MapBlock*)blockIndex.MapAddress;
+                MapCells* cells = (MapCells*)&mp->Cells;
 
                 return cells[my * 8 + mx].Z;
             }
@@ -125,7 +137,7 @@ namespace ClassicUO.Game.Map
             {
                 fixed (bool* ptr = _blockAccessList)
                 {
-                    byte* start = (byte*) ptr;
+                    byte* start = (byte*)ptr;
                     byte* end = start + _blockAccessList.Length;
                     while (&start[0] != &end[0]) *start++ = 0;
                 }
@@ -139,7 +151,7 @@ namespace ClassicUO.Game.Map
             if (access)
                 return defaultZ;
             access = true;
-             Tile tile =  GetTile(x, y);
+            Tile tile = GetTile(x, y);
 
             if (tile != null)
             {
@@ -261,7 +273,7 @@ namespace ClassicUO.Game.Map
                         if (CoreGame.Ticks - tick >= maxDelay)
                             return;
                         _usedIndices.Add(cellindex);
-                        chunk = new MapChunk((ushort) i, (ushort) j);
+                        chunk = new MapChunk((ushort)i, (ushort)j);
                         chunk.Load(Index);
                     }
 

@@ -51,15 +51,19 @@ namespace ClassicUO.IO
                         int block = (int)p.ReadUInt();
                         p.Seek(14);
                         int mapID = p.ReadByte();
-                        if (World.Map==null || mapID != World.Map.Index)
+                        if (World.Map == null || mapID != World.Map.Index)
                         {
                             return;
                         }
 
-                        MapChunk chunk = World.Map.Chunks[block];
-                        int mapWidthInBlocks = IO.Resources.Map.MapBlocksSize[mapID][0];
-                        int mapHeightInBlocks = IO.Resources.Map.MapBlocksSize[mapID][1];
+                        int mapWidthInBlocks = Resources.Map.MapBlocksSize[mapID][0];
+                        int mapHeightInBlocks = Resources.Map.MapBlocksSize[mapID][1];
                         int blocks = mapWidthInBlocks * mapHeightInBlocks;
+                        if (block < 0 || block >= blocks)
+                        {
+                            return;
+                        }
+
                         if (MapCRCs[mapID] == null)
                         {
                             MapCRCs[mapID] = new UInt16[blocks];
@@ -67,10 +71,6 @@ namespace ClassicUO.IO
                             {
                                 MapCRCs[mapID][j] = UInt16.MaxValue;
                             }
-                        }
-                        if (block < 0 || block >= blocks)
-                        {
-                            return;
                         }
 
                         int blockX = block / mapHeightInBlocks;
@@ -105,7 +105,7 @@ namespace ClassicUO.IO
                                         else
                                         {
 
-                                            crc = GetBlockCrc(blocknum, mapID);
+                                            crc = GetBlockCrc(blocknum, xBlockItr, yBlockItr);
                                         }
                                         MapCRCs[mapID][blocknum] = crc;
                                     }
@@ -142,7 +142,7 @@ namespace ClassicUO.IO
                         }
 
                         byte[] staticsData = new byte[totallen];
-                        for(int i = 0; i < totallen; i++)
+                        for (int i = 0; i < totallen; i++)
                         {
                             staticsData[i] = p.ReadByte();
                         }
@@ -191,12 +191,12 @@ namespace ClassicUO.IO
                         {
                             return;
                         }
-                        if(MapCRCs == null || MapCRCs.Length < maps)
+                        if (MapCRCs == null || MapCRCs.Length < maps)
                         {
                             MapCRCs = new UInt16[maps][];
                         }
                         p.Seek(15);//byte 15 to end of packet, the map definitions
-                        for(int i=0; i<maps; i++)
+                        for (int i = 0; i < maps; i++)
                         {
                             byte mapnum = p.ReadByte();
                             ushort dimX = p.ReadUShort();
@@ -220,10 +220,10 @@ namespace ClassicUO.IO
                         //TODO: create shard directory, copy map and statics to that directory, use that files instead of the original ones
                         break;
                     }
-                /*case 0x03://Refresh client VIEW - after an update the server will usually send this packet to refresh the client view, this packet has been discontinued after ultimalive 0.96 and isn't necessary anymore
-                    {
-                        break;
-                    }*/
+                    /*case 0x03://Refresh client VIEW - after an update the server will usually send this packet to refresh the client view, this packet has been discontinued after ultimalive 0.96 and isn't necessary anymore
+                        {
+                            break;
+                        }*/
             }
         }
 
@@ -231,7 +231,7 @@ namespace ClassicUO.IO
         {
             int block = (int)p.ReadUInt();
             byte[] landData = new byte[LandBlockLenght];
-            for(int i=0; i<LandBlockLenght; i++)
+            for (int i = 0; i < LandBlockLenght; i++)
             {
                 landData[i] = p.ReadByte();
             }
@@ -262,7 +262,7 @@ namespace ClassicUO.IO
             }
         }
 
-        public static UInt16 GetBlockCrc(int block, int mapID)
+        public static UInt16 GetBlockCrc(int block, int xblock, int yblock)
         {
             byte[] landdata = new byte[LandBlockLenght];
             int stcount = 0;
@@ -271,7 +271,7 @@ namespace ClassicUO.IO
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    var list = World.Map.Chunks[block].Tiles[j][i].ObjectsOnTiles;
+                    var list = World.Map.GetMapChunk(block, xblock, yblock).Tiles[j][i].ObjectsOnTiles;
                     for (int k = 0; k < list.Count; k++)
                     {
                         GameObject o = list[k];
