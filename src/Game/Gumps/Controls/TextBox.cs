@@ -29,9 +29,18 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class TextBox : GumpControl
     {
+        public bool MultiLineInputAllowed { get; set; } = false;
         private TextEntry _entry;
+
         private bool _showCaret;
 
+        public TextBox(TextEntry txentry, bool editable)
+        {
+            _entry = txentry;
+            base.AcceptKeyboardInput = true;
+            base.AcceptMouseInput = true;
+            IsEditable = editable;
+        }
         public TextBox(byte font, int maxcharlength = -1, int maxWidth = 0, int width = 0, bool isunicode = true, FontStyle style = FontStyle.None, ushort hue = 0)
         {
             _entry = new TextEntry(font, maxcharlength, maxWidth, width, isunicode, style, hue);
@@ -49,6 +58,8 @@ namespace ClassicUO.Game.Gumps.Controls
             LocalSerial = Serial.Parse(parts[6]);
             SetText(lines[int.Parse(parts[7])]);
         }
+
+        public bool IsChanged => _entry.IsChanged;
 
         public Hue Hue
         {
@@ -72,13 +83,15 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool ReplaceDefaultTextOnFirstKeyPress { get; set; }
 
-        public string Text => _entry.Text;
+        public string Text { get => _entry.Text; set => SetText(value); }
 
         public int LinesCount => _entry.GetLinesCount();
 
         //public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
 
         public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
+
+        public int MaxLines { get => _entry.MaxLines; set => _entry.MaxLines = value; }
 
         public void SetText(string text, bool append = false)
         {
@@ -90,6 +103,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
+            Height = _entry.Height;
             if (UIManager.KeyboardFocusControl == this)
             {
                 if (!IsFocused)
@@ -138,6 +152,8 @@ namespace ClassicUO.Game.Gumps.Controls
                         _entry.InsertString("    ");
                     break;*/
                 case SDL.SDL_Keycode.SDLK_RETURN:
+                    if ( MultiLineInputAllowed )
+                        _entry.InsertString( "\n" );
                     //if ((_entry.RenderText.FontStyle & FontStyle.Fixed) == 0)
                     //    _entry.InsertString("\n");
                     //else
@@ -145,7 +161,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
-
+                    //TODO remove from current ccaret index
                     if (ReplaceDefaultTextOnFirstKeyPress)
                         ReplaceDefaultTextOnFirstKeyPress = false;
                     else

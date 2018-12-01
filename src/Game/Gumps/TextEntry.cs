@@ -56,11 +56,13 @@ namespace ClassicUO.Game.Gumps
             MaxCharCount =/* maxcharlength <= 0 ? 200 :*/ maxcharlength;
             Width = width;
             MaxWidth = maxWidth;
+            MaxLines = 0;
         }
 
         public int MaxCharCount { get; }
 
         public int Width { get; }
+        public int Height => RenderText.Height;
 
         public int MaxWidth { get; }
 
@@ -97,6 +99,8 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
+        public int MaxLines { get; internal set; }
+
         public void Dispose()
         {
             RenderText?.Dispose();
@@ -131,11 +135,18 @@ namespace ClassicUO.Game.Gumps
             }
 
             string text = Text.Insert(CaretIndex, c);
+            if (MaxLines > 0)
+            {
+                var newlines = GetLinesCount(text);
+                if (newlines > MaxLines)
+                    return;
+            }
+
             CaretIndex += c.Length;
-            SetText(text);
+            SetText(text, true);
         }
 
-        public void SetText(string text)
+        public void SetText(string text, bool nocaretpos = false)
         {
             if (MaxCharCount > 0)
             {
@@ -180,7 +191,10 @@ namespace ClassicUO.Game.Gumps
                 }
             }
 
-            CaretIndex = text.Length;
+            if (!nocaretpos)
+            {
+                CaretIndex = text.Length;
+            }
             Text = text;
         }
 
@@ -271,7 +285,10 @@ namespace ClassicUO.Game.Gumps
         {
             return RenderText.IsUnicode ? Fonts.GetLinesCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width) : Fonts.GetLinesCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width);
         }
-
+        public int GetLinesCount(string text)
+        {
+            return RenderText.IsUnicode ? Fonts.GetLinesCountUnicode( RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width ) : Fonts.GetLinesCountASCII( RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width );
+        }
         public void Clear()
         {
             Text = string.Empty;
