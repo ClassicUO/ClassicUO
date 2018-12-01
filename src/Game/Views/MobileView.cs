@@ -269,21 +269,7 @@ namespace ClassicUO.Game.Views
 
                 if (frame == null || frame.IsDisposed)
                 {
-                    if (!Animations.LoadDirectionGroup(ref direction))
-                    {
-                        Log.Message(LogTypes.Panic, $"graphic: {graphic}\tgroup: {animGroup}");
-
-                        return;
-                    }
-
-                    frame = ref direction.Frames[animIndex];
-
-                    if (frame == null)
-                    {
-                        Log.Message(LogTypes.Panic, $"graphic: {graphic}\tgroup: {animGroup}\tframe missed: {animIndex}");
-
-                        return;
-                    }
+                    return;
                 }
 
                 if (hue == 0)

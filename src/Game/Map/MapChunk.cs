@@ -18,6 +18,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.GameObjects;
@@ -25,7 +27,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class MapChunk
+    public sealed class MapChunk : IDisposable
     {
         public static readonly MapChunk Invalid = new MapChunk(0xFFFF, 0xFFFF);
 
@@ -157,13 +159,32 @@ namespace ClassicUO.Game.Map
 
         private static IndexMap GetIndex(int map, int x, int y) => IO.Resources.Map.GetIndex(map, x, y);
 
-        public void Unload()
+        public void Dispose()
         {
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tiles[i][j].Dispose();
+
+                    for (int k = 0; k < Tiles[i][j].ObjectsOnTiles.Count; k++)
+                    {
+                        var obj = Tiles[i][j].ObjectsOnTiles[k];
+
+                        if (obj != World.Player)
+                        {
+                            int count = Tiles[i][j].ObjectsOnTiles.Count;
+                            Tiles[i][j].ObjectsOnTiles[k].Dispose();
+
+                            if (count == Tiles[i][j].ObjectsOnTiles.Count)
+                            {
+                                Tiles[i][j].ObjectsOnTiles.RemoveAt(k);
+                            }
+
+                            k--;
+                        }
+                    }
+
+                    //Tiles[i][j].Dispose();
                     Tiles[i][j] = null;// Tile.Invalid;
                 }
             }

@@ -335,8 +335,7 @@ namespace ClassicUO.IO.Resources
             }
 
             int blocksize = height * width;
-            //uint[] pData = new uint[blocksize];
-            uint* pData = stackalloc uint[blocksize];
+            uint[] pData = new uint[blocksize];
             int lineOffsY = 0;
             MultilinesFontInfo ptr = info;
             isPartial = font != 5 && font != 8 && !UnusePartialHue;
@@ -425,7 +424,8 @@ namespace ClassicUO.IO.Resources
             }
 
             FontTexture ftexture = new FontTexture(width, height, linesCount, new List<WebLinkRect>());
-            ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) pData, blocksize);
+            //ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) pData, blocksize);
+            ftexture.SetData(pData);
 
             //FontTextureInfo fontTextureInfo = new FontTextureInfo()
             //{
@@ -1052,8 +1052,8 @@ namespace ClassicUO.IO.Resources
 
             height += _topMargin + _bottomMargin + 4;
             int blocksize = height * width;
-            //uint[] pData = new uint[blocksize];
-            uint* pData = stackalloc uint[blocksize];
+            uint[] pData = new uint[blocksize];
+            //uint* pData = stackalloc uint[blocksize];
             uint* table = (uint*) _unicodeFontAddress[font];
             int lineOffsY = 1 + _topMargin;
             MultilinesFontInfo ptr = info;
@@ -1439,8 +1439,8 @@ namespace ClassicUO.IO.Resources
             }
 
             FontTexture ftexture = new FontTexture(width, height, linesCount, links);
-            ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) pData, blocksize);
-
+            //ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) pData, blocksize);
+            ftexture.SetData(pData);
             //FontTextureInfo fontTextureInfo = new FontTextureInfo()
             //{
             //    Pixels = pData,

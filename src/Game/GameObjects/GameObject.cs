@@ -279,7 +279,7 @@ namespace ClassicUO.Game.GameObjects
             Disposed.Raise();
 
             DisposeView();
-            _tile = null;
+            Tile = null;
 
             if (_overHeads != null)
             {
