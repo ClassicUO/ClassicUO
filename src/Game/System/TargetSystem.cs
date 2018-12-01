@@ -93,6 +93,11 @@ namespace ClassicUO.Game.System
                 return;
             LastGameObject = selectedEntity;
 
+            if (selectedEntity is GameEffect effect && effect.Source != null)
+            {
+                selectedEntity = effect.Source;
+            }
+
             if (selectedEntity is Entity entity)
             {
                 GameActions.TargetObject(entity, _targetCursorId, _targetCursorType);
