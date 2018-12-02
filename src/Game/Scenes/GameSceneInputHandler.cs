@@ -199,7 +199,7 @@ namespace ClassicUO.Game.Scenes
 
                                 _queuedAction = () =>
                                 {
-                                    if (!World.ClientFeatures.TooltipsEnabled)
+                                    if (!World.ClientFlags.TooltipsEnabled)
                                         GameActions.SingleClick(_queuedObject);
                                     GameActions.OpenPopupMenu(_queuedObject);
                                 };

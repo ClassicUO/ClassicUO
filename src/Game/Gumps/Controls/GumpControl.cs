@@ -125,7 +125,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public string Tooltip { get; private set; }
 
-        public bool HasTooltip => World.ClientFeatures.TooltipsEnabled && !string.IsNullOrEmpty(Tooltip);
+        public bool HasTooltip => World.ClientFlags.TooltipsEnabled && !string.IsNullOrEmpty(Tooltip);
 
         public virtual bool AcceptKeyboardInput
         {

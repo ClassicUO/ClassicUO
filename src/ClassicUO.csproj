@@ -66,6 +66,7 @@
     <Compile Include="Game\Data\BuffIcon.cs" />
     <Compile Include="Game\Data\BuffTable.cs" />
     <Compile Include="Game\Data\CharacterCreationValues.cs" />
+    <Compile Include="Game\Data\ClientFeatures.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
@@ -137,7 +138,7 @@
     <Compile Include="Game\Data\AssistantFeatures.cs" />
     <Compile Include="Game\Data\ContainerManager.cs" />
     <Compile Include="Game\Data\Direction.cs" />
-    <Compile Include="Game\Data\Features.cs" />
+    <Compile Include="Game\Data\LockedFeatures.cs" />
     <Compile Include="Game\Data\FeaturesFlags.cs" />
     <Compile Include="Game\Data\MovementSpeed.cs" />
     <Compile Include="Game\Data\Property.cs" />

@@ -1668,8 +1668,9 @@ namespace ClassicUO.Network
                 flags = p.ReadUInt();
             else
                 flags = p.ReadUShort();
+            World.ClientLockedFeatures.SetFlags((LockedFeatureFlags)flags);
+
             Animations.UpdateAnimationTable(flags);
-            World.ClientFeatures.SetFlags((FeatureFlags) flags);
         }
 
         private static void DisplayQuestArrow(Packet p)
@@ -2262,7 +2263,7 @@ namespace ClassicUO.Network
 
         private static void OPLInfo(Packet p)
         {
-            if (World.ClientFeatures.TooltipsEnabled)
+            if (World.ClientFlags.TooltipsEnabled)
             {
                 Serial serial = p.ReadUInt();
                 uint revision = p.ReadUInt();

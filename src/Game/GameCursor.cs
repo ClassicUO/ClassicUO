@@ -264,7 +264,7 @@ namespace ClassicUO.Game
             {
                 GameScene gs = SceneManager.GetScene<GameScene>();
 
-                if (!World.ClientFeatures.TooltipsEnabled || gs.IsHoldingItem)
+                if (!World.ClientFlags.TooltipsEnabled || gs.IsHoldingItem)
                 {
                     if (!_tooltip.IsEmpty)
                         _tooltip.Clear();

@@ -22,8 +22,10 @@ using System;
 using System.Net;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps.Login;
+using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
@@ -78,7 +80,7 @@ namespace ClassicUO.Game.Scenes
 
         public ServerListEntry[] Servers { get; private set; }
 
-        public CharacterListEntry[] Characters { get; private set; }
+        public string[] Characters { get; private set; }
 
         public String PopupMessage { get; private set; }
 
@@ -153,10 +155,10 @@ namespace ClassicUO.Game.Scenes
             if (CurrentLoginStep == LoginStep.CharacterSelection)
             {
                 Settings settings = Service.Get<Settings>();
-                settings.LastCharacterName = Characters[index].Name;
+                settings.LastCharacterName = Characters[index];
                 settings.Save();
                 CurrentLoginStep = LoginStep.EnteringBritania;
-                NetClient.Socket.Send(new PSelectCharacter(index, Characters[index].Name, NetClient.Socket.ClientAddress));
+                NetClient.Socket.Send(new PSelectCharacter(index, Characters[index], NetClient.Socket.ClientAddress));
             }
         }
 
@@ -172,7 +174,7 @@ namespace ClassicUO.Game.Scenes
 
             for (; i < Characters.Length; i++)
             {
-                if (string.IsNullOrEmpty(Characters[i].Name))
+                if (string.IsNullOrEmpty(Characters[i]))
                     break;
             }
 
@@ -310,12 +312,33 @@ namespace ClassicUO.Game.Scenes
             for (ushort i = 0; i < count; i++) Servers[i] = new ServerListEntry(reader);
         }
 
-        private void ParseCharacterList(Packet reader)
+        private void ParseCharacterList(Packet p)
         {
-            reader.MoveToData();
-            int count = reader.ReadByte();
-            Characters = new CharacterListEntry[count];
-            for (ushort i = 0; i < count; i++) Characters[i] = new CharacterListEntry(reader);
+            p.MoveToData();
+            int count = p.ReadByte();
+            Characters = new string[count];
+
+            for (ushort i = 0; i < count; i++)
+            {
+                Characters[i] = p.ReadASCII(30);
+                p.Skip(30);
+            }
+
+            count = p.ReadByte();
+
+            // TODO: implemnet city infos
+            if (FileManager.ClientVersion >= ClientVersions.CV_70130)
+            {
+                for (int i = 0; i < count; i++)
+                    p.Skip(1 +32 +32 + 4 + 4 + 4 + 4 + 4 + 4);
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                    p.Skip(1 + 31 + 31);
+            }
+
+            World.ClientFlags.SetFlags((CharacterListFlag)p.ReadUInt());
         }
 
         private void HandleErrorCode(Packet reader)
@@ -366,18 +389,6 @@ namespace ClassicUO.Game.Scenes
             PercentFull = reader.ReadByte();
             Timezone = reader.ReadByte();
             Address = reader.ReadUInt();
-        }
-    }
-
-    public class CharacterListEntry
-    {
-        public readonly string Name;
-        public readonly string Password;
-
-        public CharacterListEntry(Packet reader)
-        {
-            Name = reader.ReadASCII(30);
-            Password = reader.ReadASCII(30);
         }
     }
 }

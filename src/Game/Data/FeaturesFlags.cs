@@ -23,7 +23,7 @@ using System;
 namespace ClassicUO.Game.Data
 {
     [Flags]
-    public enum FeatureFlags : uint
+    public enum LockedFeatureFlags : uint
     {
         TheSecondAge = 0x1,
         Renaissance = 0x2,
@@ -45,5 +45,26 @@ namespace ClassicUO.Game.Data
         HighSeas = 0x20000,
         GothicHousing = 0x40000,
         RusticHousing = 0x80000
+    }
+
+    [Flags]
+    public enum CharacterListFlag
+    {
+        CLF_UNKNOWN = 0x01,
+        CLF_OWERWRITE_CONFIGURATION_BUTTON = 0x02,
+        CLF_ONE_CHARACTER_SLOT = 0x04,
+        CLF_CONTEXT_MENU = 0x08,
+        CLF_LIMIT_CHARACTER_SLOTS = 0x10,
+        CLF_PALADIN_NECROMANCER_TOOLTIPS = 0x20,
+        CLF_6_CHARACTER_SLOT = 0x40,
+        CLF_SAMURAI_NINJA = 0x80,
+        CLF_ELVEN_RACE = 0x100,
+        CLF_UNKNOWN_1 = 0x200,
+        CLF_UO3D = 0x400,
+        CLF_UNKNOWN_2 = 0x800,
+        CLF_7_CHARACTER_SLOT = 0x1000,
+        CLF_UNKNOWN_3 = 0x2000,
+        CLF_NEW_MOVEMENT_SYSTEM = 0x4000,
+        CLF_UNLOCK_FELUCCA_AREAS = 0x8000
     }
 }

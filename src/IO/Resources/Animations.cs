@@ -885,9 +885,9 @@ namespace ClassicUO.IO.Resources
                         bool replace = DataIndex[i].Groups[g].Direction[d].FileIndex >= 3;
 
                         if (DataIndex[i].Groups[g].Direction[d].FileIndex == 1)
-                            replace = (flags & 0x08) != 0;
+                            replace = World.ClientLockedFeatures.LBR;
                         else if (DataIndex[i].Groups[g].Direction[d].FileIndex == 2)
-                            replace = (flags & 0x10) != 0;
+                            replace = World.ClientLockedFeatures.AOS;
 
                         if (replace)
                         {
