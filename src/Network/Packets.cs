@@ -128,7 +128,7 @@ namespace ClassicUO.Network
             if (FileManager.ClientVersion >= ClientVersions.CV_70160)
             {
                 skillcount++;
-                SetPacketId(0xF8);
+                this[0] = 0xF8;
             }
 
             WriteUInt(0xEDEDEDED);
@@ -189,7 +189,7 @@ namespace ClassicUO.Network
             }
 
             WriteByte((byte) serverIndex);
-            var location = 1;
+            var location = 0; // TODO: write the city index
 
             if (FileManager.ClientVersion < ClientVersions.CV_70130)
                 location--;
