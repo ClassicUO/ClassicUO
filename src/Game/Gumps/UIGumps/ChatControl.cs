@@ -319,14 +319,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case ChatMode.Default:
                     speechType = MessageType.Regular;
                     hue = 33;
-                    NetClient.Socket.Send(new PUnicodeSpeechRequest(text, speechType, MessageFont.Normal, hue, "ENU"));
-
+                    GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.Whisper:
-
+                    speechType = MessageType.Whisper;
+                    GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.Emote:
-
+                    speechType = MessageType.Emote;
+                    GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.Party:
 
@@ -386,13 +387,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     break;
                 case ChatMode.PartyPrivate:
-
+                    
+                    //GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.Guild:
-
+                    speechType = MessageType.Guild;
+                    GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.Alliance:
-
+                    speechType = MessageType.Alliance;
+                    GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.ClientCommand:
                     CommandSystem.TriggerCommandHandler(text);
