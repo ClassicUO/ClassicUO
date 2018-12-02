@@ -21,6 +21,7 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
@@ -30,7 +31,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public LogoutGump() : base(0, 0)
         {
-            AddChildren(new GumpPic(0, 0, 0x0816, 0));
+            GumpPic pic = new GumpPic(0, 0, 0x0816, 0);
+            AddChildren(pic);
+
+
+            SpriteTexture t = IO.Resources.Gumps.GetGumpTexture(0x0816);
+
+            Width = t.Width;
+            Height = t.Height;
+
 
             AddChildren(new Label("Quit\nUltima Online?", false, 0x0386, 165)
             {
@@ -49,12 +58,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _settings = Service.Get<Settings>();
             CanMove = false;
             ControlInfo.IsModal = true;
+
+            X = (UIManager.Width - Width) >> 1;
+            Y = (UIManager.Height - Height) >> 1;
+
+            WantUpdateSize = false;
         }
+
 
         public override void Update(double totalMS, double frameMS)
         {
-            X = (UIManager.Width - Width) >> 1;
-            Y = (UIManager.Height - Height) >> 1;
+           
             base.Update(totalMS, frameMS);
         }
 

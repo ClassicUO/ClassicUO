@@ -64,6 +64,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _clicked = false;
                 _lastPosition = Point.Zero;
             };
+            _button.SetTooltip("Resize game window");
             Width = _worldWidth + BORDER_WIDTH * 2;
             Height = _worldHeight + BORDER_HEIGHT * 2;
             _border = new GameBorder(0, 0, Width, Height, 4);
@@ -75,6 +76,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(_chatControl);
             Service.Register(_chatControl);
             Resize();
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            Service.Unregister<ChatControl>();
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -129,13 +136,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             _border.Width = Width;
             _border.Height = Height;
-            _button.X = Width - 6;
-            _button.Y = Height - 6;
+            _button.X = Width - _button.Width / 2;
+            _button.Y = Height - _button.Height / 2;
             _viewport.Width = _worldWidth;
             _viewport.Height = _worldHeight;
             _chatControl.Width = _worldWidth;
             _chatControl.Height = _worldHeight;
             _chatControl.Resize();
+            WantUpdateSize = true;
         }
     }
 
