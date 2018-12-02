@@ -132,7 +132,6 @@
     <Compile Include="Configuration\ConfigurationResolver.cs" />
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="CoreGame.cs" />
-    <Compile Include="FpsCounter.cs" />
     <Compile Include="GameLoop.cs" />
     <Compile Include="Game\Chat.cs" />
     <Compile Include="Game\Data\AssistantFeatures.cs" />

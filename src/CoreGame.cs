@@ -31,13 +31,15 @@ namespace ClassicUO
     {
         private const int MIN_FPS = 15;
         private const int MAX_FPS = 250;
-        private readonly FpsCounter _fpsCounter;
         private int _maxFPS = MIN_FPS;
         private float _time;
+        private int _totalFrames;
+        private int _fps;
+        private double _currentFpsTime;
 
         protected CoreGame()
         {
-            TargetElapsedTime = TimeSpan.FromSeconds(1.0f / 300.0f);
+            TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
             GraphicsDeviceManager = new GraphicsDeviceManager(this);
             GraphicsDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
@@ -56,7 +58,6 @@ namespace ClassicUO
                 GraphicsDeviceManager.ApplyChanges();
             };
             Window.AllowUserResizing = true;
-            _fpsCounter = new FpsCounter();
         }
 
         protected GraphicsDeviceManager GraphicsDeviceManager { get; }
@@ -81,7 +82,7 @@ namespace ClassicUO
             }
         }
 
-        public int CurrentFPS => _fpsCounter.FPS;
+        public int CurrentFPS => _fps;
 
         public static long Ticks { get; private set; }
 
@@ -125,7 +126,15 @@ namespace ClassicUO
             double totalms = gameTime.TotalGameTime.TotalMilliseconds;
             double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
             Ticks = (long) totalms;
-            _fpsCounter.Update(gameTime);
+
+            _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_currentFpsTime >= 1.0)
+            {
+                _fps = _totalFrames;
+                _totalFrames = 0;
+                _currentFpsTime = 0;
+            }
 
             // ###############################
             // This should be the right order
@@ -144,7 +153,7 @@ namespace ClassicUO
                 OnFixedUpdate(totalms, framems);
                 Profiler.ExitContext("FixedUpdate");
             }
-            else
+            else 
                 SuppressDraw();
 
             Profiler.EnterContext("OutOfContext");
@@ -158,7 +167,7 @@ namespace ClassicUO
             if (Profiler.InContext("OutOfContext"))
                 Profiler.ExitContext("OutOfContext");
             Profiler.EnterContext("RenderFrame");
-            _fpsCounter.IncreaseFrame();
+            _totalFrames++;
             OnDraw(gameTime.ElapsedGameTime.TotalMilliseconds);
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");
