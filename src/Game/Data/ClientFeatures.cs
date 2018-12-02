@@ -14,7 +14,7 @@ namespace ClassicUO.Game.Data
 
         public void SetFlags(CharacterListFlag flags)
         {
-            Flags |= flags;
+            Flags = flags;
 
             PopupEnabled = (flags & CharacterListFlag.CLF_CONTEXT_MENU) != 0;
             TooltipsEnabled = (flags & CharacterListFlag.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0 && FileManager.ClientVersion >= ClientVersions.CV_308Z;

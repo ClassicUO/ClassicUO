@@ -84,9 +84,9 @@ namespace ClassicUO.Game
             Overall = 0, Personal = 0
         };
 
-        public static LockedFeatures ClientLockedFeatures { get; private set; } = new LockedFeatures();
+        public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
 
-        public static ClientFeatures ClientFlags { get; private set; } = new ClientFeatures();
+        public static ClientFeatures ClientFlags { get; } = new ClientFeatures();
 
         public static void Update(double totalMS, double frameMS)
         {
@@ -248,8 +248,8 @@ namespace ClassicUO.Game
             ToAdd.Clear();
             IO.UltimaLive.IsUltimaLiveActive = false;
             IO.UltimaLive.ShardName = null;
-            ClientFlags = null;
-            ClientLockedFeatures = null;
+            ClientFlags.SetFlags(0);
+            ClientLockedFeatures.SetFlags(0);
         }
 
         private static void InternalMapChangeClear(bool noplayer)

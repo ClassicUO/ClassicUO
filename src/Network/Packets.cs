@@ -138,13 +138,16 @@ namespace ClassicUO.Network
             WriteASCII(character.Name, 30);
             WriteUShort(0x00);
             uint clientflag = 0;
-            /*IFOR(i, 0, g_CharacterList.ClientFlag)
-                clientFlag |= (1 << i);*/
+            ushort flags = (ushort) World.ClientFlags.Flags;
+
+            for (ushort i = 0; i < flags; i++)
+                clientflag |= (uint) (1 << i);
+
             WriteUInt(clientflag);
             WriteUInt(0x01);
             WriteUInt(0x0);
             WriteByte(0x0); // Profession
-            Position += 15;
+            Skip(15);
             byte val;
 
             if (FileManager.ClientVersion < ClientVersions.CV_4011D)

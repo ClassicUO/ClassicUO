@@ -28,18 +28,26 @@ namespace ClassicUO.Network
 
         public PacketWriter(byte id)
         {
-            SetPacketId(id);
+            this[0] = id;
         }
 
         protected override byte this[int index]
         {
             get => _data[index];
-            set => _data[index] = value;
+            set
+            {
+                if (index == 0)
+                {
+                    SetPacketId(value);
+                }
+                else
+                    _data[index] = value;
+            }
         }
 
         public override int Length => _data.Length;
 
-        protected void SetPacketId(byte id)
+        private void SetPacketId(byte id)
         {
             short len = PacketsTable.GetPacketLength(id);
             IsDynamic = len < 0;
