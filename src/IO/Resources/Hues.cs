@@ -148,7 +148,7 @@ namespace ClassicUO.IO.Resources
 
         public static ushort Color32To16(uint c)
         {
-            return (ushort) (((c & 0xFF) * 32 / 256) | ((((c >> 16) & 0xff) * 32 / 256) << 10) | ((((c >> 8) & 0xff) * 32 / 256) << 5));
+            return (ushort) ((((c & 0xFF) * 32) >> 8) | (((((c >> 16) & 0xff) * 32) >> 8) << 10) | (((((c >> 8) & 0xff) * 32) >> 8) << 5));
         }
 
         public static ushort ConvertToGray(ushort c)
