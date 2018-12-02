@@ -73,7 +73,7 @@ namespace ClassicUO.Game.Views
                 {
                     _originalGraphic = item.DisplayedGraphic;
                     Texture = Art.GetStaticTexture(_originalGraphic);
-                    Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+                    Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
                 }
 
                 HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, TileData.IsPartialHue( item.ItemData.Flags), TileData.IsTranslucent( item.ItemData.Flags) ? .5f : 0, false);

@@ -416,7 +416,7 @@ namespace ClassicUO.Network
                 else
                 {
                     if (FileManager.ClientVersion >= ClientVersions.CV_500A)
-                        World.Player.WeightMax = (ushort) (7 * (World.Player.Strength / 2) + 40);
+                        World.Player.WeightMax = (ushort) (7 * (World.Player.Strength >> 1) + 40);
                     else
                         World.Player.WeightMax = (ushort) (World.Player.Strength * 4 + 25);
                 }
@@ -2181,7 +2181,7 @@ namespace ClassicUO.Network
                             else
                                 z = 0;
 
-                            for (uint i = 0; i < decompressedBytes.Length / 4; i++)
+                            for (uint i = 0; i < (decompressedBytes.Length >> 2); i++)
                             {
                                 id = stream.ReadUShort();
                                 x = stream.ReadByte();
@@ -2230,7 +2230,7 @@ namespace ClassicUO.Network
 
                             if (multiHeight == 0) return;
 
-                            for (uint i = 0; i < decompressedBytes.Length / 2; i++)
+                            for (uint i = 0; i < (decompressedBytes.Length >> 1); i++)
                             {
                                 id = stream.ReadUShort();
                                 x = (byte) (i / multiHeight + offX);

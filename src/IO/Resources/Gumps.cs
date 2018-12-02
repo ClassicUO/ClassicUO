@@ -174,7 +174,7 @@ namespace ClassicUO.IO.Resources
             if (width == 0 || height == 0)
                 return null;
 
-            //width = PaddedRowWidth(16, width, 4) / 2;
+            //width = PaddedRowWidth(16, width, 4) >> 1;
             IntPtr dataStart = _file.PositionAddress;
             ushort[] pixels = new ushort[width * height];
             int* lookuplist = (int*) dataStart;
@@ -186,7 +186,7 @@ namespace ClassicUO.IO.Resources
                 if (y < height - 1)
                     gsize = lookuplist[y + 1] - lookuplist[y];
                 else
-                    gsize = length / 4 - lookuplist[y];
+                    gsize = (length >> 2) - lookuplist[y];
                 GumpBlock* gmul = (GumpBlock*) (dataStart + lookuplist[y] * 4);
                 int pos = y * width;
                 int x = 0;

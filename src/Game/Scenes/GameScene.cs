@@ -168,7 +168,7 @@ namespace ClassicUO.Game.Scenes
 
         private void SocketOnDisconnected(object sender, EventArgs e)
         {
-            UIManager.Add(new MessageBoxGump(_settings.GameWindowX + _settings.GameWindowWidth / 2 - 100, _settings.GameWindowY + _settings.GameWindowHeight / 2 - 125 / 2, 200, 125, "Connection lost", (s) =>
+            UIManager.Add(new MessageBoxGump(_settings.GameWindowX + (_settings.GameWindowWidth >> 1) - 100, _settings.GameWindowY + (_settings.GameWindowHeight >> 1) - (125 >> 1), 200, 125, "Connection lost", (s) =>
             {
                 s.Dispose();
                 SceneManager.ChangeScene(ScenesType.Login);

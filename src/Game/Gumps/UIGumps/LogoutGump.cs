@@ -53,8 +53,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            X = (UIManager.Width - Width) / 2;
-            Y = (UIManager.Height - Height) / 2;
+            X = (UIManager.Width - Width) >> 1;
+            Y = (UIManager.Height - Height) >> 1;
             base.Update(totalMS, frameMS);
         }
 

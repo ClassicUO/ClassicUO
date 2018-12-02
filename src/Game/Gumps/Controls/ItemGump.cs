@@ -188,7 +188,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (this is ItemGumpPaperdoll)
                 {
                     Rectangle bounds = Art.GetStaticTexture(Item.DisplayedGraphic).Bounds;
-                    GameActions.PickUp(Item, bounds.Width / 2, bounds.Height / 2);
+                    GameActions.PickUp(Item, bounds.Width >> 1, bounds.Height >> 1);
                 }
                 else
                     GameActions.PickUp(Item, _clickedPoint);
@@ -221,8 +221,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 for (int i = _labels.Count - 1; i >= 0; i--)
                 {
                     Label l = _labels[i];
-                    l.X = ScreenCoordinateX + _clickedPoint.X - l.Width / 2;
-                    l.Y = ScreenCoordinateY + _clickedPoint.Y - l.Height / 2 + y;
+                    l.X = ScreenCoordinateX + _clickedPoint.X - (l.Width >> 1);
+                    l.Y = ScreenCoordinateY + _clickedPoint.Y - (l.Height >> 1) + y;
                     y += l.Height;
                 }
             }

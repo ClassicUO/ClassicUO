@@ -108,7 +108,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
 
                 //DRAW DOT OF PLAYER
-                spriteBatch.Draw2D(_playerIndicator, new Point(position.X + Width / 2, position.Y + Height / 2), Vector3.Zero);
+                spriteBatch.Draw2D(_playerIndicator, new Point(position.X + (Width >> 1), position.Y + (Height >> 1)), Vector3.Zero);
             }
 
             if (_timeMS >= ReticleBlinkMS * 2)
@@ -154,17 +154,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             if (_mapTexture != null && !_mapTexture.IsDisposed)
                 _mapTexture.Dispose();
-            int blockOffsetX = Width / 4;
-            int blockOffsetY = Height / 4;
-            int gumpCenterX = Width / 2;
-            int gumpCenterY = Height / 2;
+            int blockOffsetX = Width >> 2;
+            int blockOffsetY = Height >> 2;
+            int gumpCenterX = Width >> 1;
+            int gumpCenterY = Height >> 1;
 
             //0xFF080808 - pixel32
             //0x8421 - pixel16
-            int minBlockX = (lastX - blockOffsetX) / 8 - 1;
-            int minBlockY = (lastY - blockOffsetY) / 8 - 1;
-            int maxBlockX = (lastX + blockOffsetX) / 8 + 1;
-            int maxBlockY = (lastY + blockOffsetY) / 8 + 1;
+            int minBlockX = ((lastX - blockOffsetX) >> 3) - 1;
+            int minBlockY = ((lastY - blockOffsetY) >> 3) - 1;
+            int maxBlockX = ((lastX + blockOffsetX) >> 3) + 1;
+            int maxBlockY = ((lastY + blockOffsetY) >> 3) + 1;
 
             if (minBlockX < 0)
                 minBlockX = 0;

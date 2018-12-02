@@ -81,8 +81,8 @@ namespace ClassicUO.Game.Map
         {
             if (x < 0 || y < 0)
                 return null;
-            int cellX = x / 8;
-            int cellY = y / 8;
+            int cellX = x >> 3;
+            int cellY = y >> 3;
             int block = GetBlock(cellX, cellY);
 
             if (block >= Chunks.Length)
@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Map
         {
             if (x < 0 || y < 0)
                 return -125;
-            IndexMap blockIndex = GetIndex(x / 8, y / 8);
+            IndexMap blockIndex = GetIndex(x >> 3, y >> 3);
 
             if (blockIndex.MapAddress == 0)
                 return -125;
@@ -240,10 +240,10 @@ namespace ClassicUO.Game.Map
         private void LoadChunks(ushort centerX, ushort centerY)
         {
             const int XY_OFFSET = 30;
-            int minBlockX = (centerX - XY_OFFSET) / 8 - 1;
-            int minBlockY = (centerY - XY_OFFSET) / 8 - 1;
-            int maxBlockX = (centerX + XY_OFFSET) / 8 + 1;
-            int maxBlockY = (centerY + XY_OFFSET) / 8 + 1;
+            int minBlockX = ((centerX - XY_OFFSET) >> 3) - 1;
+            int minBlockY = ((centerY - XY_OFFSET) >> 3) - 1;
+            int maxBlockX = ((centerX + XY_OFFSET) >> 3) + 1;
+            int maxBlockY = ((centerY + XY_OFFSET) >> 3) + 1;
 
             if (minBlockX < 0)
                 minBlockX = 0;
@@ -257,7 +257,7 @@ namespace ClassicUO.Game.Map
             if (maxBlockY >= IO.Resources.Map.MapBlocksSize[Index][1])
                 maxBlockY = IO.Resources.Map.MapBlocksSize[Index][1] - 1;
             long tick = CoreGame.Ticks;
-            long maxDelay = CoreGame.FrameDelay[1] / 2;
+            long maxDelay = CoreGame.FrameDelay[1] >> 1;
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {

@@ -353,7 +353,7 @@ namespace ClassicUO.IO.Resources
                     case TEXT_ALIGN_TYPE.TS_CENTER:
 
                     {
-                        w = (width - 10 - ptr.Width) / 2;
+                        w = (width - 10 - ptr.Width) >> 1;
 
                         if (w < 0)
                             w = 0;
@@ -1086,7 +1086,7 @@ namespace ClassicUO.IO.Resources
 
                 if (ptr.Align == TEXT_ALIGN_TYPE.TS_CENTER)
                 {
-                    w += (width - 10 - ptr.Width) / 2;
+                    w += (width - 10 - ptr.Width) >> 1;
 
                     if (w < 0)
                         w = 0;
@@ -1196,7 +1196,7 @@ namespace ClassicUO.IO.Resources
                             }
                         }
 
-                        int scanlineCount = (dw - 1) / 8 + 1;
+                        int scanlineCount = ((dw - 1) >> 3) + 1;
 
                         for (int y = 0; y < dh; y++)
                         {

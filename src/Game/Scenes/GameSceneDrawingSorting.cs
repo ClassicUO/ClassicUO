@@ -296,8 +296,8 @@ namespace ClassicUO.Game.Scenes
             int winGamePosY = 0;
             int winGameWidth = _settings.GameWindowWidth;
             int winGameHeight = _settings.GameWindowHeight;
-            int winGameCenterX = winGamePosX + winGameWidth / 2;
-            int winGameCenterY = winGamePosY + winGameHeight / 2 + World.Player.Position.Z * 4;
+            int winGameCenterX = winGamePosX + (winGameWidth >> 1);
+            int winGameCenterY = winGamePosY + (winGameHeight >> 1) + World.Player.Position.Z * 4;
             winGameCenterX -= (int) World.Player.Offset.X;
             winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
             int winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX;
@@ -318,8 +318,8 @@ namespace ClassicUO.Game.Scenes
             ScaledOffsetY = winGameScaledOffsetY;
             ScaledOffsetW = winGameScaledWidth;
             ScaledOffsetH = winGameScaledHeight;
-            winDrawOffsetX += winGameScaledOffsetX / 2;
-            winDrawOffsetY += winGameScaledOffsetY / 2;
+            winDrawOffsetX += (winGameScaledOffsetX >> 1);
+            winDrawOffsetY += (winGameScaledOffsetY >> 1);
 
             if (width < height)
                 width = height;
@@ -341,10 +341,10 @@ namespace ClassicUO.Game.Scenes
 
             //if (realMaxRangeY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][1])
             //    realMaxRangeY = IO.Resources.Map.MapsDefaultSize[World.Map.Index][1];
-            int minBlockX = realMinRangeX / 8 - 1;
-            int minBlockY = realMinRangeY / 8 - 1;
-            int maxBlockX = realMaxRangeX / 8 + 1;
-            int maxBlockY = realMaxRangeY / 8 + 1;
+            int minBlockX = (realMinRangeX >> 3) - 1;
+            int minBlockY = (realMinRangeY >> 3) - 1;
+            int maxBlockX = (realMaxRangeX >> 3) + 1;
+            int maxBlockY = (realMaxRangeY >> 3) + 1;
 
             if (minBlockX < 0)
                 minBlockX = 0;

@@ -156,9 +156,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (_partyMember.Mobile != null)
             {
                 //Sets correct label location
-                _healthLabel.X = 85 - _healthLabel.Width / 2;
-                _staminaLabel.X = 85 - _staminaLabel.Width / 2;
-                _manaLabel.X = 85 - _manaLabel.Width / 2;
+                _healthLabel.X = 85 - (_healthLabel.Width >> 1);
+                _staminaLabel.X = 85 - (_staminaLabel.Width >> 1);
+                _manaLabel.X = 85 - (_manaLabel.Width >> 1);
             }
 
             base.Update(totalMS, frameMS);

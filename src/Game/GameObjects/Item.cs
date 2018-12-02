@@ -676,7 +676,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool HasSpell(int circle, int index)
         {
-            index = (3 - circle % 4 + circle / 4 * 4) * 8 + (index - 1);
+            index = (3 - circle % 4 + (circle >> 2) * 4) * 8 + (index - 1);
             ulong flag = (ulong) 1 << index;
 
             return (_spellsBitFiled & flag) == flag;

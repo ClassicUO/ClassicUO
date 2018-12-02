@@ -173,7 +173,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //sx
             spriteBatch.Draw2DTiled(_borders[1], new Rectangle(position.X, position.Y, _borderSize, Height), Vector3.Zero);
             //dx
-            spriteBatch.Draw2DTiled(_borders[1], new Rectangle(position.X + Width - _borderSize, position.Y + _borders[1].Width / 2, _borderSize, Height - _borderSize), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_borders[1], new Rectangle(position.X + Width - _borderSize, position.Y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize), Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
         }

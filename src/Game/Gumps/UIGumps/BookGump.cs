@@ -109,7 +109,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             SetActivePage( 1 );
         }
         private List<(string,TextBox)> m_pages = new List<(string, TextBox)> ();
-        private int MaxPage => BookPageCount / 2 + 1;
+        private int MaxPage => (BookPageCount >> 1) + 1;
 
         public override bool Draw( SpriteBatchUI spriteBatch, Point position, Vector3? hue = null )
         {

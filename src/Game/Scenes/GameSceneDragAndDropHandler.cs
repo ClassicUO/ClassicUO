@@ -163,8 +163,8 @@ namespace ClassicUO.Game.Scenes
 
             if (texture != null && !texture.IsDisposed)
             {
-                x -= texture.Width / 2;
-                y -= texture.Height / 2;
+                x -= texture.Width >> 1;
+                y -= texture.Height >> 1;
 
                 if (x + texture.Width > bounds.Width)
                     x = bounds.Width - texture.Width;

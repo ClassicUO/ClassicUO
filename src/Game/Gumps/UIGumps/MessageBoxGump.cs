@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(new Button(0, 0x0481, 0x0482, 0x0483)
             {
-                X = (w / 2) - 13,
+                X = (w >> 1) - 13,
                 Y = h - 45,
                 ButtonAction = ButtonAction.Activate,               
             });

@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (World.InGame)
             {
-                Point center = new Point(_settings.GameWindowX + _settings.GameWindowWidth / 2, _settings.GameWindowY + _settings.GameWindowHeight / 2);
+                Point center = new Point(_settings.GameWindowX + (_settings.GameWindowWidth >> 1), _settings.GameWindowY + (_settings.GameWindowHeight >> 1));
                 Direction direction = DirectionHelper.DirectionFromPoints(center, Mouse.Position);
                 World.Player.Walk(direction, true);
             }
@@ -313,7 +313,7 @@ namespace ClassicUO.Game.Scenes
                                 UIManager.Add(partymemberGump);
                                 PartyMemberGumpStack.Add(mobile);
                                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
-                                UIManager.AttemptDragControl(partymemberGump, new Point(_mousePicker.Position.X + rect.Width / 2, _mousePicker.Position.Y + rect.Height / 2), true);
+                                UIManager.AttemptDragControl(partymemberGump, new Point(_mousePicker.Position.X + (rect.Width >> 1), _mousePicker.Position.Y + (rect.Height >> 1)), true);
                             }
                             else
                             {
@@ -328,7 +328,7 @@ namespace ClassicUO.Game.Scenes
                                 MobileGumpStack.Add(mobile);
                                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
                                 MobileHealthGump currentMobileHealthGump;
-                                UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, Mouse.Position.X - rect.Width / 2, Mouse.Position.Y - rect.Height / 2));
+                                UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, Mouse.Position.X - (rect.Width >> 1), Mouse.Position.Y - (rect.Height >> 1)));
                                 UIManager.AttemptDragControl(currentMobileHealthGump, Mouse.Position, true);
                             }
 

@@ -47,10 +47,10 @@ namespace ClassicUO.Game.Views
             {
                 _displayedGraphic = effect.AnimationGraphic;
                 Texture = Art.GetStaticTexture(effect.AnimationGraphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
-            Bounds.X = Texture.Width / 2 - 22 - (int)effect.Offset.X;
+            Bounds.X = (Texture.Width >> 1) - 22 - (int)effect.Offset.X;
             Bounds.Y = Texture.Height - 44 + (int)(effect.Offset.Z - effect.Offset.Y);
 
             var flags = TileData.StaticData[_displayedGraphic].Flags;

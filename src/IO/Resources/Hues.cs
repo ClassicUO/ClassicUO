@@ -59,7 +59,7 @@ namespace ClassicUO.IO.Resources
             if (!File.Exists(path))
                 throw new FileNotFoundException();
             UOFileMul radarcol = new UOFileMul(path, false);
-            RadarCol = radarcol.ReadArray<ushort>((int) radarcol.Length / 2);
+            RadarCol = radarcol.ReadArray<ushort>((int)radarcol.Length >> 1);
             file.Dispose();
             radarcol.Dispose();
         }
@@ -67,7 +67,7 @@ namespace ClassicUO.IO.Resources
         public static void CreateHuesPalette()
         {
             Palette = new FloatHues[HuesCount];
-            int entrycount = HuesCount / 8;
+            int entrycount = HuesCount >> 3;
 
             for (int i = 0; i < entrycount; i++)
             {
@@ -161,7 +161,7 @@ namespace ClassicUO.IO.Resources
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                int g = color / 8;
+                int g = color >> 3;
                 int e = color % 8;
 
                 return HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F];
@@ -175,7 +175,7 @@ namespace ClassicUO.IO.Resources
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                int g = color / 8;
+                int g = color >> 3;
                 int e = color % 8;
 
                 return Color16To32(HuesRange[g].Entries[e].ColorTable[c]);
@@ -189,7 +189,7 @@ namespace ClassicUO.IO.Resources
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                int g = color / 8;
+                int g = color >> 3;
                 int e = color % 8;
 
                 return HuesRange[g].Entries[e].ColorTable[8];
@@ -203,7 +203,7 @@ namespace ClassicUO.IO.Resources
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                int g = color / 8;
+                int g = color >> 3;
                 int e = color % 8;
 
                 return Color16To32(HuesRange[g].Entries[e].ColorTable[(c >> 10) & 0x1F]);
@@ -217,7 +217,7 @@ namespace ClassicUO.IO.Resources
             if (color != 0 && color < HuesCount)
             {
                 color -= 1;
-                int g = color / 8;
+                int g = color >> 3;
                 int e = color % 8;
                 uint cl = Color16To32(c);
                 (byte B, byte G, byte R, byte A) = GetBGRA(cl);

@@ -150,7 +150,7 @@ namespace ClassicUO.Game.Views
             {
                 DamageOverhead dmg = mobile.DamageList[i];
                 View v = dmg.View;
-                v.Bounds.X = v.Texture.Width / 2 - 22;
+                v.Bounds.X = (v.Texture.Width >> 1) - 22;
                 v.Bounds.Y = offY + v.Texture.Height - dmg.OffsetY;
                 v.Bounds.Width = v.Texture.Width;
                 v.Bounds.Height = v.Texture.Height;

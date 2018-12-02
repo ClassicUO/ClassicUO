@@ -131,7 +131,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
             }
 
-            _maxPage = dictionaryPagesCount / 2 + (totalSpells + 1) / 2;
+            _maxPage = (dictionaryPagesCount >> 1) + ((totalSpells + 1) >> 1);
             int offs = 0;
             bool isMageSpellbook = false;
 
@@ -180,7 +180,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 });
             }
 
-            for (int i = 1; i <= dictionaryPagesCount / 2; i++)
+            for (int i = 1; i <= (dictionaryPagesCount >> 1); i++)
             {
                 int page = i;
 
@@ -230,7 +230,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                             text = new HoveredLabel(name, false, 0x0288, 0x33, font: 9)
                             {
-                                X = dataX, Y = 52 + y, LocalSerial = (uint) (dictionaryPagesCount / 2 + offs / 2 + 1), AcceptMouseInput = true
+                                X = dataX, Y = 52 + y, LocalSerial = (uint) ((dictionaryPagesCount >> 1) + (offs >> 1) + 1), AcceptMouseInput = true
                             };
 
                             text.MouseClick += (sender, e) =>
@@ -247,7 +247,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
             }
 
-            int page1 = dictionaryPagesCount / 2 + 1;
+            int page1 = (dictionaryPagesCount >> 1) + 1;
             int topTextY = _spellBookType == SpellBookType.Magery ? 10 : 6;
             bool haveReagents = _spellBookType <= SpellBookType.Necromancy;
             bool haveAbbreviature = _spellBookType != SpellBookType.Bushido && _spellBookType != SpellBookType.Ninjitsu;
@@ -282,7 +282,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 if (isMageSpellbook)
                 {
-                    Label text = new Label(SpellsMagery.CircleNames[i / 8], false, 0x0288, font: 6)
+                    Label text = new Label(SpellsMagery.CircleNames[i >> 3], false, 0x0288, font: 6)
                     {
                         X = topTextX, Y = topTextY
                     };
@@ -475,7 +475,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
 
-            spellsOnPage = Math.Min(maxSpellsCount / 2, 8);
+            spellsOnPage = Math.Min(maxSpellsCount >> 1, 8);
             dictionaryPagesCount = (int) Math.Ceiling(maxSpellsCount / 8.0f);
 
             if (dictionaryPagesCount % 2 != 0)
