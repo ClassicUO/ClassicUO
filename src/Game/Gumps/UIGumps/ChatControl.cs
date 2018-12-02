@@ -53,7 +53,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
     internal class ChatControl : GumpControl
     {
         private const int MAX_MESSAGE_LENGHT = 100;
-        private readonly InputManager _inputManager;
         private readonly List<Tuple<ChatMode, string>> _messageHistory;
         private readonly List<ChatLineTime> _textEntries;
         private Label _currentChatModeLabel;
@@ -71,7 +70,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Height = h;
             _textEntries = new List<ChatLineTime>();
             _messageHistory = new List<Tuple<ChatMode, string>>();
-            _inputManager = Service.Get<InputManager>();
             CanCloseWithRightClick = false;
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;

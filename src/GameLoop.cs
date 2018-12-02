@@ -48,8 +48,6 @@ namespace ClassicUO
         private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
        // private readonly StringBuffer _buffer = new StringBuffer();
         private RenderedText _infoText;
-        private InputManager _inputManager;
-        private JournalData _journalManager;
         private SpriteBatch3D _sb3D;
         private SpriteBatchUI _sbUI;
         private double _statisticsTimer;
@@ -98,17 +96,17 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
 
+            InputManager.Initialize();
+
             //Register Service Stack
             Service.Register(this);
             Service.Register(_sb3D = new SpriteBatch3D(GraphicsDevice));
             Service.Register(_sbUI = new SpriteBatchUI(GraphicsDevice));
-            Service.Register(new InputManager());
             Service.Register(_uiManager = new UIManager());
-            Service.Register(_journalManager = new JournalData());
+            Service.Register(new JournalData());
 
             //Register Command Stack
             Commands.Initialize();
-            _inputManager = Service.Get<InputManager>();
             Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
@@ -134,6 +132,7 @@ namespace ClassicUO
 
         protected override void UnloadContent()
         {
+            InputManager.Unload();
             SceneManager.CurrentScene?.Unload();
             Service.Get<Settings>().Save();
             base.UnloadContent();

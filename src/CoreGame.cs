@@ -20,6 +20,7 @@
 #endregion
 using System;
 
+using ClassicUO.Input;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
@@ -57,7 +58,7 @@ namespace ClassicUO
                 GraphicsDeviceManager.PreferredBackBufferHeight = Window.ClientBounds.Height;
                 GraphicsDeviceManager.ApplyChanges();
             };
-            Window.AllowUserResizing = true;
+            Window.AllowUserResizing = true; 
         }
 
         protected GraphicsDeviceManager GraphicsDeviceManager { get; }

@@ -52,7 +52,6 @@ namespace ClassicUO.Game.Gumps
         {
             GameCursor = new GameCursor(this);
             _sbUI = Service.Get<SpriteBatchUI>();
-            InputManager = Service.Get<InputManager>();
 
             InputManager.MouseDragging += (sender, e) =>
             {
@@ -199,8 +198,6 @@ namespace ClassicUO.Game.Gumps
         public int Width => _sbUI.GraphicsDevice.Viewport.Width;
 
         public int Height => _sbUI.GraphicsDevice.Viewport.Height;
-
-        public InputManager InputManager { get; }
 
         public GameCursor GameCursor { get; }
 

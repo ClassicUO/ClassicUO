@@ -35,7 +35,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private readonly GameBorder _border;
         private readonly Button _button;
         private readonly ChatControl _chatControl;
-        private readonly InputManager _inputManager;
         private readonly Settings _settings;
         private readonly WorldViewport _viewport;
         private bool _clicked;
@@ -46,7 +45,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
             _settings = Service.Get<Settings>();
-            _inputManager = Service.Get<InputManager>();
             AcceptMouseInput = false;
             CanMove = true;
             CanCloseWithEsc = false;
