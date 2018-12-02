@@ -41,7 +41,7 @@ namespace ClassicUO.Game.GameObjects.Managers
 
             if (_toRemove.Count > 0)
             {
-                _toRemove.ForEach( s => s.Dispose());
+                _toRemove.ForEach( s => _activeStatics.Remove(s));
                 _toRemove.Clear();
             }
         }

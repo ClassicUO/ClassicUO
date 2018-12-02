@@ -186,7 +186,6 @@ namespace ClassicUO.IO.Resources
         {
             if (BlockData[i] != null)
             {
-                Array.Clear(BlockData[i], 0, BlockData[i].Length);
                 BlockData[i] = null;
             }
         }

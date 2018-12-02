@@ -710,7 +710,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsMulti && Multi != null)
             {
-                Array.Clear(Multi.Components, 0, 0);
+                Multi.Components = null;
                 Multi = null;
             }
 
