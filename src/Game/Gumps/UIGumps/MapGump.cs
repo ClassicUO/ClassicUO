@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class MapGump : Gump
     {
-        private Texture2D _mapTexture;
+        private SpriteTexture _mapTexture;
 
         public MapGump() : base(0, 0)
         {

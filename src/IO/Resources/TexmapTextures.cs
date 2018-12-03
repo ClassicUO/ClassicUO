@@ -35,7 +35,7 @@ namespace ClassicUO.IO.Resources
         private static readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
         //private static SpriteTexture[] _textmapCache;
         private static readonly List<int> _usedIndex = new List<int>();
-        private static readonly Dictionary<Graphic, SpriteTexture> _textmapDictionary = new Dictionary<Graphic, SpriteTexture>();
+        private static readonly Dictionary<int, SpriteTexture> _textmapDictionary = new Dictionary<int, SpriteTexture>();
 
         public static void Load()
         {
@@ -136,23 +136,22 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
+            long ticks = CoreGame.Ticks - 3000;
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                Graphic g = (Graphic) _usedIndex[i];
+                int g = _usedIndex[i];
                 SpriteTexture texture = _textmapDictionary[g];
                 //ref SpriteTexture texture = ref _textmapCache[_usedIndex[i]];
 
-                if (texture == null || texture.IsDisposed)
-                    _usedIndex.RemoveAt(i--);
-                else if (CoreGame.Ticks - texture.Ticks >= 3000)
+                if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
                     // texture = null;
                     _usedIndex.RemoveAt(i--);
                     _textmapDictionary.Remove(g);
 
-                    if (++count >= 5)
+                    if (++count >= 20)
                         break;
                 }
             }

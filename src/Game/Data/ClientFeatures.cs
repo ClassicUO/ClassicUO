@@ -21,7 +21,7 @@ namespace ClassicUO.Game.Data
             PaperdollBooks = (flags & CharacterListFlag.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0;
         }
 
-        public bool TooltipsEnabled { get; private set; }
+        public bool TooltipsEnabled { get; private set; } = true;
         public bool PopupEnabled { get; private set; }
         public bool PaperdollBooks { get; private set; }
     }

@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -177,7 +178,7 @@ namespace ClassicUO.IO.Resources
                     _font[i].Chars[j].Height = fonts.ReadByte();
                     fonts.Skip(1);
                     int dataSize = _font[i].Chars[j].Width * _font[i].Chars[j].Height;
-                    _font[i].Chars[j].Data = fonts.ReadArray<ushort>(dataSize).ToList();
+                    _font[i].Chars[j].Data = fonts.ReadArray<ushort>(dataSize);
                 }
             }
 
@@ -278,7 +279,7 @@ namespace ClassicUO.IO.Resources
             if (isCropped)
                 width -= fd.Chars[_fontIndex[(byte) '.']].Width * 3;
             int textLength = 0;
-            string result = "";
+            StringBuilder sb = new StringBuilder();
 
             foreach (char c in str)
             {
@@ -286,13 +287,13 @@ namespace ClassicUO.IO.Resources
 
                 if (textLength > width)
                     break;
-                result += c;
+                sb.Append(c);
             }
 
             if (isCropped)
-                result += "...";
+                sb.Append("...");
 
-            return result;
+            return sb.ToString();
         }
 
         private static unsafe FontTexture GeneratePixelsASCII(byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial)
@@ -691,7 +692,7 @@ namespace ClassicUO.IO.Resources
             }
 
             int textLength = 0;
-            string result = "";
+            StringBuilder sb = new StringBuilder();
 
             foreach (char c in str)
             {
@@ -711,14 +712,14 @@ namespace ClassicUO.IO.Resources
 
                     if (textLength > width)
                         break;
-                    result += c;
+                    sb.Append(c);
                 }
             }
 
             if (isCropped)
-                result += "...";
+                sb.Append("...");
 
-            return result;
+            return sb.ToString();
         }
 
         public static unsafe int GetWidthUnicode(byte font, string str)
@@ -2643,13 +2644,6 @@ namespace ClassicUO.IO.Resources
 
             return count;
         }
-
-        public struct FontTextureInfo
-        {
-            public unsafe uint* Pixels;
-            public int Width, Height, LinesCount;
-            public List<WebLinkRect> Links;
-        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -2667,7 +2661,7 @@ namespace ClassicUO.IO.Resources
     public struct FontCharacterData
     {
         public byte Width, Height;
-        public List<ushort> Data;
+        public ushort[] Data;
     }
 
     public struct FontData

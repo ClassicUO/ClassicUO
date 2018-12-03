@@ -136,9 +136,7 @@ namespace ClassicUO.IO.Resources
                 SpriteTexture texture = _gumpDictionary[g];
                 //ref SpriteTexture texture = ref _gumpCache[_usedIndex[i]];
 
-                if (texture == null || texture.IsDisposed)
-                    _usedIndex.RemoveAt(i--);
-                else if (texture.Ticks < ticks)
+                if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
                     //texture = null;

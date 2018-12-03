@@ -139,7 +139,7 @@ namespace ClassicUO.Game.Views
                 Animations.AnimID = graphic;
                 ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup].Direction[Animations.Direction];
 
-                if (direction.FrameCount == 0 && !Animations.LoadDirectionGroup(ref direction))
+                if ((direction.FrameCount == 0 || direction.Frames == null) && !Animations.LoadDirectionGroup(ref direction))
                     return false;
                 direction.LastAccessTime = CoreGame.Ticks;
                 int fc = direction.FrameCount;

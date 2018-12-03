@@ -178,6 +178,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _partyMember.Mobile.HitsChanged -= OnHitsChanged;
             _partyMember.Mobile.StaminaChanged -= OnStaminaChanged;
             _partyMember.Mobile.ManaChanged -= OnManaChanged;
+
+            _healthBar.Dispose();
+            _staminaBar.Dispose();
+            _manaBar.Dispose();
             base.Dispose();
         }
 

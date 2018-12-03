@@ -130,9 +130,7 @@ namespace ClassicUO.IO.Resources
                 int g = _usedIndex[i];
                 SpriteTexture texture = _artDictionary[g];
 
-                if (texture == null || texture.IsDisposed)
-                    _usedIndex.RemoveAt(i--);
-                else if (texture.Ticks < ticks)
+                if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
                     //texture = null;
@@ -152,12 +150,10 @@ namespace ClassicUO.IO.Resources
                 int g = _usedIndexLand[i];
                 SpriteTexture texture = _landDictionary[g];
 
-                if (texture == null || texture.IsDisposed)
-                    _usedIndexLand.RemoveAt(i--);
-                else if (texture.Ticks < ticks)
+                if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
-                    //  texture = null;
+                    //texture = null;
                     _usedIndexLand.RemoveAt(i--);
                     _landDictionary.Remove(g);
 

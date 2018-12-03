@@ -268,28 +268,27 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             get => _activePage;
             set
-            {
-                UIManager _uiManager = Service.Get<UIManager>();
+            {              
                 _activePage = value;
 
-                if (_uiManager.KeyboardFocusControl != null)
+                if (UIManager.KeyboardFocusControl != null)
                 {
-                    if (Children.Contains(_uiManager.KeyboardFocusControl))
+                    if (Children.Contains(UIManager.KeyboardFocusControl))
                     {
-                        if (_uiManager.KeyboardFocusControl.Page != 0)
-                            _uiManager.KeyboardFocusControl = null;
+                        if (UIManager.KeyboardFocusControl.Page != 0)
+                            UIManager.KeyboardFocusControl = null;
                     }
                 }
 
                 // When ActivePage changes, check to see if there are new text input boxes
                 // that we should redirect text input to.
-                if (_uiManager.KeyboardFocusControl == null)
+                if (UIManager.KeyboardFocusControl == null)
                 {
                     foreach (GumpControl c in Children)
                     {
                         if (c.HandlesKeyboardFocus && c.Page == _activePage)
                         {
-                            _uiManager.KeyboardFocusControl = c;
+                            UIManager.KeyboardFocusControl = c;
 
                             break;
                         }
