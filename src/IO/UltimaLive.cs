@@ -154,11 +154,17 @@ namespace ClassicUO.IO
                             {
                                 for (int j = 0; j < 8; j++)
                                 {
-                                    var list = chunk.Tiles[i][j].ObjectsOnTiles;
-                                    for (int k = list.Count - 1; k >= 0; --k)
+                                    //var list = chunk.Tiles[i][j].ObjectsOnTiles;
+                                    //for (int k = list.Count - 1; k >= 0; --k)
+                                    //{
+                                    //    if (list[k] is Static)
+                                    //        chunk.Tiles[i][j].RemoveGameObject(list[k]);
+                                    //}
+
+                                    for (GameObject obj = chunk.Tiles[i][j].FirstNode; obj != null; obj = obj.Right)
                                     {
-                                        if (list[k] is Static)
-                                            chunk.Tiles[i][j].RemoveGameObject(list[k]);
+                                        if (obj is Static)
+                                            chunk.Tiles[i][j].RemoveGameObject(obj);
                                     }
                                 }
                             }
@@ -246,10 +252,11 @@ namespace ClassicUO.IO
                 {
                     for (int j = 0; j < 8; j++)
                     {
-                        var list = World.Map.Chunks[block].Tiles[j][i].ObjectsOnTiles;
-                        for (int k = list.Count - 1; k >= 0; --k)
+                        //var list = World.Map.Chunks[block].Tiles[j][i].ObjectsOnTiles;
+                        for (GameObject obj = World.Map.Chunks[block].Tiles[i][j].FirstNode; obj != null; obj = obj.Right)
+                            //for (int k = list.Count - 1; k >= 0; --k)
                         {
-                            if (list[k] is Land ln)
+                            if (obj is Land ln)
                             {
                                 ln.Graphic = (ushort)(landData[index++] | (landData[index++] << 8));
                                 ln.Z = (sbyte)landData[index++];
@@ -271,18 +278,20 @@ namespace ClassicUO.IO
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    var list = World.Map.GetMapChunk(block, xblock, yblock).Tiles[j][i].ObjectsOnTiles;
-                    for (int k = 0; k < list.Count; k++)
+                    //var list = World.Map.GetMapChunk(block, xblock, yblock).Tiles[j][i].ObjectsOnTiles;
+
+                    for (GameObject obj = World.Map.GetMapChunk(block, xblock, yblock).Tiles[j][i].FirstNode; obj != null; obj = obj.Right)
+                        //for (int k = 0; k < list.Count; k++)
                     {
-                        GameObject o = list[k];
-                        if (o is Land ln)
+                        //GameObject o = list[k];
+                        if (obj is Land ln)
                         {
                             landdata[blockByteIdx] = (byte)(ln.Graphic & 0x00FF);
                             landdata[blockByteIdx + 1] = (byte)((ln.Graphic & 0xFF00) >> 8);
                             landdata[blockByteIdx + 2] = (byte)ln.Z;
                             blockByteIdx += 3;
                         }
-                        else if (o is Static)
+                        else if (obj is Static)
                         {
                             stcount++;
                         }
@@ -295,11 +304,13 @@ namespace ClassicUO.IO
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    var list = World.Map.Chunks[block].Tiles[i][j].ObjectsOnTiles;
-                    for (int k = 0; k < list.Count; k++)
+                    //var list = World.Map.Chunks[block].Tiles[i][j].ObjectsOnTiles;
+                    for (GameObject obj = World.Map.Chunks[block].Tiles[i][j].FirstNode; obj != null; obj = obj.Right)
+
+                    //for (int k = 0; k < list.Count; k++)
                     {
-                        GameObject o = list[k];
-                        if (o is Static st)
+                        //GameObject obj = list[k];
+                        if (obj is Static st)
                         {
                             staticdata[blockByteIdx] = (byte)(st.Graphic & 0x00FF);
                             staticdata[blockByteIdx + 1] = (byte)((st.Graphic & 0xFF00) >> 8);

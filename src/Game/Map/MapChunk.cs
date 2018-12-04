@@ -165,22 +165,27 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
+                    var tile = Tiles[i][j];
 
-                    for (int k = 0; k < Tiles[i][j].ObjectsOnTiles.Count; k++)
+                    for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                    //for (int k = 0; k < Tiles[i][j].ObjectsOnTiles.Count; k++)
                     {
-                        var obj = Tiles[i][j].ObjectsOnTiles[k];
-
+                        //var obj = Tiles[i][j].ObjectsOnTiles[k];
                         if (obj != World.Player)
                         {
-                            int count = Tiles[i][j].ObjectsOnTiles.Count;
-                            Tiles[i][j].ObjectsOnTiles[k].Dispose();
 
-                            if (count == Tiles[i][j].ObjectsOnTiles.Count)
-                            {
-                                Tiles[i][j].ObjectsOnTiles.RemoveAt(k);
-                            }
+                           tile.RemoveGameObject(obj);
 
-                            k--;
+
+                            //int count = Tiles[i][j].ObjectsOnTiles.Count;
+                            //Tiles[i][j].ObjectsOnTiles[k].Dispose();
+
+                            //if (count == Tiles[i][j].ObjectsOnTiles.Count)
+                            //{
+                            //    Tiles[i][j].ObjectsOnTiles.RemoveAt(k);
+                            //}
+
+                            //k--;
                         }
                     }
 
@@ -199,14 +204,16 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++)
                 {
                     Tile tile = Tiles[i][j];
-                    List<GameObject> list = tile.ObjectsOnTiles;
 
-                    for (int k = 0; k < list.Count; k++)
+                    for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                    //List<GameObject> list = tile.ObjectsOnTiles;
+
+                    //for (int k = 0; k < list.Count; k++)
                     {
-                        GameObject o = list[k];
-                        if (o is Static st && st.Effect != null) st.Effect = null;
+                        //GameObject obj = list[k];
+                        if (obj is Static st && st.Effect != null) st.Effect = null;
 
-                        if (!(o is Land) && !(o is Static))
+                        if (!(obj is Land) && !(obj is Static))
                             return false;
                     }
                 }

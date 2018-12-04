@@ -155,13 +155,12 @@ namespace ClassicUO.Game.Map
 
             if (tile != null)
             {
-                var objects = tile.ObjectsOnTiles;
-                GameObject obj = null;
+                //var objects = tile.ObjectsOnTiles;
+                GameObject obj = tile.FirstNode;
 
-                for (int i = 0; i < objects.Count; i++)
+                //for (int i = 0; i < objects.Count; i++)
+                for(; obj != null; obj = obj.Right)
                 {
-                    obj = objects[i];
-
                     if (!(obj is Static) && obj is Item item && !item.IsMulti)
                         continue;
 

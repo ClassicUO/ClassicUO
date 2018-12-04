@@ -124,6 +124,7 @@
     <Compile Include="Game\Views\MovingEffectView.cs" />
     <Compile Include="Input\Mouse.cs" />
     <Compile Include="Interfaces\IMobilePaperdollOwner.cs" />
+    <Compile Include="Interfaces\INode.cs" />
     <Compile Include="Interfaces\ISmoothMovable.cs" />
     <Compile Include="IO\UltimaLive.cs" />
     <Compile Include="Network\NetClient1.cs" />

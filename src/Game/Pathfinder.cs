@@ -75,11 +75,11 @@ namespace ClassicUO.Game
                 return false;
             bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
             bool isGM = World.Player.Graphic == 0x03DB;
-            var objects = tile.ObjectsOnTiles;
-
-            for (int i = 0; i < objects.Count; i++)
+            //var objects = tile.ObjectsOnTiles;
+            for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+            //for (int i = 0; i < objects.Count; i++)
             {
-                GameObject obj = objects[i];
+               // GameObject obj = objects[i];
                 // TODO: custom house gump
                 Graphic graphic = obj.Graphic;
 

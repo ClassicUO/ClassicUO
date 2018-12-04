@@ -49,6 +49,350 @@ namespace ClassicUO.Game.Map
             }
         }
 
+
+        private static void Swap(ref GameObject a, ref GameObject b)
+        {
+            //GameObject left = a.Left;
+            //GameObject right = b.Right;
+
+            //a.Left = b;
+            //a.Right = right;
+
+            //b.Left = left;
+            //b.Right = a;
+
+            GameObject temp = b;
+            a = b;
+            b = temp;
+        }
+
+        private static void Split(GameObject head, ref GameObject front, ref GameObject back)
+        {
+            GameObject slow, fast;
+
+            if (head == null || head.Right == null)
+            {
+                front = head;
+                back = null;
+            }
+            else
+            {
+                slow = head;
+                fast = head.Right;
+
+                while (fast!= null)
+                {
+                    fast = fast.Right;
+
+                    if (fast != null)
+                    {
+                        slow = slow.Right;
+                        fast = fast.Right;
+                    }
+                }
+
+                front = head;
+                back = slow.Right;
+                back.Left = null;
+                slow.Right = null;
+            }
+        }
+
+        private static void Merge(ref GameObject head, ref GameObject l1, ref GameObject l2)
+        {
+            GameObject newHead, curr;
+
+            if (l1 == null)
+                newHead = l2;
+            else if (l2 == null)
+                newHead = l1;
+            else
+            {
+                if (Compare(l2, l1) < 0)
+                {
+                    newHead = l2;
+                    l2 = l2.Right;
+                }
+                else
+                {
+                    newHead = l1;
+                    l1 = l1.Right;
+                }
+
+                newHead.Left = null;
+                curr = newHead;
+
+                while (l1 != null && l2 != null)
+                {
+                    if (Compare(l2, l1) < 0)
+                    {
+                        curr.Right = l2;
+                        l2.Left = curr;
+                        l2 = l2.Right;
+                    }
+                    else
+                    {
+                        curr.Right = l1;
+                        l1.Left = curr;
+                        l1 = l1.Right;
+                    }
+
+                    curr = curr.Right;
+                }
+
+                while (l1 != null)
+                {
+                    curr.Right = l1;
+                    l1.Left = curr;
+                    l1 = l1.Right;
+                    curr = curr.Right;
+                }
+
+                while (l2 != null)
+                {
+                    curr.Right = l2;
+                    l2.Left = curr;
+                    l2 = l2.Right;
+                    curr = curr.Right;
+                }
+            }
+
+            head = newHead;
+        }
+
+        private static void MergeSort(ref GameObject first)
+        {
+            GameObject h1 = null;
+            GameObject h2 = null;
+
+            if (first != null && first.Right != null)
+            {
+                Split(first, ref h1, ref h2);
+                MergeSort(ref h1);
+                MergeSort( ref h2);
+                Merge(ref first, ref h1, ref h2);
+            }
+
+        }
+
+        public static void Sort(GameObject first)
+        {
+
+            //bool swapped = false;
+            //GameObject lptr = null;
+
+            MergeSort(ref first);
+          
+
+            //do
+            //{
+            //    GameObject current = first;
+            //    GameObject previous = null;
+            //    GameObject next = first.Right;
+            //    changed = false;
+
+            //    while (next != null)
+            //    {
+            //        int result = Compare(current, next);
+
+            //        if (result > 0)
+            //        {
+            //            changed = true;
+
+            //            if (previous != null)
+            //            {
+            //                GameObject sig = next.Right;
+            //                previous.Right = next;
+            //                next.Right = current;
+            //                current.Right = sig;
+            //            }
+            //            else
+            //            {
+            //                GameObject sig = next.Right;
+            //                first = next;
+            //                next.Right = current;
+            //                current.Right = sig;
+            //            }
+
+            //            previous = next;
+            //            next = current.Right;
+            //        }
+            //        else
+            //        {
+            //            previous = current;
+            //            current = next;
+            //            next = next.Right;
+            //        }
+            //    }
+
+
+            //} while (changed);
+
+            //do
+            //{
+
+            //    swapped = false;
+
+            //    GameObject ptr1 = first;
+
+            //    while (ptr1.Right != lptr)
+            //    {
+            //        int result = Compare(ptr1, ptr1.Right);
+
+            //        if (result > 0)
+            //        {
+            //            GameObject temp = ptr1;
+            //            ptr1 = ptr1.Right;
+            //            ptr1.Right = temp;
+
+            //            swapped = true;
+            //        }
+            //        else
+            //            ptr1 = ptr1.Right;
+            //    }
+
+            //    lptr = ptr1;
+
+            //} while (swapped);
+
+            //if (first?.Right == null)
+            //    return;
+
+            ////GameObject found = null;
+            //GameObject start = first;
+
+            //while (first?.Right != null)
+            //{
+            //    GameObject prev = first;
+            //    first = first.Right;
+
+            //    while (prev != null)
+            //    {
+            //        int result = Compare(prev, first);
+
+            //        if (result > 0)
+            //        {
+            //            GameObject left = prev.Left;
+            //            GameObject right = first.Right;
+
+            //            prev.Left = first;
+            //            prev.Right = right;
+
+            //            first.Left = left;
+            //            first.Right = prev;
+
+            //        }
+
+            //        GameObject p = prev;
+            //        prev = first?.Left;
+            //        first = p.Left;
+            //    }
+
+            //    //first = first.Right;
+            //    //if (first?.Right == null)
+            //    //    break;
+            //}
+
+            //int count = 0;
+
+            //GameObject right = first.Right;
+            //while (right != null)
+            //{
+            //    right = right.Right;
+            //    count++;
+            //}
+
+            //for (int i = 0; i < count; i++)
+            //{
+            //    right = first.Right;
+
+            //}
+
+            //GameObject next = first.Right;
+
+            //if (next == null)
+            //    return;
+
+
+
+            //if (first == null)
+            //    return;
+
+            //GameObject second = first.Right;
+
+            //if (second == null)
+            //    return;
+
+            //int result = Compare(first, second);
+
+            //if (result > 0)
+            //{
+            //    GameObject left = first.Left;
+            //    GameObject right = second.Right;
+
+            //    first.Left = second;
+            //    first.Right = right;
+
+            //    second.Left = left;
+            //    second.Right = first;
+            //}
+
+            //Sort(second.Right);
+
+
+            //for (GameObject obj = first; obj?.Right != null; obj = obj.Right)
+            //{
+            //    GameObject j = obj.Right;
+
+            //    while (j != null)
+            //    {
+            //        int result = Compare(obj, j);
+
+            //        if (result > 0)
+            //        {
+            //            GameObject left = obj.Left;
+            //            GameObject right = j.Right;
+
+            //            obj.Left = j;
+            //            obj.Right = right;
+
+            //            j.Left = left;
+            //            j.Right = obj;
+            //        }
+
+            //        j = j.Left;
+
+            //    }
+            //}
+
+            //GameObject second = first;
+
+            //while (second?.Right != null)
+            //{
+            //    second = second.Right;
+            //    int result = Compare(first, second);
+
+            //    if (result > 0)
+            //    {
+            //        GameObject left = first.Left; // estremo minore
+            //        GameObject right = second.Right; // estremo maggiore
+
+
+            //        first.Left = second;
+            //        first.Right = right;
+
+            //        second.Left = left;
+            //        second.Right = first;
+
+
+            //        //second = first;
+            //        second = second.Left;
+            //    }
+            //    else
+            //        first = second;
+            //}
+        }
+
         private static int Compare(GameObject x, GameObject y)
         {
             (int xZ, int xType, int xThreshold, int xTierbreaker) = GetSortValues(x);

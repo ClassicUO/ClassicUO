@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
+using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -33,7 +34,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameObject : IUpdateable, IDisposable
+    public abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
     {
         private List<TextOverhead> _overHeads;
         private Position _position = Position.Invalid;
@@ -44,6 +45,10 @@ namespace ClassicUO.Game.GameObjects
         {
             
         }
+
+        public GameObject Left { get; set; }
+        public GameObject Right { get; set; }
+
 
        
         protected Vector3 ScreenPosition { get; private set; }

@@ -60,11 +60,12 @@ namespace ClassicUO.Game.Scenes
             {
                 int pz14 = playerZ + 14;
                 int pz16 = playerZ + 16;
-                var objects = tile.ObjectsOnTiles;
+                //var objects = tile.ObjectsOnTiles;
 
-                for (int i = 0; i < objects.Count; i++)
+                for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                //for (int i = 0; i < objects.Count; i++)
                 {
-                    GameObject obj = objects[i];
+                    //GameObject obj = objects[i];
                     sbyte tileZ = obj.Z;
 
                     if (obj is Land)
@@ -107,11 +108,12 @@ namespace ClassicUO.Game.Scenes
 
                 if (tile !=null)
                 {
-                    objects = tile.ObjectsOnTiles;
+                    //objects = tile.ObjectsOnTiles;
 
-                    for (int i = 0; i < objects.Count; i++)
+                    for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
+                    //for (int i = 0; i < objects.Count; i++)
                     {
-                        GameObject obj = objects[i];
+                        //GameObject obj = objects[i];
 
                         if (!(obj is Static) && obj is Item it && !it.IsMulti)
                             continue;
@@ -155,11 +157,11 @@ namespace ClassicUO.Game.Scenes
         private int _maxZ;
         private bool _updateDrawPosition;
 
-        private void AddTileToRenderList(List<GameObject> objList, int worldX, int worldY, bool useObjectHandles, int maxZ)
+        private void AddTileToRenderList(GameObject obj, int worldX, int worldY, bool useObjectHandles, int maxZ)
         {
-            for (int i = 0; i < objList.Count; i++)
+            for (; obj != null; obj = obj.Right)
             {
-                GameObject obj = objList[i];
+                //GameObject obj = objList[i];
 
                 if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
                     continue;
@@ -276,7 +278,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (i == dropMaxZIndex)
                     currentMaxZ += 20;
-                AddTileToRenderList(tile.ObjectsOnTiles, x, y, useObjectHandles, currentMaxZ);
+                AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, currentMaxZ);
             }
         }
 
