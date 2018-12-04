@@ -97,6 +97,7 @@ namespace ClassicUO.Game.Scenes
         public override void Load()
         {
             base.Load();
+            Service.Register(new JournalData());
             Service.Register(_effectManager = new EffectManager());
             Service.Register(_staticManager = new StaticManager());
             _mousePicker = new MousePicker();
@@ -149,6 +150,7 @@ namespace ClassicUO.Game.Scenes
             UIManager.Clear();
             CleaningResources();
             World.Clear();
+            Service.Unregister<JournalData>();
             Service.Unregister<EffectManager>();
             Service.Unregister<StaticManager>();
             InputManager.LeftMouseButtonDown -= OnLeftMouseButtonDown;

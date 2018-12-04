@@ -63,6 +63,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDisposed)
+                return;
+
             if (Item.IsDisposed)
             {
                 Dispose();

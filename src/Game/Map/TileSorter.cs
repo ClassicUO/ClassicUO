@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        private static void Split(GameObject head, ref GameObject front, ref GameObject back)
+        private static void Split(GameObject head, out GameObject front, out GameObject back)
         {
             if (head?.Right == null)
             {
@@ -144,12 +144,9 @@ namespace ClassicUO.Game.Map
 
         private static void MergeSort(ref GameObject first)
         {
-            GameObject h1 = null;
-            GameObject h2 = null;
-
             if (first?.Right != null)
             {
-                Split(first, ref h1, ref h2);
+                Split(first, out GameObject h1, out GameObject h2);
                 MergeSort(ref h1);
                 MergeSort( ref h2);
                 Merge(ref first, ref h1, ref h2);

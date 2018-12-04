@@ -54,6 +54,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
 
             Texture = IO.Resources.Gumps.GetGumpTexture(_gumpIndex);
+
             Width = Texture.Width;
             Height = Texture.Height;
         }

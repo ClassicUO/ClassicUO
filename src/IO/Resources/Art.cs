@@ -204,6 +204,7 @@ namespace ClassicUO.IO.Resources
                     {
                         ushort val = *ptr++;
 
+
                         if (val > 0)
                             val = (ushort) (0x8000 | val);
                         pixels[pos++] = val;

@@ -103,7 +103,6 @@ namespace ClassicUO
             Service.Register(_sb3D = new SpriteBatch3D(GraphicsDevice));
             Service.Register(_sbUI = new SpriteBatchUI(GraphicsDevice));
             Service.Register(_uiManager = new UIManager());
-            Service.Register(new JournalData());
 
             //Register Command Stack
             Commands.Initialize();
