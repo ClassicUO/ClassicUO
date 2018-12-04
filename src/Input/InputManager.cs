@@ -229,7 +229,7 @@ namespace ClassicUO.Input
 
                                     MouseDoubleClickEventArgs arg = new MouseDoubleClickEventArgs(Mouse.Position.X, Mouse.Position.Y, MouseButton.Middle);
 
-                                    MidMouseDoubleClick.Raise(arg);
+                                    RightMouseDoubleClick.Raise(arg);
 
                                     if (!arg.Result)
                                         RightMouseButtonDown.Raise();
