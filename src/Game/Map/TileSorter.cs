@@ -50,35 +50,17 @@ namespace ClassicUO.Game.Map
         }
 
 
-        private static void Swap(ref GameObject a, ref GameObject b)
-        {
-            //GameObject left = a.Left;
-            //GameObject right = b.Right;
-
-            //a.Left = b;
-            //a.Right = right;
-
-            //b.Left = left;
-            //b.Right = a;
-
-            GameObject temp = b;
-            a = b;
-            b = temp;
-        }
-
         private static void Split(GameObject head, ref GameObject front, ref GameObject back)
         {
-            GameObject slow, fast;
-
-            if (head == null || head.Right == null)
+            if (head?.Right == null)
             {
                 front = head;
                 back = null;
             }
             else
             {
-                slow = head;
-                fast = head.Right;
+                GameObject slow = head;
+                GameObject fast = head.Right;
 
                 while (fast!= null)
                 {
@@ -100,7 +82,7 @@ namespace ClassicUO.Game.Map
 
         private static void Merge(ref GameObject head, ref GameObject l1, ref GameObject l2)
         {
-            GameObject newHead, curr;
+            GameObject newHead;
 
             if (l1 == null)
                 newHead = l2;
@@ -120,7 +102,7 @@ namespace ClassicUO.Game.Map
                 }
 
                 newHead.Left = null;
-                curr = newHead;
+                GameObject curr = newHead;
 
                 while (l1 != null && l2 != null)
                 {
@@ -165,7 +147,7 @@ namespace ClassicUO.Game.Map
             GameObject h1 = null;
             GameObject h2 = null;
 
-            if (first != null && first.Right != null)
+            if (first?.Right != null)
             {
                 Split(first, ref h1, ref h2);
                 MergeSort(ref h1);
