@@ -31,7 +31,6 @@ namespace ClassicUO.Game.Map
 {
     public sealed class Facet : IDisposable
     {
-        // private static Tile _invalid = Tile.Invalid;
         private readonly bool[] _blockAccessList = new bool[0x1000];
         //private const int CHUNKS_NUM = 5;
         //private const int MAX_CHUNKS = CHUNKS_NUM * 2 + 1;
@@ -89,7 +88,7 @@ namespace ClassicUO.Game.Map
                 return null;
             ref MapChunk chuck = ref Chunks[block];
 
-            if (chuck == null /*MapChunk.Invalid*/)
+            if (chuck == null)
             {
                 if (load)
                 {
@@ -228,7 +227,7 @@ namespace ClassicUO.Game.Map
             {
                 ref MapChunk block = ref Chunks[_usedIndices[i]];
                 block.Dispose();
-                block = null;// MapChunk.Invalid;
+                block = null;
                 _usedIndices.RemoveAt(i--);
             }
 
@@ -267,7 +266,7 @@ namespace ClassicUO.Game.Map
                     int cellindex = index + j;
                     ref MapChunk chunk = ref Chunks[cellindex];
 
-                    if (chunk == null /*MapChunk.Invalid*/)
+                    if (chunk == null)
                     {
                         if (CoreGame.Ticks - tick >= maxDelay)
                             return;

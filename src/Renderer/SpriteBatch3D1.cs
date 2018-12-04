@@ -94,8 +94,18 @@ namespace ClassicUO.Renderer
                                            0.0f, 0.0f, 0.0f, 0.0f, 0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
                                            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
             _effect.CurrentTechnique = _huesTechnique;
-            _rasterizerState = RasterizerState.CullCounterClockwise;
             _blendState = BlendState.AlphaBlend;
+
+            _rasterizerState = RasterizerState.CullNone;
+            _rasterizerState = new RasterizerState()
+            {
+                CullMode = _rasterizerState.CullMode,
+                DepthBias = _rasterizerState.DepthBias,
+                FillMode = _rasterizerState.FillMode,
+                MultiSampleAntiAlias = _rasterizerState.MultiSampleAntiAlias,
+                SlopeScaleDepthBias = _rasterizerState.SlopeScaleDepthBias,
+                ScissorTestEnable = true
+            };
         }
 
         public Matrix TransformMatrix => _transformMatrix;
@@ -238,7 +248,7 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice.BlendState = _blendState;
             GraphicsDevice.DepthStencilState = DepthStencilState.None;
-            GraphicsDevice.RasterizerState = _rasterizerState;
+            GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
@@ -299,24 +309,17 @@ namespace ClassicUO.Renderer
 
         public void EnableScissorTest(bool enable)
         {
-            if (enable == _rasterizerState.ScissorTestEnable)
+            if (enable == _useScissor)
                 return;
 
             Flush();
 
-            _rasterizerState?.Dispose();
+            //_rasterizerState?.Dispose();
 
-            _rasterizerState = new RasterizerState()
-            {
-                CullMode = _rasterizerState.CullMode,
-                DepthBias = _rasterizerState.DepthBias,
-                FillMode = _rasterizerState.FillMode,
-                MultiSampleAntiAlias = _rasterizerState.MultiSampleAntiAlias,
-                SlopeScaleDepthBias = _rasterizerState.SlopeScaleDepthBias,
-                ScissorTestEnable = enable
-            };
+            _useScissor = enable;
         }
 
+        private bool _useScissor;
 
 
         public void SetBlendState(BlendState blend)

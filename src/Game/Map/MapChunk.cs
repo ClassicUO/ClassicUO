@@ -29,8 +29,6 @@ namespace ClassicUO.Game.Map
 {
     public sealed class MapChunk : IDisposable
     {
-        public static readonly MapChunk Invalid = new MapChunk(0xFFFF, 0xFFFF);
-
         public MapChunk(ushort x, ushort y)
         {
             X = x;
@@ -46,46 +44,12 @@ namespace ClassicUO.Game.Map
             LastAccessTime = CoreGame.Ticks + 5000;
         }
 
-        //private ushort? _x, _y;
-
         public ushort X { get; }
         public ushort Y { get; }
-
-        //public ushort X
-        //{
-        //    get => _x ?? 0xFFFF;
-        //    set => _x = value;
-        //}
-
-        //public ushort Y
-        //{
-        //    get => _y ?? 0xFFFF;
-        //    set => _y = value;
-        //}
 
         public Tile[][] Tiles { get; private set; }
 
         public long LastAccessTime { get; set; }
-
-        //public static bool operator ==(MapChunk p1, MapChunk p2)
-        //{
-        //    return p1.X == p2.X && p1.Y == p2.Y;
-        //}
-
-        //public static bool operator !=(MapChunk p1, MapChunk p2)
-        //{
-        //    return p1.X != p2.X || p1.Y != p2.Y;
-        //}
-
-        //public override int GetHashCode()
-        //{
-        //    return X ^ Y;
-        //}
-
-        //public override bool Equals(object obj)
-        //{
-        //    return obj is MapChunk mapChunk && this == mapChunk;
-        //}
 
         public unsafe void Load(int map)
         {
@@ -165,32 +129,17 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    var tile = Tiles[i][j];
+                    Tile tile = Tiles[i][j];
 
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
-                    //for (int k = 0; k < Tiles[i][j].ObjectsOnTiles.Count; k++)
                     {
-                        //var obj = Tiles[i][j].ObjectsOnTiles[k];
                         if (obj != World.Player)
                         {
-
                            tile.RemoveGameObject(obj);
-
-
-                            //int count = Tiles[i][j].ObjectsOnTiles.Count;
-                            //Tiles[i][j].ObjectsOnTiles[k].Dispose();
-
-                            //if (count == Tiles[i][j].ObjectsOnTiles.Count)
-                            //{
-                            //    Tiles[i][j].ObjectsOnTiles.RemoveAt(k);
-                            //}
-
-                            //k--;
                         }
                     }
 
-                    //Tiles[i][j].Dispose();
-                    Tiles[i][j] = null;// Tile.Invalid;
+                    Tiles[i][j] = null;
                 }
             }
 
@@ -206,12 +155,9 @@ namespace ClassicUO.Game.Map
                     Tile tile = Tiles[i][j];
 
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
-                    //List<GameObject> list = tile.ObjectsOnTiles;
-
-                    //for (int k = 0; k < list.Count; k++)
                     {
-                        //GameObject obj = list[k];
-                        if (obj is Static st && st.Effect != null) st.Effect = null;
+                        if (obj is Static st && st.Effect != null)
+                            st.Effect = null;
 
                         if (!(obj is Land) && !(obj is Static))
                             return false;
