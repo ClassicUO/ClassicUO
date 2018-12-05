@@ -25,6 +25,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -42,7 +43,7 @@ namespace ClassicUO.Game.Views
                 AllowedToDraw = item.Graphic > 2 && item.DisplayedGraphic > 2 && !IsNoDrawable(item.Graphic);
             else
             {
-                item.AnimIndex = 99;
+                //item.AnimIndex = 99;
 
                 if ((item.Direction & Direction.Running) != 0)
                 {
@@ -54,7 +55,7 @@ namespace ClassicUO.Game.Views
 
                 item.Layer = (Layer) item.Direction;
                 AllowedToDraw = true;
-                item.DisplayedGraphic = item.Amount;
+                //item.DisplayedGraphic = item.Amount;
             }
         }
 
@@ -93,7 +94,7 @@ namespace ClassicUO.Game.Views
             return !item.Effect.IsDisposed && item.Effect.View.Draw(spriteBatch, position, objectList);
         }
 
-        public bool DrawCorpse(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        private bool DrawCorpse(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             if (GameObject.IsDisposed)
                 return false;
@@ -106,6 +107,7 @@ namespace ClassicUO.Game.Views
             Animations.Direction = dir;
             byte animIndex = (byte) GameObject.AnimIndex;
 
+
             for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
                 Layer layer = LayerOrder.UsedLayers[dir, i];
@@ -116,7 +118,8 @@ namespace ClassicUO.Game.Views
 
                 if (layer == Layer.Invalid)
                 {
-                    graphic = item.DisplayedGraphic;
+                    graphic = item.GetMountAnimation();
+                    //graphic = item.DisplayedGraphic;
                     Animations.AnimGroup = Animations.GetDieGroupIndex(item.GetMountAnimation(), item.UsedLayer);
                     color = GameObject.Hue;
                 }
@@ -143,13 +146,15 @@ namespace ClassicUO.Game.Views
                     return false;
                 direction.LastAccessTime = CoreGame.Ticks;
                 int fc = direction.FrameCount;
-                if (fc > 0 && animIndex >= fc) animIndex = (byte) (fc - 1);
+                if (fc > 0 && animIndex >= fc)
+                    animIndex = (byte) (fc - 1);
 
                 if (animIndex < direction.FrameCount)
                 {
                     AnimationFrameTexture frame = direction.Frames[animIndex];
 
                     if (frame == null || frame.IsDisposed) return false;
+
                     int drawCenterY = frame.CenterY;
                     const int drawX = -22;
                     int drawY = drawCenterY - 22 - 3;
@@ -161,6 +166,8 @@ namespace ClassicUO.Game.Views
                     base.Draw(spriteBatch, position, objectList);
                     Pick(frame, Bounds, position, objectList);
                 }
+
+                break;
             }
 
             return true;

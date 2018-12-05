@@ -42,7 +42,6 @@ namespace ClassicUO.Game.Scenes
         private MousePicker _mousePicker;
         private MouseOverList _mouseOverList;
         private WorldViewport _viewPortGump;
-        private TopBarGump _topBarGump;
         private StaticManager _staticManager;
         private EffectManager _effectManager;
         private Settings _settings;
@@ -103,7 +102,7 @@ namespace ClassicUO.Game.Scenes
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
             UIManager.Add(new WorldViewportGump(this));
-            UIManager.Add(_topBarGump = new TopBarGump(this));           
+            UIManager.Add(new TopBarGump(this));           
             _viewPortGump = Service.Get<WorldViewport>();
             _settings = Service.Get<Settings>();
             GameActions.Initialize(PickupItemBegin);
@@ -183,9 +182,7 @@ namespace ClassicUO.Game.Scenes
                 return;
 
             (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
-            //CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
-            //_maxZ = maxItemZ;
-            //_drawTerrain = drawTerrain;
+
             UpdateMaxDrawZ();
             _renderListCount = 0;
             int minX = minTile.X;

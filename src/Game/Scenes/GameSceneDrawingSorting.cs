@@ -60,12 +60,9 @@ namespace ClassicUO.Game.Scenes
             {
                 int pz14 = playerZ + 14;
                 int pz16 = playerZ + 16;
-                //var objects = tile.ObjectsOnTiles;
 
                 for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
-                //for (int i = 0; i < objects.Count; i++)
                 {
-                    //GameObject obj = objects[i];
                     sbyte tileZ = obj.Z;
 
                     if (obj is Land)
@@ -108,13 +105,8 @@ namespace ClassicUO.Game.Scenes
 
                 if (tile !=null)
                 {
-                    //objects = tile.ObjectsOnTiles;
-
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
-                    //for (int i = 0; i < objects.Count; i++)
                     {
-                        //GameObject obj = objects[i];
-
                         if (!(obj is Static) && obj is Item it && !it.IsMulti)
                             continue;
 
