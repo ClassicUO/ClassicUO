@@ -30,5 +30,8 @@ namespace ClassicUO.Utility
         {
             return _random.Next(low, high + 1);
         }
+
+        public static int GetValue() => _random.Next();
+
     }
 }

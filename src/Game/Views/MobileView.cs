@@ -50,6 +50,10 @@ namespace ClassicUO.Game.Views
                 return false;
 
             Mobile mobile = (Mobile)GameObject;
+
+            if (mobile.LastAnimationIdleDelay < CoreGame.Ticks)
+                mobile.SetIdleAnimation();
+
             bool mirror = false;
             byte dir = (byte)mobile.GetDirectionForAnimation();
             Animations.GetAnimDirection(ref dir, ref mirror);

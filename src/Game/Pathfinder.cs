@@ -75,11 +75,9 @@ namespace ClassicUO.Game
                 return false;
             bool ignoreGameCharacters = IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || World.Player.IgnoreCharacters || !(World.Player.Stamina < World.Player.StaminaMax && World.Map.Index == 0);
             bool isGM = World.Player.Graphic == 0x03DB;
-            //var objects = tile.ObjectsOnTiles;
+
             for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
-            //for (int i = 0; i < objects.Count; i++)
             {
-               // GameObject obj = objects[i];
                 // TODO: custom house gump
                 Graphic graphic = obj.Graphic;
 
@@ -840,11 +838,6 @@ namespace ClassicUO.Game
             public int Height { get; }
 
             public GameObject Object { get; }
-
-            public override string ToString()
-            {
-                return $"Z: {Z}, Height: {Height}";
-            }
         }
 
         private class PathNode

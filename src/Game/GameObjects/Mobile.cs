@@ -72,7 +72,15 @@ namespace ClassicUO.Game.GameObjects
         public Mobile(Serial serial) : base(serial)
         {
             _lastAnimationChangeTime = CoreGame.Ticks;
+            CalculateRandomIdleTime();
         }
+
+        private void CalculateRandomIdleTime()
+        {
+            LastAnimationIdleDelay = CoreGame.Ticks + (30000 + RandomHelper.GetValue(0, 30000));
+        }
+
+        public long LastAnimationIdleDelay { get; protected set; }
 
         public Deque<Step> Steps { get; } = new Deque<Step>();
 
@@ -434,7 +442,41 @@ namespace ClassicUO.Game.GameObjects
             AnimationDirection = frameDirection;
             AnimationFromServer = false;
             _lastAnimationChangeTime = CoreGame.Ticks;
+            CalculateRandomIdleTime();
         }
+
+        public void SetIdleAnimation()
+        {
+            CalculateRandomIdleTime();
+
+            if (Equipment[(int) Layer.Mount] == null)
+            {
+                AnimIndex = 0;
+                AnimationFrameCount = 0;
+                AnimationInterval = 1;
+                AnimationRepeatMode = 1;
+                AnimationDirection = true;
+                AnimationRepeat = false;
+                AnimationFromServer = true;
+
+                byte index = (byte) Animations.GetGroupIndex(GetMountAnimation());
+
+                AnimationGroup = _animationIdle[index - 1, RandomHelper.GetValue(0, 2)];
+            }
+        }
+
+        private static readonly byte[,] _animationIdle =
+        {
+            {
+                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_2, (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1
+            },
+            {
+                (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_2, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1
+            },
+            {
+                (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3
+            }
+        };
 
         protected virtual bool NoIterateAnimIndex()
         {
@@ -510,7 +552,7 @@ namespace ClassicUO.Game.GameObjects
                     frameIndex--;
                 else
                     frameIndex++;
-                Graphic id = GetGraphicForAnimation();
+                Graphic id = GetMountAnimation();
                 int animGroup = GetGroupForAnimation(this, id);
 
                 if (animGroup == 64 || animGroup == 65)
