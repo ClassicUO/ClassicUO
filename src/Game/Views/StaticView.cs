@@ -56,8 +56,8 @@ namespace ClassicUO.Game.Views
                     Texture = texture;
                     Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
 
-                    FrameInfo.OffsetX = texture.ImageRectangle.X;
-                    FrameInfo.OffsetY = texture.ImageRectangle.Y;
+                    FrameInfo.X = texture.ImageRectangle.X;
+                    FrameInfo.Y = texture.ImageRectangle.Y;
                     FrameInfo.Width = texture.ImageRectangle.Width;
                     FrameInfo.Height = texture.ImageRectangle.Height;
                 }

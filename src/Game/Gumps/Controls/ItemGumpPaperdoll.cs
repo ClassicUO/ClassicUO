@@ -61,11 +61,10 @@ namespace ClassicUO.Game.Gumps.Controls
             Texture = IO.Resources.Gumps.GetGumpTexture( (ushort) (id + offset));
 
             if (owner.IsFemale && Texture == null)
-                IO.Resources.Gumps.GetGumpTexture((ushort)(id + MALE_OFFSET));
+                Texture = IO.Resources.Gumps.GetGumpTexture((ushort)(id + MALE_OFFSET));
 
             if (Texture == null)
             {
-                IsInitialized = true;
                 Dispose();
                 return;
             }

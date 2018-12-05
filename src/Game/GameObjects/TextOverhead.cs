@@ -60,6 +60,19 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Initialized { get; set; }
 
+        private bool _isOverlapped;
+
+        public bool IsOverlapped
+        {
+            get => _isOverlapped;
+            set
+            {
+                _isOverlapped = value;
+
+                Alpha = _isOverlapped ? .5f : 0;
+            }
+        }
+
         protected override View CreateView()
         {
             return new TextOverheadView(this, MaxWidth, Hue, Font, IsUnicode, Style);
@@ -79,7 +92,10 @@ namespace ClassicUO.Game.GameObjects
                 if (TimeToLive > 0 && TimeToLive <= Constants.TIME_FADEOUT_TEXT)
                 {
                     // start alpha decreasing
-                    Alpha = 1 - (TimeToLive / Constants.TIME_FADEOUT_TEXT);
+                    float alpha = 1 - (TimeToLive / Constants.TIME_FADEOUT_TEXT);
+
+                    if (!_isOverlapped || (_isOverlapped && alpha > Alpha))
+                        Alpha = alpha;
                 }
                 else if (TimeToLive <= 0.0f)
                     Dispose();

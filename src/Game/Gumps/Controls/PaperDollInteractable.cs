@@ -235,16 +235,6 @@ namespace ClassicUO.Game.Gumps.Controls
                     bool isfake = false;
                     bool canPickUp = true;
 
-
-                    //if (item == null && gs.IsHoldingItem && gs.HeldItem.ItemData.Layer == layerIndex)
-                    //{
-                    //    _fakeItem = gs.HeldItem;
-                    //    isfake = true;
-                    //    canPickUp = false;
-                    //}
-                    //else if (item == null || MobileView.IsCovered(_mobile, (Layer)layerIndex))
-                    //    continue;
-
                     if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
                     {
                         item = _fakeItem;

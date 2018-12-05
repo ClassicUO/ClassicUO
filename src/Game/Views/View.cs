@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Views
         protected static float PI = (float) Math.PI;
         private Vector3 _storedHue;
         public Rectangle Bounds;
-        public FrameInfo FrameInfo;
+        public Rectangle FrameInfo;
 
         protected View(GameObject parent)
         {
@@ -76,8 +76,8 @@ namespace ClassicUO.Game.Views
         {
             Rectangle prect = Rectangle.Empty;
             Settings set = Service.Get<Settings>();
-            prect.X = (int)((set.GameWindowX + (set.GameWindowWidth >> 1)) - FrameInfo.OffsetX + GameObject.Offset.X);
-            prect.Y = (int)((set.GameWindowY + (set.GameWindowHeight >> 1)) + GameObject.Offset.Y - FrameInfo.OffsetY);
+            prect.X = (int)((set.GameWindowX + (set.GameWindowWidth >> 1)) - FrameInfo.X + GameObject.Offset.X);
+            prect.Y = (int)((set.GameWindowY + (set.GameWindowHeight >> 1)) + GameObject.Offset.Y - FrameInfo.Y);
             prect.Width = FrameInfo.Width;
             prect.Height = FrameInfo.Height;
 

@@ -418,6 +418,11 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public void Initialize()
         {
+            if (IsDisposed)
+            {
+                return;
+            }
+
             IsDisposed = false;
             IsEnabled = true;
             IsInitialized = true;
@@ -433,7 +438,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 GumpControl c = _children[i];
 
-                if (!c.IsInitialized)
+                if (!c.IsInitialized && !IsDisposed)
                 {
                     c.Initialize();
 
@@ -460,7 +465,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public GumpControl[] HitTest(Point position)
         {
-            List<GumpControl> results = new List<GumpControl>();
+            //List<GumpControl> results = new List<GumpControl>();
+            Stack<GumpControl> results = new Stack<GumpControl>();
             bool inbouds = Bounds.Contains(position.X - ParentX, position.Y - ParentY);
 
             if (inbouds)
@@ -468,7 +474,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (Contains(position.X - X - ParentX, position.Y - Y - ParentY))
                 {
                     if (AcceptMouseInput)
-                        results.Insert(0, this);
+                        results.Push(this);
 
                     for (int j = 0; j < Children.Count; j++)
                     {
@@ -481,7 +487,8 @@ namespace ClassicUO.Game.Gumps.Controls
                             if (cl != null)
                             {
                                 for (int i = cl.Length - 1; i >= 0; i--)
-                                    results.Insert(0, cl[i]);
+                                    results.Push(cl[i]);
+                                //results.Insert(0, cl[i]);
                             }
                         }
                     }

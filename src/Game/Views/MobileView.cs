@@ -70,7 +70,8 @@ namespace ClassicUO.Game.Views
             else
                 drawX = -22 - (int)mobile.Offset.X;
 
-            FrameInfo = FrameInfo.Empty;
+            FrameInfo = Rectangle.Empty;
+            Rectangle rect = Rectangle.Empty;
 
             for (int i = 0; i < _layerCount; i++)
             {
@@ -87,17 +88,17 @@ namespace ClassicUO.Game.Views
                 if (mirror)
                     xx = -(frame.Width - frame.CenterX);
 
-                if (xx < FrameInfo.X)
-                    FrameInfo.X = xx;
+                if (xx < rect.X)
+                    rect.X = xx;
 
-                if (yy < FrameInfo.Y)
-                    FrameInfo.Y = yy;
+                if (yy < rect.Y)
+                    rect.Y = yy;
 
-                if (FrameInfo.EndX < xx + frame.Width)
-                    FrameInfo.EndX = xx + frame.Width;
+                if (rect.Width < xx + frame.Width)
+                    rect.Width = xx + frame.Width;
 
-                if (FrameInfo.EndY < yy + frame.Height)
-                    FrameInfo.EndY = yy + frame.Height;
+                if (rect.Height < yy + frame.Height)
+                    rect.Height = yy + frame.Height;
 
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
@@ -106,10 +107,10 @@ namespace ClassicUO.Game.Views
                 Pick(frame, Bounds, position, objectList);
             }
 
-            FrameInfo.OffsetX = Math.Abs(FrameInfo.X);
-            FrameInfo.OffsetY = Math.Abs(FrameInfo.Y);
-            FrameInfo.Width = FrameInfo.OffsetX + FrameInfo.EndX;
-            FrameInfo.Height = FrameInfo.OffsetY + FrameInfo.EndY;
+            FrameInfo.X = Math.Abs(rect.X);
+            FrameInfo.Y = Math.Abs(rect.Y);
+            FrameInfo.Width = rect.X + rect.Width;
+            FrameInfo.Height = rect.X + rect.Height;
 
 
             int height = 0;

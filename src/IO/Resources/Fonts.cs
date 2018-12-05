@@ -426,7 +426,7 @@ namespace ClassicUO.IO.Resources
 
             FontTexture ftexture = new FontTexture(width, height, linesCount, new List<WebLinkRect>());
             //ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) pData, blocksize);
-            ftexture.SetData(pData);
+            ftexture.SetDataHitMap32(pData);
 
             //FontTextureInfo fontTextureInfo = new FontTextureInfo()
             //{
@@ -1441,7 +1441,7 @@ namespace ClassicUO.IO.Resources
 
             FontTexture ftexture = new FontTexture(width, height, linesCount, links);
             //ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) pData, blocksize);
-            ftexture.SetData(pData);
+            ftexture.SetDataHitMap32(pData);
             //FontTextureInfo fontTextureInfo = new FontTextureInfo()
             //{
             //    Pixels = pData,
