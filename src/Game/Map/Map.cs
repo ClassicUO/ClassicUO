@@ -29,7 +29,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class Facet : IDisposable
+    public sealed class Map : IDisposable
     {
         private readonly bool[] _blockAccessList = new bool[0x1000];
         //private const int CHUNKS_NUM = 5;
@@ -37,7 +37,7 @@ namespace ClassicUO.Game.Map
         private readonly List<int> _usedIndices = new List<int>();
         private Point _center;
 
-        public Facet(int index)
+        public Map(int index)
         {
             Index = index;
             IO.Resources.Map.LoadMap(index);

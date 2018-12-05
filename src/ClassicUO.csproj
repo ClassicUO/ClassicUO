@@ -211,7 +211,7 @@
     <Compile Include="Game\Gumps\UIGumps\WorldViewportGump.cs" />
     <Compile Include="Game\Gumps\UIManager.cs" />
     <Compile Include="Game\Hue.cs" />
-    <Compile Include="Game\Map\Facet.cs" />
+    <Compile Include="Game\Map\Map.cs" />
     <Compile Include="Game\Map\MapChunk.cs" />
     <Compile Include="Game\Map\Tile.cs" />
     <Compile Include="Game\Map\TileSorter.cs" />

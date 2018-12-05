@@ -41,7 +41,7 @@ namespace ClassicUO.Game
 
         public static PlayerMobile Player { get; set; }
 
-        public static Facet Map { get; private set; }
+        public static Map.Map Map { get; private set; }
 
         public static byte ViewRange { get; set; } = 24;
 
@@ -63,14 +63,14 @@ namespace ClassicUO.Game
 
                         Position position = Player.Position;
                         Map = null;
-                        Map = new Facet(value);
+                        Map = new Map.Map(value);
                         Player.Position = position;
                         Player.ClearSteps();
                         Player.ProcessDelta();
                     }
                     else
                     {
-                        Map = new Facet(value);
+                        Map = new Map.Map(value);
                         if (Player != null) Map.Center = new Point(Player.Position.X, Player.Position.Y);
                     }
                 }
