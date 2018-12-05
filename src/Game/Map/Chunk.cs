@@ -27,9 +27,9 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class MapChunk : IDisposable
+    public sealed class Chunk : IDisposable
     {
-        public MapChunk(ushort x, ushort y)
+        public Chunk(ushort x, ushort y)
         {
             X = x;
             Y = y;

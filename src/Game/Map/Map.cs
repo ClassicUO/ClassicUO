@@ -42,12 +42,12 @@ namespace ClassicUO.Game.Map
             Index = index;
             IO.Resources.Map.LoadMap(index);
             MapBlockIndex = IO.Resources.Map.MapBlocksSize[Index][0] * IO.Resources.Map.MapBlocksSize[Index][1];
-            Chunks = new MapChunk[MapBlockIndex];
+            Chunks = new Chunk[MapBlockIndex];
         }
 
         public int Index { get; }
 
-        public MapChunk[] Chunks { get; private set; }
+        public Chunk[] Chunks { get; private set; }
 
         public int MapBlockIndex { get; set; }
 
@@ -64,13 +64,13 @@ namespace ClassicUO.Game.Map
             }
         }
 
-        public MapChunk GetMapChunk(int rblock, int blockX, int blockY)
+        public Chunk GetMapChunk(int rblock, int blockX, int blockY)
         {
-            ref MapChunk chunk = ref Chunks[rblock];
+            ref Chunk chunk = ref Chunks[rblock];
             if (chunk == null)
             {
                 _usedIndices.Add(rblock);
-                chunk = new MapChunk((ushort)blockX, (ushort)blockY);
+                chunk = new Chunk((ushort)blockX, (ushort)blockY);
                 chunk.Load(Index);
             }
             return chunk;
@@ -86,14 +86,14 @@ namespace ClassicUO.Game.Map
 
             if (block >= Chunks.Length)
                 return null;
-            ref MapChunk chuck = ref Chunks[block];
+            ref Chunk chuck = ref Chunks[block];
 
             if (chuck == null)
             {
                 if (load)
                 {
                     _usedIndices.Add(block);
-                    chuck = new MapChunk((ushort)cellX, (ushort)cellY);
+                    chuck = new Chunk((ushort)cellX, (ushort)cellY);
                     chuck.Load(Index);
                 }
                 else
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.Map
 
             for (int i = 0; i < _usedIndices.Count; i++)
             {
-                ref MapChunk block = ref Chunks[_usedIndices[i]];
+                ref Chunk block = ref Chunks[_usedIndices[i]];
 
                 if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
@@ -225,7 +225,7 @@ namespace ClassicUO.Game.Map
         {
             for (int i = 0; i < _usedIndices.Count; i++)
             {
-                ref MapChunk block = ref Chunks[_usedIndices[i]];
+                ref Chunk block = ref Chunks[_usedIndices[i]];
                 block.Dispose();
                 block = null;
                 _usedIndices.RemoveAt(i--);
@@ -264,14 +264,14 @@ namespace ClassicUO.Game.Map
                 for (int j = minBlockY; j <= maxBlockY; j++)
                 {
                     int cellindex = index + j;
-                    ref MapChunk chunk = ref Chunks[cellindex];
+                    ref Chunk chunk = ref Chunks[cellindex];
 
                     if (chunk == null)
                     {
                         if (CoreGame.Ticks - tick >= maxDelay)
                             return;
                         _usedIndices.Add(cellindex);
-                        chunk = new MapChunk((ushort)i, (ushort)j);
+                        chunk = new Chunk((ushort)i, (ushort)j);
                         chunk.Load(Index);
                     }
 

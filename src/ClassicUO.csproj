@@ -212,7 +212,7 @@
     <Compile Include="Game\Gumps\UIManager.cs" />
     <Compile Include="Game\Hue.cs" />
     <Compile Include="Game\Map\Map.cs" />
-    <Compile Include="Game\Map\MapChunk.cs" />
+    <Compile Include="Game\Map\Chunk.cs" />
     <Compile Include="Game\Map\Tile.cs" />
     <Compile Include="Game\Map\TileSorter.cs" />
     <Compile Include="Game\Pathfinder.cs" />

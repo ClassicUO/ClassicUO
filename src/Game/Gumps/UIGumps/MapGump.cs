@@ -168,7 +168,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     if (!mbbv.HasValue)
                         break;
                     RadarMapBlock mb = mbbv.Value;
-                    MapChunk mapBlock = World.Map.Chunks[blockIndex];
+                    Chunk block = World.Map.Chunks[blockIndex];
                     int realBlockX = i * 8;
                     int realBlockY = j * 8;
 
@@ -184,9 +184,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                             uint color = mb.Cells[x, y].Graphic;
                             bool island = mb.Cells[x, y].IsLand;
 
-                            //if (mapBlock != null)
+                            //if (block != null)
                             //{
-                            //    ushort multicolor = mapBlock.get
+                            //    ushort multicolor = block.get
                             //}
 
                             if (!island)
