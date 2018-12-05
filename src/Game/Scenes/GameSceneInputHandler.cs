@@ -356,18 +356,18 @@ namespace ClassicUO.Game.Scenes
             if (TargetSystem.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && e.keysym.mod == SDL.SDL_Keymod.KMOD_NONE)
                 TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
-            {
-                Task.Run(async () =>
-                {
-                    while (true)
-                    {
-                        await Task.Delay(500);
-                        GameActions.CastSpell(205);
-                    }
+            //if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
+            //{
+            //    Task.Run(async () =>
+            //    {
+            //        while (true)
+            //        {
+            //            await Task.Delay(1);
+            //            GameActions.CastSpell(205);
+            //        }
 
-                });
-            }
+            //    });
+            //}
             // TEST PURPOSE
             /*if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
             {
