@@ -132,7 +132,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     GameObject obj = _mousePicker.MouseOverObject;
 
-                    if (obj != null && obj.Distance < 3)
+                    if (obj != null && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
                     {
                         switch (obj)
                         {

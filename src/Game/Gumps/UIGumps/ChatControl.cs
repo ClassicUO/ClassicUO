@@ -410,9 +410,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
 
         private class ChatLineTime : IUpdateable, IDrawableUI, IDisposable
-        {
-            private const float TIME_DISPLAY = 10000.0f;
-            private const float TIME_FADEOUT = 1000.0f;
+        {           
             private readonly float _createdTime;
             private readonly RenderedText _renderedText;
             private int _width;
@@ -458,9 +456,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 float time = (float) totalMS - _createdTime;
 
-                if (time > TIME_DISPLAY)
+                if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT)
                     IsExpired = true;
-                else if (time > TIME_DISPLAY - TIME_FADEOUT) Alpha = (time - (TIME_DISPLAY - TIME_FADEOUT)) / TIME_FADEOUT;
+                else if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT) Alpha = (time - (Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)) / Constants.TIME_FADEOUT_TEXT;
             }
 
             public override string ToString()

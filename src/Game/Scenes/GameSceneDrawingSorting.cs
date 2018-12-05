@@ -180,7 +180,7 @@ namespace ClassicUO.Game.Scenes
                 switch (obj)
                 {
                     case Mobile _:
-                        maxObjectZ += 16;
+                        maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
 
                         break;
                     case IDynamicItem dyn:

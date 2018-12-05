@@ -203,7 +203,7 @@ namespace ClassicUO.Game.Map
         public void ClearUnusedBlocks()
         {
             int count = 0;
-            long ticks = CoreGame.Ticks - 3000;
+            long ticks = CoreGame.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedIndices.Count; i++)
             {
@@ -212,10 +212,10 @@ namespace ClassicUO.Game.Map
                 if (block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
                     block.Dispose();
-                    block = null; // MapChunk.Invalid;
+                    block = null;
                     _usedIndices.RemoveAt(i--);
 
-                    if (++count >= 50)
+                    if (++count >= Constants.MAX_MAP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
                 }
             }

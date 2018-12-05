@@ -122,7 +122,7 @@ namespace ClassicUO.Game
                             case Mobile mobile:
 
                             {
-                                if (!ignoreGameCharacters && !mobile.IsDead && !mobile.IgnoreCharacters) list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Position.Z, mobile.Position.Z + 16, 16, mobile));
+                                if (!ignoreGameCharacters && !mobile.IsDead && !mobile.IgnoreCharacters) list.Add(new PathObject((uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE, mobile.Position.Z, mobile.Position.Z + Constants.DEFAULT_CHARACTER_HEIGHT, Constants.DEFAULT_CHARACTER_HEIGHT, mobile));
                                 canBeAdd = false;
 
                                 break;
@@ -329,13 +329,11 @@ namespace ClassicUO.Game
                     }
                 }
 
-                const int DEFAULT_BLOCK_HEIGHT = 16;
-
                 if ((obj.Flags & (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE) != 0)
                 {
                     int objZ = obj.Z;
 
-                    if (objZ - minZ >= DEFAULT_BLOCK_HEIGHT)
+                    if (objZ - minZ >= Constants.DEFAULT_BLOCK_HEIGHT)
                     {
                         for (int j = i - 1; j >= 0; j--)
                         {
@@ -345,7 +343,7 @@ namespace ClassicUO.Game
                             {
                                 int tempAverageZ = tempObj.AverageZ;
 
-                                if (tempAverageZ >= currentZ && objZ - tempAverageZ >= DEFAULT_BLOCK_HEIGHT && (tempAverageZ <= maxZ && (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_SURFACE) != 0 || (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) != 0 && tempObj.Z <= maxZ))
+                                if (tempAverageZ >= currentZ && objZ - tempAverageZ >= Constants.DEFAULT_BLOCK_HEIGHT && (tempAverageZ <= maxZ && (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_SURFACE) != 0 || (tempObj.Flags & (uint) PATH_OBJECT_FLAGS.POF_BRIDGE) != 0 && tempObj.Z <= maxZ))
                                 {
                                     int delta = Math.Abs(z - tempAverageZ);
 

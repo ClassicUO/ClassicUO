@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
+using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
@@ -128,7 +129,7 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
-            long ticks = CoreGame.Ticks - 3000;
+            long ticks = CoreGame.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
@@ -143,7 +144,7 @@ namespace ClassicUO.IO.Resources
                     _usedIndex.RemoveAt(i--);
                     _gumpDictionary.Remove(g);
 
-                    if (++count >= 20)
+                    if (++count >= Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
                 }
             }

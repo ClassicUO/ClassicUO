@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -122,7 +123,7 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
-            long ticks = CoreGame.Ticks - 3000;
+            long ticks = CoreGame.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
@@ -137,7 +138,7 @@ namespace ClassicUO.IO.Resources
                     _usedIndex.RemoveAt(i--);
                     _artDictionary.Remove(g);
 
-                    if (++count >= 20)
+                    if (++count >= Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
                 }
             }
@@ -157,7 +158,7 @@ namespace ClassicUO.IO.Resources
                     _usedIndexLand.RemoveAt(i--);
                     _landDictionary.Remove(g);
 
-                    if (++count >= 20)
+                    if (++count >= Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
                 }
             }

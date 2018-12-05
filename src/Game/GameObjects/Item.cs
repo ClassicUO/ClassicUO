@@ -280,11 +280,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool IsAtWorld(int x, int y)
-        {
-            return Position.X == x && Position.Y == y;
-        }
-
         protected override void OnPositionChanged(object sender, EventArgs e)
         {
             base.OnPositionChanged(sender, e);
@@ -750,7 +745,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    _lastAnimationChangeTime = CoreGame.Ticks + (int) CHARACTER_ANIMATION_DELAY;
+                    _lastAnimationChangeTime = CoreGame.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
         }

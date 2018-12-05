@@ -25,7 +25,6 @@ namespace ClassicUO.Game.GameObjects
 {
     public class TextOverhead : GameObject
     {
-        protected const float TIME_FADEOUT = 1000.0f;
 
         public TextOverhead(GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f)
         {
@@ -77,10 +76,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 TimeToLive -= (float) frameMS;
 
-                if (TimeToLive > 0 && TimeToLive <= TIME_FADEOUT)
+                if (TimeToLive > 0 && TimeToLive <= Constants.TIME_FADEOUT_TEXT)
                 {
                     // start alpha decreasing
-                    Alpha = 1 - (TimeToLive / TIME_FADEOUT);
+                    Alpha = 1 - (TimeToLive / Constants.TIME_FADEOUT_TEXT);
                 }
                 else if (TimeToLive <= 0.0f)
                     Dispose();

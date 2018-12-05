@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Views
             Animations.Direction = dir;
             byte animIndex = (byte) GameObject.AnimIndex;
 
-            for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
+            for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
             {
                 Layer layer = LayerOrder.UsedLayers[dir, i];
 

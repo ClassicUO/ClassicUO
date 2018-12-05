@@ -1413,7 +1413,7 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
-            long ticks = CoreGame.Ticks - 3000;
+            long ticks = CoreGame.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedTextures.Count; i++)
             {
@@ -1435,7 +1435,7 @@ namespace ClassicUO.IO.Resources
                     dir.LastAccessTime = 0;
                     _usedTextures.RemoveAt(i--);
 
-                    if (++count >= 5)
+                    if (++count >= Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
                 }
             }

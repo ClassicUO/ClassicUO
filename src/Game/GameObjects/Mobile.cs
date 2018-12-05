@@ -51,12 +51,6 @@ namespace ClassicUO.Game.GameObjects
 
     public partial class Mobile : Entity
     {
-        protected const int MAX_STEP_COUNT = 5;
-        protected const int TURN_DELAY = 100;
-        protected const int WALKING_DELAY = 750;
-        protected const int PLAYER_WALKING_DELAY = 150;
-        protected const int DEFAULT_CHARACTER_HEIGHT = 16;
-
         //protected override void OnPositionChanged(object sender, EventArgs e)
         //{
         //    base.OnPositionChanged(sender, e);
@@ -264,7 +258,7 @@ namespace ClassicUO.Game.GameObjects
 
         public long LastStepTime { get; set; }
 
-        protected virtual bool IsWalking => LastStepTime > CoreGame.Ticks - WALKING_DELAY;
+        protected virtual bool IsWalking => LastStepTime > CoreGame.Ticks - Constants.WALKING_DELAY;
 
         public byte AnimationGroup { get; set; } = 0xFF;
 
@@ -326,7 +320,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool EnqueueStep(int x, int y, sbyte z, Direction direction, bool run)
         {
-            if (Steps.Count >= MAX_STEP_COUNT)
+            if (Steps.Count >= Constants.MAX_STEP_COUNT)
                 return false;
 
             //Direction dirRun = run ? Direction.Running : Direction.North;
@@ -444,7 +438,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual bool NoIterateAnimIndex()
         {
-            return LastStepTime > (uint) (CoreGame.Ticks - WALKING_DELAY) && Steps.Count <= 0;
+            return LastStepTime > (uint) (CoreGame.Ticks - Constants.WALKING_DELAY) && Steps.Count <= 0;
         }
 
         public override void ProcessAnimation()
@@ -467,8 +461,8 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (Service.Get<Settings>().SmoothMovement)
                         {
-                            float framesPerTile = maxDelay / CHARACTER_ANIMATION_DELAY;
-                            float frameOffset = delay / CHARACTER_ANIMATION_DELAY;
+                            float framesPerTile = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                            float frameOffset = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
                             float x = frameOffset;
                             float y = frameOffset;
                             MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
@@ -543,7 +537,7 @@ namespace ClassicUO.Game.GameObjects
 
                 bool mirror = false;
                 Animations.GetAnimDirection(ref dir, ref mirror);
-                int currentDelay = (int) CHARACTER_ANIMATION_DELAY;
+                int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
                 if (id < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {

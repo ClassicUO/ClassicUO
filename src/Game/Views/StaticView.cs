@@ -87,16 +87,16 @@ namespace ClassicUO.Game.Views
                         {
                             if (_timeToProcessAlpha < CoreGame.Ticks)
                             {
-                                _timeToProcessAlpha = CoreGame.Ticks + 50;
+                                _timeToProcessAlpha = CoreGame.Ticks + Constants.ALPHA_TIME;
                                 if (!_isProcessingAlpha)
                                 {
                                     _alpha += .1f;
                                 }
 
-                                if (_alpha >= .6f)
+                                if (_alpha >= Constants.FOLIAGE_ALPHA)
                                 {
                                     _isProcessingAlpha = true;
-                                    _alpha = .6f;
+                                    _alpha = Constants.FOLIAGE_ALPHA;
                                 }
                             }
                         }
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Views
                             {
                                 if (_timeToProcessAlpha < CoreGame.Ticks)
                                 {
-                                    _timeToProcessAlpha = CoreGame.Ticks + 50;
+                                    _timeToProcessAlpha = CoreGame.Ticks + Constants.ALPHA_TIME;
 
 
                                     if (_isProcessingAlpha)
@@ -127,7 +127,7 @@ namespace ClassicUO.Game.Views
                         {
                             if (_timeToProcessAlpha < CoreGame.Ticks)
                             {
-                                _timeToProcessAlpha = CoreGame.Ticks + 50;
+                                _timeToProcessAlpha = CoreGame.Ticks + Constants.ALPHA_TIME;
 
 
                                 if (_isProcessingAlpha)
