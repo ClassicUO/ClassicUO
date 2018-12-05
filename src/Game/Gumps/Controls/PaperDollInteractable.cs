@@ -145,76 +145,129 @@ namespace ClassicUO.Game.Gumps.Controls
             // Add the base gump - the semi-naked paper doll.
             Graphic body = 0;
 
-            if (_mobile == World.Player)
+            bool isGM = false;
+
+            if (Mobile.Graphic == 0x0191 || Mobile.Graphic == 0x0193)
             {
-                switch (_mobile.Race)
-                {
-                    default:
-                    case RaceType.HUMAN:
-                        body = (Graphic) (0xC + (_mobile.IsFemale ? 1 : 0));
-
-                        break;
-                    case RaceType.ELF:
-                        body = (Graphic) (0xE + (_mobile.IsFemale ? 1 : 0));
-
-                        break;
-                    case RaceType.GARGOYLE:
-                        body = (Graphic) (0x29A + (_mobile.IsFemale ? 1 : 0));
-
-                        break;
-                }
+                body = 0x000D;
+            }
+            else if (Mobile.Graphic == 0x025D)
+            {
+                body = 0x000E;
+            }
+            else if (Mobile.Graphic == 0x025E)
+            {
+                body = 0x000F;
+            }
+            else if (Mobile.Graphic == 0x029A)
+            {
+                body = 0x029A;
+            }
+            else if (Mobile.Graphic == 0x029B)
+            {
+                body = 0x299;
+            }
+            else if (Mobile.Graphic == 0x03DB)
+            {
+                body = 0x000C;
+                isGM = true;
             }
             else
-                body = (Graphic) (12 + (_mobile.IsFemale ? 1 : 0));
-
-            AddChildren(new GumpPic(0, 0, body, _mobile.Hue)
             {
-                AcceptMouseInput = true, IsPaperdoll = true, IsPartialHue = true
-            });
+                body = 0x000C;
+            }
+
+            //if (_mobile == World.Player)
+            //{
+            //    switch (_mobile.Race)
+            //    {
+            //        default:
+            //        case RaceType.HUMAN:
+            //            body = (Graphic) (0xC + (_mobile.IsFemale ? 1 : 0));
+
+            //            break;
+            //        case RaceType.ELF:
+            //            body = (Graphic) (0xE + (_mobile.IsFemale ? 1 : 0));
+
+            //            break;
+            //        case RaceType.GARGOYLE:
+            //            body = (Graphic) (0x29A + (_mobile.IsFemale ? 1 : 0));
+
+            //            break;
+            //    }
+            //}
+            //else
+            //    body = (Graphic) (12 + (_mobile.IsFemale ? 1 : 0));
+
+            
 
             // Loop through the items on the mobile and create the gump pics.
 
             //GameScene gs = SceneManager.GetScene<GameScene>();
 
-            for (int i = 0; i < _layerOrder.Length; i++)
+            if (isGM)
             {
-                int layerIndex = (int) _layerOrder[i];
-                Item item = _mobile.Equipment[layerIndex];
-                bool isfake = false;
-                bool canPickUp = true;
-
-
-                //if (item == null && gs.IsHoldingItem && gs.HeldItem.ItemData.Layer == layerIndex)
-                //{
-                //    _fakeItem = gs.HeldItem;
-                //    isfake = true;
-                //    canPickUp = false;
-                //}
-                //else if (item == null || MobileView.IsCovered(_mobile, (Layer)layerIndex))
-                //    continue;
-
-                if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
+                AddChildren(new GumpPic(0, 0, body, 0x03EA)
                 {
-                    item = _fakeItem;
-                    isfake = true;
-                    canPickUp = false;
-                }
-                else if (item == null /*|| MobileView.IsCovered(_mobile, (Layer)layerIndex)*/)
-                    continue;
-
-                switch (_layerOrder[i])
-                {
-                    case Layer.Beard:
-                    case Layer.Hair:
-                        canPickUp = false;
-
-                        break;
-                }
-
-                AddChildren(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
-                {
-                    SlotIndex = i, CanPickUp = canPickUp
+                    AcceptMouseInput = true,
+                    IsPaperdoll = true,
+                    IsPartialHue = true
                 });
+                AddChildren(new GumpPic(0, 0, 0xC72B, 0)
+                {
+                    AcceptMouseInput = true,
+                    IsPaperdoll = true,
+                    IsPartialHue = true
+                });
+            }
+            else
+            {
+                AddChildren(new GumpPic(0, 0, body, _mobile.Hue)
+                {
+                    AcceptMouseInput = true,
+                    IsPaperdoll = true,
+                    IsPartialHue = true
+                });
+                for (int i = 0; i < _layerOrder.Length; i++)
+                {
+                    int layerIndex = (int) _layerOrder[i];
+                    Item item = _mobile.Equipment[layerIndex];
+                    bool isfake = false;
+                    bool canPickUp = true;
+
+
+                    //if (item == null && gs.IsHoldingItem && gs.HeldItem.ItemData.Layer == layerIndex)
+                    //{
+                    //    _fakeItem = gs.HeldItem;
+                    //    isfake = true;
+                    //    canPickUp = false;
+                    //}
+                    //else if (item == null || MobileView.IsCovered(_mobile, (Layer)layerIndex))
+                    //    continue;
+
+                    if (_fakeItem != null && _fakeItem.ItemData.Layer == layerIndex)
+                    {
+                        item = _fakeItem;
+                        isfake = true;
+                        canPickUp = false;
+                    }
+                    else if (item == null /*|| MobileView.IsCovered(_mobile, (Layer)layerIndex)*/)
+                        continue;
+
+                    switch (_layerOrder[i])
+                    {
+                        case Layer.Beard:
+                        case Layer.Hair:
+                            canPickUp = false;
+
+                            break;
+                    }
+
+                    AddChildren(new ItemGumpPaperdoll(0, 0, item, Mobile, isfake)
+                    {
+                        SlotIndex = i, CanPickUp = canPickUp
+                    });
+                }
             }
 
             // If this object has a backpack, add it last.

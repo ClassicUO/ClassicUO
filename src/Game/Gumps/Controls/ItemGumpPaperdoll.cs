@@ -36,8 +36,9 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     internal class ItemGumpPaperdoll : ItemGump, IMobilePaperdollOwner
     {
-        private readonly ushort _gumpIndex;
         private readonly bool _isTransparent;
+        private const int MALE_OFFSET = 50000;
+        private const int FEMALE_OFFSET = 60000;
 
         public ItemGumpPaperdoll(int x, int y, Item item, Mobile owner, bool transparent = false) : base(item)
         {
@@ -46,17 +47,33 @@ namespace ClassicUO.Game.Gumps.Controls
             Mobile = owner;
             HighlightOnMouseOver = false;
             _isTransparent = transparent;
-            _gumpIndex = (ushort) (Item.ItemData.AnimID + (owner.IsFemale ? 60000 : 50000));
 
-            if (Animations.EquipConversions.TryGetValue(Item.Graphic, out var dict))
+            int offset = owner.IsFemale ? FEMALE_OFFSET : MALE_OFFSET;
+
+            ushort id = Item.ItemData.AnimID;
+
+            if (Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
             {
-                if (dict.TryGetValue(Item.ItemData.AnimID, out EquipConvData data)) _gumpIndex = data.Gump;
+                if (dict.TryGetValue(id, out EquipConvData data))
+                    id = data.Gump;
             }
 
-            Texture = IO.Resources.Gumps.GetGumpTexture(_gumpIndex);
+            Texture = IO.Resources.Gumps.GetGumpTexture( (ushort) (id + offset));
+
+            if (owner.IsFemale && Texture == null)
+                IO.Resources.Gumps.GetGumpTexture((ushort)(id + MALE_OFFSET));
+
+            if (Texture == null)
+            {
+                IsInitialized = true;
+                Dispose();
+                return;
+            }
 
             Width = Texture.Width;
             Height = Texture.Height;
+
+            WantUpdateSize = false;
         }
 
         public int SlotIndex { get; set; }
@@ -65,15 +82,16 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (Item.IsDisposed || IsDisposed)
+            if (IsDisposed)
                 return;
+
             base.Update(totalMS, frameMS);
             Texture.Ticks = (long) totalMS;
         }
 
         public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
         {
-            if (Item.IsDisposed || IsDisposed)
+            if (IsDisposed)
                 return false;
 
             return spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue(Item.ItemData.Flags), _isTransparent ? .5f : 0, false));

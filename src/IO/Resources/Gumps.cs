@@ -94,9 +94,6 @@ namespace ClassicUO.IO.Resources
             {
                 ushort[] pixels = GetGumpPixels(g, out int w, out int h);
 
-                if (pixels == null && g >= 60000)
-                    pixels = GetGumpPixels(g - 10000, out w, out h);
-
                 if (pixels == null || pixels.Length <= 0)
                     return null;
                 texture = new SpriteTexture(w, h, false);

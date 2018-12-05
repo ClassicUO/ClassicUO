@@ -53,6 +53,15 @@ namespace ClassicUO.Game.Gumps.Controls
             Texture = texture;
             Width = texture.Width;
             Height = texture.Height;
+
+            Item.Disposed += ItemOnDisposed;
+
+            WantUpdateSize = false;
+        }
+
+        private void ItemOnDisposed(object sender, EventArgs e)
+        {
+            Dispose();
         }
 
         public Item Item { get; }
@@ -65,13 +74,6 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (IsDisposed)
                 return;
-
-            if (Item.IsDisposed)
-            {
-                Dispose();
-
-                return;
-            }
 
             Texture.Ticks = (long) totalMS;
 
@@ -180,6 +182,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Dispose()
         {
+            Item.Disposed += ItemOnDisposed;
             UpdateLabel(true);
             base.Dispose();
         }
