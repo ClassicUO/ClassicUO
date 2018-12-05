@@ -107,7 +107,7 @@ namespace ClassicUO.Game.Gumps.Controls
         public override void Dispose()
         {
             base.Dispose();
-            _text.Dispose();
+            _text?.Dispose();
         }
     }
 }

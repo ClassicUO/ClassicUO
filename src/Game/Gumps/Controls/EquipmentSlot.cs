@@ -43,6 +43,8 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             X = x;
             Y = y;
+            Width = 19;
+            Height = 20;
             _mobile = mobile;
             _layer = layer;
 
@@ -56,6 +58,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 AcceptMouseInput = false
             });
             AcceptMouseInput = true;
+
+            WantUpdateSize = false;
         }
 
         public Item Item { get; private set; }

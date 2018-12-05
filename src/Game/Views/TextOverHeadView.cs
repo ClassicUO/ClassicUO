@@ -18,6 +18,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -54,6 +57,14 @@ namespace ClassicUO.Game.Views
                 parent.TimeToLive = 4000 * _text.LinesCount * delay / 100.0f;
 
             parent.Initialized = true;
+
+            parent.Disposed += ParentOnDisposed;
+        }
+
+        private void ParentOnDisposed(object sender, EventArgs e)
+        {
+            GameObject.Disposed -= ParentOnDisposed;
+            _text?.Dispose();
         }
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
@@ -65,7 +76,7 @@ namespace ClassicUO.Game.Views
 
             if (GameObject.IsDisposed)
             {
-                _text?.Dispose();
+                //_text?.Dispose();
 
                 return false;
             }

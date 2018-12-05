@@ -70,19 +70,20 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 _caption = caption;
 
-                RenderedText renderedText = new RenderedText
+                _fontTexture[0] = new RenderedText
                 {
-                    IsUnicode = isunicode, Hue = FontHue, Font = font, Text = caption
-                };
-                _fontTexture[0] = renderedText;
+                    IsUnicode = isunicode,
+                    Hue = FontHue,
+                    Font = font,
+                    Text = caption
+                }; 
 
                 if (hoverHue != ushort.MaxValue)
                 {
-                    renderedText = new RenderedText
+                    _fontTexture[1] = new RenderedText
                     {
                         IsUnicode = isunicode, Hue = HueHover, Font = font, Text = caption
                     };
-                    _fontTexture[1] = renderedText;
                 }
             }
 
