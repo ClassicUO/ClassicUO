@@ -36,7 +36,10 @@ namespace ClassicUO.Game.GameObjects
 {
     public abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
     {
-        private List<TextOverhead> _overHeads;
+        private Lazy< List<TextOverhead> > _overHeads = new Lazy<List<TextOverhead>>(() =>
+        {
+            return new List<TextOverhead>();
+        }) ;
         private Position _position = Position.Invalid;
         private View _view;
         public Vector3 Offset;
@@ -121,7 +124,7 @@ namespace ClassicUO.Game.GameObjects
 
         public sbyte AnimIndex { get; set; }
 
-        public IReadOnlyList<TextOverhead> OverHeads => _overHeads ?? (_overHeads = new List<TextOverhead>());
+        public IReadOnlyList<TextOverhead> OverHeads => _overHeads.IsValueCreated ? _overHeads.Value : null;
 
         public int CurrentRenderIndex { get; set; }
 
@@ -160,15 +163,15 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsDisposed) return;
 
-            if (_overHeads != null)
+            if (_overHeads.IsValueCreated)
             {
-                for (int i = 0; i < _overHeads.Count; i++)
+                for (int i = 0; i < _overHeads.Value.Count; i++)
                 {
-                    TextOverhead gt = _overHeads[i];
+                    TextOverhead gt = _overHeads.Value[i];
                     gt.Update(totalMS, frameMS);
 
                     if (gt.IsDisposed)
-                        _overHeads.RemoveAt(i--);
+                        _overHeads.Value.RemoveAt(i--);
                 }
             }
         }
@@ -222,19 +225,16 @@ namespace ClassicUO.Game.GameObjects
             if (string.IsNullOrEmpty(text))
                 return null;
 
-            if (_overHeads == null)
-                _overHeads = new List<TextOverhead>();
-
             TextOverhead overhead;
 
-            for (int i = 0; i < _overHeads.Count; i++)
+            for (int i = 0; i < _overHeads.Value.Count; i++)
             {
-                overhead = _overHeads[i];
+                overhead = _overHeads.Value[i];
 
                 if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
                 {
                     overhead.Hue = hue;
-                    _overHeads.RemoveAt(i);
+                    _overHeads.Value.RemoveAt(i);
                     InsertGameText(overhead);
 
                     return overhead;
@@ -250,14 +250,14 @@ namespace ClassicUO.Game.GameObjects
             overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive);
             InsertGameText(overhead);
 
-            if (_overHeads.Count > 5)
+            if (_overHeads.Value.Count > 5)
             {
-                TextOverhead over = _overHeads[_overHeads.Count - 1];
+                TextOverhead over = _overHeads.Value[_overHeads.Value.Count - 1];
 
                 if (!over.IsPersistent && over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
                 {
                     over.Dispose();
-                    _overHeads.RemoveAt(_overHeads.Count - 1);
+                    _overHeads.Value.RemoveAt(_overHeads.Value.Count - 1);
                 }
             }
 
@@ -266,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
 
         private void InsertGameText(TextOverhead gameText)
         {
-            _overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
+            _overHeads.Value.Insert(_overHeads.Value.Count == 0 || _overHeads.Value[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
         protected void DisposeView()
@@ -286,10 +286,10 @@ namespace ClassicUO.Game.GameObjects
             DisposeView();
             Tile = null;
 
-            if (_overHeads != null)
+            if (_overHeads.IsValueCreated)
             {
-                _overHeads.ForEach(s => s.Dispose());
-                _overHeads.Clear();
+                _overHeads.Value.ForEach(s => s.Dispose());
+                _overHeads.Value.Clear();
                 _overHeads = null;
             }
         }

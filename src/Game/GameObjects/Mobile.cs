@@ -51,12 +51,7 @@ namespace ClassicUO.Game.GameObjects
 
     public partial class Mobile : Entity
     {
-        //protected override void OnPositionChanged(object sender, EventArgs e)
-        //{
-        //    base.OnPositionChanged(sender, e);
-        //    //Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
-        //}
-        private readonly List<DamageOverhead> _damageTextList = new List<DamageOverhead>(5);
+        private Lazy< List<DamageOverhead> > _damageTextList = new Lazy<List<DamageOverhead>>( () => new List<DamageOverhead>());
         private ushort _hits;
         private ushort _hitsMax;
         private bool _isDead;
@@ -68,6 +63,7 @@ namespace ClassicUO.Game.GameObjects
         private RaceType _race;
         private ushort _stamina;
         private ushort _staminaMax;
+        private long _lastAnimationIdleDelay;
 
         public Mobile(Serial serial) : base(serial)
         {
@@ -77,10 +73,8 @@ namespace ClassicUO.Game.GameObjects
 
         private void CalculateRandomIdleTime()
         {
-            LastAnimationIdleDelay = CoreGame.Ticks + (30000 + RandomHelper.GetValue(0, 30000));
+            _lastAnimationIdleDelay = CoreGame.Ticks + (30000 + RandomHelper.GetValue(0, 30000));
         }
-
-        public long LastAnimationIdleDelay { get; protected set; }
 
         public Deque<Step> Steps { get; } = new Deque<Step>();
 
@@ -272,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
 
         internal bool IsMoving => Steps.Count > 0;
 
-        public IReadOnlyList<DamageOverhead> DamageList => _damageTextList;
+        public IReadOnlyList<DamageOverhead> DamageList => _damageTextList.IsValueCreated ? _damageTextList.Value : null;
 
         public event EventHandler HitsChanged;
 
@@ -293,13 +287,20 @@ namespace ClassicUO.Game.GameObjects
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
+
+            if (_lastAnimationIdleDelay < CoreGame.Ticks)
+                SetIdleAnimation();
+
             ProcessAnimation();
 
-            for (int i = 0; i < _damageTextList.Count; i++)
+            if (_damageTextList.IsValueCreated)
             {
-                DamageOverhead damage = _damageTextList[i];
-                damage.Update(totalMS, frameMS);
-                if (damage.IsDisposed) _damageTextList.RemoveAt(i--);
+                for (int i = 0; i < _damageTextList.Value.Count; i++)
+                {
+                    DamageOverhead damage = _damageTextList.Value[i];
+                    damage.Update(totalMS, frameMS);
+                    if (damage.IsDisposed) _damageTextList.Value.RemoveAt(i--);
+                }
             }
         }
 
@@ -307,9 +308,9 @@ namespace ClassicUO.Game.GameObjects
         {
             DamageOverhead overhead = new DamageOverhead(this, damage.ToString(), hue: (Hue) (this == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500);
 
-            if (_damageTextList.Count >= 5)
-                _damageTextList.RemoveAt(_damageTextList.Count - 1);
-            _damageTextList.Insert(0, overhead);
+            if (_damageTextList.Value.Count >= 5)
+                _damageTextList.Value.RemoveAt(_damageTextList.Value.Count - 1);
+            _damageTextList.Value.Insert(0, overhead);
         }
 
         protected override void OnProcessDelta(Delta d)

@@ -51,9 +51,6 @@ namespace ClassicUO.Game.Views
 
             Mobile mobile = (Mobile)GameObject;
 
-            if (mobile.LastAnimationIdleDelay < CoreGame.Ticks)
-                mobile.SetIdleAnimation();
-
             bool mirror = false;
             byte dir = (byte)mobile.GetDirectionForAnimation();
             Animations.GetAnimDirection(ref dir, ref mirror);
@@ -118,7 +115,7 @@ namespace ClassicUO.Game.Views
             int height = 0;
             int centerY = 0;
 
-            if (GameObject.OverHeads.Count > 0)
+            if (GameObject.OverHeads != null && GameObject.OverHeads.Count > 0)
             {
                 GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
 
@@ -131,7 +128,7 @@ namespace ClassicUO.Game.Views
                 MessageOverHead(spriteBatch, overheadPosition, mobile.IsMounted ? 0 : -22);
             }
 
-            if (mobile.DamageList.Count > 0)
+            if (mobile.DamageList != null && mobile.DamageList.Count > 0)
             {
                 if (height == 0 && centerY == 0)
                     GetAnimationDimensions(mobile, 0xFF, out height, out centerY);

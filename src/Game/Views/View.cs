@@ -197,15 +197,18 @@ namespace ClassicUO.Game.Views
 
         protected virtual void MessageOverHead(SpriteBatch3D spriteBatch, Vector3 position, int offY)
         {
-            for (int i = 0; i < GameObject.OverHeads.Count; i++)
+            if (GameObject.OverHeads != null)
             {
-                View v = GameObject.OverHeads[i].View;
-                v.Bounds.X = (v.Texture.Width >> 1) - 22;
-                v.Bounds.Y = offY + v.Texture.Height;
-                v.Bounds.Width = v.Texture.Width;
-                v.Bounds.Height = v.Texture.Height;
-                OverheadManager.AddOverhead(v, position);
-                offY += v.Texture.Height;
+                for (int i = 0; i < GameObject.OverHeads.Count; i++)
+                {
+                    View v = GameObject.OverHeads[i].View;
+                    v.Bounds.X = (v.Texture.Width >> 1) - 22;
+                    v.Bounds.Y = offY + v.Texture.Height;
+                    v.Bounds.Width = v.Texture.Width;
+                    v.Bounds.Height = v.Texture.Height;
+                    OverheadManager.AddOverhead(v, position);
+                    offY += v.Texture.Height;
+                }
             }
         }
 

@@ -200,7 +200,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         private void UpdateLabel(bool isDisposing = false)
         {
-            if (!isDisposing && Item.OverHeads.Count > 0)
+            if (!isDisposing && Item.OverHeads != null && Item.OverHeads.Count > 0)
             {
                 if (_labels.Count <= 0)
                 {
