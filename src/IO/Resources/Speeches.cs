@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace ClassicUO.IO.Resources
@@ -54,30 +55,43 @@ namespace ClassicUO.IO.Resources
             file.Dispose();
         }
 
-        public static bool IsMatch(string input, string[] split)
+        public static bool IsMatch(string input, SpeechEntry entry)
         {
             int start = 0;
 
+            string[] split = entry.Keywords;
+
             for (int i = 0; i < split.Length; i++)
             {
-                if (split[i].Length > 0)
+                if (split[i].Length > 0 && split[i].Length <= input.Length)
                 {
-                    int idx = input.IndexOf(split[i], start);
 
-                    if (idx > 0 && i == 0 || idx < 0)
-                        return false;
-                    start = idx + split[i].Length;
+                    if (!entry.CheckStart)
+                    {
+                        if (input.IndexOf(split[i], 0) < 0)
+                            continue;
+                    }
+
+                    if (!entry.CheckEnd)
+                    {
+                        if (input.IndexOf(split[i], input.Length - split[i].Length) < 0)
+                            continue;
+                    }
+
+                    if (input.IndexOf(split[i]) >= 0)
+                        return true;
                 }
             }
-
-            if (split[split.Length - 1].Length > 0)
-                return start == input.Length;
-
-            return true;
+            return false;
         }
 
         public static SpeechEntry[] GetKeywords(string text)
         {
+            if (FileManager.ClientVersion < ClientVersions.CV_305D)
+                return new SpeechEntry[0]
+                {
+                };
+
             text = text.ToLower();
             List<SpeechEntry> list = new List<SpeechEntry>();
 
@@ -85,7 +99,7 @@ namespace ClassicUO.IO.Resources
             {
                 SpeechEntry entry = _speech[i];
 
-                if (IsMatch(text, entry.Keywords))
+                if (IsMatch(text, entry))
                     list.Add(entry);
             }
 
@@ -106,11 +120,18 @@ public struct SpeechEntry : IComparable<SpeechEntry>
         {
             '*'
         }, StringSplitOptions.RemoveEmptyEntries);
+
+        CheckStart = keyword.Length > 0 && keyword[0] == '*';
+        CheckEnd = keyword.Length > 0 && keyword[keyword.Length - 1] == '*';
     }
 
     public string[] Keywords { get; }
 
     public short KeywordID { get; }
+
+    public bool CheckStart { get; }
+
+    public bool CheckEnd { get; }
 
     public int CompareTo(SpeechEntry obj)
     {
