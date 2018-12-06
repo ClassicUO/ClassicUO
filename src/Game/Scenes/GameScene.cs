@@ -142,6 +142,8 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            _renderList = null;
+
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
             _renderTarget?.Dispose();            
@@ -238,8 +240,7 @@ namespace ClassicUO.Game.Scenes
             if (_renderIndex >= 100)
                 _renderIndex = 1;
             _updateDrawPosition = false;
-
-            CleaningResources();
+         
             base.FixedUpdate(totalMS, frameMS);
         }
 
@@ -297,6 +298,7 @@ namespace ClassicUO.Game.Scenes
                 _timePing = (long) totalMS + 10000;
             }
 
+            CleaningResources();
             base.Update(totalMS, frameMS);
         }
 
@@ -323,6 +325,8 @@ namespace ClassicUO.Game.Scenes
             for (int i = 0; i < _renderListCount; i++)
             {
                 GameObject obj = _renderList[i];
+                //Vector3 v = obj.RealScreenPosition;
+                //v.Z = 1 - (i / 1000000.0f);
 
                 if (obj.Z <= _maxGroundZ && obj.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList))
                     RenderedObjectsCount++;

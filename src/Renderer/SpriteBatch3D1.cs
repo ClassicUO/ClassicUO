@@ -70,6 +70,7 @@ namespace ClassicUO.Renderer
         private RasterizerState _rasterizerState;
         private BlendState _blendState;
 
+
         private int _numSprites;
 
         public SpriteBatch3D(GraphicsDevice device)
@@ -252,12 +253,14 @@ namespace ClassicUO.Renderer
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
+
             Viewport viewport = GraphicsDevice.Viewport;
-            _projectionMatrix.M11 = (float) (2.0 / viewport.Width);
-            _projectionMatrix.M22 = (float) (-2.0 / viewport.Height);
+            _projectionMatrix.M11 = (float)(2.0 / viewport.Width);
+            _projectionMatrix.M22 = (float)(-2.0 / viewport.Height);
             _projectionMatrix.M41 = -1 - 0.5f * _projectionMatrix.M11;
             _projectionMatrix.M42 = 1 - 0.5f * _projectionMatrix.M22;
             Matrix.Multiply(ref _transformMatrix, ref _projectionMatrix, out _matrixTransformMatrix);
+
             _projectionMatrixEffect.SetValue(_matrixTransformMatrix);
             _worldMatrixEffect.SetValue(_transformMatrix);
 

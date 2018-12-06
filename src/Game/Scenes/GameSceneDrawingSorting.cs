@@ -156,7 +156,7 @@ namespace ClassicUO.Game.Scenes
                 if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
                     continue;
 
-                if (_updateDrawPosition || obj.IsPositionChanged)
+                if (_updateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
                     obj.UpdateRealScreenPosition(_offset);
 
                 obj.UseInRender = 0xFF;
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.Scenes
                 if (!iscorpse && TileData.IsInternal(TileData.StaticData[obj.Graphic].Flags))
                     continue;
 
-                bool island = !iscorpse && !ismobile && obj is Land;
+                bool island = !ismobile && obj is Land;
 
                 if (!island && z >= _maxZ)
                     continue;

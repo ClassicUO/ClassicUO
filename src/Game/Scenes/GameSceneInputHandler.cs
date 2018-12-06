@@ -271,7 +271,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         GameObject obj = _mousePicker.MouseOverObject;
 
-                        if (Pathfinder.WalkTo(obj.Position.X, obj.Position.Y, obj.Position.Z, 0))
+                        if (Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
                             World.Player.AddGameText(MessageType.Label, "Pathfinding!", 3, 0, false);
 
