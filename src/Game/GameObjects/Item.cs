@@ -280,11 +280,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool IsAtWorld(int x, int y)
-        {
-            return Position.X == x && Position.Y == y;
-        }
-
         protected override void OnPositionChanged(object sender, EventArgs e)
         {
             base.OnPositionChanged(sender, e);
@@ -676,7 +671,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool HasSpell(int circle, int index)
         {
-            index = (3 - circle % 4 + circle / 4 * 4) * 8 + (index - 1);
+            index = (3 - circle % 4 + (circle >> 2) * 4) * 8 + (index - 1);
             ulong flag = (ulong) 1 << index;
 
             return (_spellsBitFiled & flag) == flag;
@@ -710,7 +705,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (IsMulti && Multi != null)
             {
-                Array.Clear(Multi.Components, 0, 0);
+                Multi.Components = null;
                 Multi = null;
             }
 
@@ -732,14 +727,14 @@ namespace ClassicUO.Game.GameObjects
                     bool mirror = false;
                     Animations.GetAnimDirection(ref dir, ref mirror);
 
-                    if (id < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                    if (id < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                     {
                         int animGroup = Animations.GetDieGroupIndex(id, UsedLayer);
                         ref AnimationDirection direction = ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
                         Animations.AnimID = id;
                         Animations.AnimGroup = (byte) animGroup;
                         Animations.Direction = dir;
-                        if (direction.FrameCount == 0) Animations.LoadDirectionGroup(ref direction);
+                        if ((direction.FrameCount == 0 || direction.Frames == null)) Animations.LoadDirectionGroup(ref direction);
 
                         if (direction.Address != 0 || direction.IsUOP)
                         {
@@ -750,7 +745,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    _lastAnimationChangeTime = CoreGame.Ticks + (int) CHARACTER_ANIMATION_DELAY;
+                    _lastAnimationChangeTime = CoreGame.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
         }

@@ -63,9 +63,11 @@
     <Compile Include="Configuration\GumpProperties.cs" />
     <Compile Include="Configuration\Profile.cs" />
     <Compile Include="Configuration\ProfileManager.cs" />
+    <Compile Include="Game\Constants.cs" />
     <Compile Include="Game\Data\BuffIcon.cs" />
     <Compile Include="Game\Data\BuffTable.cs" />
     <Compile Include="Game\Data\CharacterCreationValues.cs" />
+    <Compile Include="Game\Data\ClientFeatures.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
@@ -81,7 +83,7 @@
     <Compile Include="Game\GameObjects\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
-    <Compile Include="Game\GameObjects\ReflectionHolder.cs" />
+    <Compile Include="Utility\ReflectionHolder.cs" />
     <Compile Include="Game\Gumps\Controls\DataBox.cs" />
     <Compile Include="Game\Gumps\Controls\HitBox.cs" />
     <Compile Include="Game\Gumps\Controls\Line.cs" />
@@ -123,6 +125,7 @@
     <Compile Include="Game\Views\MovingEffectView.cs" />
     <Compile Include="Input\Mouse.cs" />
     <Compile Include="Interfaces\IMobilePaperdollOwner.cs" />
+    <Compile Include="Interfaces\INode.cs" />
     <Compile Include="Interfaces\ISmoothMovable.cs" />
     <Compile Include="IO\UltimaLive.cs" />
     <Compile Include="Network\NetClient1.cs" />
@@ -131,13 +134,12 @@
     <Compile Include="Configuration\ConfigurationResolver.cs" />
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="CoreGame.cs" />
-    <Compile Include="FpsCounter.cs" />
     <Compile Include="GameLoop.cs" />
     <Compile Include="Game\Chat.cs" />
     <Compile Include="Game\Data\AssistantFeatures.cs" />
     <Compile Include="Game\Data\ContainerManager.cs" />
     <Compile Include="Game\Data\Direction.cs" />
-    <Compile Include="Game\Data\Features.cs" />
+    <Compile Include="Game\Data\LockedFeatures.cs" />
     <Compile Include="Game\Data\FeaturesFlags.cs" />
     <Compile Include="Game\Data\MovementSpeed.cs" />
     <Compile Include="Game\Data\Property.cs" />
@@ -209,8 +211,8 @@
     <Compile Include="Game\Gumps\UIGumps\WorldViewportGump.cs" />
     <Compile Include="Game\Gumps\UIManager.cs" />
     <Compile Include="Game\Hue.cs" />
-    <Compile Include="Game\Map\Facet.cs" />
-    <Compile Include="Game\Map\MapChunk.cs" />
+    <Compile Include="Game\Map\Map.cs" />
+    <Compile Include="Game\Map\Chunk.cs" />
     <Compile Include="Game\Map\Tile.cs" />
     <Compile Include="Game\Map\TileSorter.cs" />
     <Compile Include="Game\Pathfinder.cs" />

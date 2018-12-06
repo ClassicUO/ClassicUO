@@ -41,7 +41,7 @@ namespace ClassicUO.Game
 
         public static PlayerMobile Player { get; set; }
 
-        public static Facet Map { get; private set; }
+        public static Map.Map Map { get; private set; }
 
         public static byte ViewRange { get; set; } = 24;
 
@@ -63,14 +63,14 @@ namespace ClassicUO.Game
 
                         Position position = Player.Position;
                         Map = null;
-                        Map = new Facet(value);
+                        Map = new Map.Map(value);
                         Player.Position = position;
                         Player.ClearSteps();
                         Player.ProcessDelta();
                     }
                     else
                     {
-                        Map = new Facet(value);
+                        Map = new Map.Map(value);
                         if (Player != null) Map.Center = new Point(Player.Position.X, Player.Position.Y);
                     }
                 }
@@ -84,7 +84,9 @@ namespace ClassicUO.Game
             Overall = 0, Personal = 0
         };
 
-        public static Features ClientFeatures { get; } = new Features();
+        public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
+
+        public static ClientFeatures ClientFlags { get; } = new ClientFeatures();
 
         public static void Update(double totalMS, double frameMS)
         {
@@ -246,6 +248,8 @@ namespace ClassicUO.Game
             ToAdd.Clear();
             IO.UltimaLive.IsUltimaLiveActive = false;
             IO.UltimaLive.ShardName = null;
+            ClientFlags.SetFlags(0);
+            ClientLockedFeatures.SetFlags(0);
         }
 
         private static void InternalMapChangeClear(bool noplayer)

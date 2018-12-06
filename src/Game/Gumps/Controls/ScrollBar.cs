@@ -182,7 +182,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             // draw slider
             if (MaxValue > MinValue && middleHeight > 0)
-                spriteBatch.Draw2D(_textureSlider, new Point(position.X + (_textureBackground[0].Width - _textureSlider.Width) / 2, (int) (position.Y + _textureUpButton[0].Height + _sliderPosition)), Vector3.Zero);
+                spriteBatch.Draw2D(_textureSlider, new Point(position.X + ((_textureBackground[0].Width - _textureSlider.Width) >> 1), (int) (position.Y + _textureUpButton[0].Height + _sliderPosition)), Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
         }
@@ -214,7 +214,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 // clicked on the up button
                 _btUpClicked = true;
             }
-            else if (new Rectangle((_textureBackground[0].Width - _textureSlider.Width) / 2, _textureUpButton[0].Height + (int) _sliderPosition, _textureSlider.Width, _textureSlider.Height).Contains(new Point(x, y)))
+            else if (new Rectangle((_textureBackground[0].Width - _textureSlider.Width) >> 1, _textureUpButton[0].Height + (int) _sliderPosition, _textureSlider.Width, _textureSlider.Height).Contains(new Point(x, y)))
             {
                 // clicked on the slider
                 _btSliderClicked = true;
@@ -245,11 +245,11 @@ namespace ClassicUO.Game.Gumps.Controls
                         sliderY = scrollableArea;
                     _clickPosition = new Point(x, y);
 
-                    if (sliderY == 0 && _clickPosition.Y < _textureUpButton[0].Height + _textureSlider.Height / 2)
-                        _clickPosition.Y = _textureUpButton[0].Height + _textureSlider.Height / 2;
+                    if (sliderY == 0 && _clickPosition.Y < _textureUpButton[0].Height + (_textureSlider.Height >> 1))
+                        _clickPosition.Y = _textureUpButton[0].Height + (_textureSlider.Height >> 1);
 
-                    if (sliderY == scrollableArea && _clickPosition.Y > Height - _textureDownButton[0].Height - _textureSlider.Height / 2)
-                        _clickPosition.Y = Height - _textureDownButton[0].Height - _textureSlider.Height / 2;
+                    if (sliderY == scrollableArea && _clickPosition.Y > Height - _textureDownButton[0].Height - (_textureSlider.Height >> 1))
+                        _clickPosition.Y = Height - _textureDownButton[0].Height - (_textureSlider.Height >> 1);
                     _value = sliderY / scrollableArea * (MaxValue - MinValue) + MinValue;
                     _sliderPosition = sliderY;
                 }

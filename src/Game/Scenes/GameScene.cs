@@ -42,7 +42,6 @@ namespace ClassicUO.Game.Scenes
         private MousePicker _mousePicker;
         private MouseOverList _mouseOverList;
         private WorldViewport _viewPortGump;
-        private TopBarGump _topBarGump;
         private StaticManager _staticManager;
         private EffectManager _effectManager;
         private Settings _settings;
@@ -97,12 +96,13 @@ namespace ClassicUO.Game.Scenes
         public override void Load()
         {
             base.Load();
+            Service.Register(new JournalData());
             Service.Register(_effectManager = new EffectManager());
             Service.Register(_staticManager = new StaticManager());
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
             UIManager.Add(new WorldViewportGump(this));
-            UIManager.Add(_topBarGump = new TopBarGump(this));           
+            UIManager.Add(new TopBarGump(this));           
             _viewPortGump = Service.Get<WorldViewport>();
             _settings = Service.Get<Settings>();
             GameActions.Initialize(PickupItemBegin);
@@ -149,6 +149,7 @@ namespace ClassicUO.Game.Scenes
             UIManager.Clear();
             CleaningResources();
             World.Clear();
+            Service.Unregister<JournalData>();
             Service.Unregister<EffectManager>();
             Service.Unregister<StaticManager>();
             InputManager.LeftMouseButtonDown -= OnLeftMouseButtonDown;
@@ -168,7 +169,7 @@ namespace ClassicUO.Game.Scenes
 
         private void SocketOnDisconnected(object sender, EventArgs e)
         {
-            UIManager.Add(new MessageBoxGump(_settings.GameWindowX + _settings.GameWindowWidth / 2 - 100, _settings.GameWindowY + _settings.GameWindowHeight / 2 - 125 / 2, 200, 125, "Connection lost", (s) =>
+            UIManager.Add(new MessageBoxGump(_settings.GameWindowX + (_settings.GameWindowWidth >> 1) - 100, _settings.GameWindowY + (_settings.GameWindowHeight >> 1) - (125 >> 1), 200, 125, "Connection lost", (s) =>
             {
                 s.Dispose();
                 SceneManager.ChangeScene(ScenesType.Login);
@@ -181,9 +182,7 @@ namespace ClassicUO.Game.Scenes
                 return;
 
             (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
-            //CheckIfUnderEntity(out int maxItemZ, out bool drawTerrain, out bool underSurface);
-            //_maxZ = maxItemZ;
-            //_drawTerrain = drawTerrain;
+
             UpdateMaxDrawZ();
             _renderListCount = 0;
             int minX = minTile.X;
@@ -226,7 +225,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (tile != null)
                         {
-                            AddTileToRenderList(tile.ObjectsOnTiles, x, y, false, 150);
+                            AddTileToRenderList(tile.FirstNode, x, y, false, 150);
                         }
                         x++;
                         y--;

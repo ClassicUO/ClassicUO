@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         private int _gumplingBottomY => _expandableScrollHeight - _gumpBottom.Height - (_gumpExpander != null ? _gumpExpander.Height : 0);
 
-        private int _gumplingExpanderX => (Width - (_gumpExpander != null ? _gumpExpander.Width : 0)) / 2;
+        private int _gumplingExpanderX => (Width - (_gumpExpander != null ? _gumpExpander.Width : 0)) >> 1;
 
         private int _gumplingExpanderY => _expandableScrollHeight - (_gumpExpander != null ? _gumpExpander.Height : 0) - c_GumplingExpanderY_Offset;
 
@@ -170,8 +170,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
                 if (_gumplingTitle != null && _gumplingTitle.IsInitialized)
                 {
-                    _gumplingTitle.X = (_gumpTop.Width - _gumplingTitle.Width) / 2;
-                    _gumplingTitle.Y = (_gumpTop.Height - _gumplingTitle.Height) / 2;
+                    _gumplingTitle.X = (_gumpTop.Width - _gumplingTitle.Width) >> 1;
+                    _gumplingTitle.Y = (_gumpTop.Height - _gumplingTitle.Height) >> 1;
                     _gumplingTitle.WantUpdateSize = true;
                 }
 

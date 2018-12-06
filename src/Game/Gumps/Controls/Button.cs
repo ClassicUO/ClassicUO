@@ -70,19 +70,20 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 _caption = caption;
 
-                RenderedText renderedText = new RenderedText
+                _fontTexture[0] = new RenderedText
                 {
-                    IsUnicode = isunicode, Hue = FontHue, Font = font, Text = caption
-                };
-                _fontTexture[0] = renderedText;
+                    IsUnicode = isunicode,
+                    Hue = FontHue,
+                    Font = font,
+                    Text = caption
+                }; 
 
                 if (hoverHue != ushort.MaxValue)
                 {
-                    renderedText = new RenderedText
+                    _fontTexture[1] = new RenderedText
                     {
                         IsUnicode = isunicode, Hue = HueHover, Font = font, Text = caption
                     };
-                    _fontTexture[1] = renderedText;
                 }
             }
 
@@ -157,7 +158,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (FontCenter)
                 {
                     int yoffset = _clicked ? 1 : 0;
-                    textTexture.Draw(spriteBatch, new Point(position.X + (Width - textTexture.Width) / 2, position.Y + yoffset + (Height - textTexture.Height) / 2));
+                    textTexture.Draw(spriteBatch, new Point(position.X + ((Width - textTexture.Width) >> 1), position.Y + yoffset + ((Height - textTexture.Height) >> 1)));
                 }
                 else
                     textTexture.Draw(spriteBatch, position);

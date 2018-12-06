@@ -19,6 +19,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -36,6 +38,7 @@ namespace ClassicUO.Renderer
         private const int MAX_SPRITES = 0x800;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;
+
         private Matrix _projectionMatrix;
         private Matrix _matrixTransformMatrix;
         private Matrix _transformMatrix = Matrix.Identity;
@@ -91,17 +94,23 @@ namespace ClassicUO.Renderer
                                            0.0f, 0.0f, 0.0f, 0.0f, 0f, //(float)( -2.0 / (double)viewport.Height ) is the actual value we will use
                                            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f);
             _effect.CurrentTechnique = _huesTechnique;
-            _rasterizerState = RasterizerState.CullNone;
             _blendState = BlendState.AlphaBlend;
+
+            _rasterizerState = RasterizerState.CullNone;
+            _rasterizerState = new RasterizerState()
+            {
+                CullMode = _rasterizerState.CullMode,
+                DepthBias = _rasterizerState.DepthBias,
+                FillMode = _rasterizerState.FillMode,
+                MultiSampleAntiAlias = _rasterizerState.MultiSampleAntiAlias,
+                SlopeScaleDepthBias = _rasterizerState.SlopeScaleDepthBias,
+                ScissorTestEnable = true
+            };
         }
 
         public Matrix TransformMatrix => _transformMatrix;
 
         public GraphicsDevice GraphicsDevice { get; }
-
-        public Matrix ProjectionMatrixWorld => Matrix.Identity;
-
-        public Matrix ProjectionMatrixScreen => Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0f, short.MinValue, short.MaxValue);
 
         public int Calls { get; set; }
 
@@ -239,7 +248,7 @@ namespace ClassicUO.Renderer
         {
             GraphicsDevice.BlendState = _blendState;
             GraphicsDevice.DepthStencilState = DepthStencilState.None;
-            GraphicsDevice.RasterizerState = _rasterizerState;
+            GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[2] = SamplerState.PointClamp;
@@ -252,8 +261,6 @@ namespace ClassicUO.Renderer
             _projectionMatrixEffect.SetValue(_matrixTransformMatrix);
             _worldMatrixEffect.SetValue(_transformMatrix);
 
-            //_projectionMatrixEffect.SetValue(ProjectionMatrixScreen);
-            //_worldMatrixEffect.SetValue(ProjectionMatrixWorld);
             _viewportEffect.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
             GraphicsDevice.SetVertexBuffer(_vertexBuffer);
             GraphicsDevice.Indices = _indexBuffer;
@@ -266,12 +273,13 @@ namespace ClassicUO.Renderer
             if (_numSprites == 0)
                 return;
 
+
             FlushCount++;
 
             fixed (SpriteVertex* p = &_vertexInfo[0]) _vertexBuffer.SetDataPointerEXT(0, (IntPtr) p, _numSprites * 4 * SpriteVertex.SizeInBytes, SetDataOptions.None);
             Texture2D current = _textureInfo[0];
             int offset = 0;
-            //Techniques last = Techniques.None;
+
             _effect.CurrentTechnique.Passes[0].Apply();
 
             for (int i = 1; i < _numSprites; i++)
@@ -288,7 +296,7 @@ namespace ClassicUO.Renderer
 
             InternalDraw(current, offset, _numSprites - offset);
             Calls += _numSprites;
-            Array.Clear(_textureInfo, 0, _numSprites);
+            //Array.Clear(_textureInfo, 0, _numSprites);
             _numSprites = 0;
         }
 
@@ -301,32 +309,24 @@ namespace ClassicUO.Renderer
 
         public void EnableScissorTest(bool enable)
         {
-            if (enable == _rasterizerState.ScissorTestEnable)
+            if (enable == _useScissor)
                 return;
 
             Flush();
 
-            _rasterizerState?.Dispose();
+            //_rasterizerState?.Dispose();
 
-            _rasterizerState = new RasterizerState() { ScissorTestEnable = enable };
+            _useScissor = enable;
         }
 
+        private bool _useScissor;
 
-        public void SetBlendMode(Blend src, Blend dst, BlendFunction function = BlendFunction.Add)
+
+        public void SetBlendState(BlendState blend)
         {
-            if (_blendState.AlphaSourceBlend == src && _blendState.AlphaDestinationBlend == dst)
-                return;
-
             Flush();
 
-            _blendState?.Dispose();
-
-            _blendState = new BlendState
-            {
-                AlphaSourceBlend = src, AlphaDestinationBlend = dst, ColorSourceBlend = src, ColorDestinationBlend = dst,
-                AlphaBlendFunction =  function, ColorBlendFunction = function
-            };
-
+            _blendState = blend ?? BlendState.AlphaBlend;
         }
 
         private static short[] GenerateIndexArray()

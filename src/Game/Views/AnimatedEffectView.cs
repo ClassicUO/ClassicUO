@@ -18,6 +18,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
@@ -37,6 +40,57 @@ namespace ClassicUO.Game.Views
         {
         }
 
+        private static readonly Lazy<BlendState> _multiplyBlendState = new Lazy<BlendState>(() =>
+        {
+            BlendState state = new BlendState();
+
+            state.AlphaSourceBlend = state.ColorSourceBlend = Blend.Zero;
+            state.AlphaDestinationBlend = state.ColorDestinationBlend = Blend.SourceColor;
+
+            return state;
+        });
+  
+        private static readonly Lazy<BlendState> _screenBlendState = new Lazy<BlendState>(() =>
+        {
+            BlendState state = new BlendState();
+
+            state.AlphaSourceBlend = state.ColorSourceBlend = Blend.One;
+            state.AlphaDestinationBlend = state.ColorDestinationBlend = Blend.One;
+
+            return state;
+        });
+
+        private static readonly Lazy<BlendState> _screenLessBlendState = new Lazy<BlendState>(() =>
+        {
+            BlendState state = new BlendState();
+
+            state.AlphaSourceBlend = state.ColorSourceBlend = Blend.DestinationColor;
+            state.AlphaDestinationBlend = state.ColorDestinationBlend = Blend.InverseSourceAlpha;
+
+            return state;
+        });
+
+        private static readonly Lazy<BlendState> _normalHalfBlendState = new Lazy<BlendState>(() =>
+        {
+            BlendState state = new BlendState();
+
+            state.AlphaSourceBlend = state.ColorSourceBlend = Blend.DestinationColor;
+            state.AlphaDestinationBlend = state.ColorDestinationBlend = Blend.SourceColor;
+
+            return state;
+        });
+
+        private static readonly Lazy<BlendState> _shadowBlueBlendState = new Lazy<BlendState>(() =>
+        {
+            BlendState state = new BlendState();
+
+            state.AlphaSourceBlend = state.ColorSourceBlend = Blend.SourceColor;
+            state.AlphaDestinationBlend = state.ColorDestinationBlend = Blend.InverseSourceColor;
+            state.AlphaBlendFunction = state.ColorBlendFunction = BlendFunction.ReverseSubtract;
+
+            return state;
+        });
+
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
             if (GameObject.IsDisposed)
@@ -47,13 +101,13 @@ namespace ClassicUO.Game.Views
             {
                 _displayedGraphic = effect.AnimationGraphic;
                 Texture = Art.GetStaticTexture(effect.AnimationGraphic);
-                Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
-            Bounds.X = Texture.Width / 2 - 22 - (int)effect.Offset.X;
+            Bounds.X = (Texture.Width >> 1) - 22 - (int)effect.Offset.X;
             Bounds.Y = Texture.Height - 44 + (int)(effect.Offset.Z - effect.Offset.Y);
 
-            var flags = TileData.StaticData[_displayedGraphic].Flags;
+            ulong flags = TileData.StaticData[_displayedGraphic].Flags;
 
 
             bool isPartial = TileData.IsPartialHue(flags);
@@ -63,30 +117,30 @@ namespace ClassicUO.Game.Views
             switch (effect.Blend)
             {
                 case GraphicEffectBlendMode.Multiply:
-                    spriteBatch.SetBlendMode(Blend.Zero, Blend.SourceColor);
+                    spriteBatch.SetBlendState(_multiplyBlendState.Value);
                     base.Draw(spriteBatch, position, objectList);
-                    spriteBatch.SetBlendMode(Blend.One, Blend.InverseSourceAlpha);
+                    spriteBatch.SetBlendState(null);
                     break;
                 case GraphicEffectBlendMode.Screen:
                 case GraphicEffectBlendMode.ScreenMore:
-                    spriteBatch.SetBlendMode(Blend.One, Blend.One);
+                    spriteBatch.SetBlendState(_screenBlendState.Value);
                     base.Draw(spriteBatch, position, objectList);
-                    spriteBatch.SetBlendMode(Blend.One, Blend.InverseSourceAlpha);
+                    spriteBatch.SetBlendState(null);
                     break;
                 case GraphicEffectBlendMode.ScreenLess:
-                    spriteBatch.SetBlendMode(Blend.DestinationColor, Blend.InverseSourceAlpha);
+                    spriteBatch.SetBlendState(_screenLessBlendState.Value);
                     base.Draw(spriteBatch, position, objectList);
-                    spriteBatch.SetBlendMode(Blend.One, Blend.InverseSourceAlpha);
+                    spriteBatch.SetBlendState(null);
                     break;
                 case GraphicEffectBlendMode.NormalHalfTransparent:
-                    spriteBatch.SetBlendMode(Blend.DestinationColor, Blend.SourceColor);
+                    spriteBatch.SetBlendState(_normalHalfBlendState.Value);
                     base.Draw(spriteBatch, position, objectList);
-                    spriteBatch.SetBlendMode(Blend.One, Blend.InverseSourceAlpha);
+                    spriteBatch.SetBlendState(null);
                     break;
                 case GraphicEffectBlendMode.ShadowBlue:
-                    spriteBatch.SetBlendMode(Blend.SourceColor, Blend.InverseSourceColor, BlendFunction.ReverseSubtract);
+                    spriteBatch.SetBlendState(_shadowBlueBlendState.Value);
                     base.Draw(spriteBatch, position, objectList);
-                    spriteBatch.SetBlendMode(Blend.One, Blend.InverseSourceAlpha);
+                    spriteBatch.SetBlendState(null);
                     break;
                 default:
                     base.Draw(spriteBatch, position, objectList);

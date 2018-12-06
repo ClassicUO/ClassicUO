@@ -52,7 +52,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             AddChildren(_dyeTybeImage = new StaticPic(0x0FAB, 0)
             {
-                X = 208 - 10, Y = _box.Y + _box.Height / 2 - 10
+                X = 208 - 10, Y = _box.Y + (_box.Height >> 1) - 10
             });
             _okClicked = okClicked;
         }

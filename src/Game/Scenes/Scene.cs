@@ -38,7 +38,6 @@ namespace ClassicUO.Game.Scenes
             Game = Service.Get<GameLoop>();
             Device = Game.GraphicsDevice;
             UIManager = Service.Get<UIManager>();
-            InputManager = Service.Get<InputManager>();
         }
 
 
@@ -49,8 +48,6 @@ namespace ClassicUO.Game.Scenes
         protected GameLoop Game { get; }
 
         protected UIManager UIManager { get; }
-
-        protected InputManager InputManager { get; }
 
         public int RenderedObjectsCount { get; protected set; }
 

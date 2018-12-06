@@ -162,7 +162,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
 
             spriteBatch.Draw2D(_gumpWidget, new Point(position.X + _sliderX, position.Y), Vector3.Zero);
-            _text?.Draw(spriteBatch, new Point(position.X + BarWidth + 2, position.Y + Height / 2 - _text.Height / 2));
+            _text?.Draw(spriteBatch, new Point(position.X + BarWidth + 2, position.Y + (Height >> 1) - (_text.Height >> 1)));
 
             return base.Draw(spriteBatch, position, hue);
         }

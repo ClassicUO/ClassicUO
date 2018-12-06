@@ -128,8 +128,8 @@ namespace ClassicUO.Game.GameObjects
             (int sx, int sy, int sz) = GetSource();
             (int tx, int ty, int tz) = GetTarget();
             Settings settings = Service.Get<Settings>();
-            int screenCenterX = settings.GameWindowX + settings.GameWindowWidth / 2;
-            int screenCenterY = settings.GameWindowY + settings.GameWindowHeight / 2;
+            int screenCenterX = settings.GameWindowX + (settings.GameWindowWidth >> 1);
+            int screenCenterY = settings.GameWindowY + (settings.GameWindowHeight >> 1);
             int playerX = World.Player.X;
             int playerY = World.Player.Y;
             int offsetX = sx - playerX;
@@ -319,10 +319,10 @@ namespace ClassicUO.Game.GameObjects
         private static void TileOffsetOnMonitorToXY(ref int ofsX, ref int ofsY, ref int x, ref int y)
         {
             if (ofsX == 0)
-                x = y = ofsY / 2;
+                x = y = ofsY >> 1;
             else if (ofsY == 0)
             {
-                x = ofsX / 2;
+                x = ofsX >> 1;
                 y = -x;
             }
             else

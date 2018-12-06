@@ -26,15 +26,33 @@ namespace ClassicUO.Utility
 {
     public static class UnsafeMemoryManager
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe int SizeOf<T>() where T : struct
         {
             DoubleStruct<T> doubleStruct = DoubleStruct<T>.Value;
+
             TypedReference tRef0 = __makeref(doubleStruct.First);
             TypedReference tRef1 = __makeref(doubleStruct.Second);
-            IntPtr ptrToT0 = *(IntPtr*) &tRef0;
-            IntPtr ptrToT1 = *(IntPtr*) &tRef1;
 
-            return (int) ((byte*) ptrToT1 - (byte*) ptrToT0);
+            // NB: Mono doesn't like these... LOL
+            //TypedReference* address0 = &tRef0;
+            //TypedReference* address1 = &tRef1;
+
+            bool use2nd = Environment.OSVersion.Platform > PlatformID.WinCE;
+
+            IntPtr firstValueAddress0 = *(IntPtr*)&tRef0;
+            IntPtr secondValueAddress0 = *((IntPtr*)&tRef0 + 1);
+            IntPtr firstValueAddress1 = *(IntPtr*)&tRef1;
+            IntPtr secondValueAddress1 = *((IntPtr*)&tRef1 + 1);
+
+            int size = 0;
+
+            if (use2nd/* firstValueAddress0 == firstValueAddress1 */ )
+                size = (int)((byte*)secondValueAddress1 - (byte*)secondValueAddress0);
+            else
+                size = (int)((byte*)firstValueAddress1 - (byte*)firstValueAddress0);
+
+            return size;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

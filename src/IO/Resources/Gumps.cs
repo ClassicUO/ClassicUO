@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
+using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
@@ -93,9 +94,6 @@ namespace ClassicUO.IO.Resources
             {
                 ushort[] pixels = GetGumpPixels(g, out int w, out int h);
 
-                if (pixels == null && g >= 60000)
-                    pixels = GetGumpPixels(g - 10000, out w, out h);
-
                 if (pixels == null || pixels.Length <= 0)
                     return null;
                 texture = new SpriteTexture(w, h, false);
@@ -128,7 +126,7 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
-            long ticks = CoreGame.Ticks - 3000;
+            long ticks = CoreGame.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
@@ -136,16 +134,14 @@ namespace ClassicUO.IO.Resources
                 SpriteTexture texture = _gumpDictionary[g];
                 //ref SpriteTexture texture = ref _gumpCache[_usedIndex[i]];
 
-                if (texture == null || texture.IsDisposed)
-                    _usedIndex.RemoveAt(i--);
-                else if (texture.Ticks < ticks)
+                if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
                     //texture = null;
                     _usedIndex.RemoveAt(i--);
                     _gumpDictionary.Remove(g);
 
-                    if (++count >= 20)
+                    if (++count >= Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
                 }
             }
@@ -174,7 +170,7 @@ namespace ClassicUO.IO.Resources
             if (width == 0 || height == 0)
                 return null;
 
-            //width = PaddedRowWidth(16, width, 4) / 2;
+            //width = PaddedRowWidth(16, width, 4) >> 1;
             IntPtr dataStart = _file.PositionAddress;
             ushort[] pixels = new ushort[width * height];
             int* lookuplist = (int*) dataStart;
@@ -186,7 +182,7 @@ namespace ClassicUO.IO.Resources
                 if (y < height - 1)
                     gsize = lookuplist[y + 1] - lookuplist[y];
                 else
-                    gsize = length / 4 - lookuplist[y];
+                    gsize = (length >> 2) - lookuplist[y];
                 GumpBlock* gmul = (GumpBlock*) (dataStart + lookuplist[y] * 4);
                 int pos = y * width;
                 int x = 0;

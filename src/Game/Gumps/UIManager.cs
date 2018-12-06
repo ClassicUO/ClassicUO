@@ -52,7 +52,6 @@ namespace ClassicUO.Game.Gumps
         {
             GameCursor = new GameCursor(this);
             _sbUI = Service.Get<SpriteBatchUI>();
-            InputManager = Service.Get<InputManager>();
 
             InputManager.MouseDragging += (sender, e) =>
             {
@@ -199,8 +198,6 @@ namespace ClassicUO.Game.Gumps
         public int Width => _sbUI.GraphicsDevice.Viewport.Width;
 
         public int Height => _sbUI.GraphicsDevice.Viewport.Height;
-
-        public InputManager InputManager { get; }
 
         public GameCursor GameCursor { get; }
 
@@ -421,7 +418,7 @@ namespace ClassicUO.Game.Gumps
                             break;
                         case "tooltip":
 
-                            if (World.ClientFeatures.TooltipsEnabled)
+                            if (World.ClientFlags.TooltipsEnabled)
                             {
                                 string cliloc = Cliloc.GetString(int.Parse(gparams[1]));
                                 GumpControl last = gump.Children.Count > 0 ? gump.Children.Last() : null;

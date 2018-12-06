@@ -241,6 +241,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Loot,
             Message
         }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _line.Dispose();
+        }
     }
 
     public class PartyListEntry : GumpControl

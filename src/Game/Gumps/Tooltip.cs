@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Gumps
                 position.Y = 0;
             else if (position.Y > window.WindowHeight - (_renderedText.Height + 8))
                 position.Y = window.WindowHeight - (_renderedText.Height + 8);
-            spriteBatch.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X - 4, position.Y - 4, _renderedText.Width + 6, _renderedText.Height + 8), ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
+            spriteBatch.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X - 4, position.Y - 2, _renderedText.Width + 8, _renderedText.Height + 4), ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
 
             return _renderedText.Draw(spriteBatch, position);
         }

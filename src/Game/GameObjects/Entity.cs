@@ -45,7 +45,6 @@ namespace ClassicUO.Game.GameObjects
 
     public abstract class Entity : GameObject
     {
-        protected const float CHARACTER_ANIMATION_DELAY = 80;
         private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
         protected Delta _delta;
         private Direction _direction;
@@ -189,6 +188,7 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Dispose()
         {
+            PositionChanged -= OnPositionChanged;
             _properties.Clear();
             base.Dispose();
         }

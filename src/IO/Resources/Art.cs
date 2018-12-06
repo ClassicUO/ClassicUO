@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -122,7 +123,7 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
-            long ticks = CoreGame.Ticks - 3000;
+            long ticks = CoreGame.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
@@ -130,16 +131,14 @@ namespace ClassicUO.IO.Resources
                 int g = _usedIndex[i];
                 SpriteTexture texture = _artDictionary[g];
 
-                if (texture == null || texture.IsDisposed)
-                    _usedIndex.RemoveAt(i--);
-                else if (texture.Ticks < ticks)
+                if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
                     //texture = null;
                     _usedIndex.RemoveAt(i--);
                     _artDictionary.Remove(g);
 
-                    if (++count >= 20)
+                    if (++count >= Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
                 }
             }
@@ -152,16 +151,14 @@ namespace ClassicUO.IO.Resources
                 int g = _usedIndexLand[i];
                 SpriteTexture texture = _landDictionary[g];
 
-                if (texture == null || texture.IsDisposed)
-                    _usedIndexLand.RemoveAt(i--);
-                else if (texture.Ticks < ticks)
+                if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
-                    //  texture = null;
+                    //texture = null;
                     _usedIndexLand.RemoveAt(i--);
                     _landDictionary.Remove(g);
 
-                    if (++count >= 20)
+                    if (++count >= Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
                 }
             }
@@ -207,6 +204,7 @@ namespace ClassicUO.IO.Resources
                     for (int j = 0; j < run; j++)
                     {
                         ushort val = *ptr++;
+
 
                         if (val > 0)
                             val = (ushort) (0x8000 | val);

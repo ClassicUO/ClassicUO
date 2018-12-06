@@ -264,7 +264,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
             // Skin
             ushort[] pallet = CharacterCreationValues.GetSkinPallet(race);
-            AddCustomColorPicker(489, 141, pallet, Layer.Invalid, 3000183, 8, pallet.Length / 8);
+            AddCustomColorPicker(489, 141, pallet, Layer.Invalid, 3000183, 8, pallet.Length >> 3);
 
             // Shirt Color
             AddCustomColorPicker(489, 183, null, Layer.Shirt, 3000440, 10, 20);
@@ -275,13 +275,13 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
             // Hair
             pallet = CharacterCreationValues.GetHairPallet(race);
-            AddCustomColorPicker(489, 267, pallet, Layer.Hair, race == RaceType.GARGOYLE ? 1112322 : 3000184, 8, pallet.Length / 8);
+            AddCustomColorPicker(489, 267, pallet, Layer.Hair, race == RaceType.GARGOYLE ? 1112322 : 3000184, 8, pallet.Length >> 3);
 
             if (!isFemale && race != RaceType.ELF)
             {
                 // Facial
                 pallet = CharacterCreationValues.GetHairPallet(race);
-                AddCustomColorPicker(489, 309, pallet, Layer.Beard, race == RaceType.GARGOYLE ? 1112512 : 3000446, 8, pallet.Length / 8);
+                AddCustomColorPicker(489, 309, pallet, Layer.Beard, race == RaceType.GARGOYLE ? 1112512 : 3000446, 8, pallet.Length >> 3);
             }
 
             _character = CreateCharacter(isFemale, race);

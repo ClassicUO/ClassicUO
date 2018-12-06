@@ -53,7 +53,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
     internal class ChatControl : GumpControl
     {
         private const int MAX_MESSAGE_LENGHT = 100;
-        private readonly InputManager _inputManager;
         private readonly List<Tuple<ChatMode, string>> _messageHistory;
         private readonly List<ChatLineTime> _textEntries;
         private Label _currentChatModeLabel;
@@ -71,7 +70,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Height = h;
             _textEntries = new List<ChatLineTime>();
             _messageHistory = new List<Tuple<ChatMode, string>>();
-            _inputManager = Service.Get<InputManager>();
             CanCloseWithRightClick = false;
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
@@ -321,14 +319,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case ChatMode.Default:
                     speechType = MessageType.Regular;
                     hue = 33;
-                    NetClient.Socket.Send(new PUnicodeSpeechRequest(text, speechType, MessageFont.Normal, hue, "ENU"));
-
+                    GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.Whisper:
-
+                    speechType = MessageType.Whisper;
+                    GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.Emote:
-
+                    speechType = MessageType.Emote;
+                    GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.Party:
 
@@ -388,13 +387,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     break;
                 case ChatMode.PartyPrivate:
-
+                    
+                    //GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.Guild:
-
+                    speechType = MessageType.Guild;
+                    GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.Alliance:
-
+                    speechType = MessageType.Alliance;
+                    GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.ClientCommand:
                     CommandSystem.TriggerCommandHandler(text);
@@ -408,9 +410,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
 
         private class ChatLineTime : IUpdateable, IDrawableUI, IDisposable
-        {
-            private const float TIME_DISPLAY = 10000.0f;
-            private const float TIME_FADEOUT = 1000.0f;
+        {           
             private readonly float _createdTime;
             private readonly RenderedText _renderedText;
             private int _width;
@@ -456,9 +456,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 float time = (float) totalMS - _createdTime;
 
-                if (time > TIME_DISPLAY)
+                if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT)
                     IsExpired = true;
-                else if (time > TIME_DISPLAY - TIME_FADEOUT) Alpha = (time - (TIME_DISPLAY - TIME_FADEOUT)) / TIME_FADEOUT;
+                else if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT) Alpha = (time - (Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)) / Constants.TIME_FADEOUT_TEXT;
             }
 
             public override string ToString()

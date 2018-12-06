@@ -50,6 +50,7 @@ namespace ClassicUO.Game.Views
                 return false;
 
             Mobile mobile = (Mobile)GameObject;
+
             bool mirror = false;
             byte dir = (byte)mobile.GetDirectionForAnimation();
             Animations.GetAnimDirection(ref dir, ref mirror);
@@ -69,7 +70,8 @@ namespace ClassicUO.Game.Views
             else
                 drawX = -22 - (int)mobile.Offset.X;
 
-            FrameInfo = FrameInfo.Empty;
+            FrameInfo = Rectangle.Empty;
+            Rectangle rect = Rectangle.Empty;
 
             for (int i = 0; i < _layerCount; i++)
             {
@@ -86,17 +88,17 @@ namespace ClassicUO.Game.Views
                 if (mirror)
                     xx = -(frame.Width - frame.CenterX);
 
-                if (xx < FrameInfo.X)
-                    FrameInfo.X = xx;
+                if (xx < rect.X)
+                    rect.X = xx;
 
-                if (yy < FrameInfo.Y)
-                    FrameInfo.Y = yy;
+                if (yy < rect.Y)
+                    rect.Y = yy;
 
-                if (FrameInfo.EndX < xx + frame.Width)
-                    FrameInfo.EndX = xx + frame.Width;
+                if (rect.Width < xx + frame.Width)
+                    rect.Width = xx + frame.Width;
 
-                if (FrameInfo.EndY < yy + frame.Height)
-                    FrameInfo.EndY = yy + frame.Height;
+                if (rect.Height < yy + frame.Height)
+                    rect.Height = yy + frame.Height;
 
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
@@ -105,16 +107,16 @@ namespace ClassicUO.Game.Views
                 Pick(frame, Bounds, position, objectList);
             }
 
-            FrameInfo.OffsetX = Math.Abs(FrameInfo.X);
-            FrameInfo.OffsetY = Math.Abs(FrameInfo.Y);
-            FrameInfo.Width = FrameInfo.OffsetX + FrameInfo.EndX;
-            FrameInfo.Height = FrameInfo.OffsetY + FrameInfo.EndY;
+            FrameInfo.X = Math.Abs(rect.X);
+            FrameInfo.Y = Math.Abs(rect.Y);
+            FrameInfo.Width = rect.X + rect.Width;
+            FrameInfo.Height = rect.X + rect.Height;
 
 
             int height = 0;
             int centerY = 0;
 
-            if (GameObject.OverHeads.Count > 0)
+            if (GameObject.OverHeads != null && GameObject.OverHeads.Count > 0)
             {
                 GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
 
@@ -127,7 +129,7 @@ namespace ClassicUO.Game.Views
                 MessageOverHead(spriteBatch, overheadPosition, mobile.IsMounted ? 0 : -22);
             }
 
-            if (mobile.DamageList.Count > 0)
+            if (mobile.DamageList != null && mobile.DamageList.Count > 0)
             {
                 if (height == 0 && centerY == 0)
                     GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
@@ -150,7 +152,7 @@ namespace ClassicUO.Game.Views
             {
                 DamageOverhead dmg = mobile.DamageList[i];
                 View v = dmg.View;
-                v.Bounds.X = v.Texture.Width / 2 - 22;
+                v.Bounds.X = (v.Texture.Width >> 1) - 22;
                 v.Bounds.Y = offY + v.Texture.Height - dmg.OffsetY;
                 v.Bounds.Width = v.Texture.Width;
                 v.Bounds.Height = v.Texture.Height;
@@ -191,7 +193,7 @@ namespace ClassicUO.Game.Views
 
             if (mobile.IsHuman)
             {
-                for (int i = 0; i < LayerOrder.USED_LAYER_COUNT; i++)
+                for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
                 {
                     Layer layer = LayerOrder.UsedLayers[dir, i];
 

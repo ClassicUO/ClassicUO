@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -58,7 +59,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (World.InGame)
             {
-                Point center = new Point(_settings.GameWindowX + _settings.GameWindowWidth / 2, _settings.GameWindowY + _settings.GameWindowHeight / 2);
+                Point center = new Point(_settings.GameWindowX + (_settings.GameWindowWidth >> 1), _settings.GameWindowY + (_settings.GameWindowHeight >> 1));
                 Direction direction = DirectionHelper.DirectionFromPoints(center, Mouse.Position);
                 World.Player.Walk(direction, true);
             }
@@ -131,7 +132,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     GameObject obj = _mousePicker.MouseOverObject;
 
-                    if (obj != null && obj.Distance < 3)
+                    if (obj != null && obj.Distance < Constants.DRAG_ITEMS_DISTANCE)
                     {
                         switch (obj)
                         {
@@ -199,7 +200,7 @@ namespace ClassicUO.Game.Scenes
 
                                 _queuedAction = () =>
                                 {
-                                    if (!World.ClientFeatures.TooltipsEnabled)
+                                    if (!World.ClientFlags.TooltipsEnabled)
                                         GameActions.SingleClick(_queuedObject);
                                     GameActions.OpenPopupMenu(_queuedObject);
                                 };
@@ -313,7 +314,7 @@ namespace ClassicUO.Game.Scenes
                                 UIManager.Add(partymemberGump);
                                 PartyMemberGumpStack.Add(mobile);
                                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
-                                UIManager.AttemptDragControl(partymemberGump, new Point(_mousePicker.Position.X + rect.Width / 2, _mousePicker.Position.Y + rect.Height / 2), true);
+                                UIManager.AttemptDragControl(partymemberGump, new Point(_mousePicker.Position.X + (rect.Width >> 1), _mousePicker.Position.Y + (rect.Height >> 1)), true);
                             }
                             else
                             {
@@ -328,7 +329,7 @@ namespace ClassicUO.Game.Scenes
                                 MobileGumpStack.Add(mobile);
                                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
                                 MobileHealthGump currentMobileHealthGump;
-                                UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, Mouse.Position.X - rect.Width / 2, Mouse.Position.Y - rect.Height / 2));
+                                UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, Mouse.Position.X - (rect.Width >> 1), Mouse.Position.Y - (rect.Height >> 1)));
                                 UIManager.AttemptDragControl(currentMobileHealthGump, Mouse.Position, true);
                             }
 
@@ -355,7 +356,18 @@ namespace ClassicUO.Game.Scenes
             if (TargetSystem.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && e.keysym.mod == SDL.SDL_Keymod.KMOD_NONE)
                 TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
 
-          
+            //if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
+            //{
+            //    Task.Run(async () =>
+            //    {
+            //        while (true)
+            //        {
+            //            await Task.Delay(1);
+            //            GameActions.CastSpell(205);
+            //        }
+
+            //    });
+            //}
             // TEST PURPOSE
             /*if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
             {

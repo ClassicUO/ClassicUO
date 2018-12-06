@@ -35,20 +35,20 @@ namespace ClassicUO.Game.GameObjects.Managers
             {
                 k.Update(totalMS, frameMS);
 
-                if (k.IsDisposed || k.OverHeads.Count <= 0 && (k.Effect == null || k.Effect.IsDisposed))
+                if (k.IsDisposed || (k.OverHeads != null && k.OverHeads.Count <= 0) && (k.Effect == null || k.Effect.IsDisposed))
                     _toRemove.Add(k);
             }
 
             if (_toRemove.Count > 0)
             {
-                _toRemove.ForEach( s => s.Dispose());
+                _toRemove.ForEach( s => _activeStatics.Remove(s));
                 _toRemove.Clear();
             }
         }
 
         public void Add(Static stat)
         {
-            if (!stat.IsDisposed && (stat.OverHeads.Count > 0 || stat.Effect != null) && !_activeStatics.Contains(stat))
+            if (!stat.IsDisposed && (stat.OverHeads != null && stat.OverHeads.Count > 0 || stat.Effect != null) && !_activeStatics.Contains(stat))
                 _activeStatics.Add(stat);
         }
     }
