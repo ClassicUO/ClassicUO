@@ -24,14 +24,64 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Utility.Logging;
+
 namespace ClassicUO.Game.System
 {
     public static class Commands
     {
+        private static readonly Dictionary<string, Action> _commands = new Dictionary<string, Action>();
+
 
         public static void Initialize()
         {
-            CommandSystem.Register("info", (sender, args) => CommandHandlers.RequestItemInfo());
+            Register("info", () =>
+            {
+                if (!TargetSystem.IsTargeting)
+                {
+                    TargetSystem.SetTargeting(TargetType.SetTargetClientSide, 6983686, 0);
+                }
+                else
+                {
+                    TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+                }
+            });
         }
+
+
+        public static void Register(string name, Action callback)
+        {
+            name = name.ToLower();
+
+            if (!_commands.ContainsKey(name))
+                _commands.Add(name, callback);
+            else
+                Log.Message(LogTypes.Error, string.Format($"Attempted to register command: '{0}' twice.", name));
+        }
+
+        public static void UnRegister(string name)
+        {
+            name = name.ToLower();
+
+            if (_commands.ContainsKey(name))
+                _commands.Remove(name);
+        }
+
+        public static void UnRegisterAll() => _commands.Clear();        
+
+        public static void Execute(string name)
+        {
+            name = name.ToLower();
+
+            if (_commands.TryGetValue(name, out var action))
+            {
+                action.Invoke();
+            }
+            else
+            {
+                Log.Message(LogTypes.Warning, $"Commad: '{name}' not exists");
+            }
+        }
+
     }
 }

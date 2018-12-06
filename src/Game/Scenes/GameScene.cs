@@ -25,6 +25,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
@@ -134,7 +135,7 @@ namespace ClassicUO.Game.Scenes
                 }
             };
             UIManager.Add(new OptionsGump1());
-
+            Commands.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
         }
 
@@ -146,7 +147,8 @@ namespace ClassicUO.Game.Scenes
 
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
-            _renderTarget?.Dispose();            
+            _renderTarget?.Dispose();
+            Commands.UnRegisterAll();
             UIManager.SaveGumps();
             UIManager.Clear();
             CleaningResources();
@@ -223,7 +225,8 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (x < minX || x > maxX || y < minY || y > maxY)
                             break;
-                         Tile tile =  World.Map.GetTile(x, y);
+
+                        Tile tile =  World.Map.GetTile(x, y);
 
                         if (tile != null)
                         {

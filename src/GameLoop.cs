@@ -104,8 +104,7 @@ namespace ClassicUO
             Service.Register(_sbUI = new SpriteBatchUI(GraphicsDevice));
             Service.Register(_uiManager = new UIManager());
 
-            //Register Command Stack
-            Commands.Initialize();
+            //Register Command Stack          
             Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);

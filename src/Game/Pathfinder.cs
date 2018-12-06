@@ -731,17 +731,15 @@ namespace ClassicUO.Game
                 if (_openList[i] == null)
                     _openList[i] = new PathNode();
                 _openList[i].Reset();
-            }
 
-            for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
-            {
                 if (_closedList[i] == null)
                     _closedList[i] = new PathNode();
                 _closedList[i].Reset();
             }
 
-            int playerX = World.Player.Position.X;
-            int playerY = World.Player.Position.Y;
+
+            int playerX = World.Player.X;
+            int playerY = World.Player.Y;
             //sbyte playerZ = 0;
             //Direction playerDir = Direction.NONE;
 

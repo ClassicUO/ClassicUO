@@ -246,23 +246,26 @@ namespace ClassicUO.Game.GameObjects
                 if (base.Graphic != value)
                 {
                     base.Graphic = value;
-                    _itemData = null;
+                    //_itemData = null;
                     Name = ItemData.Name;
                 }
             }
         }
 
-        private StaticTiles? _itemData;
+        //private StaticTiles? _itemData;
 
-        public StaticTiles ItemData
-        {
-            get
-            {
-                if (!_itemData.HasValue)
-                    _itemData = TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
-                return _itemData.Value;
-            }
-        } 
+        //public StaticTiles ItemData
+        //{
+        //    get
+        //    {
+        //        if (!_itemData.HasValue)
+        //            _itemData = TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
+        //        return _itemData.Value;
+        //    }
+        //}
+
+        public StaticTiles ItemData => TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
+
 
         public override Position Position
         {
