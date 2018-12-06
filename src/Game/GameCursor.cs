@@ -318,7 +318,7 @@ namespace ClassicUO.Game
                 }
             }
 
-            if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl != null && _uiManager.MouseOverControl.HasTooltip)
+            if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl != null && _uiManager.MouseOverControl.HasTooltip && !Mouse.IsDragging)
             {
                 if (_tooltip.Text != _uiManager.MouseOverControl.Tooltip) _tooltip.Clear();
 

@@ -139,12 +139,13 @@ namespace ClassicUO.Game.Map
                 default:
 
                 {
-                    IDynamicItem dyn1 = (IDynamicItem) obj;
 
-                    if (TileData.IsBackground(dyn1.ItemData.Flags))
+                    StaticTiles data = TileData.StaticData[obj.Graphic];
+
+                    if (TileData.IsBackground(data.Flags))
                         priorityZ--;
 
-                    if (dyn1.ItemData.Height > 0)
+                    if (data.Height > 0)
                         priorityZ++;
                 }
 

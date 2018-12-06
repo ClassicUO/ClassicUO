@@ -25,6 +25,8 @@ using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.Map
 {
     public sealed class Chunk : IDisposable
@@ -43,6 +45,7 @@ namespace ClassicUO.Game.Map
 
             LastAccessTime = CoreGame.Ticks + 5000;
         }
+
 
         public ushort X { get; }
         public ushort Y { get; }

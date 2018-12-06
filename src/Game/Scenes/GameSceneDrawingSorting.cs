@@ -153,67 +153,70 @@ namespace ClassicUO.Game.Scenes
         {
             for (; obj != null; obj = obj.Right)
             {
-                //GameObject obj = objList[i];
-
                 if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
                     continue;
 
-                if (_updateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
+                if (_updateDrawPosition || obj.IsPositionChanged)
                     obj.UpdateRealScreenPosition(_offset);
+
                 obj.UseInRender = 0xFF;
-                int drawX = (int) obj.RealScreenPosition.X;
-                int drawY = (int) obj.RealScreenPosition.Y;
+
+                float drawX = obj.RealScreenPosition.X;
+                float drawY = obj.RealScreenPosition.Y;
 
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
                     break;
                 int z = obj.Z;
                 int maxObjectZ = obj.PriorityZ;
 
-                switch (obj)
+                bool ismobile = false;
+
+                if (obj is Mobile)
                 {
-                    case Mobile _:
-                        maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
-
-                        break;
-                    case IDynamicItem dyn:
-
-                        if (_noDrawRoofs && TileData.IsRoof( dyn.ItemData.Flags)) continue;
-                        maxObjectZ += dyn.ItemData.Height;
-
-                        break;
+                    maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
+                    ismobile = true;
+                }
+                else
+                {
+                    StaticTiles data = TileData.StaticData[obj.Graphic];
+                    if (_noDrawRoofs && TileData.IsRoof(data.Flags))
+                        continue;
+                    maxObjectZ += data.Height;
                 }
 
                 if (maxObjectZ > maxZ)
                     break;
                 obj.CurrentRenderIndex = _renderIndex;
 
-                if (obj.Graphic != 0x2006 && obj is IDynamicItem dyn2 && TileData.IsInternal( dyn2.ItemData.Flags))
+                bool iscorpse = obj.Graphic == 0x2006;
+
+                if (!iscorpse && TileData.IsInternal(TileData.StaticData[obj.Graphic].Flags))
                     continue;
 
-                if (!(obj is Land) && z >= _maxZ)
-                    continue;
-                int testMinZ = drawY + z * 4;
-                int testMaxZ = drawY;
+                bool island = !iscorpse && !ismobile && obj is Land;
 
-                if (obj is Land t && t.IsStretched)
-                    testMinZ -= t.MinZ * 4;
+                if (!island && z >= _maxZ)
+                    continue;
+
+                int testMinZ = (int) drawY + z * 4;
+                int testMaxZ = (int) drawY;
+
+                if (island)
+                {
+                    Land t = (Land) obj;
+                    if (t.IsStretched)
+                        testMinZ -= t.MinZ * 4;
+                    else
+                        testMinZ = testMaxZ;
+                }
                 else
                     testMinZ = testMaxZ;
 
                 if (testMinZ < _minPixel.Y || testMaxZ > _maxPixel.Y)
                     continue;
 
-                switch (obj)
-                {
-                    case Mobile mob:
-                        AddOffsetCharacterTileToRenderList(mob, useObjectHandles);
-
-                        break;
-                    case Item item when item.IsCorpse:
-                        AddOffsetCharacterTileToRenderList(item, useObjectHandles);
-
-                        break;
-                }
+                if (ismobile || iscorpse)
+                    AddOffsetCharacterTileToRenderList((Entity)obj, useObjectHandles);
 
                 if (_renderListCount >= _renderList.Length)
                 {
