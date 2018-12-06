@@ -18,59 +18,95 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public class House : Item
+    public static class HouseManager
     {
-        public House(Serial serial) : base(serial)
+        private static readonly Dictionary<Serial, House> _houses = new Dictionary<Serial, House>();
+
+        public static void Add(Serial serial, House revision)
         {
-            Items = new List<Static>();
+            _houses[serial] = revision;
         }
 
-        public uint Revision { get; set; }
-
-        public new List<Static> Items { get; }
-
-        public void GenerateCustom()
+        public static bool TryGetHouse(Serial serial, out House house)
         {
-            //foreach (Static s in Items)
-            //{
-            //    //Tile tile = World.Map.GetTile(s.Position.X, s.Position.Y);
-            //    //tile.AddGameObject(s);
-            //}
+            return _houses.TryGetValue(serial, out house);
         }
 
-        public void GenerateOriginal(Multi multi)
+        public static void Remove(Serial serial) => _houses.Remove(serial);
+
+        public static bool Exists(Serial serial) => _houses.ContainsKey(serial);
+
+        public static void Clear() => _houses.Clear();
+    }
+
+    public sealed class House : IEquatable<Serial>, IDisposable
+    {
+        public House(Serial serial, uint revision, bool isCustom)
         {
-            foreach (MultiComponent c in multi.Components)
+            Serial = serial;
+            Revision = revision;
+            IsCustom = isCustom;
+        }
+
+        public Serial Serial { get; }
+        public uint Revision { get; private set; }
+        public List<Static> Components { get; } = new List<Static>();
+        public bool IsCustom { get; }
+
+        public void SetRevision(uint revision)
+        {
+            Revision = revision;
+        }
+
+        public void Generate()
+        {
+            if (IsCustom)
             {
-                //ref Tile tile = ref World.Map.GetTile(c.Position.X, c.Position.Y);
-                //tile.AddGameObject();
-
-                new Static(c.Graphic, 0, 0)
-                {
-                    Position = c.Position
-                };
-
-                //tile.AddGameObject(new Static(c.Graphic, 0, 0)
+                //foreach (Static component in Components)
                 //{
-                //    Position = c.Position
-                //});
+                    
+                //}
+            }
+            else
+            {
+               
+                Item item = World.Items.Get(Serial);
+
+                if (item != null)
+                {
+                    ClearComponents();
+
+                    foreach (MultiComponent component in item.Multi.Components)
+                    {
+                        new Static(component.Graphic, 0, 0)
+                        {
+                            Position = component.Position
+                        };                        
+                    }
+                }
             }
         }
 
-        public override void Dispose()
+        public bool Equals(Serial other)
         {
-            Clear();
-            base.Dispose();
+            return Serial == other;
         }
 
-        public void Clear()
+        public void ClearComponents()
         {
-            Items.ForEach(s => s.Dispose());
-            Items.Clear();
+            Components.ForEach(s => s.Dispose());
+        }
+
+        public void Dispose()
+        {
+            Components.ForEach(s => s.Dispose());
+            Components.Clear();
         }
     }
 }

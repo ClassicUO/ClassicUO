@@ -1948,17 +1948,27 @@ namespace ClassicUO.Network
                 case 0x1D: // house revision state
                     serial = p.ReadUInt();
                     uint revision = p.ReadUInt();
-                    House house = World.GetHouse(serial);
 
-                    if (house != null && house.Revision == revision)
+                    if (HouseManager.TryGetHouse(serial, out House house) && house.Revision == revision)
                     {
-                        if (house.Items.Count > 0)
-                            house.GenerateCustom();
-                        else
-                            house.GenerateOriginal(World.Items.Get(house.Serial).Multi);
+                        house.Generate();
                     }
                     else
+                    {
                         NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
+                    }
+
+                    //House house = World.GetHouse(serial);
+
+                    //if (house != null && house.Revision == revision)
+                    //{
+                    //    if (house.Items.Count > 0)
+                    //        house.GenerateCustom();
+                    //    else
+                    //        house.GenerateOriginal(World.Items.Get(house.Serial).Multi);
+                    //}
+                    //else
+                    //    NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
 
                     break;
                 //===========================================================================================
@@ -2120,10 +2130,17 @@ namespace ClassicUO.Network
 
             if (multi == null) return;
             p.Skip(4);
-            House house = World.GetOrCreateHouse(foundation);
-            house.Position = foundation.Position;
-            house.Revision = revision;
-            house.Clear();
+
+            if (!HouseManager.TryGetHouse(foundation, out House house))
+            {
+                house = new House(foundation, revision, true);
+                HouseManager.Add(foundation, house);
+            }
+            else
+            {
+                house.Dispose();
+            }
+
             short minX = multi.MinX;
             short minY = multi.MinY;
             short maxY = multi.MaxY;
@@ -2167,7 +2184,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    house.Items.Add(new Static(id, 0, 0)
+                                    house.Components.Add(new Static(id, 0, 0)
                                     {
                                         Position = new Position((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y), (sbyte) (foundation.Position.Z + z))
                                     });
@@ -2193,7 +2210,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    house.Items.Add(new Static(id, 0, 0)
+                                    house.Components.Add(new Static(id, 0, 0)
                                     {
                                         Position = new Position((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y), (sbyte) (foundation.Position.Z + z))
                                     });
@@ -2241,7 +2258,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    house.Items.Add(new Static(id, 0, 0)
+                                    house.Components.Add(new Static(id, 0, 0)
                                     {
                                         Position = new Position((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y), (sbyte) (foundation.Position.Z + z))
                                     });
@@ -2252,9 +2269,6 @@ namespace ClassicUO.Network
                     }
                 }
             }
-
-            house.GenerateCustom();
-            World.AddOrUpdateHouse(house);
         }
 
         private static void CharacterTransferLog(Packet p)

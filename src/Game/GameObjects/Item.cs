@@ -175,6 +175,12 @@ namespace ClassicUO.Game.GameObjects
                             int count = IO.Resources.Multi.GetCount(Graphic);
                             MultiComponent[] components = new MultiComponent[count];
 
+                            if (!HouseManager.TryGetHouse(Serial, out House house))
+                            {
+                                house = new House(Serial, 0, false);
+                                HouseManager.Add(Serial, house);
+                            }
+
                             for (int i = 0; i < count; i++)
                             {
                                 MultiBlock pbm = IO.Resources.Multi.GetMulti(i);
@@ -184,6 +190,11 @@ namespace ClassicUO.Game.GameObjects
                                 if (pbm.Y < minY) minY = pbm.Y;
                                 if (pbm.Y > maxY) maxY = pbm.Y;
                                 components[i] = component;
+
+                                house.Components.Add(new Static(component.Graphic, 0, 0)
+                                {
+                                    Position = component.Position
+                                });
                             }
 
                             Multi = new Multi(this)
@@ -194,9 +205,6 @@ namespace ClassicUO.Game.GameObjects
                                 MaxY = maxY,
                                 Components = components
                             };
-                            House house = World.GetOrCreateHouse(Serial);
-                            house.GenerateOriginal(Multi);
-                            World.AddOrUpdateHouse(house);
                         }
                     }
                     else
@@ -246,25 +254,23 @@ namespace ClassicUO.Game.GameObjects
                 if (base.Graphic != value)
                 {
                     base.Graphic = value;
-                    //_itemData = null;
+                    _itemData = null;
                     Name = ItemData.Name;
                 }
             }
         }
 
-        //private StaticTiles? _itemData;
+        private StaticTiles? _itemData;
 
-        //public StaticTiles ItemData
-        //{
-        //    get
-        //    {
-        //        if (!_itemData.HasValue)
-        //            _itemData = TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
-        //        return _itemData.Value;
-        //    }
-        //}
-
-        public StaticTiles ItemData => TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
+        public StaticTiles ItemData
+        {
+            get
+            {
+                if (!_itemData.HasValue)
+                    _itemData = TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
+                return _itemData.Value;
+            }
+        }
 
 
         public override Position Position

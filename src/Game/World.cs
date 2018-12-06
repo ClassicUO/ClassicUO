@@ -31,8 +31,6 @@ namespace ClassicUO.Game
 {
     public static class World
     {
-        private static readonly ConcurrentDictionary<Serial, House> _houses = new ConcurrentDictionary<Serial, House>();
-
         public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
 
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
@@ -109,12 +107,13 @@ namespace ClassicUO.Game
 
                     if (item.Distance > ViewRange && item.OnGround)
                     {
-                        if (_houses.ContainsKey(item))
+                        if (HouseManager.TryGetHouse(item, out House house))
                         {
-                            if (item.Distance > ViewRange * 2 + 5)
+                            if (item.Distance > 50)
                             {
+                                house.Dispose();
                                 RemoveItem(item);
-                                _houses.TryRemove(item, out _);
+                                HouseManager.Remove(item);
                             }
                         }
                         else
@@ -124,38 +123,7 @@ namespace ClassicUO.Game
                     if (item.IsDisposed)
                         Items.Remove(item);
                 }
-
-                //foreach (var k in _houses)
-                //{
-                //    if (k.Value.Distance > ViewRange * 2 + 5)
-                //        k.Value.Dispose();
-
-                //    if (k.Value.IsDisposed)
-                //        _houses.TryRemove(k.Key, out _);
-                //}
             }
-        }
-
-        public static House GetHouse(Serial serial)
-        {
-            _houses.TryGetValue(serial, out House h);
-
-            return h;
-        }
-
-        public static House GetOrCreateHouse(Serial serial)
-        {
-            return _houses.TryGetValue(serial, out House house) ? house : new House(serial);
-        }
-
-        public static void AddOrUpdateHouse(House house)
-        {
-            _houses.TryAdd(house.Serial, house);
-        }
-
-        public static void RemoveHouse(Serial house)
-        {
-            _houses.TryRemove(house, out House h);
         }
 
         public static bool Contains(Serial serial)
@@ -238,9 +206,9 @@ namespace ClassicUO.Game
 
         public static void Clear()
         {
+            HouseManager.Clear();
             Items.Clear();
             Mobiles.Clear();
-            _houses.Clear();
             Player.Dispose();
             Player = null;
             Map.Dispose();
