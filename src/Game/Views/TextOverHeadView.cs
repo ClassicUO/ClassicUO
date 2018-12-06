@@ -45,6 +45,7 @@ namespace ClassicUO.Game.Views
                 Font = font,
                 IsUnicode = isunicode,
                 FontStyle = style,
+                SaveHitMap = true,
                 Text = parent.Text
             };
             Texture = _text.Texture;

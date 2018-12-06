@@ -105,6 +105,8 @@ namespace ClassicUO.Renderer
 
         public bool IsPartialHue { get; set; }
 
+        public bool SaveHitMap { get; set; }
+
         public bool IsDisposed { get; private set; }
 
         public int Width { get; private set; }
@@ -162,18 +164,15 @@ namespace ClassicUO.Renderer
             if (IsHTML)
                 Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
             bool ispartial = false;
-            //Fonts.FontTextureInfo? info;
 
             if (IsUnicode)
-                Texture = Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle);
+                Texture = Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle, SaveHitMap);
             else
-                Texture = Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, out ispartial);
+                Texture = Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, out ispartial, SaveHitMap);
             IsPartialHue = ispartial;
 
             if (Texture != null)
             {
-                //Texture = new FontTexture(info.Value.Width, info.Value.Height, info.Value.LinesCount, info.Value.Links);
-                //Texture.SetData(info.Value.Pixels);
                 Width = Texture.Width;
                 Height = Texture.Height;
                 Links = Texture.Links;

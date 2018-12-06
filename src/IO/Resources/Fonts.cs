@@ -246,7 +246,7 @@ namespace ClassicUO.IO.Resources
             return textHeight;
         }
 
-        public static FontTexture GenerateASCII(byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial)
+        public static FontTexture GenerateASCII(byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap)
         {
             int linesCount = 0;
             isPartial = false;
@@ -263,11 +263,11 @@ namespace ClassicUO.IO.Resources
                 {
                     string newstr = GetTextByWidthASCII(font, str, width, (flags & UOFONT_CROPPED) != 0);
 
-                    return GeneratePixelsASCII(font, newstr, color, width, align, flags, out isPartial);
+                    return GeneratePixelsASCII(font, newstr, color, width, align, flags, out isPartial, saveHitmap);
                 }
             }
 
-            return GeneratePixelsASCII(font, str, color, width, align, flags, out isPartial);
+            return GeneratePixelsASCII(font, str, color, width, align, flags, out isPartial, saveHitmap);
         }
 
         private static string GetTextByWidthASCII(byte font, string str, int width, bool isCropped)
@@ -296,7 +296,7 @@ namespace ClassicUO.IO.Resources
             return sb.ToString();
         }
 
-        private static unsafe FontTexture GeneratePixelsASCII(byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial)
+        private static FontTexture GeneratePixelsASCII(byte font, string str, ushort color, int width, TEXT_ALIGN_TYPE align, ushort flags, out bool isPartial, bool saveHitmap)
         {
             isPartial = false;
 
@@ -425,18 +425,11 @@ namespace ClassicUO.IO.Resources
             }
 
             FontTexture ftexture = new FontTexture(width, height, linesCount, new List<WebLinkRect>());
-            //ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) pData, blocksize);
-            ftexture.SetDataHitMap32(pData);
-
-            //FontTextureInfo fontTextureInfo = new FontTextureInfo()
-            //{
-            //    Pixels = pData,
-            //    Width = width,
-            //    Height = height,
-            //    LinesCount = linesCount,
-            //    Links = new List<WebLinkRect>()
-            //};
-
+            if (saveHitmap)
+                ftexture.SetDataHitMap32(pData);
+            else
+                ftexture.SetData(pData);
+;
             return ftexture;
         }
 
@@ -653,7 +646,7 @@ namespace ClassicUO.IO.Resources
             _HTMLBackgroundCanBeColored = backgroundCanBeColored;
         }
 
-        public static FontTexture GenerateUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        public static FontTexture GenerateUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap)
         {
             if ((flags & UOFONT_FIXED) != 0 || (flags & UOFONT_CROPPED) != 0)
             {
@@ -670,11 +663,11 @@ namespace ClassicUO.IO.Resources
                 {
                     string newstring = GetTextByWidthUnicode(font, str, width, (flags & UOFONT_CROPPED) != 0);
 
-                    return GeneratePixelsUnicode(font, newstring, color, cell, width, align, flags);
+                    return GeneratePixelsUnicode(font, newstring, color, cell, width, align, flags, saveHitmap);
                 }
             }
 
-            return GeneratePixelsUnicode(font, str, color, cell, width, align, flags);
+            return GeneratePixelsUnicode(font, str, color, cell, width, align, flags, saveHitmap);
         }
 
         private static unsafe string GetTextByWidthUnicode(byte font, string str, int width, bool isCropped)
@@ -979,7 +972,7 @@ namespace ClassicUO.IO.Resources
             return info;
         }
 
-        private static unsafe FontTexture GeneratePixelsUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags)
+        private static unsafe FontTexture GeneratePixelsUnicode(byte font, string str, ushort color, byte cell, int width, TEXT_ALIGN_TYPE align, ushort flags, bool saveHitmap)
         {
             if (font >= 20 || _unicodeFontAddress[font] == IntPtr.Zero)
                 return null;
@@ -1440,16 +1433,10 @@ namespace ClassicUO.IO.Resources
             }
 
             FontTexture ftexture = new FontTexture(width, height, linesCount, links);
-            //ftexture.SetDataPointerEXT(0, ftexture.Bounds, (IntPtr) pData, blocksize);
-            ftexture.SetDataHitMap32(pData);
-            //FontTextureInfo fontTextureInfo = new FontTextureInfo()
-            //{
-            //    Pixels = pData,
-            //    Width =  width,
-            //    Height = height,
-            //    LinesCount = linesCount,
-            //    Links = links
-            //};
+            if (saveHitmap)
+                ftexture.SetDataHitMap32(pData);
+            else
+                ftexture.SetData(pData);
 
             return ftexture;
         }
