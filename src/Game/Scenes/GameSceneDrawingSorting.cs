@@ -166,34 +166,35 @@ namespace ClassicUO.Game.Scenes
 
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
                     break;
+
                 int z = obj.Z;
                 int maxObjectZ = obj.PriorityZ;
 
                 bool ismobile = false;
 
-                if (obj is Mobile)
+                switch (obj)
                 {
-                    maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
-                    ismobile = true;
-                }
-                else
-                {
-                    StaticTiles data = TileData.StaticData[obj.Graphic];
-                    if (_noDrawRoofs && TileData.IsRoof(data.Flags))
-                        continue;
-                    maxObjectZ += data.Height;
+                    case Mobile _:
+                        maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
+                        ismobile = true;
+
+                        break;
+                    case IDynamicItem dyn when _noDrawRoofs && TileData.IsRoof(dyn.ItemData.Flags): continue;
+                    case IDynamicItem dyn: maxObjectZ += dyn.ItemData.Height;
+
+                        break;
                 }
 
                 if (maxObjectZ > maxZ)
                     break;
                 obj.CurrentRenderIndex = _renderIndex;
 
-                bool iscorpse = obj.Graphic == 0x2006;
+                bool iscorpse = obj is Item item && item.IsCorpse;
 
-                if (!iscorpse && TileData.IsInternal(TileData.StaticData[obj.Graphic].Flags))
+                if (!iscorpse && obj is IDynamicItem dyn2 && TileData.IsInternal(dyn2.ItemData.Flags))
                     continue;
 
-                bool island = !ismobile && obj is Land;
+                bool island = !ismobile && !iscorpse && obj is Land;
 
                 if (!island && z >= _maxZ)
                     continue;
@@ -229,6 +230,7 @@ namespace ClassicUO.Game.Scenes
                 _renderListCount++;
             }
         }
+
 
         private void AddOffsetCharacterTileToRenderList(Entity entity, bool useObjectHandles)
         {
