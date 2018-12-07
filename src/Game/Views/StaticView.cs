@@ -54,10 +54,10 @@ namespace ClassicUO.Game.Views
                 {
                     ArtTexture texture = Art.GetStaticTexture(GameObject.Graphic);
                     Texture = texture;
-                    Bounds = new Rectangle(Texture.Width / 2 - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+                    Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
 
-                    FrameInfo.OffsetX = texture.ImageRectangle.X;
-                    FrameInfo.OffsetY = texture.ImageRectangle.Y;
+                    FrameInfo.X = texture.ImageRectangle.X;
+                    FrameInfo.Y = texture.ImageRectangle.Y;
                     FrameInfo.Width = texture.ImageRectangle.Width;
                     FrameInfo.Height = texture.ImageRectangle.Height;
                 }
@@ -87,16 +87,16 @@ namespace ClassicUO.Game.Views
                         {
                             if (_timeToProcessAlpha < CoreGame.Ticks)
                             {
-                                _timeToProcessAlpha = CoreGame.Ticks + 50;
+                                _timeToProcessAlpha = CoreGame.Ticks + Constants.ALPHA_TIME;
                                 if (!_isProcessingAlpha)
                                 {
                                     _alpha += .1f;
                                 }
 
-                                if (_alpha >= .6f)
+                                if (_alpha >= Constants.FOLIAGE_ALPHA)
                                 {
                                     _isProcessingAlpha = true;
-                                    _alpha = .6f;
+                                    _alpha = Constants.FOLIAGE_ALPHA;
                                 }
                             }
                         }
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Views
                             {
                                 if (_timeToProcessAlpha < CoreGame.Ticks)
                                 {
-                                    _timeToProcessAlpha = CoreGame.Ticks + 50;
+                                    _timeToProcessAlpha = CoreGame.Ticks + Constants.ALPHA_TIME;
 
 
                                     if (_isProcessingAlpha)
@@ -127,7 +127,7 @@ namespace ClassicUO.Game.Views
                         {
                             if (_timeToProcessAlpha < CoreGame.Ticks)
                             {
-                                _timeToProcessAlpha = CoreGame.Ticks + 50;
+                                _timeToProcessAlpha = CoreGame.Ticks + Constants.ALPHA_TIME;
 
 
                                 if (_isProcessingAlpha)

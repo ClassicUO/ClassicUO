@@ -51,18 +51,7 @@ namespace ClassicUO.Game.GameObjects
 
     public partial class Mobile : Entity
     {
-        protected const int MAX_STEP_COUNT = 5;
-        protected const int TURN_DELAY = 100;
-        protected const int WALKING_DELAY = 750;
-        protected const int PLAYER_WALKING_DELAY = 150;
-        protected const int DEFAULT_CHARACTER_HEIGHT = 16;
-
-        //protected override void OnPositionChanged(object sender, EventArgs e)
-        //{
-        //    base.OnPositionChanged(sender, e);
-        //    //Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
-        //}
-        private readonly List<DamageOverhead> _damageTextList = new List<DamageOverhead>(5);
+        private Lazy< List<DamageOverhead> > _damageTextList = new Lazy<List<DamageOverhead>>( () => new List<DamageOverhead>());
         private ushort _hits;
         private ushort _hitsMax;
         private bool _isDead;
@@ -74,10 +63,17 @@ namespace ClassicUO.Game.GameObjects
         private RaceType _race;
         private ushort _stamina;
         private ushort _staminaMax;
+        private long _lastAnimationIdleDelay;
 
         public Mobile(Serial serial) : base(serial)
         {
             _lastAnimationChangeTime = CoreGame.Ticks;
+            CalculateRandomIdleTime();
+        }
+
+        private void CalculateRandomIdleTime()
+        {
+            _lastAnimationIdleDelay = CoreGame.Ticks + (30000 + RandomHelper.GetValue(0, 30000));
         }
 
         public Deque<Step> Steps { get; } = new Deque<Step>();
@@ -264,13 +260,13 @@ namespace ClassicUO.Game.GameObjects
 
         public long LastStepTime { get; set; }
 
-        protected virtual bool IsWalking => LastStepTime > CoreGame.Ticks - WALKING_DELAY;
+        protected virtual bool IsWalking => LastStepTime > CoreGame.Ticks - Constants.WALKING_DELAY;
 
         public byte AnimationGroup { get; set; } = 0xFF;
 
         internal bool IsMoving => Steps.Count > 0;
 
-        public IReadOnlyList<DamageOverhead> DamageList => _damageTextList;
+        public IReadOnlyList<DamageOverhead> DamageList => _damageTextList.IsValueCreated ? _damageTextList.Value : null;
 
         public event EventHandler HitsChanged;
 
@@ -291,13 +287,20 @@ namespace ClassicUO.Game.GameObjects
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
+
+            if (_lastAnimationIdleDelay < CoreGame.Ticks)
+                SetIdleAnimation();
+
             ProcessAnimation();
 
-            for (int i = 0; i < _damageTextList.Count; i++)
+            if (_damageTextList.IsValueCreated)
             {
-                DamageOverhead damage = _damageTextList[i];
-                damage.Update(totalMS, frameMS);
-                if (damage.IsDisposed) _damageTextList.RemoveAt(i--);
+                for (int i = 0; i < _damageTextList.Value.Count; i++)
+                {
+                    DamageOverhead damage = _damageTextList.Value[i];
+                    damage.Update(totalMS, frameMS);
+                    if (damage.IsDisposed) _damageTextList.Value.RemoveAt(i--);
+                }
             }
         }
 
@@ -305,9 +308,9 @@ namespace ClassicUO.Game.GameObjects
         {
             DamageOverhead overhead = new DamageOverhead(this, damage.ToString(), hue: (Hue) (this == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500);
 
-            if (_damageTextList.Count >= 5)
-                _damageTextList.RemoveAt(_damageTextList.Count - 1);
-            _damageTextList.Insert(0, overhead);
+            if (_damageTextList.Value.Count >= 5)
+                _damageTextList.Value.RemoveAt(_damageTextList.Value.Count - 1);
+            _damageTextList.Value.Insert(0, overhead);
         }
 
         protected override void OnProcessDelta(Delta d)
@@ -326,7 +329,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool EnqueueStep(int x, int y, sbyte z, Direction direction, bool run)
         {
-            if (Steps.Count >= MAX_STEP_COUNT)
+            if (Steps.Count >= Constants.MAX_STEP_COUNT)
                 return false;
 
             //Direction dirRun = run ? Direction.Running : Direction.North;
@@ -440,11 +443,45 @@ namespace ClassicUO.Game.GameObjects
             AnimationDirection = frameDirection;
             AnimationFromServer = false;
             _lastAnimationChangeTime = CoreGame.Ticks;
+            CalculateRandomIdleTime();
         }
+
+        public void SetIdleAnimation()
+        {
+            CalculateRandomIdleTime();
+
+            if (Equipment[(int) Layer.Mount] == null)
+            {
+                AnimIndex = 0;
+                AnimationFrameCount = 0;
+                AnimationInterval = 1;
+                AnimationRepeatMode = 1;
+                AnimationDirection = true;
+                AnimationRepeat = false;
+                AnimationFromServer = true;
+
+                byte index = (byte) Animations.GetGroupIndex(GetMountAnimation());
+
+                AnimationGroup = _animationIdle[index - 1, RandomHelper.GetValue(0, 2)];
+            }
+        }
+
+        private static readonly byte[,] _animationIdle =
+        {
+            {
+                (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1, (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_2, (byte) LOW_ANIMATION_GROUP.LAG_FIDGET_1
+            },
+            {
+                (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_2, (byte) HIGHT_ANIMATION_GROUP.HAG_FIDGET_1
+            },
+            {
+                (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2, (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3
+            }
+        };
 
         protected virtual bool NoIterateAnimIndex()
         {
-            return LastStepTime > (uint) (CoreGame.Ticks - WALKING_DELAY) && Steps.Count <= 0;
+            return LastStepTime > (uint) (CoreGame.Ticks - Constants.WALKING_DELAY) && Steps.Count <= 0;
         }
 
         public override void ProcessAnimation()
@@ -467,8 +504,8 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (Service.Get<Settings>().SmoothMovement)
                         {
-                            float framesPerTile = maxDelay / CHARACTER_ANIMATION_DELAY;
-                            float frameOffset = delay / CHARACTER_ANIMATION_DELAY;
+                            float framesPerTile = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                            float frameOffset = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
                             float x = frameOffset;
                             float y = frameOffset;
                             MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
@@ -516,7 +553,7 @@ namespace ClassicUO.Game.GameObjects
                     frameIndex--;
                 else
                     frameIndex++;
-                Graphic id = GetGraphicForAnimation();
+                Graphic id = GetMountAnimation();
                 int animGroup = GetGroupForAnimation(this, id);
 
                 if (animGroup == 64 || animGroup == 65)
@@ -543,7 +580,7 @@ namespace ClassicUO.Game.GameObjects
 
                 bool mirror = false;
                 Animations.GetAnimDirection(ref dir, ref mirror);
-                int currentDelay = (int) CHARACTER_ANIMATION_DELAY;
+                int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
                 if (id < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
@@ -551,7 +588,7 @@ namespace ClassicUO.Game.GameObjects
                     Animations.AnimID = id;
                     Animations.AnimGroup = (byte) animGroup;
                     Animations.Direction = dir;
-                    if (direction.FrameCount == 0) Animations.LoadDirectionGroup(ref direction);
+                    if ((direction.FrameCount == 0 || direction.Frames == null)) Animations.LoadDirectionGroup(ref direction);
 
                     if (direction.Address != 0 || direction.IsUOP)
                     {

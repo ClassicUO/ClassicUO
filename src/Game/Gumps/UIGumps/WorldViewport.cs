@@ -54,6 +54,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return base.Draw(spriteBatch, position, hue);
         }
 
+        public override void Dispose()
+        {
+            base.Dispose();
+            Service.Unregister<WorldViewport>();
+        }
+
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             UIManager.KeyboardFocusControl = Service.Get<ChatControl>().GetFirstControlAcceptKeyboardInput();

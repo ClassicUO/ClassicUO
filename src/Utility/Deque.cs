@@ -372,7 +372,7 @@ namespace ClassicUO.Utility
                     RemoveFromBack();
                 else
                 {
-                    if (index < Count / 2)
+                    if (index < (Count >> 1))
                     {
                         int arrayIndex = GetArrayIndex(index);
                         // shift the array from 0 to before the index to remove by 1 to the right
@@ -393,7 +393,7 @@ namespace ClassicUO.Utility
                         int arrayIndex = GetArrayIndex(index);
                         // shift the array from the center of the array to before the index to remove by 1 to the right
                         // the element to remove is replaced by the copy
-                        int arrayCenterIndex = _items.Length / 2;
+                        int arrayCenterIndex = _items.Length >> 1;
                         Array.Copy(_items, arrayCenterIndex, _items, arrayCenterIndex + 1, _items.Length - 1 - arrayIndex);
                         // the last element in the array is now either a duplicate or it's default value
                         // to be safe set it to it's default value regardless of circumstance

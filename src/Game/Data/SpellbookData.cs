@@ -100,9 +100,9 @@ namespace ClassicUO.Game.Data
             foreach (Item item in spellbook.Items)
             {
                 int index = (item.Amount - offset) & 0x0000003F;
-                int circle = index / 8;
+                int circle = index >> 3;
                 index %= 8;
-                index = (3 - circle % 4 + circle / 4 * 4) * 8 + index;
+                index = (3 - circle % 4 + (circle >> 2) * 4) * 8 + index;
                 field |= (ulong) 1 << index;
             }
         }

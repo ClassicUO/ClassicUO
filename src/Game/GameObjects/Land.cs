@@ -113,9 +113,9 @@ namespace ClassicUO.Game.GameObjects
         {
             switch (direction)
             {
-                case 1: return Rectangle.Bottom / 4;
-                case 2: return Rectangle.Right / 4;
-                case 3: return Rectangle.Top / 4;
+                case 1: return Rectangle.Bottom >> 2;
+                case 2: return Rectangle.Right >> 2;
+                case 3: return Rectangle.Top >> 2;
                 default: return Position.Z;
             }
         }

@@ -43,6 +43,8 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             X = x;
             Y = y;
+            Width = 19;
+            Height = 20;
             _mobile = mobile;
             _layer = layer;
 
@@ -56,6 +58,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 AcceptMouseInput = false
             });
             AcceptMouseInput = true;
+
+            WantUpdateSize = false;
         }
 
         public Item Item { get; private set; }
@@ -92,8 +96,8 @@ namespace ClassicUO.Game.Gumps.Controls
                         HighlightOnMouseOver = false
                     });
                     ArtTexture texture = (ArtTexture) _itemGump.Texture;
-                    int offsetX = (13 - texture.ImageRectangle.Width) / 2;
-                    int offsetY = (14 - texture.ImageRectangle.Height) / 2;
+                    int offsetX = (13 - texture.ImageRectangle.Width) >> 1;
+                    int offsetY = (14 - texture.ImageRectangle.Height) >> 1;
                     int tileX = 2;
                     int tileY = 3;
                     tileX -= texture.ImageRectangle.X - offsetX;
@@ -171,7 +175,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private void AttempPickUp()
         {
             Rectangle bounds = Art.GetStaticTexture(Item.DisplayedGraphic).Bounds;
-            GameActions.PickUp(Item, bounds.Width / 2, bounds.Height / 2);
+            GameActions.PickUp(Item, bounds.Width >> 1, bounds.Height >> 1);
         }
     }
 }

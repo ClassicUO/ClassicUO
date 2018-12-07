@@ -33,7 +33,5 @@ namespace ClassicUO.Interfaces
         Position Position { get; set; }
 
         GameEffect Effect { get; set; }
-
-        bool IsAtWorld(int x, int y);
     }
 }

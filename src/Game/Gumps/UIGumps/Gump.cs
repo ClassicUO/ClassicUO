@@ -116,8 +116,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             SpriteBatchUI sb = Service.Get<SpriteBatchUI>();
             Point position = Location;
-            int halfWidth = Width / 2;
-            int halfHeight = Height / 2;
+            int halfWidth = Width >> 1;
+            int halfHeight = Height >> 1;
 
             if (X < -halfWidth)
                 position.X = -halfWidth;

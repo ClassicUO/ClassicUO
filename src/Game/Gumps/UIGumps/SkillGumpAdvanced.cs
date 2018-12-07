@@ -250,7 +250,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 UIManager.Add(skillButtonGump);
                 currentGameScene.SkillButtonGumpStack.Add(Skill);
                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x24B8).Bounds;
-                UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + rect.Width / 2, Mouse.Position.Y + rect.Height / 2), true);
+                UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
             }
         }
 

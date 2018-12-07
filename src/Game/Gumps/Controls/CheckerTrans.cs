@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             get
             {
-                if (_transparentTexture == null)
+                if (_transparentTexture == null || _transparentTexture.IsDisposed)
                 {
                     _transparentTexture = new SpriteTexture(1, 1);
 

@@ -108,7 +108,7 @@ namespace ClassicUO.IO.Resources
             {
                 MapBlocksSize[i] = new int[2]
                 {
-                    MapsDefaultSize[i][0] / 8, MapsDefaultSize[i][1] / 8
+                    MapsDefaultSize[i][0] >> 3, MapsDefaultSize[i][1] >> 3
                 };
 
                 //LoadMap(i);
@@ -186,7 +186,6 @@ namespace ClassicUO.IO.Resources
         {
             if (BlockData[i] != null)
             {
-                Array.Clear(BlockData[i], 0, BlockData[i].Length);
                 BlockData[i] = null;
             }
         }

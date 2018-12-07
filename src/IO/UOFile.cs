@@ -87,7 +87,6 @@ namespace ClassicUO.IO
         {
             if (Entries != null)
             {
-                Array.Clear(Entries, 0, Entries.Length);
                 Entries = null;
             }
         }

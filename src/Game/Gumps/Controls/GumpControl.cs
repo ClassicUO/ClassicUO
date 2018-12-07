@@ -125,7 +125,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public string Tooltip { get; private set; }
 
-        public bool HasTooltip => World.ClientFeatures.TooltipsEnabled && !string.IsNullOrEmpty(Tooltip);
+        public bool HasTooltip => World.ClientFlags.TooltipsEnabled && !string.IsNullOrEmpty(Tooltip);
 
         public virtual bool AcceptKeyboardInput
         {
@@ -268,28 +268,27 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             get => _activePage;
             set
-            {
-                UIManager _uiManager = Service.Get<UIManager>();
+            {              
                 _activePage = value;
 
-                if (_uiManager.KeyboardFocusControl != null)
+                if (UIManager.KeyboardFocusControl != null)
                 {
-                    if (Children.Contains(_uiManager.KeyboardFocusControl))
+                    if (Children.Contains(UIManager.KeyboardFocusControl))
                     {
-                        if (_uiManager.KeyboardFocusControl.Page != 0)
-                            _uiManager.KeyboardFocusControl = null;
+                        if (UIManager.KeyboardFocusControl.Page != 0)
+                            UIManager.KeyboardFocusControl = null;
                     }
                 }
 
                 // When ActivePage changes, check to see if there are new text input boxes
                 // that we should redirect text input to.
-                if (_uiManager.KeyboardFocusControl == null)
+                if (UIManager.KeyboardFocusControl == null)
                 {
                     foreach (GumpControl c in Children)
                     {
                         if (c.HandlesKeyboardFocus && c.Page == _activePage)
                         {
-                            _uiManager.KeyboardFocusControl = c;
+                            UIManager.KeyboardFocusControl = c;
 
                             break;
                         }
@@ -419,6 +418,11 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public void Initialize()
         {
+            if (IsDisposed)
+            {
+                return;
+            }
+
             IsDisposed = false;
             IsEnabled = true;
             IsInitialized = true;
@@ -434,7 +438,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 GumpControl c = _children[i];
 
-                if (!c.IsInitialized)
+                if (!c.IsInitialized && !IsDisposed)
                 {
                     c.Initialize();
 
@@ -461,7 +465,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public GumpControl[] HitTest(Point position)
         {
-            List<GumpControl> results = new List<GumpControl>();
+            //List<GumpControl> results = new List<GumpControl>();
+            Stack<GumpControl> results = new Stack<GumpControl>();
             bool inbouds = Bounds.Contains(position.X - ParentX, position.Y - ParentY);
 
             if (inbouds)
@@ -469,7 +474,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (Contains(position.X - X - ParentX, position.Y - Y - ParentY))
                 {
                     if (AcceptMouseInput)
-                        results.Insert(0, this);
+                        results.Push(this);
 
                     for (int j = 0; j < Children.Count; j++)
                     {
@@ -482,7 +487,8 @@ namespace ClassicUO.Game.Gumps.Controls
                             if (cl != null)
                             {
                                 for (int i = cl.Length - 1; i >= 0; i--)
-                                    results.Insert(0, cl[i]);
+                                    results.Push(cl[i]);
+                                //results.Insert(0, cl[i]);
                             }
                         }
                     }

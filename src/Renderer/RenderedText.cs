@@ -29,7 +29,7 @@ using Microsoft.Xna.Framework;
 namespace ClassicUO.Renderer
 {
     [Flags]
-    public enum FontStyle
+    public enum FontStyle : ushort
     {
         None = 0x00,
         Solid = 0x01,
@@ -42,7 +42,7 @@ namespace ClassicUO.Renderer
         BQ = 0x80
     }
 
-    public class RenderedText
+    public sealed class RenderedText : IDisposable
     {
         private string _text;
 
@@ -122,7 +122,7 @@ namespace ClassicUO.Renderer
         {
             if (string.IsNullOrEmpty(Text))
                 return false;
-            Rectangle src = new Rectangle();
+            Rectangle src = Rectangle.Empty;
 
             if (offsetX > Width || offsetX < -MaxWidth || offsetY > Height || offsetY < -Height)
                 return false;

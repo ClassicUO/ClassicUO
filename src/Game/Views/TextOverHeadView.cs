@@ -18,6 +18,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -54,29 +57,32 @@ namespace ClassicUO.Game.Views
                 parent.TimeToLive = 4000 * _text.LinesCount * delay / 100.0f;
 
             parent.Initialized = true;
+
+            parent.Disposed += ParentOnDisposed;
+        }
+
+        private void ParentOnDisposed(object sender, EventArgs e)
+        {
+            GameObject.Disposed -= ParentOnDisposed;
+            _text?.Dispose();
         }
 
         public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
         {
-            if (!AllowedToDraw)
+            if (!AllowedToDraw || GameObject.IsDisposed)
             {
-                return false;
-            }
-
-            if (GameObject.IsDisposed)
-            {
-                _text?.Dispose();
-
                 return false;
             }
 
             Texture.Ticks = CoreGame.Ticks;
             TextOverhead overhead = (TextOverhead) GameObject;
 
-            if (!overhead.IsPersistent && overhead.Alpha < 1.0f)
+            if (overhead.Alpha < 1.0f)
                 HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
+
             Settings settings = Service.Get<Settings>();
             GameScene gs = SceneManager.GetScene<GameScene>();
+
             int width = Texture.Width - Bounds.X;
             int height = Texture.Height - Bounds.Y;
 
@@ -90,11 +96,21 @@ namespace ClassicUO.Game.Views
             else if (position.Y > settings.GameWindowHeight * gs.Scale - height)
                 position.Y = settings.GameWindowHeight * gs.Scale - height;
 
+            //FrameInfo.X = (int) position.X;
+            //FrameInfo.Y = (int) position.Y;
+            //FrameInfo.Width = Texture.Width;
+            //FrameInfo.Height = Texture.Height;
+
             return base.Draw(spriteBatch, position, objectList);
         }
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
+            int x = list.MousePosition.X - (int)vertex[0].Position.X;
+            int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
+
+            if (Texture.Contains(x, y))
+                list.Add(GameObject, vertex[0].Position);
         }
 
     }

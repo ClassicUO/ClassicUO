@@ -27,27 +27,114 @@ namespace ClassicUO.Game.Map
 {
     public static class TileSorter
     {
-        public static void Sort(ref List<GameObject> objects)
+        public static void Sort(GameObject first)
         {
-            for (int i = 0; i < objects.Count - 1; i++)
+            MergeSort(ref first);
+        }
+
+
+        private static void Split(GameObject head, out GameObject front, out GameObject back)
+        {
+            if (head?.Right == null)
             {
-                int j = i + 1;
+                front = head;
+                back = null;
+            }
+            else
+            {
+                GameObject slow = head;
+                GameObject fast = head.Right;
 
-                while (j > 0)
+                while (fast!= null)
                 {
-                    int result = Compare(objects[j - 1], objects[j]);
+                    fast = fast.Right;
 
-                    if (result > 0)
+                    if (fast != null)
                     {
-                        GameObject temp = objects[j - 1];
-                        objects[j - 1] = objects[j];
-                        objects[j] = temp;
+                        slow = slow.Right;
+                        fast = fast.Right;
                     }
-
-                    j--;
                 }
+
+                front = head;
+                back = slow.Right;
+                back.Left = null;
+                slow.Right = null;
             }
         }
+
+        private static void Merge(ref GameObject head, ref GameObject l1, ref GameObject l2)
+        {
+            GameObject newHead;
+
+            if (l1 == null)
+                newHead = l2;
+            else if (l2 == null)
+                newHead = l1;
+            else
+            {
+                if (Compare(l2, l1) < 0)
+                {
+                    newHead = l2;
+                    l2 = l2.Right;
+                }
+                else
+                {
+                    newHead = l1;
+                    l1 = l1.Right;
+                }
+
+                newHead.Left = null;
+                GameObject curr = newHead;
+
+                while (l1 != null && l2 != null)
+                {
+                    if (Compare(l2, l1) < 0)
+                    {
+                        curr.Right = l2;
+                        l2.Left = curr;
+                        l2 = l2.Right;
+                    }
+                    else
+                    {
+                        curr.Right = l1;
+                        l1.Left = curr;
+                        l1 = l1.Right;
+                    }
+
+                    curr = curr.Right;
+                }
+
+                while (l1 != null)
+                {
+                    curr.Right = l1;
+                    l1.Left = curr;
+                    l1 = l1.Right;
+                    curr = curr.Right;
+                }
+
+                while (l2 != null)
+                {
+                    curr.Right = l2;
+                    l2.Left = curr;
+                    l2 = l2.Right;
+                    curr = curr.Right;
+                }
+            }
+
+            head = newHead;
+        }
+
+        private static void MergeSort(ref GameObject first)
+        {
+            if (first?.Right != null)
+            {
+                Split(first, out GameObject h1, out GameObject h2);
+                MergeSort(ref h1);
+                MergeSort( ref h2);
+                Merge(ref first, ref h1, ref h2);
+            }
+        }   
 
         private static int Compare(GameObject x, GameObject y)
         {

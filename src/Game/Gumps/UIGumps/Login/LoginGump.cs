@@ -52,6 +52,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             {
                 X = 555, Y = 4, ButtonAction = ButtonAction.Activate
             });
+            AcceptMouseInput = false;
         }
 
         public override void Update(double totalMS, double frameMS)

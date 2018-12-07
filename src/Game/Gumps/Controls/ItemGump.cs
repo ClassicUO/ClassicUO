@@ -53,6 +53,15 @@ namespace ClassicUO.Game.Gumps.Controls
             Texture = texture;
             Width = texture.Width;
             Height = texture.Height;
+
+            Item.Disposed += ItemOnDisposed;
+
+            WantUpdateSize = false;
+        }
+
+        private void ItemOnDisposed(object sender, EventArgs e)
+        {
+            Dispose();
         }
 
         public Item Item { get; }
@@ -63,12 +72,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (Item.IsDisposed)
-            {
-                Dispose();
-
+            if (IsDisposed)
                 return;
-            }
 
             Texture.Ticks = (long) totalMS;
 
@@ -177,6 +182,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Dispose()
         {
+            Item.Disposed += ItemOnDisposed;
             UpdateLabel(true);
             base.Dispose();
         }
@@ -188,7 +194,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (this is ItemGumpPaperdoll)
                 {
                     Rectangle bounds = Art.GetStaticTexture(Item.DisplayedGraphic).Bounds;
-                    GameActions.PickUp(Item, bounds.Width / 2, bounds.Height / 2);
+                    GameActions.PickUp(Item, bounds.Width >> 1, bounds.Height >> 1);
                 }
                 else
                     GameActions.PickUp(Item, _clickedPoint);
@@ -197,7 +203,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         private void UpdateLabel(bool isDisposing = false)
         {
-            if (!isDisposing && Item.OverHeads.Count > 0)
+            if (!isDisposing && Item.OverHeads != null && Item.OverHeads.Count > 0)
             {
                 if (_labels.Count <= 0)
                 {
@@ -221,8 +227,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 for (int i = _labels.Count - 1; i >= 0; i--)
                 {
                     Label l = _labels[i];
-                    l.X = ScreenCoordinateX + _clickedPoint.X - l.Width / 2;
-                    l.Y = ScreenCoordinateY + _clickedPoint.Y - l.Height / 2 + y;
+                    l.X = ScreenCoordinateX + _clickedPoint.X - (l.Width >> 1);
+                    l.Y = ScreenCoordinateY + _clickedPoint.Y - (l.Height >> 1) + y;
                     y += l.Height;
                 }
             }

@@ -124,19 +124,23 @@ namespace ClassicUO.Game.Gumps.Controls
         public void AddEntry(string text, int font, Hue hue)
         {
             bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
-            while (_entries.Count > 99) _entries.RemoveAt(0);
 
-            RenderedText entry = new RenderedText
+            while (_entries.Count > 99)
+            {
+                _entries[0].Dispose();
+                _entries.RemoveAt(0);
+            }
+
+            _entries.Add(new RenderedText
             {
                 MaxWidth = Width - 18,
                 IsUnicode = true,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 FontStyle = FontStyle.Indention | FontStyle.BlackBorder,
                 Hue = hue,
-                Font = (byte) font,
+                Font = (byte)font,
                 Text = text
-            };
-            _entries.Add(entry);
+            });
             _scrollBar.MaxValue += _entries[_entries.Count - 1].Height;
             if (maxScroll) _scrollBar.Value = _scrollBar.MaxValue;
         }

@@ -203,7 +203,7 @@ namespace ClassicUO.Game
             _draggedItemTexture = Art.GetStaticTexture(graphic);
             _hue = hue;
             _isDouble = isDouble;
-            _offset = new Point(_draggedItemTexture.Width / 2, _draggedItemTexture.Height / 2);
+            _offset = new Point(_draggedItemTexture.Width >> 1, _draggedItemTexture.Height >> 1);
             _rect = new Rectangle(0, 0, _draggedItemTexture.Width, _draggedItemTexture.Height);
             _draggingItem = true;
         }
@@ -264,7 +264,7 @@ namespace ClassicUO.Game
             {
                 GameScene gs = SceneManager.GetScene<GameScene>();
 
-                if (!World.ClientFeatures.TooltipsEnabled || gs.IsHoldingItem)
+                if (!World.ClientFlags.TooltipsEnabled || gs.IsHoldingItem)
                 {
                     if (!_tooltip.IsEmpty)
                         _tooltip.Clear();
@@ -338,8 +338,8 @@ namespace ClassicUO.Game
 
             if (!_uiManager.IsMouseOverWorld)
                 return result;
-            int windowCenterX = _settings.GameWindowX + _settings.GameWindowWidth / 2;
-            int windowCenterY = _settings.GameWindowY + _settings.GameWindowHeight / 2;
+            int windowCenterX = _settings.GameWindowX + (_settings.GameWindowWidth >> 1);
+            int windowCenterY = _settings.GameWindowY + (_settings.GameWindowHeight >> 1);
 
             return _cursorData[war, GetMouseDirection(windowCenterX, windowCenterY, Mouse.Position.X, Mouse.Position.Y, 1)];
         }

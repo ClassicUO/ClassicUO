@@ -40,7 +40,7 @@ namespace ClassicUO.IO.Resources
 
             if (address != IntPtr.Zero)
             {
-                int addr = graphic * 68 + 4 * (graphic / 8 + 1);
+                int addr = graphic * 68 + 4 * ((graphic >> 3) + 1);
                 AnimDataFrame pad = Marshal.PtrToStructure<AnimDataFrame>(address + addr);
 
                 //if (pad.FrameCount == 0)

@@ -48,8 +48,6 @@ namespace ClassicUO
         private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
        // private readonly StringBuffer _buffer = new StringBuffer();
         private RenderedText _infoText;
-        private InputManager _inputManager;
-        private JournalData _journalManager;
         private SpriteBatch3D _sb3D;
         private SpriteBatchUI _sbUI;
         private double _statisticsTimer;
@@ -98,17 +96,16 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
 
+            InputManager.Initialize();
+
             //Register Service Stack
             Service.Register(this);
             Service.Register(_sb3D = new SpriteBatch3D(GraphicsDevice));
             Service.Register(_sbUI = new SpriteBatchUI(GraphicsDevice));
-            Service.Register(new InputManager());
             Service.Register(_uiManager = new UIManager());
-            Service.Register(_journalManager = new JournalData());
 
             //Register Command Stack
             Commands.Initialize();
-            _inputManager = Service.Get<InputManager>();
             Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
@@ -134,6 +131,7 @@ namespace ClassicUO
 
         protected override void UnloadContent()
         {
+            InputManager.Unload();
             SceneManager.CurrentScene?.Unload();
             Service.Get<Settings>().Save();
             base.UnloadContent();
@@ -201,7 +199,7 @@ namespace ClassicUO
             //_buffer.Clear();
 
             _sb.ConcatFormat(FORMAT_1, CurrentFPS, SceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged);
-            _sb.ConcatFormat(FORMAT_2, World.Player == null ? string.Empty : World.Player.Position.ToString(), SceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty, _sb3D.FlushCount + _sbUI.FlushCount);
+            _sb.ConcatFormat(FORMAT_2, _sb3D.FlushCount + _sbUI.FlushCount, World.Player == null ? string.Empty : World.Player.Position.ToString(), SceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty);
 
             //_sb.ConcatFormat(FORMATTED_STRING, CurrentFPS, SceneManager.CurrentScene.RenderedObjectsCount, _sb3D.Calls, _sb3D.Merged, World.Player == null ? string.Empty : World.Player.Position.ToString(), SceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty, _sb3D.FlushCount + _sbUI.FlushCount);
             _infoText.Text = _sb.ToString();

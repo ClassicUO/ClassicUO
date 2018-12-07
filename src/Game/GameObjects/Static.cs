@@ -63,11 +63,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public bool IsAtWorld(int x, int y)
-        {
-            return Position.X == x && Position.Y == y;
-        }
-
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);

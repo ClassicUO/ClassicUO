@@ -885,9 +885,9 @@ namespace ClassicUO.IO.Resources
                         bool replace = DataIndex[i].Groups[g].Direction[d].FileIndex >= 3;
 
                         if (DataIndex[i].Groups[g].Direction[d].FileIndex == 1)
-                            replace = (flags & 0x08) != 0;
+                            replace = World.ClientLockedFeatures.LBR;
                         else if (DataIndex[i].Groups[g].Direction[d].FileIndex == 2)
-                            replace = (flags & 0x10) != 0;
+                            replace = World.ClientLockedFeatures.AOS;
 
                         if (replace)
                         {
@@ -1107,8 +1107,12 @@ namespace ClassicUO.IO.Resources
             animDirection.FrameCount = (byte) (pixelDataOffsets.Count / 5);
             int dirFrameStartIdx = animDirection.FrameCount * Direction;
 
-            if (animDirection.Frames == null)
-                animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
+            if (animDirection.Frames != null && animDirection.Frames.Length > 0)
+            {
+                Log.Message(LogTypes.Panic, "MEMORY LEAK UOP ANIM");
+            }
+
+            animDirection.Frames = new AnimationFrameTexture[animDirection.FrameCount];
 
             for (int i = 0; i < animDirection.FrameCount; i++)
             {
@@ -1174,6 +1178,10 @@ namespace ClassicUO.IO.Resources
 
                 if (f == null)
                     f = new AnimationFrameTexture(uniqueAnimationIndex, imageWidth, imageHeight);
+                else
+                {
+                    Log.Message(LogTypes.Warning, "TEXTURE EXISTS");
+                }
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
                 f.SetDataHitMap16(pixels);
@@ -1198,6 +1206,12 @@ namespace ClassicUO.IO.Resources
             uint frameCount = _reader.ReadUInt();
             animDir.FrameCount = (byte) frameCount;
             uint* frameOffset = (uint*) _reader.PositionAddress;
+
+            if (animDir.Frames != null && animDir.Frames.Length > 0)
+            {
+                Log.Message(LogTypes.Panic, "MEMORY LEAK MUL ANIM");
+            }
+
             animDir.Frames = new AnimationFrameTexture[frameCount];
 
             for (int i = 0; i < frameCount; i++)
@@ -1252,6 +1266,10 @@ namespace ClassicUO.IO.Resources
 
                 if (f == null)
                     f = new AnimationFrameTexture(uniqueAnimationIndex, imageWidth, imageHeight);
+                else
+                {
+                    Log.Message(LogTypes.Warning, "TEXTURE EXISTS");
+                }
                 f.CenterX = imageCenterX;
                 f.CenterY = imageCenterY;
                 f.SetDataHitMap16(pixels);
@@ -1285,7 +1303,7 @@ namespace ClassicUO.IO.Resources
 
                 if (dir < 5)
                 {
-                    ref AnimationDirection direction = ref DataIndex[id].Groups[animGroup].Direction[dir];
+                    AnimationDirection direction = DataIndex[id].Groups[animGroup].Direction[dir];
                     int fc = direction.FrameCount;
 
                     if (fc > 0)
@@ -1294,7 +1312,7 @@ namespace ClassicUO.IO.Resources
 
                         if (direction.Frames != null)
                         {
-                            ref AnimationFrameTexture animationFrameTexture = ref direction.Frames[frameIndex];
+                            AnimationFrameTexture animationFrameTexture = direction.Frames[frameIndex];
                             x = animationFrameTexture.CenterX;
                             y = animationFrameTexture.CenterY;
                             w = animationFrameTexture.Width;
@@ -1322,7 +1340,7 @@ namespace ClassicUO.IO.Resources
                 }
                 else if (direction1.IsUOP)
                 {
-                    ref UOPAnimationData animDataStruct = ref DataIndex[AnimID].Groups[AnimGroup].UOPAnimData;
+                    UOPAnimationData animDataStruct = DataIndex[AnimID].Groups[AnimGroup].UOPAnimData;
 
                     if (!(animDataStruct.FileIndex == 0 && animDataStruct.CompressedLength == 0 && animDataStruct.DecompressedLength == 0 && animDataStruct.Offset == 0))
                     {
@@ -1395,7 +1413,7 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
-            long ticks = CoreGame.Ticks - 3000;
+            long ticks = CoreGame.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedTextures.Count; i++)
             {
@@ -1409,7 +1427,6 @@ namespace ClassicUO.IO.Resources
                         if (dir.Frames[j] != null)
                         {
                             dir.Frames[j].Dispose();
-                            dir.Frames[j] = null;
                         }
                     }
 
@@ -1418,7 +1435,7 @@ namespace ClassicUO.IO.Resources
                     dir.LastAccessTime = 0;
                     _usedTextures.RemoveAt(i--);
 
-                    if (++count >= 5)
+                    if (++count >= Constants.MAX_ANIMATIONS_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
                 }
             }

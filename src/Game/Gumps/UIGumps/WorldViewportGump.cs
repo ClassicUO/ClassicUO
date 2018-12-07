@@ -35,7 +35,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private readonly GameBorder _border;
         private readonly Button _button;
         private readonly ChatControl _chatControl;
-        private readonly InputManager _inputManager;
         private readonly Settings _settings;
         private readonly WorldViewport _viewport;
         private bool _clicked;
@@ -46,7 +45,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
             _settings = Service.Get<Settings>();
-            _inputManager = Service.Get<InputManager>();
             AcceptMouseInput = false;
             CanMove = true;
             CanCloseWithEsc = false;
@@ -64,6 +62,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _clicked = false;
                 _lastPosition = Point.Zero;
             };
+            _button.SetTooltip("Resize game window");
             Width = _worldWidth + BORDER_WIDTH * 2;
             Height = _worldHeight + BORDER_HEIGHT * 2;
             _border = new GameBorder(0, 0, Width, Height, 4);
@@ -75,6 +74,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(_chatControl);
             Service.Register(_chatControl);
             Resize();
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            Service.Unregister<ChatControl>();
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -129,13 +134,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             _border.Width = Width;
             _border.Height = Height;
-            _button.X = Width - 6;
-            _button.Y = Height - 6;
+            _button.X = Width - _button.Width / 2;
+            _button.Y = Height - _button.Height / 2;
             _viewport.Width = _worldWidth;
             _viewport.Height = _worldHeight;
             _chatControl.Width = _worldWidth;
             _chatControl.Height = _worldHeight;
             _chatControl.Resize();
+            WantUpdateSize = true;
         }
     }
 
@@ -173,7 +179,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //sx
             spriteBatch.Draw2DTiled(_borders[1], new Rectangle(position.X, position.Y, _borderSize, Height), Vector3.Zero);
             //dx
-            spriteBatch.Draw2DTiled(_borders[1], new Rectangle(position.X + Width - _borderSize, position.Y + _borders[1].Width / 2, _borderSize, Height - _borderSize), Vector3.Zero);
+            spriteBatch.Draw2DTiled(_borders[1], new Rectangle(position.X + Width - _borderSize, position.Y + (_borders[1].Width >> 1), _borderSize, Height - _borderSize), Vector3.Zero);
 
             return base.Draw(spriteBatch, position, hue);
         }

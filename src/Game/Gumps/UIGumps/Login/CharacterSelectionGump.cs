@@ -52,7 +52,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             }
 
             LoginScene loginScene = Service.Get<LoginScene>();
-            var lastSelected = loginScene.Characters.FirstOrDefault(o => o.Name == Service.Get<Settings>().LastCharacterName);
+            var lastSelected = loginScene.Characters.FirstOrDefault(o => o == Service.Get<Settings>().LastCharacterName);
 
             if (lastSelected != null)
                 _selectedCharacter = (uint) Array.IndexOf(loginScene.Characters, lastSelected);
@@ -69,16 +69,23 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 X = 267, Y = listTitleY
             }, 1);
 
-            foreach (CharacterListEntry character in loginScene.Characters)
+            for (int i = 0; i < loginScene.Characters.Length; i++)
             {
-                AddChildren(new CharacterEntryGump((uint) posInList, character, SelectCharacter, LoginCharacter)
+                string character = loginScene.Characters[i];
+
+                if (!string.IsNullOrEmpty(character))
                 {
-                    X = 224, Y = yOffset + posInList * 40, Hue = posInList == _selectedCharacter ? SELECTED_COLOR : NORMAL_COLOR
-                }, 1);
-                posInList++;
+                    AddChildren(new CharacterEntryGump((uint)i, character, SelectCharacter, LoginCharacter)
+                    {
+                        X = 224,
+                        Y = yOffset + posInList * 40,
+                        Hue = posInList == _selectedCharacter ? SELECTED_COLOR : NORMAL_COLOR
+                    }, 1);
+                    posInList++;
+                }
             }
 
-            if (loginScene.Characters.Any(o => string.IsNullOrEmpty(o.Name)))
+            if (loginScene.Characters.Any(string.IsNullOrEmpty))
             {
                 AddChildren(new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
                 {
@@ -132,7 +139,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
         private void DeleteCharacter(LoginScene loginScene)
         {
-            var charName = loginScene.Characters[_selectedCharacter].Name;
+            var charName = loginScene.Characters[_selectedCharacter];
 
             if (!string.IsNullOrEmpty(charName))
             {
@@ -170,7 +177,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
         {
             LoginScene loginScene = Service.Get<LoginScene>();
 
-            if (loginScene.Characters.Length > index && !string.IsNullOrEmpty(loginScene.Characters[index].Name))
+            if (loginScene.Characters.Length > index && !string.IsNullOrEmpty(loginScene.Characters[index]))
                 loginScene.SelectCharacter(index);
         }
 
@@ -188,7 +195,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             private readonly Action<uint> _loginFn;
             private readonly Action<uint> _selectedFn;
 
-            public CharacterEntryGump(uint index, CharacterListEntry character, Action<uint> selectedFn, Action<uint> loginFn)
+            public CharacterEntryGump(uint index, string character, Action<uint> selectedFn, Action<uint> loginFn)
             {
                 CharacterIndex = index;
                 _selectedFn = selectedFn;
@@ -201,7 +208,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 });
 
                 // Char Name
-                AddChildren(_label = new Label(character.Name, false, NORMAL_COLOR, 270, 5, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                AddChildren(_label = new Label(character, false, NORMAL_COLOR, 270, 5, align: TEXT_ALIGN_TYPE.TS_CENTER)
                 {
                     X = 0
                 });

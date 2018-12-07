@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Views
         protected static float PI = (float) Math.PI;
         private Vector3 _storedHue;
         public Rectangle Bounds;
-        public FrameInfo FrameInfo;
+        public Rectangle FrameInfo;
 
         protected View(GameObject parent)
         {
@@ -76,8 +76,8 @@ namespace ClassicUO.Game.Views
         {
             Rectangle prect = Rectangle.Empty;
             Settings set = Service.Get<Settings>();
-            prect.X = (int)((set.GameWindowX + set.GameWindowWidth / 2) - FrameInfo.OffsetX + GameObject.Offset.X);
-            prect.Y = (int)((set.GameWindowY + set.GameWindowHeight / 2) + GameObject.Offset.Y - FrameInfo.OffsetY);
+            prect.X = (int)((set.GameWindowX + (set.GameWindowWidth >> 1)) - FrameInfo.X + GameObject.Offset.X);
+            prect.Y = (int)((set.GameWindowY + (set.GameWindowHeight >> 1)) + GameObject.Offset.Y - FrameInfo.Y);
             prect.Width = FrameInfo.Width;
             prect.Height = FrameInfo.Height;
 
@@ -197,15 +197,18 @@ namespace ClassicUO.Game.Views
 
         protected virtual void MessageOverHead(SpriteBatch3D spriteBatch, Vector3 position, int offY)
         {
-            for (int i = 0; i < GameObject.OverHeads.Count; i++)
+            if (GameObject.OverHeads != null)
             {
-                View v = GameObject.OverHeads[i].View;
-                v.Bounds.X = v.Texture.Width / 2 - 22;
-                v.Bounds.Y = offY + v.Texture.Height;
-                v.Bounds.Width = v.Texture.Width;
-                v.Bounds.Height = v.Texture.Height;
-                OverheadManager.AddOverhead(v, position);
-                offY += v.Texture.Height;
+                for (int i = 0; i < GameObject.OverHeads.Count; i++)
+                {
+                    View v = GameObject.OverHeads[i].View;
+                    v.Bounds.X = (v.Texture.Width >> 1) - 22;
+                    v.Bounds.Y = offY + v.Texture.Height;
+                    v.Bounds.Width = v.Texture.Width;
+                    v.Bounds.Height = v.Texture.Height;
+                    OverheadManager.AddOverhead(v, position);
+                    offY += v.Texture.Height;
+                }
             }
         }
 
