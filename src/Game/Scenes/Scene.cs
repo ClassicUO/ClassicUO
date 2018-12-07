@@ -35,17 +35,11 @@ namespace ClassicUO.Game.Scenes
         protected Scene(ScenesType type)
         {
             SceneType = type;
-            Game = Service.Get<Engine>();
-            Device = Game.GraphicsDevice;
             UIManager = Service.Get<UIManager>();
         }
 
 
-        protected GraphicsDevice Device { get; }
-
         public bool IsDisposed { get; private set; }
-
-        protected Engine Game { get; }
 
         protected UIManager UIManager { get; }
 

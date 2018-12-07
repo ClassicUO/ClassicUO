@@ -407,7 +407,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _settings.MusicVolume = _sliderMusic.Value;
             _settings.UseTooltips = _checkboxUseTooltips.IsChecked;
             _settings.DelayAppearTooltips = _sliderDelayAppearTooltips.Value;
-            _settings.MaxFPS = Service.Get<Engine>().MaxFPS = _sliderFPS.Value;
+            _settings.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
             _settings.HighlightGameObjects = _checkboxHighlightGameObjects.IsChecked;
             _settings.SmoothMovement = _checkboxSmoothMovement.IsChecked;
         }

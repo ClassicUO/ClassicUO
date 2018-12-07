@@ -84,17 +84,16 @@ namespace ClassicUO.Game.Gumps
                 Fonts.RecalculateWidthByInfo = false;
             }
 
-            Engine window = Service.Get<Engine>();
 
             if (position.X < 0)
                 position.X = 0;
-            else if (position.X > window.WindowWidth - (_renderedText.Width + 8))
-                position.X = window.WindowWidth - (_renderedText.Width + 8);
+            else if (position.X > Engine.WindowWidth - (_renderedText.Width + 8))
+                position.X = Engine.WindowWidth - (_renderedText.Width + 8);
 
             if (position.Y < 0)
                 position.Y = 0;
-            else if (position.Y > window.WindowHeight - (_renderedText.Height + 8))
-                position.Y = window.WindowHeight - (_renderedText.Height + 8);
+            else if (position.Y > Engine.WindowHeight - (_renderedText.Height + 8))
+                position.Y = Engine.WindowHeight - (_renderedText.Height + 8);
             batcher.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X - 4, position.Y - 2, _renderedText.Width + 8, _renderedText.Height + 4), ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
 
             return _renderedText.Draw(batcher, position);

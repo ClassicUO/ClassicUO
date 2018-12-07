@@ -38,19 +38,18 @@ namespace ClassicUO.Game.Scenes
             CurrentScene = null;
             GC.Collect();
             GC.WaitForPendingFinalizers();
-            Engine game = Service.Get<Engine>();
 
             switch (type)
             {
                 case ScenesType.Login:
-                    game.WindowWidth = 640;
-                    game.WindowHeight = 480;
+                    Engine.WindowWidth = 640;
+                    Engine.WindowHeight = 480;
                     CurrentScene = new LoginScene();
 
                     break;
                 case ScenesType.Game:
-                    game.WindowWidth = 1000;
-                    game.WindowHeight = 800;
+                    Engine.WindowWidth = 1000;
+                    Engine.WindowHeight = 800;
                     CurrentScene = new GameScene();
 
                     break;

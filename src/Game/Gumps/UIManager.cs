@@ -469,12 +469,9 @@ namespace ClassicUO.Game.Gumps
                 if (!g.IsInitialized && !g.IsDisposed)
                     g.Initialize();
                 g.Update(totalMS, frameMS);
-            }
 
-            for (int i = 0; i < _gumps.Count; i++)
-            {
-                GumpControl g = _gumps[i];
                 if (g.IsDisposed) _gumps.RemoveAt(i--);
+
             }
 
             GameCursor.Update(totalMS, frameMS);
@@ -491,7 +488,7 @@ namespace ClassicUO.Game.Gumps
                 GumpControl g = _gumps[i];
 
                 if (g.IsInitialized)
-                    g.Draw(batcher, new Point(g.X, g.Y));
+                    g.Draw(batcher, g.Location);
             }
 
             GameCursor.Draw(batcher);
