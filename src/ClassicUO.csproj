@@ -283,13 +283,9 @@
     <Compile Include="Game\GameCursor.cs" />
     <Compile Include="Game\GameObjects\IsometricLight.cs" />
     <Compile Include="Game\GameObjects\Managers\OverheadManager.cs" />
-    <Compile Include="Renderer\PixelPicking.cs" />
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\ShaderHuesTraslator.cs" />
     <Compile Include="Renderer\ScissorStack.cs" />
-    <Compile Include="Renderer\SpriteBatch3D.cs" />
-    <Compile Include="Renderer\SpriteBatch3D1.cs" />
-    <Compile Include="Renderer\SpriteBatchUI.cs" />
     <Compile Include="Renderer\SpriteTexture.cs" />
     <Compile Include="Renderer\SpriteVertex.cs" />
     <Compile Include="Renderer\Techniques.cs" />
