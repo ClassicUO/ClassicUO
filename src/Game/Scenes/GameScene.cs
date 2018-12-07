@@ -102,8 +102,8 @@ namespace ClassicUO.Game.Scenes
             Service.Register(_staticManager = new StaticManager());
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
-            UIManager.Add(new WorldViewportGump(this));
-            UIManager.Add(new TopBarGump(this));           
+            Engine.UI.Add(new WorldViewportGump(this));
+            Engine.UI.Add(new TopBarGump(this));           
             _viewPortGump = Service.Get<WorldViewport>();
             _settings = Service.Get<Settings>();
             GameActions.Initialize(PickupItemBegin);
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.Scenes
                         Scale = 2.3f;
                 }
             };
-            UIManager.Add(new OptionsGump1());
+            Engine.UI.Add(new OptionsGump1());
             Commands.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
         }
@@ -149,8 +149,8 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnect();
             _renderTarget?.Dispose();
             Commands.UnRegisterAll();
-            UIManager.SaveGumps();
-            UIManager.Clear();
+            Engine.UI.SaveGumps();
+            Engine.UI.Clear();
             CleaningResources();
             World.Clear();
             Service.Unregister<JournalData>();
@@ -173,7 +173,7 @@ namespace ClassicUO.Game.Scenes
 
         private void SocketOnDisconnected(object sender, EventArgs e)
         {
-            UIManager.Add(new MessageBoxGump(_settings.GameWindowX + (_settings.GameWindowWidth >> 1) - 100, _settings.GameWindowY + (_settings.GameWindowHeight >> 1) - (125 >> 1), 200, 125, "Connection lost", (s) =>
+            Engine.UI.Add(new MessageBoxGump(_settings.GameWindowX + (_settings.GameWindowWidth >> 1) - 100, _settings.GameWindowY + (_settings.GameWindowHeight >> 1) - (125 >> 1), 200, 125, "Connection lost", (s) =>
             {
                 s.Dispose();
                 SceneManager.ChangeScene(ScenesType.Login);

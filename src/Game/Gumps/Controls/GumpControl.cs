@@ -65,7 +65,6 @@ namespace ClassicUO.Game.Gumps.Controls
             AllowedToDraw = true;
             AcceptMouseInput = true;
             Page = 0;
-            UIManager = Service.Get<UIManager>();
             Debug = false;
         }
 
@@ -271,24 +270,24 @@ namespace ClassicUO.Game.Gumps.Controls
             {              
                 _activePage = value;
 
-                if (UIManager.KeyboardFocusControl != null)
+                if (Engine.UI.KeyboardFocusControl != null)
                 {
-                    if (Children.Contains(UIManager.KeyboardFocusControl))
+                    if (Children.Contains(Engine.UI.KeyboardFocusControl))
                     {
-                        if (UIManager.KeyboardFocusControl.Page != 0)
-                            UIManager.KeyboardFocusControl = null;
+                        if (Engine.UI.KeyboardFocusControl.Page != 0)
+                            Engine.UI.KeyboardFocusControl = null;
                     }
                 }
 
                 // When ActivePage changes, check to see if there are new text input boxes
                 // that we should redirect text input to.
-                if (UIManager.KeyboardFocusControl == null)
+                if (Engine.UI.KeyboardFocusControl == null)
                 {
                     foreach (GumpControl c in Children)
                     {
                         if (c.HandlesKeyboardFocus && c.Page == _activePage)
                         {
-                            UIManager.KeyboardFocusControl = c;
+                            Engine.UI.KeyboardFocusControl = c;
 
                             break;
                         }
@@ -444,7 +443,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
                     if (!initializedKeyboardFocusedControl && c.AcceptKeyboardInput)
                     {
-                        UIManager.KeyboardFocusControl = c;
+                        Engine.UI.KeyboardFocusControl = c;
                         initializedKeyboardFocusedControl = true;
                     }
                 }

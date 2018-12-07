@@ -345,7 +345,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 // TODO: fix multi opening
                 ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => speechColorPickerBox.SetHue(s));
-                UIManager.Add(pickerGump);
+                Engine.UI.Add(pickerGump);
             };
             item.AddChildren(speechColorPickerBox);
 
@@ -374,7 +374,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 // TODO: fix multi opening
                 ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => emoteColorPickerBox.SetHue(s));
-                UIManager.Add(pickerGump);
+                Engine.UI.Add(pickerGump);
             };
             item.AddChildren(emoteColorPickerBox);
 
@@ -403,7 +403,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 // TODO: fix multi opening
                 ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => partyMessageColor.SetHue(s));
-                UIManager.Add(pickerGump);
+                Engine.UI.Add(pickerGump);
             };
             item.AddChildren(partyMessageColor);
 
@@ -432,7 +432,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 // TODO: fix multi opening
                 ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => guildMessageColor.SetHue(s));
-                UIManager.Add(pickerGump);
+                Engine.UI.Add(pickerGump);
             };
             item.AddChildren(guildMessageColor);
 
@@ -461,7 +461,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 // TODO: fix multi opening
                 ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => allyMessageColor.SetHue(s));
-                UIManager.Add(pickerGump);
+                Engine.UI.Add(pickerGump);
             };
             item.AddChildren(allyMessageColor);
 
@@ -497,7 +497,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 // TODO: fix multi opening
                 ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => innocentColor.SetHue(s));
-                UIManager.Add(pickerGump);
+                Engine.UI.Add(pickerGump);
             };
             item.AddChildren(innocentColor);
 
@@ -528,7 +528,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 // TODO: fix multi opening
                 ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => friendColor.SetHue(s));
-                UIManager.Add(pickerGump);
+                Engine.UI.Add(pickerGump);
             };
             item.AddChildren(friendColor);
 
@@ -559,7 +559,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 // TODO: fix multi opening
                 ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => criminalColor.SetHue(s));
-                UIManager.Add(pickerGump);
+                Engine.UI.Add(pickerGump);
             };
             item.AddChildren(criminalColor);
 
@@ -590,7 +590,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 // TODO: fix multi opening
                 ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => enemyColor.SetHue(s));
-                UIManager.Add(pickerGump);
+                Engine.UI.Add(pickerGump);
             };
             item.AddChildren(enemyColor);
 
@@ -621,7 +621,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 // TODO: fix multi opening
                 ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => murdererColor.SetHue(s));
-                UIManager.Add(pickerGump);
+                Engine.UI.Add(pickerGump);
             };
             item.AddChildren(murdererColor);
 

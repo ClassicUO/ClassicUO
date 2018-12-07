@@ -280,7 +280,7 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is EquipmentSlot slot && slot.Item != null && slot.Item.Properties.Count > 0)
+                    if (Engine.UI.IsMouseOverUI && Engine.UI.MouseOverControl is EquipmentSlot slot && slot.Item != null && slot.Item.Properties.Count > 0)
                     {
                         if (_tooltip.IsEmpty || slot.Item != _tooltip.Object)
                             _tooltip.SetGameObject(slot.Item);
@@ -289,7 +289,7 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is ItemGump gumpling && gumpling.Item.Properties.Count > 0)
+                    if (Engine.UI.IsMouseOverUI && Engine.UI.MouseOverControl is ItemGump gumpling && gumpling.Item.Properties.Count > 0)
                     {
                         if (_tooltip.IsEmpty || gumpling.Item != _tooltip.Object)
                             _tooltip.SetGameObject(gumpling.Item);
@@ -298,7 +298,7 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl is GumpPicBackpack backpack && backpack.Backpack.Properties.Count > 0)
+                    if (Engine.UI.IsMouseOverUI && Engine.UI.MouseOverControl is GumpPicBackpack backpack && backpack.Backpack.Properties.Count > 0)
                     {
                         if (_tooltip.IsEmpty || backpack.Backpack != _tooltip.Object)
                             _tooltip.SetGameObject(backpack.Backpack);
@@ -318,12 +318,12 @@ namespace ClassicUO.Game
                 }
             }
 
-            if (_uiManager.IsMouseOverUI && _uiManager.MouseOverControl != null && _uiManager.MouseOverControl.HasTooltip && !Mouse.IsDragging)
+            if (Engine.UI.IsMouseOverUI && Engine.UI.MouseOverControl != null && Engine.UI.MouseOverControl.HasTooltip && !Mouse.IsDragging)
             {
-                if (_tooltip.Text != _uiManager.MouseOverControl.Tooltip) _tooltip.Clear();
+                if (_tooltip.Text != Engine.UI.MouseOverControl.Tooltip) _tooltip.Clear();
 
                 if (_tooltip.IsEmpty)
-                    _tooltip.SetText(_uiManager.MouseOverControl.Tooltip);
+                    _tooltip.SetText(Engine.UI.MouseOverControl.Tooltip);
                 _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
             }
         }
@@ -336,7 +336,7 @@ namespace ClassicUO.Game
             if (TargetSystem.IsTargeting)
                 return _cursorData[war, 12];
 
-            if (!_uiManager.IsMouseOverWorld)
+            if (!Engine.UI.IsMouseOverWorld)
                 return result;
             int windowCenterX = _settings.GameWindowX + (_settings.GameWindowWidth >> 1);
             int windowCenterY = _settings.GameWindowY + (_settings.GameWindowHeight >> 1);

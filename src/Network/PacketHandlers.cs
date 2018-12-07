@@ -328,18 +328,18 @@ namespace ClassicUO.Network
                 if (hasName && p.Position < p.Length)
                     name = p.ReadASCII();
 
-                Service.Get<UIManager>().Add(new TradingGump(serial, name, id1, id2));
+                Engine.UI.Add(new TradingGump(serial, name, id1, id2));
             }
             else if (type == 1)
             {
-                Service.Get<UIManager>().Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial)?.Dispose();
+                Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial)?.Dispose();
             }
             else if (type == 2)
             {
                 Serial id1 = p.ReadUInt();
                 Serial id2 = p.ReadUInt();
 
-                TradingGump trading = Service.Get<UIManager>().Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial);
+                TradingGump trading = Engine.UI.Gumps.OfType<TradingGump>().FirstOrDefault(s => s.ID1 == serial || s.ID2 == serial);
 
                 if (trading != null)
                 {
@@ -622,7 +622,7 @@ namespace ClassicUO.Network
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
 
-            Service.Get<UIManager>().RestoreGumps();
+            Engine.UI.RestoreGumps();
         }
 
         private static void Talk(Packet p)
@@ -811,7 +811,7 @@ namespace ClassicUO.Network
             //item.EnableCallBackForItemsUpdate(true);
             var serial = p.ReadUInt();
             Graphic graphic = p.ReadUShort();
-            UIManager ui = Service.Get<UIManager>();
+            UIManager ui = Engine.UI;
 
             ui.GetByLocalSerial(serial)?.Dispose();
 
@@ -1002,7 +1002,7 @@ namespace ClassicUO.Network
 
                     if (container.FillSpellbook(type, field))
                     {
-                        SpellbookGump gump = Service.Get<UIManager>().GetByLocalSerial<SpellbookGump>(container);
+                        SpellbookGump gump = Engine.UI.GetByLocalSerial<SpellbookGump>(container);
                         gump?.Update();
                     }
                 }
@@ -1071,7 +1071,7 @@ namespace ClassicUO.Network
 
         private static void BookData(Packet p)
         {
-            UIManager ui = Service.Get<UIManager>();
+            UIManager ui = Engine.UI;
             var serial = p.ReadUInt();
             var pageCnt = p.ReadUShort();
             var pages = new Dictionary<int,List<string>>();
@@ -1355,7 +1355,7 @@ namespace ClassicUO.Network
             if (mobile == null) return;
             string text = p.ReadASCII(60);
             byte flags = p.ReadByte();
-            UIManager ui = Service.Get<UIManager>();
+            UIManager ui = Engine.UI;
 
             if (ui.GetByLocalSerial<PaperDollGump>(mobile) == null)
             {
@@ -1428,7 +1428,7 @@ namespace ClassicUO.Network
             string title = p.ReadASCII(60);
             string author = p.ReadASCII(30);
 
-            UIManager ui = Service.Get<UIManager>();
+            UIManager ui = Engine.UI;
 
             if ( ui.GetByLocalSerial<BookGump>( book.Serial ) == null )
             {
@@ -1502,7 +1502,7 @@ namespace ClassicUO.Network
                 itemList.Add(item);
             }
 
-            UIManager ui = Service.Get<UIManager>();
+            UIManager ui = Engine.UI;
             ui.Add(new ShopGump(vendor.Serial, itemList.ToArray(), false, 100, 100));
         }
 
@@ -1725,7 +1725,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 4: // close generic gump
-                    Service.Get<UIManager>().GetByServerSerial(p.ReadUInt())?.OnButtonClick((int) p.ReadUInt());
+                    Engine.UI.GetByServerSerial(p.ReadUInt())?.OnButtonClick((int) p.ReadUInt());
 
                     break;
                 //===========================================================================================
@@ -1821,7 +1821,7 @@ namespace ClassicUO.Network
                 case 0x14: // display popup/context menu
                     PopupMenuData data = PopupMenuData.Parse(p);
 
-                    Service.Get<UIManager>().Add(new PopupMenuGump(data)
+                    Engine.UI.Add(new PopupMenuGump(data)
                     {
                         X = Mouse.Position.X, Y = Mouse.Position.Y
                     });
@@ -1938,7 +1938,7 @@ namespace ClassicUO.Network
 
                     if (spellbook.FillSpellbook(sbtype, filed))
                     {
-                        SpellbookGump gump = Service.Get<UIManager>().GetByLocalSerial<SpellbookGump>(spellbook);
+                        SpellbookGump gump = Engine.UI.GetByLocalSerial<SpellbookGump>(spellbook);
                         gump?.Update();
                     }
 
@@ -2087,7 +2087,7 @@ namespace ClassicUO.Network
             len = p.ReadUShort();
             string author = p.ReadUTF8String();
 
-            UIManager ui = Service.Get<UIManager>();
+            UIManager ui = Engine.UI;
 
             if ( ui.GetByLocalSerial<BookGump>( book.Serial ) == null )
             {
@@ -2323,7 +2323,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            Service.Get<UIManager>().Create(sender, gumpID, (int) x, (int) y, layout, lines);
+            Engine.UI.Create(sender, gumpID, (int) x, (int) y, layout, lines);
         }
 
         private static void UpdateMobileStatus(Packet p)
@@ -2339,7 +2339,7 @@ namespace ClassicUO.Network
 
             if (iconID < TABLE_COUNT)
             {
-                UIManager ui = Service.Get<UIManager>();
+                UIManager ui = Engine.UI;
                 BuffGump gump = ui.GetByLocalSerial<BuffGump>();
                 ushort mode = p.ReadUShort();
 

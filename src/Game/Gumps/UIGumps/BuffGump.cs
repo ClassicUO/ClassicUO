@@ -108,10 +108,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public static void Toggle()
         {
-            UIManager ui = Service.Get<UIManager>();
-
-            if (ui.GetByLocalSerial<BuffGump>() == null)
-                ui.Add(_gump = new BuffGump(100, 100));
+            if (Engine.UI.GetByLocalSerial<BuffGump>() == null)
+                Engine.UI.Add(_gump = new BuffGump(100, 100));
             else
                 _gump.Dispose();
         }

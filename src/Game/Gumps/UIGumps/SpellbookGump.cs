@@ -373,8 +373,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     {
                         X = Mouse.Position.X - 22, Y = Mouse.Position.Y - 22
                     };
-                    UIManager.Add(gump);
-                    UIManager.AttemptDragControl(gump, Mouse.Position, true);
+                    Engine.UI.Add(gump);
+                    Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
                 };
                 AddChildren(icon, page1);
 
@@ -625,8 +625,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
                     X = Mouse.Position.X - 22, Y = Mouse.Position.Y - 22
                 };
-                UIManager.Add(gump);
-                UIManager.AttemptDragControl(gump, Mouse.Position, true);
+                Engine.UI.Add(gump);
+                Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
             };
             AddChildren(spellImage, page);
 

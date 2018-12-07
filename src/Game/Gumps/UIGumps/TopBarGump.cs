@@ -122,10 +122,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.Paperdoll:
 
-                    if (UIManager.GetByLocalSerial<PaperDollGump>(World.Player) == null)
+                    if (Engine.UI.GetByLocalSerial<PaperDollGump>(World.Player) == null)
                         GameActions.DoubleClick((Serial) (World.Player.Serial | int.MinValue));
                     else
-                        UIManager.Remove<PaperDollGump>(World.Player);
+                        Engine.UI.Remove<PaperDollGump>(World.Player);
 
                     break;
                 case Buttons.Inventory:
@@ -133,19 +133,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     if (backpack != null && !backpack.IsDisposed)
                     {
-                        if (UIManager.GetByLocalSerial(backpack) == null)
+                        if (Engine.UI.GetByLocalSerial(backpack) == null)
                             GameActions.DoubleClick(backpack);
                         else
-                            UIManager.Remove<Gump>(backpack);
+                            Engine.UI.Remove<Gump>(backpack);
                     }
 
                     break;
                 case Buttons.Journal:
 
-                    if (UIManager.GetByLocalSerial<JournalGump>() == null)
-                        UIManager.Add(new JournalGump());
+                    if (Engine.UI.GetByLocalSerial<JournalGump>() == null)
+                        Engine.UI.Add(new JournalGump());
                     else
-                        UIManager.Remove<JournalGump>();
+                        Engine.UI.Remove<JournalGump>();
 
                     break;
                 case Buttons.Chat:

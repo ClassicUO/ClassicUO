@@ -153,7 +153,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (!string.IsNullOrEmpty(_caption))
             {
-                RenderedText textTexture = _fontTexture[UIManager.MouseOverControl == this ? 1 : 0];
+                RenderedText textTexture = _fontTexture[Engine.UI.MouseOverControl == this ? 1 : 0];
 
                 if (FontCenter)
                 {

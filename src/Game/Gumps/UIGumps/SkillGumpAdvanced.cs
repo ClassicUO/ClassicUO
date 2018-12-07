@@ -245,12 +245,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (Skill.IsClickable && Mouse.LButtonPressed)
             {
                 GameScene currentGameScene = SceneManager.GetScene<GameScene>();
-                if (currentGameScene.SkillButtonGumpStack.Contains(Skill)) UIManager.Remove<SkillButtonGump>(World.Player);
+                if (currentGameScene.SkillButtonGumpStack.Contains(Skill)) Engine.UI.Remove<SkillButtonGump>(World.Player);
                 SkillButtonGump skillButtonGump = new SkillButtonGump(Skill, Mouse.Position.X, Mouse.Position.Y);
-                UIManager.Add(skillButtonGump);
+                Engine.UI.Add(skillButtonGump);
                 currentGameScene.SkillButtonGumpStack.Add(Skill);
                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x24B8).Bounds;
-                UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
+                Engine.UI.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
             }
         }
 

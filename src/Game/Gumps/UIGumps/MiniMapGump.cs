@@ -55,10 +55,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public static void Toggle(GameScene scene)
         {
-            UIManager ui = Service.Get<UIManager>();
-
-            if (ui.GetByLocalSerial<MiniMapGump>() == null)
-                ui.Add(_self = new MiniMapGump());
+            if (Engine.UI.GetByLocalSerial<MiniMapGump>() == null)
+                Engine.UI.Add(_self = new MiniMapGump());
             else
                 _self.Dispose();
         }

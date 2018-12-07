@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Gumps.Controls
             //multiline input is fixed height, unmodifiable
             if(!MultiLineInputAllowed)
                 Height = _entry.Height;
-            if (UIManager.KeyboardFocusControl == this)
+            if (Engine.UI.KeyboardFocusControl == this)
             {
                 if (!IsFocused)
                 {

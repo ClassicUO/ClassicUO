@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            UIManager.KeyboardFocusControl = Service.Get<ChatControl>().GetFirstControlAcceptKeyboardInput();
+            Engine.UI.KeyboardFocusControl = Service.Get<ChatControl>().GetFirstControlAcceptKeyboardInput();
         }
     }
 }

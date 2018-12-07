@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public UseSpellButtonGump(SpellDefinition spell) : this()
         {
-            while (UIManager.GetByLocalSerial<UseSpellButtonGump>((uint) spell.ID) != null) UIManager.GetByLocalSerial<UseSpellButtonGump>((uint) spell.ID).Dispose();
+            while (Engine.UI.GetByLocalSerial<UseSpellButtonGump>((uint) spell.ID) != null) Engine.UI.GetByLocalSerial<UseSpellButtonGump>((uint) spell.ID).Dispose();
             _spell = spell;
             BuildGump();
         }

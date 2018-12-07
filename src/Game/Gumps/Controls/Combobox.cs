@@ -67,7 +67,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             _label.Text = _items[e];
             SelectedIndex = e;
-            UIManager.Remove<ComboboxContextMenu>();
+            Engine.UI.Remove<ComboboxContextMenu>();
             OnOptionSelected?.Invoke(this, e);
         }
 
@@ -77,9 +77,9 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 X = ScreenCoordinateX, Y = ScreenCoordinateY
             };
-            if (contextMenu.Height + ScreenCoordinateY > UIManager.Height) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - UIManager.Height;
+            if (contextMenu.Height + ScreenCoordinateY > Engine.UI.Height) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Engine.UI.Height;
             contextMenu.OnOptionSelected += _contextMenu_OnOptionSelected;
-            UIManager.Add(contextMenu);
+            Engine.UI.Add(contextMenu);
             base.OnMouseClick(x, y, button);
         }
 

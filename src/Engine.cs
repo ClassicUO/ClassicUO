@@ -146,6 +146,9 @@ namespace ClassicUO
             }
         }
 
+        public static UIManager UI => _engine._uiManager;
+
+
         public static void Start()
         {
             using (_engine = new Engine())
@@ -202,7 +205,8 @@ namespace ClassicUO
             //Service.Register(this);
             //Service.Register(_sb3D = new SpriteBatch3D(GraphicsDevice));
             //Service.Register(_sbUI = new SpriteBatchUI(GraphicsDevice));
-            Service.Register(_uiManager = new UIManager());
+            //Service.Register(_uiManager = new UIManager());
+            _uiManager = new UIManager();
 
             //Register Command Stack          
             Log.Message(LogTypes.Trace, "Network calibration...");
@@ -291,7 +295,7 @@ namespace ClassicUO
             int totalMerged = _batcher.Merged;
             int totalFlushes = _batcher.FlushCount;
             _batcher.Begin();
-            _uiManager.Draw(_batcher);
+            UI.Draw(_batcher);
             totalCalls += _batcher.Calls;
             totalMerged += _batcher.Merged;
             totalFlushes += _batcher.FlushCount;
@@ -350,7 +354,7 @@ namespace ClassicUO
 
         private void OnUIUpdate(double totalMS, double frameMS)
         {
-            _uiManager.Update(totalMS, frameMS);
+            UI.Update(totalMS, frameMS);
         }
 
         private void OnUpdate(double totalMS, double frameMS)

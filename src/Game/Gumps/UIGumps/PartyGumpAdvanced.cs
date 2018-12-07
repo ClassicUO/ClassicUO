@@ -311,15 +311,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     GameScene currentGameScene = SceneManager.GetScene<GameScene>();
 
                     if (currentGameScene.PartyMemberGumpStack.Contains(Member.Mobile))
-                        UIManager.Remove<PartyMemberGump>(Member.Mobile);
+                        Engine.UI.Remove<PartyMemberGump>(Member.Mobile);
                     else if (Member.Mobile == World.Player)
                     {
-                        StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
+                        StatusGump status = Engine.UI.GetByLocalSerial<StatusGump>();
                         status?.Dispose();
                     }
 
                     PartyMemberGump partymemberGump = new PartyMemberGump(Member, 300, 300);
-                    UIManager.Add(partymemberGump);
+                    Engine.UI.Add(partymemberGump);
                     currentGameScene.PartyMemberGumpStack.Add(Member.Mobile);
 
                     break;

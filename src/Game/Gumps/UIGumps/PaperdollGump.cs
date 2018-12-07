@@ -75,7 +75,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Dispose()
         {
-            UIManager.SavePosition(LocalSerial, Location);
+            Engine.UI.SavePosition(LocalSerial, Location);
 
             if (Mobile == World.Player)
             {
@@ -243,10 +243,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 Log.Message(LogTypes.Warning, "Party manifest pic event!!");
 
-                if (UIManager.GetByLocalSerial<PartyGumpAdvanced>() == null)
-                    UIManager.Add(new PartyGumpAdvanced());
+                if (Engine.UI.GetByLocalSerial<PartyGumpAdvanced>() == null)
+                    Engine.UI.Add(new PartyGumpAdvanced());
                 else
-                    UIManager.Remove<PartyGumpAdvanced>();
+                    Engine.UI.Remove<PartyGumpAdvanced>();
             }
         }
 
@@ -314,19 +314,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.Options:
 
-                    if (UIManager.GetByLocalSerial<OptionsGump>() == null)
+                    if (Engine.UI.GetByLocalSerial<OptionsGump>() == null)
                     {
-                        UIManager.Add(new OptionsGump
+                        Engine.UI.Add(new OptionsGump
                         {
                             X = 80, Y = 80
                         });
                     }
                     else
-                        UIManager.Remove<OptionsGump>();
+                        Engine.UI.Remove<OptionsGump>();
 
                     break;
                 case Buttons.LogOut:
-                    UIManager.Add(new LogoutGump());
+                    Engine.UI.Add(new LogoutGump());
                     Log.Message(LogTypes.Info, "Logout request sent!");
 
                     break;
@@ -336,10 +336,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.Skills:
 
-                    if (UIManager.GetByLocalSerial<SkillGumpAdvanced>() == null)
-                        UIManager.Add(new SkillGumpAdvanced());
+                    if (Engine.UI.GetByLocalSerial<SkillGumpAdvanced>() == null)
+                        Engine.UI.Add(new SkillGumpAdvanced());
                     else
-                        UIManager.Remove<SkillGumpAdvanced>();
+                        Engine.UI.Remove<SkillGumpAdvanced>();
 
                     break;
                 case Buttons.Guild:
@@ -352,10 +352,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.Status:
 
-                    if (UIManager.GetByLocalSerial<StatusGump>() == null)
-                        UIManager.Add(new StatusGump());
+                    if (Engine.UI.GetByLocalSerial<StatusGump>() == null)
+                        Engine.UI.Add(new StatusGump());
                     else
-                        UIManager.Remove<StatusGump>();
+                        Engine.UI.Remove<StatusGump>();
 
                     break;
             }

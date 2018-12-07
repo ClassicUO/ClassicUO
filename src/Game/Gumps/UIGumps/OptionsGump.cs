@@ -302,7 +302,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             button.MouseClick += (sender, e) =>
             {
                 ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => _colorPickerTooltipText.SetHue(s));
-                UIManager.Add(pickerGump);
+                Engine.UI.Add(pickerGump);
             };
             AddChildren(button, 3);
             uint color = 0xFF7F7F7F;

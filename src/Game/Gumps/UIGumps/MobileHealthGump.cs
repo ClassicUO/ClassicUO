@@ -110,7 +110,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 });
                 _textboxName.SetText(Mobile.Name);
                 _textboxName.IsEditable = false;
-                UIManager.KeyboardFocusControl = null;
+                Engine.UI.KeyboardFocusControl = null;
                 AddChildren(new FrameBorder(38, 40, 100, 7, Color.DarkGray));
             }
 
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 GameActions.Rename(Mobile, _textboxName.Text);
                 _textboxName.IsEditable = false;
-                UIManager.KeyboardFocusControl = null;
+                Engine.UI.KeyboardFocusControl = null;
             }
 
             base.OnKeyDown(key, mod);
@@ -331,7 +331,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 if (Mobile == World.Player)
                 {
-                    UIManager.Add(new StatusGump
+                    Engine.UI.Add(new StatusGump
                     {
                         X = ScreenCoordinateX, Y = ScreenCoordinateY
                     });

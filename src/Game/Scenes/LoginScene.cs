@@ -94,7 +94,7 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
             Service.Register(this);
-            UIManager.Add(new LoginGump());
+            Engine.UI.Add(new LoginGump());
 
             // Registering Packet Events
             NetClient.PacketReceived += NetClient_PacketReceived;
@@ -117,7 +117,7 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
-            UIManager.Remove<LoginGump>();
+            Engine.UI.Remove<LoginGump>();
             Service.Unregister<LoginScene>();
 
             // UnRegistering Packet Events           

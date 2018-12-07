@@ -51,9 +51,9 @@ namespace ClassicUO.Game.Scenes
         public List<Mobile> PartyMemberGumpStack = new List<Mobile>();
         public List<Skill> SkillButtonGumpStack = new List<Skill>();
         
-        public bool IsMouseOverUI => UIManager.IsMouseOverUI && !(UIManager.MouseOverControl is WorldViewport);
+        public bool IsMouseOverUI => Engine.UI.IsMouseOverUI && !(Engine.UI.MouseOverControl is WorldViewport);
 
-        public bool IsMouseOverWorld => UIManager.IsMouseOverUI && UIManager.MouseOverControl is WorldViewport;
+        public bool IsMouseOverWorld => Engine.UI.IsMouseOverUI && Engine.UI.MouseOverControl is WorldViewport;
 
         private void MoveCharacterByInputs()
         {
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (IsMouseOverUI)
                         {
-                            GumpControl control = UIManager.MouseOverControl;
+                            GumpControl control = Engine.UI.MouseOverControl;
 
                             if (control is ItemGump gumpling)
                                 obj = gumpling.Item;
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             TargetSystem.TargetGameObject(obj);
                             Mouse.LastLeftButtonClickTime = 0;
-                            UIManager.Add(new InfoGump(obj));
+                            Engine.UI.Add(new InfoGump(obj));
 
                         }
                         break;
@@ -303,34 +303,34 @@ namespace ClassicUO.Game.Scenes
                             {
                                 //Checks if party member gump is already on sceen
                                 if (PartyMemberGumpStack.Contains(mobile))
-                                    UIManager.Remove<PartyMemberGump>(mobile);
+                                    Engine.UI.Remove<PartyMemberGump>(mobile);
                                 else if (mobile == World.Player)
                                 {
-                                    StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
+                                    StatusGump status = Engine.UI.GetByLocalSerial<StatusGump>();
                                     status?.Dispose();
                                 }
 
                                 PartyMemberGump partymemberGump = new PartyMemberGump(member, _mousePicker.Position.X, _mousePicker.Position.Y);
-                                UIManager.Add(partymemberGump);
+                                Engine.UI.Add(partymemberGump);
                                 PartyMemberGumpStack.Add(mobile);
                                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
-                                UIManager.AttemptDragControl(partymemberGump, new Point(_mousePicker.Position.X + (rect.Width >> 1), _mousePicker.Position.Y + (rect.Height >> 1)), true);
+                                Engine.UI.AttemptDragControl(partymemberGump, new Point(_mousePicker.Position.X + (rect.Width >> 1), _mousePicker.Position.Y + (rect.Height >> 1)), true);
                             }
                             else
                             {
                                 if (MobileGumpStack.Contains(mobile))
-                                    UIManager.Remove<MobileHealthGump>(mobile);
+                                    Engine.UI.Remove<MobileHealthGump>(mobile);
                                 else if (mobile == World.Player)
                                 {
-                                    StatusGump status = UIManager.GetByLocalSerial<StatusGump>();
+                                    StatusGump status = Engine.UI.GetByLocalSerial<StatusGump>();
                                     status?.Dispose();
                                 }
 
                                 MobileGumpStack.Add(mobile);
                                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
                                 MobileHealthGump currentMobileHealthGump;
-                                UIManager.Add(currentMobileHealthGump = new MobileHealthGump(mobile, Mouse.Position.X - (rect.Width >> 1), Mouse.Position.Y - (rect.Height >> 1)));
-                                UIManager.AttemptDragControl(currentMobileHealthGump, Mouse.Position, true);
+                                Engine.UI.Add(currentMobileHealthGump = new MobileHealthGump(mobile, Mouse.Position.X - (rect.Width >> 1), Mouse.Position.Y - (rect.Height >> 1)));
+                                Engine.UI.AttemptDragControl(currentMobileHealthGump, Mouse.Position, true);
                             }
 
                             break;

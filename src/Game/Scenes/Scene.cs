@@ -35,13 +35,10 @@ namespace ClassicUO.Game.Scenes
         protected Scene(ScenesType type)
         {
             SceneType = type;
-            UIManager = Service.Get<UIManager>();
         }
 
 
         public bool IsDisposed { get; private set; }
-
-        protected UIManager UIManager { get; }
 
         public int RenderedObjectsCount { get; protected set; }
 

@@ -217,7 +217,7 @@ namespace ClassicUO.Game.Gumps.Controls
                             FadeOut = true
                         };
                         label.ControlInfo.Layer = UILayer.Over;
-                        UIManager.Add(label);
+                        Engine.UI.Add(label);
                         _labels.Add(label);
                     }
                 }

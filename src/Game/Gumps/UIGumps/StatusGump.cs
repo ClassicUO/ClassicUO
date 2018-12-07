@@ -621,11 +621,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         var list = SceneManager.GetScene<GameScene>().MobileGumpStack;
                         MobileHealthGump currentMobileHealthGump;
                         list.Add(World.Player);
-                        UIManager.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
+                        Engine.UI.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
 
                         //if (dict.ContainsKey(World.Player))
                         //{
-                        //    UIManager.Remove<MobileHealthGump>(World.Player);
+                        //    Engine.UI.Remove<MobileHealthGump>(World.Player);
                         //}
                         Dispose();
                     }
@@ -637,7 +637,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         var list = SceneManager.GetScene<GameScene>().MobileGumpStack;
                         MobileHealthGump currentMobileHealthGump;
                         list.Add(World.Player);
-                        UIManager.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
+                        Engine.UI.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
                         Dispose();
                     }
                 }
