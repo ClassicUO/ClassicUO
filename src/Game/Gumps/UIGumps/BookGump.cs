@@ -53,16 +53,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 ButtonAction = ButtonAction.Activate
             } );
             m_Forward.MouseClick += ( sender,e ) => {
-                if ( e.Button == MouseButton.Left && sender is GumpControl ctrl ) SetActivePage(ActivePage + 1);
+                if ( e.Button == MouseButton.Left && sender is Control ctrl ) SetActivePage(ActivePage + 1);
             };
             m_Forward.MouseDoubleClick += (sender, e) => {
-                if (e.Button == MouseButton.Left && sender is GumpControl ctrl) SetActivePage(MaxPage);
+                if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(MaxPage);
             };
             m_Backward.MouseClick += ( sender, e ) => {
-                if ( e.Button == MouseButton.Left && sender is GumpControl ctrl ) SetActivePage( ActivePage - 1 );
+                if ( e.Button == MouseButton.Left && sender is Control ctrl ) SetActivePage( ActivePage - 1 );
             };
             m_Backward.MouseDoubleClick += (sender, e) => {
-                if (e.Button == MouseButton.Left && sender is GumpControl ctrl) SetActivePage(1);
+                if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(1);
             };
             byte font = 1;
 

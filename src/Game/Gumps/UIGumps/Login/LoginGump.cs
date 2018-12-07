@@ -31,7 +31,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
     {
         private readonly LoginScene loginScene;
         private LoginStep currentStep;
-        private GumpControl currentStepGump;
+        private Control currentStepGump;
 
         public LoginGump() : base(0, 0)
         {
@@ -73,7 +73,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             base.OnButtonClick(buttonID);
         }
 
-        private GumpControl GetGumpForStep(LoginStep step)
+        private Control GetGumpForStep(LoginStep step)
         {
             currentStep = step;
 

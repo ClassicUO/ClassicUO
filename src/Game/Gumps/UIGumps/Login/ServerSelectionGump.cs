@@ -31,7 +31,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps.Login
 {
-    internal class ServerSelectionGump : GumpControl
+    internal class ServerSelectionGump : Control
     {
         public ServerSelectionGump()
         {
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             Server = 99
         }
 
-        private class ServerEntryGump : GumpControl
+        private class ServerEntryGump : Control
         {
             private readonly int _buttonId;
             private readonly ushort _hoverColor = 0x0021;

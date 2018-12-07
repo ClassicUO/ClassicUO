@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Gumps.Controls
         Activate = 1
     }
 
-    public class Button : GumpControl
+    public class Button : Control
     {
         private const int NORMAL = 0;
         private const int PRESSED = 1;

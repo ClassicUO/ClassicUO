@@ -249,7 +249,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
     }
 
-    public class PartyListEntry : GumpControl
+    public class PartyListEntry : Control
     {
         public readonly Button KickButton;
         public readonly PartyMember Member;

@@ -170,7 +170,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
     }
 
-    public class SkillListEntry : GumpControl
+    public class SkillListEntry : Control
     {
         private readonly Button _activeUse;
         private readonly GumpPic _loc;

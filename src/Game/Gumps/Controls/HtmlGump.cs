@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class HtmlGump : GumpControl
+    public class HtmlGump : Control
     {
         private RenderedText _gameText;
         private IScrollBar _scrollBar;

@@ -26,7 +26,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class Label : GumpControl
+    public class Label : Control
     {
         private float _alpha;
         private readonly RenderedText _gText;

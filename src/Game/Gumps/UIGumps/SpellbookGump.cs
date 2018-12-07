@@ -330,7 +330,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 icon.DragBegin += (sender, e) =>
                 {
-                    GumpControl ctrl = (GumpControl) sender;
+                    Control ctrl = (Control) sender;
                     int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial - 100) + 1;
                     SpellDefinition? def = null;
 
@@ -618,7 +618,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             spellImage.DragBegin += (sender, e) =>
             {
-                GumpControl ctrl = (GumpControl) sender;
+                Control ctrl = (Control) sender;
                 SpellDefinition def = SpellsMagery.GetSpell((int) ctrl.Tag);
 
                 UseSpellButtonGump gump = new UseSpellButtonGump(def)
@@ -709,12 +709,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButton.Left && sender is GumpControl ctrl) SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
+            if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
         }
 
         private void PageCornerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (e.Button == MouseButton.Left && sender is GumpControl ctrl) SetActivePage(ctrl.LocalSerial == 0 ? 1 : _maxPage);
+            if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? 1 : _maxPage);
         }
 
         public override void OnButtonClick(int buttonID)

@@ -38,14 +38,14 @@ namespace ClassicUO.Game.Gumps
     public sealed class UIManager
     {
         private readonly Dictionary<Serial, Point> _gumpPositionCache = new Dictionary<Serial, Point>();
-        private readonly List<GumpControl> _gumps = new List<GumpControl>();
+        private readonly List<Control> _gumps = new List<Control>();
         private readonly List<object> _inputBlockingObjects = new List<object>();
-        private readonly GumpControl[] _mouseDownControls = new GumpControl[5];
+        private readonly Control[] _mouseDownControls = new Control[5];
        // private readonly SpriteBatchUI _sbUI;
-        private GumpControl _draggingControl;
+        private Control _draggingControl;
         private int _dragOriginX, _dragOriginY;
         private bool _isDraggingControl;
-        private GumpControl _keyboardFocusControl;
+        private Control _keyboardFocusControl;
         private bool _needSort;
 
         public UIManager()
@@ -187,9 +187,9 @@ namespace ClassicUO.Game.Gumps
             InputManager.TextInput += (sender, e) => { _keyboardFocusControl?.InvokeTextInput(e); };
         }
 
-        public IReadOnlyList<GumpControl> Gumps => _gumps;
+        public IReadOnlyList<Control> Gumps => _gumps;
 
-        public GumpControl MouseOverControl { get; private set; }
+        public Control MouseOverControl { get; private set; }
 
         public bool IsMouseOverUI => MouseOverControl != null;
 
@@ -201,7 +201,7 @@ namespace ClassicUO.Game.Gumps
 
         public GameCursor GameCursor { get; }
 
-        public GumpControl KeyboardFocusControl
+        public Control KeyboardFocusControl
         {
             get
             {
@@ -209,7 +209,7 @@ namespace ClassicUO.Game.Gumps
                 {
                     for (int i = 0; i < _gumps.Count; i++)
                     {
-                        GumpControl c = _gumps[i];
+                        Control c = _gumps[i];
 
                         if (!c.IsDisposed && c.IsVisible && c.IsEnabled && c.AcceptKeyboardInput)
                         {
@@ -257,7 +257,7 @@ namespace ClassicUO.Game.Gumps
             return _gumpPositionCache.TryGetValue(id, out pos);
         }
 
-        public GumpControl Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
+        public Control Create(Serial sender, Serial gumpID, int x, int y, string layout, string[] lines)
         {
             if (GetGumpCachePosition(gumpID, out Point pos))
             {
@@ -311,7 +311,7 @@ namespace ClassicUO.Game.Gumps
 
                             for (int i = 0; i < gump.Children.Count; i++)
                             {
-                                GumpControl g = gump.Children[i];
+                                Control g = gump.Children[i];
                                 g.IsTransparent = true;
                                 if (g.Bounds.Contains(t.Bounds) && (g is Button || g is Checkbox)) g.IsVisible = false;
                             }
@@ -421,7 +421,7 @@ namespace ClassicUO.Game.Gumps
                             if (World.ClientFlags.TooltipsEnabled)
                             {
                                 string cliloc = Cliloc.GetString(int.Parse(gparams[1]));
-                                GumpControl last = gump.Children.Count > 0 ? gump.Children.Last() : null;
+                                Control last = gump.Children.Count > 0 ? gump.Children.Last() : null;
                                 last?.SetTooltip(cliloc);
                             }
 
@@ -443,7 +443,7 @@ namespace ClassicUO.Game.Gumps
             return gump;
         }
 
-        public T GetByLocalSerial<T>(Serial? serial = null) where T : GumpControl
+        public T GetByLocalSerial<T>(Serial? serial = null) where T : Control
         {
             return _gumps.OfType<T>().FirstOrDefault(s => !s.IsDisposed && (!serial.HasValue || s.LocalSerial == serial));
         }
@@ -464,7 +464,7 @@ namespace ClassicUO.Game.Gumps
 
             for (int i = 0; i < _gumps.Count; i++)
             {
-                GumpControl g = _gumps[i];
+                Control g = _gumps[i];
 
                 if (!g.IsInitialized && !g.IsDisposed)
                     g.Initialize();
@@ -485,7 +485,7 @@ namespace ClassicUO.Game.Gumps
 
             for (int i = _gumps.Count - 1; i >= 0; i--)
             {
-                GumpControl g = _gumps[i];
+                Control g = _gumps[i];
 
                 if (g.IsInitialized)
                     g.Draw(batcher, g.Location);
@@ -494,7 +494,7 @@ namespace ClassicUO.Game.Gumps
             GameCursor.Draw(batcher);
         }
 
-        public void Add(GumpControl gump)
+        public void Add(Control gump)
         {
             if (!gump.IsDisposed)
             {
@@ -503,9 +503,9 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public void Remove<T>(Serial? local = null) where T : GumpControl
+        public void Remove<T>(Serial? local = null) where T : Control
         {
-            foreach (GumpControl c in _gumps)
+            foreach (Control c in _gumps)
             {
                 if (c is T)
                 {
@@ -564,7 +564,7 @@ namespace ClassicUO.Game.Gumps
         private void HandleMouseInput()
         {
             Point position = Mouse.Position;
-            GumpControl gump = GetMouseOverControl(position);
+            Control gump = GetMouseOverControl(position);
 
             if (MouseOverControl != null && gump != MouseOverControl)
             {
@@ -610,16 +610,16 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        private GumpControl GetMouseOverControl(Point position)
+        private Control GetMouseOverControl(Point position)
         {
             if (_isDraggingControl)
                 return _draggingControl;
-            List<GumpControl> controls = IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal).ToList() : _gumps;
-            GumpControl[] mouseoverControls = null;
+            List<Control> controls = IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal).ToList() : _gumps;
+            Control[] mouseoverControls = null;
 
-            foreach (GumpControl c in controls)
+            foreach (Control c in controls)
             {
-                GumpControl[] ctrls = c.HitTest(position);
+                Control[] ctrls = c.HitTest(position);
 
                 if (ctrls != null)
                 {
@@ -632,9 +632,9 @@ namespace ClassicUO.Game.Gumps
             return mouseoverControls?.FirstOrDefault(s => s.AcceptMouseInput);
         }
 
-        private void MakeTopMostGump(GumpControl control)
+        private void MakeTopMostGump(Control control)
         {
-            GumpControl c = control;
+            Control c = control;
 
             while (c.Parent != null)
                 c = c.Parent;
@@ -643,7 +643,7 @@ namespace ClassicUO.Game.Gumps
             {
                 if (_gumps[i] == c)
                 {
-                    GumpControl cm = _gumps[i];
+                    Control cm = _gumps[i];
                     _gumps.RemoveAt(i);
                     _gumps.Insert(0, cm);
                     _needSort = true;
@@ -660,11 +660,11 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        public void AttemptDragControl(GumpControl control, Point mousePosition, bool attemptAlwaysSuccessful = false)
+        public void AttemptDragControl(Control control, Point mousePosition, bool attemptAlwaysSuccessful = false)
         {
             if (_isDraggingControl)
                 return;
-            GumpControl dragTarget = control;
+            Control dragTarget = control;
 
             if (!dragTarget.CanMove)
                 return;

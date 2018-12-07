@@ -28,7 +28,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class RenderedTextList : GumpControl
+    internal class RenderedTextList : Control
     {
         private readonly List<RenderedText> _entries;
         private readonly IScrollBar _scrollBar;

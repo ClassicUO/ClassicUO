@@ -24,7 +24,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class HitBox : GumpControl
+    internal class HitBox : Control
     {
         private readonly SpriteTexture _texture;
 

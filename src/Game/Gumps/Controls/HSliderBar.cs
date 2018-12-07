@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Gumps.Controls
         BlueWidgetNoBar
     }
 
-    internal class HSliderBar : GumpControl
+    internal class HSliderBar : Control
     {
         private readonly List<HSliderBar> _pairedSliders = new List<HSliderBar>();
         private readonly HSliderBarStyle _style;

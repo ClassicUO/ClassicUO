@@ -24,7 +24,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class Panel : GumpControl
+    public class Panel : Control
     {
         private readonly SpriteTexture[] _frame = new SpriteTexture[9];
 

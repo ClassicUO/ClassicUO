@@ -24,7 +24,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class CheckerTrans : GumpControl
+    public class CheckerTrans : Control
     {
         private static SpriteTexture _transparentTexture;
 

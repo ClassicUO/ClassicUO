@@ -26,7 +26,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class Combobox : GumpControl
+    internal class Combobox : Control
     {
         private readonly string[] _items;
         private readonly Label _label;
@@ -83,7 +83,7 @@ namespace ClassicUO.Game.Gumps.Controls
             base.OnMouseClick(x, y, button);
         }
 
-        private class ComboboxContextMenu : GumpControl
+        private class ComboboxContextMenu : Control
         {
             private readonly ResizePic _background;
 

@@ -29,7 +29,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
     public class GumpControlInfo
     {
-        public GumpControlInfo(GumpControl control)
+        public GumpControlInfo(Control control)
         {
             Control = control;
         }
@@ -40,6 +40,6 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool ModalClickOutsideAreaClosesThisControl { get; set; }
 
-        public GumpControl Control { get; }
+        public Control Control { get; }
     }
 }

@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         ClientCommand
     }
 
-    internal class ChatControl : GumpControl
+    internal class ChatControl : Control
     {
         private const int MAX_MESSAGE_LENGHT = 100;
         private readonly List<Tuple<ChatMode, string>> _messageHistory;

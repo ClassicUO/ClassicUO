@@ -144,7 +144,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
     }
 
-    internal class GameBorder : GumpControl
+    internal class GameBorder : Control
     {
         private readonly SpriteTexture[] _borders = new SpriteTexture[2];
         private readonly int _borderSize;

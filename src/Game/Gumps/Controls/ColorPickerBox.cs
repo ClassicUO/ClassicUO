@@ -31,7 +31,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ColorPickerBox : GumpControl
+    internal class ColorPickerBox : Control
     {
         private readonly int _columns;
         private readonly int _rows;

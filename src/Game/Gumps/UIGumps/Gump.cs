@@ -29,7 +29,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    public class Gump : GumpControl
+    public class Gump : Control
     {
         public Gump(Serial local, Serial server)
         {
@@ -143,7 +143,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     List<Serial> switches = new List<Serial>();
                     List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();
 
-                    foreach (GumpControl control in Children)
+                    foreach (Control control in Children)
                     {
                         if (control is Checkbox checkbox && checkbox.IsChecked)
                             switches.Add(control.LocalSerial);

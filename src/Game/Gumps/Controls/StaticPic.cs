@@ -25,7 +25,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class StaticPic : GumpControl
+    public class StaticPic : Control
     {
         private readonly Graphic _graphic;
         private readonly bool _isPartial;

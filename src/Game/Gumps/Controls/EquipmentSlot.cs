@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class EquipmentSlot : GumpControl, IMobilePaperdollOwner
+    internal class EquipmentSlot : Control, IMobilePaperdollOwner
     {
         private readonly Layer _layer;
         private readonly Mobile _mobile;

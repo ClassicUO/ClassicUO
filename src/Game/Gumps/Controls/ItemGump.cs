@@ -31,7 +31,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ItemGump : GumpControl
+    internal class ItemGump : Control
     {
         private readonly List<Label> _labels = new List<Label>();
         private bool _clickedCanDrag;

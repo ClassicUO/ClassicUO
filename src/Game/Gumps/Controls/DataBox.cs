@@ -29,7 +29,7 @@ using ClassicUO.Input;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    class DataBox : GumpControl
+    class DataBox : Control
     {
         public DataBox(int x, int y, int w, int h)
         {

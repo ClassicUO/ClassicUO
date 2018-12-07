@@ -25,7 +25,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ExpandableScroll : GumpControl
+    internal class ExpandableScroll : Control
     {
         private const int c_ExpandableScrollHeight_Min = 274;
         private const int c_ExpandableScrollHeight_Max = 1000;

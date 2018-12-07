@@ -502,7 +502,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Ok
         }
 
-        private class LeftColum : GumpControl
+        private class LeftColum : Control
         {
             public LeftColum()
             {

@@ -28,7 +28,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class ScrollBar : GumpControl, IScrollBar
+    public class ScrollBar : Control, IScrollBar
     {
         private const float TIME_BETWEEN_CLICKS = 500f;
         private bool _btUpClicked, _btDownClicked, _btSliderClicked;
@@ -40,7 +40,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private SpriteTexture[] _textureUpButton, _textureDownButton, _textureBackground;
         private float _timeUntilNextClick;
 
-        public ScrollBar(GumpControl parent, int x, int y, int height) : base(parent)
+        public ScrollBar(Control parent, int x, int y, int height) : base(parent)
         {
             Height = height;
             Location = new Point(x, y);

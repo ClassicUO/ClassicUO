@@ -27,7 +27,7 @@ using SDL2;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class TextBox : GumpControl
+    public class TextBox : Control
     {
         public bool MultiLineInputAllowed { get; set; } = false;
         private TextEntry _entry;

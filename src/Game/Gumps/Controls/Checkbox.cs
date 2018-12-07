@@ -28,7 +28,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class Checkbox : GumpControl
+    public class Checkbox : Control
     {
         private const int INACTIVE = 0;
         private const int ACTIVE = 1;

@@ -28,7 +28,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class ScrollFlag : GumpControl, IScrollBar
+    public class ScrollFlag : Control, IScrollBar
     {
         private bool _btnSliderClicked;
         private Point _clickPosition;
@@ -39,14 +39,14 @@ namespace ClassicUO.Game.Gumps.Controls
         private SpriteTexture _texture;
         private float _value;
 
-        public ScrollFlag(GumpControl parent, int x, int y, int height) : this(parent)
+        public ScrollFlag(Control parent, int x, int y, int height) : this(parent)
         {
             Location = new Point(x, y);
             _sliderExtentTop = y;
             _sliderExtentHeight = height;
         }
 
-        public ScrollFlag(GumpControl parent) : base(parent)
+        public ScrollFlag(Control parent) : base(parent)
         {
             AcceptMouseInput = true;
         }

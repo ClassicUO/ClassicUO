@@ -251,7 +251,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
     }
 
-    internal class FrameBorder : GumpControl
+    internal class FrameBorder : Control
     {
         private readonly Texture2D _border;
 

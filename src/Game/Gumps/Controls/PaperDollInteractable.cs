@@ -28,7 +28,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class PaperDollInteractable : GumpControl, IMobilePaperdollOwner
+    internal class PaperDollInteractable : Control, IMobilePaperdollOwner
     {
         private static readonly Layer[] _layerOrder =
         {

@@ -189,7 +189,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             Prev
         }
 
-        private class CharacterEntryGump : GumpControl
+        private class CharacterEntryGump : Control
         {
             private readonly Label _label;
             private readonly Action<uint> _loginFn;

@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (IsMouseOverUI)
                         {
-                            GumpControl control = Engine.UI.MouseOverControl;
+                            Control control = Engine.UI.MouseOverControl;
 
                             if (control is ItemGump gumpling)
                                 obj = gumpling.Item;

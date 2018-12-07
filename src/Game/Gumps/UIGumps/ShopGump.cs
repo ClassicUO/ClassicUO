@@ -236,7 +236,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Clear
         }
 
-        private class ShopItem : GumpControl
+        private class ShopItem : Control
         {
             private readonly Label _amountLabel;
 
@@ -286,7 +286,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        private class TransactionItem : GumpControl
+        private class TransactionItem : Control
         {
             private readonly Label _amountLabel;
 
@@ -346,7 +346,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        private class ResizePicLine : GumpControl
+        private class ResizePicLine : Control
         {
             private readonly Graphic _graphic;
             private readonly SpriteTexture[] _gumpTexture = new SpriteTexture[3];

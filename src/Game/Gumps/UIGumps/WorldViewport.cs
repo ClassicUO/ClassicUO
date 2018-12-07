@@ -27,7 +27,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    public class WorldViewport : GumpControl
+    public class WorldViewport : Control
     {
         private readonly GameScene _scene;
         private Rectangle _rect;

@@ -27,7 +27,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ScrollArea : GumpControl
+    internal class ScrollArea : Control
     {
         private readonly IScrollBar _scrollBar;
         private bool _needUpdate = true;
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
                 for (int i = 1; i < Children.Count; i++)
                 {
-                    GumpControl child = Children[i];
+                    Control child = Children[i];
 
                     if (!child.IsVisible)
                         continue;
@@ -153,7 +153,7 @@ namespace ClassicUO.Game.Gumps.Controls
             _needUpdate = true;
         }
 
-        public override void RemoveChildren(GumpControl c)
+        public override void RemoveChildren(Control c)
         {
             if (c is ScrollAreaItem)
                 base.RemoveChildren(c);
@@ -165,7 +165,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        public override void AddChildren(GumpControl c, int page = 0)
+        public override void AddChildren(Control c, int page = 0)
         {
             ScrollAreaItem item = new ScrollAreaItem();
             item.AddChildren(c);
@@ -206,7 +206,7 @@ namespace ClassicUO.Game.Gumps.Controls
         }
     }
 
-    internal class ScrollAreaItem : GumpControl
+    internal class ScrollAreaItem : Control
     {
     }
 }

@@ -170,7 +170,7 @@
     <Compile Include="Game\Gumps\Controls\CroppedText.cs" />
     <Compile Include="Game\Gumps\Controls\EquipmentSlot.cs" />
     <Compile Include="Game\Gumps\Controls\ExpandableScroll.cs" />
-    <Compile Include="Game\Gumps\Controls\GumpControl.cs" />
+    <Compile Include="Game\Gumps\Controls\Control.cs" />
     <Compile Include="Game\Gumps\Controls\GumpControlInfo.cs" />
     <Compile Include="Game\Gumps\Controls\GumpPic.cs" />
     <Compile Include="Game\Gumps\Controls\GumpPicBackpack.cs" />
