@@ -28,7 +28,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Graphic = graphic;
             Hue = hue;
-            Duration = duration > 0 ? CoreGame.Ticks + duration : -1;
+            Duration = duration > 0 ? Engine.Ticks + duration : -1;
             Load();
         }
 

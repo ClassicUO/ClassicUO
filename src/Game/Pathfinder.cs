@@ -771,7 +771,7 @@ namespace ClassicUO.Game
 
         public static void ProcessAutoWalk()
         {
-            if (AutoWalking && World.InGame && World.Player.RequestedSteps.Count < 5 && World.Player.LastStepRequestTime <= CoreGame.Ticks)
+            if (AutoWalking && World.InGame && World.Player.RequestedSteps.Count < 5 && World.Player.LastStepRequestTime <= Engine.Ticks)
             {
                 if (_pointIndex >= 0 && _pointIndex < _pathSize)
                 {

@@ -93,13 +93,13 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, TileData.IsPartialHue(Item.ItemData.Flags), 0, false);
-            spriteBatch.Draw2D(Texture, position, huev);
+            batcher.Draw2D(Texture, position, huev);
             if (Item.Amount > 1 && TileData.IsStackable(Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
-                spriteBatch.Draw2D(Texture, new Point(position.X + 5, position.Y + 5), huev);
-            return base.Draw(spriteBatch, position, huev);
+                batcher.Draw2D(Texture, new Point(position.X + 5, position.Y + 5), huev);
+            return base.Draw(batcher, position, huev);
         }
 
         protected override bool Contains(int x, int y)
@@ -119,7 +119,7 @@ namespace ClassicUO.Game.Gumps.Controls
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
             _clickedCanDrag = true;
-            float totalMS = CoreGame.Ticks;
+            float totalMS = Engine.Ticks;
             _picUpTime = totalMS + 800f;
             _clickedPoint = new Point(x, y);
         }
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 _clickedCanDrag = false;
                 _sendClickIfNotDClick = true;
-                float totalMS = CoreGame.Ticks;
+                float totalMS = Engine.Ticks;
                 _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
             }
         }

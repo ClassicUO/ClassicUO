@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Views
             AllowedToDraw = !tile.IsIgnored;
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
@@ -64,12 +64,12 @@ namespace ClassicUO.Game.Views
             {
                 HueVector = GetHueVector(GameObject.Hue, true);
 
-                return Draw3DStretched(spriteBatch, position, objectList);
+                return Draw3DStretched(batcher, position, objectList);
             }
 
             HueVector = GetHueVector(GameObject.Hue, false);
 
-            return base.Draw(spriteBatch, position, objectList);
+            return base.Draw(batcher, position, objectList);
         }
 
         private static Vector3 GetHueVector(int hue, bool stretched)
@@ -77,9 +77,9 @@ namespace ClassicUO.Game.Views
             return hue != 0 ? new Vector3(hue, stretched ? (int) ShadersEffectType.LandHued : (int) ShadersEffectType.Hued, 0) : new Vector3(hue, stretched ? (int) ShadersEffectType.Land : (int) ShadersEffectType.None, 0);
         }
 
-        private unsafe bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        private unsafe bool Draw3DStretched(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            Texture.Ticks = CoreGame.Ticks;
+            Texture.Ticks = Engine.Ticks;
 
             fixed (SpriteVertex* ptr = _vertex)
             {
@@ -109,7 +109,7 @@ namespace ClassicUO.Game.Views
             if (HueVector != _vertex[0].Hue)
                 _vertex[0].Hue = _vertex[1].Hue = _vertex[2].Hue = _vertex[3].Hue = HueVector;
 
-            if (!spriteBatch.DrawSprite(Texture, _vertex))
+            if (!batcher.DrawSprite(Texture, _vertex))
                 return false;
 
             if (objectList.IsMouseInObjectIsometric(_vertex))

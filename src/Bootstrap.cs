@@ -72,11 +72,7 @@ namespace ClassicUO
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
 
-            using (GameLoop game = new GameLoop())
-            {
-                Log.Message(LogTypes.Trace, $"Exe directory: {ExeDirectory}");
-                game.Run();
-            }
+            Engine.Start();
         }
     }
 }

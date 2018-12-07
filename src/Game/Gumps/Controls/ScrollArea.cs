@@ -74,18 +74,18 @@ namespace ClassicUO.Game.Gumps.Controls
             base.OnInitialize();
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            Children[0].Draw(spriteBatch, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
+            Children[0].Draw(batcher, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
             _rect.X = position.X;
             _rect.Y = position.Y;
             _rect.Width = Width;
             _rect.Height = Height;
-            Rectangle scissor = ScissorStack.CalculateScissors(spriteBatch.TransformMatrix, _rect);
+            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
 
             if (ScissorStack.PushScissors(scissor))
             {
-                spriteBatch.EnableScissorTest(true);
+                batcher.EnableScissorTest(true);
                 int height = 0;
                 int maxheight = _scrollBar.Value + _scrollBar.Height;
                 bool drawOnly1 = true;
@@ -103,12 +103,12 @@ namespace ClassicUO.Game.Gumps.Controls
                         // do nothing
                     }
                     else if (height + child.Height <= maxheight)
-                        child.Draw(spriteBatch, new Point(position.X + child.X, position.Y + child.Y));
+                        child.Draw(batcher, new Point(position.X + child.X, position.Y + child.Y));
                     else
                     {
                         if (drawOnly1)
                         {
-                            child.Draw(spriteBatch, new Point(position.X + child.X, position.Y + child.Y));
+                            child.Draw(batcher, new Point(position.X + child.X, position.Y + child.Y));
                             drawOnly1 = false;
                         }
                     }
@@ -116,7 +116,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     height += child.Height;
                 }
 
-                spriteBatch.EnableScissorTest(false);
+                batcher.EnableScissorTest(false);
                 ScissorStack.PopScissors();
             }
 

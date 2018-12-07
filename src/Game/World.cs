@@ -23,6 +23,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Map;
 
 using Microsoft.Xna.Framework;
@@ -31,6 +32,15 @@ namespace ClassicUO.Game
 {
     public static class World
     {
+
+        private static StaticManager _staticManager = new StaticManager();
+
+        public static void AddEffect(GameEffect effect)
+        {
+
+        }
+
+
         public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
 
         public static EntityCollection<Item> Items { get; } = new EntityCollection<Item>();
@@ -109,7 +119,7 @@ namespace ClassicUO.Game
                     {
                         if (HouseManager.TryGetHouse(item, out House house))
                         {
-                            if (item.Distance > 50)
+                            if (item.Distance > Constants.MAX_HOUSE_DISTANCE)
                             {
                                 house.Dispose();
                                 RemoveItem(item);

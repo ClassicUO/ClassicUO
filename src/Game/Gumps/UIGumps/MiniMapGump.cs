@@ -86,20 +86,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _mapTexture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (_gumpTexture == null || _gumpTexture.IsDisposed)
                 return false;
-            spriteBatch.Draw2D(_gumpTexture, position, Vector3.Zero);
+            batcher.Draw2D(_gumpTexture, position, Vector3.Zero);
             CreateMiniMapTexture();
-            spriteBatch.Draw2D(_mapTexture, position, Vector3.Zero);
+            batcher.Draw2D(_mapTexture, position, Vector3.Zero);
             _timeMS += (float) _frameMS;
 
             if (_timeMS >= ReticleBlinkMS)
             {
                 if (_playerIndicator == null)
                 {
-                    _playerIndicator = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
+                    _playerIndicator = new Texture2D(batcher.GraphicsDevice, 1, 1);
 
                     _playerIndicator.SetData(new uint[1]
                     {
@@ -108,13 +108,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
 
                 //DRAW DOT OF PLAYER
-                spriteBatch.Draw2D(_playerIndicator, new Point(position.X + (Width >> 1), position.Y + (Height >> 1)), Vector3.Zero);
+                batcher.Draw2D(_playerIndicator, new Point(position.X + (Width >> 1), position.Y + (Height >> 1)), Vector3.Zero);
             }
 
             if (_timeMS >= ReticleBlinkMS * 2)
                 _timeMS -= ReticleBlinkMS * 2;
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)

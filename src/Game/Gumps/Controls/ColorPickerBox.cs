@@ -123,11 +123,11 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (_pointer == null)
             {
-                _pointer = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
+                _pointer = new Texture2D(batcher.GraphicsDevice, 1, 1);
 
                 _pointer.SetData(new Color[1]
                 {
@@ -138,12 +138,12 @@ namespace ClassicUO.Game.Gumps.Controls
                     SelectedIndex = 0;
             }
 
-            spriteBatch.Draw2D(_colorTable, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
+            batcher.Draw2D(_colorTable, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
 
             if (_hues.Length > 1)
-                spriteBatch.Draw2D(_pointer, new Rectangle((int) (position.X + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (position.Y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2), Vector3.Zero);
+                batcher.Draw2D(_pointer, new Rectangle((int) (position.X + Width / _columns * (SelectedIndex % _columns + .5f) - 1), (int) (position.Y + Height / _rows * (SelectedIndex / _columns + .5f) - 1), 2, 2), Vector3.Zero);
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)

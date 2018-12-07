@@ -91,7 +91,7 @@ namespace ClassicUO.Game.Views
             return state;
         });
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (GameObject.IsDisposed)
                 return false;
@@ -117,33 +117,33 @@ namespace ClassicUO.Game.Views
             switch (effect.Blend)
             {
                 case GraphicEffectBlendMode.Multiply:
-                    spriteBatch.SetBlendState(_multiplyBlendState.Value);
-                    base.Draw(spriteBatch, position, objectList);
-                    spriteBatch.SetBlendState(null);
+                    batcher.SetBlendState(_multiplyBlendState.Value);
+                    base.Draw(batcher, position, objectList);
+                    batcher.SetBlendState(null);
                     break;
                 case GraphicEffectBlendMode.Screen:
                 case GraphicEffectBlendMode.ScreenMore:
-                    spriteBatch.SetBlendState(_screenBlendState.Value);
-                    base.Draw(spriteBatch, position, objectList);
-                    spriteBatch.SetBlendState(null);
+                    batcher.SetBlendState(_screenBlendState.Value);
+                    base.Draw(batcher, position, objectList);
+                    batcher.SetBlendState(null);
                     break;
                 case GraphicEffectBlendMode.ScreenLess:
-                    spriteBatch.SetBlendState(_screenLessBlendState.Value);
-                    base.Draw(spriteBatch, position, objectList);
-                    spriteBatch.SetBlendState(null);
+                    batcher.SetBlendState(_screenLessBlendState.Value);
+                    base.Draw(batcher, position, objectList);
+                    batcher.SetBlendState(null);
                     break;
                 case GraphicEffectBlendMode.NormalHalfTransparent:
-                    spriteBatch.SetBlendState(_normalHalfBlendState.Value);
-                    base.Draw(spriteBatch, position, objectList);
-                    spriteBatch.SetBlendState(null);
+                    batcher.SetBlendState(_normalHalfBlendState.Value);
+                    base.Draw(batcher, position, objectList);
+                    batcher.SetBlendState(null);
                     break;
                 case GraphicEffectBlendMode.ShadowBlue:
-                    spriteBatch.SetBlendState(_shadowBlueBlendState.Value);
-                    base.Draw(spriteBatch, position, objectList);
-                    spriteBatch.SetBlendState(null);
+                    batcher.SetBlendState(_shadowBlueBlendState.Value);
+                    base.Draw(batcher, position, objectList);
+                    batcher.SetBlendState(null);
                     break;
                 default:
-                    base.Draw(spriteBatch, position, objectList);
+                    base.Draw(batcher, position, objectList);
                     break;
             }
 

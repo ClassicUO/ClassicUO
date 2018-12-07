@@ -69,7 +69,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            Service.Get<GameLoop>().Quit();
+            Engine.Quit();
             base.OnButtonClick(buttonID);
         }
 

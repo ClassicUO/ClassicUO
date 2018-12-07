@@ -111,10 +111,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private List<(string,TextBox)> m_pages = new List<(string, TextBox)> ();
         private int MaxPage => (BookPageCount >> 1) + 1;
 
-        public override bool Draw( SpriteBatchUI spriteBatch, Point position, Vector3? hue = null )
-        {
-            return base.Draw( spriteBatch, position, hue );
-        }
 
         private void SetActivePage( int page )
         {

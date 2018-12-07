@@ -84,10 +84,10 @@ namespace ClassicUO.Game.Views
             return prect;
         }
 
-        public virtual unsafe bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
+        public virtual unsafe bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
         {
             if (Texture == null || Texture.IsDisposed || !AllowedToDraw || GameObject.IsDisposed) return false;
-            Texture.Ticks = CoreGame.Ticks;
+            Texture.Ticks = Engine.Ticks;
             SpriteVertex[] vertex;
 
             if (Rotation != 0.0f)
@@ -181,10 +181,10 @@ namespace ClassicUO.Game.Views
             //        vertex[3]
             //    };
 
-            //    spriteBatch.DrawShadow(Texture, vertexS, new Vector2(position.X + 22, position.Y + GameObject.Offset.Y - GameObject.Offset.Z + 22), IsFlipped, ShadowZDepth);
+            //    batcher.DrawShadow(Texture, vertexS, new Vector2(position.X + 22, position.Y + GameObject.Offset.Y - GameObject.Offset.Z + 22), IsFlipped, ShadowZDepth);
             //}
 
-            if (!spriteBatch.DrawSprite(Texture, vertex))
+            if (!batcher.DrawSprite(Texture, vertex))
                 return false;
             MousePick(list, vertex);
 
@@ -195,7 +195,7 @@ namespace ClassicUO.Game.Views
         {
         }
 
-        protected virtual void MessageOverHead(SpriteBatch3D spriteBatch, Vector3 position, int offY)
+        protected virtual void MessageOverHead(Batcher2D batcher, Vector3 position, int offY)
         {
             if (GameObject.OverHeads != null)
             {

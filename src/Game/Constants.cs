@@ -37,6 +37,8 @@ namespace ClassicUO.Game
         public const int DRAG_ITEMS_DISTANCE = 3;
 
 
+        public const int MAX_HOUSE_DISTANCE = 50;
+
         public const float FOLIAGE_ALPHA = .7f;
         public const int ALPHA_TIME = 25;
     }

@@ -45,9 +45,9 @@ namespace ClassicUO.Game.Gumps.Controls
             _entries = new List<RenderedText>();
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            base.Draw(spriteBatch, position, hue);
+            base.Draw(batcher, position, hue);
             Point p = new Point(position.X, position.Y);
             int height = 0;
             int maxheight = _scrollBar.Value + _scrollBar.Height;
@@ -66,13 +66,13 @@ namespace ClassicUO.Game.Gumps.Controls
                     if (y < 0)
                     {
                         // this entry starts above the renderable area, but exists partially within it.
-                        _entries[i].Draw(spriteBatch, new Rectangle(p.X, position.Y, _entries[i].Width, _entries[i].Height + y), 0, -y);
+                        _entries[i].Draw(batcher, new Rectangle(p.X, position.Y, _entries[i].Width, _entries[i].Height + y), 0, -y);
                         p.Y += _entries[i].Height + y;
                     }
                     else
                     {
                         // this entry is completely within the renderable area.
-                        _entries[i].Draw(spriteBatch, p);
+                        _entries[i].Draw(batcher, p);
                         p.Y += _entries[i].Height;
                     }
 
@@ -81,7 +81,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 else
                 {
                     int y = maxheight - height;
-                    _entries[i].Draw(spriteBatch, new Rectangle(p.X, position.Y + _scrollBar.Height - y, _entries[i].Width, y), 0, 0);
+                    _entries[i].Draw(batcher, new Rectangle(p.X, position.Y + _scrollBar.Height - y, _entries[i].Width, y), 0, 0);
 
                     // can't fit any more entries - so we break!
                     break;

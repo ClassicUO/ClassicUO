@@ -109,13 +109,14 @@ namespace ClassicUO.Game.GameObjects.Managers
                     return;
             }
 
-            if (effect != null)
-                Add(effect);
+            
+            Add(effect);
         }
 
         public void Add(GameEffect effect)
         {
-            _effects.Add(effect);
+            if (effect != null)
+                _effects.Add(effect);
         }
     }
 }

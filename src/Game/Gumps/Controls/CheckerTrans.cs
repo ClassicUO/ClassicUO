@@ -55,15 +55,15 @@ namespace ClassicUO.Game.Gumps.Controls
                     });
                 }
 
-                _transparentTexture.Ticks = CoreGame.Ticks;
+                _transparentTexture.Ticks = Engine.Ticks;
 
                 return _transparentTexture;
             }
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            return spriteBatch.Draw2D(TransparentTexture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            return batcher.Draw2D(TransparentTexture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
         }
     }
 }

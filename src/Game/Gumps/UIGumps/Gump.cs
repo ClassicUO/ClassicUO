@@ -114,7 +114,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnMove()
         {
-            SpriteBatchUI sb = Service.Get<SpriteBatchUI>();
             Point position = Location;
             int halfWidth = Width >> 1;
             int halfHeight = Height >> 1;
@@ -125,11 +124,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (Y < -halfHeight)
                 position.Y = -halfHeight;
 
-            if (X > sb.GraphicsDevice.Viewport.Width - halfWidth)
-                position.X = sb.GraphicsDevice.Viewport.Width - halfWidth;
+            if (X > Engine.Batcher.GraphicsDevice.Viewport.Width - halfWidth)
+                position.X = Engine.Batcher.GraphicsDevice.Viewport.Width - halfWidth;
 
-            if (Y > sb.GraphicsDevice.Viewport.Height - halfHeight)
-                position.Y = sb.GraphicsDevice.Viewport.Height - halfHeight;
+            if (Y > Engine.Batcher.GraphicsDevice.Viewport.Height - halfHeight)
+                position.Y = Engine.Batcher.GraphicsDevice.Viewport.Height - halfHeight;
             Location = position;
         }
 

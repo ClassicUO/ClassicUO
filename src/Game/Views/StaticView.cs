@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Views
             AllowedToDraw = !IsNoDrawable(st.Graphic) && !(_isFoliage && World.MapIndex == 0);
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
@@ -85,9 +85,9 @@ namespace ClassicUO.Game.Views
 
                         if (fol.InRect(World.Player.View.GetOnScreenRectangle()))
                         {
-                            if (_timeToProcessAlpha < CoreGame.Ticks)
+                            if (_timeToProcessAlpha < Engine.Ticks)
                             {
-                                _timeToProcessAlpha = CoreGame.Ticks + Constants.ALPHA_TIME;
+                                _timeToProcessAlpha = Engine.Ticks + Constants.ALPHA_TIME;
                                 if (!_isProcessingAlpha)
                                 {
                                     _alpha += .1f;
@@ -104,9 +104,9 @@ namespace ClassicUO.Game.Views
                         {
                             if (_alpha != 0.0f && _isProcessingAlpha)
                             {
-                                if (_timeToProcessAlpha < CoreGame.Ticks)
+                                if (_timeToProcessAlpha < Engine.Ticks)
                                 {
-                                    _timeToProcessAlpha = CoreGame.Ticks + Constants.ALPHA_TIME;
+                                    _timeToProcessAlpha = Engine.Ticks + Constants.ALPHA_TIME;
 
 
                                     if (_isProcessingAlpha)
@@ -125,9 +125,9 @@ namespace ClassicUO.Game.Views
                     {
                         if (_alpha != 0.0f && _isProcessingAlpha)
                         {
-                            if (_timeToProcessAlpha < CoreGame.Ticks)
+                            if (_timeToProcessAlpha < Engine.Ticks)
                             {
-                                _timeToProcessAlpha = CoreGame.Ticks + Constants.ALPHA_TIME;
+                                _timeToProcessAlpha = Engine.Ticks + Constants.ALPHA_TIME;
 
 
                                 if (_isProcessingAlpha)
@@ -144,12 +144,12 @@ namespace ClassicUO.Game.Views
                 }
 
                 HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, false, _alpha, false);
-                MessageOverHead(spriteBatch, position, Bounds.Y);
+                MessageOverHead(batcher, position, Bounds.Y);
 
-                return base.Draw(spriteBatch, position, objectList);
+                return base.Draw(batcher, position, objectList);
             }
 
-            return !st.Effect.IsDisposed && st.Effect.View.Draw(spriteBatch, position, objectList);
+            return !st.Effect.IsDisposed && st.Effect.View.Draw(batcher, position, objectList);
         }
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)

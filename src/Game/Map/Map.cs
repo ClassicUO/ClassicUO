@@ -100,7 +100,7 @@ namespace ClassicUO.Game.Map
                     return null;
             }
             else
-                chuck.LastAccessTime = CoreGame.Ticks;
+                chuck.LastAccessTime = Engine.Ticks;
 
             return chuck.Tiles[x % 8][y % 8];
         }
@@ -203,7 +203,7 @@ namespace ClassicUO.Game.Map
         public void ClearUnusedBlocks()
         {
             int count = 0;
-            long ticks = CoreGame.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedIndices.Count; i++)
             {
@@ -254,8 +254,8 @@ namespace ClassicUO.Game.Map
 
             if (maxBlockY >= IO.Resources.Map.MapBlocksSize[Index][1])
                 maxBlockY = IO.Resources.Map.MapBlocksSize[Index][1] - 1;
-            long tick = CoreGame.Ticks;
-            long maxDelay = CoreGame.FrameDelay[1] >> 1;
+            long tick = Engine.Ticks;
+            long maxDelay = Engine.FrameDelay[1] >> 1;
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
@@ -268,14 +268,14 @@ namespace ClassicUO.Game.Map
 
                     if (chunk == null)
                     {
-                        if (CoreGame.Ticks - tick >= maxDelay)
+                        if (Engine.Ticks - tick >= maxDelay)
                             return;
                         _usedIndices.Add(cellindex);
                         chunk = new Chunk((ushort)i, (ushort)j);
                         chunk.Load(Index);
                     }
 
-                    chunk.LastAccessTime = CoreGame.Ticks;
+                    chunk.LastAccessTime = Engine.Ticks;
                 }
             }
         }

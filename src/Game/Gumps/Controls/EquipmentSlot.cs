@@ -130,7 +130,7 @@ namespace ClassicUO.Game.Gumps.Controls
             if (Item == null)
                 return;
             _canDrag = true;
-            float totalMS = CoreGame.Ticks;
+            float totalMS = Engine.Ticks;
             _pickupTime = totalMS + 800;
             _clickPoint.X = x;
             _clickPoint.Y = y;
@@ -157,7 +157,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 _canDrag = false;
                 _sendClickIfNotDClick = true;
-                float totalMS = CoreGame.Ticks;
+                float totalMS = Engine.Ticks;
                 _singleClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
             }
         }

@@ -60,10 +60,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _currentHealthBarLength = MAX_BAR_WIDTH;
             _currentStaminaBarLength = MAX_BAR_WIDTH;
             _currentManaBarLength = MAX_BAR_WIDTH;
-            _backgroundBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
-            _healthBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
-            _manaBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
-            _staminaBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
+            _backgroundBar = new Texture2D(Engine.Batcher.GraphicsDevice, 1, 1);
+            _healthBar = new Texture2D(Engine.Batcher.GraphicsDevice, 1, 1);
+            _manaBar = new Texture2D(Engine.Batcher.GraphicsDevice, 1, 1);
+            _staminaBar = new Texture2D(Engine.Batcher.GraphicsDevice, 1, 1);
 
             _backgroundBar.SetData(new[]
             {
@@ -297,29 +297,29 @@ namespace ClassicUO.Game.Gumps.UIGumps
         /// <param name="position"></param>
         /// <param name="hue"></param>
         /// <returns></returns>
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (IsDisposed)
                 return false;
-            base.Draw(spriteBatch, position);
+            base.Draw(batcher, position);
 
             if (Mobile == World.Player)
             {
                 ///Draw background bars
-                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 14, (int) MAX_BAR_WIDTH, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
-                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 27, (int) MAX_BAR_WIDTH, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
-                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 40, (int) MAX_BAR_WIDTH, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
+                batcher.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 14, (int) MAX_BAR_WIDTH, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
+                batcher.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 27, (int) MAX_BAR_WIDTH, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
+                batcher.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 40, (int) MAX_BAR_WIDTH, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
                 ///Draw stat bars
-                spriteBatch.Draw2D(_healthBar, new Rectangle(X + 38, Y + 14, (int) _currentHealthBarLength, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.1f, true));
-                spriteBatch.Draw2D(_manaBar, new Rectangle(X + 38, Y + 27, (int) _currentManaBarLength, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.1f, true));
-                spriteBatch.Draw2D(_staminaBar, new Rectangle(X + 38, Y + 40, (int) _currentStaminaBarLength, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.1f, true));
+                batcher.Draw2D(_healthBar, new Rectangle(X + 38, Y + 14, (int) _currentHealthBarLength, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.1f, true));
+                batcher.Draw2D(_manaBar, new Rectangle(X + 38, Y + 27, (int) _currentManaBarLength, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.1f, true));
+                batcher.Draw2D(_staminaBar, new Rectangle(X + 38, Y + 40, (int) _currentStaminaBarLength, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.1f, true));
             }
             else
             {
                 ///Draw background bars
-                spriteBatch.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 40, (int) MAX_BAR_WIDTH, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
+                batcher.Draw2D(_backgroundBar, new Rectangle(X + 38, Y + 40, (int) MAX_BAR_WIDTH, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
                 ///Draw stat bars
-                spriteBatch.Draw2D(_healthBar, new Rectangle(X + 38, Y + 40, (int) _currentHealthBarLength, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.1f, true));
+                batcher.Draw2D(_healthBar, new Rectangle(X + 38, Y + 40, (int) _currentHealthBarLength, 7), ShaderHuesTraslator.GetHueVector(0, true, 0.1f, true));
             }
 
             return true;

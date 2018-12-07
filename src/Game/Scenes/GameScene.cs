@@ -305,24 +305,24 @@ namespace ClassicUO.Game.Scenes
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
+        public override bool Draw(Batcher2D batcher)
         {
             if (!World.InGame)
                 return false;
-            DrawWorld(sb3D);
+            DrawWorld(batcher);
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
 
-            return base.Draw(sb3D, sbUI);
+            return base.Draw(batcher);
         }
 
-        private void DrawWorld(SpriteBatch3D sb3D)
+        private void DrawWorld(Batcher2D batcher)
         {
-            sb3D.GraphicsDevice.Clear(Color.Black);
-            sb3D.GraphicsDevice.SetRenderTarget(_renderTarget);
-            sb3D.Begin();
-            sb3D.EnableLight(true);
-            sb3D.SetLightIntensity(World.Light.IsometricLevel);
-            sb3D.SetLightDirection(World.Light.IsometricDirection);
+            batcher.GraphicsDevice.Clear(Color.Black);
+            batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
+            batcher.Begin();
+            batcher.EnableLight(true);
+            batcher.SetLightIntensity(World.Light.IsometricLevel);
+            batcher.SetLightDirection(World.Light.IsometricDirection);
             RenderedObjectsCount = 0;
 
             for (int i = 0; i < _renderListCount; i++)
@@ -331,15 +331,15 @@ namespace ClassicUO.Game.Scenes
                 //Vector3 v = obj.RealScreenPosition;
                 //v.Z = 1 - (i / 1000000.0f);
 
-                if (obj.Z <= _maxGroundZ && obj.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList))
+                if (obj.Z <= _maxGroundZ && obj.View.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
                     RenderedObjectsCount++;
             }
 
             // Draw in game overhead text messages
-            OverheadManager.Draw(sb3D, _mouseOverList);
-            sb3D.End();
-            sb3D.EnableLight(false);
-            sb3D.GraphicsDevice.SetRenderTarget(null);
+            OverheadManager.Draw(batcher, _mouseOverList);
+            batcher.End();
+            batcher.EnableLight(false);
+            batcher.GraphicsDevice.SetRenderTarget(null);
         }
 
         private void CleaningResources()

@@ -70,9 +70,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 X = 70, Y = 54
             };
-            _healthBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
-            _staminaBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
-            _manaBar = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
+            _healthBar = new Texture2D(Engine.Batcher.GraphicsDevice, 1, 1);
+            _staminaBar = new Texture2D(Engine.Batcher.GraphicsDevice, 1, 1);
+            _manaBar = new Texture2D(Engine.Batcher.GraphicsDevice, 1, 1);
 
             _healthBar.SetData(new[]
             {
@@ -164,13 +164,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            spriteBatch.Draw2D(_healthBar, new Rectangle(X + 25, Y + 30, (int) _currentHealthBarLength, 10), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
-            spriteBatch.Draw2D(_staminaBar, new Rectangle(X + 25, Y + 46, (int) _currentStaminaBarLength, 10), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
-            spriteBatch.Draw2D(_manaBar, new Rectangle(X + 25, Y + 61, (int) _currentManaBarLength, 10), ShaderHuesTraslator.GetHueVector(0, true, 0.2f, true));
+            batcher.Draw2D(_healthBar, new Rectangle(X + 25, Y + 30, (int) _currentHealthBarLength, 10), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
+            batcher.Draw2D(_staminaBar, new Rectangle(X + 25, Y + 46, (int) _currentStaminaBarLength, 10), ShaderHuesTraslator.GetHueVector(0, true, 0.4f, true));
+            batcher.Draw2D(_manaBar, new Rectangle(X + 25, Y + 61, (int) _currentManaBarLength, 10), ShaderHuesTraslator.GetHueVector(0, true, 0.2f, true));
 
-            return base.Draw(spriteBatch, position);
+            return base.Draw(batcher, position);
         }
 
         public override void Dispose()
@@ -263,7 +263,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Y = y;
             Width = w;
             Height = h;
-            _border = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
+            _border = new Texture2D(Engine.Batcher.GraphicsDevice, 1, 1);
 
             _border.SetData(new[]
             {
@@ -271,9 +271,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             });
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            return spriteBatch.Draw2D(_border, new Rectangle(position.X - 1, position.Y - 1, Width + 2, Height + 2), Vector3.Zero);
+            return batcher.Draw2D(_border, new Rectangle(position.X - 1, position.Y - 1, Width + 2, Height + 2), Vector3.Zero);
         }
 
         public override void Dispose()

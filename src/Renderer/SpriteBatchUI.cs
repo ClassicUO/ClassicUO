@@ -23,13 +23,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Renderer
 {
-    public class SpriteBatchUI : SpriteBatch3D
+    //public class SpriteBatchUI : SpriteBatch3D
+    partial class Batcher2D
     {
         private readonly SpriteVertex[] _vertexBufferUI = new SpriteVertex[4];
 
-        public SpriteBatchUI(GraphicsDevice device) : base(device)
-        {
-        }
+        //public SpriteBatchUI(GraphicsDevice device) : base(device)
+        //{
+        //}
 
         public unsafe bool Draw2D(Texture2D texture, Point position, Vector3 hue)
         {

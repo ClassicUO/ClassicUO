@@ -136,7 +136,7 @@ namespace ClassicUO.IO.Resources
         public static void ClearUnusedTextures()
         {
             int count = 0;
-            long ticks = CoreGame.Ticks - 3000;
+            long ticks = Engine.Ticks - 3000;
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {

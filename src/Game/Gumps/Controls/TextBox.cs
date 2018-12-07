@@ -127,17 +127,17 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            _entry.RenderText.Draw(spriteBatch, new Point(position.X + _entry.Offset, position.Y));
+            _entry.RenderText.Draw(batcher, new Point(position.X + _entry.Offset, position.Y));
 
             if (IsEditable)
             {
                 if (_showCaret)
-                    _entry.RenderCaret.Draw(spriteBatch, new Point(position.X + _entry.Offset + _entry.CaretPosition.X, position.Y + _entry.CaretPosition.Y));
+                    _entry.RenderCaret.Draw(batcher, new Point(position.X + _entry.Offset + _entry.CaretPosition.X, position.Y + _entry.CaretPosition.Y));
             }
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
 
         protected override void OnTextInput(string c)

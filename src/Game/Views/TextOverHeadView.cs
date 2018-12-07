@@ -68,14 +68,14 @@ namespace ClassicUO.Game.Views
             _text?.Dispose();
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
             {
                 return false;
             }
 
-            Texture.Ticks = CoreGame.Ticks;
+            Texture.Ticks = Engine.Ticks;
             TextOverhead overhead = (TextOverhead) GameObject;
 
             if (overhead.Alpha < 1.0f)
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.Views
             //FrameInfo.Width = Texture.Width;
             //FrameInfo.Height = Texture.Height;
 
-            return base.Draw(spriteBatch, position, objectList);
+            return base.Draw(batcher, position, objectList);
         }
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
@@ -122,7 +122,7 @@ namespace ClassicUO.Game.Views
         {
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             DamageOverhead dmg = (DamageOverhead) GameObject;
 
@@ -132,7 +132,7 @@ namespace ClassicUO.Game.Views
                 dmg.OffsetY -= 2;
             }
 
-            return base.Draw(spriteBatch, position, objectList);
+            return base.Draw(batcher, position, objectList);
         }
     }
 }

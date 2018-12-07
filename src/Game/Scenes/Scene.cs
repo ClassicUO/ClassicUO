@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Scenes
         protected Scene(ScenesType type)
         {
             SceneType = type;
-            Game = Service.Get<GameLoop>();
+            Game = Service.Get<Engine>();
             Device = Game.GraphicsDevice;
             UIManager = Service.Get<UIManager>();
         }
@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Scenes
 
         public bool IsDisposed { get; private set; }
 
-        protected GameLoop Game { get; }
+        protected Engine Game { get; }
 
         protected UIManager UIManager { get; }
 
@@ -77,7 +77,7 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
-        public virtual bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
+        public virtual bool Draw(Batcher2D batcher)
         {
             return true;
         }

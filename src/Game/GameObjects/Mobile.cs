@@ -67,13 +67,13 @@ namespace ClassicUO.Game.GameObjects
 
         public Mobile(Serial serial) : base(serial)
         {
-            _lastAnimationChangeTime = CoreGame.Ticks;
+            _lastAnimationChangeTime = Engine.Ticks;
             CalculateRandomIdleTime();
         }
 
         private void CalculateRandomIdleTime()
         {
-            _lastAnimationIdleDelay = CoreGame.Ticks + (30000 + RandomHelper.GetValue(0, 30000));
+            _lastAnimationIdleDelay = Engine.Ticks + (30000 + RandomHelper.GetValue(0, 30000));
         }
 
         public Deque<Step> Steps { get; } = new Deque<Step>();
@@ -260,7 +260,7 @@ namespace ClassicUO.Game.GameObjects
 
         public long LastStepTime { get; set; }
 
-        protected virtual bool IsWalking => LastStepTime > CoreGame.Ticks - Constants.WALKING_DELAY;
+        protected virtual bool IsWalking => LastStepTime > Engine.Ticks - Constants.WALKING_DELAY;
 
         public byte AnimationGroup { get; set; } = 0xFF;
 
@@ -288,7 +288,7 @@ namespace ClassicUO.Game.GameObjects
         {
             base.Update(totalMS, frameMS);
 
-            if (_lastAnimationIdleDelay < CoreGame.Ticks)
+            if (_lastAnimationIdleDelay < Engine.Ticks)
                 SetIdleAnimation();
 
             ProcessAnimation();
@@ -343,7 +343,7 @@ namespace ClassicUO.Game.GameObjects
             //endDir = endDir & Direction.Up;
 
             if (endX == x && endY == y && endZ == z && endDir == direction) return true;
-            if (!IsMoving) LastStepTime = CoreGame.Ticks;
+            if (!IsMoving) LastStepTime = Engine.Ticks;
             Direction moveDir = CalculateDirection(endX, endY, x, y);
             Step step = new Step();
 
@@ -442,7 +442,7 @@ namespace ClassicUO.Game.GameObjects
             AnimationRepeat = repeat;
             AnimationDirection = frameDirection;
             AnimationFromServer = false;
-            _lastAnimationChangeTime = CoreGame.Ticks;
+            _lastAnimationChangeTime = Engine.Ticks;
             CalculateRandomIdleTime();
         }
 
@@ -481,7 +481,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected virtual bool NoIterateAnimIndex()
         {
-            return LastStepTime > (uint) (CoreGame.Ticks - Constants.WALKING_DELAY) && Steps.Count <= 0;
+            return LastStepTime > (uint) (Engine.Ticks - Constants.WALKING_DELAY) && Steps.Count <= 0;
         }
 
         public override void ProcessAnimation()
@@ -497,7 +497,7 @@ namespace ClassicUO.Game.GameObjects
                     Step step = Steps.Front();
                     if (AnimationFromServer) SetAnimation(0xFF);
                     int maxDelay = MovementSpeed.TimeToCompleteMovement(this, step.Run) - (IsMounted || SpeedMode == CharacterSpeedType.FastUnmount ? 1 : 15); // default 15 = less smooth
-                    int delay = (int) CoreGame.Ticks - (int) LastStepTime;
+                    int delay = (int) Engine.Ticks - (int) LastStepTime;
                     bool removeStep = delay >= maxDelay;
 
                     if (Position.X != step.X || Position.Y != step.Y)
@@ -539,13 +539,13 @@ namespace ClassicUO.Game.GameObjects
                         IsRunning = step.Run;
                         Offset = Vector3.Zero;
                         Steps.RemoveFromFront();
-                        LastStepTime = CoreGame.Ticks;
+                        LastStepTime = Engine.Ticks;
                         ProcessDelta();
                     }
                 } while (Steps.Count > 0 && turnOnly);
             }
 
-            if (_lastAnimationChangeTime < CoreGame.Ticks && !NoIterateAnimIndex())
+            if (_lastAnimationChangeTime < Engine.Ticks && !NoIterateAnimIndex())
             {
                 sbyte frameIndex = AnimIndex;
 
@@ -592,7 +592,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (direction.Address != 0 || direction.IsUOP)
                     {
-                        direction.LastAccessTime = CoreGame.Ticks;
+                        direction.LastAccessTime = Engine.Ticks;
                         int fc = direction.FrameCount;
 
                         if (AnimationFromServer)
@@ -659,7 +659,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                _lastAnimationChangeTime = CoreGame.Ticks + currentDelay;
+                _lastAnimationChangeTime = Engine.Ticks + currentDelay;
             }
         }
 

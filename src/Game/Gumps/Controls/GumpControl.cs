@@ -307,12 +307,12 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public SpriteTexture Texture { get; set; }
 
-        public virtual bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public virtual bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (IsDisposed) return false;
 
             if (Texture != null && !Texture.IsDisposed)
-                Texture.Ticks = CoreGame.Ticks;
+                Texture.Ticks = Engine.Ticks;
 
             foreach (GumpControl c in Children)
             {
@@ -321,7 +321,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     if (c.IsVisible && c.IsInitialized)
                     {
                         Point offset = new Point(c.X + position.X, c.Y + position.Y);
-                        c.Draw(spriteBatch, offset, hue);
+                        c.Draw(batcher, offset, hue);
                     }
                 }
             }
@@ -338,7 +338,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     });
                 }
 
-                spriteBatch.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
+                batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
             }
 
             return true;

@@ -88,13 +88,13 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (IsDisposed)
                 return false;
-            bool ok = base.Draw(spriteBatch, position);
-            spriteBatch.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
-            _text.Draw(spriteBatch, new Point(position.X + _textures[ACTIVE].Width + 2, position.Y));
+            bool ok = base.Draw(batcher, position);
+            batcher.Draw2D(IsChecked ? _textures[ACTIVE] : _textures[INACTIVE], position, HueVector);
+            _text.Draw(batcher, new Point(position.X + _textures[ACTIVE].Width + 2, position.Y));
 
             return ok;
         }

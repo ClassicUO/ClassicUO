@@ -59,14 +59,14 @@ namespace ClassicUO.Game.Views
             }
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
             Item item = (Item) GameObject;
 
             if (item.IsCorpse)
-                return DrawCorpse(spriteBatch, position, objectList);
+                return DrawCorpse(batcher, position, objectList);
 
             if (item.Effect == null)
             {
@@ -82,19 +82,19 @@ namespace ClassicUO.Game.Views
                 if (item.Amount > 1 && TileData.IsStackable(item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
                 {
                     Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
-                    base.Draw(spriteBatch, offsetDrawPosition, objectList);
+                    base.Draw(batcher, offsetDrawPosition, objectList);
                 }
 
-                bool ok = base.Draw(spriteBatch, position, objectList);
-                MessageOverHead(spriteBatch, position, Bounds.Y);
+                bool ok = base.Draw(batcher, position, objectList);
+                MessageOverHead(batcher, position, Bounds.Y);
 
                 return ok;
             }
 
-            return !item.Effect.IsDisposed && item.Effect.View.Draw(spriteBatch, position, objectList);
+            return !item.Effect.IsDisposed && item.Effect.View.Draw(batcher, position, objectList);
         }
 
-        private bool DrawCorpse(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        private bool DrawCorpse(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (GameObject.IsDisposed)
                 return false;
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.Views
 
                 if ((direction.FrameCount == 0 || direction.Frames == null) && !Animations.LoadDirectionGroup(ref direction))
                     return false;
-                direction.LastAccessTime = CoreGame.Ticks;
+                direction.LastAccessTime = Engine.Ticks;
                 int fc = direction.FrameCount;
                 if (fc > 0 && animIndex >= fc)
                     animIndex = (byte) (fc - 1);
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.Views
                     Texture = frame;
                     Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                     HueVector = ShaderHuesTraslator.GetHueVector(color);
-                    base.Draw(spriteBatch, position, objectList);
+                    base.Draw(batcher, position, objectList);
                     Pick(frame, Bounds, position, objectList);
                 }
 

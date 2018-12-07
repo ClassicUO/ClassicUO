@@ -36,9 +36,9 @@ namespace ClassicUO.Renderer
         private bool[] _hitMap;
         private readonly bool _is32Bit;
 
-        public SpriteTexture(int width, int height, bool is32bit = true) : base(Service.Get<SpriteBatch3D>().GraphicsDevice, width, height, false, is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551)
+        public SpriteTexture(int width, int height, bool is32bit = true) : base(Engine.Batcher.GraphicsDevice, width, height, false, is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551)
         {
-            Ticks = CoreGame.Ticks + 3000;
+            Ticks = Engine.Ticks + 3000;
             _is32Bit = is32bit;
         }
 

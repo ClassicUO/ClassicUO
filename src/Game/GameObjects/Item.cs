@@ -729,7 +729,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 byte dir = (byte) Layer;
 
-                if (_lastAnimationChangeTime < CoreGame.Ticks)
+                if (_lastAnimationChangeTime < Engine.Ticks)
                 {
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
                     Graphic id = GetMountAnimation();
@@ -747,14 +747,14 @@ namespace ClassicUO.Game.GameObjects
 
                         if (direction.Address != 0 || direction.IsUOP)
                         {
-                            direction.LastAccessTime = CoreGame.Ticks;
+                            direction.LastAccessTime = Engine.Ticks;
                             int fc = direction.FrameCount;
                             if (frameIndex >= fc) frameIndex = (sbyte) (fc - 1);
                             AnimIndex = frameIndex;
                         }
                     }
 
-                    _lastAnimationChangeTime = CoreGame.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
+                    _lastAnimationChangeTime = Engine.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
         }

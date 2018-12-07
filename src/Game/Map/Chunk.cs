@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Map
                 for (int j = 0; j < 8; j++) Tiles[i][j] = new Tile((ushort) (i + x * 8), (ushort) (j + y * 8));
             }
 
-            LastAccessTime = CoreGame.Ticks + 5000;
+            LastAccessTime = Engine.Ticks + 5000;
         }
 
 

@@ -234,15 +234,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            //spriteBatch.Draw2D(_mapTexture, Bounds, position);
+            //batcher.Draw2D(_mapTexture, Bounds, position);
 
-            //spriteBatch.Draw2D(_mapTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), _mapTexture.Bounds, Vector3.Zero);
+            //batcher.Draw2D(_mapTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), _mapTexture.Bounds, Vector3.Zero);
 
-            //Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
+            //Draw(batcher, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
 
         public static Vector2 RotateVector2(Vector2 point, float radians, Vector2 pivot)
@@ -259,7 +259,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return rotatedPoint;
         }
 
-        public bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY)
+        public bool Draw(Batcher2D batcher, Rectangle dst, int offsetX, int offsetY)
         {
             Rectangle src = new Rectangle();
 
@@ -295,7 +295,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //dst.X = (int)rotDest.X;
             //dst.Y = (int)rotDest.Y;
 
-            return spriteBatch.Draw2D(_mapTexture, dst, src, Vector3.Zero);
+            return batcher.Draw2D(_mapTexture, dst, src, Vector3.Zero);
         }
     }
 }

@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Views
         {
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
+        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
         {
             LightningEffect effect = (LightningEffect)GameObject;
 
@@ -55,7 +55,7 @@ namespace ClassicUO.Game.Views
 
             HueVector = ShaderHuesTraslator.GetHueVector(effect.Hue);
 
-            return base.Draw(spriteBatch, position, list);
+            return base.Draw(batcher, position, list);
         }
     }
 }

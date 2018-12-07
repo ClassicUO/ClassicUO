@@ -31,7 +31,7 @@ namespace ClassicUO.Interfaces
 
         SpriteTexture Texture { get; set; }
 
-        bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList);
+        bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList);
     }
 
     public interface IDrawableUI
@@ -40,6 +40,6 @@ namespace ClassicUO.Interfaces
 
         SpriteTexture Texture { get; set; }
 
-        bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null);
+        bool Draw(Batcher2D batcher, Point position, Vector3? hue = null);
     }
 }

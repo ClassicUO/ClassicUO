@@ -46,13 +46,13 @@ namespace ClassicUO.Game.GameObjects.Managers
             _damagesList.Add(new OverHeadInfo(view, position));
         }
 
-        public static void Draw(SpriteBatch3D spriteBatch, MouseOverList objectList)
+        public static void Draw(Batcher2D batcher, MouseOverList objectList)
         {
-            DrawOverheads(spriteBatch, objectList);
-            DrawDamages(spriteBatch, objectList);
+            DrawOverheads(batcher, objectList);
+            DrawDamages(batcher, objectList);
         }
 
-        private static void DrawOverheads(SpriteBatch3D spriteBatch, MouseOverList objectList)
+        private static void DrawOverheads(Batcher2D batcher, MouseOverList objectList)
         {
             if (_overheadsList.Count > 0)
             {
@@ -74,21 +74,21 @@ namespace ClassicUO.Game.GameObjects.Managers
                             break;
                     }
 
-                    view.Draw(spriteBatch, t.Position, objectList);
+                    view.Draw(batcher, t.Position, objectList);
                 }
 
                 _overheadsList.Clear();
             }
         }
 
-        private static void DrawDamages(SpriteBatch3D spriteBatch, MouseOverList objectList)
+        private static void DrawDamages(Batcher2D batcher, MouseOverList objectList)
         {
             if (_damagesList.Count > 0)
             {
                 for (int i = 0; i < _damagesList.Count; i++)
                 {
                     var t = _damagesList[i];
-                    t.View.Draw(spriteBatch, t.Position, objectList);
+                    t.View.Draw(batcher, t.Position, objectList);
                 }
 
                 _damagesList.Clear();

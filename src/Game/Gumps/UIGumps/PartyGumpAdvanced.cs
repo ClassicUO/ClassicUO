@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public PartyGumpAdvanced() : base(0, 0)
         {
             _partyListEntries = new List<PartyListEntry>();
-            _line = new Texture2D(Service.Get<SpriteBatch3D>().GraphicsDevice, 1, 1);
+            _line = new Texture2D(Engine.Batcher.GraphicsDevice, 1, 1);
 
             _line.SetData(new[]
             {
@@ -161,13 +161,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
             for (int i = 0; i < _partyListEntries.Count; i++) _scrollArea.AddChildren(_partyListEntries[i]);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            base.Draw(spriteBatch, position, hue);
-            spriteBatch.Draw2D(_line, new Rectangle(position.X + 30, position.Y + 50, 260, 1), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
-            spriteBatch.Draw2D(_line, new Rectangle(position.X + 95, position.Y + 50, 1, 200), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
-            spriteBatch.Draw2D(_line, new Rectangle(position.X + 245, position.Y + 50, 1, 200), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
-            spriteBatch.Draw2D(_line, new Rectangle(position.X + 30, position.Y + 250, 260, 1), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            base.Draw(batcher, position, hue);
+            batcher.Draw2D(_line, new Rectangle(position.X + 30, position.Y + 50, 260, 1), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            batcher.Draw2D(_line, new Rectangle(position.X + 95, position.Y + 50, 1, 200), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            batcher.Draw2D(_line, new Rectangle(position.X + 245, position.Y + 50, 1, 200), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
+            batcher.Draw2D(_line, new Rectangle(position.X + 30, position.Y + 250, 260, 1), ShaderHuesTraslator.GetHueVector(0, false, .5f, false));
 
             return true;
         }

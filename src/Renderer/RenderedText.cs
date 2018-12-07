@@ -115,12 +115,12 @@ namespace ClassicUO.Renderer
 
         public FontTexture Texture { get; private set; }
 
-        public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            return Draw(spriteBatch, new Rectangle(position.X, position.Y, Width, Height), 0, 0, hue);
+            return Draw(batcher, new Rectangle(position.X, position.Y, Width, Height), 0, 0, hue);
         }
 
-        public bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
+        public bool Draw(Batcher2D batcher, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
         {
             if (string.IsNullOrEmpty(Text))
                 return false;
@@ -150,7 +150,7 @@ namespace ClassicUO.Renderer
                 dst.Height = src.Height;
             }
 
-            return spriteBatch.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);
+            return batcher.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);
         }
 
         public void CreateTexture()

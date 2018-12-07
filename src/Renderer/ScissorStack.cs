@@ -52,7 +52,7 @@ namespace ClassicUO.Renderer
             }
 
             _scissors.Push(scissor);
-            Service.Get<SpriteBatchUI>().GraphicsDevice.ScissorRectangle = scissor;
+            Engine.Batcher.GraphicsDevice.ScissorRectangle = scissor;
 
             return true;
         }
@@ -60,7 +60,7 @@ namespace ClassicUO.Renderer
         public static Rectangle PopScissors()
         {
             Rectangle scissors = _scissors.Pop();
-            GraphicsDevice gd = Service.Get<SpriteBatchUI>().GraphicsDevice;
+            GraphicsDevice gd = Engine.Batcher.GraphicsDevice;
 
             if (_scissors.Count == 0)
                 gd.ScissorRectangle = gd.Viewport.Bounds;

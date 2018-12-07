@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Gumps
 
         public SpriteTexture Texture { get; set; }
 
-        public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (_gameObject != null && _hash != _gameObject.PropertiesHash)
             {
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Gumps
                 Fonts.RecalculateWidthByInfo = false;
             }
 
-            GameLoop window = Service.Get<GameLoop>();
+            Engine window = Service.Get<Engine>();
 
             if (position.X < 0)
                 position.X = 0;
@@ -95,9 +95,9 @@ namespace ClassicUO.Game.Gumps
                 position.Y = 0;
             else if (position.Y > window.WindowHeight - (_renderedText.Height + 8))
                 position.Y = window.WindowHeight - (_renderedText.Height + 8);
-            spriteBatch.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X - 4, position.Y - 2, _renderedText.Width + 8, _renderedText.Height + 4), ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
+            batcher.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X - 4, position.Y - 2, _renderedText.Width + 8, _renderedText.Height + 4), ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
 
-            return _renderedText.Draw(spriteBatch, position);
+            return _renderedText.Draw(batcher, position);
         }
 
         public void Clear()

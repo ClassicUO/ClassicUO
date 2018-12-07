@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Gumps
         private readonly List<GumpControl> _gumps = new List<GumpControl>();
         private readonly List<object> _inputBlockingObjects = new List<object>();
         private readonly GumpControl[] _mouseDownControls = new GumpControl[5];
-        private readonly SpriteBatchUI _sbUI;
+       // private readonly SpriteBatchUI _sbUI;
         private GumpControl _draggingControl;
         private int _dragOriginX, _dragOriginY;
         private bool _isDraggingControl;
@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Gumps
         public UIManager()
         {
             GameCursor = new GameCursor(this);
-            _sbUI = Service.Get<SpriteBatchUI>();
+           // _sbUI = Service.Get<SpriteBatchUI>();
 
             InputManager.MouseDragging += (sender, e) =>
             {
@@ -195,9 +195,9 @@ namespace ClassicUO.Game.Gumps
 
         public bool IsMouseOverWorld => IsMouseOverUI && MouseOverControl is WorldViewport;
 
-        public int Width => _sbUI.GraphicsDevice.Viewport.Width;
+        public int Width => Engine.Batcher.GraphicsDevice.Viewport.Width;
 
-        public int Height => _sbUI.GraphicsDevice.Viewport.Height;
+        public int Height => Engine.Batcher.GraphicsDevice.Viewport.Height;
 
         public GameCursor GameCursor { get; }
 
@@ -482,7 +482,7 @@ namespace ClassicUO.Game.Gumps
             HandleMouseInput();
         }
 
-        public void Draw(SpriteBatchUI spriteBatch)
+        public void Draw(Batcher2D batcher)
         {
             SortControlsByInfo();
 
@@ -491,10 +491,10 @@ namespace ClassicUO.Game.Gumps
                 GumpControl g = _gumps[i];
 
                 if (g.IsInitialized)
-                    g.Draw(spriteBatch, new Point(g.X, g.Y));
+                    g.Draw(batcher, new Point(g.X, g.Y));
             }
 
-            GameCursor.Draw(spriteBatch);
+            GameCursor.Draw(batcher);
         }
 
         public void Add(GumpControl gump)

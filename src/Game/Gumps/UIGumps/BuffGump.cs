@@ -234,7 +234,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 Height = Texture.Height;
                 _alpha = 0xFF;
                 _decreaseAlpha = true;
-                _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : CoreGame.Ticks + icon.Timer * 1000);
+                _timer = (uint) (icon.Timer <= 0 ? 0xFFFF_FFFF : Engine.Ticks + icon.Timer * 1000);
 
                 SetTooltip(icon.Text);
             }
@@ -283,9 +283,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 base.Update(totalMS, frameMS);
             }
 
-            public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+            public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
             {
-                return spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(0, false, 1.0f - _alpha / 255f, false));
+                return batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(0, false, 1.0f - _alpha / 255f, false));
             }
         }
     }

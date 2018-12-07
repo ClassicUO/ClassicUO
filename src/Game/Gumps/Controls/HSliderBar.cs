@@ -152,19 +152,19 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (_gumpSpliderBackground != null)
             {
-                spriteBatch.Draw2D(_gumpSpliderBackground[0], position, Vector3.Zero);
-                spriteBatch.Draw2DTiled(_gumpSpliderBackground[1], new Rectangle(position.X + _gumpSpliderBackground[0].Width, position.Y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height), Vector3.Zero);
-                spriteBatch.Draw2D(_gumpSpliderBackground[2], new Point(position.X + BarWidth - _gumpSpliderBackground[2].Width, position.Y), Vector3.Zero);
+                batcher.Draw2D(_gumpSpliderBackground[0], position, Vector3.Zero);
+                batcher.Draw2DTiled(_gumpSpliderBackground[1], new Rectangle(position.X + _gumpSpliderBackground[0].Width, position.Y, BarWidth - _gumpSpliderBackground[2].Width - _gumpSpliderBackground[0].Width, _gumpSpliderBackground[1].Height), Vector3.Zero);
+                batcher.Draw2D(_gumpSpliderBackground[2], new Point(position.X + BarWidth - _gumpSpliderBackground[2].Width, position.Y), Vector3.Zero);
             }
 
-            spriteBatch.Draw2D(_gumpWidget, new Point(position.X + _sliderX, position.Y), Vector3.Zero);
-            _text?.Draw(spriteBatch, new Point(position.X + BarWidth + 2, position.Y + (Height >> 1) - (_text.Height >> 1)));
+            batcher.Draw2D(_gumpWidget, new Point(position.X + _sliderX, position.Y), Vector3.Zero);
+            _text?.Draw(batcher, new Point(position.X + BarWidth + 2, position.Y + (Height >> 1) - (_text.Height >> 1)));
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
 
         private void InternalSetValue(int value)

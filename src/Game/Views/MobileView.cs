@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Views
             HasShadow = true;
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (GameObject.IsDisposed)
                 return false;
@@ -103,7 +103,7 @@ namespace ClassicUO.Game.Views
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
                 HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : vl.Hue, vl.IsParital, 0, false);
-                base.Draw(spriteBatch, position, objectList);
+                base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);
             }
 
@@ -126,7 +126,7 @@ namespace ClassicUO.Game.Views
                     Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
                     Z = position.Z
                 };
-                MessageOverHead(spriteBatch, overheadPosition, mobile.IsMounted ? 0 : -22);
+                MessageOverHead(batcher, overheadPosition, mobile.IsMounted ? 0 : -22);
             }
 
             if (mobile.DamageList != null && mobile.DamageList.Count > 0)
@@ -140,13 +140,13 @@ namespace ClassicUO.Game.Views
                     Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
                     Z = position.Z
                 };
-                DamageOverhead(mobile, spriteBatch, damagePosition, mobile.IsMounted ? 0 : -22);
+                DamageOverhead(mobile, batcher, damagePosition, mobile.IsMounted ? 0 : -22);
             }
 
             return true;
         }
 
-        private void DamageOverhead(Mobile mobile, SpriteBatch3D spriteBatch, Vector3 position, int offY)
+        private void DamageOverhead(Mobile mobile, Batcher2D batcher, Vector3 position, int offY)
         {
             for (int i = 0; i < mobile.DamageList.Count; i++)
             {
@@ -261,7 +261,7 @@ namespace ClassicUO.Game.Views
 
             if ((direction.FrameCount == 0 || direction.Frames == null) && !Animations.LoadDirectionGroup(ref direction))
                 return;
-            direction.LastAccessTime = CoreGame.Ticks;
+            direction.LastAccessTime = Engine.Ticks;
             int fc = direction.FrameCount;
             if (fc > 0 && animIndex >= fc) animIndex = 0;
 

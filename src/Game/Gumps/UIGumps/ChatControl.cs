@@ -256,7 +256,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             int y = _textBox.Y + position.Y - 6;
 
@@ -265,10 +265,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 y -= _textEntries[i].TextHeight;
 
                 if (y >= position.Y)
-                    _textEntries[i].Draw(spriteBatch, new Point(position.X + 2, y));
+                    _textEntries[i].Draw(batcher, new Point(position.X + 2, y));
             }
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
@@ -427,7 +427,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Text = text
                 };
                 _width = width;
-                _createdTime = CoreGame.Ticks;
+                _createdTime = Engine.Ticks;
             }
 
             public string Text => _renderedText.Text;
@@ -447,9 +447,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             public SpriteTexture Texture { get; set; }
 
-            public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+            public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
             {
-                return _renderedText.Draw(spriteBatch, position, ShaderHuesTraslator.GetHueVector(0, false, Alpha < 1.0f ? Alpha : 0, true));
+                return _renderedText.Draw(batcher, position, ShaderHuesTraslator.GetHueVector(0, false, Alpha < 1.0f ? Alpha : 0, true));
             }
 
             public void Update(double totalMS, double frameMS)

@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Scenes
             CurrentScene = null;
             GC.Collect();
             GC.WaitForPendingFinalizers();
-            GameLoop game = Service.Get<GameLoop>();
+            Engine game = Service.Get<Engine>();
 
             switch (type)
             {

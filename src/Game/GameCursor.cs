@@ -229,7 +229,7 @@ namespace ClassicUO.Game
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
-        public void Draw(SpriteBatchUI sb)
+        public void Draw(Batcher2D sb)
         {
             ushort id = Graphic;
 
@@ -258,7 +258,7 @@ namespace ClassicUO.Game
             }
         }
 
-        private void DrawToolTip(SpriteBatchUI spriteBatch, Point position)
+        private void DrawToolTip(Batcher2D batcher, Point position)
         {
             if (SceneManager.CurrentScene.SceneType == ScenesType.Game)
             {
@@ -275,7 +275,7 @@ namespace ClassicUO.Game
                     {
                         if (_tooltip.IsEmpty || item != _tooltip.Object)
                             _tooltip.SetGameObject(item);
-                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+                        _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
 
                         return;
                     }
@@ -284,7 +284,7 @@ namespace ClassicUO.Game
                     {
                         if (_tooltip.IsEmpty || slot.Item != _tooltip.Object)
                             _tooltip.SetGameObject(slot.Item);
-                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+                        _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
 
                         return;
                     }
@@ -293,7 +293,7 @@ namespace ClassicUO.Game
                     {
                         if (_tooltip.IsEmpty || gumpling.Item != _tooltip.Object)
                             _tooltip.SetGameObject(gumpling.Item);
-                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+                        _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
 
                         return;
                     }
@@ -302,7 +302,7 @@ namespace ClassicUO.Game
                     {
                         if (_tooltip.IsEmpty || backpack.Backpack != _tooltip.Object)
                             _tooltip.SetGameObject(backpack.Backpack);
-                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+                        _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
 
                         return;
                     }
@@ -311,7 +311,7 @@ namespace ClassicUO.Game
                     {
                         if (_tooltip.IsEmpty || dynItem != _tooltip.Object)
                             _tooltip.SetGameObject(dynItem);
-                        _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+                        _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
 
                         return;
                     }
@@ -324,7 +324,7 @@ namespace ClassicUO.Game
 
                 if (_tooltip.IsEmpty)
                     _tooltip.SetText(_uiManager.MouseOverControl.Tooltip);
-                _tooltip.Draw(spriteBatch, new Point(position.X, position.Y + 24));
+                _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
             }
         }
 

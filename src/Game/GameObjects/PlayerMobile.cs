@@ -793,7 +793,7 @@ namespace ClassicUO.Game.GameObjects
         public Lock IntLock { get; set; }
 
         //protected override bool NoIterateAnimIndex() => false;
-        protected override bool IsWalking => LastStepTime > CoreGame.Ticks - Constants.PLAYER_WALKING_DELAY;
+        protected override bool IsWalking => LastStepTime > Engine.Ticks - Constants.PLAYER_WALKING_DELAY;
 
         public byte SequenceNumber { get; set; }
 
@@ -1647,7 +1647,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (LastStepRequestTime > CoreGame.Ticks)
+            if (LastStepRequestTime > Engine.Ticks)
                 return false;
 
             if (RequestedSteps.Count >= Constants.MAX_STEP_COUNT)
@@ -1755,7 +1755,7 @@ namespace ClassicUO.Game.GameObjects
                 SequenceNumber = 1;
             else
                 SequenceNumber++;
-            LastStepRequestTime = CoreGame.Ticks + walkTime;
+            LastStepRequestTime = Engine.Ticks + walkTime;
             GetGroupForAnimation(this);
 
             return true;
