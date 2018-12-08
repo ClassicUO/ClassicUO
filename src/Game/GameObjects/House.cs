@@ -66,31 +66,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Generate()
         {
-            if (IsCustom)
-            {
-                //foreach (Static component in Components)
-                //{
-                    
-                //}
-            }
-            else
-            {
-               
-                Item item = World.Items.Get(Serial);
-
-                if (item != null)
-                {
-                    ClearComponents();
-
-                    foreach (MultiComponent component in item.Multi.Components)
-                    {
-                        new Static(component.Graphic, 0, 0)
-                        {
-                            Position = component.Position
-                        };                        
-                    }
-                }
-            }
+            Components.ForEach(s => s.AddToTile());
         }
 
         public bool Equals(Serial other)

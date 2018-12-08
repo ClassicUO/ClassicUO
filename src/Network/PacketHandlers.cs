@@ -30,6 +30,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
@@ -580,6 +581,7 @@ namespace ClassicUO.Network
             item.Graphic = graphic;
             item.Amount = count;
             item.Position = new Position(x, y, z);
+            item.AddToTile();
             item.Hue = hue;
             item.Flags = (Flags) flags;
             item.Direction = (Direction) direction;
@@ -610,6 +612,13 @@ namespace ClassicUO.Network
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
             World.Player.Position = new Position(p.ReadUShort(), p.ReadUShort(), (sbyte) p.ReadUShort());
+
+            if (World.Map == null)
+            {
+                World.MapIndex = 0;
+            }
+
+            World.Player.AddToTile();
             Direction direction = (Direction) p.ReadByte();
             World.Player.Direction = direction & Direction.Up;
             World.Player.IsRunning = (direction & Direction.Running) != 0;
@@ -726,7 +735,9 @@ namespace ClassicUO.Network
                 //World.Player.Position = new Position(x, y, z);
                 //World.Player.SetTile(x, y);
 
-                World.Player.Tile = World.Map.GetTile(x, y);
+                //World.Player.Tile = World.Map.GetTile(x, y);
+
+                World.Player.AddToTile(x, y);
             }
 
             //else if (World.Player.Tile == Tile.Invalid)
@@ -1224,6 +1235,8 @@ namespace ClassicUO.Network
                 mobile.Position = new Position((ushort) x, (ushort) y, z);
                 mobile.Direction = dir;
                 mobile.IsRunning = isrun;
+
+                mobile.AddToTile();
             }
 
             if (!mobile.EnqueueStep(x, y, z, dir, isrun))
@@ -1232,6 +1245,7 @@ namespace ClassicUO.Network
                 mobile.Direction = dir;
                 mobile.IsRunning = isrun;
                 mobile.ClearSteps();
+                mobile.AddToTile();
             }
         }
 
@@ -1300,6 +1314,7 @@ namespace ClassicUO.Network
                     mobile.Position = new Position(x, y, z);
                     mobile.Direction = dir;
                     mobile.IsRunning = isrun;
+                    mobile.AddToTile();
                 }
 
                 if (!mobile.EnqueueStep(x, y, z, dir, isrun))
@@ -1308,6 +1323,7 @@ namespace ClassicUO.Network
                     mobile.Direction = dir;
                     mobile.IsRunning = isrun;
                     mobile.ClearSteps();
+                    mobile.AddToTile();
                 }
             }
 
@@ -2272,6 +2288,8 @@ namespace ClassicUO.Network
 
                             break;
                     }
+
+                    house.Generate();
                 }
             }
         }
@@ -2435,6 +2453,7 @@ namespace ClassicUO.Network
             item.Amount = p.ReadUShort();
             p.Skip(2); //amount again? wtf???
             item.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
+            item.AddToTile();
             item.Direction = (Direction) p.ReadByte();
             item.Hue = p.ReadUShort();
             item.Flags = (Flags) p.ReadByte();

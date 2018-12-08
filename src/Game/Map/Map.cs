@@ -21,11 +21,14 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Map
 {
@@ -35,7 +38,6 @@ namespace ClassicUO.Game.Map
         //private const int CHUNKS_NUM = 5;
         //private const int MAX_CHUNKS = CHUNKS_NUM * 2 + 1;
         private readonly List<int> _usedIndices = new List<int>();
-        private Point _center;
 
         public Map(int index)
         {
@@ -51,18 +53,7 @@ namespace ClassicUO.Game.Map
 
         public int MapBlockIndex { get; set; }
 
-        public Point Center
-        {
-            get => _center;
-            set
-            {
-                if (_center != value)
-                {
-                    _center = value;
-                    LoadChunks((ushort)_center.X, (ushort)_center.Y);
-                }
-            }
-        }
+        public Point Center { get; set; }
 
         public Chunk GetMapChunk(int rblock, int blockX, int blockY)
         {
@@ -99,10 +90,9 @@ namespace ClassicUO.Game.Map
                 else
                     return null;
             }
-            else
-                chuck.LastAccessTime = Engine.Ticks;
 
-            return chuck.Tiles[x % 8][y % 8];
+            chuck.LastAccessTime = Engine.Ticks;
+            return chuck.Tiles[x % 8, y % 8];
         }
 
         public Tile GetTile(int x, int y, bool load = true)
@@ -150,7 +140,7 @@ namespace ClassicUO.Game.Map
             if (access)
                 return defaultZ;
             access = true;
-            Tile tile = GetTile(x, y);
+            Tile tile = GetTile(x, y, false);
 
             if (tile != null)
             {
@@ -235,13 +225,14 @@ namespace ClassicUO.Game.Map
             Chunks = null;
         }
 
-        private void LoadChunks(ushort centerX, ushort centerY)
+        public void Initialize()
         {
             const int XY_OFFSET = 30;
-            int minBlockX = ((centerX - XY_OFFSET) >> 3) - 1;
-            int minBlockY = ((centerY - XY_OFFSET) >> 3) - 1;
-            int maxBlockX = ((centerX + XY_OFFSET) >> 3) + 1;
-            int maxBlockY = ((centerY + XY_OFFSET) >> 3) + 1;
+
+            int minBlockX = ((Center.X - XY_OFFSET) >> 3) - 1;
+            int minBlockY = ((Center.Y - XY_OFFSET) >> 3) - 1;
+            int maxBlockX = ((Center.X + XY_OFFSET) >> 3) + 1;
+            int maxBlockY = ((Center.Y + XY_OFFSET) >> 3) + 1;
 
             if (minBlockX < 0)
                 minBlockX = 0;

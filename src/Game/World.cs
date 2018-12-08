@@ -83,15 +83,25 @@ namespace ClassicUO.Game
 
                         Position position = Player.Position;
                         Map = null;
-                        Map = new Map.Map(value);
+
+                        Map = new Map.Map(value)
+                        {
+                            Center = new Point(position.X, position.Y)
+                        };
+                        Map.Initialize();
+
                         Player.Position = position;
+                        Player.AddToTile();
+
                         Player.ClearSteps();
-                        Player.ProcessDelta();
+                        Player.ProcessDelta();                  
                     }
                     else
                     {
-                        Map = new Map.Map(value);
-                        if (Player != null) Map.Center = new Point(Player.Position.X, Player.Position.Y);
+                        Map = new Map.Map(value);                       
+                        if (Player != null)
+                            Map.Center = new Point(Player.X, Player.Y);
+                        Map.Initialize();
                     }
                 }
             }

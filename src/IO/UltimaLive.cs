@@ -161,20 +161,20 @@ namespace ClassicUO.IO
                                     //        chunk.Tiles[i][j].RemoveGameObject(list[k]);
                                     //}
 
-                                    for (GameObject obj = chunk.Tiles[i][j].FirstNode; obj != null; obj = obj.Right)
+                                    for (GameObject obj = chunk.Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
                                     {
                                         if (obj is Static)
-                                            chunk.Tiles[i][j].RemoveGameObject(obj);
+                                            chunk.Tiles[i, j].RemoveGameObject(obj);
                                     }
                                 }
                             }
                             for (int k = 0; k < length; k++)
                             {
-                                Tile t = chunk.Tiles[staticsData[index + 2]][staticsData[index + 3]];
+                                Tile t = chunk.Tiles[staticsData[index + 2], staticsData[index + 3]];
                                 new Static((ushort)(staticsData[index] | (staticsData[index + 1] << 8)), (ushort)(staticsData[index + 5] | (staticsData[index + 6] << 8)), k)
                                 {
                                     Position = new Position(t.X, t.Y, (sbyte)staticsData[index + 4])
-                                };
+                                }.AddToTile();
                                 index += 7;
                             }
                             //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
@@ -252,9 +252,7 @@ namespace ClassicUO.IO
                 {
                     for (int j = 0; j < 8; j++)
                     {
-                        //var list = World.Map.Chunks[block].Tiles[j][i].ObjectsOnTiles;
-                        for (GameObject obj = World.Map.Chunks[block].Tiles[i][j].FirstNode; obj != null; obj = obj.Right)
-                            //for (int k = list.Count - 1; k >= 0; --k)
+                        for (GameObject obj = World.Map.Chunks[block].Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
                         {
                             if (obj is Land ln)
                             {
@@ -280,7 +278,7 @@ namespace ClassicUO.IO
                 {
                     //var list = World.Map.GetMapChunk(block, xblock, yblock).Tiles[j][i].ObjectsOnTiles;
 
-                    for (GameObject obj = World.Map.GetMapChunk(block, xblock, yblock).Tiles[j][i].FirstNode; obj != null; obj = obj.Right)
+                    for (GameObject obj = World.Map.GetMapChunk(block, xblock, yblock).Tiles[j, i].FirstNode; obj != null; obj = obj.Right)
                         //for (int k = 0; k < list.Count; k++)
                     {
                         //GameObject o = list[k];
@@ -305,7 +303,7 @@ namespace ClassicUO.IO
                 for (int j = 0; j < 8; j++)
                 {
                     //var list = World.Map.Chunks[block].Tiles[i][j].ObjectsOnTiles;
-                    for (GameObject obj = World.Map.Chunks[block].Tiles[i][j].FirstNode; obj != null; obj = obj.Right)
+                    for (GameObject obj = World.Map.Chunks[block].Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
 
                     //for (int k = 0; k < list.Count; k++)
                     {

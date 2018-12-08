@@ -427,6 +427,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Steps.Clear();
             Position = new Position(x, y, z);
+            AddToTile(x, y);
             Direction = dir;
             Offset = Vector3.Zero;
             ProcessDelta();
@@ -535,6 +536,7 @@ namespace ClassicUO.Game.GameObjects
                         }
 
                         Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
+                        AddToTile(X, Y);
                         Direction = (Direction) step.Direction;
                         IsRunning = step.Run;
                         Offset = Vector3.Zero;

@@ -205,6 +205,8 @@ namespace ClassicUO.Game.GameObjects
                                 MaxY = maxY,
                                 Components = components
                             };
+
+                            house.Generate();
                         }
                     }
                     else
@@ -275,18 +277,28 @@ namespace ClassicUO.Game.GameObjects
 
         public override Position Position
         {
-            get => _containerPosition;
+            get => base.Position;
             set
             {
-                if (IsCorpse)
-                {
-                }
 
-                if (!OnGround)
-                    _containerPosition = value;
-                else
-                    base.Position = _containerPosition = value;
+                if (OnGround)
+                    AddToTile(value.X, value.Y);
+
+                base.Position = value;
             }
+
+            //get => _containerPosition;
+            //set
+            //{
+            //    if (IsCorpse)
+            //    {
+            //    }
+
+            //    if (!OnGround)
+            //        _containerPosition = value;
+            //    else
+            //        base.Position = _containerPosition = value;
+            //}
         }
 
         protected override void OnPositionChanged(object sender, EventArgs e)

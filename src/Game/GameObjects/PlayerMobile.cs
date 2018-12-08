@@ -1811,38 +1811,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 ResetSteps();
                 ForcePosition(position.X, position.Y, position.Z, dir);
-                if (step.Seq != seq) NetClient.Socket.Send(new PResend());
+                if (step.Seq != seq)
+                    NetClient.Socket.Send(new PResend());
             }
-
-            //if (step.Seq != seq)
-            //{
-            //    return;
-            //}
-
-            //_requestedSteps.RemoveFromFront();
-
-            //if (step.Rej == 0)
-            //{
-            //    ResetSteps();
-            //    ForcePosition(position.X, position.Y, position.Z, dir);
-
-            //}
-
-            //ProcessDelta();
-
-            //foreach (Step step in _requestedSteps)
-            //{
-            //    if (step.Seq == seq)
-            //    {
-            //        ResetSteps();
-            //        Position = new Position(position.X, position.Y, position.Z);
-            //        Direction = dir;
-
-            //        ProcessDelta();
-
-            //        break;
-            //    }
-            //}
         }
 
         public void ResetSteps()

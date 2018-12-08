@@ -30,6 +30,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -181,26 +182,27 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return;
 
-            (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
+            GetViewPort();
+
 
             UpdateMaxDrawZ();
             _renderListCount = 0;
-            int minX = minTile.X;
-            int minY = minTile.Y;
-            int maxX = maxTile.X;
-            int maxY = maxTile.Y;
-            _offset = offset;
-            _minPixel = minPixel;
-            _maxPixel = maxPixel;
-            _minTile = minTile;
-            _maxTile = maxTile;
+
+            int minX = _minTile.X;
+            int minY = _minTile.Y;
+            int maxX = _maxTile.X;
+            int maxY = _maxTile.Y;
+
+            //Log.Message(LogTypes.Warning, $"MIN: {minTile}   -  MAX: {maxTile}    -  DELTA: {renderDimensions}");
+
+            int count = 0;
 
             for (int i = 0; i < 2; i++)
             {
                 int minValue = minY;
                 int maxValue = maxY;
 
-                if (i > 0)
+                if (i != 0)
                 {
                     minValue = minX;
                     maxValue = maxX;
@@ -211,7 +213,7 @@ namespace ClassicUO.Game.Scenes
                     int x = minX;
                     int y = lead;
 
-                    if (i > 0)
+                    if (i != 0)
                     {
                         x = lead;
                         y = maxY;
@@ -222,10 +224,11 @@ namespace ClassicUO.Game.Scenes
                         if (x < minX || x > maxX || y < minY || y > maxY)
                             break;
 
-                        Tile tile =  World.Map.GetTile(x, y);
+                        Tile tile = World.Map.GetTile(x, y, true);
 
                         if (tile != null)
                         {
+                            count++;
                             AddTileToRenderList(tile.FirstNode, x, y, false, 150);
                         }
                         x++;
@@ -233,6 +236,8 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
             }
+
+
 
             _renderIndex++;
 

@@ -68,7 +68,9 @@ namespace ClassicUO.Game.GameObjects
                     SetSource(mobile.Position.X, mobile.Position.Y, mobile.Position.Z);
 
                     if (mobile != World.Player && !mobile.IsMoving && (xSource | ySource | zSource) != 0)
+                    {
                         mobile.Position = new Position((ushort) xSource, (ushort) ySource, zSourceB);
+                    }
                 }
                 else if (source is Item)
                 {

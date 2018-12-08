@@ -35,22 +35,25 @@ namespace ClassicUO.Game.Map
         {
             X = x;
             Y = y;
-            Tiles = new Tile[8][];
+            Tiles = new Tile[8, 8];
+
+            x *= 8;
+            y *= 8;
 
             for (int i = 0; i < 8; i++)
             {
-                Tiles[i] = new Tile[8];
-                for (int j = 0; j < 8; j++) Tiles[i][j] = new Tile((ushort) (i + x * 8), (ushort) (j + y * 8));
+                for (int j = 0; j < 8; j++)
+                    Tiles[i, j] = new Tile((ushort) (i + x), (ushort) (j + y));
             }
 
-            LastAccessTime = Engine.Ticks + 5000;
+            LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
 
 
         public ushort X { get; }
         public ushort Y { get; }
 
-        public Tile[][] Tiles { get; private set; }
+        public Tile[,] Tiles { get; private set; }
 
         public long LastAccessTime { get; set; }
 
@@ -85,6 +88,8 @@ namespace ClassicUO.Game.Map
                         ushort tileY = (ushort) (by + y);
                         land.Calculate(tileX, tileY, z);
                         land.Position = new Position(tileX, tileY, z);
+
+                        Tiles[x, y].AddGameObject(land);
                     }
                 }
 
@@ -108,16 +113,18 @@ namespace ClassicUO.Game.Map
                                     continue;
                                 sbyte z = sb->Z;
 
+                                ushort staticX = (ushort) (bx + x);
+                                ushort staticY = (ushort) (by + y);
+
                                 Static staticObject = new Static(sb->Color, sb->Hue, pos)
                                 {
-                                    Position = new Position((ushort)(bx + x), (ushort)(by + y), z)
+                                    Position = new Position(staticX, staticY, z)
                                 };
 
                                 if (TileData.IsAnimated(staticObject.ItemData.Flags))
-                                {
                                     World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
-                                    //staticObject.Effect = new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1);
-                                }
+
+                                Tiles[x, y].AddGameObject(staticObject);
                             }
                         }
                     }
@@ -135,7 +142,7 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tile tile = Tiles[i][j];
+                    Tile tile = Tiles[i, j];
 
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
                     {
@@ -145,7 +152,7 @@ namespace ClassicUO.Game.Map
                         }
                     }
 
-                    Tiles[i][j] = null;
+                    Tiles[i, j] = null;
                 }
             }
 
@@ -158,7 +165,7 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tile tile = Tiles[i][j];
+                    Tile tile = Tiles[i, j];
 
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
                     {

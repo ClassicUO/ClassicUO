@@ -229,6 +229,14 @@ namespace ClassicUO.Game
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
+        private RenderedText _text = new RenderedText()
+        {
+            Font = 1,
+            FontStyle = FontStyle.BlackBorder,
+            IsUnicode =  true,
+            
+        };
+
         public void Draw(Batcher2D sb)
         {
             ushort id = Graphic;
@@ -255,6 +263,12 @@ namespace ClassicUO.Game
                 }
                 DrawToolTip(sb, Mouse.Position);
                 sb.Draw2D(Texture, new Point(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id]), Vector3.Zero);
+
+                GameScene gs = SceneManager.GetScene<GameScene>();
+                if (gs != null)
+                _text.Text = gs.SelectedObject == null ? "null" : gs.SelectedObject.Position.ToString();
+
+                _text.Draw(sb, new Point(Mouse.Position.X, Mouse.Position.Y - 20));
             }
         }
 
