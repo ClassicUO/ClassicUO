@@ -90,11 +90,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _settings.GameWindowHeight += Mouse.LDroppedOffset.Y - _lastPosition.Y;
                 _lastPosition = Mouse.LDroppedOffset;
 
-                if (_settings.GameWindowWidth < 350)
-                    _settings.GameWindowWidth = 350;
+                if (_settings.GameWindowWidth < 640)
+                    _settings.GameWindowWidth = 640;
 
-                if (_settings.GameWindowHeight < 350)
-                    _settings.GameWindowHeight = 350;
+                if (_settings.GameWindowHeight < 480)
+                    _settings.GameWindowHeight = 480;
             }
 
             if (_worldWidth != _settings.GameWindowWidth || _worldHeight != _settings.GameWindowHeight)

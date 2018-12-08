@@ -322,21 +322,18 @@ namespace ClassicUO.Game.Scenes
             winDrawOffsetY += (winGameScaledOffsetY >> 1);
 
 
+            const int MAX = 70;
+
+
+            if (width > MAX)
+                width = MAX;
+
+            if (height > MAX)
+                height = MAX;
+
+
             int size = Math.Max(width, height);
 
-            //if (width < height)
-            //    width = height;
-            //else
-            //    height = width;
-
-            //int MAX = (int) (30 * Scale);
-
-
-            //if (width > MAX)
-            //    width = MAX;
-
-            //if (height > MAX)
-            //    height = MAX;
 
             int realMinRangeX = World.Player.Position.X - size;
 
