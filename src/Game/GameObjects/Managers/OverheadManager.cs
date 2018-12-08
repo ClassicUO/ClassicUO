@@ -60,8 +60,8 @@ namespace ClassicUO.Game.GameObjects.Managers
                 {
                     OverHeadInfo t = _overheadsList[i];
                     View view = t.View;
-                    
-                    Rectangle rect0 = new Rectangle((int)t.Position.X - view.Bounds.X, (int) t.Position.Y - view.Bounds.Y, view.Bounds.Width, view.Bounds.Height);
+
+                    Rectangle rect0 = new Rectangle((int)t.Position.X - view.Bounds.X, (int)t.Position.Y - view.Bounds.Y, view.Bounds.Width, view.Bounds.Height);
 
                     for (int j = i + 1; j < _overheadsList.Count; j++)
                     {
@@ -70,7 +70,7 @@ namespace ClassicUO.Game.GameObjects.Managers
 
                         Rectangle rect1 = new Rectangle((int)a.Position.X - b.Bounds.X, (int)a.Position.Y - b.Bounds.Y, b.Bounds.Width, b.Bounds.Height);
 
-                        if ((((TextOverhead) view.GameObject).IsOverlapped = rect0.InRect(rect1)))
+                        if ((((TextOverhead)view.GameObject).IsOverlapped = rect0.InRect(rect1)))
                             break;
                     }
 

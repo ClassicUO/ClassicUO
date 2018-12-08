@@ -83,7 +83,10 @@
     <Compile Include="Game\GameObjects\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
+    <Compile Include="Interfaces\IPoolable.cs" />
+    <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Renderer\Batcher2D.cs" />
+    <Compile Include="Utility\QueuedPool.cs" />
     <Compile Include="Utility\ReflectionHolder.cs" />
     <Compile Include="Game\Gumps\Controls\DataBox.cs" />
     <Compile Include="Game\Gumps\Controls\HitBox.cs" />
@@ -269,7 +272,6 @@
     <Compile Include="IO\UOFileMul.cs" />
     <Compile Include="IO\UOFileUop.cs" />
     <Compile Include="Bootstrap.cs" />
-    <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Network\CircularBuffer.cs" />
     <Compile Include="Network\Huffman.cs" />
     <Compile Include="Network\NetClient.cs" />
@@ -293,14 +295,11 @@
     <Compile Include="Utility\Bag.cs" />
     <Compile Include="Utility\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />
-    <Compile Include="Utility\IPoolable.cs" />
     <Compile Include="Utility\Logging\Log.cs" />
     <Compile Include="Utility\Logging\LogFile.cs" />
     <Compile Include="Utility\Logging\Logger.cs" />
     <Compile Include="Utility\Logging\LogTypes.cs" />
     <Compile Include="Utility\MathHelper.cs" />
-    <Compile Include="Utility\ObjectPool.cs" />
-    <Compile Include="Utility\Pool.cs" />
     <Compile Include="Utility\Profiler.cs" />
     <Compile Include="Utility\RandomHelper.cs" />
     <Compile Include="Utility\StringHelper.cs" />

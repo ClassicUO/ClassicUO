@@ -78,7 +78,7 @@ namespace ClassicUO.Game.Views
             Texture.Ticks = Engine.Ticks;
             TextOverhead overhead = (TextOverhead) GameObject;
 
-            if (overhead.Alpha < 1.0f)
+            //if (overhead.Alpha < 1.0f)
                 HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
 
             Settings settings = Service.Get<Settings>();

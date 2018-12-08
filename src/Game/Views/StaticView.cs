@@ -48,7 +48,7 @@ namespace ClassicUO.Game.Views
                 return false;
             Static st = (Static) GameObject;
 
-            if (st.Effect == null)
+            //if (st.Effect == null)
             {
                 if (Texture == null || Texture.IsDisposed)
                 {
@@ -149,7 +149,7 @@ namespace ClassicUO.Game.Views
                 return base.Draw(batcher, position, objectList);
             }
 
-            return !st.Effect.IsDisposed && st.Effect.View.Draw(batcher, position, objectList);
+            //return !st.Effect.IsDisposed && st.Effect.View.Draw(batcher, position, objectList);
         }
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)

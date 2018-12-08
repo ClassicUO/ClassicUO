@@ -43,9 +43,8 @@ namespace ClassicUO.Game.Scenes
         private MousePicker _mousePicker;
         private MouseOverList _mouseOverList;
         private WorldViewport _viewPortGump;
-        private StaticManager _staticManager;
-        private EffectManager _effectManager;
         private Settings _settings;
+        private StaticManager _staticManager;
         private static GameObject _selectedObject;
 
         public GameScene() : base(ScenesType.Game)
@@ -98,14 +97,13 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
             Service.Register(new JournalData());
-            Service.Register(_effectManager = new EffectManager());
-            Service.Register(_staticManager = new StaticManager());
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
             Engine.UI.Add(new WorldViewportGump(this));
             Engine.UI.Add(new TopBarGump(this));           
             _viewPortGump = Service.Get<WorldViewport>();
             _settings = Service.Get<Settings>();
+            _staticManager = new StaticManager();
             GameActions.Initialize(PickupItemBegin);
             InputManager.LeftMouseButtonDown += OnLeftMouseButtonDown;
             InputManager.LeftMouseButtonUp += OnLeftMouseButtonUp;
@@ -154,8 +152,6 @@ namespace ClassicUO.Game.Scenes
             CleaningResources();
             World.Clear();
             Service.Unregister<JournalData>();
-            Service.Unregister<EffectManager>();
-            Service.Unregister<StaticManager>();
             InputManager.LeftMouseButtonDown -= OnLeftMouseButtonDown;
             InputManager.LeftMouseButtonUp -= OnLeftMouseButtonUp;
             InputManager.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
@@ -293,7 +289,6 @@ namespace ClassicUO.Game.Scenes
             // ===================================
             World.Update(totalMS, frameMS);
             _staticManager.Update(totalMS, frameMS);
-            _effectManager.Update(totalMS, frameMS);
 
             if (totalMS > _timePing)
             {

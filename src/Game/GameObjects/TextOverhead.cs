@@ -20,6 +20,7 @@
 #endregion
 using ClassicUO.Game.Views;
 using ClassicUO.Renderer;
+using System;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -69,7 +70,15 @@ namespace ClassicUO.Game.GameObjects
             {
                 _isOverlapped = value;
 
-                Alpha = _isOverlapped ? .5f : 0;
+                if (value)
+                {
+                    if (Alpha <= 0)
+                        Alpha = 0.5f;
+                }
+                else
+                {
+                    Alpha = 1.0f - (TimeToLive / Constants.TIME_FADEOUT_TEXT);
+                }
             }
         }
 
@@ -92,13 +101,15 @@ namespace ClassicUO.Game.GameObjects
                 if (TimeToLive > 0 && TimeToLive <= Constants.TIME_FADEOUT_TEXT)
                 {
                     // start alpha decreasing
-                    float alpha = 1 - (TimeToLive / Constants.TIME_FADEOUT_TEXT);
+                    float alpha = 1.0f - (TimeToLive / Constants.TIME_FADEOUT_TEXT);
 
                     if (!_isOverlapped || (_isOverlapped && alpha > Alpha))
                         Alpha = alpha;
                 }
                 else if (TimeToLive <= 0.0f)
+                {
                     Dispose();
+                }
             }
         }
     }

@@ -35,7 +35,7 @@ namespace ClassicUO.Game.GameObjects.Managers
             {
                 k.Update(totalMS, frameMS);
 
-                if (k.IsDisposed || (k.OverHeads != null && k.OverHeads.Count <= 0) && (k.Effect == null || k.Effect.IsDisposed))
+                if (k.IsDisposed || (k.OverHeads != null && k.OverHeads.Count <= 0))
                     _toRemove.Add(k);
             }
 
@@ -48,7 +48,7 @@ namespace ClassicUO.Game.GameObjects.Managers
 
         public void Add(Static stat)
         {
-            if (!stat.IsDisposed && (stat.OverHeads != null && stat.OverHeads.Count > 0 || stat.Effect != null) && !_activeStatics.Contains(stat))
+            if (!stat.IsDisposed && (stat.OverHeads != null && stat.OverHeads.Count > 0) && !_activeStatics.Contains(stat))
                 _activeStatics.Add(stat);
         }
     }

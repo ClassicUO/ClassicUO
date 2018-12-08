@@ -110,11 +110,14 @@ namespace ClassicUO.Game.Map
 
                                 Static staticObject = new Static(sb->Color, sb->Hue, pos)
                                 {
-                                    Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
+                                    Position = new Position((ushort)(bx + x), (ushort)(by + y), z)
                                 };
 
                                 if (TileData.IsAnimated(staticObject.ItemData.Flags))
-                                    staticObject.Effect = new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1);
+                                {
+                                    World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
+                                    //staticObject.Effect = new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1);
+                                }
                             }
                         }
                     }
@@ -159,8 +162,8 @@ namespace ClassicUO.Game.Map
 
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
                     {
-                        if (obj is Static st && st.Effect != null)
-                            st.Effect = null;
+                        //if (obj is Static st && st.Effect != null)
+                        //    st.Effect = null;
 
                         if (!(obj is Land) && !(obj is Static))
                             return false;

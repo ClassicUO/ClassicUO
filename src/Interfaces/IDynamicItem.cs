@@ -32,6 +32,6 @@ namespace ClassicUO.Interfaces
 
         Position Position { get; set; }
 
-        GameEffect Effect { get; set; }
+        //GameEffect Effect { get; set; }
     }
 }

@@ -68,7 +68,7 @@ namespace ClassicUO.Game.Views
             if (item.IsCorpse)
                 return DrawCorpse(batcher, position, objectList);
 
-            if (item.Effect == null)
+            //if (item.Effect == null)
             {
                 if (_originalGraphic != item.DisplayedGraphic || Texture == null || Texture.IsDisposed)
                 {
@@ -91,7 +91,7 @@ namespace ClassicUO.Game.Views
                 return ok;
             }
 
-            return !item.Effect.IsDisposed && item.Effect.View.Draw(batcher, position, objectList);
+            //return !item.Effect.IsDisposed && item.Effect.View.Draw(batcher, position, objectList);
         }
 
         private bool DrawCorpse(Batcher2D batcher, Vector3 position, MouseOverList objectList)

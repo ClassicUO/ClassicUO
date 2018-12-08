@@ -86,6 +86,12 @@ namespace ClassicUO.Game.GameObjects
             if (IsDisposed)
                 return;
 
+            if (Source != null && Source.IsDisposed)
+            {
+                Dispose();
+                return;
+            }
+
             if (IsEnabled)
             {
                 if (Duration < totalMS && Duration >= 0)

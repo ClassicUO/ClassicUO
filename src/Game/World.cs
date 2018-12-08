@@ -33,9 +33,21 @@ namespace ClassicUO.Game
     public static class World
     {
 
-        private static StaticManager _staticManager = new StaticManager();
+        private static EffectManager _effectManager = new EffectManager();
+
 
         public static void AddEffect(GameEffect effect)
+        {
+            _effectManager.Add(effect);
+        }
+
+        public static void AddEffect(GraphicEffectType type, Serial source, Serial target, Graphic graphic, Hue hue, Position srcPos, Position targPos, byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
+        {
+            _effectManager.Add(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
+        }
+
+
+        public static void AddOverheadText(GameObject obj, string text)
         {
 
         }
@@ -133,6 +145,9 @@ namespace ClassicUO.Game
                     if (item.IsDisposed)
                         Items.Remove(item);
                 }
+
+
+                _effectManager.Update(totalMS, frameMS);
             }
         }
 

@@ -595,7 +595,12 @@ namespace ClassicUO.Network
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
             if (TileData.IsAnimated(item.ItemData.Flags))
-                item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
+            {
+                item.View.AllowedToDraw = false;
+
+                World.AddEffect(new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1));
+            }
+                //item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
         }
 
         private static void EnterWorld(Packet p)
@@ -1137,7 +1142,7 @@ namespace ClassicUO.Network
                 blendmode = (GraphicEffectBlendMode) p.ReadUInt();
             }
 
-            Service.Get<EffectManager>().Add(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDirection, doesExplode, false, blendmode);
+            World.AddEffect(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDirection, doesExplode, false, blendmode);
         }
 
         private static void ClientViewRange(Packet p)
@@ -2441,7 +2446,10 @@ namespace ClassicUO.Network
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
             if (TileData.IsAnimated(item.ItemData.Flags))
-                item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
+            {
+                item.View.AllowedToDraw = false;
+                World.AddEffect(new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1));
+            }
         }
 
         private static void PacketList(Packet p)

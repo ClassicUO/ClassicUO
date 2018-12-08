@@ -52,36 +52,36 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public GameEffect Effect
-        {
-            get => _effect;
-            set
-            {
-                _effect?.Dispose();
-                _effect = value;
-                if (_effect != null) Service.Get<StaticManager>().Add(this);
-            }
-        }
+        //public GameEffect Effect
+        //{
+        //    get => _effect;
+        //    set
+        //    {
+        //        //_effect?.Dispose();
+        //        //_effect = value;
+        //        //if (_effect != null) Service.Get<StaticManager>().Add(this);
+        //    }
+        //}
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
+        //public override void Update(double totalMS, double frameMS)
+        //{
+        //    base.Update(totalMS, frameMS);
 
-            if (Effect != null)
-            {
-                if (Effect.IsDisposed)
-                    Effect = null;
-                else
-                    Effect.Update(totalMS, frameMS);
-            }
-        }
+        //    if (Effect != null)
+        //    {
+        //        if (Effect.IsDisposed)
+        //            Effect = null;
+        //        else
+        //            Effect.Update(totalMS, frameMS);
+        //    }
+        //}
 
-        public override void Dispose()
-        {
-            Effect?.Dispose();
-            Effect = null;
-            base.Dispose();
-        }
+        //public override void Dispose()
+        //{
+        //    Effect?.Dispose();
+        //    Effect = null;
+        //    base.Dispose();
+        //}
 
         protected override View CreateView()
         {

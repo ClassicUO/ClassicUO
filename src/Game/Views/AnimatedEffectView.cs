@@ -97,7 +97,10 @@ namespace ClassicUO.Game.Views
                 return false;
             AnimatedItemEffect effect = (AnimatedItemEffect)GameObject;
 
-            if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
+            if (effect.AnimationGraphic == Graphic.Invalid)
+                return false;
+
+            if ((effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && effect.AnimationGraphic != Graphic.Invalid)
             {
                 _displayedGraphic = effect.AnimationGraphic;
                 Texture = Art.GetStaticTexture(effect.AnimationGraphic);

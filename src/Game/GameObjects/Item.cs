@@ -236,15 +236,15 @@ namespace ClassicUO.Game.GameObjects
 
         public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
 
-        public GameEffect Effect
-        {
-            get => _effect;
-            set
-            {
-                _effect?.Dispose();
-                _effect = value;
-            }
-        }
+        //public GameEffect Effect
+        //{
+        //    get => _effect;
+        //    set
+        //    {
+        //        _effect?.Dispose();
+        //        _effect = value;
+        //    }
+        //}
 
         public override Graphic Graphic
         {
@@ -314,13 +314,13 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsCorpse)
                 ProcessAnimation();
-            else if (Effect != null)
-            {
-                if (Effect.IsDisposed)
-                    Effect = null;
-                else
-                    Effect.Update(totalMS, frameMS);
-            }
+            //else if (Effect != null)
+            //{
+            //    if (Effect.IsDisposed)
+            //        Effect = null;
+            //    else
+            //        Effect.Update(totalMS, frameMS);
+            //}
         }
 
         protected override void OnProcessDelta(Delta d)
@@ -718,8 +718,8 @@ namespace ClassicUO.Game.GameObjects
                 Multi = null;
             }
 
-            Effect?.Dispose();
-            Effect = null;
+            //Effect?.Dispose();
+            //Effect = null;
             base.Dispose();
         }
 
