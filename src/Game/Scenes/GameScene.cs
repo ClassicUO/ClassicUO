@@ -139,18 +139,20 @@ namespace ClassicUO.Game.Scenes
             Commands.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
-            //Coroutine.Start(this, WaitMilliseconds(1));
+           // Coroutine.Start(this, WaitMilliseconds(1));
         }
 
         // TODO: with high ping this stuff can break all :D
         // TEST ONLY
         private IEnumerable<IWaitCondition> WaitSeconds(int s)
         {
-            while (true)
-            {
-                yield return new WaitTime(TimeSpan.FromSeconds(s));
-                GameActions.CastSpell(1);
-            }
+            //while (true)
+            //{
+            //    yield return new WaitTime(TimeSpan.FromSeconds(s));
+            //    GameActions.CastSpell(1);
+            //}
+            yield return new WaitTime(TimeSpan.FromSeconds(s));
+            NetClient.Socket.Send(new PResend());
         }
 
         private IEnumerable<IWaitCondition> WaitMilliseconds(int s)

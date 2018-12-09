@@ -425,11 +425,10 @@ namespace ClassicUO.Game.GameObjects
 
         public void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
-            Steps.Clear();
             Position = new Position(x, y, z);
-            AddToTile();
             Direction = dir;
-            Offset = Vector3.Zero;
+            ClearSteps();
+            AddToTile();
             ProcessDelta();
         }
 
@@ -451,7 +450,7 @@ namespace ClassicUO.Game.GameObjects
         {
             CalculateRandomIdleTime();
 
-            if (Equipment[(int) Layer.Mount] == null)
+            if (!IsMounted)
             {
                 AnimIndex = 0;
                 AnimationFrameCount = 0;

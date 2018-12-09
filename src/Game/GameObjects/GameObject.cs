@@ -159,7 +159,22 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsDisposed { get; private set; }
 
-        public int Distance => DistanceTo(World.Player);
+        public int Distance
+        {
+            get
+            {         
+                    
+                if (World.Player.Steps.Count > 0)
+                {
+                    Mobile.Step step = World.Player.Steps.Back();
+
+                    return Position.DistanceTo(step.X, step.Y);
+                }
+
+                return Position.DistanceTo(World.Player.Position);
+
+            }
+        }
 
         public virtual void Update(double totalMS, double frameMS)
         {
@@ -202,20 +217,7 @@ namespace ClassicUO.Game.GameObjects
             IsPositionChanged = false;
         }
 
-        public int DistanceTo(GameObject entity)
-        {
-            if (entity is Mobile mob)
-            {
-                if (mob.Steps.Count > 0)
-                {
-                    Mobile.Step step = mob.Steps.Back();
-
-                    return Position.DistanceTo(step.X, step.Y);
-                }
-            }
-
-            return Position.DistanceTo(entity.Position);
-        }
+        public int DistanceTo(GameObject entity) => Position.DistanceTo(entity.Position);
 
         protected virtual View CreateView()
         {

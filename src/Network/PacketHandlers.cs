@@ -755,8 +755,7 @@ namespace ClassicUO.Network
             Direction direction = (Direction) p.ReadByte();
             direction &= Direction.Up;
             sbyte z = p.ReadSByte();
-            Position position = new Position(x, y, z);
-            World.Player.DenyWalk(seq, direction, position);
+            World.Player.DenyWalk(seq, direction, x, y, z);
             World.Player.ProcessDelta();
         }
 

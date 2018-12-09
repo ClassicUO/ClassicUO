@@ -61,26 +61,8 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Initialized { get; set; }
 
-        private bool _isOverlapped;
-
-        public bool IsOverlapped
-        {
-            get => _isOverlapped;
-            set
-            {
-                _isOverlapped = value;
-
-                if (value)
-                {
-                    if (Alpha <= 0)
-                        Alpha = 0.5f;
-                }
-                else
-                {
-                    Alpha = 1.0f - (TimeToLive / Constants.TIME_FADEOUT_TEXT);
-                }
-            }
-        }
+        public bool IsOverlapped { get; set; }
+     
 
         protected override View CreateView()
         {
@@ -103,13 +85,17 @@ namespace ClassicUO.Game.GameObjects
                     // start alpha decreasing
                     float alpha = 1.0f - (TimeToLive / Constants.TIME_FADEOUT_TEXT);
 
-                    if (!_isOverlapped || (_isOverlapped && alpha > Alpha))
+                    if (!IsOverlapped || (IsOverlapped && alpha > Alpha))
                         Alpha = alpha;
                 }
                 else if (TimeToLive <= 0.0f)
                 {
                     Dispose();
                 }
+                else if (IsOverlapped && Alpha <= 0.0f)
+                    Alpha = 0.5f;
+                else if (!IsOverlapped && Alpha != 0)
+                    Alpha = 0;
             }
         }
     }

@@ -25,6 +25,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -1645,6 +1646,12 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+        public override void Dispose()
+        {
+            Log.Message(LogTypes.Warning, "PlayerMobile disposed!");
+            base.Dispose();
+        }
+
         public bool Walk(Direction direction, bool run)
         {
             if (LastStepRequestTime > Engine.Ticks)
@@ -1796,7 +1803,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void DenyWalk(byte seq, Direction dir, Position position)
+        public void DenyWalk(byte seq, Direction dir, ushort x, ushort y, sbyte z)
         {
             if (RequestedSteps.Count <= 0)
             {
@@ -1805,12 +1812,13 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            Step step = RequestedSteps.RemoveFromFront();
+            // before was RemoveFromFront()
+            Step step = RequestedSteps.RemoveFromBack();
 
             if (step.Rej == 0)
             {
                 ResetSteps();
-                ForcePosition(position.X, position.Y, position.Z, dir);
+                ForcePosition(x, y, z, dir);
                 if (step.Seq != seq)
                     NetClient.Socket.Send(new PResend());
             }
