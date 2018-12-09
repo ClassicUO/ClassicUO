@@ -86,6 +86,12 @@
     <Compile Include="Interfaces\IPoolable.cs" />
     <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Renderer\Batcher2D.cs" />
+    <Compile Include="Utility\CollectionHelper.cs" />
+    <Compile Include="Utility\Coroutines\Coroutine.cs" />
+    <Compile Include="Utility\Coroutines\CoroutineManager.cs" />
+    <Compile Include="Utility\Coroutines\CoroutineStatus.cs" />
+    <Compile Include="Utility\Coroutines\WaitCondition.cs" />
+    <Compile Include="Utility\Coroutines\WaitTime.cs" />
     <Compile Include="Utility\QueuedPool.cs" />
     <Compile Include="Utility\ReflectionHolder.cs" />
     <Compile Include="Game\Gumps\Controls\DataBox.cs" />

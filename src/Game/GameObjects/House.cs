@@ -22,6 +22,9 @@
 using System;
 using System.Collections.Generic;
 
+using ClassicUO.Game.Scenes;
+using ClassicUO.Utility.Coroutines;
+
 namespace ClassicUO.Game.GameObjects
 {
     public static class HouseManager
@@ -69,10 +72,7 @@ namespace ClassicUO.Game.GameObjects
             Components.ForEach(s => s.AddToTile());
         }
 
-        public bool Equals(Serial other)
-        {
-            return Serial == other;
-        }
+        public bool Equals(Serial other) => Serial == other;
 
         public void ClearComponents()
         {

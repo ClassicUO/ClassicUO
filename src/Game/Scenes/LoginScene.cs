@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Scenes
         private LoginRejectionReasons? _loginRejectionReason;
         private LoginStep _loginStep = LoginStep.Main;
 
-        public LoginScene() : base(ScenesType.Login)
+        public LoginScene() : base()
         {
         }
 
@@ -93,7 +93,6 @@ namespace ClassicUO.Game.Scenes
         public override void Load()
         {
             base.Load();
-            Service.Register(this);
             Engine.UI.Add(new LoginGump());
 
             // Registering Packet Events
@@ -118,7 +117,6 @@ namespace ClassicUO.Game.Scenes
         public override void Unload()
         {
             Engine.UI.Remove<LoginGump>();
-            Service.Unregister<LoginScene>();
 
             // UnRegistering Packet Events           
             // NetClient.Socket.Connected -= NetClient_Connected;

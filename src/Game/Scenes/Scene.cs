@@ -25,6 +25,7 @@ using ClassicUO.Game.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Coroutines;
 
 using Microsoft.Xna.Framework.Graphics;
 
@@ -32,9 +33,8 @@ namespace ClassicUO.Game.Scenes
 {
     public abstract class Scene : IUpdateable, IDisposable
     {
-        protected Scene(ScenesType type)
+        protected Scene()
         {
-            SceneType = type;
         }
 
 
@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Scenes
 
         public int RenderedObjectsCount { get; protected set; }
 
-        public ScenesType SceneType { get; }
+        public CoroutineManager Coroutines { get; } = new CoroutineManager();
 
         public virtual void Dispose()
         {
@@ -52,16 +52,19 @@ namespace ClassicUO.Game.Scenes
             Unload();
         }
 
-        public virtual void Update(double totalMS, double frameMS)
-        {
-        }
-
+      
         public virtual void Load()
         {
         }
 
         public virtual void Unload()
         {
+            Coroutines.Clear();
+        }
+
+        public virtual void Update(double totalMS, double frameMS)
+        {
+            Coroutines.Update();
         }
 
         public virtual void FixedUpdate(double totalMS, double frameMS)

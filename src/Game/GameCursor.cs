@@ -274,10 +274,8 @@ namespace ClassicUO.Game
 
         private void DrawToolTip(Batcher2D batcher, Point position)
         {
-            if (SceneManager.CurrentScene.SceneType == ScenesType.Game)
+            if (SceneManager.CurrentScene is GameScene gs)
             {
-                GameScene gs = SceneManager.GetScene<GameScene>();
-
                 if (!World.ClientFlags.TooltipsEnabled || gs.IsHoldingItem)
                 {
                     if (!_tooltip.IsEmpty)

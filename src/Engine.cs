@@ -114,6 +114,8 @@ namespace ClassicUO
 
         public static long Ticks { get; private set; }
 
+        public static long TicksFrame { get; private set; }
+
         public static uint[] FrameDelay { get; } = new uint[2];
 
         public static bool IsFullScreen
@@ -243,6 +245,8 @@ namespace ClassicUO
             double totalms = gameTime.TotalGameTime.TotalMilliseconds;
             double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
             Ticks = (long) totalms;
+            TicksFrame = (long) framems;
+
             _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
 
             if (_currentFpsTime >= 1.0)

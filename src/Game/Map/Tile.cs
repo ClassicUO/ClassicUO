@@ -68,23 +68,23 @@ namespace ClassicUO.Game.Map
         private void Remove(GameObject obj)
         {
 
-            if (obj != null)
-            {
-                GameObject left = obj.Left;
-                GameObject right = obj.Right;
+            //if (obj != null)
+            //{
+            //    GameObject left = obj.Left;
+            //    GameObject right = obj.Right;
 
-                if (left != null)
-                    left.Right = right;
+            //    if (left != null)
+            //        left.Right = right;
 
-                if (right != null)
-                    right.Left = left;
+            //    if (right != null)
+            //        right.Left = left;
 
-                obj.Left = null;
-                obj.Right = null;
-            }
+            //    obj.Left = null;
+            //    obj.Right = null;
+            //}
 
 
-            /* GameObject founded = FirstNode;
+            GameObject founded = FirstNode;
             if (founded == null)
                 throw new NullReferenceException();
 
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Map
 
                 founded.Left = null;
                 founded.Right = null;
-            } */
+            }
         }
 
 

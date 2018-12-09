@@ -780,7 +780,7 @@ namespace ClassicUO.Game
                     int y = 0;
                     sbyte z = 0;
                     Direction dir = Direction.NONE;
-                    World.Player.GetEndPosition(ref x, ref y, ref z, ref dir);
+                    World.Player.GetEndPosition(out x, out y, out z, out dir);
 
                     if (dir == (Direction) p.Direction)
                         _pointIndex++;

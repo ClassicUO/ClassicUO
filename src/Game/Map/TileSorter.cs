@@ -131,7 +131,7 @@ namespace ClassicUO.Game.Map
             {
                 Split(first, out GameObject h1, out GameObject h2);
                 MergeSort(ref h1);
-                MergeSort( ref h2);
+                MergeSort(ref h2);
                 Merge(ref first, ref h1, ref h2);
             }
         }   

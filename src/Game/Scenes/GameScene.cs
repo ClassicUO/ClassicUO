@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Collections.Generic;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
@@ -30,6 +31,7 @@ using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Coroutines;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -48,7 +50,7 @@ namespace ClassicUO.Game.Scenes
         private StaticManager _staticManager;
         private static GameObject _selectedObject;
 
-        public GameScene() : base(ScenesType.Game)
+        public GameScene() : base()
         {
         }
 
@@ -136,9 +138,29 @@ namespace ClassicUO.Game.Scenes
             Engine.UI.Add(new OptionsGump1());
             Commands.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
+
+            //Coroutine.Start(this, WaitMilliseconds(1));
         }
 
-        
+        // TODO: with high ping this stuff can break all :D
+        // TEST ONLY
+        private IEnumerable<IWaitCondition> WaitSeconds(int s)
+        {
+            while (true)
+            {
+                yield return new WaitTime(TimeSpan.FromSeconds(s));
+                GameActions.CastSpell(1);
+            }
+        }
+
+        private IEnumerable<IWaitCondition> WaitMilliseconds(int s)
+        {
+            while (true)
+            {
+                yield return new WaitTime(TimeSpan.FromMilliseconds(s));
+                GameActions.CastSpell(1);
+            }
+        }
 
         public override void Unload()
         {
@@ -179,6 +201,8 @@ namespace ClassicUO.Game.Scenes
 
         public override void FixedUpdate(double totalMS, double frameMS)
         {
+            base.FixedUpdate(totalMS, frameMS);
+
             if (!World.InGame)
                 return;
 
@@ -193,9 +217,6 @@ namespace ClassicUO.Game.Scenes
             int maxX = _maxTile.X;
             int maxY = _maxTile.Y;
 
-            //Log.Message(LogTypes.Warning, $"MIN: {minTile}   -  MAX: {maxTile}    -  DELTA: {renderDimensions}");
-
-            int count = 0;
 
             for (int i = 0; i < 2; i++)
             {
@@ -228,7 +249,6 @@ namespace ClassicUO.Game.Scenes
 
                         if (tile != null)
                         {
-                            count++;
                             AddTileToRenderList(tile.FirstNode, x, y, false, 150);
                         }
                         x++;
@@ -243,13 +263,13 @@ namespace ClassicUO.Game.Scenes
 
             if (_renderIndex >= 100)
                 _renderIndex = 1;
-            _updateDrawPosition = false;
-         
-            base.FixedUpdate(totalMS, frameMS);
+            _updateDrawPosition = false;      
         }
 
         public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
             if (!World.InGame)
                 return;
 
@@ -301,8 +321,7 @@ namespace ClassicUO.Game.Scenes
                 _timePing = (long) totalMS + 10000;
             }
 
-            CleaningResources();
-            base.Update(totalMS, frameMS);
+            CleaningResources();          
         }
 
         public override bool Draw(Batcher2D batcher)

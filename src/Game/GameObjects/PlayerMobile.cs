@@ -1661,7 +1661,7 @@ namespace ClassicUO.Game.GameObjects
             Direction oldDirection = Direction.NONE;
 
             if (RequestedSteps.Count <= 0)
-                GetEndPosition(ref x, ref y, ref z, ref oldDirection);
+                GetEndPosition(out x, out y, out z, out oldDirection);
             else
             {
                 Step step1 = RequestedSteps.Back();
@@ -1770,7 +1770,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            RequestedSteps.RemoveFromFront(out Step step);
+            Step step = RequestedSteps.RemoveFromFront();
 
             if (step.Seq != seq)
             {
@@ -1784,7 +1784,7 @@ namespace ClassicUO.Game.GameObjects
                 int endX = 0, endY = 0;
                 sbyte endZ = 0;
                 Direction endDir = Direction.NONE;
-                GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
+                GetEndPosition(out endX, out endY, out endZ, out endDir);
 
                 if (step.Direction == (byte) endDir)
                 {
@@ -1805,7 +1805,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            RequestedSteps.RemoveFromFront(out Step step);
+            Step step = RequestedSteps.RemoveFromFront();
 
             if (step.Rej == 0)
             {
@@ -1825,17 +1825,8 @@ namespace ClassicUO.Game.GameObjects
                 RequestedSteps[i] = s;
             }
 
-            //_requestedSteps.Clear();
-            //Steps.Clear();
             SequenceNumber = 0;
             LastStepRequestTime = 0;
-
-            //Offset = Vector3.Zero;
-        }
-
-        public void ResetRequestedSteps()
-        {
-            RequestedSteps.Clear();
         }
 
         private enum PlayerMovementState

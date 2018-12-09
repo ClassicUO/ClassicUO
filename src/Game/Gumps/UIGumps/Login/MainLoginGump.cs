@@ -123,7 +123,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             switch ((Buttons) buttonID)
             {
                 case Buttons.NextArrow:
-                    Service.Get<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
+                    SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
 
                     break;
             }

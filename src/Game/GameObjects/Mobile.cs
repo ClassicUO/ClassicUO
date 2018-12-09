@@ -338,7 +338,7 @@ namespace ClassicUO.Game.GameObjects
             int endX = 0, endY = 0;
             sbyte endZ = 0;
             Direction endDir = Direction.NONE;
-            GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
+            GetEndPosition(out endX, out endY, out endZ, out endDir);
 
             //endDir = endDir & Direction.Up;
 
@@ -404,7 +404,7 @@ namespace ClassicUO.Game.GameObjects
             return deltaY == 0 ? Direction.West : Direction.Up;
         }
 
-        internal void GetEndPosition(ref int x, ref int y, ref sbyte z, ref Direction dir)
+        internal void GetEndPosition(out int x, out int y, out sbyte z, out Direction dir)
         {
             if (Steps.Count <= 0)
             {
@@ -427,7 +427,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Steps.Clear();
             Position = new Position(x, y, z);
-            AddToTile(x, y);
+            AddToTile();
             Direction = dir;
             Offset = Vector3.Zero;
             ProcessDelta();
@@ -536,7 +536,7 @@ namespace ClassicUO.Game.GameObjects
                         }
 
                         Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);
-                        AddToTile(X, Y);
+                        AddToTile();
                         Direction = (Direction) step.Direction;
                         IsRunning = step.Run;
                         Offset = Vector3.Zero;
@@ -675,17 +675,6 @@ namespace ClassicUO.Game.GameObjects
 
         public struct Step
         {
-            //public Step(int x, int y, sbyte z, byte dir, bool anim, bool run, byte rej, byte seq)
-            //{
-            //    X = x;
-            //    Y = y;
-            //    Z = z;
-            //    Direction = dir;
-            //    Anim = anim;
-            //    Run = run;
-            //    Rej = rej;
-            //    Seq = seq;
-            //}
             public int X, Y;
             public sbyte Z;
             public byte Direction;

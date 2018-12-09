@@ -718,7 +718,7 @@ namespace ClassicUO.Network
             int endX = 0, endY = 0;
             sbyte endZ = 0;
             Direction endDir = Direction.NONE;
-            World.Player.GetEndPosition(ref endX, ref endY, ref endZ, ref endDir);
+            World.Player.GetEndPosition(out endX, out endY, out endZ, out endDir);
 
             //World.Player.SequenceNumber = 0;
             World.Player.ResetSteps();

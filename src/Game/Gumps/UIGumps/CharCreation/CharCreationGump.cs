@@ -40,7 +40,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
         public CharCreationGump() : base(0, 0)
         {
-            loginScene = Service.Get<LoginScene>();
+            loginScene = SceneManager.GetScene<LoginScene>();
             AddChildren(new CreateCharAppearanceGump(), 1);
             SetStep(CharCreationStep.Appearence);
             CanCloseWithRightClick = false;
