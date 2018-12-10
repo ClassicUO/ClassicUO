@@ -112,8 +112,14 @@ namespace ClassicUO
 
         public static int CurrentFPS { get; private set; }
 
+        /// <summary>
+        /// Total game time in milliseconds
+        /// </summary>
         public static long Ticks { get; private set; }
 
+        /// <summary>
+        /// Milliseconds from last frame
+        /// </summary>
         public static long TicksFrame { get; private set; }
 
         public static uint[] FrameDelay { get; } = new uint[2];
