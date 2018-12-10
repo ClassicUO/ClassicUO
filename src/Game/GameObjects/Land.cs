@@ -35,6 +35,7 @@ namespace ClassicUO.Game.GameObjects
         public Land(Graphic graphic)
         {
             Graphic = graphic;
+            IsStretched = TileData.TexID == 0 && IO.Resources.TileData.IsWet(TileData.Flags);
         }
 
         private LandTiles? _tileData;
@@ -60,10 +61,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsStretched { get; set; }
 
-        protected override View CreateView()
-        {
-            return new TileView(this);
-        }
+        protected override View CreateView() => new TileView(this);
 
         public void Calculate(int x, int y, sbyte z)
         {

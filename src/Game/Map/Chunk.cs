@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
@@ -57,6 +58,7 @@ namespace ClassicUO.Game.Map
 
         public long LastAccessTime { get; set; }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Load(int map)
         {
             IndexMap im = GetIndex(map);
@@ -75,15 +77,14 @@ namespace ClassicUO.Game.Map
                         int pos = y * 8 + x;
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
-                        LandTiles info = TileData.LandData[tileID];
 
                         Land land = new Land(tileID)
                         {
                             Graphic = tileID,
                             AverageZ = z,
                             MinZ = z,
-                            IsStretched = info.TexID == 0 && TileData.IsWet(info.Flags),
                         };
+
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
                         land.Calculate(tileX, tileY, z);
@@ -119,12 +120,12 @@ namespace ClassicUO.Game.Map
                                 Static staticObject = new Static(sb->Color, sb->Hue, pos)
                                 {
                                     Position = new Position(staticX, staticY, z)
-                                };
+                                };                  
 
                                 if (TileData.IsAnimated(staticObject.ItemData.Flags))
                                     World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
-
-                                Tiles[x, y].AddGameObject(staticObject);
+                                else
+                                    Tiles[x, y].AddGameObject(staticObject);
                             }
                         }
                     }
@@ -169,9 +170,6 @@ namespace ClassicUO.Game.Map
 
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
                     {
-                        //if (obj is Static st && st.Effect != null)
-                        //    st.Effect = null;
-
                         if (!(obj is Land) && !(obj is Static))
                             return false;
                     }

@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
@@ -67,6 +68,7 @@ namespace ClassicUO.Game.Map
             return chunk;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Tile GetTile(short x, short y, bool load = true)
         {
             if (x < 0 || y < 0)
