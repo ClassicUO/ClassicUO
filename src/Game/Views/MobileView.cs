@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Views
 
         public MobileView(Mobile mobile) : base(mobile)
         {
-            _frames = new ViewLayer[(int) Layer.Legs];
+            _frames = new ViewLayer[ mobile.IsHuman ? (int) Layer.Legs : 1];
             HasShadow = true;
         }
 
