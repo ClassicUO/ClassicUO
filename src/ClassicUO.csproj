@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;SB11</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -32,7 +32,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;ORIONSORT, SB1</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -278,7 +278,6 @@
     <Compile Include="IO\UOFileIndex.cs" />
     <Compile Include="IO\UOFileMul.cs" />
     <Compile Include="IO\UOFileUop.cs" />
-    <Compile Include="Bootstrap.cs" />
     <Compile Include="Network\CircularBuffer.cs" />
     <Compile Include="Network\Huffman.cs" />
     <Compile Include="Network\NetClient.cs" />

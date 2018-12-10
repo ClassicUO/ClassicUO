@@ -258,7 +258,7 @@ namespace ClassicUO.Game.Scenes
                         if (x < minX || x > maxX || y < minY || y > maxY)
                             break;
 
-                        Tile tile = World.Map.GetTile(x, y, true);
+                        Tile tile = World.Map.GetTile(x, y);
 
                         if (tile != null)
                         {

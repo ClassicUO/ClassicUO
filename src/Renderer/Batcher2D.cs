@@ -59,7 +59,7 @@ namespace ClassicUO.Renderer
         public Batcher2D(GraphicsDevice device)
         {
             GraphicsDevice = device;
-            _effect = new Effect(GraphicsDevice, File.ReadAllBytes(Path.Combine(Bootstrap.ExeDirectory, "shaders/IsometricWorld.fxc")));
+            _effect = new Effect(GraphicsDevice, File.ReadAllBytes(Path.Combine(Engine.ExePath, "shaders/IsometricWorld.fxc")));
             _effect.Parameters["HuesPerTexture"].SetValue((float)Hues.HuesCount);
             _drawLightingEffect = _effect.Parameters["DrawLighting"];
             _projectionMatrixEffect = _effect.Parameters["ProjectionMatrix"];

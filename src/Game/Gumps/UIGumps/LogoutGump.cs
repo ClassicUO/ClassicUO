@@ -59,8 +59,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanMove = false;
             ControlInfo.IsModal = true;
 
-            X = (Engine.UI.Width - Width) >> 1;
-            Y = (Engine.UI.Height - Height) >> 1;
+            X = (Engine.WindowWidth - Width) >> 1;
+            Y = (Engine.WindowHeight - Height) >> 1;
 
             WantUpdateSize = false;
         }

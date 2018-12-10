@@ -29,7 +29,7 @@ namespace ClassicUO.Configuration
 {
     internal static class ProfileManager
     {
-        private static readonly string _path = Path.Combine(Bootstrap.ExeDirectory, "Data");
+        private static readonly string _path = Path.Combine(Engine.ExePath, "Data");
 
 
         public static Profile Current { get; set; }

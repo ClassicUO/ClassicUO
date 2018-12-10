@@ -77,7 +77,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 X = ScreenCoordinateX, Y = ScreenCoordinateY
             };
-            if (contextMenu.Height + ScreenCoordinateY > Engine.UI.Height) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Engine.UI.Height;
+            if (contextMenu.Height + ScreenCoordinateY > Engine.WindowHeight) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Engine.WindowHeight;
             contextMenu.OnOptionSelected += _contextMenu_OnOptionSelected;
             Engine.UI.Add(contextMenu);
             base.OnMouseClick(x, y, button);

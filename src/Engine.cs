@@ -24,6 +24,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 
 using ClassicUO.Configuration;
@@ -48,18 +50,15 @@ namespace ClassicUO
         private const int MIN_FPS = 15;
         private const int MAX_FPS = 250;
         private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
-        //private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
         private const string FORMAT_1 = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\n";
         private const string FORMAT_2 = "Flush: {0}\nPos: {1}\nSelected: {2}\nStats: {3}";
         private static int _fpsLimit = MIN_FPS;
         private static Engine _engine;
         private readonly GraphicsDeviceManager _graphicDeviceManager;
+        private readonly StringBuilder _sb = new StringBuilder();
         private Batcher2D _batcher;
         private double _currentFpsTime;
         private RenderedText _infoText;
-        private readonly StringBuilder _sb = new StringBuilder();
-        //private SpriteBatch3D _sb3D;
-        //private SpriteBatchUI _sbUI;
         private double _statisticsTimer;
         private float _time;
         private int _totalFrames;
@@ -113,12 +112,12 @@ namespace ClassicUO
         public static int CurrentFPS { get; private set; }
 
         /// <summary>
-        /// Total game time in milliseconds
+        ///     Total game time in milliseconds
         /// </summary>
         public static long Ticks { get; private set; }
 
         /// <summary>
-        /// Milliseconds from last frame
+        ///     Milliseconds from last frame
         /// </summary>
         public static long TicksFrame { get; private set; }
 
@@ -156,25 +155,62 @@ namespace ClassicUO
 
         public static UIManager UI => _engine._uiManager;
 
+        public static Assembly Assembly { get; private set; }
 
-        public static void Start()
+        public static string ExePath { get; private set; }
+
+        private static void Main(string[] args)
         {
+            Configure();
+
             using (_engine = new Engine())
                 _engine.Run();
         }
 
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetDllDirectory(string lpPathName);
+
+        private static void Configure()
+        {
+            Log.Start(LogTypes.All);
+
+            Assembly = Assembly.GetExecutingAssembly();
+            ExePath = Path.GetDirectoryName(Assembly.Location);
+
+            AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
+            {
+                string msg = e.ExceptionObject.ToString();
+                Log.Message(LogTypes.Panic, msg);
+                string path = Path.Combine(ExePath, "Logs");
+
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+                using (LogFile crashfile = new LogFile(path, "crash.txt"))
+                    await crashfile.WriteAsync(msg);
+            };
+
+            // We can use the mono's dllmap feature, but 99% of people use VS to compile.
+            if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
+            {
+                string libsPath = Path.Combine(ExePath, "libs", Environment.Is64BitProcess ? "x64" : "x86");
+                SetDllDirectory(libsPath);
+            }
+
+            Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
+            Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
+        }
+
         protected override void Initialize()
         {
-            Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine(Bootstrap.ExeDirectory, "settings.json"));
+            Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
 
             if (settings == null)
             {
                 Log.Message(LogTypes.Trace, "settings.json file was not found creating default");
                 settings = new Settings();
                 settings.Save();
-                Process.Start("notepad.exe", "settings.json");
-                Exit();
-
+                Quit();
                 return;
             }
 
@@ -208,7 +244,6 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
             InputManager.Initialize();
-
             _uiManager = new UIManager();
 
             //Register Command Stack          
@@ -252,7 +287,6 @@ namespace ClassicUO
             double framems = gameTime.ElapsedGameTime.TotalMilliseconds;
             Ticks = (long) totalms;
             TicksFrame = (long) framems;
-
             _currentFpsTime += gameTime.ElapsedGameTime.TotalSeconds;
 
             if (_currentFpsTime >= 1.0)
