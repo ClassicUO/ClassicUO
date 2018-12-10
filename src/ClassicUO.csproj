@@ -82,6 +82,7 @@
     <Compile Include="Game\GameObjects\Land.cs" />
     <Compile Include="Game\GameObjects\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
+    <Compile Include="Game\GameObjects\Managers\JournalManager.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Interfaces\IPoolable.cs" />
     <Compile Include="Network\BufferPool.cs" />

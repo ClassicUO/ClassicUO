@@ -194,7 +194,7 @@ namespace ClassicUO.Game.Views
 
             //if (Texture.Contains(x, y))
             //{
-            //    objectList.Add(GameObject, vertex[0].Position);
+            //    objectList.AddOrUpdateText(GameObject, vertex[0].Position);
             //}
 
             //if (Art.Contains(((Item)GameObject).DisplayedGraphic, x, y))

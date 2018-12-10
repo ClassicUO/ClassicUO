@@ -30,29 +30,29 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects.Managers
 {
-    public static class OverheadManager
+    public class OverheadManager
     {
-        private static readonly List<OverHeadInfo> _overheadsList = new List<OverHeadInfo>();
-        private static readonly List<OverHeadInfo> _damagesList = new List<OverHeadInfo>();
+        private readonly List<OverHeadInfo> _overheadsList = new List<OverHeadInfo>();
+        private readonly List<OverHeadInfo> _damagesList = new List<OverHeadInfo>();
 
       
-        public static void AddOverhead(View view, Vector3 position)
+        public void AddOrUpdateText(View view, Vector3 position)
         {
             _overheadsList.Add(new OverHeadInfo(view, position));
         }
 
-        public static void AddDamage(View view, Vector3 position)
+        public void AddOrUpdateDamage(View view, Vector3 position)
         {
             _damagesList.Add(new OverHeadInfo(view, position));
         }
 
-        public static void Draw(Batcher2D batcher, MouseOverList objectList)
+        public void Draw(Batcher2D batcher, MouseOverList objectList)
         {
             DrawOverheads(batcher, objectList);
             DrawDamages(batcher, objectList);
         }
 
-        private static void DrawOverheads(Batcher2D batcher, MouseOverList objectList)
+        private void DrawOverheads(Batcher2D batcher, MouseOverList objectList)
         {
             if (_overheadsList.Count > 0)
             {
@@ -65,7 +65,7 @@ namespace ClassicUO.Game.GameObjects.Managers
 
                     for (int j = i + 1; j < _overheadsList.Count; j++)
                     {
-                        var a = _overheadsList[j];
+                        OverHeadInfo a = _overheadsList[j];
                         View b = a.View;
 
                         Rectangle rect1 = new Rectangle((int)a.Position.X - b.Bounds.X, (int)a.Position.Y - b.Bounds.Y, b.Bounds.Width, b.Bounds.Height);
@@ -81,7 +81,7 @@ namespace ClassicUO.Game.GameObjects.Managers
             }
         }
 
-        private static void DrawDamages(Batcher2D batcher, MouseOverList objectList)
+        private void DrawDamages(Batcher2D batcher, MouseOverList objectList)
         {
             if (_damagesList.Count > 0)
             {

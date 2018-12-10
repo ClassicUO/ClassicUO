@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
@@ -41,6 +42,7 @@ namespace ClassicUO.Game.GameObjects
 
         public LandTiles TileData
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 if (!_tileData.HasValue)

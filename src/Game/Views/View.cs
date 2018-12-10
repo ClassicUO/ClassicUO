@@ -23,6 +23,7 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
@@ -206,7 +207,7 @@ namespace ClassicUO.Game.Views
                     v.Bounds.Y = offY + v.Texture.Height;
                     v.Bounds.Width = v.Texture.Width;
                     v.Bounds.Height = v.Texture.Height;
-                    OverheadManager.AddOverhead(v, position);
+                    SceneManager.GetScene<GameScene>().Overheads.AddOrUpdateText(v, position);
                     offY += v.Texture.Height;
                 }
             }

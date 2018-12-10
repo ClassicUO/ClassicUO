@@ -22,6 +22,7 @@ using System.Collections.Generic;
 
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -30,7 +31,7 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     internal class RenderedTextList : Control
     {
-        private readonly List<RenderedText> _entries;
+        private readonly Deque<RenderedText> _entries;
         private readonly IScrollBar _scrollBar;
 
         public RenderedTextList(int x, int y, int width, int height, IScrollBar scrollBarControl)
@@ -42,7 +43,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Y = y;
             Width = width;
             Height = height;
-            _entries = new List<RenderedText>();
+            _entries = new Deque<RenderedText>();
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
@@ -128,10 +129,10 @@ namespace ClassicUO.Game.Gumps.Controls
             while (_entries.Count > 99)
             {
                 _entries[0].Dispose();
-                _entries.RemoveAt(0);
+                _entries.RemoveFromFront();
             }
 
-            _entries.Add(new RenderedText
+            _entries.AddToBack(new RenderedText
             {
                 MaxWidth = Width - 18,
                 IsUnicode = true,

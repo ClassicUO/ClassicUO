@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
@@ -381,7 +382,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                             //we write directly to the journal to avoid 'System:' prefix
                             Service.Get<ChatControl>().AddLine(NoteToSelf, (byte)noteToSelfFont, noteToSelfHue, false);
-                            Service.Get<JournalData>().AddEntry(NoteToSelf, (byte)noteToSelfFont, noteToSelfHue, "");
+                            SceneManager.GetScene<GameScene>().Journal.Add(NoteToSelf, noteToSelfFont, noteToSelfHue, "");
                         }
                     }
 

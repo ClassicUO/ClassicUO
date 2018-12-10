@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Views;
@@ -266,6 +267,7 @@ namespace ClassicUO.Game.GameObjects
 
         public StaticTiles ItemData
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 if (!_itemData.HasValue)
@@ -326,13 +328,6 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsCorpse)
                 ProcessAnimation();
-            //else if (Effect != null)
-            //{
-            //    if (Effect.IsDisposed)
-            //        Effect = null;
-            //    else
-            //        Effect.Update(totalMS, frameMS);
-            //}
         }
 
         protected override void OnProcessDelta(Delta d)

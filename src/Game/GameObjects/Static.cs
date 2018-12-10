@@ -18,6 +18,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System.Runtime.CompilerServices;
+
 using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
@@ -27,11 +30,9 @@ namespace ClassicUO.Game.GameObjects
 {
     public class Static : GameObject, IDynamicItem
     {
-        private GameEffect _effect;
-
-        public Static(Graphic tileID, Hue hue, int index)
+        public Static(Graphic graphic, Hue hue, int index)
         {
-            Graphic = tileID;
+            Graphic = graphic;
             Hue = hue;
             Index = index;
         }
@@ -42,8 +43,10 @@ namespace ClassicUO.Game.GameObjects
 
         private StaticTiles? _itemData;
 
+       
         public StaticTiles ItemData
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 if (!_itemData.HasValue)
@@ -52,40 +55,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        //public GameEffect Effect
-        //{
-        //    get => _effect;
-        //    set
-        //    {
-        //        //_effect?.Dispose();
-        //        //_effect = value;
-        //        //if (_effect != null) Service.Get<StaticManager>().Add(this);
-        //    }
-        //}
-
-        //public override void Update(double totalMS, double frameMS)
-        //{
-        //    base.Update(totalMS, frameMS);
-
-        //    if (Effect != null)
-        //    {
-        //        if (Effect.IsDisposed)
-        //            Effect = null;
-        //        else
-        //            Effect.Update(totalMS, frameMS);
-        //    }
-        //}
-
-        //public override void Dispose()
-        //{
-        //    Effect?.Dispose();
-        //    Effect = null;
-        //    base.Dispose();
-        //}
-
-        protected override View CreateView()
-        {
-            return new StaticView(this);
-        }
+        protected override View CreateView() => new StaticView(this);
     }
 }

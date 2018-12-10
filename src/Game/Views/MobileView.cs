@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.GameObjects.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
@@ -156,7 +157,7 @@ namespace ClassicUO.Game.Views
                 v.Bounds.Y = offY + v.Texture.Height - dmg.OffsetY;
                 v.Bounds.Width = v.Texture.Width;
                 v.Bounds.Height = v.Texture.Height;
-                OverheadManager.AddDamage(v, position);
+                SceneManager.GetScene<GameScene>().Overheads.AddOrUpdateDamage(v, position);
                 offY += v.Texture.Height;
             }
         }

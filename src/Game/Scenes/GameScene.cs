@@ -48,7 +48,9 @@ namespace ClassicUO.Game.Scenes
         private WorldViewport _viewPortGump;
         private Settings _settings;
         private StaticManager _staticManager;
-        private static GameObject _selectedObject;
+        private JournalManager _journalManager;
+        private OverheadManager _overheadManager;
+        private GameObject _selectedObject;
 
         public GameScene() : base()
         {
@@ -85,6 +87,10 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
+        public JournalManager Journal => _journalManager;
+
+        public OverheadManager Overheads => _overheadManager;
+
         private void ClearDequeued()
         {
             if (_inqueue)
@@ -99,14 +105,17 @@ namespace ClassicUO.Game.Scenes
         public override void Load()
         {
             base.Load();
-            Service.Register(new JournalData());
+
+            _journalManager = new JournalManager();
+            _overheadManager = new OverheadManager();
+            _staticManager = new StaticManager();
+
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
             Engine.UI.Add(new WorldViewportGump(this));
             Engine.UI.Add(new TopBarGump(this));           
             _viewPortGump = Service.Get<WorldViewport>();
             _settings = Service.Get<Settings>();
-            _staticManager = new StaticManager();
             GameActions.Initialize(PickupItemBegin);
             InputManager.LeftMouseButtonDown += OnLeftMouseButtonDown;
             InputManager.LeftMouseButtonUp += OnLeftMouseButtonUp;
@@ -176,7 +185,6 @@ namespace ClassicUO.Game.Scenes
             Engine.UI.Clear();
             CleaningResources();
             World.Clear();
-            Service.Unregister<JournalData>();
             InputManager.LeftMouseButtonDown -= OnLeftMouseButtonDown;
             InputManager.LeftMouseButtonUp -= OnLeftMouseButtonUp;
             InputManager.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
@@ -188,6 +196,9 @@ namespace ClassicUO.Game.Scenes
             InputManager.MouseMoving -= OnMouseMoving;
             InputManager.KeyDown -= OnKeyDown;
             InputManager.KeyUp -= OnKeyUp;
+            _journalManager = null;
+            _staticManager = null;
+            _overheadManager = null;
 
             base.Unload();
         }
@@ -357,7 +368,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             // Draw in game overhead text messages
-            OverheadManager.Draw(batcher, _mouseOverList);
+            _overheadManager.Draw(batcher, _mouseOverList);
             batcher.End();
             batcher.EnableLight(false);
             batcher.GraphicsDevice.SetRenderTarget(null);
