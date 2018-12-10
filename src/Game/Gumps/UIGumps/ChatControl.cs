@@ -74,6 +74,30 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanCloseWithRightClick = false;
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
+
+
+            int height = Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
+
+            _textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
+            {
+                X = 0,
+                Y = Height - height - 3,
+                Width = Width,
+                Height = height - 3
+            };
+            Mode = ChatMode.Default;
+
+            AddChildren(new CheckerTrans
+            {
+                X = _textBox.X,
+                Y = _textBox.Y,
+                Width = Width,
+                Height = height + 5
+            });
+            AddChildren(_textBox);
+
+
+            WantUpdateSize = false;
         }
 
         private ChatMode Mode
@@ -86,6 +110,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 switch (value)
                 {
                     case ChatMode.Default:
+                        DisposeChatModePrefix();
                         _textBox.Hue = 33;
                         _textBox.SetText(string.Empty);
 
@@ -111,7 +136,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                         break;
                     case ChatMode.Alliance:
-                        AppendChatModePrefix("[Aliance]: ", 487);
+                        AppendChatModePrefix("[Alliance]: ", 487);
 
                         break;
                     case ChatMode.ClientCommand:
@@ -124,7 +149,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void AppendChatModePrefix(string labelText, Hue hue)
         {
-            _currentChatModeLabel = new Label(labelText, true, hue)
+            _currentChatModeLabel?.Dispose();
+
+            _currentChatModeLabel = new Label(labelText, true, hue, style: FontStyle.BlackBorder)
             {
                 X = _textBox.X, Y = _textBox.Y
             };
@@ -167,23 +194,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_textBox == null)
-            {
-                int height = Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
-
-                _textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
-                {
-                    X = 0, Y = Height - height - 3, Width = Width, Height = height - 3
-                };
-                Mode = ChatMode.Default;
-
-                AddChildren(new CheckerTrans
-                {
-                    X = _textBox.X, Y = _textBox.Y, Width = Width, Height = height + 5
-                });
-                AddChildren(_textBox);
-            }
-
             for (int i = 0; i < _textEntries.Count; i++)
             {
                 _textEntries[i].Update(totalMS, frameMS);
@@ -194,34 +204,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     _textEntries.RemoveAt(i--);
                 }
             }
-
-            //if (IsFocused)
-            //{
-            //    if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_q, false, false, true) && _messageHistoryIndex > -1)
-            //    {
-            //        if (_messageHistoryIndex > 0)
-            //            _messageHistoryIndex--;
-            //        Mode = _messageHistory[_messageHistoryIndex].Item1;
-            //        _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
-            //    }
-            //    else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_w, false, false, true))
-            //    {
-            //        if (_messageHistoryIndex < _messageHistory.Count - 1)
-            //        {
-            //            _messageHistoryIndex++;
-            //            Mode = _messageHistory[_messageHistoryIndex].Item1;
-            //            _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
-            //        }
-            //        else
-            //        {
-            //            _textBox.SetText(string.Empty);
-            //        }
-            //    }
-            //    else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_BACKSPACE, false, false, false) && _textBox.Text == string.Empty)
-            //    {
-            //        Mode = ChatMode.Default;
-            //    }
-            //}
 
             if (Mode == ChatMode.Default)
             {
@@ -245,13 +227,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
                             Mode = ChatMode.Alliance;
 
                             break;
-                        case '#':
+                        case '-':
                             Mode = ChatMode.ClientCommand;
 
                             break;
                     }
                 }
-                else if (_textBox.Text.Length == 2 && _textBox.Text[0] == ':' && _textBox.Text[1] == ' ') Mode = ChatMode.Emote;
+                else if (_textBox.Text.Length == 2 && _textBox.Text[0] == ':' && _textBox.Text[1] == ' ')
+                    Mode = ChatMode.Emote;
             }
 
             base.Update(totalMS, frameMS);
@@ -331,6 +314,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.Party:
+
+                    text = text.ToLower();
 
                     if (text.Equals("add"))
                     {

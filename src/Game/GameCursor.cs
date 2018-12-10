@@ -264,9 +264,9 @@ namespace ClassicUO.Game
                 DrawToolTip(sb, Mouse.Position);
                 sb.Draw2D(Texture, new Point(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id]), Vector3.Zero);
 
-                GameScene gs = SceneManager.GetScene<GameScene>();
-                if (gs != null)
-                _text.Text = gs.SelectedObject == null ? "null" : gs.SelectedObject.Position.ToString();
+                //GameScene gs = SceneManager.GetScene<GameScene>();
+                //if (gs != null)
+                //    _text.Text = gs.SelectedObject == null ? "null" : gs.SelectedObject.Position.ToString();
 
                 _text.Draw(sb, new Point(Mouse.Position.X, Mouse.Position.Y - 20));
             }

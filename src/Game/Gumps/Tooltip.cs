@@ -38,6 +38,7 @@ namespace ClassicUO.Game.Gumps
         private uint _hash;
         private RenderedText _renderedText;
         private string _textHTML;
+        private float _lastHoverTime;
 
         public string Text { get; protected set; }
 
@@ -51,6 +52,9 @@ namespace ClassicUO.Game.Gumps
 
         public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
+            if (_lastHoverTime > Engine.Ticks)
+                return false;
+
             if (_gameObject != null && _hash != _gameObject.PropertiesHash)
             {
                 _hash = _gameObject.PropertiesHash;
@@ -111,6 +115,7 @@ namespace ClassicUO.Game.Gumps
                 _gameObject = obj;
                 _hash = obj.PropertiesHash;
                 Text = ReadProperties(obj, out _textHTML);
+                _lastHoverTime = Engine.Ticks + 250;
             }
         }
 
