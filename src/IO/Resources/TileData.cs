@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,7 +18,9 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -49,7 +52,7 @@ namespace ClassicUO.IO.Resources
             if (staticscount > 2048)
                 staticscount = 2048;
             tiledata.Seek(0);
-            LandData = new LandTiles[512 * 32];
+            LandData = new LandTiles[MAX_LAND_DATA_INDEX_COUNT];
             StaticData = new StaticTiles[staticscount * 32];
             byte[] bufferString = new byte[20];
 

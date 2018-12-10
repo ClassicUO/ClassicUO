@@ -279,14 +279,6 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public int ScaledOffsetX { get; private set; }
-
-        public int ScaledOffsetY { get; private set; }
-
-        public int ScaledOffsetW { get; private set; }
-
-        public int ScaledOffsetH { get; private set; }
-
         private void GetViewPort()
         {
             int oldDrawOffsetX = _offset.X;
@@ -296,11 +288,11 @@ namespace ClassicUO.Game.Scenes
             int winGameWidth = _settings.GameWindowWidth;
             int winGameHeight = _settings.GameWindowHeight;
             int winGameCenterX = winGamePosX + (winGameWidth >> 1);
-            int winGameCenterY = winGamePosY + (winGameHeight >> 1) + World.Player.Position.Z * 4;
+            int winGameCenterY = winGamePosY + (winGameHeight >> 1) + World.Player.Z * 4;
             winGameCenterX -= (int) World.Player.Offset.X;
             winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
-            int winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX;
-            int winDrawOffsetY = (World.Player.Position.X + World.Player.Position.Y) * 22 - winGameCenterY;
+            int winDrawOffsetX = (World.Player.X - World.Player.Y) * 22 - winGameCenterX;
+            int winDrawOffsetY = (World.Player.X + World.Player.Y) * 22 - winGameCenterY;
             float left = winGamePosX;
             float right = winGameWidth + left;
             float top = winGamePosY;
@@ -314,13 +306,8 @@ namespace ClassicUO.Game.Scenes
             int width = (int) ((winGameWidth / 44 + 1) * Scale);
             int height = (int) ((winGameHeight / 44 + 1) * Scale);
 
-            ScaledOffsetX = winGameScaledOffsetX;
-            ScaledOffsetY = winGameScaledOffsetY;
-            ScaledOffsetW = winGameScaledWidth;
-            ScaledOffsetH = winGameScaledHeight;
             winDrawOffsetX += (winGameScaledOffsetX >> 1);
             winDrawOffsetY += (winGameScaledOffsetY >> 1);
-
 
             const int MAX = 70;
 

@@ -38,7 +38,7 @@ namespace ClassicUO.Utility
             //TypedReference* address0 = &tRef0;
             //TypedReference* address1 = &tRef1;
 
-            bool use2nd = Environment.OSVersion.Platform > PlatformID.WinCE;
+            bool use2nd = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix;
 
             IntPtr firstValueAddress0 = *(IntPtr*)&tRef0;
             IntPtr secondValueAddress0 = *((IntPtr*)&tRef0 + 1);
