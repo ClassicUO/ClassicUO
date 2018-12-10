@@ -72,7 +72,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
                     ScrollAreaItem areaItem = new ScrollAreaItem();
 
-                    Label label = new Label(item.Key + ":", true, 33, font: 1, style: FontStyle.BlackBorder);
+                    Label label = new Label(item.Key + ":", true, 33, font: 1, style: FontStyle.BlackBorder)
+                    {
+                        X = 2
+                    };
                     areaItem.AddChildren(label);
 
                     int height = label.Height;
