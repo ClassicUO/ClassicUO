@@ -108,7 +108,7 @@ namespace ClassicUO.Game.GameObjects
         private ushort _maximumStaminaInc;
         private ushort _maxPhysicRes;
         private ushort _maxPoisResUshort;
-        private PlayerMovementState _movementState = PlayerMovementState.ANIMATE_IMMEDIATELY;
+        //private PlayerMovementState _movementState = PlayerMovementState.ANIMATE_IMMEDIATELY;
         private ushort _reflectPhysicalDamage;
         private ushort _resistCold;
         private ushort _resistEnergy;
@@ -125,6 +125,12 @@ namespace ClassicUO.Game.GameObjects
         private uint _tithingPoints;
         private ushort _weight;
         private ushort _weightMax;
+
+        private int _movementX, _movementY;
+        private sbyte _movementZ;
+        private int _stepsOutstanding;
+        private Direction _movementDirection;
+        private byte _sequenceNumber;
 
         public PlayerMobile(Serial serial) : base(serial)
         {
@@ -796,7 +802,6 @@ namespace ClassicUO.Game.GameObjects
         //protected override bool NoIterateAnimIndex() => false;
         protected override bool IsWalking => LastStepTime > Engine.Ticks - Constants.PLAYER_WALKING_DELAY;
 
-        public byte SequenceNumber { get; set; }
 
         public void AddBuff(Graphic graphic, uint time, string text)
         {
@@ -1657,39 +1662,28 @@ namespace ClassicUO.Game.GameObjects
             if (LastStepRequestTime > Engine.Ticks)
                 return false;
 
-            if (RequestedSteps.Count >= Constants.MAX_STEP_COUNT)
+            if (_stepsOutstanding >= Constants.MAX_STEP_COUNT)
+            {
+                NetClient.Socket.Send(new PResend());
                 return false;
+            }
 
             if (SpeedMode >= CharacterSpeedType.CantRun)
                 run = false;
             // else ALWASY RUN CHECK
-            int x = 0, y = 0;
-            sbyte z = 0;
-            Direction oldDirection = Direction.NONE;
-
-            if (RequestedSteps.Count <= 0)
-                GetEndPosition(out x, out y, out z, out oldDirection);
-            else
-            {
-                Step step1 = RequestedSteps.Back();
-                x = step1.X;
-                y = step1.Y;
-                z = step1.Z;
-                oldDirection = (Direction) step1.Direction;
-            }
 
             ushort walkTime;
             Direction newDirection = direction;
-            int newX = x;
-            int newY = y;
-            sbyte newZ = z;
+            int newX = _movementX;
+            int newY = _movementY;
+            sbyte newZ = _movementZ;
 
-            if ((oldDirection & Direction.Mask) == (newDirection & Direction.Mask))
+            if (_movementDirection == newDirection)
             {
                 if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
                     return false;
 
-                if ((newDirection & Direction.Mask) != (direction & Direction.Mask))
+                if (newDirection != direction)
                 {
                     direction = newDirection;
                     walkTime = Constants.TURN_DELAY;
@@ -1697,9 +1691,9 @@ namespace ClassicUO.Game.GameObjects
                 else
                 {
                     direction = newDirection;
-                    x = newX;
-                    y = newY;
-                    z = newZ;
+                    _movementX = newX;
+                    _movementY = newY;
+                    _movementZ = newZ;
                     walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
                 }
             }
@@ -1707,16 +1701,16 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
                 {
-                    if ((oldDirection & Direction.Mask) == (newDirection & Direction.Mask))
+                    if (newDirection == _movementDirection)
                         return false;
                 }
 
-                if ((oldDirection & Direction.Mask) == (newDirection & Direction.Mask))
+                if (_movementDirection == newDirection)
                 {
                     direction = newDirection;
-                    x = newX;
-                    y = newY;
-                    z = newZ;
+                    _movementX = newX;
+                    _movementY = newY;
+                    _movementZ = newZ;
                     walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
                 }
                 else
@@ -1726,121 +1720,46 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            Step step = new Step
-            {
-                X = x,
-                Y = y,
-                Z = z,
-                Direction = (byte) direction,
-                Run = run,
-                Seq = SequenceNumber,
-                Rej = 0
-            };
+            _movementDirection = direction;
 
-            if (_movementState == PlayerMovementState.ANIMATE_IMMEDIATELY)
-            {
-                for (int i = 0; i < RequestedSteps.Count; i++)
-                {
-                    Step s = RequestedSteps[i];
+            EnqueueStep(_movementX, _movementY, _movementZ, _movementDirection, run);
 
-                    if (!s.Anim)
-                    {
-                        s.Anim = true;
-                        RequestedSteps[i] = s;
-                        EnqueueStep(s.X, s.Y, s.Z, (Direction) s.Direction, s.Run);
-                    }
-                }
+            NetClient.Socket.Send(new PWalkRequest(direction, _sequenceNumber, run));
 
-                step.Anim = true;
-                EnqueueStep(step.X, step.Y, step.Z, (Direction) step.Direction, step.Run);
-            }
-
-            RequestedSteps.AddToBack(step);
-            NetClient.Socket.Send(new PWalkRequest(direction, SequenceNumber, run));
-
-            if (SequenceNumber == 0xFF)
-                SequenceNumber = 1;
+            if (_sequenceNumber == 0xFF)
+                _sequenceNumber = 1;
             else
-                SequenceNumber++;
+                _sequenceNumber++;
             LastStepRequestTime = Engine.Ticks + walkTime;
+            _stepsOutstanding++;
             GetGroupForAnimation(this);
 
             return true;
         }
 
-        public void ConfirmWalk(byte seq)
+        public void ConfirmWalk()
         {
-            if (RequestedSteps.Count <= 0)
+            if (_stepsOutstanding == 0)
             {
                 NetClient.Socket.Send(new PResend());
-
-                return;
             }
-
-            Step step = RequestedSteps.RemoveFromFront();
-
-            if (step.Seq != seq)
+            else
             {
-                NetClient.Socket.Send(new PResend());
-
-                return;
-            }
-
-            if (!step.Anim)
-            {
-                int endX = 0, endY = 0;
-                sbyte endZ = 0;
-                Direction endDir = Direction.NONE;
-                GetEndPosition(out endX, out endY, out endZ, out endDir);
-
-                if (step.Direction == (byte) endDir)
-                {
-                    if (_movementState == PlayerMovementState.ANIMATE_ON_CONFIRM)
-                        _movementState = PlayerMovementState.ANIMATE_ON_CONFIRM;
-                }
-
-                EnqueueStep(step.X, step.Y, step.Z, (Direction) step.Direction, step.Run);
+                _stepsOutstanding--;
             }
         }
 
-        public void DenyWalk(byte seq, Direction dir, ushort x, ushort y, sbyte z)
+        public override void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
-            if (RequestedSteps.Count <= 0)
-            {
-                NetClient.Socket.Send(new PResend());
-
-                return;
-            }
-
-            // before was RemoveFromFront()
-            Step step = RequestedSteps.RemoveFromBack();
-
-            if (step.Rej == 0)
-            {
-                ResetSteps();
-                ForcePosition(x, y, z, dir);
-                if (step.Seq != seq)
-                    NetClient.Socket.Send(new PResend());
-            }
-        }
-
-        public void ResetSteps()
-        {
-            for (int i = 0; i < RequestedSteps.Count; i++)
-            {
-                Step s = RequestedSteps[i];
-                s.Rej = 1;
-                RequestedSteps[i] = s;
-            }
-
-            SequenceNumber = 0;
-            LastStepRequestTime = 0;
-        }
-
-        private enum PlayerMovementState
-        {
-            ANIMATE_IMMEDIATELY = 0,
-            ANIMATE_ON_CONFIRM
+            LastStepRequestTime = Engine.Ticks;
+            _sequenceNumber = 0;
+            _stepsOutstanding = 0;
+            _movementX = x;
+            _movementY = y;
+            _movementZ = z;
+            _movementDirection = dir;
+            
+            base.ForcePosition(x, y, z, dir);
         }
     }
 }

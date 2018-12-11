@@ -423,7 +423,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
+        public virtual void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
             Position = new Position(x, y, z);
             Direction = dir;
@@ -681,6 +681,7 @@ namespace ClassicUO.Game.GameObjects
             public bool Run;
             public byte Rej;
             public byte Seq;
+            public byte Reserved;
         }
     }
 }

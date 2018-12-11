@@ -151,6 +151,19 @@ namespace ClassicUO.Game.Scenes
             };
             Commands.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
+
+            //Coroutine.Start(this, CastSpell());
+        }
+
+        private IEnumerable<IWaitCondition> CastSpell()
+        {
+            while (true)
+            {
+                yield return new WaitTime(TimeSpan.FromMilliseconds(1));
+
+                GameActions.CastSpell(1);
+            }
+
         }
        
 

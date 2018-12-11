@@ -618,15 +618,16 @@ namespace ClassicUO.Network
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
-            World.Player.Position = new Position(p.ReadUShort(), p.ReadUShort(), (sbyte) p.ReadUShort());
+
+            ushort x = p.ReadUShort();
+            ushort y = p.ReadUShort();
+            sbyte z = (sbyte) p.ReadUShort();
 
             if (World.Map == null)
                 World.MapIndex = 0;
 
-            World.Player.AddToTile();
-            Direction direction = (Direction) p.ReadByte();
-            World.Player.Direction = direction & Direction.Up;
-            World.Player.IsRunning = (direction & Direction.Running) != 0;
+            Direction direction = (Direction) (p.ReadByte() & 0x7);
+            World.Player.ForcePosition(x, y, z, direction);
             NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
 
             if (FileManager.ClientVersion >= ClientVersions.CV_200)
@@ -719,34 +720,20 @@ namespace ClassicUO.Network
             Direction direction = (Direction) p.ReadByte();
             sbyte z = p.ReadSByte();
 
-            // Direction dir = direction & Direction.Up;
-            int endX = 0, endY = 0;
-            sbyte endZ = 0;
-            Direction endDir = Direction.NONE;
-            World.Player.GetEndPosition(out endX, out endY, out endZ, out endDir);
+            World.Player.GetEndPosition(out int endX, out int endY, out sbyte endZ, out Direction endDir);
 
-            //World.Player.SequenceNumber = 0;
-            World.Player.ResetSteps();
+            //World.Player.ResetSteps();
             Direction dir = direction & Direction.Up;
             bool isrun = (direction & Direction.Running) != 0;
 
-            if (endX != x || endY != y || endZ != z)
-                World.Player.ForcePosition(x, y, z, dir);
-            else if (endDir != dir)
+            //if (endX != x || endY != y || endZ != z)
+            //    World.Player.ForcePosition(x, y, z, dir);
+
+            if (endDir != dir)
                 World.Player.EnqueueStep(x, y, z, dir, isrun);
             else
-            {
-                //ref Tile tile = ref World.Map.GetTile(x, y);
-                //World.Player.Position = new Position(x, y, z);
-                //World.Player.SetTile(x, y);
+                World.Player.ForcePosition(x, y, z, dir);
 
-                //World.Player.Tile = World.Map.GetTile(x, y);
-
-                World.Player.AddToTile(x, y);
-            }
-
-            //else if (World.Player.Tile == Tile.Invalid)
-            //    World.Player.Tile = World.Map.GetTile(x, y);
             World.Player.ProcessDelta();
         }
 
@@ -760,7 +747,10 @@ namespace ClassicUO.Network
             Direction direction = (Direction) p.ReadByte();
             direction &= Direction.Up;
             sbyte z = p.ReadSByte();
-            World.Player.DenyWalk(seq, direction, x, y, z);
+            //World.Player.DenyWalk(seq, direction, x, y, z);
+
+            World.Player.ForcePosition(x, y , z, direction);
+
             World.Player.ProcessDelta();
         }
 
@@ -774,7 +764,7 @@ namespace ClassicUO.Network
             if (noto <= 0 || noto >= 7)
                 noto = 0x01;
             World.Player.NotorietyFlag = (NotorietyFlag) noto;
-            World.Player.ConfirmWalk(seq);
+            World.Player.ConfirmWalk();
             World.Player.ProcessDelta();
         }
 
