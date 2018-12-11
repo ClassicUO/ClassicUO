@@ -231,7 +231,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 if (e.Button == MouseButton.Left)
                 {
-                    GameScene gs = SceneManager.GetScene<GameScene>();
+                    GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
                     if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                         return;

@@ -27,7 +27,6 @@ using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Map;
@@ -607,7 +606,13 @@ namespace ClassicUO.Network
 
         private static void EnterWorld(Packet p)
         {
-            SceneManager.ChangeScene(ScenesType.Game);
+
+            Settings settings = Service.Get<Settings>();
+            Engine.Profile.Load(World.ServerName, settings.Username, settings.LastCharacterName);
+
+            Engine.SceneManager.ChangeScene(ScenesType.Game);
+
+
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
             World.Player.Graphic = p.ReadUShort();
@@ -622,12 +627,11 @@ namespace ClassicUO.Network
             Direction direction = (Direction) p.ReadByte();
             World.Player.Direction = direction & Direction.Up;
             World.Player.IsRunning = (direction & Direction.Running) != 0;
-            Settings settings = Service.Get<Settings>();
             NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
 
             if (FileManager.ClientVersion >= ClientVersions.CV_200)
             {
-                NetClient.Socket.Send(new PGameWindowSize((uint) settings.GameWindowWidth, (uint) settings.GameWindowHeight));
+                NetClient.Socket.Send(new PGameWindowSize((uint)Engine.Profile.Current.GameWindowSize.X, (uint)Engine.Profile.Current.GameWindowSize.Y));
                 NetClient.Socket.Send(new PLanguage("ENU"));
             }
 
@@ -883,7 +887,7 @@ namespace ClassicUO.Network
         {
             if (!World.InGame)
                 return;
-            GameScene scene = SceneManager.GetScene<GameScene>();
+            GameScene scene = Engine.SceneManager.GetScene<GameScene>();
 
             if (scene == null)
                 throw new Exception("Where is my fucking GameScene?");

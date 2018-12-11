@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Views
                 Text = parent.Text
             };
             Texture = _text.Texture;
-            int delay = Service.Get<Settings>().SpeechDelay;
+            int delay = Engine.Profile.Current.SpeechDelay;
 
             if (delay < 10)
                 delay = 10;
@@ -82,20 +82,20 @@ namespace ClassicUO.Game.Views
                 HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
 
             Settings settings = Service.Get<Settings>();
-            GameScene gs = SceneManager.GetScene<GameScene>();
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
             int width = Texture.Width - Bounds.X;
             int height = Texture.Height - Bounds.Y;
 
             if (position.X < Bounds.X)
                 position.X = Bounds.X;
-            else if (position.X > settings.GameWindowWidth * gs.Scale - width)
-                position.X = settings.GameWindowWidth * gs.Scale - width;
+            else if (position.X > Engine.Profile.Current.GameWindowSize.X * gs.Scale - width)
+                position.X = Engine.Profile.Current.GameWindowSize.X * gs.Scale - width;
 
             if (position.Y - Bounds.Y < 0)
                 position.Y = Bounds.Y;
-            else if (position.Y > settings.GameWindowHeight * gs.Scale - height)
-                position.Y = settings.GameWindowHeight * gs.Scale - height;
+            else if (position.Y > Engine.Profile.Current.GameWindowSize.Y * gs.Scale - height)
+                position.Y = Engine.Profile.Current.GameWindowSize.Y * gs.Scale - height;
 
             //FrameInfo.X = (int) position.X;
             //FrameInfo.Y = (int) position.Y;

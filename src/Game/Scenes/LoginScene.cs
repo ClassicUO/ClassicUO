@@ -144,6 +144,7 @@ namespace ClassicUO.Game.Scenes
             {
                 ServerIndex = index;
                 CurrentLoginStep = LoginStep.LoginInToServer;
+                World.ServerName = Servers[index].Name;
                 NetClient.LoginSocket.Send(new PSelectServer(index));
             }
         }
@@ -307,7 +308,8 @@ namespace ClassicUO.Game.Scenes
             byte flags = reader.ReadByte();
             ushort count = reader.ReadUShort();
             Servers = new ServerListEntry[count];
-            for (ushort i = 0; i < count; i++) Servers[i] = new ServerListEntry(reader);
+            for (ushort i = 0; i < count; i++
+                 ) Servers[i] = new ServerListEntry(reader);
         }
 
         private void ParseCharacterList(Packet p)

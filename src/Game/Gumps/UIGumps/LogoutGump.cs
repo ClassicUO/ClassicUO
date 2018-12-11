@@ -80,8 +80,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Dispose();
 
                     break;
-                case 1:
-                    SceneManager.ChangeScene(ScenesType.Login);
+                case 1:                  
+                    Engine.SceneManager.ChangeScene(ScenesType.Login);
                     Dispose();
 
                     break;

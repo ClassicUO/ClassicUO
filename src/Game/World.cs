@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.GameObjects.Managers;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 
 using Microsoft.Xna.Framework;
@@ -117,6 +117,10 @@ namespace ClassicUO.Game
         public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
 
         public static ClientFeatures ClientFlags { get; } = new ClientFeatures();
+
+        public static string ServerName { get; set; }
+
+
 
         public static void Update(double totalMS, double frameMS)
         {
@@ -253,6 +257,7 @@ namespace ClassicUO.Game
             IO.UltimaLive.ShardName = null;
             ClientFlags.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
+            ServerName = string.Empty;
         }
 
         private static void InternalMapChangeClear(bool noplayer)

@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             CanMove = true;
             _useUOPGumps = FileManager.UseUOPGumps;
-            bool oldStatus = Service.Get<Settings>().UseOldStatus;
+            bool oldStatus = Engine.Profile.Current.UseOldStatusGump;
             Point p = Point.Zero;
 
             if (FileManager.ClientVersion >= ClientVersions.CV_308D && !oldStatus)
@@ -618,7 +618,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
                     if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                     {
-                        var list = SceneManager.GetScene<GameScene>().MobileGumpStack;
+                        var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
                         MobileHealthGump currentMobileHealthGump;
                         list.Add(World.Player);
                         Engine.UI.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
@@ -634,7 +634,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
                     if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                     {
-                        var list = SceneManager.GetScene<GameScene>().MobileGumpStack;
+                        var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
                         MobileHealthGump currentMobileHealthGump;
                         list.Add(World.Player);
                         Engine.UI.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
@@ -654,7 +654,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (_refreshTime < totalMS)
             {
                 _refreshTime = totalMS + 250;
-                bool oldStatus = Service.Get<Settings>().UseOldStatus;
+                bool oldStatus = Engine.Profile.Current.UseOldStatusGump;
 
                 if (FileManager.ClientVersion > ClientVersions.CV_308Z && !oldStatus)
                 {

@@ -125,7 +125,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             });
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea(150, 90, 393, 271, true);
-            LoginScene loginScene = SceneManager.GetScene<LoginScene>();
+            LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
             foreach (ServerListEntry server in loginScene.Servers) scrollArea.AddChildren(new ServerEntryGump(server));
             AddChildren(scrollArea);
 
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            LoginScene loginScene = SceneManager.GetScene<LoginScene>();
+            LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
 
             if (buttonID >= (int) Buttons.Server)
             {

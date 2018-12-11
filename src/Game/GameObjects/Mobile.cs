@@ -502,7 +502,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (Position.X != step.X || Position.Y != step.Y)
                     {
-                        if (Service.Get<Settings>().SmoothMovement)
+                        if (Engine.Profile.Current.SmoothMovements)
                         {
                             float framesPerTile = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
                             float frameOffset = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;

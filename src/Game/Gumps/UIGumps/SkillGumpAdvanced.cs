@@ -244,7 +244,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (Skill.IsClickable && Mouse.LButtonPressed)
             {
-                GameScene currentGameScene = SceneManager.GetScene<GameScene>();
+                GameScene currentGameScene = Engine.SceneManager.GetScene<GameScene>();
                 if (currentGameScene.SkillButtonGumpStack.Contains(Skill)) Engine.UI.Remove<SkillButtonGump>(World.Player);
                 SkillButtonGump skillButtonGump = new SkillButtonGump(Skill, Mouse.Position.X, Mouse.Position.Y);
                 Engine.UI.Add(skillButtonGump);

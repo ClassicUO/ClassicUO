@@ -25,36 +25,31 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Utility;
+
 namespace ClassicUO.Configuration
 {
-    internal static class ProfileManager
+    public class ProfileManager
     {
-        private static readonly string _path = Path.Combine(Engine.ExePath, "Data");
+        public Profile Current { get; private set; }
 
-
-        public static Profile Current { get; set; }
-
-
-        public static void Load(string name)
+        public void Load(string servername, string username, string charactername)
         {
-            string ext = Path.GetExtension(name);
+            string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", username, servername, charactername);
 
-            if (string.IsNullOrEmpty(ext))
-                name = name + ".json";
-
-            if (File.Exists(name))
+            if (!File.Exists(Path.Combine(path, "settings.json")))
             {
-                Current = ConfigurationResolver.Load<Profile>(name);
+                Current = new Profile(username, servername, charactername);
             }
+            else
+            {
+                Current = ConfigurationResolver.Load<Profile>(Path.Combine(path, "settings.json"));
 
-        }
+                if (Current == null)
+                    Current = new Profile(username, servername, charactername);
 
-        public static void Save()
-        {
-            if (!Directory.Exists(_path))
-                Directory.CreateDirectory(_path);
-
-            ConfigurationResolver.Save(Current, Current.Path);
+                Current.ReadGumps();
+            }
         }
     }
 }

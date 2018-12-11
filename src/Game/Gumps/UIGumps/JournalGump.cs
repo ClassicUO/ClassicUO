@@ -21,8 +21,8 @@
 using System;
 using System.Collections.Generic;
 
-using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -70,12 +70,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
         protected override void OnInitialize()
         {
             InitializeJournalEntries();
-            SceneManager.GetScene<GameScene>().Journal.EntryAdded += AddJournalEntry;
+            Engine.SceneManager.GetScene<GameScene>().Journal.EntryAdded += AddJournalEntry;
         }
 
         public override void Dispose()
         {
-            SceneManager.GetScene<GameScene>().Journal.EntryAdded -= AddJournalEntry;
+            Engine.SceneManager.GetScene<GameScene>().Journal.EntryAdded -= AddJournalEntry;
             base.Dispose();
         }
 
@@ -120,7 +120,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void InitializeJournalEntries()
         {
-            foreach (JournalEntry t in SceneManager.GetScene<GameScene>().Journal.Entries)
+            foreach (JournalEntry t in Engine.SceneManager.GetScene<GameScene>().Journal.Entries)
                 AddJournalEntry(null, t);
 
             _scrollBar.MinValue = 0;

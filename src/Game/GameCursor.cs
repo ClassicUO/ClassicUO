@@ -264,7 +264,7 @@ namespace ClassicUO.Game
                 DrawToolTip(sb, Mouse.Position);
                 sb.Draw2D(Texture, new Point(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id]), Vector3.Zero);
 
-                //GameScene gs = SceneManager.GetScene<GameScene>();
+                //GameScene gs = Engine.SceneManager.GetScene<GameScene>();
                 //if (gs != null)
                 //    _text.Text = gs.SelectedObject == null ? "null" : gs.SelectedObject.Position.ToString();
 
@@ -274,7 +274,7 @@ namespace ClassicUO.Game
 
         private void DrawToolTip(Batcher2D batcher, Point position)
         {
-            if (SceneManager.CurrentScene is GameScene gs)
+            if (Engine.SceneManager.CurrentScene is GameScene gs)
             {
                 if (!World.ClientFlags.TooltipsEnabled || gs.IsHoldingItem)
                 {
@@ -350,8 +350,8 @@ namespace ClassicUO.Game
 
             if (!Engine.UI.IsMouseOverWorld)
                 return result;
-            int windowCenterX = _settings.GameWindowX + (_settings.GameWindowWidth >> 1);
-            int windowCenterY = _settings.GameWindowY + (_settings.GameWindowHeight >> 1);
+            int windowCenterX = Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1);
+            int windowCenterY = Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1);
 
             return _cursorData[war, GetMouseDirection(windowCenterX, windowCenterY, Mouse.Position.X, Mouse.Position.Y, 1)];
         }

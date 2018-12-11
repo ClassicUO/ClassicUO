@@ -22,7 +22,6 @@ using System;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
@@ -76,9 +75,9 @@ namespace ClassicUO.Game.Views
         public Rectangle GetOnScreenRectangle()
         {
             Rectangle prect = Rectangle.Empty;
-            Settings set = Service.Get<Settings>();
-            prect.X = (int)((set.GameWindowX + (set.GameWindowWidth >> 1)) - FrameInfo.X + GameObject.Offset.X);
-            prect.Y = (int)((set.GameWindowY + (set.GameWindowHeight >> 1)) + GameObject.Offset.Y - FrameInfo.Y);
+
+            prect.X = (int)((Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1)) - FrameInfo.X + GameObject.Offset.X);
+            prect.Y = (int)((Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1)) + GameObject.Offset.Y - FrameInfo.Y);
             prect.Width = FrameInfo.Width;
             prect.Height = FrameInfo.Height;
 
@@ -207,7 +206,7 @@ namespace ClassicUO.Game.Views
                     v.Bounds.Y = offY + v.Texture.Height;
                     v.Bounds.Width = v.Texture.Width;
                     v.Bounds.Height = v.Texture.Height;
-                    SceneManager.GetScene<GameScene>().Overheads.AddOrUpdateText(v, position);
+                    Engine.SceneManager.GetScene<GameScene>().Overheads.AddOrUpdateText(v, position);
                     offY += v.Texture.Height;
                 }
             }

@@ -96,7 +96,7 @@ namespace ClassicUO.Game.System
                         string partyMemberName = partyMember.Name;
                         string partyMessage = "[" + partyMemberName + "]: " + p.ReadUnicode();
 
-                        Hue partyMessagehue = Service.Get<Settings>().PartyMessageColor;
+                        Hue partyMessagehue = Engine.Profile.Current.PartyMessageHue;
                         MessageType messageType = MessageType.Party;
                         MessageFont partyMessageFont = MessageFont.Normal;
                         

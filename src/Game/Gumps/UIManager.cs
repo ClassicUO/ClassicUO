@@ -535,7 +535,7 @@ namespace ClassicUO.Game.Gumps
         public void RestoreGumps()
         {
             var settings = Service.Get<Settings>();
-            var dict = settings.GumpsData;
+            //var dict = settings.GumpsData;
 
             //foreach (KeyValuePair<string, Dictionary<string, object>> k in dict)
             //{

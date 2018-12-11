@@ -285,8 +285,8 @@ namespace ClassicUO.Game.Scenes
             int oldDrawOffsetY = _offset.Y;
             int winGamePosX = 0;
             int winGamePosY = 0;
-            int winGameWidth = _settings.GameWindowWidth;
-            int winGameHeight = _settings.GameWindowHeight;
+            int winGameWidth = Engine.Profile.Current.GameWindowSize.X;
+            int winGameHeight = Engine.Profile.Current.GameWindowSize.Y;
             int winGameCenterX = winGamePosX + (winGameWidth >> 1);
             int winGameCenterY = winGamePosY + (winGameHeight >> 1) + World.Player.Z * 4;
             winGameCenterX -= (int) World.Player.Offset.X;

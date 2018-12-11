@@ -23,8 +23,8 @@ using System.Collections.Generic;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
@@ -81,7 +81,7 @@ namespace ClassicUO.Game.Scenes
                         _selectedObject.View.IsSelected = false;
                     _selectedObject = value;
 
-                    if (Service.Get<Settings>().HighlightGameObjects)
+                    if (Engine.Profile.Current.HighlightGameObjects)
                         _selectedObject.View.IsSelected = true;
                 }
             }
@@ -177,6 +177,8 @@ namespace ClassicUO.Game.Scenes
         {
             _renderList = null;
 
+            Engine.Profile.Current?.Save();
+
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
             _renderTarget?.Dispose();
@@ -196,6 +198,7 @@ namespace ClassicUO.Game.Scenes
             InputManager.MouseMoving -= OnMouseMoving;
             InputManager.KeyDown -= OnKeyDown;
             InputManager.KeyUp -= OnKeyUp;
+            _journalManager.Clear();
             _journalManager = null;
             _staticManager = null;
             _overheadManager = null;
@@ -205,10 +208,10 @@ namespace ClassicUO.Game.Scenes
 
         private void SocketOnDisconnected(object sender, EventArgs e)
         {
-            Engine.UI.Add(new MessageBoxGump(_settings.GameWindowX + (_settings.GameWindowWidth >> 1) - 100, _settings.GameWindowY + (_settings.GameWindowHeight >> 1) - (125 >> 1), 200, 125, "Connection lost", (s) =>
-            {
+            Engine.UI.Add(new MessageBoxGump(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1) - 100, Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1) - (125 >> 1), 200, 125, "Connection lost", (s) =>
+            {               
                 s.Dispose();
-                SceneManager.ChangeScene(ScenesType.Login);
+                Engine.SceneManager.ChangeScene(ScenesType.Login);
             }));
         }
 
@@ -286,10 +289,10 @@ namespace ClassicUO.Game.Scenes
             if (!World.InGame)
                 return;
 
-            if (_renderTarget == null || _renderTarget.Width != (int) (_settings.GameWindowWidth * Scale) || _renderTarget.Height != (int) (_settings.GameWindowHeight * Scale))
+            if (_renderTarget == null || _renderTarget.Width != (int) (Engine.Profile.Current.GameWindowSize.X * Scale) || _renderTarget.Height != (int) (Engine.Profile.Current.GameWindowSize.Y * Scale))
             {
                 _renderTarget?.Dispose();
-                _renderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int) (_settings.GameWindowWidth * Scale), (int) (_settings.GameWindowHeight * Scale), false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                _renderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(Engine.Profile.Current.GameWindowSize.X * Scale), (int)(Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
             Pathfinder.ProcessAutoWalk();

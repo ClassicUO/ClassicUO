@@ -139,26 +139,26 @@ namespace ClassicUO.Game.Gumps.UIGumps
             // Highlight
             Checkbox highlightObjects = new Checkbox(0x00D2, 0x00D3, "Highlight game objects", 1)
             {
-                Y = 10, IsChecked = _settings.HighlightGameObjects
+                Y = 10, IsChecked = Engine.Profile.Current.HighlightGameObjects
             };
             rightArea.AddChildren(highlightObjects);
 
             // smooth movements
             Checkbox smoothMovement = new Checkbox(0x00D2, 0x00D3, "Smooth movements", 1)
             {
-                IsChecked = _settings.SmoothMovement
+                IsChecked = Engine.Profile.Current.SmoothMovements
             };
             rightArea.AddChildren(smoothMovement);
 
             Checkbox enablePathfind = new Checkbox(0x00D2, 0x00D3, "Enable pathfinding", 1)
             {
-                IsChecked = _settings.EnablePathfind
+                IsChecked = Engine.Profile.Current.EnablePathfind
             };
             rightArea.AddChildren(enablePathfind);
 
             Checkbox alwaysRun = new Checkbox(0x00D2, 0x00D3, "Always run", 1)
             {
-                IsChecked = _settings.EnablePathfind
+                IsChecked = Engine.Profile.Current.AlwaysRun
             };
             rightArea.AddChildren(alwaysRun);
 
@@ -180,10 +180,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             Checkbox showHPMobile = new Checkbox(0x00D2, 0x00D3, "Show HP", 1)
             {
-                X = 25, Y = 30, IsChecked = _settings.ShowMobilesHP
+                X = 25, Y = 30, IsChecked = Engine.Profile.Current.ShowMobilesHP
             };
             hpAreaItem.AddChildren(showHPMobile);
-            int mode = _settings.ShowMobilesHPMode;
+            int mode = Engine.Profile.Current.MobileHPType;
 
             if (mode < 0 || mode > 2)
                 mode = 0;
@@ -206,7 +206,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             Checkbox highlightEnabled = new Checkbox(0x00D2, 0x00D3, "Highlight by state\n(poisoned, yellow hits, paralyzed)", 1)
             {
-                X = 25, Y = 30, IsChecked = _settings.HighlightMobilesByFlags
+                X = 25, Y = 30, IsChecked = Engine.Profile.Current.HighlightMobilesByFlags
             };
             highlightByFlagsItem.AddChildren(highlightEnabled);
             rightArea.AddChildren(highlightByFlagsItem);
@@ -220,13 +220,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             Checkbox soundCheckbox = new Checkbox(0x00D2, 0x00D3, "Sounds", 1)
             {
-                IsChecked = _settings.Sound
+                IsChecked = Engine.Profile.Current.EnableSound
             };
             rightArea.AddChildren(soundCheckbox);
             ScrollAreaItem item = new ScrollAreaItem();
             Label text = new Label("- Sounds volume:", true, 0, 0, 1);
 
-            HSliderBar sliderVolume = new HSliderBar(40, 5, 180, 0, 255, _settings.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
+            HSliderBar sliderVolume = new HSliderBar(40, 5, 180, 0, 255, Engine.Profile.Current.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
             {
                 X = 120
             };
@@ -236,13 +236,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             Checkbox musicCheckbox = new Checkbox(0x00D2, 0x00D3, "Music", 1)
             {
-                IsChecked = _settings.Music
+                IsChecked = Engine.Profile.Current.EnableMusic
             };
             rightArea.AddChildren(musicCheckbox);
             item = new ScrollAreaItem();
             text = new Label("- Music volume:", true, 0, 0, 1);
 
-            HSliderBar sliderMusicVolume = new HSliderBar(40, 5, 180, 0, 255, _settings.SoundVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
+            HSliderBar sliderMusicVolume = new HSliderBar(40, 5, 180, 0, 255, Engine.Profile.Current.MusicVolume, HSliderBarStyle.MetalWidgetRecessedBar, true, 1)
             {
                 X = 120
             };
@@ -253,20 +253,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             Checkbox footstepsCheckbox = new Checkbox(0x00D2, 0x00D3, "Footsteps sound", 1)
             {
-                Y = 30, IsChecked = _settings.FootstepsSound
+                Y = 30, IsChecked = Engine.Profile.Current.EnableFootstepsSound
             };
             item.AddChildren(footstepsCheckbox);
             rightArea.AddChildren(item);
 
             Checkbox combatMusicCheckbox = new Checkbox(0x00D2, 0x00D3, "Combat music", 1)
             {
-                IsChecked = _settings.CombatMusic
+                IsChecked = Engine.Profile.Current.EnableCombatMusic
             };
             rightArea.AddChildren(combatMusicCheckbox);
 
             Checkbox backgroundMusicCheckbox = new Checkbox(0x00D2, 0x00D3, "Reproduce music when ClassicUO is not focussed", 1)
             {
-                IsChecked = _settings.BackgroundSound
+                IsChecked = Engine.Profile.Current.ReproduceSoundsInBackground
             };
             rightArea.AddChildren(backgroundMusicCheckbox);
             AddChildren(rightArea, PAGE);
@@ -312,14 +312,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             Checkbox scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, "Scale speech delay by length", 1)
             {
-                IsChecked = _settings.ScaleSpeechDelay
+                IsChecked = Engine.Profile.Current.ScaleSpeechDelay
             };
             item.AddChildren(scaleSpeechDelay);
             rightArea.AddChildren(item);
             item = new ScrollAreaItem();
             Label text = new Label("- Speech delay:", true, 1);
             item.AddChildren(text);
-            HSliderBar sliderSpeechDelay = new HSliderBar(100, 5, 150, 1, 1000, _settings.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
+            HSliderBar sliderSpeechDelay = new HSliderBar(100, 5, 150, 1, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
             item.AddChildren(sliderSpeechDelay);
             rightArea.AddChildren(item);
             item = new ScrollAreaItem();
@@ -331,8 +331,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item.AddChildren(buttonSpeechColor);
             uint color = 0xFF7F7F7F;
 
-            if (_settings.SpeechColor != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.SpeechColor) << 8) | 0xFF);
+            if (Engine.Profile.Current.SpeechHue != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.SpeechHue) << 8) | 0xFF);
 
             ColorPickerBox speechColorPickerBox = new ColorPickerBox(3, 3, 1, 1, 13, 14)
             {
@@ -364,8 +364,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item.AddChildren(buttonEmoteColor);
             color = 0xFF7F7F7F;
 
-            if (_settings.EmoteColor != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.EmoteColor) << 8) | 0xFF);
+            if (Engine.Profile.Current.EmoteHue != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.EmoteHue) << 8) | 0xFF);
             ColorPickerBox emoteColorPickerBox = new ColorPickerBox(3, 3, 1, 1, 13, 14);
             emoteColorPickerBox.MouseClick += (sender, e) => buttonEmoteColor.InvokeMouseClick(e.Location, e.Button);
             emoteColorPickerBox.SetHue(color);
@@ -393,8 +393,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item.AddChildren(butttonPartyMessageColor);
             color = 0xFF7F7F7F;
 
-            if (_settings.PartyMessageColor != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.PartyMessageColor) << 8) | 0xFF);
+            if (Engine.Profile.Current.PartyMessageHue != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.PartyMessageHue) << 8) | 0xFF);
             ColorPickerBox partyMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
             partyMessageColor.MouseClick += (sender, e) => butttonPartyMessageColor.InvokeMouseClick(e.Location, e.Button);
             partyMessageColor.SetHue(color);
@@ -422,8 +422,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item.AddChildren(buttonGuildMessageColor);
             color = 0xFF7F7F7F;
 
-            if (_settings.GuildMessageColor != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.GuildMessageColor) << 8) | 0xFF);
+            if (Engine.Profile.Current.GuildMessageHue != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.GuildMessageHue) << 8) | 0xFF);
             ColorPickerBox guildMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
             guildMessageColor.MouseClick += (sender, e) => buttonGuildMessageColor.InvokeMouseClick(e.Location, e.Button);
             guildMessageColor.SetHue(color);
@@ -451,8 +451,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item.AddChildren(buttonAllyMessageColor);
             color = 0xFF7F7F7F;
 
-            if (_settings.AllyMessageColor != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.AllyMessageColor) << 8) | 0xFF);
+            if (Engine.Profile.Current.AllyMessageHue != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.AllyMessageHue) << 8) | 0xFF);
             ColorPickerBox allyMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
             allyMessageColor.MouseClick += (sender, e) => buttonAllyMessageColor.InvokeMouseClick(e.Location, e.Button);
             allyMessageColor.SetHue(color);
@@ -487,8 +487,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item.AddChildren(buttonInnocentColor);
             uint color = 0xFF7F7F7F;
 
-            if (_settings.InnocentColor != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.InnocentColor) << 8) | 0xFF);
+            if (Engine.Profile.Current.InnocentHue != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.InnocentHue) << 8) | 0xFF);
             ColorPickerBox innocentColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
             innocentColor.MouseClick += (sender, e) => buttonInnocentColor.InvokeMouseClick(e.Location, e.Button);
             innocentColor.SetHue(color);
@@ -514,8 +514,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item.AddChildren(buttonFriendColor);
             color = 0xFF7F7F7F;
 
-            if (_settings.FriendColor != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.FriendColor) << 8) | 0xFF);
+            if (Engine.Profile.Current.FriendHue != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.FriendHue) << 8) | 0xFF);
 
             ColorPickerBox friendColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
             {
@@ -545,8 +545,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item.AddChildren(buttonCriminalColor);
             color = 0xFF7F7F7F;
 
-            if (_settings.CriminalColor != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.CriminalColor) << 8) | 0xFF);
+            if (Engine.Profile.Current.CriminalHue != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.CriminalHue) << 8) | 0xFF);
 
             ColorPickerBox criminalColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
             {
@@ -576,8 +576,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item.AddChildren(buttonEnemyColor);
             color = 0xFF7F7F7F;
 
-            if (_settings.EnemyColor != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.EnemyColor) << 8) | 0xFF);
+            if (Engine.Profile.Current.EnemyHue != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.EnemyHue) << 8) | 0xFF);
 
             ColorPickerBox enemyColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
             {
@@ -607,8 +607,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             item.AddChildren(buttonMurdererColor);
             color = 0xFF7F7F7F;
 
-            if (_settings.MurdererColor != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, _settings.MurdererColor) << 8) | 0xFF);
+            if (Engine.Profile.Current.MurdererHue != 0xFFFF)
+                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.MurdererHue) << 8) | 0xFF);
 
             ColorPickerBox murdererColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
             {
@@ -635,7 +635,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             Checkbox queryBeforeAttact = new Checkbox(0x00D2, 0x00D3, "Query before attack", 1)
             {
-                Y = 30, IsChecked = _settings.CriminalActionQuery
+                Y = 30, IsChecked = Engine.Profile.Current.EnabledCriminalActionQuery
             };
             item.AddChildren(queryBeforeAttact);
             rightArea.AddChildren(item);

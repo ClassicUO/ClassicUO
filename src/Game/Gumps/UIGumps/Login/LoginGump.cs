@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
         public LoginGump() : base(0, 0)
         {
-            loginScene = SceneManager.GetScene<LoginScene>();
+            loginScene = Engine.SceneManager.GetScene<LoginScene>();
             CanCloseWithRightClick = false;
 
             // Background

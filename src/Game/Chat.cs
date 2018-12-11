@@ -96,18 +96,18 @@ namespace ClassicUO.Game
                     if (entity != null && entity.Serial.IsValid)
                     {
                         entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                        SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, entity.Name);
+                        Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, entity.Name);
                     }
                     else
                     {
                         Service.Get<ChatControl>().AddLine(args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                        SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "System");
+                        Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "System");
                     }
 
                     break;
                 case MessageType.System:
                     Service.Get<ChatControl>().AddLine(args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                    SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "System");
+                    Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "System");
 
                     break;
                 case MessageType.Emote:
@@ -115,17 +115,17 @@ namespace ClassicUO.Game
                     if (entity != null && entity.Serial.IsValid)
                     {
                         entity.AddGameText(args.Type, $"*{args.Text}*", (byte) args.Font, args.Hue, args.IsUnicode);
-                        SceneManager.GetScene<GameScene>().Journal.Add($"*{args.Text}*", args.Font, args.Hue, entity.Name);
+                        Engine.SceneManager.GetScene<GameScene>().Journal.Add($"*{args.Text}*", args.Font, args.Hue, entity.Name);
                     }
                     else
-                        SceneManager.GetScene<GameScene>().Journal.Add($"*{args.Text}*", args.Font, args.Hue, "System");
+                        Engine.SceneManager.GetScene<GameScene>().Journal.Add($"*{args.Text}*", args.Font, args.Hue, "System");
 
                     break;
                 case MessageType.Label:
 
                     if (entity != null && entity.Serial.IsValid)
                         entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                    SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "You see");
+                    Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "You see");
 
                     break;
                 case MessageType.Focus:
@@ -142,22 +142,22 @@ namespace ClassicUO.Game
                     if (entity != null && entity.Serial.IsValid)
                     {
                         entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                        SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, entity.Name);
+                        Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, entity.Name);
                     }
 
                     break;
                 case MessageType.Party:
                     Service.Get<ChatControl>().AddLine(args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                    SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "Party");
+                    Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "Party");
 
                     break;
                 case MessageType.Guild:
                     Service.Get<ChatControl>().AddLine($"[Guild] [{entity.Name}]: {args.Text}", (byte)args.Font, args.Hue, args.IsUnicode);
-                    SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "Party");
+                    Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "Party");
                     break;
                 case MessageType.Alliance:
                     Service.Get<ChatControl>().AddLine($"[Alliance] [{entity.Name}]: {args.Text}", (byte)args.Font, args.Hue, args.IsUnicode);
-                    SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "Party");
+                    Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "Party");
                     break;
                 case MessageType.Command:
 

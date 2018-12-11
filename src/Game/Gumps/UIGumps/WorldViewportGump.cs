@@ -50,10 +50,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanCloseWithEsc = false;
             CanCloseWithRightClick = false;
             ControlInfo.Layer = UILayer.Under;
-            X = _settings.GameWindowX;
-            Y = _settings.GameWindowY;
-            _worldWidth = _settings.GameWindowWidth;
-            _worldHeight = _settings.GameWindowHeight;
+            X = Engine.Profile.Current.GameWindowPosition.X;
+            Y = Engine.Profile.Current.GameWindowPosition.Y;
+            _worldWidth = Engine.Profile.Current.GameWindowSize.X;
+            _worldHeight = Engine.Profile.Current.GameWindowSize.Y;
             _button = new Button(0, 0x837, 0x838, 0x838);
             _button.MouseDown += (sender, e) => { _clicked = true; };
 
@@ -86,21 +86,26 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (_clicked && Mouse.LDroppedOffset != _lastPosition && Mouse.LDroppedOffset != Point.Zero)
             {
-                _settings.GameWindowWidth += Mouse.LDroppedOffset.X - _lastPosition.X;
-                _settings.GameWindowHeight += Mouse.LDroppedOffset.Y - _lastPosition.Y;
+                Engine.Profile.Current.GameWindowSize = new Point(Engine.Profile.Current.GameWindowSize.X + Mouse.LDroppedOffset.X - _lastPosition.X, Engine.Profile.Current.GameWindowSize.Y + Mouse.LDroppedOffset.Y - _lastPosition.Y);
+
                 _lastPosition = Mouse.LDroppedOffset;
 
-                if (_settings.GameWindowWidth < 640)
-                    _settings.GameWindowWidth = 640;
+                int w = Engine.Profile.Current.GameWindowSize.X;
+                int h = Engine.Profile.Current.GameWindowSize.Y;
 
-                if (_settings.GameWindowHeight < 480)
-                    _settings.GameWindowHeight = 480;
+                if (w < 640)
+                    w = 640;
+
+                if (h < 480)
+                    h = 480;
+
+                Engine.Profile.Current.GameWindowSize = new Point(w, h);
             }
 
-            if (_worldWidth != _settings.GameWindowWidth || _worldHeight != _settings.GameWindowHeight)
+            if (_worldWidth != Engine.Profile.Current.GameWindowSize.X || _worldHeight != Engine.Profile.Current.GameWindowSize.Y)
             {
-                _worldWidth = _settings.GameWindowWidth;
-                _worldHeight = _settings.GameWindowHeight;
+                _worldWidth = Engine.Profile.Current.GameWindowSize.X;
+                _worldHeight = Engine.Profile.Current.GameWindowSize.Y;
                 Width = _worldWidth + BORDER_WIDTH * 2;
                 Height = _worldHeight + BORDER_HEIGHT * 2;
                 Resize();
@@ -125,8 +130,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (position.Y < -BORDER_HEIGHT)
                 position.Y = -BORDER_HEIGHT;
             Location = position;
-            _settings.GameWindowX = position.X;
-            _settings.GameWindowY = position.Y;
+
+            Engine.Profile.Current.GameWindowPosition = position;
         }
 
         private void Resize()

@@ -41,26 +41,24 @@ namespace ClassicUO.Game.Data
     {
         public static Hue GetHue(NotorietyFlag flag)
         {
-            Settings settings = Service.Get<Settings>();
-
             switch (flag)
             {
                 case NotorietyFlag.Innocent:
 
-                    return settings.InnocentColor;
+                    return Engine.Profile.Current.InnocentHue;
                 case NotorietyFlag.Ally:
 
-                    return settings.FriendColor;
+                    return Engine.Profile.Current.FriendHue;
                 case NotorietyFlag.Criminal:
                 case NotorietyFlag.Gray:
 
-                    return settings.CriminalColor;
+                    return Engine.Profile.Current.CriminalHue;
                 case NotorietyFlag.Enemy:
 
-                    return settings.EnemyColor;
+                    return Engine.Profile.Current.EnemyHue;
                 case NotorietyFlag.Murderer:
 
-                    return settings.MurdererColor;
+                    return Engine.Profile.Current.MurdererHue;
                 case NotorietyFlag.Invulnerable:
 
                     return 0x0034;

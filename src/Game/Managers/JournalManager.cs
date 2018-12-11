@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Utility;
 
-namespace ClassicUO.Game.GameObjects.Managers
+namespace ClassicUO.Game.Managers
 {
     public class JournalManager
     {
@@ -26,6 +22,8 @@ namespace ClassicUO.Game.GameObjects.Managers
             _entries.AddToBack(entry);
             EntryAdded.Raise(entry);
         }
+
+        public void Clear() => _entries.Clear();
     }
 
     public readonly struct JournalEntry

@@ -203,7 +203,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             // Loop through the items on the mobile and create the gump pics.
 
-            //GameScene gs = SceneManager.GetScene<GameScene>();
+            //GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
             if (isGM)
             {

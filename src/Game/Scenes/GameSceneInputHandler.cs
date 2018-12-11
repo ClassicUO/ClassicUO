@@ -59,7 +59,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (World.InGame)
             {
-                Point center = new Point(_settings.GameWindowX + (_settings.GameWindowWidth >> 1), _settings.GameWindowY + (_settings.GameWindowHeight >> 1));
+                Point center = new Point(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1), Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y>> 1));
                 Direction direction = DirectionHelper.DirectionFromPoints(center, Mouse.Position);
                 World.Player.Walk(direction, true);
             }
@@ -266,7 +266,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (IsMouseOverWorld)
             {
-                if (_settings.EnablePathfind && !Pathfinder.AutoWalking)
+                if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
                 {
                     if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface( dyn.ItemData.Flags))
                     {

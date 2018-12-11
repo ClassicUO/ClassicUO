@@ -367,7 +367,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                             //we write directly to the journal to avoid 'System:' prefix
                             Service.Get<ChatControl>().AddLine(NoteToSelf, (byte)noteToSelfFont, noteToSelfHue, false);
-                            SceneManager.GetScene<GameScene>().Journal.Add(NoteToSelf, noteToSelfFont, noteToSelfHue, "");
+                            Engine.SceneManager.GetScene<GameScene>().Journal.Add(NoteToSelf, noteToSelfFont, noteToSelfHue, "");
                         }
                     }
 

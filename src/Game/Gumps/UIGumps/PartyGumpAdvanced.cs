@@ -308,7 +308,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     break;
                 case Buttons.GetBar:
-                    GameScene currentGameScene = SceneManager.GetScene<GameScene>();
+                    GameScene currentGameScene = Engine.SceneManager.GetScene<GameScene>();
 
                     if (currentGameScene.PartyMemberGumpStack.Contains(Member.Mobile))
                         Engine.UI.Remove<PartyMemberGump>(Member.Mobile);

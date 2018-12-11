@@ -130,8 +130,8 @@ namespace ClassicUO.Game.GameObjects
             (int sx, int sy, int sz) = GetSource();
             (int tx, int ty, int tz) = GetTarget();
             Settings settings = Service.Get<Settings>();
-            int screenCenterX = settings.GameWindowX + (settings.GameWindowWidth >> 1);
-            int screenCenterY = settings.GameWindowY + (settings.GameWindowHeight >> 1);
+            int screenCenterX = Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1);
+            int screenCenterY = Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1);
             int playerX = World.Player.X;
             int playerY = World.Player.Y;
             int offsetX = sx - playerX;

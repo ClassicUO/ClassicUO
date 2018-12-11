@@ -21,7 +21,6 @@
 
 using System.Runtime.CompilerServices;
 
-using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;

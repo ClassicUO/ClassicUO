@@ -42,6 +42,28 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="FNA, Version=18.10.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -80,9 +102,9 @@
     <Compile Include="Game\Data\SpellsNinjitsu.cs" />
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
-    <Compile Include="Game\GameObjects\Managers\EffectManager.cs" />
+    <Compile Include="Game\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
-    <Compile Include="Game\GameObjects\Managers\JournalManager.cs" />
+    <Compile Include="Game\Managers\JournalManager.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Interfaces\IPoolable.cs" />
     <Compile Include="Network\BufferPool.cs" />
@@ -93,6 +115,7 @@
     <Compile Include="Utility\Coroutines\CoroutineStatus.cs" />
     <Compile Include="Utility\Coroutines\WaitCondition.cs" />
     <Compile Include="Utility\Coroutines\WaitTime.cs" />
+    <Compile Include="Utility\FileSystemHelper.cs" />
     <Compile Include="Utility\QueuedPool.cs" />
     <Compile Include="Utility\ReflectionHolder.cs" />
     <Compile Include="Game\Gumps\Controls\DataBox.cs" />
@@ -170,7 +193,7 @@
     <Compile Include="Game\GameObjects\Multi.cs" />
     <Compile Include="Game\GameObjects\PlayerMobile.cs" />
     <Compile Include="Game\GameObjects\Static.cs" />
-    <Compile Include="Game\GameObjects\Managers\StaticManager.cs" />
+    <Compile Include="Game\Managers\StaticManager.cs" />
     <Compile Include="Game\GameObjects\TextOverhead.cs" />
     <Compile Include="Game\Graphic.cs" />
     <Compile Include="Game\Gumps\Controls\Button.cs" />
@@ -290,7 +313,7 @@
     <Compile Include="Network\SendQueue.cs" />
     <Compile Include="Game\GameCursor.cs" />
     <Compile Include="Game\GameObjects\IsometricLight.cs" />
-    <Compile Include="Game\GameObjects\Managers\OverheadManager.cs" />
+    <Compile Include="Game\Managers\OverheadManager.cs" />
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\ShaderHuesTraslator.cs" />
     <Compile Include="Renderer\ScissorStack.cs" />

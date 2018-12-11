@@ -94,7 +94,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnMouseEnter(int x, int y)
         {
-            GameScene gs = SceneManager.GetScene<GameScene>();
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
             if (gs.IsHoldingItem)
             {
@@ -209,7 +209,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            GameScene gs = SceneManager.GetScene<GameScene>();
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
             if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                 return;
 
@@ -314,15 +314,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.Options:
 
-                    if (Engine.UI.GetByLocalSerial<OptionsGump>() == null)
+                    if (Engine.UI.GetByLocalSerial<OptionsGump1>() == null)
                     {
-                        Engine.UI.Add(new OptionsGump
+                        Engine.UI.Add(new OptionsGump1
                         {
                             X = 80, Y = 80
                         });
                     }
                     else
-                        Engine.UI.Remove<OptionsGump>();
+                        Engine.UI.Remove<OptionsGump1>();
 
                     break;
                 case Buttons.LogOut:
