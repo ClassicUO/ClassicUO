@@ -19,11 +19,13 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
@@ -73,49 +75,23 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        public override bool Save(out Dictionary<string, object> data)
+        public override void Save(BinaryWriter writer)
         {
-            if (base.Save(out data))
-            {
-                data["serial"] = _item.Serial.Value;
-                data["graphic"] = (ushort)_gumpID;
-                return true;
-            }
-
-            return false;
+            base.Save(writer);
+            writer.Write(_item.Serial.Value);
+            writer.Write(_gumpID);
         }
 
-        public override bool Restore(Dictionary<string, object> data)
+        public override void Restore(BinaryReader reader)
         {
-            if (base.Restore(data))
-            {
+            base.Restore(reader);
 
-                if (data.TryGetValue("serial", out object s))
-                {
-                    //Item item = World.Items.Get(Serial.Parse(s.ToString()));
+           
 
-                    //if (item != null)
-                    //{
-                    //    _item = item;
+            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
+            reader.ReadUInt16();
 
-                    //    if (data.TryGetValue("graphic", out object g))
-                    //    {
-                    //        _gumpID = Graphic.Parse(g.ToString());
-                            
-                    //        BuildGump();
-
-                    //        return true;
-                    //    }
-                    //}
-
-                    GameActions.DoubleClick(Serial.Parse(s.ToString()));
-                    Dispose();
-                    return true;
-                }
-             
-            }
-
-            return false;
+            Dispose();
         }
 
         private void ItemsOnRemoved(object sender, CollectionChangedEventArgs<Item> e)

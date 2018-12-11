@@ -123,7 +123,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case Buttons.Paperdoll:
 
                     if (Engine.UI.GetByLocalSerial<PaperDollGump>(World.Player) == null)
-                        GameActions.DoubleClick((Serial) (World.Player.Serial | int.MinValue));
+                        GameActions.OpenPaperdoll(World.Player);
                     else
                         Engine.UI.Remove<PaperDollGump>(World.Player);
 

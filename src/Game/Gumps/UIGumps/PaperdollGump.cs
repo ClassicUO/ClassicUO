@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
@@ -64,8 +65,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 Mobile = mobile;
                 Title = mobileTitle;
                 BuildGump();
-                CanBeSaved = Mobile == World.Player;
-                SetNameAndPositionForSaving("paperdoll");
+                CanBeSaved = true;
             }
         }
 
@@ -79,8 +79,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             if (Mobile == World.Player)
             {
-                _virtueMenuPic.MouseDoubleClick -= VirtueMenu_MouseDoubleClickEvent;
-                _partyManifestPic.MouseDoubleClick -= PartyManifest_MouseDoubleClickEvent;
+                if (_virtueMenuPic != null)
+                    _virtueMenuPic.MouseDoubleClick -= VirtueMenu_MouseDoubleClickEvent;
+                if (_partyManifestPic != null)
+                    _partyManifestPic.MouseDoubleClick -= PartyManifest_MouseDoubleClickEvent;
             }
 
             Clear();
@@ -275,34 +277,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Save(out Dictionary<string, object> data)
-        {
-            if (base.Save(out data))
-            {
-                data["serial"] = Mobile.Serial.Value;
-                return true;
-            }
 
-            return false;
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            writer.Write(Mobile.Serial);
         }
 
-        public override bool Restore(Dictionary<string, object> data)
+        public override void Restore(BinaryReader reader)
         {
-            //if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(PaperDollGump), "serial", out uint serial))
-            //{
-            //    Mobile mobile = World.Mobiles.Get(serial);
-
-            //    if (mobile != null && World.Player == mobile)
-            //    {
-            //        GameActions.DoubleClick((Serial)(World.Player.Serial | int.MinValue));
-            //        Dispose();
-            //        return true;
-            //    }
-            //}
-
-            return false;
+            base.Restore(reader);
+            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
+            Dispose();
         }
-
 
         public override void OnButtonClick(int buttonID)
         {

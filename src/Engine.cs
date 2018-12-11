@@ -70,10 +70,11 @@ namespace ClassicUO
         private int _totalFrames;
         private UIManager _uiManager;
 
-
         private Engine()
         {
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
+            IsFixedTimeStep = false;
+
             _graphicDeviceManager = new GraphicsDeviceManager(this);
             _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
@@ -304,7 +305,6 @@ namespace ClassicUO
             InputManager.Unload();
             _sceneManager.CurrentScene?.Unload();
             Service.Get<Settings>().Save();
-            _profileManager.Current?.Save();
             base.UnloadContent();
         }
 

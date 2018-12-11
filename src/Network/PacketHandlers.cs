@@ -606,11 +606,13 @@ namespace ClassicUO.Network
 
         private static void EnterWorld(Packet p)
         {
+            GameScene scene = new GameScene();
+            Engine.SceneManager.ChangeScene(scene);
+
 
             Settings settings = Service.Get<Settings>();
-            Engine.Profile.Load(World.ServerName, settings.Username, settings.LastCharacterName);
 
-            Engine.SceneManager.ChangeScene(ScenesType.Game);
+            List<Gump> gumps = Engine.Profile.Load(World.ServerName, settings.Username, settings.LastCharacterName);
 
 
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
@@ -619,9 +621,7 @@ namespace ClassicUO.Network
             World.Player.Position = new Position(p.ReadUShort(), p.ReadUShort(), (sbyte) p.ReadUShort());
 
             if (World.Map == null)
-            {
                 World.MapIndex = 0;
-            }
 
             World.Player.AddToTile();
             Direction direction = (Direction) p.ReadByte();
@@ -640,7 +640,8 @@ namespace ClassicUO.Network
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
 
-            Engine.UI.RestoreGumps();
+            scene.Load();
+            gumps?.ForEach(Engine.UI.Add);
         }
 
         private static void Talk(Packet p)
@@ -1384,25 +1385,9 @@ namespace ClassicUO.Network
             if (ui.GetByLocalSerial<PaperDollGump>(mobile) == null)
             {
                 if (!ui.GetGumpCachePosition(mobile, out Point location))
-                {
-                    //if (Service.Get<Settings>().GetGumpValue(typeof(PaperDollGump), "location", out object point))
-                    //{
-                    //    string[] s = point.ToString().Split(new[]
-                    //    {
-                    //        ','
-                    //    }, StringSplitOptions.RemoveEmptyEntries);
-
-                    //    location.X = Convert.ToInt32(s[0]);
-                    //    location.Y = Convert.ToInt32(s[1]);
-                    //}
-                    //else
-                    {
-                        location = new Point(100 ,100);
-                    }
+                {                   
+                    location = new Point(100 ,100);                    
                 }
-
-
-
                 ui.Add(new PaperDollGump(mobile, text) { Location = location});
             }
         }

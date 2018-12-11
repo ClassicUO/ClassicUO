@@ -48,7 +48,7 @@ namespace ClassicUO.Game.Scenes
 
                     break;
                 case ScenesType.Game:
-                    Engine.WindowWidth = 1000;
+                    Engine.WindowWidth = 800;
                     Engine.WindowHeight = 800;
                     CurrentScene = new GameScene();
 
@@ -56,6 +56,28 @@ namespace ClassicUO.Game.Scenes
             }
 
             CurrentScene.Load();
+        }
+
+        public void ChangeScene(Scene scene)
+        {
+            CurrentScene?.Dispose();
+            CurrentScene = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            switch (scene)
+            {
+                case LoginScene login:
+                    Engine.WindowWidth = 640;
+                    Engine.WindowHeight = 480;
+                    CurrentScene = login;
+                    break;
+                case GameScene game:
+                    Engine.WindowWidth = 800;
+                    Engine.WindowHeight = 800;
+                    CurrentScene = game;
+                    break;
+            }
         }
 
         public T GetScene<T>() where T : Scene

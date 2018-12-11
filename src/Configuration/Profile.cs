@@ -26,6 +26,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassicUO.Game;
+using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
@@ -109,7 +110,7 @@ namespace ClassicUO.Configuration
         [JsonProperty] public Point GameWindowSize { get; set; } = new Point(600, 480);
 
 
-        public void Save()
+        public void Save(List<Gump> gumps = null)
         {
             if (string.IsNullOrEmpty(ServerName))
                 throw new InvalidDataException();
@@ -126,25 +127,89 @@ namespace ClassicUO.Configuration
             ConfigurationResolver.Save(this, Path.Combine(path, "settings.json"));
 
             // save gumps.bin
-            SaveGumps(path);
+            SaveGumps(path, gumps);
 
             Log.Message(LogTypes.Trace, "Saving done!");
         }
 
-        private void SaveGumps(string path)
+        private void SaveGumps(string path, List<Gump> gumps)
         {
             using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "gumps.bin"))))
             {
-                const int VERSION = 1;
+                const uint VERSION = 1;
 
                 writer.Write(VERSION);
                 writer.Write(0);
+
+                /*
+                 * int gumpsCount
+                 * loop:
+                 *      ushort typeLen
+                 *      string type
+                 *      int x
+                 *      int y
+                 *      undefinited data
+                 * endloop.
+                 */
+
+
+                if (gumps != null)
+                { 
+                    writer.Write(gumps.Count);
+
+                    foreach (Gump gump in gumps)
+                    {
+                        gump.Save(writer);
+                    }
+                }
+                else
+                {
+                    writer.Write(0);
+                }
             }
         }
 
-        public void ReadGumps()
+        public List<Gump> ReadGumps()
         {
+            string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", Username, ServerName, CharacterName);
 
+            string binpath = Path.Combine(path, "gumps.bin");
+            if (!File.Exists(binpath))
+                return null;
+
+            List<Gump> gumps = new List<Gump>();
+
+            using (BinaryReader reader = new BinaryReader(File.OpenRead(binpath)))
+            {
+                if (reader.BaseStream.Position + 12 < reader.BaseStream.Length)
+                {
+                    uint version = reader.ReadUInt32();
+                    uint empty = reader.ReadUInt32();
+
+                    int count = reader.ReadInt32();
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        int typeLen = reader.ReadUInt16();
+                        string typeName = reader.ReadUTF8String(typeLen);
+                        int x = reader.ReadInt32();
+                        int y = reader.ReadInt32();
+
+                        Type type = Type.GetType(typeName, true);
+                        Gump gump = (Gump) Activator.CreateInstance(type);
+                        gump.Restore(reader);
+                        gump.X = x;
+                        gump.Y = y;
+
+                        if (!gump.IsDisposed)
+                        {
+                            gumps.Add(gump);
+                        }
+                    }
+                }
+            }
+
+            return gumps;
         }
 
         

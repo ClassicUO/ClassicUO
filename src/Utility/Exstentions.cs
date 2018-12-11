@@ -129,6 +129,19 @@ namespace ClassicUO.Utility
             return inrect;
         }
 
+        public static string ReadUTF8String(this BinaryReader reader, int length)
+        {
+            byte[] data = new byte[length];
+            reader.Read(data, 0, length);
+
+            return Encoding.UTF8.GetString(data);
+        }
+
+        public static void WriteUTF8String(this BinaryWriter writer, string str)
+        {
+            writer.Write( Encoding.UTF8.GetBytes(str));
+        }
+
         //! Concatenate a formatted string with arguments
         public static StringBuilder ConcatFormat<A>(this StringBuilder string_builder, String format_string, A arg1)
             where A : IConvertible

@@ -22,6 +22,7 @@ using System;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Network;
 
 using Microsoft.Xna.Framework;
@@ -43,6 +44,9 @@ namespace ClassicUO.Game
         {
             Socket.Send(new PChangeWarMode((World.Player.Flags & Flags.WarMode) == 0));
         }
+
+        public static void OpenPaperdoll(Serial serial)
+            => DoubleClick(serial | 0x80000000);
 
         public static void DoubleClick(Serial serial)
         {

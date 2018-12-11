@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
@@ -51,6 +52,7 @@ namespace ClassicUO.Game.Scenes
         private JournalManager _journalManager;
         private OverheadManager _overheadManager;
         private GameObject _selectedObject;
+        private UseItemQueue _useItemQueue = new UseItemQueue();
 
         public GameScene() : base()
         {
@@ -90,6 +92,9 @@ namespace ClassicUO.Game.Scenes
         public JournalManager Journal => _journalManager;
 
         public OverheadManager Overheads => _overheadManager;
+
+        public void DoubleClickDelayed(Serial serial)
+            => _useItemQueue.Add(serial);
 
         private void ClearDequeued()
         {
@@ -144,46 +149,21 @@ namespace ClassicUO.Game.Scenes
                         Scale = 2.3f;
                 }
             };
-            Engine.UI.Add(new OptionsGump1());
             Commands.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
-
-           // Coroutine.Start(this, WaitMilliseconds(1));
         }
-
-        // TODO: with high ping this stuff can break all :D
-        // TEST ONLY
-        private IEnumerable<IWaitCondition> WaitSeconds(int s)
-        {
-            //while (true)
-            //{
-            //    yield return new WaitTime(TimeSpan.FromSeconds(s));
-            //    GameActions.CastSpell(1);
-            //}
-            yield return new WaitTime(TimeSpan.FromSeconds(s));
-            NetClient.Socket.Send(new PResend());
-        }
-
-        private IEnumerable<IWaitCondition> WaitMilliseconds(int s)
-        {
-            while (true)
-            {
-                yield return new WaitTime(TimeSpan.FromMilliseconds(s));
-                GameActions.CastSpell(1);
-            }
-        }
+       
 
         public override void Unload()
         {
             _renderList = null;
 
-            Engine.Profile.Current?.Save();
+            Engine.Profile.Current?.Save( Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList() );
 
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
             _renderTarget?.Dispose();
             Commands.UnRegisterAll();
-            Engine.UI.SaveGumps();
             Engine.UI.Clear();
             CleaningResources();
             World.Clear();
@@ -202,6 +182,8 @@ namespace ClassicUO.Game.Scenes
             _journalManager = null;
             _staticManager = null;
             _overheadManager = null;
+            _useItemQueue.Clear();
+            _useItemQueue = null;
 
             base.Unload();
         }
@@ -337,6 +319,7 @@ namespace ClassicUO.Game.Scenes
                 _timePing = (long) totalMS + 10000;
             }
 
+            _useItemQueue.Update(totalMS, frameMS);
             CleaningResources();          
         }
 

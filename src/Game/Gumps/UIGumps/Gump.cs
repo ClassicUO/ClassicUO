@@ -20,10 +20,12 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -58,59 +60,21 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public virtual bool Save(out Dictionary<string, object> data)
+        public virtual void Save(BinaryWriter writer)
         {
-            //if (CanBeSaved && _save && !string.IsNullOrEmpty(_saveName))
-            //{
-            //    Service.Get<Settings>().AddGump(_saveName, Location);
-            //}
-
-            if (CanBeSaved)
-            {
-                data = new Dictionary<string, object>()
-                {
-                    { "location", Location }
-                };
-
-                return true;
-            }
-            data = null;
-            return false;
+            // the header         
+            Type type = GetType();
+            ushort typeLen = (ushort) type.FullName.Length;
+            writer.Write(typeLen);
+            writer.WriteUTF8String(type.FullName);
+            writer.Write(X);
+            writer.Write(Y);
         }
 
-        public virtual bool Restore(Dictionary<string, object> data)
+        public virtual void Restore(BinaryReader reader)
         {
-            if (data.TryGetValue("location", out object point))
-            {
 
-                string[] s = point.ToString().Split(new[]
-                {
-                    ',', ' '
-                }, StringSplitOptions.RemoveEmptyEntries);
-
-
-                X = Convert.ToInt32(s[0]);
-                Y = Convert.ToInt32(s[1]);
-
-                return true;
-            }
-
-            return false;
         }
-
-        private bool _save;
-        private string _saveName;
-        
-
-        protected void SetNameAndPositionForSaving(string name)
-        {
-            if (!string.IsNullOrEmpty(name))
-            {
-                _save = true;
-                _saveName = name;
-            }
-        }
-
 
         protected override void OnMove()
         {

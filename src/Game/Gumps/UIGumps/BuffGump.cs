@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using ClassicUO.Configuration;
@@ -76,29 +77,21 @@ namespace ClassicUO.Game.Gumps.UIGumps
             UpdateElements();
         }
 
-        public override bool Save(out Dictionary<string, object> data)
-        {
-            if (base.Save(out data))
-            {
-                data["graphic"] = _graphic;
-                data["direction"] = _direction;
-                return true;
-            }
 
-            return false;
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            writer.Write(_graphic);
+            writer.Write((byte)_direction);
         }
 
-        public override bool Restore(Dictionary<string, object> data)
+        public override void Restore(BinaryReader reader)
         {
-            var settings = Service.Get<Settings>();
-            //if (base.Restore(data) && settings.GetGumpValue(typeof(BuffGump), "graphic", out _graphic) && settings.GetGumpValue(typeof(BuffGump), "direction", out _direction))
-            //{
-            //    BuildGump();
-            //    _gump = this;
-            //    return true;
-            //}
+            base.Restore(reader);
 
-            return false;
+            _graphic = reader.ReadUInt16();
+            _direction = (GumpDirection) reader.ReadByte();
+            BuildGump();
         }
 
         protected override bool Contains(int x, int y)

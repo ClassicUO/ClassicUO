@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -518,37 +519,6 @@ namespace ClassicUO.Game.Gumps
             _gumps.ForEach(s => s.Dispose());
         }
 
-        public void SaveGumps()
-        {
-            var gumps = _gumps.OfType<Gump>().Where(s => s.CanBeSaved);
-            var settings = Service.Get<Settings>();
-            settings.ClearGumps();
-            foreach (Gump gump in gumps)
-            {
-                if (gump.Save(out Dictionary<string, object> data))
-                {
-                    settings.AddGump(gump.GetType(), data);
-                }
-            }
-        }
-
-        public void RestoreGumps()
-        {
-            var settings = Service.Get<Settings>();
-            //var dict = settings.GumpsData;
-
-            //foreach (KeyValuePair<string, Dictionary<string, object>> k in dict)
-            //{
-            //    Type type = Type.GetType(k.Key);
-            //    object gump = Activator.CreateInstance(type);
-
-            //    if (gump is Gump g)
-            //    {
-            //        if (g.Restore(k.Value))
-            //            Add(g);
-            //    }
-            //}
-        }
 
         private void HandleKeyboardInput()
         {

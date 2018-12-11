@@ -19,13 +19,16 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Coroutines;
 
 namespace ClassicUO.Configuration
 {
@@ -33,7 +36,7 @@ namespace ClassicUO.Configuration
     {
         public Profile Current { get; private set; }
 
-        public void Load(string servername, string username, string charactername)
+        public List<Gump> Load(string servername, string username, string charactername)
         {
             string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", username, servername, charactername);
 
@@ -48,8 +51,10 @@ namespace ClassicUO.Configuration
                 if (Current == null)
                     Current = new Profile(username, servername, charactername);
 
-                Current.ReadGumps();
+                return Current.ReadGumps();               
             }
+
+            return null;
         }
     }
 }

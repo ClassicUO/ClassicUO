@@ -36,12 +36,12 @@ namespace ClassicUO.Game.Data
         public int TithingCost;
 
 
-        public SpellDefinition(string name, int index, int gumpIconID, string powerwords, int manacost, int minkill, int tithingcost, params Reagents[] regs)
+        public SpellDefinition(string name, int index, int gumpIconID, int gumpSmallIconID, string powerwords, int manacost, int minkill, int tithingcost, params Reagents[] regs)
         {
             Name = name;
             ID = index;
             GumpIconID = gumpIconID;
-            GumpIconSmallID = gumpIconID;
+            GumpIconSmallID = gumpSmallIconID;
             Regs = regs;
             ManaCost = manacost;
             MinSkill = minkill;

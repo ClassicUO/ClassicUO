@@ -20,11 +20,13 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -50,28 +52,22 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanBeSaved = true;
         }
 
-        public override bool Save(out Dictionary<string, object> data)
-        {
-            if (base.Save(out data))
-            {
-                data["serial"] = _spellBook.Serial.Value;
-                return true;
-            }
 
-            return false;
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            writer.Write(_spellBook.Serial);
         }
 
-        public override bool Restore(Dictionary<string, object> data)
+        public override void Restore(BinaryReader reader)
         {
-            //if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(SpellbookGump), "serial", out uint serial))
-            //{
-            //    GameActions.DoubleClick(serial);
-            //    Dispose();
-            //    return true;
-            //}
+            base.Restore(reader);
 
-            return false;
+            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
+
+            Dispose();
         }
+
 
         private void BuildGump()
         {          
