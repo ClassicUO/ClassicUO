@@ -73,7 +73,6 @@ namespace ClassicUO
         private Engine()
         {
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
-            IsFixedTimeStep = false;
 
             _graphicDeviceManager = new GraphicsDeviceManager(this);
             _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;

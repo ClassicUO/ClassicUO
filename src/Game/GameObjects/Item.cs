@@ -265,19 +265,6 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-
-        public override Position Position
-        {
-            get => base.Position;
-            set
-            { 
-                base.Position = value;
-
-                if (OnGround)
-                    AddToTile(value.X, value.Y);
-            }
-        }
-
         protected override void OnPositionChanged(object sender, EventArgs e)
         {
             base.OnPositionChanged(sender, e);

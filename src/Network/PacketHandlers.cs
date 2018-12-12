@@ -579,8 +579,7 @@ namespace ClassicUO.Network
             if (graphic != 0x2006) graphic += graphicInc;
             item.Graphic = graphic;
             item.Amount = count;
-            item.Position = new Position(x, y, z);
-            item.AddToTile();
+            item.Position = new Position(x, y, z);           
             item.Hue = hue;
             item.Flags = (Flags) flags;
             item.Direction = (Direction) direction;
@@ -593,6 +592,8 @@ namespace ClassicUO.Network
 
             item.Container = Serial.Invalid;
             item.ProcessDelta();
+
+
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
             if (TileData.IsAnimated(item.ItemData.Flags))
@@ -602,6 +603,9 @@ namespace ClassicUO.Network
                 World.AddEffect(new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1));
             }
                 //item.Effect = new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1);
+
+            if (item.OnGround)
+                item.AddToTile();
         }
 
         private static void EnterWorld(Packet p)
@@ -2440,8 +2444,7 @@ namespace ClassicUO.Network
             //item.Direction = (Direction)p.ReadByte();
             item.Amount = p.ReadUShort();
             p.Skip(2); //amount again? wtf???
-            item.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());
-            item.AddToTile();
+            item.Position = new Position(p.ReadUShort(), p.ReadUShort(), p.ReadSByte());           
             item.Direction = (Direction) p.ReadByte();
             item.Hue = p.ReadUShort();
             item.Flags = (Flags) p.ReadByte();
@@ -2457,6 +2460,9 @@ namespace ClassicUO.Network
                 item.View.AllowedToDraw = false;
                 World.AddEffect(new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1));
             }
+
+            if (item.OnGround)
+                item.AddToTile();
         }
 
         private static void PacketList(Packet p)

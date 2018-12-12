@@ -116,6 +116,15 @@ namespace ClassicUO.Game.Map
 
         public void AddGameObject(GameObject obj)
         {
+
+            if (obj.X == 836 && obj.Y == 1505)
+            {
+                if (obj.Graphic == 0x0CEA)
+                {
+
+                }
+            }
+
             RemoveGameObject(obj);
 
             short priorityZ = obj.Position.Z;
