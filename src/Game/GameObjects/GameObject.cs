@@ -197,6 +197,9 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null)
             {
+                if (Position != Position.Invalid)
+                    _tile?.RemoveGameObject(this);
+
                 _tile = World.Map.GetTile(x, y);
                 _tile?.AddGameObject(this);
             }

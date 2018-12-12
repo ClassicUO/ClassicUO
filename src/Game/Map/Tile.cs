@@ -46,13 +46,15 @@ namespace ClassicUO.Game.Map
 
         public GameObject FirstNode => _firstNode;
 
-        private void Add(GameObject obj)
+        private bool Add(GameObject obj)
         {
-            if (FirstNode == null)
+            if (_firstNode == null)
             {
                 _firstNode = obj;
                 _firstNode.Left = null;
                 _firstNode.Right = null;
+
+                return true;
             }
             else
             {
@@ -64,12 +66,13 @@ namespace ClassicUO.Game.Map
                 last.Right = obj;
                 obj.Left = last;
                 obj.Right = null;
+
+                return false;
             }
         }
 
         private void Remove(GameObject obj)
         {
-
             if (obj != null)
             {
                 GameObject left = obj.Left;
@@ -116,17 +119,6 @@ namespace ClassicUO.Game.Map
 
         public void AddGameObject(GameObject obj)
         {
-
-            if (obj.X == 836 && obj.Y == 1505)
-            {
-                if (obj.Graphic == 0x0CEA)
-                {
-
-                }
-            }
-
-            RemoveGameObject(obj);
-
             short priorityZ = obj.Position.Z;
 
             switch (obj)
@@ -169,10 +161,8 @@ namespace ClassicUO.Game.Map
 
             obj.PriorityZ = priorityZ;
         
-
-            Add(obj);
-
-            TileSorter.Sort(ref _firstNode);
+            if (!Add(obj))
+                TileSorter.Sort(ref _firstNode);                
         }
 
         public void RemoveGameObject(GameObject obj)
