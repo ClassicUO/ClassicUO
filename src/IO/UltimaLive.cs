@@ -252,7 +252,7 @@ namespace ClassicUO.IO
                 {
                     for (int j = 0; j < 8; j++)
                     {
-                        for (GameObject obj = World.Map.Chunks[block].Tiles[i, j].FirstNode; obj != null; obj = obj.Right)
+                        for (GameObject obj = World.Map.Chunks[block].Tiles[j, i].FirstNode; obj != null; obj = obj.Right)
                         {
                             if (obj is Land ln)
                             {
