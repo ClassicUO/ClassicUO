@@ -1,4 +1,5 @@
 ﻿#region license
+
 //  Copyright (C) 2018 ClassicUO Development Community on Github
 //
 //	This project is an alternative client for the game Ultima Online.
@@ -17,14 +18,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -72,7 +73,7 @@ namespace ClassicUO.Game.System
                     int Count = p.ReadByte();
                     Serial[] Serials = new Serial[Count];
                     for (int i = 0; i < Serials.Length; i++) Serials[i] = p.ReadUInt();
-                    PartySystem.ReceivePartyMemberList(Serials);
+                    ReceivePartyMemberList(Serials);
 
                     break;
                 case CommandRemoveMember:
@@ -80,13 +81,13 @@ namespace ClassicUO.Game.System
                     p.ReadUInt();
                     Serials = new Serial[Count];
                     for (int i = 0; i < Serials.Length; i++) Serials[i] = p.ReadUInt();
-                    PartySystem.ReceiveRemovePartyMember(Serials);
+                    ReceiveRemovePartyMember(Serials);
 
                     break;
                 case CommandPrivateMessage:
                 case CommandPublicMessage:
                     Serial partyMemberSerial = p.ReadUInt();
-                    PartyMember partyMember = PartySystem.GetPartyMember(partyMemberSerial);
+                    PartyMember partyMember = GetPartyMember(partyMemberSerial);
 
                     if (partyMember != null)
                     {
@@ -99,8 +100,8 @@ namespace ClassicUO.Game.System
                         Hue partyMessagehue = Engine.Profile.Current.PartyMessageHue;
                         MessageType messageType = MessageType.Party;
                         MessageFont partyMessageFont = MessageFont.Normal;
-                        
-                        Chat.OnMessage(/*partyMemberEntity*/ null, new UOMessageEventArgs(partyMessage, partyMessagehue, messageType, partyMessageFont, false));
+
+                        Chat.OnMessage( /*partyMemberEntity*/ null, new UOMessageEventArgs(partyMessage, partyMessagehue, messageType, partyMessageFont, false));
                     }
 
                     break;
@@ -122,7 +123,7 @@ namespace ClassicUO.Game.System
 
                         Chat.OnMessage(partyLeaderEntity, new UOMessageEventArgs(clilocMessage, hue, messageType, font, true));
                     }
-                    
+
                     break;
             }
         }
@@ -167,10 +168,7 @@ namespace ClassicUO.Game.System
 
         public static PartyMember GetPartyMember(Serial mobileSerial)
         {
-            if (Members.Any(p => p.Serial == mobileSerial))
-            {
-                return Members.ElementAt(Members.FindIndex(p => p.Serial == mobileSerial));
-            }
+            if (Members.Any(p => p.Serial == mobileSerial)) return Members.ElementAt(Members.FindIndex(p => p.Serial == mobileSerial));
 
             return null;
         }

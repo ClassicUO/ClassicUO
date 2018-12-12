@@ -45,8 +45,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _skillListEntries = new List<SkillListEntry>();
             _totalReal = 0;
             _totalValue = 0;
-            X = 100;
-            Y = 100;
+            CanBeSaved = true;
             CanMove = true;
             AcceptMouseInput = false;
             AddChildren(new GameBorder(0, 0, WIDTH, HEIGHT, 4));

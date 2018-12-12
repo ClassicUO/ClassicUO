@@ -143,7 +143,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 case Buttons.Journal:
 
                     if (Engine.UI.GetByLocalSerial<JournalGump>() == null)
-                        Engine.UI.Add(new JournalGump());
+                        Engine.UI.Add(new JournalGump() { X = 64, Y = 64});
                     else
                         Engine.UI.Remove<JournalGump>();
 

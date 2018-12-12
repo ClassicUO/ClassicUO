@@ -46,10 +46,7 @@ namespace ClassicUO.Configuration
             }
             else
             {
-                Current = ConfigurationResolver.Load<Profile>(Path.Combine(path, "settings.json"));
-
-                if (Current == null)
-                    Current = new Profile(username, servername, charactername);
+                Current = ConfigurationResolver.Load<Profile>(Path.Combine(path, "settings.json")) ?? new Profile(username, servername, charactername);
 
                 return Current.ReadGumps();               
             }

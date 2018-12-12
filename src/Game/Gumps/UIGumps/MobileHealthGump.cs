@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.IO;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -37,26 +38,38 @@ namespace ClassicUO.Game.Gumps.UIGumps
     internal class MobileHealthGump : Gump
     {
         private const float MAX_BAR_WIDTH = 100.0f;
-        private readonly GumpPic _background;
-        private readonly Texture2D _backgroundBar;
-        private readonly Texture2D _healthBar;
-        private readonly Texture2D _manaBar;
-        private readonly Texture2D _staminaBar;
-        private readonly TextBox _textboxName;
+        private GumpPic _background;
+        private Texture2D _backgroundBar;
+        private Texture2D _healthBar;
+        private Texture2D _manaBar;
+        private Texture2D _staminaBar;
+        private TextBox _textboxName;
         private float _currentHealthBarLength;
         private float _currentManaBarLength;
         private float _currentStaminaBarLength;
         private bool _isOutRange;
         private bool _isYellowHits, _isPoisoned, _isNormal;
         private bool _renameEventActive;
-        private Label _text;
 
-        public MobileHealthGump(Mobile mobile, int x, int y) : base(mobile.Serial, 0)
+        public MobileHealthGump(Mobile mobile, int x, int y) : this()
         {
             X = x;
             Y = y;
-            CanMove = true;
             Mobile = mobile;
+            BuildGump();
+        }
+
+        public MobileHealthGump() : base(0, 0)
+        {
+            CanMove = true;
+        }
+
+        public Mobile Mobile { get; private set; }
+
+        private void BuildGump()
+        {
+            LocalSerial = Mobile.Serial;
+            CanBeSaved = Mobile == World.Player;
             _currentHealthBarLength = MAX_BAR_WIDTH;
             _currentStaminaBarLength = MAX_BAR_WIDTH;
             _currentManaBarLength = MAX_BAR_WIDTH;
@@ -106,7 +119,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 AddChildren(_textboxName = new TextBox(1, 17, 190, 190, false, FontStyle.None, 0x0386)
                 {
-                    X = 17, Y = 16, Width = 190, Height = 25
+                    X = 17,
+                    Y = 16,
+                    Width = 190,
+                    Height = 25
                 });
                 _textboxName.SetText(Mobile.Name);
                 _textboxName.IsEditable = false;
@@ -128,7 +144,29 @@ namespace ClassicUO.Game.Gumps.UIGumps
             MobileOnStaminaChanged(null, EventArgs.Empty);
         }
 
-        public Mobile Mobile { get; }
+
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            
+            writer.Write(Mobile.Serial);
+        }
+
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+            LocalSerial = reader.ReadUInt32();
+
+            if (LocalSerial == World.Player)
+            {
+                Mobile = World.Player;
+                BuildGump();
+            }
+            else
+            {
+                Dispose();
+            }
+        }
 
         private void TextboxNameOnMouseClick(object sender, MouseEventArgs e)
         {
@@ -358,16 +396,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
         /// </summary>
         public override void Dispose()
         {
-            Mobile.HitsChanged -= MobileOnHitsChanged;
-            Mobile.ManaChanged -= MobileOnManaChanged;
-            Mobile.StaminaChanged -= MobileOnStaminaChanged;
+            if (Mobile != null)
+            {
+                Mobile.HitsChanged -= MobileOnHitsChanged;
+                Mobile.ManaChanged -= MobileOnManaChanged;
+                Mobile.StaminaChanged -= MobileOnStaminaChanged;
+            }
 
             if (_textboxName != null)
                 _textboxName.MouseClick -= TextboxNameOnMouseClick;
-            _backgroundBar.Dispose();
-            _healthBar.Dispose();
-            _manaBar.Dispose();
-            _staminaBar.Dispose();
+            _backgroundBar?.Dispose();
+            _healthBar?.Dispose();
+            _manaBar?.Dispose();
+            _staminaBar?.Dispose();
             Engine.SceneManager.GetScene<GameScene>().MobileGumpStack.Remove(Mobile);
             base.Dispose();
         }

@@ -201,6 +201,9 @@ namespace ClassicUO.Configuration
                         gump.X = x;
                         gump.Y = y;
 
+                        if (gump.LocalSerial != 0)
+                            Engine.UI.SavePosition(gump.LocalSerial, new Point(x, y));
+
                         if (!gump.IsDisposed)
                         {
                             gumps.Add(gump);

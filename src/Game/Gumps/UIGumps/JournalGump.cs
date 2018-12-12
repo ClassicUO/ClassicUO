@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Managers;
@@ -39,11 +40,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public JournalGump() : base(0, 0)
         {
-            X = 100;
-            Y = 100;
             CanMove = true;
             AcceptMouseInput = true;
-
+            CanBeSaved = true;
             AddChildren(_background = new ExpandableScroll(0, 0, 300)
             {
                 TitleGumpID = 0x82A
@@ -84,11 +83,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             WantUpdateSize = true;
             _journalEntries.Height = Height - 98;
             base.Update(totalMS, frameMS);
-        }
-
-        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
-        {
-            return base.Draw(batcher, position, hue);
         }
 
         private void AddJournalEntry(object sender, JournalEntry entry)

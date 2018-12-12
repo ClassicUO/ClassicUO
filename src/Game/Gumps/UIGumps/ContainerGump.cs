@@ -40,8 +40,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public ContainerGump() : base(0, 0)
         {
-            CanMove = true;
-            CanBeSaved = true;
+           
         }
 
         public ContainerGump(Item item, Graphic gumpid) : this()
@@ -54,6 +53,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void BuildGump()
         {
+            CanMove = true;
+            CanBeSaved = true;
             LocalSerial = _item.Serial;
             _isCorspeContainer = _gumpID == 0x0009;
             _item.Items.Added += ItemsOnAdded;
@@ -86,9 +87,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             base.Restore(reader);
 
-           
 
-            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
+            LocalSerial = reader.ReadUInt32();
+            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
             reader.ReadUInt16();
 
             Dispose();

@@ -18,6 +18,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System.IO;
+
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
@@ -35,7 +38,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private static MiniMapGump _self;
         private double _frameMS;
         private SpriteTexture _gumpTexture, _mapTexture;
-        private bool _miniMap_LargeFormat, _forceUpdate;
+        private bool _forceUpdate;
         private Texture2D _playerIndicator;
         private float _timeMS;
         private bool _useLargeMap;
@@ -46,28 +49,42 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             CanMove = true;
             AcceptMouseInput = true;
-            X = 600;
-            Y = 50;
-            _useLargeMap = _miniMap_LargeFormat;
+            CanBeSaved = true;
         }
 
-        public static bool MiniMap_LargeFormat { get; set; }
 
         public static void Toggle(GameScene scene)
         {
             if (Engine.UI.GetByLocalSerial<MiniMapGump>() == null)
+            {
                 Engine.UI.Add(_self = new MiniMapGump());
+            }
             else
+            {
                 _self.Dispose();
+            }
+
+        }
+
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            writer.Write(_useLargeMap);
+        }
+
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+            _useLargeMap = reader.ReadBoolean();
+            _forceUpdate = true;
         }
 
         public override void Update(double totalMS, double frameMS)
         {
             _frameMS = frameMS;
 
-            if (_gumpTexture == null || _gumpTexture.IsDisposed || _useLargeMap != _miniMap_LargeFormat || _forceUpdate)
+            if (_gumpTexture == null || _gumpTexture.IsDisposed || _forceUpdate)
             {
-                _useLargeMap = _miniMap_LargeFormat;
                 _gumpTexture = IO.Resources.Gumps.GetGumpTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
                 Width = _gumpTexture.Width;
                 Height = _gumpTexture.Height;
@@ -86,8 +103,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            if (_gumpTexture == null || _gumpTexture.IsDisposed)
+            if (_gumpTexture == null || _gumpTexture.IsDisposed || IsDisposed)
                 return false;
+
             batcher.Draw2D(_gumpTexture, position, Vector3.Zero);
             CreateMiniMapTexture();
             batcher.Draw2D(_mapTexture, position, Vector3.Zero);
@@ -119,8 +137,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (button == MouseButton.Left)
             {
-                MiniMap_LargeFormat = !MiniMap_LargeFormat;
-                _miniMap_LargeFormat = MiniMap_LargeFormat;
+                _useLargeMap = !_useLargeMap;
                 _forceUpdate = true;
 
                 return true;
@@ -193,7 +210,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     if (!mbbv.HasValue)
                         break;
                     RadarMapBlock mb = mbbv.Value;
-                    Chunk block = World.Map.Chunks[blockIndex];
+                    //Chunk block = World.Map.Chunks[blockIndex];
                     int realBlockX = i * 8;
                     int realBlockY = j * 8;
 

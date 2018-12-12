@@ -53,7 +53,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public PaperDollGump() : base(0, 0)
         {
-            AcceptMouseInput = false;
+            
         }
 
         public PaperDollGump(Serial serial, string mobileTitle) : this()
@@ -65,7 +65,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 Mobile = mobile;
                 Title = mobileTitle;
                 BuildGump();
-                CanBeSaved = true;
             }
         }
 
@@ -110,12 +109,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void BuildGump()
         {
-            //m_World = Service.GetByLocalSerial<WorldModel>();
-            //m_Client = Service.GetByLocalSerial<INetworkClient>();
+            AcceptMouseInput = false;
+            CanBeSaved = true;
             CanMove = true;
-            X = 100;
-            Y = 100;
-            //SaveOnWorldStop = true;
             LocalSerial = Mobile.Serial;
 
             if (Mobile == World.Player)
@@ -287,7 +283,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
-            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
+            LocalSerial = reader.ReadUInt32();
+            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
             Dispose();
         }
 

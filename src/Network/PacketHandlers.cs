@@ -612,7 +612,6 @@ namespace ClassicUO.Network
 
             Settings settings = Service.Get<Settings>();
 
-            List<Gump> gumps = Engine.Profile.Load(World.ServerName, settings.Username, settings.LastCharacterName);
 
 
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
@@ -628,6 +627,10 @@ namespace ClassicUO.Network
 
             Direction direction = (Direction) (p.ReadByte() & 0x7);
             World.Player.ForcePosition(x, y, z, direction);
+
+            List<Gump> gumps = Engine.Profile.Load(World.ServerName, settings.Username, settings.LastCharacterName);
+
+
             NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
 
             if (FileManager.ClientVersion >= ClientVersions.CV_200)
@@ -640,6 +643,7 @@ namespace ClassicUO.Network
             NetClient.Socket.Send(new PStatusRequest(World.Player));
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
+
 
             scene.Load();
             gumps?.ForEach(Engine.UI.Add);
@@ -821,9 +825,8 @@ namespace ClassicUO.Network
             //item.EnableCallBackForItemsUpdate(true);
             var serial = p.ReadUInt();
             Graphic graphic = p.ReadUShort();
-            UIManager ui = Engine.UI;
 
-            ui.GetByLocalSerial(serial)?.Dispose();
+            Engine.UI.GetByLocalSerial(serial)?.Dispose();
 
             if (graphic == 0x30) // vendor
             {
@@ -834,7 +837,7 @@ namespace ClassicUO.Network
                     .OrderBy(o => o.Serial.Value)
                     .ToArray();
 
-                ui.Add(new ShopGump(mobile.Serial, itemList, true, 100, 100));
+                Engine.UI.Add(new ShopGump(mobile.Serial, itemList, true, 100, 100));
             }
             else
             {
@@ -844,20 +847,27 @@ namespace ClassicUO.Network
                 {
                     if (item.IsSpellBook)
                     {
-                        SpellbookGump spellbookGump = new SpellbookGump(item)
+                        SpellbookGump spellbookGump = new SpellbookGump(item);
+                        if (!Engine.UI.GetGumpCachePosition(item, out Point location))
                         {
-                            X = 100, Y = 100
-                        };
-                        ui.Add(spellbookGump);
+                            location = new Point(64, 64);
+                        }
+
+                        spellbookGump.Location = location;
+                        Engine.UI.Add(spellbookGump);
                     }
                 }
                 else
                 {
-                    ContainerGump container = new ContainerGump(item, graphic)
+                    ContainerGump container = new ContainerGump(item, graphic);
+                                      
+                    if (!Engine.UI.GetGumpCachePosition(item, out Point location))
                     {
-                        X = 64, Y = 64
-                    };
-                    ui.Add(container);
+                        location = new Point(64, 64);
+                    }
+
+                    container.Location = location;
+                    Engine.UI.Add(container);
                 }
             }
         }
