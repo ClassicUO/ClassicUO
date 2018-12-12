@@ -47,6 +47,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private bool _useLargeMap;
         private ushort _x, _y;
         private int _lastMap = -1;
+        private bool _draw;
 
         public MiniMapGump() : base(0, 0)
         {
@@ -105,6 +106,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _mapTexture.Ticks = (long) totalMS;
         }
 
+
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (_gumpTexture == null || _gumpTexture.IsDisposed || IsDisposed)
@@ -113,9 +115,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
             batcher.Draw2D(_gumpTexture, position, Vector3.Zero);
             CreateMiniMapTexture();
             batcher.Draw2D(_mapTexture, position, Vector3.Zero);
-            _timeMS += (float) _frameMS;
 
-            if (_timeMS >= ReticleBlinkMS)
+            if (_timeMS < Engine.Ticks)
+            {
+                _draw = !_draw;
+                _timeMS = Engine.Ticks + 500;
+            }
+
+            if (_draw)
             {
                 if (_playerIndicator == null)
                 {
@@ -130,8 +137,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     _mobilesIndicator.SetData( new [] { Color.White } );
                 }
 
-                int blockOffsetX = (Width >> 1) - 1;
-                int blockOffsetY = (Height >> 1) - 1;
 
                 foreach (Mobile mob in World.Mobiles.Where(s => s != World.Player))
                 {
@@ -148,9 +153,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 //DRAW DOT OF PLAYER
                 batcher.Draw2D(_playerIndicator, new Rectangle(position.X + (Width >> 1), position.Y + (Height >> 1), 2 ,2), Vector3.Zero);
             }
-
-            if (_timeMS >= ReticleBlinkMS * 2)
-                _timeMS -= ReticleBlinkMS * 2;
 
             return base.Draw(batcher, position, hue);
         }
