@@ -20,7 +20,10 @@
 #endregion
 
 using System.IO;
+using System.Linq;
 
+using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
@@ -39,7 +42,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private double _frameMS;
         private SpriteTexture _gumpTexture, _mapTexture;
         private bool _forceUpdate;
-        private Texture2D _playerIndicator;
+        private Texture2D _playerIndicator, _mobilesIndicator;
         private float _timeMS;
         private bool _useLargeMap;
         private ushort _x, _y;
@@ -75,6 +78,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public override void Restore(BinaryReader reader)
         {
             base.Restore(reader);
+            _self = this;
             _useLargeMap = reader.ReadBoolean();
             _forceUpdate = true;
         }
@@ -121,10 +125,28 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     {
                         0xFFFFFFFF
                     });
+
+                    _mobilesIndicator = new Texture2D(batcher.GraphicsDevice, 1, 1);
+                    _mobilesIndicator.SetData( new [] { Color.White } );
+                }
+
+                int blockOffsetX = (Width >> 1) - 1;
+                int blockOffsetY = (Height >> 1) - 1;
+
+                foreach (Mobile mob in World.Mobiles.Where(s => s != World.Player))
+                {
+
+                    int x = mob.X - World.Player.X;
+                    int y = mob.Y - World.Player.Y;
+
+                    int gx = x - y;
+                    int gy = x + y;
+
+                    batcher.Draw2D(_mobilesIndicator, new Rectangle(position.X + (Width >> 1) + gx, position.Y + (Height >> 1) + gy, 2, 2), ShaderHuesTraslator.GetHueVector(Notoriety.GetHue(mob.NotorietyFlag)) );
                 }
 
                 //DRAW DOT OF PLAYER
-                batcher.Draw2D(_playerIndicator, new Point(position.X + (Width >> 1), position.Y + (Height >> 1)), Vector3.Zero);
+                batcher.Draw2D(_playerIndicator, new Rectangle(position.X + (Width >> 1), position.Y + (Height >> 1), 2 ,2), Vector3.Zero);
             }
 
             if (_timeMS >= ReticleBlinkMS * 2)
@@ -279,6 +301,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             _playerIndicator?.Dispose();
             _mapTexture?.Dispose();
+            _mobilesIndicator?.Dispose();
             base.Dispose();
         }
     }

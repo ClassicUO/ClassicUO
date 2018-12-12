@@ -175,7 +175,6 @@ namespace ClassicUO.Game.Map
             //}
         }
 
-
         public void AddGameObject(GameObject obj)
         {
             //if (_firstNode != null)
