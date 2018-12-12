@@ -67,9 +67,7 @@ namespace ClassicUO.Game.GameObjects
     {
         private ushort _amount;
         private Serial _container;
-        private Position _containerPosition;
         private Graphic? _displayedGraphic;
-        private GameEffect _effect;
         private bool _isMulti;
         private Layer _layer;
         private uint _price;
@@ -239,15 +237,6 @@ namespace ClassicUO.Game.GameObjects
 
         public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
 
-        //public GameEffect Effect
-        //{
-        //    get => _effect;
-        //    set
-        //    {
-        //        _effect?.Dispose();
-        //        _effect = value;
-        //    }
-        //}
 
         public override Graphic Graphic
         {
@@ -281,26 +270,12 @@ namespace ClassicUO.Game.GameObjects
         {
             get => base.Position;
             set
-            {
+            { 
+                base.Position = value;
 
                 if (OnGround)
                     AddToTile(value.X, value.Y);
-
-                base.Position = value;
             }
-
-            //get => _containerPosition;
-            //set
-            //{
-            //    if (IsCorpse)
-            //    {
-            //    }
-
-            //    if (!OnGround)
-            //        _containerPosition = value;
-            //    else
-            //        base.Position = _containerPosition = value;
-            //}
         }
 
         protected override void OnPositionChanged(object sender, EventArgs e)
@@ -310,9 +285,6 @@ namespace ClassicUO.Game.GameObjects
             if (IsCorpse)
             {
             }
-
-            //if (OnGround)
-            //    Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
         }
 
         public event EventHandler OwnerChanged;
@@ -710,10 +682,6 @@ namespace ClassicUO.Game.GameObjects
                 _spellsBitFiled = field;
                 needUpdate = true;
             }
-
-            //if (needUpdate)
-            //    _OnUpdated?.Invoke(this);
-
             return needUpdate;
         }
 
@@ -724,9 +692,6 @@ namespace ClassicUO.Game.GameObjects
                 Multi.Components = null;
                 Multi = null;
             }
-
-            //Effect?.Dispose();
-            //Effect = null;
             base.Dispose();
         }
 
