@@ -25,6 +25,7 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -83,10 +84,11 @@ namespace ClassicUO.Game.Map
                             Graphic = tileID,
                             AverageZ = z,
                             MinZ = z,
-                        };
+                        };               
 
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
+
                         land.Calculate(tileX, tileY, z);
                         land.Position = new Position(tileX, tileY, z);
 
@@ -104,7 +106,7 @@ namespace ClassicUO.Game.Map
 
                         for (int i = 0; i < count; i++, sb++)
                         {
-                            if (sb->Color > 0 && sb->Color != 0xFFFF)
+                            if (sb->Color != 0 && sb->Color != 0xFFFF)
                             {
                                 ushort x = sb->X;
                                 ushort y = sb->Y;
@@ -130,8 +132,47 @@ namespace ClassicUO.Game.Map
                         }
                     }
                 }
+
+
+                //CreateLand();
             }
         }
+
+        //private void CreateLand()
+        //{
+        //    for (int x = 0; x < 8; x++)
+        //    {
+        //        for (int y = 0; y < 8; y++)
+        //        {
+        //            Land tile = null;
+        //            Tile t = Tiles[x, y];
+        //            GameObject obj = t.FirstNode;
+
+        //            while (obj != null)
+        //            {
+        //                if (obj is Land land)
+        //                {
+        //                    tile = land;
+        //                    break;
+        //                }
+
+        //                obj = obj.Right;
+        //            }
+
+        //            if (tile != null)
+        //            {
+        //                int tileX = tile.X;
+        //                int tileY = tile.Y;
+        //                sbyte tileZ = tile.Z;
+
+        //                tile.Calculate(tileX, tileY, tileZ);
+                        
+        //                t.AddGameObject(tile);
+        //            }
+
+        //        }
+        //    }
+        //}
 
         private IndexMap GetIndex(int map) => GetIndex(map, X, Y);
 

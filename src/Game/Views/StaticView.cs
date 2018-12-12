@@ -39,7 +39,7 @@ namespace ClassicUO.Game.Views
         public StaticView(Static st) : base(st)
         {
             _isFoliage = TileData.IsFoliage( st.ItemData.Flags);
-            AllowedToDraw = !IsNoDrawable(st.Graphic) && !(_isFoliage && World.MapIndex == 0);
+            AllowedToDraw = !IsNoDrawable(st.Graphic) /*&& !(_isFoliage && World.MapIndex == 0)*/;
         }
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)

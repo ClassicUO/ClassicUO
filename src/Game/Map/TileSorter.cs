@@ -27,7 +27,7 @@ namespace ClassicUO.Game.Map
 {
     public static class TileSorter
     {
-        public static void Sort(GameObject first)
+        public static void Sort(ref GameObject first)
         {
             MergeSort(ref first);
         }
@@ -140,6 +140,7 @@ namespace ClassicUO.Game.Map
         {
             (int xZ, int xType, int xThreshold, int xTierbreaker) = GetSortValues(x);
             (int yZ, int yType, int yThreshold, int yTierbreaker) = GetSortValues(y);
+
             xZ += xThreshold;
             yZ += yThreshold;
             int comparison = xZ - yZ;
@@ -152,6 +153,7 @@ namespace ClassicUO.Game.Map
 
             if (comparison == 0)
                 comparison = xTierbreaker - yTierbreaker;
+
             if (comparison == 0)
                 comparison = x.PriorityZ - y.PriorityZ;
 
@@ -164,20 +166,20 @@ namespace ClassicUO.Game.Map
             {
                 case GameEffect effect:
 
-                    return (effect.Position.Z, effect.IsItemEffect ? 2 : 4, 2, 0);
+                    return (effect.Z, effect.IsItemEffect ? 2 : 4, 2, 0);
 
                 case Mobile mobile:
 
-                    return (mobile.Position.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);
+                    return (mobile.Z, 3 /* is sitting */, 2, mobile == World.Player ? 0x40000000 : (int) mobile.Serial.Value);
                 case Land tile:
 
                     return (tile.AverageZ, 0, 0, 0);
                 case Static staticitem:
 
-                    return (staticitem.Position.Z, 1, (staticitem.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground(staticitem.ItemData.Flags) ? 0 : 1), staticitem.Index);
+                    return (staticitem.Z, 1, (staticitem.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground(staticitem.ItemData.Flags) ? 0 : 1), staticitem.Index);
                 case Item item:
 
-                    return (item.Position.Z, item.IsCorpse ? 4 : 2, (item.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground(item.ItemData.Flags) ? 0 : 1), (int) item.Serial.Value);
+                    return (item.Z, item.IsCorpse ? 4 : 2, (item.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground(item.ItemData.Flags) ? 0 : 1), (int) item.Serial.Value);
                 default:
 
                     return (0, 0, 0, 0);

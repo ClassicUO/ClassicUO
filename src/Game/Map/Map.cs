@@ -49,6 +49,7 @@ namespace ClassicUO.Game.Map
         }
 
         public int Index { get; }
+    
 
         public Chunk[] Chunks { get; private set; }
 

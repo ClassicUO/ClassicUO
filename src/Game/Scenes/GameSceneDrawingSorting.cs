@@ -179,7 +179,8 @@ namespace ClassicUO.Game.Scenes
                         ismobile = true;
 
                         break;
-                    case IDynamicItem dyn when _noDrawRoofs && TileData.IsRoof(dyn.ItemData.Flags): continue;
+                    case IDynamicItem dyn when _noDrawRoofs && TileData.IsRoof(dyn.ItemData.Flags):
+                        continue;
                     case IDynamicItem dyn: maxObjectZ += dyn.ItemData.Height;
 
                         break;
@@ -267,10 +268,9 @@ namespace ClassicUO.Game.Scenes
 
                 if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
                     continue;
-                 Tile tile =  World.Map.GetTile(x, y, false);
 
-                if (tile == null)
-                    continue;
+                Tile tile =  World.Map.GetTile(x, y);
+
                 int currentMaxZ = maxZ;
 
                 if (i == dropMaxZIndex)
