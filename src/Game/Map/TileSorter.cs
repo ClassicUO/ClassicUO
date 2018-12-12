@@ -27,114 +27,177 @@ namespace ClassicUO.Game.Map
 {
     public static class TileSorter
     {
-        public static void Sort(ref GameObject first)
+        //public static void Sort(ref GameObject first)
+        //{
+        //    //MergeSort(ref first);
+
+        //    first = MergeSort(first);
+        //}
+
+        // https://www.geeksforgeeks.org/merge-sort-for-doubly-linked-list/
+
+        public static GameObject Sort(GameObject first)
+            => MergeSort(first);
+
+        private static GameObject Merge(GameObject first, GameObject second)
         {
-            MergeSort(ref first);
+            if (first == null)
+                return second;
+
+            if (second == null)
+                return first;
+
+            if (Compare(first, second) < 0)
+            {
+                first.Right = Merge(first.Right, second);
+                first.Right.Left = first;
+                first.Left = null;
+
+                return first;
+            }
+
+            second.Right = Merge(first, second.Right);
+            second.Right.Left = second;
+            second.Left = null;
+
+            return second;
         }
 
-
-        private static void Split(GameObject head, out GameObject front, out GameObject back)
+        private static GameObject MergeSort(GameObject head)
         {
-            if (head?.Right == null)
-            {
-                front = head;
-                back = null;
-            }
-            else
-            {
-                GameObject slow = head;
-                GameObject fast = head.Right;
+            if (head == null || head.Right == null)
+                return head;
 
-                while (fast!= null)
-                {
-                    fast = fast.Right;
+            GameObject second = Split(head);
 
-                    if (fast != null)
-                    {
-                        slow = slow.Right;
-                        fast = fast.Right;
-                    }
-                }
+            head = MergeSort(head);
+            second = MergeSort(second);
 
-                front = head;
-                back = slow.Right;
-                back.Left = null;
-                slow.Right = null;
-            }
+            return Merge(head, second);
         }
 
-        private static void Merge(ref GameObject head, ref GameObject l1, ref GameObject l2)
+        private static GameObject Split(GameObject head)
         {
-            GameObject newHead;
+            GameObject fast = head;
+            GameObject slow = head;
 
-            if (l1 == null)
-                newHead = l2;
-            else if (l2 == null)
-                newHead = l1;
-            else
+            while (fast.Right != null && fast.Right.Right != null)
             {
-                if (Compare(l2, l1) < 0)
-                {
-                    newHead = l2;
-                    l2 = l2.Right;
-                }
-                else
-                {
-                    newHead = l1;
-                    l1 = l1.Right;
-                }
-
-                newHead.Left = null;
-                GameObject curr = newHead;
-
-                while (l1 != null && l2 != null)
-                {
-                    if (Compare(l2, l1) < 0)
-                    {
-                        curr.Right = l2;
-                        l2.Left = curr;
-                        l2 = l2.Right;
-                    }
-                    else
-                    {
-                        curr.Right = l1;
-                        l1.Left = curr;
-                        l1 = l1.Right;
-                    }
-
-                    curr = curr.Right;
-                }
-
-                while (l1 != null)
-                {
-                    curr.Right = l1;
-                    l1.Left = curr;
-                    l1 = l1.Right;
-                    curr = curr.Right;
-                }
-
-                while (l2 != null)
-                {
-                    curr.Right = l2;
-                    l2.Left = curr;
-                    l2 = l2.Right;
-                    curr = curr.Right;
-                }
+                fast = fast.Right.Right;
+                slow = slow.Right;
             }
 
-            head = newHead;
+            GameObject temp = slow.Right;
+            slow.Right = null;
+
+            return temp;
         }
 
-        private static void MergeSort(ref GameObject first)
-        {
-            if (first?.Right != null)
-            {
-                Split(first, out GameObject h1, out GameObject h2);
-                MergeSort(ref h1);
-                MergeSort(ref h2);
-                Merge(ref first, ref h1, ref h2);
-            }
-        }   
+        //private static void Split(GameObject head, out GameObject front, out GameObject back)
+        //{
+        //    if (head?.Right == null)
+        //    {
+        //        front = head;
+        //        back = null;
+        //    }
+        //    else
+        //    {
+        //        GameObject slow = head;
+        //        GameObject fast = head.Right;
+
+        //        while (fast != null)
+        //        {
+        //            fast = fast.Right;
+
+        //            if (fast != null)
+        //            {
+        //                slow = slow.Right;
+        //                fast = fast.Right;
+        //            }
+        //        }
+
+        //        front = head;
+        //        back = slow.Right;
+        //        back.Left = null;
+        //        slow.Right = null;
+        //    }
+        //}
+
+        //private static void Merge(ref GameObject head, ref GameObject l1, ref GameObject l2)
+        //{
+        //    GameObject newHead;
+
+        //    if (l1 == null)
+        //        newHead = l2;
+        //    else if (l2 == null)
+        //        newHead = l1;
+        //    else
+        //    {
+        //        if (Compare(l2, l1) < 0)
+        //        {
+        //            newHead = l2;
+        //            l2 = l2.Right;
+        //        }
+        //        else
+        //        {
+        //            newHead = l1;
+        //            l1 = l1.Right;
+        //        }
+
+        //        newHead.Left = null;
+        //        GameObject curr = newHead;
+
+        //        while (l1 != null && l2 != null)
+        //        {
+        //            if (Compare(l2, l1) < 0)
+        //            {
+        //                curr.Right = l2;
+        //                l2.Left = curr;
+        //                l2 = l2.Right;
+        //            }
+        //            else
+        //            {
+        //                curr.Right = l1;
+        //                l1.Left = curr;
+        //                l1 = l1.Right;
+        //            }
+
+        //            curr = curr.Right;
+        //        }
+
+        //        while (l1 != null)
+        //        {
+        //            curr.Right = l1;
+        //            l1.Left = curr;
+        //            l1 = l1.Right;
+        //            curr = curr.Right;
+        //        }
+
+        //        while (l2 != null)
+        //        {
+        //            curr.Right = l2;
+        //            l2.Left = curr;
+        //            l2 = l2.Right;
+        //            curr = curr.Right;
+        //        }
+        //    }
+
+        //    head = newHead;
+        //}
+
+        //private static void MergeSort(ref GameObject first)
+        //{
+        //    if (first?.Right != null)
+        //    {
+        //        Split(first, out GameObject h1, out GameObject h2);
+        //        MergeSort(ref h1);
+        //        MergeSort(ref h2);
+        //        Merge(ref first, ref h1, ref h2);
+        //    }
+        //}
+
+
+
 
         private static int Compare(GameObject x, GameObject y)
         {
