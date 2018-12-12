@@ -30,6 +30,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Views
 {
@@ -109,8 +110,8 @@ namespace ClassicUO.Game.Views
 
             FrameInfo.X = Math.Abs(rect.X);
             FrameInfo.Y = Math.Abs(rect.Y);
-            FrameInfo.Width = rect.X + rect.Width;
-            FrameInfo.Height = rect.X + rect.Height;
+            FrameInfo.Width = FrameInfo.X + rect.Width;
+            FrameInfo.Height = FrameInfo.Y + rect.Height;
 
 
             int height = 0;
@@ -143,8 +144,18 @@ namespace ClassicUO.Game.Views
                 DamageOverhead(mobile, batcher, damagePosition, mobile.IsMounted ? 0 : -22);
             }
 
+            //if (_edge == null)
+            //{
+            //    _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
+            //    _edge.SetData(new Color[] { Color.LightBlue});
+            //}
+
+            //batcher.DrawRectangle(_edge, GetOnScreenRectangle(), Vector3.Zero);
+
             return true;
         }
+
+        //private static Texture2D _edge;
 
         private void DamageOverhead(Mobile mobile, Batcher2D batcher, Vector3 position, int offY)
         {

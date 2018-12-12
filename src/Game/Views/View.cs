@@ -76,8 +76,11 @@ namespace ClassicUO.Game.Views
         {
             Rectangle prect = Rectangle.Empty;
 
-            prect.X = (int)((Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1)) - FrameInfo.X + GameObject.Offset.X);
-            prect.Y = (int)((Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1)) + GameObject.Offset.Y - FrameInfo.Y);
+            //prect.X = (int)(( (Engine.Profile.Current.GameWindowSize.X >> 1)) - FrameInfo.X);
+            //prect.Y = (int)(( (Engine.Profile.Current.GameWindowSize.Y >> 1)) - FrameInfo.Y);
+
+            prect.X = (int) (GameObject.RealScreenPosition.X - FrameInfo.X + 22 + GameObject.Offset.X);
+            prect.Y = (int) (GameObject.RealScreenPosition.Y - FrameInfo.Y + 22 + (GameObject.Offset.Y - GameObject.Offset.Z));
             prect.Width = FrameInfo.Width;
             prect.Height = FrameInfo.Height;
 
