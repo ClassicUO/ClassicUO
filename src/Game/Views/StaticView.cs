@@ -39,6 +39,9 @@ namespace ClassicUO.Game.Views
         {
             _isFoliage = TileData.IsFoliage( st.ItemData.Flags);
             AllowedToDraw = !IsNoDrawable(st.Graphic) /*&& !(_isFoliage && World.MapIndex == 0)*/;
+
+            if (TileData.IsTranslucent(st.ItemData.Flags))
+                _alpha = 0.5f;
         }
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
