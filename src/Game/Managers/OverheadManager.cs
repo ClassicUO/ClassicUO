@@ -19,95 +19,294 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
+using IUpdateable = ClassicUO.Interfaces.IUpdateable;
+
 namespace ClassicUO.Game.Managers
 {
-    public class OverheadManager
+    public class OverheadManager : IUpdateable, IDisposable
     {
-        private readonly List<OverHeadInfo> _overheadsList = new List<OverHeadInfo>();
-        private readonly List<OverHeadInfo> _damagesList = new List<OverHeadInfo>();
+        private readonly Dictionary<GameObject, Deque<TextOverhead>> _textOverheads = new Dictionary<GameObject, Deque<TextOverhead>>();
+        private readonly Dictionary<GameObject, Deque<DamageOverhead>> _damageOverheads = new Dictionary<GameObject, Deque<DamageOverhead>>();
+        private readonly List<GameObject> _toRemoveDamages = new List<GameObject>();
+        private readonly List<GameObject> _toRemoveText = new List<GameObject>();
 
-      
-        public void AddOrUpdateText(View view, Vector3 position)
-        {
-            _overheadsList.Add(new OverHeadInfo(view, position));
-        }
+        private readonly Dictionary<GameObject, Vector3> _bounds = new Dictionary<GameObject, Vector3>();
 
-        public void AddOrUpdateDamage(View view, Vector3 position)
+        public void Update(double totalMS, double frameMS)
         {
-            _damagesList.Add(new OverHeadInfo(view, position));
-        }
+            UpdateTextOverhead(totalMS, frameMS);
+            UpdateDamageOverhead(totalMS, frameMS);
 
-        public void Draw(Batcher2D batcher, MouseOverList objectList)
-        {
-            DrawOverheads(batcher, objectList);
-            DrawDamages(batcher, objectList);
-        }
-
-        private void DrawOverheads(Batcher2D batcher, MouseOverList objectList)
-        {
-            if (_overheadsList.Count > 0)
+            if (_toRemoveDamages.Count > 0)
             {
-                for (int i = 0; i < _overheadsList.Count; i++)
+                _toRemoveDamages.ForEach(s =>
                 {
-                    OverHeadInfo t = _overheadsList[i];
-                    View view = t.View;
+                    if (!_textOverheads.ContainsKey(s))
+                        _bounds.Remove(s);
+                    _damageOverheads.Remove(s);
+                });
+                _toRemoveDamages.Clear();
+            }
 
-                    Rectangle rect0 = new Rectangle((int)t.Position.X - view.Bounds.X, (int)t.Position.Y - view.Bounds.Y, view.Bounds.Width, view.Bounds.Height);
+            if (_toRemoveText.Count > 0)
+            {
+                _toRemoveText.ForEach(s =>
+                {
+                    if (!_textOverheads.ContainsKey(s))
+                        _bounds.Remove(s);
+                    _textOverheads.Remove(s);
+                });
+                _toRemoveText.Clear();
+            }
+        }
 
-                    for (int j = i + 1; j < _overheadsList.Count; j++)
+        public bool HasOverhead(GameObject obj) => _textOverheads.ContainsKey(obj);
+
+        public bool HasDamage(GameObject obj) => _damageOverheads.ContainsKey(obj);
+
+        public Deque<TextOverhead> GeTextOverheads(GameObject obj)
+        {
+            return _textOverheads[obj];
+        }
+
+        public bool Draw(Batcher2D batcher, MouseOverList list, Point offset)
+        {
+            foreach (KeyValuePair<GameObject, Deque<TextOverhead>> pair in _textOverheads)
+            {
+                GameObject parent = pair.Key;
+                var deque = pair.Value;
+
+                if (!_bounds.TryGetValue(parent, out Vector3 position) || parent.IsDisposed)
+                {
+                    position.X = parent.ScreenPosition.X - offset.X - 22;
+                    position.Y = parent.ScreenPosition.Y - offset.Y - 22;
+
+                    if (parent is Static st)
+                        position.Y -= st.ItemData.Height * 2;
+                }
+
+                foreach (TextOverhead textOverhead in deque)
+                {
+                    textOverhead.View.Draw(batcher, position, list);
+                }
+            }
+
+
+            foreach (KeyValuePair<GameObject, Deque<DamageOverhead>> pair in _damageOverheads)
+            {
+                Mobile parent = (Mobile)pair.Key;
+                var deque = pair.Value;
+
+                if (!_bounds.TryGetValue(parent, out Vector3 position) || parent.IsDisposed)
+                {
+                    position.X = parent.ScreenPosition.X - offset.X - 22;
+                    position.Y = parent.ScreenPosition.Y - offset.Y - 22;
+                }
+
+                foreach (DamageOverhead damageOverhead in deque)
+                {
+                    damageOverhead.View.Draw(batcher, position, list);
+                }
+            }
+
+            return true;
+        }
+
+
+        public void UpdatePosition(GameObject obj, Vector3 position)
+            => _bounds[obj] = position;
+
+        private void UpdateTextOverhead(double totalMS, double frameMS)
+        {
+            List<Rectangle> rectangles = new List<Rectangle>();
+
+            foreach (KeyValuePair<GameObject, Deque<TextOverhead>> pair in _textOverheads)
+            {
+                GameObject parent = pair.Key;
+                Deque<TextOverhead> deque = pair.Value;
+
+                if (parent.IsDisposed)
+                {
+                    foreach (TextOverhead overhead in deque)
+                        overhead.Dispose();
+                    deque.Clear();
+                }
+                else
+                {
+                    int offY = parent is Mobile mob && mob.IsMounted ? 0 : -22;
+
+
+                    for (int i = 0; i < deque.Count; i++)
                     {
-                        OverHeadInfo a = _overheadsList[j];
-                        View b = a.View;
+                        TextOverhead obj = deque[i];
+                        obj.Update(totalMS, frameMS);
 
-                        Rectangle rect1 = new Rectangle((int)a.Position.X - b.Bounds.X, (int)a.Position.Y - b.Bounds.Y, b.Bounds.Width, b.Bounds.Height);
+                        if (obj.IsDisposed)
+                            deque.RemoveAt(i--);
+                        else
+                        {
+                            View v = obj.View;
 
-                        if ((((TextOverhead)view.GameObject).IsOverlapped = rect0.InRect(rect1)))
-                            break;
+                            v.Bounds.X = (v.Texture.Width >> 1) - 22;
+                            v.Bounds.Y = offY + v.Texture.Height;
+                            v.Bounds.Width = v.Texture.Width;
+                            v.Bounds.Height = v.Texture.Height;
+
+                            offY += v.Texture.Height;
+
+                            if (_bounds.TryGetValue(parent, out Vector3 position))
+                            {
+                                int aX = (int) position.X - v.Bounds.X;
+                                int aY = (int) position.Y - v.Bounds.Y;
+
+                                Rectangle next = new Rectangle(aX, aY, v.Bounds.Width, v.Bounds.Height);
+                                obj.IsOverlapped = rectangles.Any(s => s.Intersects(next));
+                                rectangles.Add(next);
+                            }
+
+                        }
                     }
-
-                    view.Draw(batcher, t.Position, objectList);
                 }
 
-                _overheadsList.Clear();
+                if (deque.Count == 0)
+                    _toRemoveText.Add(parent);
             }
         }
 
-        private void DrawDamages(Batcher2D batcher, MouseOverList objectList)
+        private void UpdateDamageOverhead(double totalMS, double frameMS)
         {
-            if (_damagesList.Count > 0)
+            foreach (KeyValuePair<GameObject, Deque<DamageOverhead>> pair in _damageOverheads)
             {
-                for (int i = 0; i < _damagesList.Count; i++)
+                Mobile parent = (Mobile) pair.Key;
+                var deque = pair.Value;
+
+                int offY = parent.IsMounted ? 0 : -22;
+
+                for (int i = 0; i < deque.Count; i++)
                 {
-                    var t = _damagesList[i];
-                    t.View.Draw(batcher, t.Position, objectList);
+                    DamageOverhead obj = deque[i];
+                    obj.Update(totalMS, frameMS);
+
+                    if (obj.IsDisposed)
+                    {                       
+                        deque.RemoveAt(i--);
+                    }
+                    else
+                    {
+                        View v = obj.View;
+
+                        v.Bounds.X = (v.Texture.Width >> 1) - 22;
+                        v.Bounds.Y = offY + v.Texture.Height - obj.OffsetY;
+                        v.Bounds.Width = v.Texture.Width;
+                        v.Bounds.Height = v.Texture.Height;
+
+                        offY += v.Texture.Height;
+                    }
                 }
 
-                _damagesList.Clear();
+                if (deque.Count == 0)
+                    _toRemoveDamages.Add(parent);
             }
         }
 
 
-        private struct OverHeadInfo
+        public void AddDamage(GameObject obj, DamageOverhead text)
         {
-            public OverHeadInfo(View view, Vector3 pos)
+            if (!_damageOverheads.TryGetValue(obj, out var deque) || deque == null)
             {
-                View = view;
-                Position = pos;
+                deque = new Deque<DamageOverhead>();
+                _damageOverheads[obj] = deque;
             }
 
-            public readonly View View;
-            public readonly Vector3 Position;
+            deque.AddToFront(text);
+
+            if (deque.Count > 10)
+                deque.RemoveFromBack();
         }
 
+        public void AddText(GameObject obj, TextOverhead text)
+        {
+            if (!_textOverheads.TryGetValue(obj, out Deque<TextOverhead> deque) || deque == null)
+            {
+                deque = new Deque<TextOverhead>();
+                _textOverheads[obj] = deque;
+            }
+      
+            deque.AddToFront(text);
+
+            if (deque.Count > 5)
+                deque.RemoveFromBack();
+        }
+
+        public void RemoveTextOverheadList(GameObject obj)
+        {
+            if (_textOverheads.TryGetValue(obj, out Deque<TextOverhead> deque))
+            {
+                if (deque != null && deque.Count > 0)
+                {
+                    foreach (TextOverhead overhead in deque)
+                    {
+                        overhead.Dispose();
+                    }
+                }
+
+                _textOverheads.Remove(obj);
+            }
+        }
+
+        public void Dispose()
+        {
+            foreach (Deque<TextOverhead> deque in _textOverheads.Values)
+            {
+                foreach (TextOverhead textOverhead in deque)
+                {
+                    textOverhead.Dispose();
+                }
+            }
+
+            foreach (var deque in _damageOverheads.Values)
+            {
+                foreach (DamageOverhead damageOverhead in deque)
+                {
+                    damageOverhead.Dispose();
+                }
+            }
+
+            _bounds.Clear();
+
+            if (_toRemoveDamages.Count > 0)
+            {
+                _toRemoveDamages.ForEach(s =>
+                {
+                    _bounds.Remove(s);
+                    _damageOverheads.Remove(s);
+                });
+                _toRemoveDamages.Clear();
+            }
+
+            if (_toRemoveText.Count > 0)
+            {
+                _toRemoveText.ForEach(s =>
+                {
+                    _bounds.Remove(s);
+                    _textOverheads.Remove(s);
+                });
+                _toRemoveText.Clear();
+            }
+        }
     }
 }

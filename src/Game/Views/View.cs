@@ -200,19 +200,19 @@ namespace ClassicUO.Game.Views
 
         protected virtual void MessageOverHead(Batcher2D batcher, Vector3 position, int offY)
         {
-            if (GameObject.OverHeads != null)
-            {
-                for (int i = 0; i < GameObject.OverHeads.Count; i++)
-                {
-                    View v = GameObject.OverHeads[i].View;
-                    v.Bounds.X = (v.Texture.Width >> 1) - 22;
-                    v.Bounds.Y = offY + v.Texture.Height;
-                    v.Bounds.Width = v.Texture.Width;
-                    v.Bounds.Height = v.Texture.Height;
-                    Engine.SceneManager.GetScene<GameScene>().Overheads.AddOrUpdateText(v, position);
-                    offY += v.Texture.Height;
-                }
-            }
+            //if (GameObject.OverHeads != null)
+            //{
+            //    for (int i = 0; i < GameObject.OverHeads.Count; i++)
+            //    {
+            //        View v = GameObject.OverHeads[i].View;
+            //        v.Bounds.X = (v.Texture.Width >> 1) - 22;
+            //        v.Bounds.Y = offY + v.Texture.Height;
+            //        v.Bounds.Width = v.Texture.Width;
+            //        v.Bounds.Height = v.Texture.Height;
+            //        Engine.SceneManager.GetScene<GameScene>().Overheads.AddOrUpdateText(v, position);
+            //        offY += v.Texture.Height;
+            //    }
+            //}
         }
 
         public static bool IsNoDrawable(ushort g)

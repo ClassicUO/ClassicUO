@@ -23,6 +23,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -51,7 +52,7 @@ namespace ClassicUO.Game.GameObjects
 
     public partial class Mobile : Entity
     {
-        private Lazy< List<DamageOverhead> > _damageTextList = new Lazy<List<DamageOverhead>>( () => new List<DamageOverhead>());
+        //private Lazy< List<DamageOverhead> > _damageTextList = new Lazy<List<DamageOverhead>>( () => new List<DamageOverhead>());
         private ushort _hits;
         private ushort _hitsMax;
         private bool _isDead;
@@ -266,7 +267,7 @@ namespace ClassicUO.Game.GameObjects
 
         internal bool IsMoving => Steps.Count > 0;
 
-        public IReadOnlyList<DamageOverhead> DamageList => _damageTextList.IsValueCreated ? _damageTextList.Value : null;
+        //public IReadOnlyList<DamageOverhead> DamageList => _damageTextList.IsValueCreated ? _damageTextList.Value : null;
 
         public event EventHandler HitsChanged;
 
@@ -293,25 +294,26 @@ namespace ClassicUO.Game.GameObjects
 
             ProcessAnimation();
 
-            if (_damageTextList.IsValueCreated)
-            {
-                for (int i = 0; i < _damageTextList.Value.Count; i++)
-                {
-                    DamageOverhead damage = _damageTextList.Value[i];
-                    damage.Update(totalMS, frameMS);
-                    if (damage.IsDisposed) _damageTextList.Value.RemoveAt(i--);
-                }
-            }
+            //if (_damageTextList.IsValueCreated)
+            //{
+            //    for (int i = 0; i < _damageTextList.Value.Count; i++)
+            //    {
+            //        DamageOverhead damage = _damageTextList.Value[i];
+            //        damage.Update(totalMS, frameMS);
+            //        if (damage.IsDisposed)
+            //            _damageTextList.Value.RemoveAt(i--);
+            //    }
+            //}
         }
 
-        public void AddDamage(int damage)
-        {
-            DamageOverhead overhead = new DamageOverhead(this, damage.ToString(), hue: (Hue) (this == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500);
+        //public void AddDamage(int damage)
+        //{
+        //    DamageOverhead overhead = new DamageOverhead(this, damage.ToString(), hue: (Hue) (this == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500);
 
-            if (_damageTextList.Value.Count >= 5)
-                _damageTextList.Value.RemoveAt(_damageTextList.Value.Count - 1);
-            _damageTextList.Value.Insert(0, overhead);
-        }
+        //    if (_damageTextList.Value.Count >= 5)
+        //        _damageTextList.Value.RemoveAt(_damageTextList.Value.Count - 1);
+        //    _damageTextList.Value.Insert(0, overhead);
+        //}
 
         protected override void OnProcessDelta(Delta d)
         {
@@ -666,10 +668,36 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Dispose()
         {
-            base.Dispose();
-
             for (int i = 0; i < Equipment.Length; i++)
                 Equipment[i] = null;
+
+            //if (_damageTextList.IsValueCreated)
+            //{
+            //    _damageTextList.Value.ForEach(s => s.Dispose());
+            //    _damageTextList.Value.Clear();
+            //    _damageTextList = null;
+
+            //    //if (_damageTextList.Value.Count > 0)
+            //    //{
+            //    //    int offY = 0;
+
+            //    //    Rectangle rect = View.GetOnScreenRectangle();
+
+            //    //    for (int i = 0; i < _damageTextList.Value.Count; i++)
+            //    //    {
+            //    //        DamageOverhead dmg = DamageList[i];
+            //    //        View v = dmg.View;
+            //    //        v.Bounds.X = (v.Texture.Width >> 1) - 22;
+            //    //        v.Bounds.Y = offY + v.Texture.Height - dmg.OffsetY;
+            //    //        v.Bounds.Width = v.Texture.Width;
+            //    //        v.Bounds.Height = v.Texture.Height;
+            //    //        Engine.SceneManager.GetScene<GameScene>().Overheads.AddDamageOverheadAfterDead(v, new Vector3(rect.X, rect.Y, 0));
+            //    //        offY += v.Texture.Height;
+            //    //    }
+            //    //}
+            //}
+
+            base.Dispose();
         }
 
         public struct Step

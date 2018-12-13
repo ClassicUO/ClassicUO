@@ -26,6 +26,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
@@ -57,6 +58,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Item.Disposed += ItemOnDisposed;
 
             WantUpdateSize = false;
+            ShowLabel = true;
         }
 
         private void ItemOnDisposed(object sender, EventArgs e)
@@ -69,6 +71,8 @@ namespace ClassicUO.Game.Gumps.Controls
         public bool HighlightOnMouseOver { get; set; }
 
         public bool CanPickUp { get; set; }
+
+        public bool ShowLabel { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -85,11 +89,13 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (_sendClickIfNotDClick && totalMS >= _sClickTime)
             {
+                Log.Message(LogTypes.Warning, "SINGLECLICK SENDED");
                 GameActions.SingleClick(Item);
                 _sendClickIfNotDClick = false;
             }
 
-            UpdateLabel();
+            if (ShowLabel)
+                UpdateLabel();
             base.Update(totalMS, frameMS);
         }
 
@@ -182,7 +188,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Dispose()
         {
-            Item.Disposed += ItemOnDisposed;
+            Item.Disposed -= ItemOnDisposed;
             UpdateLabel(true);
             base.Dispose();
         }
@@ -203,20 +209,39 @@ namespace ClassicUO.Game.Gumps.Controls
 
         private void UpdateLabel(bool isDisposing = false)
         {
-            if (!isDisposing && Item.OverHeads != null && Item.OverHeads.Count > 0)
+            var gs = Engine.SceneManager.GetScene<GameScene>();
+            if (!isDisposing && gs.Overheads.HasOverhead(Item))
             {
-                if (_labels.Count <= 0)
+                //if (_labels.Count <= 0)
+                //{
+                //    foreach (TextOverhead overhead in Item.OverHeads)
+                //    {
+                //        overhead.Initialized = true;
+                //        overhead.TimeToLive = 4000;
+
+                //        Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth, style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
+                //        {
+                //            FadeOut = true
+                //        };
+                //        label.ControlInfo.Layer = UILayer.Over;
+                //        Engine.UI.Add(label);
+                //        _labels.Add(label);
+                //    }
+                //}
+
+                if (_labels.Count == 0)
                 {
-                    foreach (TextOverhead overhead in Item.OverHeads)
+                    var deque = gs.Overheads.GeTextOverheads(Item);
+
+                    foreach (TextOverhead overhead in deque)
                     {
                         overhead.Initialized = true;
                         overhead.TimeToLive = 4000;
-
                         Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth, style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
                         {
-                            FadeOut = true
+                            FadeOut = true,
+                            ControlInfo = { Layer =  UILayer.Over}
                         };
-                        label.ControlInfo.Layer = UILayer.Over;
                         Engine.UI.Add(label);
                         _labels.Add(label);
                     }

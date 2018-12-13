@@ -120,8 +120,6 @@ namespace ClassicUO.Game
 
         public static string ServerName { get; set; }
 
-
-
         public static void Update(double totalMS, double frameMS)
         {
             if (Player != null)

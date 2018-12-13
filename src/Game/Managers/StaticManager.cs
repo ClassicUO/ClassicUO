@@ -33,25 +33,25 @@ namespace ClassicUO.Game.Managers
 
         public void Update(double totalMS, double frameMS)
         {
-            foreach (Static k in _activeStatics)
-            {
-                k.Update(totalMS, frameMS);
+            //foreach (Static k in _activeStatics)
+            //{
+            //    k.Update(totalMS, frameMS);
 
-                if (k.IsDisposed || (k.OverHeads != null && k.OverHeads.Count <= 0))
-                    _toRemove.Add(k);
-            }
+            //    if (k.IsDisposed || (k.OverHeads != null && k.OverHeads.Count <= 0))
+            //        _toRemove.Add(k);
+            //}
 
-            if (_toRemove.Count > 0)
-            {
-                _toRemove.ForEach( s => _activeStatics.Remove(s));
-                _toRemove.Clear();
-            }
+            //if (_toRemove.Count > 0)
+            //{
+            //    _toRemove.ForEach( s => _activeStatics.Remove(s));
+            //    _toRemove.Clear();
+            //}
         }
 
         public void Add(Static stat)
         {
-            if (!stat.IsDisposed && (stat.OverHeads != null && stat.OverHeads.Count > 0) && !_activeStatics.Contains(stat))
-                _activeStatics.Add(stat);
+            //if (!stat.IsDisposed && (stat.OverHeads != null && stat.OverHeads.Count > 0) && !_activeStatics.Contains(stat))
+            //    _activeStatics.Add(stat);
         }
     }
 }

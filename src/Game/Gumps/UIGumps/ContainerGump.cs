@@ -110,6 +110,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnInitialize()
         {
+            foreach (var c in Children.OfType<ItemGump>())
+            {
+                c.Dispose();
+            }
+
             foreach (Item item in _item.Items)
                 AddChildren(new ItemGump(item));
         }

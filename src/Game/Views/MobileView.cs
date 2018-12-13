@@ -117,32 +117,74 @@ namespace ClassicUO.Game.Views
             int height = 0;
             int centerY = 0;
 
-            if (GameObject.OverHeads != null && GameObject.OverHeads.Count > 0)
+
+            var damageManager = Engine.SceneManager.GetScene<GameScene>().Overheads;
+
+            //Vector3 overheadPosition = Vector3.Zero;
+
+            if (damageManager.HasOverhead(GameObject) || damageManager.HasDamage(GameObject))
             {
                 GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
-
-                Vector3 overheadPosition = new Vector3
+                var overheadPosition = new Vector3
                 {
                     X = position.X + mobile.Offset.X,
                     Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
                     Z = position.Z
                 };
-                MessageOverHead(batcher, overheadPosition, mobile.IsMounted ? 0 : -22);
+                damageManager.UpdatePosition(mobile, overheadPosition);
             }
 
-            if (mobile.DamageList != null && mobile.DamageList.Count > 0)
-            {
-                if (height == 0 && centerY == 0)
-                    GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
+            //if (damageManager.HasDamage(GameObject))
+            //{
+            //    if (height == 0 && centerY == 0)
+            //        GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
 
-                Vector3 damagePosition = new Vector3
-                {
-                    X = position.X + mobile.Offset.X,
-                    Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
-                    Z = position.Z
-                };
-                DamageOverhead(mobile, batcher, damagePosition, mobile.IsMounted ? 0 : -22);
-            }
+            //    if (overheadPosition != Vector3.Zero)
+            //    {
+            //        overheadPosition = new Vector3
+            //        {
+            //            X = position.X + mobile.Offset.X,
+            //            Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
+            //            Z = position.Z
+            //        };
+            //    }
+            //}
+
+            //if (GameObject.OverHeads != null && GameObject.OverHeads.Count > 0)
+            //{
+            //    GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
+
+            //    Vector3 overheadPosition = new Vector3
+            //    {
+            //        X = position.X + mobile.Offset.X,
+            //        Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
+            //        Z = position.Z
+            //    };
+            //    MessageOverHead(batcher, overheadPosition, mobile.IsMounted ? 0 : -22);
+            //}
+
+
+
+            //{
+
+            //}
+
+            //if (mobile.DamageList != null && mobile.DamageList.Count > 0)
+            //if (damageManager.HasDamage(mobile))
+            //{
+            //    if (height == 0 && centerY == 0)
+            //        GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
+
+            //    Vector3 damagePosition = new Vector3
+            //    {
+            //        X = position.X + mobile.Offset.X,
+            //        Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
+            //        Z = position.Z
+            //    };
+            //    //DamageOverhead(mobile, damagePosition, mobile.IsMounted ? 0 : -22);
+
+            //    damageManager.UpdatePosition(mobile, damagePosition);
+            //}
 
             //if (_edge == null)
             //{
@@ -157,19 +199,22 @@ namespace ClassicUO.Game.Views
 
         //private static Texture2D _edge;
 
-        private void DamageOverhead(Mobile mobile, Batcher2D batcher, Vector3 position, int offY)
+        private void DamageOverhead(Mobile mobile, Vector3 position, int offY)
         {
-            for (int i = 0; i < mobile.DamageList.Count; i++)
-            {
-                DamageOverhead dmg = mobile.DamageList[i];
-                View v = dmg.View;
-                v.Bounds.X = (v.Texture.Width >> 1) - 22;
-                v.Bounds.Y = offY + v.Texture.Height - dmg.OffsetY;
-                v.Bounds.Width = v.Texture.Width;
-                v.Bounds.Height = v.Texture.Height;
-                Engine.SceneManager.GetScene<GameScene>().Overheads.AddOrUpdateDamage(v, position);
-                offY += v.Texture.Height;
-            }
+
+            //Engine.SceneManager.GetScene<GameScene>().DamagesManager.UpdatePosition(mobile, position);
+
+            //for (int i = 0; i < mobile.DamageList.Count; i++)
+            //{
+            //    DamageOverhead dmg = mobile.DamageList[i];
+            //    View v = dmg.View;
+            //    v.Bounds.X = (v.Texture.Width >> 1) - 22;
+            //    v.Bounds.Y = offY + v.Texture.Height - dmg.OffsetY;
+            //    v.Bounds.Width = v.Texture.Width;
+            //    v.Bounds.Height = v.Texture.Height;
+            //    Engine.SceneManager.GetScene<GameScene>().Overheads.AddOrUpdateDamage(v, position);
+            //    offY += v.Texture.Height;
+            //}
         }
 
         private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int height, out int centerY)

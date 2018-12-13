@@ -36,6 +36,8 @@ namespace ClassicUO.Game.Views
     {
         private readonly RenderedText _text;
 
+        protected bool EdgeDetection { get; set; }
+
         public TextOverheadView(TextOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent)
         {
             _text = new RenderedText
@@ -60,6 +62,7 @@ namespace ClassicUO.Game.Views
             parent.Initialized = true;
 
             parent.Disposed += ParentOnDisposed;
+            EdgeDetection = true;
         }
 
         private void ParentOnDisposed(object sender, EventArgs e)
@@ -78,29 +81,25 @@ namespace ClassicUO.Game.Views
             Texture.Ticks = Engine.Ticks;
             TextOverhead overhead = (TextOverhead) GameObject;
 
-            //if (overhead.Alpha < 1.0f)
-                HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
+            HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
 
-            Settings settings = Service.Get<Settings>();
-            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
+            if (EdgeDetection)
+            {
+                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-            int width = Texture.Width - Bounds.X;
-            int height = Texture.Height - Bounds.Y;
+                int width = Texture.Width - Bounds.X;
+                int height = Texture.Height - Bounds.Y;
 
-            if (position.X < Bounds.X)
-                position.X = Bounds.X;
-            else if (position.X > Engine.Profile.Current.GameWindowSize.X * gs.Scale - width)
-                position.X = Engine.Profile.Current.GameWindowSize.X * gs.Scale - width;
+                if (position.X < Bounds.X)
+                    position.X = Bounds.X;
+                else if (position.X > Engine.Profile.Current.GameWindowSize.X * gs.Scale - width)
+                    position.X = Engine.Profile.Current.GameWindowSize.X * gs.Scale - width;
 
-            if (position.Y - Bounds.Y < 0)
-                position.Y = Bounds.Y;
-            else if (position.Y > Engine.Profile.Current.GameWindowSize.Y * gs.Scale - height)
-                position.Y = Engine.Profile.Current.GameWindowSize.Y * gs.Scale - height;
-
-            //FrameInfo.X = (int) position.X;
-            //FrameInfo.Y = (int) position.Y;
-            //FrameInfo.Width = Texture.Width;
-            //FrameInfo.Height = Texture.Height;
+                if (position.Y - Bounds.Y < 0)
+                    position.Y = Bounds.Y;
+                else if (position.Y > Engine.Profile.Current.GameWindowSize.Y * gs.Scale - height)
+                    position.Y = Engine.Profile.Current.GameWindowSize.Y * gs.Scale - height;
+            }
 
             return base.Draw(batcher, position, objectList);
         }
@@ -120,19 +119,7 @@ namespace ClassicUO.Game.Views
     {
         public DamageOverheadView(DamageOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent, maxwidth, hue, font, isunicode, style)
         {
-        }
-
-        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
-        {
-            DamageOverhead dmg = (DamageOverhead) GameObject;
-
-            if (dmg.MovingTime >= 50)
-            {
-                dmg.MovingTime = 0;
-                dmg.OffsetY -= 2;
-            }
-
-            return base.Draw(batcher, position, objectList);
+            EdgeDetection = false;
         }
     }
 }

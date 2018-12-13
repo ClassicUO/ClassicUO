@@ -129,7 +129,6 @@ namespace ClassicUO.Game.GameObjects
             base.Update(totalMS, frameMS);
             (int sx, int sy, int sz) = GetSource();
             (int tx, int ty, int tz) = GetTarget();
-            Settings settings = Service.Get<Settings>();
             int screenCenterX = Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1);
             int screenCenterY = Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1);
             int playerX = World.Player.X;

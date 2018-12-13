@@ -372,7 +372,17 @@ namespace ClassicUO.Network
         {
             if (World.Player == null)
                 return;
-            World.Mobiles.Get(p.ReadUInt())?.AddDamage(p.ReadUShort());
+
+            Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+
+            if (mobile != null)
+            {
+                ushort damage = p.ReadUShort();
+
+                Engine.SceneManager.GetScene<GameScene>().Overheads.AddDamage(mobile, new DamageOverhead(mobile, damage.ToString(), hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500));
+            }
+
+            //World.Mobiles.Get(p.ReadUInt())?.AddDamage(p.ReadUShort());
         }
 
         private static void EditTileDataGodClientR(Packet p)
@@ -2008,7 +2018,16 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 case 0x22:
                     p.Skip(1);
-                    World.Mobiles.Get(p.ReadUInt())?.AddDamage(p.ReadByte());
+
+                    Mobile mobile = World.Mobiles.Get(p.ReadUInt());
+
+                    if (mobile != null)
+                    {
+                        byte damage = p.ReadByte();
+                        Engine.SceneManager.GetScene<GameScene>().Overheads.AddDamage(mobile, new DamageOverhead(mobile, damage.ToString(), hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500));
+                    }
+
+                    //World.Mobiles.Get(p.ReadUInt())?.AddDamage(p.ReadByte());
 
                     break;
                 //===========================================================================================

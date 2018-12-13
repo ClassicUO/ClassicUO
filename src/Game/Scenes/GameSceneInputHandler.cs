@@ -185,9 +185,9 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (string.IsNullOrEmpty(st.Name))
                                 TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
-                            obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
 
-                            _staticManager.Add(st);
+                            if (!Overheads.HasOverhead(obj))
+                                obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
 
                             break;
                         }

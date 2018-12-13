@@ -38,6 +38,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private Point _clickPoint;
         private ItemGump _itemGump;
         private float _pickupTime, _singleClickTime;
+        
 
         public EquipmentSlot(int x, int y, Mobile mobile, Layer layer)
         {
@@ -93,7 +94,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 {
                     AddChildren(_itemGump = new ItemGump(Item)
                     {
-                        HighlightOnMouseOver = false
+                        HighlightOnMouseOver = false,
+                        ShowLabel = false
                     });
                     ArtTexture texture = (ArtTexture) _itemGump.Texture;
                     int offsetX = (13 - texture.ImageRectangle.Width) >> 1;

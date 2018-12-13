@@ -102,18 +102,28 @@ namespace ClassicUO.Game.GameObjects
 
     public class DamageOverhead : TextOverhead
     {
+        private const int DAMAGE_Y_MOVING_TIME = 50;
+
+        private uint _movingTime;
         public DamageOverhead(GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f) : base(parent, text, maxwidth, hue, font, isunicode, style, timeToLive)
         {
+            
         }
 
-        public float MovingTime { get; set; }
-
-        public int OffsetY { get; set; }
+        public int OffsetY { get; private set; }
 
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
-            if (Initialized) MovingTime += (float) frameMS;
+
+            if (Initialized)
+            {
+                if (_movingTime < totalMS)
+                {
+                    _movingTime = (uint) totalMS + DAMAGE_Y_MOVING_TIME;
+                    OffsetY -= 2;
+                }
+            }
         }
 
         protected override View CreateView()

@@ -48,7 +48,6 @@ namespace ClassicUO.Game.Scenes
         private MouseOverList _mouseOverList;
         private WorldViewport _viewPortGump;
         private Settings _settings;
-        private StaticManager _staticManager;
         private JournalManager _journalManager;
         private OverheadManager _overheadManager;
         private GameObject _selectedObject;
@@ -93,6 +92,7 @@ namespace ClassicUO.Game.Scenes
 
         public OverheadManager Overheads => _overheadManager;
 
+
         public void DoubleClickDelayed(Serial serial)
             => _useItemQueue.Add(serial);
 
@@ -113,7 +113,6 @@ namespace ClassicUO.Game.Scenes
 
             _journalManager = new JournalManager();
             _overheadManager = new OverheadManager();
-            _staticManager = new StaticManager();
 
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
@@ -191,12 +190,16 @@ namespace ClassicUO.Game.Scenes
             InputManager.MouseMoving -= OnMouseMoving;
             InputManager.KeyDown -= OnKeyDown;
             InputManager.KeyUp -= OnKeyUp;
+
+            _overheadManager.Dispose();
+            _overheadManager = null;
             _journalManager.Clear();
             _journalManager = null;
-            _staticManager = null;
             _overheadManager = null;
             _useItemQueue.Clear();
             _useItemQueue = null;
+
+           
 
             base.Unload();
         }
@@ -324,7 +327,7 @@ namespace ClassicUO.Game.Scenes
                 MoveCharacterByInputs();
             // ===================================
             World.Update(totalMS, frameMS);
-            _staticManager.Update(totalMS, frameMS);
+            _overheadManager.Update(totalMS, frameMS);
 
             if (totalMS > _timePing)
             {
@@ -367,7 +370,8 @@ namespace ClassicUO.Game.Scenes
             }
 
             // Draw in game overhead text messages
-            _overheadManager.Draw(batcher, _mouseOverList);
+            _overheadManager.Draw(batcher, _mouseOverList, _offset);
+
             batcher.End();
             batcher.EnableLight(false);
             batcher.GraphicsDevice.SetRenderTarget(null);
