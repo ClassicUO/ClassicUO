@@ -30,44 +30,7 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
-{
-    public enum Ability : ushort
-    {
-        None = 0,
-        ArmorIgnore = 1,
-        BleedAttack = 2,
-        ConcussionBlow = 3,
-        CrushingBlow = 4,
-        Disarm = 5,
-        Dismount = 6,
-        DoubleStrike = 7,
-        InfectiousStrike = 8,
-        MortalStrike = 9,
-        MovingShot = 10,
-        ParalyzingBlow = 11,
-        ShadowStrike = 12,
-        WhirlwindAttack = 13,
-        RidingSwipe = 14,
-        FrenziedWhirlwind = 15,
-        Block = 16,
-        DefenseMastery = 17,
-        NerveStrike = 18,
-        TalonStrike = 19,
-        Feint = 20,
-        DualWield = 21,
-        DoubleShot = 22,
-        ArmorPierce = 23,
-        Bladeweave = 24,
-        ForceArrow = 25,
-        LightningArrow = 26,
-        PsychicAttack = 27,
-        SerpentArrow = 28,
-        ForceOfNature = 29,
-        InfusedThrow = 30,
-        MysticArc = 31,
-        Invalid
-    }
-
+{   
     public class PlayerMobile : Mobile
     {
         private readonly Ability[] _ability = new Ability[2]
@@ -108,7 +71,6 @@ namespace ClassicUO.Game.GameObjects
         private ushort _maximumStaminaInc;
         private ushort _maxPhysicRes;
         private ushort _maxPoisResUshort;
-        //private PlayerMovementState _movementState = PlayerMovementState.ANIMATE_IMMEDIATELY;
         private ushort _reflectPhysicalDamage;
         private ushort _resistCold;
         private ushort _resistEnergy;
@@ -131,6 +93,7 @@ namespace ClassicUO.Game.GameObjects
         private int _stepsOutstanding;
         private Direction _movementDirection;
         private byte _sequenceNumber;
+        private int _resynchronizing;
 
         public PlayerMobile(Serial serial) : base(serial)
         {
@@ -1664,7 +1627,8 @@ namespace ClassicUO.Game.GameObjects
 
             if (_stepsOutstanding >= Constants.MAX_STEP_COUNT)
             {
-                NetClient.Socket.Send(new PResend());
+                if (LastStepRequestTime + 1000 > Engine.Ticks)
+                    Resynchronize();
                 return false;
             }
 
@@ -1741,7 +1705,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_stepsOutstanding == 0)
             {
-                NetClient.Socket.Send(new PResend());
+                Resynchronize();
             }
             else
             {
@@ -1758,8 +1722,22 @@ namespace ClassicUO.Game.GameObjects
             _movementY = y;
             _movementZ = z;
             _movementDirection = dir;
+            _resynchronizing = 0;
             
             base.ForcePosition(x, y, z, dir);
+        }
+
+        internal void Resynchronize()
+        {
+            if (_resynchronizing > 0)
+            {
+                if (LastStepRequestTime + (_resynchronizing * 1000) > Engine.Ticks)
+                    return;
+            }
+
+            _resynchronizing++;
+            NetClient.Socket.Send(new PResend());
+            Log.Message(LogTypes.Trace, $"Resync request num: {_resynchronizing}");
         }
     }
 }

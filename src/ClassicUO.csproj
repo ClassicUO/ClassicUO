@@ -86,6 +86,7 @@
     <Compile Include="Configuration\Profile.cs" />
     <Compile Include="Configuration\ProfileManager.cs" />
     <Compile Include="Game\Constants.cs" />
+    <Compile Include="Game\Data\Ability.cs" />
     <Compile Include="Game\Data\BuffIcon.cs" />
     <Compile Include="Game\Data\BuffTable.cs" />
     <Compile Include="Game\Data\CharacterCreationValues.cs" />

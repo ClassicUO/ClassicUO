@@ -37,13 +37,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class MiniMapGump : Gump
     {
-        private const float ReticleBlinkMS = 250f;
         private static MiniMapGump _self;
-        private double _frameMS;
         private SpriteTexture _gumpTexture, _mapTexture;
         private bool _forceUpdate;
         private Texture2D _playerIndicator, _mobilesIndicator;
-        private float _timeMS;
+        private long _timeMS;
         private bool _useLargeMap;
         private ushort _x, _y;
         private int _lastMap = -1;
@@ -86,8 +84,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            _frameMS = frameMS;
-
             if (_gumpTexture == null || _gumpTexture.IsDisposed || _forceUpdate)
             {
                 _gumpTexture = IO.Resources.Gumps.GetGumpTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
@@ -104,6 +100,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             if (_mapTexture != null)
                 _mapTexture.Ticks = (long) totalMS;
+
+            if (_timeMS < totalMS)
+            {
+                _draw = !_draw;
+                _timeMS = (long) totalMS + 500;
+            }
         }
 
 
@@ -114,13 +116,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             batcher.Draw2D(_gumpTexture, position, Vector3.Zero);
             CreateMiniMapTexture();
-            batcher.Draw2D(_mapTexture, position, Vector3.Zero);
-
-            if (_timeMS < Engine.Ticks)
-            {
-                _draw = !_draw;
-                _timeMS = Engine.Ticks + 500;
-            }
+            batcher.Draw2D(_mapTexture, position, Vector3.Zero);      
 
             if (_draw)
             {
@@ -137,21 +133,22 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     _mobilesIndicator.SetData( new [] { Color.White } );
                 }
 
+                int w = Width >> 1;
+                int h = Height >> 1;
 
                 foreach (Mobile mob in World.Mobiles.Where(s => s != World.Player))
                 {
-
                     int x = mob.X - World.Player.X;
                     int y = mob.Y - World.Player.Y;
 
                     int gx = x - y;
                     int gy = x + y;
 
-                    batcher.Draw2D(_mobilesIndicator, new Rectangle(position.X + (Width >> 1) + gx, position.Y + (Height >> 1) + gy, 2, 2), ShaderHuesTraslator.GetHueVector(Notoriety.GetHue(mob.NotorietyFlag)) );
+                    batcher.Draw2D(_mobilesIndicator, new Rectangle(position.X + w + gx, position.Y + h + gy, 2, 2), ShaderHuesTraslator.GetHueVector(Notoriety.GetHue(mob.NotorietyFlag)) );
                 }
 
                 //DRAW DOT OF PLAYER
-                batcher.Draw2D(_playerIndicator, new Rectangle(position.X + (Width >> 1), position.Y + (Height >> 1), 2 ,2), Vector3.Zero);
+                batcher.Draw2D(_playerIndicator, new Rectangle(position.X + w, position.Y + h, 2, 2), Vector3.Zero);
             }
 
             return base.Draw(batcher, position, hue);
