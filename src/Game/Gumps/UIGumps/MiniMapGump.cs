@@ -208,7 +208,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (minBlockY < 0)
                 minBlockY = 0;
             int maxBlockIndex = World.Map.MapBlockIndex;
-            int mapBlockHeight = IO.Resources.Map.MapBlocksSize[World.MapIndex][1];
+            int mapBlockHeight = IO.Resources.Map.MapBlocksSize[World.MapIndex, 1];
             ushort[] data = IO.Resources.Gumps.GetGumpPixels(_useLargeMap ? 5011 : 5010, out _, out _);
 
             Point[] table = new Point[2]

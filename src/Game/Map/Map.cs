@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Map
         {
             Index = index;
             IO.Resources.Map.LoadMap(index);
-            MapBlockIndex = IO.Resources.Map.MapBlocksSize[Index][0] * IO.Resources.Map.MapBlocksSize[Index][1];
+            MapBlockIndex = IO.Resources.Map.MapBlocksSize[Index, 0] * IO.Resources.Map.MapBlocksSize[Index, 1];
             Chunks = new Chunk[MapBlockIndex];
         }
 
@@ -190,7 +190,7 @@ namespace ClassicUO.Game.Map
 
         private int GetBlock(int blockX, int blockY)
         {
-            return blockX * IO.Resources.Map.MapBlocksSize[Index][1] + blockY;
+            return blockX * IO.Resources.Map.MapBlocksSize[Index, 1] + blockY;
         }
 
         public void ClearUnusedBlocks()
@@ -243,17 +243,17 @@ namespace ClassicUO.Game.Map
             if (minBlockY < 0)
                 minBlockY = 0;
 
-            if (maxBlockX >= IO.Resources.Map.MapBlocksSize[Index][0])
-                maxBlockX = IO.Resources.Map.MapBlocksSize[Index][0] - 1;
+            if (maxBlockX >= IO.Resources.Map.MapBlocksSize[Index, 0])
+                maxBlockX = IO.Resources.Map.MapBlocksSize[Index, 0] - 1;
 
-            if (maxBlockY >= IO.Resources.Map.MapBlocksSize[Index][1])
-                maxBlockY = IO.Resources.Map.MapBlocksSize[Index][1] - 1;
+            if (maxBlockY >= IO.Resources.Map.MapBlocksSize[Index, 1])
+                maxBlockY = IO.Resources.Map.MapBlocksSize[Index, 1] - 1;
             long tick = Engine.Ticks;
             long maxDelay = Engine.FrameDelay[1] >> 1;
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
-                int index = i * IO.Resources.Map.MapBlocksSize[Index][1];
+                int index = i * IO.Resources.Map.MapBlocksSize[Index, 1];
 
                 for (int j = minBlockY; j <= maxBlockY; j++)
                 {

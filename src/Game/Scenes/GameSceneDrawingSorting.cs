@@ -349,11 +349,11 @@ namespace ClassicUO.Game.Scenes
             if (minBlockY < 0)
                 minBlockY = 0;
 
-            if (maxBlockX >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][0])
-                maxBlockX = IO.Resources.Map.MapsDefaultSize[World.Map.Index][0] - 1;
+            if (maxBlockX >= IO.Resources.Map.MapsDefaultSize[World.Map.Index, 0])
+                maxBlockX = IO.Resources.Map.MapsDefaultSize[World.Map.Index, 0] - 1;
 
-            if (maxBlockY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][1])
-                maxBlockY = IO.Resources.Map.MapsDefaultSize[World.Map.Index][1] - 1;
+            if (maxBlockY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index, 1])
+                maxBlockY = IO.Resources.Map.MapsDefaultSize[World.Map.Index, 1] - 1;
             int drawOffset = (int) (Scale * 40.0);
             float maxX = winGamePosX + winGameWidth + drawOffset;
             float maxY = winGamePosY + winGameHeight + drawOffset;

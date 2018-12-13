@@ -56,8 +56,8 @@ namespace ClassicUO.IO
                             return;
                         }
 
-                        int mapWidthInBlocks = Resources.Map.MapBlocksSize[mapID][0];
-                        int mapHeightInBlocks = Resources.Map.MapBlocksSize[mapID][1];
+                        int mapWidthInBlocks = Resources.Map.MapBlocksSize[mapID, 0];
+                        int mapHeightInBlocks = Resources.Map.MapBlocksSize[mapID, 1];
                         int blocks = mapWidthInBlocks * mapHeightInBlocks;
                         if (block < 0 || block >= blocks)
                         {
@@ -147,7 +147,7 @@ namespace ClassicUO.IO
                             staticsData[i] = p.ReadByte();
                         }
                         int index = 0;
-                        if (block >= 0 && block < (IO.Resources.Map.MapBlocksSize[mapID][0] * IO.Resources.Map.MapBlocksSize[mapID][1]))
+                        if (block >= 0 && block < (IO.Resources.Map.MapBlocksSize[mapID, 0] * IO.Resources.Map.MapBlocksSize[mapID, 1]))
                         {
                             var chunk = World.Map.Chunks[block];
                             for (int i = 0; i < 8; i++)
@@ -246,7 +246,7 @@ namespace ClassicUO.IO
             if (World.Map == null || mapID != World.Map.Index)
                 return;
             int index = 0;
-            if (block >= 0 && block < (IO.Resources.Map.MapBlocksSize[mapID][0] * IO.Resources.Map.MapBlocksSize[mapID][1]))
+            if (block >= 0 && block < (IO.Resources.Map.MapBlocksSize[mapID, 0] * IO.Resources.Map.MapBlocksSize[mapID, 1]))
             {
                 for (int i = 0; i < 8; i++)
                 {

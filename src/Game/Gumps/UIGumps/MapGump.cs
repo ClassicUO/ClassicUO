@@ -47,15 +47,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private unsafe void Load()
         {
-            int size = IO.Resources.Map.MapsDefaultSize[World.MapIndex][0] * IO.Resources.Map.MapsDefaultSize[World.MapIndex][1];
+            int size = IO.Resources.Map.MapsDefaultSize[World.MapIndex, 0] * IO.Resources.Map.MapsDefaultSize[World.MapIndex, 1];
             ushort[] buffer = new ushort[size];
             int maxBlock = size - 1;
 
-            for (int bx = 0; bx < IO.Resources.Map.MapBlocksSize[World.MapIndex][0]; bx++)
+            for (int bx = 0; bx < IO.Resources.Map.MapBlocksSize[World.MapIndex, 0]; bx++)
             {
                 int mapX = bx * 8;
 
-                for (int by = 0; by < IO.Resources.Map.MapBlocksSize[World.MapIndex][1]; by++)
+                for (int by = 0; by < IO.Resources.Map.MapBlocksSize[World.MapIndex, 1]; by++)
                 {
                     IndexMap indexMap = World.Map.GetIndex(bx, by);
 
@@ -108,7 +108,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     for (int y = 0; y < 8; y++)
                     {
-                        int block = (mapY + y) * IO.Resources.Map.MapsDefaultSize[World.MapIndex][0] + mapX;
+                        int block = (mapY + y) * IO.Resources.Map.MapsDefaultSize[World.MapIndex, 0] + mapX;
 
                         for (int x = 0; x < 8; x++)
                         {
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
             }
 
-            _mapTexture = new SpriteTexture(IO.Resources.Map.MapsDefaultSize[World.MapIndex][0], IO.Resources.Map.MapsDefaultSize[World.MapIndex][1], false);
+            _mapTexture = new SpriteTexture(IO.Resources.Map.MapsDefaultSize[World.MapIndex, 0], IO.Resources.Map.MapsDefaultSize[World.MapIndex, 1], false);
             _mapTexture.SetData(buffer);
         }
 
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (minBlockY < 0)
                 minBlockY = 0;
             int maxBlockIndex = World.Map.MapBlockIndex;
-            int mapBlockHeight = IO.Resources.Map.MapBlocksSize[World.MapIndex][1];
+            int mapBlockHeight = IO.Resources.Map.MapBlocksSize[World.MapIndex, 1];
             ushort[] data = new ushort[Width * Height];
 
             for (int i = minBlockX; i <= maxBlockX; i++)
