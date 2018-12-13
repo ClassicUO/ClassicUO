@@ -1118,7 +1118,8 @@ namespace ClassicUO.Network
 
     public sealed class PResend : PacketWriter
     {
-        public PResend() : base(0x22)
+        public static Lazy<PResend> Instance { get; } = new Lazy<PResend>(() => new PResend());
+        private PResend() : base(0x22)
         {
         }
     }

@@ -762,9 +762,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Lock IntLock { get; set; }
 
-        //protected override bool NoIterateAnimIndex() => false;
         protected override bool IsWalking => LastStepTime > Engine.Ticks - Constants.PLAYER_WALKING_DELAY;
-
 
         public void AddBuff(Graphic graphic, uint time, string text)
         {
@@ -1605,12 +1603,15 @@ namespace ClassicUO.Game.GameObjects
             if (d.HasFlag(Delta.Skills)) SkillsChanged.Raise(this);
         }
 
-        protected override void OnPositionChanged(object sender, EventArgs e)
+        public override Position Position
         {
-            if (World.Map != null && World.Map.Index >= 0)
+            get => base.Position;
+            set
             {
-                World.Map.Center = new Point(X, Y);
-                base.OnPositionChanged(sender, e);
+                base.Position = value;
+
+                if (World.Map != null && World.Map.Index >= 0)
+                    World.Map.Center = new Point(X, Y);
             }
         }
 
@@ -1736,7 +1737,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             _resynchronizing++;
-            NetClient.Socket.Send(new PResend());
+            NetClient.Socket.Send(PResend.Instance.Value);
             Log.Message(LogTypes.Trace, $"Resync request num: {_resynchronizing}");
         }
     }

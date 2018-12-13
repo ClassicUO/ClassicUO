@@ -59,7 +59,6 @@ namespace ClassicUO.Game.GameObjects
         {
             Serial = serial;
             Items = new EntityCollection<Item>();
-            PositionChanged += OnPositionChanged;
         }
 
         public EntityCollection<Item> Items { get; }
@@ -188,14 +187,10 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Dispose()
         {
-            PositionChanged -= OnPositionChanged;
             _properties.Clear();
             base.Dispose();
         }
 
-        protected virtual void OnPositionChanged(object sender, EventArgs e)
-        {
-        }
 
         public static implicit operator Serial(Entity entity)
         {
@@ -212,9 +207,9 @@ namespace ClassicUO.Game.GameObjects
             return Serial.GetHashCode();
         }
 
-        public virtual void ProcessAnimation()
-        {
-        }
+        public abstract void ProcessAnimation();
+
+        public abstract Graphic GetGraphicForAnimation();
 
         [Flags]
         protected enum Delta

@@ -172,7 +172,7 @@ namespace ClassicUO.Game.GameObjects
             }
         };
 
-        public Graphic GetMountAnimation()
+        public override Graphic GetGraphicForAnimation()
         {
             ushort g = Graphic;
 
@@ -205,7 +205,7 @@ namespace ClassicUO.Game.GameObjects
         public static byte GetGroupForAnimation(Mobile mobile, ushort checkGraphic = 0)
         {
             Graphic graphic = checkGraphic;
-            if (graphic == 0) graphic = mobile.GetMountAnimation();
+            if (graphic == 0) graphic = mobile.GetGraphicForAnimation();
             ANIMATION_GROUPS groupIndex = Animations.GetGroupIndex(graphic);
             byte result = mobile.AnimationGroup;
 

@@ -37,10 +37,6 @@ namespace ClassicUO.Game.GameObjects
 {
     public abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
     {
-        //private Lazy< List<TextOverhead> > _overHeads = new Lazy<List<TextOverhead>>(() =>
-        //{
-        //    return new List<TextOverhead>();
-        //}) ;
         private Position _position = Position.Invalid;
         private View _view;
         public Vector3 Offset;
@@ -70,33 +66,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (_position != value)
                 {
-                    //if (World.Map != null)
-                    //{
-                    //    if (Tile != null/* Tile.Invalid*/)
-                    //        Tile.RemoveGameObject(this);
-                    //}
-
                     _position = value;
                     ScreenPosition = new Vector3((_position.X - _position.Y) * 22, (_position.X + _position.Y) * 22 - _position.Z * 4, 0);
                     IsPositionChanged = true;
-
-                    //if (World.Map != null)
-                    //{
-                    //     Tile newTile =  World.Map.GetTile(value.X, value.Y);
-
-                    //    if (newTile != null)
-                    //        newTile.AddGameObject(this);
-                    //    Tile = newTile;
-                    //}
-                    //else if (this != World.Player)
-                    //    Dispose();
-
-                    //if (World.Map != null)
-                    //{
-                    //    Tile = World.Map.GetTile(value.X, value.Y);
-                    //}
-                    //else if (this != World.Player)
-                    //    Dispose();
                 }
             }
         }
@@ -126,8 +98,6 @@ namespace ClassicUO.Game.GameObjects
         public View View => _view ?? (_view = CreateView());
 
         public sbyte AnimIndex { get; set; }
-
-        //public IReadOnlyList<TextOverhead> OverHeads => _overHeads.IsValueCreated ? _overHeads.Value : null;
 
         public int CurrentRenderIndex { get; set; }
 
@@ -179,19 +149,7 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            if (IsDisposed) return;
 
-            //if (_overHeads.IsValueCreated)
-            //{
-            //    for (int i = 0; i < _overHeads.Value.Count; i++)
-            //    {
-            //        TextOverhead gt = _overHeads.Value[i];
-            //        gt.Update(totalMS, frameMS);
-
-            //        if (gt.IsDisposed)
-            //            _overHeads.Value.RemoveAt(i--);
-            //    }
-            //}
         }
 
         public void AddToTile(int x, int y)

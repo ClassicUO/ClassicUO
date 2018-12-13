@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Views
         public StaticView(Static st) : base(st)
         {
             _isFoliage = TileData.IsFoliage( st.ItemData.Flags);
-            AllowedToDraw = !IsNoDrawable(st.Graphic) /*&& !(_isFoliage && World.MapIndex == 0)*/;
+            AllowedToDraw = !IsNoDrawable(st.Graphic);
 
             if (TileData.IsTranslucent(st.ItemData.Flags))
                 _alpha = 0.5f;
@@ -48,9 +48,9 @@ namespace ClassicUO.Game.Views
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
-            Static st = (Static) GameObject;
 
-            
+            Static st = (Static) GameObject;
+          
             if (Texture == null || Texture.IsDisposed)
             {
                 ArtTexture texture = Art.GetStaticTexture(GameObject.Graphic);
@@ -127,7 +127,6 @@ namespace ClassicUO.Game.Views
         {
             int x = list.MousePosition.X - (int) vertex[0].Position.X;
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
-            //if (Art.Contains(GameObject.Graphic, x, y))
             if (Texture.Contains(x, y))
                 list.Add(GameObject, vertex[0].Position);
         }

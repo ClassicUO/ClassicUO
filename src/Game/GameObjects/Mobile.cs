@@ -52,7 +52,6 @@ namespace ClassicUO.Game.GameObjects
 
     public partial class Mobile : Entity
     {
-        //private Lazy< List<DamageOverhead> > _damageTextList = new Lazy<List<DamageOverhead>>( () => new List<DamageOverhead>());
         private ushort _hits;
         private ushort _hitsMax;
         private bool _isDead;
@@ -267,8 +266,6 @@ namespace ClassicUO.Game.GameObjects
 
         internal bool IsMoving => Steps.Count > 0;
 
-        //public IReadOnlyList<DamageOverhead> DamageList => _damageTextList.IsValueCreated ? _damageTextList.Value : null;
-
         public event EventHandler HitsChanged;
 
         public event EventHandler ManaChanged;
@@ -285,6 +282,7 @@ namespace ClassicUO.Game.GameObjects
             _isSA_Poisoned = value;
         }
 
+
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -293,27 +291,7 @@ namespace ClassicUO.Game.GameObjects
                 SetIdleAnimation();
 
             ProcessAnimation();
-
-            //if (_damageTextList.IsValueCreated)
-            //{
-            //    for (int i = 0; i < _damageTextList.Value.Count; i++)
-            //    {
-            //        DamageOverhead damage = _damageTextList.Value[i];
-            //        damage.Update(totalMS, frameMS);
-            //        if (damage.IsDisposed)
-            //            _damageTextList.Value.RemoveAt(i--);
-            //    }
-            //}
-        }
-
-        //public void AddDamage(int damage)
-        //{
-        //    DamageOverhead overhead = new DamageOverhead(this, damage.ToString(), hue: (Hue) (this == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500);
-
-        //    if (_damageTextList.Value.Count >= 5)
-        //        _damageTextList.Value.RemoveAt(_damageTextList.Value.Count - 1);
-        //    _damageTextList.Value.Insert(0, overhead);
-        //}
+        }     
 
         protected override void OnProcessDelta(Delta d)
         {
@@ -334,15 +312,7 @@ namespace ClassicUO.Game.GameObjects
             if (Steps.Count >= Constants.MAX_STEP_COUNT)
                 return false;
 
-            //Direction dirRun = run ? Direction.Running : Direction.North;
-
-            //direction = direction & Direction.Up;
-            int endX = 0, endY = 0;
-            sbyte endZ = 0;
-            Direction endDir = Direction.NONE;
-            GetEndPosition(out endX, out endY, out endZ, out endDir);
-
-            //endDir = endDir & Direction.Up;
+            GetEndPosition(out int endX, out int endY, out sbyte endZ, out Direction endDir);
 
             if (endX == x && endY == y && endZ == z && endDir == direction) return true;
             if (!IsMoving) LastStepTime = Engine.Ticks;
@@ -462,7 +432,7 @@ namespace ClassicUO.Game.GameObjects
                 AnimationRepeat = false;
                 AnimationFromServer = true;
 
-                byte index = (byte) Animations.GetGroupIndex(GetMountAnimation());
+                byte index = (byte) Animations.GetGroupIndex(GetGraphicForAnimation());
 
                 AnimationGroup = _animationIdle[index - 1, RandomHelper.GetValue(0, 2)];
             }
@@ -556,7 +526,7 @@ namespace ClassicUO.Game.GameObjects
                     frameIndex--;
                 else
                     frameIndex++;
-                Graphic id = GetMountAnimation();
+                Graphic id = GetGraphicForAnimation();
                 int animGroup = GetGroupForAnimation(this, id);
 
                 if (animGroup == 64 || animGroup == 65)
@@ -574,7 +544,7 @@ namespace ClassicUO.Game.GameObjects
                         case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_1:
                         case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_2:
                         case (byte) PEOPLE_ANIMATION_GROUP.PAG_FIDGET_3:
-                            id = mount.GetMountAnimation();
+                            id = mount.GetGraphicForAnimation();
                             animGroup = GetGroupForAnimation(this, id);
 
                             break;
@@ -670,33 +640,6 @@ namespace ClassicUO.Game.GameObjects
         {
             for (int i = 0; i < Equipment.Length; i++)
                 Equipment[i] = null;
-
-            //if (_damageTextList.IsValueCreated)
-            //{
-            //    _damageTextList.Value.ForEach(s => s.Dispose());
-            //    _damageTextList.Value.Clear();
-            //    _damageTextList = null;
-
-            //    //if (_damageTextList.Value.Count > 0)
-            //    //{
-            //    //    int offY = 0;
-
-            //    //    Rectangle rect = View.GetOnScreenRectangle();
-
-            //    //    for (int i = 0; i < _damageTextList.Value.Count; i++)
-            //    //    {
-            //    //        DamageOverhead dmg = DamageList[i];
-            //    //        View v = dmg.View;
-            //    //        v.Bounds.X = (v.Texture.Width >> 1) - 22;
-            //    //        v.Bounds.Y = offY + v.Texture.Height - dmg.OffsetY;
-            //    //        v.Bounds.Width = v.Texture.Width;
-            //    //        v.Bounds.Height = v.Texture.Height;
-            //    //        Engine.SceneManager.GetScene<GameScene>().Overheads.AddDamageOverheadAfterDead(v, new Vector3(rect.X, rect.Y, 0));
-            //    //        offY += v.Texture.Height;
-            //    //    }
-            //    //}
-            //}
-
             base.Dispose();
         }
 
@@ -705,11 +648,7 @@ namespace ClassicUO.Game.GameObjects
             public int X, Y;
             public sbyte Z;
             public byte Direction;
-            public bool Anim;
             public bool Run;
-            public byte Rej;
-            public byte Seq;
-            public byte Reserved;
         }
     }
 }

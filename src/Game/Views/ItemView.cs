@@ -37,10 +37,8 @@ namespace ClassicUO.Game.Views
 
         public ItemView(Item item) : base(item)
         {
-            //if (TileData.IsWet((long) item.ItemData.Flags)) SortZ++;
-
             if (!item.IsCorpse)
-                AllowedToDraw = item.Graphic > 2 && item.DisplayedGraphic > 2 && !IsNoDrawable(item.Graphic);
+                AllowedToDraw = item.Graphic > 2 && item.DisplayedGraphic > 2 && !IsNoDrawable(item.Graphic) && !item.IsMulti;
             else
             {
                 if ((item.Direction & Direction.Running) != 0)
@@ -112,9 +110,9 @@ namespace ClassicUO.Game.Views
 
                 if (layer == Layer.Invalid)
                 {
-                    graphic = item.GetMountAnimation();
+                    graphic = item.GetGraphicForAnimation();
                     //graphic = item.DisplayedGraphic;
-                    Animations.AnimGroup = Animations.GetDieGroupIndex(item.GetMountAnimation(), item.UsedLayer);
+                    Animations.AnimGroup = Animations.GetDieGroupIndex(item.GetGraphicForAnimation(), item.UsedLayer);
                     color = GameObject.Hue;
                 }
                 else

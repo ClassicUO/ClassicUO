@@ -265,14 +265,10 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        protected override void OnPositionChanged(object sender, EventArgs e)
-        {
-            base.OnPositionChanged(sender, e);
+        //protected override void OnPositionChanged(object sender, EventArgs e)
+        //{
 
-            if (IsCorpse)
-            {
-            }
-        }
+        //}
 
         public event EventHandler OwnerChanged;
 
@@ -292,7 +288,7 @@ namespace ClassicUO.Game.GameObjects
             if (d.HasFlag(Delta.Ownership)) OwnerChanged.Raise(this);
         }
 
-        public Graphic GetMountAnimation()
+        public override Graphic GetGraphicForAnimation()
         {
             Graphic graphic = Graphic;
 
@@ -599,7 +595,7 @@ namespace ClassicUO.Game.GameObjects
                 if (_lastAnimationChangeTime < Engine.Ticks)
                 {
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
-                    Graphic id = GetMountAnimation();
+                    Graphic id = GetGraphicForAnimation();
                     bool mirror = false;
                     Animations.GetAnimDirection(ref dir, ref mirror);
 

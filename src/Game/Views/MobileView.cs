@@ -23,6 +23,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
@@ -56,8 +57,7 @@ namespace ClassicUO.Game.Views
             byte dir = (byte)mobile.GetDirectionForAnimation();
             Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
-            int mountOffset = 0;
-            SetupLayers(dir, ref mobile, ref mountOffset);
+            SetupLayers(dir, mobile, out int mountOffset);
             ref AnimationFrameTexture bodyFrame = ref _frames[0].Frame;
 
             if (bodyFrame == null)
@@ -114,17 +114,11 @@ namespace ClassicUO.Game.Views
             FrameInfo.Height = FrameInfo.Y + rect.Height;
 
 
-            int height = 0;
-            int centerY = 0;
-
-
-            var damageManager = Engine.SceneManager.GetScene<GameScene>().Overheads;
-
-            //Vector3 overheadPosition = Vector3.Zero;
+            OverheadManager damageManager = Engine.SceneManager.GetScene<GameScene>().Overheads;
 
             if (damageManager.HasOverhead(GameObject) || damageManager.HasDamage(GameObject))
             {
-                GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
+                GetAnimationDimensions(mobile, 0xFF, out int height, out int centerY);
                 var overheadPosition = new Vector3
                 {
                     X = position.X + mobile.Offset.X,
@@ -134,88 +128,10 @@ namespace ClassicUO.Game.Views
                 damageManager.UpdatePosition(mobile, overheadPosition);
             }
 
-            //if (damageManager.HasDamage(GameObject))
-            //{
-            //    if (height == 0 && centerY == 0)
-            //        GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
-
-            //    if (overheadPosition != Vector3.Zero)
-            //    {
-            //        overheadPosition = new Vector3
-            //        {
-            //            X = position.X + mobile.Offset.X,
-            //            Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
-            //            Z = position.Z
-            //        };
-            //    }
-            //}
-
-            //if (GameObject.OverHeads != null && GameObject.OverHeads.Count > 0)
-            //{
-            //    GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
-
-            //    Vector3 overheadPosition = new Vector3
-            //    {
-            //        X = position.X + mobile.Offset.X,
-            //        Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
-            //        Z = position.Z
-            //    };
-            //    MessageOverHead(batcher, overheadPosition, mobile.IsMounted ? 0 : -22);
-            //}
-
-
-
-            //{
-
-            //}
-
-            //if (mobile.DamageList != null && mobile.DamageList.Count > 0)
-            //if (damageManager.HasDamage(mobile))
-            //{
-            //    if (height == 0 && centerY == 0)
-            //        GetAnimationDimensions(mobile, 0xFF, out height, out centerY);
-
-            //    Vector3 damagePosition = new Vector3
-            //    {
-            //        X = position.X + mobile.Offset.X,
-            //        Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
-            //        Z = position.Z
-            //    };
-            //    //DamageOverhead(mobile, damagePosition, mobile.IsMounted ? 0 : -22);
-
-            //    damageManager.UpdatePosition(mobile, damagePosition);
-            //}
-
-            //if (_edge == null)
-            //{
-            //    _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
-            //    _edge.SetData(new Color[] { Color.LightBlue});
-            //}
-
-            //batcher.DrawRectangle(_edge, GetOnScreenRectangle(), Vector3.Zero);
-
             return true;
         }
 
-        //private static Texture2D _edge;
-
-        private void DamageOverhead(Mobile mobile, Vector3 position, int offY)
-        {
-
-            //Engine.SceneManager.GetScene<GameScene>().DamagesManager.UpdatePosition(mobile, position);
-
-            //for (int i = 0; i < mobile.DamageList.Count; i++)
-            //{
-            //    DamageOverhead dmg = mobile.DamageList[i];
-            //    View v = dmg.View;
-            //    v.Bounds.X = (v.Texture.Width >> 1) - 22;
-            //    v.Bounds.Y = offY + v.Texture.Height - dmg.OffsetY;
-            //    v.Bounds.Width = v.Texture.Width;
-            //    v.Bounds.Height = v.Texture.Height;
-            //    Engine.SceneManager.GetScene<GameScene>().Overheads.AddOrUpdateDamage(v, position);
-            //    offY += v.Texture.Height;
-            //}
-        }
+     
 
         private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int height, out int centerY)
         {
@@ -226,7 +142,7 @@ namespace ClassicUO.Game.Views
 
             if (frameIndex == 0xFF)
                 frameIndex = (byte) mobile.AnimIndex;
-            Animations.GetAnimationDimensions(frameIndex, mobile.Graphic, dir, animGroup, out int x, out centerY, out int w, out height);
+            Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out int x, out centerY, out int w, out height);
             if (x == 0 && centerY == 0 && w == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
 
@@ -240,12 +156,12 @@ namespace ClassicUO.Game.Views
                 x = list.MousePosition.X - (int) drawPosition.X + area.X;
             int y = list.MousePosition.Y - ((int) drawPosition.Y - area.Y);
             if (texture.Contains(x, y)) list.Add(GameObject, drawPosition);
-            //if (Animations.Contains(id, x, y)) list.Add(GameObject, drawPosition);
         }
 
-        private void SetupLayers(byte dir, ref Mobile mobile, ref int mountOffset)
+        private void SetupLayers(byte dir, Mobile mobile, out int mountOffset)
         {
             _layerCount = 0;
+            mountOffset = 0;
 
             if (mobile.IsHuman)
             {
@@ -257,7 +173,7 @@ namespace ClassicUO.Game.Views
                         continue;
 
                     if (layer == Layer.Invalid)
-                        AddLayer(dir, GameObject.Graphic, GameObject.Hue, ref mobile);
+                        AddLayer(dir, mobile.GetGraphicForAnimation(), GameObject.Hue, mobile);
                     else
                     {
                         Item item;
@@ -270,11 +186,11 @@ namespace ClassicUO.Game.Views
 
                                 if (mount != null)
                                 {
-                                    Graphic mountGraphic = item.GetMountAnimation();
+                                    Graphic mountGraphic = item.GetGraphicForAnimation();
 
                                     if (mountGraphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
                                         mountOffset = Animations.DataIndex[mountGraphic].MountedHeightOffset;
-                                    AddLayer(dir, mountGraphic, mount.Hue, ref mobile, true, offsetY: mountOffset);
+                                    AddLayer(dir, mountGraphic, mount.Hue, mobile, true, offsetY: mountOffset);
                                 }
                             }
                             else
@@ -295,7 +211,7 @@ namespace ClassicUO.Game.Views
                                         }
                                     }
 
-                                    AddLayer(dir, graphic, hue, ref mobile, false, convertedItem, TileData.IsPartialHue( item.ItemData.Flags));
+                                    AddLayer(dir, graphic, hue, mobile, false, convertedItem, TileData.IsPartialHue( item.ItemData.Flags));
                                 }
                             }
                         }
@@ -303,10 +219,10 @@ namespace ClassicUO.Game.Views
                 }
             }
             else
-                AddLayer(dir, GameObject.Graphic, mobile.IsDead ? (Hue) 0x0386 : GameObject.Hue, ref mobile);
+                AddLayer(dir, GameObject.Graphic, mobile.IsDead ? (Hue) 0x0386 : GameObject.Hue, mobile);
         }
 
-        private void AddLayer(byte dir, Graphic graphic, Hue hue, ref Mobile mobile, bool mounted = false, EquipConvData? convertedItem = null, bool ispartial = false, int offsetY = 0)
+        private void AddLayer(byte dir, Graphic graphic, Hue hue, Mobile mobile, bool mounted = false, EquipConvData? convertedItem = null, bool ispartial = false, int offsetY = 0)
         {
             byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic);
             sbyte animIndex = GameObject.AnimIndex;
