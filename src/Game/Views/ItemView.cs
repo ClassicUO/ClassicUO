@@ -43,8 +43,6 @@ namespace ClassicUO.Game.Views
                 AllowedToDraw = item.Graphic > 2 && item.DisplayedGraphic > 2 && !IsNoDrawable(item.Graphic);
             else
             {
-                //item.AnimIndex = 99;
-
                 if ((item.Direction & Direction.Running) != 0)
                 {
                     item.UsedLayer = true;
@@ -55,7 +53,6 @@ namespace ClassicUO.Game.Views
 
                 item.Layer = (Layer) item.Direction;
                 AllowedToDraw = true;
-                //item.DisplayedGraphic = item.Amount;
             }
         }
 
@@ -68,32 +65,29 @@ namespace ClassicUO.Game.Views
             if (item.IsCorpse)
                 return DrawCorpse(batcher, position, objectList);
 
-            //if (item.Effect == null)
+            
+            if (_originalGraphic != item.DisplayedGraphic || Texture == null || Texture.IsDisposed)
             {
-                if (_originalGraphic != item.DisplayedGraphic || Texture == null || Texture.IsDisposed)
-                {
-                    _originalGraphic = item.DisplayedGraphic;
-                    Texture = Art.GetStaticTexture(_originalGraphic);
-                    Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
-                }
-
-                HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, TileData.IsPartialHue( item.ItemData.Flags), TileData.IsTranslucent( item.ItemData.Flags) ? .5f : 0, false);
-
-                if (item.Amount > 1 && TileData.IsStackable(item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
-                {
-                    Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
-                    base.Draw(batcher, offsetDrawPosition, objectList);
-                }
-
-                bool ok = base.Draw(batcher, position, objectList);
-                MessageOverHead(batcher, position, Bounds.Y);
-
-                return ok;
+                _originalGraphic = item.DisplayedGraphic;
+                Texture = Art.GetStaticTexture(_originalGraphic);
+                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
-            //return !item.Effect.IsDisposed && item.Effect.View.Draw(batcher, position, objectList);
+            HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, TileData.IsPartialHue( item.ItemData.Flags), TileData.IsTranslucent( item.ItemData.Flags) ? .5f : 0, false);
+
+            if (item.Amount > 1 && TileData.IsStackable(item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
+            {
+                Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
+                base.Draw(batcher, offsetDrawPosition, objectList);
+            }
+
+            bool ok = base.Draw(batcher, position, objectList);
+            MessageOverHead(batcher, position, Bounds.Y);
+
+            return ok;
         }
 
+        // TODO: add clothes
         private bool DrawCorpse(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (GameObject.IsDisposed)
