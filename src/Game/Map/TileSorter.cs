@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Map
             if (second == null)
                 return first;
 
-            if (Compare(first, second) < 0)
+            if (Compare(first, second) <= 0)
             {
                 first.Right = Merge(first.Right, second);
                 first.Right.Left = first;

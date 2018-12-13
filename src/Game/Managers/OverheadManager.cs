@@ -96,7 +96,7 @@ namespace ClassicUO.Game.Managers
                     position.Y = parent.ScreenPosition.Y - offset.Y - 22;
 
                     if (parent is Static st)
-                        position.Y -= st.ItemData.Height * 2;
+                        position.Y -= st.ItemData.Height /*((ArtTexture)st.View.Texture).ImageRectangle.Height / 2*/;
                 }
 
                 foreach (TextOverhead textOverhead in deque)

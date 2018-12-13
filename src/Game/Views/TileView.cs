@@ -44,7 +44,7 @@ namespace ClassicUO.Game.Views
 
         public TileView(Land tile) : base(tile)
         {
-            AllowedToDraw = !tile.IsIgnored;
+            AllowedToDraw = tile.Graphic > 2;
         }
 
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)

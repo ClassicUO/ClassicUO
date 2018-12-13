@@ -57,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
 
         public sbyte AverageZ { get; set; }
 
-        public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
+        //public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
 
         public bool IsStretched { get; set; }
 
