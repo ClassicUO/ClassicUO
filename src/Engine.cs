@@ -201,6 +201,7 @@ namespace ClassicUO
             Assembly = Assembly.GetExecutingAssembly();
             ExePath = Path.GetDirectoryName(Assembly.Location);
 
+#if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
             {
                 string msg = e.ExceptionObject.ToString();
@@ -213,7 +214,7 @@ namespace ClassicUO
                 using (LogFile crashfile = new LogFile(path, "crash.txt"))
                     await crashfile.WriteAsync(msg);
             };
-
+#endif
             // We can use the mono's dllmap feature, but 99% of people use VS to compile.
             if (Environment.OSVersion.Platform != PlatformID.MacOSX && Environment.OSVersion.Platform != PlatformID.Unix)
             {
