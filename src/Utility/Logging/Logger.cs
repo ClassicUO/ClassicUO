@@ -59,58 +59,58 @@ namespace ClassicUO.Utility.Logging
 
         public void Start(LogFile logFile = null)
         {
-            Thread logThread = new Thread(async () =>
-            {
-                using (_logQueue)
-                {
-                    using (logFile)
-                    {
-                        _isLogging = true;
+            //Thread logThread = new Thread(async () =>
+            //{
+            //    using (_logQueue)
+            //    {
+            //        using (logFile)
+            //        {
+            //            _isLogging = true;
 
-                        while (_isLogging)
-                        {
-                            Thread.Sleep(1);
+            //            while (_isLogging)
+            //            {
+            //                Thread.Sleep(1);
 
-                            // Do nothing if logging is turned off (LogTypes.None) & the log queue is empty, but continue the loop.
-                            if (LogTypes == LogTypes.None || !_logQueue.TryTake(out Tuple<LogTypes, string, string> log))
-                                continue;
+            //                // Do nothing if logging is turned off (LogTypes.None) & the log queue is empty, but continue the loop.
+            //                if (LogTypes == LogTypes.None || !_logQueue.TryTake(out Tuple<LogTypes, string, string> log))
+            //                    continue;
 
-                            if (log.Item1 == LogTypes.Table)
-                            {
-                                Console.WriteLine(string.Format(log.Item3));
+            //                if (log.Item1 == LogTypes.Table)
+            //                {
+            //                    Console.WriteLine(string.Format(log.Item3));
 
-                                continue;
-                            }
+            //                    continue;
+            //                }
 
-                            // LogTypes.None is also used for empty/simple log lines (without timestamp, etc.).
-                            if (log.Item1 != LogTypes.None)
-                            {
-                                Console.ForegroundColor = ConsoleColor.White;
-                                Console.Write($"{log.Item2} |");
-                                Console.ForegroundColor = LogTypeInfo[log.Item1].Item1;
-                                Console.Write(LogTypeInfo[log.Item1].Item2);
-                                Console.ForegroundColor = ConsoleColor.White;
-                                Console.WriteLine($"| {log.Item3}");
+            //                // LogTypes.None is also used for empty/simple log lines (without timestamp, etc.).
+            //                if (log.Item1 != LogTypes.None)
+            //                {
+            //                    Console.ForegroundColor = ConsoleColor.White;
+            //                    Console.Write($"{log.Item2} |");
+            //                    Console.ForegroundColor = LogTypeInfo[log.Item1].Item1;
+            //                    Console.Write(LogTypeInfo[log.Item1].Item2);
+            //                    Console.ForegroundColor = ConsoleColor.White;
+            //                    Console.WriteLine($"| {log.Item3}");
 
-                                if (logFile != null)
-                                    await logFile.WriteAsync($"{log.Item2} |{LogTypeInfo[log.Item1].Item2}| {log.Item3}");
-                            }
-                            else
-                            {
-                                Console.WriteLine(log.Item3);
+            //                    if (logFile != null)
+            //                        await logFile.WriteAsync($"{log.Item2} |{LogTypeInfo[log.Item1].Item2}| {log.Item3}");
+            //                }
+            //                else
+            //                {
+            //                    Console.WriteLine(log.Item3);
 
-                                if (logFile != null)
-                                    await logFile.WriteAsync(log.Item3);
-                            }
-                        }
-                    }
-                }
-            })
-            {
-                IsBackground = true
-            };
-            logThread.Start();
-            _isLogging = logThread.ThreadState == ThreadState.Running || logThread.ThreadState == ThreadState.Background;
+            //                    if (logFile != null)
+            //                        await logFile.WriteAsync(log.Item3);
+            //                }
+            //            }
+            //        }
+            //    }
+            //})
+            //{
+            //    IsBackground = true
+            //};
+            //logThread.Start();
+            //_isLogging = logThread.ThreadState == ThreadState.Running || logThread.ThreadState == ThreadState.Background;
         }
 
         public void Stop()

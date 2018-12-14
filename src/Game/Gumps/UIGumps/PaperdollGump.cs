@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
@@ -34,7 +35,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    internal class PaperDollGump : Gump, IMobilePaperdollOwner
+    internal class PaperDollGump : Gump
     {
         private static readonly ushort[] PeaceModeBtnGumps =
         {

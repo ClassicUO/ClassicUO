@@ -26,6 +26,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -132,12 +133,16 @@ namespace ClassicUO.Game
 
                                 break;
                             }
-                            case IDynamicItem dyn when stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (TileData.IsDoor( dyn.ItemData.Flags) || dyn.ItemData.Weight <= 0x5A /*|| (isGM && !)*/):
-                                dropFlags = true;
+                            //case IDynamicItem dyn when stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (TileData.IsDoor( dyn.ItemData.Flags) || dyn.ItemData.Weight <= 0x5A /*|| (isGM && !)*/):
+                            //    dropFlags = true;
 
-                                break;
-                            default:
-                                dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
+                            //    break;
+                            case Item item2:
+
+                                if (stepState == (int)PATH_STEP_STATE.PSS_DEAD_OR_GM && (TileData.IsDoor(item2.ItemData.Flags) || item2.ItemData.Weight <= 0x5A /*|| (isGM && !)*/))
+                                    dropFlags = true;
+                                else 
+                                    dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
 
                                 break;
                         }
@@ -146,24 +151,25 @@ namespace ClassicUO.Game
                         {
                             uint flags = 0;
 
-                            if (obj is IDynamicItem dyn)
+                            //if (obj is IDynamicItem dyn)
+                            if (GameObjectHelper.TryGetItemData(obj, out var itemdata))
                             {
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {
-                                    if (TileData.IsWet( dyn.ItemData.Flags))
+                                    if (TileData.IsWet(itemdata.Flags))
                                         flags = (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
                                 }
                                 else
                                 {
-                                    if (TileData.IsImpassable( dyn.ItemData.Flags) || TileData.IsSurface( dyn.ItemData.Flags))
+                                    if (TileData.IsImpassable(itemdata.Flags) || TileData.IsSurface(itemdata.Flags))
                                         flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
 
-                                    if (!TileData.IsImpassable( dyn.ItemData.Flags))
+                                    if (!TileData.IsImpassable(itemdata.Flags))
                                     {
-                                        if (TileData.IsSurface( dyn.ItemData.Flags))
+                                        if (TileData.IsSurface(itemdata.Flags))
                                             flags |= (uint) PATH_OBJECT_FLAGS.POF_SURFACE;
 
-                                        if (TileData.IsBridge( dyn.ItemData.Flags))
+                                        if (TileData.IsBridge(itemdata.Flags))
                                             flags |= (uint) PATH_OBJECT_FLAGS.POF_BRIDGE;
                                     }
 
@@ -181,17 +187,17 @@ namespace ClassicUO.Game
                                     if (dropFlags)
                                         flags &= 0xFFFFFFFE;
 
-                                    if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && TileData.IsNoDiagonal( dyn.ItemData.Flags))
+                                    if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && TileData.IsNoDiagonal(itemdata.Flags))
                                         flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
                                 }
 
                                 if (flags != 0)
                                 {
                                     int objZ = obj.Position.Z;
-                                    int staticHeight = dyn.ItemData.Height;
+                                    int staticHeight = itemdata.Height;
                                     int staticAverageZ = staticHeight;
 
-                                    if (TileData.IsBridge( dyn.ItemData.Flags))
+                                    if (TileData.IsBridge(itemdata.Flags))
                                         staticAverageZ /= 2;
                                     list.Add(new PathObject(flags, objZ, staticAverageZ + objZ, staticHeight, obj));
                                 }

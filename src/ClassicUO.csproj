@@ -106,8 +106,10 @@
     <Compile Include="Game\Data\BuffTable.cs" />
     <Compile Include="Game\Data\CharacterCreationValues.cs" />
     <Compile Include="Game\Data\ClientFeatures.cs" />
+    <Compile Include="Game\Data\EntityFlags.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
+    <Compile Include="Game\Data\Layers.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
     <Compile Include="Game\Data\PopupMenuData.cs" />
     <Compile Include="Game\Data\PopupMenuItem.cs" />
@@ -133,6 +135,7 @@
     <Compile Include="Utility\Coroutines\WaitCondition.cs" />
     <Compile Include="Utility\Coroutines\WaitTime.cs" />
     <Compile Include="Utility\FileSystemHelper.cs" />
+    <Compile Include="Utility\GameObjectHelper.cs" />
     <Compile Include="Utility\QueuedPool.cs" />
     <Compile Include="Utility\ReflectionHolder.cs" />
     <Compile Include="Game\Gumps\Controls\DataBox.cs" />
@@ -173,7 +176,6 @@
     <Compile Include="Game\Views\LightningEffectView.cs" />
     <Compile Include="Game\Views\MovingEffectView.cs" />
     <Compile Include="Input\Mouse.cs" />
-    <Compile Include="Interfaces\IMobilePaperdollOwner.cs" />
     <Compile Include="Interfaces\INode.cs" />
     <Compile Include="Interfaces\ISmoothMovable.cs" />
     <Compile Include="IO\UltimaLive.cs" />
@@ -293,7 +295,6 @@
     <Compile Include="Interfaces\IColorable.cs" />
     <Compile Include="Interfaces\IDebuggable.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />
-    <Compile Include="Interfaces\IDynamicItem.cs" />
     <Compile Include="Interfaces\IUpdateable.cs" />
     <Compile Include="IO\ClientVersions.cs" />
     <Compile Include="IO\DataReader.cs" />

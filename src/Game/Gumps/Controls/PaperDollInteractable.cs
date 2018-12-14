@@ -20,6 +20,7 @@
 #endregion
 using System;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
@@ -28,7 +29,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class PaperDollInteractable : Control, IMobilePaperdollOwner
+    internal class PaperDollInteractable : Control
     {
         private static readonly Layer[] _layerOrder =
         {

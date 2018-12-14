@@ -34,7 +34,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ItemGumpPaperdoll : ItemGump, IMobilePaperdollOwner
+    internal class ItemGumpPaperdoll : ItemGump
     {
         private readonly bool _isTransparent;
         private const int MALE_OFFSET = 50000;

@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -42,7 +43,7 @@ namespace ClassicUO.Game.Views
 
         public MobileView(Mobile mobile) : base(mobile)
         {
-            _frames = new ViewLayer[ mobile.IsHuman ? (int) Layer.Legs : 1];
+            _frames = new ViewLayer[(int) Layer.Legs];
             HasShadow = true;
         }
 

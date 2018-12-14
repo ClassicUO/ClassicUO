@@ -20,6 +20,7 @@
 #endregion
 using System;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
@@ -30,7 +31,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class EquipmentSlot : Control, IMobilePaperdollOwner
+    internal class EquipmentSlot : Control
     {
         private readonly Layer _layer;
         private readonly Mobile _mobile;

@@ -28,21 +28,6 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    [Flags]
-    public enum Flags : byte
-    {
-        None,
-        Frozen = 0x01,
-        Female = 0x02,
-        Poisoned = 0x04,
-        Flying = 0x04,
-        YellowBar = 0x08,
-        IgnoreMobiles = 0x10,
-        Movable = 0x20,
-        WarMode = 0x40,
-        Hidden = 0x80
-    }
-
     public abstract class Entity : GameObject
     {
         private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
@@ -116,18 +101,18 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override Position Position
-        {
-            get => base.Position;
-            set
-            {
-                if (base.Position != value)
-                {
-                    base.Position = value;
-                    _delta |= Delta.Position;
-                }
-            }
-        }
+        //public override Position Position
+        //{
+        //    get => base.Position;
+        //    set
+        //    {
+        //        if (base.Position != value)
+        //        {
+        //            base.Position = value;
+        //            _delta |= Delta.Position;
+        //        }
+        //    }
+        //}
 
         public Direction Direction
         {
@@ -175,6 +160,13 @@ namespace ClassicUO.Game.GameObjects
             if (d.HasFlag(Delta.Position)) PositionChanged.Raise(this);
             if (d.HasFlag(Delta.Attributes)) AttributesChanged.Raise(this);
             if (d.HasFlag(Delta.Properties)) PropertiesChanged.Raise(this);
+        }
+
+        protected override void OnPositionChanged()
+        {
+            base.OnPositionChanged();
+
+            _delta |= Delta.Position;
         }
 
         public void ProcessDelta()

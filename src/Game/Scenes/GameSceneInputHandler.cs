@@ -32,6 +32,7 @@ using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -140,24 +141,40 @@ namespace ClassicUO.Game.Scenes
                                 MergeHeldItem(mobile);
 
                                 break;
-                            case IDynamicItem dyn:
-
-                                if (dyn is Item item)
+                            case Item item:
+                                if (item.IsCorpse)
+                                    MergeHeldItem(item);
+                                else
                                 {
-                                    if (item.IsCorpse)
+                                    SelectedObject = item;
+
+                                    if (item.Graphic == HeldItem.Graphic && HeldItem is Item dyn1 && TileData.IsStackable(dyn1.ItemData.Flags))
                                         MergeHeldItem(item);
                                     else
-                                    {
-                                        SelectedObject = item;
-
-                                        if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && TileData.IsStackable(dyn1.ItemData.Flags))
-                                            MergeHeldItem(item);
-                                        else
-                                            DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
-                                    }
+                                        DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
                                 }
-                                else
-                                    DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
+                                break;
+                            case Static st:
+                                DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
+                                break;
+                            //case IDynamicItem dyn:
+
+                            //    if (dyn is Item item)
+                            //    {
+                            //        if (item.IsCorpse)
+                            //            MergeHeldItem(item);
+                            //        else
+                            //        {
+                            //            SelectedObject = item;
+
+                            //            if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && TileData.IsStackable(dyn1.ItemData.Flags))
+                            //                MergeHeldItem(item);
+                            //            else
+                            //                DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
+                            //        }
+                            //    }
+                            //    else
+                            //        DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
 
                                 break;
                             case Land _:
@@ -268,7 +285,8 @@ namespace ClassicUO.Game.Scenes
             {
                 if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
                 {
-                    if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface( dyn.ItemData.Flags))
+                    //if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface( dyn.ItemData.Flags))
+                    if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetItemData(_mousePicker.MouseOverObject, out var itemdata) && TileData.IsSurface(itemdata.Flags)))
                     {
                         GameObject obj = _mousePicker.MouseOverObject;
 

@@ -40,7 +40,7 @@ namespace ClassicUO.Game.GameObjects
         private Position _position = Position.Invalid;
         private View _view;
         public Vector3 Offset;
-        
+
         protected GameObject()
         {
             
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.GameObjects
 
         //public Tile Tile { get; protected set; }
 
-        public virtual Position Position
+        public Position Position
         {
             get => _position;
             set
@@ -231,6 +231,11 @@ namespace ClassicUO.Game.GameObjects
         {
             Engine.SceneManager.GetScene<GameScene>().Overheads.AddText(this, gameText);
             //_overHeads.Value.Insert(_overHeads.Value.Count == 0 || _overHeads.Value[0].MessageType != MessageType.Label ? 0 : 1, gameText);
+        }
+
+        protected virtual void OnPositionChanged()
+        {
+
         }
 
         protected void DisposeView()

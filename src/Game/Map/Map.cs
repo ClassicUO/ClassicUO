@@ -27,6 +27,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -147,10 +148,8 @@ namespace ClassicUO.Game.Map
 
             if (tile != null)
             {
-                //var objects = tile.ObjectsOnTiles;
                 GameObject obj = tile.FirstNode;
 
-                //for (int i = 0; i < objects.Count; i++)
                 for(; obj != null; obj = obj.Right)
                 {
                     if (!(obj is Static) && obj is Item item && !item.IsMulti)
@@ -159,7 +158,10 @@ namespace ClassicUO.Game.Map
                     if (obj is Mobile)
                         continue;
 
-                    if (obj is IDynamicItem dyn && (!TileData.IsRoof(dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6))
+                    //if (obj is IDynamicItem dyn && (!TileData.IsRoof(dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6))
+                    //    continue;
+
+                    if (GameObjectHelper.TryGetItemData(obj, out var itemdata) && (!TileData.IsRoof(itemdata.Flags) || Math.Abs(z - obj.Z) > 6))
                         continue;
 
                     break;

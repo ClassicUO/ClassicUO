@@ -1603,16 +1603,23 @@ namespace ClassicUO.Game.GameObjects
             if (d.HasFlag(Delta.Skills)) SkillsChanged.Raise(this);
         }
 
-        public override Position Position
-        {
-            get => base.Position;
-            set
-            {
-                base.Position = value;
+        //public override Position Position
+        //{
+        //    get => base.Position;
+        //    set
+        //    {
+        //        base.Position = value;
 
-                if (World.Map != null && World.Map.Index >= 0)
-                    World.Map.Center = new Point(X, Y);
-            }
+                
+        //    }
+        //}
+
+        protected override void OnPositionChanged()
+        {
+            base.OnPositionChanged();
+
+            if (World.Map != null && World.Map.Index >= 0)
+                World.Map.Center = new Point(X, Y);
         }
 
         public override void Dispose()
