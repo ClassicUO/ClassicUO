@@ -27,6 +27,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
 using ClassicUO.Input;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -44,7 +45,7 @@ namespace ClassicUO.Game.Managers
         private readonly List<GameObject> _toRemoveDamages = new List<GameObject>();
         private readonly List<GameObject> _toRemoveText = new List<GameObject>();
 
-        private readonly Dictionary<GameObject, Vector3> _bounds = new Dictionary<GameObject, Vector3>();
+        //private readonly Dictionary<GameObject, Vector3> _bounds = new Dictionary<GameObject, Vector3>();
 
         public void Update(double totalMS, double frameMS)
         {
@@ -55,8 +56,8 @@ namespace ClassicUO.Game.Managers
             {
                 _toRemoveDamages.ForEach(s =>
                 {
-                    if (!_textOverheads.ContainsKey(s))
-                        _bounds.Remove(s);
+                    //if (!_textOverheads.ContainsKey(s))
+                    //    _bounds.Remove(s);
                     _damageOverheads.Remove(s);
                 });
                 _toRemoveDamages.Clear();
@@ -66,8 +67,8 @@ namespace ClassicUO.Game.Managers
             {
                 _toRemoveText.ForEach(s =>
                 {
-                    if (!_textOverheads.ContainsKey(s))
-                        _bounds.Remove(s);
+                    //if (!_damageOverheads.ContainsKey(s))
+                    //    _bounds.Remove(s);
                     _textOverheads.Remove(s);
                 });
                 _toRemoveText.Clear();
@@ -83,24 +84,60 @@ namespace ClassicUO.Game.Managers
             return _textOverheads[obj];
         }
 
+        private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int height, out int centerY)
+        {
+            byte dir = 0 & 0x7F;
+            byte animGroup = 0;
+            bool mirror = false;
+            Animations.GetAnimDirection(ref dir, ref mirror);
+
+            if (frameIndex == 0xFF)
+                frameIndex = (byte)mobile.AnimIndex;
+            Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out int x, out centerY, out int w, out height);
+            if (x == 0 && centerY == 0 && w == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
+        }
+
         public bool Draw(Batcher2D batcher, MouseOverList list, Point offset)
         {
+            List<Rectangle> rectangles = new List<Rectangle>();
+
             foreach (KeyValuePair<GameObject, Deque<TextOverhead>> pair in _textOverheads)
             {
                 GameObject parent = pair.Key;
                 var deque = pair.Value;
 
-                if (!_bounds.TryGetValue(parent, out Vector3 position) || parent.IsDisposed)
+                if (parent.IsDisposed)
                 {
-                    position.X = parent.ScreenPosition.X - offset.X - 22;
-                    position.Y = parent.ScreenPosition.Y - offset.Y - 22;
-
-                    if (parent is Static st)
-                        position.Y -= st.ItemData.Height /*((ArtTexture)st.View.Texture).ImageRectangle.Height / 2*/;
+                    continue;
                 }
+
+                Vector3 position = Vector3.Zero;
+                
+                position.X = parent.ScreenPosition.X - offset.X - 22;
+                position.Y = parent.ScreenPosition.Y - offset.Y - 22;
+
+                if (parent is Mobile m)
+                {
+                    GetAnimationDimensions(m, 0xFF, out int height, out int centerY);
+
+                    position = new Vector3
+                    {
+                        X = position.X + m.Offset.X,
+                        Y = position.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8),
+                        Z = position.Z
+                    };
+                }
+                else if (parent is Static st)
+                    position.Y -= st.ItemData.Height /*((ArtTexture)st.View.Texture).ImageRectangle.Height / 2*/;
+                
 
                 foreach (TextOverhead textOverhead in deque)
                 {
+                    View v = textOverhead.View;
+                    Rectangle next = new Rectangle((int)position.X - v.Bounds.X, (int)position.Y - v.Bounds.Y, v.Bounds.Width, v.Bounds.Height);
+                    textOverhead.IsOverlapped = rectangles.Any(s => s.Intersects(next));
+                    rectangles.Add(next);
+
                     textOverhead.View.Draw(batcher, position, list);
                 }
             }
@@ -111,28 +148,37 @@ namespace ClassicUO.Game.Managers
                 Mobile parent = (Mobile)pair.Key;
                 var deque = pair.Value;
 
-                if (!_bounds.TryGetValue(parent, out Vector3 position) || parent.IsDisposed)
-                {
-                    position.X = parent.ScreenPosition.X - offset.X - 22;
-                    position.Y = parent.ScreenPosition.Y - offset.Y - 22;
-                }
+                Vector3 position = Vector3.Zero;
+       
+                position.X = parent.ScreenPosition.X - offset.X - 22;
+                position.Y = parent.ScreenPosition.Y - offset.Y - 22;
 
-                foreach (DamageOverhead damageOverhead in deque)
+                if (parent is Mobile m)
                 {
-                    damageOverhead.View.Draw(batcher, position, list);
+                    GetAnimationDimensions(m, 0xFF, out int height, out int centerY);
+
+                    position = new Vector3
+                    {
+                        X = position.X + m.Offset.X,
+                        Y = position.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8),
+                        Z = position.Z
+                    };
                 }
+ 
+                foreach (DamageOverhead damageOverhead in deque)                  
+                    damageOverhead.View.Draw(batcher, position, list);              
             }
 
             return true;
         }
 
 
-        public void UpdatePosition(GameObject obj, Vector3 position)
-            => _bounds[obj] = position;
+        //public void UpdatePosition(GameObject obj, Vector3 position)
+        //    => _bounds[obj] = position;
 
         private void UpdateTextOverhead(double totalMS, double frameMS)
         {
-            List<Rectangle> rectangles = new List<Rectangle>();
+            //List<Rectangle> rectangles = new List<Rectangle>();
 
             foreach (KeyValuePair<GameObject, Deque<TextOverhead>> pair in _textOverheads)
             {
@@ -168,15 +214,33 @@ namespace ClassicUO.Game.Managers
 
                             offY += v.Texture.Height;
 
-                            if (_bounds.TryGetValue(parent, out Vector3 position))
-                            {
-                                int aX = (int) position.X - v.Bounds.X;
-                                int aY = (int) position.Y - v.Bounds.Y;
+                            //Vector3 position = Vector3.Zero;
+                            
+                            //position.X = parent.ScreenPosition.X - offset.X - 22;
+                            //position.Y = parent.ScreenPosition.Y - offset.Y - 22;
 
-                                Rectangle next = new Rectangle(aX, aY, v.Bounds.Width, v.Bounds.Height);
-                                obj.IsOverlapped = rectangles.Any(s => s.Intersects(next));
-                                rectangles.Add(next);
-                            }
+                            //if (parent is Mobile m)
+                            //{
+                            //    GetAnimationDimensions(m, 0xFF, out int height, out int centerY);
+
+                            //    position = new Vector3
+                            //    {
+                            //        X = position.X + m.Offset.X,
+                            //        Y = position.Y + (m.Offset.Y - m.Offset.Z) - (height + centerY + 8),
+                            //        Z = position.Z
+                            //    };
+                            //    //_bounds[m] = position;
+                            //}
+
+                            //if (_bounds.TryGetValue(parent, out Vector3 position))
+                            //{
+                            //    int aX = (int) position.X - v.Bounds.X;
+                            //    int aY = (int) position.Y - v.Bounds.Y;
+
+                            //    Rectangle next = new Rectangle(aX, aY, v.Bounds.Width, v.Bounds.Height);
+                            //    obj.IsOverlapped = rectangles.Any(s => s.Intersects(next));
+                            //    rectangles.Add(next);
+                            //}
 
                         }
                     }
@@ -286,13 +350,13 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            _bounds.Clear();
+            //_bounds.Clear();
 
             if (_toRemoveDamages.Count > 0)
             {
                 _toRemoveDamages.ForEach(s =>
                 {
-                    _bounds.Remove(s);
+                    //_bounds.Remove(s);
                     _damageOverheads.Remove(s);
                 });
                 _toRemoveDamages.Clear();
@@ -302,7 +366,7 @@ namespace ClassicUO.Game.Managers
             {
                 _toRemoveText.ForEach(s =>
                 {
-                    _bounds.Remove(s);
+                    //_bounds.Remove(s);
                     _textOverheads.Remove(s);
                 });
                 _toRemoveText.Clear();
