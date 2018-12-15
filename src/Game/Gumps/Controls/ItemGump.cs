@@ -210,7 +210,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private void UpdateLabel(bool isDisposing = false)
         {
             var gs = Engine.SceneManager.GetScene<GameScene>();
-            if (!isDisposing && gs.Overheads.HasOverhead(Item))
+            if (!isDisposing && !Item.IsDisposed && Item.Overheads.Count > 0)
             {
                 //if (_labels.Count <= 0)
                 //{
@@ -231,9 +231,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
                 if (_labels.Count == 0)
                 {
-                    var deque = gs.Overheads.GeTextOverheads(Item);
-
-                    foreach (TextOverhead overhead in deque)
+                    foreach (TextOverhead overhead in Item.Overheads)
                     {
                         overhead.Initialized = true;
                         overhead.TimeToLive = 4000;

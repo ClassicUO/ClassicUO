@@ -20,6 +20,8 @@
 #endregion
 using System;
 
+using ClassicUO.Game.System;
+
 namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType
@@ -33,7 +35,7 @@ namespace ClassicUO.Game.Scenes
         public Scene CurrentScene { get; private set; }
 
         public void ChangeScene(ScenesType type)
-        {
+        {         
             CurrentScene?.Dispose();
             CurrentScene = null;
             GC.Collect();

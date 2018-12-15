@@ -25,6 +25,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -38,7 +39,7 @@ namespace ClassicUO.Game.Views
         public ItemView(Item item) : base(item)
         {
             if (!item.IsCorpse)
-                AllowedToDraw = item.Graphic > 2 && item.DisplayedGraphic > 2 && !IsNoDrawable(item.Graphic) && !item.IsMulti;
+                AllowedToDraw = item.Graphic > 2 && item.DisplayedGraphic > 2 && ! GameObjectHelper.IsNoDrawable(item.Graphic) && !item.IsMulti;
             else
             {
                 if ((item.Direction & Direction.Running) != 0)

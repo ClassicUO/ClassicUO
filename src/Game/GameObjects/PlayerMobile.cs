@@ -1603,17 +1603,6 @@ namespace ClassicUO.Game.GameObjects
             if (d.HasFlag(Delta.Skills)) SkillsChanged.Raise(this);
         }
 
-        //public override Position Position
-        //{
-        //    get => base.Position;
-        //    set
-        //    {
-        //        base.Position = value;
-
-                
-        //    }
-        //}
-
         protected override void OnPositionChanged()
         {
             base.OnPositionChanged();
@@ -1633,7 +1622,7 @@ namespace ClassicUO.Game.GameObjects
             if (LastStepRequestTime > Engine.Ticks)
                 return false;
 
-            if (_stepsOutstanding >= Constants.MAX_STEP_COUNT)
+            if (_stepsOutstanding > Constants.MAX_STEP_COUNT)
             {
                 if (LastStepRequestTime + 1000 > Engine.Ticks)
                     Resynchronize();
@@ -1697,6 +1686,7 @@ namespace ClassicUO.Game.GameObjects
             EnqueueStep(_movementX, _movementY, _movementZ, _movementDirection, run);
 
             NetClient.Socket.Send(new PWalkRequest(direction, _sequenceNumber, run));
+            //Log.Message(LogTypes.Trace, $"Walk request - SEQUENCE: {_sequenceNumber}");
 
             if (_sequenceNumber == 0xFF)
                 _sequenceNumber = 1;
@@ -1713,16 +1703,21 @@ namespace ClassicUO.Game.GameObjects
         {
             if (_stepsOutstanding == 0)
             {
+                Log.Message(LogTypes.Warning, $"Resync needed after confirmwalk packet - SEQUENCE: {_sequenceNumber}");
                 Resynchronize();
             }
             else
             {
+                //Log.Message(LogTypes.Trace, $"Step accepted - SEQUENCE: {_sequenceNumber}");
                 _stepsOutstanding--;
             }
         }
 
         public override void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
+
+            //Log.Message(LogTypes.Warning, $"Forced position. - SEQUENCE: {_sequenceNumber}");
+
             LastStepRequestTime = Engine.Ticks;
             _sequenceNumber = 0;
             _stepsOutstanding = 0;

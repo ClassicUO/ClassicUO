@@ -137,7 +137,17 @@ namespace ClassicUO.Utility.Logging
         {
             if ((LogTypes & type) == type)
             {
-                _logQueue.TryAdd(type == LogTypes.None ? Tuple.Create(type, string.Empty, text) : Tuple.Create(type, DateTime.Now.ToString("T"), text));
+                //_logQueue.TryAdd(type == LogTypes.None ? Tuple.Create(type, string.Empty, text) : Tuple.Create(type, DateTime.Now.ToString("T"), text));
+
+                string time = type == LogTypes.None ? string.Empty : DateTime.Now.ToString("T");
+
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write($"{time} |");
+                Console.ForegroundColor = LogTypeInfo[type].Item1;
+                Console.Write(LogTypeInfo[type].Item2);
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"| {text}");
             }
         }
     }

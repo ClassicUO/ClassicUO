@@ -73,29 +73,40 @@ namespace ClassicUO.Game.GameObjects
         {
             //base.Update(totalMS, frameMS);
 
-            if (IsPersistent || IsDisposed)
+            if (IsDisposed)
                 return;
 
             if (Initialized)
             {
-                TimeToLive -= (float) frameMS;
-
-                if (TimeToLive > 0 && TimeToLive <= Constants.TIME_FADEOUT_TEXT)
+                if (IsPersistent)
                 {
-                    // start alpha decreasing
-                    float alpha = 1.0f - (TimeToLive / Constants.TIME_FADEOUT_TEXT);
-
-                    if (!IsOverlapped || (IsOverlapped && alpha > Alpha))
-                        Alpha = alpha;
+                    if (IsOverlapped && Alpha <= 0.0f)
+                        Alpha = 0.5f;
+                    else if (!IsOverlapped && Alpha != 0.0f)
+                        Alpha = 0;
                 }
-                else if (TimeToLive <= 0.0f)
+                else
                 {
-                    Dispose();
+                    TimeToLive -= (float)frameMS;
+
+                    if (TimeToLive > 0 && TimeToLive <= Constants.TIME_FADEOUT_TEXT)
+                    {
+                        // start alpha decreasing
+                        float alpha = 1.0f - (TimeToLive / Constants.TIME_FADEOUT_TEXT);
+
+                        if (!IsOverlapped || (IsOverlapped && alpha > Alpha))
+                            Alpha = alpha;
+                    }
+                    else if (TimeToLive <= 0.0f)
+                    {
+                        Dispose();
+                    }
+                    else if (IsOverlapped && Alpha <= 0.0f)
+                        Alpha = 0.5f;
+                    else if (!IsOverlapped && Alpha != 0)
+                        Alpha = 0;
                 }
-                else if (IsOverlapped && Alpha <= 0.0f)
-                    Alpha = 0.5f;
-                else if (!IsOverlapped && Alpha != 0)
-                    Alpha = 0;
+               
             }
         }
     }

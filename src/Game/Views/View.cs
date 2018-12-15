@@ -29,6 +29,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 using IDrawable = ClassicUO.Interfaces.IDrawable;
 
@@ -64,8 +65,6 @@ namespace ClassicUO.Game.Views
 
         public bool IsSelected { get; set; }
 
-        protected float ShadowZDepth { get; set; }
-
         public Vector3 HueVector { get; set; }
 
         public bool AllowedToDraw { get; set; }
@@ -75,9 +74,6 @@ namespace ClassicUO.Game.Views
         public Rectangle GetOnScreenRectangle()
         {
             Rectangle prect = Rectangle.Empty;
-
-            //prect.X = (int)(( (Engine.Profile.Current.GameWindowSize.X >> 1)) - FrameInfo.X);
-            //prect.Y = (int)(( (Engine.Profile.Current.GameWindowSize.Y >> 1)) - FrameInfo.Y);
 
             prect.X = (int) (GameObject.RealScreenPosition.X - FrameInfo.X + 22 + GameObject.Offset.X);
             prect.Y = (int) (GameObject.RealScreenPosition.Y - FrameInfo.Y + 22 + (GameObject.Offset.Y - GameObject.Offset.Z));
@@ -194,50 +190,26 @@ namespace ClassicUO.Game.Views
             return true;
         }
 
+
         protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
         }
 
         protected virtual void MessageOverHead(Batcher2D batcher, Vector3 position, int offY)
         {
-            //if (GameObject.OverHeads != null)
-            //{
-            //    for (int i = 0; i < GameObject.OverHeads.Count; i++)
-            //    {
-            //        View v = GameObject.OverHeads[i].View;
-            //        v.Bounds.X = (v.Texture.Width >> 1) - 22;
-            //        v.Bounds.Y = offY + v.Texture.Height;
-            //        v.Bounds.Width = v.Texture.Width;
-            //        v.Bounds.Height = v.Texture.Height;
-            //        Engine.SceneManager.GetScene<GameScene>().Overheads.AddOrUpdateText(v, position);
-            //        offY += v.Texture.Height;
-            //    }
-            //}
-        }
-
-        public static bool IsNoDrawable(ushort g)
-        {
-            switch (g)
+            if (GameObject.Overheads != null)
             {
-                case 0x0001:
-                case 0x21BC:
-                case 0x9E4C:
-                case 0x9E64:
-                case 0x9E65:
-                case 0x9E7D:
-
-                    return true;
+                for (int i = 0; i < GameObject.Overheads.Count; i++)
+                {
+                    View v = GameObject.Overheads[i].View;
+                    v.Bounds.X = (v.Texture.Width >> 1) - 22;
+                    v.Bounds.Y = offY + v.Texture.Height;
+                    v.Bounds.Width = v.Texture.Width;
+                    v.Bounds.Height = v.Texture.Height;
+                    Engine.SceneManager.GetScene<GameScene>().Overheads.AddOverhead(GameObject.Overheads[i], position);
+                    offY += v.Texture.Height;
+                }
             }
-
-            if (g != 0x63D3)
-            {
-                if (g >= 0x2198 && g <= 0x21A4) return true;
-                ulong flags = TileData.StaticData[g].Flags;
-
-                if (!TileData.IsNoDiagonal(flags) || TileData.IsAnimated(flags) && World.Player != null && World.Player.Race == RaceType.GARGOYLE) return false;
-            }
-
-            return true;
-        }
+        } 
     }
 }

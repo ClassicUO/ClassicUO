@@ -29,6 +29,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Views
 {
@@ -51,6 +52,12 @@ namespace ClassicUO.Game.Views
                 Text = parent.Text
             };
             Texture = _text.Texture;
+
+            //Bounds.X = (Texture.Width >> 1) - 22;
+            //Bounds.Y = Texture.Height;
+            //Bounds.Width = Texture.Width;
+            //Bounds.Height = Texture.Height;
+
             int delay = Engine.Profile.Current.SpeechDelay;
 
             if (delay < 10)
@@ -101,8 +108,21 @@ namespace ClassicUO.Game.Views
                     position.Y = Engine.Profile.Current.GameWindowSize.Y * gs.Scale - height;
             }
 
-            return base.Draw(batcher, position, objectList);
+            bool ok = base.Draw(batcher, position, objectList);
+
+
+            if (_edge == null)
+            {
+                _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
+                _edge.SetData(new Color[] { Color.LightBlue });
+            }
+
+            batcher.DrawRectangle(_edge, new Rectangle((int) position.X - Bounds.X, (int) position.Y - Bounds.Y, _text.Width, _text.Height) , Vector3.Zero);
+
+            return ok;
         }
+
+        private static Texture2D _edge;
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {

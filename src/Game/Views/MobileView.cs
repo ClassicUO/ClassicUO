@@ -114,6 +114,7 @@ namespace ClassicUO.Game.Views
             FrameInfo.Width = FrameInfo.X + rect.Width;
             FrameInfo.Height = FrameInfo.Y + rect.Height;
 
+            MessageOverHead(batcher, position, mobile.IsMounted ? 0 : -22);
 
             //OverheadManager damageManager = Engine.SceneManager.GetScene<GameScene>().Overheads;
 
@@ -134,10 +135,19 @@ namespace ClassicUO.Game.Views
             //    damageManager.UpdatePosition(mobile, overheadPosition);
             //}
 
+            if (_edge == null)
+            {
+                _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
+                _edge.SetData(new Color[] { Color.LightBlue });
+            }
+
+            batcher.DrawRectangle(_edge, GetOnScreenRectangle(), Vector3.Zero);
+
             return true;
         }
+        private static Texture2D _edge;
 
-     
+
 
         //private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int height, out int centerY)
         //{

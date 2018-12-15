@@ -33,8 +33,8 @@ namespace ClassicUO.Game
     public static class World
     {
 
-        private static EffectManager _effectManager = new EffectManager();
-
+        private static readonly EffectManager _effectManager = new EffectManager();
+        //private static readonly OverheadManager _overheadManager = new OverheadManager();
 
         public static void AddEffect(GameEffect effect)
         {
@@ -47,10 +47,10 @@ namespace ClassicUO.Game
         }
 
 
-        public static void AddOverheadText(GameObject obj, string text)
-        {
-
-        }
+        //public static void AddOverheadText(TextOverhead obj)
+        //{
+        //    _overheadManager.AddOverhead(obj);
+        //}
 
 
         public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();

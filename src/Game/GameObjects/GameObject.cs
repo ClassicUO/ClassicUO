@@ -40,6 +40,7 @@ namespace ClassicUO.Game.GameObjects
         private Position _position = Position.Invalid;
         private View _view;
         public Vector3 Offset;
+        private readonly List<TextOverhead> _overHeads = new List<TextOverhead>();
 
         protected GameObject()
         {
@@ -107,6 +108,8 @@ namespace ClassicUO.Game.GameObjects
 
         private Tile _tile;
 
+        public IReadOnlyList<TextOverhead> Overheads => _overHeads;
+
         //public Tile Tile
         //{
         //    get => _tile;
@@ -149,7 +152,14 @@ namespace ClassicUO.Game.GameObjects
 
         public virtual void Update(double totalMS, double frameMS)
         {
-
+            for (int i = 0; i < _overHeads.Count; i++)
+            {
+                var overhead = _overHeads[i];
+                overhead.Update(totalMS, frameMS);
+                
+                if (overhead.IsDisposed)
+                    _overHeads.RemoveAt(i--);
+            }
         }
 
         public void AddToTile(int x, int y)
@@ -211,26 +221,27 @@ namespace ClassicUO.Game.GameObjects
             else
                 width = 0;
             overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive);
+
             InsertGameText(overhead);
 
-            //if (_overHeads.Value.Count > 5)
-            //{
-            //    TextOverhead over = _overHeads.Value[_overHeads.Value.Count - 1];
+            if (_overHeads.Count > 5)
+            {
+                TextOverhead over = _overHeads[_overHeads.Count - 1];
 
-            //    if (!over.IsPersistent && over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
-            //    {
-            //        over.Dispose();
-            //        _overHeads.Value.RemoveAt(_overHeads.Value.Count - 1);
-            //    }
-            //}
+                if (over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
+                {
+                    over.Dispose();
+                    _overHeads.RemoveAt(_overHeads.Count - 1);
+                }
+            }
 
             return overhead;
         }
 
         private void InsertGameText(TextOverhead gameText)
         {
-            Engine.SceneManager.GetScene<GameScene>().Overheads.AddText(this, gameText);
-            //_overHeads.Value.Insert(_overHeads.Value.Count == 0 || _overHeads.Value[0].MessageType != MessageType.Label ? 0 : 1, gameText);
+            //Engine.SceneManager.GetScene<GameScene>().Overheads.AddText(this, gameText);
+            _overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
         protected virtual void OnPositionChanged()
@@ -259,12 +270,9 @@ namespace ClassicUO.Game.GameObjects
 
             //Tile = null;
 
-            //if (_overHeads.IsValueCreated)
-            //{
-            //    _overHeads.Value.ForEach(s => s.Dispose());
-            //    _overHeads.Value.Clear();
-            //    _overHeads = null;
-            //}
+            
+            _overHeads.ForEach(s => s.Dispose());
+            _overHeads.Clear();            
         }
     }
 }

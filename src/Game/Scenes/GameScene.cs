@@ -170,6 +170,8 @@ namespace ClassicUO.Game.Scenes
         {
             _renderList = null;
 
+            TargetSystem.ClearTargetingWithoutTargetCancelPacket();
+
             Engine.Profile.Current?.Save( Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList() );
 
             NetClient.Socket.Disconnected -= SocketOnDisconnected;

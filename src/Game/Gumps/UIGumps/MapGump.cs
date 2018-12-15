@@ -24,6 +24,7 @@ using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -90,7 +91,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         {
                             StaticsBlock staticBlock = sb[c];
 
-                            if (staticBlock.Color > 0 && staticBlock.Color != 0xFFFF && !View.IsNoDrawable(staticBlock.Color))
+                            if (staticBlock.Color > 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
                             {
                                 pos = staticBlock.Y * 8 + staticBlock.X;
                                 ref MapCells cell = ref infoCells[pos];

@@ -738,20 +738,20 @@ namespace ClassicUO.Network
             Direction direction = (Direction) p.ReadByte();
             sbyte z = p.ReadSByte();
 
-            World.Player.GetEndPosition(out int endX, out int endY, out sbyte endZ, out Direction endDir);
+            //World.Player.GetEndPosition(out int endX, out int endY, out sbyte endZ, out Direction endDir);
 
             //World.Player.ResetSteps();
             Direction dir = direction & Direction.Up;
-            bool isrun = (direction & Direction.Running) != 0;
+            //bool isrun = (direction & Direction.Running) != 0;
 
             //if (endX != x || endY != y || endZ != z)
             //    World.Player.ForcePosition(x, y, z, dir);
 
-            if (endDir != dir)
-                World.Player.EnqueueStep(x, y, z, dir, isrun);
-            else
-                World.Player.ForcePosition(x, y, z, dir);
-
+            //if (endDir != dir)
+            //    World.Player.EnqueueStep(x, y, z, dir, isrun);
+            //else
+            //    World.Player.ForcePosition(x, y, z, dir);
+            World.Player.ForcePosition(x, y, z, dir);
             World.Player.ProcessDelta();
         }
 
@@ -779,7 +779,7 @@ namespace ClassicUO.Network
             byte seq = p.ReadByte();
             byte noto = (byte) (p.ReadByte() & ~0x40);
 
-            if (noto <= 0 || noto >= 7)
+            if (noto == 0 || noto >= 7)
                 noto = 0x01;
             World.Player.NotorietyFlag = (NotorietyFlag) noto;
             World.Player.ConfirmWalk();
@@ -1351,8 +1351,10 @@ namespace ClassicUO.Network
                 World.Mobiles.ProcessDelta();
             World.Items.ProcessDelta();
 
-            if (string.IsNullOrEmpty(mobile.Name))
-                NetClient.Socket.Send(new PNameRequest(mobile));
+            //if (string.IsNullOrEmpty(mobile.Name))
+            //    NetClient.Socket.Send(new PNameRequest(mobile));
+
+            if (mobile!= World.Player)
             NetClient.Socket.Send(new PClickRequest(mobile));
         }
 

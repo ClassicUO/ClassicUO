@@ -203,7 +203,9 @@ namespace ClassicUO.Game.Scenes
                             if (string.IsNullOrEmpty(st.Name))
                                 TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
 
-                            if (!Overheads.HasOverhead(obj))
+                            //if (!Overheads.HasOverhead(obj))
+
+                            if (obj.Overheads.Count == 0)
                                 obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
 
                             break;
@@ -375,18 +377,25 @@ namespace ClassicUO.Game.Scenes
             if (TargetSystem.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && e.keysym.mod == SDL.SDL_Keymod.KMOD_NONE)
                 TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
 
-            //if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
-            //{
-            //    Task.Run(async () =>
-            //    {
-            //        while (true)
-            //        {
-            //            await Task.Delay(1);
-            //            GameActions.CastSpell(205);
-            //        }
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
+            {
+                Engine.PACKET_LOG_ENABLED = !Engine.PACKET_LOG_ENABLED;
+                if (Engine.PACKET_LOG_ENABLED)
+                    Log.Message(LogTypes.Trace, "PACKET LOG: ENBALED");
+                else
+                {
+                    Log.Message(LogTypes.Trace, "PACKET LOG: DISABLED");
+                }
+                //Task.Run(async () =>
+                //{
+                //    while (true)
+                //    {
+                //        await Task.Delay(1);
+                //        GameActions.CastSpell(205);
+                //    }
 
-            //    });
-            //}
+                //});
+            }
             // TEST PURPOSE
             /*if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
             {

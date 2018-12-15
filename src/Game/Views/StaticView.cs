@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Views
         public StaticView(Static st) : base(st)
         {
             _isFoliage = TileData.IsFoliage( st.ItemData.Flags);
-            AllowedToDraw = !IsNoDrawable(st.Graphic);
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(st.Graphic);
 
             if (TileData.IsTranslucent(st.ItemData.Flags))
                 _alpha = 0.5f;
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Views
             }
 
             HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, false, _alpha, false);
-            MessageOverHead(batcher, position, Bounds.Y);
+            MessageOverHead(batcher, position, Bounds.Y - 44);
 
             return base.Draw(batcher, position, objectList);
         }

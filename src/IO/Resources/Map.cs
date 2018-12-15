@@ -215,7 +215,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int c = 0; c < count; c++)
                 {
-                    if (sb->Color > 0 && sb->Color != 0xFFFF && !View.IsNoDrawable(sb->Color))
+                    if (sb->Color > 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(sb->Color))
                     {
                         ref RadarMapcells outcell = ref mb.Cells[sb->X, sb->Y];
 
