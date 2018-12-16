@@ -1980,7 +1980,7 @@ namespace ClassicUO.Network
                     serial = p.ReadUInt();
                     uint revision = p.ReadUInt();
 
-                    if (HouseManager.TryGetHouse(serial, out House house) && house.Revision == revision)
+                    if (World.HouseManager.TryGetHouse(serial, out House house) && house.Revision == revision)
                     {
                         house.Generate();
                     }
@@ -2171,10 +2171,10 @@ namespace ClassicUO.Network
             if (multi == null) return;
             p.Skip(4);
 
-            if (!HouseManager.TryGetHouse(foundation, out House house))
+            if (!World.HouseManager.TryGetHouse(foundation, out House house))
             {
                 house = new House(foundation, revision, true);
-                HouseManager.Add(foundation, house);
+                World.HouseManager.Add(foundation, house);
             }
             else
             {

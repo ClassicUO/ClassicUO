@@ -34,7 +34,6 @@ namespace ClassicUO.Game
     {
 
         private static readonly EffectManager _effectManager = new EffectManager();
-        //private static readonly OverheadManager _overheadManager = new OverheadManager();
 
         public static void AddEffect(GameEffect effect)
         {
@@ -47,6 +46,7 @@ namespace ClassicUO.Game
         }
 
 
+        public static HouseManager HouseManager { get; } = new HouseManager();
 
         public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
 
@@ -246,6 +246,7 @@ namespace ClassicUO.Game
             IO.UltimaLive.ShardName = null;
             ClientFlags.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
+            HouseManager.Clear();
             ServerName = string.Empty;
         }
 

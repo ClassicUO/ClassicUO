@@ -22,6 +22,7 @@ using System;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
@@ -140,10 +141,10 @@ namespace ClassicUO.Game.GameObjects
                             int count = IO.Resources.Multi.GetCount(Graphic);
                             MultiComponent[] components = new MultiComponent[count];
 
-                            if (!HouseManager.TryGetHouse(Serial, out House house))
+                            if (!World.HouseManager.TryGetHouse(Serial, out House house))
                             {
                                 house = new House(Serial, 0, false);
-                                HouseManager.Add(Serial, house);
+                                World.HouseManager.Add(Serial, house);
                             }
 
                             for (int i = 0; i < count; i++)
