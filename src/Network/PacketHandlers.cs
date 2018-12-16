@@ -1361,7 +1361,7 @@ namespace ClassicUO.Network
             //    NetClient.Socket.Send(new PNameRequest(mobile));
 
             if (mobile!= World.Player)
-            NetClient.Socket.Send(new PClickRequest(mobile));
+                NetClient.Socket.Send(new PClickRequest(mobile));
         }
 
         private static void OpenMenu(Packet p)
@@ -2224,7 +2224,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    house.Components.Add(new Static(id, 0, 0)
+                                    house.Components.Add(new MultiStatic(id, 0)
                                     {
                                         Position = new Position((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y), (sbyte) (foundation.Position.Z + z))
                                     });
@@ -2250,7 +2250,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    house.Components.Add(new Static(id, 0, 0)
+                                    house.Components.Add(new MultiStatic(id, 0)
                                     {
                                         Position = new Position((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y), (sbyte) (foundation.Position.Z + z))
                                     });
@@ -2298,7 +2298,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    house.Components.Add(new Static(id, 0, 0)
+                                    house.Components.Add(new MultiStatic(id, 0)
                                     {
                                         Position = new Position((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y), (sbyte) (foundation.Position.Z + z))
                                     });

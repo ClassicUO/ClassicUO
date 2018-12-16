@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Game.Scenes;
 using ClassicUO.Utility.Coroutines;
@@ -41,11 +42,56 @@ namespace ClassicUO.Game.GameObjects
             return _houses.TryGetValue(serial, out house);
         }
 
-        public static void Remove(Serial serial) => _houses.Remove(serial);
+        public static bool TryToRemove(Serial serial, int distance)
+        {
+            if (IsHouseInRange(serial, distance))
+            {
+                _houses[serial].Dispose();
+                _houses.Remove(serial);
+
+                return true;
+            }
+            return false;
+        }
+
+        public static bool IsHouseInRange(Serial serial, int distance)
+        {
+            if (TryGetHouse(serial, out _))
+            {
+                int currX = World.Player.X;
+                int currY = World.Player.Y;
+
+                Item found = World.Items.Get(serial);
+
+                distance += found.MultiDistanceBonus;
+
+                int d = Math.Max(Math.Abs(found.X - currX), Math.Abs(found.Y - currY));
+
+                return d <= distance;
+            }
+
+            return false;
+        }
+
+        public static void Remove(Serial serial)
+        {
+            if (TryGetHouse(serial, out House house))
+            {
+                house.Dispose();
+                _houses.Remove(serial);
+            }
+        } 
 
         public static bool Exists(Serial serial) => _houses.ContainsKey(serial);
 
-        public static void Clear() => _houses.Clear();
+        public static void Clear()
+        {
+            foreach (KeyValuePair<Serial, House> house in _houses)
+            {
+                house.Value.Dispose();
+            }
+            _houses.Clear();
+        }
     }
 
     public sealed class House : IEquatable<Serial>, IDisposable
@@ -59,7 +105,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Serial Serial { get; }
         public uint Revision { get; private set; }
-        public List<Static> Components { get; } = new List<Static>();
+        public List<MultiStatic> Components { get; } = new List<MultiStatic>();
         public bool IsCustom { get; }
 
         public void SetRevision(uint revision)
@@ -69,7 +115,10 @@ namespace ClassicUO.Game.GameObjects
 
         public void Generate()
         {
-            Components.ForEach(s => s.AddToTile());
+            Components.ForEach(s =>
+            {
+                s.AddToTile();
+            });
         }
 
         public bool Equals(Serial other) => Serial == other;

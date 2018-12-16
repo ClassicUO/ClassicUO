@@ -120,11 +120,13 @@
     <Compile Include="Game\Data\SpellsNinjitsu.cs" />
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
+    <Compile Include="Game\GameObjects\MultiStatic.cs" />
     <Compile Include="Game\Managers\UseItemQueue.cs" />
     <Compile Include="Game\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\Managers\JournalManager.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
+    <Compile Include="Game\Views\MultiStaticView.cs" />
     <Compile Include="Game\WalkerManager.cs" />
     <Compile Include="Interfaces\IPoolable.cs" />
     <Compile Include="Network\BufferPool.cs" />

@@ -47,11 +47,6 @@ namespace ClassicUO.Game
         }
 
 
-        //public static void AddOverheadText(TextOverhead obj)
-        //{
-        //    _overheadManager.AddOverhead(obj);
-        //}
-
 
         public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
 
@@ -141,14 +136,10 @@ namespace ClassicUO.Game
 
                     if (item.Distance > ViewRange && item.OnGround)
                     {
-                        if (HouseManager.TryGetHouse(item, out House house))
+                        if (item.IsMulti)
                         {
-                            if (item.Distance > Constants.MAX_HOUSE_DISTANCE)
-                            {
-                                house.Dispose();
+                            if (HouseManager.TryToRemove(item, ViewRange))
                                 RemoveItem(item);
-                                HouseManager.Remove(item);
-                            }
                         }
                         else
                             RemoveItem(item);

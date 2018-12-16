@@ -197,13 +197,19 @@ namespace ClassicUO.Game.Scenes
 
                     switch (obj)
                     {
+                        case MultiStatic multi:
+                            if (string.IsNullOrEmpty(multi.Name))
+                                TileData.StaticData[multi.Graphic].Name = Cliloc.GetString(1020000 + multi.Graphic);
+
+                            if (obj.Overheads.Count == 0)
+                                obj.AddGameText(MessageType.Label, multi.Name, 3, 0, false);
+
+                            break;
                         case Static st:
 
                         {
                             if (string.IsNullOrEmpty(st.Name))
                                 TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
-
-                            //if (!Overheads.HasOverhead(obj))
 
                             if (obj.Overheads.Count == 0)
                                 obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);

@@ -41,7 +41,6 @@ namespace ClassicUO.Game.GameObjects
         public string Name => ItemData.Name;
 
         private StaticTiles? _itemData;
-
        
         public StaticTiles ItemData
         {

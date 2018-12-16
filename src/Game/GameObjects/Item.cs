@@ -156,7 +156,7 @@ namespace ClassicUO.Game.GameObjects
                                 if (pbm.Y > maxY) maxY = pbm.Y;
                                 components[i] = component;
 
-                                house.Components.Add(new Static(component.Graphic, 0, 0)
+                                house.Components.Add(new MultiStatic(component.Graphic, 0)
                                 {
                                     Position = component.Position
                                 });
@@ -171,6 +171,8 @@ namespace ClassicUO.Game.GameObjects
                                 Components = components
                             };
 
+                            MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
+
                             house.Generate();
                         }
                     }
@@ -181,6 +183,8 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Multi Multi { get; private set; }
+
+        public int MultiDistanceBonus { get; private set; }
 
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
 
@@ -230,11 +234,6 @@ namespace ClassicUO.Game.GameObjects
                 return _itemData.Value;
             }
         }
-
-        //protected override void OnPositionChanged(object sender, EventArgs e)
-        //{
-
-        //}
 
         public event EventHandler OwnerChanged;
 
