@@ -35,7 +35,7 @@ using SDL2;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    internal class MobileHealthGump : Gump
+    internal class HealthBarGump : Gump
     {
         private const float MAX_BAR_WIDTH = 100.0f;
         private GumpPic _background;
@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private bool _isYellowHits, _isPoisoned, _isNormal;
         private bool _renameEventActive;
 
-        public MobileHealthGump(Mobile mobile, int x, int y) : this()
+        public HealthBarGump(Mobile mobile, int x, int y) : this()
         {
             X = x;
             Y = y;
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             BuildGump();
         }
 
-        public MobileHealthGump() : base(0, 0)
+        public HealthBarGump() : base(0, 0)
         {
             CanMove = true;
         }

@@ -678,13 +678,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                     {
                         var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
-                        MobileHealthGump currentMobileHealthGump;
+                        HealthBarGump currentHealthBarGump;
                         list.Add(World.Player);
-                        Engine.UI.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
+                        Engine.UI.Add(currentHealthBarGump = new HealthBarGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
 
                         //if (dict.ContainsKey(World.Player))
                         //{
-                        //    Engine.UI.Remove<MobileHealthGump>(World.Player);
+                        //    Engine.UI.Remove<HealthBarGump>(World.Player);
                         //}
                         Dispose();
                     }
@@ -694,9 +694,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                     {
                         var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
-                        MobileHealthGump currentMobileHealthGump;
+                        HealthBarGump currentHealthBarGump;
                         list.Add(World.Player);
-                        Engine.UI.Add(currentMobileHealthGump = new MobileHealthGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
+                        Engine.UI.Add(currentHealthBarGump = new HealthBarGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
                         Dispose();
                     }
                 }

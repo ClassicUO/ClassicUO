@@ -48,6 +48,7 @@ namespace ClassicUO.Game.Scenes
         private Action _queuedAction;
         private Entity _queuedObject;
         private bool _rightMousePressed;
+
         public List<Mobile> MobileGumpStack = new List<Mobile>();
         public List<Mobile> PartyMemberGumpStack = new List<Mobile>();
         public List<Skill> SkillButtonGumpStack = new List<Skill>();
@@ -93,7 +94,7 @@ namespace ClassicUO.Game.Scenes
 
                             if (control is ItemGump gumpling)
                                 obj = gumpling.Item;
-                            else if (control.Parent is MobileHealthGump healthGump)
+                            else if (control.Parent is HealthBarGump healthGump)
                                 obj = healthGump.Mobile;
                         }
                         else if (IsMouseOverWorld) obj = SelectedObject;
@@ -346,7 +347,7 @@ namespace ClassicUO.Game.Scenes
                             else
                             {
                                 if (MobileGumpStack.Contains(mobile))
-                                    Engine.UI.Remove<MobileHealthGump>(mobile);
+                                    Engine.UI.Remove<HealthBarGump>(mobile);
                                 else if (mobile == World.Player)
                                 {
                                     StatusGump status = Engine.UI.GetByLocalSerial<StatusGump>();
@@ -355,9 +356,9 @@ namespace ClassicUO.Game.Scenes
 
                                 MobileGumpStack.Add(mobile);
                                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
-                                MobileHealthGump currentMobileHealthGump;
-                                Engine.UI.Add(currentMobileHealthGump = new MobileHealthGump(mobile, Mouse.Position.X - (rect.Width >> 1), Mouse.Position.Y - (rect.Height >> 1)));
-                                Engine.UI.AttemptDragControl(currentMobileHealthGump, Mouse.Position, true);
+                                HealthBarGump currentHealthBarGump;
+                                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile, Mouse.Position.X - (rect.Width >> 1), Mouse.Position.Y - (rect.Height >> 1)));
+                                Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
                             }
 
                             break;

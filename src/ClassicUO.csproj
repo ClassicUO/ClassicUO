@@ -161,7 +161,7 @@
     <Compile Include="Game\Gumps\UIGumps\Login\MainLoginGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\Login\ServerSelectionGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\LogoutGump.cs" />
-    <Compile Include="Game\Gumps\UIGumps\MobileHealthGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\HealthBarGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\OptionsGump1.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyMemberGump.cs" />
