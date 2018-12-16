@@ -395,6 +395,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
+#if JAEDAN_MOVEMENT_PATCH
         public virtual void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
             Position = new Position(x, y, z);
@@ -403,6 +404,7 @@ namespace ClassicUO.Game.GameObjects
             AddToTile();
             ProcessDelta();
         }
+#endif
 
         public void SetAnimation(byte id, byte interval = 0, byte frameCount = 0, byte repeatCount = 0, bool repeat = false, bool frameDirection = false)
         {
@@ -504,6 +506,28 @@ namespace ClassicUO.Game.GameObjects
                             {
                                 // oUCH!!!!
                             }
+
+#if !JAEDAN_MOVEMENT_PATCH
+                            if (World.Player.Walker.StepInfos[World.Player.Walker.CurrentWalkSequence].Accepted)
+                            {
+                                int sequence = World.Player.Walker.CurrentWalkSequence + 1;
+
+                                if (sequence < World.Player.Walker.StepsCount)
+                                {
+                                    int count = World.Player.Walker.StepsCount - sequence;
+
+                                    for (int i = 0; i < count; i++)
+                                    {
+                                        World.Player.Walker.StepInfos[sequence - 1] = World.Player.Walker.StepInfos[sequence];
+                                        sequence++;
+                                    }
+                                }
+
+                                World.Player.Walker.StepsCount--;
+                            }
+                            else
+                                World.Player.Walker.CurrentWalkSequence++;
+#endif
                         }
 
                         Position = new Position((ushort) step.X, (ushort) step.Y, step.Z);

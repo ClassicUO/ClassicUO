@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Scenes
 
         private void MoveCharacterByInputs()
         {
-            if (World.InGame)
+            if (World.InGame && !Pathfinder.AutoWalking)
             {
                 Point center = new Point(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1), Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y>> 1));
                 Direction direction = DirectionHelper.DirectionFromPoints(center, Mouse.Position);

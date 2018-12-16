@@ -640,7 +640,11 @@ namespace ClassicUO.Network
                 World.MapIndex = 0;
 
             Direction direction = (Direction) (p.ReadByte() & 0x7);
-            World.Player.ForcePosition(x, y, z, direction);
+            //World.Player.ForcePosition(x, y, z, direction);
+
+            World.Player.Position = new Position(x, y ,z);
+            World.Player.Direction = direction;
+            World.Player.AddToTile();
 
             List<Gump> gumps = Engine.Profile.Load(World.ServerName, settings.Username, settings.LastCharacterName);
 
@@ -737,21 +741,19 @@ namespace ClassicUO.Network
             p.Skip(2);
             Direction direction = (Direction) p.ReadByte();
             sbyte z = p.ReadSByte();
-
-            //World.Player.GetEndPosition(out int endX, out int endY, out sbyte endZ, out Direction endDir);
-
-            //World.Player.ResetSteps();
             Direction dir = direction & Direction.Up;
-            //bool isrun = (direction & Direction.Running) != 0;
+            dir &= Direction.Running;
 
-            //if (endX != x || endY != y || endZ != z)
-            //    World.Player.ForcePosition(x, y, z, dir);
-
-            //if (endDir != dir)
-            //    World.Player.EnqueueStep(x, y, z, dir, isrun);
-            //else
-            //    World.Player.ForcePosition(x, y, z, dir);
+#if JAEDAN_MOVEMENT_PATCH
             World.Player.ForcePosition(x, y, z, dir);
+#else
+            World.Player.Walker.WalkingFailed = false;
+            World.Player.Position = new Position(x, y, z);
+            World.Player.Direction = dir;
+            World.Player.Walker.DenyWalk(0xFF, -1, -1, -1);
+            World.Player.Walker.ResendPacketSended = false;
+            World.Player.AddToTile();
+#endif
             World.Player.ProcessDelta();
         }
 
@@ -765,10 +767,14 @@ namespace ClassicUO.Network
             Direction direction = (Direction) p.ReadByte();
             direction &= Direction.Up;
             sbyte z = p.ReadSByte();
-            //World.Player.DenyWalk(seq, direction, x, y, z);
 
+
+#if JAEDAN_MOVEMENT_PATCH
             World.Player.ForcePosition(x, y , z, direction);
-
+#else
+            World.Player.Walker.DenyWalk(seq, x, y, z);
+#endif
+            World.Player.Direction = direction;
             World.Player.ProcessDelta();
         }
 
@@ -782,7 +788,7 @@ namespace ClassicUO.Network
             if (noto == 0 || noto >= 7)
                 noto = 0x01;
             World.Player.NotorietyFlag = (NotorietyFlag) noto;
-            World.Player.ConfirmWalk();
+            World.Player.ConfirmWalk(seq);
             World.Player.ProcessDelta();
         }
 

@@ -777,21 +777,23 @@ namespace ClassicUO.Game
 
         public static void ProcessAutoWalk()
         {
-            if (AutoWalking && World.InGame && World.Player.RequestedSteps.Count < 5 && World.Player.LastStepRequestTime <= Engine.Ticks)
+#if !JAEDAN_MOVEMENT_PATCH
+            if (AutoWalking && World.InGame && World.Player.Walker.LastStepRequestTime < Engine.Ticks)
+#else
+            if (AutoWalking && World.InGame && !World.Player.IsWaitingNextMovement)
+#endif
+
             {
                 if (_pointIndex >= 0 && _pointIndex < _pathSize)
                 {
                     PathNode p = _path[_pointIndex];
-                    int x = 0;
-                    int y = 0;
-                    sbyte z = 0;
-                    Direction dir = Direction.NONE;
-                    World.Player.GetEndPosition(out x, out y, out z, out dir);
 
-                    if (dir == (Direction) p.Direction)
+                    World.Player.GetEndPosition(out int x, out int y, out sbyte z, out Direction dir);
+
+                    if (dir == (Direction)p.Direction)
                         _pointIndex++;
 
-                    if (!World.Player.Walk((Direction) p.Direction, true))
+                    if (!World.Player.Walk((Direction)p.Direction, true))
                         StopAutoWalk();
                 }
                 else

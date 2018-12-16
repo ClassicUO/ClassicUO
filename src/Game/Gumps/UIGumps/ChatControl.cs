@@ -198,11 +198,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 _textEntries[i].Update(totalMS, frameMS);
 
-                if (_textEntries[i].IsExpired)
-                {
-                    _textEntries[i].Dispose();
+                if (_textEntries[i].IsDispose)
                     _textEntries.RemoveAt(i--);
-                }
             }
 
             if (Mode == ChatMode.Default)
@@ -395,11 +392,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //GameActions.Say(text, hue, speechType, 0);
         }
 
-        private class ChatLineTime : IUpdateable, IDrawableUI, IDisposable
+        private class ChatLineTime : IUpdateable, IDisposable
         {           
             private readonly float _createdTime;
             private readonly RenderedText _renderedText;
-            private int _width;
+            private float _alpha;
 
             public ChatLineTime(string text, int width, byte font, bool isunicode, Hue hue)
             {
@@ -412,30 +409,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Hue = hue,
                     Text = text
                 };
-                _width = width;
                 _createdTime = Engine.Ticks;
             }
 
             public string Text => _renderedText.Text;
 
-            public bool IsExpired { get; private set; }
-
-            public float Alpha { get; private set; }
+            public bool IsDispose { get; private set; }
 
             public int TextHeight => _renderedText.Height;
 
-            public void Dispose()
-            {
-                _renderedText.Dispose();
-            }
-
-            public bool AllowedToDraw { get; set; } = true;
-
-            public SpriteTexture Texture { get; set; }
-
+           
             public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
             {
-                return _renderedText.Draw(batcher, position, ShaderHuesTraslator.GetHueVector(0, false, Alpha < 1.0f ? Alpha : 0, true));
+                return _renderedText.Draw(batcher, position, ShaderHuesTraslator.GetHueVector(0, false, _alpha, true));
             }
 
             public void Update(double totalMS, double frameMS)
@@ -443,13 +429,23 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 float time = (float) totalMS - _createdTime;
 
                 if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT)
-                    IsExpired = true;
-                else if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT) Alpha = (time - (Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)) / Constants.TIME_FADEOUT_TEXT;
+                    Dispose();
+                //else if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)
+                //    _alpha = (time - (Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)) / Constants.TIME_FADEOUT_TEXT;
             }
 
             public override string ToString()
             {
                 return Text;
+            }
+
+            public void Dispose()
+            {
+                if (IsDispose)
+                    return;
+
+                IsDispose = true;
+                _renderedText.Dispose();
             }
         }
     }

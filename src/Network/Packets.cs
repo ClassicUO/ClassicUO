@@ -1118,8 +1118,7 @@ namespace ClassicUO.Network
 
     public sealed class PResend : PacketWriter
     {
-        public static Lazy<PResend> Instance { get; } = new Lazy<PResend>(() => new PResend());
-        private PResend() : base(0x22)
+        public PResend() : base(0x22)
         {
         }
     }
@@ -1316,12 +1315,10 @@ namespace ClassicUO.Network
 
     public sealed class PPing : PacketWriter
     {
-        private PPing() : base(0x73)
+        public PPing() : base(0x73)
         {
             WriteByte(0);
         }
-
-        public static Lazy<PPing> Instance { get; } = new Lazy<PPing>(() => new PPing());
     }
 
     public sealed class PClientViewRange : PacketWriter

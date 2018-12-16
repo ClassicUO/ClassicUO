@@ -333,7 +333,7 @@ namespace ClassicUO.Game.Scenes
 
             if (totalMS > _timePing)
             {
-                NetClient.Socket.Send(PPing.Instance.Value);
+                NetClient.Socket.Send(new PPing());
                 _timePing = (long) totalMS + 10000;
             }
 

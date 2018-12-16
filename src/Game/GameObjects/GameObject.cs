@@ -166,6 +166,9 @@ namespace ClassicUO.Game.GameObjects
         {
             if (World.Map != null)
             {
+                //if (_tile != null && _tile.X == x && _tile.Y == y)
+                //    return;
+
                 if (Position != Position.Invalid)
                     _tile?.RemoveGameObject(this);
 

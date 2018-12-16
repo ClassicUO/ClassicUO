@@ -135,17 +135,17 @@ namespace ClassicUO.Game.Views
             //    damageManager.UpdatePosition(mobile, overheadPosition);
             //}
 
-            if (_edge == null)
-            {
-                _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
-                _edge.SetData(new Color[] { Color.LightBlue });
-            }
+            //if (_edge == null)
+            //{
+            //    _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
+            //    _edge.SetData(new Color[] { Color.LightBlue });
+            //}
 
-            batcher.DrawRectangle(_edge, GetOnScreenRectangle(), Vector3.Zero);
+            //batcher.DrawRectangle(_edge, GetOnScreenRectangle(), Vector3.Zero);
 
             return true;
         }
-        private static Texture2D _edge;
+        //private static Texture2D _edge;
 
 
 
