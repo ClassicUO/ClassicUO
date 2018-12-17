@@ -556,7 +556,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 byte dir = (byte) Layer;
 
-                if (_lastAnimationChangeTime < Engine.Ticks)
+                if (LastAnimationChangeTime < Engine.Ticks)
                 {
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
                     Graphic id = GetGraphicForAnimation();
@@ -581,7 +581,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    _lastAnimationChangeTime = Engine.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
+                    LastAnimationChangeTime = Engine.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
         }

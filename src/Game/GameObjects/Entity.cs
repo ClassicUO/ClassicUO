@@ -36,7 +36,6 @@ namespace ClassicUO.Game.GameObjects
         private Flags _flags;
         private Graphic _graphic;
         private Hue _hue;
-        protected long _lastAnimationChangeTime;
         private string _name;
 
 
@@ -45,6 +44,8 @@ namespace ClassicUO.Game.GameObjects
             Serial = serial;
             Items = new EntityCollection<Item>();
         }
+
+        protected long LastAnimationChangeTime { get; set; }
 
         public EntityCollection<Item> Items { get; }
 

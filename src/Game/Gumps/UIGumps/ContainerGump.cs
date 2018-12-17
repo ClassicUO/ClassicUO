@@ -49,6 +49,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _gumpID = gumpid;
 
             BuildGump();
+
+            foreach (var c in Children.OfType<ItemGump>())
+                c.Dispose();
+
+            foreach (Item i in _item.Items)
+                AddChildren(new ItemGump(i));
         }
 
         private void BuildGump()
@@ -105,17 +111,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Children.OfType<ItemGump>().Where(s => e.Contains(s.Item)).ToList().ForEach(RemoveChildren);
 
             foreach (Item item in e)
-                AddChildren(new ItemGump(item));
-        }
-
-        protected override void OnInitialize()
-        {
-            foreach (var c in Children.OfType<ItemGump>())
-            {
-                c.Dispose();
-            }
-
-            foreach (Item item in _item.Items)
                 AddChildren(new ItemGump(item));
         }
 

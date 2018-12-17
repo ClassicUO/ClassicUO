@@ -123,7 +123,6 @@ namespace ClassicUO.Game.Scenes
                         if (tileZ > pz14 && _maxZ > tileZ)
                         {
                             if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (itemdata.Flags & 0x204) == 0 && TileData.IsRoof(itemdata.Flags))
-                            //if (obj is IDynamicItem dyn2 && (dyn2.ItemData.Flags & 0x204) == 0 && TileData.IsRoof( dyn2.ItemData.Flags))
                             {
                                 _maxZ = tileZ;
                                 World.Map.ClearBockAccess();

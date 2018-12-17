@@ -380,6 +380,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     if (World.Player.InWarMode)
                     {
                         //attack
+                        GameActions.Attack(Mobile);
                     }
                     else
                         GameActions.DoubleClick(Mobile);

@@ -85,18 +85,7 @@ namespace ClassicUO.Game.Views
         {
             Texture.Ticks = Engine.Ticks;
 
-            fixed (SpriteVertex* ptr = _vertex)
-            {
-                ptr[0].Position = position + _vertex0_yOffset;
-                ptr[1].Position = position + _vertex1_yOffset;
-                ptr[2].Position = position + _vertex2_yOffset;
-                ptr[3].Position = position + _vertex3_yOffset;
-            }
-
             int z = GameObject.Position.Z * 4;
-
-            for (int i = 0; i < 4; i++)
-                _vertex[i].Position.Y += z;
 
             if (IsSelected)
             {
@@ -110,8 +99,26 @@ namespace ClassicUO.Game.Views
                 _storedHue = Vector3.Zero;
             }
 
-            if (HueVector != _vertex[0].Hue)
-                _vertex[0].Hue = _vertex[1].Hue = _vertex[2].Hue = _vertex[3].Hue = HueVector;
+            fixed (SpriteVertex* ptr = _vertex)
+            {
+                ptr[0].Position = position + _vertex0_yOffset;
+                ptr[1].Position = position + _vertex1_yOffset;
+                ptr[2].Position = position + _vertex2_yOffset;
+                ptr[3].Position = position + _vertex3_yOffset;
+
+                ptr[0].Position.Y += z;
+                ptr[1].Position.Y += z;
+                ptr[2].Position.Y += z;
+                ptr[3].Position.Y += z;
+
+                if (HueVector != ptr[0].Hue)
+                {
+                    ptr[0].Hue = HueVector;
+                    ptr[1].Hue = HueVector;
+                    ptr[2].Hue = HueVector;
+                    ptr[3].Hue = HueVector;
+                }
+            }
 
             if (!batcher.DrawSprite(Texture, _vertex))
                 return false;
@@ -126,16 +133,6 @@ namespace ClassicUO.Game.Views
         {
             int x = list.MousePosition.X - (int)vertex[0].Position.X;
             int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
-
-            //if (Art.Contains(GameObject.Graphic, x, y))
-            //Land tile = (Land)GameObject;
-
-            //if (!tile.IsStretched)
-            //{
-            //    if (Texture.Contains(x, y))
-            //        list.Add(GameObject, vertex[0].Position);
-            //}
-
 
             if (Texture.Contains(x, y))
                 list.Add(GameObject, vertex[0].Position);

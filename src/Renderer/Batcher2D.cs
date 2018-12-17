@@ -48,7 +48,7 @@ namespace ClassicUO.Renderer
         private readonly SpriteVertex[] _vertexInfo;
         private bool _started;
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
-        private RasterizerState _rasterizerState;
+        private readonly RasterizerState _rasterizerState;
         private BlendState _blendState;
 
 

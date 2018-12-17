@@ -21,12 +21,13 @@
 using ClassicUO.Game.Views;
 using ClassicUO.Renderer;
 using System;
+using System.Diagnostics;
 
 namespace ClassicUO.Game.GameObjects
 {
+    [DebuggerDisplay("Text = {Text}")]
     public class TextOverhead : GameObject
     {
-
         public TextOverhead(GameObject parent, string text = "", int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = true, FontStyle style = FontStyle.None, float timeToLive = 0.0f)
         {
             Text = text;
@@ -71,8 +72,6 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Update(double totalMS, double frameMS)
         {
-            //base.Update(totalMS, frameMS);
-
             if (IsDisposed)
                 return;
 
@@ -103,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else if (IsOverlapped && Alpha <= 0.0f)
                         Alpha = 0.5f;
-                    else if (!IsOverlapped && Alpha != 0)
+                    else if (!IsOverlapped && Alpha != 0.0f)
                         Alpha = 0;
                 }
                

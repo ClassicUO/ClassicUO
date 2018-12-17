@@ -42,22 +42,25 @@ namespace ClassicUO.Game.Managers
     {
         private readonly Dictionary<GameObject, Deque<DamageOverhead>> _damageOverheads = new Dictionary<GameObject, Deque<DamageOverhead>>();
         private readonly List<GameObject> _toRemoveDamages = new List<GameObject>();
-        private readonly List<Tuple<TextOverhead, Vector3>> _allOverheads = new List<Tuple<TextOverhead, Vector3>>();
+        //private readonly List<Tuple<TextOverhead, Vector3>> _allOverheads = new List<Tuple<TextOverhead, Vector3>>();
         private readonly List<Static> _staticToUpdate = new List<Static>();
 
+        private TextOverhead _firstNode;
 
         private void DrawTextOverheads(Batcher2D batcher, MouseOverList list)
         {
-            if (_allOverheads.Count > 0)
+            if (_firstNode != null)
             {
-                for (int i = 0; i < _allOverheads.Count; i++)
+                //for (int i = 0; i < _allOverheads.Count; i++)
+
+                for (TextOverhead overhead = _firstNode; overhead != null; overhead = (TextOverhead) overhead.Right)
                 {
-                    TextOverhead overhead = _allOverheads[i].Item1;
+                   // TextOverhead overhead = _allOverheads[i].Item1;
                     GameObject owner = overhead.Parent;
 
                     if (overhead.IsDisposed || owner.IsDisposed)
                     {
-                        _allOverheads.RemoveAt(i--);
+                        //_allOverheads.RemoveAt(i--);
                         continue;
                     }
 
@@ -81,13 +84,13 @@ namespace ClassicUO.Game.Managers
                     View v = overhead.View;
                     Rectangle current = new Rectangle((int) position.X - v.Bounds.X, (int) position.Y - v.Bounds.Y, v.Bounds.Width, v.Bounds.Height);
 
-
-                    for (int j = i + 1; j < _allOverheads.Count; j++)
+                    for (TextOverhead ov = (TextOverhead) overhead.Right; ov != null; ov = (TextOverhead)ov.Right)
+                    //for (int j = i + 1; j < _allOverheads.Count; j++)
                     {
-                        var a = _allOverheads[j];
-                        TextOverhead ov = a.Item1;
+                        //var a = _allOverheads[j];
+                        //TextOverhead ov = a.Item1;
                         View b = ov.View;
-                        Vector3 pos2 = a.Item2;
+                        Vector3 pos2 = ov.RealScreenPosition; // a.Item2;
 
                         if (ov.Parent is Mobile mm)
                         {
@@ -110,7 +113,22 @@ namespace ClassicUO.Game.Managers
                     v.Draw(batcher, position, list);
                 }
 
-                _allOverheads.Clear();
+                //_allOverheads.Clear();
+
+                GameObject last = _firstNode;
+
+                while (last != null)
+                {
+                    GameObject temp = last.Right;
+
+                    last.Left = null;
+                    last.Right = null;
+
+                    last = temp;
+                }
+
+                _firstNode = null;
+
             }
         }
 
@@ -119,7 +137,26 @@ namespace ClassicUO.Game.Managers
             if (overhead.Parent is Static st && !_staticToUpdate.Contains(st))
                 _staticToUpdate.Add(st);
 
-            _allOverheads.Add(Tuple.Create(overhead, position));
+
+            overhead.Right = null;
+
+            if (_firstNode == null)
+            {
+                overhead.Left = null;
+                _firstNode = overhead;
+            }
+            else
+            {
+                var last = (GameObject) _firstNode;
+
+                while (last.Right != null)
+                    last = last.Right;
+
+                last.Right = overhead;
+                overhead.Left = last;
+            }
+
+            //_allOverheads.Add(Tuple.Create(overhead, position));
         }
 
         
@@ -237,7 +274,7 @@ namespace ClassicUO.Game.Managers
         {
             if (!_damageOverheads.TryGetValue(obj, out Deque<DamageOverhead> deque) || deque == null)
             {
-                deque = new Deque<DamageOverhead>();
+                deque = new Deque<DamageOverhead>(10);
                 _damageOverheads[obj] = deque;
             }
 
@@ -268,12 +305,28 @@ namespace ClassicUO.Game.Managers
             }
 
 
-            foreach (Tuple<TextOverhead, Vector3> tuple in _allOverheads)
+            //foreach (Tuple<TextOverhead, Vector3> tuple in _allOverheads)
+            //{
+            //    tuple.Item1.Dispose();
+            //}
+
+            //_allOverheads.Clear();
+
+            GameObject last = _firstNode;
+
+            while (last != null)
             {
-                tuple.Item1.Dispose();
+                GameObject temp = last.Right;
+
+                last.Dispose();
+
+                last.Left = null;
+                last.Right = null;
+
+                last = temp;
             }
 
-            _allOverheads.Clear();
+            _firstNode = null;
 
             _staticToUpdate.ForEach( s=> s.Dispose());
             _staticToUpdate.Clear();

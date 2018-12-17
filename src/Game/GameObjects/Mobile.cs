@@ -67,7 +67,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Mobile(Serial serial) : base(serial)
         {
-            _lastAnimationChangeTime = Engine.Ticks;
+            LastAnimationChangeTime = Engine.Ticks;
             CalculateRandomIdleTime();
         }
 
@@ -76,7 +76,7 @@ namespace ClassicUO.Game.GameObjects
             _lastAnimationIdleDelay = Engine.Ticks + (30000 + RandomHelper.GetValue(0, 30000));
         }
 
-        public Deque<Step> Steps { get; } = new Deque<Step>();
+        public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
 
         public CharacterSpeedType SpeedMode { get; internal set; } = CharacterSpeedType.Normal;
 
@@ -416,7 +416,7 @@ namespace ClassicUO.Game.GameObjects
             AnimationRepeat = repeat;
             AnimationDirection = frameDirection;
             AnimationFromServer = false;
-            _lastAnimationChangeTime = Engine.Ticks;
+            LastAnimationChangeTime = Engine.Ticks;
             CalculateRandomIdleTime();
         }
 
@@ -542,7 +542,7 @@ namespace ClassicUO.Game.GameObjects
                 } while (Steps.Count > 0 && turnOnly);
             }
 
-            if (_lastAnimationChangeTime < Engine.Ticks && !NoIterateAnimIndex())
+            if (LastAnimationChangeTime < Engine.Ticks && !NoIterateAnimIndex())
             {
                 sbyte frameIndex = AnimIndex;
 
@@ -656,7 +656,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                _lastAnimationChangeTime = Engine.Ticks + currentDelay;
+                LastAnimationChangeTime = Engine.Ticks + currentDelay;
             }
         }
 

@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
@@ -40,7 +41,8 @@ namespace ClassicUO.Game.GameObjects
         private Position _position = Position.Invalid;
         private View _view;
         public Vector3 Offset;
-        private readonly List<TextOverhead> _overHeads = new List<TextOverhead>();
+        private readonly Deque<TextOverhead> _overHeads = new Deque<TextOverhead>(5);
+        private Tile _tile;
 
         protected GameObject()
         {
@@ -57,8 +59,6 @@ namespace ClassicUO.Game.GameObjects
         public Vector3 RealScreenPosition { get; protected set; }
 
         public bool IsPositionChanged { get; protected set; }
-
-        //public Tile Tile { get; protected set; }
 
         public Position Position
         {
@@ -106,8 +106,6 @@ namespace ClassicUO.Game.GameObjects
 
         public short PriorityZ { get; set; }
 
-        private Tile _tile;
-
         public IReadOnlyList<TextOverhead> Overheads => _overHeads;
 
         //public Tile Tile
@@ -129,7 +127,6 @@ namespace ClassicUO.Game.GameObjects
         //        }
         //    }
         //}
-
 
         public bool IsDisposed { get; private set; }
 
@@ -243,8 +240,8 @@ namespace ClassicUO.Game.GameObjects
 
         private void InsertGameText(TextOverhead gameText)
         {
-            //Engine.SceneManager.GetScene<GameScene>().Overheads.AddText(this, gameText);
-            _overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
+            _overHeads.AddToFront(gameText);
+            //_overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
         }
 
         protected virtual void OnPositionChanged()
@@ -273,8 +270,11 @@ namespace ClassicUO.Game.GameObjects
 
             //Tile = null;
 
-            
-            _overHeads.ForEach(s => s.Dispose());
+            foreach (TextOverhead textOverhead in _overHeads)
+            {
+                textOverhead.Dispose();
+            }
+            //_overHeads.ForEach(s => s.Dispose());
             _overHeads.Clear();            
         }
     }

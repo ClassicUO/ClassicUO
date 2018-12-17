@@ -225,7 +225,6 @@ namespace ClassicUO.Game.Scenes
             if (IsMouseOverWorld)
             {
                 GameObject obj = _mousePicker.MouseOverObject;
-                Point point = _mousePicker.MouseOverObjectPoint;
 
                 switch (obj)
                 {
@@ -238,10 +237,7 @@ namespace ClassicUO.Game.Scenes
                         e.Result = true;
 
                         if (World.Player.InWarMode)
-                        {
-                            //TODO: attack request
-                            
-                        }
+                            GameActions.Attack(mob);                            
                         else
                             GameActions.DoubleClick(mob);
 

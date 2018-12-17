@@ -48,6 +48,9 @@ namespace ClassicUO.Game
         public static void OpenPaperdoll(Serial serial)
             => DoubleClick(serial | 0x80000000);
 
+        public static void Attack(Serial serial)
+            => Socket.Send(new PAttackRequest(serial));
+
         public static void DoubleClick(Serial serial)
         {
             Socket.Send(new PDoubleClickRequest(serial));
