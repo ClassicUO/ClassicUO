@@ -51,7 +51,6 @@ namespace ClassicUO.Game.Scenes
 
         public List<Mobile> MobileGumpStack = new List<Mobile>();
         public List<Mobile> PartyMemberGumpStack = new List<Mobile>();
-        public List<Skill> SkillButtonGumpStack = new List<Skill>();
         
         public bool IsMouseOverUI => Engine.UI.IsMouseOverUI && !(Engine.UI.MouseOverControl is WorldViewport);
 

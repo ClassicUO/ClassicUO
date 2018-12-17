@@ -121,6 +121,7 @@
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
     <Compile Include="Game\GameObjects\MultiStatic.cs" />
+    <Compile Include="Game\Managers\HealthBarManager.cs" />
     <Compile Include="Game\Managers\HouseManager.cs" />
     <Compile Include="Game\Managers\UseItemQueue.cs" />
     <Compile Include="Game\Managers\EffectManager.cs" />

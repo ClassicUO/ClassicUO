@@ -18,6 +18,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System.IO;
+
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
@@ -28,36 +31,48 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class SkillButtonGump : Gump
     {
-        private readonly ResizePic _buttonBackgroundNormal;
-        private readonly ResizePic _buttonBackgroundOver;
-        private readonly Skill _skill;
+        private ResizePic _buttonBackgroundNormal;
+        private ResizePic _buttonBackgroundOver;
+        private Skill _skill;
 
-        public SkillButtonGump(Skill skill, int x, int y) : base(0, 0)
+        public SkillButtonGump(Skill skill, int x, int y) : this()
         {
             X = x;
             Y = y;
+            _skill = skill;
+
+            BuildGump();
+            LocalSerial = (uint)(World.Player.Serial + _skill.Index + 1);
+        }
+
+        public SkillButtonGump() : base(0 ,0)
+        {
             CanMove = true;
             AcceptMouseInput = false;
             CanCloseWithRightClick = true;
-            _skill = skill;
+            CanBeSaved = true;
+        }
 
+        private void BuildGump()
+        {
             AddChildren(_buttonBackgroundNormal = new ResizePic(0x24B8)
             {
-                Width = 120, Height = 40
+                Width = 120,
+                Height = 40
             });
 
             AddChildren(_buttonBackgroundOver = new ResizePic(0x24EA)
             {
-                Width = 120, Height = 40
+                Width = 120,
+                Height = 40
             });
 
-            AddChildren(new HoveredLabel(skill.Name, true, 0, 1151, 105, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
+            AddChildren(new HoveredLabel(_skill.Name, true, 0, 1151, 105, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 7,
                 Y = 5,
                 Height = 35,
                 AcceptMouseInput = true,
-                CanMove = true
             });
         }
 
@@ -76,6 +91,26 @@ namespace ClassicUO.Game.Gumps.UIGumps
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
             if (button == MouseButton.Left) GameActions.UseSkill(_skill.Index);
+        }
+
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            writer.Write(LocalSerial);
+            writer.Write(_skill.Index);
+        }
+
+        public override void Restore(BinaryReader reader)
+        {
+            base.Restore(reader);
+
+
+            LocalSerial = reader.ReadUInt32();
+            int skillIndex = reader.ReadInt32();
+
+            _skill = World.Player.Skills[skillIndex];
+
+            BuildGump();
         }
     }
 }
