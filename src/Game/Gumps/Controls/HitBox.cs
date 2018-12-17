@@ -47,6 +47,9 @@ namespace ClassicUO.Game.Gumps.Controls
             WantUpdateSize = false;
         }
 
+
+        protected override ClickPriority Priority { get; } = ClickPriority.High;
+
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)

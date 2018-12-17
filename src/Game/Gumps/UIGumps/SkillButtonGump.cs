@@ -48,13 +48,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public SkillButtonGump() : base(0 ,0)
         {
             CanMove = true;
-            AcceptMouseInput = false;
+            AcceptMouseInput = true;
             CanCloseWithRightClick = true;
             CanBeSaved = true;
+            WantUpdateSize = false;
         }
 
         private void BuildGump()
         {
+            Width = 120;
+            Height = 40;
+
             AddChildren(_buttonBackgroundNormal = new ResizePic(0x24B8)
             {
                 Width = 120,
@@ -66,17 +70,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 Width = 120,
                 Height = 40
             });
-
+        
             AddChildren(new HoveredLabel(_skill.Name, true, 0, 1151, 105, 1, FontStyle.None, TEXT_ALIGN_TYPE.TS_CENTER)
             {
                 X = 7,
                 Y = 5,
                 Height = 35,
                 AcceptMouseInput = true,
+                CanMove = true
             });
         }
 
-        protected override void OnMouseOver(int x, int y)
+        protected override void OnMouseEnter(int x, int y)
         {
             _buttonBackgroundNormal.IsVisible = false;
             _buttonBackgroundOver.IsVisible = true;
@@ -90,7 +95,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (button == MouseButton.Left) GameActions.UseSkill(_skill.Index);
+            if (button == MouseButton.Left)
+                GameActions.UseSkill(_skill.Index);
         }
 
         public override void Save(BinaryWriter writer)
