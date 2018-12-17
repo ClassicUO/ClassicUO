@@ -211,6 +211,9 @@ namespace ClassicUO.Game.Map
 
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
                     {
+
+                        //if (obj is Static st && st.)
+
                         if (!(obj is Land) && !(obj is Static))
                             return false;
                     }

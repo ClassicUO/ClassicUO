@@ -27,6 +27,7 @@ using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -132,7 +133,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (value)
                     {
-                        if (Multi == null)
+                        if (MultiDistanceBonus == 0 || MultiInfo == null)
                         {
                             short minX = 0;
                             short minY = 0;
@@ -150,26 +151,25 @@ namespace ClassicUO.Game.GameObjects
                             for (int i = 0; i < count; i++)
                             {
                                 MultiBlock pbm = IO.Resources.Multi.GetMulti(i);
-                                MultiComponent component = new MultiComponent(pbm.ID, (ushort) (Position.X + pbm.X), (ushort) (Position.Y + pbm.Y), (sbyte) (Position.Z + pbm.Z), pbm.Flags);
+                                MultiComponent component = new MultiComponent(pbm.ID, (ushort) (X + pbm.X), (ushort) (Y + pbm.Y), (sbyte) (Z + pbm.Z), pbm.Flags);
                                 if (pbm.X < minX) minX = pbm.X;
                                 if (pbm.X > maxX) maxX = pbm.X;
                                 if (pbm.Y < minY) minY = pbm.Y;
                                 if (pbm.Y > maxY) maxY = pbm.Y;
                                 components[i] = component;
 
-                                house.Components.Add(new MultiStatic(component.Graphic, 0)
+                                house.Components.Add(new Multi(component.Graphic)
                                 {
                                     Position = component.Position
                                 });
                             }
 
-                            Multi = new Multi(this)
+                            MultiInfo = new MultiInfo((short) X, (short) Y)
                             {
                                 MinX = minX,
                                 MaxX = maxX,
                                 MinY = minY,
-                                MaxY = maxY,
-                                Components = components
+                                MaxY = maxY
                             };
 
                             MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
@@ -178,12 +178,15 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
                     else
-                        Multi = null;
+                    {
+                        MultiDistanceBonus = 0;
+                        MultiInfo = null;
+                    }
                 }
             }
         }
 
-        public Multi Multi { get; private set; }
+        public MultiInfo MultiInfo { get; private set; }
 
         public int MultiDistanceBonus { get; private set; }
 
@@ -544,11 +547,6 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Dispose()
         {
-            if (IsMulti && Multi != null)
-            {
-                Multi.Components = null;
-                Multi = null;
-            }
             base.Dispose();
         }
 

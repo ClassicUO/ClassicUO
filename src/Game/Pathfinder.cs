@@ -31,6 +31,7 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 using MathHelper = ClassicUO.Utility.MathHelper;
+using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game
 {
@@ -133,10 +134,6 @@ namespace ClassicUO.Game
 
                                 break;
                             }
-                            //case IDynamicItem dyn when stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (TileData.IsDoor( dyn.ItemData.Flags) || dyn.ItemData.Weight <= 0x5A /*|| (isGM && !)*/):
-                            //    dropFlags = true;
-
-                            //    break;
                             case Item item2:
 
                                 if (stepState == (int)PATH_STEP_STATE.PSS_DEAD_OR_GM && (TileData.IsDoor(item2.ItemData.Flags) || item2.ItemData.Weight <= 0x5A /*|| (isGM && !)*/))
@@ -152,7 +149,7 @@ namespace ClassicUO.Game
                             uint flags = 0;
 
                             //if (obj is IDynamicItem dyn)
-                            if (GameObjectHelper.TryGetItemData(obj, out var itemdata))
+                            if (GameObjectHelper.TryGetStaticData(obj, out var itemdata))
                             {
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {

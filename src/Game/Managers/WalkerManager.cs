@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using ClassicUO.Network;
-using ClassicUO.Utility.Logging;
+﻿using ClassicUO.Network;
 
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Managers
 {
 #if !JAEDAN_MOVEMENT_PATCH
     struct StepInfo

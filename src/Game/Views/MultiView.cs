@@ -12,17 +12,19 @@ using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
+using Multi = ClassicUO.Game.GameObjects.Multi;
+
 namespace ClassicUO.Game.Views
 {
-    public class MultiStaticView : View
+    public class MultiView : View
     {
         private readonly float _alpha;
 
-        public MultiStaticView(MultiStatic multi) : base(multi)
+        public MultiView(Multi st) : base(st)
         {
-            AllowedToDraw = !GameObjectHelper.IsNoDrawable(multi.Graphic);
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(st.Graphic);
 
-            if (TileData.IsTranslucent(multi.ItemData.Flags))
+            if (TileData.IsTranslucent(st.ItemData.Flags))
                 _alpha = 0.5f;
         }
 
@@ -57,5 +59,4 @@ namespace ClassicUO.Game.Views
                 list.Add(GameObject, vertex[0].Position);
         }
     }
-
 }

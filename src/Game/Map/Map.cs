@@ -32,6 +32,8 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using Multi = ClassicUO.Game.GameObjects.Multi;
+
 namespace ClassicUO.Game.Map
 {
     public sealed class Map : IDisposable
@@ -152,7 +154,7 @@ namespace ClassicUO.Game.Map
 
                 for(; obj != null; obj = obj.Right)
                 {
-                    if (!(obj is Static) && obj is Item item && !item.IsMulti)
+                    if (!(obj is Static) && !(obj is Multi))
                         continue;
 
                     if (obj is Mobile)
@@ -161,7 +163,7 @@ namespace ClassicUO.Game.Map
                     //if (obj is IDynamicItem dyn && (!TileData.IsRoof(dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6))
                     //    continue;
 
-                    if (GameObjectHelper.TryGetItemData(obj, out var itemdata) && (!TileData.IsRoof(itemdata.Flags) || Math.Abs(z - obj.Z) > 6))
+                    if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (!TileData.IsRoof(itemdata.Flags) || Math.Abs(z - obj.Z) > 6))
                         continue;
 
                     break;

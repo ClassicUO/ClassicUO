@@ -39,7 +39,7 @@ namespace ClassicUO.Game.GameObjects
 
         public Serial Serial { get; }
         public uint Revision { get; private set; }
-        public List<MultiStatic> Components { get; } = new List<MultiStatic>();
+        public List<Multi> Components { get; } = new List<Multi>();
         public bool IsCustom { get; }
 
         public void Generate()

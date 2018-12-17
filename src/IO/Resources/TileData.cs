@@ -65,10 +65,11 @@ namespace ClassicUO.IO.Resources
                     if (tiledata.Position + (isold ? 4 : 8) + 2 + 20 > tiledata.Length)
                         goto END;
                     int idx = i * 32 + j;
-                    LandData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
-                    LandData[idx].TexID = tiledata.ReadUShort();
+                    ulong flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
+                    ushort textId = tiledata.ReadUShort();
                     tiledata.Fill(bufferString, 20);
-                    LandData[idx].Name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
+                    string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
+                    LandData[idx] = new LandTiles(flags, textId, name);
                 }
             }
 
@@ -85,16 +86,19 @@ namespace ClassicUO.IO.Resources
                     if (tiledata.Position + (isold ? 4 : 8) + 13 + 20 > tiledata.Length)
                         goto END_2;
                     int idx = i * 32 + j;
-                    StaticData[idx].Flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
-                    StaticData[idx].Weight = tiledata.ReadByte();
-                    StaticData[idx].Layer = tiledata.ReadByte();
-                    StaticData[idx].Count = tiledata.ReadInt();
-                    StaticData[idx].AnimID = tiledata.ReadUShort();
-                    StaticData[idx].Hue = tiledata.ReadUShort();
-                    StaticData[idx].LightIndex = tiledata.ReadUShort();
-                    StaticData[idx].Height = tiledata.ReadByte();
+
+                    ulong flags = isold ? tiledata.ReadUInt() : tiledata.ReadULong();
+                    byte weight = tiledata.ReadByte();
+                    byte layer = tiledata.ReadByte();
+                    int count = tiledata.ReadInt();
+                    ushort animId = tiledata.ReadUShort();
+                    ushort hue = tiledata.ReadUShort();
+                    ushort lightIndex = tiledata.ReadUShort();
+                    byte height = tiledata.ReadByte();
                     tiledata.Fill(bufferString, 20);
-                    StaticData[idx].Name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
+                    string name = string.Intern(Encoding.UTF8.GetString(bufferString).TrimEnd('\0'));
+
+                    StaticData[idx] = new StaticTiles(flags, weight, layer, count, animId, hue, lightIndex, height, name);
                 }
             }
 
@@ -322,12 +326,18 @@ namespace ClassicUO.IO.Resources
         }
     }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct LandTiles
+    public readonly struct LandTiles
     {
-        public ulong Flags;
-        public ushort TexID;
-        public string Name;
+        public LandTiles(ulong flags, ushort textId, string name)
+        {
+            Flags = flags;
+            TexID = textId;
+            Name = name;
+        }
+
+        public readonly ulong Flags;
+        public readonly ushort TexID;
+        public readonly string Name;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -338,18 +348,30 @@ namespace ClassicUO.IO.Resources
         public readonly LandTiles[] Tiles;
     }
 
-    //[StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct StaticTiles
+    public readonly struct StaticTiles
     {
-        public ulong Flags;
-        public byte Weight;
-        public byte Layer;
-        public int Count;
-        public ushort AnimID;
-        public ushort Hue;
-        public ushort LightIndex;
-        public byte Height;
-        public string Name;
+        public StaticTiles(ulong flags, byte weight, byte layer, int count, ushort animId, ushort hue, ushort lightIndex, byte height, string name)
+        {
+            Flags = flags;
+            Weight = weight;
+            Layer = layer;
+            Count = count;
+            AnimID = animId;
+            Hue = hue;
+            LightIndex = lightIndex;
+            Height = height;
+            Name = name;
+        }
+
+        public readonly ulong Flags;
+        public readonly byte Weight;
+        public readonly byte Layer;
+        public readonly int Count;
+        public readonly ushort AnimID;
+        public readonly ushort Hue;
+        public readonly ushort LightIndex;
+        public readonly byte Height;
+        public readonly string Name;
     }
 
     // old

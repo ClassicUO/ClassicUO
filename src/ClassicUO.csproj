@@ -110,6 +110,8 @@
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
     <Compile Include="Game\Data\Layers.cs" />
+    <Compile Include="Game\Data\MultiComponent.cs" />
+    <Compile Include="Game\Data\MultiInfo.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
     <Compile Include="Game\Data\PopupMenuData.cs" />
     <Compile Include="Game\Data\PopupMenuItem.cs" />
@@ -120,7 +122,6 @@
     <Compile Include="Game\Data\SpellsNinjitsu.cs" />
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
-    <Compile Include="Game\GameObjects\MultiStatic.cs" />
     <Compile Include="Game\Managers\HealthBarManager.cs" />
     <Compile Include="Game\Managers\HouseManager.cs" />
     <Compile Include="Game\Managers\UseItemQueue.cs" />
@@ -128,8 +129,8 @@
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
     <Compile Include="Game\Managers\JournalManager.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
-    <Compile Include="Game\Views\MultiStaticView.cs" />
-    <Compile Include="Game\WalkerManager.cs" />
+    <Compile Include="Game\Managers\WalkerManager.cs" />
+    <Compile Include="Game\Views\MultiView.cs" />
     <Compile Include="Interfaces\IPoolable.cs" />
     <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Renderer\Batcher2D.cs" />

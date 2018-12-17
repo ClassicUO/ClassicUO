@@ -39,6 +39,8 @@ using Microsoft.Xna.Framework;
 
 using SDL2;
 
+using Multi = ClassicUO.Game.GameObjects.Multi;
+
 namespace ClassicUO.Game.Scenes
 {
     partial class GameScene
@@ -157,26 +159,6 @@ namespace ClassicUO.Game.Scenes
                             case Static st:
                                 DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + st.ItemData.Height));
                                 break;
-                            //case IDynamicItem dyn:
-
-                            //    if (dyn is Item item)
-                            //    {
-                            //        if (item.IsCorpse)
-                            //            MergeHeldItem(item);
-                            //        else
-                            //        {
-                            //            SelectedObject = item;
-
-                            //            if (item.Graphic == HeldItem.Graphic && HeldItem is IDynamicItem dyn1 && TileData.IsStackable(dyn1.ItemData.Flags))
-                            //                MergeHeldItem(item);
-                            //            else
-                            //                DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
-                            //        }
-                            //    }
-                            //    else
-                            //        DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte) (obj.Position.Z + dyn.ItemData.Height));
-
-                                break;
                             case Land _:
                                 DropHeldItemToWorld(obj.Position);
 
@@ -197,25 +179,25 @@ namespace ClassicUO.Game.Scenes
 
                     switch (obj)
                     {
-                        case MultiStatic multi:
-                            if (string.IsNullOrEmpty(multi.Name))
-                                TileData.StaticData[multi.Graphic].Name = Cliloc.GetString(1020000 + multi.Graphic);
-
-                            if (obj.Overheads.Count == 0)
-                                obj.AddGameText(MessageType.Label, multi.Name, 3, 0, false);
-
-                            break;
                         case Static st:
 
-                        {
-                            if (string.IsNullOrEmpty(st.Name))
-                                TileData.StaticData[st.Graphic].Name = Cliloc.GetString(1020000 + st.Graphic);
+                            string name = st.Name;
+                            if (string.IsNullOrEmpty(name))
+                                name = Cliloc.GetString(1020000 + st.Graphic);
 
                             if (obj.Overheads.Count == 0)
-                                obj.AddGameText(MessageType.Label, st.Name, 3, 0, false);
+                                obj.AddGameText(MessageType.Label, name, 3, 0, false);
 
                             break;
-                        }
+                        case Multi multi:
+                            name = multi.Name;
+
+                            if (string.IsNullOrEmpty(name))
+                                name = Cliloc.GetString(1020000 + multi.Graphic);
+
+                            if (obj.Overheads.Count == 0)
+                                obj.AddGameText(MessageType.Label, name, 3, 0, false);
+                            break;
                         case Entity entity:
 
                             if (!_inqueue)
@@ -294,7 +276,7 @@ namespace ClassicUO.Game.Scenes
                 if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
                 {
                     //if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface( dyn.ItemData.Flags))
-                    if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetItemData(_mousePicker.MouseOverObject, out var itemdata) && TileData.IsSurface(itemdata.Flags)))
+                    if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetStaticData(_mousePicker.MouseOverObject, out var itemdata) && TileData.IsSurface(itemdata.Flags)))
                     {
                         GameObject obj = _mousePicker.MouseOverObject;
 

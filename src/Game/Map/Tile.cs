@@ -207,7 +207,7 @@ namespace ClassicUO.Game.Map
 
                     {
 
-                        StaticTiles data = TileData.StaticData[obj.Graphic];
+                        ref StaticTiles data = ref TileData.StaticData[obj.Graphic];
 
                         if (TileData.IsBackground(data.Flags))
                             priorityZ--;

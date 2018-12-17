@@ -2161,14 +2161,15 @@ namespace ClassicUO.Network
 
         private static void CustomHouse(Packet p)
         {
-            //Log.Message(LogTypes.Info, "CUSTOM HOUSE RECV");
             bool compressed = p.ReadByte() == 0x03;
             bool enableReponse = p.ReadBool();
             Item foundation = World.Items.Get(p.ReadUInt());
             uint revision = p.ReadUInt();
-            Multi multi = foundation?.Multi;
 
-            if (multi == null) return;
+            MultiInfo multi = foundation.MultiInfo;
+            if (!foundation.IsMulti || multi == null)
+                return;
+
             p.Skip(4);
 
             if (!World.HouseManager.TryGetHouse(foundation, out House house))
@@ -2224,7 +2225,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    house.Components.Add(new MultiStatic(id, 0)
+                                    house.Components.Add(new Multi(id)
                                     {
                                         Position = new Position((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y), (sbyte) (foundation.Position.Z + z))
                                     });
@@ -2250,7 +2251,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    house.Components.Add(new MultiStatic(id, 0)
+                                    house.Components.Add(new Multi(id)
                                     {
                                         Position = new Position((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y), (sbyte) (foundation.Position.Z + z))
                                     });
@@ -2298,7 +2299,7 @@ namespace ClassicUO.Network
 
                                 if (id != 0)
                                 {
-                                    house.Components.Add(new MultiStatic(id, 0)
+                                    house.Components.Add(new Multi(id)
                                     {
                                         Position = new Position((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y), (sbyte) (foundation.Position.Z + z))
                                     });

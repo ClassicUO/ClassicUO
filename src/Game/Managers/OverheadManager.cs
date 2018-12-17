@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Managers
                     }
 
 
-                    Vector3 position = _allOverheads[i].Item2;
+                    Vector3 position = owner.RealScreenPosition; // _allOverheads[i].Item2;
 
                     if (owner is Mobile m)
                     {

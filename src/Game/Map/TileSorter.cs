@@ -23,6 +23,8 @@ using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 
+using Multi = ClassicUO.Game.GameObjects.Multi;
+
 namespace ClassicUO.Game.Map
 {
     public static class TileSorter
@@ -125,9 +127,10 @@ namespace ClassicUO.Game.Map
                 case Land tile:
 
                     return (tile.AverageZ, 0, 0, 0);
-                case MultiStatic multistatic:
 
-                    return (multistatic.Z, 1, (multistatic.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground(multistatic.ItemData.Flags) ? 0 : 1), 0);
+                case Multi multi:
+
+                    return (multi.Z, 1, (multi.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground(multi.ItemData.Flags) ? 0 : 1), 0);
                 case Static staticitem:
 
                     return (staticitem.Z, 1, (staticitem.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground(staticitem.ItemData.Flags) ? 0 : 1), staticitem.Index);

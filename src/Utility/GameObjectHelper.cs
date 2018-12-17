@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -9,31 +10,34 @@ using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
 
+using Multi = ClassicUO.Game.GameObjects.Multi;
+
 namespace ClassicUO.Utility
 {
     internal static class GameObjectHelper
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryGetItemData(GameObject obj, out StaticTiles itemdata)
-        {
-            if (obj is Static st)
+        public static bool TryGetStaticData(GameObject obj, out StaticTiles itemdata)
+        {           
+            switch (obj)
             {
-                itemdata = st.ItemData;
-                return true;
+                case Static st:
+                    itemdata = st.ItemData;
+                    return true;
+                case Item item:
+                    itemdata = item.ItemData;
+                    return true;
+                case Multi multi:
+                    itemdata = multi.ItemData;
+                    return true;
+                default:
+                    itemdata = default;
+                    return false;
             }
-
-            if (obj is Item item)
-            {
-                itemdata = item.ItemData;
-                return true;
-            }
-
-            itemdata = default;
-            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsDynamicItem(GameObject obj) => obj is Static || obj is Item;
+        public static bool IsStaticItem(GameObject obj) => obj is Static || obj is Item;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNoDrawable(ushort g)
