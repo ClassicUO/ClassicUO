@@ -21,8 +21,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public string Author { get; internal set; }
         public static bool IsNewBookD4 => FileManager.ClientVersion > ClientVersions.CV_200;
         public Dictionary<int, List<string>> BookPages { get; internal set; }
-
-        public Dictionary<int, List<TextBox>> Lines = new Dictionary<int, List<TextBox>>();
         public bool IsBookEditable { get; internal set; }
 
         public bool IsDirty => m_Title?.Text != Title || m_Author?.Text != Author;
