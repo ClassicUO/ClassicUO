@@ -24,7 +24,7 @@ namespace ClassicUO.Game.Managers
 
         public bool TryToRemove(Serial serial, int distance)
         {
-            if (IsHouseInRange(serial, distance))
+            if (!IsHouseInRange(serial, distance))
             {
                 _houses[serial].Dispose();
                 _houses.Remove(serial);
@@ -45,9 +45,7 @@ namespace ClassicUO.Game.Managers
 
                 distance += found.MultiDistanceBonus;
 
-                int d = Math.Max(Math.Abs(found.X - currX), Math.Abs(found.Y - currY));
-
-                return d <= distance;
+                return Math.Abs(found.X - currX) <= distance && Math.Abs(found.Y - currY) <= distance;
             }
 
             return false;

@@ -2166,8 +2166,8 @@ namespace ClassicUO.Network
             Item foundation = World.Items.Get(p.ReadUInt());
             uint revision = p.ReadUInt();
 
-            MultiInfo multi = foundation?.MultiInfo;
-            if (foundation != null && (!foundation.IsMulti || multi == null))
+            MultiInfo multi = foundation.MultiInfo;
+            if (!foundation.IsMulti || multi == null)
                 return;
 
             p.Skip(4);

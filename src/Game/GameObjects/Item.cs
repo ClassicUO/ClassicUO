@@ -147,6 +147,8 @@ namespace ClassicUO.Game.GameObjects
                                 house = new House(Serial, 0, false);
                                 World.HouseManager.Add(Serial, house);
                             }
+                            else 
+                                house.Dispose();
 
                             for (int i = 0; i < count; i++)
                             {
