@@ -86,7 +86,7 @@ namespace ClassicUO.Game.GameObjects
             if (IsDisposed)
                 return;
 
-            if (Source != null && Source.IsDisposed)
+            if (Source != null && Source.IsDisposed /*|| Distance > World.ViewRange*/)
             {
                 Dispose();
                 return;

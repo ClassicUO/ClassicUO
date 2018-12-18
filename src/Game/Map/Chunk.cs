@@ -190,7 +190,8 @@ namespace ClassicUO.Game.Map
                     {
                         if (obj != World.Player)
                         {
-                           tile.RemoveGameObject(obj);
+                            obj.Dispose();
+                            //tile.RemoveGameObject(obj);
                         }
                     }
 
@@ -212,7 +213,8 @@ namespace ClassicUO.Game.Map
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
                     {
 
-                        //if (obj is Static st && st.)
+                        if (obj is GameEffect effect && effect.Source is Static)
+                            continue;
 
                         if (!(obj is Land) && !(obj is Static))
                             return false;

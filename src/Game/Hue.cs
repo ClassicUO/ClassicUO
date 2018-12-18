@@ -89,7 +89,7 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            if (obj is Hue hue) return this == hue;
+            if (obj is Hue hue) return _value == hue._value;
             if (obj is ushort @ushort) return _value == @ushort;
 
             return false;

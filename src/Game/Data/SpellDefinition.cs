@@ -18,23 +18,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using System.Text;
 
 namespace ClassicUO.Game.Data
 {
-    public struct SpellDefinition
+    public readonly struct SpellDefinition : IEquatable<SpellDefinition>
     {
         public static SpellDefinition EmptySpell = new SpellDefinition();
-        public string Name;
-        public int ID;
-        public int GumpIconID;
-        public int GumpIconSmallID;
-        public Reagents[] Regs;
-        public string PowerWords;
-        public int ManaCost;
-        public int MinSkill;
-        public int TithingCost;
-
 
         public SpellDefinition(string name, int index, int gumpIconID, int gumpSmallIconID, string powerwords, int manacost, int minkill, int tithingcost, params Reagents[] regs)
         {
@@ -74,6 +66,17 @@ namespace ClassicUO.Game.Data
             TithingCost = 0;
             PowerWords = string.Empty;
         }
+
+
+        public readonly string Name;
+        public readonly int ID;
+        public readonly int GumpIconID;
+        public readonly int GumpIconSmallID;
+        public readonly Reagents[] Regs;
+        public readonly string PowerWords;
+        public readonly int ManaCost;
+        public readonly int MinSkill;
+        public readonly int TithingCost;
 
         public string CreateReagentListString(string separator)
         {
@@ -148,6 +151,11 @@ namespace ClassicUO.Game.Data
             }
 
             return sb.ToString();
+        }
+
+        public bool Equals(SpellDefinition other)
+        {
+            return ID.Equals(other.ID);
         }
     }
 }

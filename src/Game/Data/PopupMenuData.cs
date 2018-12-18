@@ -45,38 +45,40 @@ namespace ClassicUO.Game.Data
             PopupMenuItem[] items = new PopupMenuItem[count];
 
             for (int i = 0; i < count; i++)
-            {
-                ref PopupMenuItem item = ref items[i];
-                item.Hue = 0xFFFF;
+            {             
+                Hue hue = 0xFFFF, replacedHue = 0;
+                int cliloc;
+                ushort index, flags;
 
                 if (isNewCliloc)
                 {
-                    item.Cliloc = (int) p.ReadUInt();
-                    item.Index = p.ReadUShort();
-                    item.Flags = p.ReadUShort();
+                    cliloc = (int) p.ReadUInt();
+                    index = p.ReadUShort();
+                    flags = p.ReadUShort();
                 }
                 else
                 {
-                    item.Index = p.ReadUShort();
-                    item.Cliloc = p.ReadUShort() + 3000000;
-                    item.Flags = p.ReadUShort();
+                    index = p.ReadUShort();
+                    cliloc = p.ReadUShort() + 3000000;
+                    flags = p.ReadUShort();
 
-                    if ((item.Flags & 0x84) != 0)
+                    if ((flags & 0x84) != 0)
                         p.Skip(2);
 
-                    if ((item.Flags & 0x40) != 0)
+                    if ((flags & 0x40) != 0)
                         p.Skip(2);
 
-                    if ((item.Flags & 0x20) != 0)
-                        item.ReplacedHue = (Hue) (p.ReadUShort() & 0x3FFF);
+                    if ((flags & 0x20) != 0)
+                        replacedHue = (Hue) (p.ReadUShort() & 0x3FFF);
                 }
 
-                if ((item.Flags & 0x01) != 0)
-                    item.Hue = 0x0386;
+                if ((flags & 0x01) != 0)
+                    hue = 0x0386;
+
+                items[i] = new PopupMenuItem(cliloc, index, hue, replacedHue, flags);
             }
 
             return new PopupMenuData(serial, items);
-            ;
         }
     }
 }

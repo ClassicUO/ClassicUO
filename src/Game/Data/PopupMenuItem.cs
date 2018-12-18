@@ -20,12 +20,21 @@
 #endregion
 namespace ClassicUO.Game.Data
 {
-    internal struct PopupMenuItem
+    internal readonly struct PopupMenuItem
     {
-        public int Cliloc;
-        public ushort Index;
-        public Hue Hue;
-        public Hue ReplacedHue;
-        public ushort Flags;
+        public PopupMenuItem(int cliloc, ushort index, Hue hue, Hue replacedHue, ushort flags)
+        {
+            Cliloc = cliloc;
+            Index = index;
+            Hue = hue;
+            ReplacedHue = replacedHue;
+            Flags = flags;
+        }
+
+        public readonly int Cliloc;
+        public readonly ushort Index;
+        public readonly Hue Hue;
+        public readonly Hue ReplacedHue;
+        public readonly ushort Flags;
     }
 }

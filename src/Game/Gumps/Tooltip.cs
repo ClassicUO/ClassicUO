@@ -32,7 +32,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
 {
-    public class Tooltip : IDrawableUI
+    public class Tooltip 
     {
         private Entity _gameObject;
         private uint _hash;
@@ -46,15 +46,8 @@ namespace ClassicUO.Game.Gumps
 
         public GameObject Object => _gameObject;
 
-        public bool AllowedToDraw { get; set; } = true;
-
-        public SpriteTexture Texture { get; set; }
-
         public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            if (_lastHoverTime > Engine.Ticks)
-                return false;
-
             if (_gameObject != null && _hash != _gameObject.PropertiesHash)
             {
                 _hash = _gameObject.PropertiesHash;
@@ -62,6 +55,9 @@ namespace ClassicUO.Game.Gumps
             }
 
             if (string.IsNullOrEmpty(Text))
+                return false;
+
+            if (_lastHoverTime > Engine.Ticks)
                 return false;
 
             if (_renderedText == null)
