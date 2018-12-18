@@ -26,6 +26,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps.Login;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
@@ -124,6 +125,8 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Connected -= NetClient_Connected;
             NetClient.LoginSocket.Disconnected -= NetClient_Disconnected;
             NetClient.PacketReceived -= NetClient_PacketReceived;
+
+            base.Unload();
         }
 
         public void Connect(string account, string password)

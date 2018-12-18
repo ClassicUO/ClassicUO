@@ -119,16 +119,13 @@ namespace ClassicUO.Renderer
 
     public class AnimationFrameTexture : SpriteTexture
     {
-        public AnimationFrameTexture(int id, int width, int height) : base(width, height, false)
+        public AnimationFrameTexture(int width, int height) : base(width, height, false)
         {
-            ID = id;
         }
 
         public short CenterX { get; set; }
 
         public short CenterY { get; set; }
-
-        public int ID { get; }
     }
 
     public class ArtTexture : SpriteTexture

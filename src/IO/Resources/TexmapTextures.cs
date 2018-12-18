@@ -33,7 +33,6 @@ namespace ClassicUO.IO.Resources
         private static UOFile _file;
         private static readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
         private static readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
-        //private static SpriteTexture[] _textmapCache;
         private static readonly List<int> _usedIndex = new List<int>();
         private static readonly Dictionary<int, SpriteTexture> _textmapDictionary = new Dictionary<int, SpriteTexture>();
 
@@ -45,7 +44,6 @@ namespace ClassicUO.IO.Resources
             if (!File.Exists(path) || !File.Exists(pathidx))
                 throw new FileNotFoundException();
             _file = new UOFileMul(path, pathidx, TEXTMAP_COUNT, 10);
-            //_textmapCache = new SpriteTexture[TEXTMAP_COUNT];
             string pathdef = Path.Combine(FileManager.UoFolderPath, "TexTerr.def");
 
             if (!File.Exists(pathdef))
@@ -117,19 +115,6 @@ namespace ClassicUO.IO.Resources
                 _textmapDictionary.Add(g, texture);
             }
 
-            //ref SpriteTexture texture = ref _textmapCache[g];
-
-            //if (texture == null || texture.IsDisposed)
-            //{
-            //    ushort[] pixels = GetTextmapTexture(g, out int size);
-
-            //    if (pixels == null || pixels.Length == 0)
-            //        return null;
-            //    texture = new SpriteTexture(size, size, false);
-            //    texture.SetData(pixels);
-            //    _usedIndex.Add(g);
-            //}
-
             return texture;
         }
 
@@ -142,18 +127,28 @@ namespace ClassicUO.IO.Resources
             {
                 int g = _usedIndex[i];
                 SpriteTexture texture = _textmapDictionary[g];
-                //ref SpriteTexture texture = ref _textmapCache[_usedIndex[i]];
 
                 if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
-                    // texture = null;
                     _usedIndex.RemoveAt(i--);
                     _textmapDictionary.Remove(g);
 
                     if (++count >= 20)
                         break;
                 }
+            }
+        }
+
+        public static void Clear()
+        {
+            for (int i = 0; i < _usedIndex.Count; i++)
+            {
+                int g = _usedIndex[i];
+                SpriteTexture texture = _textmapDictionary[g];     
+                texture.Dispose();
+                _usedIndex.RemoveAt(i--);
+                _textmapDictionary.Remove(g);
             }
         }
 

@@ -190,25 +190,33 @@ namespace ClassicUO.Configuration
 
                     for (int i = 0; i < count; i++)
                     {
-                        int typeLen = reader.ReadUInt16();
-                        string typeName = reader.ReadUTF8String(typeLen);
-                        int x = reader.ReadInt32();
-                        int y = reader.ReadInt32();
-
-                        Type type = Type.GetType(typeName, true);
-                        Gump gump = (Gump) Activator.CreateInstance(type);
-                        gump.Initialize();
-                        gump.Restore(reader);
-                        gump.X = x;
-                        gump.Y = y;
-
-                        if (gump.LocalSerial != 0)
-                            Engine.UI.SavePosition(gump.LocalSerial, new Point(x, y));
-
-                        if (!gump.IsDisposed)
+                        try
                         {
-                            gumps.Add(gump);
+                            int typeLen = reader.ReadUInt16();
+                            string typeName = reader.ReadUTF8String(typeLen);
+                            int x = reader.ReadInt32();
+                            int y = reader.ReadInt32();
+
+                            Type type = Type.GetType(typeName, true);
+                            Gump gump = (Gump)Activator.CreateInstance(type);
+                            gump.Initialize();
+                            gump.Restore(reader);
+                            gump.X = x;
+                            gump.Y = y;
+
+                            if (gump.LocalSerial != 0)
+                                Engine.UI.SavePosition(gump.LocalSerial, new Point(x, y));
+
+                            if (!gump.IsDisposed)
+                            {
+                                gumps.Add(gump);
+                            }
                         }
+                        catch (Exception e)
+                        {
+                            Log.Message(LogTypes.Error, e.Message);
+                        }
+                      
                     }
                 }
             }

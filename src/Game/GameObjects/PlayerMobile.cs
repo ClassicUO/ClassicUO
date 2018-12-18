@@ -1697,6 +1697,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ref var step = ref Walker.StepInfos[Walker.StepsCount];
+        
             step.Sequence = Walker.WalkSequence;
             step.Accepted = false;
             step.Running = run;

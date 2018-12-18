@@ -181,6 +181,12 @@ namespace ClassicUO.IO.Resources
             }
         }
 
+        public static void Clear()
+        {
+            for (int i = 0; i < MAPS_COUNT; i++)
+                UnloadMap(i);
+        }
+
         public static unsafe RadarMapBlock? GetRadarMapBlock(int map, int blockX, int blockY)
         {
             IndexMap indexMap = GetIndex(map, blockX, blockY);

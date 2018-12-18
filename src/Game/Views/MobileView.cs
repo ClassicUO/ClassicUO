@@ -247,7 +247,7 @@ namespace ClassicUO.Game.Views
             Animations.Direction = dir;
             ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup].Direction[Animations.Direction];
 
-            if ((direction.FrameCount == 0 || direction.Frames == null) && !Animations.LoadDirectionGroup(ref direction))
+            if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !Animations.LoadDirectionGroup(ref direction))
                 return;
             direction.LastAccessTime = Engine.Ticks;
             int fc = direction.FrameCount;
@@ -255,7 +255,7 @@ namespace ClassicUO.Game.Views
 
             if (animIndex < direction.FrameCount)
             {
-                ref AnimationFrameTexture frame = ref direction.Frames[animIndex];
+                AnimationFrameTexture frame = Animations.GetTexture(direction.FramesHashes[animIndex]); // ref direction.Frames[animIndex];
 
                 if (frame == null || frame.IsDisposed)
                 {

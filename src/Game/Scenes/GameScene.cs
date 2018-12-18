@@ -179,8 +179,9 @@ namespace ClassicUO.Game.Scenes
             _renderTarget?.Dispose();
             Commands.UnRegisterAll();
             Engine.UI.Clear();
-            CleaningResources();
             World.Clear();
+
+           
             InputManager.LeftMouseButtonDown -= OnLeftMouseButtonDown;
             InputManager.LeftMouseButtonUp -= OnLeftMouseButtonUp;
             InputManager.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
@@ -200,8 +201,6 @@ namespace ClassicUO.Game.Scenes
             _overheadManager = null;
             _useItemQueue.Clear();
             _useItemQueue = null;
-
-           
 
             base.Unload();
         }
@@ -338,7 +337,6 @@ namespace ClassicUO.Game.Scenes
             }
 
             _useItemQueue.Update(totalMS, frameMS);
-            CleaningResources();          
         }
 
         public override bool Draw(Batcher2D batcher)
@@ -379,13 +377,5 @@ namespace ClassicUO.Game.Scenes
             batcher.GraphicsDevice.SetRenderTarget(null);
         }
 
-        private void CleaningResources()
-        {
-            Art.ClearUnusedTextures();
-            IO.Resources.Gumps.ClearUnusedTextures();
-            TextmapTextures.ClearUnusedTextures();
-            Animations.ClearUnusedTextures();
-            World.Map.ClearUnusedBlocks();
-        }
     }
 }

@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Coroutines;
 
@@ -60,10 +61,17 @@ namespace ClassicUO.Game.Scenes
         public virtual void Unload()
         {
             Coroutines.Clear();
+
+            //Animations.Clear();
+            //Art.Clear();
+            //TextmapTextures.Clear();
+            //IO.Resources.Gumps.Clear();
+            //IO.Resources.Map.Clear();
         }
 
         public virtual void Update(double totalMS, double frameMS)
         {
+            CleaningResources();
             Coroutines.Update();
         }
 
@@ -74,6 +82,15 @@ namespace ClassicUO.Game.Scenes
         public virtual bool Draw(Batcher2D batcher)
         {
             return true;
+        }
+
+        private void CleaningResources()
+        {
+            Art.ClearUnusedTextures();
+            IO.Resources.Gumps.ClearUnusedTextures();
+            TextmapTextures.ClearUnusedTextures();
+            Animations.ClearUnusedTextures();
+            World.Map?.ClearUnusedBlocks();
         }
     }
 }

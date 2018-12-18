@@ -572,7 +572,7 @@ namespace ClassicUO.Game.GameObjects
                         Animations.AnimID = id;
                         Animations.AnimGroup = (byte) animGroup;
                         Animations.Direction = dir;
-                        if ((direction.FrameCount == 0 || direction.Frames == null)) Animations.LoadDirectionGroup(ref direction);
+                        if ((direction.FrameCount == 0 || direction.FramesHashes == null)) Animations.LoadDirectionGroup(ref direction);
 
                         if (direction.Address != 0 || direction.IsUOP)
                         {
