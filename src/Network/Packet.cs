@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace ClassicUO.Network
@@ -36,12 +37,14 @@ namespace ClassicUO.Network
 
         protected override byte this[int index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException("index");
 
                 return _data[index];
             }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
                 if (index < 0 || index >= Length) throw new ArgumentOutOfRangeException("index");
@@ -61,21 +64,24 @@ namespace ClassicUO.Network
             return _data;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void MoveToData()
         {
             Seek(IsDynamic ? 3 : 1);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override void EnsureSize(int length)
         {
             if (length < 0 || Position + length > Length) throw new ArgumentOutOfRangeException("length");
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadByte()
         {
             EnsureSize(1);
 
-            return this[Position++];
+            return _data[Position++];
         }
 
         public sbyte ReadSByte()
@@ -91,14 +97,12 @@ namespace ClassicUO.Network
         public ushort ReadUShort()
         {
             EnsureSize(2);
-
             return (ushort) ((ReadByte() << 8) | ReadByte());
         }
 
         public uint ReadUInt()
         {
             EnsureSize(4);
-
             return (uint) ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
         }
 

@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 using ClassicUO.Game;
@@ -1203,7 +1204,7 @@ namespace ClassicUO.IO.Resources
                 //f.CenterX = imageCenterX;
                 //f.CenterY = imageCenterY;
                 f.SetDataHitMap16(pixels);
-                uint hashcode = (uint)f.GetHashCode();
+                uint hashcode = (uint)RuntimeHelpers.GetHashCode(f);
                 animDirection.FramesHashes[i] = hashcode;
                 _animationFrameTextures.Add(hashcode, f);
                 //f.SetData(pixels);
@@ -1300,7 +1301,7 @@ namespace ClassicUO.IO.Resources
 
                 f.SetDataHitMap16(pixels);
 
-                uint hashcode = (uint)f.GetHashCode();
+                uint hashcode = (uint) RuntimeHelpers.GetHashCode(f);
                 animDir.FramesHashes[i] = hashcode;
                 _animationFrameTextures.Add(hashcode, f);
                 

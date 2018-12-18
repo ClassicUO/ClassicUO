@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Diagnostics;
 
 namespace ClassicUO.IO
 {
@@ -93,40 +94,80 @@ namespace ClassicUO.IO
 
         internal short ReadShort()
         {
-            return (short) (ReadByte() | (ReadByte() << 8));
+            EnsureSize(2);
+
+            short v = *(short*)(_data + Position);
+            Position += 2;
+
+            return v;
         }
 
         internal ushort ReadUShort()
         {
-            return (ushort) ReadShort();
+            EnsureSize(2);
+
+            ushort v = *(ushort*)(_data + Position);
+            Position += 2;
+
+            return v;
         }
 
         internal int ReadInt()
         {
-            return ReadByte() | (ReadByte() << 8) | (ReadByte() << 16) | (ReadByte() << 24);
+            EnsureSize(4);
+
+            int v = *(int*) (_data + Position);
+
+            Position += 4;
+
+            return v;
         }
 
         internal uint ReadUInt()
         {
-            return (uint) ReadInt();
+            EnsureSize(4);
+
+            uint v = *(uint*)(_data + Position);
+
+            Position += 4;
+
+            return v;
         }
 
         internal long ReadLong()
         {
-            return ReadByte() | ((long) ReadByte() << 8) | ((long) ReadByte() << 16) | ((long) ReadByte() << 24) | ((long) ReadByte() << 32) | ((long) ReadByte() << 40) | ((long) ReadByte() << 48) | ((long) ReadByte() << 56);
+            EnsureSize(8);
+
+            long v = *(long*) (_data + Position);
+
+            Position += 8;
+
+            return v;
         }
 
         internal ulong ReadULong()
         {
-            return (ulong) ReadLong();
+            EnsureSize(8);
+
+            ulong v = *(ulong*)(_data + Position);
+
+            Position += 8;
+
+            return v;
         }
 
         internal byte[] ReadArray(int count)
         {
+            EnsureSize(count);
+
             byte[] data = new byte[count];
 
-            for (int i = 0; i < count; i++)
-                data[i] = ReadByte();
+            fixed (byte* ptr = data)
+            {
+                Buffer.MemoryCopy(&_data[Position], ptr, count, count);
+            }
+
+            Position += count;
 
             return data;
         }
