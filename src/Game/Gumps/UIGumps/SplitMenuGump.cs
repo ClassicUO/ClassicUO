@@ -80,7 +80,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Dispose();
         }
 
-        public override void OnKeybaordReturn(int textID, string text)
+        public override void OnKeyboardReturn(int textID, string text)
         {
             if (_slider.Value > 0)
             {

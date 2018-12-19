@@ -283,7 +283,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        public override void OnKeybaordReturn(int textID, string text)
+        public override void OnKeyboardReturn(int textID, string text)
         {
             if (string.IsNullOrEmpty(text))
                 return;

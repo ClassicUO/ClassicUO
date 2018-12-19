@@ -781,9 +781,9 @@ namespace ClassicUO.Game.Gumps.Controls
             Parent?.OnButtonClick(buttonID);
         }
 
-        public virtual void OnKeybaordReturn(int textID, string text)
+        public virtual void OnKeyboardReturn(int textID, string text)
         {
-            Parent?.OnKeybaordReturn(textID, text);
+            Parent?.OnKeyboardReturn(textID, text);
         }
 
         public virtual void ChangePage(int pageIndex)
