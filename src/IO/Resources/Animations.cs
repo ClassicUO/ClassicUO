@@ -1180,8 +1180,7 @@ namespace ClassicUO.IO.Resources
                     header = _reader.ReadUInt();
                 }
 
-                //int uniqueAnimationIndex = ((AnimID & 0xfff) << 20) + ((AnimGroup & 0x3f) << 12) + ((Direction & 0x0f) << 8);
-                //uniqueAnimationIndex += i & 0xFF;
+                uint uniqueAnimationIndex = (uint) (((AnimID & 0xfff) << 20) + ((AnimGroup & 0x3f) << 12) + ((Direction & 0x0f) << 8) + (i &  0xFF) );
 
                 AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
                 {
@@ -1189,22 +1188,9 @@ namespace ClassicUO.IO.Resources
                     CenterY = imageCenterY
                 };
 
-                //ref AnimationFrameTexture f = ref animDirection.Frames[i];
-
-                //if (f == null)
-                //    f = new AnimationFrameTexture(uniqueAnimationIndex, imageWidth, imageHeight);
-                //else
-                //{
-                //    Log.Message(LogTypes.Warning, "TEXTURE EXISTS");
-                //}
-                //f.CenterX = imageCenterX;
-                //f.CenterY = imageCenterY;
                 f.SetDataHitMap16(pixels);
-                uint hashcode = (uint)RuntimeHelpers.GetHashCode(f);
-                animDirection.FramesHashes[i] = hashcode;
-                _animationFrameTextures.Add(hashcode, f);
-                //f.SetData(pixels);
-                //_picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
+                animDirection.FramesHashes[i] = uniqueAnimationIndex;
+                _animationFrameTextures.Add(uniqueAnimationIndex, f);
             }
 
             _usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
@@ -1227,7 +1213,6 @@ namespace ClassicUO.IO.Resources
                 Log.Message(LogTypes.Panic, "MEMORY LEAK MUL ANIM");
             }
 
-            //animDir.Frames = new AnimationFrameTexture[frameCount];
             animDir.FramesHashes = new uint[frameCount];
 
             for (int i = 0; i < frameCount; i++)
@@ -1276,18 +1261,7 @@ namespace ClassicUO.IO.Resources
                     header = _reader.ReadUInt();
                 }
 
-                //int uniqueAnimationIndex = ((AnimID & 0xfff) << 20) + ((AnimGroup & 0x3f) << 12) + ((Direction & 0x0f) << 8);
-                //uniqueAnimationIndex += i & 0xFF;
-                //ref AnimationFrameTexture f = ref animDir.Frames[i];
-
-                //if (f == null)
-                //    f = new AnimationFrameTexture(uniqueAnimationIndex, imageWidth, imageHeight);
-                //else
-                //{
-                //    Log.Message(LogTypes.Warning, "TEXTURE EXISTS");
-                //}
-                //f.CenterX = imageCenterX;
-                //f.CenterY = imageCenterY;
+                uint uniqueAnimationIndex = (uint) ( ((AnimID & 0xfff) << 20) + ((AnimGroup & 0x3f) << 12) + ((Direction & 0x0f) << 8) + (i & 0xFF) );
 
                 AnimationFrameTexture f = new AnimationFrameTexture(imageWidth, imageHeight)
                 {
@@ -1297,9 +1271,8 @@ namespace ClassicUO.IO.Resources
 
                 f.SetDataHitMap16(pixels);
 
-                uint hashcode = (uint) RuntimeHelpers.GetHashCode(f);
-                animDir.FramesHashes[i] = hashcode;
-                _animationFrameTextures.Add(hashcode, f);
+                animDir.FramesHashes[i] = uniqueAnimationIndex;
+                _animationFrameTextures.Add(uniqueAnimationIndex, f);
             }
 
             _usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
@@ -1478,11 +1451,6 @@ namespace ClassicUO.IO.Resources
                         _animationFrameTextures.Remove(hash);
                         hash = 0;
                     }
-
-                    //if (dir.Frames[j] != null)
-                    //{
-                    //    dir.Frames[j].Dispose();
-                    //}
                 }
 
                 dir.FrameCount = 0;
@@ -1696,7 +1664,6 @@ namespace ClassicUO.IO.Resources
         public bool IsUOP;
         public bool IsVerdata;
         public long LastAccessTime;
-        //public AnimationFrameTexture[] Frames;
         public uint[] FramesHashes;
     }
 

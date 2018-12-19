@@ -259,12 +259,6 @@ namespace ClassicUO.Game.Views
             if (animIndex < direction.FrameCount)
             {
                 uint hash = direction.FramesHashes[animIndex];
-                //AnimationFrameTexture frame = Animations.GetTexture(direction.FramesHashes[animIndex]); // ref direction.Frames[animIndex];
-
-                //if (frame == null || frame.IsDisposed)
-                //{
-                //    return;
-                //}
 
                 if (hash == 0)
                     return;
