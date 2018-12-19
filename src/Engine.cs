@@ -66,6 +66,7 @@ namespace ClassicUO
         private RenderedText _infoText;
         private ProfileManager _profileManager;
         private SceneManager _sceneManager;
+        private InputManager _inputManager;
         private double _statisticsTimer;
         private float _time;
         private int _totalFrames;
@@ -164,6 +165,8 @@ namespace ClassicUO
         }
 
         public static UIManager UI => _engine._uiManager;
+
+        public static InputManager Input => _engine._inputManager;
 
         public static ProfileManager Profile => _engine._profileManager;
 
@@ -273,7 +276,7 @@ namespace ClassicUO
             GraphicsDevice.Textures[2] = texture1;
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
             stopwatch.Stop();
-            InputManager.Initialize();
+            _inputManager = new InputManager();
             _uiManager = new UIManager();
             _profileManager = new ProfileManager();
             _sceneManager = new SceneManager();
@@ -304,7 +307,7 @@ namespace ClassicUO
 
         protected override void UnloadContent()
         {
-            InputManager.Unload();
+            _inputManager.Dispose();
             _sceneManager.CurrentScene?.Unload();
             Service.Get<Settings>().Save();
             base.UnloadContent();

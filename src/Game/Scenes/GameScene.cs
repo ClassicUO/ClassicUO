@@ -121,19 +121,18 @@ namespace ClassicUO.Game.Scenes
             _viewPortGump = Service.Get<WorldViewport>();
             _settings = Service.Get<Settings>();
             GameActions.Initialize(PickupItemBegin);
-            InputManager.LeftMouseButtonDown += OnLeftMouseButtonDown;
-            InputManager.LeftMouseButtonUp += OnLeftMouseButtonUp;
-            InputManager.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
-            InputManager.RightMouseButtonDown += OnRightMouseButtonDown;
-            InputManager.RightMouseButtonUp += OnRightMouseButtonUp;
-            InputManager.RightMouseDoubleClick += OnRightMouseDoubleClick;
-            InputManager.DragBegin += OnMouseDragBegin;
-            InputManager.MouseDragging += OnMouseDragging;
-            InputManager.MouseMoving += OnMouseMoving;
-            InputManager.KeyDown += OnKeyDown;
-            InputManager.KeyUp += OnKeyUp;
-
-            InputManager.MouseWheel += (sender, e) =>
+            Engine.Input.LeftMouseButtonDown += OnLeftMouseButtonDown;
+            Engine.Input.LeftMouseButtonUp += OnLeftMouseButtonUp;
+            Engine.Input.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
+            Engine.Input.RightMouseButtonDown += OnRightMouseButtonDown;
+            Engine.Input.RightMouseButtonUp += OnRightMouseButtonUp;
+            Engine.Input.RightMouseDoubleClick += OnRightMouseDoubleClick;
+            Engine.Input.DragBegin += OnMouseDragBegin;
+            Engine.Input.MouseDragging += OnMouseDragging;
+            Engine.Input.MouseMoving += OnMouseMoving;
+            Engine.Input.KeyDown += OnKeyDown;
+            Engine.Input.KeyUp += OnKeyUp;
+            Engine.Input.MouseWheel += (sender, e) =>
             {
                 if (IsMouseOverWorld)
                 {
@@ -182,17 +181,17 @@ namespace ClassicUO.Game.Scenes
             World.Clear();
 
            
-            InputManager.LeftMouseButtonDown -= OnLeftMouseButtonDown;
-            InputManager.LeftMouseButtonUp -= OnLeftMouseButtonUp;
-            InputManager.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
-            InputManager.RightMouseButtonDown -= OnRightMouseButtonDown;
-            InputManager.RightMouseButtonUp -= OnRightMouseButtonUp;
-            InputManager.RightMouseDoubleClick -= OnRightMouseDoubleClick;
-            InputManager.DragBegin -= OnMouseDragBegin;
-            InputManager.MouseDragging -= OnMouseDragging;
-            InputManager.MouseMoving -= OnMouseMoving;
-            InputManager.KeyDown -= OnKeyDown;
-            InputManager.KeyUp -= OnKeyUp;
+            Engine.Input.LeftMouseButtonDown -= OnLeftMouseButtonDown;
+            Engine.Input.LeftMouseButtonUp -= OnLeftMouseButtonUp;
+            Engine.Input.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
+            Engine.Input.RightMouseButtonDown -= OnRightMouseButtonDown;
+            Engine.Input.RightMouseButtonUp -= OnRightMouseButtonUp;
+            Engine.Input.RightMouseDoubleClick -= OnRightMouseDoubleClick;
+            Engine.Input.DragBegin -= OnMouseDragBegin;
+            Engine.Input.MouseDragging -= OnMouseDragging;
+            Engine.Input.MouseMoving -= OnMouseMoving;
+            Engine.Input.KeyDown -= OnKeyDown;
+            Engine.Input.KeyUp -= OnKeyUp;
 
             _overheadManager.Dispose();
             _overheadManager = null;

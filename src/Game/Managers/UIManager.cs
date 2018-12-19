@@ -52,13 +52,13 @@ namespace ClassicUO.Game.Managers
         {
             GameCursor = new GameCursor(this);
 
-            InputManager.MouseDragging += (sender, e) =>
+            Engine.Input.MouseDragging += (sender, e) =>
             {
                 if (_isDraggingControl)
                     DoDragControl(Mouse.Position);
             };
 
-            InputManager.LeftMouseButtonDown += (sender, e) =>
+            Engine.Input.LeftMouseButtonDown += (sender, e) =>
             {
                 //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
                 //    return;
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.Managers
                 }
             };
 
-            InputManager.LeftMouseButtonUp += (sender, e) =>
+            Engine.Input.LeftMouseButtonUp += (sender, e) =>
             {
                 //if (!IsModalControlOpen && ObjectsBlockingInputExists)
                 //    return;
@@ -111,14 +111,14 @@ namespace ClassicUO.Game.Managers
                 _mouseDownControls[btn] = null;
             };
 
-            InputManager.LeftMouseDoubleClick += (sender, e) =>
+            Engine.Input.LeftMouseDoubleClick += (sender, e) =>
             {
                 //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
                 //    e.Result = false;
                 if (MouseOverControl != null && IsMouseOverUI) e.Result |= MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
             };
 
-            InputManager.RightMouseButtonDown += (sender, e) =>
+            Engine.Input.RightMouseButtonDown += (sender, e) =>
             {
                 //if (!IsModalControlOpen && ObjectsBlockingInputExists)
                 //    return;
@@ -147,7 +147,7 @@ namespace ClassicUO.Game.Managers
                 CloseIfClickOutGumps();
             };
 
-            InputManager.RightMouseButtonUp += (sender, e) =>
+            Engine.Input.RightMouseButtonUp += (sender, e) =>
             {
                 //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
                 //    return;
@@ -173,7 +173,7 @@ namespace ClassicUO.Game.Managers
                 _mouseDownControls[btn] = null;
             };
 
-            InputManager.MouseWheel += (sender, isup) =>
+            Engine.Input.MouseWheel += (sender, isup) =>
             {
                 if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
                     return;
@@ -181,9 +181,9 @@ namespace ClassicUO.Game.Managers
                 if (MouseOverControl != null && MouseOverControl.AcceptMouseInput)
                     MouseOverControl.InvokeMouseWheel(isup ? MouseEvent.WheelScrollUp : MouseEvent.WheelScrollDown);
             };
-            InputManager.KeyDown += (sender, e) => { _keyboardFocusControl?.InvokeKeyDown(e.keysym.sym, e.keysym.mod); };
-            InputManager.KeyUp += (sender, e) => { _keyboardFocusControl?.InvokeKeyUp(e.keysym.sym, e.keysym.mod); };
-            InputManager.TextInput += (sender, e) => { _keyboardFocusControl?.InvokeTextInput(e); };
+            Engine.Input.KeyDown += (sender, e) => { _keyboardFocusControl?.InvokeKeyDown(e.keysym.sym, e.keysym.mod); };
+            Engine.Input.KeyUp += (sender, e) => { _keyboardFocusControl?.InvokeKeyUp(e.keysym.sym, e.keysym.mod); };
+            Engine.Input.TextInput += (sender, e) => { _keyboardFocusControl?.InvokeTextInput(e); };
         }
 
         public IReadOnlyList<Control> Gumps => _gumps;
