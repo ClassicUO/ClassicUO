@@ -18,6 +18,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
+
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
@@ -25,6 +28,7 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Views
 {
@@ -40,10 +44,10 @@ namespace ClassicUO.Game.Views
 
         public TileView(Land tile) : base(tile)
         {
-            AllowedToDraw = !tile.IsIgnored;
+            AllowedToDraw = tile.Graphic > 2;
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
@@ -64,12 +68,12 @@ namespace ClassicUO.Game.Views
             {
                 HueVector = GetHueVector(GameObject.Hue, true);
 
-                return Draw3DStretched(spriteBatch, position, objectList);
+                return Draw3DStretched(batcher, position, objectList);
             }
 
             HueVector = GetHueVector(GameObject.Hue, false);
 
-            return base.Draw(spriteBatch, position, objectList);
+            return base.Draw(batcher, position, objectList);
         }
 
         private static Vector3 GetHueVector(int hue, bool stretched)
@@ -77,22 +81,11 @@ namespace ClassicUO.Game.Views
             return hue != 0 ? new Vector3(hue, stretched ? (int) ShadersEffectType.LandHued : (int) ShadersEffectType.Hued, 0) : new Vector3(hue, stretched ? (int) ShadersEffectType.Land : (int) ShadersEffectType.None, 0);
         }
 
-        private unsafe bool Draw3DStretched(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        private unsafe bool Draw3DStretched(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
-            Texture.Ticks = CoreGame.Ticks;
-
-            fixed (SpriteVertex* ptr = _vertex)
-            {
-                ptr[0].Position = position + _vertex0_yOffset;
-                ptr[1].Position = position + _vertex1_yOffset;
-                ptr[2].Position = position + _vertex2_yOffset;
-                ptr[3].Position = position + _vertex3_yOffset;
-            }
+            Texture.Ticks = Engine.Ticks;
 
             int z = GameObject.Position.Z * 4;
-
-            for (int i = 0; i < 4; i++)
-                _vertex[i].Position.Y += z;
 
             if (IsSelected)
             {
@@ -106,10 +99,28 @@ namespace ClassicUO.Game.Views
                 _storedHue = Vector3.Zero;
             }
 
-            if (HueVector != _vertex[0].Hue)
-                _vertex[0].Hue = _vertex[1].Hue = _vertex[2].Hue = _vertex[3].Hue = HueVector;
+            fixed (SpriteVertex* ptr = _vertex)
+            {
+                ptr[0].Position = position + _vertex0_yOffset;
+                ptr[1].Position = position + _vertex1_yOffset;
+                ptr[2].Position = position + _vertex2_yOffset;
+                ptr[3].Position = position + _vertex3_yOffset;
 
-            if (!spriteBatch.DrawSprite(Texture, _vertex))
+                ptr[0].Position.Y += z;
+                ptr[1].Position.Y += z;
+                ptr[2].Position.Y += z;
+                ptr[3].Position.Y += z;
+
+                if (HueVector != ptr[0].Hue)
+                {
+                    ptr[0].Hue = HueVector;
+                    ptr[1].Hue = HueVector;
+                    ptr[2].Hue = HueVector;
+                    ptr[3].Hue = HueVector;
+                }
+            }
+
+            if (!batcher.DrawSprite(Texture, _vertex))
                 return false;
 
             if (objectList.IsMouseInObjectIsometric(_vertex))
@@ -122,16 +133,6 @@ namespace ClassicUO.Game.Views
         {
             int x = list.MousePosition.X - (int)vertex[0].Position.X;
             int y = list.MousePosition.Y - (int)vertex[0].Position.Y;
-
-            //if (Art.Contains(GameObject.Graphic, x, y))
-            //Land tile = (Land)GameObject;
-
-            //if (!tile.IsStretched)
-            //{
-            //    if (Texture.Contains(x, y))
-            //        list.Add(GameObject, vertex[0].Position);
-            //}
-
 
             if (Texture.Contains(x, y))
                 list.Add(GameObject, vertex[0].Position);
@@ -146,14 +147,12 @@ namespace ClassicUO.Game.Views
             {
                 tile.IsStretched = false;
                 tile.MinZ = z;
-                //tile.PriorityZ = (sbyte) (tile.Position.Z - 1);
             }
             else
             {
                 tile.IsStretched = true;
                 tile.UpdateZ(map.GetTileZ(x, y + 1), map.GetTileZ(x + 1, y + 1), map.GetTileZ(x + 1, y), z);
 
-                //tile.PriorityZ = (sbyte) (tile.AverageZ - 1);
                 Vector3[,,] vec = new Vector3[3, 3, 4];
                 int i;
                 int j;

@@ -27,7 +27,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ScrollArea : GumpControl
+    internal class ScrollArea : Control
     {
         private readonly IScrollBar _scrollBar;
         private bool _needUpdate = true;
@@ -74,25 +74,25 @@ namespace ClassicUO.Game.Gumps.Controls
             base.OnInitialize();
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            Children[0].Draw(spriteBatch, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
+            Children[0].Draw(batcher, new Point(position.X + Children[0].X, position.Y + Children[0].Y));
             _rect.X = position.X;
             _rect.Y = position.Y;
             _rect.Width = Width;
             _rect.Height = Height;
-            Rectangle scissor = ScissorStack.CalculateScissors(spriteBatch.TransformMatrix, _rect);
+            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, _rect);
 
             if (ScissorStack.PushScissors(scissor))
             {
-                spriteBatch.EnableScissorTest(true);
+                batcher.EnableScissorTest(true);
                 int height = 0;
                 int maxheight = _scrollBar.Value + _scrollBar.Height;
                 bool drawOnly1 = true;
 
                 for (int i = 1; i < Children.Count; i++)
                 {
-                    GumpControl child = Children[i];
+                    Control child = Children[i];
 
                     if (!child.IsVisible)
                         continue;
@@ -103,12 +103,12 @@ namespace ClassicUO.Game.Gumps.Controls
                         // do nothing
                     }
                     else if (height + child.Height <= maxheight)
-                        child.Draw(spriteBatch, new Point(position.X + child.X, position.Y + child.Y));
+                        child.Draw(batcher, new Point(position.X + child.X, position.Y + child.Y));
                     else
                     {
                         if (drawOnly1)
                         {
-                            child.Draw(spriteBatch, new Point(position.X + child.X, position.Y + child.Y));
+                            child.Draw(batcher, new Point(position.X + child.X, position.Y + child.Y));
                             drawOnly1 = false;
                         }
                     }
@@ -116,7 +116,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     height += child.Height;
                 }
 
-                spriteBatch.EnableScissorTest(false);
+                batcher.EnableScissorTest(false);
                 ScissorStack.PopScissors();
             }
 
@@ -153,7 +153,7 @@ namespace ClassicUO.Game.Gumps.Controls
             _needUpdate = true;
         }
 
-        public override void RemoveChildren(GumpControl c)
+        public override void RemoveChildren(Control c)
         {
             if (c is ScrollAreaItem)
                 base.RemoveChildren(c);
@@ -165,7 +165,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        public override void AddChildren(GumpControl c, int page = 0)
+        public override void AddChildren(Control c, int page = 0)
         {
             ScrollAreaItem item = new ScrollAreaItem();
             item.AddChildren(c);
@@ -206,7 +206,7 @@ namespace ClassicUO.Game.Gumps.Controls
         }
     }
 
-    internal class ScrollAreaItem : GumpControl
+    internal class ScrollAreaItem : Control
     {
     }
 }

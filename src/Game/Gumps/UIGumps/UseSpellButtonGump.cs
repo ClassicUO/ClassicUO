@@ -18,12 +18,16 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using System.Collections.Generic;
+using System.IO;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
+using ClassicUO.Utility;
 
 using Newtonsoft.Json;
 
@@ -43,7 +47,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public UseSpellButtonGump(SpellDefinition spell) : this()
         {
-            while (UIManager.GetByLocalSerial<UseSpellButtonGump>((uint) spell.ID) != null) UIManager.GetByLocalSerial<UseSpellButtonGump>((uint) spell.ID).Dispose();
+            while (Engine.UI.GetByLocalSerial<UseSpellButtonGump>((uint) spell.ID) != null) Engine.UI.GetByLocalSerial<UseSpellButtonGump>((uint) spell.ID).Dispose();
             _spell = spell;
             BuildGump();
         }
@@ -73,27 +77,56 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 GameActions.CastSpell(_spell.ID);
         }
 
-        public override bool Save(out Dictionary<string, object> data)
-        {
-            if (base.Save(out data))
-            {
-                data["spell"] = _spell;
-                return true;
-            }
 
-            return false;
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+          
+            // spell data
+            writer.Write(_spell.Name.Length); // 4
+            writer.WriteUTF8String(_spell.Name); // variable
+            writer.Write(_spell.ID); // 4
+            writer.Write(_spell.GumpIconID); // 4
+            writer.Write(_spell.GumpIconSmallID); // 4
+
+            writer.Write(_spell.Regs.Length); // 4
+            for (int i = 0; i < _spell.Regs.Length; i++)
+            {
+                writer.Write((int)_spell.Regs[i]); // 4
+            }
+            writer.Write(_spell.ManaCost); // 4
+            writer.Write(_spell.MinSkill); // 4
+            writer.Write(_spell.PowerWords.Length); // 4
+            writer.WriteUTF8String(_spell.PowerWords); // variable
+            writer.Write(_spell.TithingCost); // 4
         }
 
-        public override bool Restore(Dictionary<string, object> data)
+        public override void Restore(BinaryReader reader)
         {
-            //if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(UseSpellButtonGump), "spell", out _spell))
-            //{
-            //    BuildGump();
+            base.Restore(reader);
 
-            //    return true;
-            //}
+         
+            string name = reader.ReadUTF8String(reader.ReadInt32());
+            int id = reader.ReadInt32();
+            int gumpID = reader.ReadInt32();
+            int smallGumpID = reader.ReadInt32();
+            int reagsCount = reader.ReadInt32();
+            
+            Reagents[] reagents = new Reagents[reagsCount];
 
-            return false;
+            for (int i = 0; i < reagsCount; i++)
+            {
+                reagents[i] = (Reagents) reader.ReadInt32();
+            }
+
+            int manaCost = reader.ReadInt32();
+            int minSkill = reader.ReadInt32();
+            string powerWord = reader.ReadUTF8String(reader.ReadInt32());
+            int tithingCost = reader.ReadInt32();
+
+            _spell = new SpellDefinition(name, id, gumpID, smallGumpID, powerWord, manaCost, minSkill, tithingCost, reagents);
+
+            BuildGump();
         }
 
         public override void Dispose()

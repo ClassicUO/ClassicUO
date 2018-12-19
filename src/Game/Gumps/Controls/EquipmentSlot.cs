@@ -20,6 +20,7 @@
 #endregion
 using System;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
@@ -30,7 +31,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class EquipmentSlot : GumpControl, IMobilePaperdollOwner
+    internal class EquipmentSlot : Control
     {
         private readonly Layer _layer;
         private readonly Mobile _mobile;
@@ -38,6 +39,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private Point _clickPoint;
         private ItemGump _itemGump;
         private float _pickupTime, _singleClickTime;
+        
 
         public EquipmentSlot(int x, int y, Mobile mobile, Layer layer)
         {
@@ -93,7 +95,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 {
                     AddChildren(_itemGump = new ItemGump(Item)
                     {
-                        HighlightOnMouseOver = false
+                        HighlightOnMouseOver = false,
+                        ShowLabel = false
                     });
                     ArtTexture texture = (ArtTexture) _itemGump.Texture;
                     int offsetX = (13 - texture.ImageRectangle.Width) >> 1;
@@ -130,7 +133,7 @@ namespace ClassicUO.Game.Gumps.Controls
             if (Item == null)
                 return;
             _canDrag = true;
-            float totalMS = CoreGame.Ticks;
+            float totalMS = Engine.Ticks;
             _pickupTime = totalMS + 800;
             _clickPoint.X = x;
             _clickPoint.Y = y;
@@ -157,7 +160,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 _canDrag = false;
                 _sendClickIfNotDClick = true;
-                float totalMS = CoreGame.Ticks;
+                float totalMS = Engine.Ticks;
                 _singleClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
             }
         }

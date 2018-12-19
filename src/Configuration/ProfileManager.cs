@@ -19,42 +19,39 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Utility;
+using ClassicUO.Utility.Coroutines;
+
 namespace ClassicUO.Configuration
 {
-    internal static class ProfileManager
+    public class ProfileManager
     {
-        private static readonly string _path = Path.Combine(Bootstrap.ExeDirectory, "Data");
+        public Profile Current { get; private set; }
 
-
-        public static Profile Current { get; set; }
-
-
-        public static void Load(string name)
+        public List<Gump> Load(string servername, string username, string charactername)
         {
-            string ext = Path.GetExtension(name);
+            string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", username, servername, charactername);
 
-            if (string.IsNullOrEmpty(ext))
-                name = name + ".json";
-
-            if (File.Exists(name))
+            if (!File.Exists(Path.Combine(path, "settings.json")))
             {
-                Current = ConfigurationResolver.Load<Profile>(name);
+                Current = new Profile(username, servername, charactername);
+            }
+            else
+            {
+                Current = ConfigurationResolver.Load<Profile>(Path.Combine(path, "settings.json")) ?? new Profile(username, servername, charactername);
+
+                return Current.ReadGumps();               
             }
 
-        }
-
-        public static void Save()
-        {
-            if (!Directory.Exists(_path))
-                Directory.CreateDirectory(_path);
-
-            ConfigurationResolver.Save(Current, Current.Path);
+            return null;
         }
     }
 }

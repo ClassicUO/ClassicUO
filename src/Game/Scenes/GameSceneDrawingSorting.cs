@@ -20,13 +20,17 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+
+using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -54,7 +58,7 @@ namespace ClassicUO.Game.Scenes
             _noDrawRoofs = false;
             int bx = playerX;
             int by = playerY;
-            Tile tile = World.Map.GetTile(bx, by);
+            Tile tile = World.Map.GetTile(bx, by, false);
 
             if (tile != null)
             {
@@ -82,12 +86,13 @@ namespace ClassicUO.Game.Scenes
                     if (obj is Mobile)
                         continue;
 
-                    if (!(obj is Static) && obj is Item item && !item.IsMulti)
+                    if (!(obj is Static) && !(obj is Multi))
                         continue;
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
-                        if (obj is IDynamicItem st && (st.ItemData.Flags & 0x20004) == 0 && (!TileData.IsRoof(st.ItemData.Flags) || TileData.IsSurface( st.ItemData.Flags)))
+                        if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (itemdata.Flags & 0x20004) == 0 && (!TileData.IsRoof(itemdata.Flags) || TileData.IsSurface(itemdata.Flags)))
+                        //if (obj is IDynamicItem st && (st.ItemData.Flags & 0x20004) == 0 && (!TileData.IsRoof(st.ItemData.Flags) || TileData.IsSurface( st.ItemData.Flags)))
                         {
                             _maxZ = tileZ;
                             _noDrawRoofs = true;
@@ -101,22 +106,23 @@ namespace ClassicUO.Game.Scenes
                 playerY++;
                 bx = playerX;
                 by = playerY;
-                tile = World.Map.GetTile(bx, by);
+                tile = World.Map.GetTile(bx, by, false);
 
                 if (tile !=null)
                 {
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
                     {
-                        if (!(obj is Static) && obj is Item it && !it.IsMulti)
+                        if (!(obj is Static) && !(obj is Multi))
                             continue;
 
                         if (obj is Mobile)
                             continue;
+
                         sbyte tileZ = obj.Z;
 
                         if (tileZ > pz14 && _maxZ > tileZ)
                         {
-                            if (obj is IDynamicItem dyn2 && (dyn2.ItemData.Flags & 0x204) == 0 && TileData.IsRoof( dyn2.ItemData.Flags))
+                            if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (itemdata.Flags & 0x204) == 0 && TileData.IsRoof(itemdata.Flags))
                             {
                                 _maxZ = tileZ;
                                 World.Map.ClearBockAccess();
@@ -153,32 +159,43 @@ namespace ClassicUO.Game.Scenes
         {
             for (; obj != null; obj = obj.Right)
             {
-                //GameObject obj = objList[i];
-
                 if (obj.CurrentRenderIndex == _renderIndex || obj.IsDisposed)
                     continue;
 
                 if (_updateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
                     obj.UpdateRealScreenPosition(_offset);
+
                 obj.UseInRender = 0xFF;
-                int drawX = (int) obj.RealScreenPosition.X;
-                int drawY = (int) obj.RealScreenPosition.Y;
+
+                float drawX = obj.RealScreenPosition.X;
+                float drawY = obj.RealScreenPosition.Y;
 
                 if (drawX < _minPixel.X || drawX > _maxPixel.X)
                     break;
+
                 int z = obj.Z;
                 int maxObjectZ = obj.PriorityZ;
+
+                bool ismobile = false;
 
                 switch (obj)
                 {
                     case Mobile _:
                         maxObjectZ += Constants.DEFAULT_CHARACTER_HEIGHT;
+                        ismobile = true;
 
                         break;
-                    case IDynamicItem dyn:
+                    default:
 
-                        if (_noDrawRoofs && TileData.IsRoof( dyn.ItemData.Flags)) continue;
-                        maxObjectZ += dyn.ItemData.Height;
+                        if (GameObjectHelper.TryGetStaticData(obj, out var itemdata))
+                        {
+                            if (_noDrawRoofs && TileData.IsRoof(itemdata.Flags))
+                                continue;
+                            maxObjectZ += itemdata.Height;
+                        }
+                    //case IDynamicItem dyn when _noDrawRoofs && TileData.IsRoof(dyn.ItemData.Flags):
+                    //    continue;
+                    //case IDynamicItem dyn: maxObjectZ += dyn.ItemData.Height;
 
                         break;
                 }
@@ -187,33 +204,36 @@ namespace ClassicUO.Game.Scenes
                     break;
                 obj.CurrentRenderIndex = _renderIndex;
 
-                if (obj.Graphic != 0x2006 && obj is IDynamicItem dyn2 && TileData.IsInternal( dyn2.ItemData.Flags))
+                bool iscorpse = obj is Item item && item.IsCorpse;
+
+                //if (!iscorpse && obj is IDynamicItem dyn2 && TileData.IsInternal(dyn2.ItemData.Flags))
+                if (!iscorpse && GameObjectHelper.TryGetStaticData(obj, out var itemdata1) && TileData.IsInternal(itemdata1.Flags))
                     continue;
 
-                if (!(obj is Land) && z >= _maxZ)
-                    continue;
-                int testMinZ = drawY + z * 4;
-                int testMaxZ = drawY;
+                bool island = !ismobile && !iscorpse && obj is Land;
 
-                if (obj is Land t && t.IsStretched)
-                    testMinZ -= t.MinZ * 4;
+                if (!island && z >= _maxZ)
+                    continue;
+
+                int testMinZ = (int) drawY + z * 4;
+                int testMaxZ = (int) drawY;
+
+                if (island)
+                {
+                    Land t = (Land) obj;
+                    if (t.IsStretched)
+                        testMinZ -= t.MinZ * 4;
+                    else
+                        testMinZ = testMaxZ;
+                }
                 else
                     testMinZ = testMaxZ;
 
                 if (testMinZ < _minPixel.Y || testMaxZ > _maxPixel.Y)
                     continue;
 
-                switch (obj)
-                {
-                    case Mobile mob:
-                        AddOffsetCharacterTileToRenderList(mob, useObjectHandles);
-
-                        break;
-                    case Item item when item.IsCorpse:
-                        AddOffsetCharacterTileToRenderList(item, useObjectHandles);
-
-                        break;
-                }
+                if (ismobile || iscorpse)
+                    AddOffsetCharacterTileToRenderList((Entity)obj, useObjectHandles);
 
                 if (_renderListCount >= _renderList.Length)
                 {
@@ -226,6 +246,7 @@ namespace ClassicUO.Game.Scenes
                 _renderListCount++;
             }
         }
+
 
         private void AddOffsetCharacterTileToRenderList(Entity entity, bool useObjectHandles)
         {
@@ -262,10 +283,9 @@ namespace ClassicUO.Game.Scenes
 
                 if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
                     continue;
-                 Tile tile =  World.Map.GetTile(x, y);
 
-                if (tile == null)
-                    continue;
+                Tile tile =  World.Map.GetTile(x, y);
+
                 int currentMaxZ = maxZ;
 
                 if (i == dropMaxZIndex)
@@ -274,64 +294,62 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public int ScaledOffsetX { get; private set; }
-
-        public int ScaledOffsetY { get; private set; }
-
-        public int ScaledOffsetW { get; private set; }
-
-        public int ScaledOffsetH { get; private set; }
-
-        private (Point, Point, Vector2, Vector2, Point, Point, Point, int) GetViewPort()
+        private void GetViewPort()
         {
             int oldDrawOffsetX = _offset.X;
             int oldDrawOffsetY = _offset.Y;
             int winGamePosX = 0;
             int winGamePosY = 0;
-            int winGameWidth = _settings.GameWindowWidth;
-            int winGameHeight = _settings.GameWindowHeight;
+            int winGameWidth = Engine.Profile.Current.GameWindowSize.X;
+            int winGameHeight = Engine.Profile.Current.GameWindowSize.Y;
             int winGameCenterX = winGamePosX + (winGameWidth >> 1);
-            int winGameCenterY = winGamePosY + (winGameHeight >> 1) + World.Player.Position.Z * 4;
+            int winGameCenterY = winGamePosY + (winGameHeight >> 1) + World.Player.Z * 4;
             winGameCenterX -= (int) World.Player.Offset.X;
             winGameCenterY -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
-            int winDrawOffsetX = (World.Player.Position.X - World.Player.Position.Y) * 22 - winGameCenterX;
-            int winDrawOffsetY = (World.Player.Position.X + World.Player.Position.Y) * 22 - winGameCenterY;
-            double left = winGamePosX;
-            double right = winGameWidth + left;
-            double top = winGamePosY;
-            double bottom = winGameHeight + top;
-            double newRight = right * Scale;
-            double newBottom = bottom * Scale;
+            int winDrawOffsetX = (World.Player.X - World.Player.Y) * 22 - winGameCenterX;
+            int winDrawOffsetY = (World.Player.X + World.Player.Y) * 22 - winGameCenterY;
+            float left = winGamePosX;
+            float right = winGameWidth + left;
+            float top = winGamePosY;
+            float bottom = winGameHeight + top;
+            float newRight = right * Scale;
+            float newBottom = bottom * Scale;
             int winGameScaledOffsetX = (int) (left * Scale - (newRight - right));
             int winGameScaledOffsetY = (int) (top * Scale - (newBottom - bottom));
             int winGameScaledWidth = (int) (newRight - winGameScaledOffsetX);
             int winGameScaledHeight = (int) (newBottom - winGameScaledOffsetY);
             int width = (int) ((winGameWidth / 44 + 1) * Scale);
             int height = (int) ((winGameHeight / 44 + 1) * Scale);
-            ScaledOffsetX = winGameScaledOffsetX;
-            ScaledOffsetY = winGameScaledOffsetY;
-            ScaledOffsetW = winGameScaledWidth;
-            ScaledOffsetH = winGameScaledHeight;
+
             winDrawOffsetX += (winGameScaledOffsetX >> 1);
             winDrawOffsetY += (winGameScaledOffsetY >> 1);
 
-            if (width < height)
-                width = height;
-            else
-                height = width;
-            int realMinRangeX = World.Player.Position.X - width;
+            const int MAX = 70;
+
+
+            if (width > MAX)
+                width = MAX;
+
+            if (height > MAX)
+                height = MAX;
+
+
+            int size = Math.Max(width, height);
+
+
+            int realMinRangeX = World.Player.Position.X - size;
 
             if (realMinRangeX < 0)
                 realMinRangeX = 0;
-            int realMaxRangeX = World.Player.Position.X + width;
+            int realMaxRangeX = World.Player.Position.X + size;
 
             //if (realMaxRangeX >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][0])
             //    realMaxRangeX = IO.Resources.Map.MapsDefaultSize[World.Map.Index][0];
-            int realMinRangeY = World.Player.Position.Y - height;
+            int realMinRangeY = World.Player.Position.Y - size;
 
             if (realMinRangeY < 0)
                 realMinRangeY = 0;
-            int realMaxRangeY = World.Player.Position.Y + height;
+            int realMaxRangeY = World.Player.Position.Y + size;
 
             //if (realMaxRangeY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][1])
             //    realMaxRangeY = IO.Resources.Map.MapsDefaultSize[World.Map.Index][1];
@@ -346,23 +364,35 @@ namespace ClassicUO.Game.Scenes
             if (minBlockY < 0)
                 minBlockY = 0;
 
-            if (maxBlockX >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][0])
-                maxBlockX = IO.Resources.Map.MapsDefaultSize[World.Map.Index][0] - 1;
+            if (maxBlockX >= IO.Resources.Map.MapsDefaultSize[World.Map.Index, 0])
+                maxBlockX = IO.Resources.Map.MapsDefaultSize[World.Map.Index, 0] - 1;
 
-            if (maxBlockY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][1])
-                maxBlockY = IO.Resources.Map.MapsDefaultSize[World.Map.Index][1] - 1;
+            if (maxBlockY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index, 1])
+                maxBlockY = IO.Resources.Map.MapsDefaultSize[World.Map.Index, 1] - 1;
             int drawOffset = (int) (Scale * 40.0);
-            double maxX = winGamePosX + winGameWidth + drawOffset;
-            double maxY = winGamePosY + winGameHeight + drawOffset;
-            double newMaxX = maxX * Scale;
-            double newMaxY = maxY * Scale;
+            float maxX = winGamePosX + winGameWidth + drawOffset;
+            float maxY = winGamePosY + winGameHeight + drawOffset;
+            float newMaxX = maxX * Scale;
+            float newMaxY = maxY * Scale;
             int minPixelsX = (int) ((winGamePosX - drawOffset) * Scale - (newMaxX + maxX));
             int maxPixelsX = (int) newMaxX;
             int minPixelsY = (int) ((winGamePosY - drawOffset) * Scale - (newMaxY + maxY));
             int maxPixlesY = (int) newMaxY;
             if (_updateDrawPosition || oldDrawOffsetX != winDrawOffsetX || oldDrawOffsetY != winDrawOffsetY) _updateDrawPosition = true;
 
-            return (new Point(realMinRangeX, realMinRangeY), new Point(realMaxRangeX, realMaxRangeY), new Vector2(minPixelsX, minPixelsY), new Vector2(maxPixelsX, maxPixlesY), new Point(winDrawOffsetX, winDrawOffsetY), new Point(winGameCenterX, winGameCenterY), new Point(realMinRangeX + width - 1, realMinRangeY - 1), Math.Max(width, height));
+
+            _minTile.X = realMinRangeX;
+            _minTile.Y = realMinRangeY;
+            _maxTile.X = realMaxRangeX;
+            _maxTile.Y = realMaxRangeY;
+
+            _minPixel.X = minPixelsX;
+            _minPixel.Y = minPixelsY;
+            _maxPixel.X = maxPixelsX;
+            _maxPixel.Y = maxPixlesY;
+
+            _offset.X = winDrawOffsetX;
+            _offset.Y = winDrawOffsetY;
         }
     }
 }

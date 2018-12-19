@@ -18,13 +18,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
 using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
 using ClassicUO.Utility.Logging;
 
-namespace ClassicUO.Game.GameObjects.Managers
+namespace ClassicUO.Game.Managers
 {
     internal class EffectManager : IUpdateable
     {
@@ -109,13 +111,14 @@ namespace ClassicUO.Game.GameObjects.Managers
                     return;
             }
 
-            if (effect != null)
-                Add(effect);
+            
+            Add(effect);
         }
 
         public void Add(GameEffect effect)
         {
-            _effects.Add(effect);
+            if (effect != null)
+                _effects.Add(effect);
         }
     }
 }

@@ -26,35 +26,43 @@ using static SDL2.SDL;
 
 namespace ClassicUO.Input
 {
-    public static class InputManager
+    public sealed class InputManager : IDisposable
     {
-        private static bool _dragStarted;
-        private static SDL_EventFilter _hookDel;
+        private bool _dragStarted;
+        private readonly SDL_EventFilter _hookDel;
 
-        public static void Initialize()
+        public InputManager()
         {
             _hookDel = HookFunc;
             SDL_AddEventWatch(_hookDel, IntPtr.Zero);
         }
 
-        public static void Unload()
+        public bool IsDisposed { get; private set; }
+
+
+        public void Dispose()
         {
+            if (IsDisposed)
+                return;
+
+            IsDisposed = true;
             SDL_DelEventWatch(_hookDel, IntPtr.Zero);
         }
 
-        public static event EventHandler<MouseDoubleClickEventArgs> LeftMouseDoubleClick, MidMouseDoubleClick, RightMouseDoubleClick;
 
-        public static event EventHandler LeftMouseButtonDown, LeftMouseButtonUp, MidMouseButtonDown, MidMouseButtonUp, RightMouseButtonDown, RightMouseButtonUp, X1MouseButtonDown, X1MouseButtonUp, X2MouseButtonDown, X2MouseButtonUp;
+        public event EventHandler<MouseDoubleClickEventArgs> LeftMouseDoubleClick, MidMouseDoubleClick, RightMouseDoubleClick;
 
-        public static event EventHandler<bool> MouseWheel;
+        public event EventHandler LeftMouseButtonDown, LeftMouseButtonUp, MidMouseButtonDown, MidMouseButtonUp, RightMouseButtonDown, RightMouseButtonUp, X1MouseButtonDown, X1MouseButtonUp, X2MouseButtonDown, X2MouseButtonUp;
 
-        public static event EventHandler MouseMoving, MouseDragging, DragBegin, DragEnd;
+        public event EventHandler<bool> MouseWheel;
 
-        public static event EventHandler<SDL_KeyboardEvent> KeyDown, KeyUp;
+        public event EventHandler MouseMoving, MouseDragging, DragBegin, DragEnd;
 
-        public static event EventHandler<string> TextInput;
+        public event EventHandler<SDL_KeyboardEvent> KeyDown, KeyUp;
 
-        private static unsafe int HookFunc(IntPtr userdata, IntPtr ev)
+        public event EventHandler<string> TextInput;
+
+        private unsafe int HookFunc(IntPtr userdata, IntPtr ev)
         {
             SDL_Event* e = (SDL_Event*) ev;
 

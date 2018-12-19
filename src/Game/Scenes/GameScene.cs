@@ -19,16 +19,21 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.GameObjects.Managers;
 using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Coroutines;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -42,12 +47,13 @@ namespace ClassicUO.Game.Scenes
         private MousePicker _mousePicker;
         private MouseOverList _mouseOverList;
         private WorldViewport _viewPortGump;
-        private StaticManager _staticManager;
-        private EffectManager _effectManager;
         private Settings _settings;
-        private static GameObject _selectedObject;
+        private JournalManager _journalManager;
+        private OverheadManager _overheadManager;
+        private GameObject _selectedObject;
+        private UseItemQueue _useItemQueue = new UseItemQueue();
 
-        public GameScene() : base(ScenesType.Game)
+        public GameScene() : base()
         {
         }
 
@@ -76,11 +82,19 @@ namespace ClassicUO.Game.Scenes
                         _selectedObject.View.IsSelected = false;
                     _selectedObject = value;
 
-                    if (Service.Get<Settings>().HighlightGameObjects)
+                    if (Engine.Profile.Current.HighlightGameObjects)
                         _selectedObject.View.IsSelected = true;
                 }
             }
         }
+
+        public JournalManager Journal => _journalManager;
+
+        public OverheadManager Overheads => _overheadManager;
+
+
+        public void DoubleClickDelayed(Serial serial)
+            => _useItemQueue.Add(serial);
 
         private void ClearDequeued()
         {
@@ -96,29 +110,29 @@ namespace ClassicUO.Game.Scenes
         public override void Load()
         {
             base.Load();
-            Service.Register(new JournalData());
-            Service.Register(_effectManager = new EffectManager());
-            Service.Register(_staticManager = new StaticManager());
+
+            _journalManager = new JournalManager();
+            _overheadManager = new OverheadManager();
+
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
-            UIManager.Add(new WorldViewportGump(this));
-            UIManager.Add(new TopBarGump(this));           
+            Engine.UI.Add(new WorldViewportGump(this));
+            Engine.UI.Add(new TopBarGump(this));           
             _viewPortGump = Service.Get<WorldViewport>();
             _settings = Service.Get<Settings>();
             GameActions.Initialize(PickupItemBegin);
-            InputManager.LeftMouseButtonDown += OnLeftMouseButtonDown;
-            InputManager.LeftMouseButtonUp += OnLeftMouseButtonUp;
-            InputManager.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
-            InputManager.RightMouseButtonDown += OnRightMouseButtonDown;
-            InputManager.RightMouseButtonUp += OnRightMouseButtonUp;
-            InputManager.RightMouseDoubleClick += OnRightMouseDoubleClick;
-            InputManager.DragBegin += OnMouseDragBegin;
-            InputManager.MouseDragging += OnMouseDragging;
-            InputManager.MouseMoving += OnMouseMoving;
-            InputManager.KeyDown += OnKeyDown;
-            InputManager.KeyUp += OnKeyUp;
-
-            InputManager.MouseWheel += (sender, e) =>
+            Engine.Input.LeftMouseButtonDown += OnLeftMouseButtonDown;
+            Engine.Input.LeftMouseButtonUp += OnLeftMouseButtonUp;
+            Engine.Input.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
+            Engine.Input.RightMouseButtonDown += OnRightMouseButtonDown;
+            Engine.Input.RightMouseButtonUp += OnRightMouseButtonUp;
+            Engine.Input.RightMouseDoubleClick += OnRightMouseDoubleClick;
+            Engine.Input.DragBegin += OnMouseDragBegin;
+            Engine.Input.MouseDragging += OnMouseDragging;
+            Engine.Input.MouseMoving += OnMouseMoving;
+            Engine.Input.KeyDown += OnKeyDown;
+            Engine.Input.KeyUp += OnKeyUp;
+            Engine.Input.MouseWheel += (sender, e) =>
             {
                 if (IsMouseOverWorld)
                 {
@@ -133,74 +147,97 @@ namespace ClassicUO.Game.Scenes
                         Scale = 2.3f;
                 }
             };
-            UIManager.Add(new OptionsGump1());
-
+            Commands.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
+
+            //Coroutine.Start(this, CastSpell());
         }
 
-        
+        private IEnumerable<IWaitCondition> CastSpell()
+        {
+            while (true)
+            {
+                yield return new WaitTime(TimeSpan.FromMilliseconds(1));
+
+                GameActions.CastSpell(1);
+            }
+
+        }
+       
 
         public override void Unload()
         {
+            _renderList = null;
+
+            TargetSystem.ClearTargetingWithoutTargetCancelPacket();
+
+            Engine.Profile.Current?.Save( Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList() );
+
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
-            _renderTarget?.Dispose();            
-            UIManager.SaveGumps();
-            UIManager.Clear();
-            CleaningResources();
+            _renderTarget?.Dispose();
+            Commands.UnRegisterAll();
+            Engine.UI.Clear();
             World.Clear();
-            Service.Unregister<JournalData>();
-            Service.Unregister<EffectManager>();
-            Service.Unregister<StaticManager>();
-            InputManager.LeftMouseButtonDown -= OnLeftMouseButtonDown;
-            InputManager.LeftMouseButtonUp -= OnLeftMouseButtonUp;
-            InputManager.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
-            InputManager.RightMouseButtonDown -= OnRightMouseButtonDown;
-            InputManager.RightMouseButtonUp -= OnRightMouseButtonUp;
-            InputManager.RightMouseDoubleClick -= OnRightMouseDoubleClick;
-            InputManager.DragBegin -= OnMouseDragBegin;
-            InputManager.MouseDragging -= OnMouseDragging;
-            InputManager.MouseMoving -= OnMouseMoving;
-            InputManager.KeyDown -= OnKeyDown;
-            InputManager.KeyUp -= OnKeyUp;
+
+           
+            Engine.Input.LeftMouseButtonDown -= OnLeftMouseButtonDown;
+            Engine.Input.LeftMouseButtonUp -= OnLeftMouseButtonUp;
+            Engine.Input.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
+            Engine.Input.RightMouseButtonDown -= OnRightMouseButtonDown;
+            Engine.Input.RightMouseButtonUp -= OnRightMouseButtonUp;
+            Engine.Input.RightMouseDoubleClick -= OnRightMouseDoubleClick;
+            Engine.Input.DragBegin -= OnMouseDragBegin;
+            Engine.Input.MouseDragging -= OnMouseDragging;
+            Engine.Input.MouseMoving -= OnMouseMoving;
+            Engine.Input.KeyDown -= OnKeyDown;
+            Engine.Input.KeyUp -= OnKeyUp;
+
+            _overheadManager.Dispose();
+            _overheadManager = null;
+            _journalManager.Clear();
+            _journalManager = null;
+            _overheadManager = null;
+            _useItemQueue.Clear();
+            _useItemQueue = null;
 
             base.Unload();
         }
 
         private void SocketOnDisconnected(object sender, EventArgs e)
         {
-            UIManager.Add(new MessageBoxGump(_settings.GameWindowX + (_settings.GameWindowWidth >> 1) - 100, _settings.GameWindowY + (_settings.GameWindowHeight >> 1) - (125 >> 1), 200, 125, "Connection lost", (s) =>
-            {
+            Engine.UI.Add(new MessageBoxGump(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1) - 100, Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y >> 1) - (125 >> 1), 200, 125, "Connection lost", (s) =>
+            {               
                 s.Dispose();
-                SceneManager.ChangeScene(ScenesType.Login);
+                Engine.SceneManager.ChangeScene(ScenesType.Login);
             }));
         }
 
         public override void FixedUpdate(double totalMS, double frameMS)
         {
+            base.FixedUpdate(totalMS, frameMS);
+
             if (!World.InGame)
                 return;
 
-            (Point minTile, Point maxTile, Vector2 minPixel, Vector2 maxPixel, Point offset, Point center, Point firstTile, int renderDimensions) = GetViewPort();
+            GetViewPort();
+
 
             UpdateMaxDrawZ();
             _renderListCount = 0;
-            int minX = minTile.X;
-            int minY = minTile.Y;
-            int maxX = maxTile.X;
-            int maxY = maxTile.Y;
-            _offset = offset;
-            _minPixel = minPixel;
-            _maxPixel = maxPixel;
-            _minTile = minTile;
-            _maxTile = maxTile;
+
+            int minX = _minTile.X;
+            int minY = _minTile.Y;
+            int maxX = _maxTile.X;
+            int maxY = _maxTile.Y;
+
 
             for (int i = 0; i < 2; i++)
             {
                 int minValue = minY;
                 int maxValue = maxY;
 
-                if (i > 0)
+                if (i != 0)
                 {
                     minValue = minX;
                     maxValue = maxX;
@@ -211,7 +248,7 @@ namespace ClassicUO.Game.Scenes
                     int x = minX;
                     int y = lead;
 
-                    if (i > 0)
+                    if (i != 0)
                     {
                         x = lead;
                         y = maxY;
@@ -221,7 +258,8 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (x < minX || x > maxX || y < minY || y > maxY)
                             break;
-                         Tile tile =  World.Map.GetTile(x, y);
+
+                        Tile tile = World.Map.GetTile(x, y);
 
                         if (tile != null)
                         {
@@ -233,25 +271,26 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
+
+
             _renderIndex++;
 
             if (_renderIndex >= 100)
                 _renderIndex = 1;
-            _updateDrawPosition = false;
-
-            CleaningResources();
-            base.FixedUpdate(totalMS, frameMS);
+            _updateDrawPosition = false;      
         }
 
         public override void Update(double totalMS, double frameMS)
         {
+            base.Update(totalMS, frameMS);
+
             if (!World.InGame)
                 return;
 
-            if (_renderTarget == null || _renderTarget.Width != (int) (_settings.GameWindowWidth * Scale) || _renderTarget.Height != (int) (_settings.GameWindowHeight * Scale))
+            if (_renderTarget == null || _renderTarget.Width != (int) (Engine.Profile.Current.GameWindowSize.X * Scale) || _renderTarget.Height != (int) (Engine.Profile.Current.GameWindowSize.Y * Scale))
             {
                 _renderTarget?.Dispose();
-                _renderTarget = new RenderTarget2D(Device, (int) (_settings.GameWindowWidth * Scale), (int) (_settings.GameWindowHeight * Scale), false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
+                _renderTarget = new RenderTarget2D(Engine.Batcher.GraphicsDevice, (int)(Engine.Profile.Current.GameWindowSize.X * Scale), (int)(Engine.Profile.Current.GameWindowSize.Y * Scale), false, SurfaceFormat.Bgra5551, DepthFormat.Depth24Stencil8, 0, RenderTargetUsage.DiscardContents);
             }
 
             Pathfinder.ProcessAutoWalk();
@@ -288,60 +327,54 @@ namespace ClassicUO.Game.Scenes
                 MoveCharacterByInputs();
             // ===================================
             World.Update(totalMS, frameMS);
-            _staticManager.Update(totalMS, frameMS);
-            _effectManager.Update(totalMS, frameMS);
+            _overheadManager.Update(totalMS, frameMS);
 
             if (totalMS > _timePing)
             {
-                NetClient.Socket.Send(PPing.Instance.Value);
+                NetClient.Socket.Send(new PPing());
                 _timePing = (long) totalMS + 10000;
             }
 
-            base.Update(totalMS, frameMS);
+            _useItemQueue.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
+        public override bool Draw(Batcher2D batcher)
         {
             if (!World.InGame)
                 return false;
-            DrawWorld(sb3D);
+            DrawWorld(batcher);
             _mousePicker.UpdateOverObjects(_mouseOverList, _mouseOverList.MousePosition);
 
-            return base.Draw(sb3D, sbUI);
+            return base.Draw(batcher);
         }
 
-        private void DrawWorld(SpriteBatch3D sb3D)
+        private void DrawWorld(Batcher2D batcher)
         {
-            sb3D.GraphicsDevice.Clear(Color.Black);
-            sb3D.GraphicsDevice.SetRenderTarget(_renderTarget);
-            sb3D.Begin();
-            sb3D.EnableLight(true);
-            sb3D.SetLightIntensity(World.Light.IsometricLevel);
-            sb3D.SetLightDirection(World.Light.IsometricDirection);
+            batcher.GraphicsDevice.Clear(Color.Black);
+            batcher.GraphicsDevice.SetRenderTarget(_renderTarget);
+            batcher.Begin();
+            batcher.EnableLight(true);
+            batcher.SetLightIntensity(World.Light.IsometricLevel);
+            batcher.SetLightDirection(World.Light.IsometricDirection);
             RenderedObjectsCount = 0;
 
             for (int i = 0; i < _renderListCount; i++)
             {
                 GameObject obj = _renderList[i];
+                //Vector3 v = obj.RealScreenPosition;
+                //v.Z = 1 - (i / 1000000.0f);
 
-                if (obj.Z <= _maxGroundZ && obj.View.Draw(sb3D, obj.RealScreenPosition, _mouseOverList))
+                if (obj.Z <= _maxGroundZ && obj.View.Draw(batcher, obj.RealScreenPosition, _mouseOverList))
                     RenderedObjectsCount++;
             }
 
             // Draw in game overhead text messages
-            OverheadManager.Draw(sb3D, _mouseOverList);
-            sb3D.End();
-            sb3D.EnableLight(false);
-            sb3D.GraphicsDevice.SetRenderTarget(null);
+            _overheadManager.Draw(batcher, _mouseOverList, _offset);
+
+            batcher.End();
+            batcher.EnableLight(false);
+            batcher.GraphicsDevice.SetRenderTarget(null);
         }
 
-        private void CleaningResources()
-        {
-            Art.ClearUnusedTextures();
-            IO.Resources.Gumps.ClearUnusedTextures();
-            TextmapTextures.ClearUnusedTextures();
-            Animations.ClearUnusedTextures();
-            World.Map.ClearUnusedBlocks();
-        }
     }
 }

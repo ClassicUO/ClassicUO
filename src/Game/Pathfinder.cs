@@ -26,10 +26,12 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
 using MathHelper = ClassicUO.Utility.MathHelper;
+using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game
 {
@@ -69,7 +71,7 @@ namespace ClassicUO.Game
 
         private static bool CreateItemList(ref List<PathObject> list, int x, int y, int stepState)
         {
-             Tile tile =  World.Map.GetTile(x, y);
+             Tile tile =  World.Map.GetTile(x, y, false);
 
             if (tile == null)
                 return false;
@@ -132,12 +134,12 @@ namespace ClassicUO.Game
 
                                 break;
                             }
-                            case IDynamicItem dyn when stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM && (TileData.IsDoor( dyn.ItemData.Flags) || dyn.ItemData.Weight <= 0x5A /*|| (isGM && !)*/):
-                                dropFlags = true;
+                            case Item item2:
 
-                                break;
-                            default:
-                                dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
+                                if (stepState == (int)PATH_STEP_STATE.PSS_DEAD_OR_GM && (TileData.IsDoor(item2.ItemData.Flags) || item2.ItemData.Weight <= 0x5A /*|| (isGM && !)*/))
+                                    dropFlags = true;
+                                else 
+                                    dropFlags = graphic >= 0x3946 && graphic <= 0x3964 || graphic == 0x0082;
 
                                 break;
                         }
@@ -146,24 +148,25 @@ namespace ClassicUO.Game
                         {
                             uint flags = 0;
 
-                            if (obj is IDynamicItem dyn)
+                            //if (obj is IDynamicItem dyn)
+                            if (GameObjectHelper.TryGetStaticData(obj, out var itemdata))
                             {
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {
-                                    if (TileData.IsWet( dyn.ItemData.Flags))
+                                    if (TileData.IsWet(itemdata.Flags))
                                         flags = (uint) (PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE);
                                 }
                                 else
                                 {
-                                    if (TileData.IsImpassable( dyn.ItemData.Flags) || TileData.IsSurface( dyn.ItemData.Flags))
+                                    if (TileData.IsImpassable(itemdata.Flags) || TileData.IsSurface(itemdata.Flags))
                                         flags = (uint) PATH_OBJECT_FLAGS.POF_IMPASSABLE_OR_SURFACE;
 
-                                    if (!TileData.IsImpassable( dyn.ItemData.Flags))
+                                    if (!TileData.IsImpassable(itemdata.Flags))
                                     {
-                                        if (TileData.IsSurface( dyn.ItemData.Flags))
+                                        if (TileData.IsSurface(itemdata.Flags))
                                             flags |= (uint) PATH_OBJECT_FLAGS.POF_SURFACE;
 
-                                        if (TileData.IsBridge( dyn.ItemData.Flags))
+                                        if (TileData.IsBridge(itemdata.Flags))
                                             flags |= (uint) PATH_OBJECT_FLAGS.POF_BRIDGE;
                                     }
 
@@ -181,17 +184,17 @@ namespace ClassicUO.Game
                                     if (dropFlags)
                                         flags &= 0xFFFFFFFE;
 
-                                    if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && TileData.IsNoDiagonal( dyn.ItemData.Flags))
+                                    if (stepState == (int) PATH_STEP_STATE.PSS_FLYING && TileData.IsNoDiagonal(itemdata.Flags))
                                         flags |= (uint) PATH_OBJECT_FLAGS.POF_NO_DIAGONAL;
                                 }
 
                                 if (flags != 0)
                                 {
                                     int objZ = obj.Position.Z;
-                                    int staticHeight = dyn.ItemData.Height;
+                                    int staticHeight = itemdata.Height;
                                     int staticAverageZ = staticHeight;
 
-                                    if (TileData.IsBridge( dyn.ItemData.Flags))
+                                    if (TileData.IsBridge(itemdata.Flags))
                                         staticAverageZ /= 2;
                                     list.Add(new PathObject(flags, objZ, staticAverageZ + objZ, staticHeight, obj));
                                 }
@@ -731,17 +734,15 @@ namespace ClassicUO.Game
                 if (_openList[i] == null)
                     _openList[i] = new PathNode();
                 _openList[i].Reset();
-            }
 
-            for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
-            {
                 if (_closedList[i] == null)
                     _closedList[i] = new PathNode();
                 _closedList[i].Reset();
             }
 
-            int playerX = World.Player.Position.X;
-            int playerY = World.Player.Position.Y;
+
+            int playerX = World.Player.X;
+            int playerY = World.Player.Y;
             //sbyte playerZ = 0;
             //Direction playerDir = Direction.NONE;
 
@@ -773,21 +774,23 @@ namespace ClassicUO.Game
 
         public static void ProcessAutoWalk()
         {
-            if (AutoWalking && World.InGame && World.Player.RequestedSteps.Count < 5 && World.Player.LastStepRequestTime <= CoreGame.Ticks)
+#if !JAEDAN_MOVEMENT_PATCH
+            if (AutoWalking && World.InGame && World.Player.Walker.LastStepRequestTime < Engine.Ticks)
+#else
+            if (AutoWalking && World.InGame && !World.Player.IsWaitingNextMovement)
+#endif
+
             {
                 if (_pointIndex >= 0 && _pointIndex < _pathSize)
                 {
                     PathNode p = _path[_pointIndex];
-                    int x = 0;
-                    int y = 0;
-                    sbyte z = 0;
-                    Direction dir = Direction.NONE;
-                    World.Player.GetEndPosition(ref x, ref y, ref z, ref dir);
 
-                    if (dir == (Direction) p.Direction)
+                    World.Player.GetEndPosition(out int x, out int y, out sbyte z, out Direction dir);
+
+                    if (dir == (Direction)p.Direction)
                         _pointIndex++;
 
-                    if (!World.Player.Walk((Direction) p.Direction, true))
+                    if (!World.Player.Walk((Direction)p.Direction, true))
                         StopAutoWalk();
                 }
                 else

@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
@@ -34,6 +35,7 @@ namespace ClassicUO.Game.GameObjects
         public Land(Graphic graphic)
         {
             Graphic = graphic;
+            IsStretched = TileData.TexID == 0 && IO.Resources.TileData.IsWet(TileData.Flags);
         }
 
         private LandTiles? _tileData;
@@ -41,6 +43,7 @@ namespace ClassicUO.Game.GameObjects
 
         public LandTiles TileData
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 if (!_tileData.HasValue)
@@ -54,14 +57,11 @@ namespace ClassicUO.Game.GameObjects
 
         public sbyte AverageZ { get; set; }
 
-        public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
+        //public bool IsIgnored => Graphic < 3 || Graphic == 0x1DB || Graphic >= 0x1AE && Graphic <= 0x1B5;
 
         public bool IsStretched { get; set; }
 
-        protected override View CreateView()
-        {
-            return new TileView(this);
-        }
+        protected override View CreateView() => new TileView(this);
 
         public void Calculate(int x, int y, sbyte z)
         {

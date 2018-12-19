@@ -35,18 +35,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
     {
         private const int WIDTH = 500;
         private const int HEIGHT = 400;
+
         private readonly ScrollArea _scrollArea;
-        private readonly List<SkillListEntry> _skillListEntries;
+        private readonly List<SkillListEntry> _skillListEntries = new List<SkillListEntry>();
         private double _totalReal, _totalValue;
         private bool _updateSkillsNeeded;
 
         public SkillGumpAdvanced() : base(0, 0)
         {
-            _skillListEntries = new List<SkillListEntry>();
             _totalReal = 0;
             _totalValue = 0;
-            X = 100;
-            Y = 100;
+            CanBeSaved = true;
             CanMove = true;
             AcceptMouseInput = false;
             AddChildren(new GameBorder(0, 0, WIDTH, HEIGHT, 4));
@@ -141,11 +140,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             });
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
-        {
-            return base.Draw(spriteBatch, position, hue);
-        }
-
         public override void Update(double totalMS, double frameMS)
         {
             base.Update(totalMS, frameMS);
@@ -159,7 +153,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Dispose()
         {
-            //_line.Dispose();
             World.Player.SkillsChanged -= OnSkillChanged;
             base.Dispose();
         }
@@ -170,25 +163,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
     }
 
-    public class SkillListEntry : GumpControl
+    public class SkillListEntry : Control
     {
         private readonly Button _activeUse;
-        private readonly GumpPic _loc;
-        public readonly Skill Skill;
-        public readonly Label SkillCap;
-        public readonly Label SkillName;
-        public readonly Label SkillValue;
-        public readonly Label SkillValueBase;
+        private readonly Skill _skill;
 
         public SkillListEntry(Label skillname, Label skillvaluebase, Label skillvalue, Label skillcap, Skill skill)
         {
             Height = 20;
-            SkillName = skillname;
-            SkillValueBase = skillvaluebase;
-            SkillValue = skillvalue;
-            SkillCap = skillcap;
-            Skill = skill;
-            SkillName.X = 20;
+            Label skillName = skillname;
+            Label skillValueBase = skillvaluebase;
+            Label skillValue = skillvalue;
+            Label skillCap = skillcap;
+            _skill = skill;
+            skillName.X = 20;
 
             if (skill.IsClickable)
             {
@@ -198,42 +186,42 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 });
             }
 
-            AddChildren(SkillName);
+            AddChildren(skillName);
             //======================
-            SkillValueBase.X = 200;
-            AddChildren(SkillValueBase);
+            skillValueBase.X = 200;
+            AddChildren(skillValueBase);
             //======================
-            SkillValue.X = 280;
-            AddChildren(SkillValue);
+            skillValue.X = 280;
+            AddChildren(skillValue);
             //======================
-            SkillCap.X = 360;
-            AddChildren(SkillCap);
-            _loc = new GumpPic(425, 4, (Graphic) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
-            AddChildren(_loc);
+            skillCap.X = 360;
+            AddChildren(skillCap);
+            GumpPic loc = new GumpPic(425, 4, (Graphic) (skill.Lock == Lock.Up ? 0x983 : skill.Lock == Lock.Down ? 0x985 : 0x82C), 0);
+            AddChildren(loc);
 
-            _loc.MouseClick += (sender, e) =>
+            loc.MouseClick += (sender, e) =>
             {
-                switch (Skill.Lock)
+                switch (_skill.Lock)
                 {
                     case Lock.Up:
-                        Skill.Lock = Lock.Down;
-                        GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) Lock.Down);
-                        _loc.Graphic = 0x985;
-                        _loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x985);
+                        _skill.Lock = Lock.Down;
+                        GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Down);
+                        loc.Graphic = 0x985;
+                        loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x985);
 
                         break;
                     case Lock.Down:
-                        Skill.Lock = Lock.Locked;
-                        GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) Lock.Locked);
-                        _loc.Graphic = 0x82C;
-                        _loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x82C);
+                        _skill.Lock = Lock.Locked;
+                        GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Locked);
+                        loc.Graphic = 0x82C;
+                        loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x82C);
 
                         break;
                     case Lock.Locked:
-                        Skill.Lock = Lock.Up;
-                        GameActions.ChangeSkillLockStatus((ushort) Skill.Index, (byte) Lock.Up);
-                        _loc.Graphic = 0x983;
-                        _loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x983);
+                        _skill.Lock = Lock.Up;
+                        GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Up);
+                        loc.Graphic = 0x983;
+                        loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x983);
 
                         break;
                 }
@@ -242,28 +230,18 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (Skill.IsClickable && Mouse.LButtonPressed)
+            if (_skill.IsClickable && Mouse.LButtonPressed)
             {
-                GameScene currentGameScene = SceneManager.GetScene<GameScene>();
-                if (currentGameScene.SkillButtonGumpStack.Contains(Skill)) UIManager.Remove<SkillButtonGump>(World.Player);
-                SkillButtonGump skillButtonGump = new SkillButtonGump(Skill, Mouse.Position.X, Mouse.Position.Y);
-                UIManager.Add(skillButtonGump);
-                currentGameScene.SkillButtonGumpStack.Add(Skill);
+                uint serial = (uint) (World.Player + _skill.Index + 1);
+
+                if (Engine.UI.GetByLocalSerial<SkillButtonGump>(serial) != null)
+                    Engine.UI.Remove<SkillButtonGump>(serial);
+
+                SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.Position.X, Mouse.Position.Y);
+                Engine.UI.Add(skillButtonGump);
                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x24B8).Bounds;
-                UIManager.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
+                Engine.UI.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
             }
-        }
-
-        public override void Update(double totalMS, double frameMS)
-        {
-            base.Update(totalMS, frameMS);
-        }
-
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
-        {
-            base.Draw(spriteBatch, position, hue);
-
-            return true;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -271,15 +249,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.ActiveSkillUse:
-                    GameActions.UseSkill(Skill.Index);
+                    GameActions.UseSkill(_skill.Index);
 
                     break;
             }
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
         }
 
         private enum Buttons

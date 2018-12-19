@@ -29,14 +29,16 @@ using System.Threading.Tasks;
 
 using ClassicUO.Utility;
 
+using Microsoft.Xna.Framework;
+
 namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class InfoGump : Gump
     {
-        private const int WIDTH = 300;
+        private const int WIDTH = 500;
         private const int HEIGHT = 600;
         private readonly ScrollArea _scrollArea;
-        public InfoGump(object obj) : base(0, 0)
+        public InfoGump(GameObject obj) : base(0, 0)
         {
             X = 200;
             Y = 200;
@@ -54,29 +56,49 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 IsTransparent = true
             });
             AddChildren(new Label("Object Information", true, 1153, font: 3) { X = 20, Y = 20 });
-            AddChildren(new Line(20, 50, 250, 1, 0xFFFFFFFF));
+            AddChildren(new Line(20, 50, WIDTH - 50, 1, 0xFFFFFFFF));
             _scrollArea = new ScrollArea(20, 60, WIDTH - 40, 510, true)
             {
                 AcceptMouseInput = true
             };
             AddChildren(_scrollArea);
 
-            foreach (var item in ReflectionHolder.GameObjectDictionary(obj))
+            Dictionary<string, string> dict = ReflectionHolder.GetGameObjectProperties(obj);
+
+            if (dict != null)
             {
-                if (item.Value.ToString() != "")
+               
+                foreach (KeyValuePair<string, string> item in dict.OrderBy( s => s.Key))
                 {
-                   
-                    _scrollArea.AddChildren(new Label(item.Key + " : " + item.Value, true, 1153, font: 3, maxwidth: WIDTH - 65));
-                    
+                    ScrollAreaItem areaItem = new ScrollAreaItem();
+
+                    Label label = new Label(item.Key + ":", true, 33, font: 1, style: FontStyle.BlackBorder)
+                    {
+                        X = 2
+                    };
+                    areaItem.AddChildren(label);
+
+                    int height = label.Height;
+
+                    label = new Label(item.Value, true, 1153, font: 1, style: FontStyle.BlackBorder, maxwidth: WIDTH - 65 - 200)
+                    {
+                        X = 200
+                    };
+
+                    if (label.Height > 0)
+                        height = label.Height;
+
+                    areaItem.AddChildren(label);
+                    areaItem.AddChildren(new Line(0, height + 2, WIDTH - 65, 1, Color.Gray.PackedValue));
+
+                    _scrollArea.AddChildren(areaItem);
                 }
-
-
             }
 
         }
     }
 
-    public class InfoGumpEntry : GumpControl
+    public class InfoGumpEntry : Control
     {
         public readonly Label Entry;
 

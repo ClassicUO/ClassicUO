@@ -28,7 +28,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Graphic = graphic;
             Hue = hue;
-            Duration = duration > 0 ? CoreGame.Ticks + duration : -1;
+            Duration = duration > 0 ? Engine.Ticks + duration : -1;
             Load();
         }
 
@@ -58,7 +58,9 @@ namespace ClassicUO.Game.GameObjects
                     Mobile mob = (Mobile) source;
 
                     if (mob != World.Player && !mob.IsMoving && (sourceX != 0 || sourceY != 0 || sourceZ != 0))
+                    {
                         mob.Position = new Position((ushort) sourceX, (ushort) sourceY, zSrc);
+                    }
                     SetSource(mob);
                 }
                 else if (sourceSerial.IsItem)
@@ -95,8 +97,6 @@ namespace ClassicUO.Game.GameObjects
                 if (Position.X != x || Position.Y != y || Position.Z != z)
                 {
                     Position = new Position((ushort) x, (ushort) y, (sbyte) z);
-                    //if (!IsItemEffect)
-                    //    Tile = World.Map.GetTile(x, y);
                 }
             }
         }

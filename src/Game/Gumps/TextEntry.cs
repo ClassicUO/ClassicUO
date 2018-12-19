@@ -73,7 +73,14 @@ namespace ClassicUO.Game.Gumps
         public ushort Hue
         {
             get => RenderText.Hue;
-            set => RenderText.Hue = value;
+            set
+            {
+                if (RenderText.Hue != value)
+                {
+                    RenderText.Hue = value;
+                    RenderText.CreateTexture();
+                }
+            } 
         }
 
         public bool IsChanged { get; private set; }

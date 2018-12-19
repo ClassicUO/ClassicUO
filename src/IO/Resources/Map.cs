@@ -36,31 +36,25 @@ namespace ClassicUO.IO.Resources
 
         public static IndexMap[][] BlockData { get; } = new IndexMap[MAPS_COUNT][];
 
-        public static int[][] MapBlocksSize { get; } = new int[MAPS_COUNT][];
+        public static int[,] MapBlocksSize { get; } = new int[MAPS_COUNT, 2];
 
-        public static int[][] MapsDefaultSize { get; } = new int[MAPS_COUNT][]
+        public static int[,] MapsDefaultSize { get; } = new int[MAPS_COUNT, 2]
         {
-            new int[2]
             {
                 7168, 4096
             },
-            new int[2]
             {
                 7168, 4096
             },
-            new int[2]
             {
                 2304, 1600
             },
-            new int[2]
             {
                 2560, 2048
             },
-            new int[2]
             {
                 1448, 1448
             },
-            new int[2]
             {
                 1280, 4096
             }
@@ -102,15 +96,12 @@ namespace ClassicUO.IO.Resources
             int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
 
             if (_filesMap[0].Length / mapblocksize == 393216 || FileManager.ClientVersion < ClientVersions.CV_4011D)
-                MapsDefaultSize[0][0] = MapsDefaultSize[1][0] = 6144;
+                MapsDefaultSize[0, 0] = MapsDefaultSize[1, 0] = 6144;
 
             for (int i = 0; i < MAPS_COUNT; i++)
             {
-                MapBlocksSize[i] = new int[2]
-                {
-                    MapsDefaultSize[i][0] >> 3, MapsDefaultSize[i][1] >> 3
-                };
-
+                MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
+                MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
                 //LoadMap(i);
             }
         }
@@ -120,8 +111,8 @@ namespace ClassicUO.IO.Resources
             int mapblocksize = UnsafeMemoryManager.SizeOf<MapBlock>();
             int staticidxblocksize = UnsafeMemoryManager.SizeOf<StaidxBlock>();
             int staticblocksize = UnsafeMemoryManager.SizeOf<StaticsBlock>();
-            int width = MapBlocksSize[i][0];
-            int height = MapBlocksSize[i][1];
+            int width = MapBlocksSize[i, 0];
+            int height = MapBlocksSize[i, 1];
             int maxblockcount = width * height;
             BlockData[i] = new IndexMap[maxblockcount];
             UOFile file = _filesMap[i];
@@ -190,6 +181,12 @@ namespace ClassicUO.IO.Resources
             }
         }
 
+        public static void Clear()
+        {
+            for (int i = 0; i < MAPS_COUNT; i++)
+                UnloadMap(i);
+        }
+
         public static unsafe RadarMapBlock? GetRadarMapBlock(int map, int blockX, int blockY)
         {
             IndexMap indexMap = GetIndex(map, blockX, blockY);
@@ -224,7 +221,7 @@ namespace ClassicUO.IO.Resources
 
                 for (int c = 0; c < count; c++)
                 {
-                    if (sb->Color > 0 && sb->Color != 0xFFFF && !View.IsNoDrawable(sb->Color))
+                    if (sb->Color > 0 && sb->Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(sb->Color))
                     {
                         ref RadarMapcells outcell = ref mb.Cells[sb->X, sb->Y];
 
@@ -245,7 +242,7 @@ namespace ClassicUO.IO.Resources
 
         public static IndexMap GetIndex(int map, int x, int y)
         {
-            int block = x * MapBlocksSize[map][1] + y;
+            int block = x * MapBlocksSize[map, 1] + y;
 
             return BlockData[map][block];
         }

@@ -32,7 +32,7 @@ namespace ClassicUO.IO.Resources
 
         public static int SkillsCount => _skills.Count;
 
-        public static string[] SkillNames => _skills.Select(o => o.Value.Name).ToArray();
+        public static string[] SkillNames { get; private set; }
 
         public static void Load()
         {
@@ -46,6 +46,8 @@ namespace ClassicUO.IO.Resources
             _file = new UOFileMul(path, pathidx, 56, 16);
             int i = 0;
             while (_file.Position < _file.Length) GetSkill(i++);
+
+            SkillNames = _skills.Select(o => o.Value.Name).ToArray();
         }
 
         public static SkillEntry GetSkill(int index)

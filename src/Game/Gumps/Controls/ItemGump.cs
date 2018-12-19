@@ -26,12 +26,13 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ItemGump : GumpControl
+    internal class ItemGump : Control
     {
         private readonly List<Label> _labels = new List<Label>();
         private bool _clickedCanDrag;
@@ -57,6 +58,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Item.Disposed += ItemOnDisposed;
 
             WantUpdateSize = false;
+            ShowLabel = true;
         }
 
         private void ItemOnDisposed(object sender, EventArgs e)
@@ -69,6 +71,8 @@ namespace ClassicUO.Game.Gumps.Controls
         public bool HighlightOnMouseOver { get; set; }
 
         public bool CanPickUp { get; set; }
+
+        public bool ShowLabel { get; set; }
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -85,21 +89,23 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (_sendClickIfNotDClick && totalMS >= _sClickTime)
             {
+                Log.Message(LogTypes.Warning, "SINGLECLICK SENDED");
                 GameActions.SingleClick(Item);
                 _sendClickIfNotDClick = false;
             }
 
-            UpdateLabel();
+            if (ShowLabel)
+                UpdateLabel();
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, TileData.IsPartialHue(Item.ItemData.Flags), 0, false);
-            spriteBatch.Draw2D(Texture, position, huev);
+            batcher.Draw2D(Texture, position, huev);
             if (Item.Amount > 1 && TileData.IsStackable(Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
-                spriteBatch.Draw2D(Texture, new Point(position.X + 5, position.Y + 5), huev);
-            return base.Draw(spriteBatch, position, huev);
+                batcher.Draw2D(Texture, new Point(position.X + 5, position.Y + 5), huev);
+            return base.Draw(batcher, position, huev);
         }
 
         protected override bool Contains(int x, int y)
@@ -119,7 +125,7 @@ namespace ClassicUO.Game.Gumps.Controls
         protected override void OnMouseDown(int x, int y, MouseButton button)
         {
             _clickedCanDrag = true;
-            float totalMS = CoreGame.Ticks;
+            float totalMS = Engine.Ticks;
             _picUpTime = totalMS + 800f;
             _clickedPoint = new Point(x, y);
         }
@@ -130,7 +136,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             if (button == MouseButton.Left)
             {
-                GameScene gs = SceneManager.GetScene<GameScene>();
+                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
                 if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                     return;
@@ -167,7 +173,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 _clickedCanDrag = false;
                 _sendClickIfNotDClick = true;
-                float totalMS = CoreGame.Ticks;
+                float totalMS = Engine.Ticks;
                 _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
             }
         }
@@ -182,7 +188,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Dispose()
         {
-            Item.Disposed += ItemOnDisposed;
+            Item.Disposed -= ItemOnDisposed;
             UpdateLabel(true);
             base.Dispose();
         }
@@ -203,21 +209,38 @@ namespace ClassicUO.Game.Gumps.Controls
 
         private void UpdateLabel(bool isDisposing = false)
         {
-            if (!isDisposing && Item.OverHeads != null && Item.OverHeads.Count > 0)
+            var gs = Engine.SceneManager.GetScene<GameScene>();
+            if (!isDisposing && !Item.IsDisposed && Item.Overheads.Count > 0)
             {
-                if (_labels.Count <= 0)
+                //if (_labels.Count <= 0)
+                //{
+                //    foreach (TextOverhead overhead in Item.OverHeads)
+                //    {
+                //        overhead.Initialized = true;
+                //        overhead.TimeToLive = 4000;
+
+                //        Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth, style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
+                //        {
+                //            FadeOut = true
+                //        };
+                //        label.ControlInfo.Layer = UILayer.Over;
+                //        Engine.UI.Add(label);
+                //        _labels.Add(label);
+                //    }
+                //}
+
+                if (_labels.Count == 0)
                 {
-                    foreach (TextOverhead overhead in Item.OverHeads)
+                    foreach (TextOverhead overhead in Item.Overheads)
                     {
                         overhead.Initialized = true;
                         overhead.TimeToLive = 4000;
-
                         Label label = new Label(overhead.Text, overhead.IsUnicode, overhead.Hue, overhead.MaxWidth, style: overhead.Style, align: TEXT_ALIGN_TYPE.TS_CENTER, timeToLive: overhead.TimeToLive)
                         {
-                            FadeOut = true
+                            FadeOut = true,
+                            ControlInfo = { Layer =  UILayer.Over}
                         };
-                        label.ControlInfo.Layer = UILayer.Over;
-                        UIManager.Add(label);
+                        Engine.UI.Add(label);
                         _labels.Add(label);
                     }
                 }

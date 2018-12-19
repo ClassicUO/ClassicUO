@@ -33,11 +33,8 @@ namespace ClassicUO.IO.Resources
     {
         public const int ART_COUNT = 0x10000;
         private static UOFile _file;
-        //private static SpriteTexture[] _artCache;
-        //private static SpriteTexture[] _landCache;
         private static readonly List<int> _usedIndex = new List<int>();
         private static readonly List<int> _usedIndexLand = new List<int>();
-        //private static readonly PixelPicking _picker = new PixelPicking();
         private static readonly Dictionary<int, ArtTexture> _artDictionary = new Dictionary<int, ArtTexture>();
         private static readonly Dictionary<int, SpriteTexture> _landDictionary = new Dictionary<int, SpriteTexture>();
 
@@ -55,15 +52,8 @@ namespace ClassicUO.IO.Resources
                 if (File.Exists(filepath) && File.Exists(idxpath))
                     _file = new UOFileMul(filepath, idxpath, ART_COUNT);
             }
-
-            //_artCache = new SpriteTexture[ART_COUNT];
-            //_landCache = new SpriteTexture[ART_COUNT];
         }
 
-        //public static bool Contains(ushort g, int x, int y, int extra = 0)
-        //{
-        //    return _picker.Get(g, x, y, extra);
-        //}
 
         public static ArtTexture GetStaticTexture(ushort g)
         {
@@ -71,24 +61,10 @@ namespace ClassicUO.IO.Resources
             {
                 ushort[] pixels = ReadStaticArt(g, out short w, out short h, out Rectangle imageRectangle);
                 texture = new ArtTexture(imageRectangle, w, h);
-                //texture.SetData(pixels);
                 texture.SetDataHitMap16(pixels);
                 _usedIndex.Add(g);
-                //_picker.Set(g, w, h, pixels);
                 _artDictionary.Add(g, texture);
             }
-
-            //ref SpriteTexture texture = ref _artCache[g];
-
-            //if (texture == null || texture.IsDisposed)
-            //{
-            //    ushort[] pixels = ReadStaticArt(g, out short w, out short h);
-            //    texture = new SpriteTexture(w, h, false);
-            //    texture.SetData(pixels);
-            //    _usedIndex.Add(g);
-            //    _picker.Set(g, w, h, pixels);
-            //}
-
             return texture;
         }
 
@@ -101,40 +77,45 @@ namespace ClassicUO.IO.Resources
                 texture = new SpriteTexture(SIZE, SIZE, false);
                 texture.SetDataHitMap16(pixels);
                 _usedIndexLand.Add(g);
-                //_picker.Set(g, SIZE, SIZE, pixels);
                 _landDictionary.Add(g, texture);
             }
-
-            //ref SpriteTexture texture = ref _landCache[g];
-
-            //if (texture == null || texture.IsDisposed)
-            //{
-            //    const int SIZE = 44;
-            //    ushort[] pixels = ReadLandArt(g);
-            //    texture = new SpriteTexture(SIZE, SIZE, false);
-            //    texture.SetData(pixels);
-            //    _usedIndexLand.Add(g);
-            //    _picker.Set(g, SIZE, SIZE, pixels);
-            //}
-
             return texture;
+        }
+
+        public static void Clear()
+        {
+            for (int i = 0; i < _usedIndex.Count; i++)
+            {
+                int g = _usedIndex[i];
+                SpriteTexture texture = _artDictionary[g];   
+                texture.Dispose();
+                _usedIndex.RemoveAt(i--);
+                _artDictionary.Remove(g);         
+            }
+
+            for (int i = 0; i < _usedIndexLand.Count; i++)
+            {
+                int g = _usedIndexLand[i];
+                SpriteTexture texture = _landDictionary[g];
+                texture.Dispose();
+                _usedIndexLand.RemoveAt(i--);
+                _landDictionary.Remove(g);            
+            }
         }
 
         public static void ClearUnusedTextures()
         {
             int count = 0;
-            long ticks = CoreGame.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                //ref SpriteTexture texture = ref _artCache[_usedIndex[i]];
                 int g = _usedIndex[i];
                 SpriteTexture texture = _artDictionary[g];
 
                 if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
-                    //texture = null;
                     _usedIndex.RemoveAt(i--);
                     _artDictionary.Remove(g);
 
@@ -147,14 +128,12 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < _usedIndexLand.Count; i++)
             {
-                //ref SpriteTexture texture = ref _landCache[_usedIndexLand[i]];
                 int g = _usedIndexLand[i];
                 SpriteTexture texture = _landDictionary[g];
 
                 if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
-                    //texture = null;
                     _usedIndexLand.RemoveAt(i--);
                     _landDictionary.Remove(g);
 
@@ -166,7 +145,6 @@ namespace ClassicUO.IO.Resources
 
         private static unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
         {
-            //graphic &= FileManager.GraphicMask;
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
             _file.Skip(4);
             width = _file.ReadShort();

@@ -20,6 +20,7 @@
 #endregion
 using System;
 
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
@@ -28,7 +29,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class PaperDollInteractable : GumpControl, IMobilePaperdollOwner
+    internal class PaperDollInteractable : Control
     {
         private static readonly Layer[] _layerOrder =
         {
@@ -203,7 +204,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             // Loop through the items on the mobile and create the gump pics.
 
-            //GameScene gs = SceneManager.GetScene<GameScene>();
+            //GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
             if (isGM)
             {

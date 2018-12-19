@@ -24,7 +24,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class Line : GumpControl
+    internal class Line : Control
     {
         private readonly SpriteTexture _texture;
 
@@ -48,9 +48,9 @@ namespace ClassicUO.Game.Gumps.Controls
             _texture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            return spriteBatch.Draw2D(_texture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
+            return batcher.Draw2D(_texture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? Alpha : 0, false));
         }
 
         public override void Dispose()

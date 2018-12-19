@@ -26,7 +26,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class Combobox : GumpControl
+    internal class Combobox : Control
     {
         private readonly string[] _items;
         private readonly Label _label;
@@ -67,7 +67,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             _label.Text = _items[e];
             SelectedIndex = e;
-            UIManager.Remove<ComboboxContextMenu>();
+            Engine.UI.Remove<ComboboxContextMenu>();
             OnOptionSelected?.Invoke(this, e);
         }
 
@@ -77,13 +77,13 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 X = ScreenCoordinateX, Y = ScreenCoordinateY
             };
-            if (contextMenu.Height + ScreenCoordinateY > UIManager.Height) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - UIManager.Height;
+            if (contextMenu.Height + ScreenCoordinateY > Engine.WindowHeight) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Engine.WindowHeight;
             contextMenu.OnOptionSelected += _contextMenu_OnOptionSelected;
-            UIManager.Add(contextMenu);
+            Engine.UI.Add(contextMenu);
             base.OnMouseClick(x, y, button);
         }
 
-        private class ComboboxContextMenu : GumpControl
+        private class ComboboxContextMenu : Control
         {
             private readonly ResizePic _background;
 

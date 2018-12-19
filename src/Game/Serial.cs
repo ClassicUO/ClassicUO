@@ -93,7 +93,7 @@ namespace ClassicUO.Game
 
         public override bool Equals(object obj)
         {
-            if (obj is Serial serial) return this == serial;
+            if (obj is Serial serial) return Value == serial.Value;
             if (obj is uint u) return Value == u;
 
             return false;

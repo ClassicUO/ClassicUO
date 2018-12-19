@@ -36,9 +36,9 @@ namespace ClassicUO.Renderer
         private bool[] _hitMap;
         private readonly bool _is32Bit;
 
-        public SpriteTexture(int width, int height, bool is32bit = true) : base(Service.Get<SpriteBatch3D>().GraphicsDevice, width, height, false, is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551)
+        public SpriteTexture(int width, int height, bool is32bit = true) : base(Engine.Batcher.GraphicsDevice, width, height, false, is32bit ? SurfaceFormat.Color : SurfaceFormat.Bgra5551)
         {
-            Ticks = CoreGame.Ticks + 3000;
+            Ticks = Engine.Ticks + 3000;
             _is32Bit = is32bit;
         }
 
@@ -119,16 +119,13 @@ namespace ClassicUO.Renderer
 
     public class AnimationFrameTexture : SpriteTexture
     {
-        public AnimationFrameTexture(int id, int width, int height) : base(width, height, false)
+        public AnimationFrameTexture(int width, int height) : base(width, height, false)
         {
-            ID = id;
         }
 
         public short CenterX { get; set; }
 
         public short CenterY { get; set; }
-
-        public int ID { get; }
     }
 
     public class ArtTexture : SpriteTexture

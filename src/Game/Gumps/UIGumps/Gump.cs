@@ -20,16 +20,18 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    public class Gump : GumpControl
+    public class Gump : Control
     {
         public Gump(Serial local, Serial server)
         {
@@ -58,63 +60,24 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public virtual bool Save(out Dictionary<string, object> data)
+        public virtual void Save(BinaryWriter writer)
         {
-            //if (CanBeSaved && _save && !string.IsNullOrEmpty(_saveName))
-            //{
-            //    Service.Get<Settings>().AddGump(_saveName, Location);
-            //}
-
-            if (CanBeSaved)
-            {
-                data = new Dictionary<string, object>()
-                {
-                    { "location", Location }
-                };
-
-                return true;
-            }
-            data = null;
-            return false;
+            // the header         
+            Type type = GetType();
+            ushort typeLen = (ushort) type.FullName.Length;
+            writer.Write(typeLen);
+            writer.WriteUTF8String(type.FullName);
+            writer.Write(X);
+            writer.Write(Y);
         }
 
-        public virtual bool Restore(Dictionary<string, object> data)
+        public virtual void Restore(BinaryReader reader)
         {
-            if (data.TryGetValue("location", out object point))
-            {
 
-                string[] s = point.ToString().Split(new[]
-                {
-                    ',', ' '
-                }, StringSplitOptions.RemoveEmptyEntries);
-
-
-                X = Convert.ToInt32(s[0]);
-                Y = Convert.ToInt32(s[1]);
-
-                return true;
-            }
-
-            return false;
         }
-
-        private bool _save;
-        private string _saveName;
-        
-
-        protected void SetNameAndPositionForSaving(string name)
-        {
-            if (!string.IsNullOrEmpty(name))
-            {
-                _save = true;
-                _saveName = name;
-            }
-        }
-
 
         protected override void OnMove()
         {
-            SpriteBatchUI sb = Service.Get<SpriteBatchUI>();
             Point position = Location;
             int halfWidth = Width >> 1;
             int halfHeight = Height >> 1;
@@ -125,11 +88,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (Y < -halfHeight)
                 position.Y = -halfHeight;
 
-            if (X > sb.GraphicsDevice.Viewport.Width - halfWidth)
-                position.X = sb.GraphicsDevice.Viewport.Width - halfWidth;
+            if (X > Engine.Batcher.GraphicsDevice.Viewport.Width - halfWidth)
+                position.X = Engine.Batcher.GraphicsDevice.Viewport.Width - halfWidth;
 
-            if (Y > sb.GraphicsDevice.Viewport.Height - halfHeight)
-                position.Y = sb.GraphicsDevice.Viewport.Height - halfHeight;
+            if (Y > Engine.Batcher.GraphicsDevice.Viewport.Height - halfHeight)
+                position.Y = Engine.Batcher.GraphicsDevice.Viewport.Height - halfHeight;
             Location = position;
         }
 
@@ -144,7 +107,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     List<Serial> switches = new List<Serial>();
                     List<Tuple<ushort, string>> entries = new List<Tuple<ushort, string>>();
 
-                    foreach (GumpControl control in Children)
+                    foreach (Control control in Children)
                     {
                         if (control is Checkbox checkbox && checkbox.IsChecked)
                             switches.Add(control.LocalSerial);
@@ -157,7 +120,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     GameActions.ReplyGump(LocalSerial, ServerSerial, buttonID, switches.ToArray(), entries.ToArray());
                 }
 
-                UIManager.SavePosition(ServerSerial, Location);
+                Engine.UI.SavePosition(ServerSerial, Location);
                 Dispose();
             }
         }

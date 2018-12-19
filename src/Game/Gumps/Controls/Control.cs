@@ -45,10 +45,10 @@ namespace ClassicUO.Game.Gumps.Controls
         Low
     }
 
-    public abstract class GumpControl : IDrawableUI, IUpdateable, IColorable, IDebuggable
+    public abstract class Control : IDrawableUI, IUpdateable, IColorable, IDebuggable
     {
         private static SpriteTexture _debugTexture;
-        private readonly List<GumpControl> _children;
+        private readonly List<Control> _children;
         private bool _acceptKeyboardInput, _acceptMouseInput, _mouseIsDown;
         private int _activePage;
         private bool _attempToDrag;
@@ -56,16 +56,15 @@ namespace ClassicUO.Game.Gumps.Controls
         private GumpControlInfo _controlInfo;
         private bool _handlesKeyboardFocus;
         private Point _lastClickPosition;
-        private GumpControl _parent;
+        private Control _parent;
 
-        protected GumpControl(GumpControl parent = null)
+        protected Control(Control parent = null)
         {
             Parent = parent;
-            _children = new List<GumpControl>();
+            _children = new List<Control>();
             AllowedToDraw = true;
             AcceptMouseInput = true;
             Page = 0;
-            UIManager = Service.Get<UIManager>();
             Debug = false;
         }
 
@@ -103,7 +102,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool IsFocused { get; protected set; }
 
-        public bool MouseIsOver => UIManager?.MouseOverControl == this;
+        public bool MouseIsOver => Engine.UI.MouseOverControl == this;
 
         public virtual bool CanMove { get; set; }
 
@@ -117,9 +116,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public float Alpha { get; set; } = .5f;
 
-        public IReadOnlyList<GumpControl> Children => _children;
-
-        public UIManager UIManager { get; }
+        public IReadOnlyList<Control> Children => _children;
 
         public object Tag { get; set; }
 
@@ -137,7 +134,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (_acceptKeyboardInput)
                     return true;
 
-                foreach (GumpControl c in _children)
+                foreach (Control c in _children)
                 {
                     if (c.AcceptKeyboardInput)
                         return true;
@@ -210,7 +207,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public int ScreenCoordinateY => ParentY + Y;
 
-        public GumpControl Parent
+        public Control Parent
         {
             get => _parent;
             private set
@@ -223,13 +220,13 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        public GumpControl RootParent
+        public Control RootParent
         {
             get
             {
                 if (Parent == null)
                     return null;
-                GumpControl p = Parent;
+                Control p = Parent;
 
                 while (p.Parent != null)
                     p = p.Parent;
@@ -253,7 +250,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (_children == null)
                     return false;
 
-                foreach (GumpControl c in _children)
+                foreach (Control c in _children)
                 {
                     if (c.HandlesKeyboardFocus)
                         return true;
@@ -271,24 +268,24 @@ namespace ClassicUO.Game.Gumps.Controls
             {              
                 _activePage = value;
 
-                if (UIManager.KeyboardFocusControl != null)
+                if (Engine.UI.KeyboardFocusControl != null)
                 {
-                    if (Children.Contains(UIManager.KeyboardFocusControl))
+                    if (Children.Contains(Engine.UI.KeyboardFocusControl))
                     {
-                        if (UIManager.KeyboardFocusControl.Page != 0)
-                            UIManager.KeyboardFocusControl = null;
+                        if (Engine.UI.KeyboardFocusControl.Page != 0)
+                            Engine.UI.KeyboardFocusControl = null;
                     }
                 }
 
                 // When ActivePage changes, check to see if there are new text input boxes
                 // that we should redirect text input to.
-                if (UIManager.KeyboardFocusControl == null)
+                if (Engine.UI.KeyboardFocusControl == null)
                 {
-                    foreach (GumpControl c in Children)
+                    foreach (Control c in Children)
                     {
                         if (c.HandlesKeyboardFocus && c.Page == _activePage)
                         {
-                            UIManager.KeyboardFocusControl = c;
+                            Engine.UI.KeyboardFocusControl = c;
 
                             break;
                         }
@@ -307,21 +304,21 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public SpriteTexture Texture { get; set; }
 
-        public virtual bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public virtual bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (IsDisposed) return false;
 
             if (Texture != null && !Texture.IsDisposed)
-                Texture.Ticks = CoreGame.Ticks;
+                Texture.Ticks = Engine.Ticks;
 
-            foreach (GumpControl c in Children)
+            foreach (Control c in Children)
             {
                 if (c.Page == 0 || c.Page == ActivePage)
                 {
                     if (c.IsVisible && c.IsInitialized)
                     {
                         Point offset = new Point(c.X + position.X, c.Y + position.Y);
-                        c.Draw(spriteBatch, offset, hue);
+                        c.Draw(batcher, offset, hue);
                     }
                 }
             }
@@ -338,7 +335,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     });
                 }
 
-                spriteBatch.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
+                batcher.DrawRectangle(_debugTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero);
             }
 
             return true;
@@ -352,32 +349,31 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 InitializeControls();
                 int w = 0, h = 0;
-                //List<GumpControl> toremove = new List<GumpControl>();
 
                 for (int i = 0; i < _children.Count; i++)
                 {
-                    GumpControl c = _children[i];
-                    c.Update(totalMS, frameMS);
+                    Control c = _children[i];
 
                     if (c.IsDisposed)
                     {
-                        //toremove.Add(c);
                         _children.RemoveAt(i--);
+                        continue;  
                     }
-                    else
-                    {
-                        if (WantUpdateSize)
-                        {
-                            if (c.Page == 0 || c.Page == ActivePage)
-                            {
-                                if (w < c.Bounds.Right)
-                                    w = c.Bounds.Right;
 
-                                if (h < c.Bounds.Bottom)
-                                    h = c.Bounds.Bottom;
-                            }
+                    c.Update(totalMS, frameMS);
+
+                    if (WantUpdateSize)
+                    {
+                        if (c.Page == 0 || c.Page == ActivePage)
+                        {
+                            if (w < c.Bounds.Right)
+                                w = c.Bounds.Right;
+
+                            if (h < c.Bounds.Bottom)
+                                h = c.Bounds.Bottom;
                         }
                     }
+                    
                 }
 
                 if (WantUpdateSize)
@@ -389,9 +385,6 @@ namespace ClassicUO.Game.Gumps.Controls
                         Height = h;
                     WantUpdateSize = false;
                 }
-
-                //if (toremove.Count > 0)
-                //    toremove.ForEach(s => _children.Remove(s));
             }
         }
 
@@ -436,7 +429,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             for (int i = 0; i < _children.Count; i++)
             {
-                GumpControl c = _children[i];
+                Control c = _children[i];
 
                 if (!c.IsInitialized && !IsDisposed)
                 {
@@ -444,7 +437,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
                     if (!initializedKeyboardFocusedControl && c.AcceptKeyboardInput)
                     {
-                        UIManager.KeyboardFocusControl = c;
+                        Engine.UI.KeyboardFocusControl = c;
                         initializedKeyboardFocusedControl = true;
                     }
                 }
@@ -463,10 +456,10 @@ namespace ClassicUO.Game.Gumps.Controls
             OnFocusLeft();
         }
 
-        public GumpControl[] HitTest(Point position)
+        public Control[] HitTest(Point position)
         {
             //List<GumpControl> results = new List<GumpControl>();
-            Stack<GumpControl> results = new Stack<GumpControl>();
+            Stack<Control> results = new Stack<Control>();
             bool inbouds = Bounds.Contains(position.X - ParentX, position.Y - ParentY);
 
             if (inbouds)
@@ -478,11 +471,11 @@ namespace ClassicUO.Game.Gumps.Controls
 
                     for (int j = 0; j < Children.Count; j++)
                     {
-                        GumpControl c = Children[j];
+                        Control c = Children[j];
 
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
-                            GumpControl[] cl = c.HitTest(position);
+                            Control[] cl = c.HitTest(position);
 
                             if (cl != null)
                             {
@@ -498,7 +491,7 @@ namespace ClassicUO.Game.Gumps.Controls
             return results.Count == 0 ? null : results.OrderBy(s => s.Priority).ToArray();
         }
 
-        public GumpControl GetFirstControlAcceptKeyboardInput()
+        public Control GetFirstControlAcceptKeyboardInput()
         {
             if (_acceptKeyboardInput)
                 return this;
@@ -506,7 +499,7 @@ namespace ClassicUO.Game.Gumps.Controls
             if (_children == null || _children.Count == 0)
                 return null;
 
-            foreach (GumpControl c in _children)
+            foreach (Control c in _children)
             {
                 if (c.AcceptKeyboardInput)
                     return c.GetFirstControlAcceptKeyboardInput();
@@ -515,14 +508,14 @@ namespace ClassicUO.Game.Gumps.Controls
             return null;
         }
 
-        public virtual void AddChildren(GumpControl c, int page = 0)
+        public virtual void AddChildren(Control c, int page = 0)
         {
             c.Page = page;
             c.Parent = this;
             OnChildAdded();
         }
 
-        public virtual void RemoveChildren(GumpControl c)
+        public virtual void RemoveChildren(Control c)
         {
             if (c == null)
                 return;
@@ -537,12 +530,12 @@ namespace ClassicUO.Game.Gumps.Controls
                 Children[i].Dispose();
         }
 
-        public T[] GetControls<T>() where T : GumpControl
+        public T[] GetControls<T>() where T : Control
         {
             return Children.OfType<T>().ToArray();
         }
 
-        public IEnumerable<T> FindControls<T>() where T : GumpControl
+        public IEnumerable<T> FindControls<T>() where T : Control
         {
             return Children.OfType<T>();
         }
@@ -768,7 +761,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (!CanCloseWithRightClick)
                 return;
-            GumpControl parent = Parent;
+            Control parent = Parent;
 
             while (parent != null)
             {
@@ -805,7 +798,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             for (int i = 0; i < Children.Count; i++)
             {
-                GumpControl c = Children[i];
+                Control c = Children[i];
                 c.Dispose();
             }
 

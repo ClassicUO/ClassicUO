@@ -20,8 +20,11 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 
@@ -37,11 +40,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public JournalGump() : base(0, 0)
         {
-            X = 100;
-            Y = 100;
             CanMove = true;
             AcceptMouseInput = true;
-
+            CanBeSaved = true;
             AddChildren(_background = new ExpandableScroll(0, 0, 300)
             {
                 TitleGumpID = 0x82A
@@ -68,12 +69,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
         protected override void OnInitialize()
         {
             InitializeJournalEntries();
-            Service.Get<JournalData>().OnJournalEntryAdded += AddJournalEntry;
+            Engine.SceneManager.GetScene<GameScene>().Journal.EntryAdded += AddJournalEntry;
         }
 
         public override void Dispose()
         {
-            Service.Get<JournalData>().OnJournalEntryAdded -= AddJournalEntry;
+            Engine.SceneManager.GetScene<GameScene>().Journal.EntryAdded -= AddJournalEntry;
             base.Dispose();
         }
 
@@ -84,21 +85,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        private void AddJournalEntry(object sender, JournalEntry entry)
         {
-            return base.Draw(spriteBatch, position, hue);
-        }
-
-        private void AddJournalEntry(JournalEntry entry)
-        {
-            string text = string.Format("{0}{1}", entry.SpeakerName != string.Empty ? entry.SpeakerName + ": " : string.Empty, entry.Text);
-            int font = entry.Font;
-            bool asUnicode = entry.AsUnicode;
+            string text = $"{(entry.Name != string.Empty ? $"{entry.Name}: " : string.Empty)}{entry.Text}";
+            byte font = (byte) entry.Font;
+            bool asUnicode = entry.IsUnicode;
             TransformFont(ref font, ref asUnicode);
             _journalEntries.AddEntry(text, font, entry.Hue);
         }
 
-        private void TransformFont(ref int font, ref bool asUnicode)
+        private void TransformFont(ref byte font, ref bool asUnicode)
         {
             if (asUnicode)
                 return;
@@ -118,41 +114,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void InitializeJournalEntries()
         {
-            for (int i = 0; i < Service.Get<JournalData>().JournalEntries.Count; i++) AddJournalEntry(Service.Get<JournalData>().JournalEntries[i]);
+            foreach (JournalEntry t in Engine.SceneManager.GetScene<GameScene>().Journal.Entries)
+                AddJournalEntry(null, t);
+
             _scrollBar.MinValue = 0;
-        }
-    }
-
-    public class JournalData
-    {
-        public List<JournalEntry> JournalEntries { get; } = new List<JournalEntry>();
-
-        public event Action<JournalEntry> OnJournalEntryAdded;
-
-        public void AddEntry(string text, int font, ushort hue, string speakerName)
-        {
-            while (JournalEntries.Count > 99)
-                JournalEntries.RemoveAt(0);
-            JournalEntries.Add(new JournalEntry(text, font, hue, speakerName, false));
-            OnJournalEntryAdded?.Invoke(JournalEntries[JournalEntries.Count - 1]);
-        }
-    }
-
-    public struct JournalEntry
-    {
-        public readonly bool AsUnicode;
-        public readonly int Font;
-        public readonly ushort Hue;
-        public readonly string SpeakerName;
-        public readonly string Text;
-
-        public JournalEntry(string text, int font, ushort hue, string speakerName, bool unicode)
-        {
-            Text = text;
-            Font = font;
-            Hue = hue;
-            SpeakerName = speakerName;
-            AsUnicode = unicode;
         }
     }
 }

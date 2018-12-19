@@ -31,11 +31,11 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
     {
         private readonly LoginScene loginScene;
         private LoginStep currentStep;
-        private GumpControl currentStepGump;
+        private Control currentStepGump;
 
         public LoginGump() : base(0, 0)
         {
-            loginScene = Service.Get<LoginScene>();
+            loginScene = Engine.SceneManager.GetScene<LoginScene>();
             CanCloseWithRightClick = false;
 
             // Background
@@ -69,11 +69,11 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            Service.Get<GameLoop>().Quit();
+            Engine.Quit();
             base.OnButtonClick(buttonID);
         }
 
-        private GumpControl GetGumpForStep(LoginStep step)
+        private Control GetGumpForStep(LoginStep step)
         {
             currentStep = step;
 

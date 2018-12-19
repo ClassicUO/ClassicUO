@@ -25,7 +25,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class StaticPic : GumpControl
+    public class StaticPic : Control
     {
         private readonly Graphic _graphic;
         private readonly bool _isPartial;
@@ -59,11 +59,11 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, _isPartial, 0, true));
+            batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, _isPartial, 0, true));
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
     }
 }

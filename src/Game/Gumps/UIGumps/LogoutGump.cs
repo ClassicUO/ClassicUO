@@ -59,8 +59,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanMove = false;
             ControlInfo.IsModal = true;
 
-            X = (UIManager.Width - Width) >> 1;
-            Y = (UIManager.Height - Height) >> 1;
+            X = (Engine.WindowWidth - Width) >> 1;
+            Y = (Engine.WindowHeight - Height) >> 1;
 
             WantUpdateSize = false;
         }
@@ -80,8 +80,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Dispose();
 
                     break;
-                case 1:
-                    SceneManager.ChangeScene(ScenesType.Login);
+                case 1:                  
+                    Engine.SceneManager.ChangeScene(ScenesType.Login);
                     Dispose();
 
                     break;

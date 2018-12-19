@@ -29,12 +29,15 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Views
 {
     public class TextOverheadView : View
     {
         private readonly RenderedText _text;
+
+        protected bool EdgeDetection { get; set; }
 
         public TextOverheadView(TextOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent)
         {
@@ -45,10 +48,17 @@ namespace ClassicUO.Game.Views
                 Font = font,
                 IsUnicode = isunicode,
                 FontStyle = style,
+                SaveHitMap = true,
                 Text = parent.Text
             };
             Texture = _text.Texture;
-            int delay = Service.Get<Settings>().SpeechDelay;
+
+            //Bounds.X = (Texture.Width >> 1) - 22;
+            //Bounds.Y = Texture.Height;
+            //Bounds.Width = Texture.Width;
+            //Bounds.Height = Texture.Height;
+
+            int delay = Engine.Profile.Current.SpeechDelay;
 
             if (delay < 10)
                 delay = 10;
@@ -59,6 +69,7 @@ namespace ClassicUO.Game.Views
             parent.Initialized = true;
 
             parent.Disposed += ParentOnDisposed;
+            EdgeDetection = true;
         }
 
         private void ParentOnDisposed(object sender, EventArgs e)
@@ -67,42 +78,51 @@ namespace ClassicUO.Game.Views
             _text?.Dispose();
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
             {
                 return false;
             }
 
-            Texture.Ticks = CoreGame.Ticks;
+            Texture.Ticks = Engine.Ticks;
             TextOverhead overhead = (TextOverhead) GameObject;
 
-            if (overhead.Alpha < 1.0f)
-                HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
+            HueVector = ShaderHuesTraslator.GetHueVector(0, false, overhead.Alpha, true);
 
-            Settings settings = Service.Get<Settings>();
-            GameScene gs = SceneManager.GetScene<GameScene>();
+            if (EdgeDetection)
+            {
+                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
-            int width = Texture.Width - Bounds.X;
-            int height = Texture.Height - Bounds.Y;
+                int width = Texture.Width - Bounds.X;
+                int height = Texture.Height - Bounds.Y;
 
-            if (position.X < Bounds.X)
-                position.X = Bounds.X;
-            else if (position.X > settings.GameWindowWidth * gs.Scale - width)
-                position.X = settings.GameWindowWidth * gs.Scale - width;
+                if (position.X < Bounds.X)
+                    position.X = Bounds.X;
+                else if (position.X > Engine.Profile.Current.GameWindowSize.X * gs.Scale - width)
+                    position.X = Engine.Profile.Current.GameWindowSize.X * gs.Scale - width;
 
-            if (position.Y - Bounds.Y < 0)
-                position.Y = Bounds.Y;
-            else if (position.Y > settings.GameWindowHeight * gs.Scale - height)
-                position.Y = settings.GameWindowHeight * gs.Scale - height;
+                if (position.Y - Bounds.Y < 0)
+                    position.Y = Bounds.Y;
+                else if (position.Y > Engine.Profile.Current.GameWindowSize.Y * gs.Scale - height)
+                    position.Y = Engine.Profile.Current.GameWindowSize.Y * gs.Scale - height;
+            }
 
-            //FrameInfo.X = (int) position.X;
-            //FrameInfo.Y = (int) position.Y;
-            //FrameInfo.Width = Texture.Width;
-            //FrameInfo.Height = Texture.Height;
+            bool ok = base.Draw(batcher, position, objectList);
 
-            return base.Draw(spriteBatch, position, objectList);
+
+            //if (_edge == null)
+            //{
+            //    _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
+            //    _edge.SetData(new Color[] { Color.LightBlue });
+            //}
+
+            //batcher.DrawRectangle(_edge, new Rectangle((int) position.X - Bounds.X, (int) position.Y - Bounds.Y, _text.Width, _text.Height) , Vector3.Zero);
+
+            return ok;
         }
+
+        //private static Texture2D _edge;
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
@@ -119,19 +139,7 @@ namespace ClassicUO.Game.Views
     {
         public DamageOverheadView(DamageOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent, maxwidth, hue, font, isunicode, style)
         {
-        }
-
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
-        {
-            DamageOverhead dmg = (DamageOverhead) GameObject;
-
-            if (dmg.MovingTime >= 50)
-            {
-                dmg.MovingTime = 0;
-                dmg.OffsetY -= 2;
-            }
-
-            return base.Draw(spriteBatch, position, objectList);
+            EdgeDetection = false;
         }
     }
 }

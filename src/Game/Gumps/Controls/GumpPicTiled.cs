@@ -24,14 +24,15 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class GumpPicTiled : GumpControl
+    public class GumpPicTiled : Control
     {
+        private Graphic _lastGraphic;
+
         public GumpPicTiled(Graphic graphic)
         {
             CanMove = true;
             Texture = IO.Resources.Gumps.GetGumpTexture(graphic);
-
-            //AcceptMouseInput = false;
+            Graphic = _lastGraphic = graphic;
         }
 
         public GumpPicTiled(int x, int y, int width, int heigth, Graphic graphic) : this(graphic)
@@ -50,17 +51,25 @@ namespace ClassicUO.Game.Gumps.Controls
             Height = int.Parse(parts[4]);
         }
 
+        public Graphic Graphic { get; set; }
+
         public override void Update(double totalMS, double frameMS)
         {
+            if (_lastGraphic != Graphic)
+            {
+                Texture = IO.Resources.Gumps.GetGumpTexture(Graphic);
+                _lastGraphic = Graphic;
+            }
+
             Texture.Ticks = (long) totalMS;
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            spriteBatch.Draw2DTiled(Texture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? 0.5f : 0, false));
+            batcher.Draw2DTiled(Texture, new Rectangle(position.X, position.Y, Width, Height), ShaderHuesTraslator.GetHueVector(0, false, IsTransparent ? 0.5f : 0, false));
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
     }
 }

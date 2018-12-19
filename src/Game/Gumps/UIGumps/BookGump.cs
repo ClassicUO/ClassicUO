@@ -21,8 +21,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         public string Author { get; internal set; }
         public static bool IsNewBookD4 => FileManager.ClientVersion > ClientVersions.CV_200;
         public Dictionary<int, List<string>> BookPages { get; internal set; }
-
-        public Dictionary<int, List<TextBox>> Lines = new Dictionary<int, List<TextBox>>();
         public bool IsBookEditable { get; internal set; }
 
         public bool IsDirty => m_Title?.Text != Title || m_Author?.Text != Author;
@@ -53,16 +51,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 ButtonAction = ButtonAction.Activate
             } );
             m_Forward.MouseClick += ( sender,e ) => {
-                if ( e.Button == MouseButton.Left && sender is GumpControl ctrl ) SetActivePage(ActivePage + 1);
+                if ( e.Button == MouseButton.Left && sender is Control ctrl ) SetActivePage(ActivePage + 1);
             };
             m_Forward.MouseDoubleClick += (sender, e) => {
-                if (e.Button == MouseButton.Left && sender is GumpControl ctrl) SetActivePage(MaxPage);
+                if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(MaxPage);
             };
             m_Backward.MouseClick += ( sender, e ) => {
-                if ( e.Button == MouseButton.Left && sender is GumpControl ctrl ) SetActivePage( ActivePage - 1 );
+                if ( e.Button == MouseButton.Left && sender is Control ctrl ) SetActivePage( ActivePage - 1 );
             };
             m_Backward.MouseDoubleClick += (sender, e) => {
-                if (e.Button == MouseButton.Left && sender is GumpControl ctrl) SetActivePage(1);
+                if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(1);
             };
             byte font = 1;
 
@@ -111,10 +109,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private List<(string,TextBox)> m_pages = new List<(string, TextBox)> ();
         private int MaxPage => (BookPageCount >> 1) + 1;
 
-        public override bool Draw( SpriteBatchUI spriteBatch, Point position, Vector3? hue = null )
-        {
-            return base.Draw( spriteBatch, position, hue );
-        }
 
         private void SetActivePage( int page )
         {

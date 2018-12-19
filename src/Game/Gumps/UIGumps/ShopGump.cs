@@ -236,7 +236,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Clear
         }
 
-        private class ShopItem : GumpControl
+        private class ShopItem : Control
         {
             private readonly Label _amountLabel;
 
@@ -286,7 +286,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        private class TransactionItem : GumpControl
+        private class TransactionItem : Control
         {
             private readonly Label _amountLabel;
 
@@ -346,7 +346,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        private class ResizePicLine : GumpControl
+        private class ResizePicLine : Control
         {
             private readonly Graphic _graphic;
             private readonly SpriteTexture[] _gumpTexture = new SpriteTexture[3];
@@ -373,15 +373,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 base.Update(totalMS, frameMS);
             }
 
-            public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+            public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
             {
                 Vector3 color = IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, .5f, true) : Vector3.Zero;
                 int middleWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
-                spriteBatch.Draw2D(_gumpTexture[0], position, color);
-                spriteBatch.Draw2DTiled(_gumpTexture[1], new Rectangle(position.X + _gumpTexture[0].Width, position.Y, middleWidth, _gumpTexture[1].Height), color);
-                spriteBatch.Draw2D(_gumpTexture[2], new Point(position.X + Width - _gumpTexture[2].Width, position.Y), color);
+                batcher.Draw2D(_gumpTexture[0], position, color);
+                batcher.Draw2DTiled(_gumpTexture[1], new Rectangle(position.X + _gumpTexture[0].Width, position.Y, middleWidth, _gumpTexture[1].Height), color);
+                batcher.Draw2D(_gumpTexture[2], new Point(position.X + Width - _gumpTexture[2].Width, position.Y), color);
 
-                return base.Draw(spriteBatch, position, hue);
+                return base.Draw(batcher, position, hue);
             }
         }
     }

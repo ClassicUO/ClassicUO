@@ -26,6 +26,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps.Login;
 using ClassicUO.IO;
+using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
@@ -60,7 +61,7 @@ namespace ClassicUO.Game.Scenes
         private LoginRejectionReasons? _loginRejectionReason;
         private LoginStep _loginStep = LoginStep.Main;
 
-        public LoginScene() : base(ScenesType.Login)
+        public LoginScene() : base()
         {
         }
 
@@ -93,8 +94,7 @@ namespace ClassicUO.Game.Scenes
         public override void Load()
         {
             base.Load();
-            Service.Register(this);
-            UIManager.Add(new LoginGump());
+            Engine.UI.Add(new LoginGump());
 
             // Registering Packet Events
             NetClient.PacketReceived += NetClient_PacketReceived;
@@ -117,8 +117,7 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
-            UIManager.Remove<LoginGump>();
-            Service.Unregister<LoginScene>();
+            Engine.UI.Remove<LoginGump>();
 
             // UnRegistering Packet Events           
             // NetClient.Socket.Connected -= NetClient_Connected;
@@ -126,6 +125,8 @@ namespace ClassicUO.Game.Scenes
             NetClient.LoginSocket.Connected -= NetClient_Connected;
             NetClient.LoginSocket.Disconnected -= NetClient_Disconnected;
             NetClient.PacketReceived -= NetClient_PacketReceived;
+
+            base.Unload();
         }
 
         public void Connect(string account, string password)
@@ -146,6 +147,7 @@ namespace ClassicUO.Game.Scenes
             {
                 ServerIndex = index;
                 CurrentLoginStep = LoginStep.LoginInToServer;
+                World.ServerName = Servers[index].Name;
                 NetClient.LoginSocket.Send(new PSelectServer(index));
             }
         }
@@ -309,7 +311,8 @@ namespace ClassicUO.Game.Scenes
             byte flags = reader.ReadByte();
             ushort count = reader.ReadUShort();
             Servers = new ServerListEntry[count];
-            for (ushort i = 0; i < count; i++) Servers[i] = new ServerListEntry(reader);
+            for (ushort i = 0; i < count; i++
+                 ) Servers[i] = new ServerListEntry(reader);
         }
 
         private void ParseCharacterList(Packet p)

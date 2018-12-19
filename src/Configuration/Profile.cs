@@ -25,24 +25,205 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game;
+using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
+
+using Microsoft.Xna.Framework;
+
 using Newtonsoft.Json;
 
 namespace ClassicUO.Configuration
 {
-    internal class Profile
+    public sealed class Profile
     {
         [JsonConstructor]
-        public Profile(string path, string name)
+        public Profile(string username, string servername, string charactername)
         {
-            Name = name;
-            Path = System.IO.Path.Combine(path, Name + ".json");
+            Username = username;
+            ServerName = servername;
+            CharacterName = charactername;
         }
 
         [JsonProperty]
-        public string Name { get; }
+        public string Username { get; }
         [JsonProperty]
-        public string Path { get; }
+        public string ServerName { get; }
         [JsonProperty]
-        public Dictionary<string, object> Properties { get; } = new Dictionary<string, object>();
+        public string CharacterName { get; }
+
+
+
+        // sounds
+        [JsonProperty] public bool EnableSound { get; set; } = true;
+        [JsonProperty] public int SoundVolume { get; set; } = 100;
+        [JsonProperty] public bool EnableMusic { get; set; } = true;
+        [JsonProperty] public int MusicVolume { get; set; } = 100;
+        [JsonProperty] public bool EnableFootstepsSound { get; set; } = true;
+        [JsonProperty] public bool EnableCombatMusic { get; set; } = true;
+        [JsonProperty] public bool ReproduceSoundsInBackground { get; set; } = true;
+
+        // fonts and speech
+        [JsonProperty] public byte ChatFont { get; set; } = 1;
+        [JsonProperty] public int SpeechDelay { get; set; } = 100;
+        [JsonProperty] public bool ScaleSpeechDelay { get; set; } = true;
+
+        // hues
+        [JsonProperty] public ushort SpeechHue { get; set; } = 0x02B2;
+        [JsonProperty] public ushort EmoteHue { get; set; } = 0x0021;
+        [JsonProperty] public ushort PartyMessageHue { get; set; } = 0x0044;
+        [JsonProperty] public ushort GuildMessageHue { get; set; } = 0x0044;
+        [JsonProperty] public ushort AllyMessageHue { get; set; } = 0x0057;
+        [JsonProperty] public ushort InnocentHue { get; set; } = 0x005A;
+        [JsonProperty] public ushort FriendHue { get; set; } = 0x0044;
+        [JsonProperty] public ushort CriminalHue { get; set; } = 0x03B2;
+        [JsonProperty] public ushort AnimalHue { get; set; } = 0x03B2;
+        [JsonProperty] public ushort EnemyHue { get; set; } = 0x0031;
+        [JsonProperty] public ushort MurdererHue { get; set; } = 0x0023;
+
+        // visual
+        [JsonProperty] public bool EnabledCriminalActionQuery { get; set; } = true;
+        [JsonProperty] public bool ShowIncomingNames { get; set; } = true;
+        [JsonProperty] public bool EnableStatReport { get; set; } = true;
+        [JsonProperty] public bool EnableSkillReport { get; set; } = true;
+        [JsonProperty] public bool UseOldStatusGump { get; set; } = false;
+        [JsonProperty] public int BackpackStyle { get; set; } = 0;
+        [JsonProperty] public bool HighlightGameObjects { get; set; } = true;
+        [JsonProperty] public bool HighlightMobilesByFlags { get; set; } = true;
+        [JsonProperty] public bool ShowMobilesHP { get; set; } = false;
+        [JsonProperty] public int MobileHPType { get; set; } = 0;
+
+        // tooltip
+        [JsonProperty] public bool EnableTooltip { get; set; } = true;
+        [JsonProperty] public int DelayShowTooltip { get; set; } = 250;
+        [JsonProperty] public ushort TooltipTextHue { get; set; } = 0xFFFF;
+
+        // movements
+        [JsonProperty] public bool EnablePathfind { get; set; } = true;
+        [JsonProperty] public bool AlwaysRun { get; set; } = false;
+        [JsonProperty] public bool SmoothMovements { get; set; } = true;
+
+        // general
+        [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
+        [JsonProperty] public Point GameWindowPosition { get; set; } = new Point(10, 10);
+        [JsonProperty] public Point GameWindowSize { get; set; } = new Point(600, 480);
+
+
+        public void Save(List<Gump> gumps = null)
+        {
+            if (string.IsNullOrEmpty(ServerName))
+                throw new InvalidDataException();
+            if (string.IsNullOrEmpty(Username))
+                throw new InvalidDataException();
+            if (string.IsNullOrEmpty(CharacterName))
+                throw new InvalidDataException();
+
+            string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", Username, ServerName, CharacterName);
+
+            Log.Message(LogTypes.Trace, $"Saving path:\t\t{path}");
+
+            // save settings.json
+            ConfigurationResolver.Save(this, Path.Combine(path, "settings.json"));
+
+            // save gumps.bin
+            SaveGumps(path, gumps);
+
+            Log.Message(LogTypes.Trace, "Saving done!");
+        }
+
+        private void SaveGumps(string path, List<Gump> gumps)
+        {
+            using (BinaryWriter writer = new BinaryWriter(File.Create(Path.Combine(path, "gumps.bin"))))
+            {
+                const uint VERSION = 1;
+
+                writer.Write(VERSION);
+                writer.Write(0);
+
+                /*
+                 * int gumpsCount
+                 * loop:
+                 *      ushort typeLen
+                 *      string type
+                 *      int x
+                 *      int y
+                 *      undefinited data
+                 * endloop.
+                 */
+
+
+                if (gumps != null)
+                { 
+                    writer.Write(gumps.Count);
+
+                    foreach (Gump gump in gumps)
+                    {
+                        gump.Save(writer);
+                    }
+                }
+                else
+                {
+                    writer.Write(0);
+                }
+            }
+        }
+
+        public List<Gump> ReadGumps()
+        {
+            string path = FileSystemHelper.CreateFolderIfNotExists(Engine.ExePath, "Data", "Profiles", Username, ServerName, CharacterName);
+
+            string binpath = Path.Combine(path, "gumps.bin");
+            if (!File.Exists(binpath))
+                return null;
+
+            List<Gump> gumps = new List<Gump>();
+
+            using (BinaryReader reader = new BinaryReader(File.OpenRead(binpath)))
+            {
+                if (reader.BaseStream.Position + 12 < reader.BaseStream.Length)
+                {
+                    uint version = reader.ReadUInt32();
+                    uint empty = reader.ReadUInt32();
+
+                    int count = reader.ReadInt32();
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        try
+                        {
+                            int typeLen = reader.ReadUInt16();
+                            string typeName = reader.ReadUTF8String(typeLen);
+                            int x = reader.ReadInt32();
+                            int y = reader.ReadInt32();
+
+                            Type type = Type.GetType(typeName, true);
+                            Gump gump = (Gump)Activator.CreateInstance(type);
+                            gump.Initialize();
+                            gump.Restore(reader);
+                            gump.X = x;
+                            gump.Y = y;
+
+                            if (gump.LocalSerial != 0)
+                                Engine.UI.SavePosition(gump.LocalSerial, new Point(x, y));
+
+                            if (!gump.IsDisposed)
+                            {
+                                gumps.Add(gump);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Message(LogTypes.Error, e.Message);
+                        }
+                      
+                    }
+                }
+            }
+
+            return gumps;
+        }
+
+        
     }
 }

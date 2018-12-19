@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Gumps.Controls
         Activate = 1
     }
 
-    public class Button : GumpControl
+    public class Button : Control
     {
         private const int NORMAL = 0;
         private const int PRESSED = 1;
@@ -138,33 +138,33 @@ namespace ClassicUO.Game.Gumps.Controls
             for (int i = 0; i < _textures.Length; i++)
             {
                 if (_textures[i] != null)
-                    _textures[i].Ticks = CoreGame.Ticks;
+                    _textures[i].Ticks = Engine.Ticks;
             }
 
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             SpriteTexture texture = GetTextureByState();
-            spriteBatch.Draw2D(texture, new Rectangle(position.X, position.Y, Width, Height), IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
+            batcher.Draw2D(texture, new Rectangle(position.X, position.Y, Width, Height), IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 
-            //Draw1(spriteBatch, texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), -1, 0, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
+            //Draw1(batcher, texture, new Rectangle((int) position.X, (int) position.Y, Width, Height), -1, 0, IsTransparent ? ShaderHuesTraslator.GetHueVector(0, false, 0.5f, false) : Vector3.Zero);
 
             if (!string.IsNullOrEmpty(_caption))
             {
-                RenderedText textTexture = _fontTexture[UIManager.MouseOverControl == this ? 1 : 0];
+                RenderedText textTexture = _fontTexture[Engine.UI.MouseOverControl == this ? 1 : 0];
 
                 if (FontCenter)
                 {
                     int yoffset = _clicked ? 1 : 0;
-                    textTexture.Draw(spriteBatch, new Point(position.X + ((Width - textTexture.Width) >> 1), position.Y + yoffset + ((Height - textTexture.Height) >> 1)));
+                    textTexture.Draw(batcher, new Point(position.X + ((Width - textTexture.Width) >> 1), position.Y + yoffset + ((Height - textTexture.Height) >> 1)));
                 }
                 else
-                    textTexture.Draw(spriteBatch, position);
+                    textTexture.Draw(batcher, position);
             }
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
 
         protected override void OnMouseDown(int x, int y, MouseButton button)

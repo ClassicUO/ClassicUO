@@ -21,9 +21,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility.Logging;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Map
 {
@@ -33,24 +37,29 @@ namespace ClassicUO.Game.Map
         {
             X = x;
             Y = y;
-            Tiles = new Tile[8][];
+            Tiles = new Tile[8, 8];
+
+            x *= 8;
+            y *= 8;
 
             for (int i = 0; i < 8; i++)
             {
-                Tiles[i] = new Tile[8];
-                for (int j = 0; j < 8; j++) Tiles[i][j] = new Tile((ushort) (i + x * 8), (ushort) (j + y * 8));
+                for (int j = 0; j < 8; j++)
+                    Tiles[i, j] = new Tile((ushort) (i + x), (ushort) (j + y));
             }
 
-            LastAccessTime = CoreGame.Ticks + 5000;
+            LastAccessTime = Engine.Ticks + Constants.CLEAR_TEXTURES_DELAY;
         }
+
 
         public ushort X { get; }
         public ushort Y { get; }
 
-        public Tile[][] Tiles { get; private set; }
+        public Tile[,] Tiles { get; private set; }
 
         public long LastAccessTime { get; set; }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Load(int map)
         {
             IndexMap im = GetIndex(map);
@@ -69,19 +78,21 @@ namespace ClassicUO.Game.Map
                         int pos = y * 8 + x;
                         ushort tileID = (ushort) (cells[pos].TileID & 0x3FFF);
                         sbyte z = cells[pos].Z;
-                        LandTiles info = TileData.LandData[tileID];
 
                         Land land = new Land(tileID)
                         {
                             Graphic = tileID,
                             AverageZ = z,
                             MinZ = z,
-                            IsStretched = info.TexID == 0 && TileData.IsWet(info.Flags),
-                        };
+                        };               
+
                         ushort tileX = (ushort) (bx + x);
                         ushort tileY = (ushort) (by + y);
+
                         land.Calculate(tileX, tileY, z);
                         land.Position = new Position(tileX, tileY, z);
+
+                        Tiles[x, y].AddGameObject(land);
                     }
                 }
 
@@ -95,7 +106,7 @@ namespace ClassicUO.Game.Map
 
                         for (int i = 0; i < count; i++, sb++)
                         {
-                            if (sb->Color > 0 && sb->Color != 0xFFFF)
+                            if (sb->Color != 0 && sb->Color != 0xFFFF)
                             {
                                 ushort x = sb->X;
                                 ushort y = sb->Y;
@@ -105,19 +116,63 @@ namespace ClassicUO.Game.Map
                                     continue;
                                 sbyte z = sb->Z;
 
+                                ushort staticX = (ushort) (bx + x);
+                                ushort staticY = (ushort) (by + y);
+
                                 Static staticObject = new Static(sb->Color, sb->Hue, pos)
                                 {
-                                    Position = new Position((ushort) (bx + x), (ushort) (by + y), z)
-                                };
+                                    Position = new Position(staticX, staticY, z)
+                                };                  
 
                                 if (TileData.IsAnimated(staticObject.ItemData.Flags))
-                                    staticObject.Effect = new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1);
+                                    World.AddEffect(new AnimatedItemEffect(staticObject, staticObject.Graphic, staticObject.Hue, -1));
+                                else
+                                    Tiles[x, y].AddGameObject(staticObject);
                             }
                         }
                     }
                 }
+
+
+                //CreateLand();
             }
         }
+
+        //private void CreateLand()
+        //{
+        //    for (int x = 0; x < 8; x++)
+        //    {
+        //        for (int y = 0; y < 8; y++)
+        //        {
+        //            Land tile = null;
+        //            Tile t = Tiles[x, y];
+        //            GameObject obj = t.FirstNode;
+
+        //            while (obj != null)
+        //            {
+        //                if (obj is Land land)
+        //                {
+        //                    tile = land;
+        //                    break;
+        //                }
+
+        //                obj = obj.Right;
+        //            }
+
+        //            if (tile != null)
+        //            {
+        //                int tileX = tile.X;
+        //                int tileY = tile.Y;
+        //                sbyte tileZ = tile.Z;
+
+        //                tile.Calculate(tileX, tileY, tileZ);
+                        
+        //                t.AddGameObject(tile);
+        //            }
+
+        //        }
+        //    }
+        //}
 
         private IndexMap GetIndex(int map) => GetIndex(map, X, Y);
 
@@ -129,17 +184,18 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tile tile = Tiles[i][j];
+                    Tile tile = Tiles[i, j];
 
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
                     {
                         if (obj != World.Player)
                         {
-                           tile.RemoveGameObject(obj);
+                            obj.Dispose();
+                            //tile.RemoveGameObject(obj);
                         }
                     }
 
-                    Tiles[i][j] = null;
+                    Tiles[i, j] = null;
                 }
             }
 
@@ -152,12 +208,13 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Tile tile = Tiles[i][j];
+                    Tile tile = Tiles[i, j];
 
                     for (GameObject obj = tile.FirstNode; obj != null; obj = obj.Right)
                     {
-                        if (obj is Static st && st.Effect != null)
-                            st.Effect = null;
+
+                        if (obj is GameEffect effect && effect.Source is Static)
+                            continue;
 
                         if (!(obj is Land) && !(obj is Static))
                             return false;

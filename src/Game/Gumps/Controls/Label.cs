@@ -26,7 +26,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class Label : GumpControl
+    public class Label : Control
     {
         private float _alpha;
         private readonly RenderedText _gText;
@@ -113,15 +113,15 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (IsDisposed) return false;
 
             if (FadeOut)
                 hue = ShaderHuesTraslator.GetHueVector(hue.HasValue ? (int) hue.Value.X : 0, false, _alpha, false);
-            _gText.Draw(spriteBatch, position, hue);
+            _gText.Draw(batcher, position, hue);
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
 
         public override void Dispose()

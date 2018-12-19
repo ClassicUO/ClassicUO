@@ -13,6 +13,21 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -20,7 +35,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;SB1</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -32,7 +47,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;ORIONSORT, SB1</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -42,10 +57,32 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;JAEDAN_MOVEMENT_PATCH_</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FNA, Version=18.10.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="FNA, Version=18.12.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\andre\source\repos\ClassicUO-Mono\libs\FNA\FNA.dll</HintPath>
+      <HintPath>libs\FNA\FNA.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -64,12 +101,17 @@
     <Compile Include="Configuration\Profile.cs" />
     <Compile Include="Configuration\ProfileManager.cs" />
     <Compile Include="Game\Constants.cs" />
+    <Compile Include="Game\Data\Ability.cs" />
     <Compile Include="Game\Data\BuffIcon.cs" />
     <Compile Include="Game\Data\BuffTable.cs" />
     <Compile Include="Game\Data\CharacterCreationValues.cs" />
     <Compile Include="Game\Data\ClientFeatures.cs" />
+    <Compile Include="Game\Data\EntityFlags.cs" />
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
+    <Compile Include="Game\Data\Layers.cs" />
+    <Compile Include="Game\Data\MultiComponent.cs" />
+    <Compile Include="Game\Data\MultiInfo.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
     <Compile Include="Game\Data\PopupMenuData.cs" />
     <Compile Include="Game\Data\PopupMenuItem.cs" />
@@ -80,9 +122,27 @@
     <Compile Include="Game\Data\SpellsNinjitsu.cs" />
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
-    <Compile Include="Game\GameObjects\Managers\EffectManager.cs" />
+    <Compile Include="Game\Gumps\Controls\GumpPicWithWidth.cs" />
+    <Compile Include="Game\Managers\HouseManager.cs" />
+    <Compile Include="Game\Managers\UseItemQueue.cs" />
+    <Compile Include="Game\Managers\EffectManager.cs" />
     <Compile Include="Game\GameObjects\LightningEffect.cs" />
+    <Compile Include="Game\Managers\JournalManager.cs" />
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
+    <Compile Include="Game\Managers\WalkerManager.cs" />
+    <Compile Include="Game\Views\MultiView.cs" />
+    <Compile Include="Interfaces\IPoolable.cs" />
+    <Compile Include="Network\BufferPool.cs" />
+    <Compile Include="Renderer\Batcher2D.cs" />
+    <Compile Include="Utility\CollectionHelper.cs" />
+    <Compile Include="Utility\Coroutines\Coroutine.cs" />
+    <Compile Include="Utility\Coroutines\CoroutineManager.cs" />
+    <Compile Include="Utility\Coroutines\CoroutineStatus.cs" />
+    <Compile Include="Utility\Coroutines\WaitCondition.cs" />
+    <Compile Include="Utility\Coroutines\WaitTime.cs" />
+    <Compile Include="Utility\FileSystemHelper.cs" />
+    <Compile Include="Utility\GameObjectHelper.cs" />
+    <Compile Include="Utility\QueuedPool.cs" />
     <Compile Include="Utility\ReflectionHolder.cs" />
     <Compile Include="Game\Gumps\Controls\DataBox.cs" />
     <Compile Include="Game\Gumps\Controls\HitBox.cs" />
@@ -103,7 +163,7 @@
     <Compile Include="Game\Gumps\UIGumps\Login\MainLoginGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\Login\ServerSelectionGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\LogoutGump.cs" />
-    <Compile Include="Game\Gumps\UIGumps\MobileHealthGump.cs" />
+    <Compile Include="Game\Gumps\UIGumps\HealthBarGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\OptionsGump1.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyGumpAdvanced.cs" />
     <Compile Include="Game\Gumps\UIGumps\PartyMemberGump.cs" />
@@ -115,16 +175,13 @@
     <Compile Include="Game\Scenes\GameSceneDragAndDropHandler.cs" />
     <Compile Include="Game\Scenes\GameSceneDrawingSorting.cs" />
     <Compile Include="Game\Scenes\GameSceneInputHandler.cs" />
-    <Compile Include="Game\System\CommandHandlers.cs" />
     <Compile Include="Game\System\Commands.cs" />
-    <Compile Include="Game\System\CommandSystem.cs" />
     <Compile Include="Game\System\PartySystem.cs" />
     <Compile Include="Game\System\TargetSystem.cs" />
     <Compile Include="Game\Gumps\Tooltip.cs" />
     <Compile Include="Game\Views\LightningEffectView.cs" />
     <Compile Include="Game\Views\MovingEffectView.cs" />
     <Compile Include="Input\Mouse.cs" />
-    <Compile Include="Interfaces\IMobilePaperdollOwner.cs" />
     <Compile Include="Interfaces\INode.cs" />
     <Compile Include="Interfaces\ISmoothMovable.cs" />
     <Compile Include="IO\UltimaLive.cs" />
@@ -133,8 +190,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Configuration\ConfigurationResolver.cs" />
     <Compile Include="Configuration\Settings.cs" />
-    <Compile Include="CoreGame.cs" />
-    <Compile Include="GameLoop.cs" />
+    <Compile Include="Engine.cs" />
     <Compile Include="Game\Chat.cs" />
     <Compile Include="Game\Data\AssistantFeatures.cs" />
     <Compile Include="Game\Data\ContainerManager.cs" />
@@ -162,7 +218,6 @@
     <Compile Include="Game\GameObjects\Multi.cs" />
     <Compile Include="Game\GameObjects\PlayerMobile.cs" />
     <Compile Include="Game\GameObjects\Static.cs" />
-    <Compile Include="Game\GameObjects\Managers\StaticManager.cs" />
     <Compile Include="Game\GameObjects\TextOverhead.cs" />
     <Compile Include="Game\Graphic.cs" />
     <Compile Include="Game\Gumps\Controls\Button.cs" />
@@ -172,7 +227,7 @@
     <Compile Include="Game\Gumps\Controls\CroppedText.cs" />
     <Compile Include="Game\Gumps\Controls\EquipmentSlot.cs" />
     <Compile Include="Game\Gumps\Controls\ExpandableScroll.cs" />
-    <Compile Include="Game\Gumps\Controls\GumpControl.cs" />
+    <Compile Include="Game\Gumps\Controls\Control.cs" />
     <Compile Include="Game\Gumps\Controls\GumpControlInfo.cs" />
     <Compile Include="Game\Gumps\Controls\GumpPic.cs" />
     <Compile Include="Game\Gumps\Controls\GumpPicBackpack.cs" />
@@ -209,7 +264,7 @@
     <Compile Include="Game\Gumps\UIGumps\TopBarGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\WorldViewport.cs" />
     <Compile Include="Game\Gumps\UIGumps\WorldViewportGump.cs" />
-    <Compile Include="Game\Gumps\UIManager.cs" />
+    <Compile Include="Game\Managers\UIManager.cs" />
     <Compile Include="Game\Hue.cs" />
     <Compile Include="Game\Map\Map.cs" />
     <Compile Include="Game\Map\Chunk.cs" />
@@ -246,7 +301,6 @@
     <Compile Include="Interfaces\IColorable.cs" />
     <Compile Include="Interfaces\IDebuggable.cs" />
     <Compile Include="Interfaces\IDrawable.cs" />
-    <Compile Include="Interfaces\IDynamicItem.cs" />
     <Compile Include="Interfaces\IUpdateable.cs" />
     <Compile Include="IO\ClientVersions.cs" />
     <Compile Include="IO\DataReader.cs" />
@@ -270,8 +324,6 @@
     <Compile Include="IO\UOFileIndex.cs" />
     <Compile Include="IO\UOFileMul.cs" />
     <Compile Include="IO\UOFileUop.cs" />
-    <Compile Include="Bootstrap.cs" />
-    <Compile Include="Network\BufferPool.cs" />
     <Compile Include="Network\CircularBuffer.cs" />
     <Compile Include="Network\Huffman.cs" />
     <Compile Include="Network\NetClient.cs" />
@@ -284,14 +336,10 @@
     <Compile Include="Network\SendQueue.cs" />
     <Compile Include="Game\GameCursor.cs" />
     <Compile Include="Game\GameObjects\IsometricLight.cs" />
-    <Compile Include="Game\GameObjects\Managers\OverheadManager.cs" />
-    <Compile Include="Renderer\PixelPicking.cs" />
+    <Compile Include="Game\Managers\OverheadManager.cs" />
     <Compile Include="Renderer\RenderedText.cs" />
     <Compile Include="Renderer\ShaderHuesTraslator.cs" />
     <Compile Include="Renderer\ScissorStack.cs" />
-    <Compile Include="Renderer\SpriteBatch3D.cs" />
-    <Compile Include="Renderer\SpriteBatch3D1.cs" />
-    <Compile Include="Renderer\SpriteBatchUI.cs" />
     <Compile Include="Renderer\SpriteTexture.cs" />
     <Compile Include="Renderer\SpriteVertex.cs" />
     <Compile Include="Renderer\Techniques.cs" />
@@ -299,14 +347,11 @@
     <Compile Include="Utility\Bag.cs" />
     <Compile Include="Utility\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />
-    <Compile Include="Utility\IPoolable.cs" />
     <Compile Include="Utility\Logging\Log.cs" />
     <Compile Include="Utility\Logging\LogFile.cs" />
     <Compile Include="Utility\Logging\Logger.cs" />
     <Compile Include="Utility\Logging\LogTypes.cs" />
     <Compile Include="Utility\MathHelper.cs" />
-    <Compile Include="Utility\ObjectPool.cs" />
-    <Compile Include="Utility\Pool.cs" />
     <Compile Include="Utility\Profiler.cs" />
     <Compile Include="Utility\RandomHelper.cs" />
     <Compile Include="Utility\StringHelper.cs" />
@@ -371,7 +416,18 @@
     <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7 %28x86 e x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="libs\x64\FAudio.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

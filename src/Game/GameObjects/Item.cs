@@ -19,56 +19,23 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public enum Layer : byte
-    {
-        Invalid = 0x00,
-        OneHanded = 0x01,
-        TwoHanded = 0x02,
-        Shoes = 0x03,
-        Pants = 0x04,
-        Shirt = 0x05,
-        Helmet = 0x06,
-        Gloves = 0x07,
-        Ring = 0x08,
-        Talisman = 0x09,
-        Necklace = 0x0A,
-        Hair = 0x0B,
-        Waist = 0x0C,
-        Torso = 0x0D,
-        Bracelet = 0x0E,
-        Face = 0x0F,
-        Beard = 0x10,
-        Tunic = 0x11,
-        Earrings = 0x12,
-        Arms = 0x13,
-        Cloak = 0x14,
-        Backpack = 0x15,
-        Robe = 0x16,
-        Skirt = 0x17,
-        Legs = 0x18,
-        Mount = 0x19,
-        ShopBuy = 0x1A,
-        ShopResale = 0x1B,
-        ShopSell = 0x1C,
-        Bank = 0x1D
-    }
-
-    public class Item : Entity, IDynamicItem
+    public class Item : Entity
     {
         private ushort _amount;
         private Serial _container;
-        private Position _containerPosition;
         private Graphic? _displayedGraphic;
-        private GameEffect _effect;
         private bool _isMulti;
         private Layer _layer;
         private uint _price;
@@ -166,7 +133,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (value)
                     {
-                        if (Multi == null)
+                        if (MultiDistanceBonus == 0 || MultiInfo == null)
                         {
                             short minX = 0;
                             short minY = 0;
@@ -175,37 +142,55 @@ namespace ClassicUO.Game.GameObjects
                             int count = IO.Resources.Multi.GetCount(Graphic);
                             MultiComponent[] components = new MultiComponent[count];
 
+                            if (!World.HouseManager.TryGetHouse(Serial, out House house))
+                            {
+                                house = new House(Serial, 0, false);
+                                World.HouseManager.Add(Serial, house);
+                            }
+                            else 
+                                house.Dispose();
+
                             for (int i = 0; i < count; i++)
                             {
                                 MultiBlock pbm = IO.Resources.Multi.GetMulti(i);
-                                MultiComponent component = new MultiComponent(pbm.ID, (ushort) (Position.X + pbm.X), (ushort) (Position.Y + pbm.Y), (sbyte) (Position.Z + pbm.Z), pbm.Flags);
+                                MultiComponent component = new MultiComponent(pbm.ID, (ushort) (X + pbm.X), (ushort) (Y + pbm.Y), (sbyte) (Z + pbm.Z), pbm.Flags);
                                 if (pbm.X < minX) minX = pbm.X;
                                 if (pbm.X > maxX) maxX = pbm.X;
                                 if (pbm.Y < minY) minY = pbm.Y;
                                 if (pbm.Y > maxY) maxY = pbm.Y;
                                 components[i] = component;
+
+                                house.Components.Add(new Multi(component.Graphic)
+                                {
+                                    Position = component.Position
+                                });
                             }
 
-                            Multi = new Multi(this)
+                            MultiInfo = new MultiInfo((short) X, (short) Y)
                             {
                                 MinX = minX,
                                 MaxX = maxX,
                                 MinY = minY,
-                                MaxY = maxY,
-                                Components = components
+                                MaxY = maxY
                             };
-                            House house = World.GetOrCreateHouse(Serial);
-                            house.GenerateOriginal(Multi);
-                            World.AddOrUpdateHouse(house);
+
+                            MultiDistanceBonus = Math.Max(Math.Max(Math.Abs(minX), maxX), Math.Max(Math.Abs(minY), maxY));
+
+                            house.Generate();
                         }
                     }
                     else
-                        Multi = null;
+                    {
+                        MultiDistanceBonus = 0;
+                        MultiInfo = null;
+                    }
                 }
             }
         }
 
-        public Multi Multi { get; private set; }
+        public MultiInfo MultiInfo { get; private set; }
+
+        public int MultiDistanceBonus { get; private set; }
 
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/ Graphic == 0x2006;
 
@@ -228,15 +213,6 @@ namespace ClassicUO.Game.GameObjects
 
         public SpellBookType BookType { get; private set; } = SpellBookType.Unknown;
 
-        public GameEffect Effect
-        {
-            get => _effect;
-            set
-            {
-                _effect?.Dispose();
-                _effect = value;
-            }
-        }
 
         public override Graphic Graphic
         {
@@ -256,48 +232,18 @@ namespace ClassicUO.Game.GameObjects
 
         public StaticTiles ItemData
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 if (!_itemData.HasValue)
                     _itemData = TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
                 return _itemData.Value;
             }
-        } 
-
-        public override Position Position
-        {
-            get => _containerPosition;
-            set
-            {
-                if (IsCorpse)
-                {
-                }
-
-                if (!OnGround)
-                    _containerPosition = value;
-                else
-                    base.Position = _containerPosition = value;
-            }
-        }
-
-        protected override void OnPositionChanged(object sender, EventArgs e)
-        {
-            base.OnPositionChanged(sender, e);
-
-            if (IsCorpse)
-            {
-            }
-
-            //if (OnGround)
-            //    Tile = World.Map.GetTile((short)Position.X, (short)Position.Y);
         }
 
         public event EventHandler OwnerChanged;
 
-        protected override View CreateView()
-        {
-            return new ItemView(this);
-        }
+        protected override View CreateView() => new ItemView(this);
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -305,13 +251,6 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsCorpse)
                 ProcessAnimation();
-            else if (Effect != null)
-            {
-                if (Effect.IsDisposed)
-                    Effect = null;
-                else
-                    Effect.Update(totalMS, frameMS);
-            }
         }
 
         protected override void OnProcessDelta(Delta d)
@@ -320,7 +259,7 @@ namespace ClassicUO.Game.GameObjects
             if (d.HasFlag(Delta.Ownership)) OwnerChanged.Raise(this);
         }
 
-        public Graphic GetMountAnimation()
+        public override Graphic GetGraphicForAnimation()
         {
             Graphic graphic = Graphic;
 
@@ -328,340 +267,251 @@ namespace ClassicUO.Game.GameObjects
             {
                 switch (graphic)
                 {
-                    case 0x3E90:
-
-                    {
-                        graphic = 0x0114;
-
-                        break;
-                    }
-                    case 0x3E91:
-
-                    {
-                        graphic = 0x0115;
-
-                        break;
-                    }
-                    case 0x3E92:
-
-                    {
-                        graphic = 0x011C;
-
-                        break;
-                    }
-                    case 0x3E94:
-
-                    {
-                        graphic = 0x00F3;
-
-                        break;
-                    }
-                    case 0x3E95:
-
-                    {
-                        graphic = 0x00A9;
-
-                        break;
-                    }
-                    case 0x3E97:
-
-                    {
-                        graphic = 0x00C3;
-
-                        break;
-                    }
-                    case 0x3E98:
-
-                    {
-                        graphic = 0x00C2;
-
-                        break;
-                    }
-                    case 0x3E9A:
-
-                    {
-                        graphic = 0x00C1;
-
-                        break;
-                    }
-                    case 0x3E9B:
-                    case 0x3E9D:
-
-                    {
-                        graphic = 0x00C0;
-
-                        break;
-                    }
-                    case 0x3E9C:
-
-                    {
-                        graphic = 0x00BF;
-
-                        break;
-                    }
-                    case 0x3E9E:
-
-                    {
-                        graphic = 0x00BE;
-
-                        break;
-                    }
-                    case 0x3EA0:
-
-                    {
-                        graphic = 0x00E2;
-
-                        break;
-                    }
-                    case 0x3EA1:
-
-                    {
-                        graphic = 0x00E4;
-
-                        break;
-                    }
-                    case 0x3EA2:
-
-                    {
-                        graphic = 0x00CC;
-
-                        break;
-                    }
-                    case 0x3EA3:
-
-                    {
-                        graphic = 0x00D2;
-
-                        break;
-                    }
-                    case 0x3EA4:
-
-                    {
-                        graphic = 0x00DA;
-
-                        break;
-                    }
-                    case 0x3EA5:
-
-                    {
-                        graphic = 0x00DB;
-
-                        break;
-                    }
-                    case 0x3EA6:
-
-                    {
-                        graphic = 0x00DC;
-
-                        break;
-                    }
-                    case 0x3EA7:
-
-                    {
-                        graphic = 0x0074;
-
-                        break;
-                    }
-                    case 0x3EA8:
-
-                    {
-                        graphic = 0x0075;
-
-                        break;
-                    }
-                    case 0x3EA9:
-
-                    {
-                        graphic = 0x0072;
-
-                        break;
-                    }
-                    case 0x3EAA:
-
-                    {
-                        graphic = 0x0073;
-
-                        break;
-                    }
-                    case 0x3EAB:
-
-                    {
-                        graphic = 0x00AA;
-
-                        break;
-                    }
-                    case 0x3EAC:
-
-                    {
-                        graphic = 0x00AB;
-
-                        break;
-                    }
-                    case 0x3EAD:
-
-                    {
-                        graphic = 0x0084;
-
-                        break;
-                    }
-                    case 0x3EAF:
-
-                    {
-                        graphic = 0x0078;
-
-                        break;
-                    }
-                    case 0x3EB0:
-
-                    {
-                        graphic = 0x0079;
-
-                        break;
-                    }
-                    case 0x3EB1:
-
-                    {
-                        graphic = 0x0077;
-
-                        break;
-                    }
-                    case 0x3EB2:
-
-                    {
-                        graphic = 0x0076;
-
-                        break;
-                    }
-                    case 0x3EB3:
-
-                    {
-                        graphic = 0x0090;
-
-                        break;
-                    }
-                    case 0x3EB4:
-
-                    {
-                        graphic = 0x007A;
-
-                        break;
-                    }
-                    case 0x3EB5:
-
-                    {
-                        graphic = 0x00B1;
-
-                        break;
-                    }
-                    case 0x3EB6:
-
-                    {
-                        graphic = 0x00B2;
-
-                        break;
-                    }
-                    case 0x3EB7:
-
-                    {
-                        graphic = 0x00B3;
-
-                        break;
-                    }
-                    case 0x3EB8:
-
-                    {
-                        graphic = 0x00BC;
-
-                        break;
-                    }
-                    case 0x3EBA:
-
-                    {
-                        graphic = 0x00BB;
-
-                        break;
-                    }
-                    case 0x3EBB:
-
-                    {
-                        graphic = 0x0319;
-
-                        break;
-                    }
-                    case 0x3EBC:
-
-                    {
-                        graphic = 0x0317;
-
-                        break;
-                    }
-                    case 0x3EBD:
-
-                    {
-                        graphic = 0x031A;
-
-                        break;
-                    }
-                    case 0x3EBE:
-
-                    {
-                        graphic = 0x031F;
-
-                        break;
-                    }
-                    case 0x3EC3:
-
-                    {
-                        graphic = 0x02D4;
-
-                        break;
-                    }
-                    case 0x3EC5:
-                    case 0x3F3A:
-
-                    {
-                        graphic = 0x00D5;
-
-                        break;
-                    }
-                    case 0x3EC6:
-
-                    {
-                        graphic = 0x01B0;
-
-                        break;
-                    }
-                    case 0x3EC7:
-
-                    {
-                        graphic = 0x04E6;
-
-                        break;
-                    }
-                    case 0x3EC8:
-
-                    {
-                        graphic = 0x04E7;
-
-                        break;
-                    }
-                    case 0x3EC9:
-
-                    {
-                        graphic = 0x042D;
-
-                        break;
-                    }
-                    default:
-
-                    {
-                        graphic = 0x00C8;
-
-                        break;
-                    }
+                    case 0x3E90: // 16016 Reptalon
+                        {
+                            graphic = 0x0114;
+                            break;
+                        }
+                    case 0x3E91: // 16017
+                        {
+                            graphic = 0x0115;
+                            break;
+                        }
+                    case 0x3E92: // 16018
+                        {
+                            graphic = 0x011C;
+                            break;
+                        }
+                    case 0x3E94: // 16020
+                        {
+                            graphic = 0x00F3;
+                            break;
+                        }
+                    case 0x3E95: // 16021
+                        {
+                            graphic = 0x00A9;
+                            break;
+                        }
+                    case 0x3E97: // 16023 Ethereal Giant Beetle
+                        {
+                            graphic = 0x00C3;
+                            break;
+                        }
+                    case 0x3E98: // 16024 Ethereal Swamp Dragon
+                        {
+                            graphic = 0x00C2;
+                            break;
+                        }
+                    case 0x3E9A: // 16026 Ethereal Ridgeback
+                        {
+                            graphic = 0x00C1;
+                            break;
+                        }
+                    case 0x3E9B: // 16027
+                    case 0x3E9D: // 16029 Ethereal Unicorn
+                        {
+                            graphic = 0x00C0;
+                            break;
+                        }
+                    case 0x3E9C: // 16028 Ethereal Kirin
+                        {
+                            graphic = 0x00BF;
+                            break;
+                        }
+                    case 0x3E9E: // 16030
+                        {
+                            graphic = 0x00BE;
+                            break;
+                        }
+                    case 0x3EA0: // 16032 light grey/horse3
+                        {
+                            graphic = 0x00E2;
+                            break;
+                        }
+                    case 0x3EA1: // 16033 greybrown/horse4
+                        {
+                            graphic = 0x00E4;
+                            break;
+                        }
+                    case 0x3EA2: // 16034 dark brown/horse
+                        {
+                            graphic = 0x00CC;
+                            break;
+                        }
+                    case 0x3EA3: // 16035 desert ostard
+                        {
+                            graphic = 0x00D2;
+                            break;
+                        }
+                    case 0x3EA4: // 16036 frenzied ostard (=zostrich)
+                        {
+                            graphic = 0x00DA;
+                            break;
+                        }
+                    case 0x3EA5: // 16037 forest ostard
+                        {
+                            graphic = 0x00DB;
+                            break;
+                        }
+                    case 0x3EA6: // 16038 Llama
+                        {
+                            graphic = 0x00DC;
+                            break;
+                        }
+                    case 0x3EA7: // 16039 Nightmare / Vortex
+                        {
+                            graphic = 0x0074;
+                            break;
+                        }
+                    case 0x3EA8: // 16040 Silver Steed
+                        {
+                            graphic = 0x0075;
+                            break;
+                        }
+                    case 0x3EA9: // 16041 Nightmare
+                        {
+                            graphic = 0x0072;
+                            break;
+                        }
+                    case 0x3EAA: // 16042 Ethereal Horse
+                        {
+                            graphic = 0x0073;
+                            break;
+                        }
+                    case 0x3EAB: // 16043 Ethereal Llama
+                        {
+                            graphic = 0x00AA;
+                            break;
+                        }
+                    case 0x3EAC: // 16044 Ethereal Ostard
+                        {
+                            graphic = 0x00AB;
+                            break;
+                        }
+                    case 0x3EAD: // 16045 Kirin
+                        {
+                            graphic = 0x0084;
+                            break;
+                        }
+                    case 0x3EAF: // 16047 War Horse (Blood Red)
+                        {
+                            graphic = 0x0078;
+                            break;
+                        }
+                    case 0x3EB0: // 16048 War Horse (Light Green)
+                        {
+                            graphic = 0x0079;
+                            break;
+                        }
+                    case 0x3EB1: // 16049 War Horse (Light Blue)
+                        {
+                            graphic = 0x0077;
+                            break;
+                        }
+                    case 0x3EB2: // 16050 War Horse (Purple)
+                        {
+                            graphic = 0x0076;
+                            break;
+                        }
+                    case 0x3EB3: // 16051 Sea Horse (Medium Blue)
+                        {
+                            graphic = 0x0090;
+                            break;
+                        }
+                    case 0x3EB4: // 16052 Unicorn
+                        {
+                            graphic = 0x007A;
+                            break;
+                        }
+                    case 0x3EB5: // 16053 Nightmare
+                        {
+                            graphic = 0x00B1;
+                            break;
+                        }
+                    case 0x3EB6: // 16054 Nightmare 4
+                        {
+                            graphic = 0x00B2;
+                            break;
+                        }
+                    case 0x3EB7: // 16055 Dark Steed
+                        {
+                            graphic = 0x00B3;
+                            break;
+                        }
+                    case 0x3EB8: // 16056 Ridgeback
+                        {
+                            graphic = 0x00BC;
+                            break;
+                        }
+                    case 0x3EBA: // 16058 Ridgeback, Savage
+                        {
+                            graphic = 0x00BB;
+                            break;
+                        }
+                    case 0x3EBB: // 16059 Skeletal Mount
+                        {
+                            graphic = 0x0319;
+                            break;
+                        }
+                    case 0x3EBC: // 16060 Beetle
+                        {
+                            graphic = 0x0317;
+                            break;
+                        }
+                    case 0x3EBD: // 16061 SwampDragon
+                        {
+                            graphic = 0x031A;
+                            break;
+                        }
+                    case 0x3EBE: // 16062 Armored Swamp Dragon
+                        {
+                            graphic = 0x031F;
+                            break;
+                        }
+                    case 0x3EC3: //16067 Beetle
+                        {
+                            graphic = 0x02D4;
+                            break;
+                        }
+                    case 0x3EC5: // 16069
+                    case 0x3F3A: // 16186 snow bear ???
+                        {
+                            graphic = 0x00D5;
+                            break;
+                        }
+                    case 0x3EC6: // 16070 Boura
+                        {
+                            graphic = 0x01B0;
+                            break;
+                        }
+                    case 0x3EC7: // 16071 Tiger
+                        {
+                            graphic = 0x04E6;
+                            break;
+                        }
+                    case 0x3EC8: // 16072 Tiger
+                        {
+                            graphic = 0x04E7;
+                            break;
+                        }
+                    case 0x3EC9: // 16073
+                        {
+                            graphic = 0x042D;
+                            break;
+                        }
+                    default: //lightbrown/horse2
+                        {
+                            graphic = 0x00C8;
+
+                            break;
+                        }
                 }
 
-                if (ItemData.AnimID != 0) graphic = ItemData.AnimID;
+                /* TODO: maybe this code is wrong. The animID in this case doesn't work like expected.
+                
+                if (ItemData.AnimID != 0)
+                    graphic = ItemData.AnimID;
+                */
             }
             else if (IsCorpse)
                 return Amount;
@@ -694,23 +544,11 @@ namespace ClassicUO.Game.GameObjects
                 _spellsBitFiled = field;
                 needUpdate = true;
             }
-
-            //if (needUpdate)
-            //    _OnUpdated?.Invoke(this);
-
             return needUpdate;
         }
 
         public override void Dispose()
         {
-            if (IsMulti && Multi != null)
-            {
-                Multi.Components = null;
-                Multi = null;
-            }
-
-            Effect?.Dispose();
-            Effect = null;
             base.Dispose();
         }
 
@@ -720,10 +558,10 @@ namespace ClassicUO.Game.GameObjects
             {
                 byte dir = (byte) Layer;
 
-                if (_lastAnimationChangeTime < CoreGame.Ticks)
+                if (LastAnimationChangeTime < Engine.Ticks)
                 {
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
-                    Graphic id = GetMountAnimation();
+                    Graphic id = GetGraphicForAnimation();
                     bool mirror = false;
                     Animations.GetAnimDirection(ref dir, ref mirror);
 
@@ -734,18 +572,18 @@ namespace ClassicUO.Game.GameObjects
                         Animations.AnimID = id;
                         Animations.AnimGroup = (byte) animGroup;
                         Animations.Direction = dir;
-                        if ((direction.FrameCount == 0 || direction.Frames == null)) Animations.LoadDirectionGroup(ref direction);
+                        if ((direction.FrameCount == 0 || direction.FramesHashes == null)) Animations.LoadDirectionGroup(ref direction);
 
                         if (direction.Address != 0 || direction.IsUOP)
                         {
-                            direction.LastAccessTime = CoreGame.Ticks;
+                            direction.LastAccessTime = Engine.Ticks;
                             int fc = direction.FrameCount;
                             if (frameIndex >= fc) frameIndex = (sbyte) (fc - 1);
                             AnimIndex = frameIndex;
                         }
                     }
 
-                    _lastAnimationChangeTime = CoreGame.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
+                    LastAnimationChangeTime = Engine.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
                 }
             }
         }

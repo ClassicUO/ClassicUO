@@ -20,12 +20,19 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+
+using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.Map
 {
@@ -35,34 +42,23 @@ namespace ClassicUO.Game.Map
         //private const int CHUNKS_NUM = 5;
         //private const int MAX_CHUNKS = CHUNKS_NUM * 2 + 1;
         private readonly List<int> _usedIndices = new List<int>();
-        private Point _center;
 
         public Map(int index)
         {
             Index = index;
             IO.Resources.Map.LoadMap(index);
-            MapBlockIndex = IO.Resources.Map.MapBlocksSize[Index][0] * IO.Resources.Map.MapBlocksSize[Index][1];
+            MapBlockIndex = IO.Resources.Map.MapBlocksSize[Index, 0] * IO.Resources.Map.MapBlocksSize[Index, 1];
             Chunks = new Chunk[MapBlockIndex];
         }
 
         public int Index { get; }
+    
 
         public Chunk[] Chunks { get; private set; }
 
         public int MapBlockIndex { get; set; }
 
-        public Point Center
-        {
-            get => _center;
-            set
-            {
-                if (_center != value)
-                {
-                    _center = value;
-                    LoadChunks((ushort)_center.X, (ushort)_center.Y);
-                }
-            }
-        }
+        public Point Center { get; set; }
 
         public Chunk GetMapChunk(int rblock, int blockX, int blockY)
         {
@@ -76,6 +72,7 @@ namespace ClassicUO.Game.Map
             return chunk;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Tile GetTile(short x, short y, bool load = true)
         {
             if (x < 0 || y < 0)
@@ -99,10 +96,9 @@ namespace ClassicUO.Game.Map
                 else
                     return null;
             }
-            else
-                chuck.LastAccessTime = CoreGame.Ticks;
 
-            return chuck.Tiles[x % 8][y % 8];
+            chuck.LastAccessTime = Engine.Ticks;
+            return chuck.Tiles[x % 8, y % 8];
         }
 
         public Tile GetTile(int x, int y, bool load = true)
@@ -150,23 +146,24 @@ namespace ClassicUO.Game.Map
             if (access)
                 return defaultZ;
             access = true;
-            Tile tile = GetTile(x, y);
+            Tile tile = GetTile(x, y, false);
 
             if (tile != null)
             {
-                //var objects = tile.ObjectsOnTiles;
                 GameObject obj = tile.FirstNode;
 
-                //for (int i = 0; i < objects.Count; i++)
                 for(; obj != null; obj = obj.Right)
                 {
-                    if (!(obj is Static) && obj is Item item && !item.IsMulti)
+                    if (!(obj is Static) && !(obj is Multi))
                         continue;
 
                     if (obj is Mobile)
                         continue;
 
-                    if (obj is IDynamicItem dyn && (!TileData.IsRoof(dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6))
+                    //if (obj is IDynamicItem dyn && (!TileData.IsRoof(dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6))
+                    //    continue;
+
+                    if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (!TileData.IsRoof(itemdata.Flags) || Math.Abs(z - obj.Z) > 6))
                         continue;
 
                     break;
@@ -197,13 +194,13 @@ namespace ClassicUO.Game.Map
 
         private int GetBlock(int blockX, int blockY)
         {
-            return blockX * IO.Resources.Map.MapBlocksSize[Index][1] + blockY;
+            return blockX * IO.Resources.Map.MapBlocksSize[Index, 1] + blockY;
         }
 
         public void ClearUnusedBlocks()
         {
             int count = 0;
-            long ticks = CoreGame.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedIndices.Count; i++)
             {
@@ -235,13 +232,14 @@ namespace ClassicUO.Game.Map
             Chunks = null;
         }
 
-        private void LoadChunks(ushort centerX, ushort centerY)
+        public void Initialize()
         {
             const int XY_OFFSET = 30;
-            int minBlockX = ((centerX - XY_OFFSET) >> 3) - 1;
-            int minBlockY = ((centerY - XY_OFFSET) >> 3) - 1;
-            int maxBlockX = ((centerX + XY_OFFSET) >> 3) + 1;
-            int maxBlockY = ((centerY + XY_OFFSET) >> 3) + 1;
+
+            int minBlockX = ((Center.X - XY_OFFSET) >> 3) - 1;
+            int minBlockY = ((Center.Y - XY_OFFSET) >> 3) - 1;
+            int maxBlockX = ((Center.X + XY_OFFSET) >> 3) + 1;
+            int maxBlockY = ((Center.Y + XY_OFFSET) >> 3) + 1;
 
             if (minBlockX < 0)
                 minBlockX = 0;
@@ -249,17 +247,17 @@ namespace ClassicUO.Game.Map
             if (minBlockY < 0)
                 minBlockY = 0;
 
-            if (maxBlockX >= IO.Resources.Map.MapBlocksSize[Index][0])
-                maxBlockX = IO.Resources.Map.MapBlocksSize[Index][0] - 1;
+            if (maxBlockX >= IO.Resources.Map.MapBlocksSize[Index, 0])
+                maxBlockX = IO.Resources.Map.MapBlocksSize[Index, 0] - 1;
 
-            if (maxBlockY >= IO.Resources.Map.MapBlocksSize[Index][1])
-                maxBlockY = IO.Resources.Map.MapBlocksSize[Index][1] - 1;
-            long tick = CoreGame.Ticks;
-            long maxDelay = CoreGame.FrameDelay[1] >> 1;
+            if (maxBlockY >= IO.Resources.Map.MapBlocksSize[Index, 1])
+                maxBlockY = IO.Resources.Map.MapBlocksSize[Index, 1] - 1;
+            long tick = Engine.Ticks;
+            long maxDelay = Engine.FrameDelay[1] >> 1;
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
-                int index = i * IO.Resources.Map.MapBlocksSize[Index][1];
+                int index = i * IO.Resources.Map.MapBlocksSize[Index, 1];
 
                 for (int j = minBlockY; j <= maxBlockY; j++)
                 {
@@ -268,14 +266,14 @@ namespace ClassicUO.Game.Map
 
                     if (chunk == null)
                     {
-                        if (CoreGame.Ticks - tick >= maxDelay)
+                        if (Engine.Ticks - tick >= maxDelay)
                             return;
                         _usedIndices.Add(cellindex);
                         chunk = new Chunk((ushort)i, (ushort)j);
                         chunk.Load(Index);
                     }
 
-                    chunk.LastAccessTime = CoreGame.Ticks;
+                    chunk.LastAccessTime = Engine.Ticks;
                 }
             }
         }

@@ -28,135 +28,105 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
-{
+{   
     public class StaticView : View
     {
         private readonly bool _isFoliage;
-        private bool _isProcessingAlpha;
         private float _alpha;
         private float _timeToProcessAlpha;
 
         public StaticView(Static st) : base(st)
         {
             _isFoliage = TileData.IsFoliage( st.ItemData.Flags);
-            AllowedToDraw = !IsNoDrawable(st.Graphic) && !(_isFoliage && World.MapIndex == 0);
+            AllowedToDraw = !GameObjectHelper.IsNoDrawable(st.Graphic);
+
+            if (TileData.IsTranslucent(st.ItemData.Flags))
+                _alpha = 0.5f;
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList objectList)
+        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
+
             Static st = (Static) GameObject;
-
-            if (st.Effect == null)
+          
+            if (Texture == null || Texture.IsDisposed)
             {
-                if (Texture == null || Texture.IsDisposed)
-                {
-                    ArtTexture texture = Art.GetStaticTexture(GameObject.Graphic);
-                    Texture = texture;
-                    Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
+                ArtTexture texture = Art.GetStaticTexture(GameObject.Graphic);
+                Texture = texture;
+                Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
 
-                    FrameInfo.X = texture.ImageRectangle.X;
-                    FrameInfo.Y = texture.ImageRectangle.Y;
-                    FrameInfo.Width = texture.ImageRectangle.Width;
-                    FrameInfo.Height = texture.ImageRectangle.Height;
-                }
-
-                if (_isFoliage)
-                {
-                    bool check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y;
-
-                    if (!check)
-                    {
-                        check = World.Player.Position.Y <= st.Position.Y && World.Player.Position.X <= st.Position.X + 1;
-
-                        if (!check)
-                            check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y + 1;
-                    }
-
-                    if (check)
-                    {
-                        Rectangle fol = Rectangle.Empty;
-                        fol.X = (int)position.X - Bounds.X + 22;
-                        fol.Y = (int)position.Y - Bounds.Y + 22;
-
-                        fol.Width = FrameInfo.Width;
-                        fol.Height = FrameInfo.Height;
-
-                        if (fol.InRect(World.Player.View.GetOnScreenRectangle()))
-                        {
-                            if (_timeToProcessAlpha < CoreGame.Ticks)
-                            {
-                                _timeToProcessAlpha = CoreGame.Ticks + Constants.ALPHA_TIME;
-                                if (!_isProcessingAlpha)
-                                {
-                                    _alpha += .1f;
-                                }
-
-                                if (_alpha >= Constants.FOLIAGE_ALPHA)
-                                {
-                                    _isProcessingAlpha = true;
-                                    _alpha = Constants.FOLIAGE_ALPHA;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (_alpha != 0.0f && _isProcessingAlpha)
-                            {
-                                if (_timeToProcessAlpha < CoreGame.Ticks)
-                                {
-                                    _timeToProcessAlpha = CoreGame.Ticks + Constants.ALPHA_TIME;
-
-
-                                    if (_isProcessingAlpha)
-                                        _alpha -= .1f;
-
-                                    if (_alpha <= 0.0f)
-                                    {
-                                        _isProcessingAlpha = false;
-                                        _alpha = 0;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (_alpha != 0.0f && _isProcessingAlpha)
-                        {
-                            if (_timeToProcessAlpha < CoreGame.Ticks)
-                            {
-                                _timeToProcessAlpha = CoreGame.Ticks + Constants.ALPHA_TIME;
-
-
-                                if (_isProcessingAlpha)
-                                    _alpha -= .1f;
-
-                                if (_alpha <= 0.0f)
-                                {
-                                    _isProcessingAlpha = false;
-                                    _alpha = 0;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, false, _alpha, false);
-                MessageOverHead(spriteBatch, position, Bounds.Y);
-
-                return base.Draw(spriteBatch, position, objectList);
+                FrameInfo.X = texture.ImageRectangle.X;
+                FrameInfo.Y = texture.ImageRectangle.Y;
+                FrameInfo.Width = texture.ImageRectangle.Width;
+                FrameInfo.Height = texture.ImageRectangle.Height;
             }
 
-            return !st.Effect.IsDisposed && st.Effect.View.Draw(spriteBatch, position, objectList);
+            if (_isFoliage)
+            {
+                bool check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y;
+                bool isnrect = false;
+
+                if (!check)
+                {
+                    check = World.Player.Position.Y <= st.Position.Y && World.Player.Position.X <= st.Position.X + 1;
+
+                    if (!check)
+                        check = World.Player.Position.X <= st.Position.X && World.Player.Position.Y <= st.Position.Y + 1;
+                }
+
+                if (check)
+                {
+                    Rectangle fol = Rectangle.Empty;
+                    fol.X = (int) position.X - Bounds.X + 22;
+                    fol.Y = (int) position.Y - Bounds.Y + 22;
+
+                    fol.Width = FrameInfo.Width;
+                    fol.Height = FrameInfo.Height;
+
+                    if (fol.InRect(World.Player.View.GetOnScreenRectangle()))
+                    {
+                        isnrect = true;
+
+                        if (_timeToProcessAlpha < Engine.Ticks)
+                        {
+                            _timeToProcessAlpha = Engine.Ticks + Constants.ALPHA_TIME;
+
+                            _alpha += .1f;
+
+                            if (_alpha >= Constants.FOLIAGE_ALPHA)
+                            {
+                                _alpha = Constants.FOLIAGE_ALPHA;
+                            }
+                        }
+                    }
+                }
+
+                if (_alpha > 0.0f && !isnrect)
+                {
+                    if (_timeToProcessAlpha < Engine.Ticks)
+                    {
+                        _timeToProcessAlpha = Engine.Ticks + Constants.ALPHA_TIME;
+
+                        _alpha -= .1f;
+
+                        if (_alpha < 0.0f)
+                            _alpha = 0;
+                    }
+                }
+            }
+
+            HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, false, _alpha, false);
+            MessageOverHead(batcher, position, Bounds.Y - 44);
+
+            return base.Draw(batcher, position, objectList);
         }
 
         protected override void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {
             int x = list.MousePosition.X - (int) vertex[0].Position.X;
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
-            //if (Art.Contains(GameObject.Graphic, x, y))
             if (Texture.Contains(x, y))
                 list.Add(GameObject, vertex[0].Position);
         }

@@ -20,6 +20,8 @@
 #endregion
 using System;
 
+using ClassicUO.Game.System;
+
 namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType
@@ -28,29 +30,28 @@ namespace ClassicUO.Game.Scenes
         Game
     }
 
-    public static class SceneManager
+    public sealed class SceneManager
     {
-        public static Scene CurrentScene { get; private set; }
+        public Scene CurrentScene { get; private set; }
 
-        public static void ChangeScene(ScenesType type)
-        {
+        public void ChangeScene(ScenesType type)
+        {         
             CurrentScene?.Dispose();
             CurrentScene = null;
             GC.Collect();
             GC.WaitForPendingFinalizers();
-            GameLoop game = Service.Get<GameLoop>();
 
             switch (type)
             {
                 case ScenesType.Login:
-                    game.WindowWidth = 640;
-                    game.WindowHeight = 480;
+                    Engine.WindowWidth = 640;
+                    Engine.WindowHeight = 480;
                     CurrentScene = new LoginScene();
 
                     break;
                 case ScenesType.Game:
-                    game.WindowWidth = 1000;
-                    game.WindowHeight = 800;
+                    Engine.WindowWidth = 800;
+                    Engine.WindowHeight = 800;
                     CurrentScene = new GameScene();
 
                     break;
@@ -59,7 +60,29 @@ namespace ClassicUO.Game.Scenes
             CurrentScene.Load();
         }
 
-        public static T GetScene<T>() where T : Scene
+        public void ChangeScene(Scene scene)
+        {
+            CurrentScene?.Dispose();
+            CurrentScene = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            switch (scene)
+            {
+                case LoginScene login:
+                    Engine.WindowWidth = 640;
+                    Engine.WindowHeight = 480;
+                    CurrentScene = login;
+                    break;
+                case GameScene game:
+                    Engine.WindowWidth = 800;
+                    Engine.WindowHeight = 800;
+                    CurrentScene = game;
+                    break;
+            }
+        }
+
+        public T GetScene<T>() where T : Scene
         {
             return CurrentScene?.GetType() == typeof(T) ? (T) CurrentScene : null;
         }

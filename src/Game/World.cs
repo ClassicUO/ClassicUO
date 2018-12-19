@@ -23,7 +23,9 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.System;
 
 using Microsoft.Xna.Framework;
 
@@ -31,7 +33,12 @@ namespace ClassicUO.Game
 {
     public static class World
     {
-        private static readonly ConcurrentDictionary<Serial, House> _houses = new ConcurrentDictionary<Serial, House>();
+        private static readonly EffectManager _effectManager = new EffectManager();
+
+
+        public static PartySystem Party { get; } = new PartySystem();
+
+        public static HouseManager HouseManager { get; } = new HouseManager();
 
         public static HashSet<Item> ToAdd { get; } = new HashSet<Item>();
 
@@ -63,15 +70,25 @@ namespace ClassicUO.Game
 
                         Position position = Player.Position;
                         Map = null;
-                        Map = new Map.Map(value);
+
+                        Map = new Map.Map(value)
+                        {
+                            Center = new Point(position.X, position.Y)
+                        };
+                        Map.Initialize();
+
                         Player.Position = position;
+                        Player.AddToTile();
+
                         Player.ClearSteps();
-                        Player.ProcessDelta();
+                        Player.ProcessDelta();                  
                     }
                     else
                     {
-                        Map = new Map.Map(value);
-                        if (Player != null) Map.Center = new Point(Player.Position.X, Player.Position.Y);
+                        Map = new Map.Map(value);                       
+                        if (Player != null)
+                            Map.Center = new Point(Player.X, Player.Y);
+                        Map.Initialize();
                     }
                 }
             }
@@ -87,6 +104,8 @@ namespace ClassicUO.Game
         public static LockedFeatures ClientLockedFeatures { get; } = new LockedFeatures();
 
         public static ClientFeatures ClientFlags { get; } = new ClientFeatures();
+
+        public static string ServerName { get; set; }
 
         public static void Update(double totalMS, double frameMS)
         {
@@ -109,13 +128,10 @@ namespace ClassicUO.Game
 
                     if (item.Distance > ViewRange && item.OnGround)
                     {
-                        if (_houses.ContainsKey(item))
+                        if (item.IsMulti)
                         {
-                            if (item.Distance > ViewRange * 2 + 5)
-                            {
+                            if (HouseManager.TryToRemove(item, ViewRange))
                                 RemoveItem(item);
-                                _houses.TryRemove(item, out _);
-                            }
                         }
                         else
                             RemoveItem(item);
@@ -125,37 +141,9 @@ namespace ClassicUO.Game
                         Items.Remove(item);
                 }
 
-                //foreach (var k in _houses)
-                //{
-                //    if (k.Value.Distance > ViewRange * 2 + 5)
-                //        k.Value.Dispose();
 
-                //    if (k.Value.IsDisposed)
-                //        _houses.TryRemove(k.Key, out _);
-                //}
+                _effectManager.Update(totalMS, frameMS);
             }
-        }
-
-        public static House GetHouse(Serial serial)
-        {
-            _houses.TryGetValue(serial, out House h);
-
-            return h;
-        }
-
-        public static House GetOrCreateHouse(Serial serial)
-        {
-            return _houses.TryGetValue(serial, out House house) ? house : new House(serial);
-        }
-
-        public static void AddOrUpdateHouse(House house)
-        {
-            _houses.TryAdd(house.Serial, house);
-        }
-
-        public static void RemoveHouse(Serial house)
-        {
-            _houses.TryRemove(house, out House h);
         }
 
         public static bool Contains(Serial serial)
@@ -236,11 +224,21 @@ namespace ClassicUO.Game
             return true;
         }
 
+        public static void AddEffect(GameEffect effect)
+        {
+            _effectManager.Add(effect);
+        }
+
+        public static void AddEffect(GraphicEffectType type, Serial source, Serial target, Graphic graphic, Hue hue, Position srcPos, Position targPos, byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
+        {
+            _effectManager.Add(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
+        }
+
         public static void Clear()
         {
+            HouseManager.Clear();
             Items.Clear();
             Mobiles.Clear();
-            _houses.Clear();
             Player.Dispose();
             Player = null;
             Map.Dispose();
@@ -250,6 +248,9 @@ namespace ClassicUO.Game
             IO.UltimaLive.ShardName = null;
             ClientFlags.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
+            HouseManager.Clear();
+            Party.Members.Clear();
+            ServerName = string.Empty;
         }
 
         private static void InternalMapChangeClear(bool noplayer)

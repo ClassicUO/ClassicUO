@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
@@ -50,7 +51,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         ClientCommand
     }
 
-    internal class ChatControl : GumpControl
+    internal class ChatControl : Control
     {
         private const int MAX_MESSAGE_LENGHT = 100;
         private readonly List<Tuple<ChatMode, string>> _messageHistory;
@@ -73,6 +74,30 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanCloseWithRightClick = false;
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
+
+
+            int height = Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
+
+            _textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
+            {
+                X = 0,
+                Y = Height - height - 3,
+                Width = Width,
+                Height = height - 3
+            };
+            Mode = ChatMode.Default;
+
+            AddChildren(new CheckerTrans
+            {
+                X = _textBox.X,
+                Y = _textBox.Y,
+                Width = Width,
+                Height = height + 5
+            });
+            AddChildren(_textBox);
+
+
+            WantUpdateSize = false;
         }
 
         private ChatMode Mode
@@ -85,6 +110,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 switch (value)
                 {
                     case ChatMode.Default:
+                        DisposeChatModePrefix();
                         _textBox.Hue = 33;
                         _textBox.SetText(string.Empty);
 
@@ -110,7 +136,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                         break;
                     case ChatMode.Alliance:
-                        AppendChatModePrefix("[Aliance]: ", 487);
+                        AppendChatModePrefix("[Alliance]: ", 487);
 
                         break;
                     case ChatMode.ClientCommand:
@@ -123,7 +149,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void AppendChatModePrefix(string labelText, Hue hue)
         {
-            _currentChatModeLabel = new Label(labelText, true, hue)
+            _currentChatModeLabel?.Dispose();
+
+            _currentChatModeLabel = new Label(labelText, true, hue, style: FontStyle.BlackBorder)
             {
                 X = _textBox.X, Y = _textBox.Y
             };
@@ -166,61 +194,13 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Update(double totalMS, double frameMS)
         {
-            if (_textBox == null)
-            {
-                int height = Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
-
-                _textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
-                {
-                    X = 0, Y = Height - height - 3, Width = Width, Height = height - 3
-                };
-                Mode = ChatMode.Default;
-
-                AddChildren(new CheckerTrans
-                {
-                    X = _textBox.X, Y = _textBox.Y, Width = Width, Height = height + 5
-                });
-                AddChildren(_textBox);
-            }
-
             for (int i = 0; i < _textEntries.Count; i++)
             {
                 _textEntries[i].Update(totalMS, frameMS);
 
-                if (_textEntries[i].IsExpired)
-                {
-                    _textEntries[i].Dispose();
+                if (_textEntries[i].IsDispose)
                     _textEntries.RemoveAt(i--);
-                }
             }
-
-            //if (IsFocused)
-            //{
-            //    if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_q, false, false, true) && _messageHistoryIndex > -1)
-            //    {
-            //        if (_messageHistoryIndex > 0)
-            //            _messageHistoryIndex--;
-            //        Mode = _messageHistory[_messageHistoryIndex].Item1;
-            //        _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
-            //    }
-            //    else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_w, false, false, true))
-            //    {
-            //        if (_messageHistoryIndex < _messageHistory.Count - 1)
-            //        {
-            //            _messageHistoryIndex++;
-            //            Mode = _messageHistory[_messageHistoryIndex].Item1;
-            //            _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
-            //        }
-            //        else
-            //        {
-            //            _textBox.SetText(string.Empty);
-            //        }
-            //    }
-            //    else if (_inputManager.HandleKeybaordEvent(KeyboardEvent.Down, SDL.SDL_Keycode.SDLK_BACKSPACE, false, false, false) && _textBox.Text == string.Empty)
-            //    {
-            //        Mode = ChatMode.Default;
-            //    }
-            //}
 
             if (Mode == ChatMode.Default)
             {
@@ -244,19 +224,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
                             Mode = ChatMode.Alliance;
 
                             break;
-                        case '#':
+                        case '-':
                             Mode = ChatMode.ClientCommand;
 
                             break;
                     }
                 }
-                else if (_textBox.Text.Length == 2 && _textBox.Text[0] == ':' && _textBox.Text[1] == ' ') Mode = ChatMode.Emote;
+                else if (_textBox.Text.Length == 2 && _textBox.Text[0] == ':' && _textBox.Text[1] == ' ')
+                    Mode = ChatMode.Emote;
             }
 
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             int y = _textBox.Y + position.Y - 6;
 
@@ -265,10 +246,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 y -= _textEntries[i].TextHeight;
 
                 if (y >= position.Y)
-                    _textEntries[i].Draw(spriteBatch, new Point(position.X + 2, y));
+                    _textEntries[i].Draw(batcher, new Point(position.X + 2, y));
             }
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
@@ -331,37 +312,39 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case ChatMode.Party:
 
+                    text = text.ToLower();
+
                     if (text.Equals("add"))
                     {
-                        PartySystem.TriggerAddPartyMember();
+                        World.Party.TriggerAddPartyMember();
                         break;
                     }
 
-                    if (PartySystem.IsInParty)
+                    if (World.Party.IsInParty)
                     {
                         if (text.Equals("loot"))
                         {
-                            PartySystem.AllowPartyLoot = !PartySystem.AllowPartyLoot ? true : false;
+                            World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot ? true : false;
                             break;
                         }
 
                         if (text.Equals("quit"))
                         {
-                            PartySystem.QuitParty();
+                            World.Party.QuitParty();
                             break;
                         }
 
-                        PartySystem.PartyMessage(text);
+                        World.Party.PartyMessage(text);
                     }
                     else
                     {
                         if (text.Equals("accept"))
                         {
-                            PartySystem.AcceptPartyInvite();
+                            World.Party.AcceptPartyInvite();
                         }
                         else if (text.Equals("decline"))
                         {
-                            PartySystem.DeclinePartyInvite();
+                            World.Party.DeclinePartyInvite();
                         }
                         else if (text.Equals("quit"))
                         {
@@ -381,7 +364,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                             //we write directly to the journal to avoid 'System:' prefix
                             Service.Get<ChatControl>().AddLine(NoteToSelf, (byte)noteToSelfFont, noteToSelfHue, false);
-                            Service.Get<JournalData>().AddEntry(NoteToSelf, (byte)noteToSelfFont, noteToSelfHue, "");
+                            Engine.SceneManager.GetScene<GameScene>().Journal.Add(NoteToSelf, noteToSelfFont, noteToSelfHue, "");
                         }
                     }
 
@@ -399,7 +382,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.ClientCommand:
-                    CommandSystem.TriggerCommandHandler(text);
+                    Commands.Execute(text);
 
                     break;
             }
@@ -409,11 +392,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //GameActions.Say(text, hue, speechType, 0);
         }
 
-        private class ChatLineTime : IUpdateable, IDrawableUI, IDisposable
+        private class ChatLineTime : IUpdateable, IDisposable
         {           
             private readonly float _createdTime;
             private readonly RenderedText _renderedText;
-            private int _width;
+            private float _alpha;
 
             public ChatLineTime(string text, int width, byte font, bool isunicode, Hue hue)
             {
@@ -426,30 +409,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     Hue = hue,
                     Text = text
                 };
-                _width = width;
-                _createdTime = CoreGame.Ticks;
+                _createdTime = Engine.Ticks;
             }
 
             public string Text => _renderedText.Text;
 
-            public bool IsExpired { get; private set; }
-
-            public float Alpha { get; private set; }
+            public bool IsDispose { get; private set; }
 
             public int TextHeight => _renderedText.Height;
 
-            public void Dispose()
+           
+            public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
             {
-                _renderedText.Dispose();
-            }
-
-            public bool AllowedToDraw { get; set; } = true;
-
-            public SpriteTexture Texture { get; set; }
-
-            public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
-            {
-                return _renderedText.Draw(spriteBatch, position, ShaderHuesTraslator.GetHueVector(0, false, Alpha < 1.0f ? Alpha : 0, true));
+                return _renderedText.Draw(batcher, position, ShaderHuesTraslator.GetHueVector(0, false, _alpha, true));
             }
 
             public void Update(double totalMS, double frameMS)
@@ -457,13 +429,23 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 float time = (float) totalMS - _createdTime;
 
                 if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT)
-                    IsExpired = true;
-                else if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT) Alpha = (time - (Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)) / Constants.TIME_FADEOUT_TEXT;
+                    Dispose();
+                //else if (time > Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)
+                //    _alpha = (time - (Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT - Constants.TIME_FADEOUT_TEXT)) / Constants.TIME_FADEOUT_TEXT;
             }
 
             public override string ToString()
             {
                 return Text;
+            }
+
+            public void Dispose()
+            {
+                if (IsDispose)
+                    return;
+
+                IsDispose = true;
+                _renderedText.Dispose();
             }
         }
     }

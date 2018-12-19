@@ -18,41 +18,37 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System.Runtime.CompilerServices;
+
+using ClassicUO.Game.Data;
+using ClassicUO.Game.Views;
+using ClassicUO.IO.Resources;
+
 namespace ClassicUO.Game.GameObjects
 {
-    public sealed class Multi
+    public sealed class Multi : GameObject
     {
-        public Multi(Item parent)
-        {
-            Parent = parent;
-        }
-
-        public Item Parent { get; }
-
-        public short MinX { get; set; }
-
-        public short MaxX { get; set; }
-
-        public short MinY { get; set; }
-
-        public short MaxY { get; set; }
-
-        public MultiComponent[] Components { get; set; }
-    }
-
-    public struct MultiComponent
-    {
-        public MultiComponent(Graphic graphic, ushort x, ushort y, sbyte z, uint flags)
+        public Multi(Graphic graphic)
         {
             Graphic = graphic;
-            Position = new Position(x, y, z);
-            Flags = flags;
         }
 
-        public Graphic Graphic { get; }
+        public string Name => ItemData.Name;
 
-        public uint Flags { get; }
+        private StaticTiles? _itemData;
 
-        public Position Position { get; set; }
+        public StaticTiles ItemData
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                if (!_itemData.HasValue)
+                    _itemData = TileData.StaticData[Graphic];
+                return _itemData.Value;
+            }
+        }
+
+        protected override View CreateView() => new MultiView(this);
     }
 }

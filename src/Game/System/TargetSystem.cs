@@ -48,7 +48,7 @@ namespace ClassicUO.Game.System
 
         public static GameObject LastGameObject { get; private set; }
 
-        public static bool IsTargeting => TargetingState != TargetType.Nothing;
+        public static bool IsTargeting => TargetingState != TargetType.Nothing && _targetCursorType < 3;
 
         public static void ClearTargetingWithoutTargetCancelPacket()
         {
@@ -59,7 +59,8 @@ namespace ClassicUO.Game.System
         {
             if (TargetingState != targeting || cursorID != _targetCursorId || cursorType != _targetCursorType)
             {
-                if (targeting == TargetType.Nothing) GameActions.TargetCancel(_targetCursorId, _targetCursorType);
+                if (targeting == TargetType.Nothing)
+                    GameActions.TargetCancel(_targetCursorId, _targetCursorType);
                 TargetingState = targeting;
                 _targetCursorId = cursorID;
                 _targetCursorType = cursorType;

@@ -28,21 +28,6 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    [Flags]
-    public enum Flags : byte
-    {
-        None,
-        Frozen = 0x01,
-        Female = 0x02,
-        Poisoned = 0x04,
-        Flying = 0x04,
-        YellowBar = 0x08,
-        IgnoreMobiles = 0x10,
-        Movable = 0x20,
-        WarMode = 0x40,
-        Hidden = 0x80
-    }
-
     public abstract class Entity : GameObject
     {
         private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
@@ -51,7 +36,6 @@ namespace ClassicUO.Game.GameObjects
         private Flags _flags;
         private Graphic _graphic;
         private Hue _hue;
-        protected long _lastAnimationChangeTime;
         private string _name;
 
 
@@ -59,8 +43,9 @@ namespace ClassicUO.Game.GameObjects
         {
             Serial = serial;
             Items = new EntityCollection<Item>();
-            PositionChanged += OnPositionChanged;
         }
+
+        protected long LastAnimationChangeTime { get; set; }
 
         public EntityCollection<Item> Items { get; }
 
@@ -117,18 +102,18 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public override Position Position
-        {
-            get => base.Position;
-            set
-            {
-                if (base.Position != value)
-                {
-                    base.Position = value;
-                    _delta |= Delta.Position;
-                }
-            }
-        }
+        //public override Position Position
+        //{
+        //    get => base.Position;
+        //    set
+        //    {
+        //        if (base.Position != value)
+        //        {
+        //            base.Position = value;
+        //            _delta |= Delta.Position;
+        //        }
+        //    }
+        //}
 
         public Direction Direction
         {
@@ -178,6 +163,13 @@ namespace ClassicUO.Game.GameObjects
             if (d.HasFlag(Delta.Properties)) PropertiesChanged.Raise(this);
         }
 
+        protected override void OnPositionChanged()
+        {
+            base.OnPositionChanged();
+
+            _delta |= Delta.Position;
+        }
+
         public void ProcessDelta()
         {
             Delta d = _delta;
@@ -188,14 +180,10 @@ namespace ClassicUO.Game.GameObjects
 
         public override void Dispose()
         {
-            PositionChanged -= OnPositionChanged;
             _properties.Clear();
             base.Dispose();
         }
 
-        protected virtual void OnPositionChanged(object sender, EventArgs e)
-        {
-        }
 
         public static implicit operator Serial(Entity entity)
         {
@@ -212,9 +200,9 @@ namespace ClassicUO.Game.GameObjects
             return Serial.GetHashCode();
         }
 
-        public virtual void ProcessAnimation()
-        {
-        }
+        public abstract void ProcessAnimation();
+
+        public abstract Graphic GetGraphicForAnimation();
 
         [Flags]
         protected enum Delta

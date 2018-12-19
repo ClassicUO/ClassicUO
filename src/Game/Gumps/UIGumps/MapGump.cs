@@ -24,6 +24,7 @@ using ClassicUO.Game.Map;
 using ClassicUO.Game.Views;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -47,15 +48,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private unsafe void Load()
         {
-            int size = IO.Resources.Map.MapsDefaultSize[World.MapIndex][0] * IO.Resources.Map.MapsDefaultSize[World.MapIndex][1];
+            int size = IO.Resources.Map.MapsDefaultSize[World.MapIndex, 0] * IO.Resources.Map.MapsDefaultSize[World.MapIndex, 1];
             ushort[] buffer = new ushort[size];
             int maxBlock = size - 1;
 
-            for (int bx = 0; bx < IO.Resources.Map.MapBlocksSize[World.MapIndex][0]; bx++)
+            for (int bx = 0; bx < IO.Resources.Map.MapBlocksSize[World.MapIndex, 0]; bx++)
             {
                 int mapX = bx * 8;
 
-                for (int by = 0; by < IO.Resources.Map.MapBlocksSize[World.MapIndex][1]; by++)
+                for (int by = 0; by < IO.Resources.Map.MapBlocksSize[World.MapIndex, 1]; by++)
                 {
                     IndexMap indexMap = World.Map.GetIndex(bx, by);
 
@@ -90,7 +91,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         {
                             StaticsBlock staticBlock = sb[c];
 
-                            if (staticBlock.Color > 0 && staticBlock.Color != 0xFFFF && !View.IsNoDrawable(staticBlock.Color))
+                            if (staticBlock.Color > 0 && staticBlock.Color != 0xFFFF && !GameObjectHelper.IsNoDrawable(staticBlock.Color))
                             {
                                 pos = staticBlock.Y * 8 + staticBlock.X;
                                 ref MapCells cell = ref infoCells[pos];
@@ -108,7 +109,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     for (int y = 0; y < 8; y++)
                     {
-                        int block = (mapY + y) * IO.Resources.Map.MapsDefaultSize[World.MapIndex][0] + mapX;
+                        int block = (mapY + y) * IO.Resources.Map.MapsDefaultSize[World.MapIndex, 0] + mapX;
 
                         for (int x = 0; x < 8; x++)
                         {
@@ -124,7 +125,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
             }
 
-            _mapTexture = new SpriteTexture(IO.Resources.Map.MapsDefaultSize[World.MapIndex][0], IO.Resources.Map.MapsDefaultSize[World.MapIndex][1], false);
+            _mapTexture = new SpriteTexture(IO.Resources.Map.MapsDefaultSize[World.MapIndex, 0], IO.Resources.Map.MapsDefaultSize[World.MapIndex, 1], false);
             _mapTexture.SetData(buffer);
         }
 
@@ -150,7 +151,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (minBlockY < 0)
                 minBlockY = 0;
             int maxBlockIndex = World.Map.MapBlockIndex;
-            int mapBlockHeight = IO.Resources.Map.MapBlocksSize[World.MapIndex][1];
+            int mapBlockHeight = IO.Resources.Map.MapBlocksSize[World.MapIndex, 1];
             ushort[] data = new ushort[Width * Height];
 
             for (int i = minBlockX; i <= maxBlockX; i++)
@@ -234,15 +235,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
             }
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            //spriteBatch.Draw2D(_mapTexture, Bounds, position);
+            //batcher.Draw2D(_mapTexture, Bounds, position);
 
-            //spriteBatch.Draw2D(_mapTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), _mapTexture.Bounds, Vector3.Zero);
+            //batcher.Draw2D(_mapTexture, new Rectangle((int)position.X, (int)position.Y, Width, Height), _mapTexture.Bounds, Vector3.Zero);
 
-            //Draw(spriteBatch, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
+            //Draw(batcher, new Rectangle((int)position.X, (int)position.Y, Width, Height), 0, 0);
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
 
         public static Vector2 RotateVector2(Vector2 point, float radians, Vector2 pivot)
@@ -259,7 +260,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return rotatedPoint;
         }
 
-        public bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY)
+        public bool Draw(Batcher2D batcher, Rectangle dst, int offsetX, int offsetY)
         {
             Rectangle src = new Rectangle();
 
@@ -295,7 +296,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //dst.X = (int)rotDest.X;
             //dst.Y = (int)rotDest.Y;
 
-            return spriteBatch.Draw2D(_mapTexture, dst, src, Vector3.Zero);
+            return batcher.Draw2D(_mapTexture, dst, src, Vector3.Zero);
         }
     }
 }

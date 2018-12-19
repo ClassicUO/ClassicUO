@@ -18,9 +18,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
+
 namespace ClassicUO.Game.Data
 {
-    public struct BuffIcon
+    public readonly struct BuffIcon : IEquatable<BuffIcon>
     {
         public BuffIcon(Graphic graphic, long timer, string text)
         {
@@ -29,10 +32,15 @@ namespace ClassicUO.Game.Data
             Text = text;
         }
 
-        public Graphic Graphic { get; }
+        public readonly Graphic Graphic;
 
-        public long Timer { get; }
+        public readonly long Timer;
 
-        public string Text { get; }
+        public readonly string Text;
+
+        public bool Equals(BuffIcon other)
+        {
+            return Graphic.Equals(other.Graphic);
+        }
     }
 }

@@ -24,7 +24,9 @@ using System.Collections.Generic;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
+using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Coroutines;
 
 using Microsoft.Xna.Framework.Graphics;
 
@@ -32,26 +34,16 @@ namespace ClassicUO.Game.Scenes
 {
     public abstract class Scene : IUpdateable, IDisposable
     {
-        protected Scene(ScenesType type)
+        protected Scene()
         {
-            SceneType = type;
-            Game = Service.Get<GameLoop>();
-            Device = Game.GraphicsDevice;
-            UIManager = Service.Get<UIManager>();
         }
 
 
-        protected GraphicsDevice Device { get; }
-
         public bool IsDisposed { get; private set; }
-
-        protected GameLoop Game { get; }
-
-        protected UIManager UIManager { get; }
 
         public int RenderedObjectsCount { get; protected set; }
 
-        public ScenesType SceneType { get; }
+        public CoroutineManager Coroutines { get; } = new CoroutineManager();
 
         public virtual void Dispose()
         {
@@ -61,25 +53,44 @@ namespace ClassicUO.Game.Scenes
             Unload();
         }
 
-        public virtual void Update(double totalMS, double frameMS)
-        {
-        }
-
+      
         public virtual void Load()
         {
         }
 
         public virtual void Unload()
         {
+            Coroutines.Clear();
+
+            //Animations.Clear();
+            //Art.Clear();
+            //TextmapTextures.Clear();
+            //IO.Resources.Gumps.Clear();
+            //IO.Resources.Map.Clear();
+        }
+
+        public virtual void Update(double totalMS, double frameMS)
+        {
+            CleaningResources();
+            Coroutines.Update();
         }
 
         public virtual void FixedUpdate(double totalMS, double frameMS)
         {
         }
 
-        public virtual bool Draw(SpriteBatch3D sb3D, SpriteBatchUI sbUI)
+        public virtual bool Draw(Batcher2D batcher)
         {
             return true;
+        }
+
+        private void CleaningResources()
+        {
+            Art.ClearUnusedTextures();
+            IO.Resources.Gumps.ClearUnusedTextures();
+            TextmapTextures.ClearUnusedTextures();
+            Animations.ClearUnusedTextures();
+            World.Map?.ClearUnusedBlocks();
         }
     }
 }

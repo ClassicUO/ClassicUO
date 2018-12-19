@@ -86,6 +86,12 @@ namespace ClassicUO.Game.GameObjects
             if (IsDisposed)
                 return;
 
+            if (Source != null && Source.IsDisposed /*|| Distance > World.ViewRange*/)
+            {
+                Dispose();
+                return;
+            }
+
             if (IsEnabled)
             {
                 if (Duration < totalMS && Duration >= 0)
@@ -124,6 +130,7 @@ namespace ClassicUO.Game.GameObjects
         {
             Source = source;
             Position = source.Position;
+            AddToTile(source.X, source.Y);
             //if (!IsItemEffect)
             //    Tile = World.Map.GetTile(Source.X, source.Y);
         }
@@ -135,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
             SourceY = y;
             SourceZ = z;
             Position = new Position((ushort) x, (ushort) y, (sbyte) z);
-
+            AddToTile(x, y);
             //if (!IsItemEffect)
             //    Tile = World.Map.GetTile(x, y);
         }

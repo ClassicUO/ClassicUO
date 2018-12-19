@@ -18,59 +18,44 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
 using System.Collections.Generic;
+using System.Linq;
+
+using ClassicUO.Game.Scenes;
+using ClassicUO.Utility.Coroutines;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public class House : Item
+    public sealed class House : IEquatable<Serial>, IDisposable
     {
-        public House(Serial serial) : base(serial)
+        public House(Serial serial, uint revision, bool isCustom)
         {
-            Items = new List<Static>();
+            Serial = serial;
+            Revision = revision;
+            IsCustom = isCustom;
         }
 
-        public uint Revision { get; set; }
+        public Serial Serial { get; }
+        public uint Revision { get; private set; }
+        public List<Multi> Components { get; } = new List<Multi>();
+        public bool IsCustom { get; }
 
-        public new List<Static> Items { get; }
-
-        public void GenerateCustom()
+        public void Generate()
         {
-            //foreach (Static s in Items)
-            //{
-            //    //Tile tile = World.Map.GetTile(s.Position.X, s.Position.Y);
-            //    //tile.AddGameObject(s);
-            //}
-        }
-
-        public void GenerateOriginal(Multi multi)
-        {
-            foreach (MultiComponent c in multi.Components)
+            Components.ForEach(s =>
             {
-                //ref Tile tile = ref World.Map.GetTile(c.Position.X, c.Position.Y);
-                //tile.AddGameObject();
-
-                new Static(c.Graphic, 0, 0)
-                {
-                    Position = c.Position
-                };
-
-                //tile.AddGameObject(new Static(c.Graphic, 0, 0)
-                //{
-                //    Position = c.Position
-                //});
-            }
+                s.AddToTile();
+            });
         }
 
-        public override void Dispose()
-        {
-            Clear();
-            base.Dispose();
-        }
+        public bool Equals(Serial other) => Serial == other;
 
-        public void Clear()
+        public void Dispose()
         {
-            Items.ForEach(s => s.Dispose());
-            Items.Clear();
+            Components.ForEach(s => s.Dispose());
+            Components.Clear();
         }
     }
 }

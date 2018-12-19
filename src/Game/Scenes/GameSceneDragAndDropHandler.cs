@@ -44,13 +44,13 @@ namespace ClassicUO.Game.Scenes
             {
                 if (value == null && _heldItem != null)
                 {
-                    //UIManager.RemoveInputBlocker(this);
-                    UIManager.GameCursor.ClearDraggedItem();
+                    //Engine.UI.RemoveInputBlocker(this);
+                    Engine.UI.GameCursor.ClearDraggedItem();
                 }
                 else if (value != null && _heldItem == null)
                 {
-                    //UIManager.AddInputBlocker(this);
-                    UIManager.GameCursor.SetDraggedItem(value.DisplayedGraphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && TileData.IsStackable( value.ItemData.Flags) );
+                    //Engine.UI.AddInputBlocker(this);
+                    Engine.UI.GameCursor.SetDraggedItem(value.DisplayedGraphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && TileData.IsStackable( value.ItemData.Flags) );
                 }
 
                 _heldItem = value;
@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (!amount.HasValue && !item.IsCorpse && item.Amount > 1)
             {
-                if (UIManager.GetByLocalSerial<SplitMenuGump>(item) != null)
+                if (Engine.UI.GetByLocalSerial<SplitMenuGump>(item) != null)
                     return;
 
                 SplitMenuGump gump = new SplitMenuGump(item, new Point(x, y))
@@ -78,8 +78,8 @@ namespace ClassicUO.Game.Scenes
                     X = Mouse.Position.X - 80,
                     Y = Mouse.Position.Y - 40,
                 };
-                UIManager.Add(gump);
-                UIManager.AttemptDragControl(gump, Mouse.Position, true);
+                Engine.UI.Add(gump);
+                Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
             }
             else
             {
@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Scenes
 
         private void CloseItemGumps(Item item)
         {
-            UIManager.Remove<Gump>(item);
+            Engine.UI.Remove<Gump>(item);
 
             if (item.Container.IsValid)
             {

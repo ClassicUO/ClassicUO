@@ -105,6 +105,8 @@ namespace ClassicUO.Renderer
 
         public bool IsPartialHue { get; set; }
 
+        public bool SaveHitMap { get; set; }
+
         public bool IsDisposed { get; private set; }
 
         public int Width { get; private set; }
@@ -113,12 +115,12 @@ namespace ClassicUO.Renderer
 
         public FontTexture Texture { get; private set; }
 
-        public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            return Draw(spriteBatch, new Rectangle(position.X, position.Y, Width, Height), 0, 0, hue);
+            return Draw(batcher, new Rectangle(position.X, position.Y, Width, Height), 0, 0, hue);
         }
 
-        public bool Draw(SpriteBatchUI spriteBatch, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
+        public bool Draw(Batcher2D batcher, Rectangle dst, int offsetX, int offsetY, Vector3? hue = null)
         {
             if (string.IsNullOrEmpty(Text))
                 return false;
@@ -148,7 +150,7 @@ namespace ClassicUO.Renderer
                 dst.Height = src.Height;
             }
 
-            return spriteBatch.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);
+            return batcher.Draw2D(Texture, dst, src, hue ?? Vector3.Zero);
         }
 
         public void CreateTexture()
@@ -162,18 +164,15 @@ namespace ClassicUO.Renderer
             if (IsHTML)
                 Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
             bool ispartial = false;
-            //Fonts.FontTextureInfo? info;
 
             if (IsUnicode)
-                Texture = Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle);
+                Texture = Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle, SaveHitMap);
             else
-                Texture = Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, out ispartial);
+                Texture = Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, out ispartial, SaveHitMap);
             IsPartialHue = ispartial;
 
             if (Texture != null)
             {
-                //Texture = new FontTexture(info.Value.Width, info.Value.Height, info.Value.LinesCount, info.Value.Links);
-                //Texture.SetData(info.Value.Pixels);
                 Width = Texture.Width;
                 Height = Texture.Height;
                 Links = Texture.Links;

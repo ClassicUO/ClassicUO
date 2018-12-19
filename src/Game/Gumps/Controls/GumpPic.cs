@@ -24,7 +24,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public abstract class GumpPicBase : GumpControl
+    public abstract class GumpPicBase : Control
     {
         private ushort _lastGump = 0xFFFF;
 
@@ -58,13 +58,14 @@ namespace ClassicUO.Game.Gumps.Controls
                 Height = Texture.Height;
             }
 
+            Texture.Ticks = (long) totalMS;
+
             base.Update(totalMS, frameMS);
         }
 
         protected override bool Contains(int x, int y)
         {
             return Texture.Contains(x, y);
-            //return IO.Resources.Gumps.Contains(Graphic, x, y);
         }
     }
 
@@ -80,17 +81,22 @@ namespace ClassicUO.Game.Gumps.Controls
             Texture = IO.Resources.Gumps.GetGumpTexture(Graphic);
         }
 
+        public GumpPic()
+        {
+
+        }
+
         public bool IsPartialHue { get; set; }
 
         public GumpPic(string[] parts) : this(int.Parse(parts[1]), int.Parse(parts[2]), Graphic.Parse(parts[3]), parts.Length > 4 ? Hue.Parse(parts[4].Substring(parts[4].IndexOf('=') + 1)) : (Hue) 0)
         {
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, IsPartialHue, 0, false));
+            batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Hue, IsPartialHue, 0, false));
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
     }
 }

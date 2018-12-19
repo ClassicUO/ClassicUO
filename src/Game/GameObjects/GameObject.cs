@@ -20,8 +20,10 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
@@ -36,14 +38,12 @@ namespace ClassicUO.Game.GameObjects
 {
     public abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
     {
-        private Lazy< List<TextOverhead> > _overHeads = new Lazy<List<TextOverhead>>(() =>
-        {
-            return new List<TextOverhead>();
-        }) ;
         private Position _position = Position.Invalid;
         private View _view;
         public Vector3 Offset;
-        
+        private readonly Deque<TextOverhead> _overHeads = new Deque<TextOverhead>(5);
+        private Tile _tile;
+
         protected GameObject()
         {
             
@@ -53,47 +53,23 @@ namespace ClassicUO.Game.GameObjects
         public GameObject Right { get; set; }
 
 
-       
-        protected Vector3 ScreenPosition { get; private set; }
+
+        public Vector3 ScreenPosition { get; private set; }
         
         public Vector3 RealScreenPosition { get; protected set; }
 
         public bool IsPositionChanged { get; protected set; }
 
-        //public Tile Tile { get; protected set; }
-
-        public virtual Position Position
+        public Position Position
         {
             get => _position;
             set
             {
                 if (_position != value)
                 {
-                    //if (World.Map != null)
-                    //{
-                    //    if (Tile != null/* Tile.Invalid*/)
-                    //        Tile.RemoveGameObject(this);
-                    //}
-
                     _position = value;
                     ScreenPosition = new Vector3((_position.X - _position.Y) * 22, (_position.X + _position.Y) * 22 - _position.Z * 4, 0);
                     IsPositionChanged = true;
-
-                    //if (World.Map != null)
-                    //{
-                    //     Tile newTile =  World.Map.GetTile(value.X, value.Y);
-
-                    //    if (newTile != null)
-                    //        newTile.AddGameObject(this);
-                    //    Tile = newTile;
-                    //}
-                    //else if (this != World.Player)
-                    //    Dispose();
-
-                    if (World.Map != null)
-                        Tile = World.Map.GetTile(value.X, value.Y);
-                    else if (this != World.Player)
-                        Dispose();
                 }
             }
         }
@@ -124,75 +100,85 @@ namespace ClassicUO.Game.GameObjects
 
         public sbyte AnimIndex { get; set; }
 
-        public IReadOnlyList<TextOverhead> OverHeads => _overHeads.IsValueCreated ? _overHeads.Value : null;
-
         public int CurrentRenderIndex { get; set; }
 
         public byte UseInRender { get; set; }
 
         public short PriorityZ { get; set; }
 
-        private Tile _tile;
+        public IReadOnlyList<TextOverhead> Overheads => _overHeads;
 
-        public Tile Tile
-        {
-            get => _tile;
-            set
-            {
-                if (_tile != value)
-                {
-                    _tile?.RemoveGameObject(this);
-                    _tile = value;
+        //public Tile Tile
+        //{
+        //    get => _tile;
+        //    set
+        //    {
+        //        if (_tile != value)
+        //        {
+        //            _tile?.RemoveGameObject(this);
+        //            _tile = value;
 
-                    if (_tile != null)
-                        _tile.AddGameObject(this);
-                    else
-                    {
-                        if (this != World.Player && !IsDisposed) Dispose();
-                    }
-                }
-            }
-        }
-
+        //            if (_tile != null)
+        //                _tile.AddGameObject(this);
+        //            else
+        //            {
+        //                if (this != World.Player && !IsDisposed) Dispose();
+        //            }
+        //        }
+        //    }
+        //}
 
         public bool IsDisposed { get; private set; }
 
-        public int Distance => DistanceTo(World.Player);
-
-        public virtual void Update(double totalMS, double frameMS)
+        public int Distance
         {
-            if (IsDisposed) return;
-
-            if (_overHeads.IsValueCreated)
-            {
-                for (int i = 0; i < _overHeads.Value.Count; i++)
+            get
+            {         
+                    
+                if (World.Player.Steps.Count > 0)
                 {
-                    TextOverhead gt = _overHeads.Value[i];
-                    gt.Update(totalMS, frameMS);
+                    Mobile.Step step = World.Player.Steps.Back();
 
-                    if (gt.IsDisposed)
-                        _overHeads.Value.RemoveAt(i--);
+                    return Position.DistanceTo(step.X, step.Y);
                 }
+
+                return Position.DistanceTo(World.Player.Position);
+
             }
         }
 
+        public virtual void Update(double totalMS, double frameMS)
+        {
+            for (int i = 0; i < _overHeads.Count; i++)
+            {
+                var overhead = _overHeads[i];
+                overhead.Update(totalMS, frameMS);
+                
+                if (overhead.IsDisposed)
+                    _overHeads.RemoveAt(i--);
+            }
+        }
+
+        public void AddToTile(int x, int y)
+        {
+            if (World.Map != null)
+            {
+                //if (_tile != null && _tile.X == x && _tile.Y == y)
+                //    return;
+
+                if (Position != Position.Invalid)
+                    _tile?.RemoveGameObject(this);
+
+                _tile = World.Map.GetTile(x, y);
+                _tile?.AddGameObject(this);
+            }
+        }
+
+        public void AddToTile() => AddToTile(X, Y);
+      
+
         public event EventHandler Disposed;
 
-        //public void SetTile(ushort x, ushort y)
-        //{
-        //    if (World.Map != null)
-        //    {
-        //        if (Tile != null /*Tile.Invalid*/)
-        //            Tile.RemoveGameObject(this);
-        //         Tile newTile =  World.Map.GetTile(x, y);
-
-        //        if (newTile != null)
-        //            newTile.AddGameObject(this);
-        //        Tile = newTile;
-        //    }
-        //    else
-        //        Dispose();
-        //}
 
         public void UpdateRealScreenPosition(Point offset)
         {
@@ -200,20 +186,7 @@ namespace ClassicUO.Game.GameObjects
             IsPositionChanged = false;
         }
 
-        public int DistanceTo(GameObject entity)
-        {
-            if (entity is Mobile mob)
-            {
-                if (mob.Steps.Count > 0)
-                {
-                    Mobile.Step step = mob.Steps.Back();
-
-                    return Position.DistanceTo(step.X, step.Y);
-                }
-            }
-
-            return Position.DistanceTo(entity.Position);
-        }
+        public int DistanceTo(GameObject entity) => Position.DistanceTo(entity.Position);
 
         protected virtual View CreateView()
         {
@@ -227,19 +200,19 @@ namespace ClassicUO.Game.GameObjects
 
             TextOverhead overhead;
 
-            for (int i = 0; i < _overHeads.Value.Count; i++)
-            {
-                overhead = _overHeads.Value[i];
+            //for (int i = 0; i < _overHeads.Value.Count; i++)
+            //{
+            //    overhead = _overHeads.Value[i];
 
-                if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
-                {
-                    overhead.Hue = hue;
-                    _overHeads.Value.RemoveAt(i);
-                    InsertGameText(overhead);
+            //    if (type == MessageType.Label && overhead.Text == text && overhead.MessageType == type && !overhead.IsDisposed)
+            //    {
+            //        overhead.Hue = hue;
+            //        _overHeads.Value.RemoveAt(i);
+            //        InsertGameText(overhead);
 
-                    return overhead;
-                }
-            }
+            //        return overhead;
+            //    }
+            //}
 
             int width = isunicode ? Fonts.GetWidthUnicode(font, text) : Fonts.GetWidthASCII(font, text);
 
@@ -248,16 +221,17 @@ namespace ClassicUO.Game.GameObjects
             else
                 width = 0;
             overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive);
+
             InsertGameText(overhead);
 
-            if (_overHeads.Value.Count > 5)
+            if (_overHeads.Count > 5)
             {
-                TextOverhead over = _overHeads.Value[_overHeads.Value.Count - 1];
+                TextOverhead over = _overHeads[_overHeads.Count - 1];
 
-                if (!over.IsPersistent && over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
+                if (over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
                 {
                     over.Dispose();
-                    _overHeads.Value.RemoveAt(_overHeads.Value.Count - 1);
+                    _overHeads.RemoveAt(_overHeads.Count - 1);
                 }
             }
 
@@ -266,7 +240,13 @@ namespace ClassicUO.Game.GameObjects
 
         private void InsertGameText(TextOverhead gameText)
         {
-            _overHeads.Value.Insert(_overHeads.Value.Count == 0 || _overHeads.Value[0].MessageType != MessageType.Label ? 0 : 1, gameText);
+            _overHeads.AddToFront(gameText);
+            //_overHeads.Insert(_overHeads.Count == 0 || _overHeads[0].MessageType != MessageType.Label ? 0 : 1, gameText);
+        }
+
+        protected virtual void OnPositionChanged()
+        {
+
         }
 
         protected void DisposeView()
@@ -284,14 +264,18 @@ namespace ClassicUO.Game.GameObjects
             Disposed.Raise();
 
             DisposeView();
-            Tile = null;
 
-            if (_overHeads.IsValueCreated)
+            _tile?.RemoveGameObject(this);
+            _tile = null;
+
+            //Tile = null;
+
+            foreach (TextOverhead textOverhead in _overHeads)
             {
-                _overHeads.Value.ForEach(s => s.Dispose());
-                _overHeads.Value.Clear();
-                _overHeads = null;
+                textOverhead.Dispose();
             }
+            //_overHeads.ForEach(s => s.Dispose());
+            _overHeads.Clear();            
         }
     }
 }

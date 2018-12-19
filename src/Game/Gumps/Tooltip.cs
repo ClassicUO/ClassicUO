@@ -32,12 +32,13 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps
 {
-    public class Tooltip : IDrawableUI
+    public class Tooltip 
     {
         private Entity _gameObject;
         private uint _hash;
         private RenderedText _renderedText;
         private string _textHTML;
+        private float _lastHoverTime;
 
         public string Text { get; protected set; }
 
@@ -45,11 +46,7 @@ namespace ClassicUO.Game.Gumps
 
         public GameObject Object => _gameObject;
 
-        public bool AllowedToDraw { get; set; } = true;
-
-        public SpriteTexture Texture { get; set; }
-
-        public bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (_gameObject != null && _hash != _gameObject.PropertiesHash)
             {
@@ -58,6 +55,9 @@ namespace ClassicUO.Game.Gumps
             }
 
             if (string.IsNullOrEmpty(Text))
+                return false;
+
+            if (_lastHoverTime > Engine.Ticks)
                 return false;
 
             if (_renderedText == null)
@@ -84,20 +84,19 @@ namespace ClassicUO.Game.Gumps
                 Fonts.RecalculateWidthByInfo = false;
             }
 
-            GameLoop window = Service.Get<GameLoop>();
 
             if (position.X < 0)
                 position.X = 0;
-            else if (position.X > window.WindowWidth - (_renderedText.Width + 8))
-                position.X = window.WindowWidth - (_renderedText.Width + 8);
+            else if (position.X > Engine.WindowWidth - (_renderedText.Width + 8))
+                position.X = Engine.WindowWidth - (_renderedText.Width + 8);
 
             if (position.Y < 0)
                 position.Y = 0;
-            else if (position.Y > window.WindowHeight - (_renderedText.Height + 8))
-                position.Y = window.WindowHeight - (_renderedText.Height + 8);
-            spriteBatch.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X - 4, position.Y - 2, _renderedText.Width + 8, _renderedText.Height + 4), ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
+            else if (position.Y > Engine.WindowHeight - (_renderedText.Height + 8))
+                position.Y = Engine.WindowHeight - (_renderedText.Height + 8);
+            batcher.Draw2D(CheckerTrans.TransparentTexture, new Rectangle(position.X - 4, position.Y - 2, _renderedText.Width + 8, _renderedText.Height + 4), ShaderHuesTraslator.GetHueVector(0, false, 0.3f, false));
 
-            return _renderedText.Draw(spriteBatch, position);
+            return _renderedText.Draw(batcher, position);
         }
 
         public void Clear()
@@ -112,6 +111,7 @@ namespace ClassicUO.Game.Gumps
                 _gameObject = obj;
                 _hash = obj.PropertiesHash;
                 Text = ReadProperties(obj, out _textHTML);
+                _lastHoverTime = Engine.Ticks + 250;
             }
         }
 

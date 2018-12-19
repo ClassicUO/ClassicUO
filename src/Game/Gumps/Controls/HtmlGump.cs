@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    public class HtmlGump : GumpControl
+    public class HtmlGump : Control
     {
         private RenderedText _gameText;
         private IScrollBar _scrollBar;
@@ -201,18 +201,18 @@ namespace ClassicUO.Game.Gumps.Controls
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (IsDisposed)
                 return false;
-            Rectangle scissor = ScissorStack.CalculateScissors(spriteBatch.TransformMatrix, new Rectangle(position.X, position.Y, Width, Height));
+            Rectangle scissor = ScissorStack.CalculateScissors(batcher.TransformMatrix, new Rectangle(position.X, position.Y, Width, Height));
 
             if (ScissorStack.PushScissors(scissor))
             {
-                spriteBatch.EnableScissorTest(true);
-                base.Draw(spriteBatch, new Point(position.X - 0, position.Y - 0)); // TODO: set a scrollarea
-                _gameText.Draw(spriteBatch, new Rectangle(position.X + (HasBackground ? 4 : 0), position.Y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0)), ScrollX, ScrollY);
-                spriteBatch.EnableScissorTest(false);
+                batcher.EnableScissorTest(true);
+                base.Draw(batcher, new Point(position.X - 0, position.Y - 0)); // TODO: set a scrollarea
+                _gameText.Draw(batcher, new Rectangle(position.X + (HasBackground ? 4 : 0), position.Y + (HasBackground ? 4 : 0), Width - (HasBackground ? 8 : 0), Height - (HasBackground ? 8 : 0)), ScrollX, ScrollY);
+                batcher.EnableScissorTest(false);
                 ScissorStack.PopScissors();
             }
 

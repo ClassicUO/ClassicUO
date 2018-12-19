@@ -20,11 +20,13 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -50,28 +52,22 @@ namespace ClassicUO.Game.Gumps.UIGumps
             CanBeSaved = true;
         }
 
-        public override bool Save(out Dictionary<string, object> data)
-        {
-            if (base.Save(out data))
-            {
-                data["serial"] = _spellBook.Serial.Value;
-                return true;
-            }
 
-            return false;
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            writer.Write(_spellBook.Serial);
         }
 
-        public override bool Restore(Dictionary<string, object> data)
+        public override void Restore(BinaryReader reader)
         {
-            //if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(SpellbookGump), "serial", out uint serial))
-            //{
-            //    GameActions.DoubleClick(serial);
-            //    Dispose();
-            //    return true;
-            //}
+            base.Restore(reader);
 
-            return false;
+            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(reader.ReadUInt32());
+
+            Dispose();
         }
+
 
         private void BuildGump()
         {          
@@ -330,7 +326,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 icon.DragBegin += (sender, e) =>
                 {
-                    GumpControl ctrl = (GumpControl) sender;
+                    Control ctrl = (Control) sender;
                     int idx = (int) (ctrl.LocalSerial > 1000 ? ctrl.LocalSerial - 1000 : ctrl.LocalSerial - 100) + 1;
                     SpellDefinition? def = null;
 
@@ -373,8 +369,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     {
                         X = Mouse.Position.X - 22, Y = Mouse.Position.Y - 22
                     };
-                    UIManager.Add(gump);
-                    UIManager.AttemptDragControl(gump, Mouse.Position, true);
+                    Engine.UI.Add(gump);
+                    Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
                 };
                 AddChildren(icon, page1);
 
@@ -618,15 +614,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             spellImage.DragBegin += (sender, e) =>
             {
-                GumpControl ctrl = (GumpControl) sender;
+                Control ctrl = (Control) sender;
                 SpellDefinition def = SpellsMagery.GetSpell((int) ctrl.Tag);
 
                 UseSpellButtonGump gump = new UseSpellButtonGump(def)
                 {
                     X = Mouse.Position.X - 22, Y = Mouse.Position.Y - 22
                 };
-                UIManager.Add(gump);
-                UIManager.AttemptDragControl(gump, Mouse.Position, true);
+                Engine.UI.Add(gump);
+                Engine.UI.AttemptDragControl(gump, Mouse.Position, true);
             };
             AddChildren(spellImage, page);
 
@@ -709,12 +705,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButton.Left && sender is GumpControl ctrl) SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
+            if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? ActivePage - 1 : ActivePage + 1);
         }
 
         private void PageCornerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
-            if (e.Button == MouseButton.Left && sender is GumpControl ctrl) SetActivePage(ctrl.LocalSerial == 0 ? 1 : _maxPage);
+            if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(ctrl.LocalSerial == 0 ? 1 : _maxPage);
         }
 
         public override void OnButtonClick(int buttonID)

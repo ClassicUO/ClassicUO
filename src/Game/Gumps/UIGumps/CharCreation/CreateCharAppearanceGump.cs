@@ -461,7 +461,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
             public ushort SelectedHue => Pallet != null ? (ushort) (Pallet[SelectedIndex] + 1) : (ushort) 0;
         }
 
-        private class CustomColorPicker : GumpControl
+        private class CustomColorPicker : Control
         {
             private readonly int _cellW;
             private readonly int _cellH;

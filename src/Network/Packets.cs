@@ -1120,20 +1120,18 @@ namespace ClassicUO.Network
     {
         public PResend() : base(0x22)
         {
-            WriteByte(World.Player.SequenceNumber);
-            WriteByte((byte) World.Player.NotorietyFlag);
         }
     }
 
     public sealed class PWalkRequest : PacketWriter
     {
-        public PWalkRequest(Direction direction, byte seq, bool run) : base(0x02)
+        public PWalkRequest(Direction direction, byte seq, bool run, uint fastwalk) : base(0x02)
         {
             if (run)
                 direction |= Direction.Running;
             WriteByte((byte) direction);
             WriteByte(seq);
-            WriteUInt(0);
+            WriteUInt(fastwalk);
         }
     }
 
@@ -1317,12 +1315,10 @@ namespace ClassicUO.Network
 
     public sealed class PPing : PacketWriter
     {
-        private PPing() : base(0x73)
+        public PPing() : base(0x73)
         {
             WriteByte(0);
         }
-
-        public static Lazy<PPing> Instance { get; } = new Lazy<PPing>(() => new PPing());
     }
 
     public sealed class PClientViewRange : PacketWriter

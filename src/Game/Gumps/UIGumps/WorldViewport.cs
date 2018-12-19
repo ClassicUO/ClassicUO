@@ -27,7 +27,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    public class WorldViewport : GumpControl
+    public class WorldViewport : Control
     {
         private readonly GameScene _scene;
         private Rectangle _rect;
@@ -43,15 +43,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Service.Register(this);
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             _rect.X = position.X;
             _rect.Y = position.Y;
             _rect.Width = Width;
             _rect.Height = Height;
-            spriteBatch.Draw2D(_scene.ViewportTexture, _rect, Vector3.Zero);
+            batcher.Draw2D(_scene.ViewportTexture, _rect, Vector3.Zero);
 
-            return base.Draw(spriteBatch, position, hue);
+            return base.Draw(batcher, position, hue);
         }
 
         public override void Dispose()
@@ -62,7 +62,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            UIManager.KeyboardFocusControl = Service.Get<ChatControl>().GetFirstControlAcceptKeyboardInput();
+            Engine.UI.KeyboardFocusControl = Service.Get<ChatControl>().GetFirstControlAcceptKeyboardInput();
         }
     }
 }

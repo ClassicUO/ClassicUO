@@ -20,8 +20,10 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
@@ -33,7 +35,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
-    internal class PaperDollGump : Gump, IMobilePaperdollOwner
+    internal class PaperDollGump : Gump
     {
         private static readonly ushort[] PeaceModeBtnGumps =
         {
@@ -52,7 +54,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public PaperDollGump() : base(0, 0)
         {
-            AcceptMouseInput = false;
+            
         }
 
         public PaperDollGump(Serial serial, string mobileTitle) : this()
@@ -64,8 +66,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 Mobile = mobile;
                 Title = mobileTitle;
                 BuildGump();
-                CanBeSaved = Mobile == World.Player;
-                SetNameAndPositionForSaving("paperdoll");
             }
         }
 
@@ -75,12 +75,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Dispose()
         {
-            UIManager.SavePosition(LocalSerial, Location);
+            Engine.UI.SavePosition(LocalSerial, Location);
 
             if (Mobile == World.Player)
             {
-                _virtueMenuPic.MouseDoubleClick -= VirtueMenu_MouseDoubleClickEvent;
-                _partyManifestPic.MouseDoubleClick -= PartyManifest_MouseDoubleClickEvent;
+                if (_virtueMenuPic != null)
+                    _virtueMenuPic.MouseDoubleClick -= VirtueMenu_MouseDoubleClickEvent;
+                if (_partyManifestPic != null)
+                    _partyManifestPic.MouseDoubleClick -= PartyManifest_MouseDoubleClickEvent;
             }
 
             Clear();
@@ -94,7 +96,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnMouseEnter(int x, int y)
         {
-            GameScene gs = SceneManager.GetScene<GameScene>();
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
 
             if (gs.IsHoldingItem)
             {
@@ -108,12 +110,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void BuildGump()
         {
-            //m_World = Service.GetByLocalSerial<WorldModel>();
-            //m_Client = Service.GetByLocalSerial<INetworkClient>();
+            AcceptMouseInput = false;
+            CanBeSaved = true;
             CanMove = true;
-            X = 100;
-            Y = 100;
-            //SaveOnWorldStop = true;
             LocalSerial = Mobile.Serial;
 
             if (Mobile == World.Player)
@@ -209,7 +208,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
         {
-            GameScene gs = SceneManager.GetScene<GameScene>();
+            GameScene gs = Engine.SceneManager.GetScene<GameScene>();
             if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                 return;
 
@@ -243,10 +242,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 Log.Message(LogTypes.Warning, "Party manifest pic event!!");
 
-                if (UIManager.GetByLocalSerial<PartyGumpAdvanced>() == null)
-                    UIManager.Add(new PartyGumpAdvanced());
+                if (Engine.UI.GetByLocalSerial<PartyGumpAdvanced>() == null)
+                    Engine.UI.Add(new PartyGumpAdvanced());
                 else
-                    UIManager.Remove<PartyGumpAdvanced>();
+                    Engine.UI.Remove<PartyGumpAdvanced>();
             }
         }
 
@@ -275,34 +274,20 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
-        public override bool Save(out Dictionary<string, object> data)
-        {
-            if (base.Save(out data))
-            {
-                data["serial"] = Mobile.Serial.Value;
-                return true;
-            }
 
-            return false;
+        public override void Save(BinaryWriter writer)
+        {
+            base.Save(writer);
+            writer.Write(Mobile.Serial);
         }
 
-        public override bool Restore(Dictionary<string, object> data)
+        public override void Restore(BinaryReader reader)
         {
-            //if (base.Restore(data) && Service.Get<Settings>().GetGumpValue(typeof(PaperDollGump), "serial", out uint serial))
-            //{
-            //    Mobile mobile = World.Mobiles.Get(serial);
-
-            //    if (mobile != null && World.Player == mobile)
-            //    {
-            //        GameActions.DoubleClick((Serial)(World.Player.Serial | int.MinValue));
-            //        Dispose();
-            //        return true;
-            //    }
-            //}
-
-            return false;
+            base.Restore(reader);
+            LocalSerial = reader.ReadUInt32();
+            Engine.SceneManager.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
+            Dispose();
         }
-
 
         public override void OnButtonClick(int buttonID)
         {
@@ -314,19 +299,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.Options:
 
-                    if (UIManager.GetByLocalSerial<OptionsGump>() == null)
+                    if (Engine.UI.GetByLocalSerial<OptionsGump1>() == null)
                     {
-                        UIManager.Add(new OptionsGump
+                        Engine.UI.Add(new OptionsGump1
                         {
                             X = 80, Y = 80
                         });
                     }
                     else
-                        UIManager.Remove<OptionsGump>();
+                        Engine.UI.Remove<OptionsGump1>();
 
                     break;
                 case Buttons.LogOut:
-                    UIManager.Add(new LogoutGump());
+                    Engine.UI.Add(new LogoutGump());
                     Log.Message(LogTypes.Info, "Logout request sent!");
 
                     break;
@@ -336,10 +321,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.Skills:
 
-                    if (UIManager.GetByLocalSerial<SkillGumpAdvanced>() == null)
-                        UIManager.Add(new SkillGumpAdvanced());
+                    if (Engine.UI.GetByLocalSerial<SkillGumpAdvanced>() == null)
+                        Engine.UI.Add(new SkillGumpAdvanced());
                     else
-                        UIManager.Remove<SkillGumpAdvanced>();
+                        Engine.UI.Remove<SkillGumpAdvanced>();
 
                     break;
                 case Buttons.Guild:
@@ -352,10 +337,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.Status:
 
-                    if (UIManager.GetByLocalSerial<StatusGump>() == null)
-                        UIManager.Add(new StatusGump());
+                    if (Engine.UI.GetByLocalSerial<StatusGump>() == null)
+                        Engine.UI.Add(new StatusGump());
                     else
-                        UIManager.Remove<StatusGump>();
+                        Engine.UI.Remove<StatusGump>();
 
                     break;
             }

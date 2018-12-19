@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Views
         {
         }
 
-        public override bool Draw(SpriteBatch3D spriteBatch, Vector3 position, MouseOverList list)
+        public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList list)
         {
             if (GameObject.IsDisposed)
                 return false;
@@ -53,7 +53,7 @@ namespace ClassicUO.Game.Views
             Rotation = effect.AngleToTarget;
             HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue);
 
-            return base.Draw(spriteBatch, position, list);
+            return base.Draw(batcher, position, list);
         }
     }
 }

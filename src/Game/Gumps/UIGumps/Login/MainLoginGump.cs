@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 X = 286, Y = 453
             });
 
-            AddChildren(new Label("ClassicUO Version xxx", false, 0x034E, font: 9)
+            AddChildren(new Label($"ClassicUO Version {Engine.Assembly.GetName().Version}", false, 0x034E, font: 9)
             {
                 X = 286, Y = 465
             });
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             switch ((Buttons) buttonID)
             {
                 case Buttons.NextArrow:
-                    Service.Get<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
+                    Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
 
                     break;
             }

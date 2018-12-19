@@ -34,7 +34,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.Controls
 {
-    internal class ItemGumpPaperdoll : ItemGump, IMobilePaperdollOwner
+    internal class ItemGumpPaperdoll : ItemGump
     {
         private readonly bool _isTransparent;
         private const int MALE_OFFSET = 50000;
@@ -88,12 +88,12 @@ namespace ClassicUO.Game.Gumps.Controls
             Texture.Ticks = (long) totalMS;
         }
 
-        public override bool Draw(SpriteBatchUI spriteBatch, Point position, Vector3? hue = null)
+        public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
             if (IsDisposed)
                 return false;
 
-            return spriteBatch.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue(Item.ItemData.Flags), _isTransparent ? .5f : 0, false));
+            return batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue(Item.ItemData.Flags), _isTransparent ? .5f : 0, false));
         }
 
         protected override bool Contains(int x, int y)
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (button == MouseButton.Left)
             {
-                GameScene gs = SceneManager.GetScene<GameScene>();
+                GameScene gs = Engine.SceneManager.GetScene<GameScene>();
                 if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                     return;
 

@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
@@ -33,6 +34,8 @@ namespace ClassicUO.Game.Map
 {
     public sealed class Tile
     {
+        private GameObject _firstNode;
+
         public Tile(ushort x, ushort y)
         {
             X = x;
@@ -42,120 +45,186 @@ namespace ClassicUO.Game.Map
         public ushort X { get; }
         public ushort Y { get; }
 
-        public GameObject FirstNode { get; private set; }
+        public GameObject FirstNode => _firstNode;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Add(GameObject obj)
         {
-            if (FirstNode == null)
+
+            obj.Right = null;
+
+            if (_firstNode == null)
             {
-                FirstNode = obj;             
-                FirstNode.Left = null;
-                FirstNode.Right = null;
+                obj.Left = null;
+                _firstNode = obj;
             }
             else
             {
-                GameObject last = FirstNode;
+                GameObject last = _firstNode;
 
                 while (last.Right != null)
                     last = last.Right;
 
                 last.Right = obj;
                 obj.Left = last;
-                obj.Right = null;
             }
+
+
+            //if (_firstNode == null)
+            //{
+            //    _firstNode = obj;
+            //    _firstNode.Left = null;
+            //    _firstNode.Right = null;
+
+            //}
+            //else
+            //{
+            //    GameObject last = _firstNode;
+
+            //    while (last.Right != null)
+            //        last = last.Right;
+
+            //    last.Right = obj;
+            //    obj.Left = last;
+
+            //    if (obj.Right != null)
+            //    {
+
+            //    }
+
+            //    obj.Right = null;
+
+            //}
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Remove(GameObject obj)
         {
 
-            if (obj != null)
-            {
-                GameObject left = obj.Left;
-                GameObject right = obj.Right;
+            if (_firstNode == null || obj == null)
+                return;
 
-                if (left != null)
-                    left.Right = right;
+            if (_firstNode == obj)
+                _firstNode = obj.Right;
 
-                if (right != null)
-                    right.Left = left;
+            if (obj.Right != null)
+                obj.Right.Left = obj.Left;
 
-                obj.Left = null;
-                obj.Right = null;
-            }
+            if (obj.Left != null)
+                obj.Left.Right = obj.Right;
+
+            obj.Left = null;
+            obj.Right = null;
+
+            //if (obj != null)
+            //{
+
+            //    if (obj.Left != null)
+            //        obj.Left.Right = obj.Right;
+
+            //    if (obj.Right != null)
+            //        obj.Right.Left = obj.Left;
+
+            //    obj.Right = null;
+            //    obj.Left = null;
+
+            //    //if (obj != _firstNode)
+            //    //    obj.Left.Right = obj.Right;
+
+            //    //if (obj.Right != null)
+            //    //    obj.Right.Left = obj.Left;
+
+            //    //GameObject left = obj.Left;
+            //    //GameObject right = obj.Right;
+
+            //    //if (left != null)
+            //    //    left.Right = right;
+
+            //    //if (right != null)
+            //    //    right.Left = left;
+
+            //    //obj.Left = null;
+            //    //obj.Right = null;
+            //}
 
 
-            /* GameObject founded = FirstNode;
-            if (founded == null)
-                throw new NullReferenceException();
 
-            while (founded != obj && founded != null)
-            {
-                founded = founded.Right;
-            }
 
-            if (founded != null)
-            {
-                GameObject left = founded.Left;
-                GameObject right = founded.Right;
+            //GameObject founded = FirstNode;
+            //if (founded == null)
+            //    return;
 
-                if (left != null)
-                    left.Right = right;
+            //while (founded != obj && founded != null)
+            //{
+            //    founded = founded.Right;
+            //}
 
-                if (right != null)
-                    right.Left = left;
+            //if (founded != null)
+            //{
+            //    GameObject left = founded.Left;
+            //    GameObject right = founded.Right;
 
-                founded.Left = null;
-                founded.Right = null;
-            } */
+            //    if (left != null)
+            //        left.Right = right;
+
+            //    if (right != null)
+            //        right.Left = left;
+
+            //    founded.Left = null;
+            //    founded.Right = null;
+            //}
         }
-
 
         public void AddGameObject(GameObject obj)
         {
-            short priorityZ = obj.Position.Z;
-
-            switch (obj)
+            //if (_firstNode != null)
             {
-                case Land tile:
+                short priorityZ = obj.Position.Z;
 
-                    if (tile.IsStretched)
-                        priorityZ = (short) (tile.AverageZ - 1);
-                    else
-                        priorityZ--;
-
-                    break;
-                case Mobile _:
-                    priorityZ++;
-
-                    break;
-                case Item item when item.IsCorpse:
-                    priorityZ++;
-
-                    break;
-                case GameEffect _:
-                    priorityZ += 2;
-
-                    break;
-                default:
-
+                switch (obj)
                 {
-                    IDynamicItem dyn1 = (IDynamicItem) obj;
+                    case Land tile:
 
-                    if (TileData.IsBackground(dyn1.ItemData.Flags))
-                        priorityZ--;
+                        if (tile.IsStretched)
+                            priorityZ = (short) (tile.AverageZ - 1);
+                        else
+                            priorityZ--;
 
-                    if (dyn1.ItemData.Height > 0)
+                        break;
+                    case Mobile _:
                         priorityZ++;
+
+                        break;
+                    case Item item when item.IsCorpse:
+                        priorityZ++;
+
+                        break;
+                    case GameEffect _:
+                        priorityZ += 2;
+
+                        break;
+                    default:
+
+                    {
+
+                        ref StaticTiles data = ref TileData.StaticData[obj.Graphic];
+
+                        if (TileData.IsBackground(data.Flags))
+                            priorityZ--;
+
+                        if (data.Height > 0)
+                            priorityZ++;
+                    }
+
+                        break;
                 }
 
-                    break;
+                obj.PriorityZ = priorityZ;
             }
-
-            obj.PriorityZ = priorityZ;
 
             Add(obj);
 
-            TileSorter.Sort(FirstNode);
+            _firstNode = TileSorter.Sort(_firstNode);
         }
 
         public void RemoveGameObject(GameObject obj)

@@ -26,17 +26,12 @@ namespace ClassicUO.Game
     public struct Graphic : IComparable, IComparable<ushort>
     {
         public const ushort Invariant = ushort.MaxValue;
-        public static Graphic Invalid = new Graphic(-1);
+        public static Graphic Invalid = new Graphic(0xFFFF);
         private readonly ushort _value;
 
         public Graphic(ushort graphic)
         {
             _value = graphic;
-        }
-
-        public Graphic(int graphic)
-        {
-            _value = (ushort) graphic;
         }
 
         public bool IsInvariant => _value == Invariant;
