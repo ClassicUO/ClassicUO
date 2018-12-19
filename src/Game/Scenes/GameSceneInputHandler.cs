@@ -269,7 +269,6 @@ namespace ClassicUO.Game.Scenes
             {
                 if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
                 {
-                    //if (_mousePicker.MouseOverObject is Land || _mousePicker.MouseOverObject is IDynamicItem dyn && TileData.IsSurface( dyn.ItemData.Flags))
                     if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetStaticData(_mousePicker.MouseOverObject, out var itemdata) && TileData.IsSurface(itemdata.Flags)))
                     {
                         GameObject obj = _mousePicker.MouseOverObject;
@@ -297,36 +296,17 @@ namespace ClassicUO.Game.Scenes
                     {
                         case Mobile mobile:
                             GameActions.RequestMobileStatus(mobile);
-                            //Health Bar
+           
+                            Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
 
-                            // Check if dragged mobile is in party for doing the party part ;)
-                           // PartyMember member = new PartyMember(mobile);
+                            if (mobile == World.Player)
+                                Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
 
-                            //if (World.Party.Members.Exists(x => x.Serial == member.Serial))
-                            //{
-                            //    //Checks if party member gump is already on sceen
-                            //   Engine.UI.GetByLocalSerial<PartyMemberGump>(mobile)?.Dispose();
-
-                            //    if (mobile == World.Player)
-                            //        Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
-
-                            //    PartyMemberGump partymemberGump = new PartyMemberGump(member, _mousePicker.Position.X, _mousePicker.Position.Y);
-                            //    Engine.UI.Add(partymemberGump);
-                            //    Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
-                            //    Engine.UI.AttemptDragControl(partymemberGump, new Point(_mousePicker.Position.X + (rect.Width >> 1), _mousePicker.Position.Y + (rect.Height >> 1)), true);
-                            //}
-                            //else
-                            {
-                                Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
-
-                                if (mobile == World.Player)
-                                    Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
-
-                                Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
-                                HealthBarGump currentHealthBarGump;
-                                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X= Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
-                                Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
-                            }
+                            Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
+                            HealthBarGump currentHealthBarGump;
+                            Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X= Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
+                            Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
+                            
 
                             break;
                         case Item item:
@@ -353,13 +333,7 @@ namespace ClassicUO.Game.Scenes
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
             {
-                Engine.PACKET_LOG_ENABLED = !Engine.PACKET_LOG_ENABLED;
-                if (Engine.PACKET_LOG_ENABLED)
-                    Log.Message(LogTypes.Trace, "PACKET LOG: ENBALED");
-                else
-                {
-                    Log.Message(LogTypes.Trace, "PACKET LOG: DISABLED");
-                }
+               
                 //Task.Run(async () =>
                 //{
                 //    while (true)

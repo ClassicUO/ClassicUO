@@ -33,18 +33,8 @@ namespace ClassicUO.Game
 {
     public static class World
     {
-
         private static readonly EffectManager _effectManager = new EffectManager();
 
-        public static void AddEffect(GameEffect effect)
-        {
-            _effectManager.Add(effect);
-        }
-
-        public static void AddEffect(GraphicEffectType type, Serial source, Serial target, Graphic graphic, Hue hue, Position srcPos, Position targPos, byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
-        {
-            _effectManager.Add(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
-        }
 
         public static PartySystem Party { get; } = new PartySystem();
 
@@ -232,6 +222,16 @@ namespace ClassicUO.Game
             mobile.Dispose();
 
             return true;
+        }
+
+        public static void AddEffect(GameEffect effect)
+        {
+            _effectManager.Add(effect);
+        }
+
+        public static void AddEffect(GraphicEffectType type, Serial source, Serial target, Graphic graphic, Hue hue, Position srcPos, Position targPos, byte speed, int duration, bool fixedDir, bool doesExplode, bool hasparticles, GraphicEffectBlendMode blendmode)
+        {
+            _effectManager.Add(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
         }
 
         public static void Clear()

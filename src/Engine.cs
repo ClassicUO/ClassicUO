@@ -292,48 +292,9 @@ namespace ClassicUO
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
                 MaxWidth = 150
             };
-
-
-            NetClient.PacketReceived += (sender, e) =>
-            {
-                if (PACKET_LOG_ENABLED)
-                {
-                    switch (e.ID)
-                    {
-                        case 0x22: // confirm walk
-                            e.MoveToData();
-                            byte seq = e.ReadByte();
-                            Log.Message(LogTypes.Panic, $"ConfirmWalk\t(0x22)\t\t  seq: {seq}");
-                            break;
-                        case 0x21: // case deny walk
-                            e.MoveToData();
-                            seq = e.ReadByte();
-                            Log.Message(LogTypes.Panic, $"DenyWalk\t(0x21)\t\t  seq: {seq}");
-                            break;
-                        case 0x20: // update player
-                            Log.Message(LogTypes.Panic, $"UpdatePlayer\t(0x20)");
-                            break;
-
-
-                    }
-                    //Log.Message(LogTypes.Trace, $"<< 0x{e.ID:X2} - length: {e.Length}");
-                }
-
-            };
-            NetClient.PacketSended += (sender, e) =>
-            {
-                //if (PACKET_LOG_ENABLED)
-                //{
-                //    Log.Message(LogTypes.Trace, $">> 0x{e.ID:X2} - length: {e.Length}");
-                //}
-
-            };
-
-
             base.Initialize();
         }
 
-        public static bool PACKET_LOG_ENABLED;
 
         protected override void LoadContent()
         {
