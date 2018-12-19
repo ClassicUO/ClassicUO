@@ -20,11 +20,15 @@
 #endregion
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Security;
 
 namespace ClassicUO.IO
 {
+    [SecurityCritical]
     public unsafe class DataReader
     {
+        [SecurityCritical]
         private byte* _data;
 
         internal long Position { get; set; }

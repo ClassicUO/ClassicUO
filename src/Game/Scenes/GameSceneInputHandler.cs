@@ -51,9 +51,7 @@ namespace ClassicUO.Game.Scenes
         private Entity _queuedObject;
         private bool _rightMousePressed;
 
-        public List<Mobile> MobileGumpStack = new List<Mobile>();
-        public List<Mobile> PartyMemberGumpStack = new List<Mobile>();
-        
+ 
         public bool IsMouseOverUI => Engine.UI.IsMouseOverUI && !(Engine.UI.MouseOverControl is WorldViewport);
 
         public bool IsMouseOverWorld => Engine.UI.IsMouseOverUI && Engine.UI.MouseOverControl is WorldViewport;
@@ -302,39 +300,31 @@ namespace ClassicUO.Game.Scenes
                             //Health Bar
 
                             // Check if dragged mobile is in party for doing the party part ;)
-                            PartyMember member = new PartyMember(mobile);
+                           // PartyMember member = new PartyMember(mobile);
 
-                            if (PartySystem.Members.Exists(x => x.Serial == member.Serial))
+                            //if (World.Party.Members.Exists(x => x.Serial == member.Serial))
+                            //{
+                            //    //Checks if party member gump is already on sceen
+                            //   Engine.UI.GetByLocalSerial<PartyMemberGump>(mobile)?.Dispose();
+
+                            //    if (mobile == World.Player)
+                            //        Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
+
+                            //    PartyMemberGump partymemberGump = new PartyMemberGump(member, _mousePicker.Position.X, _mousePicker.Position.Y);
+                            //    Engine.UI.Add(partymemberGump);
+                            //    Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
+                            //    Engine.UI.AttemptDragControl(partymemberGump, new Point(_mousePicker.Position.X + (rect.Width >> 1), _mousePicker.Position.Y + (rect.Height >> 1)), true);
+                            //}
+                            //else
                             {
-                                //Checks if party member gump is already on sceen
-                                if (PartyMemberGumpStack.Contains(mobile))
-                                    Engine.UI.Remove<PartyMemberGump>(mobile);
-                                else if (mobile == World.Player)
-                                {
-                                    StatusGump status = Engine.UI.GetByLocalSerial<StatusGump>();
-                                    status?.Dispose();
-                                }
+                                Engine.UI.GetByLocalSerial<HealthBarGump>(mobile)?.Dispose();
 
-                                PartyMemberGump partymemberGump = new PartyMemberGump(member, _mousePicker.Position.X, _mousePicker.Position.Y);
-                                Engine.UI.Add(partymemberGump);
-                                PartyMemberGumpStack.Add(mobile);
-                                Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
-                                Engine.UI.AttemptDragControl(partymemberGump, new Point(_mousePicker.Position.X + (rect.Width >> 1), _mousePicker.Position.Y + (rect.Height >> 1)), true);
-                            }
-                            else
-                            {
-                                if (MobileGumpStack.Contains(mobile))
-                                    Engine.UI.Remove<HealthBarGump>(mobile);
-                                else if (mobile == World.Player)
-                                {
-                                    StatusGump status = Engine.UI.GetByLocalSerial<StatusGump>();
-                                    status?.Dispose();
-                                }
+                                if (mobile == World.Player)
+                                    Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
 
-                                MobileGumpStack.Add(mobile);
                                 Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
                                 HealthBarGump currentHealthBarGump;
-                                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile, Mouse.Position.X - (rect.Width >> 1), Mouse.Position.Y - (rect.Height >> 1)));
+                                Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X= Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
                                 Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
                             }
 

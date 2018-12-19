@@ -58,13 +58,14 @@ namespace ClassicUO.Game.Gumps.Controls
                 Height = Texture.Height;
             }
 
+            Texture.Ticks = (long) totalMS;
+
             base.Update(totalMS, frameMS);
         }
 
         protected override bool Contains(int x, int y)
         {
             return Texture.Contains(x, y);
-            //return IO.Resources.Gumps.Contains(Graphic, x, y);
         }
     }
 
@@ -78,6 +79,11 @@ namespace ClassicUO.Game.Gumps.Controls
             Hue = hue;
 
             Texture = IO.Resources.Gumps.GetGumpTexture(Graphic);
+        }
+
+        public GumpPic()
+        {
+
         }
 
         public bool IsPartialHue { get; set; }

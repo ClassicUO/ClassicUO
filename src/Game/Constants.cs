@@ -36,6 +36,7 @@ namespace ClassicUO.Game
 
         public const int DRAG_ITEMS_DISTANCE = 3;
 
+        public const int MAX_FAST_WALK_STACK_SIZE = 5;
 
         public const int MAX_HOUSE_DISTANCE = 50;
 

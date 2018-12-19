@@ -26,12 +26,13 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class GumpPicTiled : Control
     {
+        private Graphic _lastGraphic;
+
         public GumpPicTiled(Graphic graphic)
         {
             CanMove = true;
             Texture = IO.Resources.Gumps.GetGumpTexture(graphic);
-
-            //AcceptMouseInput = false;
+            Graphic = _lastGraphic = graphic;
         }
 
         public GumpPicTiled(int x, int y, int width, int heigth, Graphic graphic) : this(graphic)
@@ -50,8 +51,16 @@ namespace ClassicUO.Game.Gumps.Controls
             Height = int.Parse(parts[4]);
         }
 
+        public Graphic Graphic { get; set; }
+
         public override void Update(double totalMS, double frameMS)
         {
+            if (_lastGraphic != Graphic)
+            {
+                Texture = IO.Resources.Gumps.GetGumpTexture(Graphic);
+                _lastGraphic = Graphic;
+            }
+
             Texture.Ticks = (long) totalMS;
             base.Update(totalMS, frameMS);
         }

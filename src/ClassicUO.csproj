@@ -122,7 +122,7 @@
     <Compile Include="Game\Data\SpellsNinjitsu.cs" />
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
-    <Compile Include="Game\Managers\HealthBarManager.cs" />
+    <Compile Include="Game\Gumps\Controls\GumpPicWithWidth.cs" />
     <Compile Include="Game\Managers\HouseManager.cs" />
     <Compile Include="Game\Managers\UseItemQueue.cs" />
     <Compile Include="Game\Managers\EffectManager.cs" />
@@ -264,7 +264,7 @@
     <Compile Include="Game\Gumps\UIGumps\TopBarGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\WorldViewport.cs" />
     <Compile Include="Game\Gumps\UIGumps\WorldViewportGump.cs" />
-    <Compile Include="Game\Gumps\UIManager.cs" />
+    <Compile Include="Game\Managers\UIManager.cs" />
     <Compile Include="Game\Hue.cs" />
     <Compile Include="Game\Map\Map.cs" />
     <Compile Include="Game\Map\Chunk.cs" />

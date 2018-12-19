@@ -29,6 +29,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
@@ -1126,12 +1127,18 @@ namespace ClassicUO.Network
                 var pageNum = p.ReadUShort();
                 var lineCnt = p.ReadUShort();
                 var lines = new List<string>();
-                for(int x = 0; x < lineCnt;x++ )
+                for(int x = 0; x < lineCnt; x++ )
                 {
-                    if ( BookGump.IsNewBookD4 )
-                        lines.Add( p.ReadUTF8String().TrimEnd('\n') );
-                    else
-                        lines.Add( p.ReadASCII().TrimEnd('\n') );
+
+                    //if (BookGump.IsNewBookD4)
+                    //    lines.Add(p.ReadASCII().TrimEnd('\n'));
+                    //else 
+                    lines.Add(p.ReadASCII().TrimEnd('\n'));
+
+                    //if ( BookGump.IsNewBookD4 )
+                    //    lines.Add( p.ReadUTF8String().TrimEnd('\n') );
+                    //else
+                    //    lines.Add( p.ReadASCII().TrimEnd('\n') );
                 }
                 pages.Add( pageNum, lines );
                
@@ -1744,14 +1751,17 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 1: // fast walk prevention
-                    for (int i = 0; i < 6; i++) p.ReadUInt();
+
+                    for (int i = 0; i < 6; i++)
+                    {
+                       World.Player.Walker.FastWalkStack.SetValue(i, p.ReadUInt());
+                    }
 
                     break;
                 //===========================================================================================
                 //===========================================================================================
                 case 2: // add key to fast walk stack
-                    uint key = p.ReadUInt();
-
+                    World.Player.Walker.FastWalkStack.AddValue(p.ReadUInt());
                     break;
                 //===========================================================================================
                 //===========================================================================================
@@ -2123,9 +2133,9 @@ namespace ClassicUO.Network
             ushort pages = p.ReadUShort();
             var len = p.ReadUShort();
             
-            string title = p.ReadUTF8String();
+            string title = p.ReadASCII();
             len = p.ReadUShort();
-            string author = p.ReadUTF8String();
+            string author = p.ReadASCII();
 
             UIManager ui = Engine.UI;
 
@@ -2138,7 +2148,7 @@ namespace ClassicUO.Network
                     BookPageCount = pages,
                     Title = title,
                     Author = author,
-                    IsBookEditable = flags == 0 ? false : true
+                    IsBookEditable = flags != 0
                 } );
             }
         }

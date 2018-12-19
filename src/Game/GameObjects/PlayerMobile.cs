@@ -1723,7 +1723,7 @@ namespace ClassicUO.Game.GameObjects
             //EnqueueStep(x, y, z, direction, run);
 
             byte sequence = Walker.WalkSequence;
-            NetClient.Socket.Send(new PWalkRequest(direction, sequence, run));
+            NetClient.Socket.Send(new PWalkRequest(direction, sequence, run, Walker.FastWalkStack.GetValue()));
 
             if (Walker.WalkSequence == 0xFF)
                 Walker.WalkSequence = 1;

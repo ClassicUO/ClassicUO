@@ -316,35 +316,35 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     if (text.Equals("add"))
                     {
-                        PartySystem.TriggerAddPartyMember();
+                        World.Party.TriggerAddPartyMember();
                         break;
                     }
 
-                    if (PartySystem.IsInParty)
+                    if (World.Party.IsInParty)
                     {
                         if (text.Equals("loot"))
                         {
-                            PartySystem.AllowPartyLoot = !PartySystem.AllowPartyLoot ? true : false;
+                            World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot ? true : false;
                             break;
                         }
 
                         if (text.Equals("quit"))
                         {
-                            PartySystem.QuitParty();
+                            World.Party.QuitParty();
                             break;
                         }
 
-                        PartySystem.PartyMessage(text);
+                        World.Party.PartyMessage(text);
                     }
                     else
                     {
                         if (text.Equals("accept"))
                         {
-                            PartySystem.AcceptPartyInvite();
+                            World.Party.AcceptPartyInvite();
                         }
                         else if (text.Equals("decline"))
                         {
-                            PartySystem.DeclinePartyInvite();
+                            World.Party.DeclinePartyInvite();
                         }
                         else if (text.Equals("quit"))
                         {

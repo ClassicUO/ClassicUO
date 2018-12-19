@@ -103,6 +103,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDisposed)
+                return;
+
             //multiline input is fixed height, unmodifiable
             if(!MultiLineInputAllowed)
                 Height = _entry.Height;

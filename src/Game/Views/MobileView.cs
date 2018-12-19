@@ -59,7 +59,10 @@ namespace ClassicUO.Game.Views
             Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
             SetupLayers(dir, mobile, out int mountOffset);
-            ref AnimationFrameTexture bodyFrame = ref _frames[0].Frame;
+
+
+
+            AnimationFrameTexture bodyFrame = Animations.GetTexture(_frames[0].Hash);
 
             if (bodyFrame == null)
                 return false;
@@ -78,7 +81,7 @@ namespace ClassicUO.Game.Views
             for (int i = 0; i < _layerCount; i++)
             {
                 ViewLayer vl = _frames[i];
-                AnimationFrameTexture frame = vl.Frame;
+                AnimationFrameTexture frame = Animations.GetTexture(vl.Hash);
 
                 if (frame.IsDisposed) continue;
                 int x = drawX + frame.CenterX;
@@ -255,12 +258,16 @@ namespace ClassicUO.Game.Views
 
             if (animIndex < direction.FrameCount)
             {
-                AnimationFrameTexture frame = Animations.GetTexture(direction.FramesHashes[animIndex]); // ref direction.Frames[animIndex];
+                uint hash = direction.FramesHashes[animIndex];
+                //AnimationFrameTexture frame = Animations.GetTexture(direction.FramesHashes[animIndex]); // ref direction.Frames[animIndex];
 
-                if (frame == null || frame.IsDisposed)
-                {
+                //if (frame == null || frame.IsDisposed)
+                //{
+                //    return;
+                //}
+
+                if (hash == 0)
                     return;
-                }
 
                 if (hue == 0)
                 {
@@ -269,14 +276,7 @@ namespace ClassicUO.Game.Views
                     if (hue == 0 && convertedItem.HasValue) hue = convertedItem.Value.Color;
                 }
 
-                _frames[_layerCount++] = new ViewLayer
-                {
-                    Hue = hue,
-                    Frame = frame,
-                    Graphic = graphic,
-                    IsParital = ispartial,
-                    OffsetY = offsetY
-                };
+                _frames[_layerCount++] = new ViewLayer(graphic, hue, hash, ispartial, offsetY);
             }
         }
 
@@ -387,13 +387,22 @@ namespace ClassicUO.Game.Views
             return false;
         }
 
-        private struct ViewLayer
+        private readonly struct ViewLayer
         {
-            public Hue Hue;
-            public AnimationFrameTexture Frame;
-            public Graphic Graphic;
-            public bool IsParital;
-            public int OffsetY;
+            public ViewLayer(Graphic graphic, Hue hue, uint frame, bool partial, int offsetY)
+            {
+                Graphic = graphic;
+                Hue = hue;
+                Hash = frame;
+                IsParital = partial;
+                OffsetY = offsetY;
+            }
+
+            public readonly Graphic Graphic;
+            public readonly Hue Hue;
+            public readonly uint Hash;
+            public readonly bool IsParital;
+            public readonly int OffsetY;
         }
     }
 }

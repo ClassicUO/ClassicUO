@@ -26,27 +26,28 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 
 namespace ClassicUO.Game.System
 {
-    internal class PartySystem
+    public class PartySystem
     {
-        private static bool _allowPartyLoot;
+        private bool _allowPartyLoot;
 
-        public static bool IsInParty => Members.Count > 1;
+        public bool IsInParty => Members.Count > 1;
 
-        public static bool IsPlayerLeader => IsInParty && Leader == World.Player;
+        public bool IsPlayerLeader => IsInParty && Leader == World.Player;
 
-        public static Serial Leader { get; private set; }
+        public Serial Leader { get; private set; }
 
-        public static string LeaderName => Leader != null && Leader.IsValid ? World.Mobiles.Get(Leader).Name : "";
+        public string LeaderName => Leader != null && Leader.IsValid ? World.Mobiles.Get(Leader).Name : "";
 
-        public static List<PartyMember> Members { get; } = new List<PartyMember>();
+        public List<PartyMember> Members { get; } = new List<PartyMember>();
 
-        public static bool AllowPartyLoot
+        public bool AllowPartyLoot
         {
             get => _allowPartyLoot;
             set
@@ -56,7 +57,7 @@ namespace ClassicUO.Game.System
             }
         }
 
-        public static event EventHandler PartyMemberChanged;
+        public event EventHandler PartyMemberChanged;
 
         public static void HandlePartyPacket(Packet p)
         {
@@ -70,24 +71,28 @@ namespace ClassicUO.Game.System
             switch (SubCommand)
             {
                 case CommandPartyList:
-                    int Count = p.ReadByte();
-                    Serial[] Serials = new Serial[Count];
-                    for (int i = 0; i < Serials.Length; i++) Serials[i] = p.ReadUInt();
-                    ReceivePartyMemberList(Serials);
+                    int count = p.ReadByte();
+                    Serial[] serials = new Serial[count];
+                    for (int i = 0; i < serials.Length; i++) serials[i] = p.ReadUInt();
+                    World.Party.ReceivePartyMemberList(serials);
 
                     break;
                 case CommandRemoveMember:
-                    Count = p.ReadByte();
-                    p.ReadUInt();
-                    Serials = new Serial[Count];
-                    for (int i = 0; i < Serials.Length; i++) Serials[i] = p.ReadUInt();
-                    ReceiveRemovePartyMember(Serials);
+                    count = p.ReadByte();
+
+                    if (count <= 1)
+                        p.Skip(4);
+
+                    serials = new Serial[count];
+                    for (int i = 0; i < serials.Length; i++)
+                        serials[i] = p.ReadUInt();
+                    World.Party.ReceiveRemovePartyMember(serials);
 
                     break;
                 case CommandPrivateMessage:
                 case CommandPublicMessage:
                     Serial partyMemberSerial = p.ReadUInt();
-                    PartyMember partyMember = GetPartyMember(partyMemberSerial);
+                    PartyMember partyMember = World.Party.GetPartyMember(partyMemberSerial);
 
                     if (partyMember != null)
                     {
@@ -128,21 +133,24 @@ namespace ClassicUO.Game.System
             }
         }
 
-        public static void ReceivePartyMemberList(Serial[] mobileSerials)
+        public void ReceivePartyMemberList(Serial[] mobileSerials)
         {
             Members.Clear();
             foreach (Serial serial in mobileSerials) AddPartyMember(serial);
             PartyMemberChanged.Raise();
         }
 
-        public static void ReceiveRemovePartyMember(Serial[] mobileSerials)
+        public void ReceiveRemovePartyMember(Serial[] mobileSerials)
         {
+            var list = new List<PartyMember>(Members);
             Members.Clear();
-            foreach (Serial serial in mobileSerials) AddPartyMember(serial);
+            list.ForEach(s => Engine.UI.GetByLocalSerial<HealthBarGump>(s.Serial)?.Update());
+            foreach (Serial serial in mobileSerials)
+                AddPartyMember(serial);
             PartyMemberChanged.Raise();
         }
 
-        public static void TriggerAddPartyMember()
+        public void TriggerAddPartyMember()
         {
             if (!IsInParty)
             {
@@ -157,23 +165,23 @@ namespace ClassicUO.Game.System
             }
         }
 
-        private static void AddPartyMember(Serial mobileSerial)
+        private void AddPartyMember(Serial mobileSerial)
         {
             if (!Members.Any(p => p.Serial == mobileSerial))
             {
                 Members.Add(new PartyMember(mobileSerial));
                 GameActions.RequestMobileStatus(mobileSerial);
+
+                Engine.UI.GetByLocalSerial<HealthBarGump>(mobileSerial)?.Update();
             }
         }
 
-        public static PartyMember GetPartyMember(Serial mobileSerial)
+        public PartyMember GetPartyMember(Serial mobileSerial)
         {
-            if (Members.Any(p => p.Serial == mobileSerial)) return Members.ElementAt(Members.FindIndex(p => p.Serial == mobileSerial));
-
-            return null;
+            return Members.FirstOrDefault(s => s.Serial == mobileSerial);
         }
 
-        public static void RemovePartyMember(Serial mobileSerial)
+        public void RemovePartyMember(Serial mobileSerial)
         {
             if (Members.Any(p => p.Serial == mobileSerial))
             {
@@ -182,23 +190,25 @@ namespace ClassicUO.Game.System
             }
         }
 
-        public static void AcceptPartyInvite()
+        public void AcceptPartyInvite()
         {
             GameActions.RequestPartyAccept(World.Player.Serial);
         }
 
-        public static void DeclinePartyInvite()
+        public void DeclinePartyInvite()
         {
             //Do nothing, let party invite expire
         }
 
-        public static void QuitParty()
+        public void QuitParty()
         {
             GameActions.RequestPartyQuit();
+            var list = new List<PartyMember>(Members);
             Members.Clear();
+            list.ForEach(s => Engine.UI.GetByLocalSerial<HealthBarGump>(s.Serial)?.Update());
         }
 
-        public static void PartyMessage(string message)
+        public void PartyMessage(string message)
         {
             GameActions.SayParty(message);
         }

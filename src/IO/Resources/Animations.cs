@@ -46,7 +46,6 @@ namespace ClassicUO.IO.Resources
         private static readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private static byte _animGroupCount = (int) PEOPLE_ANIMATION_GROUP.PAG_ANIMATION_COUNT;
         private static readonly DataReader _reader = new DataReader();
-        //private static readonly PixelPicking _picker = new PixelPicking();
         private static readonly List<ToRemoveInfo> _usedTextures = new List<ToRemoveInfo>();
         private static readonly Dictionary<Graphic, Rectangle> _animDimensionCache = new Dictionary<Graphic, Rectangle>();
 
@@ -66,11 +65,13 @@ namespace ClassicUO.IO.Resources
 
         public static IReadOnlyList<Tuple<ushort, byte>>[] GroupReplaces => _groupReplaces;
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static AnimationFrameTexture GetTexture(uint hash)
         {
-            _animationFrameTextures.TryGetValue(hash, out var texture);
+            //_animationFrameTextures.TryGetValue(hash, out var texture);
 
-            return texture;
+            return _animationFrameTextures[hash];
         }
 
         public static void Load()
@@ -1066,11 +1067,6 @@ namespace ClassicUO.IO.Resources
             byte[] decbuffer = new byte[decLen];
             ZLib.Decompress(buffer, 0, decbuffer, decLen);
 
-            //if (ZLib.Unpack(decbuffer, ref decLen, buffer, buffer.Length) != ZLib.ZLibError.Okay)
-            //{
-            //    Log.Message(LogTypes.Error, "Error to decompress uop animation");
-            //    return false;
-            //}
             _reader.SetData(decbuffer, decLen);
             _reader.Skip(8);
             int dcsize = _reader.ReadInt();
@@ -1304,17 +1300,10 @@ namespace ClassicUO.IO.Resources
                 uint hashcode = (uint) RuntimeHelpers.GetHashCode(f);
                 animDir.FramesHashes[i] = hashcode;
                 _animationFrameTextures.Add(hashcode, f);
-                
-                //_picker.Set(uniqueAnimationIndex, imageWidth, imageHeight, pixels);
             }
 
             _usedTextures.Add(new ToRemoveInfo(AnimID, AnimGroup, Direction));
         }
-
-        //public static bool Contains(int g, int x, int y, int extra = 0)
-        //{
-        //    return _picker.Get(g, x, y, extra);
-        //}
 
         public static void GetAnimationDimensions(byte frameIndex, Graphic id, byte dir, byte animGroup, out int x, out int y, out int w, out int h)
         {
@@ -1380,8 +1369,6 @@ namespace ClassicUO.IO.Resources
                         byte[] decbuffer = new byte[decLen];
                         ZLib.Decompress(buffer, 0, decbuffer, decLen);
 
-                        //if (ZLib.Unpack(decbuffer, ref decLen, buffer, buffer.Length) == ZLib.ZLibError.Okay)
-                        //{
                         _reader.SetData(decbuffer, decLen);
                         _reader.Skip(8);
                         int dcsize = _reader.ReadInt();
@@ -1408,7 +1395,6 @@ namespace ClassicUO.IO.Resources
                         _animDimensionCache.Add(id, new Rectangle(x, y, w, h));
 
                         return;
-                        //}
                     }
                 }
             }
@@ -1455,17 +1441,12 @@ namespace ClassicUO.IO.Resources
                     {
                         ref uint hash = ref dir.FramesHashes[j];
 
-                        if (_animationFrameTextures.TryGetValue(hash, out var texture) && texture != null)
+                        if (_animationFrameTextures.TryGetValue(hash, out var texture))
                         {
-                            texture.Dispose();
+                            texture?.Dispose();
                             _animationFrameTextures.Remove(hash);
                             hash = 0;
                         }
-
-                        //if (dir.Frames[j] != null)
-                        //{
-                        //    dir.Frames[j].Dispose();
-                        //}
                     }
 
                     dir.FrameCount = 0;

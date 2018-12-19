@@ -25,6 +25,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.System;
 
 using Microsoft.Xna.Framework;
 
@@ -45,6 +46,7 @@ namespace ClassicUO.Game
             _effectManager.Add(type, source, target, graphic, hue, srcPos, targPos, speed, duration, fixedDir, doesExplode, hasparticles, blendmode);
         }
 
+        public static PartySystem Party { get; } = new PartySystem();
 
         public static HouseManager HouseManager { get; } = new HouseManager();
 
@@ -247,6 +249,7 @@ namespace ClassicUO.Game
             ClientFlags.SetFlags(0);
             ClientLockedFeatures.SetFlags(0);
             HouseManager.Clear();
+            Party.Members.Clear();
             ServerName = string.Empty;
         }
 

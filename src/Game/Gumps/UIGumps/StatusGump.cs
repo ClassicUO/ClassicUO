@@ -44,6 +44,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public StatusGump() : base(0, 0)
         {
+            Engine.UI.GetByLocalSerial<HealthBarGump>(World.Player)?.Dispose();
+
             CanBeSaved = true;
             CanMove = true;
             _useUOPGumps = FileManager.UseUOPGumps;
@@ -677,10 +679,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
                     if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                     {
-                        var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
-                        HealthBarGump currentHealthBarGump;
-                        list.Add(World.Player);
-                        Engine.UI.Add(currentHealthBarGump = new HealthBarGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
+                        //var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
+                        //list.Add(World.Player);
+                        Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
 
                         //if (dict.ContainsKey(World.Player))
                         //{
@@ -693,10 +694,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
                     if (x >= _point.X && x <= Width + 16 && y >= _point.Y && y <= Height + 16)
                     {
-                        var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
-                        HealthBarGump currentHealthBarGump;
-                        list.Add(World.Player);
-                        Engine.UI.Add(currentHealthBarGump = new HealthBarGump(World.Player, ScreenCoordinateX, ScreenCoordinateY));
+                        //var list = Engine.SceneManager.GetScene<GameScene>().MobileGumpStack;
+                        //list.Add(World.Player);
+                        Engine.UI.Add(new HealthBarGump(World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                         Dispose();
                     }
                 }

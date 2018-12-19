@@ -18,6 +18,47 @@ namespace ClassicUO.Game.Managers
         public sbyte Z;
     }
 
+    class FastWalkStack
+    {
+        private readonly uint[] _keys = new uint[Constants.MAX_FAST_WALK_STACK_SIZE];
+
+        public void SetValue(int index, uint value)
+        {
+            if (index >= 0 && index < Constants.MAX_FAST_WALK_STACK_SIZE)
+                _keys[index] = value;
+        }
+
+        public void AddValue(uint value)
+        {
+            for (int i = 0; i < Constants.MAX_FAST_WALK_STACK_SIZE; i++)
+            {
+                if (_keys[i] == 0)
+                {
+                    _keys[i] = value;
+
+                    break;
+                }
+            }
+        }
+
+        public uint GetValue()
+        {
+            for (int i = 0; i < Constants.MAX_FAST_WALK_STACK_SIZE; i++)
+            {
+                uint key = _keys[i];
+
+                if (key != 0)
+                {
+                    _keys[i] = 0;
+
+                    return key;
+                }
+            }
+
+            return 0;
+        }
+    }
+
     class WalkerManager
     {
         public long LastStepRequestTime { get; set; }
@@ -32,6 +73,8 @@ namespace ClassicUO.Game.Managers
         public ushort NewPlayerZ { get; set; }
 
         public StepInfo[] StepInfos = new StepInfo[Constants.MAX_STEP_COUNT];
+
+        public FastWalkStack FastWalkStack { get; } = new FastWalkStack();
 
         public void DenyWalk(byte sequence, int x, int y, sbyte z)
         {

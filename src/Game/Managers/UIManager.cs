@@ -18,29 +18,29 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Input;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps
+namespace ClassicUO.Game.Managers
 {
     public sealed class UIManager
     {
         private readonly Dictionary<Serial, Point> _gumpPositionCache = new Dictionary<Serial, Point>();
         private readonly List<Control> _gumps = new List<Control>();
-        private readonly List<object> _inputBlockingObjects = new List<object>();
+        //private readonly List<object> _inputBlockingObjects = new List<object>();
         private readonly Control[] _mouseDownControls = new Control[5];
         private Control _draggingControl;
         private int _dragOriginX, _dragOriginY;
@@ -225,17 +225,17 @@ namespace ClassicUO.Game.Gumps
 
         //private bool ObjectsBlockingInputExists => _inputBlockingObjects.Count > 0;
 
-        public void AddInputBlocker(object obj)
-        {
-            if (!_inputBlockingObjects.Contains(obj))
-                _inputBlockingObjects.Add(obj);
-        }
+        //public void AddInputBlocker(object obj)
+        //{
+        //    if (!_inputBlockingObjects.Contains(obj))
+        //        _inputBlockingObjects.Add(obj);
+        //}
 
-        public void RemoveInputBlocker(object obj)
-        {
-            if (_inputBlockingObjects.Contains(obj))
-                _inputBlockingObjects.Remove(obj);
-        }
+        //public void RemoveInputBlocker(object obj)
+        //{
+        //    if (_inputBlockingObjects.Contains(obj))
+        //        _inputBlockingObjects.Remove(obj);
+        //}
 
         private void CloseIfClickOutGumps()
         {
@@ -425,7 +425,7 @@ namespace ClassicUO.Game.Gumps
 
                             break;
                         case "mastergump":
-
+                            Log.Message(LogTypes.Warning, "Gump part 'mastergump' not handled.");
                             break;
                     }
                 }

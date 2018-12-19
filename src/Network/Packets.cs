@@ -1125,13 +1125,13 @@ namespace ClassicUO.Network
 
     public sealed class PWalkRequest : PacketWriter
     {
-        public PWalkRequest(Direction direction, byte seq, bool run) : base(0x02)
+        public PWalkRequest(Direction direction, byte seq, bool run, uint fastwalk) : base(0x02)
         {
             if (run)
                 direction |= Direction.Running;
             WriteByte((byte) direction);
             WriteByte(seq);
-            WriteUInt(0);
+            WriteUInt(fastwalk);
         }
     }
 

@@ -353,26 +353,27 @@ namespace ClassicUO.Game.Gumps.Controls
                 for (int i = 0; i < _children.Count; i++)
                 {
                     Control c = _children[i];
-                    c.Update(totalMS, frameMS);
 
                     if (c.IsDisposed)
                     {
                         _children.RemoveAt(i--);
+                        continue;  
                     }
-                    else
-                    {
-                        if (WantUpdateSize)
-                        {
-                            if (c.Page == 0 || c.Page == ActivePage)
-                            {
-                                if (w < c.Bounds.Right)
-                                    w = c.Bounds.Right;
 
-                                if (h < c.Bounds.Bottom)
-                                    h = c.Bounds.Bottom;
-                            }
+                    c.Update(totalMS, frameMS);
+
+                    if (WantUpdateSize)
+                    {
+                        if (c.Page == 0 || c.Page == ActivePage)
+                        {
+                            if (w < c.Bounds.Right)
+                                w = c.Bounds.Right;
+
+                            if (h < c.Bounds.Bottom)
+                                h = c.Bounds.Bottom;
                         }
                     }
+                    
                 }
 
                 if (WantUpdateSize)
