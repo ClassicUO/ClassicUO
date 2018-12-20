@@ -271,8 +271,6 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-
-
             _renderIndex++;
 
             if (_renderIndex >= 100)

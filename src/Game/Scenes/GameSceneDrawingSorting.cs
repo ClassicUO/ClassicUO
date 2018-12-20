@@ -165,7 +165,7 @@ namespace ClassicUO.Game.Scenes
                 if (_updateDrawPosition && obj.CurrentRenderIndex != _renderIndex || obj.IsPositionChanged)
                     obj.UpdateRealScreenPosition(_offset);
 
-                obj.UseInRender = 0xFF;
+                //obj.UseInRender = 0xFF;
 
                 float drawX = obj.RealScreenPosition.X;
                 float drawY = obj.RealScreenPosition.Y;
@@ -177,6 +177,7 @@ namespace ClassicUO.Game.Scenes
                 int maxObjectZ = obj.PriorityZ;
 
                 bool ismobile = false;
+                StaticTiles itemData = StaticTiles.Empty;
 
                 switch (obj)
                 {
@@ -187,27 +188,23 @@ namespace ClassicUO.Game.Scenes
                         break;
                     default:
 
-                        if (GameObjectHelper.TryGetStaticData(obj, out var itemdata))
+                        if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
-                            if (_noDrawRoofs && TileData.IsRoof(itemdata.Flags))
+                            if (_noDrawRoofs && TileData.IsRoof(itemData.Flags))
                                 continue;
-                            maxObjectZ += itemdata.Height;
+                            maxObjectZ += itemData.Height;
                         }
-                    //case IDynamicItem dyn when _noDrawRoofs && TileData.IsRoof(dyn.ItemData.Flags):
-                    //    continue;
-                    //case IDynamicItem dyn: maxObjectZ += dyn.ItemData.Height;
-
                         break;
                 }
 
                 if (maxObjectZ > maxZ)
                     break;
+
                 obj.CurrentRenderIndex = _renderIndex;
 
-                bool iscorpse = obj is Item item && item.IsCorpse;
+                bool iscorpse = !ismobile && obj is Item item && item.IsCorpse;
 
-                //if (!iscorpse && obj is IDynamicItem dyn2 && TileData.IsInternal(dyn2.ItemData.Flags))
-                if (!iscorpse && GameObjectHelper.TryGetStaticData(obj, out var itemdata1) && TileData.IsInternal(itemdata1.Flags))
+                if (!ismobile && !iscorpse && TileData.IsInternal(itemData.Flags))
                     continue;
 
                 bool island = !ismobile && !iscorpse && obj is Land;
@@ -220,7 +217,7 @@ namespace ClassicUO.Game.Scenes
 
                 if (island)
                 {
-                    Land t = (Land) obj;
+                    Land t = obj as Land;
                     if (t.IsStretched)
                         testMinZ -= t.MinZ * 4;
                     else
@@ -233,7 +230,8 @@ namespace ClassicUO.Game.Scenes
                     continue;
 
                 if (ismobile || iscorpse)
-                    AddOffsetCharacterTileToRenderList((Entity)obj, useObjectHandles);
+                    AddOffsetCharacterTileToRenderList(obj, useObjectHandles);
+
 
                 if (_renderListCount >= _renderList.Length)
                 {
@@ -242,21 +240,21 @@ namespace ClassicUO.Game.Scenes
                 }
 
                 _renderList[_renderListCount] = obj;
-                obj.UseInRender = (byte) _renderIndex;
+                //obj.UseInRender = (byte) _renderIndex;
                 _renderListCount++;
             }
         }
 
-
-        private void AddOffsetCharacterTileToRenderList(Entity entity, bool useObjectHandles)
+        private void AddOffsetCharacterTileToRenderList(GameObject entity, bool useObjectHandles)
         {
             int charX = entity.X;
             int charY = entity.Y;
-            Mobile mob = World.Mobiles.Get(entity);
             int dropMaxZIndex = -1;
 
-            if (mob != null && mob.IsMoving && mob.Steps.Back().Direction == 2)
+
+            if (entity is Mobile mob && mob.IsMoving && mob.Steps.Back().Direction == 2)
                 dropMaxZIndex = 0;
+
             int[,] coordinates = new int[8, 2];
             coordinates[0, 0] = charX + 1;
             coordinates[0, 1] = charY - 1;
@@ -274,6 +272,7 @@ namespace ClassicUO.Game.Scenes
             coordinates[6, 1] = charY - 1;
             coordinates[7, 0] = charX + 1;
             coordinates[7, 1] = charY + 1;
+
             int maxZ = entity.PriorityZ;
 
             for (int i = 0; i < 8; i++)
@@ -284,15 +283,17 @@ namespace ClassicUO.Game.Scenes
                 if (x < _minTile.X || x > _maxTile.X || y < _minTile.Y || y > _maxTile.Y)
                     continue;
 
-                Tile tile =  World.Map.GetTile(x, y);
+                Tile tile = World.Map.GetTile(x, y);
 
                 int currentMaxZ = maxZ;
 
                 if (i == dropMaxZIndex)
                     currentMaxZ += 20;
+
                 AddTileToRenderList(tile.FirstNode, x, y, useObjectHandles, currentMaxZ);
             }
         }
+
 
         private void GetViewPort()
         {

@@ -31,7 +31,7 @@ namespace ClassicUO.Utility
                     itemdata = multi.ItemData;
                     return true;
                 default:
-                    itemdata = default;
+                    itemdata = StaticTiles.Empty;
                     return false;
             }
         }

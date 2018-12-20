@@ -350,6 +350,8 @@ namespace ClassicUO.IO.Resources
 
     public readonly struct StaticTiles
     {
+        public static readonly StaticTiles Empty = default;
+
         public StaticTiles(ulong flags, byte weight, byte layer, int count, ushort animId, ushort hue, ushort lightIndex, byte height, string name)
         {
             Flags = flags;

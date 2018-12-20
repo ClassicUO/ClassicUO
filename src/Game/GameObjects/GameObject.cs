@@ -22,6 +22,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
@@ -102,7 +104,7 @@ namespace ClassicUO.Game.GameObjects
 
         public int CurrentRenderIndex { get; set; }
 
-        public byte UseInRender { get; set; }
+        //public byte UseInRender { get; set; }
 
         public short PriorityZ { get; set; }
 
@@ -132,6 +134,7 @@ namespace ClassicUO.Game.GameObjects
 
         public int Distance
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {         
                     
@@ -179,7 +182,7 @@ namespace ClassicUO.Game.GameObjects
 
         public event EventHandler Disposed;
 
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void UpdateRealScreenPosition(Point offset)
         {
             RealScreenPosition = new Vector3(ScreenPosition.X - offset.X - 22, ScreenPosition.Y - offset.Y - 22, 0);
