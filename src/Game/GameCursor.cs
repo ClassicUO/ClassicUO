@@ -344,7 +344,7 @@ namespace ClassicUO.Game
             int war = World.InGame && World.Player.InWarMode ? 1 : 0;
             ushort result = _cursorData[war, 9];
 
-            if (TargetSystem.IsTargeting)
+            if (TargetManager.IsTargeting)
                 return _cursorData[war, 12];
 
             if (!Engine.UI.IsMouseOverWorld)

@@ -36,7 +36,7 @@ namespace ClassicUO.Game
         private static readonly EffectManager _effectManager = new EffectManager();
 
 
-        public static PartySystem Party { get; } = new PartySystem();
+        public static PartyManager Party { get; } = new PartyManager();
 
         public static HouseManager HouseManager { get; } = new HouseManager();
 

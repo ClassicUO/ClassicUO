@@ -308,7 +308,7 @@ namespace ClassicUO.Network
 
         private static void TargetCursor(Packet p)
         {
-            TargetSystem.SetTargeting((TargetType) p.ReadByte(), p.ReadUInt(), p.ReadByte());
+            TargetManager.SetTargeting((TargetType) p.ReadByte(), p.ReadUInt(), p.ReadByte());
         }
 
         private static void SecureTrading(Packet p)
@@ -1852,7 +1852,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 6: //party
-                    PartySystem.HandlePartyPacket(p);
+                    PartyManager.HandlePartyPacket(p);
                     break;
                 //===========================================================================================
                 //===========================================================================================

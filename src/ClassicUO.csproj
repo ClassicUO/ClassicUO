@@ -60,7 +60,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;JAEDAN_MOVEMENT_PATCH_, MOVEMENT2_,</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;JAEDAN_MOVEMENT_PATCH_, MOVEMENT2_</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -70,7 +70,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;JAEDAN_MOVEMENT_PATCH_, MOVEMENT2_</DefineConstants>
+    <DefineConstants>TRACE;JAEDAN_MOVEMENT_PATCH_, MOVEMENT2_,</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -175,9 +175,9 @@
     <Compile Include="Game\Scenes\GameSceneDragAndDropHandler.cs" />
     <Compile Include="Game\Scenes\GameSceneDrawingSorting.cs" />
     <Compile Include="Game\Scenes\GameSceneInputHandler.cs" />
-    <Compile Include="Game\System\Commands.cs" />
-    <Compile Include="Game\System\PartySystem.cs" />
-    <Compile Include="Game\System\TargetSystem.cs" />
+    <Compile Include="Game\Managers\CommandManager.cs" />
+    <Compile Include="Game\Managers\PartyManager.cs" />
+    <Compile Include="Game\Managers\TargetManager.cs" />
     <Compile Include="Game\Gumps\Tooltip.cs" />
     <Compile Include="Game\Views\LightningEffectView.cs" />
     <Compile Include="Game\Views\MovingEffectView.cs" />

@@ -79,9 +79,9 @@ namespace ClassicUO.Game.Scenes
 
         private void OnLeftMouseButtonUp(object sender, EventArgs e)
         {
-            if (TargetSystem.IsTargeting)
+            if (TargetManager.IsTargeting)
             {
-                switch (TargetSystem.TargetingState)
+                switch (TargetManager.TargetingState)
                 {
                     case TargetType.Position:
                     case TargetType.Object:
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (obj != null)
                         {
-                            TargetSystem.TargetGameObject(obj);
+                            TargetManager.TargetGameObject(obj);
                             Mouse.LastLeftButtonClickTime = 0;
                         }
 
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.Scenes
                         if (IsMouseOverWorld) obj = SelectedObject;
                         if (obj != null)
                         {
-                            TargetSystem.TargetGameObject(obj);
+                            TargetManager.TargetGameObject(obj);
                             Mouse.LastLeftButtonClickTime = 0;
                             Engine.UI.Add(new InfoGump(obj));
 
@@ -328,8 +328,8 @@ namespace ClassicUO.Game.Scenes
 
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
-            if (TargetSystem.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && e.keysym.mod == SDL.SDL_Keymod.KMOD_NONE)
-                TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+            if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && e.keysym.mod == SDL.SDL_Keymod.KMOD_NONE)
+                TargetManager.SetTargeting(TargetType.Nothing, 0, 0);
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
             {

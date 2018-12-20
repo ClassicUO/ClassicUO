@@ -37,7 +37,7 @@ namespace ClassicUO.Game.System
 
     }
 
-    internal static class TargetSystem
+    internal static class TargetManager
     {
         private static Serial _targetCursorId;
         private static byte _targetCursorType;

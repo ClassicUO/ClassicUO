@@ -147,7 +147,7 @@ namespace ClassicUO.Game.Scenes
                         Scale = 2.3f;
                 }
             };
-            Commands.Initialize();
+            CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
             //Coroutine.Start(this, CastSpell());
@@ -169,14 +169,14 @@ namespace ClassicUO.Game.Scenes
         {
             _renderList = null;
 
-            TargetSystem.ClearTargetingWithoutTargetCancelPacket();
+            TargetManager.ClearTargetingWithoutTargetCancelPacket();
 
             Engine.Profile.Current?.Save( Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList() );
 
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
             _renderTarget?.Dispose();
-            Commands.UnRegisterAll();
+            CommandManager.UnRegisterAll();
             Engine.UI.Clear();
             World.Clear();
 
