@@ -53,7 +53,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
     internal class ChatControl : Control
     {
-        private static SDL2.SDL.SDL_Keymod s_PresentKeyMod = SDL2.SDL.SDL_GetModState();
         private const int MAX_MESSAGE_LENGHT = 100;
         private readonly List<Tuple<ChatMode, string>> _messageHistory;
         private readonly List<ChatLineTime> _textEntries;
@@ -256,7 +255,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             switch (key)
             {
-                case SDL.SDL_Keycode.SDLK_q when ((mod & SDL.SDL_Keymod.KMOD_CTRL) == SDL.SDL_Keymod.KMOD_LCTRL || (mod & SDL.SDL_Keymod.KMOD_CTRL) == SDL.SDL_Keymod.KMOD_RCTRL) && _messageHistoryIndex > -1:
+                case SDL.SDL_Keycode.SDLK_q when (mod & SDL.SDL_Keymod.KMOD_CTRL) == mod && _messageHistoryIndex > -1:
 
                     if (_messageHistoryIndex > 0)
                         _messageHistoryIndex--;
@@ -264,7 +263,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
 
                     break;
-                case SDL.SDL_Keycode.SDLK_w when ((mod & SDL.SDL_Keymod.KMOD_CTRL) == SDL.SDL_Keymod.KMOD_LCTRL || (mod & SDL.SDL_Keymod.KMOD_CTRL) == SDL.SDL_Keymod.KMOD_RCTRL):
+                case SDL.SDL_Keycode.SDLK_w when (mod & SDL.SDL_Keymod.KMOD_CTRL) == mod:
 
                     if (_messageHistoryIndex < _messageHistory.Count - 1)
                     {
@@ -276,7 +275,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         _textBox.SetText(string.Empty);
 
                     break;
-                case SDL.SDL_Keycode.SDLK_BACKSPACE when (mod == SDL.SDL_Keymod.KMOD_NONE || (mod & s_PresentKeyMod) == s_PresentKeyMod) && string.IsNullOrEmpty(_textBox.Text):
+                case SDL.SDL_Keycode.SDLK_BACKSPACE when mod == SDL.SDL_Keymod.KMOD_NONE && string.IsNullOrEmpty(_textBox.Text):
                     Mode = ChatMode.Default;
 
                     break;

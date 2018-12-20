@@ -56,7 +56,7 @@ namespace ClassicUO
 
         private static int _fpsLimit = MIN_FPS;
         private static Engine _engine;
-
+        public static readonly SDL2.SDL.SDL_Keymod s_IgnoreKeyMod = SDL2.SDL.SDL_Keymod.KMOD_CAPS | SDL2.SDL.SDL_Keymod.KMOD_NUM | SDL2.SDL.SDL_Keymod.KMOD_MODE | SDL2.SDL.SDL_Keymod.KMOD_RESERVED;
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly StringBuilder _sb = new StringBuilder();
         private Batcher2D _batcher;
