@@ -382,7 +382,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.ClientCommand:
-                    Commands.Execute(text);
+                    CommandManager.Execute(text);
 
                     break;
             }

@@ -28,7 +28,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.System
 {
-    public static class Commands
+    public static class CommandManager
     {
         private static readonly Dictionary<string, Action> _commands = new Dictionary<string, Action>();
 
@@ -37,13 +37,13 @@ namespace ClassicUO.Game.System
         {
             Register("info", () =>
             {
-                if (!TargetSystem.IsTargeting)
+                if (!TargetManager.IsTargeting)
                 {
-                    TargetSystem.SetTargeting(TargetType.SetTargetClientSide, 6983686, 0);
+                    TargetManager.SetTargeting(TargetType.SetTargetClientSide, 6983686, 0);
                 }
                 else
                 {
-                    TargetSystem.SetTargeting(TargetType.Nothing, 0, 0);
+                    TargetManager.SetTargeting(TargetType.Nothing, 0, 0);
                 }
             });
         }

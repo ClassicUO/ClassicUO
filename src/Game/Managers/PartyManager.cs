@@ -33,7 +33,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.System
 {
-    public class PartySystem
+    public class PartyManager
     {
         private bool _allowPartyLoot;
 
