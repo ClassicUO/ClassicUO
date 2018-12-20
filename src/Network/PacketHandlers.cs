@@ -1463,7 +1463,6 @@ namespace ClassicUO.Network
             Item book = World.Items.Get(p.ReadUInt());
             bool editable = p.ReadByte() == 0 ? false : true;
             p.Skip(1);
-            string author = p.ReadASCII(30);
             UIManager ui = Engine.UI;
 
             if ( ui.GetByLocalSerial<BookGump>( book.Serial ) == null )//TODO: should we update the mainpage or else? we must investigate on this

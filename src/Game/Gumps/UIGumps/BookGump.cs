@@ -241,7 +241,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     int length = splits.Length;
                     bool allowdestack = true;
                     WriteUShort( (ushort)Math.Min(length, MaxBookLines) );
-                    if( length > MaxBookLines & changed[i] >= gump.BookPageCount )
+                    if( length > MaxBookLines && changed[i] >= gump.BookPageCount )
                     {
                         Log.Message( LogTypes.Error, $"Book page {changed[i]} split into too many lines: {length - MaxBookLines} Additional lines will be lost" );
                         allowdestack = false;
