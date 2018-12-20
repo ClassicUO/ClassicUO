@@ -1863,6 +1863,14 @@ namespace ClassicUO.Game.GameObjects
 #else
         public long LastStepRequestedTime { get; set; }
         public byte SequenceNumber { get; set; }
+
+        private PlayerMovementState _movementState;
+
+        enum PlayerMovementState
+        {
+            ANIMATE_IMMEDIATELY = 0,
+            ANIMATE_ON_CONFIRM,
+        }
         
         public bool Walk(Direction direction, bool run)
         {
@@ -1949,6 +1957,21 @@ namespace ClassicUO.Game.GameObjects
                 X = x, Y = y, Z = z, Direction = (byte) direction, Run = run, Rej = 0, Seq = SequenceNumber
             };
 
+            if (_movementState == PlayerMovementState.ANIMATE_IMMEDIATELY)
+            {
+                for (int i = 0; i < RequestedSteps.Count; i++)
+                {
+                    var s = RequestedSteps[i];
+
+                    if (!s.Anim)
+                    {
+                        s.Anim = true;
+                        RequestedSteps[i] = s;
+                        EnqueueStep(s.X, s.Y, s.Z, (Direction) s.Direction, s.Run);
+                    }
+                }
+            }
+
             step1.Anim = true;
 
             EnqueueStep(step1.X, step1.Y, step1.Z, (Direction) step1.Direction, step1.Run);
@@ -1994,7 +2017,10 @@ namespace ClassicUO.Game.GameObjects
 
                 if (step.Direction == (byte) dir)
                 {
-                    
+                    if (_movementState == PlayerMovementState.ANIMATE_ON_CONFIRM)
+                    {
+                        _movementState = PlayerMovementState.ANIMATE_IMMEDIATELY;
+                    }
                 }
 
                 EnqueueStep(step.X, step.Y, step.Z, (Direction) step.Direction, step.Run);
