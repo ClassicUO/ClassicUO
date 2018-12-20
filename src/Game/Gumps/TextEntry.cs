@@ -150,10 +150,10 @@ namespace ClassicUO.Game.Gumps
             }
 
             CaretIndex += c.Length;
-            SetText(text, true);
+            SetText(text);
         }
 
-        public void SetText(string text, bool nocaretpos = false)
+        public void SetText(string text)
         {
             if (MaxCharCount > 0)
             {
@@ -197,11 +197,7 @@ namespace ClassicUO.Game.Gumps
                     width = RenderText.IsUnicode ? Fonts.GetWidthUnicode(RenderText.Font, text) : Fonts.GetWidthASCII(RenderText.Font, text);
                 }
             }
-
-            if (!nocaretpos)
-            {
-                CaretIndex = text.Length;
-            }
+            CaretIndex = text.Length;
             Text = text;
         }
 

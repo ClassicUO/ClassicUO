@@ -1115,33 +1115,34 @@ namespace ClassicUO.Network
             UIManager ui = Engine.UI;
             var serial = p.ReadUInt();
             var pageCnt = p.ReadUShort();
-            var pages = new Dictionary<int,List<string>>();
+            var pages = new string[pageCnt];
             var gump = ui.GetByLocalSerial<BookGump>( serial );
             if(gump == null )
             {
                 //throw?
                 return;
             }
-            for (int i = 0; i< pageCnt;i++ )
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < pageCnt; i++)
             {
-                var pageNum = p.ReadUShort();
-                var lineCnt = p.ReadUShort();
-                var lines = new List<string>();
-                for(int x = 0; x < lineCnt; x++ )
+                pages[i] = string.Empty;
+            }
+            //packets sent from server can contain also an uneven amount of page, not counting that we could receive only part of them, not every page!
+            for (int i = 0; i < pageCnt; i++, sb.Clear())
+            {
+                var pageNum = p.ReadUShort() - 1;
+                if (pageNum < pageCnt)
                 {
-
-                    //if (BookGump.IsNewBookD4)
-                    //    lines.Add(p.ReadASCII().TrimEnd('\n'));
-                    //else 
-                    lines.Add(p.ReadASCII().TrimEnd('\n'));
-
-                    //if ( BookGump.IsNewBookD4 )
-                    //    lines.Add( p.ReadUTF8String().TrimEnd('\n') );
-                    //else
-                    //    lines.Add( p.ReadASCII().TrimEnd('\n') );
+                    var lineCnt = p.ReadUShort();
+                    for (int x = 0; x < lineCnt; x++)
+                    {
+                        sb.Append(BookGump.IsNewBookD4 ? p.ReadUTF8StringSafe() : p.ReadASCII());
+                        sb.Append('\n');
+                    }
+                    pages[pageNum] = sb.ToString();
                 }
-                pages.Add( pageNum, lines );
-               
+                else
+                    Log.Message(LogTypes.Error, "BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!");
             }
             gump.BookPages = pages;
         }
@@ -1460,27 +1461,83 @@ namespace ClassicUO.Network
         private static void OpenBook(Packet p)
         {
             Item book = World.Items.Get(p.ReadUInt());
-            byte flags = p.ReadByte();
+            bool editable = p.ReadByte() == 0 ? false : true;
             p.Skip(1);
-            ushort pages = p.ReadUShort();
-            string title = p.ReadASCII(60);
-            string author = p.ReadASCII(30);
-
             UIManager ui = Engine.UI;
 
-            if ( ui.GetByLocalSerial<BookGump>( book.Serial ) == null )
+            if ( ui.GetByLocalSerial<BookGump>( book.Serial ) == null )//TODO: should we update the mainpage or else? we must investigate on this
             {
-                ui.Add( new BookGump( book )
+                ui.Add(new BookGump(book)
                 {
                     X = 100,
                     Y = 100,
-                    BookPageCount = pages,
-                    Title = title,
-                    Author = author,
-                    IsBookEditable = flags == 0 ? false : true
+                    BookPageCount = p.ReadUShort(),
+                    BookTitle = 
+                    new Game.Gumps.Controls.TextBox(new TextEntry(BookGump.DefaultFont, 47, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
+                    {
+                        X = 40,
+                        Y = 40,
+                        Height = 25,
+                        Width = 155,
+                        IsEditable = editable,
+                        Text = p.ReadASCII(60).Trim('\0'),
+                        Debug = true
+                    },
+                    BookAuthor = 
+                    new Game.Gumps.Controls.TextBox(new TextEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
+                    {
+                        X = 45,
+                        Y = 130,
+                        Height = 25,
+                        Width = 155,
+                        IsEditable = editable,
+                        Text = p.ReadASCII(30).Trim('\0'),
+                        Debug = true
+                    },
+                    IsBookEditable = editable
                 } );
             }
+        }
 
+        private static void OpenBookNew(Packet p)
+        {
+            Item book = World.Items.Get(p.ReadUInt());
+            bool editable = p.ReadByte() == 0 ? false : true;
+            p.Skip(1);
+            UIManager ui = Engine.UI;
+
+            if (ui.GetByLocalSerial<BookGump>(book.Serial) == null)//TODO: should we update the mainpage or else? we must investigate on this
+            {
+                ui.Add(new BookGump(book)
+                {
+                    X = 100,
+                    Y = 100,
+                    BookPageCount = p.ReadUShort(),
+                    BookTitle =
+                    new Game.Gumps.Controls.TextBox(new TextEntry(BookGump.DefaultFont, 47, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
+                    {
+                        X = 40,
+                        Y = 40,
+                        Height = 25,
+                        Width = 155,
+                        IsEditable = editable,
+                        Text = p.ReadASCII(p.ReadUShort()).Trim('\0'),
+                        Debug = true
+                    },
+                    BookAuthor =
+                    new Game.Gumps.Controls.TextBox(new TextEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
+                    {
+                        X = 45,
+                        Y = 130,
+                        Height = 25,
+                        Width = 155,
+                        IsEditable = editable,
+                        Text = p.ReadASCII(p.ReadUShort()).Trim('\0'),
+                        Debug = true
+                    },
+                    IsBookEditable = editable
+                });
+            }
         }
 
         private static void DyeData(Packet p)
@@ -2123,34 +2180,6 @@ namespace ClassicUO.Network
 
         private static void Logout(Packet p)
         {
-        }
-
-        private static void OpenBookNew(Packet p)
-        {
-            Item book = World.Items.Get( p.ReadUInt() );
-            byte flags = p.ReadByte();
-            p.Skip( 1 );
-            ushort pages = p.ReadUShort();
-            var len = p.ReadUShort();
-            
-            string title = p.ReadASCII();
-            len = p.ReadUShort();
-            string author = p.ReadASCII();
-
-            UIManager ui = Engine.UI;
-
-            if ( ui.GetByLocalSerial<BookGump>( book.Serial ) == null )
-            {
-                ui.Add( new BookGump( book )
-                {
-                    X = 100,
-                    Y = 100,
-                    BookPageCount = pages,
-                    Title = title,
-                    Author = author,
-                    IsBookEditable = flags != 0
-                } );
-            }
         }
 
         private static void MegaCliloc(Packet p)

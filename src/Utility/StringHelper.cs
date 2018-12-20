@@ -67,5 +67,9 @@ namespace ClassicUO.Utility
             return Encoding.UTF8.GetString(data, (int)(ptr - data));
         }
 
+        public static bool IsSafeChar(int c)
+        {
+            return (c >= 0x20 && c < 0xFFFE);
+        }
     }
 }

@@ -20,7 +20,6 @@
 #endregion
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-
 using Microsoft.Xna.Framework;
 
 using SDL2;
@@ -150,7 +149,15 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            switch (key)
+            if(((mod & SDL.SDL_Keymod.KMOD_CTRL) == SDL.SDL_Keymod.KMOD_LCTRL || (mod & SDL.SDL_Keymod.KMOD_CTRL) == SDL.SDL_Keymod.KMOD_RCTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
+            {
+                string s = SDL.SDL_GetClipboardText();
+                if(!string.IsNullOrEmpty(s))
+                {
+                    _entry.InsertString(s.Replace("\r", string.Empty));
+                }
+            }
+            else switch (key)
             {
                 /*case SDL.SDL_Keycode.SDLK_TAB:
                     if (AllowTAB)
@@ -162,7 +169,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     //if ((_entry.RenderText.FontStyle & FontStyle.Fixed) == 0)
                     //    _entry.InsertString("\n");
                     //else
-                    Parent.OnKeybaordReturn((int) LocalSerial.Value, Text);
+                    Parent.OnKeyboardReturn((int) LocalSerial.Value, Text);
 
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:

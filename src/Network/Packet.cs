@@ -134,6 +134,58 @@ namespace ClassicUO.Network
             return sb.ToString();
         }
 
+        public string ReadUTF8StringSafe()
+        {
+            if (Position >= Length)
+            {
+                return String.Empty;
+            }
+
+            int count = 0;
+            int index = Position;
+
+            while (index < Length && _data[index++] != 0)
+            {
+                ++count;
+            }
+
+            index = 0;
+
+            var buffer = new byte[count];
+            int val = 0;
+
+            while (Position < Length && (val = _data[Position++]) != 0)
+            {
+                buffer[index++] = (byte)val;
+            }
+
+            string s = Encoding.UTF8.GetString(buffer);
+
+            bool isSafe = true;
+
+            for (int i = 0; isSafe && i < s.Length; ++i)
+            {
+                isSafe = Utility.StringHelper.IsSafeChar(s[i]);
+            }
+
+            if (isSafe)
+            {
+                return s;
+            }
+
+            StringBuilder sb = new StringBuilder(s.Length);
+
+            for (int i = 0; i < s.Length; ++i)
+            {
+                if (Utility.StringHelper.IsSafeChar(s[i]))
+                {
+                    sb.Append(s[i]);
+                }
+            }
+
+            return sb.ToString();
+        }
+
         public string ReadUnicode()
         {
             EnsureSize(2);

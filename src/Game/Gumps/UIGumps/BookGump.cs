@@ -15,16 +15,14 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     public class BookGump : Gump
     {
-        private TextBox m_Title, m_Author;
+        public TextBox BookTitle, BookAuthor;
         public ushort BookPageCount { get; internal set; }
-        public string Title { get; internal set; }
-        public string Author { get; internal set; }
         public static bool IsNewBookD4 => FileManager.ClientVersion > ClientVersions.CV_200;
-        public Dictionary<int, List<string>> BookPages { get; internal set; }
+        public static byte DefaultFont => (byte)(IsNewBookD4 ? 1 : 4);
+        public string[] BookPages { get; internal set; }
         public bool IsBookEditable { get; internal set; }
-
-        public bool IsDirty => m_Title?.Text != Title || m_Author?.Text != Author;
-        public bool IsContentsDirty => m_pages.Any( t => t.Item1 != t.Item2.Text );
+        public bool IntroChanges => PageChanged[0];
+        public bool[] PageChanged;
 
         public BookGump( Item book ) : base( book.Serial, 0 )
         {
@@ -62,21 +60,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
             m_Backward.MouseDoubleClick += (sender, e) => {
                 if (e.Button == MouseButton.Left && sender is Control ctrl) SetActivePage(1);
             };
-            byte font = 1;
 
-            if (!IsNewBookD4)
-                font = 4;
+            PageChanged = new bool[BookPageCount + 1];
             //title allows only 47  dots (. + \0) so 47 is the right number
-            AddChildren( m_Title = new TextBox(new TextEntry(font, 47, 150, 150, IsNewBookD4, FontStyle.None, 0), this.IsBookEditable) { X = 40, Y = 40, Height = 25, Width = 155, IsEditable = this.IsBookEditable, Text = Title ?? "", Debug = true }, 1);
+            AddChildren( BookTitle, 1);
             AddChildren( new Label( "by", true, 1 ) { X = 45, Y = 110 },1);
             //as the old booktitle supports only 30 characters in AUTHOR and since the new clients only allow 29 dots (. + \0 character at end), we use 29 as a limitation
-            AddChildren( m_Author = new TextBox(new TextEntry(font, 29, 150, 150, IsNewBookD4, FontStyle.None, 0), this.IsBookEditable) { X = 45, Y = 130, Height = 25, Width = 155, IsEditable = this.IsBookEditable, Text = Author ?? "", Debug = true } ,1);
-
+            AddChildren( BookAuthor, 1);
             for ( int k = 1; k <= BookPageCount; k++ )
             {
-                List<string> p = null;
-                if(k < BookPages.Count)
-                    p = BookPages[k];
                 int x = 38;
                 int y = 30;
                 if ( k % 2 == 1 )
@@ -87,28 +79,27 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 int page = k + 1;
                 if ( page % 2 == 1 )
                     page += 1;
-                page /= 2;
-                TextBox tbox;
-                AddChildren( tbox = new TextBox(new TextEntry(font, 53, 156, 156, IsNewBookD4, FontStyle.None, 2), this.IsBookEditable) { X = x, Y = y, Height = 170, Width = 155, IsEditable = this.IsBookEditable, Text = "", MultiLineInputAllowed = true , MaxLines = 8, Debug = true }, page );
-
-                for ( int i = 0; i < 8; i++ )
+                page = page >> 1;
+                TextBox tbox = new TextBox(new TextEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.None, 2), this.IsBookEditable)
                 {
-                    var txt = ( p != null && p.Count > i ? p[i] : "" );
-
-                    if ( i < 7 && !string.IsNullOrEmpty(txt) && !txt.EndsWith( "\n" ) )
-                        txt += "\n";
-                    tbox.SetText( txt, true );
-                }
-                m_pages.Add( (tbox.Text, tbox) );
+                    X = x,
+                    Y = y,
+                    Height = 170,
+                    Width = 155,
+                    IsEditable = this.IsBookEditable,
+                    Text = BookPages[k - 1],
+                    MultiLineInputAllowed = true,
+                    MaxLines = 8,
+                    Debug = true
+                };
+                AddChildren( tbox, page );
+                m_Pages.Add( tbox );
                 AddChildren( new Label( k.ToString(), true, 1 ) { X = x + 80, Y = 200 }, page );
-
-                
             }
             SetActivePage( 1 );
         }
-        private List<(string,TextBox)> m_pages = new List<(string, TextBox)> ();
+        private List<TextBox> m_Pages = new List<TextBox> ();
         private int MaxPage => (BookPageCount >> 1) + 1;
-
 
         private void SetActivePage( int page )
         {
@@ -146,45 +137,59 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnInitialize()
         {
-            
             base.OnInitialize();
             BuildGump();
             Debug = true;
         }
         protected override void CloseWithRightClick()
         {
-            
-            if ( IsDirty )
+            if ( PageChanged[0] )
             {
                 if ( IsNewBookD4 )
                 {
-                    NetClient.Socket.Send( new PBookHeaderNew( LocalSerial, m_Title.Text, m_Author.Text, BookPages.Count ) );
+                    NetClient.Socket.Send( new PBookHeaderNew( this ) );
                 }
                 else
                 {
-                    NetClient.Socket.Send( new PBookHeader( LocalSerial, m_Title.Text, m_Author.Text, BookPages.Count ) );
+                    NetClient.Socket.Send( new PBookHeader( this ) );
                 }
-
+                PageChanged[0] = false;
             }
-            if ( IsContentsDirty )
+            if ( PageChanged.Any(t => t == true) )
             {
-                NetClient.Socket.Send( new PBookData( LocalSerial, m_pages ) );
+                NetClient.Socket.Send( new PBookData( this ) );
             }
             base.CloseWithRightClick();
         }
 
+        public override void Update(double totalMS, double frameMS)
+        {
+            if (!IsDisposed && BookPages == null)
+            {
+                if (BookAuthor.IsChanged || BookTitle.IsChanged)
+                    PageChanged[0] = true;
+                for (int i = m_Pages.Count - 1; i >= 0; --i)
+                {
+                    if (m_Pages[i].IsChanged)
+                        PageChanged[i + 1] = true;
+                }
+            }
+            else
+                BookPages = null;
+            base.Update(totalMS, frameMS);
+        }
+
         public sealed class PBookHeaderNew : PacketWriter
         {
-           
-            public PBookHeaderNew( Serial serial, string title,string author,int pagecount ) : base( 0xD4 )
+            public PBookHeaderNew( BookGump gump ) : base( 0xD4 )//Serial serial, string title,string author,int pagecount ) : base( 0xD4 )
             {
-                byte[] titleBuffer = Encoding.UTF8.GetBytes( title );
-                byte[] authorBuffer = Encoding.UTF8.GetBytes( author );
+                byte[] titleBuffer = Encoding.UTF8.GetBytes(gump.BookTitle.Text);
+                byte[] authorBuffer = Encoding.UTF8.GetBytes(gump.BookAuthor.Text);
                 EnsureSize( 15 + titleBuffer.Length + authorBuffer.Length );
-                WriteUInt( serial );
-                WriteByte( pagecount > 0 ? (byte)1 : (byte)0 );
-                WriteByte( pagecount > 0 ? (byte)1 : (byte)0 );
-                WriteUShort( (ushort)pagecount );
+                WriteUInt( gump.LocalSerial );
+                WriteByte( gump.BookPageCount > 0 ? (byte)1 : (byte)0 );
+                WriteByte( gump.BookPageCount > 0 ? (byte)1 : (byte)0 );
+                WriteUShort( gump.BookPageCount );
 
                 WriteUShort( (ushort) (titleBuffer.Length + 1) );
                 WriteBytes( titleBuffer, 0, titleBuffer.Length );
@@ -198,74 +203,85 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
         public sealed class PBookHeader : PacketWriter
         {
-            public PBookHeader( Serial serial, string title, string author, int pagecount ) : base( 0x93 )
+            public PBookHeader( BookGump gump ) : base( 0x93 )//Serial serial, string title, string author, int pagecount ) : base( 0x93 )
             {
-               
                 EnsureSize( 15 + 60 + 30 );
-                WriteUInt( serial );
-                WriteByte( pagecount > 0 ? (byte)1 : (byte)0 );
-                WriteByte( pagecount > 0 ? (byte)1 : (byte)0 );
+                WriteUInt( gump.LocalSerial );
+                WriteByte( gump.BookPageCount > 0 ? (byte)1 : (byte)0 );
+                WriteByte( gump.BookPageCount > 0 ? (byte)1 : (byte)0 );
 
-                WriteUShort( (ushort)pagecount );
+                WriteUShort( gump.BookPageCount );
 
-                WriteASCII( title, 60 );
-                WriteASCII( author, 30 );
+                WriteASCII( gump.BookTitle.Text, 60 );
+                WriteASCII( gump.BookAuthor.Text, 30 );
             }
         }
+
+        private const int MaxBookLines = 8;
         public sealed class PBookData : PacketWriter
         {
-            public PBookData( Serial serial, List<(string, TextBox)> data ) : base( 0x66 )
+            public PBookData( BookGump gump ) : base(0x66)//Serial serial, List<TextBox> data
             {
                 EnsureSize( 256 );
 
-                WriteUInt( serial );
-                WriteUShort( (ushort)data.Count );
-                for( int i= 0; i < data.Count; i++ )
+                WriteUInt( gump.LocalSerial );
+                List<int> changed = new List<int>();
+                for(int i = 1; i < gump.PageChanged.Length; i++)
                 {
-                    WriteUShort( (ushort)(i+1) );
-                    var splits = data[i].Item2.Text.Split( '\n' );
+                    if(gump.PageChanged[i])
+                    {
+                        changed.Add(i);
+                    }
+                }
+                WriteUShort( (ushort)changed.Count );
+                for( int i = changed.Count - 1; i >= 0; --i )
+                {
+                    WriteUShort( (ushort)(changed[i]) );
+                    var splits = gump.m_Pages[changed[i]-1].Text.Split( '\n' );
                     int length = splits.Length;
                     bool allowdestack = true;
-                    WriteUShort( (ushort)Math.Min(length, 8) );
-                    if( length > 8 & i+1 >= data.Count )
+                    WriteUShort( (ushort)Math.Min(length, MaxBookLines) );
+                    if( length > MaxBookLines && changed[i] >= gump.BookPageCount )
                     {
-                        Log.Message( LogTypes.Error, $"Book page {i} split into too many lines: {length - 8} Additional lines will be lost" );
+                        Log.Message( LogTypes.Error, $"Book page {changed[i]} split into too many lines: {length - MaxBookLines} Additional lines will be lost" );
                         allowdestack = false;
                     }
                     for ( int j = 0; j < length; j++ )
                     {
                         // each line should BE < 53 chars long, even if 80 is admitted (the 'dot' is the least space demanding char, '.',
                         // a page full of dots is 52 chars exactly, but in multibyte things might change in byte size!)
-                        if (j < 8)
+                        if (j < MaxBookLines)
                         {
                             if (IsNewBookD4)
                             {
                                 byte[] buf = Encoding.UTF8.GetBytes(splits[j]);
                                 if (buf.Length > 79)
                                 {
-                                    Log.Message(LogTypes.Error, $"Book page {i} single line too LONG, total lenght -> {buf.Length} vs MAX 79 bytes allowed, some content might get lost");
+                                    Log.Message(LogTypes.Error, $"Book page {changed[i]} single line too LONG, total lenght -> {buf.Length} vs MAX 79 bytes allowed, some content might get lost");
                                     splits[j] = splits[j].Substring(0, 79);
                                 }
-                                WriteUShort((ushort)(buf.Length + 1));
                                 WriteBytes(buf, 0, buf.Length);
                                 WriteByte(0);
-
                             }
                             else
                             {
                                 if (splits[j].Length > 79)
                                 {
-                                    Log.Message(LogTypes.Error, $"Book page {i} single line too LONG, total lenght -> {splits[j].Length} vs MAX 79 bytes allowed, some content might get lost");
+                                    Log.Message(LogTypes.Error, $"Book page {changed[i]} single line too LONG, total lenght -> {splits[j].Length} vs MAX 79 bytes allowed, some content might get lost");
                                     splits[j] = splits[j].Substring(0, 79);
                                 }
-                                WriteUShort((ushort)(splits[j].Length + 1));
                                 WriteASCII(splits[j]);
-                                WriteByte(0);
                             }
                         }
                         else if(allowdestack)
                         {
-                            data[i+1].Item2.Text.Insert(0, string.Format("{0}\n", splits[j]));
+                            int idx = Position;
+                            Seek(7);
+                            gump.m_Pages[changed[i]].Text.Insert(0, string.Format("{0}\n", splits[j]));
+                            changed.Insert(0, changed[i]);
+                            WriteUShort((ushort)changed.Count);
+                            Seek(idx);
+                            i++;
                         }
                     }
                 }
