@@ -57,8 +57,6 @@ namespace ClassicUO
         private static int _fpsLimit = MIN_FPS;
         private static Engine _engine;
 
-
-
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly StringBuilder _sb = new StringBuilder();
         private Batcher2D _batcher;
