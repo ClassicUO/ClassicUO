@@ -51,7 +51,6 @@ namespace ClassicUO.Game
         private readonly int[,] _cursorOffset = new int[2, 16];
         private readonly Settings _settings;
         private readonly Tooltip _tooltip;
-        private readonly UIManager _uiManager;
         private SpriteTexture _draggedItemTexture;
         private bool _draggingItem;
         private Graphic _graphic = 0x2073;
@@ -60,9 +59,8 @@ namespace ClassicUO.Game
         private Point _offset;
         private Rectangle _rect;
 
-        public GameCursor(UIManager ui)
+        public GameCursor()
         {
-            _uiManager = ui;
             _settings = Service.Get<Settings>();
             _tooltip = new Tooltip();
 

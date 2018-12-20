@@ -337,10 +337,16 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     break;
                 case Buttons.Status:
 
+                    Engine.UI.GetByLocalSerial<HealthBarGump>(World.Player)?.Dispose();
+
                     if (Engine.UI.GetByLocalSerial<StatusGump>() == null)
-                        Engine.UI.Add(new StatusGump());
-                    else
-                        Engine.UI.Remove<StatusGump>();
+                    {
+                        Engine.UI.Add(new StatusGump()
+                        {
+                            X = Mouse.Position.X - 100,
+                            Y = Mouse.Position.Y - 25
+                        });
+                    }
 
                     break;
             }

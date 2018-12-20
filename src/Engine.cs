@@ -75,7 +75,6 @@ namespace ClassicUO
         private Engine()
         {
             TargetElapsedTime = TimeSpan.FromSeconds(1.0f / MAX_FPS);
-
             _graphicDeviceManager = new GraphicsDeviceManager(this);
             _graphicDeviceManager.PreparingDeviceSettings += (sender, e) => e.GraphicsDeviceInformation.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
@@ -100,7 +99,7 @@ namespace ClassicUO
 
         public static Batcher2D Batcher => _engine._batcher;
 
-        protected float IntervalFixedUpdate => 1000.0f / FpsLimit;
+        protected float IntervalFixedUpdate { get; private set; }
 
         public static int FpsLimit
         {
@@ -116,6 +115,8 @@ namespace ClassicUO
                     else if (_fpsLimit > MAX_FPS)
                         _fpsLimit = MAX_FPS;
                     FrameDelay[0] = FrameDelay[1] = (uint) (1000 / _fpsLimit);
+
+                    _engine.IntervalFixedUpdate = 1000.0f / _fpsLimit;
                 }
             }
         }
@@ -280,7 +281,6 @@ namespace ClassicUO
             _uiManager = new UIManager();
             _profileManager = new ProfileManager();
             _sceneManager = new SceneManager();
-            //Register Command Stack          
             Log.Message(LogTypes.Trace, "Network calibration...");
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);

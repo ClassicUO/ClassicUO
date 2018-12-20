@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Managers
 
         public UIManager()
         {
-            GameCursor = new GameCursor(this);
+            GameCursor = new GameCursor();
 
             Engine.Input.MouseDragging += (sender, e) =>
             {
@@ -85,6 +85,8 @@ namespace ClassicUO.Game.Managers
                 }
             };
 
+            Control lastLeftUp = null, lastRight = null;
+
             Engine.Input.LeftMouseButtonUp += (sender, e) =>
             {
                 //if (!IsModalControlOpen && ObjectsBlockingInputExists)
@@ -103,6 +105,8 @@ namespace ClassicUO.Game.Managers
 
                     if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
                         _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Left);
+
+                    lastLeftUp = MouseOverControl;
                 }
                 else
                     _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Left);
@@ -113,9 +117,11 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.LeftMouseDoubleClick += (sender, e) =>
             {
-                //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
-                //    e.Result = false;
-                if (MouseOverControl != null && IsMouseOverUI) e.Result |= MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
+                if (MouseOverControl != null && IsMouseOverUI && MouseOverControl == lastLeftUp)
+                {
+                    e.Result |= MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
+                }
+                
             };
 
             Engine.Input.RightMouseButtonDown += (sender, e) =>
@@ -165,6 +171,8 @@ namespace ClassicUO.Game.Managers
 
                     if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
                         _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Right);
+
+                    lastRight = MouseOverControl;
                 }
                 else
                     _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Right);
@@ -465,7 +473,8 @@ namespace ClassicUO.Game.Managers
                     g.Initialize();
                 g.Update(totalMS, frameMS);
 
-                if (g.IsDisposed) _gumps.RemoveAt(i--);
+                if (g.IsDisposed)
+                    _gumps.RemoveAt(i--);
 
             }
 
@@ -578,12 +587,12 @@ namespace ClassicUO.Game.Managers
         {
             if (_isDraggingControl)
                 return _draggingControl;
-            List<Control> controls = IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal).ToList() : _gumps;
-            Control[] mouseoverControls = null;
+            var controls = IsModalControlOpen ? _gumps.Where(s => s.ControlInfo.IsModal) : _gumps;
+            IReadOnlyList<Control> mouseoverControls = null;
 
             foreach (Control c in controls)
             {
-                Control[] ctrls = c.HitTest(position);
+                var ctrls = c.HitTest(position);
 
                 if (ctrls != null)
                 {
@@ -593,7 +602,7 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            return mouseoverControls?.FirstOrDefault(s => s.AcceptMouseInput);
+            return mouseoverControls?.LastOrDefault(s => s.AcceptMouseInput);
         }
 
         private void MakeTopMostGump(Control control)

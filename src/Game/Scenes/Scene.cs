@@ -27,6 +27,7 @@ using ClassicUO.Interfaces;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Coroutines;
+using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework.Graphics;
 
@@ -56,6 +57,7 @@ namespace ClassicUO.Game.Scenes
       
         public virtual void Load()
         {
+            Coroutine.Start(this, CleaningResources(), "cleaning resources");
         }
 
         public virtual void Unload()
@@ -71,7 +73,6 @@ namespace ClassicUO.Game.Scenes
 
         public virtual void Update(double totalMS, double frameMS)
         {
-            CleaningResources();
             Coroutines.Update();
         }
 
@@ -84,13 +85,32 @@ namespace ClassicUO.Game.Scenes
             return true;
         }
 
-        private void CleaningResources()
+        private IEnumerable<IWaitCondition> CleaningResources()
         {
-            Art.ClearUnusedTextures();
-            IO.Resources.Gumps.ClearUnusedTextures();
-            TextmapTextures.ClearUnusedTextures();
-            Animations.ClearUnusedTextures();
-            World.Map?.ClearUnusedBlocks();
+            Log.Message(LogTypes.Trace, "Cleaning routine running...");
+            while (!IsDisposed)
+            {
+                Art.ClearUnusedTextures();
+
+                yield return new WaitTime(TimeSpan.FromSeconds(1));
+
+                IO.Resources.Gumps.ClearUnusedTextures();
+
+                yield return new WaitTime(TimeSpan.FromSeconds(1));
+
+                TextmapTextures.ClearUnusedTextures();
+
+                yield return new WaitTime(TimeSpan.FromSeconds(1));
+
+                Animations.ClearUnusedTextures();
+
+                yield return new WaitTime(TimeSpan.FromSeconds(1));
+
+                World.Map?.ClearUnusedBlocks();
+
+                yield return new WaitTime(TimeSpan.FromSeconds(1));
+            }
+            Log.Message(LogTypes.Trace, "Cleaning routine finished");
         }
     }
 }

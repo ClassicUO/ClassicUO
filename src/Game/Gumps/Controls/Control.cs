@@ -456,10 +456,10 @@ namespace ClassicUO.Game.Gumps.Controls
             OnFocusLeft();
         }
 
-        public Control[] HitTest(Point position)
+        public IReadOnlyList<Control> HitTest(Point position)
         {
-            //List<GumpControl> results = new List<GumpControl>();
-            Stack<Control> results = new Stack<Control>();
+            List<Control> results = new List<Control>();
+            //Stack<Control> results = new Stack<Control>();
             bool inbouds = Bounds.Contains(position.X - ParentX, position.Y - ParentY);
 
             if (inbouds)
@@ -467,7 +467,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (Contains(position.X - X - ParentX, position.Y - Y - ParentY))
                 {
                     if (AcceptMouseInput)
-                        results.Push(this);
+                       results.Add(this);  //results.Push(this);
 
                     for (int j = 0; j < Children.Count; j++)
                     {
@@ -475,20 +475,38 @@ namespace ClassicUO.Game.Gumps.Controls
 
                         if (c.Page == 0 || c.Page == ActivePage)
                         {
-                            Control[] cl = c.HitTest(position);
+                            var cl = c.HitTest(position);
 
                             if (cl != null)
                             {
-                                for (int i = cl.Length - 1; i >= 0; i--)
-                                    results.Push(cl[i]);
-                                //results.Insert(0, cl[i]);
+                                //for (int i = cl.Length - 1; i >= 0; i--)
+                                //    results.Push(cl[i]);
+
+                      
+                                //foreach (Control control in cl)
+                                //{
+                                //    results.Push(control);
+                                //}
+
+                               // for (int i = cl.Count - 1; i >= 0; i--)
+                                 //   results.Add(cl[i]);
+                                 results.AddRange(cl);
                             }
                         }
                     }
                 }
             }
 
-            return results.Count == 0 ? null : results.OrderBy(s => s.Priority).ToArray();
+            if (results.Count != 0)
+            {
+                results.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+
+                return results;
+            }
+
+            return null;
+
+            //return results.Count == 0 ? null : results/*.OrderBy(s => s.Priority)*/;
         }
 
         public Control GetFirstControlAcceptKeyboardInput()

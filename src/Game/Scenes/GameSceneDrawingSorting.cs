@@ -92,7 +92,6 @@ namespace ClassicUO.Game.Scenes
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
                         if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (itemdata.Flags & 0x20004) == 0 && (!TileData.IsRoof(itemdata.Flags) || TileData.IsSurface(itemdata.Flags)))
-                        //if (obj is IDynamicItem st && (st.ItemData.Flags & 0x20004) == 0 && (!TileData.IsRoof(st.ItemData.Flags) || TileData.IsSurface( st.ItemData.Flags)))
                         {
                             _maxZ = tileZ;
                             _noDrawRoofs = true;
