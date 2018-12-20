@@ -1136,7 +1136,7 @@ namespace ClassicUO.Network
                     var lineCnt = p.ReadUShort();
                     for (int x = 0; x < lineCnt; x++)
                     {
-                        sb.Append(p.ReadASCII());
+                        sb.Append(BookGump.IsNewBookD4 ? p.ReadUTF8StringSafe() : p.ReadASCII());
                         sb.Append('\n');
                     }
                     pages[pageNum] = sb.ToString();
