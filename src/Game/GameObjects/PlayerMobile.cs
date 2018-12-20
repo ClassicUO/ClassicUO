@@ -1901,12 +1901,13 @@ namespace ClassicUO.Game.GameObjects
                 oldDirection = (Direction) step.Direction;
             }
 
+            bool onMount = IsMounted;
             ushort walkTime;
 
+            Direction newDirection = direction;
             int newX = x;
             int newY = y;
             sbyte newZ = z;
-            Direction newDirection = direction;
 
             if (oldDirection == newDirection)
             {
@@ -1939,7 +1940,6 @@ namespace ClassicUO.Game.GameObjects
                 {
                     direction = newDirection;
                     x = newX;
-                    x = newX;
                     y = newY;
                     z = newZ;
                     walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
@@ -1951,10 +1951,15 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-
             Step step1 = new Step()
             {
-                X = x, Y = y, Z = z, Direction = (byte) direction, Run = run, Rej = 0, Seq = SequenceNumber
+                X = x,
+                Y = y,
+                Z = z,
+                Direction = (byte) direction,
+                Run = run,
+                Rej = 0,
+                Seq = SequenceNumber
             };
 
             if (_movementState == PlayerMovementState.ANIMATE_IMMEDIATELY)
@@ -1970,13 +1975,11 @@ namespace ClassicUO.Game.GameObjects
                         EnqueueStep(s.X, s.Y, s.Z, (Direction) s.Direction, s.Run);
                     }
                 }
+            
+                step1.Anim = true;
+
+                EnqueueStep(step1.X, step1.Y, step1.Z, (Direction) step1.Direction, step1.Run);
             }
-
-            step1.Anim = true;
-
-            EnqueueStep(step1.X, step1.Y, step1.Z, (Direction) step1.Direction, step1.Run);
-
-
             RequestedSteps.AddToBack(step1);
 
             NetClient.Socket.Send(new PWalkRequest(direction, SequenceNumber, run, 0));

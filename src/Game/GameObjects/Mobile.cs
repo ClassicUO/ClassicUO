@@ -398,9 +398,9 @@ namespace ClassicUO.Game.GameObjects
 #if JAEDAN_MOVEMENT_PATCH || MOVEMENT2
         public virtual void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
+            ClearSteps();
             Position = new Position(x, y, z);
             Direction = dir;
-            ClearSteps();
             AddToTile();
             ProcessDelta();
         }
