@@ -607,7 +607,7 @@ namespace ClassicUO.Network
 
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
-            if (TileData.IsAnimated(item.ItemData.Flags))
+            if (item.ItemData.IsAnimated)
             {
                 item.View.AllowedToDraw = false;
 
@@ -1248,7 +1248,7 @@ namespace ClassicUO.Network
                 int cliloc = 0;
 
                 if (int.TryParse(name, out cliloc))
-                    item.Name = Cliloc.GetString(cliloc);
+                    item.Name = FileManager.Cliloc.GetString(cliloc);
                 else
                     item.Name = name;
             }
@@ -1609,7 +1609,7 @@ namespace ClassicUO.Network
                 
                 string name = p.ReadASCII(p.ReadUShort());
                 if (int.TryParse(name, out int clilocnum))
-                    name = Cliloc.GetString(clilocnum);
+                    name = FileManager.Cliloc.GetString(clilocnum);
 
                 item.Name = name;
 
@@ -1784,7 +1784,7 @@ namespace ClassicUO.Network
                 flags = p.ReadUShort();
             World.ClientLockedFeatures.SetFlags((LockedFeatureFlags)flags);
 
-            Animations.UpdateAnimationTable(flags);
+            FileManager.Animations.UpdateAnimationTable(flags);
         }
 
         private static void DisplayQuestArrow(Packet p)
@@ -1877,7 +1877,7 @@ namespace ClassicUO.Network
 
                     if (cliloc > 0)
                     {
-                        str = Cliloc.Translate(Cliloc.GetString((int) cliloc), capitalize: true);
+                        str = FileManager.Cliloc.Translate(FileManager.Cliloc.GetString((int) cliloc), capitalize: true);
 
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
@@ -1908,7 +1908,7 @@ namespace ClassicUO.Network
                     {
                         if (count != 0 || next == 0xFFFFFFFD || next == 0xFFFFFFFC) next = p.ReadUInt();
                         short charges = (short) p.ReadUShort();
-                        string attr = Cliloc.GetString((int) next);
+                        string attr = FileManager.Cliloc.GetString((int) next);
 
                         if (charges == -1)
                         {
@@ -2158,9 +2158,9 @@ namespace ClassicUO.Network
 
             if (p.Position < p.Length)
                 arguments = p.ReadUnicodeReversed(p.Length - p.Position);
-            string text = Cliloc.Translate((int) cliloc, arguments);
+            string text = FileManager.Cliloc.Translate((int) cliloc, arguments);
 
-            if (!Fonts.UnicodeFontExists((byte) font))
+            if (!FileManager.Fonts.UnicodeFontExists((byte) font))
                 font = MessageFont.Bold;
 
             if (entity != null)
@@ -2457,21 +2457,21 @@ namespace ClassicUO.Network
                     uint descriptionCliloc = p.ReadUInt();
                     uint wtfCliloc = p.ReadUInt();
                     p.Skip(4);
-                    string title = Cliloc.GetString((int) titleCliloc);
+                    string title = FileManager.Cliloc.GetString((int) titleCliloc);
                     string description = string.Empty;
                     string wtf = string.Empty;
 
                     if (descriptionCliloc != 0)
                     {
                         string args = p.ReadUnicodeReversed();
-                        description = "\n" + Cliloc.Translate((int) descriptionCliloc, args, true);
+                        description = "\n" + FileManager.Cliloc.Translate((int) descriptionCliloc, args, true);
 
                         if (description.Length < 2)
                             description = string.Empty;
                     }
 
                     if (wtfCliloc != 0)
-                        wtf = "\n" + Cliloc.GetString((int) wtfCliloc);
+                        wtf = "\n" + FileManager.Cliloc.GetString((int) wtfCliloc);
                     string text = $"<left>{title}{description}{wtf}</left>";
                     World.Player.AddBuff(BuffTable.Table[iconID], timer, text);
                     gump?.AddBuff(BuffTable.Table[iconID]);
@@ -2545,7 +2545,7 @@ namespace ClassicUO.Network
             item.ProcessDelta();
             if (World.Items.Add(item)) World.Items.ProcessDelta();
 
-            if (TileData.IsAnimated(item.ItemData.Flags))
+            if (item.ItemData.IsAnimated)
             {
                 item.View.AllowedToDraw = false;
                 World.AddEffect(new AnimatedItemEffect(item.Serial, item.Graphic, item.Hue, -1));

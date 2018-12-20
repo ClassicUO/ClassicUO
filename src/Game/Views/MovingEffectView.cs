@@ -20,6 +20,7 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -44,7 +45,7 @@ namespace ClassicUO.Game.Views
             if (effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _displayedGraphic = effect.AnimationGraphic;
-                Texture = Art.GetStaticTexture(effect.AnimationGraphic);
+                Texture = FileManager.Art.GetTexture(effect.AnimationGraphic);
                 Bounds = new Rectangle(0, 0, Texture.Width, Texture.Height);
             }
 

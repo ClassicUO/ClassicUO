@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     else if (st == Lock.Locked)
                         gumpid = 0x082C; //Lock
                     _lockers[0].Graphic = gumpid;
-                    _lockers[0].Texture = IO.Resources.Gumps.GetGumpTexture(gumpid);
+                    _lockers[0].Texture = FileManager.Gumps.GetTexture(gumpid);
                 };
 
                 //AddChildren(_lockers[0] = new Button((int)ButtonType.LockerStr, gumpID, gumpID)
@@ -149,7 +149,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     else if (st == Lock.Locked)
                         gumpid = 0x082C; //Lock
                     _lockers[1].Graphic = gumpid;
-                    _lockers[1].Texture = IO.Resources.Gumps.GetGumpTexture(gumpid);
+                    _lockers[1].Texture = FileManager.Gumps.GetTexture(gumpid);
                 };
                 //AddChildren(_lockers[1] = new Button((int)ButtonType.LockerDex, gumpID, gumpID)
                 //{
@@ -179,7 +179,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     else if (st == Lock.Locked)
                         gumpid = 0x082C; //Lock
                     _lockers[2].Graphic = gumpid;
-                    _lockers[2].Texture = IO.Resources.Gumps.GetGumpTexture(gumpid);
+                    _lockers[2].Texture = FileManager.Gumps.GetTexture(gumpid);
                 };
                 //AddChildren(_lockers[2] = new Button((int)ButtonType.LockerInt, gumpID, gumpID)
                 //{

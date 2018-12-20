@@ -22,6 +22,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -160,8 +161,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Y = y;
             Width = w;
             Height = h;
-            _borders[0] = IO.Resources.Gumps.GetGumpTexture(0x0A8C);
-            _borders[1] = IO.Resources.Gumps.GetGumpTexture(0x0A8D);
+            _borders[0] = FileManager.Gumps.GetTexture(0x0A8C);
+            _borders[1] = FileManager.Gumps.GetTexture(0x0A8D);
             _borderSize = borderSize;
             CanMove = true;
             AcceptMouseInput = true;

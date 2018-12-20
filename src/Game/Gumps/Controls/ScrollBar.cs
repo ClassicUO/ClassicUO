@@ -21,6 +21,7 @@
 using System;
 
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -102,16 +103,16 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             base.OnInitialize();
             _textureUpButton = new SpriteTexture[2];
-            _textureUpButton[0] = IO.Resources.Gumps.GetGumpTexture(251);
-            _textureUpButton[1] = IO.Resources.Gumps.GetGumpTexture(250);
+            _textureUpButton[0] = FileManager.Gumps.GetTexture(251);
+            _textureUpButton[1] = FileManager.Gumps.GetTexture(250);
             _textureDownButton = new SpriteTexture[2];
-            _textureDownButton[0] = IO.Resources.Gumps.GetGumpTexture(253);
-            _textureDownButton[1] = IO.Resources.Gumps.GetGumpTexture(252);
+            _textureDownButton[0] = FileManager.Gumps.GetTexture(253);
+            _textureDownButton[1] = FileManager.Gumps.GetTexture(252);
             _textureBackground = new SpriteTexture[3];
-            _textureBackground[0] = IO.Resources.Gumps.GetGumpTexture(257);
-            _textureBackground[1] = IO.Resources.Gumps.GetGumpTexture(256);
-            _textureBackground[2] = IO.Resources.Gumps.GetGumpTexture(255);
-            _textureSlider = IO.Resources.Gumps.GetGumpTexture(254);
+            _textureBackground[0] = FileManager.Gumps.GetTexture(257);
+            _textureBackground[1] = FileManager.Gumps.GetTexture(256);
+            _textureBackground[2] = FileManager.Gumps.GetTexture(255);
+            _textureSlider = FileManager.Gumps.GetTexture(254);
             Width = _textureBackground[0].Width;
         }
 

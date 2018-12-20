@@ -30,6 +30,7 @@ using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -148,7 +149,7 @@ namespace ClassicUO.Game.Scenes
                                 {
                                     SelectedObject = item;
 
-                                    if (item.Graphic == HeldItem.Graphic && HeldItem is Item dyn1 && TileData.IsStackable(dyn1.ItemData.Flags))
+                                    if (item.Graphic == HeldItem.Graphic && HeldItem is Item dyn1 && dyn1.ItemData.IsStackable)
                                         MergeHeldItem(item);
                                     else
                                         DropHeldItemToWorld(obj.Position.X, obj.Position.Y, (sbyte)(obj.Position.Z + item.ItemData.Height));
@@ -181,7 +182,7 @@ namespace ClassicUO.Game.Scenes
 
                             string name = st.Name;
                             if (string.IsNullOrEmpty(name))
-                                name = Cliloc.GetString(1020000 + st.Graphic);
+                                name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
 
                             if (obj.Overheads.Count == 0)
                                 obj.AddGameText(MessageType.Label, name, 3, 0, false);
@@ -191,7 +192,7 @@ namespace ClassicUO.Game.Scenes
                             name = multi.Name;
 
                             if (string.IsNullOrEmpty(name))
-                                name = Cliloc.GetString(1020000 + multi.Graphic);
+                                name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
 
                             if (obj.Overheads.Count == 0)
                                 obj.AddGameText(MessageType.Label, name, 3, 0, false);
@@ -269,7 +270,7 @@ namespace ClassicUO.Game.Scenes
             {
                 if (Engine.Profile.Current.EnablePathfind && !Pathfinder.AutoWalking)
                 {
-                    if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetStaticData(_mousePicker.MouseOverObject, out var itemdata) && TileData.IsSurface(itemdata.Flags)))
+                    if (_mousePicker.MouseOverObject is Land || (GameObjectHelper.TryGetStaticData(_mousePicker.MouseOverObject, out var itemdata) && itemdata.IsSurface))
                     {
                         GameObject obj = _mousePicker.MouseOverObject;
 
@@ -302,7 +303,7 @@ namespace ClassicUO.Game.Scenes
                             if (mobile == World.Player)
                                 Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
 
-                            Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
+                            Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                             HealthBarGump currentHealthBarGump;
                             Engine.UI.Add(currentHealthBarGump = new HealthBarGump(mobile) { X= Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1)});
                             Engine.UI.AttemptDragControl(currentHealthBarGump, Mouse.Position, true);
@@ -328,7 +329,7 @@ namespace ClassicUO.Game.Scenes
 
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
-            if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && (e.keysym.mod % Engine.s_IgnoreKeyMod) == SDL.SDL_Keymod.KMOD_NONE)
+            if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && (e.keysym.mod & Engine.s_IgnoreKeyMod) == SDL.SDL_Keymod.KMOD_NONE)
                 TargetManager.SetTargeting(TargetType.Nothing, 0, 0);
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)

@@ -24,6 +24,7 @@ using System;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -56,10 +57,10 @@ namespace ClassicUO.Game.Views
             if (Texture == null || Texture.IsDisposed)
             {
                 if (tile.IsStretched)
-                    Texture = TextmapTextures.GetTextmapTexture(tile.TileData.TexID);
+                    Texture = FileManager.Textmaps.GetTexture(tile.TileData.TexID);
                 else
                 {
-                    Texture = Art.GetLandTexture(GameObject.Graphic);
+                    Texture = FileManager.Art.GetLandTexture(GameObject.Graphic);
                     Bounds = new Rectangle(0, 0, 44, 44);
                 }
             }
@@ -143,7 +144,7 @@ namespace ClassicUO.Game.Views
             Land tile = (Land) GameObject;
             Map.Map map = World.Map;
 
-            if (tile.IsStretched || TextmapTextures.GetTextmapTexture(tile.TileData.TexID) == null || !TestStretched(x, y, z, true))
+            if (tile.IsStretched || FileManager.Textmaps.GetTexture(tile.TileData.TexID) == null || !TestStretched(x, y, z, true))
             {
                 tile.IsStretched = false;
                 tile.MinZ = z;

@@ -22,6 +22,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
@@ -50,7 +51,7 @@ namespace ClassicUO.Game.Scenes
                 else if (value != null && _heldItem == null)
                 {
                     //Engine.UI.AddInputBlocker(this);
-                    Engine.UI.GameCursor.SetDraggedItem(value.DisplayedGraphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && TileData.IsStackable( value.ItemData.Flags) );
+                    Engine.UI.GameCursor.SetDraggedItem(value.DisplayedGraphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && value.ItemData.IsStackable);
                 }
 
                 _heldItem = value;
@@ -134,7 +135,7 @@ namespace ClassicUO.Game.Scenes
             GameObject obj = SelectedObject;
             Serial serial;
 
-            if (obj is Item item && TileData.IsContainer( item.ItemData.Flags))
+            if (obj is Item item && item.ItemData.IsContainer)
             {
                 serial = item;
                 x = y = 0xFFFF;
@@ -159,7 +160,7 @@ namespace ClassicUO.Game.Scenes
         public void DropHeldItemToContainer(Item container, int x, int y)
         {
             Rectangle bounds = ContainerManager.Get(container.Graphic).Bounds;
-            ArtTexture texture = Art.GetStaticTexture(HeldItem.DisplayedGraphic);
+            ArtTexture texture = FileManager.Art.GetTexture(HeldItem.DisplayedGraphic);
 
             if (texture != null && !texture.IsDisposed)
             {

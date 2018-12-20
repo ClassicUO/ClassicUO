@@ -24,6 +24,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -177,7 +178,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         private void AttempPickUp()
         {
-            Rectangle bounds = Art.GetStaticTexture(Item.DisplayedGraphic).Bounds;
+            Rectangle bounds = FileManager.Art.GetTexture(Item.DisplayedGraphic).Bounds;
             GameActions.PickUp(Item, bounds.Width >> 1, bounds.Height >> 1);
         }
     }

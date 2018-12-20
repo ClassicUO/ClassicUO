@@ -25,6 +25,7 @@ using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -316,7 +317,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     if (Member.Mobile == World.Player)
                         Engine.UI.GetByLocalSerial<StatusGump>()?.Dispose();
-                    Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x0804).Bounds;
+                    Rectangle rect = FileManager.Gumps.GetTexture(0x0804).Bounds;
                     Engine.UI.Add(new HealthBarGump(Member.Mobile) { X = Mouse.Position.X - (rect.Width >> 1), Y = Mouse.Position.Y - (rect.Height >> 1) });
 
                     break;

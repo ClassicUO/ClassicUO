@@ -1,36 +1,21 @@
-﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    public static class Multi
+    class MultiLoader : ResourceLoader
     {
-        private static UOFileMul _file;
-        private static int _itemOffset;
+        private UOFileMul _file;
+        private int _itemOffset;
 
-        public static void Load()
+        public override void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "multi.mul");
             string pathidx = Path.Combine(FileManager.UoFolderPath, "multi.idx");
@@ -42,12 +27,17 @@ namespace ClassicUO.IO.Resources
             _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? UnsafeMemoryManager.SizeOf<MultiBlockNew>() : UnsafeMemoryManager.SizeOf<MultiBlock>();
         }
 
-        public static unsafe MultiBlock GetMulti(int index)
+        protected override void CleanResources()
         {
-            return *(MultiBlock*) (_file.PositionAddress + index * _itemOffset);
+            throw new NotImplementedException();
         }
 
-        public static int GetCount(int graphic)
+        public unsafe MultiBlock GetMulti(int index)
+        {
+            return *(MultiBlock*)(_file.PositionAddress + index * _itemOffset);
+        }
+
+        public int GetCount(int graphic)
         {
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
             int count = length / _itemOffset;

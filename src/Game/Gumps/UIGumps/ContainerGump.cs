@@ -26,6 +26,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
+using ClassicUO.IO;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
@@ -78,7 +79,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;
                 _corpseEyeTicks = (long) totalMS + 750;
                 _eyeGumpPic.Graphic = (Graphic) (0x0045 + _eyeCorspeOffset);
-                _eyeGumpPic.Texture = IO.Resources.Gumps.GetGumpTexture(_eyeGumpPic.Graphic);
+                _eyeGumpPic.Texture = FileManager.Gumps.GetTexture(_eyeGumpPic.Graphic);
             }
         }
 

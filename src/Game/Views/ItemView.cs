@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -68,13 +69,13 @@ namespace ClassicUO.Game.Views
             if (_originalGraphic != item.DisplayedGraphic || Texture == null || Texture.IsDisposed)
             {
                 _originalGraphic = item.DisplayedGraphic;
-                Texture = Art.GetStaticTexture(_originalGraphic);
+                Texture = FileManager.Art.GetTexture(_originalGraphic);
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
-            HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, TileData.IsPartialHue( item.ItemData.Flags), TileData.IsTranslucent( item.ItemData.Flags) ? .5f : 0, false);
+            HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, item.ItemData.IsPartialHue, item.ItemData.IsTranslucent ? .5f : 0, false);
 
-            if (item.Amount > 1 && TileData.IsStackable(item.ItemData.Flags) && item.DisplayedGraphic == GameObject.Graphic)
+            if (item.Amount > 1 && item.ItemData.IsStackable && item.DisplayedGraphic == GameObject.Graphic)
             {
                 Vector3 offsetDrawPosition = new Vector3(position.X - 5, position.Y - 5, 0);
                 base.Draw(batcher, offsetDrawPosition, objectList);
@@ -95,9 +96,9 @@ namespace ClassicUO.Game.Views
 
             byte dir = (byte) ((byte) item.Layer & 0x7F & 7);
             bool mirror = false;
-            Animations.GetAnimDirection(ref dir, ref mirror);
+            FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
-            Animations.Direction = dir;
+            FileManager.Animations.Direction = dir;
             byte animIndex = (byte) GameObject.AnimIndex;
 
 
@@ -113,7 +114,7 @@ namespace ClassicUO.Game.Views
                 {
                     graphic = item.GetGraphicForAnimation();
                     //graphic = item.DisplayedGraphic;
-                    Animations.AnimGroup = Animations.GetDieGroupIndex(item.GetGraphicForAnimation(), item.UsedLayer);
+                    FileManager.Animations.AnimGroup = FileManager.Animations.GetDieGroupIndex(item.GetGraphicForAnimation(), item.UsedLayer);
                     color = GameObject.Hue;
                 }
                 else
@@ -123,7 +124,7 @@ namespace ClassicUO.Game.Views
                     if (itemEquip == null) continue;
                     graphic = itemEquip.ItemData.AnimID;
 
-                    if (Animations.EquipConversions.TryGetValue(itemEquip.Graphic, out Dictionary<ushort, EquipConvData> map))
+                    if (FileManager.Animations.EquipConversions.TryGetValue(itemEquip.Graphic, out Dictionary<ushort, EquipConvData> map))
                     {
                         if (map.TryGetValue(itemEquip.ItemData.AnimID, out EquipConvData data))
                             graphic = data.Graphic;
@@ -132,10 +133,10 @@ namespace ClassicUO.Game.Views
                     color = itemEquip.Hue;
                 }
 
-                Animations.AnimID = graphic;
-                ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup].Direction[Animations.Direction];
+                FileManager.Animations.AnimID = graphic;
+                ref AnimationDirection direction = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
 
-                if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !Animations.LoadDirectionGroup(ref direction))
+                if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                     return false;
                 direction.LastAccessTime = Engine.Ticks;
                 int fc = direction.FrameCount;
@@ -144,7 +145,7 @@ namespace ClassicUO.Game.Views
 
                 if (animIndex < direction.FrameCount)
                 {
-                    AnimationFrameTexture frame = Animations.GetTexture(direction.FramesHashes[animIndex]);
+                    AnimationFrameTexture frame = FileManager.Animations.GetTexture(direction.FramesHashes[animIndex]);
 
                     if (frame == null || frame.IsDisposed) return false;
 
@@ -175,7 +176,7 @@ namespace ClassicUO.Game.Views
             else
                 x = list.MousePosition.X - (int) drawPosition.X + area.X;
             int y = list.MousePosition.Y - ((int) drawPosition.Y - area.Y);
-            //if (Animations.Contains(id, x, y))
+            //if (FileManager.Animations.Contains(id, x, y))
             if (texture.Contains(x, y))
                 list.Add(GameObject, drawPosition);
         }
@@ -190,7 +191,7 @@ namespace ClassicUO.Game.Views
             //    objectList.AddOrUpdateText(GameObject, vertex[0].Position);
             //}
 
-            //if (Art.Contains(((Item)GameObject).DisplayedGraphic, x, y))
+            //if (FileManager.Art.Contains(((Item)GameObject).DisplayedGraphic, x, y))
             if (Texture.Contains(x, y))
                 objectList.Add(GameObject, vertex[0].Position);
         }

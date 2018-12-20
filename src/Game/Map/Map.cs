@@ -26,6 +26,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
@@ -46,8 +47,8 @@ namespace ClassicUO.Game.Map
         public Map(int index)
         {
             Index = index;
-            IO.Resources.Map.LoadMap(index);
-            MapBlockIndex = IO.Resources.Map.MapBlocksSize[Index, 0] * IO.Resources.Map.MapBlocksSize[Index, 1];
+            FileManager.Map.LoadMap(index);
+            MapBlockIndex = FileManager.Map.MapBlocksSize[Index, 0] * FileManager.Map.MapBlocksSize[Index, 1];
             Chunks = new Chunk[MapBlockIndex];
         }
 
@@ -163,7 +164,7 @@ namespace ClassicUO.Game.Map
                     //if (obj is IDynamicItem dyn && (!TileData.IsRoof(dyn.ItemData.Flags) || Math.Abs(z - obj.Z) > 6))
                     //    continue;
 
-                    if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (!TileData.IsRoof(itemdata.Flags) || Math.Abs(z - obj.Z) > 6))
+                    if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (!itemdata.IsRoof || Math.Abs(z - obj.Z) > 6))
                         continue;
 
                     break;
@@ -187,14 +188,14 @@ namespace ClassicUO.Game.Map
         public IndexMap GetIndex(int blockX, int blockY)
         {
             int block = GetBlock(blockX, blockY);
-            ref IndexMap[] list = ref IO.Resources.Map.BlockData[Index];
+            ref IndexMap[] list = ref FileManager.Map.BlockData[Index];
 
             return block >= list.Length ? IndexMap.Invalid : list[block];
         }
 
         private int GetBlock(int blockX, int blockY)
         {
-            return blockX * IO.Resources.Map.MapBlocksSize[Index, 1] + blockY;
+            return blockX * FileManager.Map.MapBlocksSize[Index, 1] + blockY;
         }
 
         public void ClearUnusedBlocks()
@@ -228,7 +229,7 @@ namespace ClassicUO.Game.Map
                 _usedIndices.RemoveAt(i--);
             }
 
-            IO.Resources.Map.UnloadMap(Index);
+            FileManager.Map.UnloadMap(Index);
             Chunks = null;
         }
 
@@ -247,17 +248,17 @@ namespace ClassicUO.Game.Map
             if (minBlockY < 0)
                 minBlockY = 0;
 
-            if (maxBlockX >= IO.Resources.Map.MapBlocksSize[Index, 0])
-                maxBlockX = IO.Resources.Map.MapBlocksSize[Index, 0] - 1;
+            if (maxBlockX >= FileManager.Map.MapBlocksSize[Index, 0])
+                maxBlockX = FileManager.Map.MapBlocksSize[Index, 0] - 1;
 
-            if (maxBlockY >= IO.Resources.Map.MapBlocksSize[Index, 1])
-                maxBlockY = IO.Resources.Map.MapBlocksSize[Index, 1] - 1;
+            if (maxBlockY >= FileManager.Map.MapBlocksSize[Index, 1])
+                maxBlockY = FileManager.Map.MapBlocksSize[Index, 1] - 1;
             long tick = Engine.Ticks;
             long maxDelay = Engine.FrameDelay[1] >> 1;
 
             for (int i = minBlockX; i <= maxBlockX; i++)
             {
-                int index = i * IO.Resources.Map.MapBlocksSize[Index, 1];
+                int index = i * FileManager.Map.MapBlocksSize[Index, 1];
 
                 for (int j = minBlockY; j <= maxBlockY; j++)
                 {

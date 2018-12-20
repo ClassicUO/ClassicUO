@@ -28,6 +28,7 @@ using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -217,10 +218,10 @@ namespace ClassicUO.Game.GameObjects
             //    }
             //}
 
-            int width = isunicode ? Fonts.GetWidthUnicode(font, text) : Fonts.GetWidthASCII(font, text);
+            int width = isunicode ? FileManager.Fonts.GetWidthUnicode(font, text) : FileManager.Fonts.GetWidthASCII(font, text);
 
             if (width > 200)
-                width = isunicode ? Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
+                width = isunicode ? FileManager.Fonts.GetWidthExUnicode(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder) : FileManager.Fonts.GetWidthExASCII(font, text, 200, TEXT_ALIGN_TYPE.TS_LEFT, (ushort) FontStyle.BlackBorder);
             else
                 width = 0;
             overhead = new TextOverhead(this, text, width, hue, font, isunicode, FontStyle.BlackBorder, timeToLive);
@@ -258,6 +259,11 @@ namespace ClassicUO.Game.GameObjects
                 _view = null;
         }
 
+        //~GameObject()
+        //{
+        //    Dispose();
+        //}
+
         public virtual void Dispose()
         {
             if (IsDisposed)
@@ -277,8 +283,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 textOverhead.Dispose();
             }
-            //_overHeads.ForEach(s => s.Dispose());
-            _overHeads.Clear();            
+            _overHeads.Clear();
+
+            //GC.SuppressFinalize(this);
         }
     }
 }

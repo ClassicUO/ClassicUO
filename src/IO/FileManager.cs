@@ -27,7 +27,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.IO
 {
-    public static class FileManager
+    internal static class FileManager
     {
         private static string _uofolderpath;
 
@@ -63,22 +63,79 @@ namespace ClassicUO.IO
 
         public static bool UseUOPGumps { get; set; }
 
+        public static AnimationsLoader Animations { get; private set; }
+        public static AnimDataLoader AnimData { get; private set; }
+        public static ArtLoader Art { get; private set; }
+        public static MapLoader Map { get; private set; }
+        public static ClilocLoader Cliloc { get; private set; }
+        public static GumpsLoader Gumps { get; private set; }
+        public static FontsLoader Fonts { get; private set; }    
+        public static HuesLoader Hues { get; private set; }
+        public static TileDataLoader TileData { get; private set; }
+        public static MultiLoader Multi { get; private set; }
+        public static SkillsLoader Skills { get; private set; }
+        public static TexmapsLoader Textmaps { get; private set; }
+        public static SpeechesLoader Speeches { get; private set; }
+        public static LightsLoader Lights { get; private set; }
+
         public static void LoadFiles()
         {
-            Map.Load();
-            Art.Load();
-            Cliloc.Load();
+            Animations = new AnimationsLoader();
             Animations.Load();
-            Gumps.Load();
-            Fonts.Load();
-            Hues.Load();
-            TileData.Load();
-            Multi.Load();
-            Skills.Load();
-            TextmapTextures.Load();
-            Speeches.Load();
+
+            AnimData = new AnimDataLoader();
             AnimData.Load();
-            Light.Load();
+
+            Art = new ArtLoader();
+            Art.Load();
+
+            Map = new MapLoader();
+            Map.Load();
+
+            Cliloc = new ClilocLoader();
+            Cliloc.Load();
+
+            Gumps = new GumpsLoader();
+            Gumps.Load();
+
+            Fonts = new FontsLoader();
+            Fonts.Load();
+
+            Hues = new HuesLoader();
+            Hues.Load();
+
+            TileData = new TileDataLoader();
+            TileData.Load();
+
+            Multi = new MultiLoader();
+            Multi.Load();
+
+            Skills = new SkillsLoader();
+            Skills.Load();
+
+            Textmaps = new TexmapsLoader();
+            Textmaps.Load();
+
+            Speeches = new SpeechesLoader();
+            Speeches.Load();
+
+            Lights = new LightsLoader();
+            Lights.Load();
+
+            //Map.Load();
+            //Art.Load();
+            //Cliloc.Load();
+            //Animations.Load();
+            //Gumps.Load();
+            //Fonts.Load();
+            //FileManager.Hues.Load();
+            //TileData.Load();
+            //Multi.Load();
+            //Skills.Load();
+            //TextmapTextures.Load();
+            //Speeches.Load();
+            //AnimData.Load();
+            //Light.Load();
         }
     }
 }

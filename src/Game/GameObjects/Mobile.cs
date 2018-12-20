@@ -434,7 +434,7 @@ namespace ClassicUO.Game.GameObjects
                 AnimationRepeat = false;
                 AnimationFromServer = true;
 
-                byte index = (byte) Animations.GetGroupIndex(GetGraphicForAnimation());
+                byte index = (byte) FileManager.Animations.GetGroupIndex(GetGraphicForAnimation());
 
                 AnimationGroup = _animationIdle[index - 1, RandomHelper.GetValue(0, 2)];
             }
@@ -576,16 +576,16 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 bool mirror = false;
-                Animations.GetAnimDirection(ref dir, ref mirror);
+                FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
                 int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
-                if (id < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
+                if (id < AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                 {
-                    ref AnimationDirection direction = ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
-                    Animations.AnimID = id;
-                    Animations.AnimGroup = (byte) animGroup;
-                    Animations.Direction = dir;
-                    if ((direction.FrameCount == 0 || direction.FramesHashes == null)) Animations.LoadDirectionGroup(ref direction);
+                    ref AnimationDirection direction = ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+                    FileManager.Animations.AnimID = id;
+                    FileManager.Animations.AnimGroup = (byte) animGroup;
+                    FileManager.Animations.Direction = dir;
+                    if ((direction.FrameCount == 0 || direction.FramesHashes == null)) FileManager.Animations.LoadDirectionGroup(ref direction);
 
                     if (direction.Address != 0 || direction.IsUOP)
                     {

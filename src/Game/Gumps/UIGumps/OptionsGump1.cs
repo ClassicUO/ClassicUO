@@ -20,7 +20,9 @@
 #endregion
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
@@ -332,7 +334,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             uint color = 0xFF7F7F7F;
 
             if (Engine.Profile.Current.SpeechHue != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.SpeechHue) << 8) | 0xFF);
+                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.SpeechHue) << 8) | 0xFF);
 
             ColorPickerBox speechColorPickerBox = new ColorPickerBox(3, 3, 1, 1, 13, 14)
             {
@@ -365,7 +367,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             color = 0xFF7F7F7F;
 
             if (Engine.Profile.Current.EmoteHue != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.EmoteHue) << 8) | 0xFF);
+                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.EmoteHue) << 8) | 0xFF);
             ColorPickerBox emoteColorPickerBox = new ColorPickerBox(3, 3, 1, 1, 13, 14);
             emoteColorPickerBox.MouseClick += (sender, e) => buttonEmoteColor.InvokeMouseClick(e.Location, e.Button);
             emoteColorPickerBox.SetHue(color);
@@ -394,7 +396,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             color = 0xFF7F7F7F;
 
             if (Engine.Profile.Current.PartyMessageHue != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.PartyMessageHue) << 8) | 0xFF);
+                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.PartyMessageHue) << 8) | 0xFF);
             ColorPickerBox partyMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
             partyMessageColor.MouseClick += (sender, e) => butttonPartyMessageColor.InvokeMouseClick(e.Location, e.Button);
             partyMessageColor.SetHue(color);
@@ -423,7 +425,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             color = 0xFF7F7F7F;
 
             if (Engine.Profile.Current.GuildMessageHue != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.GuildMessageHue) << 8) | 0xFF);
+                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.GuildMessageHue) << 8) | 0xFF);
             ColorPickerBox guildMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
             guildMessageColor.MouseClick += (sender, e) => buttonGuildMessageColor.InvokeMouseClick(e.Location, e.Button);
             guildMessageColor.SetHue(color);
@@ -452,7 +454,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             color = 0xFF7F7F7F;
 
             if (Engine.Profile.Current.AllyMessageHue != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.AllyMessageHue) << 8) | 0xFF);
+                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.AllyMessageHue) << 8) | 0xFF);
             ColorPickerBox allyMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
             allyMessageColor.MouseClick += (sender, e) => buttonAllyMessageColor.InvokeMouseClick(e.Location, e.Button);
             allyMessageColor.SetHue(color);
@@ -488,7 +490,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             uint color = 0xFF7F7F7F;
 
             if (Engine.Profile.Current.InnocentHue != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.InnocentHue) << 8) | 0xFF);
+                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.InnocentHue) << 8) | 0xFF);
             ColorPickerBox innocentColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
             innocentColor.MouseClick += (sender, e) => buttonInnocentColor.InvokeMouseClick(e.Location, e.Button);
             innocentColor.SetHue(color);
@@ -515,7 +517,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             color = 0xFF7F7F7F;
 
             if (Engine.Profile.Current.FriendHue != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.FriendHue) << 8) | 0xFF);
+                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.FriendHue) << 8) | 0xFF);
 
             ColorPickerBox friendColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
             {
@@ -546,7 +548,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             color = 0xFF7F7F7F;
 
             if (Engine.Profile.Current.CriminalHue != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.CriminalHue) << 8) | 0xFF);
+                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.CriminalHue) << 8) | 0xFF);
 
             ColorPickerBox criminalColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
             {
@@ -577,7 +579,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             color = 0xFF7F7F7F;
 
             if (Engine.Profile.Current.EnemyHue != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.EnemyHue) << 8) | 0xFF);
+                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.EnemyHue) << 8) | 0xFF);
 
             ColorPickerBox enemyColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
             {
@@ -608,7 +610,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             color = 0xFF7F7F7F;
 
             if (Engine.Profile.Current.MurdererHue != 0xFFFF)
-                color = Hues.RgbaToArgb((Hues.GetPolygoneColor(12, Engine.Profile.Current.MurdererHue) << 8) | 0xFF);
+                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.MurdererHue) << 8) | 0xFF);
 
             ColorPickerBox murdererColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
             {

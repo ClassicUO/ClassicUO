@@ -212,7 +212,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                 return;
 
-            if (TileData.IsWearable(gs.HeldItem.ItemData.Flags))
+            if (gs.HeldItem.ItemData.IsWearable)
             {
                 gs.WearHeldItem(Mobile);
             }

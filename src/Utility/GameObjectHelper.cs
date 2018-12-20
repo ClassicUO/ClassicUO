@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 using Multi = ClassicUO.Game.GameObjects.Multi;
@@ -57,9 +58,10 @@ namespace ClassicUO.Utility
             if (g != 0x63D3)
             {
                 if (g >= 0x2198 && g <= 0x21A4) return true;
-                ulong flags = TileData.StaticData[g].Flags;
 
-                if (!TileData.IsNoDiagonal(flags) || TileData.IsAnimated(flags) && World.Player != null && World.Player.Race == RaceType.GARGOYLE) return false;
+                ref StaticTiles data = ref FileManager.TileData.StaticData[g];
+
+                if (!data.IsNoDiagonal || data.IsAnimated && World.Player != null && World.Player.Race == RaceType.GARGOYLE) return false;
             }
 
             return true;

@@ -21,6 +21,7 @@
 using System;
 
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -38,8 +39,8 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public Checkbox(ushort inactive, ushort active, string text = "", byte font = 0, ushort color = 0)
         {
-            _textures[INACTIVE] = IO.Resources.Gumps.GetGumpTexture(inactive);
-            _textures[ACTIVE] = IO.Resources.Gumps.GetGumpTexture(active);
+            _textures[INACTIVE] = FileManager.Gumps.GetTexture(inactive);
+            _textures[ACTIVE] = FileManager.Gumps.GetTexture(active);
             ref SpriteTexture t = ref _textures[INACTIVE];
             Width = t.Width;
             Height = t.Height;

@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 using Microsoft.Xna.Framework;
@@ -90,7 +91,7 @@ namespace ClassicUO.Renderer
                         IsPartialHue = false;
 
                         if (IsHTML)
-                            Fonts.SetUseHTML(false);
+                            FileManager.Fonts.SetUseHTML(false);
                         Links.Clear();
                         Texture?.Dispose();
                         Texture = null;
@@ -162,13 +163,13 @@ namespace ClassicUO.Renderer
             }
 
             if (IsHTML)
-                Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+                FileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
             bool ispartial = false;
 
             if (IsUnicode)
-                Texture = Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle, SaveHitMap);
+                Texture = FileManager.Fonts.GenerateUnicode(Font, Text, Hue, Cell, MaxWidth, Align, (ushort) FontStyle, SaveHitMap);
             else
-                Texture = Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, out ispartial, SaveHitMap);
+                Texture = FileManager.Fonts.GenerateASCII(Font, Text, Hue, MaxWidth, Align, (ushort) FontStyle, out ispartial, SaveHitMap);
             IsPartialHue = ispartial;
 
             if (Texture != null)
@@ -179,7 +180,7 @@ namespace ClassicUO.Renderer
             }
 
             if (IsHTML)
-                Fonts.SetUseHTML(false);
+                FileManager.Fonts.SetUseHTML(false);
         }
 
         public void Dispose()

@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
@@ -50,7 +51,7 @@ namespace ClassicUO.Game.Gumps.Controls
             Y = item.Y;
             HighlightOnMouseOver = true;
             CanPickUp = true;
-            var texture = Art.GetStaticTexture(item.DisplayedGraphic);
+            var texture = FileManager.Art.GetTexture(item.DisplayedGraphic);
             Texture = texture;
             Width = texture.Width;
             Height = texture.Height;
@@ -101,9 +102,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {
-            Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, TileData.IsPartialHue(Item.ItemData.Flags), 0, false);
+            Vector3 huev = ShaderHuesTraslator.GetHueVector(MouseIsOver && HighlightOnMouseOver ? 0x0035 : Item.Hue, Item.ItemData.IsPartialHue, 0, false);
             batcher.Draw2D(Texture, position, huev);
-            if (Item.Amount > 1 && TileData.IsStackable(Item.ItemData.Flags) && Item.DisplayedGraphic == Item.Graphic)
+            if (Item.Amount > 1 && Item.ItemData.IsStackable && Item.DisplayedGraphic == Item.Graphic)
                 batcher.Draw2D(Texture, new Point(position.X + 5, position.Y + 5), huev);
             return base.Draw(batcher, position, huev);
         }
@@ -113,7 +114,7 @@ namespace ClassicUO.Game.Gumps.Controls
             if (Texture.Contains(x, y))
                 return true;
 
-            if (Item.Amount > 1 && TileData.IsStackable(Item.ItemData.Flags))
+            if (Item.Amount > 1 && Item.ItemData.IsStackable)
             {
                 if (Texture.Contains(x - 5, y - 5))
                     return true;
@@ -143,9 +144,9 @@ namespace ClassicUO.Game.Gumps.Controls
 
                 gs.SelectedObject = Item;
 
-                if (TileData.IsContainer(Item.ItemData.Flags))
+                if (Item.ItemData.IsContainer)
                     gs.DropHeldItemToContainer(Item);
-                else if (gs.HeldItem.Graphic == Item.Graphic && TileData.IsStackable(gs.HeldItem.ItemData.Flags))
+                else if (gs.HeldItem.Graphic == Item.Graphic && gs.HeldItem.ItemData.IsStackable)
                     gs.MergeHeldItem(Item);
                 else
                 {
@@ -199,7 +200,7 @@ namespace ClassicUO.Game.Gumps.Controls
             {
                 if (this is ItemGumpPaperdoll)
                 {
-                    Rectangle bounds = Art.GetStaticTexture(Item.DisplayedGraphic).Bounds;
+                    Rectangle bounds = FileManager.Art.GetTexture(Item.DisplayedGraphic).Bounds;
                     GameActions.PickUp(Item, bounds.Width >> 1, bounds.Height >> 1);
                 }
                 else

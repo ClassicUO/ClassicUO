@@ -18,6 +18,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -31,7 +33,7 @@ namespace ClassicUO.Game.Gumps.Controls
         public GumpPicTiled(Graphic graphic)
         {
             CanMove = true;
-            Texture = IO.Resources.Gumps.GetGumpTexture(graphic);
+            Texture = FileManager.Gumps.GetTexture(graphic);
             Graphic = _lastGraphic = graphic;
         }
 
@@ -57,7 +59,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (_lastGraphic != Graphic)
             {
-                Texture = IO.Resources.Gumps.GetGumpTexture(Graphic);
+                Texture = FileManager.Gumps.GetTexture(Graphic);
                 _lastGraphic = Graphic;
             }
 

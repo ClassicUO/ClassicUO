@@ -20,6 +20,7 @@
 #endregion
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -48,7 +49,7 @@ namespace ClassicUO.Game.Views
 
                 if (_displayed > 0x4E29)
                     return false;
-                Texture = IO.Resources.Gumps.GetGumpTexture(_displayed);
+                Texture = FileManager.Gumps.GetTexture(_displayed);
                 Point offset = _offsets[_displayed - 20000];
                 Bounds = new Rectangle(offset.X, Texture.Height - 33 + offset.Y, Texture.Width, Texture.Height);
             }

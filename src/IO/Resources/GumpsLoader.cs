@@ -1,41 +1,23 @@
-﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    public static class Gumps
+    class GumpsLoader : ResourceLoader<SpriteTexture>
     {
         public const int GUMP_COUNT = 0x10000;
-        private static UOFile _file;
-        private static readonly List<int> _usedIndex = new List<int>();
-        private static readonly Dictionary<int, SpriteTexture> _gumpDictionary = new Dictionary<int, SpriteTexture>();
+        private UOFile _file;
+        private readonly List<uint> _usedIndex = new List<uint>();
 
-        public static void Load()
+        public override void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "gumpartLegacyMUL.uop");
 
@@ -85,9 +67,9 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public static SpriteTexture GetGumpTexture(ushort g)
+        public override SpriteTexture GetTexture(uint g)
         {
-            if (!_gumpDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
+            if (!ResourceDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
             {
                 ushort[] pixels = GetGumpPixels(g, out int w, out int h);
 
@@ -96,26 +78,31 @@ namespace ClassicUO.IO.Resources
                 texture = new SpriteTexture(w, h, false);
                 texture.SetDataHitMap16(pixels);
                 _usedIndex.Add(g);
-                _gumpDictionary.Add(g, texture);
+                ResourceDictionary.Add(g, texture);
             }
             return texture;
         }
 
-        public static void ClearUnusedTextures()
+        protected override void CleanResources()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ClearUnusedTextures()
         {
             int count = 0;
             long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                int g = _usedIndex[i];
-                SpriteTexture texture = _gumpDictionary[g];
+                uint g = _usedIndex[i];
+                SpriteTexture texture = ResourceDictionary[g];
 
                 if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
                     _usedIndex.RemoveAt(i--);
-                    _gumpDictionary.Remove(g);
+                    ResourceDictionary.Remove(g);
 
                     if (++count >= Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
@@ -123,22 +110,22 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public static void Clear()
+        public void Clear()
         {
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                int g = _usedIndex[i];
-                SpriteTexture texture = _gumpDictionary[g]; 
+                uint g = _usedIndex[i];
+                SpriteTexture texture = ResourceDictionary[g];
                 texture.Dispose();
                 _usedIndex.RemoveAt(i--);
-                _gumpDictionary.Remove(g);                
+                ResourceDictionary.Remove(g);
             }
         }
 
 
-        public static unsafe ushort[] GetGumpPixels(int index, out int width, out int height)
+        public unsafe ushort[] GetGumpPixels(uint index, out int width, out int height)
         {
-            (int length, int extra, bool patcher) = _file.SeekByEntryIndex(index);
+            (int length, int extra, bool patcher) = _file.SeekByEntryIndex((int)index);
 
             if (extra == -1)
             {
@@ -157,7 +144,7 @@ namespace ClassicUO.IO.Resources
             //width = PaddedRowWidth(16, width, 4) >> 1;
             IntPtr dataStart = _file.PositionAddress;
             ushort[] pixels = new ushort[width * height];
-            int* lookuplist = (int*) dataStart;
+            int* lookuplist = (int*)dataStart;
 
             for (int y = 0; y < height; y++)
             {
@@ -167,7 +154,7 @@ namespace ClassicUO.IO.Resources
                     gsize = lookuplist[y + 1] - lookuplist[y];
                 else
                     gsize = (length >> 2) - lookuplist[y];
-                GumpBlock* gmul = (GumpBlock*) (dataStart + lookuplist[y] * 4);
+                GumpBlock* gmul = (GumpBlock*)(dataStart + lookuplist[y] * 4);
                 int pos = y * width;
                 int x = 0;
 
@@ -179,7 +166,7 @@ namespace ClassicUO.IO.Resources
                     if (val > 0)
                     {
                         for (int j = 0; j < count; j++)
-                            pixels[pos + x++] = (ushort) (0x8000 | val);
+                            pixels[pos + x++] = (ushort)(0x8000 | val);
                     }
                     else
                         x += count;

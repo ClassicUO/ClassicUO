@@ -25,6 +25,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -74,14 +75,14 @@ namespace ClassicUO.Game.Gumps
             }
             else if (_renderedText.Text != Text)
             {
-                Fonts.RecalculateWidthByInfo = true;
-                int width = Fonts.GetWidthUnicode(1, Text);
+                FileManager.Fonts.RecalculateWidthByInfo = true;
+                int width = FileManager.Fonts.GetWidthUnicode(1, Text);
 
                 if (width > 600)
                     width = 600;
                 _renderedText.MaxWidth = width;
                 _renderedText.Text = _textHTML;
-                Fonts.RecalculateWidthByInfo = false;
+                FileManager.Fonts.RecalculateWidthByInfo = false;
             }
 
 
@@ -146,7 +147,7 @@ namespace ClassicUO.Game.Gumps
                     hasStartColor = true;
                 }
 
-                string text = Cliloc.Translate((int) property.Cliloc, property.Args, true);
+                string text = FileManager.Cliloc.Translate((int) property.Cliloc, property.Args, true);
 
                 if (string.IsNullOrEmpty(text)) continue;
                 _sb.Append(text);

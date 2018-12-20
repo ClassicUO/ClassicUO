@@ -27,6 +27,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.Views;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -191,11 +192,11 @@ namespace ClassicUO.Game.Managers
             byte dir = 0 & 0x7F;
             byte animGroup = 0;
             bool mirror = false;
-            Animations.GetAnimDirection(ref dir, ref mirror);
+            FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
 
             if (frameIndex == 0xFF)
                 frameIndex = (byte)mobile.AnimIndex;
-            Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out int x, out centerY, out int w, out height);
+            FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out int x, out centerY, out int w, out height);
             if (x == 0 && centerY == 0 && w == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         }
 

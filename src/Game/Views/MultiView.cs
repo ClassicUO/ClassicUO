@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -24,7 +25,7 @@ namespace ClassicUO.Game.Views
         {
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(st.Graphic);
 
-            if (TileData.IsTranslucent(st.ItemData.Flags))
+            if (st.ItemData.IsTranslucent)
                 _alpha = 0.5f;
         }
 
@@ -35,7 +36,7 @@ namespace ClassicUO.Game.Views
 
             if (Texture == null || Texture.IsDisposed)
             {
-                ArtTexture texture = Art.GetStaticTexture(GameObject.Graphic);
+                ArtTexture texture = FileManager.Art.GetTexture(GameObject.Graphic);
                 Texture = texture;
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
 

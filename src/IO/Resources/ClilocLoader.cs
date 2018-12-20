@@ -1,37 +1,19 @@
-﻿#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    public static class Cliloc
+    class ClilocLoader : ResourceLoader
     {
-        private static readonly Dictionary<int, StringEntry> _entries = new Dictionary<int, StringEntry>();
+        private readonly Dictionary<int, StringEntry> _entries = new Dictionary<int, StringEntry>();
 
-        public static void Load()
+        public override void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "Cliloc.enu");
 
@@ -59,24 +41,29 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public static string GetString(int number)
+        protected override void CleanResources()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetString(int number)
         {
             return GetEntry(number).Text;
         }
 
-        public static StringEntry GetEntry(int number)
+        public StringEntry GetEntry(int number)
         {
             _entries.TryGetValue(number, out StringEntry res);
 
             return res;
         }
 
-        public static string Translate(int baseCliloc, string arg = null, bool capitalize = false)
+        public string Translate(int baseCliloc, string arg = null, bool capitalize = false)
         {
             return Translate(GetString(baseCliloc), arg, capitalize);
         }
 
-        public static string Translate(string baseCliloc, string arg = null, bool capitalize = false)
+        public string Translate(string baseCliloc, string arg = null, bool capitalize = false)
         {
             if (string.IsNullOrEmpty(baseCliloc))
                 return string.Empty;
@@ -86,7 +73,7 @@ namespace ClassicUO.IO.Resources
 
             string[] args = arg.Split(new[]
             {
-               '\t'
+                '\t'
             }, StringSplitOptions.RemoveEmptyEntries);
 
             for (int i = 0; i < args.Length; i++)
@@ -127,15 +114,4 @@ namespace ClassicUO.IO.Resources
         public readonly int Number;
         public readonly string Text;
     }
-
-    //[StructLayout(LayoutKind.Sequential, Pack = 1, Size = 4 + 1 + 2 + 20)]
-    //internal unsafe readonly struct ClilocEntry
-    //{
-    //    public readonly int Number;
-    //    public readonly byte Flag;
-    //    public readonly ushort Length;
-    //    //[MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
-    //    //public readonly char[] Name;
-    //    public readonly char* Name;
-    //}
 }

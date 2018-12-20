@@ -29,6 +29,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -69,7 +70,7 @@ namespace ClassicUO.Game
                 for (int j = 0; j < 16; j++)
                 {
                     ushort id = _cursorData[i, j];
-                    Texture2D texture = Art.GetStaticTexture(id);
+                    Texture2D texture = FileManager.Art.GetTexture(id);
 
                     if (i == 0)
                     {
@@ -199,7 +200,7 @@ namespace ClassicUO.Game
         private bool _isDouble;
         public void SetDraggedItem(Graphic graphic, Hue hue, bool isDouble)
         {
-            _draggedItemTexture = Art.GetStaticTexture(graphic);
+            _draggedItemTexture = FileManager.Art.GetTexture(graphic);
             _hue = hue;
             _isDouble = isDouble;
             _offset = new Point(_draggedItemTexture.Width >> 1, _draggedItemTexture.Height >> 1);
@@ -218,7 +219,7 @@ namespace ClassicUO.Game
 
             if (Texture == null || Texture.IsDisposed || _needGraphicUpdate)
             {
-                Texture = Art.GetStaticTexture(Graphic);
+                Texture = FileManager.Art.GetTexture(Graphic);
                 _needGraphicUpdate = false;
             }
 

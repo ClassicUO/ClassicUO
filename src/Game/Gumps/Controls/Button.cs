@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -49,9 +50,9 @@ namespace ClassicUO.Game.Gumps.Controls
             _gumpGraphics[NORMAL] = normal;
             _gumpGraphics[PRESSED] = pressed;
             _gumpGraphics[OVER] = over;
-            _textures[NORMAL] = IO.Resources.Gumps.GetGumpTexture(normal);
-            _textures[PRESSED] = IO.Resources.Gumps.GetGumpTexture(pressed);
-            if (over > 0) _textures[OVER] = IO.Resources.Gumps.GetGumpTexture(over);
+            _textures[NORMAL] = FileManager.Gumps.GetTexture(normal);
+            _textures[PRESSED] = FileManager.Gumps.GetTexture(pressed);
+            if (over > 0) _textures[OVER] = FileManager.Gumps.GetTexture(over);
             ref SpriteTexture t = ref _textures[NORMAL];
 
             if (t == null)
@@ -112,19 +113,19 @@ namespace ClassicUO.Game.Gumps.Controls
         public int ButtonGraphicNormal
         {
             get => _gumpGraphics[NORMAL];
-            set => _textures[NORMAL] = IO.Resources.Gumps.GetGumpTexture((ushort) value);
+            set => _textures[NORMAL] = FileManager.Gumps.GetTexture((ushort) value);
         }
 
         public int ButtonGraphicPressed
         {
             get => _gumpGraphics[PRESSED];
-            set => _textures[PRESSED] = IO.Resources.Gumps.GetGumpTexture((ushort) value);
+            set => _textures[PRESSED] = FileManager.Gumps.GetTexture((ushort) value);
         }
 
         public int ButtonGraphicOver
         {
             get => _gumpGraphics[OVER];
-            set => _textures[OVER] = IO.Resources.Gumps.GetGumpTexture((ushort) value);
+            set => _textures[OVER] = FileManager.Gumps.GetTexture((ushort) value);
         }
 
         public Hue FontHue { get; }
@@ -231,7 +232,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
             return texture.Contains(x, y);
             //return (Texture != null && Texture.Contains(x, y)) /*|| Bounds.Contains(X + x, Y + y)*/;
-            //return IO.Resources.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
+            //return FileManager.Gumps.Contains(GetGraphicByState(), x, y) || Bounds.Contains(X + x, Y + y);
         }
 
         public override void Dispose()

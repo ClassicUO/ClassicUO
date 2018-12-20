@@ -27,6 +27,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -52,16 +53,16 @@ namespace ClassicUO.Game.Gumps.Controls
 
             ushort id = Item.ItemData.AnimID;
 
-            if (Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
+            if (FileManager.Animations.EquipConversions.TryGetValue(Mobile.Graphic, out var dict))
             {
                 if (dict.TryGetValue(id, out EquipConvData data))
                     id = data.Gump;
             }
 
-            Texture = IO.Resources.Gumps.GetGumpTexture( (ushort) (id + offset));
+            Texture = FileManager.Gumps.GetTexture( (ushort) (id + offset));
 
             if (owner.IsFemale && Texture == null)
-                Texture = IO.Resources.Gumps.GetGumpTexture((ushort)(id + MALE_OFFSET));
+                Texture = FileManager.Gumps.GetTexture((ushort)(id + MALE_OFFSET));
 
             if (Texture == null)
             {
@@ -93,13 +94,13 @@ namespace ClassicUO.Game.Gumps.Controls
             if (IsDisposed)
                 return false;
 
-            return batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, TileData.IsPartialHue(Item.ItemData.Flags), _isTransparent ? .5f : 0, false));
+            return batcher.Draw2D(Texture, position, ShaderHuesTraslator.GetHueVector(Item.Hue & 0x3FFF, Item.ItemData.IsPartialHue, _isTransparent ? .5f : 0, false));
         }
 
         protected override bool Contains(int x, int y)
         {
             return Texture.Contains(x, y);
-            //return IO.Resources.Gumps.Contains(_gumpIndex, x, y);
+            //return FileManager.Gumps.Contains(_gumpIndex, x, y);
         }
 
         protected override void OnMouseUp(int x, int y, MouseButton button)
@@ -110,7 +111,7 @@ namespace ClassicUO.Game.Gumps.Controls
                 if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                     return;
 
-                if (TileData.IsWearable(gs.HeldItem.ItemData.Flags))
+                if (gs.HeldItem.ItemData.IsWearable)
                 {
                     gs.WearHeldItem(Mobile);                   
                 }       

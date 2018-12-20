@@ -21,6 +21,7 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -35,7 +36,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(pic);
 
 
-            SpriteTexture t = IO.Resources.Gumps.GetGumpTexture(0x0816);
+            SpriteTexture t = FileManager.Gumps.GetTexture(0x0816);
 
             Width = t.Width;
             Height = t.Height;

@@ -265,12 +265,12 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, "Loading files...");
             Stopwatch stopwatch = Stopwatch.StartNew();
             FileManager.LoadFiles();
-            uint[] hues = Hues.CreateShaderColors();
+            uint[] hues = FileManager.Hues.CreateShaderColors();
             _batcher = new Batcher2D(GraphicsDevice);
-            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, Hues.HuesCount);
-            texture0.SetData(hues, 0, 32 * Hues.HuesCount);
-            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, Hues.HuesCount);
-            texture1.SetData(hues, 32 * Hues.HuesCount, 32 * Hues.HuesCount);
+            Texture2D texture0 = new Texture2D(GraphicsDevice, 32, FileManager.Hues.HuesCount);
+            texture0.SetData(hues, 0, 32 * FileManager.Hues.HuesCount);
+            Texture2D texture1 = new Texture2D(GraphicsDevice, 32, FileManager.Hues.HuesCount);
+            texture1.SetData(hues, 32 * FileManager.Hues.HuesCount, 32 * FileManager.Hues.HuesCount);
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
             Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");

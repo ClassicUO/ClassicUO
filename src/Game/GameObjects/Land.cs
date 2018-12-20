@@ -22,6 +22,7 @@ using System;
 using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Views;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 using Microsoft.Xna.Framework;
@@ -35,7 +36,7 @@ namespace ClassicUO.Game.GameObjects
         public Land(Graphic graphic)
         {
             Graphic = graphic;
-            IsStretched = TileData.TexID == 0 && IO.Resources.TileData.IsWet(TileData.Flags);
+            IsStretched = TileData.TexID == 0 && TileData.IsWet;
         }
 
         private LandTiles? _tileData;
@@ -47,7 +48,7 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 if (!_tileData.HasValue)
-                    _tileData = IO.Resources.TileData.LandData[Graphic];
+                    _tileData = FileManager.TileData.LandData[Graphic];
 
                 return _tileData.Value;
             }
