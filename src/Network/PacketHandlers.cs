@@ -743,10 +743,27 @@ namespace ClassicUO.Network
             Direction direction = (Direction) p.ReadByte();
             sbyte z = p.ReadSByte();
             Direction dir = direction & Direction.Up;
+            bool run = (dir & Direction.Running) != 0;
             dir &= Direction.Running;
 
 #if JAEDAN_MOVEMENT_PATCH
             World.Player.ForcePosition(x, y, z, dir);
+#elif MOVEMENT2
+            World.Player.ResetSteps();
+
+            World.Player.GetEndPosition(out int endX, out int endY, out sbyte endZ, out Direction endDir);
+
+            if (endX == x && endY == y && endZ == z)
+            {
+                if (endDir != dir)
+                {
+                    World.Player.EnqueueStep(x, y, z, dir, run);
+                }
+            }
+            else
+            {
+                World.Player.ForcePosition(x, y, z , dir);
+            }
 #else
             World.Player.Walker.WalkingFailed = false;
             World.Player.Position = new Position(x, y, z);
@@ -772,10 +789,12 @@ namespace ClassicUO.Network
 
 #if JAEDAN_MOVEMENT_PATCH
             World.Player.ForcePosition(x, y , z, direction);
+#elif MOVEMENT2
+            World.Player.DenyWalk(seq, direction, x, y , z);
 #else
             World.Player.Walker.DenyWalk(seq, x, y, z);
-#endif
             World.Player.Direction = direction;
+#endif
             World.Player.ProcessDelta();
         }
 
@@ -1809,16 +1828,20 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 case 1: // fast walk prevention
 
+#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
+
                     for (int i = 0; i < 6; i++)
                     {
                        World.Player.Walker.FastWalkStack.SetValue(i, p.ReadUInt());
                     }
-
+#endif
                     break;
                 //===========================================================================================
                 //===========================================================================================
                 case 2: // add key to fast walk stack
+#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
                     World.Player.Walker.FastWalkStack.AddValue(p.ReadUInt());
+#endif
                     break;
                 //===========================================================================================
                 //===========================================================================================

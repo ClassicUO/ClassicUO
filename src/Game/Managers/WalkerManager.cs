@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
-#if !JAEDAN_MOVEMENT_PATCH
+#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
     struct StepInfo
     {
         public byte Direction;

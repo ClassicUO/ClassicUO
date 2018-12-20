@@ -1611,9 +1611,9 @@ namespace ClassicUO.Game.GameObjects
             base.Dispose();
         }
 
-        
 
-#if !JAEDAN_MOVEMENT_PATCH
+
+#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
         internal WalkerManager Walker { get; } = new WalkerManager();
 
         public bool Walk(Direction direction, bool run)
@@ -1763,7 +1763,7 @@ namespace ClassicUO.Game.GameObjects
         private bool _lastRun, _lastMount;
         private int _lastDir, _lastDelta, _lastStepTime;
 
-#else
+#elif !MOVEMENT2
         private int _movementX, _movementY;
         private sbyte _movementZ;
         private int _stepsOutstanding;
@@ -1860,13 +1860,147 @@ namespace ClassicUO.Game.GameObjects
 
             return true;
         }
+#else
+        public long LastStepRequestedTime { get; set; }
+        public byte SequenceNumber { get; set; }
+        
+        public bool Walk(Direction direction, bool run)
+        {
+            if (LastStepRequestedTime > Engine.Ticks)
+                return false;
+
+            if (RequestedSteps.Count >= Constants.MAX_STEP_COUNT)
+                return false;
+
+            if (SpeedMode >= CharacterSpeedType.CantRun)
+                run = false;
+            // else ALWASY RUN CHECK
+
+
+            int x, y;
+            sbyte z;
+            Direction oldDirection;
+
+            if (RequestedSteps.Count == 0)
+                GetEndPosition(out x, out y, out  z, out oldDirection);
+            else
+            {
+                Step step = RequestedSteps.Back();
+
+                x = step.X;
+                y = step.Y;
+                z = step.Z;
+                oldDirection = (Direction) step.Direction;
+            }
+
+            ushort walkTime;
+
+            int newX = x;
+            int newY = y;
+            sbyte newZ = z;
+            Direction newDirection = direction;
+
+            if (oldDirection == newDirection)
+            {
+                if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
+                    return false;
+
+                if (newDirection != direction)
+                {
+                    direction = newDirection;
+                    walkTime = Constants.TURN_DELAY;
+                }
+                else
+                {
+                    direction = newDirection;
+                    x = newX;
+                    y = newY;
+                    z = newZ;
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(this, run);
+                }
+            }
+            else
+            {
+                if (!Pathfinder.CanWalk(ref newDirection, ref newX, ref newY, ref newZ))
+                {
+                    if (newDirection == oldDirection)
+                        return false;
+                }
+
+                if (oldDirection == newDirection)
+                {
+                    direction = newDirection;
+                    x = newX;
+                    x = newX;
+                    y = newY;
+                    z = newZ;
+                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(this, run);
+                }
+                else
+                {
+                    direction = newDirection;
+                    walkTime = Constants.TURN_DELAY;
+                }
+            }
+
+
+            Step step1 = new Step()
+            {
+                X = x, Y = y, Z = z, Direction = (byte) direction, Run = run, Rej = 0, Seq = SequenceNumber
+            };
+
+            step1.Anim = true;
+
+            EnqueueStep(step1.X, step1.Y, step1.Z, (Direction) step1.Direction, step1.Run);
+
+
+            RequestedSteps.AddToBack(step1);
+
+            NetClient.Socket.Send(new PWalkRequest(direction, SequenceNumber, run, 0));
+
+            if (SequenceNumber == 0xFF)
+                SequenceNumber = 1;
+            else SequenceNumber++;
+
+            LastStepRequestedTime = Engine.Ticks + walkTime;
+
+            GetGroupForAnimation(this);
+
+            return true;
+        }
 #endif
 
         public void ConfirmWalk(byte seq)
         {
-#if !JAEDAN_MOVEMENT_PATCH
-            Walker.ConfirmWalk(seq);
-#else
+#if MOVEMENT2
+
+            if (RequestedSteps.Count == 0)
+            {
+                NetClient.Socket.Send(new PResend());
+                return;
+            }
+
+            Step step = RequestedSteps.RemoveFromFront();
+
+            if (step.Seq != seq)
+            {
+                NetClient.Socket.Send(new PResend());
+                return;
+            }
+
+            if (!step.Anim)
+            {
+                GetEndPosition(out int x, out int y, out sbyte z, out Direction dir);
+
+                if (step.Direction == (byte) dir)
+                {
+                    
+                }
+
+                EnqueueStep(step.X, step.Y, step.Z, (Direction) step.Direction, step.Run);
+            }
+
+#elif JAEDAN_MOVEMENT_PATCH
 
             if (_stepsOutstanding == 0)
             {
@@ -1878,6 +2012,8 @@ namespace ClassicUO.Game.GameObjects
                 //Log.Message(LogTypes.Trace, $"Step accepted - SEQUENCE: {_sequenceNumber}");
                 _stepsOutstanding--;
             }
+#else
+     Walker.ConfirmWalk(seq);
 #endif
         }
 
@@ -1911,6 +2047,46 @@ namespace ClassicUO.Game.GameObjects
             _resynchronizing++;
             NetClient.Socket.Send(new PResend());
             Log.Message(LogTypes.Trace, $"Resync request num: {_resynchronizing}");
+        }
+#elif MOVEMENT2
+        public void DenyWalk(byte seq, Direction dir, ushort x, ushort y, sbyte z)
+        {
+            if (RequestedSteps.Count == 0)
+            {
+                NetClient.Socket.Send(new PResend());
+                return;
+            }
+
+            Step step = RequestedSteps.RemoveFromFront();
+
+            if (step.Rej == 0)
+            {
+                ResetSteps();
+                ForcePosition(x, y , z ,dir);
+
+                if (step.Seq != seq)
+                {
+                    NetClient.Socket.Send(new PResend());
+
+                }
+            }
+            else
+            {
+                
+            }
+        }
+
+        public void ResetSteps()
+        {
+            for (int i = 0; i < RequestedSteps.Count; i++)
+            {
+                var s = RequestedSteps[i];
+                s.Rej = 1;
+                RequestedSteps[i] = s;
+            }
+
+            SequenceNumber = 0;
+            LastStepRequestedTime = 0;
         }
 #endif
     }

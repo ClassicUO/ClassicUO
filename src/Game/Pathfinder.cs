@@ -774,12 +774,13 @@ namespace ClassicUO.Game
 
         public static void ProcessAutoWalk()
         {
-#if !JAEDAN_MOVEMENT_PATCH
-            if (AutoWalking && World.InGame && World.Player.Walker.LastStepRequestTime < Engine.Ticks)
-#else
+#if MOVEMENT2
+            if (AutoWalking && World.InGame && World.Player.LastStepRequestedTime < Engine.Ticks)
+#elif JAEDAN_MOVEMENT_PATCH
             if (AutoWalking && World.InGame && !World.Player.IsWaitingNextMovement)
+#else
+            if (AutoWalking && World.InGame && World.Player.Walker.LastStepRequestTime < Engine.Ticks)
 #endif
-
             {
                 if (_pointIndex >= 0 && _pointIndex < _pathSize)
                 {

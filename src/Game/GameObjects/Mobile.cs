@@ -395,7 +395,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-#if JAEDAN_MOVEMENT_PATCH
+#if JAEDAN_MOVEMENT_PATCH || MOVEMENT2
         public virtual void ForcePosition(ushort x, ushort y, sbyte z, Direction dir)
         {
             Position = new Position(x, y, z);
@@ -507,7 +507,7 @@ namespace ClassicUO.Game.GameObjects
                                 // oUCH!!!!
                             }
 
-#if !JAEDAN_MOVEMENT_PATCH
+#if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
                             if (World.Player.Walker.StepInfos[World.Player.Walker.CurrentWalkSequence].Accepted)
                             {
                                 int sequence = World.Player.Walker.CurrentWalkSequence + 1;
@@ -673,6 +673,9 @@ namespace ClassicUO.Game.GameObjects
             public sbyte Z;
             public byte Direction;
             public bool Run;
+            public byte Rej;
+            public bool Anim;
+            public byte Seq;
         }
     }
 }
