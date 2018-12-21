@@ -328,7 +328,7 @@ namespace ClassicUO.Game.Scenes
 
         private void OnKeyDown(object sender, SDL.SDL_KeyboardEvent e)
         {
-            if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && (e.keysym.mod % Engine.s_IgnoreKeyMod) == SDL.SDL_Keymod.KMOD_NONE)
+            if (TargetManager.IsTargeting && e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && ((uint)e.keysym.mod % (uint)Engine.s_IgnoreKeyMod) == 0)
                 TargetManager.SetTargeting(TargetType.Nothing, 0, 0);
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)

@@ -255,7 +255,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             switch (key)
             {
-                case SDL.SDL_Keycode.SDLK_q when (mod & SDL.SDL_Keymod.KMOD_CTRL) == mod && _messageHistoryIndex > -1:
+                case SDL.SDL_Keycode.SDLK_q when KeyboardInput.IsKeymodPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && _messageHistoryIndex > -1:
 
                     if (_messageHistoryIndex > 0)
                         _messageHistoryIndex--;
@@ -263,7 +263,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     _textBox.SetText(_messageHistory[_messageHistoryIndex].Item2);
 
                     break;
-                case SDL.SDL_Keycode.SDLK_w when (mod & SDL.SDL_Keymod.KMOD_CTRL) == mod:
+                case SDL.SDL_Keycode.SDLK_w when KeyboardInput.IsKeymodPressed(mod, SDL.SDL_Keymod.KMOD_CTRL):
 
                     if (_messageHistoryIndex < _messageHistory.Count - 1)
                     {

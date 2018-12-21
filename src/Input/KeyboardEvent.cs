@@ -27,4 +27,13 @@ namespace ClassicUO.Input
         Press,
         TextInput
     }
+
+    public static class KeyboardInput
+    {
+        public static bool IsKeymodPressed(SDL2.SDL.SDL_Keymod mod, SDL2.SDL.SDL_Keymod tocheck)
+        {
+            return mod != SDL2.SDL.SDL_Keymod.KMOD_NONE && (mod & tocheck) != 0;
+            
+        }
+    }
 }

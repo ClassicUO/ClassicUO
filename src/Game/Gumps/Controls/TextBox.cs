@@ -149,7 +149,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            if((mod & SDL.SDL_Keymod.KMOD_CTRL) == mod && key == SDL.SDL_Keycode.SDLK_v)//paste
+            if(KeyboardInput.IsKeymodPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
             {
                 string s = SDL.SDL_GetClipboardText();
                 if(!string.IsNullOrEmpty(s))

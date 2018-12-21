@@ -637,12 +637,12 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public void InvokeKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            OnKeyDown(key, mod % Engine.s_IgnoreKeyMod);
+            OnKeyDown(key, (SDL.SDL_Keymod)((uint)mod % (uint)Engine.s_IgnoreKeyMod));
         }
 
         public void InvokeKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            OnKeyUp(key, mod % Engine.s_IgnoreKeyMod);
+            OnKeyUp(key, (SDL.SDL_Keymod)((uint)mod % (uint)Engine.s_IgnoreKeyMod));
         }
 
         public void InvokeMouseWheel(MouseEvent delta)
