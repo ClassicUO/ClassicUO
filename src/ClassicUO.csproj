@@ -97,7 +97,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration\GumpProperties.cs" />
     <Compile Include="Configuration\Profile.cs" />
     <Compile Include="Configuration\ProfileManager.cs" />
     <Compile Include="Game\Constants.cs" />
@@ -132,6 +131,7 @@
     <Compile Include="Game\Managers\WalkerManager.cs" />
     <Compile Include="Game\Views\MultiView.cs" />
     <Compile Include="Interfaces\IPoolable.cs" />
+    <Compile Include="IO\DefReader.cs" />
     <Compile Include="IO\ResourceLoader.cs" />
     <Compile Include="IO\Resources\AnimationsLoader.cs" />
     <Compile Include="IO\Resources\AnimDataLoader.cs" />

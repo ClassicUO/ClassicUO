@@ -31,39 +31,19 @@ namespace ClassicUO.IO.Resources
             if (!File.Exists(pathdef))
                 return;
 
-            using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
+            using (DefReader defReader = new DefReader(pathdef, 2))
             {
-                string line;
-
-                while ((line = reader.ReadLine()) != null)
+                while (defReader.Next())
                 {
-                    line = line.Trim();
-
-                    if (line.Length <= 0 || line[0] == '#')
-                        continue;
-
-                    string[] defs = line.Split(new[]
-                    {
-                        '\t', ' ', '#'
-                    }, StringSplitOptions.RemoveEmptyEntries);
-
-                    if (defs.Length < 2)
-                        continue;
-                    int index = int.Parse(defs[0]);
-
+                    int index = defReader.ReadInt();
                     if (index < 0 || index >= TEXTMAP_COUNT)
                         continue;
-                    int first = defs[1].IndexOf("{");
-                    int last = defs[1].IndexOf("}");
 
-                    string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[]
-                    {
-                        ' ', ','
-                    }, StringSplitOptions.RemoveEmptyEntries);
+                    int[] group = defReader.ReadGroup();
 
-                    foreach (string s in newdef)
+                    for (int i = 0; i < group.Length; i++)
                     {
-                        int checkindex = int.Parse(s);
+                        int checkindex = group[i];
 
                         if (checkindex < 0 || checkindex >= TEXTMAP_COUNT)
                             continue;
@@ -71,6 +51,47 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
+
+            //using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
+            //{
+            //    string line;
+
+            //    while ((line = reader.ReadLine()) != null)
+            //    {
+            //        line = line.Trim();
+
+            //        if (line.Length <= 0 || line[0] == '#')
+            //            continue;
+
+            //        string[] defs = line.Split(new[]
+            //        {
+            //            '\t', ' ', '#'
+            //        }, StringSplitOptions.RemoveEmptyEntries);
+
+            //        if (defs.Length < 2)
+            //            continue;
+            //        int index = int.Parse(defs[0]);
+
+            //        if (index < 0 || index >= TEXTMAP_COUNT)
+            //            continue;
+            //        int first = defs[1].IndexOf("{");
+            //        int last = defs[1].IndexOf("}");
+
+            //        string[] newdef = defs[1].Substring(first + 1, last - 1).Split(new[]
+            //        {
+            //            ' ', ','
+            //        }, StringSplitOptions.RemoveEmptyEntries);
+
+            //        foreach (string s in newdef)
+            //        {
+            //            int checkindex = int.Parse(s);
+
+            //            if (checkindex < 0 || checkindex >= TEXTMAP_COUNT)
+            //                continue;
+            //            _file.Entries[index] = _file.Entries[checkindex];
+            //        }
+            //    }
+            //}
         }
 
         public override SpriteTexture GetTexture(uint g)

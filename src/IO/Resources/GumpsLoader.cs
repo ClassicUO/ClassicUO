@@ -39,32 +39,49 @@ namespace ClassicUO.IO.Resources
             if (!File.Exists(pathdef))
                 return;
 
-            using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
+            using (DefReader defReader = new DefReader(pathdef, 3))
             {
-                string line;
-
-                while ((line = reader.ReadLine()) != null)
+                while (defReader.Next())
                 {
-                    line = line.Trim();
-
-                    if (line.Length <= 0 || line[0] == '#')
-                        continue;
-                    string[] defs = line.Replace('\t', ' ').Split(' ');
-
-                    if (defs.Length < 3)
-                        continue;
-                    int ingump = int.Parse(defs[0]);
-
+                    int ingump = defReader.ReadInt();
                     if (ingump < 0 || ingump >= GUMP_COUNT || _file.Entries[ingump].DecompressedLength != 0)
                         continue;
-                    int outgump = int.Parse(defs[1].Replace("{", string.Empty).Replace("}", string.Empty));
 
-                    if (outgump < 0 || outgump >= GUMP_COUNT || _file.Entries[outgump].DecompressedLength == 0)
+                    int outgump = defReader.ReadGroupInt();
+                    if (outgump < 0 || outgump >= GUMP_COUNT || _file.Entries[outgump].DecompressedLength != 0)
                         continue;
-                    int outhue = int.Parse(defs[2]);
+
                     _file.Entries[ingump] = _file.Entries[outgump];
+
                 }
             }
+
+            //using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
+            //{
+            //    string line;
+
+            //    while ((line = reader.ReadLine()) != null)
+            //    {
+            //        line = line.Trim();
+
+            //        if (line.Length <= 0 || line[0] == '#')
+            //            continue;
+            //        string[] defs = line.Replace('\t', ' ').Split(' ');
+
+            //        if (defs.Length < 3)
+            //            continue;
+            //        int ingump = int.Parse(defs[0]);
+
+            //        if (ingump < 0 || ingump >= GUMP_COUNT || _file.Entries[ingump].DecompressedLength != 0)
+            //            continue;
+            //        int outgump = int.Parse(defs[1].Replace("{", string.Empty).Replace("}", string.Empty));
+
+            //        if (outgump < 0 || outgump >= GUMP_COUNT || _file.Entries[outgump].DecompressedLength == 0)
+            //            continue;
+            //        int outhue = int.Parse(defs[2]);
+            //        _file.Entries[ingump] = _file.Entries[outgump];
+            //    }
+            //}
         }
 
         public override SpriteTexture GetTexture(uint g)
