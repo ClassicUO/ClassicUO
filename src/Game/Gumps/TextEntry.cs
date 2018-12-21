@@ -90,7 +90,7 @@ namespace ClassicUO.Game.Gumps
 
         public Point CaretPosition { get; set; }
 
-        protected int CaretIndex { get; set; }
+        public int CaretIndex { get; protected set; }
 
         public RenderedText RenderText { get; private set; }
 
@@ -121,7 +121,7 @@ namespace ClassicUO.Game.Gumps
         {
         }
 
-        public void InsertString(string c)
+        public string InsertString(string c)
         {
             if (CaretIndex < 0)
                 CaretIndex = 0;
@@ -137,21 +137,35 @@ namespace ClassicUO.Game.Gumps
                     s = s.Insert(CaretIndex, c);
 
                     if (!int.TryParse(s, out int value) || value >= MaxCharCount)
-                        return;
+                        return c;
                 }
-                else if (Text.Length >= MaxCharCount) return;
+                else if (Text.Length >= MaxCharCount)
+                {
+                    return c;
+                }
             }
 
             string text = Text.Insert(CaretIndex, c);
+            int count = c.Length;
             if (MaxLines > 0)
             {
-                var newlines = GetLinesCount(text);
-                if (newlines > MaxLines)
-                    return;
+                var newlines = GetLinesCharsCount(text);
+                if (newlines.Length > MaxLines)
+                {
+                    count = newlines.Length - MaxLines;
+                    for (int i = newlines.Length - 1; i >= MaxLines; --i)
+                        count += newlines[i];
+                    text = text.Remove(text.Length - count);
+                    c = c.Substring(Math.Max(0, c.Length - count));
+                    count -= c.Length;
+                }
             }
+            else
+                c = null;
 
-            CaretIndex += c.Length;
+            CaretIndex += count;
             SetText(text);
+            return c;
         }
 
         public void SetText(string text)
@@ -285,13 +299,13 @@ namespace ClassicUO.Game.Gumps
                 UpdateCaretPosition();
         }
 
-        public int GetLinesCount()
+        public int[] GetLinesCharsCount()
         {
-            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width) : FileManager.Fonts.GetLinesCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width);
+            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width) : FileManager.Fonts.GetLinesCharsCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width);
         }
-        public int GetLinesCount(string text)
+        public int[] GetLinesCharsCount(string text)
         {
-            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCountUnicode( RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width ) : FileManager.Fonts.GetLinesCountASCII( RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width );
+            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCharsCountUnicode( RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width ) : FileManager.Fonts.GetLinesCharsCountASCII( RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width );
         }
         public void Clear()
         {

@@ -179,6 +179,39 @@ namespace ClassicUO.Game.Gumps.UIGumps
             base.Update(totalMS, frameMS);
         }
 
+        public override void OnKeyboardReturn(int textID, string text)
+        {
+            switch ((TextBox.PageCommand)textID)
+            {
+                case TextBox.PageCommand.GoBackward when ActivePage > 1:
+                    SetActivePage(ActivePage - 1);
+                    RefreshShowCaretPos(m_Pages[ActivePage - 1].Text.Length - 1, m_Pages[ActivePage - 1]);
+                    break;
+                case TextBox.PageCommand.GoForward when ActivePage > 0 && ActivePage < MaxPage:
+                    SetActivePage(ActivePage + 1);
+                    RefreshShowCaretPos(0, m_Pages[ActivePage - 1]);
+                    break;
+                case TextBox.PageCommand.PasteText when !string.IsNullOrEmpty(text):
+                    int page = ActivePage;
+                    SetActivePage(page + 1);
+                    if (ActivePage > 0 && page != ActivePage)//effectively changed page, continue pasting the text
+                    {
+                        m_Pages[ActivePage - 1].SetText(text, true);
+                    }
+                    break;
+                case TextBox.PageCommand.RemoveText:
+                    //TODO: remove text from other pages, making it roll over on the previous pages, line by line
+                    break;
+            }
+        }
+
+        private void RefreshShowCaretPos(int pos, TextBox box)
+        {
+            box.SetFocused();
+            box._entry.SetCaretPosition(pos);
+            box._entry.UpdateCaretPosition();
+        }
+
         public sealed class PBookHeaderNew : PacketWriter
         {
             public PBookHeaderNew( BookGump gump ) : base( 0xD4 )//Serial serial, string title,string author,int pagecount ) : base( 0xD4 )

@@ -2562,42 +2562,56 @@ namespace ClassicUO.IO.Resources
             return (oldx, y);
         }
 
-        public int GetLinesCountASCII(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width)
+        public int[] GetLinesCharsCountASCII(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width)
         {
             if (width == 0)
                 width = GetWidthASCII(font, str);
             MultilinesFontInfo info = GetInfoASCII(font, str, str.Length, align, flags, width);
 
             if (info == null)
-                return 0;
+                return new int[0];
+            MultilinesFontInfo orig = info;
             int count = 0;
-
             while (info != null)
             {
                 info = info.Next;
                 count++;
             }
+            int[] chars = new int[count];
+            count = 0;
+            while(orig != null)
+            {
+                chars[count++] = orig.CharCount;
+                orig = orig.Next;
+            }
 
-            return count;
+            return chars;
         }
 
-        public int GetLinesCountUnicode(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width)
+        public int[] GetLinesCharsCountUnicode(byte font, string str, TEXT_ALIGN_TYPE align, ushort flags, int width)
         {
             if (width == 0)
                 width = GetWidthUnicode(font, str);
             MultilinesFontInfo info = GetInfoUnicode(font, str, str.Length, align, flags, width);
 
             if (info == null)
-                return 0;
+                return new int[0];
+            MultilinesFontInfo orig = info;
             int count = 0;
-
             while (info != null)
             {
-                info = info.Next;
                 count++;
+                info = info.Next;
+            }
+            int[] chars = new int[count];
+            count = 0;
+            while(orig != null)
+            {
+                chars[count++] = orig.CharCount;
+                orig = orig.Next;
             }
 
-            return count;
+            return chars;
         }
     }
 

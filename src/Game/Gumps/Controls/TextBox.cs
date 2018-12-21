@@ -28,8 +28,16 @@ namespace ClassicUO.Game.Gumps.Controls
 {
     public class TextBox : Control
     {
+        public enum PageCommand
+        {
+            Nothing = 0x00,
+            GoForward = 0x01,
+            GoBackward = 0x02,
+            RemoveText = 0x04,
+            PasteText = 0x08
+        }
         public bool MultiLineInputAllowed { get; set; } = false;
-        private TextEntry _entry;
+        public TextEntry _entry { get; private set; }
 
         private bool _showCaret;
 
@@ -84,7 +92,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public string Text { get => _entry.Text; set => SetText(value); }
 
-        public int LinesCount => _entry.GetLinesCount();
+        public int LinesCount => _entry.GetLinesCharsCount().Length;
 
         //public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
 
@@ -149,12 +157,15 @@ namespace ClassicUO.Game.Gumps.Controls
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
-            if(KeyboardInput.IsKeymodPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
+            string s=null;
+            int oldidx = _entry.CaretIndex;
+            TextEntry oldentry = _entry;
+            if (KeyboardInput.IsKeymodPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
             {
-                string s = SDL.SDL_GetClipboardText();
+                s = SDL.SDL_GetClipboardText();
                 if(!string.IsNullOrEmpty(s))
                 {
-                    _entry.InsertString(s.Replace("\r", string.Empty));
+                    s = _entry.InsertString(s.Replace("\r", string.Empty));
                 }
             }
             else switch (key)
@@ -165,12 +176,8 @@ namespace ClassicUO.Game.Gumps.Controls
                     break;*/
                 case SDL.SDL_Keycode.SDLK_RETURN:
                     if ( MultiLineInputAllowed )
-                        _entry.InsertString( "\n" );
-                    //if ((_entry.RenderText.FontStyle & FontStyle.Fixed) == 0)
-                    //    _entry.InsertString("\n");
-                    //else
-                    Parent.OnKeyboardReturn((int) LocalSerial.Value, Text);
-
+                        s = _entry.InsertString( "\n" );
+                    Parent?.OnKeyboardReturn((int)PageCommand.GoForward, Text);
                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     //TODO remove from current ccaret index
@@ -178,30 +185,55 @@ namespace ClassicUO.Game.Gumps.Controls
                         ReplaceDefaultTextOnFirstKeyPress = false;
                     else
                         _entry.RemoveChar(true);
-
+                    break;
+                case SDL.SDL_Keycode.SDLK_UP when MultiLineInputAllowed:
+                    _entry.OnMouseClick(_entry.CaretPosition.X, _entry.CaretPosition.Y - (_entry.RenderCaret.Height >> 1));
+                        if (_entry.CaretIndex == 0 && oldidx == 0)
+                        {
+                            Parent?.OnKeyboardReturn((int)PageCommand.GoBackward, null);
+                        }
+                    break;
+                case SDL.SDL_Keycode.SDLK_DOWN when MultiLineInputAllowed:
+                    _entry.OnMouseClick(_entry.CaretPosition.X, _entry.CaretPosition.Y + _entry.RenderCaret.Height);
+                    if (_entry.CaretIndex == Text.Length && oldidx == Text.Length)
+                    {
+                        Parent?.OnKeyboardReturn((int)PageCommand.GoForward, null);
+                    }
                     break;
                 case SDL.SDL_Keycode.SDLK_LEFT:
                     _entry.SeekCaretPosition(-1);
-
+                    if (_entry.CaretIndex == 0 && oldidx == 0)
+                    {
+                        Parent?.OnKeyboardReturn((int)PageCommand.GoBackward, null);
+                    }
                     break;
                 case SDL.SDL_Keycode.SDLK_RIGHT:
                     _entry.SeekCaretPosition(1);
-
+                    if (_entry.CaretIndex == Text.Length && oldidx == Text.Length)
+                    {
+                        Parent?.OnKeyboardReturn((int)PageCommand.GoForward, null);
+                    }
                     break;
                 case SDL.SDL_Keycode.SDLK_DELETE:
                     _entry.RemoveChar(false);
-
+                    Parent?.OnKeyboardReturn((int)PageCommand.RemoveText, null);
                     break;
                 case SDL.SDL_Keycode.SDLK_HOME:
                     _entry.SetCaretPosition(0);
-
+                    if (oldidx == 0)
+                    {
+                        Parent?.OnKeyboardReturn((int)PageCommand.GoBackward, null);
+                    }
                     break;
                 case SDL.SDL_Keycode.SDLK_END:
                     _entry.SetCaretPosition(Text.Length - 1);
-
+                    if (oldidx == Text.Length)
+                    {
+                        Parent?.OnKeyboardReturn((int)PageCommand.GoForward, null);
+                    }
                     break;
             }
-
+            Parent?.OnKeyboardReturn((int)PageCommand.PasteText, s);
             base.OnKeyDown(key, mod);
         }
 
