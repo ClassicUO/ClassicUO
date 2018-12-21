@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ClassicUO.Game;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework.Content;
@@ -11,7 +13,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.IO
 {
-    abstract class ResourceLoader<T> where T : GraphicsResource, IDisposable
+    abstract class ResourceLoader<T> where T : SpriteTexture, IDisposable
     {
         private readonly string[] _paths;
 
@@ -37,8 +39,22 @@ namespace ClassicUO.IO
 
         public abstract T GetTexture(uint id);
 
-        protected abstract void CleanResources();
+        public abstract void CleanResources();
 
+        public virtual void CleaUnusedResources()
+        {
+            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+
+            ResourceDictionary
+               .Where(s => s.Value.Ticks < ticks)
+               .Take(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
+               .ToList()
+               .ForEach(s =>
+                {
+                    s.Value.Dispose();
+                    ResourceDictionary.Remove(s.Key);
+                });
+        }
 
         public void Dispose()
         {

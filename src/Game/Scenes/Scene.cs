@@ -91,19 +91,19 @@ namespace ClassicUO.Game.Scenes
             Log.Message(LogTypes.Trace, "Cleaning routine running...");
             while (!IsDisposed)
             {
-                FileManager.Art.ClearUnusedTextures();
+                FileManager.Art.CleaUnusedResources();
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                FileManager.Gumps.ClearUnusedTextures();
+                FileManager.Gumps.CleaUnusedResources();
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                FileManager.Textmaps.ClearUnusedTextures();
+                FileManager.Textmaps.CleaUnusedResources();
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                FileManager.Animations.ClearUnusedTextures();
+                FileManager.Animations.CleaUnusedResources();
 
                 yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 

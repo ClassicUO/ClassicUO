@@ -100,7 +100,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool IsInitialized { get; set; }
 
-        public bool IsFocused { get; protected set; }
+        public bool HasKeyboardFocus => Engine.UI.KeyboardFocusControl == this;
 
         public bool MouseIsOver => Engine.UI.MouseOverControl == this;
 
@@ -401,6 +401,14 @@ namespace ClassicUO.Game.Gumps.Controls
             Tooltip = null;
         }
 
+        public void SetKeyboardFocus()
+        {
+            if (AcceptKeyboardInput && !HasKeyboardFocus)
+            {
+                Engine.UI.KeyboardFocusControl = this;
+            }
+        }
+
         public event EventHandler<MouseEventArgs> MouseDown, MouseUp, MouseMove, MouseOver, MouseEnter, MouseExit, MouseClick, DragBegin, DragEnd;
 
         public event EventHandler<MouseWheelEventArgs> MouseWheel;
@@ -444,18 +452,7 @@ namespace ClassicUO.Game.Gumps.Controls
             }
         }
 
-        internal void SetFocused()
-        {
-            IsFocused = true;
-            OnFocusEnter();
-        }
-
-        internal void RemoveFocus()
-        {
-            IsFocused = false;
-            OnFocusLeft();
-        }
-
+     
         public IReadOnlyList<Control> HitTest(Point position)
         {
             List<Control> results = new List<Control>();

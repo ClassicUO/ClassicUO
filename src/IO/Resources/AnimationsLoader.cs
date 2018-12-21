@@ -814,7 +814,7 @@ namespace ClassicUO.IO.Resources
             return ResourceDictionary[id];
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
             throw new NotImplementedException();
         }
@@ -1328,7 +1328,7 @@ namespace ClassicUO.IO.Resources
                 x = y = w = h = 0;
         }
 
-        public void ClearUnusedTextures()
+        public override void CleaUnusedResources()
         {
             int count = 0;
             long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
@@ -1362,6 +1362,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
         }
+
 
         public void Clear()
         {

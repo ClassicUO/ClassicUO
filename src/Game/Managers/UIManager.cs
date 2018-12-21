@@ -220,14 +220,19 @@ namespace ClassicUO.Game.Managers
                             _keyboardFocusControl = c.GetFirstControlAcceptKeyboardInput();
 
                             if (_keyboardFocusControl != null)
+                            {
                                 break;
+                            }
                         }
                     }
                 }
 
                 return _keyboardFocusControl;
             }
-            set => _keyboardFocusControl = value;
+            set
+            {
+                _keyboardFocusControl = value;
+            } 
         }
 
         public bool IsModalControlOpen => _gumps.Any(s => s.ControlInfo.IsModal);

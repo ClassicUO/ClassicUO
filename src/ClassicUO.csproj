@@ -109,7 +109,6 @@
     <Compile Include="Game\Data\GraphicEffectBlendMode.cs" />
     <Compile Include="Game\Data\GraphicEffectType.cs" />
     <Compile Include="Game\Data\Layers.cs" />
-    <Compile Include="Game\Data\MultiComponent.cs" />
     <Compile Include="Game\Data\MultiInfo.cs" />
     <Compile Include="Game\Data\NotorietyFlag.cs" />
     <Compile Include="Game\Data\PopupMenuData.cs" />

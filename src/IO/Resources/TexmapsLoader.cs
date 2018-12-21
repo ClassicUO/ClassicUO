@@ -15,7 +15,7 @@ namespace ClassicUO.IO.Resources
         private UOFile _file;
         private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
         private readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
-        private readonly List<uint> _usedIndex = new List<uint>();
+        //private readonly List<uint> _usedIndex = new List<uint>();
 
 
         public override void Load()
@@ -104,51 +104,51 @@ namespace ClassicUO.IO.Resources
                     return null;
                 texture = new SpriteTexture(size, size, false);
                 texture.SetData(pixels);
-                _usedIndex.Add(g);
+                //_usedIndex.Add(g);
                 ResourceDictionary.Add(g, texture);
             }
 
             return texture;
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
             throw new NotImplementedException();
         }
 
-        public void ClearUnusedTextures()
-        {
-            int count = 0;
-            long ticks = Engine.Ticks - 3000;
+        //public void ClearUnusedTextures()
+        //{
+        //    int count = 0;
+        //    long ticks = Engine.Ticks - 3000;
 
-            for (int i = 0; i < _usedIndex.Count; i++)
-            {
-                uint g = _usedIndex[i];
-                SpriteTexture texture = ResourceDictionary[g];
+        //    for (int i = 0; i < _usedIndex.Count; i++)
+        //    {
+        //        uint g = _usedIndex[i];
+        //        SpriteTexture texture = ResourceDictionary[g];
 
-                if (texture.Ticks < ticks)
-                {
-                    texture.Dispose();
-                    _usedIndex.RemoveAt(i--);
-                    ResourceDictionary.Remove(g);
+        //        if (texture.Ticks < ticks)
+        //        {
+        //            texture.Dispose();
+        //            _usedIndex.RemoveAt(i--);
+        //            ResourceDictionary.Remove(g);
 
-                    if (++count >= 20)
-                        break;
-                }
-            }
-        }
+        //            if (++count >= 20)
+        //                break;
+        //        }
+        //    }
+        //}
 
-        public void Clear()
-        {
-            for (int i = 0; i < _usedIndex.Count; i++)
-            {
-                uint g = _usedIndex[i];
-                SpriteTexture texture = ResourceDictionary[g];
-                texture.Dispose();
-                _usedIndex.RemoveAt(i--);
-                ResourceDictionary.Remove(g);
-            }
-        }
+        //public void Clear()
+        //{
+        //    for (int i = 0; i < _usedIndex.Count; i++)
+        //    {
+        //        uint g = _usedIndex[i];
+        //        SpriteTexture texture = ResourceDictionary[g];
+        //        texture.Dispose();
+        //        _usedIndex.RemoveAt(i--);
+        //        ResourceDictionary.Remove(g);
+        //    }
+        //}
 
         private ushort[] GetTextmapTexture(ushort index, out int size)
         {

@@ -16,7 +16,6 @@ namespace ClassicUO.IO.Resources
         private const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
 
         public LandTiles[] LandData { get; private set; }
-
         public StaticTiles[] StaticData { get; private set; }
 
 

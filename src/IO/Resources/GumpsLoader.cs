@@ -15,7 +15,7 @@ namespace ClassicUO.IO.Resources
     {
         public const int GUMP_COUNT = 0x10000;
         private UOFile _file;
-        private readonly List<uint> _usedIndex = new List<uint>();
+        //private readonly List<uint> _usedIndex = new List<uint>();
 
         public override void Load()
         {
@@ -44,10 +44,12 @@ namespace ClassicUO.IO.Resources
                 while (defReader.Next())
                 {
                     int ingump = defReader.ReadInt();
+
                     if (ingump < 0 || ingump >= GUMP_COUNT || _file.Entries[ingump].DecompressedLength != 0)
                         continue;
 
                     int outgump = defReader.ReadGroupInt();
+
                     if (outgump < 0 || outgump >= GUMP_COUNT || _file.Entries[outgump].DecompressedLength != 0)
                         continue;
 
@@ -55,33 +57,6 @@ namespace ClassicUO.IO.Resources
 
                 }
             }
-
-            //using (StreamReader reader = new StreamReader(File.OpenRead(pathdef)))
-            //{
-            //    string line;
-
-            //    while ((line = reader.ReadLine()) != null)
-            //    {
-            //        line = line.Trim();
-
-            //        if (line.Length <= 0 || line[0] == '#')
-            //            continue;
-            //        string[] defs = line.Replace('\t', ' ').Split(' ');
-
-            //        if (defs.Length < 3)
-            //            continue;
-            //        int ingump = int.Parse(defs[0]);
-
-            //        if (ingump < 0 || ingump >= GUMP_COUNT || _file.Entries[ingump].DecompressedLength != 0)
-            //            continue;
-            //        int outgump = int.Parse(defs[1].Replace("{", string.Empty).Replace("}", string.Empty));
-
-            //        if (outgump < 0 || outgump >= GUMP_COUNT || _file.Entries[outgump].DecompressedLength == 0)
-            //            continue;
-            //        int outhue = int.Parse(defs[2]);
-            //        _file.Entries[ingump] = _file.Entries[outgump];
-            //    }
-            //}
         }
 
         public override SpriteTexture GetTexture(uint g)
@@ -94,50 +69,72 @@ namespace ClassicUO.IO.Resources
                     return null;
                 texture = new SpriteTexture(w, h, false);
                 texture.SetDataHitMap16(pixels);
-                _usedIndex.Add(g);
+                //_usedIndex.Add(g);
                 ResourceDictionary.Add(g, texture);
             }
             return texture;
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
-            throw new NotImplementedException();
+            //for (int i = 0; i < _usedIndex.Count; i++)
+            //{
+            //    uint g = _usedIndex[i];
+            //    SpriteTexture texture = ResourceDictionary[g];
+            //    texture.Dispose();
+            //    _usedIndex.RemoveAt(i--);
+            //    ResourceDictionary.Remove(g);
+            //}
+
+            //int count = 0;
+
+            //long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+
+            ////foreach (SpriteTexture t in ResourceDictionary.Values.Where(s => s.Ticks < ticks).Take(20).)
+            ////{
+            ////    t.Dispose();
+            ////}
+
+            //ResourceDictionary
+            //                  .Where(s => s.Value.Ticks < ticks)
+            //                  .Take(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
+            //                  .ToList()
+            //                  .ForEach(s => ResourceDictionary.Remove(s.Key));
         }
 
-        public void ClearUnusedTextures()
-        {
-            int count = 0;
-            long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+        //public void ClearUnusedTextures()
+        //{
+        //    long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
-            for (int i = 0; i < _usedIndex.Count; i++)
-            {
-                uint g = _usedIndex[i];
-                SpriteTexture texture = ResourceDictionary[g];
+        //    ResourceDictionary
+        //       .Where(s => s.Value.Ticks < ticks)
+        //       .Take(Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
+        //       .ToList()
+        //       .ForEach(s =>
+        //        {
+        //            s.Value.Dispose();
+        //            ResourceDictionary.Remove(s.Key);
+        //        });
 
-                if (texture.Ticks < ticks)
-                {
-                    texture.Dispose();
-                    _usedIndex.RemoveAt(i--);
-                    ResourceDictionary.Remove(g);
+        //    //int count = 0;
+        //    //long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
-                    if (++count >= Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-                        break;
-                }
-            }
-        }
+        //    //for (int i = 0; i < _usedIndex.Count; i++)
+        //    //{
+        //    //    uint g = _usedIndex[i];
+        //    //    SpriteTexture texture = ResourceDictionary[g];
 
-        public void Clear()
-        {
-            for (int i = 0; i < _usedIndex.Count; i++)
-            {
-                uint g = _usedIndex[i];
-                SpriteTexture texture = ResourceDictionary[g];
-                texture.Dispose();
-                _usedIndex.RemoveAt(i--);
-                ResourceDictionary.Remove(g);
-            }
-        }
+        //    //    if (texture.Ticks < ticks)
+        //    //    {
+        //    //        texture.Dispose();
+        //    //        _usedIndex.RemoveAt(i--);
+        //    //        ResourceDictionary.Remove(g);
+
+        //    //        if (++count >= Constants.MAX_GUMP_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
+        //    //            break;
+        //    //    }
+        //    //}
+        //}
 
 
         public unsafe ushort[] GetGumpPixels(uint index, out int width, out int height)

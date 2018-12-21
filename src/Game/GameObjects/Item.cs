@@ -143,7 +143,6 @@ namespace ClassicUO.Game.GameObjects
                             short maxX = 0;
                             short maxY = 0;
                             int count = FileManager.Multi.GetCount(Graphic);
-                            MultiComponent[] components = new MultiComponent[count];
 
                             if (!World.HouseManager.TryGetHouse(Serial, out House house))
                             {
@@ -156,17 +155,21 @@ namespace ClassicUO.Game.GameObjects
                             for (int i = 0; i < count; i++)
                             {
                                 MultiBlock pbm = FileManager.Multi.GetMulti(i);
-                                MultiComponent component = new MultiComponent(pbm.ID, (ushort) (X + pbm.X), (ushort) (Y + pbm.Y), (sbyte) (Z + pbm.Z), pbm.Flags);
+                                ushort x = (ushort) (X + pbm.X);
+                                ushort y = (ushort) (Y + pbm.Y);
+                                sbyte z = (sbyte) (Z + pbm.Z);
+
                                 if (pbm.X < minX) minX = pbm.X;
                                 if (pbm.X > maxX) maxX = pbm.X;
                                 if (pbm.Y < minY) minY = pbm.Y;
                                 if (pbm.Y > maxY) maxY = pbm.Y;
-                                components[i] = component;
-
-                                house.Components.Add(new Multi(component.Graphic)
+                                if (pbm.Flags != 0)
                                 {
-                                    Position = component.Position
-                                });
+                                    house.Components.Add(new Multi(pbm.ID)
+                                    {
+                                        Position = new Position(x, y, z)
+                                    });
+                                }                              
                             }
 
                             MultiInfo = new MultiInfo((short) X, (short) Y)

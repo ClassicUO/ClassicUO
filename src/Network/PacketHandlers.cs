@@ -2500,12 +2500,16 @@ namespace ClassicUO.Network
             item.Direction = (Direction) p.ReadByte();
             item.Hue = p.ReadUShort();
             item.Flags = (Flags) p.ReadByte();
-            if (FileManager.ClientVersion >= ClientVersions.CV_7090) p.ReadUShort(); //unknown
+            if (FileManager.ClientVersion >= ClientVersions.CV_7090)
+                p.ReadUShort(); //unknown
             item.Container = Serial.Invalid;
-            if (type == 2) item.IsMulti = true;
-            if (item.Graphic != 0x2006) item.Graphic += graphicInc;
+            if (type == 2)
+                item.IsMulti = true;
+            if (item.Graphic != 0x2006)
+                item.Graphic += graphicInc;
             item.ProcessDelta();
-            if (World.Items.Add(item)) World.Items.ProcessDelta();
+            if (World.Items.Add(item))
+                World.Items.ProcessDelta();
 
             if (item.ItemData.IsAnimated)
             {

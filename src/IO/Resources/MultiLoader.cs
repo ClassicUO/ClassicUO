@@ -13,10 +13,19 @@ namespace ClassicUO.IO.Resources
     class MultiLoader : ResourceLoader
     {
         private UOFileMul _file;
+        private UOFileUop _fileUop;
         private int _itemOffset;
 
         public override void Load()
         {
+            string uopPath = Path.Combine(FileManager.UoFolderPath, "MultiCollection.uop");
+
+            if (File.Exists(uopPath))
+            {
+                //_fileUop = new UOFileUop(uopPath, ".tga");
+
+            }
+
             string path = Path.Combine(FileManager.UoFolderPath, "multi.mul");
             string pathidx = Path.Combine(FileManager.UoFolderPath, "multi.idx");
 
@@ -35,6 +44,17 @@ namespace ClassicUO.IO.Resources
         public unsafe MultiBlock GetMulti(int index)
         {
             return *(MultiBlock*)(_file.PositionAddress + index * _itemOffset);
+        }
+
+        public unsafe void GetMultiData(int index, out ushort graphic, out short x, out short y, out short z, out uint flags)
+        {
+            MultiBlock* block = (MultiBlock*)(_file.PositionAddress + index * _itemOffset);
+
+            graphic = block->ID;
+            x =  block->X;
+            y = block->Y;
+            z = block->Z;
+            flags = block->Flags;
         }
 
         public int GetCount(int graphic)

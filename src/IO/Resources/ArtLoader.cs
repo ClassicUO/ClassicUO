@@ -17,8 +17,8 @@ namespace ClassicUO.IO.Resources
         public const int ART_COUNT = 0x10000;
 
         private UOFile _file;
-        private readonly List<uint> _usedIndex = new List<uint>();
-        private readonly List<uint> _usedIndexLand = new List<uint>();
+        //private readonly List<uint> _usedIndex = new List<uint>();
+        //private readonly List<uint> _usedIndexLand = new List<uint>();
         private readonly Dictionary<uint, SpriteTexture> _landDictionary = new Dictionary<uint, SpriteTexture>();
 
         public override void Load()
@@ -44,7 +44,7 @@ namespace ClassicUO.IO.Resources
                 ushort[] pixels = ReadStaticArt((ushort)g, out short w, out short h, out Rectangle imageRectangle);
                 texture = new ArtTexture(imageRectangle, w, h);
                 texture.SetDataHitMap16(pixels);
-                _usedIndex.Add(g);
+                //_usedIndex.Add(g);
                 ResourceDictionary.Add(g, texture);
             }
             return texture;
@@ -58,78 +58,95 @@ namespace ClassicUO.IO.Resources
                 ushort[] pixels = ReadLandArt((ushort)g);
                 texture = new SpriteTexture(SIZE, SIZE, false);
                 texture.SetDataHitMap16(pixels);
-                _usedIndexLand.Add(g);
+                //_usedIndexLand.Add(g);
                 _landDictionary.Add(g, texture);
             }
             return texture;
         }
 
-        protected override void CleanResources()
+        public override void CleanResources()
         {
             throw new NotImplementedException();
         }
 
 
-        public void Clear()
-        {
-            for (int i = 0; i < _usedIndex.Count; i++)
-            {
-                uint g = _usedIndex[i];
-                SpriteTexture texture = ResourceDictionary[g];
-                texture.Dispose();
-                _usedIndex.RemoveAt(i--);
-                ResourceDictionary.Remove(g);
-            }
+        //public void Clear()
+        //{
+        //    for (int i = 0; i < _usedIndex.Count; i++)
+        //    {
+        //        uint g = _usedIndex[i];
+        //        SpriteTexture texture = ResourceDictionary[g];
+        //        texture.Dispose();
+        //        _usedIndex.RemoveAt(i--);
+        //        ResourceDictionary.Remove(g);
+        //    }
 
-            for (int i = 0; i < _usedIndexLand.Count; i++)
-            {
-                uint g = _usedIndexLand[i];
-                SpriteTexture texture = _landDictionary[g];
-                texture.Dispose();
-                _usedIndexLand.RemoveAt(i--);
-                _landDictionary.Remove(g);
-            }
-        }
+        //    for (int i = 0; i < _usedIndexLand.Count; i++)
+        //    {
+        //        uint g = _usedIndexLand[i];
+        //        SpriteTexture texture = _landDictionary[g];
+        //        texture.Dispose();
+        //        _usedIndexLand.RemoveAt(i--);
+        //        _landDictionary.Remove(g);
+        //    }
+        //}
 
-        public void ClearUnusedTextures()
+        public override void CleaUnusedResources()
         {
-            int count = 0;
+            base.CleaUnusedResources();
+
             long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
-            for (int i = 0; i < _usedIndex.Count; i++)
-            {
-                uint g = _usedIndex[i];
-                SpriteTexture texture = ResourceDictionary[g];
-
-                if (texture.Ticks < ticks)
+            _landDictionary
+               .Where(s => s.Value.Ticks < ticks)
+               .Take(Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
+               .ToList()
+               .ForEach(s =>
                 {
-                    texture.Dispose();
-                    _usedIndex.RemoveAt(i--);
-                    ResourceDictionary.Remove(g);
-
-                    if (++count >= Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-                        break;
-                }
-            }
-
-            count = 0;
-
-            for (int i = 0; i < _usedIndexLand.Count; i++)
-            {
-                uint g = _usedIndexLand[i];
-                SpriteTexture texture = _landDictionary[g];
-
-                if (texture.Ticks < ticks)
-                {
-                    texture.Dispose();
-                    _usedIndexLand.RemoveAt(i--);
-                    _landDictionary.Remove(g);
-
-                    if (++count >= Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
-                        break;
-                }
-            }
+                    s.Value.Dispose();
+                    _landDictionary.Remove(s.Key);
+                });
         }
+
+        //public void ClearUnusedTextures()
+        //{
+        //    int count = 0;
+        //    long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
+
+        //    for (int i = 0; i < _usedIndex.Count; i++)
+        //    {
+        //        uint g = _usedIndex[i];
+        //        SpriteTexture texture = ResourceDictionary[g];
+
+        //        if (texture.Ticks < ticks)
+        //        {
+        //            texture.Dispose();
+        //            _usedIndex.RemoveAt(i--);
+        //            ResourceDictionary.Remove(g);
+
+        //            if (++count >= Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
+        //                break;
+        //        }
+        //    }
+
+        //    count = 0;
+
+        //    for (int i = 0; i < _usedIndexLand.Count; i++)
+        //    {
+        //        uint g = _usedIndexLand[i];
+        //        SpriteTexture texture = _landDictionary[g];
+
+        //        if (texture.Ticks < ticks)
+        //        {
+        //            texture.Dispose();
+        //            _usedIndexLand.RemoveAt(i--);
+        //            _landDictionary.Remove(g);
+
+        //            if (++count >= Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
+        //                break;
+        //        }
+        //    }
+        //}
 
         private unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
         {

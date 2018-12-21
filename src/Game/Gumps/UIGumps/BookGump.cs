@@ -207,7 +207,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void RefreshShowCaretPos(int pos, TextBox box)
         {
-            box.SetFocused();
+            box.SetKeyboardFocus();
             box._entry.SetCaretPosition(pos);
             box._entry.UpdateCaretPosition();
         }
