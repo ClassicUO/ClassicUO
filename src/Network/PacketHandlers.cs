@@ -281,7 +281,7 @@ namespace ClassicUO.Network
             ToClient.Add(0xD1, Logout); //ToServer.Add(0xD1, LogoutStatusS);
             ToClient.Add(0xD2, UpdateCharacter);
             ToClient.Add(0xD3, UpdateObject);
-            ToClient.Add(0xD4, OpenBookNew); //ToServer.Add(0xD4, BookHeaderNewS);
+            ToClient.Add(0xD4, OpenBook); //ToServer.Add(0xD4, BookHeaderNewS);
             ToClient.Add(0xD6, MegaCliloc); //ToServer.Add(0xD6, MegaClilocS);
             ToClient.Add(0xD7, GenericAOSCommandsR); //ToServer.Add(0xD7, GenericAOSCommandsS);
             ToClient.Add(0xD8, CustomHouse);
@@ -1158,6 +1158,8 @@ namespace ClassicUO.Network
                         sb.Append(BookGump.IsNewBookD4 ? p.ReadUTF8StringSafe() : p.ReadASCII());
                         sb.Append('\n');
                     }
+                    if(sb.Length > 0)
+                        sb.Remove(sb.Length - 1, 1);//this removes the last, unwanted, newline
                     pages[pageNum] = sb.ToString();
                 }
                 else
@@ -1480,6 +1482,7 @@ namespace ClassicUO.Network
         private static void OpenBook(Packet p)
         {
             Item book = World.Items.Get(p.ReadUInt());
+            bool oldpacket = p.ID == 0x93;
             bool editable = p.ReadByte() == 0 ? false : true;
             p.Skip(1);
             UIManager ui = Engine.UI;
@@ -1491,71 +1494,30 @@ namespace ClassicUO.Network
                     X = 100,
                     Y = 100,
                     BookPageCount = p.ReadUShort(),
-                    BookTitle = 
-                    new Game.Gumps.Controls.TextBox(new TextEntry(BookGump.DefaultFont, 47, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
-                    {
-                        X = 40,
-                        Y = 40,
-                        Height = 25,
-                        Width = 155,
-                        IsEditable = editable,
-                        Text = p.ReadASCII(60).Trim('\0'),
-                        Debug = true
-                    },
-                    BookAuthor = 
-                    new Game.Gumps.Controls.TextBox(new TextEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
-                    {
-                        X = 45,
-                        Y = 130,
-                        Height = 25,
-                        Width = 155,
-                        IsEditable = editable,
-                        Text = p.ReadASCII(30).Trim('\0'),
-                        Debug = true
-                    },
-                    IsBookEditable = editable
-                } );
-            }
-        }
-
-        private static void OpenBookNew(Packet p)
-        {
-            Item book = World.Items.Get(p.ReadUInt());
-            bool editable = p.ReadByte() == 0 ? false : true;
-            p.Skip(1);
-            UIManager ui = Engine.UI;
-
-            if (ui.GetByLocalSerial<BookGump>(book.Serial) == null)//TODO: should we update the mainpage or else? we must investigate on this
-            {
-                ui.Add(new BookGump(book)
-                {
-                    X = 100,
-                    Y = 100,
-                    BookPageCount = p.ReadUShort(),
                     BookTitle =
                     new Game.Gumps.Controls.TextBox(new TextEntry(BookGump.DefaultFont, 47, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
                     {
                         X = 40,
-                        Y = 40,
+                        Y = 60,
                         Height = 25,
                         Width = 155,
                         IsEditable = editable,
-                        Text = p.ReadASCII(p.ReadUShort()).Trim('\0'),
+                        Text = oldpacket ? p.ReadASCII(60).Trim('\0') : p.ReadASCII(p.ReadUShort()).Trim('\0'),
                         Debug = true
                     },
                     BookAuthor =
                     new Game.Gumps.Controls.TextBox(new TextEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
                     {
-                        X = 45,
-                        Y = 130,
+                        X = 40,
+                        Y = 160,
                         Height = 25,
                         Width = 155,
                         IsEditable = editable,
-                        Text = p.ReadASCII(p.ReadUShort()).Trim('\0'),
+                        Text = oldpacket ? p.ReadASCII(30).Trim('\0') : p.ReadASCII(p.ReadUShort()).Trim('\0'),
                         Debug = true
                     },
                     IsBookEditable = editable
-                });
+                } );
             }
         }
 

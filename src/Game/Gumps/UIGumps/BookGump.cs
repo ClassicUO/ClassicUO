@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             PageChanged = new bool[BookPageCount + 1];
             //title allows only 47  dots (. + \0) so 47 is the right number
             AddChildren( BookTitle, 1);
-            AddChildren( new Label( "by", true, 1 ) { X = 45, Y = 110 },1);
+            AddChildren( new Label( "by", true, 1 ) { X = BookAuthor.X, Y = BookAuthor.Y - 30 },1);
             //as the old booktitle supports only 30 characters in AUTHOR and since the new clients only allow 29 dots (. + \0 character at end), we use 29 as a limitation
             AddChildren( BookAuthor, 1);
             for ( int k = 1; k <= BookPageCount; k++ )
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if ( page % 2 == 1 )
                     page += 1;
                 page = page >> 1;
-                TextBox tbox = new TextBox(new TextEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.None, 2), this.IsBookEditable)
+                TextBox tbox = new TextBox(new TextEntry(DefaultFont, 53 * 8, 0, 155, IsNewBookD4, FontStyle.ExtraHeight, 2), this.IsBookEditable)
                 {
                     X = x,
                     Y = y,

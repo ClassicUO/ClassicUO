@@ -276,7 +276,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         _textBox.SetText(string.Empty);
 
                     break;
-                case SDL.SDL_Keycode.SDLK_BACKSPACE when mod == SDL.SDL_Keymod.KMOD_NONE && string.IsNullOrEmpty(_textBox.Text):
+                case SDL.SDL_Keycode.SDLK_BACKSPACE when KeyboardInput.IsKeymodPressed(mod, SDL.SDL_Keymod.KMOD_NONE) && string.IsNullOrEmpty(_textBox.Text):
                     Mode = ChatMode.Default;
 
                     break;

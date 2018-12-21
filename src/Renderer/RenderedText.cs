@@ -32,15 +32,16 @@ namespace ClassicUO.Renderer
     [Flags]
     public enum FontStyle : ushort
     {
-        None = 0x00,
-        Solid = 0x01,
-        Italic = 0x02,
-        Indention = 0x04,
-        BlackBorder = 0x08,
-        Underline = 0x10,
-        Fixed = 0x20,
-        Cropped = 0x40,
-        BQ = 0x80
+        None = 0x0000,
+        Solid = 0x0001,
+        Italic = 0x0002,
+        Indention = 0x0004,
+        BlackBorder = 0x0008,
+        Underline = 0x0010,
+        Fixed = 0x0020,
+        Cropped = 0x0040,
+        BQ = 0x0080,
+        ExtraHeight = 0x0100
     }
 
     public sealed class RenderedText : IDisposable
