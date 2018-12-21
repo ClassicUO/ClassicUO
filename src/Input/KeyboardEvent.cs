@@ -32,7 +32,8 @@ namespace ClassicUO.Input
     {
         public static bool IsKeymodPressed(SDL2.SDL.SDL_Keymod mod, SDL2.SDL.SDL_Keymod tocheck)
         {
-            return mod != SDL2.SDL.SDL_Keymod.KMOD_NONE && (mod & tocheck) != 0;
+            mod ^= mod & Engine.s_IgnoreKeyMod;
+            return tocheck == mod || (mod != SDL2.SDL.SDL_Keymod.KMOD_NONE && (mod & tocheck) != 0);
             
         }
     }
