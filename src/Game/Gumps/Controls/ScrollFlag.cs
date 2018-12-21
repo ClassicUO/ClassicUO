@@ -21,6 +21,7 @@
 using System;
 
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -103,7 +104,7 @@ namespace ClassicUO.Game.Gumps.Controls
         protected override void OnInitialize()
         {
             base.OnInitialize();
-            _texture = IO.Resources.Gumps.GetGumpTexture(0x0828);
+            _texture = FileManager.Gumps.GetTexture(0x0828);
             Width = _texture.Width;
             Height = _texture.Height;
         }

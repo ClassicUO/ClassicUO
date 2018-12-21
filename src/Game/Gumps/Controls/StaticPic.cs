@@ -18,6 +18,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -34,7 +36,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             _graphic = graphic;
             Hue = hue;
-            _isPartial = TileData.IsPartialHue(TileData.StaticData[_graphic].Flags);
+            _isPartial = FileManager.TileData.StaticData[_graphic].IsPartialHue;
             CanMove = true;
         }
 
@@ -50,7 +52,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             if (Texture == null || Texture.IsDisposed)
             {
-                Texture = Art.GetStaticTexture(_graphic);
+                Texture = FileManager.Art.GetTexture(_graphic);
                 Width = Texture.Width;
                 Height = Texture.Height;
             }

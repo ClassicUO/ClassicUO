@@ -49,22 +49,22 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             {
                 ushort textColor = 0xFFFF;
 
-                AddChildren(new Label(Cliloc.GetString(1044579), true, textColor, font: 1)
+                AddChildren(new Label(FileManager.Cliloc.GetString(1044579), true, textColor, font: 1)
                 {
                     X = 155, Y = 70
                 }); // "Select which shard to play on:"
 
-                AddChildren(new Label(Cliloc.GetString(1044577), true, textColor, font: 1)
+                AddChildren(new Label(FileManager.Cliloc.GetString(1044577), true, textColor, font: 1)
                 {
                     X = 400, Y = 70
                 }); // "Latency:"
 
-                AddChildren(new Label(Cliloc.GetString(1044578), true, textColor, font: 1)
+                AddChildren(new Label(FileManager.Cliloc.GetString(1044578), true, textColor, font: 1)
                 {
                     X = 470, Y = 70
                 }); // "Packet Loss:"
 
-                AddChildren(new Label(Cliloc.GetString(1044580), true, textColor, font: 1)
+                AddChildren(new Label(FileManager.Cliloc.GetString(1044580), true, textColor, font: 1)
                 {
                     X = 153, Y = 368
                 }); // "Sort by:"

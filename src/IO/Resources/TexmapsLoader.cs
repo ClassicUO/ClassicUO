@@ -1,42 +1,24 @@
-#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.IO.Resources
 {
-    public static class TextmapTextures
+    class TexmapsLoader : ResourceLoader<SpriteTexture>
     {
         public const int TEXTMAP_COUNT = 0x4000;
-        private static UOFile _file;
-        private static readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
-        private static readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
-        private static readonly List<int> _usedIndex = new List<int>();
-        private static readonly Dictionary<int, SpriteTexture> _textmapDictionary = new Dictionary<int, SpriteTexture>();
+        private UOFile _file;
+        private readonly ushort[] _textmapPixels64 = new ushort[64 * 64];
+        private readonly ushort[] _textmapPixels128 = new ushort[128 * 128];
+        private readonly List<uint> _usedIndex = new List<uint>();
 
-        public static void Load()
+
+        public override void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "texmaps.mul");
             string pathidx = Path.Combine(FileManager.UoFolderPath, "texidx.mul");
@@ -89,50 +71,45 @@ namespace ClassicUO.IO.Resources
                     }
                 }
             }
-
-            //if (ClassicUO.Game.Map.Tile._Stretchables.Count == 0)
-            //{
-            //    for (int i = TEXTMAP_COUNT - 1; i >= 0; --i)
-            //    {
-            //        (int length, int extra, bool patched) = _file.SeekByEntryIndex(i);
-            //        if (length > 0)
-            //            ClassicUO.Game.Map.Tile._Stretchables.Add((ushort)i);
-            //    }
-            //}
         }
 
-        public static SpriteTexture GetTextmapTexture(ushort g)
+        public override SpriteTexture GetTexture(uint g)
         {
-            if (!_textmapDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
+            if (!ResourceDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
             {
-                ushort[] pixels = GetTextmapTexture(g, out int size);
+                ushort[] pixels = GetTextmapTexture( (ushort) g, out int size);
 
                 if (pixels == null || pixels.Length == 0)
                     return null;
                 texture = new SpriteTexture(size, size, false);
                 texture.SetData(pixels);
                 _usedIndex.Add(g);
-                _textmapDictionary.Add(g, texture);
+                ResourceDictionary.Add(g, texture);
             }
 
             return texture;
         }
 
-        public static void ClearUnusedTextures()
+        protected override void CleanResources()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ClearUnusedTextures()
         {
             int count = 0;
             long ticks = Engine.Ticks - 3000;
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                int g = _usedIndex[i];
-                SpriteTexture texture = _textmapDictionary[g];
+                uint g = _usedIndex[i];
+                SpriteTexture texture = ResourceDictionary[g];
 
                 if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
                     _usedIndex.RemoveAt(i--);
-                    _textmapDictionary.Remove(g);
+                    ResourceDictionary.Remove(g);
 
                     if (++count >= 20)
                         break;
@@ -140,19 +117,19 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        public static void Clear()
+        public void Clear()
         {
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                int g = _usedIndex[i];
-                SpriteTexture texture = _textmapDictionary[g];     
+                uint g = _usedIndex[i];
+                SpriteTexture texture = ResourceDictionary[g];
                 texture.Dispose();
                 _usedIndex.RemoveAt(i--);
-                _textmapDictionary.Remove(g);
+                ResourceDictionary.Remove(g);
             }
         }
 
-        private static ushort[] GetTextmapTexture(ushort index, out int size)
+        private ushort[] GetTextmapTexture(ushort index, out int size)
         {
             (int length, int extra, bool patched) = _file.SeekByEntryIndex(index);
 
@@ -181,7 +158,7 @@ namespace ClassicUO.IO.Resources
                 int pos = i * size;
 
                 for (int j = 0; j < size; j++)
-                    pixels[pos + j] = (ushort) (0x8000 | _file.ReadUShort());
+                    pixels[pos + j] = (ushort)(0x8000 | _file.ReadUShort());
             }
 
             return pixels;

@@ -385,7 +385,7 @@ namespace ClassicUO.Network
     {
         public PUnicodeSpeechRequest(string text, MessageType type, MessageFont font, Hue hue, string lang) : base(0xAD)
         {
-            SpeechEntry[] entries = Speeches.GetKeywords(text);
+            SpeechEntry[] entries = FileManager.Speeches.GetKeywords(text);
 
             if (entries.Length > 0)
                 type |= MessageType.Encoded;

@@ -21,6 +21,7 @@
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps.CharCreation;
 using ClassicUO.Game.Scenes;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 using static ClassicUO.Game.Scenes.LoginScene;
@@ -114,23 +115,23 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 {
                     case LoginRejectionReasons.BadPassword:
                     case LoginRejectionReasons.InvalidAccountPassword:
-                        labelText = Cliloc.GetString(3000036); // Incorrect username and/or password.
+                        labelText = FileManager.Cliloc.GetString(3000036); // Incorrect username and/or password.
 
                         break;
                     case LoginRejectionReasons.AccountInUse:
-                        labelText = Cliloc.GetString(3000034); // Someone is already using this account.
+                        labelText = FileManager.Cliloc.GetString(3000034); // Someone is already using this account.
 
                         break;
                     case LoginRejectionReasons.AccountBlocked:
-                        labelText = Cliloc.GetString(3000035); // Your account has been blocked / banned
+                        labelText = FileManager.Cliloc.GetString(3000035); // Your account has been blocked / banned
 
                         break;
                     case LoginRejectionReasons.IdleExceeded:
-                        labelText = Cliloc.GetString(3000004); // Login idle period exceeded (I use "Connection lost")
+                        labelText = FileManager.Cliloc.GetString(3000004); // Login idle period exceeded (I use "Connection lost")
 
                         break;
                     case LoginRejectionReasons.BadCommuncation:
-                        labelText = Cliloc.GetString(3000037); // Communication problem.
+                        labelText = FileManager.Cliloc.GetString(3000037); // Communication problem.
 
                         break;
                 }
@@ -145,19 +146,19 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 switch (loginScene.CurrentLoginStep)
                 {
                     case LoginStep.Connecting:
-                        labelText = Cliloc.GetString(3000002); // "Connecting..."
+                        labelText = FileManager.Cliloc.GetString(3000002); // "Connecting..."
 
                         break;
                     case LoginStep.VerifyingAccount:
-                        labelText = Cliloc.GetString(3000003); // "Verifying Account..."
+                        labelText = FileManager.Cliloc.GetString(3000003); // "Verifying Account..."
 
                         break;
                     case LoginStep.LoginInToServer:
-                        labelText = Cliloc.GetString(3000053); // logging into shard
+                        labelText = FileManager.Cliloc.GetString(3000053); // logging into shard
 
                         break;
                     case LoginStep.EnteringBritania:
-                        labelText = Cliloc.GetString(3000001); // Entering Britania...
+                        labelText = FileManager.Cliloc.GetString(3000001); // Entering Britania...
 
                         break;
                 }

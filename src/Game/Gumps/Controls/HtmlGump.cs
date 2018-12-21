@@ -22,8 +22,10 @@ using System.Diagnostics;
 using System.Linq;
 
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -112,7 +114,7 @@ namespace ClassicUO.Game.Gumps.Controls
                         if (hue == 0x00FFFFFF)
                             htmlColor = 0xFFFFFFFE;
                         else
-                            htmlColor = (Hues.Color16To32((ushort) hue) << 8) | 0xFF;
+                            htmlColor = (HuesHelper.Color16To32((ushort) hue) << 8) | 0xFF;
                     }
                     else if (!HasBackground)
                     {
@@ -229,7 +231,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     Rectangle rect = new Rectangle(link.StartX, link.StartY, link.EndX, link.EndY);
                     bool inbounds = rect.Contains(x, _scrollBar.Value + y);
 
-                    if (inbounds && Fonts.GetWebLink(link.LinkID, out WebLink result))
+                    if (inbounds && FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
                     {
                         Log.Message(LogTypes.Info, "LINK CLICKED: " + result.Link);
                         Process.Start(result.Link);

@@ -237,7 +237,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
             // Hair
             content = CharacterCreationValues.GetHairComboContent(isFemale, race);
 
-            AddChildren(_hairLabel = new Label(Cliloc.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0x07F4, font: 9)
+            AddChildren(_hairLabel = new Label(FileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), false, 0x07F4, font: 9)
             {
                 X = 98, Y = 142
             }, 1);
@@ -249,7 +249,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
             {
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
 
-                AddChildren(_facialLabel = new Label(Cliloc.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0x07F4, font: 9)
+                AddChildren(_facialLabel = new Label(FileManager.Cliloc.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), false, 0x07F4, font: 9)
                 {
                     X = 98, Y = 186
                 }, 1);
@@ -380,7 +380,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
         {
             if (string.IsNullOrEmpty(character.Name))
             {
-                Service.Get<CharCreationGump>().ShowMessage(Cliloc.GetString(3000612));
+                Service.Get<CharCreationGump>().ShowMessage(FileManager.Cliloc.GetString(3000612));
 
                 return false;
             }
@@ -424,7 +424,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
                 _ids = ids;
             }
 
-            public string[] Labels => _labels.Select(o => Cliloc.GetString(o)).ToArray();
+            public string[] Labels => _labels.Select(o => FileManager.Cliloc.GetString(o)).ToArray();
 
             public int GetGraphic(int index)
             {
@@ -479,7 +479,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
                 _columns = columns;
                 _layer = layer;
 
-                AddChildren(new Label(Cliloc.GetString(label), false, 0x07F4, font: 9)
+                AddChildren(new Label(FileManager.Cliloc.GetString(label), false, 0x07F4, font: 9)
                 {
                     X = 0, Y = 0
                 });

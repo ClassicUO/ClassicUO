@@ -27,6 +27,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
@@ -56,13 +57,13 @@ namespace ClassicUO.Game.Views
 
             bool mirror = false;
             byte dir = (byte)mobile.GetDirectionForAnimation();
-            Animations.GetAnimDirection(ref dir, ref mirror);
+            FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
             IsFlipped = mirror;
             SetupLayers(dir, mobile, out int mountOffset);
 
 
 
-            AnimationFrameTexture bodyFrame = Animations.GetTexture(_frames[0].Hash);
+            AnimationFrameTexture bodyFrame = FileManager.Animations.GetTexture(_frames[0].Hash);
 
             if (bodyFrame == null)
                 return false;
@@ -81,7 +82,7 @@ namespace ClassicUO.Game.Views
             for (int i = 0; i < _layerCount; i++)
             {
                 ViewLayer vl = _frames[i];
-                AnimationFrameTexture frame = Animations.GetTexture(vl.Hash);
+                AnimationFrameTexture frame = FileManager.Animations.GetTexture(vl.Hash);
 
                 if (frame.IsDisposed) continue;
                 int x = drawX + frame.CenterX;
@@ -157,11 +158,11 @@ namespace ClassicUO.Game.Views
         //    byte dir = 0 & 0x7F;
         //    byte animGroup = 0;
         //    bool mirror = false;
-        //    Animations.GetAnimDirection(ref dir, ref mirror);
+        //    FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
 
         //    if (frameIndex == 0xFF)
         //        frameIndex = (byte) mobile.AnimIndex;
-        //    Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out int x, out centerY, out int w, out height);
+        //    FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out int x, out centerY, out int w, out height);
         //    if (x == 0 && centerY == 0 && w == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
         //}
 
@@ -207,8 +208,8 @@ namespace ClassicUO.Game.Views
                                 {
                                     Graphic mountGraphic = item.GetGraphicForAnimation();
 
-                                    if (mountGraphic < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT)
-                                        mountOffset = Animations.DataIndex[mountGraphic].MountedHeightOffset;
+                                    if (mountGraphic < AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT)
+                                        mountOffset = FileManager.Animations.DataIndex[mountGraphic].MountedHeightOffset;
                                     AddLayer(dir, mountGraphic, mount.Hue, mobile, true, offsetY: mountOffset);
                                 }
                             }
@@ -221,7 +222,7 @@ namespace ClassicUO.Game.Views
                                     Graphic graphic = item.ItemData.AnimID;
                                     Hue hue = item.Hue;
 
-                                    if (Animations.EquipConversions.TryGetValue(item.Graphic, out Dictionary<ushort, EquipConvData> map))
+                                    if (FileManager.Animations.EquipConversions.TryGetValue(item.Graphic, out Dictionary<ushort, EquipConvData> map))
                                     {
                                         if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
                                         {
@@ -230,7 +231,7 @@ namespace ClassicUO.Game.Views
                                         }
                                     }
 
-                                    AddLayer(dir, graphic, hue, mobile, false, convertedItem, TileData.IsPartialHue( item.ItemData.Flags));
+                                    AddLayer(dir, graphic, hue, mobile, false, convertedItem, item.ItemData.IsPartialHue);
                                 }
                             }
                         }
@@ -245,12 +246,12 @@ namespace ClassicUO.Game.Views
         {
             byte animGroup = Mobile.GetGroupForAnimation(mobile, graphic);
             sbyte animIndex = GameObject.AnimIndex;
-            Animations.AnimID = graphic;
-            Animations.AnimGroup = animGroup;
-            Animations.Direction = dir;
-            ref AnimationDirection direction = ref Animations.DataIndex[Animations.AnimID].Groups[Animations.AnimGroup].Direction[Animations.Direction];
+            FileManager.Animations.AnimID = graphic;
+            FileManager.Animations.AnimGroup = animGroup;
+            FileManager.Animations.Direction = dir;
+            ref AnimationDirection direction = ref FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Groups[FileManager.Animations.AnimGroup].Direction[FileManager.Animations.Direction];
 
-            if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !Animations.LoadDirectionGroup(ref direction))
+            if ((direction.FrameCount == 0 || direction.FramesHashes == null) && !FileManager.Animations.LoadDirectionGroup(ref direction))
                 return;
             direction.LastAccessTime = Engine.Ticks;
             int fc = direction.FrameCount;
@@ -266,7 +267,7 @@ namespace ClassicUO.Game.Views
                 if (hue == 0)
                 {
                     if (direction.Address != direction.PatchedAddress)
-                        hue = Animations.DataIndex[Animations.AnimID].Color;
+                        hue = FileManager.Animations.DataIndex[FileManager.Animations.AnimID].Color;
                     if (hue == 0 && convertedItem.HasValue) hue = convertedItem.Value.Color;
                 }
 

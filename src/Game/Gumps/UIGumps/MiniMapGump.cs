@@ -27,6 +27,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -86,7 +87,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (_gumpTexture == null || _gumpTexture.IsDisposed || _forceUpdate)
             {
-                _gumpTexture = IO.Resources.Gumps.GetGumpTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
+                _gumpTexture = FileManager.Gumps.GetTexture(_useLargeMap ? (ushort) 5011 : (ushort) 5010);
                 Width = _gumpTexture.Width;
                 Height = _gumpTexture.Height;
                 CreateMiniMapTexture();
@@ -208,8 +209,8 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (minBlockY < 0)
                 minBlockY = 0;
             int maxBlockIndex = World.Map.MapBlockIndex;
-            int mapBlockHeight = IO.Resources.Map.MapBlocksSize[World.MapIndex, 1];
-            ushort[] data = IO.Resources.Gumps.GetGumpPixels(_useLargeMap ? 5011 : 5010, out _, out _);
+            int mapBlockHeight = FileManager.Map.MapBlocksSize[World.MapIndex, 1];
+            ushort[] data = FileManager.Gumps.GetGumpPixels(_useLargeMap ? (uint) 5011 : 5010, out _, out _);
 
             Point[] table = new Point[2]
             {
@@ -226,7 +227,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     if (blockIndex >= maxBlockIndex)
                         break;
-                    RadarMapBlock? mbbv = IO.Resources.Map.GetRadarMapBlock(World.MapIndex, i, j);
+                    RadarMapBlock? mbbv = FileManager.Map.GetRadarMapBlock(World.MapIndex, i, j);
 
                     if (!mbbv.HasValue)
                         break;
@@ -255,7 +256,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                             if (!island)
                                 color += 0x4000;
                             int tableSize = 2;
-                            color = (uint) (0x8000 | Hues.GetRadarColorData((int) color));
+                            color = (uint) (0x8000 | FileManager.Hues.GetRadarColorData((int) color));
                             CreatePixels(data, (int) color, gx, gy, Width, Height, table, tableSize);
                         }
                     }
@@ -293,7 +294,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         protected override bool Contains(int x, int y)
         {
             return _mapTexture.Contains(x, y);
-            //return IO.Resources.Gumps.Contains(_useLargeMap ? (ushort) 5011 : (ushort) 5010, x, y);
+            //return FileManager.Gumps.Contains(_useLargeMap ? (ushort) 5011 : (ushort) 5010, x, y);
         }
 
         public override void Dispose()

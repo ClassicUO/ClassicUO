@@ -23,6 +23,7 @@ using System.Collections.Generic;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -93,11 +94,11 @@ namespace ClassicUO.Game.GameObjects
 
         public PlayerMobile(Serial serial) : base(serial)
         {
-            _sklls = new Skill[IO.Resources.Skills.SkillsCount];
+            _sklls = new Skill[FileManager.Skills.SkillsCount];
 
             for (int i = 0; i < _sklls.Length; i++)
             {
-                SkillEntry skill = IO.Resources.Skills.GetSkill(i);
+                SkillEntry skill = FileManager.Skills.GetSkill(i);
                 _sklls[i] = new Skill(skill.Name, skill.Index, skill.HasButton);
             }
 

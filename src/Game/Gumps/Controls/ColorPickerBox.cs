@@ -22,6 +22,7 @@ using System;
 using System.Runtime.InteropServices;
 
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -100,7 +101,7 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public void SetHue(ushort hue)
         {
-            SetHue(Hues.RgbaToArgb((Hues.GetPolygoneColor(12, hue) << 8) | 0xFF));
+            SetHue(HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, hue) << 8) | 0xFF));
         }
 
         public void SetHue(uint hue)
@@ -162,8 +163,8 @@ namespace ClassicUO.Game.Gumps.Controls
             _hues = new ushort[_rows * _columns];
             uint[] pixels = new uint[_rows * _columns];
             int size = Marshal.SizeOf<HuesGroup>();
-            IntPtr ptr = Marshal.AllocHGlobal(size * Hues.HuesRange.Length);
-            for (int i = 0; i < Hues.HuesRange.Length; i++) Marshal.StructureToPtr(Hues.HuesRange[i], ptr + i * size, false);
+            IntPtr ptr = Marshal.AllocHGlobal(size * FileManager.Hues.HuesRange.Length);
+            for (int i = 0; i < FileManager.Hues.HuesRange.Length; i++) Marshal.StructureToPtr(FileManager.Hues.HuesRange[i], ptr + i * size, false);
             byte* huesData = (byte*) (ptr + (32 + 4));
 
             for (int y = 0; y < _rows; y++)
@@ -175,7 +176,7 @@ namespace ClassicUO.Game.Gumps.Controls
                     int colorIndex = (startColor + ((startColor + (startColor << 2)) << 1)) << 3;
                     colorIndex += (colorIndex / offset) << 2;
                     ushort color = *(ushort*) ((IntPtr) huesData + colorIndex);
-                    uint cc = Hues.RgbaToArgb((Hues.Color16To32(color) << 8) | 0xFF);
+                    uint cc = HuesHelper.RgbaToArgb((HuesHelper.Color16To32(color) << 8) | 0xFF);
                     pixels[y * _columns + x] = cc;
                     _hues[y * _columns + x] = startColor;
                     startColor += 5;

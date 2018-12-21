@@ -21,6 +21,7 @@
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.Gumps.UIGumps
@@ -48,7 +49,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
             foreach (PopupMenuItem item in data.Items)
             {
-                string text = Cliloc.GetString(item.Cliloc);
+                string text = FileManager.Cliloc.GetString(item.Cliloc);
 
                 Label label = new Label(text, true, item.Hue, font: 1)
                 {

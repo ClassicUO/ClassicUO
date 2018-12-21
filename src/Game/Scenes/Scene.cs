@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Coroutines;
@@ -64,11 +65,11 @@ namespace ClassicUO.Game.Scenes
         {
             Coroutines.Clear();
 
-            //Animations.Clear();
-            //Art.Clear();
+            //FileManager.Animations.Clear();
+            //FileManager.Art.Clear();
             //TextmapTextures.Clear();
-            //IO.Resources.Gumps.Clear();
-            //IO.Resources.Map.Clear();
+            //FileManager.Gumps.Clear();
+            //FileManager.Map.Clear();
         }
 
         public virtual void Update(double totalMS, double frameMS)
@@ -90,25 +91,25 @@ namespace ClassicUO.Game.Scenes
             Log.Message(LogTypes.Trace, "Cleaning routine running...");
             while (!IsDisposed)
             {
-                Art.ClearUnusedTextures();
+                FileManager.Art.ClearUnusedTextures();
 
-                yield return new WaitTime(TimeSpan.FromSeconds(1));
+                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                IO.Resources.Gumps.ClearUnusedTextures();
+                FileManager.Gumps.ClearUnusedTextures();
 
-                yield return new WaitTime(TimeSpan.FromSeconds(1));
+                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                TextmapTextures.ClearUnusedTextures();
+                FileManager.Textmaps.ClearUnusedTextures();
 
-                yield return new WaitTime(TimeSpan.FromSeconds(1));
+                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
-                Animations.ClearUnusedTextures();
+                FileManager.Animations.ClearUnusedTextures();
 
-                yield return new WaitTime(TimeSpan.FromSeconds(1));
+                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
 
                 World.Map?.ClearUnusedBlocks();
 
-                yield return new WaitTime(TimeSpan.FromSeconds(1));
+                yield return new WaitTime(TimeSpan.FromMilliseconds(500));
             }
             Log.Message(LogTypes.Trace, "Cleaning routine finished");
         }

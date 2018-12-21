@@ -207,7 +207,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(new Label(World.Player.Name, false, 0x0386, font: 1)
                             { X = 84, Y = 40 });
 
-            int fontWidth = 260 - Fonts.GetWidthASCII(1, _name);
+            int fontWidth = 260 - FileManager.Fonts.GetWidthASCII(1, _name);
 
             AddChildren(new Label(_name, false, 0x0386, font: 1)
                             { X = fontWidth, Y = 170 });
@@ -236,7 +236,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                     if (!gs.IsHoldingItem || !gs.IsMouseOverUI)
                         return;
 
-                    ArtTexture texture = Art.GetStaticTexture(gs.HeldItem.DisplayedGraphic);
+                    ArtTexture texture = FileManager.Art.GetTexture(gs.HeldItem.DisplayedGraphic);
 
                     int x = e.X;
                     int y = e.Y;

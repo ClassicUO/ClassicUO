@@ -1,26 +1,9 @@
-#region license
-//  Copyright (C) 2018 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#endregion
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 using ClassicUO.Game;
 using ClassicUO.Renderer;
@@ -29,16 +12,16 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.IO.Resources
 {
-    public static class Art
+    class ArtLoader : ResourceLoader<ArtTexture>
     {
         public const int ART_COUNT = 0x10000;
-        private static UOFile _file;
-        private static readonly List<int> _usedIndex = new List<int>();
-        private static readonly List<int> _usedIndexLand = new List<int>();
-        private static readonly Dictionary<int, ArtTexture> _artDictionary = new Dictionary<int, ArtTexture>();
-        private static readonly Dictionary<int, SpriteTexture> _landDictionary = new Dictionary<int, SpriteTexture>();
 
-        public static void Load()
+        private UOFile _file;
+        private readonly List<uint> _usedIndex = new List<uint>();
+        private readonly List<uint> _usedIndexLand = new List<uint>();
+        private readonly Dictionary<uint, SpriteTexture> _landDictionary = new Dictionary<uint, SpriteTexture>();
+
+        public override void Load()
         {
             string filepath = Path.Combine(FileManager.UoFolderPath, "artLegacyMUL.uop");
 
@@ -54,26 +37,25 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-
-        public static ArtTexture GetStaticTexture(ushort g)
+        public override ArtTexture GetTexture(uint g)
         {
-            if (!_artDictionary.TryGetValue(g, out ArtTexture texture) || texture.IsDisposed)
+            if (!ResourceDictionary.TryGetValue(g, out ArtTexture texture) || texture.IsDisposed)
             {
-                ushort[] pixels = ReadStaticArt(g, out short w, out short h, out Rectangle imageRectangle);
+                ushort[] pixels = ReadStaticArt((ushort)g, out short w, out short h, out Rectangle imageRectangle);
                 texture = new ArtTexture(imageRectangle, w, h);
                 texture.SetDataHitMap16(pixels);
                 _usedIndex.Add(g);
-                _artDictionary.Add(g, texture);
+                ResourceDictionary.Add(g, texture);
             }
             return texture;
         }
 
-        public static SpriteTexture GetLandTexture(ushort g)
+        public SpriteTexture GetLandTexture(uint g)
         {
             if (!_landDictionary.TryGetValue(g, out SpriteTexture texture) || texture.IsDisposed)
             {
                 const int SIZE = 44;
-                ushort[] pixels = ReadLandArt(g);
+                ushort[] pixels = ReadLandArt((ushort)g);
                 texture = new SpriteTexture(SIZE, SIZE, false);
                 texture.SetDataHitMap16(pixels);
                 _usedIndexLand.Add(g);
@@ -82,42 +64,48 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
-        public static void Clear()
+        protected override void CleanResources()
+        {
+            throw new NotImplementedException();
+        }
+
+
+        public void Clear()
         {
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                int g = _usedIndex[i];
-                SpriteTexture texture = _artDictionary[g];   
+                uint g = _usedIndex[i];
+                SpriteTexture texture = ResourceDictionary[g];
                 texture.Dispose();
                 _usedIndex.RemoveAt(i--);
-                _artDictionary.Remove(g);         
+                ResourceDictionary.Remove(g);
             }
 
             for (int i = 0; i < _usedIndexLand.Count; i++)
             {
-                int g = _usedIndexLand[i];
+                uint g = _usedIndexLand[i];
                 SpriteTexture texture = _landDictionary[g];
                 texture.Dispose();
                 _usedIndexLand.RemoveAt(i--);
-                _landDictionary.Remove(g);            
+                _landDictionary.Remove(g);
             }
         }
 
-        public static void ClearUnusedTextures()
+        public void ClearUnusedTextures()
         {
             int count = 0;
             long ticks = Engine.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
             for (int i = 0; i < _usedIndex.Count; i++)
             {
-                int g = _usedIndex[i];
-                SpriteTexture texture = _artDictionary[g];
+                uint g = _usedIndex[i];
+                SpriteTexture texture = ResourceDictionary[g];
 
                 if (texture.Ticks < ticks)
                 {
                     texture.Dispose();
                     _usedIndex.RemoveAt(i--);
-                    _artDictionary.Remove(g);
+                    ResourceDictionary.Remove(g);
 
                     if (++count >= Constants.MAX_ART_OBJECT_REMOVED_BY_GARBAGE_COLLECTOR)
                         break;
@@ -128,7 +116,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < _usedIndexLand.Count; i++)
             {
-                int g = _usedIndexLand[i];
+                uint g = _usedIndexLand[i];
                 SpriteTexture texture = _landDictionary[g];
 
                 if (texture.Ticks < ticks)
@@ -143,7 +131,7 @@ namespace ClassicUO.IO.Resources
             }
         }
 
-        private static unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
+        private unsafe ushort[] ReadStaticArt(ushort graphic, out short width, out short height, out Rectangle imageRectangle)
         {
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic + 0x4000);
             _file.Skip(4);
@@ -154,12 +142,12 @@ namespace ClassicUO.IO.Resources
             if (width == 0 || height == 0)
                 return new ushort[0];
             ushort[] pixels = new ushort[width * height];
-            ushort* ptr = (ushort*) _file.PositionAddress;
+            ushort* ptr = (ushort*)_file.PositionAddress;
             ushort* lineoffsets = ptr;
-            byte* datastart = (byte*) ptr + height * 2;
+            byte* datastart = (byte*)ptr + height * 2;
             int x = 0;
             int y = 0;
-            ptr = (ushort*) (datastart + lineoffsets[0] * 2);
+            ptr = (ushort*)(datastart + lineoffsets[0] * 2);
             int minX = width, minY = height, maxX = 0, maxY = 0;
 
             while (y < height)
@@ -185,7 +173,7 @@ namespace ClassicUO.IO.Resources
 
 
                         if (val > 0)
-                            val = (ushort) (0x8000 | val);
+                            val = (ushort)(0x8000 | val);
                         pixels[pos++] = val;
 
                         if (val != 0)
@@ -203,7 +191,7 @@ namespace ClassicUO.IO.Resources
                 {
                     x = 0;
                     y++;
-                    ptr = (ushort*) (datastart + lineoffsets[y] * 2);
+                    ptr = (ushort*)(datastart + lineoffsets[y] * 2);
                 }
             }
 
@@ -246,7 +234,7 @@ namespace ClassicUO.IO.Resources
             return pixels;
         }
 
-        private static ushort[] ReadLandArt(ushort graphic)
+        private ushort[] ReadLandArt(ushort graphic)
         {
             graphic &= FileManager.GraphicMask;
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
@@ -263,7 +251,7 @@ namespace ClassicUO.IO.Resources
                     ushort val = _file.ReadUShort();
 
                     if (val > 0)
-                        val = (ushort) (0x8000 | val);
+                        val = (ushort)(0x8000 | val);
                     pixels[pos++] = val;
                 }
             }
@@ -278,7 +266,7 @@ namespace ClassicUO.IO.Resources
                     ushort val = _file.ReadUShort();
 
                     if (val > 0)
-                        val = (ushort) (0x8000 | val);
+                        val = (ushort)(0x8000 | val);
                     pixels[pos++] = val;
                 }
             }
@@ -286,4 +274,5 @@ namespace ClassicUO.IO.Resources
             return pixels;
         }
     }
+
 }

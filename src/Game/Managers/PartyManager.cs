@@ -27,6 +27,7 @@ using System.Linq;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -123,7 +124,7 @@ namespace ClassicUO.Game.System
                         MessageType messageType = MessageType.System;
                         MessageFont font = MessageFont.Normal;
                         int cliloc = 1008089; // " : You are invited to join the party. Type /accept to join or /decline to decline the offer."
-                        string clilocString = Cliloc.Translate(Cliloc.GetString(cliloc));
+                        string clilocString = FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(cliloc));
                         string clilocMessage = partyLeaderEntity.Name + clilocString;
 
                         Chat.OnMessage(partyLeaderEntity, new UOMessageEventArgs(clilocMessage, hue, messageType, font, true));

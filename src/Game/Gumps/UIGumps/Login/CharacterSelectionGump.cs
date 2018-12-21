@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 X = 160, Y = 70, Width = 408, Height = 343 + yBonus
             }, 1);
 
-            AddChildren(new Label(Cliloc.GetString(3000050), false, 0x0386, font: 2)
+            AddChildren(new Label(FileManager.Cliloc.GetString(3000050), false, 0x0386, font: 2)
             {
                 X = 267, Y = listTitleY
             }, 1);
@@ -147,7 +147,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
                 if (existing != null)
                     RemoveChildren(existing);
-                var text = Cliloc.GetString(1080033).Replace("~1_NAME~", charName);
+                var text = FileManager.Cliloc.GetString(1080033).Replace("~1_NAME~", charName);
 
                 AddChildren(new LoadingGump(text, LoadingGump.Buttons.OK | LoadingGump.Buttons.Cancel, buttonID =>
                 {

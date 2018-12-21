@@ -23,6 +23,7 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Views;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
@@ -44,7 +45,7 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 if (!_itemData.HasValue)
-                    _itemData = TileData.StaticData[Graphic];
+                    _itemData = FileManager.TileData.StaticData[Graphic];
                 return _itemData.Value;
             }
         }

@@ -26,6 +26,7 @@ using System.Runtime.CompilerServices;
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -207,9 +208,9 @@ namespace ClassicUO.Game.Map
 
                     {
 
-                        ref StaticTiles data = ref TileData.StaticData[obj.Graphic];
+                        ref StaticTiles data = ref FileManager.TileData.StaticData[obj.Graphic];
 
-                        if (TileData.IsBackground(data.Flags))
+                        if (data.IsBackground)
                             priorityZ--;
 
                         if (data.Height > 0)

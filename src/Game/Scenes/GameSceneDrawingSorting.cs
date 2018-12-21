@@ -25,6 +25,7 @@ using System.Diagnostics;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 
@@ -91,7 +92,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
-                        if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (itemdata.Flags & 0x20004) == 0 && (!TileData.IsRoof(itemdata.Flags) || TileData.IsSurface(itemdata.Flags)))
+                        if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong)itemdata.Flags & 0x20004) == 0 && (!itemdata.IsRoof || itemdata.IsSurface))
                         {
                             _maxZ = tileZ;
                             _noDrawRoofs = true;
@@ -121,7 +122,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (tileZ > pz14 && _maxZ > tileZ)
                         {
-                            if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && (itemdata.Flags & 0x204) == 0 && TileData.IsRoof(itemdata.Flags))
+                            if (GameObjectHelper.TryGetStaticData(obj, out var itemdata) && ((ulong)itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
                             {
                                 _maxZ = tileZ;
                                 World.Map.ClearBockAccess();
@@ -189,7 +190,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (GameObjectHelper.TryGetStaticData(obj, out itemData))
                         {
-                            if (_noDrawRoofs && TileData.IsRoof(itemData.Flags))
+                            if (_noDrawRoofs && itemData.IsRoof)
                                 continue;
                             maxObjectZ += itemData.Height;
                         }
@@ -203,7 +204,7 @@ namespace ClassicUO.Game.Scenes
 
                 bool iscorpse = !ismobile && obj is Item item && item.IsCorpse;
 
-                if (!ismobile && !iscorpse && TileData.IsInternal(itemData.Flags))
+                if (!ismobile && !iscorpse && itemData.IsInternal)
                     continue;
 
                 bool island = !ismobile && !iscorpse && obj is Land;
@@ -343,16 +344,16 @@ namespace ClassicUO.Game.Scenes
                 realMinRangeX = 0;
             int realMaxRangeX = World.Player.Position.X + size;
 
-            //if (realMaxRangeX >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][0])
-            //    realMaxRangeX = IO.Resources.Map.MapsDefaultSize[World.Map.Index][0];
+            //if (realMaxRangeX >= FileManager.Map.MapsDefaultSize[World.Map.Index][0])
+            //    realMaxRangeX = FileManager.Map.MapsDefaultSize[World.Map.Index][0];
             int realMinRangeY = World.Player.Position.Y - size;
 
             if (realMinRangeY < 0)
                 realMinRangeY = 0;
             int realMaxRangeY = World.Player.Position.Y + size;
 
-            //if (realMaxRangeY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index][1])
-            //    realMaxRangeY = IO.Resources.Map.MapsDefaultSize[World.Map.Index][1];
+            //if (realMaxRangeY >= FileManager.Map.MapsDefaultSize[World.Map.Index][1])
+            //    realMaxRangeY = FileManager.Map.MapsDefaultSize[World.Map.Index][1];
             int minBlockX = (realMinRangeX >> 3) - 1;
             int minBlockY = (realMinRangeY >> 3) - 1;
             int maxBlockX = (realMaxRangeX >> 3) + 1;
@@ -364,11 +365,11 @@ namespace ClassicUO.Game.Scenes
             if (minBlockY < 0)
                 minBlockY = 0;
 
-            if (maxBlockX >= IO.Resources.Map.MapsDefaultSize[World.Map.Index, 0])
-                maxBlockX = IO.Resources.Map.MapsDefaultSize[World.Map.Index, 0] - 1;
+            if (maxBlockX >= FileManager.Map.MapsDefaultSize[World.Map.Index, 0])
+                maxBlockX = FileManager.Map.MapsDefaultSize[World.Map.Index, 0] - 1;
 
-            if (maxBlockY >= IO.Resources.Map.MapsDefaultSize[World.Map.Index, 1])
-                maxBlockY = IO.Resources.Map.MapsDefaultSize[World.Map.Index, 1] - 1;
+            if (maxBlockY >= FileManager.Map.MapsDefaultSize[World.Map.Index, 1])
+                maxBlockY = FileManager.Map.MapsDefaultSize[World.Map.Index, 1] - 1;
             int drawOffset = (int) (Scale * 40.0);
             float maxX = winGamePosX + winGameWidth + drawOffset;
             float maxY = winGamePosY + winGameHeight + drawOffset;

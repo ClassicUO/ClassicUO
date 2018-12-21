@@ -1,45 +1,26 @@
-﻿#region license
-
-//  Copyright (C) 2018 ClassicUO Development Community on Github
-//
-//	This project is an alternative client for the game Ultima Online.
-//	The goal of this is to develop a lightweight client considering 
-//	new technologies.  
-//      
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 
 using ClassicUO.Utility;
 
 namespace ClassicUO.IO.Resources
 {
-    public static class TileData
+    class TileDataLoader : ResourceLoader
     {
         private const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
         private const int MAX_STATIC_DATA_INDEX_COUNT = 0x10000;
 
-        public static LandTiles[] LandData { get; private set; }
+        public LandTiles[] LandData { get; private set; }
 
-        public static StaticTiles[] StaticData { get; private set; }
+        public StaticTiles[] StaticData { get; private set; }
 
-        public static void Load()
+
+        public override void Load()
         {
             string path = Path.Combine(FileManager.UoFolderPath, "tiledata.mul");
 
@@ -47,7 +28,7 @@ namespace ClassicUO.IO.Resources
                 throw new FileNotFoundException();
             UOFileMul tiledata = new UOFileMul(path, false);
             bool isold = FileManager.ClientVersion < ClientVersions.CV_7090;
-            int staticscount = !isold ? (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int) (tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
+            int staticscount = !isold ? (int)(tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupNew>()) / UnsafeMemoryManager.SizeOf<StaticGroupNew>() : (int)(tiledata.Length - 512 * UnsafeMemoryManager.SizeOf<LandGroupOld>()) / UnsafeMemoryManager.SizeOf<StaticGroupOld>();
 
             if (staticscount > 2048)
                 staticscount = 2048;
@@ -73,7 +54,7 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            END:
+        END:
 
             for (int i = 0; i < staticscount; i++)
             {
@@ -102,10 +83,10 @@ namespace ClassicUO.IO.Resources
                 }
             }
 
-            END_2:
+        END_2:
             tiledata.Dispose();
 
-            //string pathdef = Path.Combine(FileManager.UoFolderPath, "art.def");
+            //string pathdef = Path.Combine(FileManager.UoFolderPath, "FileManager.Art.def");
             //if (!File.Exists(pathdef))
             //    return;
 
@@ -165,164 +146,9 @@ namespace ClassicUO.IO.Resources
             //}
         }
 
-        public static bool IsBackground(ulong flags)
+        protected override void CleanResources()
         {
-            return (flags & 0x00000001) != 0;
-        }
-
-        public static bool IsWeapon(ulong flags)
-        {
-            return (flags & 0x00000002) != 0;
-        }
-
-        public static bool IsTransparent(ulong flags)
-        {
-            return (flags & 0x00000004) != 0;
-        }
-
-        public static bool IsTranslucent(ulong flags)
-        {
-            return (flags & 0x00000008) != 0;
-        }
-
-        public static bool IsWall(ulong flags)
-        {
-            return (flags & 0x00000010) != 0;
-        }
-
-        public static bool IsDamaging(ulong flags)
-        {
-            return (flags & 0x00000020) != 0;
-        }
-
-        public static bool IsImpassable(ulong flags)
-        {
-            return (flags & 0x00000040) != 0;
-        }
-
-        public static bool IsWet(ulong flags)
-        {
-            return (flags & 0x00000080) != 0;
-        }
-
-        public static bool IsUnknown(ulong flags)
-        {
-            return (flags & 0x00000100) != 0;
-        }
-
-        public static bool IsSurface(ulong flags)
-        {
-            return (flags & 0x00000200) != 0;
-        }
-
-        public static bool IsBridge(ulong flags)
-        {
-            return (flags & 0x00000400) != 0;
-        }
-
-        public static bool IsStackable(ulong flags)
-        {
-            return (flags & 0x00000800) != 0;
-        }
-
-        public static bool IsWindow(ulong flags)
-        {
-            return (flags & 0x00001000) != 0;
-        }
-
-        public static bool IsNoShoot(ulong flags)
-        {
-            return (flags & 0x00002000) != 0;
-        }
-
-        public static bool IsPrefixA(ulong flags)
-        {
-            return (flags & 0x00004000) != 0;
-        }
-
-        public static bool IsPrefixAn(ulong flags)
-        {
-            return (flags & 0x00008000) != 0;
-        }
-
-        public static bool IsInternal(ulong flags)
-        {
-            return (flags & 0x00010000) != 0;
-        }
-
-        public static bool IsFoliage(ulong flags)
-        {
-            return (flags & 0x00020000) != 0;
-        }
-
-        public static bool IsPartialHue(ulong flags)
-        {
-            return (flags & 0x00040000) != 0;
-        }
-
-        public static bool IsUnknown1(ulong flags)
-        {
-            return (flags & 0x00080000) != 0;
-        }
-
-        public static bool IsMap(ulong flags)
-        {
-            return (flags & 0x00100000) != 0;
-        }
-
-        public static bool IsContainer(ulong flags)
-        {
-            return (flags & 0x00200000) != 0;
-        }
-
-        public static bool IsWearable(ulong flags)
-        {
-            return (flags & 0x00400000) != 0;
-        }
-
-        public static bool IsLightSource(ulong flags)
-        {
-            return (flags & 0x00800000) != 0;
-        }
-
-        public static bool IsAnimated(ulong flags)
-        {
-            return (flags & 0x01000000) != 0;
-        }
-
-        public static bool IsNoDiagonal(ulong flags)
-        {
-            return (flags & 0x02000000) != 0;
-        }
-
-        public static bool IsUnknown2(ulong flags)
-        {
-            return (flags & 0x04000000) != 0;
-        }
-
-        public static bool IsArmor(ulong flags)
-        {
-            return (flags & 0x08000000) != 0;
-        }
-
-        public static bool IsRoof(ulong flags)
-        {
-            return (flags & 0x10000000) != 0;
-        }
-
-        public static bool IsDoor(ulong flags)
-        {
-            return (flags & 0x20000000) != 0;
-        }
-
-        public static bool IsStairBack(ulong flags)
-        {
-            return (flags & 0x40000000) != 0;
-        }
-
-        public static bool IsStairRight(ulong flags)
-        {
-            return (flags & 0x80000000) != 0;
+            throw new NotImplementedException();
         }
     }
 
@@ -330,14 +156,19 @@ namespace ClassicUO.IO.Resources
     {
         public LandTiles(ulong flags, ushort textId, string name)
         {
-            Flags = flags;
+            Flags = (TileFlag)flags;
             TexID = textId;
             Name = name;
         }
 
-        public readonly ulong Flags;
+        public readonly TileFlag Flags;
         public readonly ushort TexID;
         public readonly string Name;
+
+        public bool IsWet => (Flags & TileFlag.Wet) != 0;
+        public bool IsImpassable => (Flags & TileFlag.Impassable) != 0;
+        public bool IsNoDiagonal => (Flags & TileFlag.NoDiagonal) != 0;
+
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -354,7 +185,7 @@ namespace ClassicUO.IO.Resources
 
         public StaticTiles(ulong flags, byte weight, byte layer, int count, ushort animId, ushort hue, ushort lightIndex, byte height, string name)
         {
-            Flags = flags;
+            Flags = (TileFlag)flags;
             Weight = weight;
             Layer = layer;
             Count = count;
@@ -365,7 +196,7 @@ namespace ClassicUO.IO.Resources
             Name = name;
         }
 
-        public readonly ulong Flags;
+        public readonly TileFlag Flags;
         public readonly byte Weight;
         public readonly byte Layer;
         public readonly int Count;
@@ -374,6 +205,24 @@ namespace ClassicUO.IO.Resources
         public readonly ushort LightIndex;
         public readonly byte Height;
         public readonly string Name;
+
+        public bool IsAnimated => (Flags & TileFlag.Animation) != 0;
+        public bool IsBridge => (Flags & TileFlag.Bridge) != 0;
+        public bool IsImpassable => (Flags & TileFlag.Impassable) != 0;
+        public bool IsSurface => (Flags & TileFlag.Surface) != 0;
+        public bool IsWearable => (Flags & TileFlag.Wearable) != 0;
+        public bool IsInternal => (Flags & TileFlag.Internal) != 0;
+        public bool IsBackground => (Flags & TileFlag.Background) != 0;
+        public bool IsNoDiagonal => (Flags & TileFlag.NoDiagonal) != 0;
+        public bool IsWet => (Flags & TileFlag.Wet) != 0;
+        public bool IsFoliage => (Flags & TileFlag.Foliage) != 0;
+        public bool IsRoof => (Flags & TileFlag.Roof) != 0;
+        public bool IsTranslucent => (Flags & TileFlag.Translucent) != 0;
+        public bool IsPartialHue => (Flags & TileFlag.PartialHue) != 0;
+        public bool IsStackable => (Flags & TileFlag.Generic) != 0;
+        public bool IsTransparent => (Flags & TileFlag.Transparent) != 0;
+        public bool IsContainer => (Flags & TileFlag.Container) != 0;
+        public bool IsDoor => (Flags & TileFlag.Door) != 0;
     }
 
     // old
@@ -570,11 +419,11 @@ namespace ClassicUO.IO.Resources
         /// <summary>
         ///     Gargoyles can fly over
         /// </summary>
-        HoverOver = 0x02000000,
+        NoDiagonal = 0x02000000,
         /// <summary>
         ///     Unknown.
         /// </summary>
-        NoDiagonal = 0x04000000,
+        Unknown2 = 0x04000000,
         /// <summary>
         ///     Not yet documented.
         /// </summary>

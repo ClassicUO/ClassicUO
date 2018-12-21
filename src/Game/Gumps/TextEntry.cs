@@ -20,6 +20,7 @@
 #endregion
 using System;
 
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -177,7 +178,7 @@ namespace ClassicUO.Game.Gumps
 
             if (MaxWidth > 0)
             {
-                int width = RenderText.IsUnicode ? Fonts.GetWidthUnicode(RenderText.Font, text) : Fonts.GetWidthASCII(RenderText.Font, text);
+                int width = RenderText.IsUnicode ? FileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : FileManager.Fonts.GetWidthASCII(RenderText.Font, text);
                 int len = text.Length;
 
                 while (MaxWidth < width && len > 0)
@@ -194,7 +195,7 @@ namespace ClassicUO.Game.Gumps
                     else
                         text = text.Remove(text.Length - 1);
                     len--;
-                    width = RenderText.IsUnicode ? Fonts.GetWidthUnicode(RenderText.Font, text) : Fonts.GetWidthASCII(RenderText.Font, text);
+                    width = RenderText.IsUnicode ? FileManager.Fonts.GetWidthUnicode(RenderText.Font, text) : FileManager.Fonts.GetWidthASCII(RenderText.Font, text);
                 }
             }
             CaretIndex = text.Length;
@@ -250,9 +251,9 @@ namespace ClassicUO.Game.Gumps
             int x, y;
 
             if (RenderText.IsUnicode)
-                (x, y) = Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+                (x, y) = FileManager.Fonts.GetCaretPosUnicode(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort) RenderText.FontStyle);
             else
-                (x, y) = Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+                (x, y) = FileManager.Fonts.GetCaretPosASCII(RenderText.Font, RenderText.Text, CaretIndex, Width, RenderText.Align, (ushort) RenderText.FontStyle);
             CaretPosition = new Point(x, y);
 
             if (Offset > 0)
@@ -276,9 +277,9 @@ namespace ClassicUO.Game.Gumps
             int oldPos = CaretIndex;
 
             if (RenderText.IsUnicode)
-                CaretIndex = Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+                CaretIndex = FileManager.Fonts.CalculateCaretPosUnicode(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle);
             else
-                CaretIndex = Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle);
+                CaretIndex = FileManager.Fonts.CalculateCaretPosASCII(RenderText.Font, RenderText.Text, x, y, Width, RenderText.Align, (ushort) RenderText.FontStyle);
 
             if (oldPos != CaretIndex)
                 UpdateCaretPosition();
@@ -286,11 +287,11 @@ namespace ClassicUO.Game.Gumps
 
         public int GetLinesCount()
         {
-            return RenderText.IsUnicode ? Fonts.GetLinesCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width) : Fonts.GetLinesCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width);
+            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCountUnicode(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width) : FileManager.Fonts.GetLinesCountASCII(RenderText.Font, RenderText.Text, RenderText.Align, (ushort) RenderText.FontStyle, Width);
         }
         public int GetLinesCount(string text)
         {
-            return RenderText.IsUnicode ? Fonts.GetLinesCountUnicode( RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width ) : Fonts.GetLinesCountASCII( RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width );
+            return RenderText.IsUnicode ? FileManager.Fonts.GetLinesCountUnicode( RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width ) : FileManager.Fonts.GetLinesCountASCII( RenderText.Font, text, RenderText.Align, (ushort)RenderText.FontStyle, Width );
         }
         public void Clear()
         {

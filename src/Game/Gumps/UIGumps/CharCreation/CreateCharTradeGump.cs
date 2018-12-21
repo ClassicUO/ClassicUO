@@ -55,23 +55,23 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
             // title text
             //TextLabelAscii(AControl parent, int x, int y, int font, int hue, string text, int width = 400)
-            AddChildren(new Label(Cliloc.GetString(3000326), false, 0x0386, font: 2)
+            AddChildren(new Label(FileManager.Cliloc.GetString(3000326), false, 0x0386, font: 2)
             {
                 X = 148, Y = 132
             });
 
             // strength, dexterity, intelligence
-            AddChildren(new Label(Cliloc.GetString(3000111), false, 1, font: 1)
+            AddChildren(new Label(FileManager.Cliloc.GetString(3000111), false, 1, font: 1)
             {
                 X = 158, Y = 170
             });
 
-            AddChildren(new Label(Cliloc.GetString(3000112), false, 1, font: 1)
+            AddChildren(new Label(FileManager.Cliloc.GetString(3000112), false, 1, font: 1)
             {
                 X = 158, Y = 250
             });
 
-            AddChildren(new Label(Cliloc.GetString(3000113), false, 1, font: 1)
+            AddChildren(new Label(FileManager.Cliloc.GetString(3000113), false, 1, font: 1)
             {
                 X = 158, Y = 330
             });
@@ -91,7 +91,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
                 initialValue = 30;
             }
 
-            string[] skillList = Skills.SkillNames;
+            string[] skillList = FileManager.Skills.SkillNames;
             int y = 172;
             _skillSliders = new HSliderBar[skillCount];
             _skills = new Combobox[skillCount];
@@ -172,7 +172,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
             if (duplicated > 0)
             {
-                Service.Get<CharCreationGump>().ShowMessage(Cliloc.GetString(1080032));
+                Service.Get<CharCreationGump>().ShowMessage(FileManager.Cliloc.GetString(1080032));
 
                 return false;
             }

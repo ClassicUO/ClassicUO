@@ -130,13 +130,13 @@ namespace ClassicUO.Game.Map
 
                 case Multi multi:
 
-                    return (multi.Z, 1, (multi.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground(multi.ItemData.Flags) ? 0 : 1), 0);
+                    return (multi.Z, 1, (multi.ItemData.Height > 0 ? 1 : 0) + (multi.ItemData.IsBackground ? 0 : 1), 0);
                 case Static staticitem:
 
-                    return (staticitem.Z, 1, (staticitem.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground(staticitem.ItemData.Flags) ? 0 : 1), staticitem.Index);
+                    return (staticitem.Z, 1, (staticitem.ItemData.Height > 0 ? 1 : 0) + (staticitem.ItemData.IsBackground ? 0 : 1), staticitem.Index);
                 case Item item:
 
-                    return (item.Z, item.IsCorpse ? 4 : 2, (item.ItemData.Height > 0 ? 1 : 0) + (TileData.IsBackground(item.ItemData.Flags) ? 0 : 1), (int) item.Serial.Value);
+                    return (item.Z, item.IsCorpse ? 4 : 2, (item.ItemData.Height > 0 ? 1 : 0) + (item.ItemData.IsBackground ? 0 : 1), (int) item.Serial.Value);
                 default:
 
                     return (0, 0, 0, 0);

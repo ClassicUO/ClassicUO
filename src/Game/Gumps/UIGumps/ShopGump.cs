@@ -26,6 +26,7 @@ using System.Linq;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 
@@ -360,7 +361,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 for (int i = 0; i < _gumpTexture.Length; i++)
                 {
                     if (_gumpTexture[i] == null)
-                        _gumpTexture[i] = IO.Resources.Gumps.GetGumpTexture((Graphic) (_graphic + i));
+                        _gumpTexture[i] = FileManager.Gumps.GetTexture((Graphic) (_graphic + i));
                 }
 
                 Height = _gumpTexture.Max(o => o.Height);

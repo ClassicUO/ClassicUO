@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 
@@ -121,13 +122,13 @@ namespace ClassicUO.Game.Gumps.Controls
 
                         _gumpSpliderBackground = new SpriteTexture[3]
                         {
-                            IO.Resources.Gumps.GetGumpTexture(213), IO.Resources.Gumps.GetGumpTexture(214), IO.Resources.Gumps.GetGumpTexture(215)
+                            FileManager.Gumps.GetTexture(213), FileManager.Gumps.GetTexture(214), FileManager.Gumps.GetTexture(215)
                         };
-                        _gumpWidget = IO.Resources.Gumps.GetGumpTexture(216);
+                        _gumpWidget = FileManager.Gumps.GetTexture(216);
 
                         break;
                     case HSliderBarStyle.BlueWidgetNoBar:
-                        _gumpWidget = IO.Resources.Gumps.GetGumpTexture(0x845);
+                        _gumpWidget = FileManager.Gumps.GetTexture(0x845);
 
                         break;
                 }

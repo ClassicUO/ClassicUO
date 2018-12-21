@@ -18,6 +18,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -31,7 +33,7 @@ namespace ClassicUO.Game.Gumps.Controls
         public Panel(ushort background)
         {
             for (int i = 0; i < _frame.Length; i++)
-                _frame[i] = IO.Resources.Gumps.GetGumpTexture((ushort) (background + i));
+                _frame[i] = FileManager.Gumps.GetTexture((ushort) (background + i));
         }
 
         public override void Update(double totalMS, double frameMS)

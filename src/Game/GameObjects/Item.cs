@@ -25,6 +25,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Views;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
@@ -122,6 +123,8 @@ namespace ClassicUO.Game.GameObjects
             set => _displayedGraphic = value;
         }
 
+        public bool IsLocked => (Flags & Flags.Movable) == 0 && ItemData.Weight > 90;
+
         public bool IsMulti
         {
             get => _isMulti;
@@ -139,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
                             short minY = 0;
                             short maxX = 0;
                             short maxY = 0;
-                            int count = IO.Resources.Multi.GetCount(Graphic);
+                            int count = FileManager.Multi.GetCount(Graphic);
                             MultiComponent[] components = new MultiComponent[count];
 
                             if (!World.HouseManager.TryGetHouse(Serial, out House house))
@@ -152,7 +155,7 @@ namespace ClassicUO.Game.GameObjects
 
                             for (int i = 0; i < count; i++)
                             {
-                                MultiBlock pbm = IO.Resources.Multi.GetMulti(i);
+                                MultiBlock pbm = FileManager.Multi.GetMulti(i);
                                 MultiComponent component = new MultiComponent(pbm.ID, (ushort) (X + pbm.X), (ushort) (Y + pbm.Y), (sbyte) (Z + pbm.Z), pbm.Flags);
                                 if (pbm.X < minX) minX = pbm.X;
                                 if (pbm.X > maxX) maxX = pbm.X;
@@ -236,7 +239,7 @@ namespace ClassicUO.Game.GameObjects
             get
             {
                 if (!_itemData.HasValue)
-                    _itemData = TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
+                    _itemData = FileManager.TileData.StaticData[IsMulti ? Graphic + 0x4000 : Graphic];
                 return _itemData.Value;
             }
         }
@@ -563,16 +566,16 @@ namespace ClassicUO.Game.GameObjects
                     sbyte frameIndex = (sbyte) (AnimIndex + 1);
                     Graphic id = GetGraphicForAnimation();
                     bool mirror = false;
-                    Animations.GetAnimDirection(ref dir, ref mirror);
+                    FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
 
-                    if (id < Animations.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
+                    if (id < AnimationsLoader.MAX_ANIMATIONS_DATA_INDEX_COUNT && dir < 5)
                     {
-                        int animGroup = Animations.GetDieGroupIndex(id, UsedLayer);
-                        ref AnimationDirection direction = ref Animations.DataIndex[id].Groups[animGroup].Direction[dir];
-                        Animations.AnimID = id;
-                        Animations.AnimGroup = (byte) animGroup;
-                        Animations.Direction = dir;
-                        if ((direction.FrameCount == 0 || direction.FramesHashes == null)) Animations.LoadDirectionGroup(ref direction);
+                        int animGroup = FileManager.Animations.GetDieGroupIndex(id, UsedLayer);
+                        ref AnimationDirection direction = ref FileManager.Animations.DataIndex[id].Groups[animGroup].Direction[dir];
+                        FileManager.Animations.AnimID = id;
+                        FileManager.Animations.AnimGroup = (byte) animGroup;
+                        FileManager.Animations.Direction = dir;
+                        if ((direction.FrameCount == 0 || direction.FramesHashes == null)) FileManager.Animations.LoadDirectionGroup(ref direction);
 
                         if (direction.Address != 0 || direction.IsUOP)
                         {

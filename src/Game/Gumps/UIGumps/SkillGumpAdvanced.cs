@@ -25,6 +25,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -207,21 +208,21 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         _skill.Lock = Lock.Down;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Down);
                         loc.Graphic = 0x985;
-                        loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x985);
+                        loc.Texture = FileManager.Gumps.GetTexture(0x985);
 
                         break;
                     case Lock.Down:
                         _skill.Lock = Lock.Locked;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Locked);
                         loc.Graphic = 0x82C;
-                        loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x82C);
+                        loc.Texture = FileManager.Gumps.GetTexture(0x82C);
 
                         break;
                     case Lock.Locked:
                         _skill.Lock = Lock.Up;
                         GameActions.ChangeSkillLockStatus((ushort) _skill.Index, (byte) Lock.Up);
                         loc.Graphic = 0x983;
-                        loc.Texture = IO.Resources.Gumps.GetGumpTexture(0x983);
+                        loc.Texture = FileManager.Gumps.GetTexture(0x983);
 
                         break;
                 }
@@ -239,7 +240,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump(_skill, Mouse.Position.X, Mouse.Position.Y);
                 Engine.UI.Add(skillButtonGump);
-                Rectangle rect = IO.Resources.Gumps.GetGumpTexture(0x24B8).Bounds;
+                Rectangle rect = FileManager.Gumps.GetTexture(0x24B8).Bounds;
                 Engine.UI.AttemptDragControl(skillButtonGump, new Point(Mouse.Position.X + (rect.Width >> 1), Mouse.Position.Y + (rect.Height >> 1)), true);
             }
         }

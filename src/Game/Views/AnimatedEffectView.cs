@@ -24,6 +24,7 @@ using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 
@@ -103,18 +104,17 @@ namespace ClassicUO.Game.Views
             if ((effect.AnimationGraphic != _displayedGraphic || Texture == null || Texture.IsDisposed) && effect.AnimationGraphic != Graphic.Invalid)
             {
                 _displayedGraphic = effect.AnimationGraphic;
-                Texture = Art.GetStaticTexture(effect.AnimationGraphic);
+                Texture = FileManager.Art.GetTexture(effect.AnimationGraphic);
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
             }
 
             Bounds.X = (Texture.Width >> 1) - 22 - (int)effect.Offset.X;
             Bounds.Y = Texture.Height - 44 + (int)(effect.Offset.Z - effect.Offset.Y);
 
-            ulong flags = TileData.StaticData[_displayedGraphic].Flags;
+            StaticTiles data = FileManager.TileData.StaticData[_displayedGraphic];
 
-
-            bool isPartial = TileData.IsPartialHue(flags);
-            bool isTransparent = TileData.IsTransparent(flags);
+            bool isPartial = data.IsPartialHue;
+            bool isTransparent = data.IsTransparent;
             HueVector = ShaderHuesTraslator.GetHueVector(effect.Hue, isPartial, isTransparent ? .5f : 0, false);
 
             switch (effect.Blend)
@@ -158,7 +158,7 @@ namespace ClassicUO.Game.Views
         {
             int x = list.MousePosition.X - (int) vertex[0].Position.X;
             int y = list.MousePosition.Y - (int) vertex[0].Position.Y;
-            //if (Art.Contains(GameObject.Graphic, x, y))
+            //if (FileManager.Art.Contains(GameObject.Graphic, x, y))
             if (Texture.Contains(x, y))
                 list.Add(GameObject, vertex[0].Position);
         }

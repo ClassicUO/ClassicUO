@@ -27,6 +27,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.System;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
@@ -75,7 +76,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AcceptMouseInput = false;
             AcceptKeyboardInput = false;
 
-            int height = Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
+            int height = FileManager.Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort)(FontStyle.BlackBorder | FontStyle.Fixed));
 
             _textBox = new TextBox(1, MAX_MESSAGE_LENGHT, Width, Width, true, FontStyle.BlackBorder | FontStyle.Fixed, 33)
             {
@@ -180,7 +181,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             if (_textBox != null)
             {
-                int height = Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
+                int height = FileManager.Fonts.GetHeightUnicode(1, "ABC", Width, 0, (ushort) (FontStyle.BlackBorder | FontStyle.Fixed));
                 _textBox.Y = Height - height - 3;
                 _textBox.Width = Width;
                 _textBox.Height = height - 3;

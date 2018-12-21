@@ -25,6 +25,7 @@ using System.Linq;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -195,7 +196,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 }
 
                 _background.Graphic = _graphic;
-                _background.Texture = IO.Resources.Gumps.GetGumpTexture(_graphic);
+                _background.Texture = FileManager.Gumps.GetTexture(_graphic);
                 Width = _background.Texture.Width;
                 Height = _background.Texture.Height;
 
@@ -220,7 +221,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             public BuffControlEntry(BuffIcon icon) : base(0, 0, icon.Graphic, 0)
             {
                 Icon = icon;
-                Texture = IO.Resources.Gumps.GetGumpTexture(icon.Graphic);
+                Texture = FileManager.Gumps.GetTexture(icon.Graphic);
                 Width = Texture.Width;
                 Height = Texture.Height;
                 _alpha = 0xFF;

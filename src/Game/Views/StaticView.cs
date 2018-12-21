@@ -21,6 +21,7 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -31,16 +32,17 @@ namespace ClassicUO.Game.Views
 {   
     public class StaticView : View
     {
-        private readonly bool _isFoliage;
+        private readonly bool _isFoliage, _isPartialHue;
         private float _alpha;
         private float _timeToProcessAlpha;
 
         public StaticView(Static st) : base(st)
         {
-            _isFoliage = TileData.IsFoliage( st.ItemData.Flags);
+            _isFoliage = st.ItemData.IsFoliage;
+            _isPartialHue = st.ItemData.IsPartialHue;
             AllowedToDraw = !GameObjectHelper.IsNoDrawable(st.Graphic);
 
-            if (TileData.IsTranslucent(st.ItemData.Flags))
+            if (st.ItemData.IsTranslucent)
                 _alpha = 0.5f;
         }
 
@@ -53,7 +55,7 @@ namespace ClassicUO.Game.Views
           
             if (Texture == null || Texture.IsDisposed)
             {
-                ArtTexture texture = Art.GetStaticTexture(GameObject.Graphic);
+                ArtTexture texture = FileManager.Art.GetTexture(GameObject.Graphic);
                 Texture = texture;
                 Bounds = new Rectangle((Texture.Width >> 1) - 22, Texture.Height - 44, Texture.Width, Texture.Height);
 
@@ -117,7 +119,7 @@ namespace ClassicUO.Game.Views
                 }
             }
 
-            HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, false, _alpha, false);
+            HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, _isPartialHue, _alpha, false);
             MessageOverHead(batcher, position, Bounds.Y - 44);
 
             return base.Draw(batcher, position, objectList);
