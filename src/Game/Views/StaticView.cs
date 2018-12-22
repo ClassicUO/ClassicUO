@@ -121,7 +121,7 @@ namespace ClassicUO.Game.Views
 
             HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, _isPartialHue, _alpha, false);
             MessageOverHead(batcher, position, Bounds.Y - 44);
-
+            Engine.DebugInfo.StaticsRendered++;
             return base.Draw(batcher, position, objectList);
         }
 

@@ -18,6 +18,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using SDL2;
+
 namespace ClassicUO.Input
 {
     public enum KeyboardEvent
@@ -26,15 +29,5 @@ namespace ClassicUO.Input
         Up,
         Press,
         TextInput
-    }
-
-    public static class KeyboardInput
-    {
-        public static bool IsKeymodPressed(SDL2.SDL.SDL_Keymod mod, SDL2.SDL.SDL_Keymod tocheck)
-        {
-            mod ^= mod & Engine.s_IgnoreKeyMod;
-            return tocheck == mod || (mod != SDL2.SDL.SDL_Keymod.KMOD_NONE && (mod & tocheck) != 0);
-            
-        }
     }
 }

@@ -177,8 +177,7 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             string s=null;
             int oldidx = _entry.CaretIndex;
-            TextEntry oldentry = _entry;
-            if (KeyboardInput.IsKeymodPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
+            if (Input.Keyboard.IsModPressed(mod, SDL.SDL_Keymod.KMOD_CTRL) && key == SDL.SDL_Keycode.SDLK_v)//paste
             {
                 s = SDL.SDL_GetClipboardText();
                 if(!string.IsNullOrEmpty(s))

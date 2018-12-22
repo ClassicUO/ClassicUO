@@ -150,6 +150,7 @@ namespace ClassicUO.Game.Views
                     break;
             }
 
+            Engine.DebugInfo.EffectsRendered++;
 
             return true;
         }

@@ -48,7 +48,7 @@ namespace ClassicUO.Game.Views
 
             HueVector = ShaderHuesTraslator.GetHueVector(GameObject.Hue, false, _alpha, false);
             MessageOverHead(batcher, position, Bounds.Y - 44);
-
+            Engine.DebugInfo.MultiRendered++;
             return base.Draw(batcher, position, objectList);
         }
 

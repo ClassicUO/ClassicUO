@@ -55,7 +55,7 @@ namespace ClassicUO.Game.Views
             }
 
             HueVector = ShaderHuesTraslator.GetHueVector(effect.Hue);
-
+            Engine.DebugInfo.EffectsRendered++;
             return base.Draw(batcher, position, list);
         }
     }

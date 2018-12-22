@@ -146,7 +146,7 @@ namespace ClassicUO.Game.Views
             //}
 
             //batcher.DrawRectangle(_edge, GetOnScreenRectangle(), Vector3.Zero);
-
+            Engine.DebugInfo.MobilesRendered++;
             return true;
         }
         //private static Texture2D _edge;

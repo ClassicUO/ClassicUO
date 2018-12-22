@@ -35,13 +35,6 @@ using IDrawable = ClassicUO.Interfaces.IDrawable;
 
 namespace ClassicUO.Game.Views
 {
-    public struct FrameInfo
-    {
-        public int X, Y, OffsetX, OffsetY, EndX, EndY, Width, Height;
-
-        public static readonly FrameInfo Empty = new FrameInfo();
-    }
-
     public abstract class View : IDrawable, IColorable
     {
         protected static float PI = (float) Math.PI;
@@ -190,6 +183,7 @@ namespace ClassicUO.Game.Views
             return true;
         }
 
+        public virtual Vector3 SelectedHue { get; protected set; }
 
         protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {

@@ -53,7 +53,7 @@ namespace ClassicUO.Game.Views
             if (!AllowedToDraw || GameObject.IsDisposed)
                 return false;
             Land tile = (Land) GameObject;
-
+            Engine.DebugInfo.LandsRendered++;
             if (Texture == null || Texture.IsDisposed)
             {
                 if (tile.IsStretched)

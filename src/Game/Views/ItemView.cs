@@ -62,6 +62,8 @@ namespace ClassicUO.Game.Views
                 return false;
             Item item = (Item) GameObject;
 
+            Engine.DebugInfo.ItemsRendered++;
+
             if (item.IsCorpse)
                 return DrawCorpse(batcher, position, objectList);
 
@@ -83,7 +85,7 @@ namespace ClassicUO.Game.Views
 
             bool ok = base.Draw(batcher, position, objectList);
             MessageOverHead(batcher, position, Bounds.Y);
-
+            
             return ok;
         }
 

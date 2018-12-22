@@ -31,6 +31,7 @@ using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Gumps;
+using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
@@ -46,17 +47,36 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO
 {
-    public class Engine : Microsoft.Xna.Framework.Game
+    public class DebugInfo
     {
+        public int MobilesRendered { get; set; }
+        public int ItemsRendered { get; set; }
+        public int StaticsRendered { get; set; }
+        public int MultiRendered { get; set; }
+        public int LandsRendered { get; set; }
+        public int EffectsRendered { get; set; }
+
+        public void Reset()
+        {
+            MobilesRendered = ItemsRendered = StaticsRendered = MultiRendered = LandsRendered = EffectsRendered = 0;
+        }
+    }
+
+    public class Engine : Microsoft.Xna.Framework.Game
+    { 
         private const int MIN_FPS = 15;
         private const int MAX_FPS = 250;
-        private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
-        private const string FORMAT_1 = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\n";
-        private const string FORMAT_2 = "Flush: {0}\nPos: {1}\nSelected: {2}\nStats: {3}";
+        //private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
+        //private const string FORMAT_1 = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\n";
+        //private const string FORMAT_2 = "Flush: {0}\nPos: {1}\nSelected: {2}\nStats: {3}";
+
+        private const string DEBUG_STRING_1 = "- FPS: {0}\n- Rendered: {1} mobiles, {2} items, {3} statics, {4} multi, {5} lands, {6} effects\n";
+        private const string DEBUG_STRING_2 = "- CharPos: {0}    Mouse: {1}    InGamePos: {2}\n";
+        private const string DEBUG_STRING_3 = "- Selected: {0}";
+
 
         private static int _fpsLimit = MIN_FPS;
         private static Engine _engine;
-        public static readonly SDL2.SDL.SDL_Keymod s_IgnoreKeyMod = SDL2.SDL.SDL_Keymod.KMOD_CAPS | SDL2.SDL.SDL_Keymod.KMOD_NUM | SDL2.SDL.SDL_Keymod.KMOD_MODE | SDL2.SDL.SDL_Keymod.KMOD_RESERVED;
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly StringBuilder _sb = new StringBuilder();
         private Batcher2D _batcher;
@@ -70,6 +90,7 @@ namespace ClassicUO
         private int _totalFrames;
         private UIManager _uiManager;
         private Settings _settings;
+        private DebugInfo _debugInfo;
 
         private Engine()
         {
@@ -178,6 +199,8 @@ namespace ClassicUO
 
         public static string ExePath { get; private set; }
 
+        public static DebugInfo DebugInfo => _engine._debugInfo;
+
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -285,14 +308,20 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, "Done!");
             FpsLimit = _settings.MaxFPS;
 
+            _debugInfo = new DebugInfo();
+
             _infoText = new RenderedText
             {
                 IsUnicode = true,
-                Font = 3,
+                Font = 1,
                 FontStyle = FontStyle.BlackBorder,
                 Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                MaxWidth = 150
+                Hue = 0x35,
+                Cell = 31,
+                //MaxWidth = 500
             };
+
+            _uiManager.Add(new DebugGump());
             base.Initialize();
         }
 
@@ -356,6 +385,8 @@ namespace ClassicUO
 
         protected override void Draw(GameTime gameTime)
         {
+            _debugInfo.Reset();
+
             Profiler.EndFrame();
             Profiler.BeginFrame();
 
@@ -366,19 +397,18 @@ namespace ClassicUO
             if (_sceneManager.CurrentScene.IsLoaded)
                 _sceneManager.CurrentScene.Draw(_batcher);
             GraphicsDevice.Clear(Color.Transparent);
-            int totalCalls = _batcher.Calls;
-            int totalMerged = _batcher.Merged;
-            int totalFlushes = _batcher.FlushCount;
             _batcher.Begin();
             UI.Draw(_batcher);
-            totalCalls += _batcher.Calls;
-            totalMerged += _batcher.Merged;
-            totalFlushes += _batcher.FlushCount;
             _sb.Clear();
-            _sb.ConcatFormat(FORMAT_1, CurrentFPS, _sceneManager.CurrentScene.RenderedObjectsCount, totalCalls, totalMerged);
-            _sb.ConcatFormat(FORMAT_2, totalFlushes, World.Player == null ? string.Empty : World.Player.Position.ToString(), _sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty);
+
+            _sb.AppendFormat(DEBUG_STRING_1, CurrentFPS, _debugInfo.MobilesRendered, _debugInfo.ItemsRendered, _debugInfo.StaticsRendered, _debugInfo.MultiRendered, _debugInfo.LandsRendered, _debugInfo.EffectsRendered);
+            _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.Invalid, Mouse.Position, _sceneManager.CurrentScene is GameScene gs ? gs.MouseOverWorldPosition : Point.Zero);
+            _sb.AppendFormat(DEBUG_STRING_3, _sceneManager.CurrentScene is GameScene gs1 && gs1.SelectedObject != null ? gs1.SelectedObject.ToString() : "");
+
+            //_sb.ConcatFormat(FORMAT_1, CurrentFPS, _sceneManager.CurrentScene.RenderedObjectsCount, totalCalls, totalMerged);
+            //_sb.ConcatFormat(FORMAT_2, totalFlushes, World.Player == null ? string.Empty : World.Player.Position.ToString(), _sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty);
             _infoText.Text = _sb.ToString();
-            _infoText.Draw(_batcher, new Point(Window.ClientBounds.Width - 150, 20));
+            _infoText.Draw(_batcher, new Point(20, 0));
             _batcher.End();
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");

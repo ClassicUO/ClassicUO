@@ -121,6 +121,7 @@
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
     <Compile Include="Game\Gumps\Controls\GumpPicWithWidth.cs" />
+    <Compile Include="Game\Gumps\UIGumps\DebugGump.cs" />
     <Compile Include="Game\Managers\HouseManager.cs" />
     <Compile Include="Game\Managers\UseItemQueue.cs" />
     <Compile Include="Game\Managers\EffectManager.cs" />
@@ -129,6 +130,7 @@
     <Compile Include="Game\GameObjects\MovingEffect.cs" />
     <Compile Include="Game\Managers\WalkerManager.cs" />
     <Compile Include="Game\Views\MultiView.cs" />
+    <Compile Include="Input\Keyboard.cs" />
     <Compile Include="Interfaces\IPoolable.cs" />
     <Compile Include="IO\DefReader.cs" />
     <Compile Include="IO\ResourceLoader.cs" />
