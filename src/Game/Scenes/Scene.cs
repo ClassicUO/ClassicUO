@@ -43,6 +43,8 @@ namespace ClassicUO.Game.Scenes
 
         public bool IsDisposed { get; private set; }
 
+        public bool IsLoaded { get; private set; }
+
         public int RenderedObjectsCount { get; protected set; }
 
         public CoroutineManager Coroutines { get; } = new CoroutineManager();
@@ -59,17 +61,12 @@ namespace ClassicUO.Game.Scenes
         public virtual void Load()
         {
             Coroutine.Start(this, CleaningResources(), "cleaning resources");
+            IsLoaded = true;
         }
 
         public virtual void Unload()
         {
             Coroutines.Clear();
-
-            //FileManager.Animations.Clear();
-            //FileManager.Art.Clear();
-            //TextmapTextures.Clear();
-            //FileManager.Gumps.Clear();
-            //FileManager.Map.Clear();
         }
 
         public virtual void Update(double totalMS, double frameMS)

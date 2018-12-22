@@ -98,6 +98,29 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
 
             WantUpdateSize = false;
+
+            Chat.Message += ChatOnMessage;
+        }
+
+        private void ChatOnMessage(object sender, UOMessageEventArgs e)
+        {
+
+            switch (e.Type)
+            {
+                case MessageType.Regular when e.Parent == null || !e.Parent.Serial.IsValid:
+                case MessageType.System:
+                case MessageType.Party:
+                case MessageType.Guild:
+                case MessageType.Alliance:
+                    AddLine(e.Text, (byte)e.Font, e.Hue, e.IsUnicode);
+                    break;
+            }
+        }
+
+        public override void Dispose()
+        {
+            Chat.Message -= ChatOnMessage;
+            base.Dispose();
         }
 
         private ChatMode Mode
@@ -288,7 +311,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (string.IsNullOrEmpty(text))
                 return;
             ChatMode sentMode = Mode;
-            MessageType speechType = MessageType.Regular;
             ushort hue = 0;
             _textBox.SetText(string.Empty);
             _messageHistory.Add(new Tuple<ChatMode, string>(Mode, text));
@@ -298,88 +320,58 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch (sentMode)
             {
                 case ChatMode.Default:
-                    speechType = MessageType.Regular;
                     hue = 33;
-                    GameActions.Say(text, hue, speechType);
+                    GameActions.Say(text, hue);
                     break;
                 case ChatMode.Whisper:
-                    speechType = MessageType.Whisper;
-                    GameActions.Say(text, hue, speechType);
+                    GameActions.Say(text, hue, MessageType.Whisper);
                     break;
                 case ChatMode.Emote:
-                    speechType = MessageType.Emote;
-                    GameActions.Say(text, hue, speechType);
+                    GameActions.Say(text, hue, MessageType.Emote);
                     break;
                 case ChatMode.Party:
 
                     text = text.ToLower();
 
-                    if (text.Equals("add"))
+                    switch (text)
                     {
-                        World.Party.TriggerAddPartyMember();
-                        break;
-                    }
-
-                    if (World.Party.IsInParty)
-                    {
-                        if (text.Equals("loot"))
-                        {
-                            World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot ? true : false;
+                        case "add":
+                            World.Party.TriggerAddPartyMember();
                             break;
-                        }
-
-                        if (text.Equals("quit"))
-                        {
-                            World.Party.QuitParty();
+                        case "loot":
+                            if (World.Party.IsInParty)
+                                World.Party.AllowPartyLoot = !World.Party.AllowPartyLoot;
                             break;
-                        }
+                        case "quit":
+                            if (World.Party.IsInParty)
+                                World.Party.QuitParty();
+                            break;
+                        case "accept":
+                            if (!World.Party.IsInParty)
+                                World.Party.AcceptPartyInvite();
+                            break;
+                        case "decline":
+                            if (!World.Party.IsInParty)
+                                World.Party.DeclinePartyInvite();
+                            break;
+                        default:
 
-                        World.Party.PartyMessage(text);
+                            if (World.Party.IsInParty)
+                            {
+                                World.Party.PartyMessage(text);
+                            }
+                            break;
                     }
-                    else
-                    {
-                        if (text.Equals("accept"))
-                        {
-                            World.Party.AcceptPartyInvite();
-                        }
-                        else if (text.Equals("decline"))
-                        {
-                            World.Party.DeclinePartyInvite();
-                        }
-                        else if (text.Equals("quit"))
-                        {
-                            string notInPartyMessage = "You are not in a party.";
-                            Hue notInPartyHue = 0x03B2; //white
-                            MessageType type = MessageType.Regular;
-                            MessageFont notInPartyFont = MessageFont.Normal;
-                            bool isUnicode = true;
-
-                            Chat.OnMessage(null, new UOMessageEventArgs(notInPartyMessage, notInPartyHue, type, notInPartyFont, isUnicode));
-                        }
-                        else
-                        {
-                            Hue noteToSelfHue = 0x7FFF; //grey
-                            MessageFont noteToSelfFont = MessageFont.Normal;
-                            string NoteToSelf = "Note to self: " + text;
-
-                            //we write directly to the journal to avoid 'System:' prefix
-                            Service.Get<ChatControl>().AddLine(NoteToSelf, (byte)noteToSelfFont, noteToSelfHue, false);
-                            Engine.SceneManager.GetScene<GameScene>().Journal.Add(NoteToSelf, noteToSelfFont, noteToSelfHue, "");
-                        }
-                    }
-
                     break;
                 case ChatMode.PartyPrivate:
                     
                     //GameActions.Say(text, hue, speechType);
                     break;
                 case ChatMode.Guild:
-                    speechType = MessageType.Guild;
-                    GameActions.Say(text, hue, speechType);
+                    GameActions.Say(text, hue, MessageType.Guild);
                     break;
                 case ChatMode.Alliance:
-                    speechType = MessageType.Alliance;
-                    GameActions.Say(text, hue, speechType);
+                    GameActions.Say(text, hue, MessageType.Alliance);
                     break;
                 case ChatMode.ClientCommand:
                     CommandManager.Execute(text);

@@ -50,7 +50,6 @@ namespace ClassicUO.Game
             }
         };
         private readonly int[,] _cursorOffset = new int[2, 16];
-        private readonly Settings _settings;
         private readonly Tooltip _tooltip;
         private SpriteTexture _draggedItemTexture;
         private bool _draggingItem;
@@ -62,7 +61,6 @@ namespace ClassicUO.Game
 
         public GameCursor()
         {
-            _settings = Service.Get<Settings>();
             _tooltip = new Tooltip();
 
             for (int i = 0; i < 2; i++)

@@ -43,7 +43,6 @@ namespace ClassicUO.Game
         Alliance = 14,
         Command = 15,
         Encoded = 0xC0,
-        Damage
     }
 
     public enum MessageFont : ushort
@@ -77,90 +76,34 @@ namespace ClassicUO.Game
             Graphic = Graphic.Invariant, Name = "System"
         };
 
-
-        public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
-        public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => OnMessage(entity, new UOMessageEventArgs(message, hue, type, font, true, "ENU"));
-
-        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
-
         public static event EventHandler<UOMessageEventArgs> Message;
 
         public static event EventHandler<UOMessageEventArgs> LocalizedMessage;
 
-        public static void OnMessage(Entity entity, UOMessageEventArgs args)
+        public static void Print(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => Print(_system, message, hue, type, font);
+        public static void Print(this Entity entity, string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => OnMessage(new UOMessageEventArgs(entity, message, hue, type, font, true, "ENU"));
+
+        public static void Say(string message, ushort hue = defaultHue, MessageType type = MessageType.Regular, MessageFont font = MessageFont.Normal) => GameActions.Say(message, hue, type, font);
+    
+        public static void OnMessage(UOMessageEventArgs args)
         {
             switch (args.Type)
             {
+                case MessageType.Spell:
+                case MessageType.Label:
                 case MessageType.Regular:
-
-                    if (entity != null && entity.Serial.IsValid)
-                    {
-                        entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                        Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, entity.Name);
-                    }
-                    else
-                    {
-                        Service.Get<ChatControl>().AddLine(args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                        Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "System");
-                    }
-
-                    break;
-                case MessageType.System:
-                    Service.Get<ChatControl>().AddLine(args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                    Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "System");
-
+                    args.Parent?.AddOverhead(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
                     break;
                 case MessageType.Emote:
-
-                    if (entity != null && entity.Serial.IsValid)
-                    {
-                        entity.AddGameText(args.Type, $"*{args.Text}*", (byte) args.Font, args.Hue, args.IsUnicode);
-                        Engine.SceneManager.GetScene<GameScene>().Journal.Add($"*{args.Text}*", args.Font, args.Hue, entity.Name);
-                    }
-                    else
-                        Engine.SceneManager.GetScene<GameScene>().Journal.Add($"*{args.Text}*", args.Font, args.Hue, "System");
-
-                    break;
-                case MessageType.Label:
-
-                    if (entity != null && entity.Serial.IsValid)
-                        entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                    Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "You see");
-
-                    break;
+                     args.Parent?.AddOverhead(args.Type, $"*{args.Text}*", (byte) args.Font, args.Hue, args.IsUnicode);
+                    break;           
                 case MessageType.Focus:
-
                     break;
                 case MessageType.Whisper:
-
                     break;
                 case MessageType.Yell:
-
-                    break;
-                case MessageType.Spell:
-
-                    if (entity != null && entity.Serial.IsValid)
-                    {
-                        entity.AddGameText(args.Type, args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                        Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, entity.Name);
-                    }
-
-                    break;
-                case MessageType.Party:
-                    Service.Get<ChatControl>().AddLine(args.Text, (byte) args.Font, args.Hue, args.IsUnicode);
-                    Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "Party");
-
-                    break;
-                case MessageType.Guild:
-                    Service.Get<ChatControl>().AddLine($"[Guild] [{entity.Name}]: {args.Text}", (byte)args.Font, args.Hue, args.IsUnicode);
-                    Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "Party");
-                    break;
-                case MessageType.Alliance:
-                    Service.Get<ChatControl>().AddLine($"[Alliance] [{entity.Name}]: {args.Text}", (byte)args.Font, args.Hue, args.IsUnicode);
-                    Engine.SceneManager.GetScene<GameScene>().Journal.Add(args.Text, args.Font, args.Hue, "Party");
-                    break;
+                    break;          
                 case MessageType.Command:
-
                     break;
                 case MessageType.Encoded:
 
@@ -170,7 +113,7 @@ namespace ClassicUO.Game
                     throw new ArgumentOutOfRangeException();
             }
 
-            Message.Raise(args, entity ?? _system);
+            Message.Raise(args, args.Parent ?? _system);
         }
 
         public static void OnLocalizedMessage(Entity entity, UOMessageEventArgs args)
@@ -181,8 +124,9 @@ namespace ClassicUO.Game
 
     public class UOMessageEventArgs : EventArgs
     {
-        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
+        public UOMessageEventArgs(Entity parent, string text, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {
+            Parent = parent;
             Text = text;
             Hue = hue;
             Type = type;
@@ -192,8 +136,9 @@ namespace ClassicUO.Game
             IsUnicode = unicode;
         }
 
-        public UOMessageEventArgs(string text, Hue hue, MessageType type, MessageFont font, uint cliloc, bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
+        public UOMessageEventArgs(Entity parent, string text, Hue hue, MessageType type, MessageFont font, uint cliloc, bool unicode = false, AffixType affixType = AffixType.None, string affix = null)
         {
+            Parent = parent;
             Text = text;
             Hue = hue;
             Type = type;
@@ -203,6 +148,8 @@ namespace ClassicUO.Game
             Affix = affix;
             IsUnicode = unicode;
         }
+
+        public Entity Parent { get; }
 
         public string Text { get; }
 

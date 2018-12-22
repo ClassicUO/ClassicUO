@@ -69,6 +69,7 @@ namespace ClassicUO
         private float _time;
         private int _totalFrames;
         private UIManager _uiManager;
+        private Settings _settings;
 
         private Engine()
         {
@@ -169,6 +170,8 @@ namespace ClassicUO
 
         public static ProfileManager Profile => _engine._profileManager;
 
+        public static Settings GlobalSettings => _engine._settings;
+
         public static SceneManager SceneManager => _engine._sceneManager;
 
         public static Assembly Assembly { get; private set; }
@@ -234,24 +237,23 @@ namespace ClassicUO
 
         protected override void Initialize()
         {
-            Settings settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
+            _settings = ConfigurationResolver.Load<Settings>(Path.Combine(ExePath, "settings.json"));
 
-            if (settings == null)
+            if (_settings == null)
             {
                 Log.Message(LogTypes.Trace, "settings.json file was not found creating default");
-                settings = new Settings();
-                settings.Save();
+                _settings = new Settings();
+                _settings.Save();
                 Quit();
 
                 return;
             }
 
-            Service.Register(settings);
             Log.Message(LogTypes.Trace, "Checking for Ultima Online installation...");
 
             try
             {
-                FileManager.UoFolderPath = settings.UltimaOnlineDirectory;
+                FileManager.UoFolderPath = _settings.UltimaOnlineDirectory;
             }
             catch (FileNotFoundException e)
             {
@@ -263,7 +265,6 @@ namespace ClassicUO
             Log.Message(LogTypes.Trace, "Done!");
             Log.Message(LogTypes.Trace, $"Ultima Online installation folder: {FileManager.UoFolderPath}");
             Log.Message(LogTypes.Trace, "Loading files...");
-            Stopwatch stopwatch = Stopwatch.StartNew();
             FileManager.LoadFiles();
             uint[] hues = FileManager.Hues.CreateShaderColors();
             _batcher = new Batcher2D(GraphicsDevice);
@@ -273,8 +274,7 @@ namespace ClassicUO
             texture1.SetData(hues, 32 * FileManager.Hues.HuesCount, 32 * FileManager.Hues.HuesCount);
             GraphicsDevice.Textures[1] = texture0;
             GraphicsDevice.Textures[2] = texture1;
-            Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
-            stopwatch.Stop();
+         
             _inputManager = new InputManager();
             _uiManager = new UIManager();
             _profileManager = new ProfileManager();
@@ -283,7 +283,7 @@ namespace ClassicUO
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
             Log.Message(LogTypes.Trace, "Done!");
-            FpsLimit = settings.MaxFPS;
+            FpsLimit = _settings.MaxFPS;
 
             _infoText = new RenderedText
             {
@@ -307,7 +307,7 @@ namespace ClassicUO
         {
             _inputManager.Dispose();
             _sceneManager.CurrentScene?.Unload();
-            Service.Get<Settings>().Save();
+            _settings.Save();
             base.UnloadContent();
         }
 
@@ -363,7 +363,8 @@ namespace ClassicUO
                 Profiler.ExitContext("OutOfContext");
             Profiler.EnterContext("RenderFrame");
             _totalFrames++;
-            _sceneManager.CurrentScene.Draw(_batcher);
+            if (_sceneManager.CurrentScene.IsLoaded)
+                _sceneManager.CurrentScene.Draw(_batcher);
             GraphicsDevice.Clear(Color.Transparent);
             int totalCalls = _batcher.Calls;
             int totalMerged = _batcher.Merged;
@@ -433,12 +434,14 @@ namespace ClassicUO
 
         private void OnUpdate(double totalMS, double frameMS)
         {
-            _sceneManager.CurrentScene.Update(totalMS, frameMS);
+            if (_sceneManager.CurrentScene.IsLoaded)
+                _sceneManager.CurrentScene.Update(totalMS, frameMS);
         }
 
         private void OnFixedUpdate(double totalMS, double frameMS)
         {
-            _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
+            if (_sceneManager.CurrentScene.IsLoaded)
+                _sceneManager.CurrentScene.FixedUpdate(totalMS, frameMS);
         }
     }
 }

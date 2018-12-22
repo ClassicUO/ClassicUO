@@ -102,9 +102,8 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnected += NetClient_Disconnected;
             NetClient.LoginSocket.Connected += NetClient_Connected;
             NetClient.LoginSocket.Disconnected += NetClient_Disconnected;
-            Settings settings = Service.Get<Settings>();
 
-            string[] parts = settings.ClientVersion.Split(new[]
+            string[] parts = Engine.GlobalSettings.ClientVersion.Split(new[]
             {
                 '.'
             }, StringSplitOptions.RemoveEmptyEntries);
@@ -135,9 +134,8 @@ namespace ClassicUO.Game.Scenes
                 return;
             Account = account;
             Password = password;
-            Settings settings = Service.Get<Settings>();
             Log.Message(LogTypes.Trace, "Start login...");
-            NetClient.LoginSocket.Connect(settings.IP, settings.Port);
+            NetClient.LoginSocket.Connect(Engine.GlobalSettings.IP, Engine.GlobalSettings.Port);
             CurrentLoginStep = LoginStep.Connecting;
         }
 
@@ -156,9 +154,8 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginStep.CharacterSelection)
             {
-                Settings settings = Service.Get<Settings>();
-                settings.LastCharacterName = Characters[index];
-                settings.Save();
+                Engine.GlobalSettings.LastCharacterName = Characters[index];
+                Engine.GlobalSettings.Save();
                 CurrentLoginStep = LoginStep.EnteringBritania;
                 NetClient.Socket.Send(new PSelectCharacter(index, Characters[index], NetClient.Socket.ClientAddress));
             }
@@ -242,17 +239,15 @@ namespace ClassicUO.Game.Scenes
 
         private void NetClient_PacketReceived(object sender, Packet e)
         {
-            Settings settings = Service.Get<Settings>();
-
             switch (e.ID)
             {
                 case 0xA8: // ServerListReceived
                     ParseServerList(e);
 
                     // Save credentials to config file
-                    settings.Username = Account;
-                    settings.Password = Password;
-                    settings.Save();
+                    Engine.GlobalSettings.Username = Account;
+                    Engine.GlobalSettings.Password = Password;
+                    Engine.GlobalSettings.Save();
                     CurrentLoginStep = LoginStep.ServerSelection;
 
                     break;
@@ -270,7 +265,7 @@ namespace ClassicUO.Game.Scenes
 
                     break;
                 case 0xBD: // ReceiveVersionRequest
-                    NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
+                    NetClient.Socket.Send(new PClientVersion(Engine.GlobalSettings.ClientVersion));
 
                     break;
                 case 0x82: // ReceiveLoginRejection

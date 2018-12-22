@@ -185,7 +185,7 @@ namespace ClassicUO.Game.Scenes
                                 name = FileManager.Cliloc.GetString(1020000 + st.Graphic);
 
                             if (obj.Overheads.Count == 0)
-                                obj.AddGameText(MessageType.Label, name, 3, 0, false);
+                                obj.AddOverhead(MessageType.Label, name, 3, 0, false);
 
                             break;
                         case Multi multi:
@@ -195,7 +195,7 @@ namespace ClassicUO.Game.Scenes
                                 name = FileManager.Cliloc.GetString(1020000 + multi.Graphic);
 
                             if (obj.Overheads.Count == 0)
-                                obj.AddGameText(MessageType.Label, name, 3, 0, false);
+                                obj.AddOverhead(MessageType.Label, name, 3, 0, false);
                             break;
                         case Entity entity:
 
@@ -276,7 +276,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
-                            World.Player.AddGameText(MessageType.Label, "Pathfinding!", 3, 0, false);
+                            World.Player.AddOverhead(MessageType.Label, "Pathfinding!", 3, 0, false);
 
                             e.Result = true;
                         }

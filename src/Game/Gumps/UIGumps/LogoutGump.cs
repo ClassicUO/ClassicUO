@@ -28,8 +28,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class LogoutGump : Gump
     {
-        private Settings _settings;
-
         public LogoutGump() : base(0, 0)
         {
             GumpPic pic = new GumpPic(0, 0, 0x0816, 0);
@@ -56,7 +54,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             {
                 X = 100, Y = 75, ButtonAction = ButtonAction.Activate
             });
-            _settings = Service.Get<Settings>();
             CanMove = false;
             ControlInfo.IsModal = true;
 

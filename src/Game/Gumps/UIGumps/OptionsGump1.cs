@@ -32,8 +32,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public OptionsGump1() : base(0, 0)
         {
-            _settings = Service.Get<Settings>();
-
             AddChildren(new ResizePic( /*0x2436*/ /*0x2422*/ /*0x9C40*/ 9200 /*0x53*/ /*0xE10*/)
             {
                 Width = 600, Height = 500

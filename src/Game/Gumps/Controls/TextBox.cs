@@ -184,16 +184,18 @@ namespace ClassicUO.Game.Gumps.Controls
                 if(!string.IsNullOrEmpty(s))
                 {
                     s = _entry.InsertString(s.Replace("\r", string.Empty));
+                    Parent?.OnKeyboardReturn((int)PageCommand.PasteText, s);
+                    return;
                 }
             }
             else switch (key)
             {
-                /*case SDL.SDL_Keycode.SDLK_TAB:
-                    if (AllowTAB)
-                        _entry.InsertString("    ");
-                    break;*/
-                case SDL.SDL_Keycode.SDLK_RETURN when MultiLineInputAllowed:
+                case SDL.SDL_Keycode.SDLK_RETURN:
+
+                    if (MultiLineInputAllowed)
                         s = _entry.InsertString("\n");
+                    else
+                        s = _entry.Text;
                         break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     //TODO remove from current ccaret index
@@ -249,7 +251,9 @@ namespace ClassicUO.Game.Gumps.Controls
                     }
                     break;
             }
-            Parent?.OnKeyboardReturn((int)PageCommand.PasteText, s);
+
+            Parent?.OnKeyboardReturn((int)PageCommand.Nothing, s);
+
             base.OnKeyDown(key, mod);
         }
 

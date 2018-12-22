@@ -33,8 +33,6 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
         public MainLoginGump() : base(0, 0)
         {
-            Settings settings = Service.Get<Settings>();
-
             if (FileManager.ClientVersion >= ClientVersions.CV_500A)
                 // Full background
                 AddChildren(new GumpPic(0, 0, 0x2329, 0));
@@ -90,7 +88,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 X = 183, Y = 385
             });
 
-            AddChildren(new Label("UO Version " + settings.ClientVersion + ".", false, 0x034E, font: 9)
+            AddChildren(new Label($"UO Version {Engine.GlobalSettings.ClientVersion}.", false, 0x034E, font: 9)
             {
                 X = 286, Y = 453
             });
@@ -114,8 +112,8 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 Height = 25,
                 IsPassword = true
             });
-            _textboxAccount.SetText(settings.Username);
-            _textboxPassword.SetText(settings.Password);
+            _textboxAccount.SetText(Engine.GlobalSettings.Username);
+            _textboxPassword.SetText(Engine.GlobalSettings.Password);
         }
 
         public override void OnButtonClick(int buttonID)

@@ -36,7 +36,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private readonly GameBorder _border;
         private readonly Button _button;
         private readonly ChatControl _chatControl;
-        private readonly Settings _settings;
         private readonly WorldViewport _viewport;
         private bool _clicked;
         private Point _lastPosition = Point.Zero;
@@ -45,7 +44,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
-            _settings = Service.Get<Settings>();
             AcceptMouseInput = false;
             CanMove = true;
             CanCloseWithEsc = false;
@@ -73,14 +71,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(_button);
             AddChildren(_viewport);
             AddChildren(_chatControl);
-            Service.Register(_chatControl);
             Resize();
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-            Service.Unregister<ChatControl>();
         }
 
         public override void Update(double totalMS, double frameMS)

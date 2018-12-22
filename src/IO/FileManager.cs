@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Diagnostics;
 using System.IO;
 
 using ClassicUO.Configuration;
@@ -43,7 +44,7 @@ namespace ClassicUO.IO
 
                 //FileVersionInfo versInfo = FileVersionInfo.GetVersionInfo(client.FullName);
 
-                if (!Version.TryParse(Service.Get<Settings>().ClientVersion.Replace(",", ".").Trim(), out Version version))
+                if (!Version.TryParse(Engine.GlobalSettings.ClientVersion.Replace(",", ".").Trim(), out Version version))
                 {
                     Log.Message(LogTypes.Error, "Wrong version.");
 
@@ -80,6 +81,8 @@ namespace ClassicUO.IO
 
         public static void LoadFiles()
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
             Animations = new AnimationsLoader();
             Animations.Load();
 
@@ -122,20 +125,8 @@ namespace ClassicUO.IO
             Lights = new LightsLoader();
             Lights.Load();
 
-            //Map.Load();
-            //Art.Load();
-            //Cliloc.Load();
-            //Animations.Load();
-            //Gumps.Load();
-            //Fonts.Load();
-            //FileManager.Hues.Load();
-            //TileData.Load();
-            //Multi.Load();
-            //Skills.Load();
-            //TextmapTextures.Load();
-            //Speeches.Load();
-            //AnimData.Load();
-            //Light.Load();
+            Log.Message(LogTypes.Trace, $"Files loaded in: {stopwatch.ElapsedMilliseconds} ms!");
+            stopwatch.Stop();
         }
     }
 }

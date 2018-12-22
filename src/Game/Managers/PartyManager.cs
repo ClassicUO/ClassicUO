@@ -107,7 +107,7 @@ namespace ClassicUO.Game.System
                         MessageType messageType = MessageType.Party;
                         MessageFont partyMessageFont = MessageFont.Normal;
 
-                        Chat.OnMessage( /*partyMemberEntity*/ null, new UOMessageEventArgs(partyMessage, partyMessagehue, messageType, partyMessageFont, false));
+                        Chat.OnMessage(new UOMessageEventArgs(null, partyMessage, partyMessagehue, messageType, partyMessageFont, false));
                     }
 
                     break;
@@ -127,7 +127,7 @@ namespace ClassicUO.Game.System
                         string clilocString = FileManager.Cliloc.Translate(FileManager.Cliloc.GetString(cliloc));
                         string clilocMessage = partyLeaderEntity.Name + clilocString;
 
-                        Chat.OnMessage(partyLeaderEntity, new UOMessageEventArgs(clilocMessage, hue, messageType, font, true));
+                        Chat.OnMessage(new UOMessageEventArgs(partyLeaderEntity, clilocMessage, hue, messageType, font, true));
                     }
 
                     break;

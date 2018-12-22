@@ -625,9 +625,6 @@ namespace ClassicUO.Network
             Engine.SceneManager.ChangeScene(scene);
 
 
-            Settings settings = Service.Get<Settings>();
-
-
 
             World.Mobiles.Add(World.Player = new PlayerMobile(p.ReadUInt()));
             p.Skip(4);
@@ -647,10 +644,10 @@ namespace ClassicUO.Network
             World.Player.Direction = direction;
             World.Player.AddToTile();
 
-            List<Gump> gumps = Engine.Profile.Load(World.ServerName, settings.Username, settings.LastCharacterName);
+            List<Gump> gumps = Engine.Profile.Load(World.ServerName, Engine.GlobalSettings.Username, Engine.GlobalSettings.LastCharacterName);
 
 
-            NetClient.Socket.Send(new PClientVersion(settings.ClientVersion));
+            NetClient.Socket.Send(new PClientVersion(Engine.GlobalSettings.ClientVersion));
 
             if (FileManager.ClientVersion >= ClientVersions.CV_200)
             {
@@ -693,7 +690,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, new UOMessageEventArgs(text, hue, type, font, false));
+            Chat.OnMessage(new UOMessageEventArgs(entity, text, hue, type, font, false));
         }
 
         private static void DeleteObject(Packet p)
@@ -1691,7 +1688,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, new UOMessageEventArgs(text, hue, type, font, true, lang));
+            Chat.OnMessage(new UOMessageEventArgs(entity, text, hue, type, font, true, lang));
         }
 
         private static void OpenGump(Packet p)
@@ -1843,7 +1840,7 @@ namespace ClassicUO.Network
 
                         if (!string.IsNullOrEmpty(str))
                             item.Name = str;
-                        item.AddGameText(MessageType.Label, str, 3, 0x3B2, true, 4000.0f);
+                        item.AddOverhead(MessageType.Label, str, 3, 0x3B2, true, 4000.0f);
                     }
 
                     str = string.Empty;
@@ -2117,7 +2114,7 @@ namespace ClassicUO.Network
                 entity.ProcessDelta();
             }
 
-            Chat.OnMessage(entity, new UOMessageEventArgs(text, hue, type, font, true));
+            Chat.OnMessage(new UOMessageEventArgs(entity, text, hue, type, font, true));
         }
 
         private static void UnicodePrompt(Packet p)

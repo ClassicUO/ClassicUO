@@ -44,7 +44,6 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
             AddChildren(new CreateCharAppearanceGump(), 1);
             SetStep(CharCreationStep.Appearence);
             CanCloseWithRightClick = false;
-            Service.Register(this);
         }
 
         public void SetCharacter(PlayerMobile character)
@@ -56,14 +55,12 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
         public void CreateCharacter()
         {
             loginScene.CreateCharacter(_character);
-            Service.Unregister<CharCreationGump>();
         }
 
         public void StepBack()
         {
             if (_currentStep == CharCreationStep.Appearence)
             {
-                Service.Unregister<CharCreationGump>();
                 loginScene.StepBack();
             }
             else

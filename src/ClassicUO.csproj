@@ -345,7 +345,6 @@
     <Compile Include="Renderer\SpriteTexture.cs" />
     <Compile Include="Renderer\SpriteVertex.cs" />
     <Compile Include="Renderer\Techniques.cs" />
-    <Compile Include="Service.cs" />
     <Compile Include="Utility\Bag.cs" />
     <Compile Include="Utility\Deque.cs" />
     <Compile Include="Utility\Exstentions.cs" />

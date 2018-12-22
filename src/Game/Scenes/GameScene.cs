@@ -47,7 +47,6 @@ namespace ClassicUO.Game.Scenes
         private MousePicker _mousePicker;
         private MouseOverList _mouseOverList;
         private WorldViewport _viewPortGump;
-        private Settings _settings;
         private JournalManager _journalManager;
         private OverheadManager _overheadManager;
         private GameObject _selectedObject;
@@ -61,7 +60,7 @@ namespace ClassicUO.Game.Scenes
 
         public Texture2D ViewportTexture => _renderTarget;
 
-        public Point MouseOverWorldPosition => new Point((int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale), (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale));
+        public Point MouseOverWorldPosition => _viewPortGump == null ? Point.Zero : new Point((int) ((Mouse.Position.X - _viewPortGump.ScreenCoordinateX) * Scale), (int) ((Mouse.Position.Y - _viewPortGump.ScreenCoordinateY) * Scale));
 
         public GameObject SelectedObject
         {
@@ -116,10 +115,12 @@ namespace ClassicUO.Game.Scenes
 
             _mousePicker = new MousePicker();
             _mouseOverList = new MouseOverList(_mousePicker);
-            Engine.UI.Add(new WorldViewportGump(this));
-            Engine.UI.Add(new TopBarGump(this));           
-            _viewPortGump = Service.Get<WorldViewport>();
-            _settings = Service.Get<Settings>();
+
+            WorldViewportGump viewport = new WorldViewportGump(this);
+            Engine.UI.Add(viewport);
+            Engine.UI.Add(new TopBarGump(this));
+            _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
+
             GameActions.Initialize(PickupItemBegin);
             Engine.Input.LeftMouseButtonDown += OnLeftMouseButtonDown;
             Engine.Input.LeftMouseButtonUp += OnLeftMouseButtonUp;
@@ -150,7 +151,75 @@ namespace ClassicUO.Game.Scenes
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
+            Chat.Message += ChatOnMessage;
             //Coroutine.Start(this, CastSpell());
+        }
+
+        private void ChatOnMessage(object sender, UOMessageEventArgs e)
+        {
+            if (e.Type == MessageType.Command)
+                return;
+
+            string name;
+            string text;
+
+            switch (e.Type)
+            {
+                case MessageType.Regular:
+
+                    if (e.Parent == null || e.Parent.Serial == Serial.Invalid)
+                        name = "System";
+                    else
+                        name = e.Parent.Name;
+
+                    text = e.Text;
+                    break;
+
+                case MessageType.System:
+                    name = "System";
+                    text = e.Text;
+                    break;
+
+                case MessageType.Emote:
+                    name = e.Parent.Name;
+                    text = $"*{e.Text}*";
+
+                    break;
+                case MessageType.Label:
+                    name = "You see";
+                    text = e.Text;
+                    break;
+
+                case MessageType.Spell:
+
+                    if (e.Parent != null && e.Parent.Serial.IsValid)
+                    {
+                        name = e.Parent.Name;
+                    }
+                    else
+                        name = "<Not found>";
+
+                    text = e.Text;
+                    break;
+                case MessageType.Party:
+                    text = e.Text;
+                    name = "[Party]";
+                    break;
+                case MessageType.Alliance:
+                    text = e.Text;
+                    name = "[Alliance]";
+
+                    break;
+                case MessageType.Guild:
+                    text = e.Text;
+                    name = "[Guild]";
+
+                    break;
+                default:
+                    return;
+            }
+
+            _journalManager.Add(text, e.Font, e.Hue, name);
         }
 
         private IEnumerable<IWaitCondition> CastSpell()
@@ -200,6 +269,8 @@ namespace ClassicUO.Game.Scenes
             _overheadManager = null;
             _useItemQueue.Clear();
             _useItemQueue = null;
+
+            Chat.Message -= ChatOnMessage;
 
             base.Unload();
         }

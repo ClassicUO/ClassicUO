@@ -18,6 +18,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System.Linq;
+
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
@@ -40,7 +43,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Height = height;
             _scene = scene;
             AcceptMouseInput = true;
-            Service.Register(this);
         }
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
@@ -54,15 +56,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return base.Draw(batcher, position, hue);
         }
 
-        public override void Dispose()
-        {
-            base.Dispose();
-            Service.Unregister<WorldViewport>();
-        }
-
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            Engine.UI.KeyboardFocusControl = Service.Get<ChatControl>().GetFirstControlAcceptKeyboardInput();
+            if (!(Engine.UI.KeyboardFocusControl is ChatControl))
+            {
+                Engine.UI.KeyboardFocusControl = Engine.UI.GetByLocalSerial<WorldViewportGump>()
+                                                       .FindControls<ChatControl>()
+                                                       .FirstOrDefault()?
+                                                       .GetFirstControlAcceptKeyboardInput();
+            }
         }
     }
 }
