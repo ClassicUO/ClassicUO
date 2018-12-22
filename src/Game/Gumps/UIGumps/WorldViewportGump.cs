@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private const int BORDER_HEIGHT = 5;
         private readonly GameBorder _border;
         private readonly Button _button;
-        private readonly ChatControl _chatControl;
+        private readonly SystemChatControl _systemChatControl;
         private readonly WorldViewport _viewport;
         private bool _clicked;
         private Point _lastPosition = Point.Zero;
@@ -66,11 +66,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             Height = _worldHeight + BORDER_HEIGHT * 2;
             _border = new GameBorder(0, 0, Width, Height, 4);
             _viewport = new WorldViewport(scene, BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
-            _chatControl = new ChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
+            _systemChatControl = new SystemChatControl(BORDER_WIDTH, BORDER_HEIGHT, _worldWidth, _worldHeight);
             AddChildren(_border);
             AddChildren(_button);
             AddChildren(_viewport);
-            AddChildren(_chatControl);
+            AddChildren(_systemChatControl);
             Resize();
         }
 
@@ -134,9 +134,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _button.Y = Height - _button.Height / 2;
             _viewport.Width = _worldWidth;
             _viewport.Height = _worldHeight;
-            _chatControl.Width = _worldWidth;
-            _chatControl.Height = _worldHeight;
-            _chatControl.Resize();
+            _systemChatControl.Width = _worldWidth;
+            _systemChatControl.Height = _worldHeight;
+            _systemChatControl.Resize();
             WantUpdateSize = true;
         }
     }

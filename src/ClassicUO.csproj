@@ -265,7 +265,7 @@
     <Compile Include="Game\Gumps\Controls\ScrollFlag.cs" />
     <Compile Include="Game\Gumps\Controls\StaticPic.cs" />
     <Compile Include="Game\Gumps\Controls\TextBox.cs" />
-    <Compile Include="Game\Gumps\UIGumps\ChatControl.cs" />
+    <Compile Include="Game\Gumps\UIGumps\SystemChatControl.cs" />
     <Compile Include="Game\Gumps\UIGumps\ColorPickerGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\ContainerGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\Gump.cs" />

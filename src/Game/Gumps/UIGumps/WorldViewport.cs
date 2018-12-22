@@ -58,10 +58,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (!(Engine.UI.KeyboardFocusControl is ChatControl))
+            if (!(Engine.UI.KeyboardFocusControl is SystemChatControl))
             {
                 Engine.UI.KeyboardFocusControl = Engine.UI.GetByLocalSerial<WorldViewportGump>()
-                                                       .FindControls<ChatControl>()
+                                                       .FindControls<SystemChatControl>()
                                                        .FirstOrDefault()?
                                                        .GetFirstControlAcceptKeyboardInput();
             }
