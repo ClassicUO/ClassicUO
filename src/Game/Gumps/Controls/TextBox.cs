@@ -102,7 +102,10 @@ namespace ClassicUO.Game.Gumps.Controls
         public void SetText(string text, bool append = false)
         {
             if (append)
-                _entry.InsertString(text);
+            {
+                text = _entry.InsertString(text);
+                Parent?.OnKeyboardReturn((int)PageCommand.PasteText, text);
+            }
             else
                 _entry.SetText(text);
         }
@@ -189,11 +192,9 @@ namespace ClassicUO.Game.Gumps.Controls
                     if (AllowTAB)
                         _entry.InsertString("    ");
                     break;*/
-                case SDL.SDL_Keycode.SDLK_RETURN:
-                    if ( MultiLineInputAllowed )
-                        s = _entry.InsertString( "\n" );
-                    Parent?.OnKeyboardReturn((int)PageCommand.GoForward, Text);
-                    break;
+                case SDL.SDL_Keycode.SDLK_RETURN when MultiLineInputAllowed:
+                        s = _entry.InsertString("\n");
+                        break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     //TODO remove from current ccaret index
                     if (ReplaceDefaultTextOnFirstKeyPress)
