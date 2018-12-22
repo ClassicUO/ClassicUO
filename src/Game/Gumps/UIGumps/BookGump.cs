@@ -100,6 +100,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
         }
         private List<TextBox> m_Pages = new List<TextBox> ();
         private int MaxPage => (BookPageCount >> 1) + 1;
+        private int ActiveInternalPage => m_Pages.FindIndex(t => t.HasKeyboardFocus);
 
         private void SetActivePage( int page )
         {
@@ -181,23 +182,43 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void OnKeyboardReturn(int textID, string text)
         {
+            int curpage = ActiveInternalPage;
             switch ((TextBox.PageCommand)textID)
             {
-                case TextBox.PageCommand.GoBackward when ActivePage > 1:
-                    SetActivePage(ActivePage - 1);
-                    RefreshShowCaretPos(m_Pages[ActivePage - 1].Text.Length - 1, m_Pages[ActivePage - 1]);
+                case TextBox.PageCommand.GoBackward when curpage > 0:
+                    if((curpage+1)%2 == 0)
+                        SetActivePage(ActivePage - 1);
+                    RefreshShowCaretPos(m_Pages[curpage - 1].Text.Length, m_Pages[curpage - 1]);
                     break;
-                case TextBox.PageCommand.GoForward when ActivePage > 0 && ActivePage < MaxPage:
-                    SetActivePage(ActivePage + 1);
-                    RefreshShowCaretPos(0, m_Pages[ActivePage - 1]);
+                case TextBox.PageCommand.GoForward when curpage >= 0 && curpage+1 < BookPageCount:
+                    if((curpage+1)%2 == 1)
+                        SetActivePage(ActivePage + 1);
+                    RefreshShowCaretPos(0, m_Pages[curpage + 1]);
                     break;
-                case TextBox.PageCommand.PasteText when !string.IsNullOrEmpty(text):
-                    int page = ActivePage;
-                    SetActivePage(page + 1);
-                    if (ActivePage > 0 && page != ActivePage)//effectively changed page, continue pasting the text
+                case TextBox.PageCommand.PasteText when text!=null && curpage >= 0:
+                    curpage++;
+                    if (curpage % 2 == 1)
+                        SetActivePage(ActivePage + 1);
+                    while (text != null && curpage < BookPageCount)
                     {
-                        m_Pages[ActivePage - 1].SetText(text, true);
+                        RefreshShowCaretPos(0, m_Pages[curpage]);
+                        text = m_Pages[curpage]._entry.InsertString(text);
+                        if (!string.IsNullOrEmpty(text))
+                        {
+                            curpage++;
+                            if (curpage < BookPageCount)
+                            {
+                                if(curpage % 2 == 1)
+                                    SetActivePage(ActivePage + 1);
+                            }
+                            else
+                            {
+                                --curpage;
+                                text = null;
+                            }
+                        }
                     }
+                    RefreshShowCaretPos(m_Pages[curpage].Text.Length, m_Pages[curpage]);
                     break;
                 case TextBox.PageCommand.RemoveText:
                     //TODO: remove text from other pages, making it roll over on the previous pages, line by line

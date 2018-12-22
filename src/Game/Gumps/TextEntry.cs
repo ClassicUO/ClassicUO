@@ -155,16 +155,20 @@ namespace ClassicUO.Game.Gumps
                     count = newlines.Length - MaxLines;
                     for (int i = newlines.Length - 1; i >= MaxLines; --i)
                         count += newlines[i];
+                    c = text;
                     text = text.Remove(text.Length - count);
-                    c = c.Substring(Math.Max(0, c.Length - count));
-                    count -= c.Length;
+                    c = c.Substring(Math.Min(c.Length - 1, text.Length + 1));
+                    count -= c.Length - 1;
                 }
+                else
+                    c = null;
             }
             else
                 c = null;
 
-            CaretIndex += count;
+            count = CaretIndex += count;
             SetText(text);
+            CaretIndex = count;
             return c;
         }
 
