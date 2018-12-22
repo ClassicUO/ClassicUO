@@ -26,7 +26,7 @@ namespace ClassicUO.Game.Managers
         {
             if (!IsHouseInRange(serial, distance))
             {
-                _houses[serial].Dispose();
+                _houses[serial].ClearComponents();
                 _houses.Remove(serial);
 
                 return true;
@@ -55,7 +55,7 @@ namespace ClassicUO.Game.Managers
         {
             if (TryGetHouse(serial, out House house))
             {
-                house.Dispose();
+                house.ClearComponents();
                 _houses.Remove(serial);
             }
         }
@@ -66,7 +66,7 @@ namespace ClassicUO.Game.Managers
         {
             foreach (KeyValuePair<Serial, House> house in _houses)
             {
-                house.Value.Dispose();
+                house.Value.ClearComponents();
             }
             _houses.Clear();
         }

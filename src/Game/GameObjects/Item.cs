@@ -142,7 +142,8 @@ namespace ClassicUO.Game.GameObjects
                             short minY = 0;
                             short maxX = 0;
                             short maxY = 0;
-                            int count = FileManager.Multi.GetCount(Graphic);
+
+                            int count = FileManager.Multi.GetCount(Graphic, out bool uopValid);
 
                             if (!World.HouseManager.TryGetHouse(Serial, out House house))
                             {
@@ -150,24 +151,22 @@ namespace ClassicUO.Game.GameObjects
                                 World.HouseManager.Add(Serial, house);
                             }
                             else 
-                                house.Dispose();
+                                house.ClearComponents();
 
                             for (int i = 0; i < count; i++)
                             {
-                                MultiBlock pbm = FileManager.Multi.GetMulti(i);
-                                ushort x = (ushort) (X + pbm.X);
-                                ushort y = (ushort) (Y + pbm.Y);
-                                sbyte z = (sbyte) (Z + pbm.Z);
+                                FileManager.Multi.GetMultiData(i, Graphic, uopValid, out ushort graphic, out short x, out short y, out short z, out uint flags);
 
-                                if (pbm.X < minX) minX = pbm.X;
-                                if (pbm.X > maxX) maxX = pbm.X;
-                                if (pbm.Y < minY) minY = pbm.Y;
-                                if (pbm.Y > maxY) maxY = pbm.Y;
-                                if (pbm.Flags != 0)
+                                if (x < minX) minX = x;
+                                if (x > maxX) maxX = x;
+                                if (y < minY) minY = y;
+                                if (y > maxY) maxY = y;
+
+                                if (flags != 0)
                                 {
-                                    house.Components.Add(new Multi(pbm.ID)
+                                    house.Components.Add(new Multi(graphic)
                                     {
-                                        Position = new Position(x, y, z)
+                                        Position = new Position((ushort) (X + x), (ushort) (Y + y), (sbyte) (Z + z))
                                     });
                                 }                              
                             }

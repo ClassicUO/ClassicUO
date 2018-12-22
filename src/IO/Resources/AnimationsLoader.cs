@@ -21,7 +21,7 @@ namespace ClassicUO.IO.Resources
         public const int MAX_ANIMATIONS_DATA_INDEX_COUNT = 2048;
 
         private readonly UOFileMul[] _files = new UOFileMul[5];
-        private readonly UOFileUopAnimation[] _filesUop = new UOFileUopAnimation[4];
+        private readonly UOFileUopNoFormat[] _filesUop = new UOFileUopNoFormat[4];
         private readonly List<Tuple<ushort, byte>>[] _groupReplaces = new List<Tuple<ushort, byte>>[2]
         {
             new List<Tuple<ushort, byte>>(), new List<Tuple<ushort, byte>>()
@@ -55,7 +55,7 @@ namespace ClassicUO.IO.Resources
 
         public override void Load()
         {
-            Dictionary<ulong, UOPAnimationData> hashes = new Dictionary<ulong, UOPAnimationData>();
+            Dictionary<ulong, UopFileData> hashes = new Dictionary<ulong, UopFileData>();
 
             for (int i = 0; i < 5; i++)
             {
@@ -69,7 +69,7 @@ namespace ClassicUO.IO.Resources
 
                     if (File.Exists(pathuop))
                     {
-                        _filesUop[i - 1] = new UOFileUopAnimation(pathuop, i - 1);
+                        _filesUop[i - 1] = new UOFileUopNoFormat(pathuop, i - 1);
                         _filesUop[i - 1].LoadEx(ref hashes);
                     }
                 }
@@ -661,7 +661,7 @@ namespace ClassicUO.IO.Resources
                     string hashstring = $"build/animationlegacyframe/{animID:D6}/{grpID:D2}.bin";
                     ulong hash = UOFileUop.CreateHash(hashstring);
 
-                    if (hashes.TryGetValue(hash, out UOPAnimationData data))
+                    if (hashes.TryGetValue(hash, out UopFileData data))
                     {
                         if (grpID > maxGroup)
                             maxGroup = grpID;
@@ -984,7 +984,7 @@ namespace ClassicUO.IO.Resources
         private  unsafe bool TryReadUOPAnimDimension(ref AnimationDirection animDirection)
         {
             ref AnimationGroup dataindex = ref DataIndex[AnimID].Groups[AnimGroup];
-            UOPAnimationData animData = dataindex.UOPAnimData;
+            UopFileData animData = dataindex.UOPAnimData;
 
             if (animData.FileIndex == 0 && animData.CompressedLength == 0 && animData.DecompressedLength == 0 && animData.Offset == 0)
             {
@@ -995,7 +995,7 @@ namespace ClassicUO.IO.Resources
 
             animDirection.LastAccessTime = Engine.Ticks;
             int decLen = (int)animData.DecompressedLength;
-            UOFileUopAnimation file = _filesUop[animData.FileIndex];
+            UOFileUopNoFormat file = _filesUop[animData.FileIndex];
             file.Seek(animData.Offset);
             byte[] buffer = file.ReadArray<byte>((int)animData.CompressedLength);
             byte[] decbuffer = new byte[decLen];
@@ -1262,12 +1262,12 @@ namespace ClassicUO.IO.Resources
                 }
                 else if (direction1.IsUOP)
                 {
-                    UOPAnimationData animDataStruct = DataIndex[AnimID].Groups[AnimGroup].UOPAnimData;
+                    UopFileData animDataStruct = DataIndex[AnimID].Groups[AnimGroup].UOPAnimData;
 
                     if (!(animDataStruct.FileIndex == 0 && animDataStruct.CompressedLength == 0 && animDataStruct.DecompressedLength == 0 && animDataStruct.Offset == 0))
                     {
                         int decLen = (int)animDataStruct.DecompressedLength;
-                        UOFileUopAnimation file = _filesUop[animDataStruct.FileIndex];
+                        UOFileUopNoFormat file = _filesUop[animDataStruct.FileIndex];
                         file.Seek(animDataStruct.Offset);
                         byte[] buffer = file.ReadArray<byte>((int)animDataStruct.CompressedLength);
                         byte[] decbuffer = new byte[decLen];
@@ -1550,7 +1550,7 @@ namespace ClassicUO.IO.Resources
     {
         // 5
         public AnimationDirection[] Direction;
-        public UOPAnimationData UOPAnimData;
+        public UopFileData UOPAnimData;
     }
 
     public struct AnimationDirection
@@ -1583,9 +1583,9 @@ namespace ClassicUO.IO.Resources
         public readonly ushort Color;
     }
 
-    public readonly struct UOPAnimationData
+    public readonly struct UopFileData
     {
-        public UOPAnimationData(uint offset, uint clen, uint dlen, int index)
+        public UopFileData(uint offset, uint clen, uint dlen, int index)
         {
             Offset = offset;
             CompressedLength = clen;

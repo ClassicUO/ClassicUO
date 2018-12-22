@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Runtime.CompilerServices;
 
 using Microsoft.Xna.Framework;
 
@@ -40,6 +41,19 @@ namespace ClassicUO.Utility
                 distx = disty;
 
             return distx;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong Combine(int val1, int val2)
+        {
+            return (ulong)(long)val1 | ((ulong)(long)(val2) << 32);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void GetNumbersFromCombine(ulong b, out int val1, out int val2)
+        {
+            val1 = (int)(0xFFFFFFFF & b);
+            val2 = (int) (b >> 32);
         }
     }
 }

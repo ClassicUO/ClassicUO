@@ -2032,27 +2032,12 @@ namespace ClassicUO.Network
                     serial = p.ReadUInt();
                     uint revision = p.ReadUInt();
 
-                    if (World.HouseManager.TryGetHouse(serial, out House house) && house.Revision == revision)
-                    {
-                        house.Generate();
-                    }
-                    else
+                    if (!World.HouseManager.TryGetHouse(serial, out House house) || !house.IsCustom || house.Revision != revision)
                     {
                         NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
                     }
-
-                    //House house = World.GetHouse(serial);
-
-                    //if (house != null && house.Revision == revision)
-                    //{
-                    //    if (house.Items.Count > 0)
-                    //        house.GenerateCustom();
-                    //    else
-                    //        house.GenerateOriginal(World.Items.Get(house.Serial).Multi);
-                    //}
-                    //else
-                    //    NetClient.Socket.Send(new PCustomHouseDataRequest(serial));
-
+                    else
+                        house.Generate();
                     break;
                 //===========================================================================================
                 //===========================================================================================
@@ -2187,7 +2172,8 @@ namespace ClassicUO.Network
         {
             bool compressed = p.ReadByte() == 0x03;
             bool enableReponse = p.ReadBool();
-            Item foundation = World.Items.Get(p.ReadUInt());
+            Serial serial = p.ReadUInt();
+            Item foundation = World.Items.Get(serial);
             uint revision = p.ReadUInt();
 
             MultiInfo multi = foundation.MultiInfo;
@@ -2203,7 +2189,9 @@ namespace ClassicUO.Network
             }
             else
             {
-                house.Dispose();
+                house.ClearComponents();
+                house.Revision = revision;
+                house.IsCustom = true;
             }
 
             short minX = multi.MinX;
@@ -2232,7 +2220,7 @@ namespace ClassicUO.Network
                 {
                     p.Skip(clen);
                     ushort id = 0;
-                    byte x = 0, y = 0, z = 0;
+                    sbyte x = 0, y = 0, z = 0;
 
                     switch (planeMode)
                     {
@@ -2241,17 +2229,15 @@ namespace ClassicUO.Network
                             for (uint i = 0; i < decompressedBytes.Length / 5; i++)
                             {
                                 id = stream.ReadUShort();
-                                x = stream.ReadByte();
-                                y = stream.ReadByte();
-                                z = stream.ReadByte();
-                                x += (byte) -minX;
-                                y += (byte) -minY;
-
+                                x = stream.ReadSByte();
+                                y = stream.ReadSByte();
+                                z = stream.ReadSByte();
+ 
                                 if (id != 0)
                                 {
                                     house.Components.Add(new Multi(id)
                                     {
-                                        Position = new Position((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y), (sbyte) (foundation.Position.Z + z))
+                                        Position = new Position((ushort) (foundation.X + x), (ushort) (foundation.Y + y), (sbyte) (foundation.Z + z))
                                     });
                                 }
                             }
@@ -2260,24 +2246,21 @@ namespace ClassicUO.Network
                         case 1:
 
                             if (planeZ > 0)
-                                z = (byte) ((planeZ - 1) % 4 * 20 + 7);
+                                z = (sbyte) (((planeZ - 1) % 4) * 20 + 7);
                             else
                                 z = 0;
 
                             for (uint i = 0; i < (decompressedBytes.Length >> 2); i++)
                             {
                                 id = stream.ReadUShort();
-                                x = stream.ReadByte();
-                                y = stream.ReadByte();
-
-                                //x += (byte)-minX;
-                                //y += (byte)-minY;
+                                x = stream.ReadSByte();
+                                y = stream.ReadSByte();
 
                                 if (id != 0)
                                 {
                                     house.Components.Add(new Multi(id)
                                     {
-                                        Position = new Position((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y), (sbyte) (foundation.Position.Z + z))
+                                        Position = new Position((ushort) (foundation.X + x), (ushort) (foundation.Y + y), (sbyte) (foundation.Z + z))
                                     });
                                 }
                             }
@@ -2288,7 +2271,7 @@ namespace ClassicUO.Network
                             short multiHeight = 0;
 
                             if (planeZ > 0)
-                                z = (byte) ((planeZ - 1) % 4 * 20 + 7);
+                                z = (sbyte) (((planeZ - 1) % 4) * 20 + 7);
                             else
                                 z = 0;
 
@@ -2296,7 +2279,7 @@ namespace ClassicUO.Network
                             {
                                 offX = minX;
                                 offY = minY;
-                                multiHeight = (short) (maxY - minY + 2);
+                                multiHeight = (short) ((maxY - minY) + 2);
                             }
                             else if (planeZ <= 4)
                             {
@@ -2308,24 +2291,20 @@ namespace ClassicUO.Network
                             {
                                 offX = minX;
                                 offY = minY;
-                                multiHeight = (short) (maxY - minY + 1);
+                                multiHeight = (short) ((maxY - minY) + 1);
                             }
-
-                            if (multiHeight == 0) return;
 
                             for (uint i = 0; i < (decompressedBytes.Length >> 1); i++)
                             {
                                 id = stream.ReadUShort();
-                                x = (byte) (i / multiHeight + offX);
-                                y = (byte) (i % multiHeight + offY);
-                                x += (byte) -minX;
-                                y += (byte) -minY;
+                                x = (sbyte) ((i / multiHeight) + offX);
+                                y = (sbyte) ((i % multiHeight) + offY);
 
                                 if (id != 0)
                                 {
                                     house.Components.Add(new Multi(id)
                                     {
-                                        Position = new Position((ushort) (minX + foundation.Position.X + x), (ushort) (minY + foundation.Position.Y + y), (sbyte) (foundation.Position.Z + z))
+                                        Position = new Position((ushort) (foundation.X + x), (ushort) (foundation.Y + y), (sbyte) (foundation.Z + z))
                                     });
                                 }
                             }
@@ -2503,10 +2482,18 @@ namespace ClassicUO.Network
             if (FileManager.ClientVersion >= ClientVersions.CV_7090)
                 p.ReadUShort(); //unknown
             item.Container = Serial.Invalid;
-            if (type == 2)
-                item.IsMulti = true;
+
             if (item.Graphic != 0x2006)
                 item.Graphic += graphicInc;
+
+            if (type == 2)
+            {
+                item.IsMulti = true;
+                item.Graphic = (ushort) (item.Graphic & 0x3FFF);
+            }
+
+           
+
             item.ProcessDelta();
             if (World.Items.Add(item))
                 World.Items.ProcessDelta();

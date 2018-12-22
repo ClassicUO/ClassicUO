@@ -53,6 +53,7 @@ namespace ClassicUO.IO
 
                 for (int i = 0; i < count; i++)
                     Entries[i] = new UOFileIndex3D(_idxFile.ReadInt(), _idxFile.ReadInt(), 0, _idxFile.ReadInt());
+
                 UOFileIndex5D[] patches = Verdata.Patches;
 
                 for (int i = 0; i < patches.Length; i++)
@@ -62,9 +63,7 @@ namespace ClassicUO.IO
                     if (patch.File == _patch && patch.Index >= 0 && patch.Index < Entries.Length)
                     {
                         ref UOFileIndex3D entry = ref Entries[patch.Index];
-                        entry.Offset = patch.Offset;
-                        entry.Length = patch.Length | (1 << 31);
-                        entry.Extra = patch.Extra;
+                        entry = new UOFileIndex3D(patch.Offset, patch.Length | (1 << 31), 0, patch.Extra);
                     }
                 }
             }

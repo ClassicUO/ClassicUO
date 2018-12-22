@@ -12,28 +12,57 @@ namespace ClassicUO.IO.Resources
 {
     class MultiLoader : ResourceLoader
     {
+        const int MAX_MULTI_DATA_INDEX_COUNT = 0x2200;
+
         private UOFileMul _file;
-        private UOFileUop _fileUop;
+        private UOFileUopNoFormat _fileUop;
         private int _itemOffset;
+        private DataReader _reader;
 
         public override void Load()
         {
-            string uopPath = Path.Combine(FileManager.UoFolderPath, "MultiCollection.uop");
-
-            if (File.Exists(uopPath))
-            {
-                //_fileUop = new UOFileUop(uopPath, ".tga");
-
-            }
-
             string path = Path.Combine(FileManager.UoFolderPath, "multi.mul");
             string pathidx = Path.Combine(FileManager.UoFolderPath, "multi.idx");
 
             if (File.Exists(path) && File.Exists(pathidx))
-                _file = new UOFileMul(path, pathidx, 0x2000, 14);
+                _file = new UOFileMul(path, pathidx, MAX_MULTI_DATA_INDEX_COUNT, 14);
             else
                 throw new FileNotFoundException();
+
             _itemOffset = FileManager.ClientVersion >= ClientVersions.CV_7090 ? UnsafeMemoryManager.SizeOf<MultiBlockNew>() : UnsafeMemoryManager.SizeOf<MultiBlock>();
+
+
+            string uopPath = Path.Combine(FileManager.UoFolderPath, "MultiCollection.uop");
+
+            if (File.Exists(uopPath))
+            {
+                _fileUop = new UOFileUopNoFormat(uopPath);
+                _reader = new DataReader();
+
+                for (int i = 0; i < _fileUop.Entries.Length; i++)
+                {
+                    long offset = _fileUop.Entries[i].Offset;
+                    int csize = _fileUop.Entries[i].Length;
+                    int dsize = _fileUop.Entries[i].DecompressedLength;
+
+                    _fileUop.Seek(offset);
+                    byte[] cdata = _fileUop.ReadArray<byte>(csize);
+                    byte[] ddata = new byte[dsize];
+
+                    ZLib.Decompress(cdata, 0, ddata, dsize);
+                    _reader.SetData(ddata, dsize);
+
+                    uint id = _reader.ReadUInt();
+
+                    if (id < MAX_MULTI_DATA_INDEX_COUNT)
+                    {
+                        ref UOFileIndex3D index = ref _file.Entries[id];
+                        int count = _reader.ReadInt();
+
+                        index = new UOFileIndex3D(offset, csize, dsize, (int)MathHelper.Combine(count, index.Extra));
+                    }
+                }
+            }
         }
 
         protected override void CleanResources()
@@ -41,26 +70,65 @@ namespace ClassicUO.IO.Resources
             throw new NotImplementedException();
         }
 
-        public unsafe MultiBlock GetMulti(int index)
+        public unsafe void GetMultiData(int index, ushort g, bool uopValid, out ushort graphic, out short x, out short y, out short z, out uint flags)
         {
-            return *(MultiBlock*)(_file.PositionAddress + index * _itemOffset);
+            if (_fileUop != null && uopValid)
+            {             
+                graphic = _reader.ReadUShort();
+                x = _reader.ReadShort();
+                y = _reader.ReadShort();
+                z = _reader.ReadShort();
+                flags = _reader.ReadUShort();
+
+                if (flags == 0)
+                    flags = 1;
+
+                uint clilocsCount = _reader.ReadUInt();
+
+                if (clilocsCount != 0)
+                    _reader.Skip( (int) (clilocsCount * 4));
+            }
+            else
+            {
+                MultiBlock* block = (MultiBlock*)(_file.PositionAddress + index * _itemOffset);
+
+                graphic = block->ID;
+                x = block->X;
+                y = block->Y;
+                z = block->Z;
+                flags = block->Flags;
+            }
         }
 
-        public unsafe void GetMultiData(int index, out ushort graphic, out short x, out short y, out short z, out uint flags)
+        public int GetCount(int graphic, out bool uopValid)
         {
-            MultiBlock* block = (MultiBlock*)(_file.PositionAddress + index * _itemOffset);
+            ref UOFileIndex3D index = ref _file.Entries[graphic];
 
-            graphic = block->ID;
-            x =  block->X;
-            y = block->Y;
-            z = block->Z;
-            flags = block->Flags;
-        }
+            MathHelper.GetNumbersFromCombine((ulong)index.Extra, out int count, out _);
 
-        public int GetCount(int graphic)
-        {
+            if (_fileUop != null && count > 0)
+            {
+                uopValid = true;
+
+                long offset = index.Offset;
+                int csize = index.Length;
+                int dsize = index.DecompressedLength;
+
+                _fileUop.Seek(offset);
+                byte[] cdata = _fileUop.ReadArray<byte>(csize);
+                byte[] ddata = new byte[dsize];
+                ZLib.Decompress(cdata, 0, ddata, dsize);
+
+                _reader.SetData(ddata, dsize);               
+                _reader.Skip(8);
+
+                return count;
+            }
+
+            uopValid = false;
+
             (int length, int extra, bool patcher) = _file.SeekByEntryIndex(graphic);
-            int count = length / _itemOffset;
+            count = length / _itemOffset;
 
             return count;
         }

@@ -28,7 +28,7 @@ using ClassicUO.Utility.Coroutines;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public sealed class House : IEquatable<Serial>, IDisposable
+    public sealed class House : IEquatable<Serial>
     {
         public House(Serial serial, uint revision, bool isCustom)
         {
@@ -38,9 +38,9 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public Serial Serial { get; }
-        public uint Revision { get; private set; }
+        public uint Revision { get; set; }
         public List<Multi> Components { get; } = new List<Multi>();
-        public bool IsCustom { get; }
+        public bool IsCustom { get; set; }
 
         public void Generate()
         {
@@ -52,7 +52,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Equals(Serial other) => Serial == other;
 
-        public void Dispose()
+        public void ClearComponents()
         {
             Components.ForEach(s => s.Dispose());
             Components.Clear();

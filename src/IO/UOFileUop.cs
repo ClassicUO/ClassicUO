@@ -102,9 +102,10 @@ namespace ClassicUO.IO
                             Seek(offset + headerLength);
                             int extra1 = ReadInt();
                             int extra2 = ReadInt();
-                            Entries[idx].Offset += 8;
-                            Entries[idx].Extra = (extra1 << 16) | extra2;
-                            Entries[idx].Length -= 8;
+
+                            ref UOFileIndex3D index3D = ref Entries[idx];
+                            index3D = new UOFileIndex3D(index3D.Offset + 8, (int) (index3D.Length - 8), decompressedLength, (extra1 << 16) | extra2);
+                         
                             Seek(curpos);
                         }
                     }

@@ -18,9 +18,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System.Runtime.InteropServices;
+
 namespace ClassicUO.IO
 {
-    public struct UOFileIndex3D
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public readonly struct UOFileIndex3D
     {
         public UOFileIndex3D(long offset, int length, int decompressed, int extra = 0)
         {
@@ -30,12 +34,13 @@ namespace ClassicUO.IO
             Extra = extra;
         }
 
-        public long Offset;
-        public int Length;
-        public int DecompressedLength;
-        public int Extra;
+        public readonly long Offset;
+        public readonly int Length;
+        public readonly int DecompressedLength;
+        public readonly int Extra;
     }
 
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct UOFileIndex5D
     {
         public UOFileIndex5D(int file, int index, int offset, int length, int extra = 0)
