@@ -70,9 +70,9 @@ namespace ClassicUO
         //private const string FORMAT_1 = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\n";
         //private const string FORMAT_2 = "Flush: {0}\nPos: {1}\nSelected: {2}\nStats: {3}";
 
-        private const string DEBUG_STRING_1 = "- FPS: {0}\n- Rendered: {1} mobiles, {2} items, {3} statics, {4} multi, {5} lands, {6} effects\n";
-        private const string DEBUG_STRING_2 = "- CharPos: {0}    Mouse: {1}    InGamePos: {2}\n";
-        private const string DEBUG_STRING_3 = "- Selected: {0}";
+        //private const string DEBUG_STRING_1 = "- FPS: {0}\n- Rendered: {1} mobiles, {2} items, {3} statics, {4} multi, {5} lands, {6} effects\n";
+        //private const string DEBUG_STRING_2 = "- CharPos: {0}    Mouse: {1}    InGamePos: {2}\n";
+        //private const string DEBUG_STRING_3 = "- Selected: {0}";
 
 
         private static int _fpsLimit = MIN_FPS;
@@ -81,7 +81,7 @@ namespace ClassicUO
         private readonly StringBuilder _sb = new StringBuilder();
         private Batcher2D _batcher;
         private double _currentFpsTime;
-        private RenderedText _infoText;
+        //private RenderedText _infoText;
         private ProfileManager _profileManager;
         private SceneManager _sceneManager;
         private InputManager _inputManager;
@@ -91,6 +91,7 @@ namespace ClassicUO
         private UIManager _uiManager;
         private Settings _settings;
         private DebugInfo _debugInfo;
+        private bool _isRunningSlowly;
 
         private Engine()
         {
@@ -201,6 +202,8 @@ namespace ClassicUO
 
         public static DebugInfo DebugInfo => _engine._debugInfo;
 
+        public static bool IsRunningSlowly => _engine._isRunningSlowly;
+
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -310,16 +313,16 @@ namespace ClassicUO
 
             _debugInfo = new DebugInfo();
 
-            _infoText = new RenderedText
-            {
-                IsUnicode = true,
-                Font = 1,
-                FontStyle = FontStyle.BlackBorder,
-                Align = TEXT_ALIGN_TYPE.TS_LEFT,
-                Hue = 0x35,
-                Cell = 31,
-                //MaxWidth = 500
-            };
+            //_infoText = new RenderedText
+            //{
+            //    IsUnicode = true,
+            //    Font = 1,
+            //    FontStyle = FontStyle.BlackBorder,
+            //    Align = TEXT_ALIGN_TYPE.TS_LEFT,
+            //    Hue = 0x35,
+            //    Cell = 31,
+            //    //MaxWidth = 500
+            //};
 
             _uiManager.Add(new DebugGump());
             base.Initialize();
@@ -385,6 +388,7 @@ namespace ClassicUO
 
         protected override void Draw(GameTime gameTime)
         {
+            _isRunningSlowly = gameTime.IsRunningSlowly;
             _debugInfo.Reset();
 
             Profiler.EndFrame();
@@ -399,16 +403,16 @@ namespace ClassicUO
             GraphicsDevice.Clear(Color.Transparent);
             _batcher.Begin();
             UI.Draw(_batcher);
-            _sb.Clear();
+            //_sb.Clear();
 
-            _sb.AppendFormat(DEBUG_STRING_1, CurrentFPS, _debugInfo.MobilesRendered, _debugInfo.ItemsRendered, _debugInfo.StaticsRendered, _debugInfo.MultiRendered, _debugInfo.LandsRendered, _debugInfo.EffectsRendered);
-            _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.Invalid, Mouse.Position, _sceneManager.CurrentScene is GameScene gs ? gs.MouseOverWorldPosition : Point.Zero);
-            _sb.AppendFormat(DEBUG_STRING_3, _sceneManager.CurrentScene is GameScene gs1 && gs1.SelectedObject != null ? gs1.SelectedObject.ToString() : "");
+            //_sb.AppendFormat(DEBUG_STRING_1, CurrentFPS, _debugInfo.MobilesRendered, _debugInfo.ItemsRendered, _debugInfo.StaticsRendered, _debugInfo.MultiRendered, _debugInfo.LandsRendered, _debugInfo.EffectsRendered);
+            //_sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.Invalid, Mouse.Position, _sceneManager.CurrentScene is GameScene gs ? gs.MouseOverWorldPosition : Point.Zero);
+            //_sb.AppendFormat(DEBUG_STRING_3, _sceneManager.CurrentScene is GameScene gs1 && gs1.SelectedObject != null ? gs1.SelectedObject.ToString() : "");
 
-            //_sb.ConcatFormat(FORMAT_1, CurrentFPS, _sceneManager.CurrentScene.RenderedObjectsCount, totalCalls, totalMerged);
-            //_sb.ConcatFormat(FORMAT_2, totalFlushes, World.Player == null ? string.Empty : World.Player.Position.ToString(), _sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty);
-            _infoText.Text = _sb.ToString();
-            _infoText.Draw(_batcher, new Point(20, 0));
+            ////_sb.ConcatFormat(FORMAT_1, CurrentFPS, _sceneManager.CurrentScene.RenderedObjectsCount, totalCalls, totalMerged);
+            ////_sb.ConcatFormat(FORMAT_2, totalFlushes, World.Player == null ? string.Empty : World.Player.Position.ToString(), _sceneManager.CurrentScene is GameScene gameScene && gameScene.SelectedObject != null ? gameScene.SelectedObject.ToString() : string.Empty, string.Empty);
+            //_infoText.Text = _sb.ToString();
+            //_infoText.Draw(_batcher, new Point(20, 0));
             _batcher.End();
             Profiler.ExitContext("RenderFrame");
             Profiler.EnterContext("OutOfContext");

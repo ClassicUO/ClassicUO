@@ -21,13 +21,30 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Reflection.Emit;
 
 namespace ClassicUO.Utility
 {
-    public static class UnsafeMemoryManager
+    public static unsafe class UnsafeMemoryManager
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe int SizeOf<T>() where T : struct
+        public static void* AsPointer<T>(ref T v)
+        {
+            TypedReference t = __makeref(v);
+            return (void*)*((IntPtr*)&t );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T As<T>(object v)
+        {
+            int size = SizeOf<T>();
+
+            return Reinterpret<object, T>(v, size);
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int SizeOf<T>() //where T : struct
         {
             DoubleStruct<T> doubleStruct = DoubleStruct<T>.Value;
 
@@ -56,7 +73,7 @@ namespace ClassicUO.Utility
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe TOut Reinterpret<TIn, TOut>(TIn curValue, int sizeBytes) where TIn : struct where TOut : struct
+        public static TOut Reinterpret<TIn, TOut>(TIn curValue, int sizeBytes) //where TIn : struct where TOut : struct
         {
             TOut result = default;
             TypedReference resultRef = __makeref(result);
@@ -69,7 +86,7 @@ namespace ClassicUO.Utility
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private struct DoubleStruct<T> where T : struct
+        private struct DoubleStruct<T> //where T : struct
         {
             public T First;
             public T Second;

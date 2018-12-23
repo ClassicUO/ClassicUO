@@ -246,6 +246,10 @@ namespace ClassicUO.Game.Scenes
                         GameActions.DoubleClick(item);
 
                         break;
+                    case TextOverhead overhead when overhead.Parent is Entity entity:
+                        e.Result = true;
+                        GameActions.DoubleClick(entity);
+                        break;
                 }
 
                 ClearDequeued();
