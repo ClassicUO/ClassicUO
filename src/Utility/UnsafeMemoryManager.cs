@@ -31,7 +31,7 @@ namespace ClassicUO.Utility
         public static void* AsPointer<T>(ref T v)
         {
             TypedReference t = __makeref(v);
-            return (void*)*((IntPtr*)&t );
+            return (void*)*((IntPtr*)&t + (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? 1 : 0) );
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,11 +76,23 @@ namespace ClassicUO.Utility
         public static TOut Reinterpret<TIn, TOut>(TIn curValue, int sizeBytes) //where TIn : struct where TOut : struct
         {
             TOut result = default;
+
+            //SingleStruct<TIn> inS = SingleStruct<TIn>.Value;
+            //SingleStruct<TOut> outS = SingleStruct<TOut>.Value;
+
             TypedReference resultRef = __makeref(result);
-            byte* resultPtr = (byte*) *(IntPtr*) &resultRef;
             TypedReference curValueRef = __makeref(curValue);
-            byte* curValuePtr = (byte*) *(IntPtr*) &curValueRef;
-            for (int i = 0; i < sizeBytes; ++i) resultPtr[i] = curValuePtr[i];
+
+
+            int offset = (Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix ? 1 : 0);
+
+            byte* resultPtr = (byte*)*((IntPtr*)&resultRef + offset);
+            byte* curValuePtr = (byte*)*((IntPtr*)&curValueRef + offset);
+
+            //for (int i = 0; i < sizeBytes; ++i)
+            //    resultPtr[i] = curValuePtr[i];
+
+            Buffer.MemoryCopy(curValuePtr, resultPtr, sizeBytes, sizeBytes);
 
             return result;
         }
@@ -91,6 +103,13 @@ namespace ClassicUO.Utility
             public T First;
             public T Second;
             public static readonly DoubleStruct<T> Value;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct SingleStruct<T> //where T : struct
+        {
+            public T First;
+            public static readonly SingleStruct<T> Value;
         }
     }
 }
