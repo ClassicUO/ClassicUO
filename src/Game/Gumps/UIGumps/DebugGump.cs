@@ -88,10 +88,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         case Multi multi:
                             buffer.AppendFormat("Multi (0x{0:X4})  height: {1}  flags: {2}", (ushort)multi.Graphic, multi.ItemData.Height, multi.ItemData.Flags.ToString());
                             break;
-                        //case GameEffect effect:
-                        //    break;
-                        //case TextOverhead overhead:
-                        //    break;
+                        case GameEffect effect:
+                            buffer.Append("GameEffect");
+                            break;
+                        case TextOverhead overhead:
+                            buffer.Append("TextOverhead");
+                            break;
                         case Land land:
                             buffer.AppendFormat("Static (0x{0:X4})  flags: {1}", (ushort)land.Graphic, land.TileData.Flags.ToString());
                             break;
