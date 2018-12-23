@@ -159,7 +159,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                     break;
                 case Buttons.Debug:
-                    Log.Message(LogTypes.Warning, "Debug button pushed! Not implemented yet!");
+
+                    DebugGump debugGump = Engine.UI.GetByLocalSerial<DebugGump>();
+
+                    if (debugGump == null)
+                    {
+                        // dont consider this case
+                    }
+                    else
+                    {
+                        debugGump.IsVisible = !debugGump.IsVisible;
+                    }
 
                     break;
             }

@@ -86,12 +86,9 @@ namespace ClassicUO.Game.Managers
                     Rectangle current = new Rectangle((int) position.X - v.Bounds.X, (int) position.Y - v.Bounds.Y, v.Bounds.Width, v.Bounds.Height);
 
                     for (TextOverhead ov = (TextOverhead) overhead.Right; ov != null; ov = (TextOverhead)ov.Right)
-                    //for (int j = i + 1; j < _allOverheads.Count; j++)
                     {
-                        //var a = _allOverheads[j];
-                        //TextOverhead ov = a.Item1;
                         View b = ov.View;
-                        Vector3 pos2 = ov.RealScreenPosition; // a.Item2;
+                        Vector3 pos2 = ov.Parent.RealScreenPosition; 
 
                         if (ov.Parent is Mobile mm)
                         {

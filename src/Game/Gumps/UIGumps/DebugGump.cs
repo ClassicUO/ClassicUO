@@ -93,7 +93,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                         //case TextOverhead overhead:
                         //    break;
                         case Land land:
-                            buffer.AppendFormat("Static (0x{0:X4})  name: {1}  flags: {2}", (ushort)land.Graphic, land.TileData.Name, land.TileData.Flags.ToString());
+                            buffer.AppendFormat("Static (0x{0:X4})  flags: {1}", (ushort)land.Graphic, land.TileData.Flags.ToString());
                             break;
                     }
                 }
