@@ -31,6 +31,7 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
 using Microsoft.Xna.Framework;
@@ -361,11 +362,11 @@ namespace ClassicUO.Game.Managers
 
                             if (color == 0x7FFF)
                                 color = 0x00FFFFFF;
-                            StringBuilder sb = null;
+                            StringBuffer sb = null;
 
                             if (gparams.Length > 9)
                             {
-                                sb = new StringBuilder();
+                                sb = new StringBuffer();
                                 sb.Append(gparams[9]);
 
                                 for (int i = 10; i < gparams.Length; i++)

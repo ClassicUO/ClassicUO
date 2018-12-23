@@ -1846,7 +1846,7 @@ namespace ClassicUO.Network
                     str = string.Empty;
                     ushort crafterNameLen = 0;
                     uint next = p.ReadUInt();
-                    StringBuilder strBuffer = new StringBuilder();
+                    StringBuffer strBuffer = new StringBuffer();
 
                     if (next == 0xFFFFFFFD)
                     {
@@ -1887,7 +1887,7 @@ namespace ClassicUO.Network
                             strBuffer.Append("\n[");
                             strBuffer.Append(attr);
                             strBuffer.Append(" : ");
-                            strBuffer.Append(charges);
+                            strBuffer.Append(charges.ToString());
                             strBuffer.Append("]");
                             count += 20;
                         }

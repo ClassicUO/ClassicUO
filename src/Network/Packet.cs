@@ -22,6 +22,8 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 
+using ClassicUO.Utility;
+
 namespace ClassicUO.Network
 {
     public sealed class Packet : PacketBase
@@ -109,7 +111,7 @@ namespace ClassicUO.Network
         public string ReadASCII()
         {
             EnsureSize(1);
-            StringBuilder sb = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
             char c;
             while ((c = (char) ReadByte()) != '\0') sb.Append(c);
 
@@ -119,7 +121,7 @@ namespace ClassicUO.Network
         public string ReadASCII(int length, bool exitIfNull = false)
         {
             EnsureSize(length);
-            StringBuilder sb = new StringBuilder(length);
+            StringBuffer sb = new StringBuffer(length);
 
             for (int i = 0; i < length; i++)
             {
@@ -173,7 +175,7 @@ namespace ClassicUO.Network
                 return s;
             }
 
-            StringBuilder sb = new StringBuilder(s.Length);
+            StringBuffer sb = new StringBuffer(s.Length);
 
             for (int i = 0; i < s.Length; ++i)
             {
@@ -189,7 +191,7 @@ namespace ClassicUO.Network
         public string ReadUnicode()
         {
             EnsureSize(2);
-            StringBuilder sb = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
             char c;
             while ((c = (char) ReadUShort()) != '\0') sb.Append(c);
 
@@ -199,7 +201,7 @@ namespace ClassicUO.Network
         public string ReadUnicode(int length)
         {
             EnsureSize(length);
-            StringBuilder sb = new StringBuilder(length);
+            StringBuffer sb = new StringBuffer(length);
 
             for (int i = 0; i < length; i++)
             {
@@ -209,16 +211,6 @@ namespace ClassicUO.Network
 
             return sb.ToString();
         }
-
-        //public string ReadUTF8String()
-        //{
-        //    StringBuilder sb = new StringBuilder();
-
-        //    char c;
-        //    while ((c = (char)ReadByte()) != '\0') sb.Append(c);
-
-        //    return sb.ToString();
-        //}
 
         public byte[] ReadArray(int count)
         {
@@ -234,7 +226,7 @@ namespace ClassicUO.Network
         {
             EnsureSize(length);
             length /= 2;
-            StringBuilder sb = new StringBuilder(length);
+            StringBuffer sb = new StringBuffer(length);
 
             for (int i = 0; i < length; i++)
             {
@@ -248,7 +240,7 @@ namespace ClassicUO.Network
         public string ReadUnicodeReversed()
         {
             EnsureSize(2);
-            StringBuilder sb = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
             char c;
             while ((c = (char) ReadUShortReversed()) != '\0') sb.Append(c);
 

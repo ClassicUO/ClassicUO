@@ -14,7 +14,7 @@ namespace ClassicUO.Utility
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
 
-            StringBuilder sb = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
 
             foreach (string part in parts)
             {

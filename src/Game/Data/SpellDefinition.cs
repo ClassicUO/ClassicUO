@@ -22,6 +22,8 @@
 using System;
 using System.Text;
 
+using ClassicUO.Utility;
+
 namespace ClassicUO.Game.Data
 {
     public readonly struct SpellDefinition : IEquatable<SpellDefinition>
@@ -80,7 +82,7 @@ namespace ClassicUO.Game.Data
 
         public string CreateReagentListString(string separator)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
 
             for (int i = 0; i < Regs.Length; i++)
             {

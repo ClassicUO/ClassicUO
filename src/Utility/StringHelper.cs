@@ -47,7 +47,7 @@ namespace ClassicUO.Utility
 
             if (str.Length == 1)
                 return char.ToUpper(str[0]).ToString();
-            StringBuilder sb = new StringBuilder();
+            StringBuffer sb = new StringBuffer();
             bool capitalizeNext = true;
 
             for (int i = 0; i < str.Length; i++)

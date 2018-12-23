@@ -28,6 +28,7 @@ using ClassicUO.Interfaces;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 
 using Microsoft.Xna.Framework;
 
@@ -116,8 +117,8 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        private StringBuilder _sb = new StringBuilder();
-        private StringBuilder _sbHTML = new StringBuilder();
+        private StringBuffer _sb = new StringBuffer();
+        private StringBuffer _sbHTML = new StringBuffer();
 
         private string ReadProperties(Entity obj, out string htmltext)
         {
