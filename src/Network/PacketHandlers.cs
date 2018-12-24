@@ -1846,7 +1846,7 @@ namespace ClassicUO.Network
                     str = string.Empty;
                     ushort crafterNameLen = 0;
                     uint next = p.ReadUInt();
-                    StringBuffer strBuffer = new StringBuffer();
+                    StringBuilder strBuffer = new StringBuilder();
 
                     if (next == 0xFFFFFFFD)
                     {

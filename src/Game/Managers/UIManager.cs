@@ -363,11 +363,11 @@ namespace ClassicUO.Game.Managers
 
                             if (color == 0x7FFF)
                                 color = 0x00FFFFFF;
-                            StringBuffer sb = null;
+                            StringBuilder sb = null;
 
                             if (gparams.Length > 9)
                             {
-                                sb = new StringBuffer();
+                                sb = new StringBuilder();
                                 sb.Append(gparams[9]);
 
                                 for (int i = 10; i < gparams.Length; i++)

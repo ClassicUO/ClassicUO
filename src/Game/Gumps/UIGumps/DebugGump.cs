@@ -18,7 +18,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
 {
     class DebugGump : Gump
     {
-        private readonly StringBuffer _sb = new StringBuffer();
+        private readonly StringBuilder _sb = new StringBuilder();
         private readonly Label _label;
         private readonly CheckerTrans _trans;
 
@@ -59,48 +59,21 @@ namespace ClassicUO.Game.Gumps.UIGumps
             WantUpdateSize = false;
 
 
-            StringBuffer.SetCustomFormatter<Position>((buffer, position, view) =>
-            {
-                buffer.AppendFormat("X:{0}, Y:{1}, Z:{2}", position.X, position.Y, position.Z);
-            });
+            //StringBuffer.SetCustomFormatter<Position>((buffer, position, view) =>
+            //{
+            //    buffer.AppendFormat("X:{0}, Y:{1}, Z:{2}", position.X, position.Y, position.Z);
+            //});
 
-            StringBuffer.SetCustomFormatter<Point>((buffer, position, view) =>
-            {
-                buffer.AppendFormat("X:{0}, Y:{1}", position.X, position.Y);
-            });
+            //StringBuffer.SetCustomFormatter<Point>((buffer, position, view) =>
+            //{
+            //    buffer.AppendFormat("X:{0}, Y:{1}", position.X, position.Y);
+            //});
 
-            StringBuffer.SetCustomFormatter<GameObject>((buffer, obj, view) =>
-            {
-                if (obj != null)
-                {
-
-                    switch (obj)
-                    {
-                        case Mobile mob:
-                            buffer.AppendFormat("Mobile (0x{0:X8})  graphic: 0x{1:X4}  flags: {2}  noto: {3}", mob.Serial.Value, (ushort) mob.Graphic, mob.Flags.ToString(), mob.NotorietyFlag.ToString());
-                            break;
-                        case Item item:
-                            buffer.AppendFormat("Item (0x{0:X8})  graphic: 0x{1:X4}  flags: {2}  amount: {3}", item.Serial.Value, (ushort)item.Graphic, item.Flags.ToString(), item.Amount);
-                            break;
-                        case Static st:
-                            buffer.AppendFormat("Static (0x{0:X4})  height: {1}  flags: {2}", (ushort) st.Graphic, st.ItemData.Height, st.ItemData.Flags.ToString());
-                            break;
-                        case Multi multi:
-                            buffer.AppendFormat("Multi (0x{0:X4})  height: {1}  flags: {2}", (ushort)multi.Graphic, multi.ItemData.Height, multi.ItemData.Flags.ToString());
-                            break;
-                        case GameEffect effect:
-                            buffer.Append("GameEffect");
-                            break;
-                        case TextOverhead overhead:
-                            buffer.Append("TextOverhead");
-                            break;
-                        case Land land:
-                            buffer.AppendFormat("Static (0x{0:X4})  flags: {1}", (ushort)land.Graphic, land.TileData.Flags.ToString());
-                            break;
-                    }
-                }
+            //StringBuffer.SetCustomFormatter<GameObject>((buffer, obj, view) =>
+            //{
+                
                
-            });
+            //});
         }
 
 
@@ -129,11 +102,39 @@ namespace ClassicUO.Game.Gumps.UIGumps
             //_sb.AppendFormat(DEBUG_PROFILER, (timeDraw / timeTotal), (timeUpdate / timeTotal), (timeFixedUpdate / timeTotal), (int) avgDrawMs, Engine.IsRunningSlowly);
             _sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
             _sb.AppendFormat(DEBUG_STRING_2, World.InGame ? World.Player.Position : Position.Invalid, Mouse.Position, scene?.SelectedObject?.Position ?? Position.Invalid);
-            _sb.AppendFormat(DEBUG_STRING_3, scene?.SelectedObject);
+            _sb.AppendFormat(DEBUG_STRING_3, ReadObject(scene?.SelectedObject));
 
             _label.Text = _sb.ToString();
 
             return base.Draw(batcher, position, hue);
+        }
+
+        private string ReadObject(GameObject obj)
+        {
+            if (obj != null)
+            {
+
+                switch (obj)
+                {
+                    case Mobile mob:
+                        return string.Format("Mobile (0x{0:X8})  graphic: 0x{1:X4}  flags: {2}  noto: {3}", mob.Serial.Value, (ushort)mob.Graphic, mob.Flags.ToString(), mob.NotorietyFlag.ToString());
+                    case Item item:
+                        return string.Format("Item (0x{0:X8})  graphic: 0x{1:X4}  flags: {2}  amount: {3}", item.Serial.Value, (ushort)item.Graphic, item.Flags.ToString(), item.Amount);
+                    case Static st:
+                        return string.Format("Static (0x{0:X4})  height: {1}  flags: {2}", (ushort)st.Graphic, st.ItemData.Height, st.ItemData.Flags.ToString());
+                    case Multi multi:
+                        return string.Format("Multi (0x{0:X4})  height: {1}  flags: {2}", (ushort)multi.Graphic, multi.ItemData.Height, multi.ItemData.Flags.ToString());
+                    case GameEffect effect:
+                        return string.Format("GameEffect");
+                    case TextOverhead overhead:
+                        return string.Format("TextOverhead");
+                    case Land land:
+                        return string.Format("Static (0x{0:X4})  flags: {1}", (ushort)land.Graphic, land.TileData.Flags.ToString());
+                }
+
+            }
+            return string.Empty;
+
         }
     }
 }

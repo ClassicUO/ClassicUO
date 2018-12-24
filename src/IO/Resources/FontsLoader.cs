@@ -241,7 +241,7 @@ namespace ClassicUO.IO.Resources
             if (isCropped)
                 width -= fd.Chars[_fontIndex[(byte)'.']].Width * 3;
             int textLength = 0;
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
 
             foreach (char c in str)
             {
@@ -646,7 +646,7 @@ namespace ClassicUO.IO.Resources
             }
 
             int textLength = 0;
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
 
             foreach (char c in str)
             {

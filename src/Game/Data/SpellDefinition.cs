@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Data
 
         public string CreateReagentListString(string separator)
         {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
 
             for (int i = 0; i < Regs.Length; i++)
             {

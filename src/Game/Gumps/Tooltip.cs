@@ -117,8 +117,8 @@ namespace ClassicUO.Game.Gumps
             }
         }
 
-        private StringBuffer _sb = new StringBuffer();
-        private StringBuffer _sbHTML = new StringBuffer();
+        private StringBuilder _sb = new StringBuilder();
+        private StringBuilder _sbHTML = new StringBuilder();
 
         private string ReadProperties(Entity obj, out string htmltext)
         {

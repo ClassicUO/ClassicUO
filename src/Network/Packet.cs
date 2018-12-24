@@ -111,7 +111,7 @@ namespace ClassicUO.Network
         public string ReadASCII()
         {
             EnsureSize(1);
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             char c;
             while ((c = (char) ReadByte()) != '\0') sb.Append(c);
 
@@ -121,7 +121,7 @@ namespace ClassicUO.Network
         public string ReadASCII(int length, bool exitIfNull = false)
         {
             EnsureSize(length);
-            StringBuffer sb = new StringBuffer(length);
+            StringBuilder sb = new StringBuilder(length);
 
             for (int i = 0; i < length; i++)
             {
@@ -175,7 +175,7 @@ namespace ClassicUO.Network
                 return s;
             }
 
-            StringBuffer sb = new StringBuffer(s.Length);
+            StringBuilder sb = new StringBuilder(s.Length);
 
             for (int i = 0; i < s.Length; ++i)
             {
@@ -191,7 +191,7 @@ namespace ClassicUO.Network
         public string ReadUnicode()
         {
             EnsureSize(2);
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             char c;
             while ((c = (char) ReadUShort()) != '\0') sb.Append(c);
 
@@ -201,7 +201,7 @@ namespace ClassicUO.Network
         public string ReadUnicode(int length)
         {
             EnsureSize(length);
-            StringBuffer sb = new StringBuffer(length);
+            StringBuilder sb = new StringBuilder(length);
 
             for (int i = 0; i < length; i++)
             {
@@ -226,7 +226,7 @@ namespace ClassicUO.Network
         {
             EnsureSize(length);
             length /= 2;
-            StringBuffer sb = new StringBuffer(length);
+            StringBuilder sb = new StringBuilder(length);
 
             for (int i = 0; i < length; i++)
             {
@@ -240,7 +240,7 @@ namespace ClassicUO.Network
         public string ReadUnicodeReversed()
         {
             EnsureSize(2);
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             char c;
             while ((c = (char) ReadUShortReversed()) != '\0') sb.Append(c);
 
