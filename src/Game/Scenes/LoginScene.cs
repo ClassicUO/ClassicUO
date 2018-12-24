@@ -24,6 +24,9 @@ using System.Net;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.Gumps.UIGumps.CharCreation;
 using ClassicUO.Game.Gumps.UIGumps.Login;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -60,30 +63,39 @@ namespace ClassicUO.Game.Scenes
         private byte[] _clientVersionBuffer;
         private LoginRejectionReasons? _loginRejectionReason;
         private LoginStep _loginStep = LoginStep.Main;
+        private Gump _currentGump;
+
 
         public LoginScene() : base()
         {
         }
 
-        public bool UpdateScreen { get; set; }
-
         public LoginStep CurrentLoginStep
         {
             get => _loginStep;
-            private set => SetProperty(ref _loginStep, value);
+            private set
+            {
+                _loginStep = value;
+
+                // this trick avoid the flickering
+                var g = _currentGump;
+                Engine.UI.Add(_currentGump = GetGumpForStep());
+                g.Dispose();
+
+            }
         }
 
         public LoginRejectionReasons? LoginRejectionReason
         {
             get => _loginRejectionReason;
-            private set => SetProperty(ref _loginRejectionReason, value);
+            private set => _loginRejectionReason = value;
         }
 
         public ServerListEntry[] Servers { get; private set; }
 
         public string[] Characters { get; private set; }
 
-        public String PopupMessage { get; private set; }
+        public string PopupMessage { get; private set; }
 
         public byte ServerIndex { get; private set; }
 
@@ -94,11 +106,14 @@ namespace ClassicUO.Game.Scenes
         public override void Load()
         {
             base.Load();
-            Engine.UI.Add(new LoginGump());
+
+            Engine.FpsLimit = 60;
+
+            Engine.UI.Add(new LoginBackground());
+            Engine.UI.Add(_currentGump = new LoginGump());
 
             // Registering Packet Events
             NetClient.PacketReceived += NetClient_PacketReceived;
-            // NetClient.Socket.Connected += NetClient_Connected;
             NetClient.Socket.Disconnected += NetClient_Disconnected;
             NetClient.LoginSocket.Connected += NetClient_Connected;
             NetClient.LoginSocket.Disconnected += NetClient_Disconnected;
@@ -114,9 +129,12 @@ namespace ClassicUO.Game.Scenes
             };
         }
 
+
         public override void Unload()
         {
-            Engine.UI.Remove<LoginGump>();
+            //Engine.UI.Remove<LoginGump>();
+            Engine.UI.Remove<LoginBackground>();
+            _currentGump?.Dispose();
 
             // UnRegistering Packet Events           
             // NetClient.Socket.Connected -= NetClient_Connected;
@@ -126,6 +144,105 @@ namespace ClassicUO.Game.Scenes
             NetClient.PacketReceived -= NetClient_PacketReceived;
 
             base.Unload();
+        }
+
+
+        private Gump GetGumpForStep()
+        {
+            switch (CurrentLoginStep)
+            {
+                case LoginStep.Main:
+
+                    return new LoginGump();
+                case LoginStep.Connecting:
+                case LoginStep.VerifyingAccount:
+                case LoginStep.LoginInToServer:
+                case LoginStep.EnteringBritania:
+                case LoginStep.PopUpMessage:
+
+                    return GetLoadingScreen();
+                case LoginStep.CharacterSelection:
+
+                    return new CharacterSelectionGump();
+                case LoginStep.ServerSelection:
+
+                    return new ServerSelectionGump();
+                case LoginStep.CharCreation:
+
+                    return new CharCreationGump();
+            }
+
+            return null;
+        }
+
+        private LoadingGump GetLoadingScreen()
+        {
+            var labelText = "No Text";
+            var showButtons = LoadingGump.Buttons.None;
+
+            if (LoginRejectionReason.HasValue)
+            {
+                switch (LoginRejectionReason.Value)
+                {
+                    case LoginRejectionReasons.BadPassword:
+                    case LoginRejectionReasons.InvalidAccountPassword:
+                        labelText = FileManager.Cliloc.GetString(3000036); // Incorrect username and/or password.
+
+                        break;
+                    case LoginRejectionReasons.AccountInUse:
+                        labelText = FileManager.Cliloc.GetString(3000034); // Someone is already using this account.
+
+                        break;
+                    case LoginRejectionReasons.AccountBlocked:
+                        labelText = FileManager.Cliloc.GetString(3000035); // Your account has been blocked / banned
+
+                        break;
+                    case LoginRejectionReasons.IdleExceeded:
+                        labelText = FileManager.Cliloc.GetString(3000004); // Login idle period exceeded (I use "Connection lost")
+
+                        break;
+                    case LoginRejectionReasons.BadCommuncation:
+                        labelText = FileManager.Cliloc.GetString(3000037); // Communication problem.
+
+                        break;
+                }
+
+                showButtons = LoadingGump.Buttons.OK;
+            }
+            else if (!string.IsNullOrEmpty(PopupMessage))
+            {
+                labelText = PopupMessage;
+                showButtons = LoadingGump.Buttons.OK;
+            }
+            else
+            {
+                switch (CurrentLoginStep)
+                {
+                    case LoginStep.Connecting:
+                        labelText = FileManager.Cliloc.GetString(3000002); // "Connecting..."
+
+                        break;
+                    case LoginStep.VerifyingAccount:
+                        labelText = FileManager.Cliloc.GetString(3000003); // "Verifying Account..."
+
+                        break;
+                    case LoginStep.LoginInToServer:
+                        labelText = FileManager.Cliloc.GetString(3000053); // logging into shard
+
+                        break;
+                    case LoginStep.EnteringBritania:
+                        labelText = FileManager.Cliloc.GetString(3000001); // Entering Britania...
+
+                        break;
+                }
+            }
+
+            return new LoadingGump(labelText, showButtons, OnLoadingGumpButtonClick);
+        }
+
+        private void OnLoadingGumpButtonClick(int buttonId)
+        {
+            if ((LoadingGump.Buttons)buttonId == LoadingGump.Buttons.OK) StepBack();
         }
 
         public void Connect(string account, string password)
@@ -363,12 +480,6 @@ namespace ClassicUO.Game.Scenes
             reader.MoveToData();
             byte reasonId = reader.ReadByte();
             LoginRejectionReason = (LoginRejectionReasons)reasonId;
-        }
-
-        private void SetProperty<T>(ref T storage, T value)
-        {
-            storage = value;
-            UpdateScreen = true;
         }
     }
 

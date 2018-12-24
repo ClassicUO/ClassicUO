@@ -19,16 +19,13 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
-using System.Linq;
-
-using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Gumps.UIGumps
+namespace ClassicUO.Game.Gumps.Controls
 {
     public class WorldViewport : Control
     {
@@ -56,15 +53,15 @@ namespace ClassicUO.Game.Gumps.UIGumps
             return base.Draw(batcher, position, hue);
         }
 
-        protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            if (!(Engine.UI.KeyboardFocusControl is SystemChatControl))
-            {
-                Engine.UI.KeyboardFocusControl = Engine.UI.GetByLocalSerial<WorldViewportGump>()
-                                                       .FindControls<SystemChatControl>()
-                                                       .FirstOrDefault()?
-                                                       .GetFirstControlAcceptKeyboardInput();
-            }
-        }
+        //protected override void OnMouseClick(int x, int y, MouseButton button)
+        //{
+        //    //if (!(Engine.UI.KeyboardFocusControl is SystemChatControl))
+        //    //{
+        //    //    Engine.UI.KeyboardFocusControl = Engine.UI.GetByLocalSerial<WorldViewportGump>()
+        //    //                                           .FindControls<SystemChatControl>()
+        //    //                                           .FirstOrDefault()?
+        //    //                                           .GetFirstControlAcceptKeyboardInput();
+        //    //}
+        //}
     }
 }

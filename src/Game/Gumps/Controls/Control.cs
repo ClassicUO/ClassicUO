@@ -128,19 +128,13 @@ namespace ClassicUO.Game.Gumps.Controls
         {
             get
             {
-                if (!IsEnabled || IsDisposed || !IsVisible)
+                if (!IsEnabled || IsDisposed || !IsVisible || !IsInitialized)
                     return false;
 
                 if (_acceptKeyboardInput)
                     return true;
 
-                foreach (Control c in _children)
-                {
-                    if (c.AcceptKeyboardInput)
-                        return true;
-                }
-
-                return false;
+                return _acceptKeyboardInput; // _children.Any(s => s.AcceptKeyboardInput);
             }
             set => _acceptKeyboardInput = value;
         }

@@ -28,6 +28,8 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
 
+using SDL2;
+
 namespace ClassicUO.Game.Gumps.UIGumps.Login
 {
     internal class CharacterSelectionGump : Gump
@@ -38,6 +40,8 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 
         public CharacterSelectionGump() : base(0, 0)
         {
+            //AddChildren(new LoginBackground(true));
+
             bool testField = FileManager.ClientVersion >= ClientVersions.CV_305D;
             int posInList = 0;
             int yOffset = 150;
@@ -107,7 +111,17 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
             {
                 X = 610, Y = 445, ButtonAction = ButtonAction.Activate
             }, 1);
+
+            AcceptKeyboardInput = true;
             ChangePage(1);
+        }
+
+        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            if (key == SDL.SDL_Keycode.SDLK_RETURN)
+            {
+                LoginCharacter(_selectedCharacter);             
+            }
         }
 
         public override void OnButtonClick(int buttonID)

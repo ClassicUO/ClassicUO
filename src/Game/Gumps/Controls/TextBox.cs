@@ -110,24 +110,6 @@ namespace ClassicUO.Game.Gumps.Controls
                 _entry.SetText(text);
         }
 
-        //private bool _isFocused;
-
-        //public override bool IsFocused
-        //{
-        //    get => base.IsFocused;
-        //    set
-        //    {
-        //        if (value)
-        //        {
-        //            if (Engine.UI.KeyboardFocusControl != null)
-        //                Engine.UI.KeyboardFocusControl.IsFocused = false;
-
-        //            Engine.UI.KeyboardFocusControl = this;
-        //        }
-
-        //        base.IsFocused = value;
-        //    } 
-        //}
 
         public override void Update(double totalMS, double frameMS)
         {
@@ -135,20 +117,8 @@ namespace ClassicUO.Game.Gumps.Controls
                 return;
 
             //multiline input is fixed height, unmodifiable
-            if(!MultiLineInputAllowed)
+            if(!MultiLineInputAllowed && Height != _entry.Height)
                 Height = _entry.Height;
-
-            //if (Engine.UI.KeyboardFocusControl == this)
-            //{
-            //    if (!IsFocused)
-            //    {
-            //        _showCaret = true;
-            //    }
-            //}
-            //else if (IsFocused)
-            //{
-            //    _showCaret = false;
-            //}
 
             if (_entry.IsChanged)
                 _entry.UpdateCaretPosition();
@@ -195,7 +165,8 @@ namespace ClassicUO.Game.Gumps.Controls
                         s = _entry.InsertString("\n");
                     else
                         s = _entry.Text;
-                        break;
+                    Parent?.OnKeyboardReturn((int)PageCommand.Nothing, s);
+                     break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     //TODO remove from current ccaret index
                     if (ReplaceDefaultTextOnFirstKeyPress)
@@ -251,7 +222,6 @@ namespace ClassicUO.Game.Gumps.Controls
                     break;
             }
 
-            Parent?.OnKeyboardReturn((int)PageCommand.Nothing, s);
 
             base.OnKeyDown(key, mod);
         }

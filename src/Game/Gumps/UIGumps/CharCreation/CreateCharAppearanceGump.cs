@@ -25,6 +25,7 @@ using System.Linq;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Game.Gumps.UIGumps.Login;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -336,7 +337,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = Engine.UI.GetByLocalSerial<CharCreationGump>();
+            var charCreationGump = Engine.UI.GetByLocalSerial<LoginGump>().FindControls<CharCreationGump>().SingleOrDefault();
 
             switch ((Buttons) buttonID)
             {
@@ -380,7 +381,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
         {
             if (string.IsNullOrEmpty(character.Name))
             {
-                Engine.UI.GetByLocalSerial<CharCreationGump>().ShowMessage(FileManager.Cliloc.GetString(3000612));
+                Engine.UI.GetByLocalSerial<LoginGump>().FindControls<CharCreationGump>().SingleOrDefault()?.ShowMessage(FileManager.Cliloc.GetString(3000612));
 
                 return false;
             }
@@ -468,6 +469,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
             private readonly int _columns;
             private readonly ColorPickerBox _colorPicker;
             private readonly ColorPickerBox _colorPickerBox;
+            private readonly ColorBox _box;
             private readonly Layer _layer;
 
             public CustomColorPicker(Layer layer, int label, ushort[] pallet, int rows, int columns)
@@ -483,7 +485,11 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
                 {
                     X = 0, Y = 0
                 });
+
                 AddChildren(_colorPicker = new ColorPickerBox(1, 15, 1, 1, 121, 23, pallet));
+
+                //AddChildren(_box = new ColorBox(1, 15, 121,23, ));
+
                 _colorPicker.MouseClick += ColorPicker_MouseClick;
                 _colorPickerBox = new ColorPickerBox(489, 141, rows, columns, _cellW, _cellH, pallet);
                 _colorPickerBox.MouseOver += _colorPicker_MouseMove;
@@ -504,7 +510,7 @@ namespace ClassicUO.Game.Gumps.UIGumps.CharCreation
                 int column = e.X / _cellW;
                 int row = e.Y / _cellH;
                 var selectedIndex = row * _columns + column;
-                ColorSelected?.Invoke(this, new ColorSelectedEventArgs(_layer, _colorPickerBox.GeneratedHues, selectedIndex));
+                ColorSelected?.Invoke(this, new ColorSelectedEventArgs(_layer, _colorPickerBox.Hues, selectedIndex));
             }
 
             private void ColorPickerBox_Selected(object sender, EventArgs e)

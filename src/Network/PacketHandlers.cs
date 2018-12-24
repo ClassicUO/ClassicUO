@@ -660,7 +660,7 @@ namespace ClassicUO.Network
             World.Player.ProcessDelta();
             World.Mobiles.ProcessDelta();
 
-
+            Engine.FpsLimit = Engine.Profile.Current.MaxFPS;
             scene.Load();
             gumps?.ForEach(Engine.UI.Add);
         }

@@ -53,5 +53,7 @@ namespace ClassicUO.Configuration
 
             return null;
         }
+
+        public void UnLoadProfile() => Current = null;
     }
 }

@@ -31,6 +31,7 @@ namespace ClassicUO.Game.Gumps.Controls
         private readonly string[] _items;
         private readonly Label _label;
         private readonly int _maxHeight;
+        private int _selectedIndex;
 
         public Combobox(int x, int y, int width, string[] items, int selected = -1, int maxHeight = 0, bool showArrow = true, string emptyString = "")
         {
@@ -59,37 +60,44 @@ namespace ClassicUO.Game.Gumps.Controls
 
         public bool IsOpen { get; set; }
 
-        public int SelectedIndex { get; private set; }
+        public int SelectedIndex
+        {
+            get => _selectedIndex;
+            set
+            {
+                _selectedIndex = value;
+
+                if (_items != null)
+                {
+                    _label.Text = _items[value];
+                    Engine.UI.Remove<ComboboxContextMenu>();
+                    OnOptionSelected?.Invoke(this, value);
+                }
+            }
+        }
 
         public event EventHandler<int> OnOptionSelected;
 
-        private void _contextMenu_OnOptionSelected(object sender, int e)
-        {
-            _label.Text = _items[e];
-            SelectedIndex = e;
-            Engine.UI.Remove<ComboboxContextMenu>();
-            OnOptionSelected?.Invoke(this, e);
-        }
-
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            var contextMenu = new ComboboxContextMenu(_items, Width, _maxHeight)
+            var contextMenu = new ComboboxContextMenu(this, _items, Width, _maxHeight)
             {
                 X = ScreenCoordinateX, Y = ScreenCoordinateY
             };
             if (contextMenu.Height + ScreenCoordinateY > Engine.WindowHeight) contextMenu.Y -= contextMenu.Height + ScreenCoordinateY - Engine.WindowHeight;
-            contextMenu.OnOptionSelected += _contextMenu_OnOptionSelected;
             Engine.UI.Add(contextMenu);
             base.OnMouseClick(x, y, button);
         }
 
         private class ComboboxContextMenu : Control
         {
-            private readonly ResizePic _background;
+            private readonly Combobox _box;
 
-            public ComboboxContextMenu(string[] items, int minWidth, int maxHeight)
+            public ComboboxContextMenu(Combobox box, string[] items, int minWidth, int maxHeight)
             {
-                AddChildren(_background = new ResizePic(0x0BB8));
+                _box = box;
+                ResizePic background;
+                AddChildren(background = new ResizePic(0x0BB8));
                 Label[] labels = new Label[items.Length];
                 var index = 0;
 
@@ -118,27 +126,28 @@ namespace ClassicUO.Game.Gumps.Controls
                     }
 
                     AddChildren(scrollArea);
-                    _background.Height = maxHeight;
+                    background.Height = maxHeight;
                 }
                 else
                 {
                     foreach (var label in labels)
                         AddChildren(label);
-                    _background.Height = totalHeight;
+                    background.Height = totalHeight;
                 }
 
-                _background.Width = maxWidth;
-                Height = _background.Height;
+                background.Width = maxWidth;
+                Height = background.Height;
                 ControlInfo.IsModal = true;
                 ControlInfo.Layer = UILayer.Over;
                 ControlInfo.ModalClickOutsideAreaClosesThisControl = true;
             }
 
-            public event EventHandler<int> OnOptionSelected;
+            //public event EventHandler<int> OnOptionSelected;
 
             private void Label_MouseClick(object sender, MouseEventArgs e)
             {
-                OnOptionSelected?.Invoke(this, (int) ((Label) sender).Tag);
+                _box.SelectedIndex = (int) ((Label) sender).Tag;
+                //OnOptionSelected?.Invoke(this, (int) ((Label) sender).Tag);
             }
         }
     }

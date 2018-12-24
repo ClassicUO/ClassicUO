@@ -63,7 +63,12 @@ namespace ClassicUO.Game.Scenes
             {
                 Point center = new Point(Engine.Profile.Current.GameWindowPosition.X + (Engine.Profile.Current.GameWindowSize.X >> 1), Engine.Profile.Current.GameWindowPosition.Y + (Engine.Profile.Current.GameWindowSize.Y>> 1));
                 Direction direction = DirectionHelper.DirectionFromPoints(center, Mouse.Position);
-                World.Player.Walk(direction, true);
+
+                float distanceFromCenter = Utility.MathHelper.GetDistance(center, Mouse.Position);
+
+                bool run = distanceFromCenter >= 190.0f;
+
+                World.Player.Walk(direction, run);
             }
         }
 

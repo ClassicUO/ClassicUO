@@ -1624,6 +1624,8 @@ namespace ClassicUO.Game.GameObjects
 
             if (SpeedMode >= CharacterSpeedType.CantRun)
                 run = false;
+            else if (!run)
+                run = Engine.Profile.Current.AlwaysRun;
 
             int x = X;
             int y = Y;

@@ -24,6 +24,7 @@ using System.Linq;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
@@ -241,6 +242,7 @@ namespace ClassicUO.Game.Scenes
             TargetManager.ClearTargetingWithoutTargetCancelPacket();
 
             Engine.Profile.Current?.Save( Engine.UI.Gumps.OfType<Gump>().Where(s => s.CanBeSaved).Reverse().ToList() );
+            Engine.Profile.UnLoadProfile();
 
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();

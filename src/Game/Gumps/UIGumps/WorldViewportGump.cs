@@ -76,6 +76,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         public override void Update(double totalMS, double frameMS)
         {
+            if (IsDisposed)
+                return;
+
             if (_clicked && Mouse.LDroppedOffset != _lastPosition && Mouse.LDroppedOffset != Point.Zero)
             {
                 Engine.Profile.Current.GameWindowSize = new Point(Engine.Profile.Current.GameWindowSize.X + Mouse.LDroppedOffset.X - _lastPosition.X, Engine.Profile.Current.GameWindowSize.Y + Mouse.LDroppedOffset.Y - _lastPosition.Y);

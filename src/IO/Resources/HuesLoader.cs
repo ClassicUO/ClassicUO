@@ -35,6 +35,7 @@ namespace ClassicUO.IO.Resources
 
             for (int i = 0; i < entrycount; i++)
                 HuesRange[i] = Marshal.PtrToStructure<HuesGroup>((IntPtr)(addr + (ulong)(i * groupSize)));
+
             path = Path.Combine(FileManager.UoFolderPath, "radarcol.mul");
 
             if (!File.Exists(path))

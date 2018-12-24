@@ -30,146 +30,157 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
 {
     internal class LoginGump : Gump
     {
-        private readonly LoginScene loginScene;
-        private LoginStep currentStep;
-        private Control currentStepGump;
+        private readonly TextBox _textboxAccount;
+        private readonly TextBox _textboxPassword;
+        private Checkbox _checkboxSaveAccount;
+
+
+        public override void OnKeyboardReturn(int textID, string text)
+        {
+            Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
+        }
 
         public LoginGump() : base(0, 0)
         {
-            loginScene = Engine.SceneManager.GetScene<LoginScene>();
             CanCloseWithRightClick = false;
 
-            // Background
-            AddChildren(new GumpPicTiled(0, 0, 640, 480, 0x0E14));
-            // Border
-            AddChildren(new GumpPic(0, 0, 0x157C, 0));
-            AddChildren(currentStepGump = GetGumpForStep(loginScene.CurrentLoginStep));
+            AcceptKeyboardInput = false;
 
-            // UO Flag
-            AddChildren(new GumpPic(0, 4, 0x15A0, 0));
 
-            // Quit Button
-            AddChildren(new Button(0, 0x1589, 0x158B, 0x158A)
+            if (FileManager.ClientVersion >= ClientVersions.CV_500A)
+                // Full background
+                AddChildren(new GumpPic(0, 0, 0x2329, 0));
+
+
+            //// Quit Button
+            AddChildren(new Button((int)Buttons.Quit, 0x1589, 0x158B, 0x158A)
             {
-                X = 555, Y = 4, ButtonAction = ButtonAction.Activate
+                X = 555,
+                Y = 4,
+                ButtonAction = ButtonAction.Activate
             });
-            AcceptMouseInput = false;
-        }
 
-        public override void Update(double totalMS, double frameMS)
-        {
-            if (loginScene.UpdateScreen)
+
+            // Login Panel
+            AddChildren(new ResizePic(0x13BE)
             {
-                RemoveChildren(currentStepGump);
-                AddChildren(currentStepGump = GetGumpForStep(loginScene.CurrentLoginStep));
-                loginScene.UpdateScreen = false;
-            }
+                X = 128,
+                Y = 288,
+                Width = 451,
+                Height = 157
+            });
 
-            base.Update(totalMS, frameMS);
+            if (FileManager.ClientVersion < ClientVersions.CV_500A)
+                AddChildren(new GumpPic(286, 45, 0x058A, 0));
+
+            // Arrow Button
+            AddChildren(new Button((int)Buttons.NextArrow, 0x15A4, 0x15A6, 0x15A5)
+            {
+                X = 610,
+                Y = 445,
+                ButtonAction = ButtonAction.Activate
+            });
+
+            // Account Text Input Background
+            AddChildren(new ResizePic(0x0BB8)
+            {
+                X = 328,
+                Y = 343,
+                Width = 210,
+                Height = 30
+            });
+
+            // Password Text Input Background
+            AddChildren(new ResizePic(0x0BB8)
+            {
+                X = 328,
+                Y = 383,
+                Width = 210,
+                Height = 30
+            });
+
+            AddChildren(_checkboxSaveAccount = new Checkbox(0x00D2, 0x00D3)
+            {
+                X = 328,
+                Y = 417
+            });
+            //g_MainScreen.m_SavePassword->SetTextParameters(9, "Save Password", 0x0386, STP_RIGHT_CENTER);
+
+            //g_MainScreen.m_AutoLogin =
+            //    (CGUICheckbox*)AddChildren(new CGUICheckbox(ID_MS_AUTOLOGIN, 0x00D2, 0x00D3, 0x00D2, 183, 417));
+            //g_MainScreen.m_AutoLogin->SetTextParameters(9, "Auto Login", 0x0386, STP_RIGHT_CENTER);
+            AddChildren(new Label("Log in to Ultima Online", false, 0x0386, font: 2)
+            {
+                X = 253,
+                Y = 305
+            });
+
+            AddChildren(new Label("Account Name", false, 0x0386, font: 2)
+            {
+                X = 183,
+                Y = 345
+            });
+
+            AddChildren(new Label("Password", false, 0x0386, font: 2)
+            {
+                X = 183,
+                Y = 385
+            });
+
+            AddChildren(new Label($"UO Version {Engine.GlobalSettings.ClientVersion}.", false, 0x034E, font: 9)
+            {
+                X = 286,
+                Y = 453
+            });
+
+            AddChildren(new Label($"ClassicUO Version {Engine.Assembly.GetName().Version}", false, 0x034E, font: 9)
+            {
+                X = 286,
+                Y = 465
+            });
+
+            // Text Inputs
+            AddChildren(_textboxAccount = new TextBox(5, 32, 190, 190, false)
+            {
+                X = 335,
+                Y = 343,
+                Width = 190,
+                Height = 25
+            });
+
+            AddChildren(_textboxPassword = new TextBox(5, 32, 190, 190, false)
+            {
+                X = 335,
+                Y = 385,
+                Width = 190,
+                Height = 25,
+                IsPassword = true
+            });
+            _textboxAccount.SetText(Engine.GlobalSettings.Username);
+            _textboxPassword.SetText(Engine.GlobalSettings.Password);
         }
+
 
         public override void OnButtonClick(int buttonID)
         {
-            Engine.Quit();
-            base.OnButtonClick(buttonID);
+            switch ((Buttons)buttonID)
+            {
+                case Buttons.NextArrow:
+                    Engine.SceneManager.GetScene<LoginScene>().Connect(_textboxAccount.Text, _textboxPassword.Text);
+                    
+                    break;
+                case Buttons.Quit:
+                    Engine.Quit();
+
+                    break;
+            }
         }
 
-        private Control GetGumpForStep(LoginStep step)
+
+        private enum Buttons
         {
-            currentStep = step;
-
-            switch (step)
-            {
-                case LoginStep.Main:
-
-                    return new MainLoginGump();
-                case LoginStep.Connecting:
-                case LoginStep.VerifyingAccount:
-                case LoginStep.LoginInToServer:
-                case LoginStep.EnteringBritania:
-                case LoginStep.PopUpMessage:
-
-                    return GetLoadingScreen();
-                case LoginStep.CharacterSelection:
-
-                    return new CharacterSelectionGump();
-                case LoginStep.ServerSelection:
-
-                    return new ServerSelectionGump();
-                case LoginStep.CharCreation:
-
-                    return new CharCreationGump();
-            }
-
-            return null;
-        }
-
-        private LoadingGump GetLoadingScreen()
-        {
-            var labelText = "No Text";
-            var showButtons = LoadingGump.Buttons.None;
-
-            if (loginScene.LoginRejectionReason.HasValue)
-            {
-                switch (loginScene.LoginRejectionReason.Value)
-                {
-                    case LoginRejectionReasons.BadPassword:
-                    case LoginRejectionReasons.InvalidAccountPassword:
-                        labelText = FileManager.Cliloc.GetString(3000036); // Incorrect username and/or password.
-
-                        break;
-                    case LoginRejectionReasons.AccountInUse:
-                        labelText = FileManager.Cliloc.GetString(3000034); // Someone is already using this account.
-
-                        break;
-                    case LoginRejectionReasons.AccountBlocked:
-                        labelText = FileManager.Cliloc.GetString(3000035); // Your account has been blocked / banned
-
-                        break;
-                    case LoginRejectionReasons.IdleExceeded:
-                        labelText = FileManager.Cliloc.GetString(3000004); // Login idle period exceeded (I use "Connection lost")
-
-                        break;
-                    case LoginRejectionReasons.BadCommuncation:
-                        labelText = FileManager.Cliloc.GetString(3000037); // Communication problem.
-
-                        break;
-                }
-
-                showButtons = LoadingGump.Buttons.OK;
-            }
-            else if (!string.IsNullOrEmpty(loginScene.PopupMessage))
-            {
-                labelText = loginScene.PopupMessage;
-                showButtons = LoadingGump.Buttons.OK;
-            } else {
-                switch (loginScene.CurrentLoginStep)
-                {
-                    case LoginStep.Connecting:
-                        labelText = FileManager.Cliloc.GetString(3000002); // "Connecting..."
-
-                        break;
-                    case LoginStep.VerifyingAccount:
-                        labelText = FileManager.Cliloc.GetString(3000003); // "Verifying Account..."
-
-                        break;
-                    case LoginStep.LoginInToServer:
-                        labelText = FileManager.Cliloc.GetString(3000053); // logging into shard
-
-                        break;
-                    case LoginStep.EnteringBritania:
-                        labelText = FileManager.Cliloc.GetString(3000001); // Entering Britania...
-
-                        break;
-                }
-            }
-
-            return new LoadingGump(labelText, showButtons, OnLoadingGumpButtonClick);
-        }
-
-        private void OnLoadingGumpButtonClick(int buttonId)
-        {
-            if ((LoadingGump.Buttons) buttonId == LoadingGump.Buttons.OK) loginScene.StepBack();
+            NextArrow,
+            Quit,
         }
     }
 }

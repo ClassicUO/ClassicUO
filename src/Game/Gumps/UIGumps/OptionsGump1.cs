@@ -18,17 +18,40 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
+
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Gumps.UIGumps
 {
     internal class OptionsGump1 : Gump
     {
-        private readonly Settings _settings;
+
+        // general
+        private HSliderBar _sliderFPS;
+        private Checkbox _highlightObjects, _smoothMovements, _enablePathfind, _alwaysRun, _preloadMaps, _showHpMobile, _highlightByState;
+        private Combobox _hpComboBox;
+
+        // sounds
+
+        // speech
+        private Checkbox _scaleSpeechDelay;
+        private HSliderBar _sliderSpeechDelay;
+        private ColorBox _speechColorPickerBox, _emoteColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox;
+
+        // combat
+        private ColorBox _innocentColorPickerBox, _friendColorPickerBox, _crimialColorPickerBox, _genericColorPickerBox, _enemyColorPickerBox, _murdererColorPickerBox;
+        private Checkbox _queryBeforAttackCheckbox;
+
 
         public OptionsGump1() : base(0, 0)
         {
@@ -132,42 +155,42 @@ namespace ClassicUO.Game.Gumps.UIGumps
             ScrollAreaItem fpsItem = new ScrollAreaItem();
             Label text = new Label("- FPS:", true, 1);
             fpsItem.AddChildren(text);
-            HSliderBar sliderFPS = new HSliderBar(40, 5, 250, 15, 250, _settings.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
-            fpsItem.AddChildren(sliderFPS);
+            _sliderFPS = new HSliderBar(40, 5, 250, 15, 250, Engine.Profile.Current.MaxFPS, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
+            fpsItem.AddChildren(_sliderFPS);
             rightArea.AddChildren(fpsItem);
 
             // Highlight
-            Checkbox highlightObjects = new Checkbox(0x00D2, 0x00D3, "Highlight game objects", 1)
+            _highlightObjects = new Checkbox(0x00D2, 0x00D3, "Highlight game objects", 1)
             {
                 Y = 10, IsChecked = Engine.Profile.Current.HighlightGameObjects
             };
-            rightArea.AddChildren(highlightObjects);
+            rightArea.AddChildren(_highlightObjects);
 
             // smooth movements
-            Checkbox smoothMovement = new Checkbox(0x00D2, 0x00D3, "Smooth movements", 1)
+            _smoothMovements = new Checkbox(0x00D2, 0x00D3, "Smooth movements", 1)
             {
                 IsChecked = Engine.Profile.Current.SmoothMovements
             };
-            rightArea.AddChildren(smoothMovement);
+            rightArea.AddChildren(_smoothMovements);
 
-            Checkbox enablePathfind = new Checkbox(0x00D2, 0x00D3, "Enable pathfinding", 1)
+            _enablePathfind = new Checkbox(0x00D2, 0x00D3, "Enable pathfinding", 1)
             {
                 IsChecked = Engine.Profile.Current.EnablePathfind
             };
-            rightArea.AddChildren(enablePathfind);
+            rightArea.AddChildren(_enablePathfind);
 
-            Checkbox alwaysRun = new Checkbox(0x00D2, 0x00D3, "Always run", 1)
+            _alwaysRun = new Checkbox(0x00D2, 0x00D3, "Always run", 1)
             {
                 IsChecked = Engine.Profile.Current.AlwaysRun
             };
-            rightArea.AddChildren(alwaysRun);
+            rightArea.AddChildren(_alwaysRun);
 
             // preload maps
-            Checkbox preloadMaps = new Checkbox(0x00D2, 0x00D3, "Preload maps (it increases the RAM usage)", 1)
+            _preloadMaps = new Checkbox(0x00D2, 0x00D3, "Preload maps (it increases the RAM usage)", 1)
             {
-                IsChecked = _settings.PreloadMaps
+                IsChecked = Engine.GlobalSettings.PreloadMaps
             };
-            rightArea.AddChildren(preloadMaps);
+            rightArea.AddChildren(_preloadMaps);
 
             // show % hp mobile
             ScrollAreaItem hpAreaItem = new ScrollAreaItem();
@@ -178,21 +201,21 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             hpAreaItem.AddChildren(text);
 
-            Checkbox showHPMobile = new Checkbox(0x00D2, 0x00D3, "Show HP", 1)
+            _showHpMobile = new Checkbox(0x00D2, 0x00D3, "Show HP", 1)
             {
                 X = 25, Y = 30, IsChecked = Engine.Profile.Current.ShowMobilesHP
             };
-            hpAreaItem.AddChildren(showHPMobile);
+            hpAreaItem.AddChildren(_showHpMobile);
             int mode = Engine.Profile.Current.MobileHPType;
 
             if (mode < 0 || mode > 2)
                 mode = 0;
 
-            Combobox hpComboBox = new Combobox(200, 30, 150, new[]
+            _hpComboBox = new Combobox(200, 30, 150, new[]
             {
                 "Percentage", "Line", "Both"
             }, mode);
-            hpAreaItem.AddChildren(hpComboBox);
+            hpAreaItem.AddChildren(_hpComboBox);
             rightArea.AddChildren(hpAreaItem);
 
             // highlight character by flags
@@ -204,11 +227,11 @@ namespace ClassicUO.Game.Gumps.UIGumps
             };
             highlightByFlagsItem.AddChildren(text);
 
-            Checkbox highlightEnabled = new Checkbox(0x00D2, 0x00D3, "Highlight by state\n(poisoned, yellow hits, paralyzed)", 1)
+            _highlightByState = new Checkbox(0x00D2, 0x00D3, "Highlight by state\n(poisoned, yellow hits, paralyzed)", 1)
             {
                 X = 25, Y = 30, IsChecked = Engine.Profile.Current.HighlightMobilesByFlags
             };
-            highlightByFlagsItem.AddChildren(highlightEnabled);
+            highlightByFlagsItem.AddChildren(_highlightByState);
             rightArea.AddChildren(highlightByFlagsItem);
             AddChildren(rightArea, PAGE);
         }
@@ -310,167 +333,25 @@ namespace ClassicUO.Game.Gumps.UIGumps
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
             ScrollAreaItem item = new ScrollAreaItem();
 
-            Checkbox scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, "Scale speech delay by length", 1)
+            _scaleSpeechDelay = new Checkbox(0x00D2, 0x00D3, "Scale speech delay by length", 1)
             {
                 IsChecked = Engine.Profile.Current.ScaleSpeechDelay
             };
-            item.AddChildren(scaleSpeechDelay);
+            item.AddChildren(_scaleSpeechDelay);
             rightArea.AddChildren(item);
             item = new ScrollAreaItem();
             Label text = new Label("- Speech delay:", true, 1);
             item.AddChildren(text);
-            HSliderBar sliderSpeechDelay = new HSliderBar(100, 5, 150, 1, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
-            item.AddChildren(sliderSpeechDelay);
+            _sliderSpeechDelay = new HSliderBar(100, 5, 150, 1, 1000, Engine.Profile.Current.SpeechDelay, HSliderBarStyle.MetalWidgetRecessedBar, true, 1);
+            item.AddChildren(_sliderSpeechDelay);
             rightArea.AddChildren(item);
-            item = new ScrollAreaItem();
 
-            Button buttonSpeechColor = new Button((int) Buttons.SpeechColor, 0x00D4, 0x00D4)
-            {
-                ButtonAction = ButtonAction.Activate, Y = 30
-            };
-            item.AddChildren(buttonSpeechColor);
-            uint color = 0xFF7F7F7F;
+            _speechColorPickerBox = CreateClickableColorBox(rightArea, 0, 30, Engine.Profile.Current.SpeechHue, "Speech color", 20, 30);
+            _emoteColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EmoteHue, "Emote color", 20, 0);
+            _partyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.PartyMessageHue, "Party message color", 20, 0);
+            _guildMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.GuildMessageHue, "Guild message color", 20, 0);
+            _allyMessageColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AllyMessageHue, "Alliance message color", 20, 0);
 
-            if (Engine.Profile.Current.SpeechHue != 0xFFFF)
-                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.SpeechHue) << 8) | 0xFF);
-
-            ColorPickerBox speechColorPickerBox = new ColorPickerBox(3, 3, 1, 1, 13, 14)
-            {
-                Y = 33
-            };
-            speechColorPickerBox.MouseClick += (sender, e) => buttonSpeechColor.InvokeMouseClick(e.Location, e.Button);
-            speechColorPickerBox.SetHue(color);
-
-            buttonSpeechColor.MouseClick += (sender, e) =>
-            {
-                // TODO: fix multi opening
-                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => speechColorPickerBox.SetHue(s));
-                Engine.UI.Add(pickerGump);
-            };
-            item.AddChildren(speechColorPickerBox);
-
-            text = new Label("Speech color", true, 1)
-            {
-                X = 20, Y = 30
-            };
-            item.AddChildren(text);
-            rightArea.AddChildren(item);
-            item = new ScrollAreaItem();
-
-            Button buttonEmoteColor = new Button((int) Buttons.EmoteColor, 0x00D4, 0x00D4)
-            {
-                ButtonAction = ButtonAction.Activate
-            };
-            item.AddChildren(buttonEmoteColor);
-            color = 0xFF7F7F7F;
-
-            if (Engine.Profile.Current.EmoteHue != 0xFFFF)
-                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.EmoteHue) << 8) | 0xFF);
-            ColorPickerBox emoteColorPickerBox = new ColorPickerBox(3, 3, 1, 1, 13, 14);
-            emoteColorPickerBox.MouseClick += (sender, e) => buttonEmoteColor.InvokeMouseClick(e.Location, e.Button);
-            emoteColorPickerBox.SetHue(color);
-
-            buttonEmoteColor.MouseClick += (sender, e) =>
-            {
-                // TODO: fix multi opening
-                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => emoteColorPickerBox.SetHue(s));
-                Engine.UI.Add(pickerGump);
-            };
-            item.AddChildren(emoteColorPickerBox);
-
-            text = new Label("Emote color", true, 1)
-            {
-                X = 20
-            };
-            item.AddChildren(text);
-            rightArea.AddChildren(item);
-            item = new ScrollAreaItem();
-
-            Button butttonPartyMessageColor = new Button((int) Buttons.PartyMessageColor, 0x00D4, 0x00D4)
-            {
-                ButtonAction = ButtonAction.Activate
-            };
-            item.AddChildren(butttonPartyMessageColor);
-            color = 0xFF7F7F7F;
-
-            if (Engine.Profile.Current.PartyMessageHue != 0xFFFF)
-                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.PartyMessageHue) << 8) | 0xFF);
-            ColorPickerBox partyMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
-            partyMessageColor.MouseClick += (sender, e) => butttonPartyMessageColor.InvokeMouseClick(e.Location, e.Button);
-            partyMessageColor.SetHue(color);
-
-            butttonPartyMessageColor.MouseClick += (sender, e) =>
-            {
-                // TODO: fix multi opening
-                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => partyMessageColor.SetHue(s));
-                Engine.UI.Add(pickerGump);
-            };
-            item.AddChildren(partyMessageColor);
-
-            text = new Label("Party message color", true, 1)
-            {
-                X = 20
-            };
-            item.AddChildren(text);
-            rightArea.AddChildren(item);
-            item = new ScrollAreaItem();
-
-            Button buttonGuildMessageColor = new Button((int) Buttons.GuildMessageColor, 0x00D4, 0x00D4)
-            {
-                ButtonAction = ButtonAction.Activate
-            };
-            item.AddChildren(buttonGuildMessageColor);
-            color = 0xFF7F7F7F;
-
-            if (Engine.Profile.Current.GuildMessageHue != 0xFFFF)
-                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.GuildMessageHue) << 8) | 0xFF);
-            ColorPickerBox guildMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
-            guildMessageColor.MouseClick += (sender, e) => buttonGuildMessageColor.InvokeMouseClick(e.Location, e.Button);
-            guildMessageColor.SetHue(color);
-
-            buttonGuildMessageColor.MouseClick += (sender, e) =>
-            {
-                // TODO: fix multi opening
-                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => guildMessageColor.SetHue(s));
-                Engine.UI.Add(pickerGump);
-            };
-            item.AddChildren(guildMessageColor);
-
-            text = new Label("Guild message color", true, 1)
-            {
-                X = 20
-            };
-            item.AddChildren(text);
-            rightArea.AddChildren(item);
-            item = new ScrollAreaItem();
-
-            Button buttonAllyMessageColor = new Button((int) Buttons.AllyMessageColor, 0x00D4, 0x00D4)
-            {
-                ButtonAction = ButtonAction.Activate
-            };
-            item.AddChildren(buttonAllyMessageColor);
-            color = 0xFF7F7F7F;
-
-            if (Engine.Profile.Current.AllyMessageHue != 0xFFFF)
-                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.AllyMessageHue) << 8) | 0xFF);
-            ColorPickerBox allyMessageColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
-            allyMessageColor.MouseClick += (sender, e) => buttonAllyMessageColor.InvokeMouseClick(e.Location, e.Button);
-            allyMessageColor.SetHue(color);
-
-            buttonAllyMessageColor.MouseClick += (sender, e) =>
-            {
-                // TODO: fix multi opening
-                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => allyMessageColor.SetHue(s));
-                Engine.UI.Add(pickerGump);
-            };
-            item.AddChildren(allyMessageColor);
-
-            text = new Label("Ally message color", true, 1)
-            {
-                X = 20
-            };
-            item.AddChildren(text);
-            rightArea.AddChildren(item);
             AddChildren(rightArea, PAGE);
         }
 
@@ -478,185 +359,29 @@ namespace ClassicUO.Game.Gumps.UIGumps
         {
             const int PAGE = 8;
             ScrollArea rightArea = new ScrollArea(190, 60, 390, 380, true);
+
+            _innocentColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.InnocentHue, "Innocent color", 20, 0);
+            _friendColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.FriendHue, "Friend color", 20, 0);
+            _crimialColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.CriminalHue, "Criminal color", 20, 0);
+            _genericColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.AnimalHue, "Animal color", 20, 0);
+            _murdererColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.MurdererHue, "Murderer color", 20, 0);
+            _enemyColorPickerBox = CreateClickableColorBox(rightArea, 0, 0, Engine.Profile.Current.EnemyHue, "Enemy color", 20, 0);
+
+
             ScrollAreaItem item = new ScrollAreaItem();
 
-            Button buttonInnocentColor = new Button((int) Buttons.InnocentColor, 0x00D4, 0x00D4)
+            _queryBeforAttackCheckbox = new Checkbox(0x00D2, 0x00D3, "Query before attack", 1)
             {
-                ButtonAction = ButtonAction.Activate
+                Y = 30,
+                IsChecked = Engine.Profile.Current.EnabledCriminalActionQuery
             };
-            item.AddChildren(buttonInnocentColor);
-            uint color = 0xFF7F7F7F;
+            item.AddChildren(_queryBeforAttackCheckbox);
 
-            if (Engine.Profile.Current.InnocentHue != 0xFFFF)
-                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.InnocentHue) << 8) | 0xFF);
-            ColorPickerBox innocentColor = new ColorPickerBox(3, 3, 1, 1, 13, 14);
-            innocentColor.MouseClick += (sender, e) => buttonInnocentColor.InvokeMouseClick(e.Location, e.Button);
-            innocentColor.SetHue(color);
-
-            buttonInnocentColor.MouseClick += (sender, e) =>
-            {
-                // TODO: fix multi opening
-                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => innocentColor.SetHue(s));
-                Engine.UI.Add(pickerGump);
-            };
-            item.AddChildren(innocentColor);
-
-            Label text = new Label("Innocent color", true, 1)
-            {
-                X = 20
-            };
-            item.AddChildren(text);
-
-            Button buttonFriendColor = new Button((int) Buttons.FriendColor, 0x00D4, 0x00D4)
-            {
-                ButtonAction = ButtonAction.Activate, Y = buttonInnocentColor.Height
-            };
-            item.AddChildren(buttonFriendColor);
-            color = 0xFF7F7F7F;
-
-            if (Engine.Profile.Current.FriendHue != 0xFFFF)
-                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.FriendHue) << 8) | 0xFF);
-
-            ColorPickerBox friendColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
-            {
-                Y = buttonInnocentColor.Height + 3
-            };
-            friendColor.MouseClick += (sender, e) => buttonFriendColor.InvokeMouseClick(e.Location, e.Button);
-            friendColor.SetHue(color);
-
-            buttonFriendColor.MouseClick += (sender, e) =>
-            {
-                // TODO: fix multi opening
-                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => friendColor.SetHue(s));
-                Engine.UI.Add(pickerGump);
-            };
-            item.AddChildren(friendColor);
-
-            text = new Label("Friend color", true, 1)
-            {
-                X = 20, Y = buttonInnocentColor.Height
-            };
-            item.AddChildren(text);
-
-            Button buttonCriminalColor = new Button((int) Buttons.CriminalColor, 0x00D4, 0x00D4)
-            {
-                ButtonAction = ButtonAction.Activate, Y = buttonFriendColor.Bounds.Bottom
-            };
-            item.AddChildren(buttonCriminalColor);
-            color = 0xFF7F7F7F;
-
-            if (Engine.Profile.Current.CriminalHue != 0xFFFF)
-                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.CriminalHue) << 8) | 0xFF);
-
-            ColorPickerBox criminalColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
-            {
-                Y = buttonFriendColor.Bounds.Bottom + 3
-            };
-            criminalColor.MouseClick += (sender, e) => buttonCriminalColor.InvokeMouseClick(e.Location, e.Button);
-            criminalColor.SetHue(color);
-
-            buttonCriminalColor.MouseClick += (sender, e) =>
-            {
-                // TODO: fix multi opening
-                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => criminalColor.SetHue(s));
-                Engine.UI.Add(pickerGump);
-            };
-            item.AddChildren(criminalColor);
-
-            text = new Label("Criminal color", true, 1)
-            {
-                X = 20, Y = buttonFriendColor.Bounds.Bottom
-            };
-            item.AddChildren(text);
-
-            Button buttonEnemyColor = new Button((int) Buttons.EnemyColor, 0x00D4, 0x00D4)
-            {
-                ButtonAction = ButtonAction.Activate, X = 150
-            };
-            item.AddChildren(buttonEnemyColor);
-            color = 0xFF7F7F7F;
-
-            if (Engine.Profile.Current.EnemyHue != 0xFFFF)
-                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.EnemyHue) << 8) | 0xFF);
-
-            ColorPickerBox enemyColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
-            {
-                X = 150 + 3
-            };
-            enemyColor.MouseClick += (sender, e) => buttonEnemyColor.InvokeMouseClick(e.Location, e.Button);
-            enemyColor.SetHue(color);
-
-            buttonEnemyColor.MouseClick += (sender, e) =>
-            {
-                // TODO: fix multi opening
-                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => enemyColor.SetHue(s));
-                Engine.UI.Add(pickerGump);
-            };
-            item.AddChildren(enemyColor);
-
-            text = new Label("Enemy color", true, 1)
-            {
-                X = 150 + 20
-            };
-            item.AddChildren(text);
-
-            Button buttonMurdererColor = new Button((int) Buttons.MurdererColor, 0x00D4, 0x00D4)
-            {
-                ButtonAction = ButtonAction.Activate, X = 150, Y = buttonEnemyColor.Bounds.Bottom
-            };
-            item.AddChildren(buttonMurdererColor);
-            color = 0xFF7F7F7F;
-
-            if (Engine.Profile.Current.MurdererHue != 0xFFFF)
-                color = HuesHelper.RgbaToArgb((FileManager.Hues.GetPolygoneColor(12, Engine.Profile.Current.MurdererHue) << 8) | 0xFF);
-
-            ColorPickerBox murdererColor = new ColorPickerBox(3, 3, 1, 1, 13, 14)
-            {
-                X = 150 + 3, Y = buttonEnemyColor.Bounds.Bottom + 3
-            };
-            murdererColor.MouseClick += (sender, e) => buttonMurdererColor.InvokeMouseClick(e.Location, e.Button);
-            murdererColor.SetHue(color);
-
-            buttonMurdererColor.MouseClick += (sender, e) =>
-            {
-                // TODO: fix multi opening
-                ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => murdererColor.SetHue(s));
-                Engine.UI.Add(pickerGump);
-            };
-            item.AddChildren(murdererColor);
-
-            text = new Label("Murderer color", true, 1)
-            {
-                X = 150 + 20, Y = buttonEnemyColor.Bounds.Bottom
-            };
-            item.AddChildren(text);
-            rightArea.AddChildren(item);
-            item = new ScrollAreaItem();
-
-            Checkbox queryBeforeAttact = new Checkbox(0x00D2, 0x00D3, "Query before attack", 1)
-            {
-                Y = 30, IsChecked = Engine.Profile.Current.EnabledCriminalActionQuery
-            };
-            item.AddChildren(queryBeforeAttact);
             rightArea.AddChildren(item);
             AddChildren(rightArea, PAGE);
         }
 
-        //class LeftButton : GumpControl
-        //{
-        //    public LeftButton()
-        //    {
-        //        CanMove = false;
-        //        CanCloseWithRightClick = false;
-        //        AcceptMouseInput = true;
 
-        //        //ResizePic background = new ResizePic(0x23F0);
-        //        GumpPicTiled background = new GumpPicTiled(0x462);
-        //        background.AddChildren(new HoveredLabel("General", true, 0xFF, 23, 100, 1, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER));
-        //        AddChildren(background);
-
-        //    }
-        //}
         public override void OnButtonClick(int buttonID)
         {
             switch ((Buttons) buttonID)
@@ -694,11 +419,88 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
         private void SetDefault()
         {
+            switch (ActivePage)
+            {
+                case 1: // general
+                    _sliderFPS.Value = 60;
+                    _highlightObjects.IsChecked = true;
+                    _smoothMovements.IsChecked = true;
+                    _enablePathfind.IsChecked = true;
+                    _alwaysRun.IsChecked = false;
+                    _showHpMobile.IsChecked = false;
+                    _hpComboBox.SelectedIndex = 0;
+                    _highlightByState.IsChecked = true;
+                    break;
+                case 2: // sounds
+                    
+                    break;
+                case 3: // video
+
+                    break;
+                case 4: // commands
+
+                    break;
+                case 5: // tooltip
+
+                    break;
+                case 6: // fonts
+                    
+                    
+                    break;
+                case 7: // speech
+                    _scaleSpeechDelay.IsChecked = true;
+                    _sliderSpeechDelay.Value = 100;
+                    _speechColorPickerBox.SetColor(0x02B2,  FileManager.Hues.GetPolygoneColor(12, 0x02B2));
+                    _emoteColorPickerBox.SetColor(0x0021, FileManager.Hues.GetPolygoneColor(12, 0x0021));
+                    _partyMessageColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
+                    _guildMessageColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
+                    _allyMessageColorPickerBox.SetColor(0x0057, FileManager.Hues.GetPolygoneColor(12, 0x0057));
+                    break;
+                case 8: // combat
+                    _innocentColorPickerBox.SetColor(0x005A, FileManager.Hues.GetPolygoneColor(12, 0x005A));
+                    _friendColorPickerBox.SetColor(0x0044, FileManager.Hues.GetPolygoneColor(12, 0x0044));
+                    _crimialColorPickerBox.SetColor(0x03B2, FileManager.Hues.GetPolygoneColor(12, 0x03B2));
+                    _genericColorPickerBox.SetColor(0x03B2, FileManager.Hues.GetPolygoneColor(12, 0x03B2));
+                    _murdererColorPickerBox.SetColor(0x0023, FileManager.Hues.GetPolygoneColor(12, 0x0023));
+                    _enemyColorPickerBox.SetColor(0x0031, FileManager.Hues.GetPolygoneColor(12, 0x0031));
+                    _queryBeforAttackCheckbox.IsChecked = true;
+                    break;
+            }
         }
 
         private void Apply()
         {
+            // general
+            Engine.Profile.Current.MaxFPS = Engine.FpsLimit = _sliderFPS.Value;
+            Engine.Profile.Current.HighlightGameObjects = _highlightObjects.IsChecked;
+            Engine.Profile.Current.SmoothMovements = _smoothMovements.IsChecked;
+            Engine.Profile.Current.EnablePathfind = _enablePathfind.IsChecked;
+            Engine.Profile.Current.AlwaysRun = _alwaysRun.IsChecked;
+            Engine.Profile.Current.ShowMobilesHP = _showHpMobile.IsChecked;
+            Engine.Profile.Current.HighlightMobilesByFlags = _highlightByState.IsChecked;
+            Engine.Profile.Current.MobileHPType = _hpComboBox.SelectedIndex;
+
+            // sounds
+
+            // speech
+            Engine.Profile.Current.ScaleSpeechDelay = _scaleSpeechDelay.IsChecked;
+            Engine.Profile.Current.SpeechDelay = _sliderSpeechDelay.Value;
+            Engine.Profile.Current.SpeechHue = _speechColorPickerBox.Hue;
+            Engine.Profile.Current.EmoteHue = _emoteColorPickerBox.Hue;
+            Engine.Profile.Current.PartyMessageHue = _partyMessageColorPickerBox.Hue;
+            Engine.Profile.Current.GuildMessageHue = _guildMessageColorPickerBox.Hue;
+            Engine.Profile.Current.AllyMessageHue = _allyMessageColorPickerBox.Hue;
+
+            //// combat
+            Engine.Profile.Current.InnocentHue = _innocentColorPickerBox.Hue;
+            Engine.Profile.Current.FriendHue = _friendColorPickerBox.Hue;
+            Engine.Profile.Current.CriminalHue = _crimialColorPickerBox.Hue;
+            Engine.Profile.Current.AnimalHue = _genericColorPickerBox.Hue;
+            Engine.Profile.Current.EnemyHue = _enemyColorPickerBox.Hue;
+            Engine.Profile.Current.MurdererHue = _murdererColorPickerBox.Hue;
+            Engine.Profile.Current.EnabledCriminalActionQuery = _queryBeforAttackCheckbox.IsChecked;
         }
+
 
         private enum Buttons
         {
@@ -717,5 +519,63 @@ namespace ClassicUO.Game.Gumps.UIGumps
             EnemyColor,
             MurdererColor
         }
+
+        private ClickableColorBox CreateClickableColorBox(ScrollArea area, int x, int y, ushort hue, string text, int labelX, int labelY)
+        {
+            ScrollAreaItem item = new ScrollAreaItem();
+
+            uint color = 0xFF7F7F7F;
+
+            if (hue != 0xFFFF)
+                color = FileManager.Hues.GetPolygoneColor(12, hue);
+
+            ClickableColorBox box = new ClickableColorBox(x, y, 13, 14, hue, color);
+            item.AddChildren(box);
+
+            item.AddChildren(new Label(text, true, 1)
+            {
+                X = labelX, Y = labelY
+            });
+            area.AddChildren(item);
+            return box;
+        }
+
+        class ClickableColorBox : ColorBox
+        {
+            private const int CELL = 12;
+
+            private readonly SpriteTexture _background;
+            public ClickableColorBox(int x, int y, int w, int h, ushort hue, uint color) : base(w, h, hue, color)
+            {
+                X = x + 3;
+                Y = y + 3;
+                WantUpdateSize = false;
+
+                _background = FileManager.Gumps.GetTexture(0x00D4);
+            }
+
+            public override void Update(double totalMS, double frameMS)
+            {
+                _background.Ticks = (long) totalMS;
+
+                base.Update(totalMS, frameMS);
+            }
+
+            public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
+            {
+                batcher.Draw2D(_background, new Point(position.X - 3, position.Y - 3), Vector3.Zero);
+                return base.Draw(batcher, position, hue);
+            }
+
+            protected override void OnMouseClick(int x, int y, MouseButton button)
+            {
+                if (button == MouseButton.Left)
+                {
+                    ColorPickerGump pickerGump = new ColorPickerGump(100, 100, s => SetColor(s, FileManager.Hues.GetPolygoneColor(CELL, s)));
+                    Engine.UI.Add(pickerGump);
+                }
+            }
+        }
+
     }
 }

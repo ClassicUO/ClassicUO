@@ -64,6 +64,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private readonly TextBox _textBox;
         private readonly CheckerTrans _trans;
 
+        //public override bool AcceptKeyboardInput
+        //{
+        //    get;
+        //    set;
+        //}
+
         public SystemChatControl(int x, int y, int w, int h)
         {
             X = x;
@@ -118,7 +124,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 {
                     case ChatMode.Default:
                         DisposeChatModePrefix();
-                        _textBox.Hue = 33;
+                        _textBox.Hue = Engine.Profile.Current.SpeechHue;
                         _textBox.SetText(string.Empty);
 
                         break;
@@ -127,23 +133,23 @@ namespace ClassicUO.Game.Gumps.UIGumps
 
                         break;
                     case ChatMode.Emote:
-                        AppendChatModePrefix("[Emote]: ", 646);
+                        AppendChatModePrefix("[Emote]: ", Engine.Profile.Current.EmoteHue);
 
                         break;
                     case ChatMode.Party:
-                        AppendChatModePrefix("[Party]: ", 0xFFFF);
+                        AppendChatModePrefix("[Party]: ", Engine.Profile.Current.PartyMessageHue);
 
                         break;
                     case ChatMode.PartyPrivate:
-                        AppendChatModePrefix("[Private Party Message]: ", 1918);
+                        AppendChatModePrefix("[Private Party Message]: ", Engine.Profile.Current.PartyMessageHue);
 
                         break;
                     case ChatMode.Guild:
-                        AppendChatModePrefix("[Guild]: ", 70);
+                        AppendChatModePrefix("[Guild]: ", Engine.Profile.Current.GuildMessageHue);
 
                         break;
                     case ChatMode.Alliance:
-                        AppendChatModePrefix("[Alliance]: ", 487);
+                        AppendChatModePrefix("[Alliance]: ", Engine.Profile.Current.AllyMessageHue);
 
                         break;
                     case ChatMode.ClientCommand:
@@ -218,6 +224,12 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 _trans.Width = Width;
                 _trans.Height = height + 5;
             }
+        }
+
+        protected override void OnInitialize()
+        {
+            base.OnInitialize();
+            _textBox.SetKeyboardFocus();
         }
 
         public override void Update(double totalMS, double frameMS)
@@ -316,7 +328,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             if (string.IsNullOrEmpty(text))
                 return;
             ChatMode sentMode = Mode;
-            ushort hue = 0;
             _textBox.SetText(string.Empty);
             _messageHistory.Add(new Tuple<ChatMode, string>(Mode, text));
             _messageHistoryIndex = _messageHistory.Count;
@@ -325,11 +336,10 @@ namespace ClassicUO.Game.Gumps.UIGumps
             switch (sentMode)
             {
                 case ChatMode.Default:
-                    hue = 33;
-                    GameActions.Say(text, hue);
+                    GameActions.Say(text, Engine.Profile.Current.SpeechHue);
                     break;
                 case ChatMode.Whisper:
-                    GameActions.Say(text, hue, MessageType.Whisper);
+                    GameActions.Say(text, 33, MessageType.Whisper);
                     break;
                 case ChatMode.Emote:
                     GameActions.Say(text, Engine.Profile.Current.EmoteHue, MessageType.Emote);

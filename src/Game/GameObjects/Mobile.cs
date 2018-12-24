@@ -475,17 +475,15 @@ namespace ClassicUO.Game.GameObjects
                     bool removeStep = delay >= maxDelay;
 
                     if (Position.X != step.X || Position.Y != step.Y)
-                    {
-                        if (Engine.Profile.Current.SmoothMovements)
-                        {
-                            float framesPerTile = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
-                            float frameOffset = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
-                            float x = frameOffset;
-                            float y = frameOffset;
-                            MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
-                            Offset = new Vector3((sbyte) x, (sbyte) y, (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
-                        }
+                    {     
+                        float framesPerTile = maxDelay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                        float frameOffset = delay / (float) Constants.CHARACTER_ANIMATION_DELAY;
+                        float x = frameOffset;
+                        float y = frameOffset;
 
+                        MovementSpeed.GetPixelOffset((byte) Direction, ref x, ref y, framesPerTile);
+                        Offset = new Vector3((sbyte) x, (sbyte) y, (int) ((step.Z - Position.Z) * frameOffset * (4.0f / framesPerTile)));
+                     
                         turnOnly = false;
                     }
                     else

@@ -43,6 +43,7 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _showButtons = showButtons;
             _buttonClick = buttonClick;
 
+
             AddChildren(new ResizePic(0x0A28)
             {
                 X = 142, Y = 134, Width = 356, Height = 212

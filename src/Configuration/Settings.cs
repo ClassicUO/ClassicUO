@@ -50,7 +50,7 @@ namespace ClassicUO.Configuration
 
         [JsonProperty(PropertyName = "clientversion")] public string ClientVersion { get; set; } = "7.0.59.8";
 
-        [JsonProperty(PropertyName = "maxfps")]public int MaxFPS { get; set; } = 144;
+        //[JsonProperty(PropertyName = "maxfps")]public int MaxFPS { get; set; } = 144;
 
         [JsonProperty(PropertyName = "debug")] public bool Debug { get; set; } = true;
 

@@ -66,6 +66,8 @@ namespace ClassicUO
     { 
         private const int MIN_FPS = 15;
         private const int MAX_FPS = 250;
+        private const int LOGIN_SCREEN_FPS = 60;
+
         //private const string FORMATTED_STRING = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\nFlush: {7}\nPos: {4}\nSelected: {5}\nStats: {6}";
         //private const string FORMAT_1 = "FPS: {0}\nObjects: {1}\nCalls: {2}\nMerged: {3}\n";
         //private const string FORMAT_2 = "Flush: {0}\nPos: {1}\nSelected: {2}\nStats: {3}";
@@ -75,7 +77,7 @@ namespace ClassicUO
         //private const string DEBUG_STRING_3 = "- Selected: {0}";
 
 
-        private static int _fpsLimit = MIN_FPS;
+        private static int _fpsLimit = MIN_FPS - 1;
         private static Engine _engine;
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly StringBuilder _sb = new StringBuilder();
@@ -309,7 +311,8 @@ namespace ClassicUO
             PacketHandlers.Load();
             PacketsTable.AdjustPacketSizeByVersion(FileManager.ClientVersion);
             Log.Message(LogTypes.Trace, "Done!");
-            FpsLimit = _settings.MaxFPS;
+
+            FpsLimit = LOGIN_SCREEN_FPS;
 
             _debugInfo = new DebugInfo();
 

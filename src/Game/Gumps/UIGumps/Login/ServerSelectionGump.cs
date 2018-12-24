@@ -29,12 +29,16 @@ using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
 
+using SDL2;
+
 namespace ClassicUO.Game.Gumps.UIGumps.Login
 {
-    internal class ServerSelectionGump : Control
+    internal class ServerSelectionGump : Gump
     {
-        public ServerSelectionGump()
+        public ServerSelectionGump() : base(0,0)
         {
+            //AddChildren(new LoginBackground(true));
+
             AddChildren(new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
             {
                 X = 586, Y = 445, ButtonAction = ButtonAction.Activate
@@ -146,6 +150,8 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                     });
                 }
             }
+
+            AcceptKeyboardInput = true;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -174,6 +180,17 @@ namespace ClassicUO.Game.Gumps.UIGumps.Login
                 }
             }
         }
+
+        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            if (key == SDL.SDL_Keycode.SDLK_RETURN)
+            {
+                LoginScene loginScene = Engine.SceneManager.GetScene<LoginScene>();
+                if (loginScene.Servers.Count() > 0)
+                    loginScene.SelectServer(0);
+            }
+        }
+
 
         private enum Buttons
         {

@@ -120,7 +120,9 @@
     <Compile Include="Game\Data\SpellsNinjitsu.cs" />
     <Compile Include="Game\Data\SpellsSpellweaving.cs" />
     <Compile Include="Game\GameObjects\Land.cs" />
+    <Compile Include="Game\Gumps\Controls\ColorBox.cs" />
     <Compile Include="Game\Gumps\Controls\GumpPicWithWidth.cs" />
+    <Compile Include="Game\Gumps\Controls\LoginBackground.cs" />
     <Compile Include="Game\Gumps\UIGumps\DebugGump.cs" />
     <Compile Include="Game\Managers\HouseManager.cs" />
     <Compile Include="Game\Managers\UseItemQueue.cs" />
@@ -280,7 +282,7 @@
     <Compile Include="Game\Gumps\UIGumps\SpellbookGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\StatusGump.cs" />
     <Compile Include="Game\Gumps\UIGumps\TopBarGump.cs" />
-    <Compile Include="Game\Gumps\UIGumps\WorldViewport.cs" />
+    <Compile Include="Game\Gumps\Controls\WorldViewport.cs" />
     <Compile Include="Game\Gumps\UIGumps\WorldViewportGump.cs" />
     <Compile Include="Game\Managers\UIManager.cs" />
     <Compile Include="Game\Hue.cs" />

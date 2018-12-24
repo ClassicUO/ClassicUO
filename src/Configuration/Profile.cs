@@ -101,13 +101,14 @@ namespace ClassicUO.Configuration
 
         // movements
         [JsonProperty] public bool EnablePathfind { get; set; } = true;
-        [JsonProperty] public bool AlwaysRun { get; set; } = false;
+        [JsonProperty] public bool AlwaysRun { get; set; }
         [JsonProperty] public bool SmoothMovements { get; set; } = true;
 
         // general
         [JsonProperty] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
         [JsonProperty] public Point GameWindowPosition { get; set; } = new Point(10, 10);
         [JsonProperty] public Point GameWindowSize { get; set; } = new Point(600, 480);
+        [JsonProperty] public int MaxFPS { get; set; } = 60;
 
 
         public void Save(List<Gump> gumps = null)

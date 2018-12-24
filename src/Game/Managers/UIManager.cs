@@ -232,7 +232,8 @@ namespace ClassicUO.Game.Managers
             }
             set
             {
-                _keyboardFocusControl = value;
+                if (value != null && value.AcceptKeyboardInput)
+                    _keyboardFocusControl = value;
             } 
         }
 

@@ -78,8 +78,9 @@ namespace ClassicUO.Game.Gumps
             {
                 if (RenderText.Hue != value)
                 {
-                    RenderText.Hue = value;
+                    RenderCaret.Hue = RenderText.Hue = value;
                     RenderText.CreateTexture();
+                    RenderCaret.CreateTexture();
                 }
             } 
         }

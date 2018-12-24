@@ -788,7 +788,7 @@ namespace ClassicUO.Game
                     if (dir == (Direction)p.Direction)
                         _pointIndex++;
 
-                    if (!World.Player.Walk((Direction)p.Direction, true))
+                    if (!World.Player.Walk((Direction)p.Direction, Engine.Profile.Current.AlwaysRun))
                         StopAutoWalk();
                 }
                 else

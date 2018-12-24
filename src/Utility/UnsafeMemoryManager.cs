@@ -58,7 +58,7 @@ namespace ClassicUO.Utility
             bool use2nd = Environment.OSVersion.Platform == PlatformID.MacOSX || Environment.OSVersion.Platform == PlatformID.Unix;
 
             IntPtr firstValueAddress0 = *(IntPtr*)&tRef0;
-            IntPtr secondValueAddress0 = *((IntPtr*)&tRef0 + 1);
+            IntPtr secondValueAddress0 = *(IntPtr*)&tRef0 + 1;
             IntPtr firstValueAddress1 = *(IntPtr*)&tRef1;
             IntPtr secondValueAddress1 = *((IntPtr*)&tRef1 + 1);
 
