@@ -251,7 +251,7 @@ namespace ClassicUO.Game.Scenes
                 return;
             Account = account;
             Password = password;
-            Log.Message(LogTypes.Trace, "Start login...");
+            Log.Message(LogTypes.Trace, $"Start login to: {Engine.GlobalSettings.IP},{Engine.GlobalSettings.Port}");
             NetClient.LoginSocket.Connect(Engine.GlobalSettings.IP, Engine.GlobalSettings.Port);
             CurrentLoginStep = LoginStep.Connecting;
         }

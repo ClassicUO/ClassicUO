@@ -122,7 +122,7 @@
     <Compile Include="Game\GameObjects\Land.cs" />
     <Compile Include="Game\Gumps\Controls\ColorBox.cs" />
     <Compile Include="Game\Gumps\Controls\GumpPicWithWidth.cs" />
-    <Compile Include="Game\Gumps\Controls\LoginBackground.cs" />
+    <Compile Include="Game\Gumps\UIGumps\Login\LoginBackground.cs" />
     <Compile Include="Game\Gumps\UIGumps\DebugGump.cs" />
     <Compile Include="Game\Managers\HouseManager.cs" />
     <Compile Include="Game\Managers\UseItemQueue.cs" />

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ClassicUO.Game.Gumps.Controls;
 
-using ClassicUO.Game.Gumps.UIGumps;
-
-namespace ClassicUO.Game.Gumps.Controls
+namespace ClassicUO.Game.Gumps.UIGumps.Login
 {
     class LoginBackground : Gump
     {
@@ -29,8 +23,9 @@ namespace ClassicUO.Game.Gumps.Controls
                 ButtonAction = ButtonAction.Activate,
                 AcceptKeyboardInput = false
             });
-            
 
+            CanCloseWithEsc = false;
+            CanCloseWithRightClick = false;
             AcceptKeyboardInput = false;
 
             ControlInfo.Layer = UILayer.Under;
