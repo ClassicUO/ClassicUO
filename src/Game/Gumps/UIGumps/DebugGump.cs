@@ -117,19 +117,19 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 switch (obj)
                 {
                     case Mobile mob:
-                        return string.Format("Mobile (0x{0:X8})  graphic: 0x{1:X4}  flags: {2}  noto: {3}", mob.Serial.Value, (ushort)mob.Graphic, mob.Flags.ToString(), mob.NotorietyFlag.ToString());
+                        return string.Format("Mobile ({0:X8})  graphic: 0x{1:X4}  flags: {2}  noto: {3}", mob.Serial, mob.Graphic, mob.Flags, mob.NotorietyFlag);
                     case Item item:
-                        return string.Format("Item (0x{0:X8})  graphic: 0x{1:X4}  flags: {2}  amount: {3}", item.Serial.Value, (ushort)item.Graphic, item.Flags.ToString(), item.Amount);
+                        return string.Format("Item ({0:X8})  graphic: 0x{1:X4}  flags: {2}  amount: {3}", item.Serial, item.Graphic, item.Flags, item.Amount);
                     case Static st:
-                        return string.Format("Static (0x{0:X4})  height: {1}  flags: {2}", (ushort)st.Graphic, st.ItemData.Height, st.ItemData.Flags.ToString());
+                        return string.Format("Static ({0:X4})  height: {1}  flags: {2}", st.Graphic, st.ItemData.Height, st.ItemData.Flags);
                     case Multi multi:
-                        return string.Format("Multi (0x{0:X4})  height: {1}  flags: {2}", (ushort)multi.Graphic, multi.ItemData.Height, multi.ItemData.Flags.ToString());
+                        return string.Format("Multi ({0:X4})  height: {1}  flags: {2}", multi.Graphic, multi.ItemData.Height, multi.ItemData.Flags);
                     case GameEffect effect:
                         return string.Format("GameEffect");
                     case TextOverhead overhead:
                         return string.Format("TextOverhead");
                     case Land land:
-                        return string.Format("Static (0x{0:X4})  flags: {1}", (ushort)land.Graphic, land.TileData.Flags.ToString());
+                        return string.Format("Static ({0:X4})  flags: {1}", land.Graphic, land.TileData.Flags);
                 }
 
             }
