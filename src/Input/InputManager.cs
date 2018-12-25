@@ -152,11 +152,10 @@ namespace ClassicUO.Input
                     switch ((uint) mouse.button)
                     {
                         case SDL_BUTTON_LEFT:
-                            Mouse.LButtonPressed = isDown;
-
                             if (isDown)
                             {
                                 Mouse.Begin();
+                                Mouse.LButtonPressed = true;
                                 Mouse.LDropPosition = Mouse.Position;
                                 Mouse.CancelDoubleClick = false;
                                 uint ticks = SDL_GetTicks();
@@ -184,16 +183,16 @@ namespace ClassicUO.Input
                             {
                                 if (Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF)
                                     LeftMouseButtonUp.Raise();
+                                Mouse.LButtonPressed = false;
                                 Mouse.End();
                             }
 
                             break;
                         case SDL_BUTTON_MIDDLE:
-                            Mouse.MButtonPressed = isDown;
-
                             if (isDown)
                             {
                                 Mouse.Begin();
+                                Mouse.MButtonPressed = true;
                                 Mouse.MDropPosition = Mouse.Position;
                                 Mouse.CancelDoubleClick = false;
                                 uint ticks = SDL_GetTicks();
@@ -217,16 +216,16 @@ namespace ClassicUO.Input
                             else
                             {
                                 MidMouseButtonUp.Raise();
+                                Mouse.MButtonPressed = false;
                                 Mouse.End();
                             }
 
                             break;
                         case SDL_BUTTON_RIGHT:
-                            Mouse.RButtonPressed = isDown;
-
                             if (isDown)
                             {
                                 Mouse.Begin();
+                                Mouse.RButtonPressed = true;
                                 Mouse.RDropPosition = Mouse.Position;
                                 Mouse.CancelDoubleClick = false;
                                 uint ticks = SDL_GetTicks();
@@ -254,6 +253,7 @@ namespace ClassicUO.Input
                             {
                                 if (Mouse.LastRightButtonClickTime != 0xFFFF_FFFF)
                                     RightMouseButtonUp.Raise();
+                                Mouse.RButtonPressed = false;
                                 Mouse.End();
                             }
 

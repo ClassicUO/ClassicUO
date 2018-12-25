@@ -18,11 +18,16 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
+using System;
+using System.Net.Sockets;
+
 using ClassicUO.Configuration;
 using ClassicUO.Game.Gumps.Controls;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -38,9 +43,9 @@ namespace ClassicUO.Game.Gumps.UIGumps
         private readonly SystemChatControl _systemChatControl;
         private readonly WorldViewport _viewport;
         private bool _clicked;
-        private Point _lastPosition = Point.Zero;
         private int _worldHeight;
         private int _worldWidth;
+        private Point _lastSize, _savedSize;
 
         public WorldViewportGump(GameScene scene) : base(0, 0)
         {
@@ -54,13 +59,29 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _worldWidth = Engine.Profile.Current.GameWindowSize.X;
             _worldHeight = Engine.Profile.Current.GameWindowSize.Y;
             _button = new Button(0, 0x837, 0x838, 0x838);
-            _button.MouseDown += (sender, e) => { _clicked = true; };
+            _button.MouseDown += (sender, e) =>
+            {
+                _clicked = true;
+                Console.WriteLine(_clicked);
+
+            };
 
             _button.MouseUp += (sender, e) =>
             {
+                if (_lastSize.X < 640)
+                    _lastSize.X = 640;
+
+                if (_lastSize.Y < 480)
+                    _lastSize.Y = 480;
+
+                _savedSize = Engine.Profile.Current.GameWindowSize = _lastSize;
+
+                if (FileManager.ClientVersion >= ClientVersions.CV_200)
+                    NetClient.Socket.Send(new PGameWindowSize((uint) _lastSize.X, (uint) _lastSize.Y));
+
                 _clicked = false;
-                _lastPosition = Point.Zero;
             };
+
             _button.SetTooltip("Resize game window");
             Width = _worldWidth + BORDER_WIDTH * 2;
             Height = _worldHeight + BORDER_HEIGHT * 2;
@@ -72,21 +93,24 @@ namespace ClassicUO.Game.Gumps.UIGumps
             AddChildren(_viewport);
             AddChildren(_systemChatControl);
             Resize();
+
+            _savedSize = _lastSize = Engine.Profile.Current.GameWindowSize;
         }
+
 
         public override void Update(double totalMS, double frameMS)
         {
             if (IsDisposed)
                 return;
 
-            if (_clicked && Mouse.LDroppedOffset != _lastPosition && Mouse.LDroppedOffset != Point.Zero)
+            Point offset = Mouse.LDroppedOffset;
+
+            _lastSize = _savedSize;
+
+            if (_clicked && offset != Point.Zero)
             {
-                Engine.Profile.Current.GameWindowSize = new Point(Engine.Profile.Current.GameWindowSize.X + Mouse.LDroppedOffset.X - _lastPosition.X, Engine.Profile.Current.GameWindowSize.Y + Mouse.LDroppedOffset.Y - _lastPosition.Y);
-
-                _lastPosition = Mouse.LDroppedOffset;
-
-                int w = Engine.Profile.Current.GameWindowSize.X;
-                int h = Engine.Profile.Current.GameWindowSize.Y;
+                int w = _lastSize.X + offset.X;
+                int h = _lastSize.Y + offset.Y;
 
                 if (w < 640)
                     w = 640;
@@ -94,15 +118,17 @@ namespace ClassicUO.Game.Gumps.UIGumps
                 if (h < 480)
                     h = 480;
 
-                Engine.Profile.Current.GameWindowSize = new Point(w, h);
+                _lastSize.X = w;
+                _lastSize.Y = h;
             }
 
-            if (_worldWidth != Engine.Profile.Current.GameWindowSize.X || _worldHeight != Engine.Profile.Current.GameWindowSize.Y)
+            if (_worldWidth != _lastSize.X || _worldHeight != _lastSize.Y)
             {
-                _worldWidth = Engine.Profile.Current.GameWindowSize.X;
-                _worldHeight = Engine.Profile.Current.GameWindowSize.Y;
+                _worldWidth = _lastSize.X;
+                _worldHeight = _lastSize.Y;
                 Width = _worldWidth + BORDER_WIDTH * 2;
                 Height = _worldHeight + BORDER_HEIGHT * 2;
+                Engine.Profile.Current.GameWindowSize = _lastSize;
                 Resize();
             }
 
