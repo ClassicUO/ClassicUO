@@ -1822,8 +1822,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 0x0C: // close statusbar gump
-                    Serial serial = p.ReadUInt();
-
+                    Engine.UI.Remove<HealthBarGump>(p.ReadUInt());
                     break;
                 //===========================================================================================
                 //===========================================================================================
@@ -1911,21 +1910,21 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 case 0x16: // close user interface windows
                     uint id = p.ReadUInt();
-                    serial = p.ReadUInt();
+                    Serial serial = p.ReadUInt();
 
                     switch (id)
                     {
                         case 1: // paperdoll
-
+                            Engine.UI.Remove<PaperDollGump>(serial);
                             break;
                         case 2: //statusbar
-
+                            Engine.UI.Remove<HealthBarGump>(serial);
                             break;
                         case 8: // char profile
-
+                            // TODO
                             break;
                         case 0x0C: //container
-
+                            Engine.UI.Remove<ContainerGump>(serial);
                             break;
                     }
 
@@ -1933,7 +1932,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 //===========================================================================================
                 case 0x18: // enable map patches
-
+                    Log.Message(LogTypes.Warning, "Map patches packet received. Not implemented yet");
                     break;
                 //===========================================================================================
                 //===========================================================================================
@@ -1948,8 +1947,7 @@ namespace ClassicUO.Network
 
                             if (bonded == null) break;
                             bool dead = p.ReadBool();
-
-                            //bonded.IsDead
+                            bonded.IsDead = dead;
                             break;
                         case 2:
 
@@ -2068,8 +2066,6 @@ namespace ClassicUO.Network
                         byte damage = p.ReadByte();
                         Engine.SceneManager.GetScene<GameScene>().Overheads.AddDamage(mobile, new DamageOverhead(mobile, damage.ToString(), hue: (Hue)(mobile == World.Player ? 0x0034 : 0x0021), font: 3, isunicode: false, timeToLive: 1500));
                     }
-
-                    //World.Mobiles.Get(p.ReadUInt())?.AddDamage(p.ReadByte());
 
                     break;
                 //===========================================================================================

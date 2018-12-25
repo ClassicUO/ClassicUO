@@ -517,17 +517,7 @@ namespace ClassicUO.Game.Managers
 
         public void Remove<T>(Serial? local = null) where T : Control
         {
-            foreach (Control c in _gumps)
-            {
-                if (c is T)
-                {
-                    if (!local.HasValue || c.LocalSerial == local)
-                    {
-                        if (!c.IsDisposed)
-                            c.Dispose();
-                    }
-                }
-            }
+            _gumps.OfType<T>().Where(s => (!local.HasValue || s.LocalSerial == local) && !s.IsDisposed).FirstOrDefault()?.Dispose();
         }
 
         public void Clear()
