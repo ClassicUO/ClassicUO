@@ -234,8 +234,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (over.MessageType != MessageType.Spell && over.MessageType != MessageType.Label)
                 {
-                    over.Dispose();
-                    _overHeads.RemoveAt(_overHeads.Count - 1);
+                    _overHeads.RemoveFromBack().Dispose();
                 }
             }
 

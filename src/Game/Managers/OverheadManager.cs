@@ -51,6 +51,8 @@ namespace ClassicUO.Game.Managers
         {
             if (_firstNode != null)
             {
+                int skip = 0;
+
                 for (TextOverhead overhead = _firstNode; overhead != null; overhead = (TextOverhead) overhead.Right)
                 {
                     GameObject owner = overhead.Parent;
@@ -60,7 +62,7 @@ namespace ClassicUO.Game.Managers
                         continue;
                     }
 
-                    Vector3 position = owner.RealScreenPosition; // _allOverheads[i].Item2;
+                    Vector3 position = owner.RealScreenPosition; 
 
                     if (owner is Mobile m)
                     {
@@ -79,28 +81,50 @@ namespace ClassicUO.Game.Managers
                     View v = overhead.View;
                     Rectangle current = new Rectangle((int) position.X - v.Bounds.X, (int) position.Y - v.Bounds.Y, v.Bounds.Width, v.Bounds.Height);
 
-                    for (TextOverhead ov = (TextOverhead) overhead.Right; ov != null; ov = (TextOverhead)ov.Right)
+                    if (skip == 0)
                     {
-                        View b = ov.View;
-                        Vector3 pos2 = ov.Parent.RealScreenPosition; 
-
-                        if (ov.Parent is Mobile mm)
+                        for (TextOverhead ov = (TextOverhead) overhead.Right; ov != null; ov = (TextOverhead) ov.Right)
                         {
-                            GetAnimationDimensions(mm, 0xFF, out int height, out int centerY);
+                            View b = ov.View;
+                            Vector3 pos2 = ov.Parent.RealScreenPosition;
 
-                            pos2 = new Vector3
+                            if (ov.Parent is Mobile mm)
                             {
-                                X = pos2.X + mm.Offset.X,
-                                Y = pos2.Y + (mm.Offset.Y - mm.Offset.Z) - (height + centerY + 8),
-                                Z = pos2.Z
-                            };
+                                GetAnimationDimensions(mm, 0xFF, out int height, out int centerY);
+
+                                pos2 = new Vector3
+                                {
+                                    X = pos2.X + mm.Offset.X,
+                                    Y = pos2.Y + (mm.Offset.Y - mm.Offset.Z) - (height + centerY + 8),
+                                    Z = pos2.Z
+                                };
+                            }
+
+                            Rectangle next = new Rectangle((int) pos2.X - b.Bounds.X, (int) pos2.Y - b.Bounds.Y, b.Bounds.Width, b.Bounds.Height);
+
+                            overhead.IsOverlapped = current.Intersects(next);
+
+                            if (overhead.IsOverlapped)
+                            {
+                                bool startSkip = false;
+                                foreach (TextOverhead parentOverhead in owner.Overheads)
+                                {
+                                    parentOverhead.IsOverlapped = true;
+
+                                    if (parentOverhead == overhead)
+                                    {
+                                        startSkip = true;
+                                    }
+                                    else if (startSkip)
+                                        skip++;
+                                }
+
+                                break;
+                            }
                         }
-
-                        Rectangle next = new Rectangle((int)pos2.X - b.Bounds.X, (int)pos2.Y - b.Bounds.Y, b.Bounds.Width, b.Bounds.Height);
-
-                        if (overhead.IsOverlapped = current.Intersects(next))
-                            break;
                     }
+                    else
+                        skip--;
 
                     v.Draw(batcher, position, list);
                 }
@@ -172,7 +196,6 @@ namespace ClassicUO.Game.Managers
                 });
                 _toRemoveDamages.Clear();
             }
-
         }
 
 
@@ -264,7 +287,7 @@ namespace ClassicUO.Game.Managers
         {
             if (!_damageOverheads.TryGetValue(obj, out Deque<DamageOverhead> deque) || deque == null)
             {
-                deque = new Deque<DamageOverhead>(10);
+                deque = new Deque<DamageOverhead>();
                 _damageOverheads[obj] = deque;
             }
 

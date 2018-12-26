@@ -62,8 +62,6 @@ namespace ClassicUO.Game.Gumps.UIGumps
             _button.MouseDown += (sender, e) =>
             {
                 _clicked = true;
-                Console.WriteLine(_clicked);
-
             };
 
             _button.MouseUp += (sender, e) =>

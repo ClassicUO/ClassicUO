@@ -343,7 +343,12 @@ namespace ClassicUO.Game.Scenes
 
             if (e.keysym.sym == SDL.SDL_Keycode.SDLK_0)
             {
-               
+
+                foreach (Mobile mobile in World.Mobiles)
+                {
+                    mobile.AddOverhead(MessageType.Regular, "AAAAAAAAAAAAAAAAAAAAA", 1, 0x45, true);
+                }
+
                 //Task.Run(async () =>
                 //{
                 //    while (true)

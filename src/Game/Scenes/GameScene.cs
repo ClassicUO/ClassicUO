@@ -153,6 +153,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
             Chat.Message += ChatOnMessage;
+
             //Coroutine.Start(this, CastSpell());
         }
 
@@ -217,6 +218,7 @@ namespace ClassicUO.Game.Scenes
 
                     break;
                 default:
+                    Log.Message(LogTypes.Warning, $"Unhandled text type {e.Type}  -  text: '{e.Text}'");
                     return;
             }
 
@@ -229,7 +231,10 @@ namespace ClassicUO.Game.Scenes
             {
                 yield return new WaitTime(TimeSpan.FromMilliseconds(1));
 
-                GameActions.CastSpell(1);
+                foreach (Mobile mobile in World.Mobiles)
+                {
+                    mobile.AddOverhead(MessageType.Regular, "AAAAAAAAAAAAAAAAAAAAA", 1, 0x45, true);
+                }
             }
 
         }
