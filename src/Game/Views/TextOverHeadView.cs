@@ -73,7 +73,7 @@ namespace ClassicUO.Game.Views
                 long delay = ((5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32) >> 5;
 
                 if (parent.TimeToLive <= 0.0f)
-                    parent.TimeToLive = delay;
+                    parent.TimeToLive = (delay >> 31) + delay;
             }
 
 
