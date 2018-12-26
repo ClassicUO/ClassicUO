@@ -33,7 +33,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class SpellbookGump : Gump
     {
         private readonly Item _spellBook;
-        private readonly sbyte[] _spells = new sbyte[64];
+        private readonly bool[] _spells = new bool[64];
         private int _maxPage;
         private GumpPic _pageCornerLeft, _pageCornerRight;
         private SpellBookType _spellBookType;
@@ -120,7 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_spellBook.HasSpell(circle, i))
                     {
-                        _spells[circle * 8 + i - 1] = 1;
+                        _spells[circle * 8 + i - 1] = true;
                         totalSpells++;
                     }
                 }
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int k = 0; k < spellsOnPage; k++)
                     {
-                        if (_spells[offs] > 0)
+                        if (_spells[offs])
                         {
                             GetSpellNames(offs, out string name, out string abbreviature, out string reagents);
 
@@ -247,31 +247,36 @@ namespace ClassicUO.Game.UI.Gumps
             bool haveReagents = _spellBookType <= SpellBookType.Necromancy;
             bool haveAbbreviature = _spellBookType != SpellBookType.Bushido && _spellBookType != SpellBookType.Ninjitsu;
 
-            for (int i = 0; i < maxSpellsCount; i++)
+            for (int i = 0, spellsDone = 0; i < maxSpellsCount; i++)
             {
-                if (_spells[i] <= 0)
+                if (!_spells[i])
+                {
                     continue;
+                }
 
+                
                 int iconX = 62;
                 int topTextX = 87;
                 int iconTextX = 112;
                 uint iconSerial = 100 + (uint) i;
 
 
-                if (i > 0)
+                if (spellsDone > 0)
                 {
-                    if (i % 2 != 0)
+                    if (spellsDone % 2 != 0)
                     {
                         iconX = 225;
                         topTextX = 244 - 20;
                         iconTextX = 275;
-                        iconSerial = 1000 + (uint) (i);  
+                        iconSerial = 1000 + (uint) i;  
                     }
                     else
                     {
                         page1++;
                     }                       
                 }
+
+                spellsDone++;
 
                 GetSpellNames(i, out string name, out string abbreviature, out string reagents);
 
