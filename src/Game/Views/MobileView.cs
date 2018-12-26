@@ -48,6 +48,7 @@ namespace ClassicUO.Game.Views
             HasShadow = true;
         }
 
+
         public override bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList)
         {
             if (GameObject.IsDisposed)
@@ -79,6 +80,21 @@ namespace ClassicUO.Game.Views
             FrameInfo = Rectangle.Empty;
             Rectangle rect = Rectangle.Empty;
 
+            Hue hue = 0;
+            if (Engine.Profile.Current.HighlightMobilesByFlags)
+            {
+                Mobile m = (Mobile)GameObject;
+
+                if (m.IsPoisoned)
+                    hue = 0x0044;
+
+                if (m.IsParalyzed)
+                    hue = 0x014C;
+
+                if (m.NotorietyFlag != NotorietyFlag.Invulnerable && m.IsYellowHits)
+                    hue = 0x0030;
+            }
+
             for (int i = 0; i < _layerCount; i++)
             {
                 ViewLayer vl = _frames[i];
@@ -108,7 +124,7 @@ namespace ClassicUO.Game.Views
 
                 Texture = frame;
                 Bounds = new Rectangle(x, -y, frame.Width, frame.Height);
-                HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : vl.Hue, vl.IsParital, 0, false);
+                HueVector = ShaderHuesTraslator.GetHueVector(mobile.IsHidden ? 0x038E : hue == 0 ? vl.Hue : hue, vl.IsParital, 0, false);
                 base.Draw(batcher, position, objectList);
                 Pick(frame, Bounds, position, objectList);
             }

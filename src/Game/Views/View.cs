@@ -183,7 +183,7 @@ namespace ClassicUO.Game.Views
             return true;
         }
 
-        public virtual Vector3 SelectedHue { get; protected set; }
+        public virtual Hue SelectedHue { get; protected set; }
 
         protected virtual void MousePick(MouseOverList list, SpriteVertex[] vertex)
         {

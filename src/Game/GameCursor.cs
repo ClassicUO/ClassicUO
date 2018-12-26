@@ -226,12 +226,11 @@ namespace ClassicUO.Game
                 _draggedItemTexture.Ticks = (long) totalMS;
         }
 
-        private RenderedText _text = new RenderedText()
+        private readonly RenderedText _text = new RenderedText()
         {
             Font = 1,
             FontStyle = FontStyle.BlackBorder,
-            IsUnicode =  true,
-            
+            IsUnicode =  true,         
         };
 
         public void Draw(Batcher2D sb)
@@ -344,13 +343,14 @@ namespace ClassicUO.Game
         private ushort AssignGraphicByState()
         {
             int war = World.InGame && World.Player.InWarMode ? 1 : 0;
-            ushort result = _cursorData[war, 9];
 
             if (TargetManager.IsTargeting)
                 return _cursorData[war, 12];
 
             if (Engine.UI.IsDragging)
-                return (ushort) (war == 1 ? 0x205B : 0x2072);
+                return _cursorData[war, 8];
+
+            ushort result = _cursorData[war, 9];
 
             if (!Engine.UI.IsMouseOverWorld)
                 return result;

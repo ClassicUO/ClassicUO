@@ -87,7 +87,7 @@ namespace ClassicUO.Game.Managers
                 }
             };
 
-            Control lastLeftUp = null, lastRight = null;
+            Control lastLeftUp = null;
 
             Engine.Input.LeftMouseButtonUp += (sender, e) =>
             {
@@ -173,8 +173,6 @@ namespace ClassicUO.Game.Managers
 
                     if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
                         _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Right);
-
-                    lastRight = MouseOverControl;
                 }
                 else
                     _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Right);
