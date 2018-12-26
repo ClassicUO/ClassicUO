@@ -27,12 +27,12 @@ using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Gumps;
-using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.System;
+using ClassicUO.Game.UI;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -1492,7 +1492,7 @@ namespace ClassicUO.Network
                     Y = 100,
                     BookPageCount = p.ReadUShort(),
                     BookTitle =
-                    new Game.Gumps.Controls.TextBox(new TextEntry(BookGump.DefaultFont, 47, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
+                    new TextBox(new TextEntry(BookGump.DefaultFont, 47, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
                     {
                         X = 40,
                         Y = 60,
@@ -1503,7 +1503,7 @@ namespace ClassicUO.Network
                         Debug = true
                     },
                     BookAuthor =
-                    new Game.Gumps.Controls.TextBox(new TextEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
+                    new TextBox(new TextEntry(BookGump.DefaultFont, 29, 150, 150, BookGump.IsNewBookD4, Renderer.FontStyle.None, 0), editable)
                     {
                         X = 40,
                         Y = 160,

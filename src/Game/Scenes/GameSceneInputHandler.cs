@@ -25,9 +25,9 @@ using System.Threading.Tasks;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Gumps.Controls;
-using ClassicUO.Game.Gumps.UIGumps;
-using ClassicUO.Game.System;
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Interfaces;
 using ClassicUO.IO;

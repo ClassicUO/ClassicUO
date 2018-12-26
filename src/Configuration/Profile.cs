@@ -26,7 +26,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassicUO.Game;
-using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 

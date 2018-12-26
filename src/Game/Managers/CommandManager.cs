@@ -18,15 +18,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using ClassicUO.Utility.Logging;
 
-namespace ClassicUO.Game.System
+namespace ClassicUO.Game.Managers
 {
     public static class CommandManager
     {

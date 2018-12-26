@@ -21,7 +21,6 @@
 using System;
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Utility;
 

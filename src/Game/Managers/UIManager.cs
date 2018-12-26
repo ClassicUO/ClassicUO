@@ -25,8 +25,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using ClassicUO.Game.Gumps.Controls;
-using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;

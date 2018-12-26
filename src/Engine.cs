@@ -30,10 +30,9 @@ using System.Text;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
-using ClassicUO.Game.Gumps;
-using ClassicUO.Game.Gumps.UIGumps;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;

@@ -20,8 +20,6 @@
 #endregion
 using System;
 
-using ClassicUO.Game.System;
-
 namespace ClassicUO.Game.Scenes
 {
     public enum ScenesType

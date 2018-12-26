@@ -26,13 +26,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Gumps.UIGumps;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
-using ClassicUO.IO.Resources;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 
-namespace ClassicUO.Game.System
+namespace ClassicUO.Game.Managers
 {
     public class PartyManager
     {
