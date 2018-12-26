@@ -27,9 +27,9 @@ namespace ClassicUO.Game.UI.Gumps
 {
     class MessageBoxGump : Gump
     {
-        private readonly Action<MessageBoxGump> _action;
+        private readonly Action<bool> _action;
 
-        public MessageBoxGump(int x, int y, int w, int h, string message, Action<MessageBoxGump> action) : base(0, 0)
+        public MessageBoxGump(int w, int h, string message, Action<bool> action) : base(0, 0)
         {
             CanMove = false;
             CanCloseWithRightClick = false;
@@ -40,8 +40,6 @@ namespace ClassicUO.Game.UI.Gumps
             ControlInfo.Layer = UILayer.Over;
             WantUpdateSize = false;
 
-            X = x;
-            Y = y;
             Width = w;
             Height = h;
             _action = action;
@@ -57,12 +55,19 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = 45
             });
 
+            // OK
             AddChildren(new Button(0, 0x0481, 0x0482, 0x0483)
             {
-                X = (w >> 1) - 13,
-                Y = h - 45,
+                X = 100,
+                Y = 75,
                 ButtonAction = ButtonAction.Activate,               
             });
+
+            X = (Engine.WindowWidth - Width) >> 1;
+            Y = (Engine.WindowHeight - Height) >> 1;
+
+
+            WantUpdateSize = false;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -70,7 +75,8 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 0:
-                    _action(this);
+                    _action(true);
+                    Dispose();
                     break;
             }
         }

@@ -147,6 +147,7 @@
     <Compile Include="IO\Resources\MapLoader.cs" />
     <Compile Include="IO\Resources\MultiLoader.cs" />
     <Compile Include="IO\Resources\SkillsLoader.cs" />
+    <Compile Include="IO\Resources\SoundsLoader.cs" />
     <Compile Include="IO\Resources\SpeechesLoader.cs" />
     <Compile Include="IO\Resources\TexmapsLoader.cs" />
     <Compile Include="IO\Resources\TileDataLoader.cs" />
@@ -182,7 +183,7 @@
     <Compile Include="Game\UI\Gumps\Login\LoginGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\MainLoginGump.cs" />
     <Compile Include="Game\UI\Gumps\Login\ServerSelectionGump.cs" />
-    <Compile Include="Game\UI\Gumps\LogoutGump.cs" />
+    <Compile Include="Game\UI\Gumps\QuestionGump.cs" />
     <Compile Include="Game\UI\Gumps\HealthBarGump.cs" />
     <Compile Include="Game\UI\Gumps\OptionsGump1.cs" />
     <Compile Include="Game\UI\Gumps\PartyGumpAdvanced.cs" />

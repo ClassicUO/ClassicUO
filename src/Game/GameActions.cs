@@ -23,6 +23,7 @@ using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 
 using Microsoft.Xna.Framework;
@@ -49,7 +50,28 @@ namespace ClassicUO.Game
             => DoubleClick(serial | 0x80000000);
 
         public static void Attack(Serial serial)
-            => Socket.Send(new PAttackRequest(serial));
+        {
+            if (Engine.Profile.Current.EnabledCriminalActionQuery)
+            {
+                Mobile m = World.Mobiles.Get(serial);
+
+                if (m != null && World.Player.NotorietyFlag == NotorietyFlag.Innocent && m.NotorietyFlag == NotorietyFlag.Innocent)
+                {
+
+                    QuestionGump messageBox = new QuestionGump("This may flag\nyou criminal!",
+                                                                   s =>
+                                                                   {
+                                                                       if (s)
+                                                                           Socket.Send(new PAttackRequest(serial));
+                                                                   });
+
+                    Engine.UI.Add(messageBox);
+                    return;
+                }
+            }
+
+            Socket.Send(new PAttackRequest(serial));
+        } 
 
         public static void DoubleClick(Serial serial)
         {
