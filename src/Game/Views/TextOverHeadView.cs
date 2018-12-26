@@ -58,13 +58,24 @@ namespace ClassicUO.Game.Views
             //Bounds.Width = Texture.Width;
             //Bounds.Height = Texture.Height;
 
-            int delay = Engine.Profile.Current.SpeechDelay;
+            if (Engine.Profile.Current.ScaleSpeechDelay)
+            {
+                int delay = Engine.Profile.Current.SpeechDelay;
 
-            if (delay < 10)
-                delay = 10;
+                if (delay < 10)
+                    delay = 10;
 
-            if (parent.TimeToLive <= 0.0f)
-                parent.TimeToLive = 4000 * _text.LinesCount * delay / 100.0f;
+                if (parent.TimeToLive <= 0.0f)
+                    parent.TimeToLive = 4000 * _text.LinesCount * delay / 100.0f;
+            }
+            else
+            {
+                long delay = ((5497558140000 * Engine.Profile.Current.SpeechDelay) >> 32) >> 5;
+
+                if (parent.TimeToLive <= 0.0f)
+                    parent.TimeToLive = delay;
+            }
+
 
             parent.Initialized = true;
 
