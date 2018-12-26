@@ -76,7 +76,7 @@ namespace ClassicUO
         //private const string DEBUG_STRING_3 = "- Selected: {0}";
 
 
-        private static int _fpsLimit = MIN_FPS - 1;
+        private static int _fpsLimit = 30;
         private static Engine _engine;
         private readonly GraphicsDeviceManager _graphicDeviceManager;
         private readonly StringBuilder _sb = new StringBuilder();
@@ -143,6 +143,8 @@ namespace ClassicUO
             }
         }
 
+        public static Version Version { get; } = new Version(0, 0, 0, 1);
+
         public static int CurrentFPS { get; private set; }
 
         /// <summary>
@@ -197,8 +199,6 @@ namespace ClassicUO
 
         public static SceneManager SceneManager => _engine._sceneManager;
 
-        public static Assembly Assembly { get; private set; }
-
         public static string ExePath { get; private set; }
 
         public static DebugInfo DebugInfo => _engine._debugInfo;
@@ -231,8 +231,7 @@ namespace ClassicUO
         {
             Log.Start(LogTypes.All);
 
-            Assembly = Assembly.GetExecutingAssembly();
-            ExePath = Path.GetDirectoryName(Assembly.Location);
+            ExePath = Directory.GetCurrentDirectory();
 
 #if !DEBUG
             AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
