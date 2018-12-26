@@ -78,7 +78,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 X = 610,
                 Y = 445,
-                ButtonAction = ButtonAction.Activate
+                ButtonAction = ButtonAction.Activate,
+                IsVisible = false
             });
 
             AddChildren(_nextArrow1 = new Button((int)Buttons.NextArrow, 0x15A5, 0x15A6, 0x15A5)
@@ -86,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 610,
                 Y = 445,
                 ButtonAction = ButtonAction.Activate,
-                IsVisible = false
+                IsVisible = true
             });
 
             // Account Text Input Background
@@ -153,7 +154,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 X = 335,
                 Y = 343,
                 Width = 190,
-                Height = 25
+                Height = 25,
+                Hue = 0x034F,
             });
 
             AddChildren(_textboxPassword = new TextBox(5, 32, 190, 190, false)
@@ -162,6 +164,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Y = 385,
                 Width = 190,
                 Height = 25,
+                Hue = 0x034F,
                 IsPassword = true
             });
             _textboxAccount.SetText(Engine.GlobalSettings.Username);
@@ -179,6 +182,23 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _nextArrow0.IsVisible = _nextArrow1.IsVisible;
                 _nextArrow1.IsVisible = !_nextArrow0.IsVisible;
             }
+
+            if (_textboxPassword.HasKeyboardFocus)
+            {
+                if (_textboxPassword.Hue != 0x0021)
+                    _textboxPassword.Hue = 0x0021;
+            }
+            else if (_textboxPassword.Hue != 0x034F)
+                _textboxPassword.Hue = 0x034F;
+
+
+            if (_textboxAccount.HasKeyboardFocus)
+            {
+                if (_textboxAccount.Hue != 0x0021)
+                    _textboxAccount.Hue = 0x0021;
+            }
+            else if (_textboxAccount.Hue != 0x034F)
+                _textboxAccount.Hue = 0x034F;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -196,6 +216,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
         }
 
+        protected override void OnInitialize()
+        {
+            base.OnInitialize();
+
+            if (!string.IsNullOrEmpty(_textboxAccount.Text))
+                _textboxPassword.SetKeyboardFocus();
+        }
 
         private enum Buttons
         {
