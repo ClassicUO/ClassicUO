@@ -175,6 +175,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             base.Update(totalMS, frameMS);
 
+            if (IsDisposed)
+                return;
+
             if (_time < totalMS)
             {
                 _time = (float) totalMS + 1000;

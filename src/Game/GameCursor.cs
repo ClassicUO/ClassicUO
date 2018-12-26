@@ -335,6 +335,10 @@ namespace ClassicUO.Game
                     _tooltip.SetText(Engine.UI.MouseOverControl.Tooltip);
                 _tooltip.Draw(batcher, new Point(position.X, position.Y + 24));
             }
+            else if (!_tooltip.IsEmpty)
+            {
+                _tooltip.Clear();
+            }
         }
 
         private ushort AssignGraphicByState()
@@ -344,6 +348,9 @@ namespace ClassicUO.Game
 
             if (TargetManager.IsTargeting)
                 return _cursorData[war, 12];
+
+            if (Engine.UI.IsDragging)
+                return (ushort) (war == 1 ? 0x205B : 0x2072);
 
             if (!Engine.UI.IsMouseOverWorld)
                 return result;

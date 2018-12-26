@@ -239,6 +239,8 @@ namespace ClassicUO.Game.Managers
 
         public bool IsModalControlOpen => _gumps.Any(s => s.ControlInfo.IsModal);
 
+        public bool IsDragging => _isDraggingControl && _draggingControl != null;
+
         //private bool ObjectsBlockingInputExists => _inputBlockingObjects.Count > 0;
 
         //public void AddInputBlocker(object obj)

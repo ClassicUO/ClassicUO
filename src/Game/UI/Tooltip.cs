@@ -39,6 +39,8 @@ namespace ClassicUO.Game.UI
         private RenderedText _renderedText;
         private string _textHTML;
         private float _lastHoverTime;
+        private readonly StringBuilder _sb = new StringBuilder();
+        private readonly StringBuilder _sbHTML = new StringBuilder();
 
         public string Text { get; protected set; }
 
@@ -101,6 +103,8 @@ namespace ClassicUO.Game.UI
 
         public void Clear()
         {
+            _gameObject = null;
+            _hash = 0;
             _textHTML = Text = null;
         }
 
@@ -115,9 +119,7 @@ namespace ClassicUO.Game.UI
             }
         }
 
-        private StringBuilder _sb = new StringBuilder();
-        private StringBuilder _sbHTML = new StringBuilder();
-
+       
         private string ReadProperties(Entity obj, out string htmltext)
         {
             _sb.Clear();
