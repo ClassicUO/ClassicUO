@@ -83,15 +83,13 @@ namespace ClassicUO.Game.Views
             Hue hue = 0;
             if (Engine.Profile.Current.HighlightMobilesByFlags)
             {
-                Mobile m = (Mobile)GameObject;
-
-                if (m.IsPoisoned)
+                if (mobile.IsPoisoned)
                     hue = 0x0044;
 
-                if (m.IsParalyzed)
+                if (mobile.IsParalyzed)
                     hue = 0x014C;
 
-                if (m.NotorietyFlag != NotorietyFlag.Invulnerable && m.IsYellowHits)
+                if (mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.IsYellowHits)
                     hue = 0x0030;
             }
 
