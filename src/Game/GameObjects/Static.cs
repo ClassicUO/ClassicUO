@@ -28,7 +28,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public class Static : GameObject
+    internal class Static : GameObject
     {
         public Static(Graphic graphic, Hue hue, int index)
         {

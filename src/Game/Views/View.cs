@@ -35,7 +35,7 @@ using IDrawable = ClassicUO.Interfaces.IDrawable;
 
 namespace ClassicUO.Game.Views
 {
-    public abstract class View : IDrawable, IColorable
+    internal abstract class View : IDrawable, IColorable
     {
         protected static float PI = (float) Math.PI;
         private Vector3 _storedHue;

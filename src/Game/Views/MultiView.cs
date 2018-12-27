@@ -17,7 +17,7 @@ using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.Views
 {
-    public class MultiView : View
+    internal class MultiView : View
     {
         private readonly float _alpha;
 

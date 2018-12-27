@@ -33,7 +33,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Views
 {
-    public class AnimatedEffectView : View
+    internal class AnimatedEffectView : View
     {
         private Graphic _displayedGraphic = Graphic.Invalid;
 

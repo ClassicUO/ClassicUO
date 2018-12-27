@@ -32,8 +32,8 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
-{   
-    public class PlayerMobile : Mobile
+{
+    internal class PlayerMobile : Mobile
     {
         private readonly Ability[] _ability = new Ability[2]
         {

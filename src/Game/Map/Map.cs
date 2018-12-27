@@ -37,7 +37,7 @@ using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class Map : IDisposable
+    internal sealed class Map : IDisposable
     {
         private readonly bool[] _blockAccessList = new bool[0x1000];
         //private const int CHUNKS_NUM = 5;

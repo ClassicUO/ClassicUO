@@ -28,7 +28,7 @@ using ClassicUO.Utility.Coroutines;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public sealed class House : IEquatable<Serial>
+    internal sealed class House : IEquatable<Serial>
     {
         public House(Serial serial, uint revision, bool isCustom)
         {

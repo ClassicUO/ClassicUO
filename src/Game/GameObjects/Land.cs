@@ -29,7 +29,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public class Land : GameObject
+    internal class Land : GameObject
     {
         public Rectangle Rectangle;
 

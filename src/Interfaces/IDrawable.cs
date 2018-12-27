@@ -25,7 +25,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Interfaces
 {
-    public interface IDrawable
+    internal interface IDrawable
     {
         bool AllowedToDraw { get; set; }
 
@@ -34,7 +34,7 @@ namespace ClassicUO.Interfaces
         bool Draw(Batcher2D batcher, Vector3 position, MouseOverList objectList);
     }
 
-    public interface IDrawableUI
+    internal interface IDrawableUI
     {
         bool AllowedToDraw { get; set; }
 

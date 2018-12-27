@@ -33,7 +33,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class Tile
+    internal sealed class Tile
     {
         private GameObject _firstNode;
 

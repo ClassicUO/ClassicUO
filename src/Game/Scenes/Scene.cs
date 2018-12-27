@@ -33,7 +33,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Scenes
 {
-    public abstract class Scene : IUpdateable, IDisposable
+    internal abstract class Scene : IUpdateable, IDisposable
     {
         protected Scene()
         {

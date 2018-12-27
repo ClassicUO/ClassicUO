@@ -34,7 +34,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Scenes
 {
-    public sealed class LoginScene : Scene
+    internal sealed class LoginScene : Scene
     {
         public enum LoginRejectionReasons : byte
         {

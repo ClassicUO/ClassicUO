@@ -28,7 +28,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public sealed class Multi : GameObject
+    internal sealed class Multi : GameObject
     {
         public Multi(Graphic graphic)
         {

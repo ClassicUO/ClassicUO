@@ -33,7 +33,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Views
 {
-    public class TileView : View
+    internal class TileView : View
     {
         private readonly Vector3[] _normals = new Vector3[4];
         private readonly SpriteVertex[] _vertex = new SpriteVertex[4]

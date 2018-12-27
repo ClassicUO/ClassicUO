@@ -40,7 +40,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Scenes
 {
-    public partial class GameScene : Scene
+    internal partial class GameScene : Scene
     {
         private RenderTarget2D _renderTarget;
         private long _timePing;

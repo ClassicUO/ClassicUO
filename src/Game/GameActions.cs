@@ -119,14 +119,14 @@ namespace ClassicUO.Game
             Socket.Send(new PPartyChangeLootTypeRequest(isLootable));
         }
 
-        public static void PickUp(Item item, Point point, int? amount = null)
+        public static void PickUp(Serial item, Point point, int? amount = null)
         {
             PickUp(item, point.X, point.Y, amount);
         }
 
-        public static void PickUp(Item item, int x, int y, int? amount = null)
+        public static void PickUp(Serial item, int x, int y, int? amount = null)
         {
-            _pickUpAction(item, x, y, amount);
+            _pickUpAction(World.Items.Get(item), x, y, amount);
         }
 
         public static void DropItem(Serial serial, int x, int y, int z, Serial container)
@@ -139,7 +139,7 @@ namespace ClassicUO.Game
             DropItem(serial, position.X, position.Y, position.Z, container);
         }
 
-        public static void Equip(Serial serial, Layer layer, Mobile target)
+        public static void Equip(Serial serial, Layer layer, Serial target)
         {
             Socket.Send(new PEquipRequest(serial, layer, target));
         }
@@ -174,7 +174,7 @@ namespace ClassicUO.Game
             Socket.Send(new PTargetCancel(cursorID, cursorType));
         }
 
-        public static void TargetObject(Entity entity, Serial cursorID, byte cursorType)
+        public static void TargetObject(Serial entity, Serial cursorID, byte cursorType)
         {
             Socket.Send(new PTargetObject(entity, cursorID, cursorType));
         }
@@ -228,9 +228,9 @@ namespace ClassicUO.Game
 
         public static void SystemMessage(string message, ushort hue) => Chat.Print(message, hue);
 
-        public static void MessageOverhead(string message, Entity entity) => entity.Print(message);
+        public static void MessageOverhead(string message, Serial entity) => World.Get(entity)?.Print(message);
 
-        public static void MessageOverhead(string message, ushort hue, Entity entity) => entity.Print(message, hue);
+        public static void MessageOverhead(string message, ushort hue, Serial entity) => World.Get(entity)?.Print(message, hue);
 
         public static void AcceptTrade(Serial serial, bool accepted)
             => Socket.Send(new PTradeResponse(serial, 2, accepted));

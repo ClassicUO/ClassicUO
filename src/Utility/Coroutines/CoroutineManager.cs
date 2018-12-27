@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Utility.Coroutines
 {
-    public class CoroutineManager
+    internal class CoroutineManager
     {
         private static QueuedPool<Coroutine> _pool = new QueuedPool<Coroutine>();
         private List<Coroutine> _coroutines = new List<Coroutine>();

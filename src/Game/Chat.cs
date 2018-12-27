@@ -67,7 +67,7 @@ namespace ClassicUO.Game
         None = 0xFF
     }
 
-    public static class Chat
+    internal static class Chat
     {
         private const ushort defaultHue = 0x0017;
         private static readonly Mobile _system = new Mobile(Serial.Invalid)
@@ -121,7 +121,7 @@ namespace ClassicUO.Game
         }
     }
 
-    public class UOMessageEventArgs : EventArgs
+    internal class UOMessageEventArgs : EventArgs
     {
         public UOMessageEventArgs(Entity parent, string text, Hue hue, MessageType type, MessageFont font, bool unicode = false, string lang = null)
         {

@@ -26,7 +26,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class WorldViewport : Control
+    internal class WorldViewport : Control
     {
         private readonly GameScene _scene;
         private Rectangle _rect;

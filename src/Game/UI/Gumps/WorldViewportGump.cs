@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    public class WorldViewportGump : Gump
+    internal class WorldViewportGump : Gump
     {
         private const int BORDER_WIDTH = 5;
         private const int BORDER_HEIGHT = 5;

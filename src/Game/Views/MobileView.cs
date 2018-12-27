@@ -37,7 +37,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Views
 {
-    public class MobileView : View
+    internal class MobileView : View
     {
         private readonly ViewLayer[] _frames;
         private int _layerCount;
@@ -289,7 +289,7 @@ namespace ClassicUO.Game.Views
             }
         }
 
-        public static bool IsCovered(Mobile mobile, Layer layer)
+        internal static bool IsCovered(Mobile mobile, Layer layer)
         {
             switch (layer)
             {

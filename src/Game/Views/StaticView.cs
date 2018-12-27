@@ -29,8 +29,8 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
-{   
-    public class StaticView : View
+{
+    internal class StaticView : View
     {
         private readonly bool _isFoliage, _isPartialHue;
         private float _alpha;

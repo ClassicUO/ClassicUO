@@ -27,7 +27,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public partial class Mobile
+    internal partial class Mobile
     {
         private static readonly byte[][] _animAssociateTable =
         {

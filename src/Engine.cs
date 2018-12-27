@@ -46,7 +46,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO
 {
-    public class DebugInfo
+    internal class DebugInfo
     {
         public int MobilesRendered { get; set; }
         public int ItemsRendered { get; set; }
@@ -61,7 +61,7 @@ namespace ClassicUO
         }
     }
 
-    public class Engine : Microsoft.Xna.Framework.Game
+    internal class Engine : Microsoft.Xna.Framework.Game
     { 
         private const int MIN_FPS = 15;
         private const int MAX_FPS = 250;

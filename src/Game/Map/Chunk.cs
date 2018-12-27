@@ -32,7 +32,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Map
 {
-    public sealed class Chunk : IDisposable
+    internal sealed class Chunk : IDisposable
     {
         public Chunk(ushort x, ushort y)
         {

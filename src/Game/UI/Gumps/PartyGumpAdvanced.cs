@@ -251,7 +251,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
     }
 
-    public class PartyListEntry : Control
+    internal class PartyListEntry : Control
     {
         public readonly Button KickButton;
         public readonly PartyMember Member;

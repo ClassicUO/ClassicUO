@@ -8,7 +8,7 @@ using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game.Managers
 {
-    public class HouseManager
+    internal class HouseManager
     {
         private readonly Dictionary<Serial, House> _houses = new Dictionary<Serial, House>();
 

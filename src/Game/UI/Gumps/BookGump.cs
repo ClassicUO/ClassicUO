@@ -13,7 +13,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    public class BookGump : Gump
+    internal class BookGump : Gump
     {
         public TextBox BookTitle, BookAuthor;
         public ushort BookPageCount { get; internal set; }

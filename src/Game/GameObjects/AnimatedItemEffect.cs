@@ -22,7 +22,7 @@ using ClassicUO.Game.Views;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public class AnimatedItemEffect : GameEffect
+    internal class AnimatedItemEffect : GameEffect
     {
         public AnimatedItemEffect(Graphic graphic, Hue hue, int duration)
         {

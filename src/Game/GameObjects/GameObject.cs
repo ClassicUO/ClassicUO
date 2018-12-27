@@ -39,7 +39,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
+    internal abstract class GameObject : IUpdateable, IDisposable, INode<GameObject>
     {
         private Position _position = Position.Invalid;
         private View _view;

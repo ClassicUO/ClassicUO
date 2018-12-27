@@ -33,7 +33,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Views
 {
-    public class ItemView : View
+    internal class ItemView : View
     {
         private Graphic _originalGraphic;
 

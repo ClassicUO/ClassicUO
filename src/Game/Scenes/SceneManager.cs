@@ -28,7 +28,7 @@ namespace ClassicUO.Game.Scenes
         Game
     }
 
-    public sealed class SceneManager
+    internal sealed class SceneManager
     {
         public Scene CurrentScene { get; private set; }
 

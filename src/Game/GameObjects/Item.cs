@@ -32,7 +32,7 @@ using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public class Item : Entity
+    internal class Item : Entity
     {
         private ushort _amount;
         private Serial _container;

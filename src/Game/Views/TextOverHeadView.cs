@@ -33,7 +33,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.Views
 {
-    public class TextOverheadView : View
+    internal class TextOverheadView : View
     {
         private readonly RenderedText _text;
 
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.Views
 
     }
 
-    public class DamageOverheadView : TextOverheadView
+    internal class DamageOverheadView : TextOverheadView
     {
         public DamageOverheadView(DamageOverhead parent, int maxwidth = 0, ushort hue = 0xFFFF, byte font = 0, bool isunicode = false, FontStyle style = FontStyle.None) : base(parent, maxwidth, hue, font, isunicode, style)
         {

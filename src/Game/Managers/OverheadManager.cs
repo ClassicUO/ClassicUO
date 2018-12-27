@@ -39,7 +39,7 @@ using IUpdateable = ClassicUO.Interfaces.IUpdateable;
 
 namespace ClassicUO.Game.Managers
 {
-    public class OverheadManager : IUpdateable, IDisposable
+    internal class OverheadManager : IUpdateable, IDisposable
     {
         private readonly Dictionary<GameObject, Deque<DamageOverhead>> _damageOverheads = new Dictionary<GameObject, Deque<DamageOverhead>>();
         private readonly List<GameObject> _toRemoveDamages = new List<GameObject>();
@@ -283,7 +283,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public void AddDamage(GameObject obj, DamageOverhead text)
+        internal void AddDamage(GameObject obj, DamageOverhead text)
         {
             if (!_damageOverheads.TryGetValue(obj, out Deque<DamageOverhead> deque) || deque == null)
             {

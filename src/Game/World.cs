@@ -30,7 +30,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game
 {
-    public static class World
+    internal static class World
     {
         private static readonly EffectManager _effectManager = new EffectManager();
 
@@ -223,7 +223,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        public static void AddEffect(GameEffect effect)
+        internal static void AddEffect(GameEffect effect)
         {
             _effectManager.Add(effect);
         }

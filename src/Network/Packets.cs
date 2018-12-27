@@ -119,7 +119,7 @@ namespace ClassicUO.Network
         }
     }
 
-    public sealed class PCreateCharacter : PacketWriter
+    internal sealed class PCreateCharacter : PacketWriter
     {
         public PCreateCharacter(PlayerMobile character, uint clientIP, int serverIndex, uint slot) : base(0x00)
         {
@@ -604,17 +604,19 @@ namespace ClassicUO.Network
 
     public sealed class PTargetObject : PacketWriter
     {
-        public PTargetObject(Entity entity, Serial cursorID, byte cursorType) : base(0x6C)
+        public PTargetObject(Serial entity, Serial cursorID, byte cursorType) : base(0x6C)
         {
+            var e = World.Get(entity);
+
             WriteByte(0x00);
             WriteUInt(cursorID);
             WriteByte(cursorType);
-            WriteUInt(entity.Serial);
-            WriteUShort(entity.Position.X);
-            WriteUShort(entity.Position.Y);
+            WriteUInt(entity);
+            WriteUShort(e.X);
+            WriteUShort(e.Y);
             WriteByte(0xFF);
-            WriteSByte(entity.Position.Z);
-            WriteUShort(entity.Graphic);
+            WriteSByte(e.Z);
+            WriteUShort(e.Graphic);
         }
     }
 

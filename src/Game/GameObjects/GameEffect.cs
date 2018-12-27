@@ -27,7 +27,7 @@ using ClassicUO.IO.Resources;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class GameEffect : GameObject
+    internal abstract class GameEffect : GameObject
     {
         private readonly List<GameEffect> _children;
 

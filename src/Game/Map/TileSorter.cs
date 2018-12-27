@@ -27,7 +27,7 @@ using Multi = ClassicUO.Game.GameObjects.Multi;
 
 namespace ClassicUO.Game.Map
 {
-    public static class TileSorter
+    internal static class TileSorter
     {
         // https://www.geeksforgeeks.org/merge-sort-for-doubly-linked-list/
 

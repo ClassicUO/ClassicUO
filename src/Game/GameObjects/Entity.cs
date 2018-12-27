@@ -28,7 +28,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.GameObjects
 {
-    public abstract class Entity : GameObject
+    internal abstract class Entity : GameObject
     {
         private readonly ConcurrentDictionary<int, Property> _properties = new ConcurrentDictionary<int, Property>();
         protected Delta _delta;

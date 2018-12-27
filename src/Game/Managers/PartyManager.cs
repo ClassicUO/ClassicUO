@@ -33,7 +33,7 @@ using ClassicUO.Utility;
 
 namespace ClassicUO.Game.Managers
 {
-    public class PartyManager
+    internal class PartyManager
     {
         private bool _allowPartyLoot;
 
@@ -214,7 +214,7 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    public class PartyMember
+    internal class PartyMember
     {
         public readonly Serial Serial;
         private string _name;

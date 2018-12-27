@@ -32,7 +32,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI
 {
-    public class Tooltip 
+    internal class Tooltip 
     {
         private Entity _gameObject;
         private uint _hash;
