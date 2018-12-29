@@ -106,7 +106,7 @@ namespace ClassicUO.Game.Views
                 {
                     if (TargetLineGump.TTargetLineGump?.Mobile != mobile)
                     {
-                        if (TargetLineGump.TTargetLineGump == null)
+                        if (TargetLineGump.TTargetLineGump == null || TargetLineGump.TTargetLineGump.IsDisposed)
                         {
                             TargetLineGump.TTargetLineGump = new TargetLineGump();
                             Engine.UI.Add(TargetLineGump.TTargetLineGump);
