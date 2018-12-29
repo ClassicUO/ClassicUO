@@ -744,7 +744,7 @@ namespace ClassicUO.Network
             p.Skip(2);
             Direction direction = (Direction) p.ReadByte();
             sbyte z = p.ReadSByte();
-            Direction dir = direction & Direction.Up;
+            Direction dir = direction & Direction.Mask;
 
 #if JAEDAN_MOVEMENT_PATCH
             World.Player.ForcePosition(x, y, z, dir);
@@ -1661,11 +1661,20 @@ namespace ClassicUO.Network
 
         private static void AttackCharacter(Packet p)
         {
-            Mobile lastattackedmobile = World.Mobiles.Get(p.ReadUInt());
+            World.LastAttack = p.ReadUInt();
 
-            if (lastattackedmobile != null)
+            if (World.LastAttack != 0 && World.InGame)
             {
+                Mobile mob = World.Mobiles.Get(World.LastAttack);
+
+                if (mob != null && mob.HitsMax <= 0)
+                    NetClient.Socket.Send(new PStatusRequest(World.LastAttack)); 
             }
+            //Mobile lastattackedmobile = World.Mobiles.Get(p.ReadUInt());
+
+            //if (lastattackedmobile != null)
+            //{
+            //}
         }
 
         private static void TextEntryDialog(Packet p)

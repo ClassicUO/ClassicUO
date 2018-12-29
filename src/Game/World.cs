@@ -51,6 +51,8 @@ namespace ClassicUO.Game
 
         public static byte ViewRange { get; set; } = 24;
 
+        public static Serial LastAttack { get; set; }
+
         public static int MapIndex
         {
             get => Map?.Index ?? -1;
@@ -250,6 +252,7 @@ namespace ClassicUO.Game
             HouseManager.Clear();
             Party.Members.Clear();
             ServerName = string.Empty;
+            LastAttack = 0;        
         }
 
         private static void InternalMapChangeClear(bool noplayer)

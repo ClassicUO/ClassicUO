@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Managers
         
         public static TargetType TargetingState { get; private set; } = TargetType.Nothing;
 
-        public static GameObject LastGameObject { get; private set; }
+        public static GameObject LastGameObject { get; set; }
 
         public static bool IsTargeting => TargetingState != TargetType.Nothing && _targetCursorType < 3;
 
@@ -89,7 +89,6 @@ namespace ClassicUO.Game.Managers
         {
             if (selectedEntity == null)
                 return;
-            LastGameObject = selectedEntity;
 
             if (selectedEntity is GameEffect effect && effect.Source != null)
             {
@@ -98,6 +97,9 @@ namespace ClassicUO.Game.Managers
 
             if (selectedEntity is Entity entity)
             {
+                if (selectedEntity != World.Player)
+                    LastGameObject = selectedEntity;
+
                 GameActions.TargetObject(entity, _targetCursorId, _targetCursorType);
                 Mouse.CancelDoubleClick = true;
             }

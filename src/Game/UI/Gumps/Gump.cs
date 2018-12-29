@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         }
 
-        protected override void OnMove()
+        protected override void OnDragEnd(int x, int y)
         {
             Point position = Location;
             int halfWidth = Width >> 1;
@@ -95,7 +95,6 @@ namespace ClassicUO.Game.UI.Gumps
                 position.Y = Engine.Batcher.GraphicsDevice.Viewport.Height - halfHeight;
             Location = position;
         }
-
 
         public override bool Draw(Batcher2D batcher, Point position, Vector3? hue = null)
         {

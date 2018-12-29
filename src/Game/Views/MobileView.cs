@@ -26,6 +26,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.IO.Resources;
@@ -80,7 +81,7 @@ namespace ClassicUO.Game.Views
             FrameInfo = Rectangle.Empty;
             Rectangle rect = Rectangle.Empty;
 
-            Hue hue = 0;
+            Hue hue = 0, targetColor = 0;
             if (Engine.Profile.Current.HighlightMobilesByFlags)
             {
                 if (mobile.IsPoisoned)
@@ -91,6 +92,36 @@ namespace ClassicUO.Game.Views
 
                 if (mobile.NotorietyFlag != NotorietyFlag.Invulnerable && mobile.IsYellowHits)
                     hue = 0x0030;
+            }
+
+            bool isAttack = mobile.Serial == World.LastAttack;
+            bool isUnderMouse = IsSelected && TargetManager.IsTargeting;
+            bool needHpLine = false;
+
+            if (mobile != World.Player && (isAttack || isUnderMouse || TargetManager.LastGameObject == mobile))
+            {
+                targetColor = Notoriety.GetHue(mobile.NotorietyFlag);
+
+                if (isAttack || mobile == TargetManager.LastGameObject)
+                {
+                    if (TargetLineGump.TTargetLineGump?.Mobile != mobile)
+                    {
+                        if (TargetLineGump.TTargetLineGump == null)
+                        {
+                            TargetLineGump.TTargetLineGump = new TargetLineGump();
+                            Engine.UI.Add(TargetLineGump.TTargetLineGump);
+                        }
+                        else
+                        {
+                            TargetLineGump.TTargetLineGump.SetMobile(mobile);
+                        }
+                    }
+
+                    needHpLine = true;
+                }
+
+                if (isAttack || isUnderMouse)
+                    hue = targetColor;
             }
 
             for (int i = 0; i < _layerCount; i++)
@@ -134,7 +165,21 @@ namespace ClassicUO.Game.Views
 
             MessageOverHead(batcher, position, mobile.IsMounted ? 0 : -22);
 
-           
+            if (needHpLine)
+            {
+                TargetLineGump.TTargetLineGump.X = (int) ( position.X + 22 + GameObject.Offset.X);
+                TargetLineGump.TTargetLineGump.Y = (int) (position.Y + 44 + (mobile.IsMounted ? 22 : 0) + GameObject.Offset.Y - GameObject.Offset.Z - 3) ;
+                TargetLineGump.TTargetLineGump.BackgroudHue = targetColor;
+                
+                if (mobile.IsPoisoned)
+                    TargetLineGump.TTargetLineGump.HpHue = 63;
+                else if (mobile.IsYellowHits)
+                    TargetLineGump.TTargetLineGump.HpHue = 53;
+
+                else
+                    TargetLineGump.TTargetLineGump.HpHue = 90;
+            }
+
             //if (_edge == null)
             //{
             //    _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
@@ -146,7 +191,6 @@ namespace ClassicUO.Game.Views
             return true;
         }
         //private static Texture2D _edge;
-
 
 
 

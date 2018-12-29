@@ -261,7 +261,7 @@ namespace ClassicUO.Game
                 }
                 DrawToolTip(sb, Mouse.Position);
 
-                Vector3 vec = World.InGame ? new Vector3(0x0033, 1, 0) : Vector3.Zero; 
+                Vector3 vec = World.InGame && !World.Player.InWarMode ? new Vector3(0x0033, 1, 0) : Vector3.Zero; 
 
                 sb.Draw2D(Texture, new Point(Mouse.Position.X + _cursorOffset[0, id], Mouse.Position.Y + _cursorOffset[1, id]), vec);
 

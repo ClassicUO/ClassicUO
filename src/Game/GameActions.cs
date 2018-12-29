@@ -19,6 +19,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 using System;
+using System.Linq;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -70,6 +71,7 @@ namespace ClassicUO.Game
                 }
             }
 
+            World.LastAttack = serial;
             Socket.Send(new PAttackRequest(serial));
         } 
 
@@ -127,6 +129,11 @@ namespace ClassicUO.Game
         public static void PickUp(Serial item, int x, int y, int? amount = null)
         {
             _pickUpAction(World.Items.Get(item), x, y, amount);
+        }
+
+        public static void PickUp(Serial item, int? amount = null)
+        {
+            _pickUpAction(World.Items.Get(item), 0, 0, amount);
         }
 
         public static void DropItem(Serial serial, int x, int y, int z, Serial container)
@@ -237,5 +244,28 @@ namespace ClassicUO.Game
 
         public static void CancelTrade(Serial serial)
             => Socket.Send(new PTradeResponse(serial, 1, false));
+
+        public static void AllNames()
+        {
+            foreach (Mobile mobile in World.Mobiles)
+            {
+                if (mobile != World.Player)
+                {
+                    Socket.Send(new PClickRequest(mobile));
+                }
+            }
+
+            foreach (Item item in World.Items.Where(s => s.IsCorpse))
+            {
+                Socket.Send(new PClickRequest(item));
+            }
+        }
+
+        public static void OpenDoor()
+            => Socket.Send(new POpenDoor());
+
+        public static void EmoteAction(string action)
+            => Socket.Send(new PEmoteAction(action));
+
     }
 }

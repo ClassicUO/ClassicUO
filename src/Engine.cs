@@ -393,7 +393,6 @@ namespace ClassicUO
             }
 
            // Server.Flush();
-
             Profiler.EnterContext("OutOfContext");
         }
 
