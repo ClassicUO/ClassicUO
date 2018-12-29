@@ -742,9 +742,10 @@ namespace ClassicUO.Network
             ushort x = p.ReadUShort();
             ushort y = p.ReadUShort();
             p.Skip(2);
-            Direction direction = (Direction) p.ReadByte();
+            Direction direction = (Direction)p.ReadByte();
             sbyte z = p.ReadSByte();
-            Direction dir = direction & Direction.Up;
+            Direction dir = direction & Direction.Mask;
+            bool run = (direction & Direction.Running) != 0;
 
 #if JAEDAN_MOVEMENT_PATCH
             World.Player.ForcePosition(x, y, z, dir);
@@ -757,7 +758,7 @@ namespace ClassicUO.Network
             {
                 if (endDir != dir)
                 {
-                    World.Player.EnqueueStep(x, y, z, dir, false);
+                    World.Player.EnqueueStep(x, y, z, dir, run);
                 }
             }
             else
