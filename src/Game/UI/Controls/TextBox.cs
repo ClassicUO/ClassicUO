@@ -94,6 +94,13 @@ namespace ClassicUO.Game.UI.Controls
         public string Text { get => _entry.Text; set => SetText(value); }
 
         public int LinesCount => _entry.GetLinesCharsCount().Length;
+        public int GetCharsOnLine(int line)
+        {
+            int[] lnch = _entry.GetLinesCharsCount();
+            if (line < lnch.Length)
+                return lnch[line];
+            return 0;
+        }
 
         //public override bool AcceptMouseInput => base.AcceptMouseInput && IsEditable;
 
@@ -162,19 +169,26 @@ namespace ClassicUO.Game.UI.Controls
             else switch (key)
             {
                 case SDL.SDL_Keycode.SDLK_RETURN:
-
                     if (MultiLineInputAllowed)
+                    {
                         s = _entry.InsertString("\n");
+                        Parent?.OnKeyboardReturn((int)PageCommand.PasteText, s);
+                    }
                     else
+                    {
                         s = _entry.Text;
-                    Parent?.OnKeyboardReturn((int)PageCommand.Nothing, s);
-                     break;
+                        Parent?.OnKeyboardReturn((int)PageCommand.Nothing, s);
+                    }
+                    break;
                 case SDL.SDL_Keycode.SDLK_BACKSPACE:
                     //TODO remove from current ccaret index
-                    if (ReplaceDefaultTextOnFirstKeyPress)
-                        ReplaceDefaultTextOnFirstKeyPress = false;
-                    else
+                    if (!ReplaceDefaultTextOnFirstKeyPress)
+                    {
                         _entry.RemoveChar(true);
+                        Parent?.OnKeyboardReturn((int)PageCommand.RemoveText, _entry.CaretIndex == 0 ? string.Empty : null);
+                    }
+                    else
+                        ReplaceDefaultTextOnFirstKeyPress = false;
                     break;
                 case SDL.SDL_Keycode.SDLK_UP when MultiLineInputAllowed:
                     _entry.OnMouseClick(_entry.CaretPosition.X, _entry.CaretPosition.Y - (_entry.RenderCaret.Height >> 1));

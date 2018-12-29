@@ -12,7 +12,7 @@ namespace ClassicUO.IO.Resources
 {
     class MapLoader : ResourceLoader
     {
-        private const int MAPS_COUNT = 6;
+        internal const int MAPS_COUNT = 6;
         private readonly UOFile[] _filesMap = new UOFile[MAPS_COUNT];
         private readonly UOFileMul[] _filesStatics = new UOFileMul[MAPS_COUNT];
         private readonly UOFileMul[] _filesIdxStatics = new UOFileMul[MAPS_COUNT];
