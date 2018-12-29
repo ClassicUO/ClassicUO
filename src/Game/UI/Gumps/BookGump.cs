@@ -220,8 +220,50 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     RefreshShowCaretPos(m_Pages[curpage].Text.Length, m_Pages[curpage]);
                     break;
-                case TextBox.PageCommand.RemoveText:
-                    //TODO: remove text from other pages, making it roll over on the previous pages, line by line
+                case TextBox.PageCommand.RemoveText when curpage >= 0:
+                    //we have already removed our text with a KEYBOARD pressure, now we do this:
+                    //1) calculate the remaining one until the very LAST PAGE
+                    //2) avoid the repetition of this piece of code
+                    if(text!=null)
+                    {
+                        if (curpage == 0)
+                            return; //we can't go more backward
+                        if ((curpage + 1) % 2 == 0)
+                            SetActivePage(ActivePage - 1);
+                        curpage--;
+                        RefreshShowCaretPos(m_Pages[curpage].Text.Length, m_Pages[curpage]);
+                    }
+                    int active = curpage, caretpos = m_Pages[curpage]._entry.CaretIndex;
+                    curpage++;
+                    if (curpage < BookPageCount)//if we are on the last page it doesn't need the front text backscaling
+                    {
+                        StringBuilder sb = new StringBuilder();
+                        do
+                        {
+                            int curlen = m_Pages[curpage].Text.Length, prevlen = m_Pages[curpage - 1].Text.Length, chonline = m_Pages[curpage].GetCharsOnLine(0), prevpage = curpage - 1;
+                            m_Pages[prevpage]._entry.SetCaretPosition(prevlen);
+                            for (int i = MaxBookLines - m_Pages[prevpage].LinesCount; i > 0 && prevlen > 0; --i)
+                            {
+                                sb.Append('\n');
+                            }
+                            sb.Append(m_Pages[curpage].Text.Substring(0, chonline));
+                            if (curlen > 0)
+                            {
+                                sb.Append('\n');
+                                if (m_Pages[curpage].Text[Math.Min(Math.Max(curlen - 1, 0), chonline)] == '\n')
+                                    chonline++;
+                                if (string.IsNullOrEmpty(text))
+                                    m_Pages[curpage].Text = m_Pages[curpage].Text.Substring(chonline);
+                                else
+                                    m_Pages[curpage].Text = m_Pages[curpage].Text.Substring(chonline - curlen);
+                            }
+                            m_Pages[prevpage]._entry.InsertString(sb.ToString());
+                            curpage++;
+                            sb.Clear();
+                        }
+                        while (curpage < BookPageCount);
+                        m_Pages[active]._entry.SetCaretPosition(caretpos);
+                    }
                     break;
             }
         }

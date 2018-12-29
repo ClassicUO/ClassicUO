@@ -34,6 +34,7 @@ namespace ClassicUO.IO
         private const int CRCLength = 25;
         private const int LandBlockLenght = 192;
         public static UInt16[][] MapCRCs;//caching, to avoid excessive cpu & memory use
+        public static UInt16[,] WrapSize;
         public static void OnUltimaLivePacket(Packet p)
         {
             p.Seek(13);
@@ -75,13 +76,19 @@ namespace ClassicUO.IO
 
                         int blockX = block / mapHeightInBlocks;
                         int blockY = block % mapHeightInBlocks;
+                        //this will avoid going OVER the wrapsize, so that we have the ILLUSION of never going over the main world
+                        mapWidthInBlocks = blockX < (WrapSize[mapID, 0] >> 3) ? WrapSize[mapID, 0] >> 3 : mapWidthInBlocks;
+                        mapHeightInBlocks = blockY < (WrapSize[mapID, 1] >> 3) ? WrapSize[mapID, 1] >> 3 : mapHeightInBlocks;
                         ushort[] tosendCRCs = new ushort[CRCLength];     //byte 015 through 64   -  25 block CRCs
                         for (int x = -2; x <= 2; x++)
                         {
                             int xBlockItr = (blockX + x) % mapWidthInBlocks;
                             if (xBlockItr < 0 && xBlockItr > -3)
                             {
-                                xBlockItr += mapWidthInBlocks;
+                                
+                                {
+                                    xBlockItr += mapWidthInBlocks;
+                                }
                             }
 
                             for (int y = -2; y <= 2; y++)
@@ -193,6 +200,8 @@ namespace ClassicUO.IO
 
                         p.Seek(7);
                         uint maps = (p.ReadUInt() * 7) / 9;
+                        if (WrapSize == null)
+                            WrapSize = new UInt16[maps, 2];
                         if (p.Length < (maps * 9 + 15))//the packet has padding inside, so it's usually larger or equal than what we expect
                         {
                             return;
@@ -204,11 +213,11 @@ namespace ClassicUO.IO
                         p.Seek(15);//byte 15 to end of packet, the map definitions
                         for (int i = 0; i < maps; i++)
                         {
-                            byte mapnum = p.ReadByte();
-                            ushort dimX = p.ReadUShort();
-                            ushort dimY = p.ReadUShort();
-                            ushort wrapdimX = p.ReadUShort();
-                            ushort wrapdimY = p.ReadUShort();
+                            int mapnum = p.ReadByte();
+                            ushort dimX = Math.Min((ushort)FileManager.Map.MapsDefaultSize[0, 0], p.ReadUShort());
+                            ushort dimY = Math.Min((ushort)FileManager.Map.MapsDefaultSize[0, 1], p.ReadUShort());
+                            WrapSize[mapnum,0] = p.ReadUShort();
+                            WrapSize[mapnum,1] = p.ReadUShort();
                         }
                         IsUltimaLiveActive = true;//after receiving the shardname and map defs, we can consider the system as fully active
                         break;
