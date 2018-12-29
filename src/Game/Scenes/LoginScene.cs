@@ -69,6 +69,8 @@ namespace ClassicUO.Game.Scenes
         {
         }
 
+        private LoginStep _lastLoginStep;
+
         public LoginStep CurrentLoginStep
         {
             get => _loginStep;
@@ -76,10 +78,7 @@ namespace ClassicUO.Game.Scenes
             {
                 _loginStep = value;
 
-                // this trick avoid the flickering
-                var g = _currentGump;
-                Engine.UI.Add(_currentGump = GetGumpForStep());
-                g.Dispose();
+             
 
             }
         }
@@ -145,6 +144,20 @@ namespace ClassicUO.Game.Scenes
             base.Unload();
         }
 
+        public override void Update(double totalMS, double frameMS)
+        {
+            if (_lastLoginStep != CurrentLoginStep)
+            {
+                // this trick avoid the flickering
+                var g = _currentGump;
+                Engine.UI.Add(_currentGump = GetGumpForStep());
+                g.Dispose();
+
+                _lastLoginStep = CurrentLoginStep;
+            }
+
+            base.Update(totalMS, frameMS);
+        }
 
         private Gump GetGumpForStep()
         {

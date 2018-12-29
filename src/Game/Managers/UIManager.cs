@@ -64,7 +64,6 @@ namespace ClassicUO.Game.Managers
             {
                 //if (!IsModalControlOpen /*&& ObjectsBlockingInputExists*/)
                 //    return;
-
                 if (MouseOverControl != null)
                 {
                     MakeTopMostGump(MouseOverControl);
@@ -87,7 +86,7 @@ namespace ClassicUO.Game.Managers
                 }
             };
 
-            Control lastLeftUp = null;
+            Control lastLeftUp = null, lastRightUp = null;
 
             Engine.Input.LeftMouseButtonUp += (sender, e) =>
             {
@@ -96,6 +95,7 @@ namespace ClassicUO.Game.Managers
 
                 //if (MouseOverControl == null)
                 //    return;
+
                 const int btn = (int) MouseButton.Left;
                 EndDragControl(Mouse.Position);
 
@@ -119,9 +119,9 @@ namespace ClassicUO.Game.Managers
 
             Engine.Input.LeftMouseDoubleClick += (sender, e) =>
             {
-                if (MouseOverControl != null && IsMouseOverUI && MouseOverControl == lastLeftUp)
+                if (MouseOverControl != null && IsMouseOverAControl && MouseOverControl == lastLeftUp)
                 {
-                    e.Result |= MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
+                    e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Left);
                 }
                 
             };
@@ -173,12 +173,23 @@ namespace ClassicUO.Game.Managers
 
                     if (_mouseDownControls[btn] != null && MouseOverControl != _mouseDownControls[btn])
                         _mouseDownControls[btn].InvokeMouseUp(Mouse.Position, MouseButton.Right);
+
+                    lastRightUp = MouseOverControl;
                 }
                 else
                     _mouseDownControls[btn]?.InvokeMouseUp(Mouse.Position, MouseButton.Right);
 
                 CloseIfClickOutGumps();
                 _mouseDownControls[btn] = null;
+            };
+
+            Engine.Input.RightMouseDoubleClick += (sender, e) =>
+            {
+                if (MouseOverControl != null && IsMouseOverAControl && MouseOverControl == lastRightUp)
+                {
+                    e.Result = MouseOverControl.InvokeMouseDoubleClick(Mouse.Position, MouseButton.Right);
+                }
+
             };
 
             Engine.Input.MouseWheel += (sender, isup) =>
@@ -198,9 +209,9 @@ namespace ClassicUO.Game.Managers
 
         public Control MouseOverControl { get; private set; }
 
-        public bool IsMouseOverUI => MouseOverControl != null;
+        public bool IsMouseOverAControl => MouseOverControl != null;
 
-        public bool IsMouseOverWorld => IsMouseOverUI && MouseOverControl is WorldViewport;
+        public bool IsMouseOverWorld => MouseOverControl is WorldViewport;
 
         public GameCursor GameCursor { get; }
 
@@ -517,13 +528,17 @@ namespace ClassicUO.Game.Managers
 
         public void Remove<T>(Serial? local = null) where T : Control
         {
-            _gumps.OfType<T>().Where(s => (!local.HasValue || s.LocalSerial == local) && !s.IsDisposed).FirstOrDefault()?.Dispose();
+            _gumps.OfType<T>().FirstOrDefault(s => (!local.HasValue || s.LocalSerial == local) && !s.IsDisposed)?.Dispose();
         }
 
         public void Clear()
         {
             GameCursor?.ClearDraggedItem();
-            _gumps.ForEach(s => s.Dispose());
+            _gumps.ForEach(s =>
+            {
+                if (!(s is DebugGump))
+                    s.Dispose();
+            });
         }
 
 

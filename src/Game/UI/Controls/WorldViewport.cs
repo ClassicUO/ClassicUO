@@ -19,7 +19,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #endregion
 
+using System.Linq;
+
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 
 using Microsoft.Xna.Framework;
@@ -52,15 +56,15 @@ namespace ClassicUO.Game.UI.Controls
             return base.Draw(batcher, position, hue);
         }
 
-        //protected override void OnMouseClick(int x, int y, MouseButton button)
-        //{
-        //    //if (!(Engine.UI.KeyboardFocusControl is SystemChatControl))
-        //    //{
-        //    //    Engine.UI.KeyboardFocusControl = Engine.UI.GetByLocalSerial<WorldViewportGump>()
-        //    //                                           .FindControls<SystemChatControl>()
-        //    //                                           .FirstOrDefault()?
-        //    //                                           .GetFirstControlAcceptKeyboardInput();
-        //    //}
-        //}
+        protected override void OnMouseClick(int x, int y, MouseButton button)
+        {
+            if (!(Engine.UI.KeyboardFocusControl is TextBox tb && tb.RootParent is WorldViewportGump))
+            {
+                Engine.UI.KeyboardFocusControl = Parent
+                                                       .FindControls<SystemChatControl>()
+                                                       .FirstOrDefault()?
+                                                       .GetFirstControlAcceptKeyboardInput();
+            }
+        }
     }
 }

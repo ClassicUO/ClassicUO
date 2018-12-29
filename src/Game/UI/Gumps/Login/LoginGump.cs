@@ -173,10 +173,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void Update(double totalMS, double frameMS)
         {
-            base.Update(totalMS, frameMS);
-
             if (IsDisposed)
                 return;
+
+            base.Update(totalMS, frameMS);
 
             if (_time < totalMS)
             {

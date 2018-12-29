@@ -122,37 +122,45 @@ namespace ClassicUO.Game.Scenes
             _viewPortGump = viewport.FindControls<WorldViewport>().SingleOrDefault();
 
             GameActions.Initialize(PickupItemBegin);
-            Engine.Input.LeftMouseButtonDown += OnLeftMouseButtonDown;
-            Engine.Input.LeftMouseButtonUp += OnLeftMouseButtonUp;
-            Engine.Input.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
-            Engine.Input.RightMouseButtonDown += OnRightMouseButtonDown;
-            Engine.Input.RightMouseButtonUp += OnRightMouseButtonUp;
-            Engine.Input.RightMouseDoubleClick += OnRightMouseDoubleClick;
-            Engine.Input.DragBegin += OnMouseDragBegin;
-            Engine.Input.MouseDragging += OnMouseDragging;
-            Engine.Input.MouseMoving += OnMouseMoving;
+
+            _viewPortGump.MouseDown += OnMouseDown;
+            _viewPortGump.MouseUp += OnMouseUp;
+            _viewPortGump.MouseDoubleClick += OnMouseDoubleClick;
+            _viewPortGump.DragBegin += OnMouseDragBegin;
+            //_viewPortGump.Keyboard += OnKeyboard;
+
+            //Engine.Input.LeftMouseButtonDown += OnLeftMouseButtonDown;
+            //Engine.Input.LeftMouseButtonUp += OnLeftMouseButtonUp;
+            //Engine.Input.LeftMouseDoubleClick += OnLeftMouseDoubleClick;
+            //Engine.Input.RightMouseButtonDown += OnRightMouseButtonDown;
+            //Engine.Input.RightMouseButtonUp += OnRightMouseButtonUp;
+            //Engine.Input.RightMouseDoubleClick += OnRightMouseDoubleClick;
+            //Engine.Input.DragBegin += OnMouseDragBegin;
+            //Engine.Input.MouseDragging += OnMouseDragging;
+            //Engine.Input.MouseMoving += OnMouseMoving;
             Engine.Input.KeyDown += OnKeyDown;
             Engine.Input.KeyUp += OnKeyUp;
-            Engine.Input.MouseWheel += (sender, e) =>
-            {
-                if (IsMouseOverWorld)
-                {
-                    if (!e)
-                        Scale += 0.1f;
-                    else
-                        Scale -= 0.1f;
+            //Engine.Input.MouseWheel += (sender, e) =>
+            //{
+            //    if (IsMouseOverWorld)
+            //    {
+            //        if (!e)
+            //            Scale += 0.1f;
+            //        else
+            //            Scale -= 0.1f;
 
-                    if (Scale < 0.7f)
-                        Scale = 0.7f;
-                    else if (Scale > 2.3f)
-                        Scale = 2.3f;
-                }
-            };
+            //        if (Scale < 0.7f)
+            //            Scale = 0.7f;
+            //        else if (Scale > 2.3f)
+            //            Scale = 2.3f;
+            //    }
+            //};
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
 
             Chat.Message += ChatOnMessage;
 
+            Plugin.OnConnected();
             //Coroutine.Start(this, CastSpell());
         }
 
@@ -241,6 +249,8 @@ namespace ClassicUO.Game.Scenes
 
         public override void Unload()
         {
+            Plugin.OnDisconnected();
+
             _renderList = null;
 
             TargetManager.ClearTargetingWithoutTargetCancelPacket();
@@ -252,19 +262,25 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnect();
             _renderTarget?.Dispose();
             CommandManager.UnRegisterAll();
+
+            _viewPortGump.MouseDown -= OnMouseDown;
+            _viewPortGump.MouseUp -= OnMouseUp;
+            _viewPortGump.MouseDoubleClick -= OnMouseDoubleClick;
+            _viewPortGump.DragBegin -= OnMouseDragBegin;
+
             Engine.UI.Clear();
             World.Clear();
 
-           
-            Engine.Input.LeftMouseButtonDown -= OnLeftMouseButtonDown;
-            Engine.Input.LeftMouseButtonUp -= OnLeftMouseButtonUp;
-            Engine.Input.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
-            Engine.Input.RightMouseButtonDown -= OnRightMouseButtonDown;
-            Engine.Input.RightMouseButtonUp -= OnRightMouseButtonUp;
-            Engine.Input.RightMouseDoubleClick -= OnRightMouseDoubleClick;
-            Engine.Input.DragBegin -= OnMouseDragBegin;
-            Engine.Input.MouseDragging -= OnMouseDragging;
-            Engine.Input.MouseMoving -= OnMouseMoving;
+
+            //Engine.Input.LeftMouseButtonDown -= OnLeftMouseButtonDown;
+            //Engine.Input.LeftMouseButtonUp -= OnLeftMouseButtonUp;
+            //Engine.Input.LeftMouseDoubleClick -= OnLeftMouseDoubleClick;
+            //Engine.Input.RightMouseButtonDown -= OnRightMouseButtonDown;
+            //Engine.Input.RightMouseButtonUp -= OnRightMouseButtonUp;
+            //Engine.Input.RightMouseDoubleClick -= OnRightMouseDoubleClick;
+            //Engine.Input.DragBegin -= OnMouseDragBegin;
+            //Engine.Input.MouseDragging -= OnMouseDragging;
+            //Engine.Input.MouseMoving -= OnMouseMoving;
             Engine.Input.KeyDown -= OnKeyDown;
             Engine.Input.KeyUp -= OnKeyUp;
 
@@ -389,7 +405,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (IsMouseOverWorld)
+            if (Engine.UI.IsMouseOverWorld)
             {
                 _mouseOverList.MousePosition = _mousePicker.Position = MouseOverWorldPosition;
                 _mousePicker.PickOnly = PickerType.PickEverything;

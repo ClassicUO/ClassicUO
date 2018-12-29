@@ -23,6 +23,7 @@ using System.IO;
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -186,8 +187,17 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
         {
-            if (_canChangeName)
+            if (TargetManager.IsTargeting)
+            {
+                if (TargetManager.TargetingState == TargetType.Position || TargetManager.TargetingState == TargetType.Object)
+                {
+                    TargetManager.TargetGameObject(Mobile);
+                    Mouse.LastLeftButtonClickTime = 0;
+                }
+            }
+            else if (_canChangeName)
                 _textBox.IsEditable = false;
+
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButton button)
@@ -196,7 +206,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Mobile != World.Player)
                 {
-                    if (World.Player.InWarMode)
+                    if (World.Player.InWarMode && World.Player != Mobile)
                     {
                         GameActions.Attack(Mobile);
                     }

@@ -409,7 +409,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Hue = hue,
                     Text = text
                 };
-                _createdTime = (Engine.Ticks + Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT );
+                _createdTime = Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT;
             }
 
             public string Text => _renderedText.Text;

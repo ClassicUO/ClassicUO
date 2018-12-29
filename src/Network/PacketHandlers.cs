@@ -39,6 +39,8 @@ using ClassicUO.IO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
+using ClassicUO_API;
+
 using Microsoft.Xna.Framework;
 
 using Multi = ClassicUO.Game.GameObjects.Multi;
@@ -92,6 +94,9 @@ namespace ClassicUO.Network
             {
                 for (int i = 0; i < _handlers[p.ID].Count; i++)
                 {
+                    //if (Engine.Server.IsConnected)
+                    //    Engine.Server.SendToPlugin(p.ToArray(), p.Length, p.IsDynamic, false);
+
                     p.MoveToData();
                     _handlers[p.ID][i].Callback(p);
                 }
@@ -740,8 +745,6 @@ namespace ClassicUO.Network
             Direction direction = (Direction) p.ReadByte();
             sbyte z = p.ReadSByte();
             Direction dir = direction & Direction.Up;
-            bool run = (dir & Direction.Running) != 0;
-            dir &= Direction.Running;
 
 #if JAEDAN_MOVEMENT_PATCH
             World.Player.ForcePosition(x, y, z, dir);
@@ -754,7 +757,7 @@ namespace ClassicUO.Network
             {
                 if (endDir != dir)
                 {
-                    World.Player.EnqueueStep(x, y, z, dir, run);
+                    World.Player.EnqueueStep(x, y, z, dir, false);
                 }
             }
             else

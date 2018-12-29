@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -128,7 +129,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             _clickedCanDrag = true;
             float totalMS = Engine.Ticks;
-            _picUpTime = totalMS + 800f;
+            _picUpTime = totalMS + 500f;
             _clickedPoint = new Point(x, y);
         }
 
@@ -167,16 +168,30 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         protected override void OnMouseClick(int x, int y, MouseButton button)
-        {
-            _labelClickedPosition.X = x;
-            _labelClickedPosition.Y = y;
+        {      
+            if (Engine.SceneManager.GetScene<GameScene>().IsHoldingItem)
+                return;
 
-            if (_clickedCanDrag)
+            if (TargetManager.IsTargeting)
             {
-                _clickedCanDrag = false;
-                _sendClickIfNotDClick = true;
-                float totalMS = Engine.Ticks;
-                _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                if (TargetManager.TargetingState == TargetType.Position || TargetManager.TargetingState == TargetType.Object)
+                {
+                    TargetManager.TargetGameObject(Item);
+                    Mouse.LastLeftButtonClickTime = 0;
+                }
+            }
+            else
+            {
+                _labelClickedPosition.X = x;
+                _labelClickedPosition.Y = y;
+
+                if (_clickedCanDrag)
+                {
+                    _clickedCanDrag = false;
+                    _sendClickIfNotDClick = true;
+                    float totalMS = Engine.Ticks;
+                    _sClickTime = totalMS + Mouse.MOUSE_DELAY_DOUBLE_CLICK;
+                }
             }
         }
 
@@ -211,7 +226,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private void UpdateLabel(bool isDisposing = false)
         {
-            var gs = Engine.SceneManager.GetScene<GameScene>();
+            //var gs = Engine.SceneManager.GetScene<GameScene>();
             if (!isDisposing && !Item.IsDisposed && Item.Overheads.Count > 0)
             {
                 //if (_labels.Count <= 0)

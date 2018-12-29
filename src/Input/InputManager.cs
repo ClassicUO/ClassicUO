@@ -20,7 +20,10 @@
 #endregion
 using System;
 
+using ClassicUO.Network;
 using ClassicUO.Utility;
+
+using SDL2;
 
 using static SDL2.SDL;
 
@@ -46,6 +49,7 @@ namespace ClassicUO.Input
                 return;
 
             IsDisposed = true;
+           
             SDL_DelEventWatch(_hookDel, IntPtr.Zero);
         }
 
@@ -81,11 +85,12 @@ namespace ClassicUO.Input
 
                             break;
                         case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
-
+                            Plugin.OnFocusGained();
                             // SDL_CaptureMouse(SDL_bool.SDL_TRUE);
                             //Log.Message(LogTypes.Debug, "FOCUS");
                             break;
                         case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
+                            Plugin.OnFocusLost();
                             //Log.Message(LogTypes.Debug, "NO FOCUS");
                             //SDL_CaptureMouse(SDL_bool.SDL_FALSE);
 
@@ -97,6 +102,8 @@ namespace ClassicUO.Input
                         case SDL_WindowEventID.SDL_WINDOWEVENT_HIT_TEST:
 
                             break;
+
+                        
                     }
 
                     break;
@@ -104,14 +111,26 @@ namespace ClassicUO.Input
 
                     break;
                 case SDL_EventType.SDL_KEYDOWN:
-                    KeyDown?.Raise(e->key);
+
+                    if (Plugin.ProcessHotkeys((int) e->key.keysym.sym, (int) e->key.keysym.mod, true))
+                    {
+                        Keyboard.IgnoreNextTextInput = false;
+                        KeyDown?.Raise(e->key);
+                    }
+                    else
+                        Keyboard.IgnoreNextTextInput = true;
 
                     break;
                 case SDL_EventType.SDL_KEYUP:
-                    KeyUp.Raise(e->key);
+                    //if (Plugin.ProcessHotkeys((int)e->key.keysym.sym, (int)e->key.keysym.mod, false))
+                        KeyUp.Raise(e->key);
 
                     break;
                 case SDL_EventType.SDL_TEXTINPUT:
+
+                    if (Keyboard.IgnoreNextTextInput)
+                        break;
+
                     string s = StringHelper.ReadUTF8(e->text.text);
 
                     if (!string.IsNullOrEmpty(s))
@@ -133,6 +152,8 @@ namespace ClassicUO.Input
                 case SDL_EventType.SDL_MOUSEWHEEL:
                     Mouse.Update();
                     bool isup = e->wheel.y > 0;
+
+                    Plugin.ProcessMouse(0, e->wheel.y);
                     MouseWheel.Raise(isup);
 
                     break;
@@ -210,6 +231,8 @@ namespace ClassicUO.Input
                                     break;
                                 }
 
+                                Plugin.ProcessMouse(e->button.button, 0);
+
                                 MidMouseButtonDown.Raise();
                                 Mouse.LastMidButtonClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
                             }
@@ -259,10 +282,12 @@ namespace ClassicUO.Input
 
                             break;
                         case SDL_BUTTON_X1:
-
+                            if (isDown)
+                                Plugin.ProcessMouse(e->button.button, 0);
                             break;
                         case SDL_BUTTON_X2:
-
+                            if (isDown)
+                                Plugin.ProcessMouse(e->button.button, 0);
                             break;
                     }
 

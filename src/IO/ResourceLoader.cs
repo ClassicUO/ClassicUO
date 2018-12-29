@@ -56,6 +56,13 @@ namespace ClassicUO.IO
                 });
         }
 
+        public virtual bool TryGetEntryInfo(int entry, out long address, out long size, out long compressedsize)
+        {
+            address = size = compressedsize = 0;
+
+            return false;
+        }
+
         public void Dispose()
         {
             if (IsDisposed)

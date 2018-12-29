@@ -64,6 +64,23 @@ namespace ClassicUO.IO.Resources
             return texture;
         }
 
+        public override bool TryGetEntryInfo(int entry, out long address, out long size, out long compressedsize)
+        {
+            entry += 0x4000;
+
+            if (entry < _file.Length && entry >= 0)
+            {
+                UOFileIndex3D e = _file.Entries[entry];
+
+                address = _file.StartAddress.ToInt64() + e.Offset;
+                size = e.DecompressedLength == 0 ? e.Length : e.DecompressedLength;
+                compressedsize = e.Length;
+                return true;
+            }
+
+            return base.TryGetEntryInfo(entry, out address, out size, out compressedsize);
+        }
+
         public override void CleanResources()
         {
             throw new NotImplementedException();

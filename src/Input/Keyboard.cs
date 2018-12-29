@@ -17,5 +17,7 @@ namespace ClassicUO.Input
             mod ^= mod & IgnoreKeyMod;
             return tocheck == mod || (mod != SDL.SDL_Keymod.KMOD_NONE && (mod & tocheck) != 0);
         }
+
+        public static bool IgnoreNextTextInput { get; set; }
     }
 }

@@ -41,8 +41,12 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
+using ClassicUO_API.NetPipes;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+using SDL2;
 
 namespace ClassicUO
 {
@@ -117,7 +121,7 @@ namespace ClassicUO
             Window.AllowUserResizing = true;
         }
 
-
+      //  public static ClassicUO_API.NetPipes.Server Server { get; } = new Server();
 
         public static Batcher2D Batcher => _engine._batcher;
 
@@ -257,6 +261,7 @@ namespace ClassicUO
 
             Environment.SetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI", "1");
             Environment.SetEnvironmentVariable("FNA_OPENGL_BACKBUFFER_SCALE_NEAREST", "1");
+            Environment.SetEnvironmentVariable(SDL.SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
         }
 
 
@@ -334,13 +339,16 @@ namespace ClassicUO
         {
             _sceneManager.ChangeScene(ScenesType.Login);
             base.LoadContent();
+
+            Plugin.Load();
         }
 
         protected override void UnloadContent()
-        {
+        {   
             _inputManager.Dispose();
             _sceneManager.CurrentScene?.Unload();
             _settings.Save();
+            Plugin.OnClosing();
             base.UnloadContent();
         }
 
@@ -383,6 +391,8 @@ namespace ClassicUO
             {
                 SuppressDraw();
             }
+
+           // Server.Flush();
 
             Profiler.EnterContext("OutOfContext");
         }

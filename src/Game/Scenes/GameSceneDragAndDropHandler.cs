@@ -51,7 +51,7 @@ namespace ClassicUO.Game.Scenes
                 else if (value != null && _heldItem == null)
                 {
                     //Engine.UI.AddInputBlocker(this);
-                    Engine.UI.GameCursor.SetDraggedItem(value.DisplayedGraphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && value.ItemData.IsStackable);
+                    Engine.UI.GameCursor.SetDraggedItem(value.DisplayedGraphic, value.Hue, value.Amount > 1 && value.DisplayedGraphic == value.Graphic && value.ItemData.IsStackable, value.ItemData.IsPartialHue, value.ItemData.IsTransparent || value.ItemData.IsTranslucent);
                 }
 
                 _heldItem = value;

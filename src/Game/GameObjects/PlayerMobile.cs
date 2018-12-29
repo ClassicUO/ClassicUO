@@ -1604,6 +1604,8 @@ namespace ClassicUO.Game.GameObjects
 
             if (World.Map != null && World.Map.Index >= 0)
                 World.Map.Center = new Point(X, Y);
+
+            Plugin.UpdatePlayerPosition(X, Y , Z);
         }
 
         public override void Dispose()

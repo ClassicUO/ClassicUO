@@ -20,6 +20,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 using ClassicUO.Utility;
 
@@ -62,7 +63,7 @@ namespace ClassicUO.Configuration
 
         public void Save()
         {
-            ConfigurationResolver.Save(this, "settings.json");
+            ConfigurationResolver.Save(this, Path.Combine(Engine.ExePath, "settings.json"));
         }
     }
 }

@@ -684,7 +684,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnMouseOver(int x, int y)
         {
-            if (_mouseIsDown && !_attempToDrag && Mouse.LDropPosition != Point.Zero)
+            if (_mouseIsDown && !_attempToDrag && Mouse.LDroppedOffset != Point.Zero)
             {
                 InvokeDragBegin(new Point(x, y));
                 _attempToDrag = true;

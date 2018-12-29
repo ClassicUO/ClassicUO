@@ -134,25 +134,7 @@ namespace ClassicUO.Game.Views
 
             MessageOverHead(batcher, position, mobile.IsMounted ? 0 : -22);
 
-            //OverheadManager damageManager = Engine.SceneManager.GetScene<GameScene>().Overheads;
-
-            //if (mobile.Name != null && mobile.Name.ToLower().Contains("trunks"))
-            //{
-
-            //}
-
-            //if (damageManager.HasOverhead(GameObject) || damageManager.HasDamage(GameObject))
-            //{
-            //    GetAnimationDimensions(mobile, 0xFF, out int height, out int centerY);
-            //    var overheadPosition = new Vector3
-            //    {
-            //        X = position.X + mobile.Offset.X,
-            //        Y = position.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8),
-            //        Z = position.Z
-            //    };
-            //    damageManager.UpdatePosition(mobile, overheadPosition);
-            //}
-
+           
             //if (_edge == null)
             //{
             //    _edge = new Texture2D(batcher.GraphicsDevice, 1, 1);
@@ -167,18 +149,6 @@ namespace ClassicUO.Game.Views
 
 
 
-        //private static void GetAnimationDimensions(Mobile mobile, byte frameIndex, out int height, out int centerY)
-        //{
-        //    byte dir = 0 & 0x7F;
-        //    byte animGroup = 0;
-        //    bool mirror = false;
-        //    FileManager.Animations.GetAnimDirection(ref dir, ref mirror);
-
-        //    if (frameIndex == 0xFF)
-        //        frameIndex = (byte) mobile.AnimIndex;
-        //    FileManager.Animations.GetAnimationDimensions(frameIndex, mobile.GetGraphicForAnimation(), dir, animGroup, out int x, out centerY, out int w, out height);
-        //    if (x == 0 && centerY == 0 && w == 0 && height == 0) height = mobile.IsMounted ? 100 : 60;
-        //}
 
         private void Pick(SpriteTexture texture, Rectangle area, Vector3 drawPosition, MouseOverList list)
         {
