@@ -1614,6 +1614,16 @@ namespace ClassicUO.Game.GameObjects
             base.Dispose();
         }
 
+        public void CloseBank()
+        {
+            Item bank = Equipment[(int) Layer.Bank];
+
+            if (bank != null)
+            {
+                bank.Dispose();
+                //Engine.UI.c
+            }
+        }
 
 
 #if !JAEDAN_MOVEMENT_PATCH && !MOVEMENT2
@@ -1693,6 +1703,8 @@ namespace ClassicUO.Game.GameObjects
 
                 direction = newDir;
             }
+
+            CloseBank();
 
             if (emptyStack)
             {

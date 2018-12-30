@@ -84,6 +84,17 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update(totalMS, frameMS);
 
+            if (IsDisposed)
+            {
+                return;
+            }
+
+            if (_item.IsDisposed)
+            {
+                Dispose();
+                return;
+            }
+
             if (_isCorspeContainer && _corpseEyeTicks < totalMS)
             {
                 _eyeCorspeOffset = _eyeCorspeOffset == 0 ? 1 : 0;

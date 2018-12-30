@@ -765,6 +765,7 @@ namespace ClassicUO.Network
                 World.Player.ForcePosition(x, y, z , dir);
             }
 #else
+            World.Player.CloseBank();
             World.Player.Walker.WalkingFailed = false;
             World.Player.Position = new Position(x, y, z);
             World.Player.Direction = dir;
