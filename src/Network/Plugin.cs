@@ -22,13 +22,10 @@ namespace ClassicUO.Network
         private static OnGetStaticImage _getStaticImage;
 
         private static readonly List<PluginHeader> _headers = new List<PluginHeader>();
-        //private static Mutex _mutex;
 
 
         public static void Load()
         {
-            //_mutex = new Mutex();
-
             _recv = OnPluginRecv;
             _send = OnPluginSend;
             _getPacketLength = PacketsTable.GetPacketLength;
@@ -119,7 +116,7 @@ namespace ClassicUO.Network
 
             for (int i = 0; i < _headers.Count; i++)
             {
-                var header = _headers[i];
+                PluginHeader header = _headers[i];
 
                 if (header.OnRecv != null && !header.OnRecv(data, length))
                     result = false;
@@ -225,26 +222,24 @@ namespace ClassicUO.Network
             }
         }
 
-
         private static bool OnPluginRecv(byte[] data, int length)
         {
             Packet p = new Packet(data, length);
-
-            //_mutex.WaitOne();
-
             NetClient.EnqueuePacketFromPlugin(p);
-
-            //_mutex.ReleaseMutex();
             return true;
         }
 
         private static bool OnPluginSend(byte[] data, int length)
         {
-            //_mutex.WaitOne();
+            if (NetClient.LoginSocket.IsDisposed && NetClient.Socket.IsConnected)
+            {
+                NetClient.Socket.Send(data);
+            }
+            else if (NetClient.Socket.IsDisposed && NetClient.LoginSocket.IsConnected)
+            {
+                NetClient.LoginSocket.Send(data);
+            }
 
-            NetClient.Socket.Send(data);
-
-            //_mutex.ReleaseMutex();
             return true;
         }
     }

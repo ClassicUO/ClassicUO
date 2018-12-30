@@ -84,18 +84,14 @@ namespace ClassicUO.Network
 
         public static event EventHandler<Packet> PacketReceived, PacketSended;
 
-        private Queue<Packet> _pluginPackets = new Queue<Packet>();
-
         public static void EnqueuePacketFromPlugin(Packet p)
         {
 
             if (LoginSocket.IsDisposed && Socket.IsConnected)
             {
-                //lock (Socket._sync)
-                lock (Socket._pluginPackets)
+                lock (Socket._sync)
                 {
-                    Socket._pluginPackets.Enqueue(p);
-                    //Socket._workingQueue.Enqueue(p);
+                    Socket._workingQueue.Enqueue(p);
                     Socket.Statistics.TotalPacketsReceived++;
                 }
             }
@@ -251,15 +247,6 @@ namespace ClassicUO.Network
 
                 if (Plugin.ProcessRecvPacket(p.ToArray(), p.Length))
                     PacketReceived.Raise(p);
-            }
-
-            lock (_pluginPackets)
-            {
-                while (_pluginPackets.Count > 0)
-                {
-                    Packet p = _pluginPackets.Dequeue();
-                    PacketReceived.Raise(p);
-                }
             }
 
             Flush();
