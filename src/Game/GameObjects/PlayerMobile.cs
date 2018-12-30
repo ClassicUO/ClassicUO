@@ -1616,13 +1616,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseBank()
         {
-            Item bank = Equipment[(int) Layer.Bank];
-
-            if (bank != null)
-            {
-                bank.Dispose();
-                //Engine.UI.c
-            }
+            Equipment[(int)Layer.Bank]?.Dispose();
         }
 
 
