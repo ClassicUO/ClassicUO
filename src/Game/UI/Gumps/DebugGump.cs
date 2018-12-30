@@ -14,7 +14,7 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly StringBuilder _sb = new StringBuilder();
         private readonly Label _label;
-        private readonly CheckerTrans _trans;
+        private readonly AlphaBlendControl _trans;
 
         private const string DEBUG_STRING_0 = "- FPS: {0}\n";
         //private const string DEBUG_PROFILER = "- Draw: {0,2:P1}\n  Update: {1,2:P1}\n  Fixed: {2,2:P1}\n  AvgDraw: {3,2:G1}ms\n  Run slow: {4}\n";
@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = 500;
             Height = 275;
 
-            AddChildren(_trans = new CheckerTrans(.3f)
+            AddChildren(_trans = new AlphaBlendControl(.3f)
             {
                 Width = Width , Height = Height
             });

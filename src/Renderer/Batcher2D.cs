@@ -31,6 +31,7 @@ namespace ClassicUO.Renderer
         private readonly EffectParameter _projectionMatrixEffect;
         private readonly EffectTechnique _huesTechnique, _shadowTechnique, _landTechnique;
         private readonly Effect _effect;
+
         //private readonly DepthStencilState _dss = new DepthStencilState
         //{
         //    DepthBufferEnable = true,
@@ -51,6 +52,7 @@ namespace ClassicUO.Renderer
         private readonly Vector3 _minVector3 = new Vector3(0, 0, int.MinValue);
         private readonly RasterizerState _rasterizerState;
         private BlendState _blendState;
+        private DepthStencilState _stencil;
 
 
         private int _numSprites;
@@ -91,6 +93,8 @@ namespace ClassicUO.Renderer
                 SlopeScaleDepthBias = _rasterizerState.SlopeScaleDepthBias,
                 ScissorTestEnable = true
             };
+
+            _stencil = DepthStencilState.None;
         }
 
         public Matrix TransformMatrix => _transformMatrix;
@@ -494,7 +498,7 @@ namespace ClassicUO.Renderer
         private void ApplyStates()
         {
             GraphicsDevice.BlendState = _blendState;
-            GraphicsDevice.DepthStencilState = DepthStencilState.None;
+            GraphicsDevice.DepthStencilState = _stencil;
             GraphicsDevice.RasterizerState = _useScissor ? _rasterizerState : RasterizerState.CullNone;
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
@@ -565,11 +569,21 @@ namespace ClassicUO.Renderer
         private bool _useScissor;
 
 
-        public void SetBlendState(BlendState blend)
+        public void SetBlendState(BlendState blend, bool noflush = false)
         {
-            Flush();
+            if (!noflush)
+                Flush();
 
             _blendState = blend ?? BlendState.AlphaBlend;
+        }
+
+
+        public void SetStencil(DepthStencilState stencil, bool noflush = false)
+        {
+            if (!noflush)
+                Flush();
+
+            _stencil = stencil ?? DepthStencilState.None;
         }
 
         private static short[] GenerateIndexArray()

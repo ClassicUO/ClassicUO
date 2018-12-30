@@ -336,7 +336,16 @@ namespace ClassicUO.Game.Managers
                             {
                                 Control g = gump.Children[i];
                                 g.IsTransparent = true;
-                                if (g.Bounds.Contains(t.Bounds) && (g is Button || g is Checkbox)) g.IsVisible = false;
+
+                                if (g.Bounds.Contains(t.Bounds))
+                                {
+                                    if (g is ResizePic res)
+                                        res.OnlyCenterTransparent = true;
+                                    else if (g is Button || g is Checkbox)
+                                    {
+                                        g.IsVisible = false;
+                                    }
+                                }
                             }
 
                             gump.AddChildren(t, page);

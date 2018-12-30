@@ -62,6 +62,8 @@ namespace ClassicUO.Game.UI.Controls
             Height = int.Parse(parts[5]);
         }
 
+        public bool OnlyCenterTransparent { get; set; }
+
         public override void Update(double totalMS, double frameMS)
         {
             for (int i = 0; i < _gumpTexture.Length; i++)
@@ -138,7 +140,9 @@ namespace ClassicUO.Game.UI.Controls
                         drawY += _gumpTexture[0].Height;
                         drawWidth = Width - _gumpTexture[0].Width - _gumpTexture[2].Width;
                         drawHeight = Height - _gumpTexture[2].Height - _gumpTexture[7].Height;
-                        batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
+
+                        if (!OnlyCenterTransparent)
+                            batcher.Draw2DTiled(t, new Rectangle(drawX, drawY, drawWidth, drawHeight), color);
 
                         break;
                 }
