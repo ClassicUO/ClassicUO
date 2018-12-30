@@ -41,8 +41,6 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 
-using ClassicUO_API.NetPipes;
-
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -337,10 +335,10 @@ namespace ClassicUO
 
         protected override void LoadContent()
         {
-            _sceneManager.ChangeScene(ScenesType.Login);
-            base.LoadContent();
-
             Plugin.Load();
+
+            _sceneManager.ChangeScene(ScenesType.Login);
+            base.LoadContent();           
         }
 
         protected override void UnloadContent()

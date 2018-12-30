@@ -69,7 +69,7 @@ namespace ClassicUO.Game.Scenes
 
         private void PickupItemBegin(Item item, int x, int y, int? amount = null)
         {
-            if (!amount.HasValue && !item.IsCorpse && item.Amount > 1)
+            if (!amount.HasValue && !item.IsCorpse && item.Amount > 1 && item.ItemData.IsStackable)
             {
                 if (Engine.UI.GetByLocalSerial<SplitMenuGump>(item) != null)
                     return;
