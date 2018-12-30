@@ -92,7 +92,6 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_sendClickIfNotDClick && totalMS >= _sClickTime)
             {
-                Log.Message(LogTypes.Warning, "SINGLECLICK SENDED");
                 GameActions.SingleClick(Item);
                 _sendClickIfNotDClick = false;
             }
